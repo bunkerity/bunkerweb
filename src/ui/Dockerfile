@@ -10,7 +10,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
     rm -rf /tmp/req
 
 # Install python dependencies
-RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev
+RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev file make
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
@@ -63,7 +63,7 @@ RUN apk add --no-cache bash && \
     chown root:ui /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
-RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"
+# There are no CVEs for python:3.11.3-alpine at the moment
 
 VOLUME /data /etc/nginx
 

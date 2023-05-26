@@ -20,7 +20,8 @@ services:
       - www.example.com_REVERSE_PROXY_URL=/changeme/ # replace with another url
       - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
       - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme # replace with another url
-      - www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
+      - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
+      - www.example.com_SECURITY_POLICY=object-src 'none'; frame-ancestors 'self';
     labels:
       - "bunkerweb.INSTANCE"
     networks:
@@ -60,6 +61,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
+      - LOG_LEVEL=warning
     networks:
       - bw-docker
 

@@ -1,11 +1,15 @@
+#!/usr/bin/python3
+
 from os import getenv
+from typing import Any, Dict, List
 from docker import DockerClient
 from re import compile as re_compile
 from traceback import format_exc
 
+from docker.models.containers import Container
 from Controller import Controller
-from ConfigCaller import ConfigCaller
-from logger import setup_logger
+from ConfigCaller import ConfigCaller  # type: ignore
+from logger import setup_logger  # type: ignore
 
 
 class DockerController(Controller, ConfigCaller):
@@ -18,13 +22,13 @@ class DockerController(Controller, ConfigCaller):
             r"^bunkerweb.CUSTOM_CONF_(SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
         )
 
-    def _get_controller_instances(self):
+    def _get_controller_instances(self) -> List[Container]:
         return self.__client.containers.list(filters={"label": "bunkerweb.INSTANCE"})
 
-    def _get_controller_services(self):
+    def _get_controller_services(self) -> List[Container]:
         return self.__client.containers.list(filters={"label": "bunkerweb.SERVER_NAME"})
 
-    def _to_instances(self, controller_instance):
+    def _to_instances(self, controller_instance) -> List[dict]:
         instance = {}
         instance["name"] = controller_instance.name
         instance["hostname"] = controller_instance.name
@@ -40,18 +44,18 @@ class DockerController(Controller, ConfigCaller):
                 instance["env"][variable] = value
         return [instance]
 
-    def _to_services(self, controller_service):
+    def _to_services(self, controller_service) -> List[dict]:
         service = {}
         for variable, value in controller_service.labels.items():
             if not variable.startswith("bunkerweb."):
                 continue
             real_variable = variable.replace("bunkerweb.", "", 1)
-            if not self._is_multisite_setting(real_variable):
+            if not self._is_setting_context(real_variable, "multisite"):
                 continue
             service[real_variable] = value
         return [service]
 
-    def _get_static_services(self):
+    def _get_static_services(self) -> List[dict]:
         services = []
         variables = {}
         for instance in self.__client.containers.list(
@@ -71,14 +75,14 @@ class DockerController(Controller, ConfigCaller):
                 for variable, value in variables.items():
                     prefix = variable.split("_")[0]
                     real_variable = variable.replace(f"{prefix}_", "", 1)
-                    if prefix == server_name and self._is_multisite_setting(
-                        real_variable
+                    if prefix == server_name and self._is_setting_context(
+                        real_variable, "multisite"
                     ):
                         service[real_variable] = value
                 services.append(service)
         return services
 
-    def get_configs(self):
+    def get_configs(self) -> Dict[str, Dict[str, Any]]:
         configs = {config_type: {} for config_type in self._supported_config_types}
         # get site configs from labels
         for container in self.__client.containers.list(
@@ -106,7 +110,7 @@ class DockerController(Controller, ConfigCaller):
                 ] = value
         return configs
 
-    def apply_config(self):
+    def apply_config(self) -> bool:
         return self._config.apply(
             self._instances, self._services, configs=self._configs
         )

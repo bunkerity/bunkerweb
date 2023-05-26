@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 
 from argparse import ArgumentParser
-from glob import glob
-from json import loads
-from os import R_OK, X_OK, access, environ, getenv, listdir, walk
-from os.path import join
+from os import R_OK, X_OK, access, environ, getenv, listdir, sep, walk
+from os.path import basename, join, normpath
 from pathlib import Path
 from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
@@ -12,22 +10,19 @@ from time import sleep
 from traceback import format_exc
 from typing import Any
 
-
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/api",
-        "/usr/share/bunkerweb/db",
-    )
-)
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (("deps", "python"), ("utils",), ("api",), ("db",))
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
 from docker import DockerClient
 
-from logger import setup_logger
-from Database import Database
+from logger import setup_logger  # type: ignore
+from Database import Database  # type: ignore
 from Configurator import Configurator
-from API import API
+from API import API  # type: ignore
 
 custom_confs_rx = re_compile(
     r"^([0-9a-z\.-]*)_?CUSTOM_CONF_(HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
@@ -97,19 +92,19 @@ if __name__ == "__main__":
         parser = ArgumentParser(description="BunkerWeb config saver")
         parser.add_argument(
             "--settings",
-            default="/usr/share/bunkerweb/settings.json",
+            default=join(sep, "usr", "share", "bunkerweb", "settings.json"),
             type=str,
             help="file containing the main settings",
         )
         parser.add_argument(
             "--core",
-            default="/usr/share/bunkerweb/core",
+            default=join(sep, "usr", "share", "bunkerweb", "core"),
             type=str,
             help="directory containing the core plugins",
         )
         parser.add_argument(
             "--plugins",
-            default="/etc/bunkerweb/plugins",
+            default=join(sep, "etc", "bunkerweb", "plugins"),
             type=str,
             help="directory containing the external plugins",
         )
@@ -131,26 +126,31 @@ if __name__ == "__main__":
         )
         args = parser.parse_args()
 
+        settings_path = Path(normpath(args.settings))
+        core_path = Path(normpath(args.core))
+        plugins_path = Path(normpath(args.plugins))
+
         logger.info("Save config started ...")
-        logger.info(f"Settings : {args.settings}")
-        logger.info(f"Core : {args.core}")
-        logger.info(f"Plugins : {args.plugins}")
+        logger.info(f"Settings : {settings_path}")
+        logger.info(f"Core : {core_path}")
+        logger.info(f"Plugins : {plugins_path}")
         logger.info(f"Init : {args.init}")
 
         integration = "Linux"
+        integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
+        os_release_path = Path(sep, "etc", "os-release")
         if getenv("KUBERNETES_MODE", "no").lower() == "yes":
             integration = "Kubernetes"
         elif getenv("SWARM_MODE", "no").lower() == "yes":
             integration = "Swarm"
         elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
             integration = "Autoconf"
-        elif Path("/usr/share/bunkerweb/INTEGRATION").is_file():
-            integration = Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip()
-        elif (
-            Path("/etc/os-release").is_file()
-            and "Alpine" in Path("/etc/os-release").read_text()
-        ):
+        elif integration_path.is_file():
+            integration = integration_path.read_text().strip()
+        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text():
             integration = "Docker"
+
+        del integration_path, os_release_path
 
         if args.init:
             logger.info(f"Detected {integration} integration")
@@ -160,7 +160,7 @@ if __name__ == "__main__":
         apis = []
 
         external_plugins = args.plugins
-        if not Path("/usr/sbin/nginx").exists() and args.method == "ui":
+        if not Path(sep, "usr", "sbin", "nginx").exists() and args.method == "ui":
             db = Database(logger)
             external_plugins = []
             for plugin in db.get_plugins():
@@ -168,17 +168,19 @@ if __name__ == "__main__":
 
         # Check existences and permissions
         logger.info("Checking arguments ...")
-        files = [args.settings] + ([args.variables] if args.variables else [])
-        paths_rx = [args.core, args.plugins]
+        files = [settings_path] + (
+            [Path(normpath(args.variables))] if args.variables else []
+        )
+        paths_rx = [core_path, plugins_path]
         for file in files:
-            if not Path(file).is_file():
+            if not file.is_file():
                 logger.error(f"Missing file : {file}")
                 sys_exit(1)
             if not access(file, R_OK):
                 logger.error(f"Can't read file : {file}")
                 sys_exit(1)
         for path in paths_rx:
-            if not Path(path).is_dir():
+            if not path.is_dir():
                 logger.error(f"Missing directory : {path}")
                 sys_exit(1)
             if not access(path, R_OK | X_OK):
@@ -188,15 +190,16 @@ if __name__ == "__main__":
                 sys_exit(1)
 
         if args.variables:
-            logger.info(f"Variables : {args.variables}")
+            variables_path = Path(normpath(args.variables))
+            logger.info(f"Variables : {variables_path}")
 
             # Compute the config
             logger.info("Computing config ...")
             config = Configurator(
-                args.settings,
-                args.core,
+                str(settings_path),
+                str(core_path),
                 external_plugins,
-                args.variables,
+                str(variables_path),
                 logger,
             )
             config_files = config.get_config()
@@ -214,27 +217,25 @@ if __name__ == "__main__":
                             ),
                         }
                     )
-            root_dirs = listdir("/etc/bunkerweb/configs")
-            for root, dirs, files in walk("/etc/bunkerweb/configs", topdown=True):
-                if (
-                    root != "configs"
-                    and (dirs and not root.split("/")[-1] in root_dirs)
-                    or files
-                ):
+            configs_path = join(sep, "etc", "bunkerweb", "configs")
+            root_dirs = listdir(configs_path)
+            for root, dirs, files in walk(configs_path):
+                if files or (dirs and basename(root) not in root_dirs):
                     path_exploded = root.split("/")
                     for file in files:
-                        custom_confs.append(
-                            {
-                                "value": Path(join(root, file)).read_text(),
-                                "exploded": (
-                                    f"{path_exploded.pop()}"
-                                    if path_exploded[-1] not in root_dirs
-                                    else "",
-                                    path_exploded[-1],
-                                    file.replace(".conf", ""),
-                                ),
-                            }
-                        )
+                        with open(join(root, file), "r") as f:
+                            custom_confs.append(
+                                {
+                                    "value": f.read(),
+                                    "exploded": (
+                                        f"{path_exploded.pop()}"
+                                        if path_exploded[-1] not in root_dirs
+                                        else None,
+                                        path_exploded[-1],
+                                        file.replace(".conf", ""),
+                                    ),
+                                }
+                            )
         else:
             docker_client = DockerClient(
                 base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
@@ -282,12 +283,12 @@ if __name__ == "__main__":
                         elif splitted[0] == "API_SERVER_NAME":
                             api_server_name = splitted[1]
 
-            apis.append(
-                API(
-                    f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
-                    host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
+                apis.append(
+                    API(
+                        f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                        host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
+                    )
                 )
-            )
 
         if not db:
             db = Database(logger)
@@ -330,7 +331,9 @@ if __name__ == "__main__":
                 logger.info("Database tables initialized")
 
             err = db.initialize_db(
-                version=Path("/usr/share/bunkerweb/VERSION").read_text().strip(),
+                version=Path(sep, "usr", "share", "bunkerweb", "VERSION")
+                .read_text()
+                .strip(),
                 integration=integration,
             )
 

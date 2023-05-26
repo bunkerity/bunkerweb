@@ -1,4 +1,4 @@
-requests==2.30.0
+requests==2.31.0
 redis==4.5.5
 fastapi==0.95.2
 uvicorn[standard]==0.22.0

@@ -1,17 +1,15 @@
+#!/usr/bin/python3
+
+from os import sep
+from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path
 from typing import Any, Optional, Union
 
-
-from API import API
-from ApiCaller import ApiCaller
-
-if "/usr/share/bunkerweb/deps/python" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/deps/python")
-
+from API import API  # type: ignore
+from ApiCaller import ApiCaller  # type: ignore
 from dotenv import dotenv_values
-from kubernetes import config
 
 
 class Instance:
@@ -56,7 +54,7 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", "/usr/sbin/nginx", "-s", "reload"],
+                    ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                 ).returncode
@@ -69,7 +67,7 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", "/usr/sbin/nginx"],
+                    ["sudo", join(sep, "usr", "sbin", "nginx")],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                 ).returncode
@@ -82,7 +80,7 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", "/usr/sbin/nginx", "-s", "stop"],
+                    ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                 ).returncode
@@ -95,7 +93,7 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", "/usr/sbin/nginx", "-s", "restart"],
+                    ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "restart"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                 ).returncode
@@ -240,9 +238,11 @@ class Instances:
         )
 
         # Local instance
-        if Path("/usr/sbin/nginx").exists():
+        if Path(sep, "usr", "sbin", "nginx").exists():
             apiCaller = ApiCaller()
-            env_variables = dotenv_values("/etc/bunkerweb/variables.env")
+            env_variables = dotenv_values(
+                join(sep, "etc", "bunkerweb", "variables.env")
+            )
             apiCaller._set_apis(
                 [
                     API(
@@ -259,7 +259,9 @@ class Instances:
                     "local",
                     "127.0.0.1",
                     "local",
-                    "up" if Path("/var/tmp/bunkerweb/nginx.pid").exists() else "down",
+                    "up"
+                    if Path(sep, "var", "tmp", "bunkerweb", "nginx.pid").exists()
+                    else "down",
                     None,
                     apiCaller,
                 ),

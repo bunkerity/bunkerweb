@@ -13,6 +13,7 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 | **Discord** | 1.0 | Send security notifications to a Discord channel using a Webhook. | [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord) |
 | **Slack** | 1.0 | Send security notifications to a Slack channel using a Webhook. | [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack) |
 | **VirusTotal** |   1.0   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
+| **Coraza** |   1.0   | Inspect requests using a Core Rule Set and deny malicious ones.           | [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza) |
 
 ## How to use a plugin
 
@@ -275,30 +276,29 @@ A file named **plugin.json** and written at the root of the plugin folder must c
 
 ```json
 {
-	"id": "myplugin",
-	"order": 42,
-	"name": "My Plugin",
-	"description": "Just an example plugin.",
-	"version": "1.0",
+  "id": "myplugin",
+  "name": "My Plugin",
+  "description": "Just an example plugin.",
+  "version": "1.0",
   "stream": "partial",
-	"settings": {
-		"DUMMY_SETTING": {
-			"context": "multisite",
-			"default": "1234",
-			"help": "Here is the help of the setting.",
-			"id": "dummy-id",
-			"label": "Dummy setting",
-			"regex": "^.*$",
-			"type": "text"
-		}
-	},
-	"jobs": [
-		{
-			"name": "my-job",
-			"file": "my-job.py",
-			"every": "hour"
-		}
-	]
+  "settings": {
+    "DUMMY_SETTING": {
+      "context": "multisite",
+      "default": "1234",
+      "help": "Here is the help of the setting.",
+      "id": "dummy-id",
+      "label": "Dummy setting",
+      "regex": "^.*$",
+      "type": "text"
+    }
+  },
+  "jobs": [
+    {
+      "name": "my-job",
+      "file": "my-job.py",
+      "every": "hour"
+    }
+  ]
 }
 ```
 
@@ -307,7 +307,6 @@ Here are the details of the fields :
 |     Field     | Mandatory |  Type  | Description                                                                                                                                                                                        |
 | :-----------: | :-------: | :----: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 |     `id`      |    yes    | string | Internal ID for the plugin : must be unique among other plugins (including "core" ones) and contain only lowercase chars.                                                                          |
-|    `order`    |    yes    |  int   | When the plugin should be executed during the access phase : `1` for whitelisting, `2` for blacklisting, `3` for "standard security feature" or `999` if your settings don't use the access phase. |
 |    `name`     |    yes    | string | Name of your plugin.                                                                                                                                                                               |
 | `description` |    yes    | string | Description of your plugin.                                                                                                                                                                        |
 |   `version`   |    yes    | string | Version of your plugin.                                                                                                                                                                            |

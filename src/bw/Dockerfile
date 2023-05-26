@@ -69,7 +69,7 @@ RUN apk add --no-cache pcre bash python3 && \
 	ln -s /proc/1/fd/1 /var/log/nginx/access.log
 
 # Fix CVEs
-RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4" "curl>=8.1.0-r0" "libcurl>=8.1.0-r0"
+RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4" "curl>=8.1.0-r0" "libcurl>=8.1.0-r0" "libwebp>=1.2.4-r2"
 
 VOLUME /data /etc/nginx
 

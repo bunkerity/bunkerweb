@@ -1,20 +1,24 @@
+#!/usr/bin/python3
+
 from io import BytesIO
-from os import getenv
+from os import getenv, sep
+from os.path import join
 from sys import path as sys_path
-from tarfile import open as taropen
+from tarfile import open as tar_open
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
-if "/usr/share/bunkerweb/utils" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/utils")
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (("deps", "python"), ("utils",))
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
+from API import API  # type: ignore
 from logger import setup_logger
-from API import API
 
-if "/usr/share/bunkerweb/deps/python" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/deps/python")
-
-from kubernetes import client as kube_client, config
 from docker import DockerClient
+from kubernetes import client as kube_client, config
 
 
 class ApiCaller:
@@ -154,7 +158,7 @@ class ApiCaller:
     def _send_files(self, path: str, url: str) -> bool:
         ret = True
         with BytesIO() as tgz:
-            with taropen(
+            with tar_open(
                 mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3
             ) as tf:
                 tf.add(path, arcname=".")

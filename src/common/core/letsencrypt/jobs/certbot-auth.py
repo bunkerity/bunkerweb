@@ -1,38 +1,43 @@
 #!/usr/bin/python3
 
-from os import getenv
+from os import getenv, sep
+from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from threading import Lock
 from traceback import format_exc
 
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/api",
-        "/usr/share/bunkerweb/db",
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (
+        ("deps", "python"),
+        ("utils",),
+        ("api",),
+        ("db",),
     )
-)
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
-from Database import Database
-from logger import setup_logger
-from API import API
+from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
+from API import API  # type: ignore
 
-logger = setup_logger("Lets-encrypt", getenv("LOG_LEVEL", "INFO"))
+logger = setup_logger("Lets-encrypt.auth", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
     # Get env vars
-    bw_integration = None
+    bw_integration = "Linux"
+    integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
     if getenv("KUBERNETES_MODE") == "yes":
         bw_integration = "Kubernetes"
     elif getenv("SWARM_MODE") == "yes":
         bw_integration = "Swarm"
     elif getenv("AUTOCONF_MODE") == "yes":
         bw_integration = "Autoconf"
-    elif Path("/usr/share/bunkerweb/INTEGRATION").exists():
-        bw_integration = Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip()
+    elif integration_path.is_file():
+        integration = integration_path.read_text().strip()
     token = getenv("CERTBOT_TOKEN", "")
     validation = getenv("CERTBOT_VALIDATION", "")
 
@@ -48,9 +53,10 @@ try:
             instances = db.get_instances()
 
         for instance in instances:
-            endpoint = f"http://{instance['hostname']}:{instance['port']}"
-            host = instance["server_name"]
-            api = API(endpoint, host=host)
+            api = API(
+                f"http://{instance['hostname']}:{instance['port']}",
+                host=instance["server_name"],
+            )
             sent, err, status, resp = api.request(
                 "POST",
                 "/lets-encrypt/challenge",
@@ -61,22 +67,29 @@ try:
                 logger.error(
                     f"Can't send API request to {api.get_endpoint()}/lets-encrypt/challenge : {err}"
                 )
+            elif status != 200:
+                status = 1
+                logger.error(
+                    f"Error while sending API request to {api.get_endpoint()}/lets-encrypt/challenge : status = {resp['status']}, msg = {resp['msg']}",
+                )
             else:
-                if status != 200:
-                    status = 1
-                    logger.error(
-                        f"Error while sending API request to {api.get_endpoint()}/lets-encrypt/challenge : status = {resp['status']}, msg = {resp['msg']}",
-                    )
-                else:
-                    logger.info(
-                        f"Successfully sent API request to {api.get_endpoint()}/lets-encrypt/challenge",
-                    )
+                logger.info(
+                    f"Successfully sent API request to {api.get_endpoint()}/lets-encrypt/challenge",
+                )
 
     # Linux case
     else:
-        root_dir = "/var/tmp/bunkerweb/lets-encrypt/.well-known/acme-challenge/"
-        Path(root_dir).mkdir(parents=True, exist_ok=True)
-        Path(f"{root_dir}{token}").write_text(validation)
+        root_dir = Path(
+            sep,
+            "var",
+            "tmp",
+            "bunkerweb",
+            "lets-encrypt",
+            ".well-known",
+            "acme-challenge",
+        )
+        root_dir.mkdir(parents=True, exist_ok=True)
+        root_dir.joinpath(token).write_text(validation)
 except:
     status = 1
     logger.error(f"Exception while running certbot-auth.py :\n{format_exc()}")

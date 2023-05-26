@@ -13,39 +13,32 @@
   <meta name="author" content="bunkerity" />
   <title>BunkerWeb UI</title>
   <link rel="icon" type="image/x-icon" href="images/favicon.ico" />
-  <!--     Fonts and icons     -->
-  <link
-    href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"
-    rel="stylesheet"
-  />
   <!-- tailwind style -->
   <link rel="stylesheet" type="text/css" href="./css/dashboard.css" />
 
-  <script type="module"  src="./js/global.js"></script>
+  <script type="module" src="./js/global.js"></script>
 
-  <script
-    src="./js/editor/ace.js"
-  ></script>
+  <script src="./js/editor/ace.js"></script>
 
   {% if current_endpoint == "global_config" %}
-  <script  type="module" src="./js/global_config.js"></script>
+  <script type="module" src="./js/global_config.js"></script>
   {% elif current_endpoint == "configs" %}
-  <script  type="module" src="./js/configs.js"></script>
+  <script type="module" src="./js/configs.js"></script>
   {% elif current_endpoint == "services" %}
-  <script  type="module" src="./js/services.js"></script>
+  <script type="module" src="./js/services.js"></script>
   {% elif current_endpoint == "plugins" %}
-  <script type="module"  src="./js/plugins.js"></script>
+  <script type="module" src="./js/plugins.js"></script>
   {% elif current_endpoint == "cache" %}
-  <script  type="module" src="./js/cache.js"></script>
+  <script type="module" src="./js/cache.js"></script>
   {% elif current_endpoint == "logs" %}
   <link rel="stylesheet" type="text/css" href="./css/flatpickr.css" />
   <link rel="stylesheet" type="text/css" href="./css/flatpickr.dark.css" />
 
-  <script type="module"  src="./js/utils/flatpickr.js"></script>
-  <script type="module"  src="./js/utils/fr.js"></script>
+  <script type="module" src="./js/utils/flatpickr.js"></script>
+  <script type="module" src="./js/utils/fr.js"></script>
 
-  <script type="module"  src="./js/logs.js"></script>
-  <script type="module"  src="./js/datepicker/datepicker.js"></script>
+  <script type="module" src="./js/logs.js"></script>
+  <script type="module" src="./js/datepicker/datepicker.js"></script>
   <link
     rel="stylesheet"
     type="text/css"

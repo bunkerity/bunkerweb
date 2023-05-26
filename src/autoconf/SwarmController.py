@@ -1,13 +1,17 @@
+#!/usr/bin/python3
+
 from os import getenv
 from time import sleep
 from traceback import format_exc
 from threading import Thread, Lock
+from typing import Any, Dict, List
 from docker import DockerClient
 from base64 import b64decode
 
+from docker.models.services import Service
 from Controller import Controller
-from ConfigCaller import ConfigCaller
-from logger import setup_logger
+from ConfigCaller import ConfigCaller  # type: ignore
+from logger import setup_logger  # type: ignore
 
 
 class SwarmController(Controller, ConfigCaller):
@@ -18,13 +22,13 @@ class SwarmController(Controller, ConfigCaller):
         self.__internal_lock = Lock()
         self.__logger = setup_logger("Swarm-controller", getenv("LOG_LEVEL", "INFO"))
 
-    def _get_controller_instances(self):
+    def _get_controller_instances(self) -> List[Service]:
         return self.__client.services.list(filters={"label": "bunkerweb.INSTANCE"})
 
-    def _get_controller_services(self):
+    def _get_controller_services(self) -> List[Service]:
         return self.__client.services.list(filters={"label": "bunkerweb.SERVER_NAME"})
 
-    def _to_instances(self, controller_instance):
+    def _to_instances(self, controller_instance) -> List[dict]:
         instances = []
         instance_env = {}
         for env in controller_instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
@@ -48,18 +52,18 @@ class SwarmController(Controller, ConfigCaller):
             )
         return instances
 
-    def _to_services(self, controller_service):
+    def _to_services(self, controller_service) -> List[dict]:
         service = {}
         for variable, value in controller_service.attrs["Spec"]["Labels"].items():
             if not variable.startswith("bunkerweb."):
                 continue
             real_variable = variable.replace("bunkerweb.", "", 1)
-            if not self._is_multisite_setting(real_variable):
+            if not self._is_setting_context(real_variable, "multisite"):
                 continue
             service[real_variable] = value
         return [service]
 
-    def _get_static_services(self):
+    def _get_static_services(self) -> List[dict]:
         services = []
         variables = {}
         for instance in self.__client.services.list(
@@ -81,14 +85,14 @@ class SwarmController(Controller, ConfigCaller):
                 for variable, value in variables.items():
                     prefix = variable.split("_")[0]
                     real_variable = variable.replace(f"{prefix}_", "", 1)
-                    if prefix == server_name and self._is_multisite_setting(
-                        real_variable
+                    if prefix == server_name and self._is_setting_context(
+                        real_variable, "multisite"
                     ):
                         service[real_variable] = value
                 services.append(service)
         return services
 
-    def get_configs(self):
+    def get_configs(self) -> Dict[str, Dict[str, Any]]:
         configs = {}
         for config_type in self._supported_config_types:
             configs[config_type] = {}
@@ -127,7 +131,7 @@ class SwarmController(Controller, ConfigCaller):
             )
         return configs
 
-    def apply_config(self):
+    def apply_config(self) -> bool:
         return self._config.apply(
             self._instances, self._services, configs=self._configs
         )

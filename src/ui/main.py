@@ -1,24 +1,24 @@
+#!/usr/bin/python3
+
+from os import _exit, getenv, getpid, listdir, sep
+from os.path import basename, dirname, join
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
 
-if Path("/etc/os-release").is_file():
-    with open("/etc/os-release", "r") as f:
-        if (
-            "/usr/share/bunkerweb/deps/python" not in sys_path
-            and "Alpine" not in f.read()
-        ):
-            sys_path.append("/usr/share/bunkerweb/deps/python")
+os_release_path = Path(sep, "etc", "os-release")
+if os_release_path.is_file() and "Alpine" not in os_release_path.read_text():
+    sys_path.append(join(sep, "usr", "share", "bunkerweb", "deps", "python"))
 
-if "/usr/share/bunkerweb/utils" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/utils")
-if "/usr/share/bunkerweb/api" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/api")
-if "/usr/share/bunkerweb/db" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/db")
+del os_release_path
 
-from hashlib import sha256
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (("utils",), ("api",), ("db",))
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
 from bs4 import BeautifulSoup
-from contextlib import suppress
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from dateutil.parser import parse as dateutil_parse
@@ -46,14 +46,14 @@ from flask_login import (
     logout_user,
 )
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+from hashlib import sha256
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
-from json import JSONDecodeError, dumps, load as json_load
+from json import JSONDecodeError, dumps, loads as json_loads
 from jinja2 import Template
 from kubernetes import client as kube_client
 from kubernetes import config as kube_config
 from kubernetes.client.exceptions import ApiException as kube_ApiException
-from os import _exit, getenv, getpid, listdir
 from re import compile as re_compile
 from regex import match as regex_match
 from requests import get
@@ -79,8 +79,8 @@ from utils import (
     get_variables,
     path_to_dict,
 )
-from logger import setup_logger
-from Database import Database
+from logger import setup_logger  # type: ignore
+from Database import Database  # type: ignore
 
 logger = setup_logger("UI", getenv("LOG_LEVEL", "INFO"))
 
@@ -93,10 +93,8 @@ def stop_gunicorn():
 
 
 def stop(status, stop=True):
-    if Path("/var/tmp/bunkerweb/ui.pid").exists():
-        Path("/var/tmp/bunkerweb/ui.pid").unlink()
-    if Path("/var/tmp/bunkerweb/ui.healthy").exists():
-        Path("/var/tmp/bunkerweb/ui.healthy").unlink()
+    Path(sep, "var", "tmp", "bunkerweb", "ui.pid").unlink(exist_ok=True)
+    Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").unlink(exist_ok=True)
     if stop is True:
         stop_gunicorn()
     _exit(status)
@@ -111,8 +109,12 @@ def handle_stop(signum, frame):
 signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
 
-if not Path("/var/tmp/bunkerweb/ui.pid").is_file():
-    Path("/var/tmp/bunkerweb/ui.pid").write_text(str(getpid()))
+sbin_nginx_path = Path(sep, "usr", "sbin", "nginx")
+pid_file = Path(sep, "var", "tmp", "bunkerweb", "ui.pid")
+if not pid_file.is_file():
+    pid_file.write_text(str(getpid()))
+
+del pid_file
 
 # Flask app
 app = Flask(
@@ -167,15 +169,17 @@ PLUGIN_KEYS = [
 ]
 
 integration = "Linux"
+integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
 if getenv("KUBERNETES_MODE", "no").lower() == "yes":
     integration = "Kubernetes"
 elif getenv("SWARM_MODE", "no").lower() == "yes":
     integration = "Swarm"
 elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
     integration = "Autoconf"
-elif Path("/usr/share/bunkerweb/INTEGRATION").exists():
-    with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
-        integration = f.read().strip()
+elif integration_path.is_file():
+    integration = integration_path.read_text().strip()
+
+del integration_path
 
 docker_client = None
 kubernetes_client = None
@@ -207,10 +211,8 @@ while not db.is_first_config_saved() or not env:
     env = db.get_config()
 
 logger.info("Database is ready")
-Path("/var/tmp/bunkerweb/ui.healthy").write_text("ok")
-
-with open("/usr/share/bunkerweb/VERSION", "r") as f:
-    bw_version = f.read().strip()
+Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").write_text("ok")
+bw_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip()
 
 try:
     app.config.update(
@@ -345,14 +347,16 @@ def home():
 
     try:
         r = get(
-            "https://raw.githubusercontent.com/bunkerity/bunkerweb/master/VERSION",
+            "https://github.com/bunkerity/bunkerweb/releases/latest",
+            allow_redirects=True,
         )
+        r.raise_for_status()
     except BaseException:
         r = None
     remote_version = None
 
     if r and r.status_code == 200:
-        remote_version = r.text.strip()
+        remote_version = basename(r.url).strip().replace("v", "")
 
     instances = app.config["INSTANCES"].get_instances()
     services = app.config["CONFIG"].get_services()
@@ -551,6 +555,8 @@ def services():
                 "SERVE_FILES": service["SERVE_FILES"],
                 "REMOTE_PHP": service["REMOTE_PHP"],
                 "AUTO_LETS_ENCRYPT": service["AUTO_LETS_ENCRYPT"],
+                "USE_CUSTOM_SSL": service["USE_CUSTOM_SSL"],
+                "GENERATE_SELF_SIGNED_SSL": service["GENERATE_SELF_SIGNED_SSL"],
                 "USE_MODSECURITY": service["USE_MODSECURITY"],
                 "USE_BAD_BEHAVIOR": service["USE_BAD_BEHAVIOR"],
                 "USE_LIMIT_REQ": service["USE_LIMIT_REQ"],
@@ -710,7 +716,7 @@ def configs():
         "configs.html",
         folders=[
             path_to_dict(
-                "/etc/bunkerweb/configs",
+                join(sep, "etc", "bunkerweb", "configs"),
                 db_data=db.get_custom_configs(),
                 services=app.config["CONFIG"]
                 .get_config(methods=False)["SERVER_NAME"]
@@ -724,6 +730,7 @@ def configs():
 @app.route("/plugins", methods=["GET", "POST"])
 @login_required
 def plugins():
+    tmp_ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui")
     if request.method == "POST":
         operation = ""
         error = 0
@@ -750,9 +757,7 @@ def plugins():
                 )
             flash(f"Deleted plugin {variables['name']} successfully")
         else:
-            if not Path("/var/tmp/bunkerweb/ui").exists() or not listdir(
-                "/var/tmp/bunkerweb/ui"
-            ):
+            if not tmp_ui_path.exists() or not listdir(str(tmp_ui_path)):
                 flash("Please upload new plugins to reload plugins", "error")
                 return redirect(url_for("loading", next=url_for("plugins")))
 
@@ -761,161 +766,25 @@ def plugins():
             new_plugins = []
             new_plugins_ids = []
 
-            for file in listdir("/var/tmp/bunkerweb/ui"):
-                if not Path(f"/var/tmp/bunkerweb/ui/{file}").is_file():
+            for file in listdir(str(tmp_ui_path)):
+                if not tmp_ui_path.joinpath(file).is_file():
                     continue
 
                 files_count += 1
                 folder_name = ""
                 temp_folder_name = file.split(".")[0]
+                temp_folder_path = tmp_ui_path.joinpath(temp_folder_name)
+                is_dir = False
 
                 try:
                     if file.endswith(".zip"):
                         try:
-                            with ZipFile(f"/var/tmp/bunkerweb/ui/{file}") as zip_file:
+                            with ZipFile(str(tmp_ui_path.joinpath(file))) as zip_file:
                                 try:
                                     zip_file.getinfo("plugin.json")
-                                    zip_file.extractall(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
-                                    )
-                                    with open(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}/plugin.json",
-                                        "r",
-                                    ) as f:
-                                        plugin_file = json_load(f)
-
-                                    if not all(
-                                        key in plugin_file.keys() for key in PLUGIN_KEYS
-                                    ):
-                                        raise ValueError
-
-                                    folder_name = plugin_file["id"]
-
-                                    if not app.config["CONFIGFILES"].check_name(
-                                        folder_name
-                                    ):
-                                        errors += 1
-                                        error = 1
-                                        flash(
-                                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
-                                            "error",
-                                        )
-                                        raise Exception
-
-                                    plugin_content = BytesIO()
-                                    with tar_open(
-                                        fileobj=plugin_content,
-                                        mode="w:gz",
-                                        compresslevel=9,
-                                    ) as tar:
-                                        tar.add(
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
-                                            arcname=temp_folder_name,
-                                            recursive=True,
-                                        )
-                                    plugin_content.seek(0)
-                                    value = plugin_content.getvalue()
-
-                                    new_plugins.append(
-                                        plugin_file
-                                        | {
-                                            "external": True,
-                                            "page": "ui"
-                                            in listdir(
-                                                f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
-                                            ),
-                                            "method": "ui",
-                                            "data": value,
-                                            "checksum": sha256(value).hexdigest(),
-                                        }
-                                    )
-                                    new_plugins_ids.append(folder_name)
                                 except KeyError:
-                                    zip_file.extractall(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
-                                    )
-                                    dirs = [
-                                        d
-                                        for d in listdir(
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
-                                        )
-                                        if Path(
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{d}"
-                                        ).is_dir()
-                                    ]
-
-                                    if (
-                                        not dirs
-                                        or len(dirs) > 1
-                                        or not Path(
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}/plugin.json"
-                                        ).is_file()
-                                    ):
-                                        raise KeyError
-
-                                    with open(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}/plugin.json",
-                                        "r",
-                                    ) as f:
-                                        plugin_file = json_load(f)
-
-                                    if not all(
-                                        key in plugin_file.keys() for key in PLUGIN_KEYS
-                                    ):
-                                        raise ValueError
-
-                                    folder_name = plugin_file["id"]
-
-                                    if not app.config["CONFIGFILES"].check_name(
-                                        folder_name
-                                    ):
-                                        errors += 1
-                                        error = 1
-                                        flash(
-                                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
-                                            "error",
-                                        )
-                                        raise Exception
-
-                                    for file_name in listdir(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}"
-                                    ):
-                                        move(
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}/{file_name}",
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{file_name}",
-                                        )
-                                    rmtree(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}"
-                                    )
-
-                                    plugin_content = BytesIO()
-                                    with tar_open(
-                                        fileobj=plugin_content,
-                                        mode="w:gz",
-                                        compresslevel=9,
-                                    ) as tar:
-                                        tar.add(
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
-                                            arcname=temp_folder_name,
-                                            recursive=True,
-                                        )
-                                    plugin_content.seek(0)
-                                    value = plugin_content.getvalue()
-
-                                    new_plugins.append(
-                                        plugin_file
-                                        | {
-                                            "external": True,
-                                            "page": "ui"
-                                            in listdir(
-                                                f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
-                                            ),
-                                            "method": "ui",
-                                            "data": value,
-                                            "checksum": sha256(value).hexdigest(),
-                                        }
-                                    )
-                                    new_plugins_ids.append(folder_name)
+                                    is_dir = True
+                                zip_file.extractall(str(temp_folder_path))
                         except BadZipFile:
                             errors += 1
                             error = 1
@@ -926,152 +795,13 @@ def plugins():
                     else:
                         try:
                             with tar_open(
-                                f"/var/tmp/bunkerweb/ui/{file}",
-                                errorlevel=2,
+                                str(tmp_ui_path.joinpath(file)), errorlevel=2
                             ) as tar_file:
                                 try:
                                     tar_file.getmember("plugin.json")
-                                    tar_file.extractall(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
-                                    )
-                                    with open(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}/plugin.json",
-                                        "r",
-                                    ) as f:
-                                        plugin_file = json_load(f)
-
-                                    if not all(
-                                        key in plugin_file.keys() for key in PLUGIN_KEYS
-                                    ):
-                                        raise ValueError
-
-                                    folder_name = plugin_file["id"]
-
-                                    if not app.config["CONFIGFILES"].check_name(
-                                        folder_name
-                                    ):
-                                        errors += 1
-                                        error = 1
-                                        flash(
-                                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
-                                            "error",
-                                        )
-                                        raise Exception
-
-                                    plugin_content = BytesIO()
-                                    with tar_open(
-                                        fileobj=plugin_content,
-                                        mode="w:gz",
-                                        compresslevel=9,
-                                    ) as tar:
-                                        tar.add(
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
-                                            arcname=temp_folder_name,
-                                            recursive=True,
-                                        )
-                                    plugin_content.seek(0)
-                                    value = plugin_content.getvalue()
-
-                                    new_plugins.append(
-                                        plugin_file
-                                        | {
-                                            "external": True,
-                                            "page": "ui"
-                                            in listdir(
-                                                f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
-                                            ),
-                                            "method": "ui",
-                                            "data": value,
-                                            "checksum": sha256(value).hexdigest(),
-                                        }
-                                    )
-                                    new_plugins_ids.append(folder_name)
                                 except KeyError:
-                                    tar_file.extractall(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
-                                    )
-                                    dirs = [
-                                        d
-                                        for d in listdir(
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
-                                        )
-                                        if Path(
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{d}"
-                                        ).is_dir()
-                                    ]
-
-                                    if (
-                                        not dirs
-                                        or len(dirs) > 1
-                                        or not Path(
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}/plugin.json"
-                                        ).is_file()
-                                    ):
-                                        raise KeyError
-
-                                    with open(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}/plugin.json",
-                                        "r",
-                                    ) as f:
-                                        plugin_file = json_load(f)
-
-                                    if not all(
-                                        key in plugin_file.keys() for key in PLUGIN_KEYS
-                                    ):
-                                        raise ValueError
-
-                                    folder_name = plugin_file["id"]
-
-                                    if not app.config["CONFIGFILES"].check_name(
-                                        folder_name
-                                    ):
-                                        errors += 1
-                                        error = 1
-                                        flash(
-                                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
-                                            "error",
-                                        )
-                                        raise Exception
-
-                                    for file_name in listdir(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}"
-                                    ):
-                                        move(
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}/{file_name}",
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{file_name}",
-                                        )
-                                    rmtree(
-                                        f"/var/tmp/bunkerweb/ui/{temp_folder_name}/{dirs[0]}"
-                                    )
-
-                                    plugin_content = BytesIO()
-                                    with tar_open(
-                                        fileobj=plugin_content,
-                                        mode="w:gz",
-                                        compresslevel=9,
-                                    ) as tar:
-                                        tar.add(
-                                            f"/var/tmp/bunkerweb/ui/{temp_folder_name}",
-                                            arcname=temp_folder_name,
-                                            recursive=True,
-                                        )
-                                    plugin_content.seek(0)
-                                    value = plugin_content.getvalue()
-
-                                    new_plugins.append(
-                                        plugin_file
-                                        | {
-                                            "external": True,
-                                            "page": "ui"
-                                            in listdir(
-                                                f"/var/tmp/bunkerweb/ui/{temp_folder_name}"
-                                            ),
-                                            "method": "ui",
-                                            "data": value,
-                                            "checksum": sha256(value).hexdigest(),
-                                        }
-                                    )
-                                    new_plugins_ids.append(folder_name)
+                                    is_dir = True
+                                tar_file.extractall(str(temp_folder_path))
                         except ReadError:
                             errors += 1
                             error = 1
@@ -1093,6 +823,78 @@ def plugins():
                                 f"The file plugin.json in {file} is not valid ({folder_name or temp_folder_name})",
                                 "error",
                             )
+
+                    if is_dir:
+                        dirs = [
+                            d
+                            for d in listdir(str(temp_folder_path))
+                            if temp_folder_path.joinpath(d).is_dir()
+                        ]
+
+                        if (
+                            not dirs
+                            or len(dirs) > 1
+                            or not temp_folder_path.joinpath(
+                                dirs[0], "plugin.json"
+                            ).is_file()
+                        ):
+                            raise KeyError
+
+                        for file_name in listdir(
+                            str(temp_folder_path.joinpath(dirs[0]))
+                        ):
+                            move(
+                                str(temp_folder_path.joinpath(dirs[0], file_name)),
+                                str(temp_folder_path.joinpath(file_name)),
+                            )
+                        rmtree(
+                            str(temp_folder_path.joinpath(dirs[0])),
+                            ignore_errors=True,
+                        )
+
+                    plugin_file = json_loads(
+                        temp_folder_path.joinpath("plugin.json").read_text()
+                    )
+
+                    if not all(key in plugin_file.keys() for key in PLUGIN_KEYS):
+                        raise ValueError
+
+                    folder_name = plugin_file["id"]
+
+                    if not app.config["CONFIGFILES"].check_name(folder_name):
+                        errors += 1
+                        error = 1
+                        flash(
+                            f"Invalid plugin name for {temp_folder_name}. (Can only contain numbers, letters, underscores and hyphens (min 4 characters and max 64))",
+                            "error",
+                        )
+                        raise Exception
+
+                    plugin_content = BytesIO()
+                    with tar_open(
+                        fileobj=plugin_content,
+                        mode="w:gz",
+                        compresslevel=9,
+                    ) as tar:
+                        tar.add(
+                            str(temp_folder_path),
+                            arcname=temp_folder_name,
+                            recursive=True,
+                        )
+                    plugin_content.seek(0)
+                    value = plugin_content.getvalue()
+
+                    new_plugins.append(
+                        plugin_file
+                        | {
+                            "external": True,
+                            "page": "ui" in listdir(str(temp_folder_path)),
+                            "method": "ui",
+                            "data": value,
+                            "checksum": sha256(value).hexdigest(),
+                        }
+                    )
+                    new_plugins_ids.append(folder_name)
                 except KeyError:
                     errors += 1
                     error = 1
@@ -1166,9 +968,8 @@ def plugins():
         ).start()
 
         # Remove tmp folder
-        if Path("/var/tmp/bunkerweb/ui").exists():
-            with suppress(OSError):
-                rmtree("/var/tmp/bunkerweb/ui")
+        if tmp_ui_path.exists():
+            rmtree(str(tmp_ui_path), ignore_errors=True)
 
         return redirect(
             url_for("loading", next=url_for("plugins"), message="Reloading plugins")
@@ -1224,13 +1025,52 @@ def upload_plugin():
     if not request.files:
         return {"status": "ko"}, 400
 
-    Path("/var/tmp/bunkerweb/ui").mkdir(parents=True, exist_ok=True)
+    tmp_ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui")
+    tmp_ui_path.mkdir(parents=True, exist_ok=True)
 
-    for file in request.files.values():
-        if not file.filename.endswith((".zip", ".tar.gz", ".tar.xz")):
+    for uploaded_file in request.files.values():
+        if not uploaded_file.filename.endswith((".zip", ".tar.gz", ".tar.xz")):
             return {"status": "ko"}, 422
 
-        Path(f"/var/tmp/bunkerweb/ui/{file.filename}").write_bytes(file.read())
+        with BytesIO(uploaded_file.read()) as io:
+            io.seek(0, 0)
+            plugins = []
+            if uploaded_file.filename.endswith(".zip"):
+                with ZipFile(io) as zip_file:
+                    for file in zip_file.namelist():
+                        if file.endswith("plugin.json"):
+                            plugins.append(basename(dirname(file)))
+                    if len(plugins) > 1:
+                        zip_file.extractall(str(tmp_ui_path) + "/")
+                folder_name = uploaded_file.filename.replace(".zip", "")
+            else:
+                with tar_open(fileobj=io) as tar_file:
+                    for file in tar_file.getnames():
+                        if file.endswith("plugin.json"):
+                            plugins.append(basename(dirname(file)))
+                    if len(plugins) > 1:
+                        tar_file.extractall(str(tmp_ui_path) + "/")
+                folder_name = uploaded_file.filename.replace(".tar.gz", "").replace(
+                    ".tar.xz", ""
+                )
+
+            if len(plugins) <= 1:
+                io.seek(0, 0)
+                tmp_ui_path.joinpath(uploaded_file.filename).write_bytes(io.read())
+                return {"status": "ok"}, 201
+
+        for plugin in plugins:
+            with BytesIO() as tgz:
+                with tar_open(
+                    mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3
+                ) as tf:
+                    tf.add(
+                        str(tmp_ui_path.joinpath(folder_name, plugin)), arcname=plugin
+                    )
+                tgz.seek(0, 0)
+                tmp_ui_path.joinpath(f"{plugin}.tar.gz").write_bytes(tgz.read())
+
+        rmtree(str(tmp_ui_path.joinpath(folder_name)), ignore_errors=True)
 
     return {"status": "ok"}, 201
 
@@ -1290,7 +1130,7 @@ def custom_plugin(plugin):
         )
         error = True
     finally:
-        if Path("/usr/sbin/nginx").is_file():
+        if sbin_nginx_path.is_file():
             # Remove the custom plugin from the shared library
             sys_path.pop()
             sys_modules.pop("actions")
@@ -1319,7 +1159,7 @@ def cache():
         "cache.html",
         folders=[
             path_to_dict(
-                "/var/cache/bunkerweb",
+                join(sep, "var", "cache", "bunkerweb"),
                 is_cache=True,
                 db_data=db.get_jobs_cache_files(),
                 services=app.config["CONFIG"]
@@ -1344,7 +1184,7 @@ def logs():
 @app.route("/logs/local", methods=["GET"])
 @login_required
 def logs_linux():
-    if not Path("/usr/sbin/nginx").is_file():
+    if not sbin_nginx_path.is_file():
         return (
             jsonify(
                 {
@@ -1359,24 +1199,17 @@ def logs_linux():
     raw_logs_access = []
     raw_logs_error = []
 
-    if last_update:
-        if Path("/var/log/nginx/error.log").exists():
-            with open("/var/log/nginx/error.log", "r") as f:
-                raw_logs_error = f.read().splitlines()[int(last_update.split(".")[0]) :]
+    nginx_error_file = Path(sep, "var", "log", "nginx", "error.log")
+    if nginx_error_file.is_file():
+        raw_logs_access = nginx_error_file.read_text().splitlines()[
+            int(last_update.split(".")[0]) if last_update else 0 :
+        ]
 
-        if Path("/var/log/nginx/access.log").exists():
-            with open("/var/log/nginx/access.log", "r") as f:
-                raw_logs_access = f.read().splitlines()[
-                    int(last_update.split(".")[1]) :
-                ]
-    else:
-        if Path("/var/log/nginx/error.log").exists():
-            with open("/var/log/nginx/error.log", "r") as f:
-                raw_logs_error = f.read().splitlines()
-
-        if Path("/var/log/nginx/access.log").exists():
-            with open("/var/log/nginx/access.log", "r") as f:
-                raw_logs_access = f.read().splitlines()
+    nginx_access_file = Path(sep, "var", "log", "nginx", "access.log")
+    if nginx_access_file.is_file():
+        raw_logs_error = nginx_access_file.read_text().splitlines()[
+            int(last_update.split(".")[1]) if last_update else 0 :
+        ]
 
     logs_error = []
     temp_multiple_lines = []
@@ -1428,6 +1261,9 @@ def logs_linux():
 
     logs = []
     for log in raw_logs:
+        if "[48;2" in log or not log.strip():
+            continue
+
         log_lower = log.lower()
         error_type = (
             "error"

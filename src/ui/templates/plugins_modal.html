@@ -1,15 +1,15 @@
 <!-- modal -->
 <div
-data-plugins-modal
+  data-plugins-modal
   class="dark:brightness-110 w-screen h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 hidden justify-center items-center"
 >
   <div
-  data-plugins-modal-card
+    data-plugins-modal-card
     class="min-w-[500px ]overflow-y-auto mx-3 ml-2 mr-6 sm:mx-6 lg:mx-8 my-3 px-4 pt-4 pb-8 w-full max-w-[400px] flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
     <div class="w-full flex justify-between mb-2">
       <p
-      data-plugins-modal-title
+        data-plugins-modal-title
         class="transition duration-300 ease-in-out dark:opacity-90 dark:text-gray-300 mb-2 font-sans font-semibold leading-normal uppercase text-md"
       >
         DELETE PLUGINS
@@ -28,7 +28,7 @@ data-plugins-modal
     </div>
     <!-- delete form-->
     <form
-    data-plugins-modal-form-delete
+      data-plugins-modal-form-delete
       class="w-full h-full flex flex-col justify-between"
       id="form-delete-plugin"
       method="POST"
@@ -39,14 +39,14 @@ data-plugins-modal
       <input type="hidden" value="delete" name="operation" id="operation" />
       <div>
         <p
-        data-plugins-modal-text
+          data-plugins-modal-text
           class="text-center mx-2 mb-2 mt-8 font-semibold font-sans leading-normal uppercase text-sm"
         ></p>
       </div>
       <!-- action button -->
       <div class="w-full justify-center flex mt-10">
         <button
-        data-plugins-modal-close
+          data-plugins-modal-close
           type="button"
           class="dark:brightness-90 mr-3 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
         >

@@ -56,7 +56,6 @@ services:
         bunkerweb.CUSTOM_CONF_MODSEC_nextcloud=
         SecRule REQUEST_FILENAME "@rx ^/remote.php/dav/files/" "id:2000,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-generic,nolog"
 
-
   mydb:
     image: mariadb
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
@@ -70,7 +69,7 @@ services:
       - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=nc
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password (must match MYSQL_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
 
 volumes:
   nc-files:

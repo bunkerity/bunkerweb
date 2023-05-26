@@ -69,7 +69,7 @@ Learn more about the core security features in the [security tuning](https://doc
 ## Demo
 
 <p align="center">
-	<a href="https://www.youtube.com/watch?v=ZhYV-QELzA4" target="_blank"><img alt="BunkerWeb demo" src="https://yt-embed.herokuapp.com/embed?v=ZhYV-QELzA4" /></a>
+	<a href="https://www.youtube.com/watch?v=ZhYV-QELzA4" target="_blank"><img alt="BunkerWeb demo" src="https://img.youtube.com/vi/ZhYV-QELzA4/0.jpg" /></a>
 </p>
 
 A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io). Feel free to visit it and perform some security tests.

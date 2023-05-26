@@ -1,19 +1,22 @@
+#!/usr/bin/python3
+
+from os import environ, urandom
+from os.path import join
 from typing import List
-import os
 
 
 def get_variables():
     vars = {}
     vars["DOCKER_HOST"] = "unix:///var/run/docker.sock"
     vars["ABSOLUTE_URI"] = ""
-    vars["FLASK_SECRET"] = os.urandom(32)
+    vars["FLASK_SECRET"] = urandom(32)
     vars["FLASK_ENV"] = "development"
     vars["ADMIN_USERNAME"] = "admin"
     vars["ADMIN_PASSWORD"] = "changeme"
 
     for k in vars:
-        if k in os.environ:
-            vars[k] = os.environ[k]
+        if k in environ:
+            vars[k] = environ[k]
 
     return vars
 
@@ -48,7 +51,7 @@ def path_to_dict(
                 {
                     "name": config,
                     "type": "folder",
-                    "path": f"{path}/{config}",
+                    "path": join(path, config),
                     "can_create_files": True,
                     "can_create_folders": False,
                     "can_edit": False,
@@ -57,7 +60,7 @@ def path_to_dict(
                         {
                             "name": service,
                             "type": "folder",
-                            "path": f"{path}/{config}/{service}",
+                            "path": join(path, config, service),
                             "can_create_files": True,
                             "can_create_folders": False,
                             "can_edit": False,
@@ -76,7 +79,12 @@ def path_to_dict(
             file_info = {
                 "name": f"{conf['name']}.conf",
                 "type": "file",
-                "path": f"{path}/{type_lower}{'/' + conf['service_id'] if conf['service_id'] else ''}/{conf['name']}.conf",
+                "path": join(
+                    path,
+                    type_lower,
+                    conf["service_id"] if conf["service_id"] else "",
+                    f"{conf['name']}.conf",
+                ),
                 "can_edit": conf["method"] == "ui",
                 "can_delete": True,
                 "can_download": True,
@@ -109,7 +117,7 @@ def path_to_dict(
                 {
                     "name": service,
                     "type": "folder",
-                    "path": f"{path}/{service}",
+                    "path": join(path, service),
                     "can_create_files": False,
                     "can_create_folders": False,
                     "can_edit": False,
@@ -122,9 +130,13 @@ def path_to_dict(
 
         for conf in db_data:
             file_info = {
-                "name": f"{conf['job_name']}/{conf['file_name']}",
+                "name": join(conf["job_name"], conf["file_name"]),
                 "type": "file",
-                "path": f"{path}{'/' + conf['service_id'] if conf['service_id'] else ''}/{conf['file_name']}",
+                "path": join(
+                    path,
+                    conf["service_id"] if conf["service_id"] else "",
+                    conf["file_name"],
+                ),
                 "can_edit": False,
                 "can_delete": False,
                 "can_download": True,
