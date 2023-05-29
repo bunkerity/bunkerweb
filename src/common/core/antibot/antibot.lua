@@ -221,6 +221,11 @@ function antibot:display_challenge()
 	if self.variables["USE_ANTIBOT"] == "hcaptcha" then
 		template_vars.hcaptcha_sitekey = self.variables["ANTIBOT_HCAPTCHA_SITEKEY"]
 	end
+	
+	-- Turnstile case
+	if self.variables["USE_ANTIBOT"] == "turnstile" then
+		template_vars.turnstile_sitekey = self.variables["ANTIBOT_TURNSTILE_SITEKEY"]
+	end
 
 	-- Render content
 	template.render(self.variables["USE_ANTIBOT"] .. ".html", template_vars)
@@ -340,6 +345,45 @@ function antibot:check_challenge()
 			return nil, "error while decoding JSON from hCaptcha API : " .. data, nil
 		end
 		if not hdata.success then
+			return false, "client failed challenge", nil
+		end
+		self.session_data.resolved = true
+		self.session_data.time_valid = ngx.now()
+		return true, "resolved", self.session_data.original_uri
+	end
+	
+	-- Turnstile case
+	if self.variables["USE_ANTIBOT"] == "turnstile" then
+		ngx.req.read_body()
+		local args, err = ngx.req.get_post_args(1)
+		if err == "truncated" or not args or not args["token"] then
+			return nil, "missing challenge arg", nil
+		end
+		local httpc, err = http.new()
+		if not httpc then
+			return nil, "can't instantiate http object : " .. err, nil, nil
+		end
+		local data = {
+			secret=self.variables["ANTIBOT_TURNSTILE_SECRET"],
+			response=args["token"],
+			remoteip=ngx.ctx.bw.remote_addr
+		}
+		local res, err = httpc:request_uri("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+			method = "POST",
+			body = cjson.encode(data),
+			headers = {
+				["Content-Type"] = "application/x-www-form-urlencoded"
+			}
+		})
+		httpc:close()
+		if not res then
+			return nil, "can't send request to Turnstile API : " .. err, nil
+		end
+		local ok, tdata = pcall(cjson.decode, res.body)
+		if not ok then
+			return nil, "error while decoding JSON from Turnstile API : " .. data, nil
+		end
+		if not tdata.success then
 			return false, "client failed challenge", nil
 		end
 		self.session_data.resolved = true
