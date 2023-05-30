@@ -121,7 +121,7 @@ class CLI(ApiCaller):
         ):
             # Docker & Linux case
             super().__init__(
-                apis=[
+                [
                     API(
                         f"http://127.0.0.1:{self.__variables.get('API_HTTP_PORT', '5000')}",
                         host=self.__variables.get("API_SERVER_NAME", "bwapi"),
@@ -142,8 +142,10 @@ class CLI(ApiCaller):
         elif self.__variables.get("AUTOCONF_MODE", "no").lower() == "yes":
             return "autoconf"
         elif integration_path.is_file():
-            return integration_path.read_text().strip().lower()
-        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text():
+            return integration_path.read_text(encoding="utf-8").strip().lower()
+        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
+            encoding="utf-8"
+        ):
             return "docker"
 
         return "linux"
@@ -154,7 +156,7 @@ class CLI(ApiCaller):
             if not ok:
                 self.__logger.error(f"Failed to delete ban for {ip} from redis")
 
-        if self._send_to_apis("POST", "/unban", data={"ip": ip}):
+        if self.send_to_apis("POST", "/unban", data={"ip": ip}):
             return True, f"IP {ip} has been unbanned"
         return False, "error"
 
@@ -168,7 +170,7 @@ class CLI(ApiCaller):
             if not ok:
                 self.__logger.error(f"Failed to ban {ip} in redis")
 
-        if self._send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp}):
+        if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp}):
             return (
                 True,
                 f"IP {ip} has been banned for {format_remaining_time(exp)}",
@@ -178,7 +180,7 @@ class CLI(ApiCaller):
     def bans(self) -> Tuple[bool, str]:
         servers = {}
 
-        ret, resp = self._send_to_apis("GET", "/bans", response=True)
+        ret, resp = self.send_to_apis("GET", "/bans", response=True)
         if not ret:
             return False, "error"
 
@@ -206,7 +208,6 @@ class CLI(ApiCaller):
 
             for ban in bans:
                 cli_str += f"- {ban['ip']} for {format_remaining_time(ban['exp'])} : {ban.get('reason', 'no reason given')}\n"
-            else:
-                cli_str += "\n"
+            cli_str += "\n"
 
         return True, cli_str

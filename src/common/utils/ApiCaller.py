@@ -26,6 +26,14 @@ class ApiCaller:
         self.__apis = apis or []
         self.__logger = setup_logger("Api", getenv("LOG_LEVEL", "INFO"))
 
+    @property
+    def apis(self) -> List[API]:
+        return self.__apis
+
+    @apis.setter
+    def apis(self, apis: List[API]):
+        self.__apis = apis
+
     def auto_setup(self, bw_integration: Optional[str] = None):
         if bw_integration is None:
             if getenv("KUBERNETES_MODE", "no") == "yes":
@@ -105,13 +113,7 @@ class ApiCaller:
                     )
                 )
 
-    def _set_apis(self, apis: List[API]):
-        self.__apis = apis
-
-    def _get_apis(self):
-        return self.__apis
-
-    def _send_to_apis(
+    def send_to_apis(
         self,
         method: Union[Literal["POST"], Literal["GET"]],
         url: str,
@@ -155,7 +157,7 @@ class ApiCaller:
             return ret, responses
         return ret
 
-    def _send_files(self, path: str, url: str) -> bool:
+    def send_files(self, path: str, url: str) -> bool:
         ret = True
         with BytesIO() as tgz:
             with tar_open(
@@ -164,6 +166,6 @@ class ApiCaller:
                 tf.add(path, arcname=".")
             tgz.seek(0, 0)
             files = {"archive.tar.gz": tgz}
-            if not self._send_to_apis("POST", url, files=files):
+            if not self.send_to_apis("POST", url, files=files):
                 ret = False
         return ret
