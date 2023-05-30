@@ -18,7 +18,7 @@ start() {
     fi
     source /etc/bunkerweb/ui.env
     export $(cat /etc/bunkerweb/ui.env)
-    python3 -m gunicorn main:app --worker-class gevent --bind 127.0.0.1:7000 --graceful-timeout 0 --access-logfile - --error-logfile - &
+    PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/ui python3 -m gunicorn main:app --worker-class gevent --bind 127.0.0.1:7000 --graceful-timeout 0 --access-logfile - --error-logfile - &
     echo $! > /var/tmp/bunkerweb/ui.pid
 }
 
