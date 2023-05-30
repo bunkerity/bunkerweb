@@ -247,7 +247,6 @@ You will find more information in the [Ansible section](https://docs.bunkerweb.i
 
 We maintain ready to use Vagrant boxes hosted on Vagrant cloud for the following providers :
 
-- vmware_desktop 
 - virtualbox 
 - libvirt
 
