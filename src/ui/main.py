@@ -18,6 +18,10 @@ for deps_path in [
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from gevent import monkey
+
+monkey.patch_all()
+
 from bs4 import BeautifulSoup
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
@@ -93,8 +97,8 @@ def stop_gunicorn():
 
 
 def stop(status, stop=True):
-    Path(sep, "var", "tmp", "bunkerweb", "ui.pid").unlink(exist_ok=True)
-    Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").unlink(exist_ok=True)
+    Path(sep, "var", "tmp", "bunkerweb", "ui.pid").unlink(missing_ok=True)
+    Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").unlink(missing_ok=True)
     if stop is True:
         stop_gunicorn()
     _exit(status)
@@ -110,11 +114,6 @@ signal(SIGINT, handle_stop)
 signal(SIGTERM, handle_stop)
 
 sbin_nginx_path = Path(sep, "usr", "sbin", "nginx")
-pid_file = Path(sep, "var", "tmp", "bunkerweb", "ui.pid")
-if not pid_file.is_file():
-    pid_file.write_text(str(getpid()))
-
-del pid_file
 
 # Flask app
 app = Flask(

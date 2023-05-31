@@ -135,7 +135,7 @@ class Instances:
 
                 instances.append(
                     Instance(
-                        instance._id,
+                        instance.id,
                         instance.name,
                         instance.name,
                         "container",
@@ -183,7 +183,7 @@ class Instances:
 
                 instances.append(
                     Instance(
-                        instance._id,
+                        instance.id,
                         instance.name,
                         instance.name,
                         "service",
