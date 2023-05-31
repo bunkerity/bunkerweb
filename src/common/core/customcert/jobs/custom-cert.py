@@ -51,8 +51,15 @@ def check_cert(
             return False
 
         cert_cache_path = Path(
-            sep, "var", "cache", "bunkerweb", "customcert", "cert.pem"
+            sep,
+            "var",
+            "cache",
+            "bunkerweb",
+            "customcert",
+            first_server or "",
+            "cert.pem",
         )
+        cert_cache_path.parent.mkdir(parents=True, exist_ok=True)
 
         cert_hash = file_hash(cert_path)
         old_hash = cache_hash(cert_cache_path, db)
@@ -66,8 +73,15 @@ def check_cert(
             logger.error(f"Error while caching custom-cert cert.pem file : {err}")
 
         key_cache_path = Path(
-            sep, "var", "cache", "bunkerweb", "customcert", "cert.key"
+            sep,
+            "var",
+            "cache",
+            "bunkerweb",
+            "customcert",
+            first_server or "",
+            "key.pem",
         )
+        key_cache_path.parent.mkdir(parents=True, exist_ok=True)
 
         key_hash = file_hash(key_path)
         old_hash = cache_hash(key_cache_path, db)
@@ -76,7 +90,7 @@ def check_cert(
                 key_path, key_cache_path, key_hash, db, delete_file=False
             )
             if not cached:
-                logger.error(f"Error while caching custom-cert cert.key file : {err}")
+                logger.error(f"Error while caching custom-cert key.pem file : {err}")
 
         return True
     except:
@@ -95,7 +109,7 @@ try:
 
     # Multisite case
     if getenv("MULTISITE") == "yes":
-        servers = getenv("SERVER_NAME", [])
+        servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):
             servers = servers.split(" ")
