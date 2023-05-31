@@ -201,6 +201,9 @@ if __name__ == "__main__":
         )
         dotenv_env = dotenv_values(str(tmp_variables_path))
 
+        # Instantiate scheduler
+        SCHEDULER = JobScheduler(environ.copy(), logger)
+
         logger.info("Scheduler started ...")
 
         # Checking if the argument variables is true.
@@ -230,6 +233,10 @@ if __name__ == "__main__":
                 INTEGRATION = integration_path.read_text(encoding="utf-8").strip()
 
             del integration_path
+
+            SCHEDULER.set_integration(INTEGRATION)
+            # Automatically setup the scheduler apis
+            SCHEDULER.auto_setup()
 
             db = Database(
                 logger,
@@ -369,11 +376,6 @@ if __name__ == "__main__":
             logger.warning(
                 "Looks like BunkerWeb configuration is already generated, will not GENERATE it again ..."
             )
-
-        # Instantiate scheduler
-        SCHEDULER = JobScheduler(env.copy() | environ.copy(), logger, INTEGRATION)
-        # Automatically setup the scheduler apis
-        SCHEDULER.auto_setup(bw_integration=INTEGRATION)
 
         FIRST_RUN = True
         while True:

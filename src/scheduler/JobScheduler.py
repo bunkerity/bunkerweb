@@ -62,6 +62,12 @@ class JobScheduler(ApiCaller):
     def env(self, env: Dict[str, Any]):
         self.__env = env
 
+    def set_integration(self, integration: str):
+        self.__integration = integration
+
+    def auto_setup(self):
+        super().auto_setup(bw_integration=self.__integration)
+
     def __get_jobs(self):
         jobs = {}
         for plugin_file in glob(
