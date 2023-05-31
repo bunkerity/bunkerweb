@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! -f /var/tmp/bunkerweb/ui.pid ] ; then
+if [ ! -f /var/run/bunkerweb/ui.pid ] ; then
 	exit 1
 fi
 

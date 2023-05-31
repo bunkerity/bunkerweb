@@ -21,7 +21,7 @@ trap "trap_exit" TERM INT QUIT
 # trap SIGHUP
 function trap_reload() {
 	log "ENTRYPOINT" "ℹ️" "Catched reload operation"
-	if [ -f /var/tmp/bunkerweb/nginx.pid ] ; then
+	if [ -f /var/run/bunkerweb/nginx.pid ] ; then
 		log "ENTRYPOINT" "ℹ️" "Reloading nginx ..."
 		nginx -s reload
 		if [ $? -eq 0 ] ; then
@@ -50,7 +50,7 @@ pid="$!"
 
 # wait while nginx is running
 wait "$pid"
-while [ -f "/var/tmp/bunkerweb/nginx.pid" ] ; do
+while [ -f "/var/run/bunkerweb/nginx.pid" ] ; do
 	wait "$pid"
 done
 

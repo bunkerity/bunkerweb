@@ -55,6 +55,7 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl && \
   cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
   echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
   mkdir -p /var/tmp/bunkerweb && \
+  mkdir -p /var/run/bunkerweb && \
   mkdir -p /var/www && \
   mkdir -p /etc/bunkerweb && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
@@ -64,8 +65,8 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:scheduler /data && \
   chmod -R 770 /data && \
-  chown -R root:scheduler /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
-  chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
+  chown -R root:scheduler /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /usr/bin/bwcli && \
+  chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb && \
   find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
   chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/scheduler/entrypoint.sh /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/deps/python/bin/* /usr/bin/bwcli && \
   mkdir -p /etc/nginx && \

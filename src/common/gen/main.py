@@ -188,7 +188,7 @@ if __name__ == "__main__":
             and not args.no_linux_reload
         ):
             retries = 0
-            while not Path(sep, "var", "tmp", "bunkerweb", "nginx.pid").exists():
+            while not Path(sep, "var", "run", "bunkerweb", "nginx.pid").exists():
                 if retries == 5:
                     logger.error(
                         "BunkerWeb's nginx didn't start in time.",

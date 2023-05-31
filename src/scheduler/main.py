@@ -83,7 +83,7 @@ signal(SIGHUP, handle_reload)
 
 
 def stop(status):
-    Path(sep, "var", "tmp", "bunkerweb", "scheduler.pid").unlink(missing_ok=True)
+    Path(sep, "var", "run", "bunkerweb", "scheduler.pid").unlink(missing_ok=True)
     Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy").unlink(missing_ok=True)
     _exit(status)
 
@@ -172,7 +172,7 @@ def generate_external_plugins(
 if __name__ == "__main__":
     try:
         # Don't execute if pid file exists
-        pid_path = Path(sep, "var", "tmp", "bunkerweb", "scheduler.pid")
+        pid_path = Path(sep, "var", "run", "bunkerweb", "scheduler.pid")
         if pid_path.is_file():
             logger.error(
                 "Scheduler is already running, skipping execution ...",
@@ -507,7 +507,7 @@ if __name__ == "__main__":
                         i = 0
                         while i < 20:
                             if not Path(
-                                sep, "var", "tmp", "bunkerweb", "nginx.pid"
+                                sep, "var", "run", "bunkerweb", "nginx.pid"
                             ).is_file():
                                 break
                             logger.warning("Waiting for temp nginx to stop ...")

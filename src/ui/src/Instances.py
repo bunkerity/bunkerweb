@@ -251,7 +251,7 @@ class Instances:
                     "127.0.0.1",
                     "local",
                     "up"
-                    if Path(sep, "var", "tmp", "bunkerweb", "nginx.pid").exists()
+                    if Path(sep, "var", "run", "bunkerweb", "nginx.pid").exists()
                     else "down",
                     None,
                     ApiCaller(

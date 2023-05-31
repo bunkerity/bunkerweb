@@ -97,7 +97,7 @@ def stop_gunicorn():
 
 
 def stop(status, stop=True):
-    Path(sep, "var", "tmp", "bunkerweb", "ui.pid").unlink(missing_ok=True)
+    Path(sep, "var", "run", "bunkerweb", "ui.pid").unlink(missing_ok=True)
     Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").unlink(missing_ok=True)
     if stop is True:
         stop_gunicorn()

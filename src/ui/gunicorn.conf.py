@@ -9,7 +9,7 @@ access_log_format = (
 )
 errorlog = "-"
 preload_app = True
-pidfile = join(sep, "var", "tmp", "bunkerweb", "ui.pid")
+pidfile = join(sep, "var", "run", "bunkerweb", "ui.pid")
 user = "ui"
 group = "ui"
 secure_scheme_headers = {

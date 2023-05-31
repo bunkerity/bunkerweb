@@ -45,8 +45,8 @@ function stop_nginx() {
 }
 
 function stop_scheduler() {
-    if [ -f "/var/tmp/bunkerweb/scheduler.pid" ] ; then
-        scheduler_pid=$(cat "/var/tmp/bunkerweb/scheduler.pid")
+    if [ -f "/var/run/bunkerweb/scheduler.pid" ] ; then
+        scheduler_pid=$(cat "/var/run/bunkerweb/scheduler.pid")
         log "SYSTEMCTL" "ℹ️ " "Stopping scheduler..."
         kill -SIGINT "$scheduler_pid"
         if [ $? -ne 0 ] ; then
@@ -58,7 +58,7 @@ function stop_scheduler() {
         return 0
     fi
     count=0
-    while [ -f "/var/tmp/bunkerweb/scheduler.pid" ] ; do
+    while [ -f "/var/run/bunkerweb/scheduler.pid" ] ; do
         sleep 1
         count=$(($count + 1))
         if [ $count -ge 10 ] ; then
@@ -171,7 +171,7 @@ function reload()
 
     log "SYSTEMCTL" "ℹ️" "Reloading BunkerWeb service ..."
 
-    PID_FILE_PATH="/var/tmp/bunkerweb/scheduler.pid"
+    PID_FILE_PATH="/var/run/bunkerweb/scheduler.pid"
     if [ -f "$PID_FILE_PATH" ];
     then
         var=$(cat "$PID_FILE_PATH")

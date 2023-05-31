@@ -16,14 +16,14 @@ start() {
     source /etc/bunkerweb/ui.env
     export $(cat /etc/bunkerweb/ui.env)
     python3 -m gunicorn --config /usr/share/bunkerweb/ui/gunicorn.conf.py main:app --bind 127.0.0.1:7000 &
-    echo $! > /var/tmp/bunkerweb/ui.pid
+    echo $! > /var/run/bunkerweb/ui.pid
 }
 
 # Function to stop the UI
 stop() {
     echo "Stopping UI service..."
-    if [ -f "/var/tmp/bunkerweb/ui.pid" ]; then
-        pid=$(cat /var/tmp/bunkerweb/ui.pid)
+    if [ -f "/var/run/bunkerweb/ui.pid" ]; then
+        pid=$(cat /var/run/bunkerweb/ui.pid)
         kill -s TERM $pid
     else
         echo "UI service is not running or the pid file doesn't exist."
