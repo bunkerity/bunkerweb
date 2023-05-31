@@ -60,7 +60,7 @@ RUN apk add --no-cache bash && \
     chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/bin/bwcli /usr/share/bunkerweb/autoconf/main.py /usr/share/bunkerweb/deps/python/bin/*
 
 # Fix CVEs
-# There are no CVEs for python:3.11.3-alpine at the moment
+RUN apk add --no-cache "libcrypto3>=3.1.1-r0" "libssl3>=3.1.1-r0"
 
 VOLUME /data /etc/nginx
 
