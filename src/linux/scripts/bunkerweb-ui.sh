@@ -13,12 +13,9 @@ fi
 # Function to start the UI
 start() {
     echo "Starting UI"
-    if [ ! -f /var/tmp/bunkerweb/ui.pid ]; then
-        touch /var/tmp/bunkerweb/ui.pid
-    fi
     source /etc/bunkerweb/ui.env
     export $(cat /etc/bunkerweb/ui.env)
-    PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/ui python3 -m gunicorn main:app --worker-class gevent --bind 127.0.0.1:7000 --graceful-timeout 0 --access-logfile - --error-logfile - &
+    python3 -m gunicorn --config /usr/share/bunkerweb/ui/gunicorn.conf.py main:app --bind 127.0.0.1:7000 &
     echo $! > /var/tmp/bunkerweb/ui.pid
 }
 
