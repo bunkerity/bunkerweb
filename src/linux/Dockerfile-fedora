@@ -4,12 +4,12 @@ ENV OS=fedora
 ENV NGINX_VERSION 1.24.0
 
 # Install fpm
-RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build && \
+RUN dnf update -y && \
+    dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build && \
     gem install fpm
 
 # Nginx
-RUN dnf update -y && \
-    dnf install -y curl gnupg2 ca-certificates redhat-lsb-core && \
+RUN dnf install -y curl gnupg2 ca-certificates redhat-lsb-core && \
     dnf install nginx-${NGINX_VERSION} -y
 
 # Copy dependencies sources folder
