@@ -151,9 +151,6 @@ class Database:
         )
         self.suffix_rx = re_compile(r"_\d+$")
 
-    def get_database_uri(self) -> str:
-        return self.database_uri
-
     def __del__(self) -> None:
         """Close the database"""
         if self.__sql_session:

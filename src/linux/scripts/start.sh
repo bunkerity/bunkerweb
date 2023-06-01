@@ -85,7 +85,7 @@ function start() {
 
     # Create dummy variables.env
     if [ ! -f /etc/bunkerweb/variables.env ]; then
-        sudo -E -u nginx -g nginx /bin/bash -c "echo -ne '# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env"
+        sudo -E -u nginx -g nginx /bin/bash -c "echo -ne '# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nUSE_BUNKERNET=no\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env"
         log "SYSTEMCTL" "ℹ️" "Created dummy variables.env file"
     fi
 
@@ -133,19 +133,6 @@ function start() {
         exit 1
     fi
     log "SYSTEMCTL" "ℹ️" "nginx started ..."
-
-    # Update database
-    log "SYSTEMCTL" "ℹ️" "Updating database ..."
-    if [ ! -f /var/lib/bunkerweb/db.sqlite3 ]; then
-        sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/gen/save_config.py --variables /etc/bunkerweb/variables.env --init"
-else
-        sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/gen/save_config.py --variables /etc/bunkerweb/variables.env"
-    fi
-    if [ $? -ne 0 ] ; then
-        log "SYSTEMCTL" "❌" "save_config failed"
-        exit 1
-    fi
-    log "SYSTEMCTL" "ℹ️" "Database updated ..."
 
     # Execute scheduler
     log "SYSTEMCTL" "ℹ️ " "Executing scheduler ..."

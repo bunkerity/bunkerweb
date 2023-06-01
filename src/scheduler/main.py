@@ -192,99 +192,102 @@ if __name__ == "__main__":
             help="path to the file containing environment variables",
         )
         args = parser.parse_args()
+
+        integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
+        os_release_path = Path(sep, "etc", "os-release")
+        if getenv("KUBERNETES_MODE", "no").lower() == "yes":
+            INTEGRATION = "Kubernetes"
+        elif getenv("SWARM_MODE", "no").lower() == "yes":
+            INTEGRATION = "Swarm"
+        elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
+            INTEGRATION = "Autoconf"
+        elif integration_path.is_file():
+            INTEGRATION = integration_path.read_text(encoding="utf-8").strip()
+        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
+            encoding="utf-8"
+        ):
+            INTEGRATION = "Docker"
+
+        del integration_path, os_release_path
+
         tmp_variables_path = (
             normpath(args.variables)
             if args.variables
             else join(sep, "var", "tmp", "bunkerweb", "variables.env")
         )
         tmp_variables_path = Path(tmp_variables_path)
+        nginx_variables_path = Path(sep, "etc", "nginx", "variables.env")
         dotenv_env = dotenv_values(str(tmp_variables_path))
 
-        # Instantiate scheduler
-        SCHEDULER = JobScheduler(environ.copy(), logger)
+        db = Database(
+            logger,
+            sqlalchemy_string=dotenv_env.get(
+                "DATABASE_URI", getenv("DATABASE_URI", None)
+            ),
+        )
 
-        logger.info("Scheduler started ...")
-
-        # Checking if the argument variables is true.
-        if args.variables:
-            logger.info(f"Variables : {tmp_variables_path}")
-
-            # Read env file
-            env = dotenv_env.copy()
-
-            db = Database(
-                logger,
-                sqlalchemy_string=env.get("DATABASE_URI", getenv("DATABASE_URI", None)),
-            )
-
-            while not db.is_initialized():
+        if INTEGRATION in (
+            "Swarm",
+            "Kubernetes",
+            "Autoconf",
+        ):
+            while not db.is_autoconf_loaded():
                 logger.warning(
-                    "Database is not initialized, retrying in 5s ...",
+                    "Autoconf is not loaded yet in the database, retrying in 5s ...",
                 )
                 sleep(5)
+        elif (
+            not tmp_variables_path.exists()
+            or not nginx_variables_path.exists()
+            or (
+                tmp_variables_path.read_text(encoding="utf-8")
+                != nginx_variables_path.read_text(encoding="utf-8")
+            )
+            or db.is_initialized()
+            and db.get_config() != dotenv_env
+        ):
+            # run the config saver
+            proc = subprocess_run(
+                [
+                    "python3",
+                    join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                    "--settings",
+                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                ]
+                + (["--variables", str(tmp_variables_path)] if args.variables else []),
+                stdin=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                logger.error(
+                    "Config saver failed, configuration will not work as expected...",
+                )
 
-            db_configs = db.get_custom_configs()
-        else:
-            # Read from database
-            INTEGRATION = "Docker"
-            integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
-            if integration_path.is_file():
-                INTEGRATION = integration_path.read_text(encoding="utf-8").strip()
+        while not db.is_initialized():
+            logger.warning(
+                "Database is not initialized, retrying in 5s ...",
+            )
+            sleep(5)
 
-            del integration_path
+        env = db.get_config()
+        while not db.is_first_config_saved() or not env:
+            logger.warning(
+                "Database doesn't have any config saved yet, retrying in 5s ...",
+            )
+            sleep(5)
+            env = db.get_config()
 
-            SCHEDULER.set_integration(INTEGRATION)
+        env["DATABASE_URI"] = db.database_uri
+
+        # Instantiate scheduler
+        SCHEDULER = JobScheduler(env.copy() | environ.copy(), logger, INTEGRATION)
+
+        if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf", "Docker"):
             # Automatically setup the scheduler apis
             SCHEDULER.auto_setup()
 
-            db = Database(
-                logger,
-                sqlalchemy_string=getenv("DATABASE_URI", None),
-            )
-
-            if INTEGRATION in (
-                "Swarm",
-                "Kubernetes",
-                "Autoconf",
-            ):
-                while not db.is_autoconf_loaded():
-                    logger.warning(
-                        "Autoconf is not loaded yet in the database, retrying in 5s ...",
-                    )
-                    sleep(5)
-            elif not tmp_variables_path.is_file() or db.get_config() != dotenv_env:
-                # run the config saver
-                proc = subprocess_run(
-                    [
-                        "python",
-                        join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
-                        "--settings",
-                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                    ],
-                    stdin=DEVNULL,
-                    stderr=STDOUT,
-                    check=False,
-                )
-                if proc.returncode != 0:
-                    logger.error(
-                        "Config saver failed, configuration will not work as expected...",
-                    )
-
-            while not db.is_initialized():
-                logger.warning(
-                    "Database is not initialized, retrying in 5s ...",
-                )
-                sleep(5)
-
-            env = db.get_config()
-            while not db.is_first_config_saved() or not env:
-                logger.warning(
-                    "Database doesn't have any config saved yet, retrying in 5s ...",
-                )
-                sleep(5)
-                env = db.get_config()
-
-            env["DATABASE_URI"] = db.get_database_uri()
+        logger.info("Scheduler started ...")
 
         # Checking if any custom config has been created by the user
         custom_configs = []
@@ -367,13 +370,21 @@ if __name__ == "__main__":
 
         logger.info("Executing scheduler ...")
 
-        GENERATE = not tmp_variables_path.exists() or env != dotenv_env
+        GENERATE = (
+            env != dotenv_env
+            or not tmp_variables_path.exists()
+            or not nginx_variables_path.exists()
+            or (
+                tmp_variables_path.read_text(encoding="utf-8")
+                != nginx_variables_path.read_text(encoding="utf-8")
+            )
+        )
 
         del dotenv_env
 
         if not GENERATE:
             logger.warning(
-                "Looks like BunkerWeb configuration is already generated, will not GENERATE it again ..."
+                "Looks like BunkerWeb configuration is already generated, will not generate it again ..."
             )
 
         FIRST_RUN = True
@@ -464,10 +475,7 @@ if __name__ == "__main__":
                         "Config generator failed, configuration will not work as expected...",
                     )
                 else:
-                    copy(
-                        join(sep, "etc", "nginx", "variables.env"),
-                        str(tmp_variables_path),
-                    )
+                    copy(str(nginx_variables_path), str(tmp_variables_path))
 
                     if SCHEDULER.apis:
                         # send nginx configs
