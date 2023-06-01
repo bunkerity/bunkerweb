@@ -1,21 +1,20 @@
 #!/usr/bin/python3
 
-from os import _exit, getenv
+from os import _exit, getenv, sep
+from os.path import join
 from signal import SIGINT, SIGTERM, signal
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from pathlib import Path
 
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/api",
-        "/usr/share/bunkerweb/db",
-    )
-)
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (("deps", "python"), ("utils",), ("api",), ("db",))
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
-from logger import setup_logger
+from logger import setup_logger  # type: ignore
 from SwarmController import SwarmController
 from IngressController import IngressController
 from DockerController import DockerController
@@ -70,12 +69,11 @@ try:
         _exit(1)
 
     # Process events
-    Path("/var/tmp/bunkerweb/autoconf.healthy").write_text("ok")
+    Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy").write_text("ok")
     logger.info("Processing events ...")
     controller.process_events()
-
 except:
     logger.error(f"Exception while running autoconf :\n{format_exc()}")
     sys_exit(1)
 finally:
-    Path("/var/tmp/bunkerweb/autoconf.healthy").unlink(missing_ok=True)
+    Path(sep, "var", "tmp", "bunkerweb", "autoconf.healthy").unlink(missing_ok=True)

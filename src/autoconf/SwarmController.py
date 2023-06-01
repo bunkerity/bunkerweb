@@ -1,30 +1,29 @@
-from os import getenv
+#!/usr/bin/python3
+
 from time import sleep
 from traceback import format_exc
 from threading import Thread, Lock
+from typing import Any, Dict, List
 from docker import DockerClient
 from base64 import b64decode
 
+from docker.models.services import Service
 from Controller import Controller
-from ConfigCaller import ConfigCaller
-from logger import setup_logger
 
 
-class SwarmController(Controller, ConfigCaller):
+class SwarmController(Controller):
     def __init__(self, docker_host):
-        Controller.__init__(self, "swarm")
-        ConfigCaller.__init__(self)
+        super().__init__("swarm")
         self.__client = DockerClient(base_url=docker_host)
         self.__internal_lock = Lock()
-        self.__logger = setup_logger("Swarm-controller", getenv("LOG_LEVEL", "INFO"))
 
-    def _get_controller_instances(self):
+    def _get_controller_instances(self) -> List[Service]:
         return self.__client.services.list(filters={"label": "bunkerweb.INSTANCE"})
 
-    def _get_controller_services(self):
+    def _get_controller_services(self) -> List[Service]:
         return self.__client.services.list(filters={"label": "bunkerweb.SERVER_NAME"})
 
-    def _to_instances(self, controller_instance):
+    def _to_instances(self, controller_instance) -> List[dict]:
         instances = []
         instance_env = {}
         for env in controller_instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
@@ -48,18 +47,18 @@ class SwarmController(Controller, ConfigCaller):
             )
         return instances
 
-    def _to_services(self, controller_service):
+    def _to_services(self, controller_service) -> List[dict]:
         service = {}
         for variable, value in controller_service.attrs["Spec"]["Labels"].items():
             if not variable.startswith("bunkerweb."):
                 continue
             real_variable = variable.replace("bunkerweb.", "", 1)
-            if not self._is_multisite_setting(real_variable):
+            if not self._is_setting_context(real_variable, "multisite"):
                 continue
             service[real_variable] = value
         return [service]
 
-    def _get_static_services(self):
+    def _get_static_services(self) -> List[dict]:
         services = []
         variables = {}
         for instance in self.__client.services.list(
@@ -81,14 +80,14 @@ class SwarmController(Controller, ConfigCaller):
                 for variable, value in variables.items():
                     prefix = variable.split("_")[0]
                     real_variable = variable.replace(f"{prefix}_", "", 1)
-                    if prefix == server_name and self._is_multisite_setting(
-                        real_variable
+                    if prefix == server_name and self._is_setting_context(
+                        real_variable, "multisite"
                     ):
                         service[real_variable] = value
                 services.append(service)
         return services
 
-    def get_configs(self):
+    def get_configs(self) -> Dict[str, Dict[str, Any]]:
         configs = {}
         for config_type in self._supported_config_types:
             configs[config_type] = {}
@@ -106,7 +105,7 @@ class SwarmController(Controller, ConfigCaller):
             config_type = config.attrs["Spec"]["Labels"]["bunkerweb.CONFIG_TYPE"]
             config_name = config.name
             if config_type not in self._supported_config_types:
-                self.__logger.warning(
+                self._logger.warning(
                     f"Ignoring unsupported CONFIG_TYPE {config_type} for Config {config_name}",
                 )
                 continue
@@ -115,7 +114,7 @@ class SwarmController(Controller, ConfigCaller):
                 if not self._is_service_present(
                     config.attrs["Spec"]["Labels"]["bunkerweb.CONFIG_SITE"]
                 ):
-                    self.__logger.warning(
+                    self._logger.warning(
                         f"Ignoring config {config_name} because {config.attrs['Spec']['Labels']['bunkerweb.CONFIG_SITE']} doesn't exist",
                     )
                     continue
@@ -127,10 +126,8 @@ class SwarmController(Controller, ConfigCaller):
             )
         return configs
 
-    def apply_config(self):
-        return self._config.apply(
-            self._instances, self._services, configs=self._configs
-        )
+    def apply_config(self) -> bool:
+        return self.apply(self._instances, self._services, configs=self._configs)
 
     def __event(self, event_type):
         while True:
@@ -146,31 +143,31 @@ class SwarmController(Controller, ConfigCaller):
                         self._instances = self.get_instances()
                         self._services = self.get_services()
                         self._configs = self.get_configs()
-                        if not self._config.update_needed(
+                        if not self.update_needed(
                             self._instances, self._services, configs=self._configs
                         ):
                             self.__internal_lock.release()
                             locked = False
                             continue
-                        self.__logger.info(
+                        self._logger.info(
                             f"Catched Swarm event ({event_type}), deploying new configuration ..."
                         )
                         if not self.apply_config():
-                            self.__logger.error(
+                            self._logger.error(
                                 "Error while deploying new configuration"
                             )
                         else:
-                            self.__logger.info(
+                            self._logger.info(
                                 "Successfully deployed new configuration 🚀",
                             )
                     except:
-                        self.__logger.error(
+                        self._logger.error(
                             f"Exception while processing Swarm event ({event_type}) :\n{format_exc()}"
                         )
                     self.__internal_lock.release()
                     locked = False
             except:
-                self.__logger.error(
+                self._logger.error(
                     f"Exception while reading Swarm event ({event_type}) :\n{format_exc()}",
                 )
                 error = True
@@ -179,7 +176,7 @@ class SwarmController(Controller, ConfigCaller):
                     self.__internal_lock.release()
                     locked = False
                 if error is True:
-                    self.__logger.warning("Got exception, retrying in 10 seconds ...")
+                    self._logger.warning("Got exception, retrying in 10 seconds ...")
                     sleep(10)
 
     def process_events(self):

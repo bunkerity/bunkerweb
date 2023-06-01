@@ -12,7 +12,7 @@ function plugin:initialize(id)
     self.id = id
     local multisite = false
     local current_phase = ngx.get_phase()
-    for i, check_phase in ipairs({ "set", "access", "content", "header", "log", "preread", "log_stream", "log_default" }) do
+    for i, check_phase in ipairs({ "set", "access", "content", "header_filter", "log", "preread", "log_stream", "log_default" }) do
         if current_phase == check_phase then
             multisite = true
             break

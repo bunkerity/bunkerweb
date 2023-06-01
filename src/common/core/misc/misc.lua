@@ -21,7 +21,7 @@ function misc:access()
             return self:ret(true, "method " .. method .. " is allowed")
         end
     end
-    return self:ret(true, "method " .. method .. " not is allowed", ngx.HTTP_NOT_ALLOWED)
+    return self:ret(true, "method " .. method .. " is not allowed", ngx.HTTP_NOT_ALLOWED)
 end
 
 return misc

@@ -18,21 +18,7 @@ from typing import Optional, Union
 class BWLogger(Logger):
     def __init__(self, name, level=INFO):
         self.name = name
-        return super(BWLogger, self).__init__(name, level)
-
-    def _log(
-        self,
-        level,
-        msg,
-        args,
-        exc_info=None,
-        extra=None,
-        stack_info=False,
-        stacklevel=1,
-    ):
-        return super(BWLogger, self)._log(
-            level, msg, args, exc_info, extra, stack_info, stacklevel
-        )
+        super(BWLogger, self).__init__(name, level)
 
 
 setLoggerClass(BWLogger)

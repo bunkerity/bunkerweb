@@ -1,30 +1,36 @@
 #!/usr/bin/python3
 
-from os import getenv
-from os.path import basename
+from os import getenv, sep
+from os.path import basename, join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (
+        ("deps", "python"),
+        ("utils",),
     )
-)
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
 from requests import get
-from logger import setup_logger
+from logger import setup_logger  # type: ignore
 
 logger = setup_logger("UPDATE-CHECK", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
-    current_version = f"v{Path('/usr/share/bunkerweb/VERSION').read_text().strip()}"
+    current_version = (
+        f"v{Path('/usr/share/bunkerweb/VERSION').read_text(encoding='utf-8').strip()}"
+    )
 
     response = get(
         "https://github.com/bunkerity/bunkerweb/releases/latest",
         allow_redirects=True,
+        timeout=5,
     )
     response.raise_for_status()
 

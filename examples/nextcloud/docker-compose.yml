@@ -71,6 +71,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
+      - LOG_LEVEL=warning
     networks:
       - bw-docker
 
@@ -109,7 +110,6 @@ volumes:
   bw-data:
   db-data:
   nc-files:
-
 
 networks:
   bw-universe:

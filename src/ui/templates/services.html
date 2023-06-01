@@ -122,7 +122,7 @@
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
-          {% if service['REMOTE_PHP']['value'] == 'yes' %}
+          {% if service['REMOTE_PHP']['value'] != '' %}
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -156,8 +156,7 @@
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
-          {% if service['REMOTE_PHP']['value'] == 'yes' or service['USE_CUSTOM_SSL'] and service['USE_CUSTOM_SSL']['value'] ==
-          'yes' or service['GENERATE_SELF_SIGNED_SSL'] and service['GENERATE_SELF_SIGNED_SSL']['value'] == 'yes' %}
+          {% if service['AUTO_LETS_ENCRYPT']['value'] == 'yes' or service['USE_CUSTOM_SSL']['value'] == 'yes' or service['GENERATE_SELF_SIGNED_SSL']['value'] == 'yes' %}
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
