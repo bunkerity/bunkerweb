@@ -80,4 +80,4 @@ USER ui:ui
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-ui.sh
 
 ENV PYTHONPATH /usr/share/bunkerweb/deps/python
-CMD ["python3", "-m", "gunicorn", "--config", "/usr/share/bunkerweb/ui/gunicorn.conf.py", "--bind", "0.0.0.0:7000"]
+CMD ["python3", "-m", "gunicorn", "--config", "/usr/share/bunkerweb/ui/gunicorn.conf.py", "--user", "ui", "--group", "ui", "--bind", "0.0.0.0:7000"]
