@@ -1,12 +1,14 @@
 #!/usr/bin/python3
 
-from os import _exit, getenv, getpid, listdir, sep
+from os import _exit, environ, getenv, listdir, sep
 from os.path import basename, dirname, join
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
 
 os_release_path = Path(sep, "etc", "os-release")
-if os_release_path.is_file() and "Alpine" not in os_release_path.read_text():
+if os_release_path.is_file() and "Alpine" not in os_release_path.read_text(
+    encoding="utf-8"
+):
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "deps", "python"))
 
 del os_release_path
@@ -18,7 +20,7 @@ for deps_path in [
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from gevent import monkey
+from gevent import monkey, spawn
 
 monkey.patch_all()
 
@@ -96,10 +98,10 @@ def stop_gunicorn():
     call(["kill", "-SIGTERM", pid])
 
 
-def stop(status, stop=True):
+def stop(status, _stop=True):
     Path(sep, "var", "run", "bunkerweb", "ui.pid").unlink(missing_ok=True)
     Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").unlink(missing_ok=True)
-    if stop is True:
+    if _stop is True:
         stop_gunicorn()
     _exit(status)
 
@@ -127,10 +129,7 @@ app.wsgi_app = ReverseProxied(app.wsgi_app)
 # Set variables and instantiate objects
 vars = get_variables()
 
-if "ABSOLUTE_URI" not in vars:
-    logger.error("ABSOLUTE_URI is not set")
-    stop(1)
-elif "ADMIN_USERNAME" not in vars:
+if "ADMIN_USERNAME" not in vars:
     logger.error("ADMIN_USERNAME is not set")
     stop(1)
 elif "ADMIN_PASSWORD" not in vars:
@@ -146,14 +145,6 @@ if not vars.get("FLASK_DEBUG", False) and not regex_match(
     )
     stop(1)
 
-if not vars["ABSOLUTE_URI"].endswith("/"):
-    vars["ABSOLUTE_URI"] += "/"
-
-if not vars.get("FLASK_DEBUG", False) and vars["ABSOLUTE_URI"].endswith("/changeme/"):
-    logger.error("Please change the default URL.")
-    stop(1)
-
-
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -167,33 +158,44 @@ PLUGIN_KEYS = [
     "settings",
 ]
 
-integration = "Linux"
+INTEGRATION = "Linux"
 integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
 if getenv("KUBERNETES_MODE", "no").lower() == "yes":
-    integration = "Kubernetes"
+    INTEGRATION = "Kubernetes"
 elif getenv("SWARM_MODE", "no").lower() == "yes":
-    integration = "Swarm"
+    INTEGRATION = "Swarm"
 elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
-    integration = "Autoconf"
+    INTEGRATION = "Autoconf"
 elif integration_path.is_file():
-    integration = integration_path.read_text().strip()
+    INTEGRATION = integration_path.read_text(encoding="utf-8").strip()
 
 del integration_path
 
 docker_client = None
 kubernetes_client = None
-if integration in ("Docker", "Swarm", "Autoconf"):
+if INTEGRATION in ("Docker", "Swarm", "Autoconf"):
     try:
         docker_client: DockerClient = DockerClient(
             base_url=vars.get("DOCKER_HOST", "unix:///var/run/docker.sock")
         )
     except (docker_APIError, DockerException):
         logger.warning("No docker host found")
-elif integration == "Kubernetes":
+elif INTEGRATION == "Kubernetes":
     kube_config.load_incluster_config()
     kubernetes_client = kube_client.CoreV1Api()
 
-db = Database(logger)
+db = Database(logger, ui=True)
+
+if INTEGRATION in (
+    "Swarm",
+    "Kubernetes",
+    "Autoconf",
+):
+    while not db.is_autoconf_loaded():
+        logger.warning(
+            "Autoconf is not loaded yet in the database, retrying in 5s ...",
+        )
+        sleep(5)
 
 while not db.is_initialized():
     logger.warning(
@@ -209,6 +211,8 @@ while not db.is_first_config_saved() or not env:
     sleep(5)
     env = db.get_config()
 
+del env
+
 logger.info("Database is ready")
 Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").write_text("ok", encoding="utf-8")
 bw_version = (
@@ -217,16 +221,101 @@ bw_version = (
     .strip()
 )
 
+ABSOLUTE_URI = vars.get("ABSOLUTE_URI")
+CONFIG = Config(db)
+
+
+def update_config():
+    global ABSOLUTE_URI
+
+    ret = db.checked_changes("ui")
+
+    if ret:
+        logger.error(
+            f"An error occurred when setting the changes to checked in the database : {ret}"
+        )
+        stop(1)
+
+    ssl = False
+    server_name = None
+    endpoint = None
+
+    for service in CONFIG.get_services():
+        if service.get("USE_UI", "no") == "no":
+            continue
+
+        server_name = service.get("SERVER_NAME", {"value": None})["value"]
+        endpoint = service.get("REVERSE_PROXY_URL", {"value": "/"})["value"]
+
+        logger.warning(service.get("AUTO_LETS_ENCRYPT", {"value": "no"}))
+        logger.warning(service.get("GENERATE_SELF_SIGNED_SSL", {"value": "no"}))
+        logger.warning(service.get("USE_CUSTOM_SSL", {"value": "no"}))
+
+        if any(
+            [
+                service.get("AUTO_LETS_ENCRYPT", {"value": "no"})["value"] == "yes",
+                service.get("GENERATE_SELF_SIGNED_SSL", {"value": "no"})["value"]
+                == "yes",
+                service.get("USE_CUSTOM_SSL", {"value": "no"})["value"] == "yes",
+            ]
+        ):
+            ssl = True
+            break
+
+    if not server_name:
+        logger.error("No service found with USE_UI=yes")
+        stop(1)
+
+    ABSOLUTE_URI = f"http{'s' if ssl else ''}://{server_name}{endpoint}"
+    SCRIPT_NAME = f"/{basename(ABSOLUTE_URI[:-1] if ABSOLUTE_URI.endswith('/') and ABSOLUTE_URI != '/' else ABSOLUTE_URI)}"
+
+    if not ABSOLUTE_URI.endswith("/"):
+        ABSOLUTE_URI += "/"
+
+    if ABSOLUTE_URI != app.config.get("ABSOLUTE_URI"):
+        app.config["ABSOLUTE_URI"] = ABSOLUTE_URI
+        app.config["SESSION_COOKIE_DOMAIN"] = server_name
+
+        logger.info(f"The ABSOLUTE_URI is now {ABSOLUTE_URI}")
+    else:
+        logger.info(f"The ABSOLUTE_URI is still {ABSOLUTE_URI}")
+
+    if SCRIPT_NAME != getenv("SCRIPT_NAME"):
+        environ["SCRIPT_NAME"] = f"/{basename(ABSOLUTE_URI[:-1])}"
+        logger.info(f"The script name is now {environ['SCRIPT_NAME']}")
+    else:
+        logger.info(f"The script name is still {environ['SCRIPT_NAME']}")
+
+
+def check_config_changes():
+    while True:
+        changes = db.check_changes("ui")
+
+        if isinstance(changes, str):
+            continue
+
+        if changes:
+            logger.info(
+                "Config changed in the database, updating ABSOLUTE_URI and SCRIPT_NAME ..."
+            )
+
+            update_config()
+
+        sleep(1)
+
+
+update_config()
+
+spawn(check_config_changes)
+
 try:
     app.config.update(
         DEBUG=True,
         SECRET_KEY=vars["FLASK_SECRET"],
-        ABSOLUTE_URI=vars["ABSOLUTE_URI"],
-        INSTANCES=Instances(docker_client, kubernetes_client, integration),
+        INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION),
         CONFIG=Config(db),
         CONFIGFILES=ConfigFiles(logger, db),
-        SESSION_COOKIE_DOMAIN=vars["ABSOLUTE_URI"]
-        .replace("http://", "")
+        SESSION_COOKIE_DOMAIN=ABSOLUTE_URI.replace("http://", "")
         .replace("https://", "")
         .split("/")[0],
         WTF_CSRF_SSL_STRICT=False,
@@ -1346,7 +1435,7 @@ def logs_container(container_id):
     tmp_logs = []
     if docker_client:
         try:
-            if integration != "Swarm":
+            if INTEGRATION != "Swarm":
                 docker_logs = docker_client.containers.get(container_id).logs(
                     stdout=True,
                     stderr=True,
