@@ -37,7 +37,7 @@ try:
     elif getenv("AUTOCONF_MODE") == "yes":
         bw_integration = "Autoconf"
     elif integration_path.is_file():
-        integration = integration_path.read_text().strip()
+        integration = integration_path.read_text(encoding="utf-8").strip()
     token = getenv("CERTBOT_TOKEN", "")
 
     # Cluster case

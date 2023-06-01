@@ -53,13 +53,17 @@ def data() -> Tuple[bool, Optional[int], Union[str, dict]]:
 def get_id() -> str:
     return (
         Path(sep, "var", "cache", "bunkerweb", "bunkernet", "instance.id")
-        .read_text()
+        .read_text(encoding="utf-8")
         .strip()
     )
 
 
 def get_version() -> str:
-    return Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip()
+    return (
+        Path(sep, "usr", "share", "bunkerweb", "VERSION")
+        .read_text(encoding="utf-8")
+        .strip()
+    )
 
 
 def get_integration() -> str:
@@ -73,8 +77,10 @@ def get_integration() -> str:
         elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
             return "autoconf"
         elif integration_path.is_file():
-            return integration_path.read_text().strip().lower()
-        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text():
+            return integration_path.read_text(encoding="utf-8").strip().lower()
+        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
+            encoding="utf-8"
+        ):
             return "docker"
 
         return "linux"

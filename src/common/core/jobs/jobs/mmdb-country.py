@@ -22,7 +22,7 @@ for deps_path in [
         sys_path.append(deps_path)
 
 from maxminddb import open_database
-from requests import get
+from requests import RequestException, get
 
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -41,9 +41,15 @@ try:
     # Don't go further if the cache match the latest version
     if tmp_path.exists():
         with lock:
-            response = get("https://db-ip.com/db/download/ip-to-country-lite")
+            response = None
+            try:
+                response = get(
+                    "https://db-ip.com/db/download/ip-to-country-lite", timeout=5
+                )
+            except RequestException:
+                logger.warning("Unable to check if country.mmdb is the latest version")
 
-        if response.status_code == 200:
+        if response and response.status_code == 200:
             _sha1 = sha1()
             with open(str(tmp_path), "rb") as f:
                 while True:
@@ -79,11 +85,15 @@ try:
         # Download the mmdb file and save it to tmp
         logger.info(f"Downloading mmdb file from url {mmdb_url} ...")
         file_content = b""
-        with get(mmdb_url, stream=True) as resp:
-            resp.raise_for_status()
-            for chunk in resp.iter_content(chunk_size=4 * 1024):
-                if chunk:
-                    file_content += chunk
+        try:
+            with get(mmdb_url, stream=True, timeout=5) as resp:
+                resp.raise_for_status()
+                for chunk in resp.iter_content(chunk_size=4 * 1024):
+                    if chunk:
+                        file_content += chunk
+        except RequestException:
+            logger.error(f"Error while downloading mmdb file from {mmdb_url}")
+            _exit(2)
 
         try:
             assert file_content

@@ -47,6 +47,7 @@ def generate_cert(
                 ],
                 stdin=DEVNULL,
                 stderr=STDOUT,
+                check=False,
             ).returncode
             == 0
         ):
@@ -74,6 +75,7 @@ def generate_cert(
             ],
             stdin=DEVNULL,
             stderr=DEVNULL,
+            check=False,
         ).returncode
         != 0
     ):
@@ -111,7 +113,7 @@ try:
 
     # Multisite case
     if getenv("MULTISITE") == "yes":
-        servers = getenv("SERVER_NAME", [])
+        servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):
             servers = servers.split(" ")

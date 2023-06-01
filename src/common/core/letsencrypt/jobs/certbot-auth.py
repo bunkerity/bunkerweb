@@ -37,7 +37,7 @@ try:
     elif getenv("AUTOCONF_MODE") == "yes":
         bw_integration = "Autoconf"
     elif integration_path.is_file():
-        integration = integration_path.read_text().strip()
+        integration = integration_path.read_text(encoding="utf-8").strip()
     token = getenv("CERTBOT_TOKEN", "")
     validation = getenv("CERTBOT_VALIDATION", "")
 
@@ -89,7 +89,7 @@ try:
             "acme-challenge",
         )
         root_dir.mkdir(parents=True, exist_ok=True)
-        root_dir.joinpath(token).write_text(validation)
+        root_dir.joinpath(token).write_text(validation, encoding="utf-8")
 except:
     status = 1
     logger.error(f"Exception while running certbot-auth.py :\n{format_exc()}")

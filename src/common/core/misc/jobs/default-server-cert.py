@@ -85,6 +85,7 @@ try:
                 ],
                 stdin=DEVNULL,
                 stderr=DEVNULL,
+                check=False,
             ).returncode
             != 0
         ):

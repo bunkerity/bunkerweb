@@ -40,7 +40,7 @@ try:
     elif getenv("AUTOCONF_MODE") == "yes":
         bw_integration = "Autoconf"
     elif integration_path.is_file():
-        integration = integration_path.read_text().strip()
+        integration = integration_path.read_text(encoding="utf-8").strip()
     token = getenv("CERTBOT_TOKEN", "")
 
     logger.info(f"Certificates renewal for {getenv('RENEWED_DOMAINS')} successful")
@@ -111,6 +111,7 @@ try:
                 ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
                 stdin=DEVNULL,
                 stderr=STDOUT,
+                check=False,
             ).returncode
             != 0
         ):

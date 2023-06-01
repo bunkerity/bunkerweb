@@ -32,7 +32,7 @@ try:
     bunkernet_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        servers = getenv("SERVER_NAME", [])
+        servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):
             servers = servers.split(" ")
@@ -110,7 +110,7 @@ try:
             )
             _exit(2)
         bunkernet_id = data["data"]
-        instance_id_path.write_text(bunkernet_id)
+        instance_id_path.write_text(bunkernet_id, encoding="utf-8")
         registered = True
         exit_status = 1
         logger.info(

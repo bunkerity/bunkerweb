@@ -36,8 +36,8 @@ def check_cert(
             )
             return False
 
-        cert_path = Path(normpath(cert_path))
-        key_path = Path(normpath(key_path))
+        cert_path: Path = Path(normpath(cert_path))
+        key_path: Path = Path(normpath(key_path))
 
         if not cert_path.is_file():
             logger.warning(

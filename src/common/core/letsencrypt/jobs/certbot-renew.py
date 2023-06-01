@@ -54,6 +54,7 @@ def renew(domain: str, letsencrypt_path: Path) -> int:
         stdin=DEVNULL,
         stderr=STDOUT,
         env=environ,
+        check=False,
     ).returncode
 
 
@@ -101,8 +102,8 @@ try:
     else:
         logger.info("No Let's Encrypt data found in db cache")
 
-    if getenv("MULTISITE") == "yes":
-        servers = getenv("SERVER_NAME", [])
+    if getenv("MULTISITE", "no") == "yes":
+        servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):
             servers = servers.split(" ")

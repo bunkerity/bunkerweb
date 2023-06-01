@@ -23,11 +23,14 @@ logger = setup_logger("UPDATE-CHECK", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
-    current_version = f"v{Path('/usr/share/bunkerweb/VERSION').read_text().strip()}"
+    current_version = (
+        f"v{Path('/usr/share/bunkerweb/VERSION').read_text(encoding='utf-8').strip()}"
+    )
 
     response = get(
         "https://github.com/bunkerity/bunkerweb/releases/latest",
         allow_redirects=True,
+        timeout=5,
     )
     response.raise_for_status()
 

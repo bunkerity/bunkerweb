@@ -92,7 +92,7 @@ try:
     for url in urls:
         try:
             logger.info(f"Downloading RealIP list from {url} ...")
-            resp = get(url, stream=True)
+            resp = get(url, stream=True, timeout=10)
 
             if resp.status_code != 200:
                 continue
