@@ -15,7 +15,7 @@ start() {
     echo "Starting UI"
     source /etc/bunkerweb/ui.env
     export $(cat /etc/bunkerweb/ui.env)
-    python3 -m gunicorn --config /usr/share/bunkerweb/ui/gunicorn.conf.py &
+    python3 -m gunicorn --config /usr/share/bunkerweb/ui/gunicorn.conf.py --user nginx --group nginx --bind 127.0.0.1:7000 &
     echo $! > /var/run/bunkerweb/ui.pid
 }
 
