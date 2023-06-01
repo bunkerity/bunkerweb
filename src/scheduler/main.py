@@ -193,11 +193,9 @@ if __name__ == "__main__":
         )
         args = parser.parse_args()
         tmp_variables_path = Path(
-            normpath(args.variables) if args.variables else sep,
-            "var",
-            "tmp",
-            "bunkerweb",
-            "variables.env",
+            normpath(args.variables)
+            if args.variables
+            else (sep, "var", "tmp", "bunkerweb", "variables.env")
         )
         dotenv_env = dotenv_values(str(tmp_variables_path))
 
