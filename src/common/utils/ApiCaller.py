@@ -131,23 +131,21 @@ class ApiCaller:
             if not sent:
                 ret = False
                 self.__logger.error(
-                    f"Can't send API request to {api.get_endpoint()}{url} : {err}",
+                    f"Can't send API request to {api.endpoint}{url} : {err}",
                 )
             else:
                 if status != 200:
                     ret = False
                     self.__logger.error(
-                        f"Error while sending API request to {api.get_endpoint()}{url} : status = {resp['status']}, msg = {resp['msg']}",
+                        f"Error while sending API request to {api.endpoint}{url} : status = {resp['status']}, msg = {resp['msg']}",
                     )
                 else:
                     self.__logger.info(
-                        f"Successfully sent API request to {api.get_endpoint()}{url}",
+                        f"Successfully sent API request to {api.endpoint}{url}",
                     )
 
                     if response:
-                        instance = (
-                            api.get_endpoint().replace("http://", "").split(":")[0]
-                        )
+                        instance = api.endpoint.replace("http://", "").split(":")[0]
                         if isinstance(resp, dict):
                             responses[instance] = resp
                         else:

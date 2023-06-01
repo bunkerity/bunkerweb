@@ -15,23 +15,11 @@ from uuid import uuid4
 class Config:
     def __init__(self, db) -> None:
         self.__settings = json_loads(
-            Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text()
+            Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(
+                encoding="utf-8"
+            )
         )
         self.__db = db
-
-    def __dict_to_env(self, filename: str, variables: dict) -> None:
-        """Converts the content of a dict into an env file
-
-        Parameters
-        ----------
-        filename : str
-            The path to save the env file
-        variables : dict
-            The dict to convert to env file
-        """
-        Path(filename).write_text(
-            "\n".join(f"{k}={variables[k]}" for k in sorted(variables))
-        )
 
     def __gen_conf(self, global_conf: dict, services_conf: list[dict]) -> None:
         """Generates the nginx configuration file from the given configuration
@@ -43,7 +31,7 @@ class Config:
 
         Raises
         ------
-        Exception
+        ConfigGenerationError
             If an error occurred during the generation of the configuration file, raises this exception
         """
         conf = deepcopy(global_conf)
@@ -68,7 +56,11 @@ class Config:
 
         conf["SERVER_NAME"] = " ".join(servers)
         env_file = Path(sep, "tmp", f"{uuid4()}.env")
-        self.__dict_to_env(env_file, conf)
+        env_file.write_text(
+            "\n".join(f"{k}={conf[k]}" for k in sorted(conf)),
+            encoding="utf-8",
+        )
+
         proc = run(
             [
                 "python3",
@@ -80,6 +72,7 @@ class Config:
             ],
             stdin=DEVNULL,
             stderr=STDOUT,
+            check=False,
         )
 
         if proc.returncode != 0:
@@ -270,7 +263,7 @@ class Config:
         self.__gen_conf(
             self.get_config(methods=False) | variables, self.get_services(methods=False)
         )
-        return f"The global configuration has been edited."
+        return "The global configuration has been edited."
 
     def delete_service(self, service_name: str) -> Tuple[str, int]:
         """Deletes a service

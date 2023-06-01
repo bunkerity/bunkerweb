@@ -78,31 +78,31 @@ try:
             if not sent:
                 status = 1
                 logger.error(
-                    f"Can't send API request to {api.get_endpoint()}/lets-encrypt/certificates : {err}"
+                    f"Can't send API request to {api.endpoint}/lets-encrypt/certificates : {err}"
                 )
             elif status != 200:
                 status = 1
                 logger.error(
-                    f"Error while sending API request to {api.get_endpoint()}/lets-encrypt/certificates : status = {resp['status']}, msg = {resp['msg']}"
+                    f"Error while sending API request to {api.endpoint}/lets-encrypt/certificates : status = {resp['status']}, msg = {resp['msg']}"
                 )
             else:
                 logger.info(
-                    f"Successfully sent API request to {api.get_endpoint()}/lets-encrypt/certificates",
+                    f"Successfully sent API request to {api.endpoint}/lets-encrypt/certificates",
                 )
                 sent, err, status, resp = api.request("POST", "/reload")
                 if not sent:
                     status = 1
                     logger.error(
-                        f"Can't send API request to {api.get_endpoint()}/reload : {err}"
+                        f"Can't send API request to {api.endpoint}/reload : {err}"
                     )
                 elif status != 200:
                     status = 1
                     logger.error(
-                        f"Error while sending API request to {api.get_endpoint()}/reload : status = {resp['status']}, msg = {resp['msg']}"
+                        f"Error while sending API request to {api.endpoint}/reload : status = {resp['status']}, msg = {resp['msg']}"
                     )
                 else:
                     logger.info(
-                        f"Successfully sent API request to {api.get_endpoint()}/reload"
+                        f"Successfully sent API request to {api.endpoint}/reload"
                     )
     # Linux case
     else:

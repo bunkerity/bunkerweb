@@ -70,12 +70,12 @@ def is_cached_file(
     return is_cached and cached_file
 
 
-def get_file_in_db(file: Union[str, Path], db) -> bytes:
+def get_file_in_db(file: Union[str, Path], db) -> Optional[bytes]:
     cached_file = db.get_job_cache_file(
         basename(getsourcefile(_getframe(1))).replace(".py", ""), normpath(file)
     )
     if not cached_file:
-        return False
+        return None
     return cached_file.data
 
 
@@ -142,7 +142,9 @@ def bytes_hash(bio: BufferedReader) -> str:
 
 def cache_hash(cache: Union[str, Path], db=None) -> Optional[str]:
     with suppress(BaseException):
-        return loads(Path(normpath(f"{cache}.md")).read_text()).get("checksum", None)
+        return loads(Path(normpath(f"{cache}.md")).read_text(encoding="utf-8")).get(
+            "checksum", None
+        )
     if db:
         cached_file = db.get_job_cache_file(
             basename(getsourcefile(_getframe(1))).replace(".py", ""),
@@ -192,7 +194,8 @@ def cache_file(
             )
         else:
             Path(f"{cache}.md").write_text(
-                dumps(dict(date=datetime.now().timestamp(), checksum=_hash))
+                dumps(dict(date=datetime.now().timestamp(), checksum=_hash)),
+                encoding="utf-8",
             )
     except:
         return False, f"exception :\n{format_exc()}"

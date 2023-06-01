@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from os import getenv
 from time import sleep
 from traceback import format_exc
 from typing import List
@@ -9,19 +8,15 @@ from kubernetes.client.exceptions import ApiException
 from threading import Thread, Lock
 
 from Controller import Controller
-from ConfigCaller import ConfigCaller  # type: ignore
-from logger import setup_logger  # type: ignore
 
 
-class IngressController(Controller, ConfigCaller):
+class IngressController(Controller):
     def __init__(self):
-        Controller.__init__(self, "kubernetes")
-        ConfigCaller.__init__(self)
+        self.__internal_lock = Lock()
+        super().__init__("kubernetes", self.__internal_lock)
         config.load_incluster_config()
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
-        self.__internal_lock = Lock()
-        self.__logger = setup_logger("Ingress-controller", getenv("LOG_LEVEL", "INFO"))
 
     def _get_controller_instances(self) -> list:
         return [
@@ -51,7 +46,7 @@ class IngressController(Controller, ConfigCaller):
                 pod = container
                 break
         if not pod:
-            self.__logger.warning(
+            self._logger.warning(
                 f"Missing container bunkerweb in pod {controller_instance.metadata.name}"
             )
         else:
@@ -81,7 +76,7 @@ class IngressController(Controller, ConfigCaller):
         # parse rules
         for rule in controller_service.spec.rules:
             if not rule.host:
-                self.__logger.warning(
+                self._logger.warning(
                     "Ignoring unsupported ingress rule without host.",
                 )
                 continue
@@ -93,22 +88,22 @@ class IngressController(Controller, ConfigCaller):
             location = 1
             for path in rule.http.paths:
                 if not path.path:
-                    self.__logger.warning(
+                    self._logger.warning(
                         "Ignoring unsupported ingress rule without path.",
                     )
                     continue
                 elif not path.backend.service:
-                    self.__logger.warning(
+                    self._logger.warning(
                         "Ignoring unsupported ingress rule without backend service.",
                     )
                     continue
                 elif not path.backend.service.port:
-                    self.__logger.warning(
+                    self._logger.warning(
                         "Ignoring unsupported ingress rule without backend service port.",
                     )
                     continue
                 elif not path.backend.service.port.number:
-                    self.__logger.warning(
+                    self._logger.warning(
                         "Ignoring unsupported ingress rule without backend service port number.",
                     )
                     continue
@@ -119,7 +114,7 @@ class IngressController(Controller, ConfigCaller):
                 ).items
 
                 if not service_list:
-                    self.__logger.warning(
+                    self._logger.warning(
                         f"Ignoring ingress rule with service {path.backend.service.name} : service not found.",
                     )
                     continue
@@ -137,7 +132,7 @@ class IngressController(Controller, ConfigCaller):
 
         # parse tls
         if controller_service.spec.tls:  # TODO: support tls
-            self.__logger.warning("Ignoring unsupported tls.")
+            self._logger.warning("Ignoring unsupported tls.")
 
         # parse annotations
         if controller_service.metadata.annotations:
@@ -204,12 +199,12 @@ class IngressController(Controller, ConfigCaller):
 
             config_type = configmap.metadata.annotations["bunkerweb.io/CONFIG_TYPE"]
             if config_type not in self._supported_config_types:
-                self.__logger.warning(
+                self._logger.warning(
                     f"Ignoring unsupported CONFIG_TYPE {config_type} for ConfigMap {configmap.metadata.name}",
                 )
                 continue
             elif not configmap.data:
-                self.__logger.warning(
+                self._logger.warning(
                     f"Ignoring blank ConfigMap {configmap.metadata.name}",
                 )
                 continue
@@ -218,7 +213,7 @@ class IngressController(Controller, ConfigCaller):
                 if not self._is_service_present(
                     configmap.metadata.annotations["bunkerweb.io/CONFIG_SITE"]
                 ):
-                    self.__logger.warning(
+                    self._logger.warning(
                         f"Ignoring config {configmap.metadata.name} because {configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']} doesn't exist",
                     )
                     continue
@@ -253,46 +248,41 @@ class IngressController(Controller, ConfigCaller):
                     self._instances = self.get_instances()
                     self._services = self.get_services()
                     self._configs = self.get_configs()
-                    if not self._config.update_needed(
+                    if not self.update_needed(
                         self._instances, self._services, configs=self._configs
                     ):
                         self.__internal_lock.release()
                         locked = False
                         continue
-                    self.__logger.info(
+                    self._logger.info(
                         f"Catched kubernetes event ({watch_type}), deploying new configuration ...",
                     )
                     try:
                         ret = self.apply_config()
                         if not ret:
-                            self.__logger.error(
+                            self._logger.error(
                                 "Error while deploying new configuration ...",
                             )
                         else:
-                            self.__logger.info(
+                            self._logger.info(
                                 "Successfully deployed new configuration 🚀",
                             )
 
-                            if not self._config._db.is_autoconf_loaded():
-                                ret = self._config._db.set_autoconf_load(True)
-                                if ret:
-                                    self.__logger.warning(
-                                        f"Can't set autoconf loaded metadata to true in database: {ret}",
-                                    )
+                            self._set_autoconf_load_db()
                     except:
-                        self.__logger.error(
+                        self._logger.error(
                             f"Exception while deploying new configuration :\n{format_exc()}",
                         )
                     self.__internal_lock.release()
                     locked = False
             except ApiException as e:
                 if e.status != 410:
-                    self.__logger.error(
+                    self._logger.error(
                         f"API exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
                     )
                     error = True
             except:
-                self.__logger.error(
+                self._logger.error(
                     f"Unknown exception while reading k8s event (type = {watch_type}) :\n{format_exc()}",
                 )
                 error = True
@@ -302,13 +292,11 @@ class IngressController(Controller, ConfigCaller):
                     locked = False
 
                 if error is True:
-                    self.__logger.warning("Got exception, retrying in 10 seconds ...")
+                    self._logger.warning("Got exception, retrying in 10 seconds ...")
                     sleep(10)
 
     def apply_config(self) -> bool:
-        return self._config.apply(
-            self._instances, self._services, configs=self._configs
-        )
+        return self.apply(self._instances, self._services, configs=self._configs)
 
     def process_events(self):
         self._set_autoconf_load_db()

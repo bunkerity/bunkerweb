@@ -298,7 +298,7 @@ class Configurator:
         elif not self.__plugin_version_rx.match(plugin["version"]):
             return (
                 False,
-                f"Invalid version for plugin {plugin['id']} (Must be in format \d+\.\d+(\.\d+)?)",
+                f"Invalid version for plugin {plugin['id']} (Must be in format \\d+\\.\\d+(\\.\\d+)?)",
             )
         elif plugin["stream"] not in ["yes", "no", "partial"]:
             return (

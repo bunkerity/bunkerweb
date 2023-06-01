@@ -65,16 +65,16 @@ try:
             if not sent:
                 status = 1
                 logger.error(
-                    f"Can't send API request to {api.get_endpoint()}/lets-encrypt/challenge : {err}"
+                    f"Can't send API request to {api.endpoint}/lets-encrypt/challenge : {err}"
                 )
             elif status != 200:
                 status = 1
                 logger.error(
-                    f"Error while sending API request to {api.get_endpoint()}/lets-encrypt/challenge : status = {resp['status']}, msg = {resp['msg']}",
+                    f"Error while sending API request to {api.endpoint}/lets-encrypt/challenge : status = {resp['status']}, msg = {resp['msg']}",
                 )
             else:
                 logger.info(
-                    f"Successfully sent API request to {api.get_endpoint()}/lets-encrypt/challenge",
+                    f"Successfully sent API request to {api.endpoint}/lets-encrypt/challenge",
                 )
 
     # Linux case

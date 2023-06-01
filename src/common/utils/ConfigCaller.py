@@ -16,13 +16,17 @@ class ConfigCaller:
     def __init__(self):
         self.__logger = setup_logger("Config", "INFO")
         self._settings = loads(
-            Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text()
+            Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(
+                encoding="utf-8"
+            )
         )
         for plugin in glob(
             join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json")
         ) + glob(join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")):
             try:
-                self._settings.update(loads(Path(plugin).read_text())["settings"])
+                self._settings.update(
+                    loads(Path(plugin).read_text(encoding="utf-8"))["settings"]
+                )
             except KeyError:
                 self.__logger.error(
                     f'Error while loading plugin metadata file at {plugin} : missing "settings" key',

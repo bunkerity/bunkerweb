@@ -11,7 +11,7 @@ from os.path import basename, dirname, join
 from pathlib import Path
 from re import compile as re_compile
 from sys import _getframe, path as sys_path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 from time import sleep
 from traceback import format_exc
 
@@ -55,7 +55,7 @@ install_as_MySQLdb()
 
 
 class Database:
-    def __init__(self, logger: Logger, sqlalchemy_string: str = None) -> None:
+    def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None) -> None:
         """Initialize the database"""
         self.__logger = logger
         self.__sql_session = None
@@ -257,7 +257,7 @@ class Database:
 
         return ""
 
-    def check_changes(self) -> Dict[str, bool]:
+    def check_changes(self) -> Union[Dict[str, bool], str]:
         """Check if either the config, the custom configs or plugins have changed inside the database"""
         with self.__db_session() as session:
             try:

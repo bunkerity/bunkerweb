@@ -210,8 +210,12 @@ while not db.is_first_config_saved() or not env:
     env = db.get_config()
 
 logger.info("Database is ready")
-Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").write_text("ok")
-bw_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip()
+Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").write_text("ok", encoding="utf-8")
+bw_version = (
+    Path(sep, "usr", "share", "bunkerweb", "VERSION")
+    .read_text(encoding="utf-8")
+    .strip()
+)
 
 try:
     app.config.update(
@@ -243,8 +247,12 @@ plugin_id_rx = re_compile(r"^[\w_-]{1,64}$")
 # Declare functions for jinja2
 app.jinja_env.globals.update(check_settings=check_settings)
 
+# CSRF protection
+csrf = CSRFProtect()
+csrf.init_app(app)
 
-def manage_bunkerweb(method: str, operation: str = "reloads", *args):
+
+def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
     # Do the operation
     if method == "services":
         error = False
@@ -295,11 +303,6 @@ def load_user(user_id):
     return User(user_id, vars["ADMIN_PASSWORD"])
 
 
-# CSRF protection
-csrf = CSRFProtect()
-csrf.init_app(app)
-
-
 @app.errorhandler(CSRFError)
 def handle_csrf_error(_):
     """
@@ -348,6 +351,7 @@ def home():
         r = get(
             "https://github.com/bunkerity/bunkerweb/releases/latest",
             allow_redirects=True,
+            timeout=5,
         )
         r.raise_for_status()
     except BaseException:
@@ -418,7 +422,8 @@ def instances():
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
-            args=("instances", request.form["operation"], request.form["INSTANCE_ID"]),
+            args=("instances", request.form["INSTANCE_ID"]),
+            kwargs={"operation": request.form["operation"]},
         ).start()
 
         return redirect(
@@ -522,11 +527,11 @@ def services():
             name="Reloading instances",
             args=(
                 "services",
-                request.form["operation"],
                 variables,
                 request.form.get("OLD_SERVER_NAME", "").split(" ")[0],
                 variables.get("SERVER_NAME", "").split(" ")[0],
             ),
+            kwargs={"operation": request.form["operation"]},
         ).start()
 
         message = ""
@@ -589,7 +594,7 @@ def global_config():
 
         if not variables:
             flash(
-                f"The global configuration was not edited because no values were changed."
+                "The global configuration was not edited because no values were changed."
             )
             return redirect(url_for("loading", next=url_for("global_config")))
 
@@ -606,7 +611,6 @@ def global_config():
             name="Reloading instances",
             args=(
                 "global_config",
-                "reloads",
                 variables,
             ),
         ).start()
@@ -668,6 +672,8 @@ def configs():
                 variables["content"] = BeautifulSoup(
                     variables["content"], "html.parser"
                 ).get_text()
+
+            error = False
 
             if request.form["operation"] == "new":
                 if variables["type"] == "folder":
@@ -852,7 +858,9 @@ def plugins():
                         )
 
                     plugin_file = json_loads(
-                        temp_folder_path.joinpath("plugin.json").read_text()
+                        temp_folder_path.joinpath("plugin.json").read_text(
+                            encoding="utf-8"
+                        )
                     )
 
                     if not all(key in plugin_file.keys() for key in PLUGIN_KEYS):
@@ -1200,13 +1208,13 @@ def logs_linux():
 
     nginx_error_file = Path(sep, "var", "log", "nginx", "error.log")
     if nginx_error_file.is_file():
-        raw_logs_access = nginx_error_file.read_text().splitlines()[
+        raw_logs_access = nginx_error_file.read_text(encoding="utf-8").splitlines()[
             int(last_update.split(".")[0]) if last_update else 0 :
         ]
 
     nginx_access_file = Path(sep, "var", "log", "nginx", "access.log")
     if nginx_access_file.is_file():
-        raw_logs_error = nginx_access_file.read_text().splitlines()[
+        raw_logs_error = nginx_access_file.read_text(encoding="utf-8").splitlines()[
             int(last_update.split(".")[1]) if last_update else 0 :
         ]
 

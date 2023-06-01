@@ -5,8 +5,8 @@ from bcrypt import checkpw, hashpw, gensalt
 
 
 class User(UserMixin):
-    def __init__(self, id, password):
-        self.__id = id
+    def __init__(self, _id, password):
+        self.__id = _id
         self.__password = hashpw(password.encode("utf-8"), gensalt())
 
     def get_id(self):
