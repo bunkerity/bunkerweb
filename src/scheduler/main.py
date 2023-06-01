@@ -192,11 +192,12 @@ if __name__ == "__main__":
             help="path to the file containing environment variables",
         )
         args = parser.parse_args()
-        tmp_variables_path = Path(
+        tmp_variables_path = (
             normpath(args.variables)
             if args.variables
-            else (sep, "var", "tmp", "bunkerweb", "variables.env")
+            else join(sep, "var", "tmp", "bunkerweb", "variables.env")
         )
+        tmp_variables_path = Path(tmp_variables_path)
         dotenv_env = dotenv_values(str(tmp_variables_path))
 
         # Instantiate scheduler
