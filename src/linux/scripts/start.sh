@@ -104,7 +104,7 @@ function start() {
     if [ "$HTTPS_PORT" = "" ] ; then
         HTTPS_PORT="8443"
     fi
-    sudo -E -u nginx -g nginx /bin/bash -c "echo -ne 'IS_LOADING=yes\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /var/tmp/bunkerweb/tmp.env"
+    sudo -E -u nginx -g nginx /bin/bash -c "echo -ne 'IS_LOADING=yes\nUSE_BUNKERNET=no\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /var/tmp/bunkerweb/tmp.env"
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env --no-linux-reload"
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
