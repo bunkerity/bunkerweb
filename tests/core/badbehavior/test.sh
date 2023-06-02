@@ -21,7 +21,7 @@ cleanup_stack () {
     if [[ $end -eq 1 || $exit_code = 1 ]] || [[ $end -eq 0 && $exit_code = 0 ]] && [ $manual = 0 ] ; then
         find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_BAD_BEHAVIOR: "no"@USE_BAD_BEHAVIOR: "yes"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@BAD_BEHAVIOR_STATUS_CODES: "400 401 404 405 429 444"@BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444"@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BAD_BEHAVIOR_BAN_TIME: "5"@BAD_BEHAVIOR_BAN_TIME: "86400"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@BAD_BEHAVIOR_BAN_TIME: "60"@BAD_BEHAVIOR_BAN_TIME: "86400"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@BAD_BEHAVIOR_THRESHOLD: "20"@BAD_BEHAVIOR_THRESHOLD: "10"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@BAD_BEHAVIOR_COUNT_TIME: "5"@BAD_BEHAVIOR_COUNT_TIME: "60"@' {} \;
         if [[ $end -eq 1 && $exit_code = 0 ]] ; then
@@ -56,12 +56,12 @@ do
         find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_BAD_BEHAVIOR: "no"@USE_BAD_BEHAVIOR: "yes"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444"@BAD_BEHAVIOR_STATUS_CODES: "400 401 404 405 429 444"@' {} \;
     elif [ "$test" = "ban_time" ] ; then
-        echo "📟 Running tests with badbehavior's ban time changed to 5 seconds ..."
+        echo "📟 Running tests with badbehavior's ban time changed to 60 seconds ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@BAD_BEHAVIOR_STATUS_CODES: "400 401 404 405 429 444"@BAD_BEHAVIOR_STATUS_CODES: "400 401 403 404 405 429 444"@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BAD_BEHAVIOR_BAN_TIME: "86400"@BAD_BEHAVIOR_BAN_TIME: "5"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@BAD_BEHAVIOR_BAN_TIME: "86400"@BAD_BEHAVIOR_BAN_TIME: "60"@' {} \;
     elif [ "$test" = "threshold" ] ; then
         echo "📟 Running tests with badbehavior's threshold set to 20 ..."
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BAD_BEHAVIOR_BAN_TIME: "5"@BAD_BEHAVIOR_BAN_TIME: "86400"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@BAD_BEHAVIOR_BAN_TIME: "60"@BAD_BEHAVIOR_BAN_TIME: "86400"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@BAD_BEHAVIOR_THRESHOLD: "10"@BAD_BEHAVIOR_THRESHOLD: "20"@' {} \;
     elif [ "$test" = "count_time" ] ; then
         echo "📟 Running tests with badbehavior's count time set to 5 seconds ..."

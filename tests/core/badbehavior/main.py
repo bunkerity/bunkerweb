@@ -68,10 +68,10 @@ try:
             exit(1)
         elif bad_behavior_ban_time != "86400":
             print(
-                "ℹ️ Sleeping for 7s to wait if Bad Behavior's ban time changed ...",
+                "ℹ️ Sleeping for 65s to wait if Bad Behavior's ban time changed ...",
                 flush=True,
             )
-            sleep(7)
+            sleep(65)
 
             status_code = get(
                 f"http://www.example.com",
