@@ -2,7 +2,7 @@
 
 from os import environ, urandom
 from os.path import join
-from typing import List
+from typing import List, Optional
 
 
 def get_variables():
@@ -22,12 +22,15 @@ def get_variables():
 
 
 def path_to_dict(
-    path,
+    path: str,
     *,
     is_cache: bool = False,
-    db_data: List[dict] = [],
-    services: List[str] = [],
+    db_data: Optional[List[dict]] = None,
+    services: Optional[List[dict]] = None,
 ) -> dict:
+    db_data = db_data or []
+    services = services or []
+
     if not is_cache:
         config_types = [
             "http",

@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from os import getenv
 from time import sleep
 from traceback import format_exc
 from threading import Thread, Lock
@@ -10,17 +9,13 @@ from base64 import b64decode
 
 from docker.models.services import Service
 from Controller import Controller
-from ConfigCaller import ConfigCaller  # type: ignore
-from logger import setup_logger  # type: ignore
 
 
-class SwarmController(Controller, ConfigCaller):
+class SwarmController(Controller):
     def __init__(self, docker_host):
-        Controller.__init__(self, "swarm")
-        ConfigCaller.__init__(self)
+        super().__init__("swarm")
         self.__client = DockerClient(base_url=docker_host)
         self.__internal_lock = Lock()
-        self.__logger = setup_logger("Swarm-controller", getenv("LOG_LEVEL", "INFO"))
 
     def _get_controller_instances(self) -> List[Service]:
         return self.__client.services.list(filters={"label": "bunkerweb.INSTANCE"})
@@ -110,7 +105,7 @@ class SwarmController(Controller, ConfigCaller):
             config_type = config.attrs["Spec"]["Labels"]["bunkerweb.CONFIG_TYPE"]
             config_name = config.name
             if config_type not in self._supported_config_types:
-                self.__logger.warning(
+                self._logger.warning(
                     f"Ignoring unsupported CONFIG_TYPE {config_type} for Config {config_name}",
                 )
                 continue
@@ -119,7 +114,7 @@ class SwarmController(Controller, ConfigCaller):
                 if not self._is_service_present(
                     config.attrs["Spec"]["Labels"]["bunkerweb.CONFIG_SITE"]
                 ):
-                    self.__logger.warning(
+                    self._logger.warning(
                         f"Ignoring config {config_name} because {config.attrs['Spec']['Labels']['bunkerweb.CONFIG_SITE']} doesn't exist",
                     )
                     continue
@@ -132,9 +127,7 @@ class SwarmController(Controller, ConfigCaller):
         return configs
 
     def apply_config(self) -> bool:
-        return self._config.apply(
-            self._instances, self._services, configs=self._configs
-        )
+        return self.apply(self._instances, self._services, configs=self._configs)
 
     def __event(self, event_type):
         while True:
@@ -150,31 +143,31 @@ class SwarmController(Controller, ConfigCaller):
                         self._instances = self.get_instances()
                         self._services = self.get_services()
                         self._configs = self.get_configs()
-                        if not self._config.update_needed(
+                        if not self.update_needed(
                             self._instances, self._services, configs=self._configs
                         ):
                             self.__internal_lock.release()
                             locked = False
                             continue
-                        self.__logger.info(
+                        self._logger.info(
                             f"Catched Swarm event ({event_type}), deploying new configuration ..."
                         )
                         if not self.apply_config():
-                            self.__logger.error(
+                            self._logger.error(
                                 "Error while deploying new configuration"
                             )
                         else:
-                            self.__logger.info(
+                            self._logger.info(
                                 "Successfully deployed new configuration 🚀",
                             )
                     except:
-                        self.__logger.error(
+                        self._logger.error(
                             f"Exception while processing Swarm event ({event_type}) :\n{format_exc()}"
                         )
                     self.__internal_lock.release()
                     locked = False
             except:
-                self.__logger.error(
+                self._logger.error(
                     f"Exception while reading Swarm event ({event_type}) :\n{format_exc()}",
                 )
                 error = True
@@ -183,7 +176,7 @@ class SwarmController(Controller, ConfigCaller):
                     self.__internal_lock.release()
                     locked = False
                 if error is True:
-                    self.__logger.warning("Got exception, retrying in 10 seconds ...")
+                    self._logger.warning("Got exception, retrying in 10 seconds ...")
                     sleep(10)
 
     def process_events(self):

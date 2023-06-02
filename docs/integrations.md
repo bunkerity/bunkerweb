@@ -1231,7 +1231,6 @@ Configuration of BunkerWeb is done by using specific role variables :
 -->
 List of supported providers :
 
-- vmware_desktop 
 - virtualbox 
 - libvirt
 
@@ -1243,10 +1242,10 @@ Similar to other BunkerWeb integrations, the Vagrant setup uses **NGINX version 
 
 By using the provided Vagrant box based on Ubuntu 22.04 "Jammy", you benefit from a well-configured and integrated setup, allowing you to focus on developing and securing your applications with BunkerWeb without worrying about the underlying infrastructure.
 
-Here are the steps to install BunkerWeb using Vagrant on Ubuntu with the supported virtualization providers (VirtualBox, VMware, and libvirt):
+Here are the steps to install BunkerWeb using Vagrant on Ubuntu with the supported virtualization providers (VirtualBox, and libvirt):
 
 
-1. Make sure you have Vagrant and one of the supported virtualization providers (VirtualBox, VMware, or libvirt) installed on your system.
+1. Make sure you have Vagrant and one of the supported virtualization providers (VirtualBox or libvirt) installed on your system.
 2. There are two ways to install the Vagrant box with BunkerWeb: either by using a provided Vagrantfile to configure your virtual machine or by creating a new box based on the existing BunkerWeb Vagrant box, offering you flexibility in how you set up your development environment.
 
 === "Vagrantfile"
@@ -1259,7 +1258,6 @@ Here are the steps to install BunkerWeb using Vagrant on Ubuntu with the support
 
     Depending on the virtualization provider you choose, you may need to install additional plugins:
 
-    * For **VMware**, install the `vagrant-vmware-desktop` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
     * For **libvirt**, install the `vagrant-libvirt plugin`. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
     * For **VirtualBox**, install the `vagrant-vbguest` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
 
@@ -1271,14 +1269,13 @@ Here are the steps to install BunkerWeb using Vagrant on Ubuntu with the support
 
     Depending on the virtualization provider you choose, you may need to install additional plugins:
 
-    * For **VMware**, install the `vagrant-vmware-desktop` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
     * For **libvirt**, install the `vagrant-libvirt plugin`. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
     * For **VirtualBox**, install the `vagrant-vbguest` plugin. For more information, see the [Vagrant documentation](https://www.vagrantup.com/docs/providers).
 
 After installing the necessary plugins for your chosen virtualization provider, run the following command to start the virtual machine and install BunkerWeb:
 
 ```shell
-vagrant up --provider=virtualbox # or --provider=vmware_desktop or --provider=libvirt
+vagrant up --provider=virtualbox # or --provider=libvirt
 ```
 
 Finally, to access the virtual machine using SSH, execute the following command:
@@ -1298,9 +1295,6 @@ Vagrant.configure("2") do |config|
   # Uncomment the desired virtualization provider
   # For VirtualBox (default)
   config.vm.provider "virtualbox"
-  # For VMware
-  # config.vm.provider "vmware_desktop" # Windows
-  # config.vm.provider "vmware_workstation" # Linux
   # For libvirt
   # config.vm.provider "libvirt"
 end

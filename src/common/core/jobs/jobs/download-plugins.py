@@ -40,7 +40,7 @@ status = 0
 
 def install_plugin(plugin_dir) -> bool:
     # Load plugin.json
-    metadata = loads(Path(plugin_dir, "plugin.json").read_text())
+    metadata = loads(Path(plugin_dir, "plugin.json").read_text(encoding="utf-8"))
     # Don't go further if plugin is already installed
     if Path("etc", "bunkerweb", "plugins", metadata["id"], "plugin.json").is_file():
         logger.warning(
@@ -71,7 +71,7 @@ try:
     for plugin_url in plugin_urls.split(" "):
         # Download ZIP file
         try:
-            req = get(plugin_url)
+            req = get(plugin_url, timeout=10)
         except:
             logger.error(
                 f"Exception while downloading plugin(s) from {plugin_url} :\n{format_exc()}",
@@ -122,7 +122,7 @@ try:
             rmtree(path, ignore_errors=True)
             continue
 
-        plugin_file = loads(Path(path, "plugin.json").read_text())
+        plugin_file = loads(Path(path, "plugin.json").read_text(encoding="utf-8"))
 
         plugin_content = BytesIO()
         with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:

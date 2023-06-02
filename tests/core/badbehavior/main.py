@@ -50,6 +50,7 @@ try:
             "http://www.example.com/?id=/etc/passwd",
             headers={"Host": "www.example.com"},
         )
+        sleep(1)
 
     sleep(1)
 

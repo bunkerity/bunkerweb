@@ -36,8 +36,8 @@ def check_cert(
             )
             return False
 
-        cert_path = Path(normpath(cert_path))
-        key_path = Path(normpath(key_path))
+        cert_path: Path = Path(normpath(cert_path))
+        key_path: Path = Path(normpath(key_path))
 
         if not cert_path.is_file():
             logger.warning(
@@ -51,8 +51,15 @@ def check_cert(
             return False
 
         cert_cache_path = Path(
-            sep, "var", "cache", "bunkerweb", "customcert", "cert.pem"
+            sep,
+            "var",
+            "cache",
+            "bunkerweb",
+            "customcert",
+            first_server or "",
+            "cert.pem",
         )
+        cert_cache_path.parent.mkdir(parents=True, exist_ok=True)
 
         cert_hash = file_hash(cert_path)
         old_hash = cache_hash(cert_cache_path, db)
@@ -66,8 +73,15 @@ def check_cert(
             logger.error(f"Error while caching custom-cert cert.pem file : {err}")
 
         key_cache_path = Path(
-            sep, "var", "cache", "bunkerweb", "customcert", "cert.key"
+            sep,
+            "var",
+            "cache",
+            "bunkerweb",
+            "customcert",
+            first_server or "",
+            "key.pem",
         )
+        key_cache_path.parent.mkdir(parents=True, exist_ok=True)
 
         key_hash = file_hash(key_path)
         old_hash = cache_hash(key_cache_path, db)
@@ -76,7 +90,7 @@ def check_cert(
                 key_path, key_cache_path, key_hash, db, delete_file=False
             )
             if not cached:
-                logger.error(f"Error while caching custom-cert cert.key file : {err}")
+                logger.error(f"Error while caching custom-cert key.pem file : {err}")
 
         return True
     except:
@@ -93,9 +107,26 @@ try:
         parents=True, exist_ok=True
     )
 
-    # Multisite case
-    if getenv("MULTISITE") == "yes":
-        servers = getenv("SERVER_NAME", [])
+    if getenv("USE_CUSTOM_SSL", "no") == "yes" and getenv("SERVER_NAME", "") != "":
+        db = Database(
+            logger,
+            sqlalchemy_string=getenv("DATABASE_URI", None),
+        )
+
+        cert_path = getenv("CUSTOM_SSL_CERT", "")
+        key_path = getenv("CUSTOM_SSL_KEY", "")
+
+        if cert_path and key_path:
+            logger.info(f"Checking certificate {cert_path} ...")
+            need_reload = check_cert(cert_path, key_path)
+            if need_reload:
+                logger.info(f"Detected change for certificate {cert_path}")
+                status = 1
+            else:
+                logger.info(f"No change for certificate {cert_path}")
+
+    if getenv("MULTISITE", "no") == "yes":
+        servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):
             servers = servers.split(" ")
@@ -113,43 +144,23 @@ try:
                     sqlalchemy_string=getenv("DATABASE_URI", None),
                 )
 
-            cert_path = getenv(
-                f"{first_server}_CUSTOM_SSL_CERT", getenv("CUSTOM_SSL_CERT", "")
-            )
-            key_path = getenv(
-                f"{first_server}_CUSTOM_SSL_KEY", getenv("CUSTOM_SSL_KEY", "")
-            )
+            cert_path = getenv(f"{first_server}_CUSTOM_SSL_CERT", "")
+            key_path = getenv(f"{first_server}_CUSTOM_SSL_KEY", "")
 
-            logger.info(
-                f"Checking certificate {cert_path} ...",
-            )
-            need_reload = check_cert(cert_path, key_path, first_server)
-            if need_reload:
+            if cert_path and key_path:
                 logger.info(
-                    f"Detected change for certificate {cert_path}",
+                    f"Checking certificate {cert_path} ...",
                 )
-                status = 1
-            else:
-                logger.info(
-                    f"No change for certificate {cert_path}",
-                )
-    # Singlesite case
-    elif getenv("USE_CUSTOM_SSL") == "yes" and getenv("SERVER_NAME") != "":
-        db = Database(
-            logger,
-            sqlalchemy_string=getenv("DATABASE_URI", None),
-        )
-
-        cert_path = getenv("CUSTOM_SSL_CERT", "")
-        key_path = getenv("CUSTOM_SSL_KEY", "")
-
-        logger.info(f"Checking certificate {cert_path} ...")
-        need_reload = check_cert(cert_path, key_path)
-        if need_reload:
-            logger.info(f"Detected change for certificate {cert_path}")
-            status = 1
-        else:
-            logger.info(f"No change for certificate {cert_path}")
+                need_reload = check_cert(cert_path, key_path, first_server)
+                if need_reload:
+                    logger.info(
+                        f"Detected change for certificate {cert_path}",
+                    )
+                    status = 1
+                else:
+                    logger.info(
+                        f"No change for certificate {cert_path}",
+                    )
 except:
     status = 2
     logger.error(f"Exception while running custom-cert.py :\n{format_exc()}")

@@ -53,8 +53,7 @@ try:
     bunkernet_tmp_path.mkdir(parents=True, exist_ok=True)
 
     # Create empty file in case it doesn't exist
-    if not bunkernet_path.joinpath("ip.list").is_file():
-        bunkernet_path.joinpath("ip.list").write_text("")
+    bunkernet_path.joinpath("ip.list").touch(exist_ok=True)
 
     # Get ID from cache
     bunkernet_id = None

@@ -7,12 +7,16 @@ from requests import request
 class API:
     def __init__(self, endpoint: str, host: str = "bwapi"):
         self.__endpoint = endpoint
+        if not self.__endpoint.endswith("/"):
+            self.__endpoint += "/"
         self.__host = host
 
-    def get_endpoint(self) -> str:
+    @property
+    def endpoint(self) -> str:
         return self.__endpoint
 
-    def get_host(self) -> str:
+    @property
+    def host(self) -> str:
         return self.__host
 
     def request(

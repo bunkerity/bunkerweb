@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from os import getenv
 from typing import Any, Dict, List
 from docker import DockerClient
 from re import compile as re_compile
@@ -8,16 +7,12 @@ from traceback import format_exc
 
 from docker.models.containers import Container
 from Controller import Controller
-from ConfigCaller import ConfigCaller  # type: ignore
-from logger import setup_logger  # type: ignore
 
 
-class DockerController(Controller, ConfigCaller):
+class DockerController(Controller):
     def __init__(self, docker_host):
-        Controller.__init__(self, "docker")
-        ConfigCaller.__init__(self)
+        super().__init__("docker")
         self.__client = DockerClient(base_url=docker_host)
-        self.__logger = setup_logger("docker-controller", getenv("LOG_LEVEL", "INFO"))
         self.__custom_confs_rx = re_compile(
             r"^bunkerweb.CUSTOM_CONF_(SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
         )
@@ -111,9 +106,7 @@ class DockerController(Controller, ConfigCaller):
         return configs
 
     def apply_config(self) -> bool:
-        return self._config.apply(
-            self._instances, self._services, configs=self._configs
-        )
+        return self.apply(self._instances, self._services, configs=self._configs)
 
     def process_events(self):
         self._set_autoconf_load_db()
@@ -122,27 +115,22 @@ class DockerController(Controller, ConfigCaller):
                 self._instances = self.get_instances()
                 self._services = self.get_services()
                 self._configs = self.get_configs()
-                if not self._config.update_needed(
+                if not self.update_needed(
                     self._instances, self._services, configs=self._configs
                 ):
                     continue
-                self.__logger.info(
+                self._logger.info(
                     "Caught Docker event, deploying new configuration ..."
                 )
                 if not self.apply_config():
-                    self.__logger.error("Error while deploying new configuration")
+                    self._logger.error("Error while deploying new configuration")
                 else:
-                    self.__logger.info(
+                    self._logger.info(
                         "Successfully deployed new configuration 🚀",
                     )
 
-                    if not self._config._db.is_autoconf_loaded():
-                        ret = self._config._db.set_autoconf_load(True)
-                        if ret:
-                            self.__logger.warning(
-                                f"Can't set autoconf loaded metadata to true in database: {ret}",
-                            )
+                    self._set_autoconf_load_db()
             except:
-                self.__logger.error(
+                self._logger.error(
                     f"Exception while processing events :\n{format_exc()}"
                 )

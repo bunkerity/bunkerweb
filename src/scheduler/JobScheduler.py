@@ -36,10 +36,11 @@ class JobScheduler(ApiCaller):
     def __init__(
         self,
         env: Optional[Dict[str, Any]] = None,
-        lock: Optional[Lock] = None,
-        apis: Optional[list] = None,
         logger: Optional[Logger] = None,
         integration: str = "Linux",
+        *,
+        lock: Optional[Lock] = None,
+        apis: Optional[list] = None,
     ):
         super().__init__(apis or [])
         self.__logger = logger or setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
@@ -53,6 +54,20 @@ class JobScheduler(ApiCaller):
         self.__job_success = True
         self.__semaphore = Semaphore(cpu_count() or 1)
 
+    @property
+    def env(self) -> Dict[str, Any]:
+        return self.__env
+
+    @env.setter
+    def env(self, env: Dict[str, Any]):
+        self.__env = env
+
+    def set_integration(self, integration: str):
+        self.__integration = integration
+
+    def auto_setup(self):
+        super().auto_setup(bw_integration=self.__integration)
+
     def __get_jobs(self):
         jobs = {}
         for plugin_file in glob(
@@ -63,7 +78,7 @@ class JobScheduler(ApiCaller):
             plugin_name = basename(dirname(plugin_file))
             jobs[plugin_name] = []
             try:
-                plugin_data = loads(Path(plugin_file).read_text())
+                plugin_data = loads(Path(plugin_file).read_text(encoding="utf-8"))
                 if not "jobs" in plugin_data:
                     continue
 
@@ -130,7 +145,7 @@ class JobScheduler(ApiCaller):
             return schedule_every().day
         elif every == "week":
             return schedule_every().week
-        raise Exception(f"can't convert string {every} to schedule")
+        raise ValueError(f"can't convert string {every} to schedule")
 
     def __reload(self) -> bool:
         reload = True
@@ -141,6 +156,7 @@ class JobScheduler(ApiCaller):
                 stdin=DEVNULL,
                 stderr=PIPE,
                 env=self.__env,
+                check=False,
             )
             reload = proc.returncode == 0
             if reload:
@@ -151,7 +167,7 @@ class JobScheduler(ApiCaller):
                 )
         else:
             self.__logger.info("Reloading nginx ...")
-            reload = self._send_to_apis("POST", "/reload")
+            reload = self.send_to_apis("POST", "/reload")
             if reload:
                 self.__logger.info("Successfully reloaded nginx")
             else:
@@ -166,7 +182,11 @@ class JobScheduler(ApiCaller):
         ret = -1
         try:
             proc = run(
-                join(path, "jobs", file), stdin=DEVNULL, stderr=STDOUT, env=self.__env
+                join(path, "jobs", file),
+                stdin=DEVNULL,
+                stderr=STDOUT,
+                env=self.__env,
+                check=False,
             )
             ret = proc.returncode
         except BaseException:
@@ -235,10 +255,10 @@ class JobScheduler(ApiCaller):
 
         if reload:
             try:
-                if self._get_apis():
+                if self.apis:
                     cache_path = join(sep, "var", "cache", "bunkerweb")
                     self.__logger.info(f"Sending {cache_path} folder ...")
-                    if not self._send_files(cache_path, "/cache"):
+                    if not self.send_files(cache_path, "/cache"):
                         success = False
                         self.__logger.error(f"Error while sending {cache_path} folder")
                     else:
@@ -283,7 +303,7 @@ class JobScheduler(ApiCaller):
         return ret
 
     def __run_in_thread(self, jobs: list):
-        self.__semaphore.acquire()
+        self.__semaphore.acquire(timeout=60)
         for job in jobs:
             job()
         self.__semaphore.release()

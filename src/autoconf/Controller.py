@@ -11,12 +11,13 @@ from Config import Config
 from logger import setup_logger  # type: ignore
 
 
-class Controller(ABC):
+class Controller(Config):
     def __init__(
         self,
         ctrl_type: Union[Literal["docker"], Literal["swarm"], Literal["kubernetes"]],
         lock: Optional[Lock] = None,
     ):
+        super().__init__(lock)
         self._type = ctrl_type
         self._instances = []
         self._services = []
@@ -32,15 +33,16 @@ class Controller(ABC):
         self._configs = {
             config_type: {} for config_type in self._supported_config_types
         }
-        self._config = Config(ctrl_type, lock)
-        self.__logger = setup_logger("Controller", getenv("LOG_LEVEL", "INFO"))
+        self._logger = setup_logger(
+            f"{self._type}-controller", getenv("LOG_LEVEL", "INFO")
+        )
 
     def wait(self, wait_time: int) -> list:
         all_ready = False
         while not all_ready:
             self._instances = self.get_instances()
             if not self._instances:
-                self.__logger.warning(
+                self._logger.warning(
                     f"No instance found, waiting {wait_time}s ...",
                 )
                 sleep(wait_time)
@@ -48,7 +50,7 @@ class Controller(ABC):
             all_ready = True
             for instance in self._instances:
                 if not instance["health"]:
-                    self.__logger.warning(
+                    self._logger.warning(
                         f"Instance {instance['name']} is not ready, waiting {wait_time}s ...",
                     )
                     sleep(wait_time)
@@ -83,10 +85,10 @@ class Controller(ABC):
         pass
 
     def _set_autoconf_load_db(self):
-        if not self._config._db.is_autoconf_loaded():
-            ret = self._config._db.set_autoconf_load(True)
+        if not self._db.is_autoconf_loaded():
+            ret = self._db.set_autoconf_load(True)
             if ret:
-                self.__logger.warning(
+                self._logger.warning(
                     f"Can't set autoconf loaded metadata to true in database: {ret}",
                 )
 

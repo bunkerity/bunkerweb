@@ -13,7 +13,7 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 | **Discord** | 1.0 | Send security notifications to a Discord channel using a Webhook. | [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord) |
 | **Slack** | 1.0 | Send security notifications to a Slack channel using a Webhook. | [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack) |
 | **VirusTotal** |   1.0   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-| **Coraza** |   1.0   | Inspect requests using a Core Rule Set and deny malicious ones.           | [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza) |
+| **Coraza** |   0.1   | Inspect requests using a Core Rule Set and deny malicious ones.           | [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza) |
 
 ## How to use a plugin
 

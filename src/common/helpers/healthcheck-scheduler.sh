@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! -f /var/tmp/bunkerweb/scheduler.pid ] ; then
+if [ ! -f /var/run/bunkerweb/scheduler.pid ] ; then
 	exit 1
 fi
 

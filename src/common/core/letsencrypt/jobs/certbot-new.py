@@ -60,6 +60,7 @@ def certbot_new(
         stderr=STDOUT,
         env=environ.copy()
         | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
+        check=True,
     ).returncode
 
 
@@ -190,7 +191,7 @@ try:
     bio.seek(0, 0)
 
     # Put tgz in cache
-    cached, err = set_file_in_db(f"folder.tgz", bio.read(), db)
+    cached, err = set_file_in_db("folder.tgz", bio.read(), db)
 
     if not cached:
         logger.error(f"Error while saving Let's Encrypt data to db cache : {err}")

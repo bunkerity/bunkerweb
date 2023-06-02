@@ -4,7 +4,6 @@ from os import sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
-from sys import path as sys_path
 from typing import Any, Optional, Union
 
 from API import API  # type: ignore
@@ -47,7 +46,8 @@ class Instance:
         self.env = data
         self.apiCaller = apiCaller or ApiCaller()
 
-    def get_id(self) -> str:
+    @property
+    def id(self) -> str:
         return self._id
 
     def reload(self) -> bool:
@@ -57,11 +57,12 @@ class Instance:
                     ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
+                    check=False,
                 ).returncode
                 == 0
             )
 
-        return self.apiCaller._send_to_apis("POST", "/reload")
+        return self.apiCaller.send_to_apis("POST", "/reload")
 
     def start(self) -> bool:
         if self._type == "local":
@@ -70,11 +71,12 @@ class Instance:
                     ["sudo", join(sep, "usr", "sbin", "nginx")],
                     stdin=DEVNULL,
                     stderr=STDOUT,
+                    check=False,
                 ).returncode
                 == 0
             )
 
-        return self.apiCaller._send_to_apis("POST", "/start")
+        return self.apiCaller.send_to_apis("POST", "/start")
 
     def stop(self) -> bool:
         if self._type == "local":
@@ -83,11 +85,12 @@ class Instance:
                     ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
+                    check=False,
                 ).returncode
                 == 0
             )
 
-        return self.apiCaller._send_to_apis("POST", "/stop")
+        return self.apiCaller.send_to_apis("POST", "/stop")
 
     def restart(self) -> bool:
         if self._type == "local":
@@ -96,11 +99,12 @@ class Instance:
                     ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "restart"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
+                    check=False,
                 ).returncode
                 == 0
             )
 
-        return self.apiCaller._send_to_apis("POST", "/restart")
+        return self.apiCaller.send_to_apis("POST", "/restart")
 
 
 class Instances:
@@ -112,10 +116,10 @@ class Instances:
     def __instance_from_id(self, _id) -> Instance:
         instances: list[Instance] = self.get_instances()
         for instance in instances:
-            if instance._id == _id:
+            if instance.id == _id:
                 return instance
 
-        raise Exception(f"Can't find instance with id {_id}")
+        raise ValueError(f"Can't find instance with _id {_id}")
 
     def get_instances(self) -> list[Instance]:
         instances = []
@@ -129,16 +133,6 @@ class Instances:
                     for x in [env.split("=") for env in instance.attrs["Config"]["Env"]]
                 }
 
-                apiCaller = ApiCaller()
-                apiCaller._set_apis(
-                    [
-                        API(
-                            f"http://{instance.name}:{env_variables.get('API_HTTP_PORT', '5000')}",
-                            env_variables.get("API_SERVER_NAME", "bwapi"),
-                        )
-                    ]
-                )
-
                 instances.append(
                     Instance(
                         instance.id,
@@ -147,7 +141,14 @@ class Instances:
                         "container",
                         "up" if instance.status == "running" else "down",
                         instance,
-                        apiCaller,
+                        ApiCaller(
+                            [
+                                API(
+                                    f"http://{instance.name}:{env_variables.get('API_HTTP_PORT', '5000')}",
+                                    env_variables.get("API_SERVER_NAME", "bwapi"),
+                                )
+                            ]
+                        ),
                     )
                 )
         elif self.__integration == "Swarm":
@@ -160,7 +161,7 @@ class Instances:
                 if desired_tasks > 0 and (desired_tasks == running_tasks):
                     status = "up"
 
-                apis = []
+                apiCaller = ApiCaller()
                 api_http_port = None
                 api_server_name = None
 
@@ -173,13 +174,12 @@ class Instances:
                         api_server_name = var.replace("API_SERVER_NAME=", "", 1)
 
                 for task in instance.tasks():
-                    apis.append(
+                    apiCaller.append(
                         API(
                             f"http://{instance.name}.{task['NodeID']}.{task['ID']}:{api_http_port or '5000'}",
                             host=api_server_name or "bwapi",
                         )
                     )
-                apiCaller = ApiCaller(apis=apis)
 
                 instances.append(
                     Instance(
@@ -204,15 +204,6 @@ class Instances:
                         env.name: env.value or "" for env in pod.spec.containers[0].env
                     }
 
-                    apiCaller = ApiCaller(
-                        apis=[
-                            API(
-                                f"http://{pod.status.pod_ip}:{env_variables.get('API_HTTP_PORT', '5000')}",
-                                host=env_variables.get("API_SERVER_NAME", "bwapi"),
-                            )
-                        ]
-                    )
-
                     status = "up"
                     if pod.status.conditions is not None:
                         for condition in pod.status.conditions:
@@ -228,7 +219,16 @@ class Instances:
                             "pod",
                             status,
                             pod,
-                            apiCaller,
+                            ApiCaller(
+                                [
+                                    API(
+                                        f"http://{pod.status.pod_ip}:{env_variables.get('API_HTTP_PORT', '5000')}",
+                                        host=env_variables.get(
+                                            "API_SERVER_NAME", "bwapi"
+                                        ),
+                                    )
+                                ]
+                            ),
                         )
                     )
 
@@ -239,17 +239,8 @@ class Instances:
 
         # Local instance
         if Path(sep, "usr", "sbin", "nginx").exists():
-            apiCaller = ApiCaller()
             env_variables = dotenv_values(
                 join(sep, "etc", "bunkerweb", "variables.env")
-            )
-            apiCaller._set_apis(
-                [
-                    API(
-                        f"http://127.0.0.1:{env_variables.get('API_HTTP_PORT', '5000')}",
-                        env_variables.get("API_SERVER_NAME", "bwapi"),
-                    )
-                ]
             )
 
             instances.insert(
@@ -260,10 +251,17 @@ class Instances:
                     "127.0.0.1",
                     "local",
                     "up"
-                    if Path(sep, "var", "tmp", "bunkerweb", "nginx.pid").exists()
+                    if Path(sep, "var", "run", "bunkerweb", "nginx.pid").exists()
                     else "down",
                     None,
-                    apiCaller,
+                    ApiCaller(
+                        [
+                            API(
+                                f"http://127.0.0.1:{env_variables.get('API_HTTP_PORT', '5000')}",
+                                env_variables.get("API_SERVER_NAME", "bwapi"),
+                            )
+                        ]
+                    ),
                 ),
             )
 
@@ -282,10 +280,10 @@ class Instances:
         return not_reloaded or "Successfully reloaded instances"
 
     def reload_instance(
-        self, id: Optional[int] = None, instance: Optional[Instance] = None
+        self, _id: Optional[int] = None, instance: Optional[Instance] = None
     ) -> str:
         if instance is None:
-            instance = self.__instance_from_id(id)
+            instance = self.__instance_from_id(_id)
 
         result = instance.reload()
 
@@ -294,8 +292,8 @@ class Instances:
 
         return f"Can't reload {instance.name}"
 
-    def start_instance(self, id) -> str:
-        instance = self.__instance_from_id(id)
+    def start_instance(self, _id) -> str:
+        instance = self.__instance_from_id(_id)
 
         result = instance.start()
 
@@ -304,8 +302,8 @@ class Instances:
 
         return f"Can't start {instance.name}"
 
-    def stop_instance(self, id) -> str:
-        instance = self.__instance_from_id(id)
+    def stop_instance(self, _id) -> str:
+        instance = self.__instance_from_id(_id)
 
         result = instance.stop()
 
@@ -314,8 +312,8 @@ class Instances:
 
         return f"Can't stop {instance.name}"
 
-    def restart_instance(self, id) -> str:
-        instance = self.__instance_from_id(id)
+    def restart_instance(self, _id) -> str:
+        instance = self.__instance_from_id(_id)
 
         result = instance.restart()
 

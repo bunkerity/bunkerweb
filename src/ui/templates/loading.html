@@ -40,6 +40,7 @@
       logoEl.classList.toggle("scale-105");
     }, 300);
     const reloading = setInterval(check_reloading, 2000);
+    check_reloading();
 
     async function check_reloading() {
       const controller = new AbortController();

@@ -14,9 +14,8 @@ from utils import path_to_dict
 def generate_custom_configs(
     custom_configs: List[Dict[str, Any]],
     *,
-    original_path: str = join(sep, "etc", "bunkerweb", "configs"),
+    original_path: Path = Path(sep, "etc", "bunkerweb", "configs"),
 ):
-    original_path: Path = Path(original_path)
     original_path.mkdir(parents=True, exist_ok=True)
     for custom_config in custom_configs:
         tmp_path = original_path.joinpath(custom_config["type"].replace("_", "-"))
@@ -64,7 +63,7 @@ class ConfigFiles:
             if files or (dirs and basename(root) not in root_dirs):
                 path_exploded = root.split("/")
                 for file in files:
-                    with open(join(root, file), "r") as f:
+                    with open(join(root, file), "r", encoding="utf-8") as f:
                         custom_configs.append(
                             {
                                 "value": f.read(),
@@ -148,7 +147,7 @@ class ConfigFiles:
     def create_file(self, path: str, name: str, content: str) -> Tuple[str, int]:
         file_path = Path(path, name)
         file_path.parent.mkdir(exist_ok=True)
-        file_path.write_text(content)
+        file_path.write_text(content, encoding="utf-8")
         return f"The file {file_path} was successfully created", 0
 
     def edit_folder(self, path: str, name: str, old_name: str) -> Tuple[str, int]:
@@ -178,7 +177,7 @@ class ConfigFiles:
         old_path = join(dirname(path), old_name)
 
         try:
-            file_content = Path(old_path).read_text()
+            file_content = Path(old_path).read_text(encoding="utf-8")
         except FileNotFoundError:
             return f"Could not find {old_path}", 1
 
@@ -201,6 +200,6 @@ class ConfigFiles:
             except OSError:
                 return f"Could not remove {old_path}", 1
 
-        Path(new_path).write_text(content)
+        Path(new_path).write_text(content, encoding="utf-8")
 
         return f"The file {old_path} was successfully edited", 0

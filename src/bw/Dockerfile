@@ -3,6 +3,9 @@ FROM nginx:1.24.0-alpine AS builder
 # Copy dependencies sources folder
 COPY src/deps /tmp/bunkerweb/deps
 
+# Update apk
+RUN apk update
+
 # Compile and install dependencies
 RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev && \
 	mkdir -p /usr/share/bunkerweb/deps && \
@@ -51,6 +54,7 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 RUN apk add --no-cache pcre bash python3 && \
 	cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
 	mkdir -p /var/tmp/bunkerweb && \
+	mkdir -p /var/run/bunkerweb && \
 	mkdir -p /var/www/html && \
 	mkdir -p /etc/bunkerweb && \
 	mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
@@ -58,8 +62,8 @@ RUN apk add --no-cache pcre bash python3 && \
 	for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
 	chown -R root:nginx /data && \
 	chmod -R 770 /data && \
-	chown -R root:nginx /var/cache/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
-	chmod 770 /var/cache/bunkerweb /var/tmp/bunkerweb && \
+	chown -R root:nginx /var/cache/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /usr/bin/bwcli && \
+	chmod 770 /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb && \
 	chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/entrypoint.sh /usr/bin/bwcli /usr/share/bunkerweb/deps/python/bin/* && \
 	chown -R root:nginx /etc/nginx && \
 	chmod -R 770 /etc/nginx && \

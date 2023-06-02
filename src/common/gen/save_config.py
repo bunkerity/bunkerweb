@@ -371,10 +371,8 @@ if __name__ == "__main__":
         if args.method != "ui":
             if apis:
                 for api in apis:
-                    endpoint_data = api.get_endpoint().replace("http://", "").split(":")
-                    err = db.add_instance(
-                        endpoint_data[0], endpoint_data[1], api.get_host()
-                    )
+                    endpoint_data = api.endpoint.replace("http://", "").split(":")
+                    err = db.add_instance(endpoint_data[0], endpoint_data[1], api.host)
 
                     if err:
                         logger.warning(err)

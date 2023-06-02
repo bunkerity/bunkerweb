@@ -3,7 +3,7 @@
 from os import getenv
 from threading import Lock
 from time import sleep
-from typing import Literal, Optional, Union
+from typing import Optional
 
 from ConfigCaller import ConfigCaller  # type: ignore
 from Database import Database  # type: ignore
@@ -11,13 +11,8 @@ from logger import setup_logger  # type: ignore
 
 
 class Config(ConfigCaller):
-    def __init__(
-        self,
-        ctrl_type: Union[Literal["docker"], Literal["swarm"], Literal["kubernetes"]],
-        lock: Optional[Lock] = None,
-    ):
+    def __init__(self, lock: Optional[Lock] = None):
         super().__init__()
-        self.__ctrl_type = ctrl_type
         self.__lock = lock
         self.__logger = setup_logger("Config", getenv("LOG_LEVEL", "INFO"))
         self.__instances = []
