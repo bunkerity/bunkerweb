@@ -45,6 +45,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
+      - LOG_LEVEL=warning
     networks:
       - bw-docker
 
@@ -66,7 +67,7 @@ services:
       - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=drupaldb
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd      # replace with a stronger password
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password
     networks:
       - bw-services
 

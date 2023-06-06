@@ -317,6 +317,10 @@ fi
 git_secure_clone "https://github.com/SpiderLabs/ModSecurity-nginx.git" "d59e4ad121df702751940fd66bcc0b3ecb51a079"
 if [ "$dopatch" = "yes" ] ; then
 	do_and_check_cmd patch deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_log.c deps/misc/modsecurity-nginx.patch
+	do_and_check_cmd patch deps/src/ModSecurity-nginx/config deps/misc/config.patch
+	do_and_check_cmd patch deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_common.h deps/misc/ngx_http_modsecurity_common.h.patch
+	do_and_check_cmd patch deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_module.c deps/misc/ngx_http_modsecurity_module.c.patch
+	do_and_check_cmd cp deps/misc/ngx_http_modsecurity_access.c deps/src/ModSecurity-nginx/src
 fi
 
 # libmaxminddb v1.7.1

@@ -1,17 +1,20 @@
-from os import getenv
+#!/usr/bin/python3
+
 from dotenv import dotenv_values
+from os import getenv, sep
+from os.path import join
 from pathlib import Path
 from redis import StrictRedis
 from sys import path as sys_path
 from typing import Tuple
 
 
-if "/usr/share/bunkerweb/utils" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/utils")
+if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
+    sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
-from API import API
-from ApiCaller import ApiCaller
-from logger import setup_logger
+from API import API  # type: ignore
+from ApiCaller import ApiCaller  # type: ignore
+from logger import setup_logger  # type: ignore
 
 
 def format_remaining_time(seconds):
@@ -37,14 +40,15 @@ def format_remaining_time(seconds):
 class CLI(ApiCaller):
     def __init__(self):
         self.__logger = setup_logger("CLI", getenv("LOG_LEVEL", "INFO"))
+        db_path = Path(sep, "usr", "share", "bunkerweb", "db")
 
-        if not Path("/usr/share/bunkerweb/db").is_dir():
-            self.__variables = dotenv_values("/etc/nginx/variables.env")
+        if not db_path.is_dir():
+            self.__variables = dotenv_values(join(sep, "etc", "nginx", "variables.env"))
         else:
-            if "/usr/share/bunkerweb/db" not in sys_path:
-                sys_path.append("/usr/share/bunkerweb/db")
+            if str(db_path) not in sys_path:
+                sys_path.append(str(db_path))
 
-            from Database import Database
+            from Database import Database  # type: ignore
 
             db = Database(
                 self.__logger,
@@ -110,14 +114,14 @@ class CLI(ApiCaller):
                 )
                 self.__use_redis = False
 
-        if not Path("/usr/share/bunkerweb/db").is_dir() or self.__integration not in (
+        if not db_path.is_dir() or self.__integration not in (
             "kubernetes",
             "swarm",
             "autoconf",
         ):
             # Docker & Linux case
             super().__init__(
-                apis=[
+                [
                     API(
                         f"http://127.0.0.1:{self.__variables.get('API_HTTP_PORT', '5000')}",
                         host=self.__variables.get("API_SERVER_NAME", "bwapi"),
@@ -129,17 +133,18 @@ class CLI(ApiCaller):
             self.auto_setup(self.__integration)
 
     def __detect_integration(self) -> str:
+        integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
+        os_release_path = Path(sep, "etc", "os-release")
         if self.__variables.get("KUBERNETES_MODE", "no").lower() == "yes":
             return "kubernetes"
         elif self.__variables.get("SWARM_MODE", "no").lower() == "yes":
             return "swarm"
         elif self.__variables.get("AUTOCONF_MODE", "no").lower() == "yes":
             return "autoconf"
-        elif Path("/usr/share/bunkerweb/INTEGRATION").is_file():
-            return Path("/usr/share/bunkerweb/INTEGRATION").read_text().strip().lower()
-        elif (
-            Path("/etc/os-release").is_file()
-            and "Alpine" in Path("/etc/os-release").read_text()
+        elif integration_path.is_file():
+            return integration_path.read_text(encoding="utf-8").strip().lower()
+        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
+            encoding="utf-8"
         ):
             return "docker"
 
@@ -151,7 +156,7 @@ class CLI(ApiCaller):
             if not ok:
                 self.__logger.error(f"Failed to delete ban for {ip} from redis")
 
-        if self._send_to_apis("POST", "/unban", data={"ip": ip}):
+        if self.send_to_apis("POST", "/unban", data={"ip": ip}):
             return True, f"IP {ip} has been unbanned"
         return False, "error"
 
@@ -165,7 +170,7 @@ class CLI(ApiCaller):
             if not ok:
                 self.__logger.error(f"Failed to ban {ip} in redis")
 
-        if self._send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp}):
+        if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp}):
             return (
                 True,
                 f"IP {ip} has been banned for {format_remaining_time(exp)}",
@@ -175,7 +180,7 @@ class CLI(ApiCaller):
     def bans(self) -> Tuple[bool, str]:
         servers = {}
 
-        ret, resp = self._send_to_apis("GET", "/bans", response=True)
+        ret, resp = self.send_to_apis("GET", "/bans", response=True)
         if not ret:
             return False, "error"
 
@@ -203,7 +208,6 @@ class CLI(ApiCaller):
 
             for ban in bans:
                 cli_str += f"- {ban['ip']} for {format_remaining_time(ban['exp'])} : {ban.get('reason', 'no reason given')}\n"
-            else:
-                cli_str += "\n"
+            cli_str += "\n"
 
         return True, cli_str

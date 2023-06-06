@@ -1,5 +1,40 @@
 # Changelog
 
+## v1.5.1 - 
+
+- [BUGFIX] New version checker in logs displays "404 not found"
+- [BUGFIX] New version checker in UI
+- [BUGFIX] Only get the right keys from plugin.json files when importing plugins
+- [BUGFIX] Remove external resources for Google fonts in UI
+- [BUGFIX] Support multiple plugin uploads in one zip when using the UI
+- [BUGFIX] Variable being ignored instead of saved in the database when value is empty
+- [BUGFIX] ALLOWED_METHODS regex working with LOCK/UNLOCK methods
+- [BUGFIX] Custom certificate bug after the refactoring
+- [BUGFIX] Fix wrong variables in header phase (fix CORS feature too)
+- [PERFORMANCE] Reduce CPU usage of scheduler
+- [FEATURE] Add Turnstile antibot mode
+- [MISC] Add LOG_LEVEL=warning for docker socket proxy in docs, examples and boilerplates
+- [MISC] Temp remove VMWare provider for Vagrant integration
+
+## v1.5.0 - 2023/05/23
+
+- Refactoring of almost all the components of the project
+- Dedicated scheduler service to manage jobs and configuration
+- Store configuration in a database backend
+- Improved web UI and make it working with all integrations
+- Improved internal LUA code
+- Improved internal cache of BW
+- Add Redis support when using clustered integrations
+- Add RHEL integration
+- Add Vagrant integration
+- Init support of generic TCP/UDP (stream)
+- Init support of IPv6
+- Improved CI/CD : UI tests, core tests and release automation
+- Reduce Docker images size
+- Fix and improved core plugins : antibot, cors, dnsbl, ...
+- Use PCRE regex instead of LUA patterns
+- Connectivity tests at startup/reload with logging
+
 ## v1.5.0-beta - 2023/05/02
 
 - Refactoring of almost all the components of the project

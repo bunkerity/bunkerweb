@@ -7,7 +7,7 @@ services:
       - 80:8080
       - 443:8443
     environment:
-      - SERVER_NAME=www.example.com                  # replace with your domain
+      - SERVER_NAME=www.example.com # replace with your domain
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
       - AUTO_LETS_ENCRYPT=yes
       - DISABLE_DEFAULT_SERVER=yes
@@ -43,6 +43,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
+      - LOG_LEVEL=warning
     networks:
       - bw-docker
 
@@ -58,7 +59,7 @@ services:
     environment:
       - APP_FULL_BASE_URL=https://www.example.com # replace with your URL
       - DATASOURCES_DEFAULT_HOST=mydb
-      - DATASOURCES_DEFAULT_PASSWORD=db-user-pwd     # replace with a stronger password (must match MYSQL_PASSWORD)
+      - DATASOURCES_DEFAULT_PASSWORD=db-user-pwd # replace with a stronger password (must match MYSQL_PASSWORD)
       - DATASOURCES_DEFAULT_USERNAME=user
       - DATASOURCES_DEFAULT_DATABASE=passbolt
     volumes:
@@ -81,10 +82,10 @@ services:
     volumes:
       - db-data:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd              # replace with a stronger password
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=passbolt
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd                   # replace with a stronger password (must match DATASOURCES_DEFAULT_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match DATASOURCES_DEFAULT_PASSWORD)
     networks:
       - bw-services
 

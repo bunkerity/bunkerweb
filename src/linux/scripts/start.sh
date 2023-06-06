@@ -45,8 +45,8 @@ function stop_nginx() {
 }
 
 function stop_scheduler() {
-    if [ -f "/var/tmp/bunkerweb/scheduler.pid" ] ; then
-        scheduler_pid=$(cat "/var/tmp/bunkerweb/scheduler.pid")
+    if [ -f "/var/run/bunkerweb/scheduler.pid" ] ; then
+        scheduler_pid=$(cat "/var/run/bunkerweb/scheduler.pid")
         log "SYSTEMCTL" "ℹ️ " "Stopping scheduler..."
         kill -SIGINT "$scheduler_pid"
         if [ $? -ne 0 ] ; then
@@ -58,7 +58,7 @@ function stop_scheduler() {
         return 0
     fi
     count=0
-    while [ -f "/var/tmp/bunkerweb/scheduler.pid" ] ; do
+    while [ -f "/var/run/bunkerweb/scheduler.pid" ] ; do
         sleep 1
         count=$(($count + 1))
         if [ $count -ge 10 ] ; then
@@ -85,7 +85,7 @@ function start() {
 
     # Create dummy variables.env
     if [ ! -f /etc/bunkerweb/variables.env ]; then
-        sudo -E -u nginx -g nginx /bin/bash -c "echo -ne '# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env"
+        sudo -E -u nginx -g nginx /bin/bash -c "echo -ne '# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nUSE_BUNKERNET=no\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env"
         log "SYSTEMCTL" "ℹ️" "Created dummy variables.env file"
     fi
 
@@ -104,7 +104,7 @@ function start() {
     if [ "$HTTPS_PORT" = "" ] ; then
         HTTPS_PORT="8443"
     fi
-    sudo -E -u nginx -g nginx /bin/bash -c "echo -ne 'IS_LOADING=yes\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /var/tmp/bunkerweb/tmp.env"
+    sudo -E -u nginx -g nginx /bin/bash -c "echo -ne 'IS_LOADING=yes\nUSE_BUNKERNET=no\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /var/tmp/bunkerweb/tmp.env"
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env --no-linux-reload"
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
@@ -134,19 +134,6 @@ function start() {
     fi
     log "SYSTEMCTL" "ℹ️" "nginx started ..."
 
-    # Update database
-    log "SYSTEMCTL" "ℹ️" "Updating database ..."
-    if [ ! -f /var/lib/bunkerweb/db.sqlite3 ]; then
-        sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/gen/save_config.py --variables /etc/bunkerweb/variables.env --init"
-else
-        sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/gen/save_config.py --variables /etc/bunkerweb/variables.env"
-    fi
-    if [ $? -ne 0 ] ; then
-        log "SYSTEMCTL" "❌" "save_config failed"
-        exit 1
-    fi
-    log "SYSTEMCTL" "ℹ️" "Database updated ..."
-
     # Execute scheduler
     log "SYSTEMCTL" "ℹ️ " "Executing scheduler ..."
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/scheduler/main.py --variables /etc/bunkerweb/variables.env"
@@ -171,7 +158,7 @@ function reload()
 
     log "SYSTEMCTL" "ℹ️" "Reloading BunkerWeb service ..."
 
-    PID_FILE_PATH="/var/tmp/bunkerweb/scheduler.pid"
+    PID_FILE_PATH="/var/run/bunkerweb/scheduler.pid"
     if [ -f "$PID_FILE_PATH" ];
     then
         var=$(cat "$PID_FILE_PATH")

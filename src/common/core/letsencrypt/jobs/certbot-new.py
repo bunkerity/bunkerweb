@@ -1,51 +1,53 @@
 #!/usr/bin/python3
 
-from os import environ, getenv, listdir
+from os import _exit, environ, getenv, sep
+from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
-from threading import Lock
 from traceback import format_exc
-from tarfile import open as tfopen
+from tarfile import open as tar_open
 from io import BytesIO
 from shutil import rmtree
 
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/db",
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (
+        ("deps", "python"),
+        ("utils",),
+        ("db",),
     )
-)
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
-from Database import Database
-from logger import setup_logger
+from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
 from jobs import get_file_in_db, set_file_in_db
 
 logger = setup_logger("LETS-ENCRYPT.new", getenv("LOG_LEVEL", "INFO"))
-db = Database(
-    logger,
-    sqlalchemy_string=getenv("DATABASE_URI", None),
-)
-lock = Lock()
 status = 0
 
 
-def certbot_new(domains, email):
-    environ["PYTHONPATH"] = "/usr/share/bunkerweb/deps/python"
-    proc = run(
+def certbot_new(
+    domains: str, email: str, letsencrypt_path: Path, letsencrypt_job_path: Path
+) -> int:
+    return run(
         [
-            "/usr/share/bunkerweb/deps/python/bin/certbot",
+            join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot"),
             "certonly",
-            "--config-dir=/var/cache/bunkerweb/letsencrypt/etc",
-            "--work-dir=/var/cache/bunkerweb/letsencrypt/lib",
-            "--logs-dir=/var/cache/bunkerweb/letsencrypt/log",
+            "--config-dir",
+            letsencrypt_path.joinpath("etc"),
+            "--work-dir",
+            letsencrypt_path.joinpath("lib"),
+            "--logs-dir",
+            letsencrypt_path.joinpath("log"),
             "--manual",
             "--preferred-challenges=http",
             "--manual-auth-hook",
-            "/usr/share/bunkerweb/core/letsencrypt/jobs/certbot-auth.py",
+            letsencrypt_job_path.joinpath("certbot-auth.py"),
             "--manual-cleanup-hook",
-            "/usr/share/bunkerweb/core/letsencrypt/jobs/certbot-cleanup.py",
+            letsencrypt_job_path.joinpath("certbot-cleanup.py"),
             "-n",
             "-d",
             domains,
@@ -56,34 +58,57 @@ def certbot_new(domains, email):
         + (["--staging"] if getenv("USE_LETS_ENCRYPT_STAGING", "no") == "yes" else []),
         stdin=DEVNULL,
         stderr=STDOUT,
-        env=environ,
-    )
-    return proc.returncode
+        env=environ.copy()
+        | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
+        check=True,
+    ).returncode
 
 
 status = 0
 
 try:
+    # Check if we're using let's encrypt
+    use_letsencrypt = False
+    if getenv("AUTO_LETS_ENCRYPT", "no") == "yes":
+        use_letsencrypt = True
+    elif getenv("MULTISITE", "no") == "yes":
+        for first_server in getenv("SERVER_NAME", "").split(" "):
+            if (
+                first_server
+                and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes"
+            ):
+                use_letsencrypt = True
+                break
+
+    if not use_letsencrypt:
+        logger.info("Let's Encrypt is not activated, skipping generation...")
+        _exit(0)
+
     # Create directory if it doesn't exist
-    Path("/var/cache/bunkerweb/letsencrypt").mkdir(parents=True, exist_ok=True)
+    letsencrypt_path = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
+    letsencrypt_job_path = Path(
+        sep, "usr", "share", "bunkerweb", "core", "letsencrypt", "jobs"
+    )
+    letsencrypt_path.mkdir(parents=True, exist_ok=True)
 
     # Extract letsencrypt folder if it exists in db
     db = Database(
         logger,
         sqlalchemy_string=getenv("DATABASE_URI", None),
     )
-    if db:
-        tgz = get_file_in_db("certbot-new", "folder.tgz", db)
-        if tgz:
-            # Delete folder if needed
-            if len(listdir("/var/cache/bunkerweb/letsencrypt")) > 0:
-                rmtree("/var/cache/bunkerweb/letsencrypt", ignore_errors=True)
-            # Extract it
-            with tfopen(name="folder.tgz", mode="r:gz", fileobj=BytesIO(tgz)) as tf:
-                tf.extractall("/var/cache/bunkerweb/letsencrypt")
-            logger.info("Successfully retrieved Let's Encrypt data from db cache")
-        else:
-            logger.info("No Let's Encrypt data found in db cache")
+
+    tgz = get_file_in_db("folder.tgz", db)
+    if tgz:
+        # Delete folder if needed
+        if letsencrypt_path.exists():
+            rmtree(str(letsencrypt_path), ignore_errors=True)
+        letsencrypt_path.mkdir(parents=True, exist_ok=True)
+        # Extract it
+        with tar_open(name="folder.tgz", mode="r:gz", fileobj=BytesIO(tgz)) as tf:
+            tf.extractall(str(letsencrypt_path))
+        logger.info("Successfully retrieved Let's Encrypt data from db cache")
+    else:
+        logger.info("No Let's Encrypt data found in db cache")
 
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
@@ -102,9 +127,7 @@ try:
                 " ", ","
             )
 
-            if Path(
-                f"/var/cache/bunkerweb/letsencrypt/{first_server}/cert.pem"
-            ).exists():
+            if letsencrypt_path.joinpath(first_server, "cert.pem").exists():
                 logger.info(
                     f"Certificates already exists for domain(s) {domains}",
                 )
@@ -120,7 +143,10 @@ try:
             logger.info(
                 f"Asking certificates for domains : {domains} (email = {real_email}) ...",
             )
-            if certbot_new(domains, real_email) != 0:
+            if (
+                certbot_new(domains, real_email, letsencrypt_path, letsencrypt_job_path)
+                != 0
+            ):
                 status = 2
                 logger.error(
                     f"Certificate generation failed for domain(s) {domains} ...",
@@ -136,9 +162,7 @@ try:
         first_server = getenv("SERVER_NAME", "").split(" ")[0]
         domains = getenv("SERVER_NAME", "").replace(" ", ",")
 
-        if Path(
-            f"/var/cache/bunkerweb/letsencrypt/etc/live/{first_server}/cert.pem"
-        ).exists():
+        if letsencrypt_path.joinpath("etc", "live", first_server, "cert.pem").exists():
             logger.info(f"Certificates already exists for domain(s) {domains}")
         else:
             real_email = getenv("EMAIL_LETS_ENCRYPT", f"contact@{first_server}")
@@ -148,7 +172,10 @@ try:
             logger.info(
                 f"Asking certificates for domain(s) : {domains} (email = {real_email}) ...",
             )
-            if certbot_new(domains, real_email) != 0:
+            if (
+                certbot_new(domains, real_email, letsencrypt_path, letsencrypt_job_path)
+                != 0
+            ):
                 status = 2
                 logger.error(f"Certificate generation failed for domain(s) : {domains}")
             else:
@@ -158,23 +185,22 @@ try:
                 )
 
     # Put new folder in cache
-    if db:
-        bio = BytesIO()
-        with tfopen("folder.tgz", mode="w:gz", fileobj=bio) as tgz:
-            tgz.add("/var/cache/bunkerweb/letsencrypt", arcname=".")
-        bio.seek(0)
-        # Put tgz in cache
-        cached, err = set_file_in_db(f"certbot-new", f"folder.tgz", bio, db)
-        if not cached:
-            logger.error(f"Error while saving Let's Encrypt data to db cache : {err}")
-        else:
-            logger.info("Successfully saved Let's Encrypt data to db cache")
-        # Delete lib and log folders to avoid sending them
-        if Path("/var/cache/bunkerweb/letsencrypt/lib").exists():
-            rmtree("/var/cache/bunkerweb/letsencrypt/lib", ignore_errors=True)
-        if Path("/var/cache/bunkerweb/letsencrypt/log").exists():
-            rmtree("/var/cache/bunkerweb/letsencrypt/log", ignore_errors=True)
+    bio = BytesIO()
+    with tar_open("folder.tgz", mode="w:gz", fileobj=bio, compresslevel=9) as tgz:
+        tgz.add(str(letsencrypt_path), arcname=".")
+    bio.seek(0, 0)
 
+    # Put tgz in cache
+    cached, err = set_file_in_db("folder.tgz", bio.read(), db)
+
+    if not cached:
+        logger.error(f"Error while saving Let's Encrypt data to db cache : {err}")
+    else:
+        logger.info("Successfully saved Let's Encrypt data to db cache")
+
+    # Delete lib and log folders to avoid sending them
+    rmtree(str(letsencrypt_path.joinpath("lib")), ignore_errors=True)
+    rmtree(str(letsencrypt_path.joinpath("log")), ignore_errors=True)
 except:
     status = 3
     logger.error(f"Exception while running certbot-new.py :\n{format_exc()}")

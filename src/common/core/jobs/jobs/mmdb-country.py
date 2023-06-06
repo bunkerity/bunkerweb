@@ -3,25 +3,29 @@
 from datetime import date
 from gzip import decompress
 from hashlib import sha1
-from os import _exit, getenv
+from os import _exit, getenv, sep
+from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from threading import Lock
 from traceback import format_exc
 
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/db",
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (
+        ("deps", "python"),
+        ("utils",),
+        ("db",),
     )
-)
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
 from maxminddb import open_database
-from requests import get
+from requests import RequestException, get
 
-from Database import Database
-from logger import setup_logger
+from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
 from jobs import cache_file, cache_hash, file_hash, is_cached_file
 
 logger = setup_logger("JOBS.mmdb-country", getenv("LOG_LEVEL", "INFO"))
@@ -30,17 +34,24 @@ lock = Lock()
 
 try:
     dl_mmdb = True
-    tmp_path = "/var/tmp/bunkerweb/country.mmdb"
+    tmp_path = Path(sep, "var", "tmp", "bunkerweb", "country.mmdb")
+    cache_path = Path(sep, "var", "cache", "bunkerweb", "country.mmdb")
     new_hash = None
 
     # Don't go further if the cache match the latest version
-    if Path("/var/tmp/bunkerweb/country.mmdb").exists():
+    if tmp_path.exists():
         with lock:
-            response = get("https://db-ip.com/db/download/ip-to-country-lite")
+            response = None
+            try:
+                response = get(
+                    "https://db-ip.com/db/download/ip-to-country-lite", timeout=5
+                )
+            except RequestException:
+                logger.warning("Unable to check if country.mmdb is the latest version")
 
-        if response.status_code == 200:
+        if response and response.status_code == 200:
             _sha1 = sha1()
-            with open("/var/tmp/bunkerweb/country.mmdb", "rb") as f:
+            with open(str(tmp_path), "rb") as f:
                 while True:
                     data = f.read(1024)
                     if not data:
@@ -52,7 +63,6 @@ try:
                     "country.mmdb is already the latest version, skipping download..."
                 )
                 dl_mmdb = False
-                tmp_path = "/var/tmp/bunkerweb/country.mmdb"
         else:
             logger.warning(
                 "Unable to check if country.mmdb is the latest version, downloading it anyway..."
@@ -65,7 +75,7 @@ try:
 
     if dl_mmdb:
         # Don't go further if the cache is fresh
-        if is_cached_file("/var/cache/bunkerweb/country.mmdb", "month", db):
+        if is_cached_file(cache_path, "month", db):
             logger.info("country.mmdb is already in cache, skipping download...")
             _exit(0)
 
@@ -75,11 +85,15 @@ try:
         # Download the mmdb file and save it to tmp
         logger.info(f"Downloading mmdb file from url {mmdb_url} ...")
         file_content = b""
-        with get(mmdb_url, stream=True) as resp:
-            resp.raise_for_status()
-            for chunk in resp.iter_content(chunk_size=4 * 1024):
-                if chunk:
-                    file_content += chunk
+        try:
+            with get(mmdb_url, stream=True, timeout=5) as resp:
+                resp.raise_for_status()
+                for chunk in resp.iter_content(chunk_size=4 * 1024):
+                    if chunk:
+                        file_content += chunk
+        except RequestException:
+            logger.error(f"Error while downloading mmdb file from {mmdb_url}")
+            _exit(2)
 
         try:
             assert file_content
@@ -89,25 +103,23 @@ try:
 
         # Decompress it
         logger.info("Decompressing mmdb file ...")
-        Path(tmp_path).write_bytes(decompress(file_content))
+        tmp_path.write_bytes(decompress(file_content))
 
         # Check if file has changed
         new_hash = file_hash(tmp_path)
-        old_hash = cache_hash("/var/cache/bunkerweb/country.mmdb", db)
+        old_hash = cache_hash(cache_path, db)
         if new_hash == old_hash:
             logger.info("New file is identical to cache file, reload is not needed")
             _exit(0)
 
     # Try to load it
     logger.info("Checking if mmdb file is valid ...")
-    with open_database(tmp_path or "/var/cache/bunkerweb/country.mmdb") as reader:
+    with open_database(str(tmp_path)) as reader:
         pass
 
     # Move it to cache folder
     logger.info("Moving mmdb file to cache ...")
-    cached, err = cache_file(
-        tmp_path, "/var/cache/bunkerweb/country.mmdb", new_hash, db
-    )
+    cached, err = cache_file(tmp_path, cache_path, new_hash, db)
     if not cached:
         logger.error(f"Error while caching mmdb file : {err}")
         _exit(2)
@@ -117,7 +129,6 @@ try:
         logger.info(f"Downloaded new mmdb from {mmdb_url}")
 
     status = 1
-
 except:
     status = 2
     logger.error(f"Exception while running mmdb-country.py :\n{format_exc()}")

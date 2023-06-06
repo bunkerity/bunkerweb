@@ -50,18 +50,19 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
+      - LOG_LEVEL=warning
     networks:
       - bw-docker
 
   app1:
     image: istio/tcp-echo-server:1.2
-    command: [ "9000", "app1" ]
+    command: ["9000", "app1"]
     networks:
       - bw-services
 
   app2:
     image: istio/tcp-echo-server:1.2
-    command: [ "9000", "app2" ]
+    command: ["9000", "app2"]
     networks:
       - bw-services
 

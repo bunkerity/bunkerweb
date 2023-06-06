@@ -50,6 +50,7 @@ try:
             "http://www.example.com/?id=/etc/passwd",
             headers={"Host": "www.example.com"},
         )
+        sleep(1)
 
     sleep(1)
 
@@ -67,10 +68,10 @@ try:
             exit(1)
         elif bad_behavior_ban_time != "86400":
             print(
-                "ℹ️ Sleeping for 7s to wait if Bad Behavior's ban time changed ...",
+                "ℹ️ Sleeping for 65s to wait if Bad Behavior's ban time changed ...",
                 flush=True,
             )
-            sleep(7)
+            sleep(65)
 
             status_code = get(
                 f"http://www.example.com",
@@ -85,11 +86,11 @@ try:
             exit(1)
         elif bad_behavior_count_time != "60":
             print(
-                "ℹ️ Sleeping for 7s to wait if Bad Behavior's count time changed ...",
+                "ℹ️ Sleeping for 35s to wait if Bad Behavior's count time changed ...",
                 flush=True,
             )
             current_time = datetime.now().timestamp()
-            sleep(7)
+            sleep(35)
 
             print(
                 "ℹ️ Checking BunkerWeb's logs to see if Bad Behavior's count time changed ...",

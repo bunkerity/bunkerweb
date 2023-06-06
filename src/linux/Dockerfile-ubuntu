@@ -29,8 +29,7 @@ RUN apt update && \
     apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~jammy
 
 # Compile and install dependencies
-RUN apt update && \
-    apt install --no-install-recommends bash python3-pip libssl-dev git libpcre++-dev zlib1g-dev libxml2-dev libyajl-dev pkgconf libcurl4-openssl-dev libgeoip-dev liblmdb-dev apt-utils bash build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev -y && \
+RUN apt install --no-install-recommends bash python3-pip libssl-dev git libpcre++-dev zlib1g-dev libxml2-dev libyajl-dev pkgconf libcurl4-openssl-dev libgeoip-dev liblmdb-dev apt-utils bash build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev -y && \
     pip install --no-cache-dir --upgrade pip && \
     pip install wheel && \
     #mkdir -p /usr/share/bunkerweb/deps && \
@@ -65,12 +64,13 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
     mkdir -p /var/cache/bunkerweb/ && \
     mkdir -p /etc/bunkerweb/plugins && \
     mkdir -p /var/tmp/bunkerweb/ && \
+    mkdir -p /var/run/bunkerweb/ && \
     mkdir -p /var/www/html && \
     mkdir -p /var/lib/bunkerweb && \
     echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec chmod 0740 {} \; && \
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type d -exec chmod 0750 {} \; && \
-    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ && \
+    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ && \
     chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/ui/main.py /var/www/ && \
     find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
     chmod 755 /usr/share/bunkerweb

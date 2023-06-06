@@ -48,6 +48,7 @@ RUN apk add --no-cache bash && \
     adduser -h /var/cache/nginx -g ui -s /bin/sh -G ui -D -H -u 101 ui && \
     echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
     mkdir -p /var/tmp/bunkerweb && \
+    mkdir -p /var/run/bunkerweb && \
     mkdir -p /etc/bunkerweb && \
     mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
     mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
@@ -56,14 +57,14 @@ RUN apk add --no-cache bash && \
     for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
     chown -R root:ui /data && \
     chmod -R 770 /data && \
-    chown -R root:ui /usr/share/bunkerweb/INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/log/nginx && \
-    chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb /var/log/nginx/ui.log && \
+    chown -R root:ui /usr/share/bunkerweb/INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/nginx && \
+    chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/nginx/ui.log && \
     chmod 750 /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/ui/*.py /usr/share/bunkerweb/ui/src/*.py /usr/share/bunkerweb/deps/python/bin/* /usr/share/bunkerweb/helpers/*.sh && \
     chmod 660 /usr/share/bunkerweb/INTEGRATION && \
     chown root:ui /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
-RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"
+RUN apk add --no-cache "libcrypto3>=3.1.1-r0" "libssl3>=3.1.1-r0"
 
 VOLUME /data /etc/nginx
 
@@ -76,4 +77,4 @@ USER ui:ui
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-ui.sh
 
 ENV PYTHONPATH /usr/share/bunkerweb/deps/python
-CMD ["python3", "-m", "gunicorn", "--user", "ui", "--group", "ui", "main:app", "--worker-class", "gevent", "--bind", "0.0.0.0:7000", "--graceful-timeout", "0", "--access-logfile", "-", "--error-logfile", "-"]
+CMD ["python3", "-m", "gunicorn", "--config", "/usr/share/bunkerweb/ui/gunicorn.conf.py", "--user", "ui", "--group", "ui", "--bind", "0.0.0.0:7000"]
