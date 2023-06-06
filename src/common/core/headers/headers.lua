@@ -13,6 +13,9 @@ function headers:initialize()
     ["REFERRER_POLICY"] = "Referrer-Policy",
     ["PERMISSIONS_POLICY"] = "Permissions-Policy",
     ["FEATURE_POLICY"] = "Feature-Policy",
+    ["CROSS_ORIGIN_OPENER_POLICY"] = "Cross-Origin-Opener-Policy",
+    ["CROSS_ORIGIN_EMBEDDER_POLICY"] = "Cross-Origin-Embedder-Policy",
+    ["CROSS_ORIGIN_RESOURCE_POLICY"] = "Cross-Origin-Resource-Policy",
     ["X_FRAME_OPTIONS"] = "X-Frame-Options",
     ["X_CONTENT_TYPE_OPTIONS"] = "X-Content-Type-Options",
     ["X_XSS_PROTECTION"] = "X-XSS-Protection"
