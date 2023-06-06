@@ -22,7 +22,7 @@ from kubernetes import client as kube_client, config
 
 
 class ApiCaller:
-    def __init__(self, apis: List[API] = None):
+    def __init__(self, apis: Optional[List[API]] = None):
         self.__apis = apis or []
         self.__logger = setup_logger("Api", getenv("LOG_LEVEL", "INFO"))
 
