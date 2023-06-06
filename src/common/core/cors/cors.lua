@@ -65,7 +65,7 @@ function cors:header()
 				ngx.header[header] = self.variables[variable]
 			end
 		end
-		ngx.header["Content-Type"] = "text/html"
+		ngx.header["Content-Type"] = "text/html; charset=UTF-8"
 		ngx.header["Content-Length"] = "0"
 		return self:ret(true, "edited headers for preflight request")
 	end
