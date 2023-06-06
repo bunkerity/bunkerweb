@@ -147,10 +147,10 @@ try:
                 certbot_new(domains, real_email, letsencrypt_path, letsencrypt_job_path)
                 != 0
             ):
-                status = 2
                 logger.error(
                     f"Certificate generation failed for domain(s) {domains} ...",
                 )
+                _exit(2)
             else:
                 status = 1
                 logger.info(
