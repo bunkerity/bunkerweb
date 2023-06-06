@@ -35,7 +35,7 @@ function headers:header()
 	end
   -- Add custom headers
   for srv, vars in pairs(variables) do
-    if srv == ngx.var.server_name then
+    if srv == ngx.ctx.bw.server_name then
       for var, value in pairs(vars) do
         if utils.regex_match(var, "CUSTOM_HEADER") and value then
           local m = utils.regex_match(value, "([\\w-]+): ([^,]+)")
@@ -47,7 +47,7 @@ function headers:header()
     end
   end
   -- Remove headers
-  if self.variables["REMOVE_HEADERS"] then
+  if self.variables["REMOVE_HEADERS"] ~= "" then
     local iterator, err = ngx.re.gmatch(self.variables["REMOVE_HEADERS"], "([\\w-]+)")
     if not iterator then
         return self:ret(false, "Error while matching remove headers: " .. err)
