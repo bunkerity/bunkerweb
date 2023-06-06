@@ -122,6 +122,7 @@ class ApiCaller:
         response: bool = False,
     ) -> Tuple[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
         ret = True
+        url = url if not url.startswith("/") else url[1:]
         responses = {}
         for api in self.__apis:
             if files is not None:
