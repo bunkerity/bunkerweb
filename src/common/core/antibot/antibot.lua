@@ -221,7 +221,7 @@ function antibot:display_challenge()
 	if self.variables["USE_ANTIBOT"] == "hcaptcha" then
 		template_vars.hcaptcha_sitekey = self.variables["ANTIBOT_HCAPTCHA_SITEKEY"]
 	end
-	
+
 	-- Turnstile case
 	if self.variables["USE_ANTIBOT"] == "turnstile" then
 		template_vars.turnstile_sitekey = self.variables["ANTIBOT_TURNSTILE_SITEKEY"]
@@ -294,8 +294,8 @@ function antibot:check_challenge()
 		local res, err = httpc:request_uri("https://www.google.com/recaptcha/api/siteverify", {
 			method = "POST",
 			body = "secret=" ..
-			self.variables["ANTIBOT_RECAPTCHA_SECRET"] ..
-			"&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
+					self.variables["ANTIBOT_RECAPTCHA_SECRET"] ..
+					"&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}
@@ -330,8 +330,8 @@ function antibot:check_challenge()
 		local res, err = httpc:request_uri("https://hcaptcha.com/siteverify", {
 			method = "POST",
 			body = "secret=" ..
-			self.variables["ANTIBOT_HCAPTCHA_SECRET"] ..
-			"&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
+					self.variables["ANTIBOT_HCAPTCHA_SECRET"] ..
+					"&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}
@@ -351,7 +351,7 @@ function antibot:check_challenge()
 		self.session_data.time_valid = ngx.now()
 		return true, "resolved", self.session_data.original_uri
 	end
-	
+
 	-- Turnstile case
 	if self.variables["USE_ANTIBOT"] == "turnstile" then
 		ngx.req.read_body()
@@ -364,9 +364,9 @@ function antibot:check_challenge()
 			return nil, "can't instantiate http object : " .. err, nil, nil
 		end
 		local data = {
-			secret=self.variables["ANTIBOT_TURNSTILE_SECRET"],
-			response=args["token"],
-			remoteip=ngx.ctx.bw.remote_addr
+			secret = self.variables["ANTIBOT_TURNSTILE_SECRET"],
+			response = args["token"],
+			remoteip = ngx.ctx.bw.remote_addr
 		}
 		local res, err = httpc:request_uri("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
 			method = "POST",

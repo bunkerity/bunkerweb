@@ -1,16 +1,16 @@
-local cdatastore             = require "bunkerweb.datastore"
-local mmdb                   = require "bunkerweb.mmdb"
-local clogger                = require "bunkerweb.logger"
+local cdatastore = require "bunkerweb.datastore"
+local mmdb       = require "bunkerweb.mmdb"
+local clogger    = require "bunkerweb.logger"
 
-local ipmatcher              = require "resty.ipmatcher"
-local resolver               = require "resty.dns.resolver"
-local session                = require "resty.session"
-local cjson                  = require "cjson"
+local ipmatcher  = require "resty.ipmatcher"
+local resolver   = require "resty.dns.resolver"
+local session    = require "resty.session"
+local cjson      = require "cjson"
 
-local logger                 = clogger:new("UTILS")
-local datastore              = cdatastore:new()
+local logger     = clogger:new("UTILS")
+local datastore  = cdatastore:new()
 
-local utils                  = {}
+local utils      = {}
 
 math.randomseed(os.time())
 
@@ -326,7 +326,7 @@ utils.get_resolvers          = function()
 	return resolvers
 end
 
-utils.get_rdns = function(ip)
+utils.get_rdns               = function(ip)
 	-- Check cache
 	local cachestore = utils.new_cachestore()
 	local ok, value = cachestore:get("rdns_" .. ip)
@@ -376,7 +376,7 @@ utils.get_rdns = function(ip)
 	return ptrs, ret_err
 end
 
-utils.get_ips = function(fqdn, ipv6)
+utils.get_ips                = function(fqdn, ipv6)
 	-- Check cache
 	local cachestore = utils.new_cachestore()
 	local ok, value = cachestore:get("dns_" .. fqdn)
@@ -511,8 +511,8 @@ utils.get_deny_status        = function()
 	return tonumber(status)
 end
 
-utils.check_session = function()
-	local _session, err, exists, refreshed = session.start({audience = "metadata"})
+utils.check_session          = function()
+	local _session, err, exists, refreshed = session.start({ audience = "metadata" })
 	if exists then
 		for i, check in ipairs(ngx.ctx.bw.sessions_checks) do
 			local key = check[1]
@@ -521,7 +521,7 @@ utils.check_session = function()
 				local ok, err = _session:destroy()
 				if not ok then
 					_session:close()
-					return false,  "session:destroy() error : " .. err
+					return false, "session:destroy() error : " .. err
 				end
 				logger:log(ngx.WARN, "session check " .. key .. " failed, destroying session")
 				return utils.check_session()
@@ -551,14 +551,14 @@ utils.get_session            = function(audience)
 		end
 	end
 	-- Open session with specific audience
-	local _session, err, exists = session.open({audience = audience})
+	local _session, err, exists = session.open({ audience = audience })
 	if err then
 		logger:log(ngx.INFO, "session:open() error : " .. err)
 	end
 	return _session
 end
 
-utils.get_session_data	= function(_session, site)
+utils.get_session_data       = function(_session, site)
 	local site_only = site == nil or site
 	local data = _session:get_data()
 	if site_only then
@@ -567,7 +567,7 @@ utils.get_session_data	= function(_session, site)
 	return data
 end
 
-utils.set_session_data = function(_session, data, site)
+utils.set_session_data       = function(_session, data, site)
 	local site_only = site == nil or site
 	if site_only then
 		local all_data = _session:get_data()
@@ -683,7 +683,7 @@ utils.new_cachestore         = function()
 	return require "bunkerweb.cachestore":new(use_redis, true)
 end
 
-utils.regex_match = function(str, regex, options)
+utils.regex_match            = function(str, regex, options)
 	local all_options = "o"
 	if options then
 		all_options = all_options .. options
@@ -696,7 +696,7 @@ utils.regex_match = function(str, regex, options)
 	return match
 end
 
-utils.get_phases = function()
+utils.get_phases             = function()
 	return {
 		"init",
 		"init_worker",
@@ -710,7 +710,7 @@ utils.get_phases = function()
 	}
 end
 
-utils.is_cosocket_available = function()
+utils.is_cosocket_available  = function()
 	local phases = {
 		"timer",
 		"access",
@@ -725,7 +725,7 @@ utils.is_cosocket_available = function()
 	return false
 end
 
-utils.kill_all_threads = function(threads)
+utils.kill_all_threads       = function(threads)
 	for i, thread in ipairs(threads) do
 		local ok, err = ngx.thread.kill(thread)
 		if not ok then
@@ -734,7 +734,7 @@ utils.kill_all_threads = function(threads)
 	end
 end
 
-utils.get_ctx_obj = function(obj)
+utils.get_ctx_obj            = function(obj)
 	if ngx.ctx and ngx.ctx.bw then
 		return ngx.ctx.bw[obj]
 	end

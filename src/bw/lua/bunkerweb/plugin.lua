@@ -1,18 +1,19 @@
-local class     = require "middleclass"
-local logger    = require "bunkerweb.logger"
-local datastore = require "bunkerweb.datastore"
-local cachestore = require "bunkerweb.cachestore"
+local class        = require "middleclass"
+local logger       = require "bunkerweb.logger"
+local datastore    = require "bunkerweb.datastore"
+local cachestore   = require "bunkerweb.cachestore"
 local clusterstore = require "bunkerweb.clusterstore"
-local utils     = require "bunkerweb.utils"
-local cjson     = require "cjson"
-local plugin    = class("plugin")
+local utils        = require "bunkerweb.utils"
+local cjson        = require "cjson"
+local plugin       = class("plugin")
 
 function plugin:initialize(id)
     -- Store common, values
     self.id = id
     local multisite = false
     local current_phase = ngx.get_phase()
-    for i, check_phase in ipairs({ "set", "access", "content", "header_filter", "log", "preread", "log_stream", "log_default" }) do
+    for i, check_phase in ipairs({ "set", "access", "content", "header_filter", "log", "preread", "log_stream",
+        "log_default" }) do
         if current_phase == check_phase then
             multisite = true
             break
@@ -21,11 +22,11 @@ function plugin:initialize(id)
     self.is_request = multisite
     -- Store common objets
     self.logger = logger:new(self.id)
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
-	if not use_redis then
-		self.logger:log(ngx.ERR, err)
-	end
-	self.use_redis = use_redis == "yes"
+    local use_redis, err = utils.get_variable("USE_REDIS", false)
+    if not use_redis then
+        self.logger:log(ngx.ERR, err)
+    end
+    self.use_redis = use_redis == "yes"
     if self.is_request then
         self.datastore = utils.get_ctx_obj("datastore") or datastore:new()
         self.cachestore = utils.get_ctx_obj("cachestore") or cachestore:new(use_redis == "yes", true)
