@@ -247,10 +247,6 @@ def update_config():
         server_name = service.get("SERVER_NAME", {"value": None})["value"]
         endpoint = service.get("REVERSE_PROXY_URL", {"value": "/"})["value"]
 
-        logger.warning(service.get("AUTO_LETS_ENCRYPT", {"value": "no"}))
-        logger.warning(service.get("GENERATE_SELF_SIGNED_SSL", {"value": "no"}))
-        logger.warning(service.get("USE_CUSTOM_SSL", {"value": "no"}))
-
         if any(
             [
                 service.get("AUTO_LETS_ENCRYPT", {"value": "no"})["value"] == "yes",
@@ -282,9 +278,9 @@ def update_config():
 
     if SCRIPT_NAME != getenv("SCRIPT_NAME"):
         environ["SCRIPT_NAME"] = f"/{basename(ABSOLUTE_URI[:-1])}"
-        logger.info(f"The script name is now {environ['SCRIPT_NAME']}")
+        logger.info(f"The SCRIPT_NAME is now {environ['SCRIPT_NAME']}")
     else:
-        logger.info(f"The script name is still {environ['SCRIPT_NAME']}")
+        logger.info(f"The SCRIPT_NAME is still {environ['SCRIPT_NAME']}")
 
 
 def check_config_changes():
@@ -385,6 +381,15 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
         app.config["TO_FLASH"].append({"content": operation, "type": "success"})
 
     app.config["RELOADING"] = False
+
+
+@app.after_request
+def set_csp_header(response):
+    """Set the Content-Security-Policy header to prevent XSS attacks."""
+    response.headers[
+        "Content-Security-Policy"
+    ] = "object-src 'none'; frame-ancestors 'self';"
+    return response
 
 
 @login_manager.user_loader
