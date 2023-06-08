@@ -64,7 +64,7 @@ try:
         f"http{'s' if ssl else ''}://www.example.com",
         headers={
             "Host": "www.example.com",
-            "Origin": f"http{'s' if ssl else ''}://bwadm.example.com",
+            "Origin": f"http{'s' if ssl else ''}://app1.example.com",
         },
         verify=False,
     )
@@ -121,7 +121,7 @@ try:
         f"http{'s' if ssl else ''}://www.example.com/options",
         headers={
             "Host": "www.example.com",
-            "Origin": f"http{'s' if ssl else ''}://bwadm.example.com",
+            "Origin": f"http{'s' if ssl else ''}://app1.example.com",
         },
         verify=False,
     )
@@ -186,7 +186,6 @@ try:
 
     if any(
         [
-            cors_allow_origin != "*",
             cors_expose_headers != "Content-Length,Content-Range",
             cors_max_age != "86400",
             cors_allow_credentials == "true",
@@ -206,6 +205,11 @@ try:
     with webdriver.Firefox(options=firefox_options) as driver:
         driver.delete_all_cookies()
         driver.maximize_window()
+
+        print("ℹ️ Navigating to http://app1.example.com ...", flush=True)
+        driver.get(f"http{'s' if ssl else ''}://app1.example.com")
+
+        sleep(1.5)
 
         print(
             f"ℹ️ Sending a javascript request to http{'s' if ssl else ''}://www.example.com ...",

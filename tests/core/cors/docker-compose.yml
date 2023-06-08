@@ -7,17 +7,20 @@ services:
     labels:
       - "bunkerweb.INSTANCE"
     volumes:
-      - ./index.html:/var/www/html/index.html
+      - ./www:/var/www/html
     environment:
+      SERVER_NAME: "www.example.com app1.example.com"
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      MULTISITE: "yes"
       HTTP_PORT: "80"
       HTTPS_PORT: "443"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
+      REMOTE_PHP: "app1"
+      REMOTE_PHP_PATH: "/app"
       LOG_LEVEL: "info"
       GENERATE_SELF_SIGNED_SSL: "no"
       ALLOWED_METHODS: "GET|POST|HEAD|OPTIONS"
-      CUSTOM_CONF_SEVER_HTTP_main: "location /options { default_type 'text/plain'; content_by_lua_block { if ngx.var.request_method == \"OPTIONS\" then ngx.say(\"Hello, world!\") end } }"
 
       # ? CORS settings
       USE_CORS: "no"
@@ -53,6 +56,14 @@ services:
       CONTAINERS: "1"
     networks:
       - bw-docker
+
+  app1:
+    image: php:fpm
+    volumes:
+      - ./www/app1.example.com:/app
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.4
 
 networks:
   bw-universe:
