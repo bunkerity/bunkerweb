@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from os import _exit, environ, getenv, listdir, sep
+from os import _exit, getenv, listdir, sep, urandom
 from os.path import basename, dirname, join
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
@@ -20,7 +20,7 @@ for deps_path in [
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from gevent import monkey, spawn
+from gevent import monkey
 
 monkey.patch_all()
 
@@ -124,21 +124,18 @@ app = Flask(
     static_folder="static",
     template_folder="templates",
 )
-app.wsgi_app = ReverseProxied(app.wsgi_app)
+app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
-# Set variables and instantiate objects
-vars = get_variables()
-
-if "ADMIN_USERNAME" not in vars:
+if not getenv("ADMIN_USERNAME"):
     logger.error("ADMIN_USERNAME is not set")
     stop(1)
-elif "ADMIN_PASSWORD" not in vars:
+elif not getenv("ADMIN_PASSWORD"):
     logger.error("ADMIN_PASSWORD is not set")
     stop(1)
 
-if not vars.get("FLASK_DEBUG", False) and not regex_match(
+if not getenv("FLASK_DEBUG", False) and not regex_match(
     r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$",
-    vars["ADMIN_PASSWORD"],
+    getenv("ADMIN_PASSWORD", "changeme"),
 ):
     logger.error(
         "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
@@ -148,7 +145,7 @@ if not vars.get("FLASK_DEBUG", False) and not regex_match(
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
-user = User(vars["ADMIN_USERNAME"], vars["ADMIN_PASSWORD"])
+user = User(getenv("ADMIN_USERNAME", "admin"), getenv("ADMIN_PASSWORD", "changeme"))
 PLUGIN_KEYS = [
     "id",
     "name",
@@ -176,7 +173,7 @@ kubernetes_client = None
 if INTEGRATION in ("Docker", "Swarm", "Autoconf"):
     try:
         docker_client: DockerClient = DockerClient(
-            base_url=vars.get("DOCKER_HOST", "unix:///var/run/docker.sock")
+            base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
         )
     except (docker_APIError, DockerException):
         logger.warning("No docker host found")
@@ -221,99 +218,13 @@ bw_version = (
     .strip()
 )
 
-ABSOLUTE_URI = vars.get("ABSOLUTE_URI")
-CONFIG = Config(db)
-
-
-def update_config():
-    global ABSOLUTE_URI
-
-    ret = db.checked_changes("ui")
-
-    if ret:
-        logger.error(
-            f"An error occurred when setting the changes to checked in the database : {ret}"
-        )
-        stop(1)
-
-    ssl = False
-    server_name = None
-    endpoint = None
-
-    for service in CONFIG.get_services():
-        if service.get("USE_UI", "no") == "no":
-            continue
-
-        server_name = service.get("SERVER_NAME", {"value": None})["value"]
-        endpoint = service.get("REVERSE_PROXY_URL", {"value": "/"})["value"]
-
-        if any(
-            [
-                service.get("AUTO_LETS_ENCRYPT", {"value": "no"})["value"] == "yes",
-                service.get("GENERATE_SELF_SIGNED_SSL", {"value": "no"})["value"]
-                == "yes",
-                service.get("USE_CUSTOM_SSL", {"value": "no"})["value"] == "yes",
-            ]
-        ):
-            ssl = True
-            break
-
-    if not server_name:
-        logger.error("No service found with USE_UI=yes")
-        stop(1)
-
-    ABSOLUTE_URI = f"http{'s' if ssl else ''}://{server_name}{endpoint}"
-    SCRIPT_NAME = f"/{basename(ABSOLUTE_URI[:-1] if ABSOLUTE_URI.endswith('/') and ABSOLUTE_URI != '/' else ABSOLUTE_URI)}"
-
-    if not ABSOLUTE_URI.endswith("/"):
-        ABSOLUTE_URI += "/"
-
-    if ABSOLUTE_URI != app.config.get("ABSOLUTE_URI"):
-        app.config["ABSOLUTE_URI"] = ABSOLUTE_URI
-        app.config["SESSION_COOKIE_DOMAIN"] = server_name
-
-        logger.info(f"The ABSOLUTE_URI is now {ABSOLUTE_URI}")
-    else:
-        logger.info(f"The ABSOLUTE_URI is still {ABSOLUTE_URI}")
-
-    if SCRIPT_NAME != getenv("SCRIPT_NAME"):
-        environ["SCRIPT_NAME"] = f"/{basename(ABSOLUTE_URI[:-1])}"
-        logger.info(f"The SCRIPT_NAME is now {environ['SCRIPT_NAME']}")
-    else:
-        logger.info(f"The SCRIPT_NAME is still {environ['SCRIPT_NAME']}")
-
-
-def check_config_changes():
-    while True:
-        changes = db.check_changes("ui")
-
-        if isinstance(changes, str):
-            continue
-
-        if changes:
-            logger.info(
-                "Config changed in the database, updating ABSOLUTE_URI and SCRIPT_NAME ..."
-            )
-
-            update_config()
-
-        sleep(1)
-
-
-update_config()
-
-spawn(check_config_changes)
-
 try:
     app.config.update(
         DEBUG=True,
-        SECRET_KEY=vars["FLASK_SECRET"],
+        SECRET_KEY=getenv("FLASK_SECRET", urandom(32)),
         INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION),
         CONFIG=Config(db),
         CONFIGFILES=ConfigFiles(logger, db),
-        SESSION_COOKIE_DOMAIN=ABSOLUTE_URI.replace("http://", "")
-        .replace("https://", "")
-        .split("/")[0],
         WTF_CSRF_SSL_STRICT=False,
         USER=user,
         SEND_FILE_MAX_AGE_DEFAULT=86400,
@@ -394,7 +305,7 @@ def set_csp_header(response):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User(user_id, vars["ADMIN_PASSWORD"])
+    return User(user_id, getenv("ADMIN_PASSWORD", "changeme"))
 
 
 @app.errorhandler(CSRFError)

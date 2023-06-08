@@ -1,24 +1,7 @@
 #!/usr/bin/python3
 
-from os import environ, urandom
 from os.path import join
 from typing import List, Optional
-
-
-def get_variables():
-    vars = {}
-    vars["DOCKER_HOST"] = "unix:///var/run/docker.sock"
-    vars["ABSOLUTE_URI"] = ""
-    vars["FLASK_SECRET"] = urandom(32)
-    vars["FLASK_ENV"] = "development"
-    vars["ADMIN_USERNAME"] = "admin"
-    vars["ADMIN_PASSWORD"] = "changeme"
-
-    for k in vars:
-        if k in environ:
-            vars[k] = environ[k]
-
-    return vars
 
 
 def path_to_dict(

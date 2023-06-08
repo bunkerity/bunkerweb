@@ -264,44 +264,32 @@ class Database:
 
         return ""
 
-    def check_changes(
-        self, _type: Union[Literal["scheduler"], Literal["ui"]] = "scheduler"
-    ) -> Union[Dict[str, bool], bool, str]:
+    def check_changes(self) -> Union[Dict[str, bool], bool, str]:
         """Check if either the config, the custom configs or plugins have changed inside the database"""
         with self.__db_session() as session:
             try:
-                if _type == "scheduler":
-                    entities = (
+                metadata = (
+                    session.query(Metadata)
+                    .with_entities(
                         Metadata.custom_configs_changed,
                         Metadata.external_plugins_changed,
                         Metadata.config_changed,
                     )
-                else:
-                    entities = (Metadata.ui_config_changed,)
-
-                metadata = (
-                    session.query(Metadata)
-                    .with_entities(*entities)
                     .filter_by(id=1)
                     .first()
                 )
 
-                if _type == "scheduler":
-                    return dict(
-                        custom_configs_changed=metadata is not None
-                        and metadata.custom_configs_changed,
-                        external_plugins_changed=metadata is not None
-                        and metadata.external_plugins_changed,
-                        config_changed=metadata is not None and metadata.config_changed,
-                    )
-                else:
-                    return metadata is not None and metadata.ui_config_changed
+                return dict(
+                    custom_configs_changed=metadata is not None
+                    and metadata.custom_configs_changed,
+                    external_plugins_changed=metadata is not None
+                    and metadata.external_plugins_changed,
+                    config_changed=metadata is not None and metadata.config_changed,
+                )
             except BaseException:
                 return format_exc()
 
-    def checked_changes(
-        self, _type: Union[Literal["scheduler"], Literal["ui"]] = "scheduler"
-    ) -> str:
+    def checked_changes(self) -> str:
         """Set that the config, the custom configs and the plugins didn't change"""
         with self.__db_session() as session:
             try:
@@ -310,12 +298,9 @@ class Database:
                 if not metadata:
                     return "The metadata are not set yet, try again"
 
-                if _type == "scheduler":
-                    metadata.config_changed = False
-                    metadata.custom_configs_changed = False
-                    metadata.external_plugins_changed = False
-                else:
-                    metadata.ui_config_changed = False
+                metadata.config_changed = False
+                metadata.custom_configs_changed = False
+                metadata.external_plugins_changed = False
                 session.commit()
             except BaseException:
                 return format_exc()
