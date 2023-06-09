@@ -221,17 +221,16 @@ function api:do_api_call()
 			end
 		end
 	end
-	local list, err = self.datastore:get("plugins")
+	local list, err = self.datastore:get("plugins", true)
 	if not list then
 		local status, resp = self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't list loaded plugins : " .. err)
 		return false, resp["msg"], ngx.HTTP_INTERNAL_SERVER_ERROR, cjson.encode(resp)
 	end
-	list = cjson.decode(list)
 	for i, plugin in ipairs(list) do
 		if pcall(require, plugin.id .. "/" .. plugin.id) then
 			local plugin_lua = require(plugin.id .. "/" .. plugin.id)
 			if plugin_lua.api ~= nil then
-				local matched, status, resp = plugin_lua.api()
+				local matched, status, resp = plugin_lua:api(self.ctx)
 				if matched then
 					local ret = true
 					if status ~= ngx.HTTP_OK then
