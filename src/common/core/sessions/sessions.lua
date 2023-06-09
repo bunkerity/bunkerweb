@@ -29,13 +29,13 @@ function sessions:set()
         return self:ret(true, "set not needed")
     end
     local checks = {
-        ["IP"] = ngx.ctx.bw.remote_addr,
-        ["USER_AGENT"] = ngx.ctx.bw.http_user_agent or ""
+        ["IP"] = self.ctx.bw.remote_addr,
+        ["USER_AGENT"] = self.ctx.bw.http_user_agent or ""
     }
-    ngx.ctx.bw.sessions_checks = {}
+    self.ctx.bw.sessions_checks = {}
     for check, value in pairs(checks) do
         if self.variables["SESSIONS_CHECK_" .. check] == "yes" then
-            table.insert(ngx.ctx.bw.sessions_checks, {check, value})
+            table.insert(self.ctx.bw.sessions_checks, {check, value})
         end
     end
     return self:ret(true, "success")

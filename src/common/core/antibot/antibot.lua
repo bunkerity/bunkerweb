@@ -15,9 +15,9 @@ end
 
 local antibot = class("antibot", plugin)
 
-function antibot:initialize()
+function antibot:initialize(ctx)
 	-- Call parent initialize
-	plugin.initialize(self, "antibot")
+	plugin.initialize(self, "antibot", ctx)
 end
 
 function antibot:access()
@@ -27,18 +27,18 @@ function antibot:access()
 	end
 
 	-- Get session data
-	local session, err = utils.get_session("antibot")
+	local session, err = utils.get_session("antibot", self.ctx)
 	if not session then
 		return self:ret(false, "can't get session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
 	end
 	self.session = session
-	self.session_data = utils.get_session_data(self.session)
+	self.session_data = utils.get_session_data(self.session, self.ctx)
 	-- Check if session is valid
 	self:check_session()
 
 	-- Don't go further if client resolved the challenge
 	if self.session_data.resolved then
-		if ngx.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
+		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
 			return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
 		end
 		return self:ret(true, "client already resolved the challenge")
@@ -52,7 +52,7 @@ function antibot:access()
 	end
 
 	-- Redirect to challenge page
-	if ngx.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
+	if self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
 		return self:ret(true, "redirecting client to the challenge uri", nil, self.variables["ANTIBOT_URI"])
 	end
 
@@ -62,13 +62,13 @@ function antibot:access()
 	end
 
 	-- Display challenge needed
-	if ngx.ctx.bw.request_method == "GET" then
-		ngx.ctx.bw.antibot_display_content = true
+	if self.ctx.bw.request_method == "GET" then
+		self.ctx.bw.antibot_display_content = true
 		return self:ret(true, "displaying challenge to client", ngx.OK)
 	end
 
 	-- Check challenge
-	if ngx.ctx.bw.request_method == "POST" then
+	if self.ctx.bw.request_method == "POST" then
 		local ok, err, redirect = self:check_challenge()
 		local set_ok, set_err = self:set_session_data()
 		if not set_ok then
@@ -87,12 +87,12 @@ function antibot:access()
 		if not ok then
 			return self:ret(false, "can't save session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
 		end
-		ngx.ctx.bw.antibot_display_content = true
+		self.ctx.bw.antibot_display_content = true
 		return self:ret(true, "displaying challenge to client", ngx.OK)
 	end
 
 	-- Method is suspicious, let's deny the request
-	return self:ret(true, "unsupported HTTP method for antibot", utils.get_deny_status())
+	return self:ret(true, "unsupported HTTP method for antibot", utils.get_deny_status(self.ctx))
 end
 
 function antibot:content()
@@ -102,17 +102,17 @@ function antibot:content()
 	end
 
 	-- Check if display content is needed
-	if not ngx.ctx.bw.antibot_display_content then
+	if not self.ctx.bw.antibot_display_content then
 		return self:ret(true, "display content not needed", nil, "/")
 	end
 
 	-- Get session data
-	local session, err = utils.get_session("antibot")
+	local session, err = utils.get_session("antibot", self.ctx)
 	if not session then
 		return self:ret(false, "can't get session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
 	end
 	self.session = session
-	self.session_data = utils.get_session_data(self.session)
+	self.session_data = utils.get_session_data(self.session, self.ctx)
 
 	-- Direct access without session
 	if not self.session_data.prepared then
@@ -155,7 +155,7 @@ end
 
 function antibot:set_session_data()
 	if self.session_updated then
-		local ok, err = utils.set_session_data(self.session, self.session_data)
+		local ok, err = utils.set_session_data(self.session, self.session_data, self.ctx)
 		if not ok then
 			return false, err
 		end
@@ -172,8 +172,8 @@ function antibot:prepare_challenge()
 		self.session_data.time_resolve = ngx.now()
 		self.session_data.type = self.variables["USE_ANTIBOT"]
 		self.session_data.resolved = false
-		self.session_data.original_uri = ngx.ctx.bw.request_uri
-		if ngx.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
+		self.session_data.original_uri = self.ctx.bw.request_uri
+		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
 			self.session_data.original_uri = "/"
 		end
 		if self.variables["USE_ANTIBOT"] == "cookie" then
@@ -295,7 +295,7 @@ function antibot:check_challenge()
 			method = "POST",
 			body = "secret=" ..
 			self.variables["ANTIBOT_RECAPTCHA_SECRET"] ..
-			"&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
+			"&response=" .. args["token"] .. "&remoteip=" .. self.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}
@@ -331,7 +331,7 @@ function antibot:check_challenge()
 			method = "POST",
 			body = "secret=" ..
 			self.variables["ANTIBOT_HCAPTCHA_SECRET"] ..
-			"&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
+			"&response=" .. args["token"] .. "&remoteip=" .. self.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}
@@ -366,7 +366,7 @@ function antibot:check_challenge()
 		local data = {
 			secret=self.variables["ANTIBOT_TURNSTILE_SECRET"],
 			response=args["token"],
-			remoteip=ngx.ctx.bw.remote_addr
+			remoteip=self.ctx.bw.remote_addr
 		}
 		local res, err = httpc:request_uri("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
 			method = "POST",

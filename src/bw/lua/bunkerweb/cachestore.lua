@@ -42,7 +42,8 @@ if not cache then
 	module_logger:log(ngx.ERR, "can't instantiate mlcache : " .. err)
 end
 
-function cachestore:initialize(use_redis, new_cs)
+function cachestore:initialize(use_redis, new_cs, ctx)
+	self.ctx = ctx
 	self.cache = cache
 	self.use_redis = use_redis or false
 	self.logger = module_logger
@@ -50,7 +51,7 @@ function cachestore:initialize(use_redis, new_cs)
 		self.clusterstore = clusterstore:new(false)
 		self.shared_cs = false
 	else
-		self.clusterstore = utils.get_ctx_obj("clusterstore")
+		self.clusterstore = utils.get_ctx_obj("clusterstore", self.ctx)
 		self.shared_cs = true
 	end
 end

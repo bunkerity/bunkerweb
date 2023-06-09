@@ -11,7 +11,7 @@ end
 
 function misc:access()
     -- Check if method is valid
-    local method = ngx.ctx.bw.request_method
+    local method = self.ctx.bw.request_method
     if not method or not utils.regex_match(method, "^[A-Z]+$") then
         return self:ret(true, "method is not valid", ngx.HTTP_BAD_REQUEST)
     end

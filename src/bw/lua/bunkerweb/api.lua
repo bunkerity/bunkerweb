@@ -14,6 +14,16 @@ api.global      = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
 function api:initialize()
 	self.datastore = datastore:new()
 	self.logger = logger:new("API")
+	self.ctx = ngx.ctx
+	local data, err = utils.get_variable("API_WHITELIST_IP", false)
+	self.ips = {}
+	if not data then
+		self.logger.log(ngx.ERR, "can't get API_WHITELIST_IP variable : " .. err)
+	else
+		for ip in data:gmatch("%S+") do
+			table.insert(self.ips, ip)
+		end
+	end
 end
 
 function api:log_cmd(cmd, status, stdout, stderr)
@@ -71,17 +81,17 @@ api.global.POST["^/stop$"] = function(self)
 end
 
 api.global.POST["^/confs$"] = function(self)
-	local tmp = "/var/tmp/bunkerweb/api_" .. ngx.ctx.bw.uri:sub(2) .. ".tar.gz"
-	local destination = "/usr/share/bunkerweb/" .. ngx.ctx.bw.uri:sub(2)
-	if ngx.ctx.bw.uri == "/confs" then
+	local tmp = "/var/tmp/bunkerweb/api_" .. self.ctx.bw.uri:sub(2) .. ".tar.gz"
+	local destination = "/usr/share/bunkerweb/" .. self.ctx.bw.uri:sub(2)
+	if self.ctx.bw.uri == "/confs" then
 		destination = "/etc/nginx"
-	elseif ngx.ctx.bw.uri == "/data" then
+	elseif self.ctx.bw.uri == "/data" then
 		destination = "/data"
-	elseif ngx.ctx.bw.uri == "/cache" then
+	elseif self.ctx.bw.uri == "/cache" then
 		destination = "/var/cache/bunkerweb"
-	elseif ngx.ctx.bw.uri == "/custom_configs" then
+	elseif self.ctx.bw.uri == "/custom_configs" then
 		destination = "/etc/bunkerweb/configs"
-	elseif ngx.ctx.bw.uri == "/plugins" then
+	elseif self.ctx.bw.uri == "/plugins" then
 		destination = "/etc/bunkerweb/plugins"
 	end
 	local form, err = upload:new(4096)
@@ -186,20 +196,16 @@ api.global.GET["^/bans$"] = function(self)
 end
 
 function api:is_allowed_ip()
-	local data, err = self.datastore:get("api_whitelist_ip")
-	if not data then
-		return false, "can't access api_allowed_ips in datastore"
-	end
-	if utils.is_ip_in_networks(ngx.ctx.bw.remote_addr, cjson.decode(data)) then
+	if utils.is_ip_in_networks(self.ctx.bw.remote_addr, self.ips) then
 		return true, "ok"
 	end
 	return false, "IP is not in API_WHITELIST_IP"
 end
 
 function api:do_api_call()
-	if self.global[ngx.ctx.bw.request_method] ~= nil then
-		for uri, api_fun in pairs(self.global[ngx.ctx.bw.request_method]) do
-			if string.match(ngx.ctx.bw.uri, uri) then
+	if self.global[self.ctx.bw.request_method] ~= nil then
+		for uri, api_fun in pairs(self.global[self.ctx.bw.request_method]) do
+			if string.match(self.ctx.bw.uri, uri) then
 				local status, resp = api_fun(self)
 				local ret = true
 				if status ~= ngx.HTTP_OK then

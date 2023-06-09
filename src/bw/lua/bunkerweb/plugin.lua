@@ -7,7 +7,7 @@ local utils     = require "bunkerweb.utils"
 local cjson     = require "cjson"
 local plugin    = class("plugin")
 
-function plugin:initialize(id)
+function plugin:initialize(id, ctx)
     -- Store common, values
     self.id = id
     local multisite = false
@@ -27,29 +27,40 @@ function plugin:initialize(id)
 	end
 	self.use_redis = use_redis == "yes"
     if self.is_request then
-        self.datastore = utils.get_ctx_obj("datastore") or datastore:new()
-        self.cachestore = utils.get_ctx_obj("cachestore") or cachestore:new(use_redis == "yes", true)
-        self.clusterstore = utils.get_ctx_obj("clusterstore") or clusterstore:new(false)
+        -- Store ctx
+        self.ctx = ctx or ngx.ctx
+        self.datastore = utils.get_ctx_obj("datastore", self.ctx) or datastore:new()
+        self.cachestore = utils.get_ctx_obj("cachestore", self.ctx) or cachestore:new(use_redis == "yes", true, self.ctx)
+        self.clusterstore = utils.get_ctx_obj("clusterstore", self.ctx) or clusterstore:new(false)
     else
         self.datastore = datastore:new()
         self.cachestore = cachestore:new(use_redis == "yes", true)
         self.clusterstore = clusterstore:new(false)
     end
     -- Get metadata
-    local encoded_metadata, err = self.datastore:get("plugin_" .. id)
-    if not encoded_metadata then
+    local metadata, err = self.datastore:get("plugin_" .. id, true)
+    if not metadata then
         self.logger:log(ngx.ERR, err)
         return
     end
     -- Store variables
     self.variables = {}
-    local metadata = cjson.decode(encoded_metadata)
+    self.multiples = {}
     for k, v in pairs(metadata.settings) do
         local value, err = utils.get_variable(k, v.context == "multisite" and multisite)
         if value == nil then
             self.logger:log(ngx.ERR, "can't get " .. k .. " variable : " .. err)
         end
         self.variables[k] = value
+        -- if v.multiple then
+        --     local multiples, err = utils.get_multiple_variables(k)
+        --     if not multiples then
+        --         self.logger:log(ngx.ERR, "can't get " .. k .. " multiple variable : " .. err)
+        --         self.multiples[k] = {}
+        --     else
+        --         self.multiples[k] = multiples
+        --     end
+        -- end
     end
     -- Is loading
     local is_loading, err = utils.get_variable("IS_LOADING", false)

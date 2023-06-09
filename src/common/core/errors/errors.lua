@@ -9,9 +9,9 @@ end
 
 local errors = class("errors", plugin)
 
-function errors:initialize()
+function errors:initialize(ctx)
 	-- Call parent initialize
-	plugin.initialize(self, "errors")
+	plugin.initialize(self, "errors", ctx)
 	-- Default error texts
 	self.default_errors = {
 		["400"] = {

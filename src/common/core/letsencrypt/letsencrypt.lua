@@ -11,7 +11,7 @@ function letsencrypt:initialize()
 end
 
 function letsencrypt:access()
-	if string.sub(ngx.ctx.bw.uri, 1, string.len("/.well-known/acme-challenge/")) == "/.well-known/acme-challenge/" then
+	if string.sub(self.ctx.bw.uri, 1, string.len("/.well-known/acme-challenge/")) == "/.well-known/acme-challenge/" then
 		self.logger:log(ngx.NOTICE, "got a visit from Let's Encrypt, let's whitelist it")
 		return self:ret(true, "visit from LE", ngx.OK)
 	end
@@ -19,8 +19,8 @@ function letsencrypt:access()
 end
 
 function letsencrypt:api()
-	if not string.match(ngx.ctx.bw.uri, "^/lets%-encrypt/challenge$") or
-			(ngx.ctx.bw.request_method ~= "POST" and ngx.ctx.bw.request_method ~= "DELETE") then
+	if not string.match(self.ctx.bw.uri, "^/lets%-encrypt/challenge$") or
+			(self.ctx.bw.request_method ~= "POST" and self.ctx.bw.request_method ~= "DELETE") then
 		return false, nil, nil
 	end
 	local acme_folder = "/var/tmp/bunkerweb/lets-encrypt/.well-known/acme-challenge/"
@@ -30,7 +30,7 @@ function letsencrypt:api()
 		return true, ngx.HTTP_BAD_REQUEST, { status = "error", msg = "json body decoding failed" }
 	end
 	os.execute("mkdir -p " .. acme_folder)
-	if ngx.ctx.bw.request_method == "POST" then
+	if self.ctx.bw.request_method == "POST" then
 		local file, err = io.open(acme_folder .. data.token, "w+")
 		if not file then
 			return true, ngx.HTTP_INTERNAL_SERVER_ERROR, { status = "error", msg = "can't write validation token : " .. err }
@@ -38,7 +38,7 @@ function letsencrypt:api()
 		file:write(data.validation)
 		file:close()
 		return true, ngx.HTTP_OK, { status = "success", msg = "validation token written" }
-	elseif ngx.ctx.bw.request_method == "DELETE" then
+	elseif self.ctx.bw.request_method == "DELETE" then
 		local ok, err = os.remove(acme_folder .. data.token)
 		if not ok then
 			return true, ngx.HTTP_INTERNAL_SERVER_ERROR, { status = "error", msg = "can't remove validation token : " .. err }

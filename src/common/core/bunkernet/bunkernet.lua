@@ -7,16 +7,16 @@ local http      = require "resty.http"
 
 local bunkernet = class("bunkernet", plugin)
 
-function bunkernet:initialize()
+function bunkernet:initialize(ctx)
 	-- Call parent initialize
-	plugin.initialize(self, "bunkernet")
+	plugin.initialize(self, "bunkernet", ctx)
 	-- Get BunkerNet ID and save info
 	if ngx.get_phase() ~= "init" and self:is_needed() then
-		local id, err = self.datastore:get("plugin_bunkernet_id")
+		local id, err = self.datastore:get("plugin_bunkernet_id", true)
 		if id then
 			self.bunkernet_id = id
-			self.version = (ngx.ctx.bw and ngx.ctx.bw.version) or utils.get_version()
-			self.integration = (ngx.ctx.bw and ngx.ctx.bw.integration) or utils.get_integration()
+			self.version = (self.ctx and self.ctx.bw.version) or utils.get_version()
+			self.integration = (self.ctx and self.ctx.bw.integration) or utils.get_integration()
 		else
 			self.logger:log(ngx.ERR, "can't get BunkerNet ID from datastore : " .. err)
 		end
@@ -29,7 +29,7 @@ function bunkernet:is_needed()
 		return false
 	end
 	-- Request phases (no default)
-	if self.is_request and (ngx.ctx.bw.server_name ~= "_") then
+	if self.is_request and (self.ctx.bw.server_name ~= "_") then
 		return self.variables["USE_BUNKERNET"] == "yes"
 	end
 	-- Other cases : at least one service uses it
@@ -75,7 +75,7 @@ function bunkernet:init()
 	local id = f:read("*all"):gsub("[\r\n]", "")
 	f:close()
 	-- Store ID in datastore
-	local ok, err = self.datastore:set("plugin_bunkernet_id", id)
+	local ok, err = self.datastore:set("plugin_bunkernet_id", id, nil, true)
 	if not ok then
 		return self:ret(false, "can't save instance ID to the datastore : " .. err)
 	end
@@ -100,7 +100,7 @@ function bunkernet:init()
 		return self:ret(false, "error while reading database : " .. err)
 	end
 	f:close()
-	local ok, err = self.datastore:set("plugin_bunkernet_db", cjson.encode(db))
+	local ok, err = self.datastore:set("plugin_bunkernet_db", db, nil, true)
 	if not ok then
 		return self:ret(false, "can't store bunkernet database into datastore : " .. err)
 	end
@@ -117,25 +117,24 @@ function bunkernet:access()
 		return self:ret(false, "missing instance ID")
 	end
 	-- Check if IP is global
-	if not ngx.ctx.bw.ip_is_global then
+	if not self.ctx.bw.ip_is_global then
 		return self:ret(true, "IP is not global")
 	end
 	-- Check if whitelisted
-	if ngx.ctx.bw.is_whitelisted == "yes" then
+	if self.ctx.bw.is_whitelisted == "yes" then
 		return self:ret(true, "client is whitelisted")
 	end
 	-- Extract DB
-	local db, err = self.datastore:get("plugin_bunkernet_db")
+	local db, err = self.datastore:get("plugin_bunkernet_db", true)
 	if db then
-		db = cjson.decode(db)
 		-- Check if is IP is present
 		if #db.ip > 0 then
-			local present, err = utils.is_ip_in_networks(ngx.ctx.bw.remote_addr, db.ip)
+			local present, err = utils.is_ip_in_networks(self.ctx.bw.remote_addr, db.ip)
 			if present == nil then
 				return self:ret(false, "can't check if ip is in db : " .. err)
 			end
 			if present then
-				return self:ret(true, "ip is in db", utils.get_deny_status())
+				return self:ret(true, "ip is in db", utils.get_deny_status(self.ctx))
 			end
 		end
 	else
@@ -156,7 +155,7 @@ function bunkernet:log(bypass_checks)
 		end
 	end
 	-- Check if IP has been blocked
-	local reason = utils.get_reason()
+	local reason = utils.get_reason(self.ctx)
 	if not reason then
 		return self:ret(true, "ip is not blocked")
 	end
@@ -164,7 +163,7 @@ function bunkernet:log(bypass_checks)
 		return self:ret(true, "skipping report because the reason is bunkernet")
 	end
 	-- Check if IP is global
-	if not ngx.ctx.bw.ip_is_global then
+	if not self.ctx.bw.ip_is_global then
 		return self:ret(true, "IP is not global")
 	end
 	-- TODO : check if IP has been reported recently
@@ -179,8 +178,8 @@ function bunkernet:log(bypass_checks)
 		end
 	end
 
-	local hdr, err = ngx.timer.at(0, report_callback, self, ngx.ctx.bw.remote_addr, reason, ngx.ctx.bw.request_method,
-		ngx.ctx.bw.request_uri, ngx.req.get_headers())
+	local hdr, err = ngx.timer.at(0, report_callback, self, self.ctx.bw.remote_addr, reason, self.ctx.bw.request_method,
+		self.ctx.bw.request_uri, ngx.req.get_headers())
 	if not hdr then
 		return self:ret(false, "can't create report timer : " .. err)
 	end

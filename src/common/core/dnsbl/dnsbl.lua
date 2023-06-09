@@ -7,9 +7,9 @@ local resolver   = require "resty.dns.resolver"
 
 local dnsbl      = class("dnsbl", plugin)
 
-function dnsbl:initialize()
+function dnsbl:initialize(ctx)
 	-- Call parent initialize
-	plugin.initialize(self, "dnsbl")
+	plugin.initialize(self, "dnsbl", ctx)
 end
 
 function dnsbl:init_worker()
@@ -56,25 +56,25 @@ function dnsbl:access()
 		return self:ret(true, "dnsbl list is empty")
 	end
 	-- Don't go further if IP is not global
-	if not ngx.ctx.bw.ip_is_global then
+	if not self.ctx.bw.ip_is_global then
 		return self:ret(true, "client IP is not global, skipping DNSBL check")
 	end
 	-- Check if IP is in cache
-	local ok, cached = self:is_in_cache(ngx.ctx.bw.remote_addr)
+	local ok, cached = self:is_in_cache(self.ctx.bw.remote_addr)
 	if not ok then
 		return self:ret(false, "error while checking cache : " .. cached)
 	elseif cached then
 		if cached == "ok" then
-			return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is in DNSBL cache (not blacklisted)")
+			return self:ret(true, "client IP " .. self.ctx.bw.remote_addr .. " is in DNSBL cache (not blacklisted)")
 		end
-		return self:ret(true, "client IP " .. ngx.ctx.bw.remote_addr .. " is in DNSBL cache (server = " .. cached .. ")",
-			utils.get_deny_status())
+		return self:ret(true, "client IP " .. self.ctx.bw.remote_addr .. " is in DNSBL cache (server = " .. cached .. ")",
+			utils.get_deny_status(self.ctx))
 	end
 	-- Loop on DNSBL list
 	local threads = {}
 	for server in self.variables["DNSBL_LIST"]:gmatch("%S+") do
 		-- Create thread
-		local thread = ngx.thread.spawn(self.is_in_dnsbl, self, ngx.ctx.bw.remote_addr, server)
+		local thread = ngx.thread.spawn(self.is_in_dnsbl, self, self.ctx.bw.remote_addr, server)
 		threads[server] = thread
 	end
 	-- Wait for threads
@@ -124,17 +124,17 @@ function dnsbl:access()
 		end
 		-- Blacklisted by a server : add to cache and deny access
 		if ret_threads then
-			local ok, err = self:add_to_cache(ngx.ctx.bw.remote_addr, ret_server)
+			local ok, err = self:add_to_cache(self.ctx.bw.remote_addr, ret_server)
 			if not ok then
 				return self:ret(false, "error while adding element to cache : " .. err)
 			end
-			return self:ret(true, "IP is blacklisted by " .. ret_server, utils.get_deny_status())
+			return self:ret(true, "IP is blacklisted by " .. ret_server, utils.get_deny_status(self.ctx))
 		end
 		-- Error case
 		return self:ret(false, ret_err)
 	end
 	-- IP is not in DNSBL
-	local ok, err = self:add_to_cache(ngx.ctx.bw.remote_addr, "ok")
+	local ok, err = self:add_to_cache(self.ctx.bw.remote_addr, "ok")
 	if not ok then
 		return self:ret(false, "IP is not in DNSBL (error = " .. err .. ")")
 	end
@@ -146,7 +146,7 @@ function dnsbl:preread()
 end
 
 function dnsbl:is_in_cache(ip)
-	local ok, data = self.cachestore:get("plugin_dnsbl_" .. ngx.ctx.bw.server_name .. ip)
+	local ok, data = self.cachestore:get("plugin_dnsbl_" .. self.ctx.bw.server_name .. ip)
 	if not ok then
 		return false, data
 	end
@@ -154,7 +154,7 @@ function dnsbl:is_in_cache(ip)
 end
 
 function dnsbl:add_to_cache(ip, value)
-	local ok, err = self.cachestore:set("plugin_dnsbl_" .. ngx.ctx.bw.server_name .. ip, value, 86400)
+	local ok, err = self.cachestore:set("plugin_dnsbl_" .. self.ctx.bw.server_name .. ip, value, 86400)
 	if not ok then
 		return false, err
 	end

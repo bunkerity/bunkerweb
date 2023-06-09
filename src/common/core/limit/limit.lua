@@ -14,12 +14,11 @@ function limit:initialize()
 	if ngx.get_phase() ~= "init" and self:is_needed() then
 		-- Get all rules from datastore
 		local limited = false
-		local all_rules, err = self.datastore:get("plugin_limit_rules")
+		local all_rules, err = self.datastore:get("plugin_limit_rules", true)
 		if not all_rules then
 			self.logger:log(ngx.ERR, err)
 			return
 		end
-		all_rules = cjson.decode(all_rules)
 		self.rules = {}
 		-- Extract global rules
 		if all_rules.global then
@@ -28,8 +27,8 @@ function limit:initialize()
 			end
 		end
 		-- Extract and overwrite if needed server rules
-		if all_rules[ngx.ctx.bw.server_name] then
-			for k, v in pairs(all_rules[ngx.ctx.bw.server_name]) do
+		if all_rules[self.ctx.bw.server_name] then
+			for k, v in pairs(all_rules[self.ctx.bw.server_name]) do
 				self.rules[k] = v
 			end
 		end
@@ -42,7 +41,7 @@ function limit:is_needed()
 		return false
 	end
 	-- Request phases (no default)
-	if self.is_request and (ngx.ctx.bw.server_name ~= "_") then
+	if self.is_request and (self.ctx.bw.server_name ~= "_") then
 		return self.variables["USE_LIMIT_REQ"] == "yes"
 	end
 	-- Other cases : at least one service uses it
@@ -63,6 +62,7 @@ function limit:init()
 	if variables == nil then
 		return self:ret(false, err)
 	end
+	self.logger:log(ngx.ERR, cjson.encode(variables))
 	-- Store URLs and rates
 	local data = {}
 	local i = 0
@@ -79,7 +79,7 @@ function limit:init()
 			end
 		end
 	end
-	local ok, err = self.datastore:set("plugin_limit_rules", cjson.encode(data))
+	local ok, err = self.datastore:set("plugin_limit_rules", data, nil, true)
 	if not ok then
 		return self:ret(false, err)
 	end
@@ -88,7 +88,7 @@ end
 
 function limit:access()
 	-- Check if we are whitelisted
-	if ngx.ctx.bw.is_whitelisted == "yes" then
+	if self.ctx.bw.is_whitelisted == "yes" then
 		return self:ret(true, "client is whitelisted")
 	end
 	-- Check if access is needed
@@ -99,7 +99,7 @@ function limit:access()
 	local rate = nil
 	local uri = nil
 	for k, v in pairs(self.rules) do
-		if k ~= "/" and utils.regex_match(ngx.ctx.bw.uri, k) then
+		if k ~= "/" and utils.regex_match(self.ctx.bw.uri, k) then
 			rate = v
 			uri = k
 			break
@@ -110,7 +110,7 @@ function limit:access()
 			rate = self.rules["/"]
 			uri = "/"
 		else
-			return self:ret(true, "no rule for " .. ngx.ctx.bw.uri)
+			return self:ret(true, "no rule for " .. self.ctx.bw.uri)
 		end
 	end
 	-- Check if limit is reached
@@ -123,17 +123,17 @@ function limit:access()
 	if limited then
 		return self:ret(true,
 			"client IP " ..
-			ngx.ctx.bw.remote_addr ..
+			self.ctx.bw.remote_addr ..
 			" is limited for URL " ..
-			ngx.ctx.bw.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")",
+			self.ctx.bw.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")",
 			ngx.HTTP_TOO_MANY_REQUESTS)
 	end
 	-- Limit not reached
 	return self:ret(true,
 		"client IP " ..
-		ngx.ctx.bw.remote_addr ..
+		self.ctx.bw.remote_addr ..
 		" is not limited for URL " ..
-		ngx.ctx.bw.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")")
+		self.ctx.bw.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")")
 end
 
 function limit:limit_req(rate_max, rate_time)
@@ -147,7 +147,7 @@ function limit:limit_req(rate_max, rate_time)
 			timestamps = redis_timestamps
 			-- Save the new timestamps
 			local ok, err = self.datastore:set(
-				"plugin_limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri,
+				"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
 				cjson.encode(timestamps), delay)
 			if not ok then
 				return nil, "can't update timestamps : " .. err
@@ -171,7 +171,7 @@ end
 function limit:limit_req_local(rate_max, rate_time)
 	-- Get timestamps
 	local timestamps, err = self.datastore:get("plugin_limit_" ..
-		ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri)
+		self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri)
 	if not timestamps and err ~= "not found" then
 		return nil, err
 	elseif err == "not found" then
@@ -183,7 +183,7 @@ function limit:limit_req_local(rate_max, rate_time)
 	-- Save new timestamps if needed
 	if updated then
 		local ok, err = self.datastore:set(
-			"plugin_limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri,
+			"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
 			cjson.encode(new_timestamps), delay)
 		if not ok then
 			return nil, err
@@ -249,7 +249,7 @@ function limit:limit_req_redis(rate_max, rate_time)
 	end
 	-- Execute script
 	local timestamps, err = self.clusterstore:call("eval", redis_script, 1,
-		"plugin_limit_" .. ngx.ctx.bw.server_name .. ngx.ctx.bw.remote_addr .. ngx.ctx.bw.uri, rate_max, rate_time,
+		"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri, rate_max, rate_time,
 		os.time(os.date("!*t")))
 	if not timestamps then
 		self.clusterstore:close()
