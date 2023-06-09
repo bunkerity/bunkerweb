@@ -62,7 +62,6 @@ function limit:init()
 	if variables == nil then
 		return self:ret(false, err)
 	end
-	self.logger:log(ngx.ERR, cjson.encode(variables))
 	-- Store URLs and rates
 	local data = {}
 	local i = 0

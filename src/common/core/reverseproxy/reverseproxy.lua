@@ -21,7 +21,7 @@ function reverseproxy:header()
   end
   -- Add reverseproxy client headers
   for srv, vars in pairs(variables) do
-    if srv == ngx.ctx.bw.server_name then
+    if srv == self.ctx.bw.server_name then
       for var, value in pairs(vars) do
         if utils.regex_match(var, "REVERSE_PROXY_HEADERS_CLIENT") and value then
           local iterator, err = ngx.re.gmatch(value, "([\\w-]+) ([^;]+)")
