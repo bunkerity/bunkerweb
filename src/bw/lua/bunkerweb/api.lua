@@ -224,7 +224,7 @@ function api:do_api_call()
 	local list, err = self.datastore:get("plugins")
 	if not list then
 		local status, resp = self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't list loaded plugins : " .. err)
-		return false, resp["msg"], ngx.HTTP_INTERNAL_SERVER_ERROR, resp
+		return false, resp["msg"], ngx.HTTP_INTERNAL_SERVER_ERROR, cjson.encode(resp)
 	end
 	list = cjson.decode(list)
 	for i, plugin in ipairs(list) do
