@@ -1,10 +1,11 @@
 local class     = require "middleclass"
-local lrucache 	= require "resty.lrucache"
+local lrucache  = require "resty.lrucache"
 local datastore = class("datastore")
 
-local lru, err = lrucache.new(10000)
+local lru, err  = lrucache.new(10000)
 if not lru then
-	require "bunkerweb.logger":new("DATASTORE"):log(ngx.ERR, "failed to instantiate LRU cache : " .. (err or "unknown error"))
+	require "bunkerweb.logger":new("DATASTORE"):log(ngx.ERR,
+		"failed to instantiate LRU cache : " .. (err or "unknown error"))
 end
 
 function datastore:initialize()
@@ -53,7 +54,7 @@ end
 
 function datastore:ttl(key)
 	if worker then
-		return false, "no supported for LRU"
+		return false, "not supported by LRU"
 	end
 	local ttl, err = self.dict:ttl(key)
 	if not ttl then
@@ -67,7 +68,7 @@ function datastore:delete_all(pattern, worker)
 	if worker then
 		lru:keys(0)
 	else
-		local keys = self.dict:get_keys(0)
+		keys = self.dict:get_keys(0)
 	end
 	for i, key in ipairs(keys) do
 		if key:match(pattern) then
