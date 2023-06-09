@@ -2,7 +2,7 @@ local class       = require "middleclass"
 local plugin      = require "bunkerweb.plugin"
 local utils       = require "bunkerweb.utils"
 local cachestore  = require "bunkerweb.cachestore"
-local cjson      = require "cjson"
+local cjson       = require "cjson"
 
 local reversescan = class("reversescan", plugin)
 
@@ -27,25 +27,25 @@ function reversescan:access()
             ret_threads = false
             ret_err = "error getting info from cachestore : " .. cached
             break
-        -- Deny access if port opened
+            -- Deny access if port opened
         elseif cached == "open" then
             ret_threads = true
             ret_err = "port " .. port .. " is opened for IP " .. self.ctx.bw.remote_addr
             break
-        -- Perform scan in a thread
+            -- Perform scan in a thread
         elseif not cached then
             local thread = ngx.thread.spawn(self.scan, self.ctx.bw.remote_addr, tonumber(port), tonumber(self.variables["REVERSE_SCAN_TIMEOUT"]))
             threads[port] = thread
         end
     end
     if ret_threads ~= nil then
-		if #threads > 0 then
-			local wait_threads = {}
-			for port, thread in pairs(threads) do
-				table.insert(wait_threads, thread)
-			end
-			utils.kill_all_threads(wait_threads)
-		end
+        if #threads > 0 then
+            local wait_threads = {}
+            for port, thread in pairs(threads) do
+                table.insert(wait_threads, thread)
+            end
+            utils.kill_all_threads(wait_threads)
+        end
         -- Open port case
         if ret_threads then
             return self:ret(true, ret_err, utils.get_deny_status(self.ctx))
@@ -58,27 +58,27 @@ function reversescan:access()
     ret_err = nil
     local results = {}
     while true do
-		-- Compute threads to wait
-		local wait_threads = {}
-		for port, thread in pairs(threads) do
-			table.insert(wait_threads, thread)
-		end
-		-- No port opened
-		if #wait_threads == 0 then
-			break
-		end
-		-- Wait for first thread
-		local ok, open, port = ngx.thread.wait(unpack(wait_threads))
-		-- Error case
-		if not ok then
-			ret_threads = false
-			ret_err = "error while waiting thread : " .. open
-			break
-		end
+        -- Compute threads to wait
+        local wait_threads = {}
+        for port, thread in pairs(threads) do
+            table.insert(wait_threads, thread)
+        end
+        -- No port opened
+        if #wait_threads == 0 then
+            break
+        end
+        -- Wait for first thread
+        local ok, open, port = ngx.thread.wait(unpack(wait_threads))
+        -- Error case
+        if not ok then
+            ret_threads = false
+            ret_err = "error while waiting thread : " .. open
+            break
+        end
         port = tostring(port)
-		-- Remove thread from list
-		threads[port] = nil
-		-- Add result to cache
+        -- Remove thread from list
+        threads[port] = nil
+        -- Add result to cache
         local result = "close"
         if open then
             result = "open"

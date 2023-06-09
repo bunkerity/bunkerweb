@@ -11,17 +11,26 @@
       "help": "Custom header to add (HeaderName: HeaderValue).",
       "id": "custom-header",
       "label": "Custom header (HeaderName: HeaderValue)",
-      "regex": "^([\\w-]+: .+)?$",
+      "regex": "^([\\w-]+: [^,]+)?$",
       "type": "text",
       "multiple": "custom-headers"
     },
     "REMOVE_HEADERS": {
       "context": "multisite",
-      "default": "Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version",
+      "default": "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version",
       "help": "Headers to remove (Header1 Header2 Header3 ...)",
       "id": "remove-headers",
       "label": "Remove headers",
       "regex": "^(?! )( ?[\\w-]+)*$",
+      "type": "text"
+    },
+    "KEEP_UPSTREAM_HEADERS": {
+      "context": "multisite",
+      "default": "Content-Security-Policy Permissions-Policy Feature-Policy X-Frame-Options",
+      "help": "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all).",
+      "id": "keep-upstream-headers",
+      "label": "Keep upstream headers",
+      "regex": "^((?! )( ?[\\w-]+)+|\\*)?$",
       "type": "text"
     },
     "STRICT_TRANSPORT_SECURITY": {
@@ -98,6 +107,51 @@
       "label": "Feature-Policy",
       "regex": "^(?![; ])( ?([\\w-]+)(?!.*[^-]\\2 )( ('(none|self|strict-dynamic|report-sample|unsafe-inline|unsafe-eval|unsafe-hashes|unsafe-allow-redirects)'|https?://[\\w@:%.+~#=-]+[\\w()!@:%+.~#?&/=$-]*))+;)*$",
       "type": "text"
+    },
+    "CROSS_ORIGIN_OPENER_POLICY": {
+      "context": "multisite",
+      "default": "same-origin",
+      "help": "Value for the Cross-Origin-Opener-Policy header.",
+      "id": "cross-origin-opener-policy",
+      "label": "Cross-Origin-Opener-Policy",
+      "regex": "^(unsafe-none|same-origin-allow-popups|same-origin)?$",
+      "type": "select",
+      "select": [
+        "",
+        "unsafe-none",
+        "same-origin-allow-popups",
+        "same-origin"
+      ]
+    },
+    "CROSS_ORIGIN_EMBEDDER_POLICY": {
+      "context": "multisite",
+      "default": "require-corp",
+      "help": "Value for the Cross-Origin-Embedder-Policy header.",
+      "id": "cross-origin-embedder-policy",
+      "label": "Cross-Origin-Embedder-Policy",
+      "regex": "^(unsafe-none|require-corp|credentialless)?$",
+      "type": "select",
+      "select": [
+        "",
+        "unsafe-none",
+        "require-corp",
+        "credentialless"
+      ]
+    },
+    "CROSS_ORIGIN_RESOURCE_POLICY": {
+      "context": "multisite",
+      "default": "same-site",
+      "help": "Value for the Cross-Origin-Resource-Policy header.",
+      "id": "cross-origin-resource-policy",
+      "label": "Cross-Origin-Resource-Policy",
+      "regex": "^(same-site|same-origin|cross-origin)?$",
+      "type": "select",
+      "select": [
+        "",
+        "same-site",
+        "same-origin",
+        "cross-origin"
+      ]
     },
     "X_FRAME_OPTIONS": {
       "context": "multisite",

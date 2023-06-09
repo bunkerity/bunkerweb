@@ -3,7 +3,7 @@
 echo "🛰️ Building cors stack ..."
 
 # Starting stack
-docker compose pull bw-docker
+docker compose pull bw-docker app1
 if [ $? -ne 0 ] ; then
     echo "🛰️ Pull failed ❌"
     exit 1
@@ -47,17 +47,30 @@ cleanup_stack () {
 # Cleanup stack on exit
 trap cleanup_stack EXIT
 
-for test in "deactivated" "activated" "tweaked_settings"
+echo "🛰️ Initializing workspace ..."
+docker compose -f docker-compose.init.yml up --build
+if [ $? -ne 0 ] ; then
+    echo "🛰️ Build failed ❌"
+    exit 1
+elif [[ $(stat -L -c "%a %g %u" www/app1.example.com/index.php) != "655 101 33" ]] ; then
+    echo "🛰️ Init failed, permissions are not correct ❌"
+    exit 1
+fi
+
+for test in "deactivated" "activated" "allow_origin" "tweaked_settings"
 do
     if [ "$test" = "deactivated" ] ; then
         echo "🛰️ Running tests without cors ..."
     elif [ "$test" = "activated" ] ; then
         echo "🛰️ Running tests with cors ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_CORS: "no"@USE_CORS: "yes"@' {} \;
+    elif [ "$test" = "allow_origin" ] ; then
+        echo "🛰️ Running tests with a specific origin allowed only ..."
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_ORIGIN: "\*"@CORS_ALLOW_ORIGIN: "^http://app1\\\\.example\\\\.com$$"@' {} \;
     elif [ "$test" = "tweaked_settings" ] ; then
         echo "🛰️ Running tests with tweaked cors settings ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@GENERATE_SELF_SIGNED_SSL: "no"@GENERATE_SELF_SIGNED_SSL: "yes"@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_ORIGIN: "\*"@CORS_ALLOW_ORIGIN: "^https://bwadm\\\\.example\\\\.com$$"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_ORIGIN: ".*"$@CORS_ALLOW_ORIGIN: "^https://app1\\\\.example\\\\.com$$"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_EXPOSE_HEADERS: "Content-Length,Content-Range"@CORS_EXPOSE_HEADERS: "X-Test"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_MAX_AGE: "86400"@CORS_MAX_AGE: "3600"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_CREDENTIALS: "no"@CORS_ALLOW_CREDENTIALS: "yes"@' {} \;

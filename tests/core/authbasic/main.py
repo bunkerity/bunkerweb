@@ -51,6 +51,8 @@ try:
             print("ℹ️ Navigating to http://www.example.com ...", flush=True)
             driver.get("http://www.example.com")
 
+            sleep(2)
+
             try:
                 driver.find_element(By.XPATH, "//img[@alt='NGINX Logo']")
             except NoSuchElementException:
@@ -84,6 +86,8 @@ try:
             if status_code != 401:
                 print("❌ The page is accessible without auth-basic ...", flush=True)
                 exit(1)
+
+            sleep(2)
 
             print(
                 f"ℹ️ Trying to access http://{auth_basic_username}:{auth_basic_password}@www.example.com ...",

@@ -9,9 +9,6 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
   cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 /tmp/req/requirements.txt.2 > /usr/share/bunkerweb/deps/requirements.txt && \
   rm -rf /tmp/req
 
-# Update apk
-RUN apk update
-
 # Install python dependencies
 RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev
 

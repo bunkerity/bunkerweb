@@ -30,14 +30,20 @@ try:
     # Get env vars
     bw_integration = "Linux"
     integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
-    if getenv("KUBERNETES_MODE") == "yes":
+    os_release_path = Path(sep, "etc", "os-release")
+    if getenv("KUBERNETES_MODE", "no") == "yes":
         bw_integration = "Kubernetes"
-    elif getenv("SWARM_MODE") == "yes":
+    elif getenv("SWARM_MODE", "no") == "yes":
         bw_integration = "Swarm"
-    elif getenv("AUTOCONF_MODE") == "yes":
+    elif getenv("AUTOCONF_MODE", "no") == "yes":
         bw_integration = "Autoconf"
     elif integration_path.is_file():
-        integration = integration_path.read_text(encoding="utf-8").strip()
+        bw_integration = integration_path.read_text(encoding="utf-8").strip()
+    elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
+        encoding="utf-8"
+    ):
+        bw_integration = "Docker"
+
     token = getenv("CERTBOT_TOKEN", "")
     validation = getenv("CERTBOT_VALIDATION", "")
 

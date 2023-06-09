@@ -41,7 +41,7 @@ local function _createIndexWrapper(aClass, f)
         return (f(self, name))
       end
     end
-  else   -- if  type(f) == "table" then
+  else -- if  type(f) == "table" then
     return function(self, name)
       local value = aClass.__instanceDict[name]
 

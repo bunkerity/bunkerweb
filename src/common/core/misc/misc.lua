@@ -2,11 +2,11 @@ local class  = require "middleclass"
 local plugin = require "bunkerweb.plugin"
 local utils  = require "bunkerweb.utils"
 
-local misc = class("misc", plugin)
+local misc   = class("misc", plugin)
 
 function misc:initialize()
-	-- Call parent initialize
-	plugin.initialize(self, "misc")
+    -- Call parent initialize
+    plugin.initialize(self, "misc")
 end
 
 function misc:access()

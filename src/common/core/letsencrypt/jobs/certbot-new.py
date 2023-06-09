@@ -37,17 +37,17 @@ def certbot_new(
             join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot"),
             "certonly",
             "--config-dir",
-            letsencrypt_path.joinpath("etc"),
+            str(letsencrypt_path.joinpath("etc")),
             "--work-dir",
-            letsencrypt_path.joinpath("lib"),
+            str(letsencrypt_path.joinpath("lib")),
             "--logs-dir",
-            letsencrypt_path.joinpath("log"),
+            str(letsencrypt_path.joinpath("log")),
             "--manual",
             "--preferred-challenges=http",
             "--manual-auth-hook",
-            letsencrypt_job_path.joinpath("certbot-auth.py"),
+            str(letsencrypt_job_path.joinpath("certbot-auth.py")),
             "--manual-cleanup-hook",
-            letsencrypt_job_path.joinpath("certbot-cleanup.py"),
+            str(letsencrypt_job_path.joinpath("certbot-cleanup.py")),
             "-n",
             "-d",
             domains,
@@ -147,10 +147,10 @@ try:
                 certbot_new(domains, real_email, letsencrypt_path, letsencrypt_job_path)
                 != 0
             ):
-                status = 2
                 logger.error(
                     f"Certificate generation failed for domain(s) {domains} ...",
                 )
+                _exit(2)
             else:
                 status = 1
                 logger.info(

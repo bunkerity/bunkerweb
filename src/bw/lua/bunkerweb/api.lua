@@ -1,11 +1,11 @@
 local class     = require "middleclass"
 local datastore = require "bunkerweb.datastore"
 local utils     = require "bunkerweb.utils"
-local logger	= require "bunkerweb.logger"
+local logger    = require "bunkerweb.logger"
 local cjson     = require "cjson"
 local upload    = require "resty.upload"
-local rsignal	= require "resty.signal"
-local process	= require "ngx.process"
+local rsignal   = require "resty.signal"
+local process   = require "ngx.process"
 
 local api       = class("api")
 

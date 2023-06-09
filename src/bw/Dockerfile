@@ -3,9 +3,6 @@ FROM nginx:1.24.0-alpine AS builder
 # Copy dependencies sources folder
 COPY src/deps /tmp/bunkerweb/deps
 
-# Update apk
-RUN apk update
-
 # Compile and install dependencies
 RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev && \
 	mkdir -p /usr/share/bunkerweb/deps && \

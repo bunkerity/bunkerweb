@@ -11,7 +11,7 @@ from os.path import basename, dirname, join
 from pathlib import Path
 from re import compile as re_compile
 from sys import _getframe, path as sys_path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 from time import sleep
 from traceback import format_exc
 
@@ -55,7 +55,13 @@ install_as_MySQLdb()
 
 
 class Database:
-    def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        logger: Logger,
+        sqlalchemy_string: Optional[str] = None,
+        *,
+        ui: bool = False,
+    ) -> None:
         """Initialize the database"""
         self.__logger = logger
         self.__sql_session = None
@@ -67,10 +73,14 @@ class Database:
             )
 
         if sqlalchemy_string.startswith("sqlite"):
-            with suppress(FileExistsError):
-                Path(dirname(sqlalchemy_string.split("///")[1])).mkdir(
-                    parents=True, exist_ok=True
-                )
+            if ui:
+                while not Path(sep, "var", "lib", "bunkerweb", "db.sqlite3"):
+                    sleep(1)
+            else:
+                with suppress(FileExistsError):
+                    Path(dirname(sqlalchemy_string.split("///")[1])).mkdir(
+                        parents=True, exist_ok=True
+                    )
         elif "+" in sqlalchemy_string and "+pymysql" not in sqlalchemy_string:
             splitted = sqlalchemy_string.split("+")
             sqlalchemy_string = f"{splitted[0]}:{':'.join(splitted[1].split(':')[1:])}"
@@ -254,7 +264,7 @@ class Database:
 
         return ""
 
-    def check_changes(self) -> Union[Dict[str, bool], str]:
+    def check_changes(self) -> Union[Dict[str, bool], bool, str]:
         """Check if either the config, the custom configs or plugins have changed inside the database"""
         with self.__db_session() as session:
             try:
@@ -268,6 +278,7 @@ class Database:
                     .filter_by(id=1)
                     .first()
                 )
+
                 return dict(
                     custom_configs_changed=metadata is not None
                     and metadata.custom_configs_changed,
@@ -658,6 +669,7 @@ class Database:
                     if not metadata.first_config_saved:
                         metadata.first_config_saved = True
                     metadata.config_changed = bool(to_put)
+                    metadata.ui_config_changed = bool(to_put)
 
             try:
                 session.add_all(to_put)

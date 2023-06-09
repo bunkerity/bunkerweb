@@ -63,6 +63,12 @@ STREAM support :x:
 
 You can automatically remove verbose headers in the HTTP responses by using the `REMOVE_HEADERS` setting (default : `Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version`).
 
+#### Keep upstream headers
+
+STREAM support :x:
+
+You can automatically keep headers from upstream servers and prevent BunkerWeb from overriding them in the HTTP responses by using the `KEEP_UPSTREAM_HEADERS` setting (default : `Content-Security-Policy Permissions-Policy Feature-Policy X-Frame-Options`). A special value `*` is available to keep all headers. List of headers to keep must be separated with a space. Note that if the header is not present in the upstream response, it will be added by BunkerWeb.
+
 #### Cookies
 
 STREAM support :x:
@@ -250,6 +256,7 @@ That kind of security is implemented but not enabled by default in BunkerWeb and
 - **Captcha** : force the client to solve a classical captcha (no external dependencies)
 - **hCaptcha** : force the client to solve a captcha from hCaptcha
 - **reCAPTCHA** : force the client to get a minimum score with Google reCAPTCHA
+- **Turnstile** : enforce rate limiting and access control for APIs and web applications using various mechanisms with Coudflare Turnstile
 
 Here is the list of related settings :
 
@@ -262,6 +269,8 @@ Here is the list of related settings :
 |`ANTIBOT_RECAPTCHA_SECRET` |            |multisite|no      |Secret for reCAPTCHA challenge.                                                                                               |
 |`ANTIBOT_HCAPTCHA_SITEKEY` |            |multisite|no      |Sitekey for hCaptcha challenge.                                                                                               |
 |`ANTIBOT_HCAPTCHA_SECRET`  |            |multisite|no      |Secret for hCaptcha challenge.                                                                                                |
+|`ANTIBOT_TURNSTILE_SITEKEY`|            |multisite|no      |Sitekey for Turnstile challenge.                                                                                              |
+|`ANTIBOT_TURNSTILE_SECRET` |            |multisite|no      |Secret for Turnstile challenge.                                                                                               |
 |`ANTIBOT_TIME_RESOLVE`     |`60`        |multisite|no      |Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.|
 |`ANTIBOT_TIME_VALID`       |`86400`     |multisite|no      |Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                |
 
