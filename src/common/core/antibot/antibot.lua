@@ -1,14 +1,13 @@
-local class     = require "middleclass"
-local plugin    = require "bunkerweb.plugin"
-local utils     = require "bunkerweb.utils"
-local datastore = require "bunkerweb.datastore"
-local cjson     = require "cjson"
-local captcha   = require "antibot.captcha"
-local base64    = require "base64"
-local sha256    = require "resty.sha256"
-local str       = require "resty.string"
-local http      = require "resty.http"
-local template  = nil
+local class    = require "middleclass"
+local plugin   = require "bunkerweb.plugin"
+local utils    = require "bunkerweb.utils"
+local cjson    = require "cjson"
+local captcha  = require "antibot.captcha"
+local base64   = require "base64"
+local sha256   = require "resty.sha256"
+local str      = require "resty.string"
+local http     = require "resty.http"
+local template = nil
 if ngx.shared.datastore then
 	template = require "resty.template"
 end
@@ -32,7 +31,7 @@ function antibot:access()
 		return self:ret(false, "can't get session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
 	end
 	self.session = session
-	self.session_data = utils.get_session_data(self.session, self.ctx)
+	self.session_data = utils.get_session_data(self.session, true, self.ctx)
 	-- Check if session is valid
 	self:check_session()
 
@@ -112,7 +111,7 @@ function antibot:content()
 		return self:ret(false, "can't get session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
 	end
 	self.session = session
-	self.session_data = utils.get_session_data(self.session, self.ctx)
+	self.session_data = utils.get_session_data(self.session, true, self.ctx)
 
 	-- Direct access without session
 	if not self.session_data.prepared then
@@ -155,7 +154,7 @@ end
 
 function antibot:set_session_data()
 	if self.session_updated then
-		local ok, err = utils.set_session_data(self.session, self.session_data, self.ctx)
+		local ok, err = utils.set_session_data(self.session, self.session_data, true, self.ctx)
 		if not ok then
 			return false, err
 		end
@@ -195,7 +194,7 @@ function antibot:display_challenge()
 
 	-- Common variables for templates
 	local template_vars = {
-		antibot_uri = self.variables["ANTIBOT_URI"]
+		antibot_uri = self.variables["ANTIBOT_URI"],
 	}
 
 	-- Javascript case
@@ -294,8 +293,8 @@ function antibot:check_challenge()
 		local res, err = httpc:request_uri("https://www.google.com/recaptcha/api/siteverify", {
 			method = "POST",
 			body = "secret=" ..
-			self.variables["ANTIBOT_RECAPTCHA_SECRET"] ..
-			"&response=" .. args["token"] .. "&remoteip=" .. self.ctx.bw.remote_addr,
+					self.variables["ANTIBOT_RECAPTCHA_SECRET"] ..
+					"&response=" .. args["token"] .. "&remoteip=" .. self.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}
@@ -330,8 +329,8 @@ function antibot:check_challenge()
 		local res, err = httpc:request_uri("https://hcaptcha.com/siteverify", {
 			method = "POST",
 			body = "secret=" ..
-			self.variables["ANTIBOT_HCAPTCHA_SECRET"] ..
-			"&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
+					self.variables["ANTIBOT_HCAPTCHA_SECRET"] ..
+					"&response=" .. args["token"] .. "&remoteip=" .. self.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}
@@ -364,9 +363,9 @@ function antibot:check_challenge()
 			return nil, "can't instantiate http object : " .. err, nil, nil
 		end
 		local data = {
-			secret=self.variables["ANTIBOT_TURNSTILE_SECRET"],
-			response=args["token"],
-			remoteip=ngx.ctx.bw.remote_addr
+			secret = self.variables["ANTIBOT_TURNSTILE_SECRET"],
+			response = args["token"],
+			remoteip = self.ctx.bw.remote_addr
 		}
 		local res, err = httpc:request_uri("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
 			method = "POST",

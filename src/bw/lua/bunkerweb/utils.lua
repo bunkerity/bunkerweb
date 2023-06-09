@@ -56,7 +56,7 @@ utils.has_variable           = function(var, value)
 	return variables["global"][var] == value, "success"
 end
 
-utils.has_not_variable           = function(var, value)
+utils.has_not_variable       = function(var, value)
 	-- Get global variable
 	local variables, err = datastore:get('variables', true)
 	if not variables then
@@ -479,8 +479,8 @@ utils.get_deny_status        = function(ctx)
 	return tonumber(variables["global"]["DENY_HTTP_STATUS"])
 end
 
-utils.check_session = function(ctx)
-	local _session, err, exists, refreshed = session.start({audience = "metadata"})
+utils.check_session          = function(ctx)
+	local _session, err, exists, refreshed = session.start({ audience = "metadata" })
 	if exists then
 		for i, check in ipairs(ctx.bw.sessions_checks) do
 			local key = check[1]
@@ -526,7 +526,7 @@ utils.get_session            = function(audience, ctx)
 	return _session
 end
 
-utils.get_session_data	= function(_session, site)
+utils.get_session_data       = function(_session, site, ctx)
 	local site_only = site == nil or site
 	local data = _session:get_data()
 	if site_only then
@@ -535,7 +535,7 @@ utils.get_session_data	= function(_session, site)
 	return data
 end
 
-utils.set_session_data = function(_session, data, site)
+utils.set_session_data       = function(_session, data, site, ctx)
 	local site_only = site == nil or site
 	if site_only then
 		local all_data = _session:get_data()
@@ -702,7 +702,7 @@ utils.kill_all_threads       = function(threads)
 	end
 end
 
-utils.get_ctx_obj = function(obj)
+utils.get_ctx_obj            = function(obj)
 	if ngx.ctx and ngx.ctx.bw then
 		return ngx.ctx.bw[obj]
 	end
