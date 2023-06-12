@@ -80,11 +80,7 @@ from src.Config import Config
 from src.ReverseProxied import ReverseProxied
 from src.User import User
 
-from utils import (
-    check_settings,
-    get_variables,
-    path_to_dict,
-)
+from utils import check_settings, path_to_dict
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 
