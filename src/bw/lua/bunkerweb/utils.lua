@@ -26,7 +26,7 @@ utils.get_variable           = function(var, site_search)
 	end
 	local value = variables["global"][var]
 	-- Site search case
-	local multisite = site_search and variables["global"]["MULTISITE"] == "yes" and ngx.var.server_name
+	local multisite = site_search and variables["global"]["MULTISITE"] == "yes" and ngx.var.server_name ~= "_"
 	if multisite then
 		value = variables[ngx.var.server_name][var]
 	end
