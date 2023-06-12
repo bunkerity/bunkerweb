@@ -288,7 +288,6 @@ function antibot:display_challenge()
 	-- hCaptcha case
 	if self.session_data.type == "hcaptcha" then
 		template_vars.hcaptcha_sitekey = self.variables["ANTIBOT_HCAPTCHA_SITEKEY"]
-		template_vars.hcaptcha_passive = self.variables["ANTIBOT_HCAPTCHA_PASSIVE"] == "yes"
 	end
 
 	-- Turnstile case
