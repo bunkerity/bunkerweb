@@ -19,6 +19,71 @@ function antibot:initialize(ctx)
 	plugin.initialize(self, "antibot", ctx)
 end
 
+function antibot:header()
+	-- Check if access is needed
+	if self.variables["USE_ANTIBOT"] == "no" then
+		return self:ret(true, "antibot not activated")
+	end
+	-- Check if antibot uri
+	if self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
+		return self:ret(true, "Not antibot uri")
+	end
+
+	-- Get session data
+	local session, err = utils.get_session("antibot", self.ctx)
+	if not session then
+		return self:ret(false, "can't get session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
+	end
+	self.session = session
+	self.session_data = utils.get_session_data(self.session, true, self.ctx)
+	-- Check if session is valid
+	self:check_session()
+
+	-- Don't go further if client resolved the challenge
+	if self.session_data.resolved then
+		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
+			return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
+		end
+		return self:ret(true, "client already resolved the challenge")
+	end
+
+	local header = "Content-Security-Policy"
+	if utils.get_variable("CONTENT_SECURITY_POLICY_REPORT_ONLY", true) == "yes" then
+		header = header .. "-Report-Only"
+	end
+
+	if self.session_data.type == "recaptcha" then
+		ngx.header[header] =
+				"default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-" ..
+				self.session_data.nonce_script ..
+				"' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ 'unsafe-inline' http: https:; img-src https://www.gstatic.com/recaptcha/ 'self' data:; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/; style-src 'self' 'nonce-" ..
+				self.session_data.nonce_style ..
+				"'; font-src 'self' https://fonts.gstatic.com data:; base-uri 'self';"
+	elseif self.session_data.type == "hcaptcha" then
+		ngx.header[header] =
+				"default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-" ..
+				self.session_data.nonce_script ..
+				"' https://hcaptcha.com https://*.hcaptcha.com 'unsafe-inline' http: https:; img-src 'self' data:; frame-src https://hcaptcha.com https://*.hcaptcha.com; style-src 'self' 'nonce-" ..
+				self.session_data.nonce_style ..
+				"' https://hcaptcha.com https://*.hcaptcha.com; connect-src https://hcaptcha.com https://*.hcaptcha.com; font-src 'self' data:; base-uri 'self';"
+	elseif self.session_data.type == "turnstile" then
+		ngx.header[header] =
+				"default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-" ..
+				self.session_data.nonce_script ..
+				"' https://challenges.cloudflare.com 'unsafe-inline' http: https:; img-src 'self' data:; frame-src https://challenges.cloudflare.com; style-src 'self' 'nonce-" ..
+				self.session_data.nonce_style ..
+				"'; font-src 'self' data:; base-uri 'self';"
+	else
+		ngx.header[header] =
+				"default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-" ..
+				self.session_data.nonce_script ..
+				"' 'unsafe-inline' http: https:; img-src 'self' data:; style-src 'self' 'nonce-" ..
+				self.session_data.nonce_style ..
+				"'; font-src 'self' data:; base-uri 'self';"
+	end
+	return self:ret(true, "Successfully overridden CSP header")
+end
+
 function antibot:access()
 	-- Check if access is needed
 	if self.variables["USE_ANTIBOT"] == "no" then
@@ -172,15 +237,17 @@ function antibot:prepare_challenge()
 		self.session_data.type = self.variables["USE_ANTIBOT"]
 		self.session_data.resolved = false
 		self.session_data.original_uri = self.ctx.bw.request_uri
+		self.session_data.nonce_script = utils.rand(16)
+		self.session_data.nonce_style = utils.rand(16)
 		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
 			self.session_data.original_uri = "/"
 		end
-		if self.variables["USE_ANTIBOT"] == "cookie" then
+		if self.session_data.type == "cookie" then
 			self.session_data.resolved = true
 			self.session_data.time_valid = ngx.now()
-		elseif self.variables["USE_ANTIBOT"] == "javascript" then
+		elseif self.session_data.type == "javascript" then
 			self.session_data.random = utils.rand(20)
-		elseif self.variables["USE_ANTIBOT"] == "captcha" then
+		elseif self.session_data.type == "captcha" then
 			self.session_data.captcha = utils.rand(6, true)
 		end
 	end
@@ -195,15 +262,17 @@ function antibot:display_challenge()
 	-- Common variables for templates
 	local template_vars = {
 		antibot_uri = self.variables["ANTIBOT_URI"],
+		nonce_script = self.session_data.nonce_script,
+		nonce_style = self.session_data.nonce_style,
 	}
 
 	-- Javascript case
-	if self.variables["USE_ANTIBOT"] == "javascript" then
+	if self.session_data.type == "javascript" then
 		template_vars.random = self.session_data.random
 	end
 
 	-- Captcha case
-	if self.variables["USE_ANTIBOT"] == "captcha" then
+	if self.session_data.type == "captcha" then
 		local chall_captcha = captcha.new()
 		chall_captcha:font("/usr/share/bunkerweb/core/antibot/files/font.ttf")
 		chall_captcha:string(self.session_data.captcha)
@@ -212,22 +281,23 @@ function antibot:display_challenge()
 	end
 
 	-- reCAPTCHA case
-	if self.variables["USE_ANTIBOT"] == "recaptcha" then
+	if self.session_data.type == "recaptcha" then
 		template_vars.recaptcha_sitekey = self.variables["ANTIBOT_RECAPTCHA_SITEKEY"]
 	end
 
 	-- hCaptcha case
-	if self.variables["USE_ANTIBOT"] == "hcaptcha" then
+	if self.session_data.type == "hcaptcha" then
 		template_vars.hcaptcha_sitekey = self.variables["ANTIBOT_HCAPTCHA_SITEKEY"]
+		template_vars.hcaptcha_passive = self.variables["ANTIBOT_HCAPTCHA_PASSIVE"] == "yes"
 	end
 
 	-- Turnstile case
-	if self.variables["USE_ANTIBOT"] == "turnstile" then
+	if self.session_data.type == "turnstile" then
 		template_vars.turnstile_sitekey = self.variables["ANTIBOT_TURNSTILE_SITEKEY"]
 	end
 
 	-- Render content
-	template.render(self.variables["USE_ANTIBOT"] .. ".html", template_vars)
+	template.render(self.session_data.type .. ".html", template_vars)
 
 	return true, "displayed challenge"
 end
@@ -239,14 +309,12 @@ function antibot:check_challenge()
 	end
 
 	local resolved = false
-	local err = ""
-	local redirect = nil
 
 	self.session_data.prepared = false
 	self.session_updated = true
 
 	-- Javascript case
-	if self.variables["USE_ANTIBOT"] == "javascript" then
+	if self.session_data.type == "javascript" then
 		ngx.req.read_body()
 		local args, err = ngx.req.get_post_args(1)
 		if err == "truncated" or not args or not args["challenge"] then
@@ -265,7 +333,7 @@ function antibot:check_challenge()
 	end
 
 	-- Captcha case
-	if self.variables["USE_ANTIBOT"] == "captcha" then
+	if self.session_data.type == "captcha" then
 		ngx.req.read_body()
 		local args, err = ngx.req.get_post_args(1)
 		if err == "truncated" or not args or not args["captcha"] then
@@ -280,7 +348,7 @@ function antibot:check_challenge()
 	end
 
 	-- reCAPTCHA case
-	if self.variables["USE_ANTIBOT"] == "recaptcha" then
+	if self.session_data.type == "recaptcha" then
 		ngx.req.read_body()
 		local args, err = ngx.req.get_post_args(1)
 		if err == "truncated" or not args or not args["token"] then
@@ -316,7 +384,7 @@ function antibot:check_challenge()
 	end
 
 	-- hCaptcha case
-	if self.variables["USE_ANTIBOT"] == "hcaptcha" then
+	if self.session_data.type == "hcaptcha" then
 		ngx.req.read_body()
 		local args, err = ngx.req.get_post_args(1)
 		if err == "truncated" or not args or not args["token"] then
@@ -352,7 +420,7 @@ function antibot:check_challenge()
 	end
 
 	-- Turnstile case
-	if self.variables["USE_ANTIBOT"] == "turnstile" then
+	if self.session_data.type == "turnstile" then
 		ngx.req.read_body()
 		local args, err = ngx.req.get_post_args(1)
 		if err == "truncated" or not args or not args["token"] then
@@ -362,14 +430,11 @@ function antibot:check_challenge()
 		if not httpc then
 			return nil, "can't instantiate http object : " .. err, nil, nil
 		end
-		local data = {
-			secret = self.variables["ANTIBOT_TURNSTILE_SECRET"],
-			response = args["token"],
-			remoteip = self.ctx.bw.remote_addr
-		}
 		local res, err = httpc:request_uri("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
 			method = "POST",
-			body = cjson.encode(data),
+			body = "secret=" ..
+					self.variables["ANTIBOT_TURNSTILE_SECRET"] ..
+					"&response=" .. args["token"] .. "&remoteip=" .. self.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}

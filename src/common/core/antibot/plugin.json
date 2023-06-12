@@ -59,6 +59,15 @@
       "regex": "^[\\w-]*$",
       "type": "password"
     },
+    "ANTIBOT_HCAPTCHA_PASSIVE": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Use hCaptcha in passive mode.",
+      "id": "antibot-hcaptcha-passive",
+      "label": "hCaptcha passive",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "ANTIBOT_HCAPTCHA_SITEKEY": {
       "context": "multisite",
       "default": "",
