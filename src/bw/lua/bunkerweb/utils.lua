@@ -45,7 +45,7 @@ utils.has_variable           = function(var, value)
 		local servers = variables["global"]["SERVER_NAME"]
 		-- Check each server
 		for server in servers:gmatch("%S+") do
-			if variables[server][var] == "value" then
+			if variables[server][var] == value then
 				return true, "success"
 			end
 		end
