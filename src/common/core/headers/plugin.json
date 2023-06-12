@@ -70,6 +70,15 @@
       "regex": "^.*$",
       "type": "text"
     },
+    "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Send reports for violations of the Content-Security-Policy header instead of blocking them.",
+      "id": "content-security-policy-report-only",
+      "label": "Content-Security-Policy-Report-Only",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "REFERRER_POLICY": {
       "context": "multisite",
       "default": "strict-origin-when-cross-origin",
@@ -107,51 +116,6 @@
       "label": "Feature-Policy",
       "regex": "^(?![; ])( ?([\\w-]+)(?!.*[^-]\\2 )( ('(none|self|strict-dynamic|report-sample|unsafe-inline|unsafe-eval|unsafe-hashes|unsafe-allow-redirects)'|https?://[\\w@:%.+~#=-]+[\\w()!@:%+.~#?&/=$-]*))+;)*$",
       "type": "text"
-    },
-    "CROSS_ORIGIN_OPENER_POLICY": {
-      "context": "multisite",
-      "default": "same-origin",
-      "help": "Value for the Cross-Origin-Opener-Policy header.",
-      "id": "cross-origin-opener-policy",
-      "label": "Cross-Origin-Opener-Policy",
-      "regex": "^(unsafe-none|same-origin-allow-popups|same-origin)?$",
-      "type": "select",
-      "select": [
-        "",
-        "unsafe-none",
-        "same-origin-allow-popups",
-        "same-origin"
-      ]
-    },
-    "CROSS_ORIGIN_EMBEDDER_POLICY": {
-      "context": "multisite",
-      "default": "require-corp",
-      "help": "Value for the Cross-Origin-Embedder-Policy header.",
-      "id": "cross-origin-embedder-policy",
-      "label": "Cross-Origin-Embedder-Policy",
-      "regex": "^(unsafe-none|require-corp|credentialless)?$",
-      "type": "select",
-      "select": [
-        "",
-        "unsafe-none",
-        "require-corp",
-        "credentialless"
-      ]
-    },
-    "CROSS_ORIGIN_RESOURCE_POLICY": {
-      "context": "multisite",
-      "default": "same-site",
-      "help": "Value for the Cross-Origin-Resource-Policy header.",
-      "id": "cross-origin-resource-policy",
-      "label": "Cross-Origin-Resource-Policy",
-      "regex": "^(same-site|same-origin|cross-origin)?$",
-      "type": "select",
-      "select": [
-        "",
-        "same-site",
-        "same-origin",
-        "cross-origin"
-      ]
     },
     "X_FRAME_OPTIONS": {
       "context": "multisite",

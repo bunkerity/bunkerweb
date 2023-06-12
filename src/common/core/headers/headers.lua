@@ -13,9 +13,6 @@ function headers:initialize()
     ["REFERRER_POLICY"] = "Referrer-Policy",
     ["PERMISSIONS_POLICY"] = "Permissions-Policy",
     ["FEATURE_POLICY"] = "Feature-Policy",
-    ["CROSS_ORIGIN_OPENER_POLICY"] = "Cross-Origin-Opener-Policy",
-    ["CROSS_ORIGIN_EMBEDDER_POLICY"] = "Cross-Origin-Embedder-Policy",
-    ["CROSS_ORIGIN_RESOURCE_POLICY"] = "Cross-Origin-Resource-Policy",
     ["X_FRAME_OPTIONS"] = "X-Frame-Options",
     ["X_CONTENT_TYPE_OPTIONS"] = "X-Content-Type-Options",
     ["X_XSS_PROTECTION"] = "X-XSS-Protection"
@@ -24,12 +21,17 @@ end
 
 function headers:header()
   -- Override upstream headers if needed
-  local ssl = utils.get_variable("AUTO_LETS_ENCRYPT") == "yes" or utils.get_variable("USE_CUSTOM_SSL") == "yes" or
-      utils.get_variable("GENERATE_SELF_SIGNED_SSL") == "yes"
+  local ssl = utils.get_variable("AUTO_LETS_ENCRYPT", true) == "yes" or
+      utils.get_variable("USE_CUSTOM_SSL", true) == "yes" or
+      utils.get_variable("GENERATE_SELF_SIGNED_SSL", true) == "yes"
   for variable, header in pairs(self.all_headers) do
     if ngx.header[header] == nil or self.variables[variable] and self.variables["KEEP_UPSTREAM_HEADERS"] ~= "*" and utils.regex_match(self.variables["KEEP_UPSTREAM_HEADERS"], "(^| )" .. header .. "($| )") == nil then
-      if header ~= "Strict-Transport-Security" or ssl then
-        ngx.header[header] = self.variables[variable]
+      if (header ~= "Strict-Transport-Security" or ssl) then
+        if header == "Content-Security-Policy" and self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes" then
+          ngx.header["Content-Security-Policy-Report-Only"] = self.variables[variable]
+        else
+          ngx.header[header] = self.variables[variable]
+        end
       end
     end
   end

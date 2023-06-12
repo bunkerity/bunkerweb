@@ -8,7 +8,10 @@ function cors:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "cors", ctx)
 	self.all_headers = {
-		["CORS_EXPOSE_HEADERS"] = "Access-Control-Expose-Headers"
+		["CORS_EXPOSE_HEADERS"] = "Access-Control-Expose-Headers",
+		["CROSS_ORIGIN_OPENER_POLICY"] = "Cross-Origin-Opener-Policy",
+		["CROSS_ORIGIN_EMBEDDER_POLICY"] = "Cross-Origin-Embedder-Policy",
+		["CROSS_ORIGIN_RESOURCE_POLICY"] = "Cross-Origin-Resource-Policy",
 	}
 	self.preflight_headers = {
 		["CORS_MAX_AGE"] = "Access-Control-Max-Age",
@@ -79,7 +82,8 @@ function cors:access()
 	end
 	-- Deny as soon as possible if needed
 	if self.ctx.bw.http_origin and self.variables["CORS_DENY_REQUEST"] == "yes" and self.variables["CORS_ALLOW_ORIGIN"] ~= "*" and not utils.regex_match(self.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"]) then
-		return self:ret(true, "origin " .. self.ctx.bw.http_origin .. " is not allowed, denying access", utils.get_deny_status(self.ctx))
+		return self:ret(true, "origin " .. self.ctx.bw.http_origin .. " is not allowed, denying access",
+			utils.get_deny_status(self.ctx))
 	end
 	-- Send CORS policy with a 204 (no content) status
 	if self.ctx.bw.request_method == "OPTIONS" and self.ctx.bw.http_origin then
