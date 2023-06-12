@@ -1,12 +1,9 @@
-local class      = require "middleclass"
-local plugin     = require "bunkerweb.plugin"
-local utils      = require "bunkerweb.utils"
-local datastore  = require "bunkerweb.datastore"
-local cachestore = require "bunkerweb.cachestore"
-local cjson      = require "cjson"
-local ipmatcher  = require "resty.ipmatcher"
+local class     = require "middleclass"
+local plugin    = require "bunkerweb.plugin"
+local utils     = require "bunkerweb.utils"
+local ipmatcher = require "resty.ipmatcher"
 
-local blacklist  = class("blacklist", plugin)
+local blacklist = class("blacklist", plugin)
 
 function blacklist:initialize(ctx)
 	-- Call parent initialize

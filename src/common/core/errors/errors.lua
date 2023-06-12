@@ -1,7 +1,5 @@
 local class    = require "middleclass"
 local plugin   = require "bunkerweb.plugin"
-local utils    = require "bunkerweb.utils"
-local cjson    = require "cjson"
 local template = nil
 if ngx.shared.datastore then
 	template = require "resty.template"

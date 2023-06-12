@@ -1,11 +1,9 @@
-local class        = require "middleclass"
-local plugin       = require "bunkerweb.plugin"
-local utils        = require "bunkerweb.utils"
-local datastore    = require "bunkerweb.datastore"
-local clusterstore = require "bunkerweb.clusterstore"
-local cjson        = require "cjson"
+local class  = require "middleclass"
+local plugin = require "bunkerweb.plugin"
+local utils  = require "bunkerweb.utils"
+local cjson  = require "cjson"
 
-local limit        = class("limit", plugin)
+local limit  = class("limit", plugin)
 
 function limit:initialize()
 	-- Call parent initialize

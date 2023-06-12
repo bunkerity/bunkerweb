@@ -1,11 +1,9 @@
-local class      = require "middleclass"
-local plugin     = require "bunkerweb.plugin"
-local utils      = require "bunkerweb.utils"
-local cachestore = require "bunkerweb.cachestore"
-local cjson      = require "cjson"
-local ipmatcher  = require "resty.ipmatcher"
+local class     = require "middleclass"
+local plugin    = require "bunkerweb.plugin"
+local utils     = require "bunkerweb.utils"
+local ipmatcher = require "resty.ipmatcher"
 
-local greylist   = class("greylist", plugin)
+local greylist  = class("greylist", plugin)
 
 function greylist:initialize(ctx)
 	-- Call parent initialize

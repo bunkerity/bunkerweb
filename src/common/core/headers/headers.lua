@@ -42,7 +42,7 @@ function headers:header()
   end
   -- Add custom headers
   for srv, vars in pairs(variables) do
-    if srv == self.ctx.bw.server_name then
+    if srv == self.ctx.bw.server_name or srv == "global" then
       for var, value in pairs(vars) do
         if utils.regex_match(var, "CUSTOM_HEADER") and value then
           local m = utils.regex_match(value, "([\\w-]+): ([^,]+)")

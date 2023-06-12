@@ -1,11 +1,9 @@
-local class      = require "middleclass"
-local plugin     = require "bunkerweb.plugin"
-local utils      = require "bunkerweb.utils"
-local cachestore = require "bunkerweb.cachestore"
-local cjson      = require "cjson"
-local resolver   = require "resty.dns.resolver"
+local class    = require "middleclass"
+local plugin   = require "bunkerweb.plugin"
+local utils    = require "bunkerweb.utils"
+local resolver = require "resty.dns.resolver"
 
-local dnsbl      = class("dnsbl", plugin)
+local dnsbl    = class("dnsbl", plugin)
 
 function dnsbl:initialize(ctx)
 	-- Call parent initialize

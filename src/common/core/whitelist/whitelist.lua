@@ -1,13 +1,10 @@
-local class      = require "middleclass"
-local plugin     = require "bunkerweb.plugin"
-local utils      = require "bunkerweb.utils"
-local datastore  = require "bunkerweb.datastore"
-local cachestore = require "bunkerweb.cachestore"
-local cjson      = require "cjson"
-local ipmatcher  = require "resty.ipmatcher"
-local env        = require "resty.env"
+local class     = require "middleclass"
+local plugin    = require "bunkerweb.plugin"
+local utils     = require "bunkerweb.utils"
+local ipmatcher = require "resty.ipmatcher"
+local env       = require "resty.env"
 
-local whitelist  = class("whitelist", plugin)
+local whitelist = class("whitelist", plugin)
 
 function whitelist:initialize()
 	-- Call parent initialize

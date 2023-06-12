@@ -35,7 +35,7 @@ function sessions:set()
     self.ctx.bw.sessions_checks = {}
     for check, value in pairs(checks) do
         if self.variables["SESSIONS_CHECK_" .. check] == "yes" then
-            table.insert(self.ctx.bw.sessions_checks, {check, value})
+            table.insert(self.ctx.bw.sessions_checks, { check, value })
         end
     end
     return self:ret(true, "success")

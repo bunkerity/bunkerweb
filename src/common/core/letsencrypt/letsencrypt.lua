@@ -1,6 +1,5 @@
 local class       = require "middleclass"
 local plugin      = require "bunkerweb.plugin"
-local utils       = require "bunkerweb.utils"
 local cjson       = require "cjson"
 
 local letsencrypt = class("letsencrypt", plugin)
