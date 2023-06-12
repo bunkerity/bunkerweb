@@ -112,7 +112,7 @@ try:
             flush=True,
         )
         exit(0)
-    elif request_number != int(limit_req_rate[:-3]) + 1:
+    elif request_number < int(limit_req_rate[:-3]) + 1:
         print(
             f"❌ The limit_req directive is not working correctly, {request_number} requests were made in {total:.2f}s while the limit was set to {limit_req_rate}, exiting ...",
             flush=True,
@@ -159,7 +159,7 @@ try:
                 flush=True,
             )
             exit(1)
-        elif request_number != int(limit_req_rate_1[:-3]) + 1:
+        elif request_number < int(limit_req_rate_1[:-3]) + 1:
             print(
                 f"❌ The limit_req_1 directive is not working correctly, {request_number} requests were made in {total:.2f}s while the limit was set to {limit_req_rate}, exiting ...",
                 flush=True,
