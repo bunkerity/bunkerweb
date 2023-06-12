@@ -155,13 +155,14 @@ try:
         total = time() - start
         rate = int(limit_req_rate_1[:-3])
 
-        if stopped:
-            print(
-                f"❌ The limit_req_1 directive is not working correctly, the limit was not reached in 20 requests in {total:.2f}s, exiting ...",
-                flush=True,
-            )
-            exit(1)
-        elif request_number < rate + 1 or request_number > rate + 3:
+        if request_number < rate + 1 or request_number > rate + 3:
+            if stopped:
+                print(
+                    f"❌ The limit_req_1 directive is not working correctly, the limit was not reached in 20 requests in {total:.2f}s, exiting ...",
+                    flush=True,
+                )
+                exit(1)
+
             print(
                 f"❌ The limit_req_1 directive is not working correctly, {request_number} requests were made in {total:.2f}s while the limit was set to {limit_req_rate}, exiting ...",
                 flush=True,
