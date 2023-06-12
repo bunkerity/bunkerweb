@@ -221,7 +221,7 @@ function helpers.load_variables(all_variables, plugins)
         all_settings[setting] = data
     end
     -- Extract vars
-    local variables = {["global"] = {}}
+    local variables = { ["global"] = {} }
     local multisite = all_variables["MULTISITE"] == "yes"
     local server_names = {}
     if multisite then
@@ -233,7 +233,8 @@ function helpers.load_variables(all_variables, plugins)
     for setting, data in pairs(all_settings) do
         if all_variables[setting] then
             variables["global"][setting] = all_variables[setting]
-        elseif multisite then
+        end
+        if multisite then
             for i, server_name in ipairs(server_names) do
                 local key = server_name .. "_" .. setting
                 if all_variables[key] then
@@ -250,7 +251,7 @@ function helpers.load_variables(all_variables, plugins)
                         variables[prefix][setting] = value
                         break
                     end
-                    variables["global"][setting]  = prefix
+                    variables["global"][setting] = prefix
                     break
                 end
             end
