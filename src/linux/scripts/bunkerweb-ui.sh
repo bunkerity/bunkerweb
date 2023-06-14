@@ -7,7 +7,6 @@ export PYTHONPATH=/usr/share/bunkerweb/deps/python:/usr/share/bunkerweb/ui
 if [ ! -f /etc/bunkerweb/ui.env ]; then
     echo "ADMIN_USERNAME=admin" > /etc/bunkerweb/ui.env
     echo "ADMIN_PASSWORD=changeme" >> /etc/bunkerweb/ui.env
-    echo "ABSOLUTE_URI=http://bwadm.example.com/changeme/" >> /etc/bunkerweb/ui.env
 fi
 
 # Function to start the UI

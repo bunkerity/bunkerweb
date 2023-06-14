@@ -381,7 +381,7 @@ if __name__ == "__main__":
             if apis:
                 for api in apis:
                     endpoint_data = api.endpoint.replace("http://", "").split(":")
-                    err = db.add_instance(endpoint_data[0], endpoint_data[1], api.host)
+                    err = db.add_instance(endpoint_data[0], endpoint_data[1].replace("/", ""), api.host)
 
                     if err:
                         logger.warning(err)

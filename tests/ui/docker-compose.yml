@@ -23,7 +23,6 @@ services:
       www.example.com_USE_REVERSE_PROXY: "yes"
       www.example.com_REVERSE_PROXY_URL: "/admin/"
       www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
-      www.example.com_REVERSE_PROXY_HEADERS: "X-Script-Name /admin"
       www.example.com_INTERCEPTED_ERROR_CODES: "400 405 413 429 500 501 502 503 504"
       CUSTOM_CONF_SERVER_HTTP_port-redirect: "port_in_redirect on;"
     labels:
@@ -53,7 +52,6 @@ services:
       - bw
       - bw-docker-proxy
     environment:
-      ABSOLUTE_URI: "http://www.example.com/admin/"
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "S$$cr3tP@ssw0rd"
       DOCKER_HOST: "tcp://bw-docker-proxy:2375"

@@ -65,7 +65,6 @@ Bot detection by using a challenge.
 |`ANTIBOT_RECAPTCHA_SCORE`  |`0.7`       |multisite|no      |Minimum score required for reCAPTCHA challenge.                                                                               |
 |`ANTIBOT_RECAPTCHA_SITEKEY`|            |multisite|no      |Sitekey for reCAPTCHA challenge.                                                                                              |
 |`ANTIBOT_RECAPTCHA_SECRET` |            |multisite|no      |Secret for reCAPTCHA challenge.                                                                                               |
-|`ANTIBOT_HCAPTCHA_PASSIVE` |`no`        |multisite|no      |Use hCaptcha in passive mode.                                                                                                 |
 |`ANTIBOT_HCAPTCHA_SITEKEY` |            |multisite|no      |Sitekey for hCaptcha challenge.                                                                                               |
 |`ANTIBOT_HCAPTCHA_SECRET`  |            |multisite|no      |Secret for hCaptcha challenge.                                                                                                |
 |`ANTIBOT_TURNSTILE_SITEKEY`|            |multisite|no      |Sitekey for Turnstile challenge.                                                                                              |

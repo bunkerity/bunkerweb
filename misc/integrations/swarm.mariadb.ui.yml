@@ -93,7 +93,6 @@ services:
       - DOCKER_HOST=tcp://bw-docker:2375
       - ADMIN_USERNAME=changeme
       - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the changeme user
-      - ABSOLUTE_URI=http://www.example.com/changeme/
     networks:
       - bw-universe
       - bw-docker
@@ -104,7 +103,6 @@ services:
         - "bunkerweb.USE_REVERSE_PROXY=yes"
         - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
         - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-        - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme"
         - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
 
 volumes:

@@ -66,7 +66,7 @@ end
 function datastore:delete_all(pattern, worker)
 	local keys = {}
 	if worker then
-		lru:keys(0)
+		keys = lru:keys(0)
 	else
 		keys = self.dict:get_keys(0)
 	end

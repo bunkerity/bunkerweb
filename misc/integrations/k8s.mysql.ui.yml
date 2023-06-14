@@ -237,8 +237,6 @@ spec:
               value: "changeme"
             - name: "ADMIN_PASSWORD"
               value: "changeme"
-            - name: "ABSOLUTE_URI"
-              value: "http://www.example.com/changeme/"
             - name: KUBERNETES_MODE
               value: "YES"
             - name: "DATABASE_URI"
@@ -312,7 +310,6 @@ metadata:
   name: ingress
   annotations:
     bunkerweb.io/www.example.com_USE_UI: "yes"
-    bunkerweb.io/www.example.com_REVERSE_PROXY_HEADERS_1: "X-Script-Name /changeme"
     bunkerweb.io/www.example.com_INTERCEPTED_ERROR_CODES: "400 404 405 413 429 500 501 502 503 504"
 spec:
   rules:

@@ -55,7 +55,6 @@ Because the web UI is a web application, the recommended installation procedure 
 
     - `ADMIN_USERNAME` : username to access the web UI
     - `ADMIN_PASSWORD` : password to access the web UI
-    - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
@@ -88,7 +87,6 @@ Because the web UI is a web application, the recommended installation procedure 
           - www.example.com_USE_REVERSE_PROXY=yes
           - www.example.com_REVERSE_PROXY_URL=/changeme/
           - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
-          - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
           - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
         networks:
           - bw-universe
@@ -125,7 +123,6 @@ Because the web UI is a web application, the recommended installation procedure 
           - DOCKER_HOST=tcp://bw-docker:2375
           - ADMIN_USERNAME=changeme
           - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the changeme user
-          - ABSOLUTE_URI=http://www.example.com/changeme/
         networks:
           - bw-universe
           - bw-docker
@@ -178,7 +175,6 @@ Because the web UI is a web application, the recommended installation procedure 
 
     - `ADMIN_USERNAME` : username to access the web UI
     - `ADMIN_PASSWORD` : password to access the web UI
-    - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
@@ -270,14 +266,12 @@ Because the web UI is a web application, the recommended installation procedure 
           - AUTOCONF_MODE=yes
           - ADMIN_USERNAME=admin
           - ADMIN_PASSWORD=changeme
-          - ABSOLUTE_URI=http://www.example.com/changeme/
         labels:
           - "bunkerweb.SERVER_NAME=www.example.com"
           - "bunkerweb.USE_UI=yes"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-          - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme"
           - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
 
     volumes:
@@ -316,7 +310,6 @@ Because the web UI is a web application, the recommended installation procedure 
 
     - `ADMIN_USERNAME` : username to access the web UI
     - `ADMIN_PASSWORD` : password to access the web UI
-    - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
@@ -422,7 +415,6 @@ Because the web UI is a web application, the recommended installation procedure 
           - DOCKER_HOST=tcp://bw-docker:2375
           - ADMIN_USERNAME=changeme
           - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the changeme user
-          - ABSOLUTE_URI=http://www.example.com/changeme/
         networks:
           - bw-universe
           - bw-docker
@@ -433,9 +425,8 @@ Because the web UI is a web application, the recommended installation procedure 
             - "bunkerweb.USE_REVERSE_PROXY=yes"
             - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
             - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-            - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme"
             - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
-            - "INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
+            - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
 
     volumes:
       bw-data:
@@ -466,7 +457,6 @@ Because the web UI is a web application, the recommended installation procedure 
 
     - `ADMIN_USERNAME` : username to access the web UI
     - `ADMIN_PASSWORD` : password to access the web UI
-    - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the `7000` port.
 
@@ -715,8 +705,6 @@ Because the web UI is a web application, the recommended installation procedure 
                   value: "changeme"
                 - name: "ADMIN_PASSWORD"
                   value: "changeme"
-                - name: "ABSOLUTE_URI"
-                  value: "http://www.example.com/changeme/"
                 - name: KUBERNETES_MODE
                   value: "YES"
                 - name: "DATABASE_URI"
@@ -791,8 +779,8 @@ Because the web UI is a web application, the recommended installation procedure 
       name: ingress
       annotations:
         bunkerweb.io/www.example.com_USE_UI: "yes"
-        bunkerweb.io/www.example.com_REVERSE_PROXY_HEADERS_1: "X-Script-Name /changeme"
         bunkerweb.io/www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
+        bunkerweb.io/www.example.com_INTERCEPTED_ERROR_CODES: '400 404 405 413 429 500 501 502 503 504'
     spec:
       rules:
         - host: www.example.com
@@ -822,7 +810,6 @@ Because the web UI is a web application, the recommended installation procedure 
     ```conf
     ADMIN_USERNAME=changeme
     ADMIN_PASSWORD=changeme
-    ABSOLUTE_URI=http://www.example.com/changeme/
     ```
 
     Each time you edit the `/etc/bunkerweb/ui.env` file, you will need to restart the service :
@@ -846,7 +833,6 @@ Because the web UI is a web application, the recommended installation procedure 
     www.example.com_USE_REVERSE_PROXY=yes
     www.example.com_REVERSE_PROXY_URL=/changeme/
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     ```
 
@@ -865,7 +851,6 @@ Because the web UI is a web application, the recommended installation procedure 
     ```conf
     ADMIN_USERNAME=changeme
     ADMIN_PASSWORD=changeme
-    ABSOLUTE_URI=http://www.example.com/changeme/
     ```
 
     Here is the `my_variables.env` boilerplate you can use :
@@ -880,7 +865,6 @@ Because the web UI is a web application, the recommended installation procedure 
     www.example.com_USE_REVERSE_PROXY=yes
     www.example.com_REVERSE_PROXY_URL=/changeme/
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     ```
 
@@ -932,7 +916,6 @@ Because the web UI is a web application, the recommended installation procedure 
     ```conf
     ADMIN_USERNAME=changeme
     ADMIN_PASSWORD=changeme
-    ABSOLUTE_URI=http://www.example.com/changeme/
     ```
 
     Each time you edit the `/etc/bunkerweb/ui.env` file, you will need to restart the service :
@@ -955,7 +938,6 @@ Because the web UI is a web application, the recommended installation procedure 
     www.example.com_USE_REVERSE_PROXY=yes
     www.example.com_REVERSE_PROXY_URL=/changeme/
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     ```
 
