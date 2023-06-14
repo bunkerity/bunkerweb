@@ -1,14 +1,10 @@
 #!/usr/bin/python3
 
 from typing import Iterable
-from wsgiref.types import StartResponse, WSGIEnvironment
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-
 class ReverseProxied(ProxyFix):
-    def __call__(
-        self, environ: WSGIEnvironment, start_response: StartResponse
-    ) -> Iterable[bytes]:
+    def __call__(self, environ, start_response):
         """Modify the WSGI environ based on the various ``Forwarded``
         headers before calling the wrapped application. Store the
         original environ values in ``werkzeug.proxy_fix.orig_{key}``.
