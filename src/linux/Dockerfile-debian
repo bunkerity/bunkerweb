@@ -19,6 +19,35 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
     cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 /tmp/req/requirements.txt.2 /tmp/req/requirements.txt.3 > /usr/share/bunkerweb/deps/requirements.txt && \
     rm -rf /tmp/req
 
+# # Install dependencies
+# RUN apt-get update && \
+#     apt-get install -y --no-install-recommends \
+#     wget \
+#     build-essential \
+#     libffi-dev \
+#     libgdbm-dev \
+#     libc6-dev \
+#     libssl-dev \
+#     zlib1g-dev \
+#     libbz2-dev \
+#     libreadline-dev \
+#     libsqlite3-dev \
+#     libncurses5-dev \
+#     libncursesw5-dev \
+#     xz-utils \
+#     tk-dev
+
+# # Installing python3.11
+# RUN wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz && \
+#     tar xzf Python-3.11.4.tgz && \
+#     cd Python-3.11.4 && \
+#     ./configure --enable-optimizations && \
+#     make -j$(nproc) && \
+#     make altinstall && \
+#     rm -rf /usr/src/Python-3.11.4*
+#     # Installing pip
+# RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
+
 # Nginx
 RUN apt-get install gnupg2 ca-certificates wget -y && \
     echo "deb https://nginx.org/packages/debian/ bullseye nginx" > /etc/apt/sources.list.d/nginx.list && \
@@ -28,15 +57,15 @@ RUN apt-get install gnupg2 ca-certificates wget -y && \
     apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~bullseye
 
 # Compile and install dependencies
-RUN apt install --no-install-recommends bash python3-pip libssl-dev git libpcre++-dev zlib1g-dev libxml2-dev libyajl-dev pkgconf libcurl4-openssl-dev libgeoip-dev liblmdb-dev apt-utils bash build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev -y && \
-    pip install --no-cache-dir --upgrade pip && \
-    pip install wheel && \
+RUN apt install --no-install-recommends bash libssl-dev git libpcre++-dev zlib1g-dev libxml2-dev libyajl-dev pkgconf libcurl4-openssl-dev libgeoip-dev liblmdb-dev apt-utils bash build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev -y && \
+    pip3.11 install --no-cache-dir --upgrade pip && \
+    pip3.11 install wheel && \
     #mkdir -p /usr/share/bunkerweb/deps && \
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /usr/share/bunkerweb/deps/python && \
     export MAKEFLAGS="-j$(nproc)" && \
-    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
+    pip3.11 install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
 
     # Dirty fix to avoid errors with --target and packages same namespace
 #RUN pip install --no-deps --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt
