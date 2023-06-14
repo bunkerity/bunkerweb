@@ -1,4 +1,4 @@
-FROM nginx:1.24.0-alpine AS builder
+FROM nginx:1.25.0-alpine AS builder
 
 # Copy dependencies sources folder
 COPY src/deps /tmp/bunkerweb/deps
@@ -39,7 +39,7 @@ COPY src/common/utils /usr/share/bunkerweb/utils
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 COPY misc/*.ascii /usr/share/bunkerweb/misc/
 
-FROM nginx:1.24.0-alpine
+FROM nginx:1.25.0-alpine
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
