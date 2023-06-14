@@ -11,6 +11,7 @@
 - [BUGFIX] ALLOWED_METHODS regex working with LOCK/UNLOCK methods
 - [BUGFIX] Custom certificate bug after the refactoring
 - [BUGFIX] Fix wrong variables in header phase (fix CORS feature too)
+- [BUGFIX] Fix UI not working in Ubuntu (python zope module)
 - [PERFORMANCE] Reduce CPU usage of scheduler
 - [FEATURE] Add Turnstile antibot mode
 - [MISC] Add LOG_LEVEL=warning for docker socket proxy in docs, examples and boilerplates
