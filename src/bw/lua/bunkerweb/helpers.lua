@@ -245,13 +245,13 @@ function helpers.load_variables(all_variables, plugins)
         end
         if data.multiple then
             for variable, value in pairs(all_variables) do
-                local found, _, prefix = variable:find("^([^_]*)_?" .. variable .. "_[0-9]+$")
+                local found, _, prefix = variable:find("^([^_]*)_?" .. setting .. "_[0-9]+$")
                 if found then
-                    if multisite and prefix then
-                        variables[prefix][setting] = value
+                    if multisite and prefix and prefix ~= "" then
+                        variables[prefix][variable] = value
                         break
                     end
-                    variables["global"][setting] = prefix
+                    variables["global"][variable] = value
                     break
                 end
             end
