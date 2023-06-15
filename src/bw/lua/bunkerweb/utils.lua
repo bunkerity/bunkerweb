@@ -22,7 +22,7 @@ utils.get_variable           = function(var, site_search)
 	-- Get global value
 	local variables, err = datastore:get('variables', true)
 	if not variables then
-		return nil, "can't access variables " .. var .. " from datastore : " .. err
+		return nil, "can't access variables from datastore : " .. err
 	end
 	local value = variables["global"][var]
 	-- Site search case

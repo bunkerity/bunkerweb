@@ -2,7 +2,7 @@ local class     = require "middleclass"
 local lrucache  = require "resty.lrucache"
 local datastore = class("datastore")
 
-local lru, err  = lrucache.new(10000)
+local lru, err  = lrucache.new(100000)
 if not lru then
 	require "bunkerweb.logger":new("DATASTORE"):log(ngx.ERR,
 		"failed to instantiate LRU cache : " .. (err or "unknown error"))

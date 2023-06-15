@@ -159,6 +159,7 @@ helpers.fill_ctx = function()
             data.kind = "stream"
         end
         data.remote_addr = ngx.var.remote_addr
+        data.server_name = ngx.var.server_name
         if data.kind == "http" then
             data.uri = ngx.var.uri
             data.request_uri = ngx.var.request_uri
@@ -239,7 +240,6 @@ function helpers.load_variables(all_variables, plugins)
                 local key = server_name .. "_" .. setting
                 if all_variables[key] then
                     variables[server_name][setting] = all_variables[key]
-                    break
                 end
             end
         end
@@ -249,10 +249,8 @@ function helpers.load_variables(all_variables, plugins)
                 if found then
                     if multisite and prefix and prefix ~= "" then
                         variables[prefix][variable] = value
-                        break
                     end
                     variables["global"][variable] = value
-                    break
                 end
             end
         end

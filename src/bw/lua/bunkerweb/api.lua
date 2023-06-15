@@ -195,6 +195,14 @@ api.global.GET["^/bans$"] = function(self)
 	return self:response(ngx.HTTP_OK, "success", data)
 end
 
+api.global.GET["^/variables$"] = function(self)
+	local variables, err = datastore:get('variables', true)
+	if not variables then
+		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't access variables from datastore : " .. err)
+	end
+	return self:response(ngx.HTTP_OK, "success", variables)
+end
+
 function api:is_allowed_ip()
 	if utils.is_ip_in_networks(self.ctx.bw.remote_addr, self.ips) then
 		return true, "ok"
