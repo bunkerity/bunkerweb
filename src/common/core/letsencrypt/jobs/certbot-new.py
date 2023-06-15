@@ -97,7 +97,7 @@ try:
         sqlalchemy_string=getenv("DATABASE_URI", None),
     )
 
-    tgz = get_file_in_db("folder.tgz", db)
+    tgz = get_file_in_db("folder.tgz", db, job_name="certbot-renew")
     if tgz:
         # Delete folder if needed
         if letsencrypt_path.exists():
