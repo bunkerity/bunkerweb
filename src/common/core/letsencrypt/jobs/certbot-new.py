@@ -191,7 +191,7 @@ try:
     bio.seek(0, 0)
 
     # Put tgz in cache
-    cached, err = set_file_in_db("folder.tgz", bio.read(), db)
+    cached, err = set_file_in_db("folder.tgz", bio.read(), db, job_name="certbot-renew")
 
     if not cached:
         logger.error(f"Error while saving Let's Encrypt data to db cache : {err}")
