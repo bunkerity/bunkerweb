@@ -289,8 +289,9 @@ class Database:
             except BaseException:
                 return format_exc()
 
-    def checked_changes(self) -> str:
+    def checked_changes(self, changes: Optional[List[str]] = None) -> str:
         """Set that the config, the custom configs and the plugins didn't change"""
+        changes = changes or ["config", "custom_configs", "external_plugins"]
         with self.__db_session() as session:
             try:
                 metadata = session.query(Metadata).get(1)
@@ -298,9 +299,12 @@ class Database:
                 if not metadata:
                     return "The metadata are not set yet, try again"
 
-                metadata.config_changed = False
-                metadata.custom_configs_changed = False
-                metadata.external_plugins_changed = False
+                if "config" in changes:
+                    metadata.config_changed = False
+                if "custom_configs" in changes:
+                    metadata.custom_configs_changed = False
+                if "external_plugins" in changes:
+                    metadata.external_plugins_changed = False
                 session.commit()
             except BaseException:
                 return format_exc()
@@ -669,7 +673,6 @@ class Database:
                     if not metadata.first_config_saved:
                         metadata.first_config_saved = True
                     metadata.config_changed = bool(to_put)
-                    metadata.ui_config_changed = bool(to_put)
 
             try:
                 session.add_all(to_put)
@@ -762,11 +765,10 @@ class Database:
                         )
                     )
 
-            if to_put:
-                with suppress(ProgrammingError, OperationalError):
-                    metadata = session.query(Metadata).get(1)
-                    if metadata is not None:
-                        metadata.custom_configs_changed = True
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.custom_configs_changed = True
 
             try:
                 session.add_all(to_put)
@@ -1460,11 +1462,10 @@ class Database:
                                         Plugin_pages.plugin_id == plugin["id"]
                                     ).update(updates)
 
-            if to_put:
-                with suppress(ProgrammingError, OperationalError):
-                    metadata = session.query(Metadata).get(1)
-                    if metadata is not None:
-                        metadata.external_plugins_changed = True
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.external_plugins_changed = True
 
             try:
                 session.add_all(to_put)
