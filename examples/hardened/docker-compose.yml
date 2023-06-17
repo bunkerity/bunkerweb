@@ -15,6 +15,7 @@ services:
     tmpfs:
       - /tmp:mode=0770,uid=0,gid=101
       - /var/tmp/bunkerweb:mode=0770,uid=0,gid=101
+      - /var/run/bunkerweb:mode=0770,uid=0,gid=101
       - /var/cache/bunkerweb:mode=0770,uid=0,gid=101
       - /etc/nginx:mode=0770,uid=0,gid=101
     ports:
