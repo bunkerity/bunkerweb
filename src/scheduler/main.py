@@ -117,14 +117,14 @@ def generate_custom_configs(
             tmp_path.parent.mkdir(parents=True, exist_ok=True)
             tmp_path.write_bytes(custom_config["data"])
 
-        if SCHEDULER.apis:
-            logger.info("Sending custom configs to BunkerWeb")
-            ret = SCHEDULER.send_files(original_path, "/custom_configs")
+    if SCHEDULER and SCHEDULER.apis:
+        logger.info("Sending custom configs to BunkerWeb")
+        ret = SCHEDULER.send_files(original_path, "/custom_configs")
 
-            if not ret:
-                logger.error(
-                    "Sending custom configs failed, configuration will not work as expected...",
-                )
+        if not ret:
+            logger.error(
+                "Sending custom configs failed, configuration will not work as expected...",
+            )
 
 
 def generate_external_plugins(
@@ -159,14 +159,14 @@ def generate_external_plugins(
                 st = Path(job_file).stat()
                 chmod(job_file, st.st_mode | S_IEXEC)
 
-        if SCHEDULER.apis:
-            logger.info("Sending plugins to BunkerWeb")
-            ret = SCHEDULER.send_files(original_path, "/plugins")
+    if SCHEDULER and SCHEDULER.apis:
+        logger.info("Sending plugins to BunkerWeb")
+        ret = SCHEDULER.send_files(original_path, "/plugins")
 
-            if not ret:
-                logger.error(
-                    "Sending plugins failed, configuration will not work as expected...",
-                )
+        if not ret:
+            logger.error(
+                "Sending plugins failed, configuration will not work as expected...",
+            )
 
 
 if __name__ == "__main__":
@@ -388,8 +388,9 @@ if __name__ == "__main__":
             )
 
         FIRST_RUN = True
+        CHANGES = []
         while True:
-            ret = db.checked_changes()
+            ret = db.checked_changes(CHANGES)
 
             if ret:
                 logger.error(
@@ -439,7 +440,7 @@ if __name__ == "__main__":
                         "Config saver failed, configuration will not work as expected...",
                     )
 
-                ret = db.checked_changes()
+                ret = db.checked_changes(["external_plugins"])
 
                 if ret:
                     logger.error(
@@ -552,6 +553,7 @@ if __name__ == "__main__":
             GENERATE = True
             SCHEDULER.setup()
             NEED_RELOAD = False
+            CONFIG_NEED_GENERATION = False
             CONFIGS_NEED_GENERATION = False
             PLUGINS_NEED_GENERATION = False
             FIRST_RUN = False
@@ -588,21 +590,28 @@ if __name__ == "__main__":
                 # check if the config have changed since last time
                 if changes["config_changed"]:
                     logger.info("Config changed, generating ...")
+                    CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
 
             if NEED_RELOAD:
+                CHANGES.clear()
+
                 if CONFIGS_NEED_GENERATION:
+                    CHANGES.append("custom_configs")
                     generate_custom_configs(
                         db.get_custom_configs(), original_path=configs_path
                     )
 
                 if PLUGINS_NEED_GENERATION:
+                    CHANGES.append("external_plugins")
                     generate_external_plugins(
                         db.get_plugins(external=True, with_data=True),
                         original_path=plugins_dir,
                     )
 
-                env = db.get_config()
+                if CONFIG_NEED_GENERATION:
+                    CHANGES.append("config")
+                    env = db.get_config()
     except:
         logger.error(
             f"Exception while executing scheduler : {format_exc()}",
