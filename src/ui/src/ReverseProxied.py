@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-from typing import Iterable
 from werkzeug.middleware.proxy_fix import ProxyFix
+
 
 class ReverseProxied(ProxyFix):
     def __call__(self, environ, start_response):
