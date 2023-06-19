@@ -264,45 +264,34 @@ class Database:
 
         return ""
 
-    def check_changes(
-        self, _type: Union[Literal["scheduler"], Literal["ui"]] = "scheduler"
-    ) -> Union[Dict[str, bool], bool, str]:
+    def check_changes(self) -> Union[Dict[str, bool], bool, str]:
         """Check if either the config, the custom configs or plugins have changed inside the database"""
         with self.__db_session() as session:
             try:
-                if _type == "scheduler":
-                    entities = (
+                metadata = (
+                    session.query(Metadata)
+                    .with_entities(
                         Metadata.custom_configs_changed,
                         Metadata.external_plugins_changed,
                         Metadata.config_changed,
                     )
-                else:
-                    entities = (Metadata.ui_config_changed,)
-
-                metadata = (
-                    session.query(Metadata)
-                    .with_entities(*entities)
                     .filter_by(id=1)
                     .first()
                 )
 
-                if _type == "scheduler":
-                    return dict(
-                        custom_configs_changed=metadata is not None
-                        and metadata.custom_configs_changed,
-                        external_plugins_changed=metadata is not None
-                        and metadata.external_plugins_changed,
-                        config_changed=metadata is not None and metadata.config_changed,
-                    )
-                else:
-                    return metadata is not None and metadata.ui_config_changed
+                return dict(
+                    custom_configs_changed=metadata is not None
+                    and metadata.custom_configs_changed,
+                    external_plugins_changed=metadata is not None
+                    and metadata.external_plugins_changed,
+                    config_changed=metadata is not None and metadata.config_changed,
+                )
             except BaseException:
                 return format_exc()
 
-    def checked_changes(
-        self, _type: Union[Literal["scheduler"], Literal["ui"]] = "scheduler"
-    ) -> str:
+    def checked_changes(self, changes: Optional[List[str]] = None) -> str:
         """Set that the config, the custom configs and the plugins didn't change"""
+        changes = changes or ["config", "custom_configs", "external_plugins"]
         with self.__db_session() as session:
             try:
                 metadata = session.query(Metadata).get(1)
@@ -310,12 +299,12 @@ class Database:
                 if not metadata:
                     return "The metadata are not set yet, try again"
 
-                if _type == "scheduler":
+                if "config" in changes:
                     metadata.config_changed = False
+                if "custom_configs" in changes:
                     metadata.custom_configs_changed = False
+                if "external_plugins" in changes:
                     metadata.external_plugins_changed = False
-                else:
-                    metadata.ui_config_changed = False
                 session.commit()
             except BaseException:
                 return format_exc()
@@ -684,7 +673,6 @@ class Database:
                     if not metadata.first_config_saved:
                         metadata.first_config_saved = True
                     metadata.config_changed = bool(to_put)
-                    metadata.ui_config_changed = bool(to_put)
 
             try:
                 session.add_all(to_put)
@@ -777,11 +765,10 @@ class Database:
                         )
                     )
 
-            if to_put:
-                with suppress(ProgrammingError, OperationalError):
-                    metadata = session.query(Metadata).get(1)
-                    if metadata is not None:
-                        metadata.custom_configs_changed = True
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.custom_configs_changed = True
 
             try:
                 session.add_all(to_put)
@@ -1475,11 +1462,10 @@ class Database:
                                         Plugin_pages.plugin_id == plugin["id"]
                                     ).update(updates)
 
-            if to_put:
-                with suppress(ProgrammingError, OperationalError):
-                    metadata = session.query(Metadata).get(1)
-                    if metadata is not None:
-                        metadata.external_plugins_changed = True
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.external_plugins_changed = True
 
             try:
                 session.add_all(to_put)

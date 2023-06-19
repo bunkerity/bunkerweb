@@ -1,10 +1,7 @@
-local class        = require "middleclass"
-local plugin       = require "bunkerweb.plugin"
-local logger       = require "bunkerweb.logger"
-local utils        = require "bunkerweb.utils"
-local clusterstore = require "bunkerweb.clusterstore"
+local class  = require "middleclass"
+local plugin = require "bunkerweb.plugin"
 
-local redis        = class("redis", plugin)
+local redis  = class("redis", plugin)
 
 function redis:initialize()
 	-- Call parent initialize

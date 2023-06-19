@@ -108,9 +108,9 @@ helpers.require_plugin = function(id)
     return plugin_lua, "require() call successful for plugin " .. id
 end
 
-helpers.new_plugin = function(plugin_lua)
+helpers.new_plugin = function(plugin_lua, ctx)
     -- Require call
-    local ok, plugin_obj = pcall(plugin_lua.new, plugin_lua)
+    local ok, plugin_obj = pcall(plugin_lua.new, plugin_lua, ctx)
     if not ok then
         return false, "new error for plugin " .. plugin_lua.name .. " : " .. plugin_obj
     end
@@ -148,8 +148,9 @@ end
 helpers.fill_ctx = function()
     -- Return errors as table
     local errors = {}
+    local ctx = ngx.ctx
     -- Check if ctx is already filled
-    if not ngx.ctx.bw then
+    if not ctx.bw then
         -- Instantiate bw table
         local data = {}
         -- Common vars
@@ -158,14 +159,19 @@ helpers.fill_ctx = function()
             data.kind = "stream"
         end
         data.remote_addr = ngx.var.remote_addr
-        data.uri = ngx.var.uri
-        data.request_uri = ngx.var.request_uri
-        data.request_method = ngx.var.request_method
-        data.http_user_agent = ngx.var.http_user_agent
-        data.http_host = ngx.var.http_host
         data.server_name = ngx.var.server_name
-        data.http_content_type = ngx.var.http_content_type
-        data.http_origin = ngx.var.http_origin
+        if data.kind == "http" then
+            data.uri = ngx.var.uri
+            data.request_uri = ngx.var.request_uri
+            data.request_method = ngx.var.request_method
+            data.http_user_agent = ngx.var.http_user_agent
+            data.http_host = ngx.var.http_host
+            data.server_name = ngx.var.server_name
+            data.http_content_type = ngx.var.http_content_type
+            data.http_content_length = ngx.var.http_content_length
+            data.http_origin = ngx.var.http_origin
+            data.http_version = ngx.req.http_version()
+        end
         -- IP data : global
         local ip_is_global, err = utils.ip_is_global(data.remote_addr)
         if ip_is_global == nil then
@@ -180,17 +186,76 @@ helpers.fill_ctx = function()
         data.integration = utils.get_integration()
         data.version = utils.get_version()
         -- Fill ctx
-        ngx.ctx.bw = data
+        ctx.bw = data
     end
     -- Always create new objects for current phases in case of cosockets
     local use_redis, err = utils.get_variable("USE_REDIS", false)
     if not use_redis then
         table.insert(errors, "can't get variable from datastore : " .. err)
     end
-    ngx.ctx.bw.datastore = require "bunkerweb.datastore":new()
-    ngx.ctx.bw.clusterstore = require "bunkerweb.clusterstore":new()
-    ngx.ctx.bw.cachestore = require "bunkerweb.cachestore":new(use_redis == "yes")
-    return true, "ctx filled", errors
+    ctx.bw.datastore = require "bunkerweb.datastore":new()
+    ctx.bw.clusterstore = require "bunkerweb.clusterstore":new()
+    ctx.bw.cachestore = require "bunkerweb.cachestore":new(use_redis == "yes")
+    return true, "ctx filled", errors, ctx
+end
+
+function helpers.load_variables(all_variables, plugins)
+    -- Extract settings from plugins and global ones
+    local all_settings = {}
+    for i, plugin in ipairs(plugins) do
+        if plugin.settings then
+            for setting, data in pairs(plugin.settings) do
+                all_settings[setting] = data
+            end
+        end
+    end
+    local file = io.open("/usr/share/bunkerweb/settings.json")
+    if not file then
+        return false, "can't open settings.json"
+    end
+    local ok, settings = pcall(cjson.decode, file:read("*a"))
+    file:close()
+    if not ok then
+        return false, "invalid settings.json : " .. err
+    end
+    for setting, data in pairs(settings) do
+        all_settings[setting] = data
+    end
+    -- Extract vars
+    local variables = { ["global"] = {} }
+    local multisite = all_variables["MULTISITE"] == "yes"
+    local server_names = {}
+    if multisite then
+        for server_name in all_variables["SERVER_NAME"]:gmatch("%S+") do
+            variables[server_name] = {}
+            table.insert(server_names, server_name)
+        end
+    end
+    for setting, data in pairs(all_settings) do
+        if all_variables[setting] then
+            variables["global"][setting] = all_variables[setting]
+        end
+        if multisite then
+            for i, server_name in ipairs(server_names) do
+                local key = server_name .. "_" .. setting
+                if all_variables[key] then
+                    variables[server_name][setting] = all_variables[key]
+                end
+            end
+        end
+        if data.multiple then
+            for variable, value in pairs(all_variables) do
+                local found, _, prefix = variable:find("^([^_]*)_?" .. setting .. "_[0-9]+$")
+                if found then
+                    if multisite and prefix and prefix ~= "" then
+                        variables[prefix][variable] = value
+                    end
+                    variables["global"][variable] = value
+                end
+            end
+        end
+    end
+    return true, variables
 end
 
 return helpers

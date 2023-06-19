@@ -32,11 +32,11 @@ def renew(domain: str, letsencrypt_path: Path) -> int:
             join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot"),
             "renew",
             "--config-dir",
-            letsencrypt_path.joinpath("etc"),
+            str(letsencrypt_path.joinpath("etc")),
             "--work-dir",
-            letsencrypt_path.joinpath("lib"),
+            str(letsencrypt_path.joinpath("lib")),
             "--logs-dir",
-            letsencrypt_path.joinpath("log"),
+            str(letsencrypt_path.joinpath("log")),
             "--cert-name",
             domain,
             "--deploy-hook",
@@ -53,7 +53,8 @@ def renew(domain: str, letsencrypt_path: Path) -> int:
         ],
         stdin=DEVNULL,
         stderr=STDOUT,
-        env=environ,
+        env=environ.copy()
+        | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
         check=False,
     ).returncode
 

@@ -1,4 +1,4 @@
-FROM python:3.11.3-alpine AS builder
+FROM python:3.11.4-alpine AS builder
 
 # Copy python requirements
 COPY src/scheduler/requirements.txt /tmp/req/requirements.txt
@@ -36,7 +36,7 @@ COPY src/common/utils /usr/share/bunkerweb/utils
 COPY src/scheduler /usr/share/bunkerweb/scheduler
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 
-FROM python:3.11.3-alpine
+FROM python:3.11.4-alpine
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -78,7 +78,7 @@ COPY --chown=root:scheduler src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.
 RUN chmod 770 /var/tmp/bunkerweb/asn.mmdb /var/tmp/bunkerweb/country.mmdb
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.1.1-r0" "libssl3>=3.1.1-r0"
+# There are no CVE to fix for the moment
 
 VOLUME /data /etc/nginx
 

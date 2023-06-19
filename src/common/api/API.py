@@ -41,7 +41,7 @@ class API:
 
             resp = request(
                 method,
-                f"{self.__endpoint}{url}",
+                f"{self.__endpoint}{url if not url.startswith('/') else url[1:]}",
                 timeout=timeout,
                 headers={"User-Agent": "bwapi", "Host": self.__host},
                 **kwargs,

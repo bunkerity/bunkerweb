@@ -77,7 +77,8 @@ function clusterstore:close()
     if self.redis_client then
         -- Equivalent to close but keep a pool of connections
         if self.pool then
-            local ok, err = self.redis_client:set_keepalive(tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]), tonumber(self.variables["REDIS_KEEPALIVE_POOL"]))
+            local ok, err = self.redis_client:set_keepalive(tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]),
+                tonumber(self.variables["REDIS_KEEPALIVE_POOL"]))
             self.redis_client = nil
             if not ok then
                 require "bunkerweb.logger":new("clusterstore-close"):log(ngx.ERR, err)

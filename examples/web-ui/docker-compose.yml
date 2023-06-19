@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.0
+    image: bunkerity/bunkerweb:1.5.1
     ports:
       - 80:8080
       - 443:8443
@@ -19,9 +19,7 @@ services:
       - www.example.com_USE_REVERSE_PROXY=yes
       - www.example.com_REVERSE_PROXY_URL=/changeme/ # replace with another url
       - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
-      - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme # replace with another url
       - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
-      - www.example.com_SECURITY_POLICY=object-src 'none'; frame-ancestors 'self';
     labels:
       - "bunkerweb.INSTANCE"
     networks:
@@ -29,7 +27,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.0
+    image: bunkerity/bunkerweb-scheduler:1.5.1
     depends_on:
       - mybunker
     environment:
@@ -41,11 +39,10 @@ services:
       - bw-docker
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.5.0
+    image: bunkerity/bunkerweb-ui:1.5.1
     depends_on:
       - bw-docker-proxy
     environment:
-      - ABSOLUTE_URI=https://www.example.com/changeme/ # replace with another url
       - DOCKER_HOST=tcp://bw-docker-proxy:2375
       - ADMIN_USERNAME=changeme
       - ADMIN_PASSWORD=changeme # replace with a stronger password

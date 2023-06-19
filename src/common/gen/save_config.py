@@ -54,6 +54,9 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
                     ),
                 }
             )
+            logger.info(
+                f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
+            )
         else:
             tmp_config[splitted[0]] = splitted[1]
 
@@ -217,6 +220,9 @@ if __name__ == "__main__":
                             ),
                         }
                     )
+                    logger.info(
+                        f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
+                    )
             configs_path = join(sep, "etc", "bunkerweb", "configs")
             root_dirs = listdir(configs_path)
             for root, dirs, files in walk(configs_path):
@@ -269,6 +275,9 @@ if __name__ == "__main__":
                                     custom_conf[2].replace(".conf", ""),
                                 ),
                             }
+                        )
+                        logger.info(
+                            f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
                         )
                     else:
                         tmp_config[splitted[0]] = splitted[1]
@@ -372,7 +381,7 @@ if __name__ == "__main__":
             if apis:
                 for api in apis:
                     endpoint_data = api.endpoint.replace("http://", "").split(":")
-                    err = db.add_instance(endpoint_data[0], endpoint_data[1], api.host)
+                    err = db.add_instance(endpoint_data[0], endpoint_data[1].replace("/", ""), api.host)
 
                     if err:
                         logger.warning(err)

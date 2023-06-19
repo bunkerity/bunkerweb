@@ -178,7 +178,8 @@ class Configurator:
             if ret:
                 config[variable] = value
             elif (
-                not variable.startswith("PYTHON")
+                "CUSTOM_CONF" not in variable
+                and not variable.startswith("PYTHON")
                 and not variable.startswith("KUBERNETES_SERVICE_")
                 and not variable.startswith("KUBERNETES_PORT_")
                 and not variable.startswith("SVC_")

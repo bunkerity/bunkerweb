@@ -1,5 +1,5 @@
 requests==2.31.0
 redis==4.5.5
-fastapi==0.95.2
+fastapi==0.97.0
 uvicorn[standard]==0.22.0
-selenium==4.9.1
+selenium==4.10.0

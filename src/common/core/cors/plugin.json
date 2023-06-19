@@ -32,6 +32,51 @@
       "regex": "^(\\*|(?![, ]+)(,? ?([\\w-]+)(?!.*\\3(?!.)))*)?$",
       "type": "text"
     },
+    "CROSS_ORIGIN_OPENER_POLICY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value for the Cross-Origin-Opener-Policy header.",
+      "id": "cross-origin-opener-policy",
+      "label": "Cross-Origin-Opener-Policy",
+      "regex": "^(unsafe-none|same-origin-allow-popups|same-origin)?$",
+      "type": "select",
+      "select": [
+        "",
+        "unsafe-none",
+        "same-origin-allow-popups",
+        "same-origin"
+      ]
+    },
+    "CROSS_ORIGIN_EMBEDDER_POLICY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value for the Cross-Origin-Embedder-Policy header.",
+      "id": "cross-origin-embedder-policy",
+      "label": "Cross-Origin-Embedder-Policy",
+      "regex": "^(unsafe-none|require-corp|credentialless)?$",
+      "type": "select",
+      "select": [
+        "",
+        "unsafe-none",
+        "require-corp",
+        "credentialless"
+      ]
+    },
+    "CROSS_ORIGIN_RESOURCE_POLICY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Value for the Cross-Origin-Resource-Policy header.",
+      "id": "cross-origin-resource-policy",
+      "label": "Cross-Origin-Resource-Policy",
+      "regex": "^(same-site|same-origin|cross-origin)?$",
+      "type": "select",
+      "select": [
+        "",
+        "same-site",
+        "same-origin",
+        "cross-origin"
+      ]
+    },
     "CORS_MAX_AGE": {
       "context": "multisite",
       "default": "86400",

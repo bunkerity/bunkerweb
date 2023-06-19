@@ -55,13 +55,12 @@ Because the web UI is a web application, the recommended installation procedure 
 
     - `ADMIN_USERNAME` : username to access the web UI
     - `ADMIN_PASSWORD` : password to access the web UI
-    - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.1/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -70,7 +69,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.0
+        image: bunkerity/bunkerweb:1.5.1
         ports:
           - 80:8080
           - 443:8443
@@ -88,14 +87,13 @@ Because the web UI is a web application, the recommended installation procedure 
           - www.example.com_USE_REVERSE_PROXY=yes
           - www.example.com_REVERSE_PROXY_URL=/changeme/
           - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
-          - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
           - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
         networks:
           - bw-universe
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.0
+        image: bunkerity/bunkerweb-scheduler:1.5.1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -112,11 +110,12 @@ Because the web UI is a web application, the recommended installation procedure 
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
           - CONTAINERS=1
+          - LOG_LEVEL=warning
         networks:
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.0
+        image: bunkerity/bunkerweb-ui:1.5.1
         depends_on:
           - bw-docker
         environment:
@@ -124,7 +123,6 @@ Because the web UI is a web application, the recommended installation procedure 
           - DOCKER_HOST=tcp://bw-docker:2375
           - ADMIN_USERNAME=changeme
           - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the changeme user
-          - ABSOLUTE_URI=http://www.example.com/changeme/
         networks:
           - bw-universe
           - bw-docker
@@ -177,13 +175,12 @@ Because the web UI is a web application, the recommended installation procedure 
 
     - `ADMIN_USERNAME` : username to access the web UI
     - `ADMIN_PASSWORD` : password to access the web UI
-    - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.1/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -192,7 +189,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.0
+        image: bunkerity/bunkerweb:1.5.1
         ports:
           - 80:8080
           - 443:8443
@@ -209,7 +206,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-services
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.0
+        image: bunkerity/bunkerweb-autoconf:1.5.1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -222,7 +219,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.0
+        image: bunkerity/bunkerweb-scheduler:1.5.1
         depends_on:
           - bunkerweb
           - bw-docker
@@ -240,6 +237,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
           - CONTAINERS=1
+          - LOG_LEVEL=warning
         networks:
           - bw-docker
 
@@ -256,7 +254,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.0
+        image: bunkerity/bunkerweb-ui:1.5.1
         networks:
           bw-docker:
           bw-universe:
@@ -268,14 +266,12 @@ Because the web UI is a web application, the recommended installation procedure 
           - AUTOCONF_MODE=yes
           - ADMIN_USERNAME=admin
           - ADMIN_PASSWORD=changeme
-          - ABSOLUTE_URI=http://www.example.com/changeme/
         labels:
           - "bunkerweb.SERVER_NAME=www.example.com"
           - "bunkerweb.USE_UI=yes"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
           - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-          - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme"
           - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
 
     volumes:
@@ -314,13 +310,12 @@ Because the web UI is a web application, the recommended installation procedure 
 
     - `ADMIN_USERNAME` : username to access the web UI
     - `ADMIN_PASSWORD` : password to access the web UI
-    - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). We recommend you to connect BunkerWeb and web UI using a dedicated network (like `bw-universe` also used by the scheduler and autoconf) so it won't be on the same network of your web services for obvious security reasons. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.1/misc/integrations) of the repository.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -329,7 +324,7 @@ Because the web UI is a web application, the recommended installation procedure 
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.0
+        image: bunkerity/bunkerweb:1.5.1
         ports:
           - published: 80
             target: 8080
@@ -359,7 +354,7 @@ Because the web UI is a web application, the recommended installation procedure 
             - "bunkerweb.INSTANCE"
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.0
+        image: bunkerity/bunkerweb-autoconf:1.5.1
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -378,6 +373,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - SERVICES=1
           - SWARM=1
           - TASKS=1
+          - LOG_LEVEL=warning
         networks:
           - bw-docker
         deploy:
@@ -386,7 +382,7 @@ Because the web UI is a web application, the recommended installation procedure 
               - "node.role == manager"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.0
+        image: bunkerity/bunkerweb-scheduler:1.5.1
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -413,13 +409,12 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.0
+        image: bunkerity/bunkerweb-ui:1.5.1
         environment:
           - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
           - DOCKER_HOST=tcp://bw-docker:2375
           - ADMIN_USERNAME=changeme
           - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the changeme user
-          - ABSOLUTE_URI=http://www.example.com/changeme/
         networks:
           - bw-universe
           - bw-docker
@@ -430,9 +425,8 @@ Because the web UI is a web application, the recommended installation procedure 
             - "bunkerweb.USE_REVERSE_PROXY=yes"
             - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
             - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-            - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme"
             - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
-            - "INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
+            - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
 
     volumes:
       bw-data:
@@ -463,13 +457,12 @@ Because the web UI is a web application, the recommended installation procedure 
 
     - `ADMIN_USERNAME` : username to access the web UI
     - `ADMIN_PASSWORD` : password to access the web UI
-    - `ABSOLUTE_URI` : full URI of your web UI instance (like `http://www.example.com/foo/`)
 
     Accessing the web UI through BunkerWeb is a classical [reverse proxy setup](quickstart-guide.md#protect-http-applications). Network segmentation between web UI and web services is not covered in this documentation. Please note that the web UI container is listening on the `7000` port.
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.0/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.1/misc/integrations) of the repository.
 
     Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -524,7 +517,7 @@ Because the web UI is a web application, the recommended installation procedure 
           containers:
             # using bunkerweb as name is mandatory
             - name: bunkerweb
-              image: bunkerity/bunkerweb:1.5.0
+              image: bunkerity/bunkerweb:1.5.1
               imagePullPolicy: Always
               securityContext:
                 runAsUser: 101
@@ -594,7 +587,7 @@ Because the web UI is a web application, the recommended installation procedure 
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.5.0
+              image: bunkerity/bunkerweb-autoconf:1.5.1
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -621,7 +614,7 @@ Because the web UI is a web application, the recommended installation procedure 
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.5.0
+              image: bunkerity/bunkerweb-scheduler:1.5.1
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -705,15 +698,13 @@ Because the web UI is a web application, the recommended installation procedure 
         spec:
           containers:
             - name: bunkerweb-ui
-              image: bunkerity/bunkerweb-ui:1.5.0
+              image: bunkerity/bunkerweb-ui:1.5.1
               imagePullPolicy: Always
               env:
                 - name: ADMIN_USERNAME
                   value: "changeme"
                 - name: "ADMIN_PASSWORD"
                   value: "changeme"
-                - name: "ABSOLUTE_URI"
-                  value: "http://www.example.com/changeme/"
                 - name: KUBERNETES_MODE
                   value: "YES"
                 - name: "DATABASE_URI"
@@ -788,8 +779,8 @@ Because the web UI is a web application, the recommended installation procedure 
       name: ingress
       annotations:
         bunkerweb.io/www.example.com_USE_UI: "yes"
-        bunkerweb.io/www.example.com_REVERSE_PROXY_HEADERS_1: "X-Script-Name /changeme"
         bunkerweb.io/www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
+        bunkerweb.io/www.example.com_INTERCEPTED_ERROR_CODES: '400 404 405 413 429 500 501 502 503 504'
     spec:
       rules:
         - host: www.example.com
@@ -819,7 +810,6 @@ Because the web UI is a web application, the recommended installation procedure 
     ```conf
     ADMIN_USERNAME=changeme
     ADMIN_PASSWORD=changeme
-    ABSOLUTE_URI=http://www.example.com/changeme/
     ```
 
     Each time you edit the `/etc/bunkerweb/ui.env` file, you will need to restart the service :
@@ -843,7 +833,6 @@ Because the web UI is a web application, the recommended installation procedure 
     www.example.com_USE_REVERSE_PROXY=yes
     www.example.com_REVERSE_PROXY_URL=/changeme/
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     ```
 
@@ -862,7 +851,6 @@ Because the web UI is a web application, the recommended installation procedure 
     ```conf
     ADMIN_USERNAME=changeme
     ADMIN_PASSWORD=changeme
-    ABSOLUTE_URI=http://www.example.com/changeme/
     ```
 
     Here is the `my_variables.env` boilerplate you can use :
@@ -877,7 +865,6 @@ Because the web UI is a web application, the recommended installation procedure 
     www.example.com_USE_REVERSE_PROXY=yes
     www.example.com_REVERSE_PROXY_URL=/changeme/
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     ```
 
@@ -929,7 +916,6 @@ Because the web UI is a web application, the recommended installation procedure 
     ```conf
     ADMIN_USERNAME=changeme
     ADMIN_PASSWORD=changeme
-    ABSOLUTE_URI=http://www.example.com/changeme/
     ```
 
     Each time you edit the `/etc/bunkerweb/ui.env` file, you will need to restart the service :
@@ -952,7 +938,6 @@ Because the web UI is a web application, the recommended installation procedure 
     www.example.com_USE_REVERSE_PROXY=yes
     www.example.com_REVERSE_PROXY_URL=/changeme/
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
-    www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     ```
 

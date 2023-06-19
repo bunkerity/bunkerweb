@@ -1,23 +1,21 @@
-local class      = require "middleclass"
-local plugin     = require "bunkerweb.plugin"
-local utils      = require "bunkerweb.utils"
-local cachestore = require "bunkerweb.cachestore"
-local cjson      = require "cjson"
-local ipmatcher  = require "resty.ipmatcher"
+local class     = require "middleclass"
+local plugin    = require "bunkerweb.plugin"
+local utils     = require "bunkerweb.utils"
+local ipmatcher = require "resty.ipmatcher"
 
-local greylist   = class("greylist", plugin)
+local greylist  = class("greylist", plugin)
 
-function greylist:initialize()
+function greylist:initialize(ctx)
 	-- Call parent initialize
-	plugin.initialize(self, "greylist")
+	plugin.initialize(self, "greylist", ctx)
 	-- Decode lists
 	if ngx.get_phase() ~= "init" and self:is_needed() then
-		local lists, err = self.datastore:get("plugin_greylist_lists")
+		local lists, err = self.datastore:get("plugin_greylist_lists", true)
 		if not lists then
 			self.logger:log(ngx.ERR, err)
 			self.lists = {}
 		else
-			self.lists = cjson.decode(lists)
+			self.lists = lists
 		end
 		local kinds = {
 			["IP"] = {},
@@ -43,7 +41,7 @@ function greylist:is_needed()
 		return false
 	end
 	-- Request phases (no default)
-	if self.is_request and (ngx.ctx.bw.server_name ~= "_") then
+	if self.is_request and (self.ctx.bw.server_name ~= "_") then
 		return self.variables["USE_GREYLIST"] == "yes"
 	end
 	-- Other cases : at least one service uses it
@@ -79,7 +77,7 @@ function greylist:init()
 		end
 	end
 	-- Load them into datastore
-	local ok, err = self.datastore:set("plugin_greylist_lists", cjson.encode(greylists))
+	local ok, err = self.datastore:set("plugin_greylist_lists", greylists, nil, true)
 	if not ok then
 		return self:ret(false, "can't store greylist list into datastore : " .. err)
 	end
@@ -93,13 +91,13 @@ function greylist:access()
 	end
 	-- Check the caches
 	local checks = {
-		["IP"] = "ip" .. ngx.ctx.bw.remote_addr
+		["IP"] = "ip" .. self.ctx.bw.remote_addr
 	}
-	if ngx.ctx.bw.http_user_agent then
-		checks["UA"] = "ua" .. ngx.ctx.bw.http_user_agent
+	if self.ctx.bw.http_user_agent then
+		checks["UA"] = "ua" .. self.ctx.bw.http_user_agent
 	end
-	if ngx.ctx.bw.uri then
-		checks["URI"] = "uri" .. ngx.ctx.bw.uri
+	if self.ctx.bw.uri then
+		checks["URI"] = "uri" .. self.ctx.bw.uri
 	end
 	local already_cached = {
 		["IP"] = false,
@@ -140,7 +138,7 @@ function greylist:access()
 	end
 
 	-- Return
-	return self:ret(true, "not in greylist", utils.get_deny_status())
+	return self:ret(true, "not in greylist", utils.get_deny_status(self.ctx))
 end
 
 function greylist:preread()
@@ -149,11 +147,11 @@ end
 
 function greylist:kind_to_ele(kind)
 	if kind == "IP" then
-		return "ip" .. ngx.ctx.bw.remote_addr
+		return "ip" .. self.ctx.bw.remote_addr
 	elseif kind == "UA" then
-		return "ua" .. ngx.ctx.bw.http_user_agent
+		return "ua" .. self.ctx.bw.http_user_agent
 	elseif kind == "URI" then
-		return "uri" .. ngx.ctx.bw.uri
+		return "uri" .. self.ctx.bw.uri
 	end
 end
 
@@ -174,7 +172,7 @@ function greylist:is_greylisted_ip()
 	if not ipm then
 		return nil, err
 	end
-	local match, err = ipm:match(ngx.ctx.bw.remote_addr)
+	local match, err = ipm:match(self.ctx.bw.remote_addr)
 	if err then
 		return nil, err
 	end
@@ -184,12 +182,12 @@ function greylist:is_greylisted_ip()
 
 	-- Check if rDNS is needed
 	local check_rdns = true
-	if self.variables["GREYLIST_RDNS_GLOBAL"] == "yes" and not ngx.ctx.bw.ip_is_global then
+	if self.variables["GREYLIST_RDNS_GLOBAL"] == "yes" and not self.ctx.bw.ip_is_global then
 		check_rdns = false
 	end
 	if check_rdns then
 		-- Get rDNS
-		local rdns_list, err = utils.get_rdns(ngx.ctx.bw.remote_addr)
+		local rdns_list, err = utils.get_rdns(self.ctx.bw.remote_addr)
 		-- Check if rDNS is in greylist
 		if rdns_list then
 			for i, rdns in ipairs(rdns_list) do
@@ -205,10 +203,10 @@ function greylist:is_greylisted_ip()
 	end
 
 	-- Check if ASN is in greylist
-	if ngx.ctx.bw.ip_is_global then
-		local asn, err = utils.get_asn(ngx.ctx.bw.remote_addr)
+	if self.ctx.bw.ip_is_global then
+		local asn, err = utils.get_asn(self.ctx.bw.remote_addr)
 		if not asn then
-			self.logger:log(ngx.ERR, "can't get ASN of IP " .. ngx.ctx.bw.remote_addr .. " : " .. err)
+			self.logger:log(ngx.ERR, "can't get ASN of IP " .. self.ctx.bw.remote_addr .. " : " .. err)
 		else
 			for i, bl_asn in ipairs(self.lists["ASN"]) do
 				if bl_asn == tostring(asn) then
@@ -225,7 +223,7 @@ end
 function greylist:is_greylisted_uri()
 	-- Check if URI is in greylist
 	for i, uri in ipairs(self.lists["URI"]) do
-		if utils.regex_match(ngx.ctx.bw.uri, uri) then
+		if utils.regex_match(self.ctx.bw.uri, uri) then
 			return true, "URI " .. uri
 		end
 	end
@@ -236,7 +234,7 @@ end
 function greylist:is_greylisted_ua()
 	-- Check if UA is in greylist
 	for i, ua in ipairs(self.lists["USER_AGENT"]) do
-		if utils.regex_match(ngx.ctx.bw.http_user_agent, ua) then
+		if utils.regex_match(self.ctx.bw.http_user_agent, ua) then
 			return true, "UA " .. ua
 		end
 	end
@@ -245,7 +243,7 @@ function greylist:is_greylisted_ua()
 end
 
 function greylist:is_in_cache(ele)
-	local ok, data = self.cachestore:get("plugin_greylist_" .. ngx.ctx.bw.server_name .. ele)
+	local ok, data = self.cachestore:get("plugin_greylist_" .. self.ctx.bw.server_name .. ele)
 	if not ok then
 		return false, data
 	end
@@ -253,7 +251,7 @@ function greylist:is_in_cache(ele)
 end
 
 function greylist:add_to_cache(ele, value)
-	local ok, err = self.cachestore:set("plugin_greylist_" .. ngx.ctx.bw.server_name .. ele, value, 86400)
+	local ok, err = self.cachestore:set("plugin_greylist_" .. self.ctx.bw.server_name .. ele, value, 86400)
 	if not ok then
 		return false, err
 	end

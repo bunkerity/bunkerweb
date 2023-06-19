@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.0
+    image: bunkerity/bunkerweb:1.5.1
     pull_policy: never
     ports:
       - 80:80
@@ -23,7 +23,6 @@ services:
       www.example.com_USE_REVERSE_PROXY: "yes"
       www.example.com_REVERSE_PROXY_URL: "/admin/"
       www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
-      www.example.com_REVERSE_PROXY_HEADERS: "X-Script-Name /admin"
       www.example.com_INTERCEPTED_ERROR_CODES: "400 405 413 429 500 501 502 503 504"
       CUSTOM_CONF_SERVER_HTTP_port-redirect: "port_in_redirect on;"
     labels:
@@ -34,7 +33,7 @@ services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.0
+    image: bunkerity/bunkerweb-scheduler:1.5.1
     pull_policy: never
     depends_on:
       - bw
@@ -47,13 +46,12 @@ services:
       - bw-docker
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.5.0
+    image: bunkerity/bunkerweb-ui:1.5.1
     pull_policy: never
     depends_on:
       - bw
       - bw-docker-proxy
     environment:
-      ABSOLUTE_URI: "http://www.example.com/admin/"
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWORD: "S$$cr3tP@ssw0rd"
       DOCKER_HOST: "tcp://bw-docker-proxy:2375"

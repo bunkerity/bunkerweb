@@ -19,6 +19,37 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
     cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 /tmp/req/requirements.txt.2 /tmp/req/requirements.txt.3 > /usr/share/bunkerweb/deps/requirements.txt && \
     rm -rf /tmp/req
 
+# # Install dependencies
+# RUN apt-get update -y && \
+#     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+#     wget \
+#     build-essential \
+#     checkinstall \
+#     libgdbm-dev \
+#     libc6-dev \
+#     libssl-dev \
+#     zlib1g-dev \
+#     libbz2-dev \
+#     libreadline-dev \
+#     libsqlite3-dev \
+#     libncurses5-dev \
+#     libncursesw5-dev \
+#     xz-utils \
+#     tk-dev \
+#     libffi-dev \
+#     tzdata
+
+# # Installing python3.11
+# RUN wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz && \
+#     tar xzf Python-3.11.4.tgz && \
+#     cd Python-3.11.4 && \
+#     ./configure --enable-optimizations && \
+#     make -j$(nproc) && \
+#     make altinstall && \
+#     rm -rf /usr/src/Python-3.11.4*
+#     # Installing pip
+# RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
+
 # Nginx
 RUN apt update && \
     apt-get install curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common -y && \
@@ -29,7 +60,7 @@ RUN apt update && \
     apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~jammy
 
 # Compile and install dependencies
-RUN apt install --no-install-recommends bash python3-pip libssl-dev git libpcre++-dev zlib1g-dev libxml2-dev libyajl-dev pkgconf libcurl4-openssl-dev libgeoip-dev liblmdb-dev apt-utils bash build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev -y && \
+RUN apt install --no-install-recommends bash libssl-dev git libpcre++-dev zlib1g-dev libxml2-dev libyajl-dev pkgconf libcurl4-openssl-dev libgeoip-dev liblmdb-dev apt-utils bash build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev python3-pip -y && \
     pip install --no-cache-dir --upgrade pip && \
     pip install wheel && \
     #mkdir -p /usr/share/bunkerweb/deps && \
@@ -37,7 +68,8 @@ RUN apt install --no-install-recommends bash python3-pip libssl-dev git libpcre+
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /usr/share/bunkerweb/deps/python && \
     export MAKEFLAGS="-j$(nproc)" && \
-    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
+    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
+    if [ ! -f /usr/share/bunkerweb/deps/python/zope/__init__.py ] ; then touch /usr/share/bunkerweb/deps/python/zope/__init__.py ; fi
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand

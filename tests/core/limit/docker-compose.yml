@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.0
+    image: bunkerity/bunkerweb:1.5.1
     pull_policy: never
     labels:
       - "bunkerweb.INSTANCE"
@@ -13,6 +13,7 @@ services:
       HTTP_PORT: "80"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
+      BAD_BEHAVIOR_STATUS_CODES: "400 401 403 405 429 444"
       LOG_LEVEL: "info"
 
       # ? LIMIT settings
@@ -27,7 +28,7 @@ services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.0
+    image: bunkerity/bunkerweb-scheduler:1.5.1
     pull_policy: never
     depends_on:
       - bw
