@@ -29,7 +29,7 @@
       "help": "List of URLs, separated with spaces, containing bad IP/network to block.",
       "id": "blacklist-ip-urls",
       "label": "Blacklist IP/network URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_RDNS_GLOBAL": {
@@ -56,7 +56,7 @@
       "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to block.",
       "id": "blacklist-rdns-urls",
       "label": "Blacklist reverse DNS URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_ASN": {
@@ -74,7 +74,7 @@
       "help": "List of URLs, separated with spaces, containing ASN to block.",
       "id": "blacklist-asn-urls",
       "label": "Blacklist ASN URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_USER_AGENT": {
@@ -92,7 +92,7 @@
       "help": "List of URLs, separated with spaces, containing bad User-Agent to block.",
       "id": "blacklist-user-agent-urls",
       "label": "Blacklist User-Agent URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_URI": {
@@ -110,7 +110,7 @@
       "help": "List of URLs, separated with spaces, containing bad URI to block.",
       "id": "blacklist-uri-urls",
       "label": "Blacklist URI URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_IP": {
@@ -128,7 +128,7 @@
       "help": "List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.",
       "id": "blacklist-ignore-ip-urls",
       "label": "Blacklist ignore IP/network URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_RDNS": {
@@ -146,7 +146,7 @@
       "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.",
       "id": "blacklist-ignore-rdns-urls",
       "label": "Blacklist ignore reverse DNS URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_ASN": {
@@ -164,7 +164,7 @@
       "help": "List of URLs, separated with spaces, containing ASN to ignore in the blacklist.",
       "id": "blacklist-ignore-asn-urls",
       "label": "Blacklist ignore ASN URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_USER_AGENT": {
@@ -182,7 +182,7 @@
       "help": "List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.",
       "id": "blacklist-ignore-user-agent-urls",
       "label": "Blacklist ignore User-Agent URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_URI": {
@@ -200,7 +200,7 @@
       "help": "List of URLs, separated with spaces, containing URI to ignore in the blacklist.",
       "id": "blacklist-ignore-uri-urls",
       "label": "Blacklist ignore URI URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     }
   },
