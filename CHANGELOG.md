@@ -19,6 +19,8 @@
 - [FEATURE] Add Turnstile antibot mode
 - [FEATURE] Add more CORS headers
 - [FEATURE] Add KEEP_UPSTREAM_HEADERS to preserve headers when using reverse proxy
+- [FEATURE] Add the possibility to download the different lists and plugins from a local file (like the blacklist)
+- [FEATURE] External plugins can now be downloaded from a tar.gz and tar.xz file as well as zip
 - [MISC] Add LOG_LEVEL=warning for docker socket proxy in docs, examples and boilerplates
 - [MISC] Temp remove VMWare provider for Vagrant integration
 - [MISC] Remove X-Script-Name header and ABSOLUTE_URI variable when using UI
