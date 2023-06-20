@@ -46,7 +46,7 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
             custom_conf = custom_confs_rx.search(splitted[0]).groups()
             custom_confs.append(
                 {
-                    "value": splitted[1],
+                    "value": f"# CREATED BY ENV\n{splitted[1]}",
                     "exploded": (
                         custom_conf[0],
                         custom_conf[1],
@@ -212,7 +212,7 @@ if __name__ == "__main__":
                     custom_conf = custom_confs_rx.search(k).groups()
                     custom_confs.append(
                         {
-                            "value": v,
+                            "value": f"# CREATED BY ENV\n{v}",
                             "exploded": (
                                 custom_conf[0],
                                 custom_conf[1],
@@ -223,25 +223,6 @@ if __name__ == "__main__":
                     logger.info(
                         f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
                     )
-            configs_path = join(sep, "etc", "bunkerweb", "configs")
-            root_dirs = listdir(configs_path)
-            for root, dirs, files in walk(configs_path):
-                if files or (dirs and basename(root) not in root_dirs):
-                    path_exploded = root.split("/")
-                    for file in files:
-                        with open(join(root, file), "r") as f:
-                            custom_confs.append(
-                                {
-                                    "value": f.read(),
-                                    "exploded": (
-                                        f"{path_exploded.pop()}"
-                                        if path_exploded[-1] not in root_dirs
-                                        else None,
-                                        path_exploded[-1],
-                                        file.replace(".conf", ""),
-                                    ),
-                                }
-                            )
         else:
             docker_client = DockerClient(
                 base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
@@ -268,7 +249,7 @@ if __name__ == "__main__":
                         custom_conf = custom_confs_rx.search(splitted[0]).groups()
                         custom_confs.append(
                             {
-                                "value": splitted[1],
+                                "value": f"# CREATED BY ENV\n{splitted[1]}",
                                 "exploded": (
                                     custom_conf[0],
                                     custom_conf[1],

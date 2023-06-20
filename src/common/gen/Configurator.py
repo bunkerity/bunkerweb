@@ -119,20 +119,20 @@ class Configurator:
 
                 if _type == "external":
                     plugin_content = BytesIO()
-                    with tar_open(fileobj=plugin_content, mode="w:gz") as tar:
+                    with tar_open(
+                        fileobj=plugin_content, mode="w:gz", compresslevel=9
+                    ) as tar:
                         tar.add(
                             dirname(file),
                             arcname=basename(dirname(file)),
                             recursive=True,
                         )
-                    plugin_content.seek(0)
+                    plugin_content.seek(0, 0)
                     value = plugin_content.getvalue()
 
                     data.update(
                         {
-                            "external": path.startswith(
-                                join(sep, "etc", "bunkerweb", "plugins")
-                            ),
+                            "external": True,
                             "page": "ui" in listdir(dirname(file)),
                             "method": "manual",
                             "data": value,
