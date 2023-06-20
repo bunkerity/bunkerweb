@@ -218,6 +218,36 @@ class Database:
             except (ProgrammingError, OperationalError):
                 return False
 
+    def set_scheduler_first_start(self, value: bool = False) -> str:
+        """Set the scheduler_first_start value"""
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                metadata.scheduler_first_start = value
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def is_scheduler_first_start(self) -> bool:
+        """Check if it's the scheduler's first start"""
+        with self.__db_session() as session:
+            try:
+                metadata = (
+                    session.query(Metadata)
+                    .with_entities(Metadata.scheduler_first_start)
+                    .filter_by(id=1)
+                    .first()
+                )
+                return metadata is not None and metadata.scheduler_first_start
+            except (ProgrammingError, OperationalError):
+                return True
+
     def is_first_config_saved(self) -> bool:
         """Check if the first configuration has been saved"""
         with self.__db_session() as session:
@@ -254,6 +284,7 @@ class Database:
                     Metadata(
                         is_initialized=True,
                         first_config_saved=False,
+                        scheduler_first_start=True,
                         version=version,
                         integration=integration,
                     )
@@ -361,6 +392,8 @@ class Database:
                             stream=plugin["stream"],
                             external=plugin.get("external", False),
                             method=plugin.get("method"),
+                            data=plugin.get("data"),
+                            checksum=plugin.get("checksum"),
                         )
                     )
 

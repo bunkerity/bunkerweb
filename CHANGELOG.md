@@ -13,12 +13,15 @@
 - [BUGFIX] Fix wrong variables in header phase (fix CORS feature too)
 - [BUGFIX] Fix UI not working in Ubuntu (python zope module)
 - [BUGFIX] Patch ModSecurity to run it after LUA code (should fix whitelist problems)
-- [PERFORMANCE] Reduce CPU usage of scheduler
+- [BUGFIX] Custom configurations from env were not being deleted properly
+- [PERFORMANCE] Reduce CPU and RAM usage of scheduler
 - [PERFORMANCE] Cache ngx.ctx instead of loading it each time
 - [PERFORMANCE] Use per-worker LRU cache for common RO LUA values
 - [FEATURE] Add Turnstile antibot mode
 - [FEATURE] Add more CORS headers
 - [FEATURE] Add KEEP_UPSTREAM_HEADERS to preserve headers when using reverse proxy
+- [FEATURE] Add the possibility to download the different lists and plugins from a local file (like the blacklist)
+- [FEATURE] External plugins can now be downloaded from a tar.gz and tar.xz file as well as zip
 - [MISC] Add LOG_LEVEL=warning for docker socket proxy in docs, examples and boilerplates
 - [MISC] Temp remove VMWare provider for Vagrant integration
 - [MISC] Remove X-Script-Name header and ABSOLUTE_URI variable when using UI

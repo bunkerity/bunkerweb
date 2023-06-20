@@ -68,6 +68,9 @@ class JobScheduler(ApiCaller):
     def auto_setup(self):
         super().auto_setup(bw_integration=self.__integration)
 
+    def update_jobs(self):
+        self.__jobs = self.__get_jobs()
+
     def __get_jobs(self):
         jobs = {}
         for plugin_file in glob(
