@@ -29,7 +29,7 @@
       "help": "List of URLs, separated with spaces, containing good IP/network to whitelist.",
       "id": "whitelist-ip-urls",
       "label": "Whitelist IP/network URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "WHITELIST_RDNS_GLOBAL": {
@@ -56,7 +56,7 @@
       "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.",
       "id": "whitelist-rdns-urls",
       "label": "Whitelist reverse DNS URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "WHITELIST_ASN": {
@@ -74,7 +74,7 @@
       "help": "List of URLs, separated with spaces, containing ASN to whitelist.",
       "id": "whitelist-asn-urls",
       "label": "Whitelist ASN URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "WHITELIST_USER_AGENT": {
@@ -92,7 +92,7 @@
       "help": "List of URLs, separated with spaces, containing good User-Agent to whitelist.",
       "id": "whitelist-user-agent-urls",
       "label": "Whitelist User-Agent URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "WHITELIST_URI": {
@@ -110,7 +110,7 @@
       "help": "List of URLs, separated with spaces, containing bad URI to whitelist.",
       "id": "whitelist-uri-urls",
       "label": "Whitelist URI URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     }
   },

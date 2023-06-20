@@ -3,7 +3,7 @@
 from hashlib import sha256
 from io import BytesIO
 from os import getenv, listdir, chmod, _exit, sep
-from os.path import basename, dirname, join
+from os.path import basename, dirname, join, normpath
 from pathlib import Path
 from stat import S_IEXEC
 from sys import exit as sys_exit, path as sys_path
@@ -28,6 +28,7 @@ for deps_path in [
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from magic import Magic
 from requests import get
 
 from Database import Database  # type: ignore
@@ -69,9 +70,22 @@ try:
     # Loop on URLs
     logger.info(f"Downloading external plugins from {plugin_urls}...")
     for plugin_url in plugin_urls.split(" "):
-        # Download ZIP file
+        # Download Plugin file
         try:
-            req = get(plugin_url, timeout=10)
+            if plugin_urls.startswith("file://"):
+                content = Path(normpath(plugin_urls[7:])).read_bytes()
+            else:
+                content = b""
+                resp = get(plugin_url, stream=True, timeout=10)
+
+                if resp.status_code != 200:
+                    logger.warning(f"Got status code {resp.status_code}, skipping...")
+                    continue
+
+                # Iterate over the response content in chunks
+                for chunk in resp.iter_content(chunk_size=8192):
+                    if chunk:
+                        content += chunk
         except:
             logger.error(
                 f"Exception while downloading plugin(s) from {plugin_url} :\n{format_exc()}",
@@ -83,8 +97,22 @@ try:
         temp_dir = join(sep, "var", "tmp", "bunkerweb", "plugins", str(uuid4()))
         try:
             Path(temp_dir).mkdir(parents=True, exist_ok=True)
-            with ZipFile(BytesIO(req.content)) as zf:
-                zf.extractall(path=temp_dir)
+            file_type = Magic(mime=True).from_buffer(content)
+
+            if file_type == "application/zip":
+                with ZipFile(BytesIO(content)) as zf:
+                    zf.extractall(path=temp_dir)
+            elif file_type == "application/gzip":
+                with tar_open(fileobj=BytesIO(content), mode="r:gz") as tar:
+                    tar.extractall(path=temp_dir)
+            elif file_type == "application/x-tar":
+                with tar_open(fileobj=BytesIO(content), mode="r") as tar:
+                    tar.extractall(path=temp_dir)
+            else:
+                logger.error(
+                    f"Unknown file type for {plugin_url}, either zip or tar are supported, skipping..."
+                )
+                continue
         except:
             logger.error(
                 f"Exception while decompressing plugin(s) from {plugin_url} :\n{format_exc()}",

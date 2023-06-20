@@ -70,9 +70,12 @@ def is_cached_file(
     return is_cached and cached_file
 
 
-def get_file_in_db(file: Union[str, Path], db, *, job_name: Optional[str] = None) -> Optional[bytes]:
+def get_file_in_db(
+    file: Union[str, Path], db, *, job_name: Optional[str] = None
+) -> Optional[bytes]:
     cached_file = db.get_job_cache_file(
-        job_name or basename(getsourcefile(_getframe(1))).replace(".py", ""), normpath(file)
+        job_name or basename(getsourcefile(_getframe(1))).replace(".py", ""),
+        normpath(file),
     )
     if not cached_file:
         return None

@@ -3,7 +3,7 @@
 from contextlib import suppress
 from ipaddress import ip_address, ip_network
 from os import _exit, getenv, sep
-from os.path import join
+from os.path import join, normpath
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -92,12 +92,19 @@ try:
     for url in urls:
         try:
             logger.info(f"Downloading RealIP list from {url} ...")
-            resp = get(url, stream=True, timeout=10)
+            if url.startswith("file://"):
+                with open(normpath(url[7:]), "rb") as f:
+                    iterable = f.readlines()
+            else:
+                resp = get(url, stream=True, timeout=10)
 
-            if resp.status_code != 200:
-                continue
+                if resp.status_code != 200:
+                    logger.warning(f"Got status code {resp.status_code}, skipping...")
+                    continue
 
-            for line in resp.iter_lines():
+                iterable = resp.iter_lines()
+
+            for line in iterable:
                 line = line.strip().split(b" ")[0]
 
                 if not line or line.startswith(b"#") or line.startswith(b";"):
