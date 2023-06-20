@@ -13,7 +13,8 @@
 - [BUGFIX] Fix wrong variables in header phase (fix CORS feature too)
 - [BUGFIX] Fix UI not working in Ubuntu (python zope module)
 - [BUGFIX] Patch ModSecurity to run it after LUA code (should fix whitelist problems)
-- [PERFORMANCE] Reduce CPU usage of scheduler
+- [BUGFIX] Custom configurations from env were not being deleted properly
+- [PERFORMANCE] Reduce CPU and RAM usage of scheduler
 - [PERFORMANCE] Cache ngx.ctx instead of loading it each time
 - [PERFORMANCE] Use per-worker LRU cache for common RO LUA values
 - [FEATURE] Add Turnstile antibot mode
