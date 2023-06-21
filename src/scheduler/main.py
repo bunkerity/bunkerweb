@@ -23,6 +23,7 @@ from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from tarfile import open as tar_open
+from threading import Thread
 from time import sleep
 from traceback import format_exc
 from typing import Any, Dict, List, Optional, Union
@@ -172,8 +173,7 @@ def generate_external_plugins(
 def dict_to_frozenset(d):
     if isinstance(d, dict):
         return frozenset((k, dict_to_frozenset(v)) for k, v in d.items())
-    else:
-        return d
+    return d
 
 
 if __name__ == "__main__":
@@ -351,7 +351,11 @@ if __name__ == "__main__":
                 )
 
         if (scheduler_first_start and db_configs) or changes:
-            generate_custom_configs(db.get_custom_configs(), original_path=configs_path)
+            Thread(
+                target=generate_custom_configs,
+                args=(db.get_custom_configs(),),
+                kwargs={"original_path": configs_path},
+            ).start()
 
         del custom_configs, db_configs
 
@@ -404,6 +408,7 @@ if __name__ == "__main__":
                 db.get_plugins(external=True, with_data=True),
                 original_path=plugins_dir,
             )
+            SCHEDULER.update_jobs()
 
         del tmp_external_plugins, external_plugins, db_plugins
 
@@ -437,7 +442,33 @@ if __name__ == "__main__":
 
         FIRST_RUN = True
         CHANGES = []
+        threads = []
+
+        def send_nginx_configs():
+            logger.info(f"Sending {join(sep, 'etc', 'nginx')} folder ...")
+            ret = SCHEDULER.send_files(join(sep, "etc", "nginx"), "/confs")
+            if not ret:
+                logger.error(
+                    "Sending nginx configs failed, configuration will not work as expected...",
+                )
+
+        def send_nginx_cache():
+            logger.info(f"Sending {CACHE_PATH} folder ...")
+            if not SCHEDULER.send_files(CACHE_PATH, "/cache"):
+                logger.error(f"Error while sending {CACHE_PATH} folder")
+            else:
+                logger.info(f"Successfully sent {CACHE_PATH} folder")
+
         while True:
+            threads.clear()
+            ret = db.checked_changes(CHANGES)
+
+            if ret:
+                logger.error(
+                    f"An error occurred when setting the changes to checked in the database : {ret}"
+                )
+                stop(1)
+
             # Update the environment variables of the scheduler
             SCHEDULER.env = env.copy() | environ.copy()
             SCHEDULER.setup()
@@ -447,37 +478,6 @@ if __name__ == "__main__":
                 logger.error("At least one job in run_once() failed")
             else:
                 logger.info("All jobs in run_once() were successful")
-
-            changes = db.check_changes()
-
-            if isinstance(changes, str):
-                logger.error(
-                    f"An error occurred when checking for changes in the database : {changes}"
-                )
-                stop(1)
-
-            # check if the plugins have changed since last time
-            if changes["external_plugins_changed"]:
-                # run the config saver to save potential plugins settings
-                proc = subprocess_run(
-                    [
-                        "python",
-                        join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
-                        "--settings",
-                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                    ],
-                    stdin=DEVNULL,
-                    stderr=STDOUT,
-                    check=False,
-                )
-                if proc.returncode != 0:
-                    logger.error(
-                        "Config saver failed, configuration will not work as expected...",
-                    )
-
-                CHANGES = CHANGES or ["config", "custom_configs"]
-                if "external_plugins_changed" in CHANGES:
-                    CHANGES.remove("external_plugins_changed")
 
             if GENERATE:
                 # run the generator
@@ -511,21 +511,19 @@ if __name__ == "__main__":
 
                     if SCHEDULER.apis:
                         # send nginx configs
-                        logger.info(f"Sending {join(sep, 'etc', 'nginx')} folder ...")
-                        ret = SCHEDULER.send_files(join(sep, "etc", "nginx"), "/confs")
-                        if not ret:
-                            logger.error(
-                                "Sending nginx configs failed, configuration will not work as expected...",
-                            )
+                        thread = Thread(target=send_nginx_configs)
+                        thread.start()
+                        threads.append(thread)
 
             try:
                 if SCHEDULER.apis:
                     # send cache
-                    logger.info(f"Sending {CACHE_PATH} folder ...")
-                    if not SCHEDULER.send_files(CACHE_PATH, "/cache"):
-                        logger.error(f"Error while sending {CACHE_PATH} folder")
-                    else:
-                        logger.info(f"Successfully sent {CACHE_PATH} folder")
+                    thread = Thread(target=send_nginx_cache)
+                    thread.start()
+                    threads.append(thread)
+
+                    for thread in threads:
+                        thread.join()
 
                     if SCHEDULER.send_to_apis("POST", "/reload"):
                         logger.info("Successfully reloaded nginx")
@@ -586,15 +584,6 @@ if __name__ == "__main__":
             CONFIG_NEED_GENERATION = False
             CONFIGS_NEED_GENERATION = False
             PLUGINS_NEED_GENERATION = False
-            FIRST_RUN = False
-
-            ret = db.checked_changes(CHANGES)
-
-            if ret:
-                logger.error(
-                    f"An error occurred when setting the changes to checked in the database : {ret}"
-                )
-                stop(1)
 
             # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
@@ -613,16 +602,52 @@ if __name__ == "__main__":
                     )
                     stop(1)
 
+                # check if the plugins have changed since last time
+                if changes["external_plugins_changed"]:
+                    logger.info("External plugins changed, generating ...")
+
+                    if FIRST_RUN:
+                        # run the config saver to save potential ignored external plugins settings
+                        logger.info(
+                            "Running config saver to save potential ignored external plugins settings ..."
+                        )
+                        proc = subprocess_run(
+                            [
+                                "python",
+                                join(
+                                    sep,
+                                    "usr",
+                                    "share",
+                                    "bunkerweb",
+                                    "gen",
+                                    "save_config.py",
+                                ),
+                                "--settings",
+                                join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                            ],
+                            stdin=DEVNULL,
+                            stderr=STDOUT,
+                            check=False,
+                        )
+                        if proc.returncode != 0:
+                            logger.error(
+                                "Config saver failed, configuration will not work as expected...",
+                            )
+
+                        changes.update(
+                            {
+                                "custom_configs_changed": True,
+                                "config_changed": True,
+                            }
+                        )
+
+                    PLUGINS_NEED_GENERATION = True
+                    NEED_RELOAD = True
+
                 # check if the custom configs have changed since last time
                 if changes["custom_configs_changed"]:
                     logger.info("Custom configs changed, generating ...")
                     CONFIGS_NEED_GENERATION = True
-                    NEED_RELOAD = True
-
-                # check if the plugins have changed since last time
-                if changes["external_plugins_changed"]:
-                    logger.info("External plugins changed, generating ...")
-                    PLUGINS_NEED_GENERATION = True
                     NEED_RELOAD = True
 
                 # check if the config have changed since last time
@@ -631,14 +656,18 @@ if __name__ == "__main__":
                     CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
 
+            FIRST_RUN = False
+
             if NEED_RELOAD:
                 CHANGES.clear()
 
                 if CONFIGS_NEED_GENERATION:
                     CHANGES.append("custom_configs")
-                    generate_custom_configs(
-                        db.get_custom_configs(), original_path=configs_path
-                    )
+                    Thread(
+                        target=generate_custom_configs,
+                        args=(db.get_custom_configs(),),
+                        kwargs={"original_path": configs_path},
+                    ).start()
 
                 if PLUGINS_NEED_GENERATION:
                     CHANGES.append("external_plugins")

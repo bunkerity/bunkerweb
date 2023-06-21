@@ -90,12 +90,12 @@ class JobScheduler(ApiCaller):
                 for x, job in enumerate(deepcopy(plugin_jobs)):
                     if not all(
                         key in job.keys()
-                        for key in [
+                        for key in (
                             "name",
                             "file",
                             "every",
                             "reload",
-                        ]
+                        )
                     ):
                         self.__logger.warning(
                             f"missing keys for job {job['name']} in plugin {plugin_name}, must have name, file, every and reload, ignoring job"
@@ -115,7 +115,7 @@ class JobScheduler(ApiCaller):
                         )
                         plugin_jobs.pop(x)
                         continue
-                    elif job["every"] not in ["once", "minute", "hour", "day", "week"]:
+                    elif job["every"] not in ("once", "minute", "hour", "day", "week"):
                         self.__logger.warning(
                             f"Invalid every for job {job['name']} in plugin {plugin_name} (Must be once, minute, hour, day or week), ignoring job"
                         )
@@ -208,6 +208,11 @@ class JobScheduler(ApiCaller):
             with self.__thread_lock:
                 self.__job_success = False
 
+        Thread(target=self.__update_job, args=(plugin, name, success)).start()
+
+        return ret
+
+    def __update_job(self, plugin: str, name: str, success: bool):
         with self.__thread_lock:
             err = self.__db.update_job(plugin, name, success)
 
@@ -219,7 +224,6 @@ class JobScheduler(ApiCaller):
             self.__logger.warning(
                 f"Failed to update database for the job {name} from plugin {plugin}: {err}",
             )
-        return ret
 
     def setup(self):
         for plugin, jobs in self.__jobs.items():
