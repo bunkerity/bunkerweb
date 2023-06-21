@@ -793,12 +793,12 @@ with webdriver.Firefox(
             driver, By.XPATH, "//div[@data-configs-modal-editor='']/textarea"
         ).send_keys(
             """
-            location /hello {
-                default_type 'text/plain';
-                content_by_lua_block {
-                    ngx.say('hello app1')
-                }
-            }
+location /hello {
+    default_type 'text/plain';
+    content_by_lua_block {
+        ngx.say('hello app1')
+    }
+}
             """
         )
 
@@ -812,7 +812,7 @@ with webdriver.Firefox(
 
         assert_alert_message(driver, "was successfully created")
 
-        sleep(30)
+        sleep(60)
 
         driver.execute_script("window.open('http://www.example.com/hello','_blank');")
         driver.switch_to.window(driver.window_handles[1])
@@ -994,8 +994,7 @@ with webdriver.Firefox(
 
         assert_button_click(driver, "//button[@data-cache-modal-submit='']")
 
-        print(
-            "The cache file content is correct, trying logs page ...", flush=True)
+        print("The cache file content is correct, trying logs page ...", flush=True)
 
         access_page(
             driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[8]/a", "logs"
