@@ -649,7 +649,7 @@ try:
                 )
                 exit(1)
             elif (
-                custom_config.data
+                custom_config.data.replace(b"# CREATED BY ENV\n", b"")
                 != current_custom_configs[custom_config.name]["value"]
             ):
                 print(
