@@ -169,6 +169,13 @@ def generate_external_plugins(
             )
 
 
+def dict_to_frozenset(d):
+    if isinstance(d, dict):
+        return frozenset((k, dict_to_frozenset(v)) for k, v in d.items())
+    else:
+        return d
+
+
 if __name__ == "__main__":
     try:
         # Don't execute if pid file exists
@@ -332,8 +339,8 @@ if __name__ == "__main__":
                     if saving:
                         custom_configs.append(custom_conf)
 
-        changes = changes or {hash(frozenset(d.items())) for d in custom_configs} != {
-            hash(frozenset(d.items())) for d in db_configs
+        changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {
+            hash(dict_to_frozenset(d)) for d in db_configs
         }
 
         if changes:
@@ -381,8 +388,8 @@ if __name__ == "__main__":
             external_plugin.pop("jobs", None)
             tmp_external_plugins.append(external_plugin)
 
-        changes = {hash(frozenset(d.items())) for d in tmp_external_plugins} != {
-            hash(frozenset(d.items())) for d in db_plugins
+        changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {
+            hash(dict_to_frozenset(d)) for d in db_plugins
         }
 
         if changes:
