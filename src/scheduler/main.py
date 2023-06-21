@@ -376,9 +376,9 @@ if __name__ == "__main__":
 
         tmp_external_plugins = []
         for external_plugin in external_plugins.copy():
-            external_plugin.pop("data")
-            external_plugin.pop("checksum")
-            external_plugin.pop("jobs")
+            external_plugin.pop("data", None)
+            external_plugin.pop("checksum", None)
+            external_plugin.pop("jobs", None)
             tmp_external_plugins.append(external_plugin)
 
         changes = {hash(frozenset(d.items())) for d in tmp_external_plugins} != {
