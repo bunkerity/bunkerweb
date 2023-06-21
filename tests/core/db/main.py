@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from glob import iglob
-from hashlib import sha512
+from hashlib import sha256
 from json import dumps, load
 from os import environ, getenv
 from os.path import dirname, join
@@ -486,14 +486,14 @@ try:
     print("ℹ️ Checking if all plugin pages are in the database ...", flush=True)
 
     def file_hash(file: str) -> str:
-        _sha512 = sha512()
+        _sha256 = sha256()
         with open(file, "rb") as f:
             while True:
                 data = f.read(1024)
                 if not data:
                     break
-                _sha512.update(data)
-        return _sha512.hexdigest()
+                _sha256.update(data)
+        return _sha256.hexdigest()
 
     with db_session() as session:
         plugin_pages = (
