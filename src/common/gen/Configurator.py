@@ -5,12 +5,13 @@ from hashlib import sha256
 from io import BytesIO
 from json import loads
 from logging import Logger
-from os import listdir, sep
+from os import cpu_count, listdir, sep
 from os.path import basename, dirname, join
 from pathlib import Path
 from re import compile as re_compile, search as re_search
 from sys import path as sys_path
 from tarfile import open as tar_open
+from threading import Lock, Semaphore, Thread
 from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
@@ -28,16 +29,20 @@ class Configurator:
         logger: Logger,
     ):
         self.__logger = logger
+        self.__thread_lock = Lock()
+        self.__semaphore = Semaphore(cpu_count() or 1)
         self.__plugin_id_rx = re_compile(r"^[\w.-]{1,64}$")
         self.__plugin_version_rx = re_compile(r"^\d+\.\d+(\.\d+)?$")
         self.__setting_id_rx = re_compile(r"^[A-Z0-9_]{1,256}$")
         self.__name_rx = re_compile(r"^[\w.-]{1,128}$")
         self.__job_file_rx = re_compile(r"^[\w./-]{1,256}$")
         self.__settings = self.__load_settings(settings)
-        self.__core_plugins = self.__load_plugins(core)
+        self.__core_plugins = []
+        self.__load_plugins(core)
 
         if isinstance(external_plugins, str):
-            self.__external_plugins = self.__load_plugins(external_plugins, "external")
+            self.__external_plugins = []
+            self.__load_plugins(external_plugins, "external")
         else:
             self.__external_plugins = external_plugins
 
@@ -103,50 +108,61 @@ class Configurator:
     def __load_settings(self, path: str) -> Dict[str, Any]:
         return loads(Path(path).read_text())
 
-    def __load_plugins(self, path: str, _type: str = "core") -> List[Dict[str, Any]]:
-        plugins = []
-        files = glob(join(path, "*", "plugin.json"))
-        for file in files:
-            try:
-                data = self.__load_settings(file)
+    def __load_plugins(self, path: str, _type: str = "core"):
+        threads = []
+        for file in glob(join(path, "*", "plugin.json")):
+            thread = Thread(target=self.__load_plugin, args=(file, _type))
+            thread.start()
+            threads.append(thread)
 
-                resp, msg = self.__validate_plugin(data)
-                if not resp:
-                    self.__logger.warning(
-                        f"Ignoring plugin {file} : {msg}",
+        for thread in threads:
+            thread.join()
+
+    def __load_plugin(self, file: str, _type: str = "core"):
+        self.__semaphore.acquire(timeout=60)
+        try:
+            data = self.__load_settings(file)
+
+            resp, msg = self.__validate_plugin(data)
+            if not resp:
+                self.__logger.warning(
+                    f"Ignoring plugin {file} : {msg}",
+                )
+                return
+
+            if _type == "external":
+                plugin_content = BytesIO()
+                with tar_open(
+                    fileobj=plugin_content, mode="w:gz", compresslevel=9
+                ) as tar:
+                    tar.add(
+                        dirname(file),
+                        arcname=basename(dirname(file)),
+                        recursive=True,
                     )
-                    continue
+                plugin_content.seek(0, 0)
+                value = plugin_content.getvalue()
 
-                if _type == "external":
-                    plugin_content = BytesIO()
-                    with tar_open(
-                        fileobj=plugin_content, mode="w:gz", compresslevel=9
-                    ) as tar:
-                        tar.add(
-                            dirname(file),
-                            arcname=basename(dirname(file)),
-                            recursive=True,
-                        )
-                    plugin_content.seek(0, 0)
-                    value = plugin_content.getvalue()
-
-                    data.update(
-                        {
-                            "external": True,
-                            "page": "ui" in listdir(dirname(file)),
-                            "method": "manual",
-                            "data": value,
-                            "checksum": sha256(value).hexdigest(),
-                        }
-                    )
-
-                plugins.append(data)
-            except:
-                self.__logger.error(
-                    f"Exception while loading JSON from {file} : {format_exc()}",
+                data.update(
+                    {
+                        "external": True,
+                        "page": "ui" in listdir(dirname(file)),
+                        "method": "manual",
+                        "data": value,
+                        "checksum": sha256(value).hexdigest(),
+                    }
                 )
 
-        return plugins
+                with self.__thread_lock:
+                    self.__external_plugins.append(data)
+            else:
+                with self.__thread_lock:
+                    self.__core_plugins.append(data)
+        except:
+            self.__logger.error(
+                f"Exception while loading JSON from {file} : {format_exc()}",
+            )
+        self.__semaphore.release()
 
     def __load_variables(self, path: str) -> Dict[str, Any]:
         variables = {}

@@ -11,7 +11,7 @@ from os.path import basename, dirname, join
 from pathlib import Path
 from re import compile as re_compile
 from sys import _getframe, path as sys_path
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from time import sleep
 from traceback import format_exc
 
@@ -647,7 +647,7 @@ class Database:
                             )
                         )
 
-                    config.pop("SERVER_NAME")
+                    config.pop("SERVER_NAME", None)
 
                     for key, value in config.items():
                         suffix = 0
@@ -705,7 +705,7 @@ class Database:
                 if metadata is not None:
                     if not metadata.first_config_saved:
                         metadata.first_config_saved = True
-                    metadata.config_changed = bool(to_put)
+                    metadata.config_changed = True
 
             try:
                 session.add_all(to_put)
