@@ -143,10 +143,10 @@
     "EXTERNAL_PLUGIN_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of external plugins URLs (direct download to .zip file) to download and install (URLs are separated with space).",
+      "help": "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
       "id": "external-plugin-urls",
       "label": "External plugin URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "DENY_HTTP_STATUS": {

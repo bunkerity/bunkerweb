@@ -279,6 +279,7 @@ class Metadata(Base):
     is_initialized = Column(Boolean, nullable=False)
     first_config_saved = Column(Boolean, nullable=False)
     autoconf_loaded = Column(Boolean, default=False, nullable=True)
+    scheduler_first_start = Column(Boolean, nullable=True)
     custom_configs_changed = Column(Boolean, default=False, nullable=True)
     external_plugins_changed = Column(Boolean, default=False, nullable=True)
     config_changed = Column(Boolean, default=False, nullable=True)
