@@ -16,6 +16,15 @@
   font-family: "Open Sans", sans-serif !important;
 }
 
+.ace_editor,
+.ace_editor div,
+.ace_content {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", "source-code-pro",
+    monospace !important;
+  font-size: 16px !important;
+  font-weight: normal !important;
+}
+
 *,
 ::before,
 ::after {
