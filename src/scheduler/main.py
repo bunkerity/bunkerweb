@@ -507,7 +507,10 @@ if __name__ == "__main__":
                         "Config generator failed, configuration will not work as expected...",
                     )
                 else:
-                    copy(str(nginx_variables_path), str(tmp_variables_path))
+                    copy(
+                        str(nginx_variables_path),
+                        join(sep, "var", "tmp", "bunkerweb", "variables.env"),
+                    )
 
                     if SCHEDULER.apis:
                         # send nginx configs
