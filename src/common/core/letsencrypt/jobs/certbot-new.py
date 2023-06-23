@@ -197,10 +197,6 @@ try:
         logger.error(f"Error while saving Let's Encrypt data to db cache : {err}")
     else:
         logger.info("Successfully saved Let's Encrypt data to db cache")
-
-    # Delete lib and log folders to avoid sending them
-    rmtree(str(letsencrypt_path.joinpath("lib")), ignore_errors=True)
-    rmtree(str(letsencrypt_path.joinpath("log")), ignore_errors=True)
 except:
     status = 3
     logger.error(f"Exception while running certbot-new.py :\n{format_exc()}")
