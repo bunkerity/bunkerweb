@@ -31,15 +31,6 @@ CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "server_stream",
     name="custom_configs_types_enum",
 )
-LOG_LEVELS_ENUM = Enum(
-    "CRITICAL",
-    "ERROR",
-    "WARNING",
-    "INFO",
-    "DEBUG",
-    "NOTSET",
-    name="log_levels_enum",
-)
 INTEGRATIONS_ENUM = Enum(
     "Linux",
     "Docker",

@@ -51,24 +51,20 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl libmagic && \
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler && \
   cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
   echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
+  mkdir -p /etc/nginx && \
   mkdir -p /var/tmp/bunkerweb && \
   mkdir -p /var/run/bunkerweb && \
+  mkdir -p /var/log/bunkerweb && \
   mkdir -p /var/www && \
   mkdir -p /etc/bunkerweb && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-  mkdir -p /data/www && ln -s /data/www /var/www/html && \
   for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
-  chown -R root:scheduler /data && \
-  chmod -R 770 /data && \
-  chown -R root:scheduler /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /usr/bin/bwcli && \
-  chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb && \
+  chown -R root:scheduler /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
+  chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
   chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/scheduler/entrypoint.sh /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/deps/python/bin/* /usr/bin/bwcli && \
-  mkdir -p /etc/nginx && \
-  chown -R scheduler:scheduler /etc/nginx && \
-  chmod -R 770 /etc/nginx && \
   chmod 660 /usr/share/bunkerweb/INTEGRATION && \
   chown root:scheduler /usr/share/bunkerweb/INTEGRATION
 

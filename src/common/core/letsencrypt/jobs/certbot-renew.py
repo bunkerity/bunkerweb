@@ -34,9 +34,9 @@ def renew(domain: str, letsencrypt_path: Path) -> int:
             "--config-dir",
             str(letsencrypt_path.joinpath("etc")),
             "--work-dir",
-            str(letsencrypt_path.joinpath("lib")),
+            join(sep, "var", "lib", "bunkerweb", "letsencrypt"),
             "--logs-dir",
-            str(letsencrypt_path.joinpath("log")),
+            join(sep, "var", "log", "bunkerweb"),
             "--cert-name",
             domain,
             "--deploy-hook",
@@ -83,6 +83,9 @@ try:
     # Create directory if it doesn't exist
     letsencrypt_path = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
     letsencrypt_path.mkdir(parents=True, exist_ok=True)
+    Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(
+        parents=True, exist_ok=True
+    )
 
     # Extract letsencrypt folder if it exists in db
     db = Database(
@@ -149,10 +152,6 @@ try:
         logger.error(f"Error while saving Let's Encrypt data to db cache : {err}")
     else:
         logger.info("Successfully saved Let's Encrypt data to db cache")
-
-    # Delete lib and log folders to avoid sending them
-    rmtree(str(letsencrypt_path.joinpath("lib")), ignore_errors=True)
-    rmtree(str(letsencrypt_path.joinpath("log")), ignore_errors=True)
 except:
     status = 2
     logger.error(f"Exception while running certbot-renew.py :\n{format_exc()}")

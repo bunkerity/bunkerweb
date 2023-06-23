@@ -112,6 +112,11 @@ Database configuration is done by using the `DATABASE_URI` setting which respect
 - MySQL : `mysql+pymysql://bunkerweb:changeme@bw-db:3306/db`
 - PostgreSQL : `postgresql://bunkerweb:changeme@bw-db:5432/db`
 
+<figure markdown>
+  ![Overview](assets/img/bunkerweb_db.svg){ align=center, width="800" }
+  <figcaption>Database Schema</figcaption>
+</figure>
+
 ## Scheduler
 
 To make things automagically work together, a dedicated service called the scheduler is in charge of :

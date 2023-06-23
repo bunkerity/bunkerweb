@@ -66,6 +66,12 @@ function remove {
         do_and_check_cmd rm -rf /var/run/bunkerweb
     fi
 
+    # Remove /var/log/bunkerweb
+    if test -e "/var/log/bunkerweb"; then
+        echo "ℹ️ Remove /var/log/bunkerweb"
+        do_and_check_cmd rm -rf /var/log/bunkerweb
+    fi
+
     # Remove /var/lib/bunkerweb
     if test -e "/var/cache/bunkerweb"; then
         echo "ℹ️ Remove  /var/cache/bunkerweb"
