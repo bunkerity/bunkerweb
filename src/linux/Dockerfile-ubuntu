@@ -19,37 +19,6 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
     cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 /tmp/req/requirements.txt.2 /tmp/req/requirements.txt.3 > /usr/share/bunkerweb/deps/requirements.txt && \
     rm -rf /tmp/req
 
-# # Install dependencies
-# RUN apt-get update -y && \
-#     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-#     wget \
-#     build-essential \
-#     checkinstall \
-#     libgdbm-dev \
-#     libc6-dev \
-#     libssl-dev \
-#     zlib1g-dev \
-#     libbz2-dev \
-#     libreadline-dev \
-#     libsqlite3-dev \
-#     libncurses5-dev \
-#     libncursesw5-dev \
-#     xz-utils \
-#     tk-dev \
-#     libffi-dev \
-#     tzdata
-
-# # Installing python3.11
-# RUN wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz && \
-#     tar xzf Python-3.11.4.tgz && \
-#     cd Python-3.11.4 && \
-#     ./configure --enable-optimizations && \
-#     make -j$(nproc) && \
-#     make altinstall && \
-#     rm -rf /usr/src/Python-3.11.4*
-#     # Installing pip
-# RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.11
-
 # Nginx
 RUN apt update && \
     apt-get install curl gnupg2 ca-certificates lsb-release ubuntu-keyring software-properties-common -y && \
@@ -63,7 +32,6 @@ RUN apt update && \
 RUN apt install --no-install-recommends bash libssl-dev git libpcre++-dev zlib1g-dev libxml2-dev libyajl-dev pkgconf libcurl4-openssl-dev libgeoip-dev liblmdb-dev apt-utils bash build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev python3-pip -y && \
     pip install --no-cache-dir --upgrade pip && \
     pip install wheel && \
-    #mkdir -p /usr/share/bunkerweb/deps && \
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /usr/share/bunkerweb/deps/python && \
@@ -97,12 +65,13 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
     mkdir -p /etc/bunkerweb/plugins && \
     mkdir -p /var/tmp/bunkerweb/ && \
     mkdir -p /var/run/bunkerweb/ && \
+    mkdir -p /var/log/bunkerweb/ && \
     mkdir -p /var/www/html && \
     mkdir -p /var/lib/bunkerweb && \
     echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec chmod 0740 {} \; && \
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type d -exec chmod 0750 {} \; && \
-    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ && \
+    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ /var/log/bunkerweb/ && \
     chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/ui/main.py /var/www/ && \
     find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
     chmod 755 /usr/share/bunkerweb

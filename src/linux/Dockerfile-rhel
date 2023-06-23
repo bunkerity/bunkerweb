@@ -40,17 +40,14 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
 
 # Compile and install dependencies
 RUN dnf install -y readline-devel python39-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel --skip-broken && \
-    pip3.9 install --no-cache-dir --upgrade pip && \
-    pip3.9 install wheel && \
-    #mkdir -p /usr/share/bunkerweb/deps && \
-    chmod +x /tmp/bunkerweb/deps/install.sh && \
-    bash /tmp/bunkerweb/deps/install.sh && \
-    mkdir /usr/share/bunkerweb/deps/python && \
-    export MAKEFLAGS="-j$(nproc)" && \
-    pip3.9 install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
-    if [ ! -f /usr/share/bunkerweb/deps/python/zope/__init__.py ] ; then touch /usr/share/bunkerweb/deps/python/zope/__init__.py ; fi
-
-#RUN pip3.10 install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /tmp/bunkerweb/deps/requirements.txt
+  pip3.9 install --no-cache-dir --upgrade pip && \
+  pip3.9 install wheel && \
+  chmod +x /tmp/bunkerweb/deps/install.sh && \
+  bash /tmp/bunkerweb/deps/install.sh && \
+  mkdir /usr/share/bunkerweb/deps/python && \
+  export MAKEFLAGS="-j$(nproc)" && \
+  pip3.9 install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
+  if [ ! -f /usr/share/bunkerweb/deps/python/zope/__init__.py ] ; then touch /usr/share/bunkerweb/deps/python/zope/__init__.py ; fi
 
 # Copy BW files
 # can't exclude deps from . so we are copying everything by hand
@@ -72,21 +69,22 @@ COPY src/VERSION /usr/share/bunkerweb/VERSION
 
 # Setup BW
 RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
-    chmod 755 /usr/bin/bwcli && \
-    mkdir -p /etc/bunkerweb/configs && \
-    mkdir -p /var/cache/bunkerweb/ && \
-    mkdir -p /etc/bunkerweb/plugins && \
-    mkdir -p /var/tmp/bunkerweb/ && \
-    mkdir -p /var/run/bunkerweb/ && \
-    mkdir -p /var/www/html && \
-    mkdir -p /var/lib/bunkerweb && \
-    echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
-    find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec chmod 0740 {} \; && \
-    find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type d -exec chmod 0750 {} \; && \
-    chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ && \
-    chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/ui/main.py /var/www/ && \
-    find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
-    chmod 755 /usr/share/bunkerweb
+  chmod 755 /usr/bin/bwcli && \
+  mkdir -p /etc/bunkerweb/configs && \
+  mkdir -p /var/cache/bunkerweb/ && \
+  mkdir -p /etc/bunkerweb/plugins && \
+  mkdir -p /var/tmp/bunkerweb/ && \
+  mkdir -p /var/run/bunkerweb/ && \
+  mkdir -p /var/log/bunkerweb/ && \
+  mkdir -p /var/www/html && \
+  mkdir -p /var/lib/bunkerweb && \
+  echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
+  find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec chmod 0740 {} \; && \
+  find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type d -exec chmod 0750 {} \; && \
+  chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ /var/log/bunkerweb/ && \
+  chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/ui/main.py /var/www/ && \
+  find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
+  chmod 755 /usr/share/bunkerweb
 
 # Copy Linux files
 COPY src/linux/scripts /usr/share/bunkerweb/scripts

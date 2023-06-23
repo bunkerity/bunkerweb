@@ -39,9 +39,9 @@ def certbot_new(
             "--config-dir",
             str(letsencrypt_path.joinpath("etc")),
             "--work-dir",
-            str(letsencrypt_path.joinpath("lib")),
+            join(sep, "var", "lib", "bunkerweb", "letsencrypt"),
             "--logs-dir",
-            str(letsencrypt_path.joinpath("log")),
+            join(sep, "var", "log", "bunkerweb"),
             "--manual",
             "--preferred-challenges=http",
             "--manual-auth-hook",
@@ -86,10 +86,14 @@ try:
 
     # Create directory if it doesn't exist
     letsencrypt_path = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
+    letsencrypt_path.mkdir(parents=True, exist_ok=True)
+
     letsencrypt_job_path = Path(
         sep, "usr", "share", "bunkerweb", "core", "letsencrypt", "jobs"
     )
-    letsencrypt_path.mkdir(parents=True, exist_ok=True)
+    Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(
+        parents=True, exist_ok=True
+    )
 
     # Extract letsencrypt folder if it exists in db
     db = Database(

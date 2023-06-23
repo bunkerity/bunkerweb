@@ -52,22 +52,19 @@ RUN apk add --no-cache pcre bash python3 && \
 	cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
 	mkdir -p /var/tmp/bunkerweb && \
 	mkdir -p /var/run/bunkerweb && \
+	mkdir -p /var/log/bunkerweb && \
 	mkdir -p /var/www/html && \
 	mkdir -p /etc/bunkerweb && \
 	mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
 	for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
 	for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
-	chown -R root:nginx /data && \
-	chmod -R 770 /data && \
-	chown -R root:nginx /var/cache/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /usr/bin/bwcli && \
-	chmod 770 /var/cache/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb && \
+	chown -R root:nginx /data /etc/nginx /var/cache/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
+	chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
 	chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/entrypoint.sh /usr/bin/bwcli /usr/share/bunkerweb/deps/python/bin/* && \
-	chown -R root:nginx /etc/nginx && \
-	chmod -R 770 /etc/nginx && \
-	rm -f /var/log/nginx/* && \
-	ln -s /proc/1/fd/2 /var/log/nginx/error.log && \
-	ln -s /proc/1/fd/2 /var/log/nginx/modsec_audit.log && \
-	ln -s /proc/1/fd/1 /var/log/nginx/access.log
+	rm -f /var/log/bunkerweb/* && \
+	ln -s /proc/1/fd/2 /var/log/bunkerweb/error.log && \
+	ln -s /proc/1/fd/2 /var/log/bunkerweb/modsec_audit.log && \
+	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 # Fix CVEs
 RUN apk add "libx11>=1.8.4-r1"
