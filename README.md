@@ -1,5 +1,5 @@
 <p align="center">
-	<img alt="BunkerWeb logo" src="misc/logo.png" />
+	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.1/misc/logo.png" />
 </p>
 
 <p align="center">
@@ -33,7 +33,7 @@
 # BunkerWeb
 
 <p align="center">
-	<img alt="overview" src="docs/assets/img/intro-overview.svg" />
+	<img alt="overview" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.1/docs/assets/img/intro-overview.svg" />
 </p>
 
 BunkerWeb is a next-generation and open-source Web Application Firewall (WAF).
@@ -77,7 +77,7 @@ A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](http
 # Concepts
 
 <p align="center">
-	<img alt="BunkerWeb logo" src="docs/assets/img/concepts.svg" />
+	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.1/docs/assets/img/concepts.svg" />
 </p>
 
 You will find more information about the key concepts of BunkerWeb in the [documentation](https://docs.bunkerweb.io/1.5.1/concepts).
@@ -160,7 +160,7 @@ In other words, the scheduler is the brain of BunkerWeb.
 ## Docker
 
 <p align="center">
-	<img alt="Docker" src="docs/assets/img/integration-docker.svg" />
+	<img alt="Docker" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.1/docs/assets/img/integration-docker.svg" />
 </p>
 
 We provide ready to use prebuilt images for x64, x86, armv7 and arm64 platforms on [Docker Hub](https://hub.docker.com/u/bunkerity).
@@ -176,7 +176,7 @@ You will find more information in the [Docker integration section](https://docs.
 ## Docker autoconf
 
 <p align="center">
-	<img alt="Docker autoconf" src="docs/assets/img/integration-autoconf.svg" />
+	<img alt="Docker autoconf" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.1/docs/assets/img/integration-autoconf.svg" />
 </p>
 
 The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called **autoconf** which will listen for Docker events and automatically reconfigure BunkerWeb in real-time without recreating the container.
@@ -188,7 +188,7 @@ You will find more information in the [Docker autoconf section](https://docs.bun
 ## Swarm
 
 <p align="center">
-	<img alt="Swarm" src="docs/assets/img/integration-swarm.svg" />
+	<img alt="Swarm" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.1/docs/assets/img/integration-swarm.svg" />
 </p>
 
 To automatically configure BunkerWeb instances, a special service, called **autoconf** will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime.
@@ -200,7 +200,7 @@ You will find more information in the [Swarm section](https://docs.bunkerweb.io/
 ## Kubernetes
 
 <p align="center">
-	<img alt="Kubernetes" src="docs/assets/img/integration-kubernetes.svg" />
+	<img alt="Kubernetes" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.1/docs/assets/img/integration-kubernetes.svg" />
 </p>
 
 The autoconf acts as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) and will configure the BunkerWeb instances according to the [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/). It also monitors other Kubernetes objects like [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) for custom configurations.
@@ -210,7 +210,7 @@ You will find more information in the [Kubernetes section](https://docs.bunkerwe
 ## Linux
 
 <p align="center">
-	<img alt="Linux" src="docs/assets/img/integration-linux.svg" />
+	<img alt="Linux" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.1/docs/assets/img/integration-linux.svg" />
 </p>
 
 List of supported Linux distros :
@@ -227,7 +227,7 @@ You will find more information in the [Linux section](https://docs.bunkerweb.io/
 ## Ansible
 
 <p align="center">
-	<img alt="Ansible" src="docs/assets/img/integration-ansible.svg" />
+	<img alt="Ansible" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.1/docs/assets/img/integration-ansible.svg" />
 </p>
 
 List of supported Linux distros :
