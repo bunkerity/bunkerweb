@@ -1,8 +1,0 @@
---TEST--
-test memory problem with negative index
---INPUT--
-foo,bar
---EXPECTED--
-n foo
-
-

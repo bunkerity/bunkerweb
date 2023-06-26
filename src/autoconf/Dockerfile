@@ -19,7 +19,8 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
 
 # Remove build dependencies
-RUN apk del .build-deps
+RUN apk del .build-deps && \
+    rm -rf /var/cache/apk/*
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
