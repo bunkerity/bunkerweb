@@ -7,11 +7,10 @@ on:
     branches: [dev]
 
 jobs:
-  steps:
-    - name: Checkout repository and submodules
-      uses: actions/checkout@v2
-      with:
-        submodules: recursive
+  checkout-repository:
+    uses: actions/checkout@v2
+    with:
+      submodules: recursive
 
   # Containers
   build-containers:
