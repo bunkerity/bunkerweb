@@ -1,6 +1,0 @@
---TEST--
-keyword merging test
---INPUT--
-UNION /* foo */ALL
---EXPECTED--
-U UNION ALL

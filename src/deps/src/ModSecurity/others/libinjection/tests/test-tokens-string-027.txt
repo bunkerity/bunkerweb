@@ -1,8 +1,0 @@
---TEST--
-Strings, c-style string merging.  Different state
---INPUT--
-$$FOO BAR$$more
---EXPECTED--
-s $FOO BAR$
-n more
-

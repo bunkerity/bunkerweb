@@ -1,7 +1,0 @@
---TEST--
-smoke
---INPUT--
-SELECT $1,000.00
---EXPECTED--
-E SELECT
-1 $1,000.00

@@ -18,9 +18,10 @@ function do_and_check_cmd() {
 NTASK=$(nproc)
 
 # Compiling and installing lua
-echo "ℹ️ Compiling and installing lua-5.1.5"
-CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-5.1.5" do_and_check_cmd make -j $NTASK linux
-CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-5.1.5" do_and_check_cmd make INSTALL_TOP=/usr/share/bunkerweb/deps install
+LUA_VERSION="5.1.5"
+echo "ℹ️ Compiling and installing lua-${LUA_VERSION}"
+CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-${LUA_VERSION}" do_and_check_cmd make -j $NTASK linux
+CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-${LUA_VERSION}" do_and_check_cmd make INSTALL_TOP=/usr/share/bunkerweb/deps install
 
 # Compiling and installing libmaxminddb
 echo "ℹ️ Compiling and installing libmaxminddb"
@@ -39,8 +40,8 @@ CHANGE_DIR="/tmp/bunkerweb/deps/src/zlib" do_and_check_cmd make install
 
 # Compiling and installing ModSecurity
 echo "ℹ️ Compiling and installing ModSecurity"
-# temp fix : Debian run it twice
-# TODO : patch it in clone.sh
+do_and_check_cmd patch deps/src/ModSecurity/configure.ac deps/misc/modsecurity.patch
+do_and_check_cmd cp -r deps/src/libinjection deps/src/ModSecurity/others
 cd /tmp/bunkerweb/deps/src/ModSecurity && ./build.sh > /dev/null 2>&1
 CHANGE_DIR="/tmp/bunkerweb/deps/src/ModSecurity" do_and_check_cmd sh build.sh
 CHANGE_DIR="/tmp/bunkerweb/deps/src/ModSecurity" do_and_check_cmd ./configure --disable-dependency-tracking --disable-static --disable-examples --disable-doxygen-doc --disable-doxygen-html --disable-valgrind-memcheck --disable-valgrind-helgrind --prefix=/usr/share/bunkerweb/deps --with-maxmind=/usr/share/bunkerweb/deps
@@ -107,6 +108,7 @@ CHANGE_DIR="/tmp/bunkerweb/deps/src/luasec" do_and_check_cmd make LUACPATH=/usr/
 
 # Installing lua-resty-ipmatcher
 echo "ℹ️ Installing lua-resty-ipmatcher"
+do_and_check_cmd patch deps/src/lua-resty-ipmatcher/resty/ipmatcher.lua deps/misc/ipmatcher.patch
 CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-ipmatcher" do_and_check_cmd make INST_PREFIX=/usr/share/bunkerweb/deps INST_LIBDIR=/usr/share/bunkerweb/deps/lib/lua INST_LUADIR=/usr/share/bunkerweb/deps/lib/lua install
 
 # Installing lua-resty-redis
@@ -119,6 +121,7 @@ CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-upload" do_and_check_cmd make PREF
 
 # Installing lujit-geoip
 echo "ℹ️ Installing luajit-geoip"
+do_and_check_cmd patch deps/src/luajit-geoip/geoip/mmdb.lua deps/misc/mmdb.patch
 do_and_check_cmd cp -r /tmp/bunkerweb/deps/src/luajit-geoip/geoip /usr/share/bunkerweb/deps/lib/lua
 
 # Installing lbase64
@@ -143,15 +146,18 @@ CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-lock" do_and_check_cmd make PREFIX
 
 # Installing lua-pack
 echo "ℹ️ Installing lua-pack"
+do_and_check_cmd cp deps/misc/lua-pack.Makefile deps/src/lua-pack/Makefile
 CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-pack" do_and_check_cmd make INST_LIBDIR=/usr/share/bunkerweb/deps/lib/lua LUA_LIBDIR=-L/usr/share/bunkerweb/deps/lib LUA_INCDIR=-I/usr/share/bunkerweb/deps/include install
 
 # Installing lua-resty-openssl
 echo "ℹ️ Installing lua-resty-openssl"
+do_and_check_cmd rm -r deps/src/lua-resty-openssl/t
 CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-openssl" do_and_check_cmd make LUA_LIB_DIR=/usr/share/bunkerweb/deps/lib/lua install
 do_and_check_cmd cp /tmp/bunkerweb/deps/src/lua-resty-openssl/lib/resty/openssl.lua /usr/share/bunkerweb/deps/lib/lua/resty
 
 # Installing lua-ffi-zlib
 echo "ℹ️ Installing lua-ffi-zlib"
+do_and_check_cmd patch deps/src/lua-ffi-zlib/lib/ffi-zlib.lua deps/misc/lua-ffi-zlib.patch
 do_and_check_cmd cp /tmp/bunkerweb/deps/src/lua-ffi-zlib/lib/ffi-zlib.lua /usr/share/bunkerweb/deps/lib/lua
 
 # Installing lua-resty-signal
@@ -168,13 +174,20 @@ CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='-Wl/--with-ld-opt='-lpcr
 if [ "$OS" = "fedora" ] ; then
 	CONFARGS="$(echo -n "$CONFARGS" | sed "s/--with-ld-opt='.*'/--with-ld-opt=-lpcre/" | sed "s/--with-cc-opt='.*'//")"
 fi
-echo '#!/bin/bash' > "/tmp/bunkerweb/deps/src/nginx-${NGINX_VERSION}/configure-fix.sh"
-echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerweb/deps/src/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_brotli --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_devel_kit --add-dynamic-module=/tmp/bunkerweb/deps/src/stream-lua-nginx-module" --add-dynamic-module=/tmp/bunkerweb/deps/src/ModSecurity-nginx >> "/tmp/bunkerweb/deps/src/nginx-${NGINX_VERSION}/configure-fix.sh"
-do_and_check_cmd chmod +x "/tmp/bunkerweb/deps/src/nginx-${NGINX_VERSION}/configure-fix.sh"
-CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx-${NGINX_VERSION}" LUAJIT_LIB="/usr/share/bunkerweb/deps/lib -Wl,-rpath,/usr/share/bunkerweb/deps/lib" LUAJIT_INC="/usr/share/bunkerweb/deps/include/luajit-2.1" MODSECURITY_LIB="/usr/share/bunkerweb/deps/lib" MODSECURITY_INC="/usr/share/bunkerweb/deps/include" do_and_check_cmd ./configure-fix.sh
-CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx-${NGINX_VERSION}" do_and_check_cmd make -j $NTASK modules
+
+do_and_check_cmd patch deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_log.c deps/misc/modsecurity-nginx.patch
+do_and_check_cmd patch deps/src/ModSecurity-nginx/config deps/misc/config.patch
+do_and_check_cmd patch deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_common.h deps/misc/ngx_http_modsecurity_common.h.patch
+do_and_check_cmd patch deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_module.c deps/misc/ngx_http_modsecurity_module.c.patch
+do_and_check_cmd cp deps/misc/ngx_http_modsecurity_access.c deps/src/ModSecurity-nginx/src
+
+echo '#!/bin/bash' > "/tmp/bunkerweb/deps/src/nginx/configure-fix.sh"
+echo "./configure $CONFARGS --add-dynamic-module=/tmp/bunkerweb/deps/src/headers-more-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/nginx_cookie_flag_module --add-dynamic-module=/tmp/bunkerweb/deps/src/lua-nginx-module --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_brotli --add-dynamic-module=/tmp/bunkerweb/deps/src/ngx_devel_kit --add-dynamic-module=/tmp/bunkerweb/deps/src/stream-lua-nginx-module" --add-dynamic-module=/tmp/bunkerweb/deps/src/ModSecurity-nginx >> "/tmp/bunkerweb/deps/src/nginx/configure-fix.sh"
+do_and_check_cmd chmod +x "/tmp/bunkerweb/deps/src/nginx/configure-fix.sh"
+CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx" LUAJIT_LIB="/usr/share/bunkerweb/deps/lib -Wl,-rpath,/usr/share/bunkerweb/deps/lib" LUAJIT_INC="/usr/share/bunkerweb/deps/include/luajit-2.1" MODSECURITY_LIB="/usr/share/bunkerweb/deps/lib" MODSECURITY_INC="/usr/share/bunkerweb/deps/include" do_and_check_cmd ./configure-fix.sh
+CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx" do_and_check_cmd make -j $NTASK modules
 do_and_check_cmd mkdir /usr/share/bunkerweb/modules
-CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx-${NGINX_VERSION}" do_and_check_cmd cp ./objs/*.so /usr/share/bunkerweb/modules
+CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx" do_and_check_cmd cp ./objs/*.so /usr/share/bunkerweb/modules
 
 # Dependencies are installed
 echo "ℹ️ Dependencies for BunkerWeb successfully compiled and installed !"
