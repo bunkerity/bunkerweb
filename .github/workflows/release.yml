@@ -7,7 +7,6 @@ on:
     branches: [master]
 
 jobs:
-
   # Build amd64 + 386 containers images
   build-containers:
     strategy:
@@ -133,6 +132,8 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Get VERSION
         id: getversion
         run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"
@@ -145,7 +146,8 @@ jobs:
     needs: [create-arm, wait-builds]
     strategy:
       matrix:
-        image: [bunkerweb, bunkerweb-scheduler, bunkerweb-autoconf, bunkerweb-ui]
+        image:
+          [bunkerweb, bunkerweb-scheduler, bunkerweb-autoconf, bunkerweb-ui]
         include:
           - release: latest
           - image: bunkerweb

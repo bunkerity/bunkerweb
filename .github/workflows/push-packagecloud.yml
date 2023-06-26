@@ -41,6 +41,8 @@ jobs:
       # Prepare
       - name: Check out repository code
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Install ruby
         uses: ruby/setup-ruby@v1
         with:

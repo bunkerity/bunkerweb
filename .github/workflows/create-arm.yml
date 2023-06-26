@@ -35,6 +35,8 @@ jobs:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Create ARM VM
         id: scw
         uses: scaleway/action-scw@bbcfd65cd2af73456ce439088e0d42c1657c4c38
@@ -72,4 +74,3 @@ jobs:
         run: ssh root@$SSH_IP "curl -fsSL https://test.docker.com -o test-docker.sh ; sh test-docker.sh"
         env:
           SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
-

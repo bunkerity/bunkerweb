@@ -50,6 +50,8 @@ jobs:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Setup SSH for ARM node
         if: inputs.CACHE_SUFFIX == 'arm'
         run: |
