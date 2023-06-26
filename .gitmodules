@@ -2,50 +2,37 @@
 
 # TODO add Lua ?
 
-[submodule "cpython"]
-	path = src/deps/src/cpython
-	url = https://github.com/python/cpython.git
-	branch = tags/v3.11.4
-
 [submodule "LuaJIT"]
 	path = src/deps/src/luajit2
 	url = https://github.com/openresty/luajit2.git
-	branch = tags/v2.1-20230410
 
 [submodule "lua-nginx-module"]
 	path = src/deps/src/lua-nginx-module
 	url = https://github.com/openresty/lua-nginx-module.git
-	branch = tags/v0.10.25
 
 [submodule "lua-resty-core"]
 	path = src/deps/src/lua-resty-core
 	url = https://github.com/openresty/lua-resty-core.git
-	branch = tags/v0.1.27
 
 [submodule "lua-resty-lrucache"]
 	path = src/deps/src/lua-resty-lrucache
 	url = https://github.com/openresty/lua-resty-lrucache.git
-	branch = tags/v0.13
 
 [submodule "lua-resty-dns"]
 	path = src/deps/src/lua-resty-dns
 	url = https://github.com/openresty/lua-resty-dns.git
-	branch = tags/v0.22
 
 [submodule "lua-resty-string"]
 	path = src/deps/src/lua-resty-string
 	url = https://github.com/openresty/lua-resty-string.git
-	branch = tags/v0.15
 
 [submodule "lua-cjson"]
 	path = src/deps/src/lua-cjson
 	url = https://github.com/openresty/lua-cjson.git
-	branch = tags/2.1.0.12
 
 [submodule "lua-resty-session"]
 	path = src/deps/src/lua-resty-session
 	url = https://github.com/bungle/lua-resty-session.git
-	branch = tags/v4.0.4
 
 [submodule "lua-resty-random"]
 	path = src/deps/src/lua-resty-random
@@ -58,61 +45,50 @@
 [submodule "lua-resty-http"]
 	path = src/deps/src/lua-resty-http
 	url = https://github.com/ledgetech/lua-resty-http.git
-	branch = tags/v0.17.1
-	
+
 [submodule "lualogging"]
 	path = src/deps/src/lualogging
 	url = https://github.com/lunarmodules/lualogging.git
-	branch = tags/v1.8.2
 
 [submodule "luasocket"]
 	path = src/deps/src/luasocket
 	url = https://github.com/diegonehab/luasocket.git
-	branch = tags/v1.8.2
 
 [submodule "luasec"]
 	path = src/deps/src/luasec
 	url = https://github.com/brunoos/luasec.git
-	branch = tags/v1.3.1
 
 # TODO add lua-resty-ipmatcher
 
 [submodule "lua-resty-redis"]
 	path = src/deps/src/lua-resty-redis
 	url = https://github.com/openresty/lua-resty-redis.git
-	branch = tags/v0.30
 
 [submodule "lua-resty-upload"]
 	path = src/deps/src/lua-resty-upload
 	url = https://github.com/openresty/lua-resty-upload.git
-	branch = tags/v0.11
 
 # TODO add luajit-geoip
 
 [submodule "lbase64"]
 	path = src/deps/src/lbase64
 	url = https://github.com/iskolbin/lbase64.git
-	branch = tags/v1.5.3
 
 [submodule "lua-resty-env"]
 	path = src/deps/src/lua-resty-env
 	url = https://github.com/3scale/lua-resty-env.git
-	branch = tags/v0.4.0
 
 [submodule "lua-resty-mlcache"]
 	path = src/deps/src/lua-resty-mlcache
 	url = https://github.com/thibaultcha/lua-resty-mlcache.git
-	branch = tags/2.6.0
 
 [submodule "lua-resty-template"]
 	path = src/deps/src/lua-resty-template
 	url = https://github.com/bungle/lua-resty-template.git
-	branch = tags/v0.11
 
 [submodule "lua-resty-lock"]
 	path = src/deps/src/lua-resty-lock
 	url = https://github.com/openresty/lua-resty-lock.git
-	branch = tags/v0.09
 
 # TODO add lua-pack
 
@@ -129,22 +105,18 @@
 [submodule "libmaxminddb"]
 	path = src/deps/src/libmaxminddb
 	url = https://github.com/maxmind/libmaxminddb.git
-	branch = tags/1.7.1
 
 [submodule "zlib"]
 	path = src/deps/src/zlib
 	url = https://github.com/madler/zlib.git
-	branch = tags/v1.2.13
 
 [submodule "headers-more-nginx-module"]
 	path = src/deps/src/headers-more-nginx-module
 	url = https://github.com/openresty/headers-more-nginx-module.git
-	branch = tags/v0.34
 
 [submodule "nginx_cookie_flag_module"]
 	path = src/deps/src/nginx_cookie_flag_module
 	url = https://github.com/AirisX/nginx_cookie_flag_module.git
-	branch = tags/v1.1.0
 
 [submodule "ngx_brotli"]
 	path = src/deps/src/ngx_brotli
@@ -153,9 +125,11 @@
 [submodule "ngx_devel_kit"]
 	path = src/deps/src/ngx_devel_kit
 	url = https://github.com/vision5/ngx_devel_kit.git
-	branch = tags/v0.3.2
 
 [submodule "stream-lua-nginx-module"]
 	path = src/deps/src/stream-lua-nginx-module
 	url = https://github.com/openresty/stream-lua-nginx-module.git
-	branch = tags/v0.0.13
+
+[submodule "cpython"]
+	path = src/deps/src/cpython
+	url = https://github.com/python/cpython.git
