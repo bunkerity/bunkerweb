@@ -128,6 +128,15 @@ function do_and_check_cmd() {
 	return 0
 }
 
+# nginx 1.24.0
+echo "ℹ️ Downloading nginx"
+NGINX_VERSION="1.24.0"
+secure_download "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" "nginx-${NGINX_VERSION}.tar.gz" "1114e37de5664a8109c99cfb2faa1f42ff8ac63c932bcf3780d645e5ed32c0b2ac446f80305b4465994c8f9430604968e176ae464fd80f632d1cb2c8f6007ff3"
+if [ -f "deps/src/nginx-${NGINX_VERSION}.tar.gz" ] ; then
+	do_and_check_cmd tar -xvzf deps/src/nginx-${NGINX_VERSION}.tar.gz -C deps/src
+	do_and_check_cmd rm -f deps/src/nginx-${NGINX_VERSION}.tar.gz
+fi
+
 # Lua 5.1.5
 echo "ℹ️ Downloading Lua"
 LUA_VERSION="5.1.5"
