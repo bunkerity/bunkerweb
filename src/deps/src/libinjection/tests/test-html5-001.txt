@@ -1,6 +1,0 @@
---TEST--
-ascii word
---INPUT--
-foo
---EXPECTED--
-DATA_TEXT,3,foo

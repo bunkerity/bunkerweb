@@ -20,6 +20,8 @@ jobs:
         if: inputs.TYPE != 'k8s'
       - name: Checkout source code
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Install terraform
         uses: hashicorp/setup-terraform@v2
       - name: Install kubectl

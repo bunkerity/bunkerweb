@@ -1,4 +1,0 @@
-*.pem
-*.csr
-cfssl
-cfssljson

@@ -1,9 +1,0 @@
---TEST--
-cdata, degenerate
---INPUT--
-<?import foo="bar"/>
---EXPECTED--
-TAG_COMMENT,17,import foo="bar"/
-
-
-

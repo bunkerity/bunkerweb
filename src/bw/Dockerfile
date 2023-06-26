@@ -1,14 +1,19 @@
 FROM nginx:1.24.0-alpine AS builder
 
+# Install temporary requirements for the dependencies
+RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev
+
 # Copy dependencies sources folder
 COPY src/deps /tmp/bunkerweb/deps
 
 # Compile and install dependencies
-RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev && \
-	mkdir -p /usr/share/bunkerweb/deps && \
+RUN mkdir -p /usr/share/bunkerweb/deps && \
 	chmod +x /tmp/bunkerweb/deps/install.sh && \
-	bash /tmp/bunkerweb/deps/install.sh && \
-	apk del .build-deps
+	bash /tmp/bunkerweb/deps/install.sh
+
+# Clean up temporary dependencies
+RUN apk del .build-deps && \
+	rm -rf /var/cache/apk/*
 
 # Copy python requirements
 COPY src/common/gen/requirements.txt /usr/share/bunkerweb/deps/requirements.txt
@@ -20,7 +25,8 @@ RUN apk add --no-cache --virtual .build-deps py3-pip && \
 	mkdir -p /usr/share/bunkerweb/deps/python && \
 	export MAKEFLAGS="-j$(nproc)" && \
 	pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
-	apk del .build-deps
+	apk del .build-deps && \
+	rm -rf /var/cache/apk/*
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand

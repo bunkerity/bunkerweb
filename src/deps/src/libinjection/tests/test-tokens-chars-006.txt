@@ -1,7 +1,0 @@
---TEST--
-junk
---INPUT--
-SELECT ]
---EXPECTED--
-E SELECT
-? ]
