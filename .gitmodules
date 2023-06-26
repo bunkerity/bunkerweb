@@ -2,10 +2,6 @@
 	path = src/deps/src/luajit2
 	url = https://github.com/openresty/luajit2.git
 
-[submodule "cpython"]
-	path = src/deps/src/cpython
-	url = https://github.com/python/cpython.git
-
 [submodule "zlib"]
 	path = src/deps/src/zlib
 	url = https://github.com/madler/zlib.git
