@@ -133,11 +133,9 @@ Besides the HTTPS configuration, the following settings related to HTTPS can be 
 | :---------------------------: | :---------------: | :----------------------------------------------------------------------------------------------------------- |
 |   `REDIRECT_HTTP_TO_HTTPS`    |       `no`        | When set to `yes`, will redirect every HTTP request to HTTPS even if BunkerWeb is not configured with HTTPS. |
 | `AUTO_REDIRECT_HTTP_TO_HTTPS` |       `yes`       | When set to `yes`, will redirect every HTTP request to HTTPS only if BunkerWeb is configured with HTTPS.     |
-|       `HTTPS_PROTOCOLS`       | `TLSv1.2 TLSv1.3` | List of supported SSL/TLS protocols when HTTPS is enabled.                                                   |
+|       `SSL_PROTOCOLS`       | `TLSv1.2 TLSv1.3` | List of supported SSL/TLS protocols when SSL is enabled.                                                   |
 |            `HTTP2`            |       `yes`       | When set to `yes`, will enable HTTP2 protocol support when using HTTPS.                                      |
 |         `LISTEN_HTTP`         |       `yes`       | When set to `no`, BunkerWeb will not listen for HTTP requests. Useful if you want HTTPS only for example.    |
-
-When using stream, the `SSL_PROTOCOLS` can be used which takes the same value as the `HTTPS_PROTOCOLS` one.
 
 ### Let's Encrypt
 
