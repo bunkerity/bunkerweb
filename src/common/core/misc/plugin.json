@@ -38,7 +38,7 @@
       "help": "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
       "id": "allowed-methods",
       "label": "Allowed methods",
-      "regex": "^(?!\\|)(\\|?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH|COPY|LOCK|MKCOL|MOVE|PROPFIND|PROPPATCH|UNLOCK)(?!.*(^|\\|)\\2))+$",
+      "regex": "^(?!\\|)(\\|?([A-Z]{3,})(?!.*(^|\\|)\\2))+$",
       "type": "text"
     },
     "MAX_CLIENT_SIZE": {
