@@ -105,7 +105,7 @@
       "help": "Value for the Permissions-Policy header.",
       "id": "permissions-policy",
       "label": "Permissions-Policy",
-      "regex": "^(?![, ])(,? ?([a-z-]+)(?!.*[^-]\\2=)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*\\u0022))*\\)))*$",
+      "regex": "^(?![, ])(,? ?([a-z-]+)(?!.*[^-]\\2=)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*\\u0022)(?=[ \\)]))*\\)))*$",
       "type": "text"
     },
     "FEATURE_POLICY": {
