@@ -60,17 +60,17 @@
 	url = https://github.com/ledgetech/lua-resty-http.git
 	branch = tags/v0.17.1
 	
-[submodule "lualogging"]
+[submodule "lualogging]
 	path = src/deps/src/lualogging
 	url = https://github.com/lunarmodules/lualogging.git
 	branch = tags/v1.8.2
 
-[submodule "luasocket"]
+[submodule "luasocket]
 	path = src/deps/src/luasocket
 	url = https://github.com/diegonehab/luasocket.git
 	branch = tags/v1.8.2
 
-[submodule "luasec"]
+[submodule "luasec]
 	path = src/deps/src/luasec
 	url = https://github.com/brunoos/luasec.git
 	branch = tags/v1.3.1
