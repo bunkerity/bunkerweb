@@ -17,7 +17,10 @@ local add = stack_lib.add_of(STACK)
 local mt = stack_lib.mt_of(STACK, x509_lib.dup, _M)
 
 function _M.new()
-  local raw = new()
+  local raw, err = new()
+  if raw == nil then
+    return nil, err
+  end
 
   local self = setmetatable({
     stack_of = STACK,

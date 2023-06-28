@@ -248,6 +248,7 @@ Table of Contents
     + [store:set_depth](#storeset_depth)
     + [store:set_flags](#storeset_flags)
     + [store:verify](#storeverify)
+    + [store:check_revocation](#storecheck_revocation)
   * [resty.openssl.x509.revoked](#restyopensslx509revoked)
     + [revoked.new](#revokednew)
     + [revoked.istype](#revokedistype)
@@ -294,7 +295,7 @@ Description
 ===========
 
 `lua-resty-openssl` is a FFI-based OpenSSL binding library, currently
-supports OpenSSL `3.0.0`, `1.1.1`, `1.1.0` and `1.0.2` series.
+supports OpenSSL `3.1.x`, `3.0.x`, `1.1.1`, `1.1.0` and `1.0.2` series.
 
 **Note: when using with OpenSSL 1.0.2, it's recommanded to not use this library with other FFI-based OpenSSL binding libraries to avoid potential mismatch of `cdef`.**
 
@@ -411,13 +412,13 @@ lua-resty-openssl supports following modes:
 
 Compile the module per [security policy](https://www.openssl.org/docs/fips/SecurityPolicy-2.0.2.pdf),
 
-**OpenSSL 3.0.0 fips provider (haven't certified)**
+**OpenSSL 3.0.0 fips provider **
 
 Refer to https://wiki.openssl.org/index.php/OpenSSL_3.0 Section 7
 Compile the provider per guide, install the fipsmodule.cnf that
 matches hash of FIPS provider fips.so.
 
-On OpenSSL 3.0, this function also turns on and off default
+On OpenSSL 3.0 or later, this function also turns on and off default
 properties for EVP functions. When turned on, all applications using
 EVP_* API will be redirected to FIPS-compliant implementations and
 have no access to non-FIPS-compliant algorithms.
@@ -510,7 +511,7 @@ A module to provide OSSL_LIB_CTX context switches.
   OSSL_LIB_CTX is an internal OpenSSL library context type. Applications may allocate their own, but may also use NULL to use a default context with functions that take an OSSL_LIB_CTX argument.
 
 See [OSSL_LIB_CTX.3](#https://www.openssl.org/docs/manmaster/man3/OSSL_LIB_CTX.html) for deeper
-reading. It can be used to replace `ENGINE` in prior 3.0 world.
+reading.
 
 The context is currently effective following modules:
 
@@ -524,7 +525,7 @@ The context is currently effective following modules:
 - [rand](#restyopensslrand)
 - [x509](#restyopensslx509), [x509.csr](#restyopensslx509csr), [x509.crl](#restyopensslx509crl) and some [x509.store](#restyopensslx509store) functions
 
-This module is only available on OpenSSL 3.0.
+This module is only available on OpenSSL 3.0 or later.
  
 [Back to TOC](#table-of-contents)
 
@@ -634,7 +635,7 @@ for explanation of each type.
 
 ```lua
 local version = require("resty.openssl.version")
-ngx.say(version.version(version.INFO_DSO_EXTENSION))
+ngx.say(version.info(version.INFO_DSO_EXTENSION))
 -- outputs ".so"
 ```
 
@@ -646,7 +647,7 @@ A boolean indicates whether the linked OpenSSL is 3.x series.
 
 [Back to TOC](#table-of-contents)
 
-### version.OPENSSL_3X
+### version.OPENSSL_30
 
 Deprecated: use `version.OPENSSL_3X` is encouraged.
 
@@ -3813,11 +3814,15 @@ to explictly select provider to fetch algorithms.
 
 ### store:add
 
-**syntax**: *ok, err = store:add(x509_or_crl)*
+**syntax**: *ok, err = store:add(x509_or_crl, skip_set_crl_check_flags?)*
 
 Adds a X.509 or a CRL object into store.
 The argument must be a [resty.openssl.x509](#restyopensslx509) instance or a
 [resty.openssl.x509.crl](#restyopensslx509crl) instance.
+
+By default, adding a CRL object will automatically set the flag to store
+`X509_V_FLAG_CRL_CHECK`. Setting the second optional argument to `true` will
+skip settting the flags.
 
 [Back to TOC](#table-of-contents)
 
@@ -3944,6 +3949,25 @@ couple of other defaults but **does not** override the parameters set from
 
 `verify_flags` paramter is the additional verify flags to be set. See [store:set_flags](#storeset_flags)
 for all available flags.
+
+[Back to TOC](#table-of-contents)
+
+### store:check_revocation
+
+**syntax**: *ok, err = store:check_revocation(verified_chain, properties?)*
+
+Only does the revocation check. The first argument `verified_chain` must be a
+[resty.openssl.x509.chain](#restyopensslx509chain) instance which could be returned from
+`store_ctx:verify` or be built by yourself. Note the first cert needs to be the end entity
+certificate you want to check and the second cert needs to be its issuer.
+
+Staring from OpenSSL 3.0, this function accepts an optional `properties` parameter
+to explictly select provider to fetch algorithms.
+
+Returns `true` when the certificate isn't revoked,
+otherwise returns `nil` and error explaining the reason.
+
+Note this function is supported from OpenSSL 1.1.0 and not supported in BoringSSL.
 
 [Back to TOC](#table-of-contents)
 

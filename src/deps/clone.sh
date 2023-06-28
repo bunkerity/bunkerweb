@@ -254,13 +254,13 @@ git_secure_clone "https://github.com/bungle/lua-resty-template.git" "c08c6bc9e27
 echo "ℹ️ Downloading lua-resty-lock"
 git_secure_clone "https://github.com/openresty/lua-resty-lock.git" "9dc550e56b6f3b1a2f1a31bb270a91813b5b6861"
 
-# lua-resty-openssl v0.8.22
+# lua-resty-openssl v0.8.23
 echo "ℹ️ Downloading lua-resty-openssl"
 dopatch="no"
 if [ ! -d "deps/src/lua-resty-openssl" ] ; then
 	dopatch="yes"
 fi
-git_secure_clone "https://github.com/fffonion/lua-resty-openssl.git" "484907935e60273d31626ac849b23a2d218173de"
+git_secure_clone "https://github.com/fffonion/lua-resty-openssl.git" "b23c072a405b749ac60d21e3946cbf57a959b780"
 if [ "$dopatch" == "yes" ] ; then
 	do_and_check_cmd rm -r deps/src/lua-resty-openssl/t
 fi

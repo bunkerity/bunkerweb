@@ -9,14 +9,17 @@ local x509_lib = require "resty.openssl.x509"
 local chain_lib = require "resty.openssl.x509.chain"
 local crl_lib = require "resty.openssl.x509.crl"
 local ctx_lib = require "resty.openssl.ctx"
-local format_error = require("resty.openssl.err").format_all_error
-local format_all_error = require("resty.openssl.err").format_error
+local format_all_error = require("resty.openssl.err").format_all_error
+local format_error = require("resty.openssl.err").format_error
+local OPENSSL_11_OR_LATER = require("resty.openssl.version").OPENSSL_11_OR_LATER
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
+local BORINGSSL = require("resty.openssl.version").BORINGSSL
 
 local _M = {}
 local mt = { __index = _M }
 
 _M.verify_flags = x509_vfy_macro.verify_flags
+local flag_crl_check = _M.verify_flags.X509_V_FLAG_CRL_CHECK
 
 local x509_store_ptr_ct = ffi.typeof('X509_STORE*')
 
@@ -47,7 +50,7 @@ function _M:use_default(properties)
   return true
 end
 
-function _M:add(item)
+function _M:add(item, skip_set_flags)
   local dup
   local err
   if x509_lib.istype(item) then
@@ -75,7 +78,7 @@ function _M:add(item)
     -- enables CRL checking for the certificate chain leaf certificate.
     -- An error occurs if a suitable CRL cannot be found.
     -- Note: this does not check for certificates in the chain.
-    if C.X509_STORE_set_flags(self.ctx, 0x4) ~= 1 then
+    if not skip_set_flags and C.X509_STORE_set_flags(self.ctx, 0x4) ~= 1 then
       return false, format_error("x509.store:add: X509_STORE_set_flags")
     end
     -- decrease the dup ctx ref count immediately to make leak test happy
@@ -226,6 +229,51 @@ function _M:verify(x509, chain, return_chain, properties, verify_method, flags)
   -- error
   return nil, format_error("x509.store:verify: X509_verify_cert", code)
 
+end
+
+function _M:check_revocation(verified_chain, properties)
+  if BORINGSSL then
+    return nil, "x509.store:check_revocation: this API is not supported in BoringSSL"
+  end
+
+  if not OPENSSL_11_OR_LATER then
+    return nil, "x509.store:check_revocation: this API is supported from OpenSSL 1.1.0"
+  end
+
+  if not verified_chain or not chain_lib.istype(verified_chain) then
+    return nil, "x509.store:check_revocation: expect a x509.chain instance at #1"
+  end
+
+  local ctx
+  if OPENSSL_3X then
+    ctx = C.X509_STORE_CTX_new_ex(ctx_lib.get_libctx(), properties)
+  else
+    ctx = C.X509_STORE_CTX_new()
+  end
+  if ctx == nil then
+    return nil, "x509.store:check_revocation: X509_STORE_CTX_new() failed"
+  end
+
+  ffi_gc(ctx, C.X509_STORE_CTX_free)
+
+  if C.X509_STORE_CTX_init(ctx, self.ctx, nil, nil) ~= 1 then
+    return nil, format_error("x509.store:check_revocation: X509_STORE_CTX_init")
+  end
+
+  C.X509_STORE_CTX_set0_verified_chain(ctx, verified_chain.ctx)
+
+  -- enables CRL checking for the certificate chain leaf certificate.
+  -- An error occurs if a suitable CRL cannot be found.
+  C.X509_STORE_CTX_set_flags(ctx, flag_crl_check)
+
+  local check_revocation = C.X509_STORE_CTX_get_check_revocation(ctx)
+  local code = check_revocation(ctx)
+  if code == 1 then -- succeess
+    return true, nil
+  else
+    local vfy_code = C.X509_STORE_CTX_get_error(ctx)
+    return nil, ffi_str(C.X509_verify_cert_error_string(vfy_code))
+  end
 end
 
 return _M

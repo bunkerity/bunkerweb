@@ -59,7 +59,10 @@ function _M.dup(ctx)
   if ctx == nil or not ffi.istype(authority_info_access_ptr_ct, ctx) then
     return nil, "expect a AUTHORITY_INFO_ACCESS* ctx at #1"
   end
-  local dup_ctx = dup(ctx)
+  local dup_ctx, err = dup(ctx)
+  if dup_ctx == nil then
+    return nil, err
+  end
 
   return setmetatable({
     ctx = dup_ctx,
