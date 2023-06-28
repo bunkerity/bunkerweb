@@ -1,0 +1,86 @@
+[
+   {
+      "input" : "",
+      "param" : "0",
+      "name" : "lt",
+      "type" : "op",
+      "ret" : 0
+   },
+   {
+      "param" : "5",
+      "input" : "",
+      "name" : "lt",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "name" : "lt",
+      "type" : "op",
+      "ret" : 0,
+      "input" : "5",
+      "param" : "xxx"
+   },
+   {
+      "input" : "-1",
+      "param" : "xxx",
+      "name" : "lt",
+      "ret" : 1,
+      "type" : "op"
+   },
+   {
+      "type" : "op",
+      "ret" : 0,
+      "name" : "lt",
+      "param" : "-1",
+      "input" : "xxx"
+   },
+   {
+      "param" : "5",
+      "input" : "xxx",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "lt"
+   },
+   {
+      "name" : "lt",
+      "ret" : 1,
+      "type" : "op",
+      "param" : "0",
+      "input" : "-5"
+   },
+   {
+      "name" : "lt",
+      "ret" : 0,
+      "type" : "op",
+      "input" : "0",
+      "param" : "0"
+   },
+   {
+      "param" : "0",
+      "input" : "5",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "lt"
+   },
+   {
+      "param" : "5",
+      "input" : "0",
+      "name" : "lt",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "name" : "lt",
+      "type" : "op",
+      "ret" : 0,
+      "input" : "5",
+      "param" : "5"
+   },
+   {
+      "param" : "5",
+      "input" : "10",
+      "name" : "lt",
+      "type" : "op",
+      "ret" : 0
+   }
+]

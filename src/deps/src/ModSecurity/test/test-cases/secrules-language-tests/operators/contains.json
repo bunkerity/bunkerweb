@@ -1,0 +1,72 @@
+[
+   {
+      "param" : "",
+      "input" : "",
+      "name" : "contains",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "name" : "contains",
+      "ret" : 0,
+      "type" : "op",
+      "input" : "",
+      "param" : "TestCase"
+   },
+   {
+      "input" : "TestCase",
+      "param" : "",
+      "type" : "op",
+      "ret" : 1,
+      "name" : "contains"
+   },
+   {
+      "input" : "abcdefghi",
+      "param" : "abc",
+      "type" : "op",
+      "ret" : 1,
+      "name" : "contains"
+   },
+   {
+      "name" : "contains",
+      "ret" : 1,
+      "type" : "op",
+      "param" : "def",
+      "input" : "abcdefghi"
+   },
+   {
+      "name" : "contains",
+      "ret" : 1,
+      "type" : "op",
+      "param" : "ghi",
+      "input" : "abcdefghi"
+   },
+   {
+      "input" : "abcdefghi",
+      "param" : "ghij",
+      "name" : "contains",
+      "type" : "op",
+      "ret" : 0
+   },
+   {
+      "input" : "x",
+      "param" : "x",
+      "name" : "contains",
+      "ret" : 1,
+      "type" : "op"
+   },
+   {
+      "ret" : 1,
+      "type" : "op",
+      "name" : "contains",
+      "input" : "xyz",
+      "param" : "y"
+   },
+   {
+      "param" : "hiding",
+      "input" : "hidinX<-not quite, but is later on->hiding",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "contains"
+   }
+]

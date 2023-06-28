@@ -1,0 +1,51 @@
+[
+   {
+      "input" : "",
+      "param" : "",
+      "name" : "streq",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "type" : "op",
+      "ret" : 0,
+      "name" : "streq",
+      "param" : "TestCase",
+      "input" : ""
+   },
+   {
+      "name" : "streq",
+      "type" : "op",
+      "ret" : 0,
+      "input" : "TestCase",
+      "param" : ""
+   },
+   {
+      "type" : "op",
+      "ret" : 0,
+      "name" : "streq",
+      "input" : "abcdefghi",
+      "param" : "abc"
+   },
+   {
+      "name" : "streq",
+      "type" : "op",
+      "ret" : 0,
+      "param" : "def",
+      "input" : "abcdefghi"
+   },
+   {
+      "ret" : 0,
+      "type" : "op",
+      "name" : "streq",
+      "input" : "abcdefghi",
+      "param" : "ghi"
+   },
+   {
+      "input" : "abcdefghi",
+      "param" : "abcdefghi",
+      "name" : "streq",
+      "type" : "op",
+      "ret" : 1
+   }
+]

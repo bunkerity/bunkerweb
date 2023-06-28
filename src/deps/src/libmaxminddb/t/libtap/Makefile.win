@@ -1,0 +1,37 @@
+CFLAGS = /Zi /Wall /wd4255 /wd4996 /wd4127 /wd4820 /wd4100 /wd4619 \
+		 /wd4514 /wd4668 /I.
+CC = cl /nologo
+TESTS = $(patsubst %.c, %.exe, $(wildcard t/*.c))
+
+%.exe:
+	$(CC) $(LDFLAGS) $(filter %.obj %.lib %.dll, $^) $(LDLIBS) /Fe $@
+
+%.o:
+	$(CC) $(CFLAGS) $(CPPFLAGS) /c $(filter %.c, $^) $(LDLIBS) /Fo $@
+
+%.lib:
+	lib /nologo /out:$@ $(filter %.obj, $^)
+
+%.dll:
+	lib /nologo /out:$@ $(filter %.obj, $^)
+
+all: tap.lib tests
+
+tap.lib: tap.obj
+
+tap.obj: tap.c tap.h
+
+tests: $(TESTS)
+
+$(TESTS): %.exe: %.obj tap.lib
+
+$(patsubst %.exe, %.obj, $(TESTS)): %.obj: %.c tap.h
+
+clean:
+	rm -rf *.obj t/*.obj tap.lib $(TESTS)
+
+check test: all
+	prove
+
+.PHONY: all clean check test tests
+

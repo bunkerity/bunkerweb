@@ -1,0 +1,65 @@
+[
+   {
+      "ret" : 0,
+      "type" : "tfn",
+      "input" : "",
+      "name" : "trim",
+      "output" : ""
+   },
+   {
+      "input" : "TestCase",
+      "name" : "trim",
+      "type" : "tfn",
+      "ret" : 0,
+      "output" : "TestCase"
+   },
+   {
+      "ret" : 0,
+      "input" : "Test\u0000Case",
+      "type" : "tfn",
+      "name" : "trim",
+      "output" : "Test\u0000Case"
+   },
+   {
+      "output" : "TestCase",
+      "input" : "    TestCase",
+      "name" : "trim",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "output" : "TestCase",
+      "ret" : 1,
+      "name" : "trim",
+      "input" : "TestCase    ",
+      "type" : "tfn"
+   },
+   {
+      "output" : "TestCase",
+      "ret" : 1,
+      "name" : "trim",
+      "input" : "    TestCase    ",
+      "type" : "tfn"
+   },
+   {
+      "output" : "Test   Case",
+      "type" : "tfn",
+      "input" : "    Test   Case    ",
+      "name" : "trim",
+      "ret" : 1
+   },
+   {
+      "name" : "trim",
+      "input" : "    Test \\u0000 Case    ",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "Test \\u0000 Case"
+   },
+   {
+      "input" : " \t   Test \\u0000 Case \t  \t   \r\n  ",
+      "name" : "trim",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "Test \\u0000 Case"
+   }
+]

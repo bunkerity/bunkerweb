@@ -1,0 +1,26 @@
+[
+   {
+      "param" : "([0-9]{4} ?[0-9]{6})",
+      "input" : "1237010180",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "verifysvnr"
+   },
+   {
+      "param" : "([0-9]{4} ?[0-9]{6})",
+      "input" : "asdf 1237 010180 asdf",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "verifysvnr"
+   },
+   {
+      "param" : "([0-9]{4} ?[0-9]{6})",
+      "input" : "asdf 0100817 asdf",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "verifysvnr"
+   }
+
+
+
+]

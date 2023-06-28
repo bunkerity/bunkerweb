@@ -1,0 +1,65 @@
+[
+   {
+      "type" : "tfn",
+      "input" : "",
+      "name" : "trimLeft",
+      "ret" : 0,
+      "output" : ""
+   },
+   {
+      "input" : "TestCase",
+      "type" : "tfn",
+      "name" : "trimLeft",
+      "ret" : 0,
+      "output" : "TestCase"
+   },
+   {
+      "name" : "trimLeft",
+      "input" : "Test\u0000Case",
+      "type" : "tfn",
+      "ret" : 0,
+      "output" : "Test\u0000Case"
+   },
+   {
+      "ret" : 0,
+      "type" : "tfn",
+      "input" : "TestCase    ",
+      "name" : "trimLeft",
+      "output" : "TestCase    "
+   },
+   {
+      "ret" : 1,
+      "input" : "    TestCase",
+      "name" : "trimLeft",
+      "type" : "tfn",
+      "output" : "TestCase"
+   },
+   {
+      "output" : "TestCase    ",
+      "name" : "trimLeft",
+      "input" : "    TestCase    ",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "output" : "Test   Case    ",
+      "ret" : 1,
+      "input" : "    Test   Case    ",
+      "type" : "tfn",
+      "name" : "trimLeft"
+   },
+   {
+      "input" : "    Test \u0000 Case    ",
+      "name" : "trimLeft",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "Test \u0000 Case    "
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : " \t   Test \u0000 Case \t  \t   \r\n  ",
+      "name" : "trimLeft",
+      "output" : "Test \u0000 Case \t  \t   \r\n  "
+   }
+]

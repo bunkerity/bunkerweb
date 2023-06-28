@@ -1,0 +1,44 @@
+[
+   {
+      "input" : "",
+      "output" : "",
+      "name" : "cssDecode",
+      "ret" : 0,
+      "type" : "tfn"
+   },
+   {
+      "output" : "TestCase",
+      "name" : "cssDecode",
+      "input" : "TestCase",
+      "ret" : 0,
+      "type" : "tfn"
+   },
+   {
+      "input" : "Test\u0000Case",
+      "output" : "Test\u0000Case",
+      "name" : "cssDecode",
+      "ret" : 0,
+      "type" : "tfn"
+   },
+   {
+      "type" : "tfn",
+      "ret" : 1,
+      "input" : "test\\a\\b\\f\\n\\r\\t\\v\\?\\'\\\"\\\u0000\\12\\123\\1234\\12345\\123456\\ff01\\ff5e\\\n\\\u0000  string",
+      "name" : "cssDecode",
+      "output" : "test\n\u000b\u000fnrtv?'\"\u0000\u0012#4EV!~\u0000 string"
+   },
+   {
+      "input" : "test\\",
+      "output" : "test",
+      "name" : "cssDecode",
+      "ret" : 1,
+      "type" : "tfn"
+   },
+   {
+      "type" : "tfn",
+      "ret" : 1,
+      "input" : "\\1A\\1 A\\1234567\\123456 7\\1x\\1 x",
+      "name" : "cssDecode",
+      "output" : "\u001a\u0001AV7V7\u0001x\u0001x"
+   }
+]

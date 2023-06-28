@@ -1,0 +1,65 @@
+[
+   {
+      "output" : "",
+      "type" : "tfn",
+      "input" : "",
+      "name" : "trimRight",
+      "ret" : 0
+   },
+   {
+      "ret" : 0,
+      "input" : "TestCase",
+      "name" : "trimRight",
+      "type" : "tfn",
+      "output" : "TestCase"
+   },
+   {
+      "input" : "Test\\u0000Case",
+      "type" : "tfn",
+      "name" : "trimRight",
+      "ret" : 0,
+      "output" : "Test\\u0000Case"
+   },
+   {
+      "output" : "    TestCase",
+      "ret" : 0,
+      "input" : "    TestCase",
+      "type" : "tfn",
+      "name" : "trimRight"
+   },
+   {
+      "input" : "TestCase    ",
+      "type" : "tfn",
+      "name" : "trimRight",
+      "ret" : 1,
+      "output" : "TestCase"
+   },
+   {
+      "output" : "    TestCase",
+      "input" : "    TestCase    ",
+      "type" : "tfn",
+      "name" : "trimRight",
+      "ret" : 1
+   },
+   {
+      "output" : "    Test   Case",
+      "ret" : 1,
+      "name" : "trimRight",
+      "input" : "    Test   Case    ",
+      "type" : "tfn"
+   },
+   {
+      "ret" : 1,
+      "input" : "    Test \\u0000 Case    ",
+      "name" : "trimRight",
+      "type" : "tfn",
+      "output" : "    Test \\u0000 Case"
+   },
+   {
+      "name" : "trimRight",
+      "input" : " \t   Test12 \\u0000 Case \t  \t   \r\n  ",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : " \t   Test12 \\u0000 Case"
+   }
+]

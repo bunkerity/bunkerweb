@@ -1,0 +1,20 @@
+[
+   {
+      "input" : "",
+      "name" : "detectSQLi",
+      "ret" : 0,
+      "type" : "op"
+   },
+   {
+      "type" : "op",
+      "ret" : 0,
+      "name" : "detectSQLi",
+      "input" : "this is not isqli"
+   },
+   {
+      "input" : "ascii(substring(version() from 1 for 1))",
+      "type" : "op",
+      "ret" : 1,
+      "name" : "detectSQLi"
+   }
+]

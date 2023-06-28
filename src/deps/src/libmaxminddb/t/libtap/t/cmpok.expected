@@ -1,0 +1,37 @@
+1..9
+not ok 1
+#   Failed test at t/cmpok.c line 5.
+#     420
+#         >
+#     666
+not ok 2 - the number 23 is definitely 55
+#   Failed test 'the number 23 is definitely 55'
+#   at t/cmpok.c line 6.
+#     23
+#         ==
+#     55
+not ok 3
+#   Failed test at t/cmpok.c line 7.
+#     23
+#         ==
+#     55
+ok 4
+# unrecognized operator 'frob'
+not ok 5
+#   Failed test at t/cmpok.c line 9.
+#     23
+#         frob
+#     55
+ok 6
+not ok 7
+#   Failed test at t/cmpok.c line 11.
+#     55
+#         +
+#     -55
+ok 8
+not ok 9
+#   Failed test at t/cmpok.c line 13.
+#     55
+#         %
+#     5
+# Looks like you failed 6 tests of 9 run.

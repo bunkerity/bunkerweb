@@ -1,0 +1,30 @@
+[
+   {
+      "name" : "parityEven7bit",
+      "input" : "",
+      "type" : "tfn",
+      "ret" : 0,
+      "output" : ""
+   },
+   {
+      "output" : "cefijloqrtwx03569ABDGHKMNPSUVYZ",
+      "ret" : 0,
+      "name" : "parityEven7bit",
+      "input" : "cefijloqrtwx03569ABDGHKMNPSUVYZ",
+      "type" : "tfn"
+   },
+   {
+      "output" : "\\xe1\\xe2c\\xe4ef\\xe7\\xe8ij\\xebl\\xed\\xeeo\\xf0qr\\xf3t\\xf5\\xf6wx\\xf9\\xfa0\\xb1\\xb23\\xb456\\xb7\\xb89AB\\xc3D\\xc5\\xc6GH\\xc9\\xcaK\\xccMN\\xcfP\\xd1\\xd2S\\xd4UV\\xd7\\xd8YZ",
+      "name" : "parityEven7bit",
+      "input" : "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "output" : "\\xe1\\xe2c\\xe4ef\\xe7\\xe8ij\\xebl\\xed\\xeeo\\xf0qr\\xf3t\\xf5\\xf6wx\\xf9\\xfa\\x000\\xb1\\xb23\\xb456\\xb7\\xb89\\x00AB\\xc3D\\xc5\\xc6GH\\xc9\\xcaK\\xccMN\\xcfP\\xd1\\xd2S\\xd4UV\\xd7\\xd8YZ",
+      "input" : "abcdefghijklmnopqrstuvwxyz\\u00000123456789\\u0000ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "type" : "tfn",
+      "name" : "parityEven7bit",
+      "ret" : 1
+   }
+]

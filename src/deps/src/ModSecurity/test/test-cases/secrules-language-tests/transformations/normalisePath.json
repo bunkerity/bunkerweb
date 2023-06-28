@@ -1,0 +1,219 @@
+[
+   {
+      "ret" : 0,
+      "input" : "",
+      "name" : "normalisePath",
+      "type" : "tfn",
+      "output" : ""
+   },
+   {
+      "name" : "normalisePath",
+      "input" : "/foo/bar/baz",
+      "type" : "tfn",
+      "ret" : 0,
+      "output" : "/foo/bar/baz"
+   },
+   {
+      "ret" : 0,
+      "input" : "/foo/bar\\u0000/baz",
+      "name" : "normalisePath",
+      "type" : "tfn",
+      "output" : "/foo/bar\\u0000/baz"
+   },
+   {
+      "name" : "normalisePath",
+      "input" : "x",
+      "type" : "tfn",
+      "ret" : 0,
+      "output" : "x"
+   },
+   {
+      "output" : "",
+      "name" : "normalisePath",
+      "input" : ".",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "output" : "",
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "./",
+      "name" : "normalisePath"
+   },
+   {
+      "ret" : 1,
+      "input" : "./..",
+      "name" : "normalisePath",
+      "type" : "tfn",
+      "output" : ".."
+   },
+   {
+      "ret" : 1,
+      "input" : "./../",
+      "name" : "normalisePath",
+      "type" : "tfn",
+      "output" : "../"
+   },
+   {
+      "output" : "..",
+      "ret" : 0,
+      "input" : "..",
+      "name" : "normalisePath",
+      "type" : "tfn"
+   },
+   {
+      "output" : "../",
+      "ret" : 0,
+      "input" : "../",
+      "name" : "normalisePath",
+      "type" : "tfn"
+   },
+   {
+      "output" : "..",
+      "input" : "../.",
+      "name" : "normalisePath",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "name" : "normalisePath",
+      "input" : ".././",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "../"
+   },
+   {
+      "ret" : 0,
+      "input" : "../..",
+      "name" : "normalisePath",
+      "type" : "tfn",
+      "output" : "../.."
+   },
+   {
+      "ret" : 0,
+      "type" : "tfn",
+      "input" : "../../",
+      "name" : "normalisePath",
+      "output" : "../../"
+   },
+   {
+      "name" : "normalisePath",
+      "input" : "/dir/foo//bar",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "/dir/foo/bar"
+   },
+   {
+      "input" : "dir/foo//bar/",
+      "type" : "tfn",
+      "name" : "normalisePath",
+      "ret" : 1,
+      "output" : "dir/foo/bar/"
+   },
+   {
+      "output" : "foo",
+      "ret" : 1,
+      "input" : "dir/../foo",
+      "type" : "tfn",
+      "name" : "normalisePath"
+   },
+   {
+      "output" : "../foo",
+      "type" : "tfn",
+      "input" : "dir/../../foo",
+      "name" : "normalisePath",
+      "ret" : 1
+   },
+   {
+      "ret" : 1,
+      "input" : "dir/./.././../../foo/bar",
+      "name" : "normalisePath",
+      "type" : "tfn",
+      "output" : "../../foo/bar"
+   },
+   {
+      "output" : "../../foo/bar",
+      "type" : "tfn",
+      "input" : "dir/./.././../../foo/bar/.",
+      "name" : "normalisePath",
+      "ret" : 1
+   },
+   {
+      "output" : "../../foo/bar/",
+      "ret" : 1,
+      "input" : "dir/./.././../../foo/bar/./",
+      "name" : "normalisePath",
+      "type" : "tfn"
+   },
+   {
+      "input" : "dir/./.././../../foo/bar/..",
+      "name" : "normalisePath",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "../../foo"
+   },
+   {
+      "output" : "../../foo/",
+      "ret" : 1,
+      "input" : "dir/./.././../../foo/bar/../",
+      "name" : "normalisePath",
+      "type" : "tfn"
+   },
+   {
+      "ret" : 1,
+      "name" : "normalisePath",
+      "input" : "dir/./.././../../foo/bar/",
+      "type" : "tfn",
+      "output" : "../../foo/bar/"
+   },
+   {
+      "output" : "../../foo/bar",
+      "name" : "normalisePath",
+      "input" : "dir//.//..//.//..//..//foo//bar",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "name" : "normalisePath",
+      "input" : "dir//.//..//.//..//..//foo//bar//",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "../../foo/bar/"
+   },
+   {
+      "output" : "dir",
+      "ret" : 1,
+      "input" : "dir/subdir/subsubdir/subsubsubdir/../../..",
+      "name" : "normalisePath",
+      "type" : "tfn"
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "dir/./subdir/./subsubdir/./subsubsubdir/../../..",
+      "name" : "normalisePath",
+      "output" : "dir"
+   },
+   {
+      "ret" : 1,
+      "input" : "dir/./subdir/../subsubdir/../subsubsubdir/..",
+      "type" : "tfn",
+      "name" : "normalisePath",
+      "output" : "dir"
+   },
+   {
+      "type" : "tfn",
+      "input" : "/dir/./subdir/../subsubdir/../subsubsubdir/../",
+      "name" : "normalisePath",
+      "ret" : 1,
+      "output" : "/dir/"
+   },
+   {
+      "output" : "/etc/passwd",
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "/./.././../../../../../../../\\u0000/../etc/./passwd",
+      "name" : "normalisePath"
+   }
+]

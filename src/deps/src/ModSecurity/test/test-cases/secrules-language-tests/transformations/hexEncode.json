@@ -1,0 +1,23 @@
+[
+   {
+      "ret" : 1,
+      "input" : "",
+      "type" : "tfn",
+      "name" : "hexEncode",
+      "output" : ""
+   },
+   {
+      "output" : "5465737443617365",
+      "ret" : 1,
+      "name" : "hexEncode",
+      "input" : "TestCase",
+      "type" : "tfn"
+   },
+   {
+      "output" : "546573740043617365",
+      "name" : "hexEncode",
+      "input" : "Test\\u0000Case",
+      "type" : "tfn",
+      "ret" : 1
+   }
+]

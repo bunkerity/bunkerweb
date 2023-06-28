@@ -1,0 +1,107 @@
+[
+   {
+      "output" : "",
+      "ret" : 0,
+      "input" : "",
+      "name" : "jsDecode",
+      "type" : "tfn"
+   },
+   {
+      "output" : "TestCase",
+      "ret" : 0,
+      "type" : "tfn",
+      "input" : "TestCase",
+      "name" : "jsDecode"
+   },
+   {
+      "ret" : 0,
+      "input" : "Test\u0000Case",
+      "type" : "tfn",
+      "name" : "jsDecode",
+      "output" : "Test\u0000Case"
+   },
+   {
+      "input" : "\\\\a\\\\b\\\\f\\\\n\\\\r\\\\t\\\\v\\?\\'\\\"\\0\\12\\123\\x00\\xff",
+      "output" : "\\a\\b\\f\\n\\r\\t\\v?'\"\\x00\\x0a\\x53\\x00\\xff",
+      "ret" : 1,
+      "type" : "tfn",
+      "name" : "jsDecode"
+   },
+   {
+      "output" : "8966\\x0a\\x00\\x00\\x00\\x0a\\x0a\\x0a3u00a",
+      "input" : "8966\\x0a\\x00\\x00\\x00\\x0a\\x0a\\x0a3u00a",
+      "type" : "tfn",
+      "name" : "jsDecode",
+      "ret" : 1
+   },
+   {
+      "input" : "\\x",
+      "name" : "jsDecode",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "x"
+   },
+   {
+      "output" : "xx0",
+      "ret" : 1,
+      "name" : "jsDecode",
+      "input" : "\\x\\x0",
+      "type" : "tfn"
+   },
+   {
+      "output" : "xx0\u0000",
+      "type" : "tfn",
+      "input" : "\\x\\x0\u0000",
+      "name" : "jsDecode",
+      "ret" : 1
+   },
+   {
+      "output" : "u",
+      "input" : "\\u",
+      "name" : "jsDecode",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "input" : "\\u\\u0",
+      "name" : "jsDecode",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "uu0"
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "\\u\\u0\\u01",
+      "name" : "jsDecode",
+      "output" : "uu0u01"
+   },
+   {
+      "input" : "\\u\\u0\\u01\\u012",
+      "type" : "tfn",
+      "name" : "jsDecode",
+      "ret" : 1,
+      "output" : "uu0u01u012"
+   },
+   {
+      "ret" : 1,
+      "input" : "\\u\\u0\\u01\\u012\u0000",
+      "type" : "tfn",
+      "name" : "jsDecode",
+      "output" : "uu0u01u012\u0000"
+   },
+   {
+      "input" : "\\",
+      "type" : "tfn",
+      "name" : "jsDecode",
+      "ret" : 0,
+      "output" : "\\"
+   },
+   {
+      "output" : "\\0",
+      "ret" : 1,
+      "input" : "\\\\0",
+      "type" : "tfn",
+      "name" : "jsDecode"
+   }
+]

@@ -1,0 +1,13 @@
+language: c
+
+compiler:
+  - gcc
+  - clang
+
+before_install: sudo apt-get install -y libtest-differences-perl
+
+install: make CC=$CC install
+
+script: make CC=$CC test
+
+after_script: make uninstall

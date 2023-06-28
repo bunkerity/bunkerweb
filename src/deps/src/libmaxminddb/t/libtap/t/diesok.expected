@@ -1,0 +1,6 @@
+1..5
+ok 1 - sanity
+ok 2 - can't divide by zero
+ok 3 - this is a perfectly fine statement
+ok 4 - abort kills the program
+ok 5 - supress output

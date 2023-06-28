@@ -1,0 +1,58 @@
+[
+   {
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateByteRange",
+      "input" : "",
+      "param" : "0-255"
+   },
+   {
+      "param" : "",
+      "input" : "TestCase",
+      "name" : "validateByteRange",
+      "ret" : 1,
+      "type" : "op"
+   },
+   {
+      "param" : "xxx",
+      "input" : "TestCase",
+      "type" : "op",
+      "ret" : 1,
+      "name" : "validateByteRange"
+   },
+   {
+      "param" : "xxx",
+      "input" : "\u0000",
+      "type" : "op",
+      "ret" : 0,
+      "name" : "validateByteRange"
+   },
+   {
+      "param" : "0-255",
+      "input" : "abcdefghi",
+      "name" : "validateByteRange",
+      "ret" : 0,
+      "type" : "op"
+   },
+   {
+      "name" : "validateByteRange",
+      "type" : "op",
+      "ret" : 0,
+      "input" : "abcdefghi",
+      "param" : "97-105"
+   },
+   {
+      "input" : "abcdefghij",
+      "param" : "97-105",
+      "name" : "validateByteRange",
+      "ret" : 1,
+      "type" : "op"
+   },
+   {
+      "input" : "\u00d0\u0090",
+      "param" : "0-255",
+      "name" : "validateByteRange",
+      "ret" : 0,
+      "type" : "op"
+   }
+]

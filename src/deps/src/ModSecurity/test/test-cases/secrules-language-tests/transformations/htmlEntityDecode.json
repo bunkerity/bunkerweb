@@ -1,0 +1,51 @@
+[
+   {
+      "name" : "htmlEntityDecode",
+      "input" : "",
+      "type" : "tfn",
+      "ret" : 0,
+      "output" : ""
+   },
+   {
+      "output" : "TestCase",
+      "ret" : 0,
+      "input" : "TestCase",
+      "type" : "tfn",
+      "name" : "htmlEntityDecode"
+   },
+   {
+      "ret" : 0,
+      "type" : "tfn",
+      "input" : "Test\\u0000Case",
+      "name" : "htmlEntityDecode",
+      "output" : "Test\\u0000Case"
+   },
+   {
+      "output" : "&#xg;&#Xg;&#xg0;\\u0002g;&#a;\\u0000&#a2;\\u0003a&#a00;\\u0001a0;\na;&foo;",
+      "ret" : 1,
+      "input" : "&#xg;&#Xg;&#xg0;&#X2g;&#a;\\u0000&#a2;&#3a&#a00;&#1a0;&#10a;&foo;",
+      "type" : "tfn",
+      "name" : "htmlEntityDecode"
+   },
+   {
+      "ret" : 1,
+      "name" : "htmlEntityDecode",
+      "input" : "&#xg&#Xg&#xg0&#X2g&#a\\u0000&#a2&#3a&#a00&#1a0&#10a&foo",
+      "type" : "tfn",
+      "output" : "&#xg&#Xg&#xg0\\u0002g&#a\\u0000&#a2\\u0003a&#a00\\u0001a0\na&foo"
+   },
+   {
+      "output" : "\\x00\\x00\\x20\\x20\\x00\\x20\\x00\\x64\"&<>\\xa0",
+      "type" : "tfn",
+      "input" : "&#x0&#X0&#x20&#X20&#0&#32\\u0000&#100&quot&amp&lt&gt&nbsp",
+      "name" : "htmlEntityDecode",
+      "ret" : 1
+   },
+   {
+      "output" : "\\x00\\x00\\x20\\x20\\x00\\x20\\x00\\x64\"&<>\\xa0",
+      "ret" : 1,
+      "name" : "htmlEntityDecode",
+      "input" : "&#x0;&#X0;&#x20;&#X20;&#0;&#32;\\x00&#100;&quot;&amp;&lt;&gt;&nbsp;",
+      "type" : "tfn"
+   }
+]

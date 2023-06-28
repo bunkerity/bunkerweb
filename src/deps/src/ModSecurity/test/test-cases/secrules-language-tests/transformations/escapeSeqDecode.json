@@ -1,0 +1,100 @@
+[
+   {
+      "output" : "",
+      "type" : "tfn",
+      "input" : "",
+      "name" : "escapeSeqDecode",
+      "ret" : 0
+   },
+   {
+      "name" : "escapeSeqDecode",
+      "input" : "TestCase",
+      "type" : "tfn",
+      "ret" : 0,
+      "output" : "TestCase"
+   },
+   {
+      "output" : "Test\\u0000Case",
+      "ret" : 0,
+      "type" : "tfn",
+      "input" : "Test\\u0000Case",
+      "name" : "escapeSeqDecode"
+   },
+   {
+      "ret" : 1,
+      "input" : "\\a\\b\\f\\n\\r\\t\\v\\?\\'\\\"\\0\\12\\123\\x00\\xff",
+      "name" : "escapeSeqDecode",
+      "type" : "tfn",
+      "output" : "\u0007\b\f\n\r\t\u000b?'\"\\u0000\nS\\u0000\\xff"
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "\\a\\b\\f\\n\\r\\t\\v\\u0000\\?\\'\\\"\\0\\12\\123\\x00\\xff",
+      "name" : "escapeSeqDecode",
+      "output" : "\u0007\b\f\n\r\t\u000b\\u0000?'\"\\u0000\nS\\u0000\\xff"
+   },
+   {
+      "input" : "\\8\\9\\666\\xag\\xga\\0123",
+      "type" : "tfn",
+      "name" : "escapeSeqDecode",
+      "ret" : 1,
+      "output" : "89\\xb6\\xag\\xga\\x0a3"
+   },
+   {
+      "output" : "x",
+      "type" : "tfn",
+      "input" : "\\x",
+      "name" : "escapeSeqDecode",
+      "ret" : 1
+   },
+   {
+      "name" : "escapeSeqDecode",
+      "input" : "\\x\\x0",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "xx0"
+   },
+   {
+      "output" : "xx0\\u0000",
+      "name" : "escapeSeqDecode",
+      "input" : "\\x\\x0\\u0000",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "name" : "escapeSeqDecode",
+      "input" : "\\0",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "\\u0000"
+   },
+   {
+      "output" : "\u0001",
+      "ret" : 1,
+      "input" : "\\01",
+      "name" : "escapeSeqDecode",
+      "type" : "tfn"
+   },
+   {
+      "ret" : 1,
+      "name" : "escapeSeqDecode",
+      "input" : "\\012",
+      "type" : "tfn",
+      "output" : "\n"
+   },
+   {
+      "ret" : 0,
+      "type" : "tfn",
+      "input" : "\\",
+      "name" : "escapeSeqDecode",
+      "output" : "\\"
+   },
+   {
+      "input" : "\\\\u0000",
+      "type" : "tfn",
+      "name" : "escapeSeqDecode",
+      "ret" : 1,
+      "output" : "\\u0000"
+   }
+]

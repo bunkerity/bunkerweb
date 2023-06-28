@@ -1,0 +1,149 @@
+[
+   {
+      "output" : "",
+      "input" : "",
+      "type" : "tfn",
+      "name" : "removeComments",
+      "ret" : 1
+   },
+   {
+      "input" : "TestCase",
+      "type" : "tfn",
+      "name" : "removeComments",
+      "ret" : 1,
+      "output" : "TestCase"
+   },
+   {
+      "ret" : 1,
+      "input" : "Test\\u0000Case",
+      "name" : "removeComments",
+      "type" : "tfn",
+      "output" : "Test\\u0000Case"
+   },
+   {
+      "ret" : 1,
+      "input" : "/* TestCase */",
+      "name" : "removeComments",
+      "type" : "tfn",
+      "output" : "\\x00"
+   },
+   {
+      "output" : "\\x00",
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "/*TestCase*/",
+      "name" : "removeComments"
+   },
+   {
+      "input" : "/* TestCase*/",
+      "type" : "tfn",
+      "name" : "removeComments",
+      "ret" : 1,
+      "output" : "\\x00"
+   },
+   {
+      "output" : "\\x00",
+      "ret" : 1,
+      "name" : "removeComments",
+      "input" : "/*TestCase */",
+      "type" : "tfn"
+   },
+   {
+      "output" : "BeforeAfter",
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "Before/* TestCase */After",
+      "name" : "removeComments"
+   },
+   {
+      "output" : "Before TestCase */ After",
+      "name" : "removeComments",
+      "input" : "Before TestCase */ After",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "type" : "tfn",
+      "input" : "/* Test\\nCase */",
+      "name" : "removeComments",
+      "ret" : 1,
+      "output" : "\\x00"
+   },
+   {
+      "name" : "removeComments",
+      "input" : "/* Test\r\nCase */",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "\\x00"
+   },
+   {
+      "ret" : 1,
+      "input" : "/* Test\nCase */",
+      "type" : "tfn",
+      "name" : "removeComments",
+      "output" : "\\x00"
+   },
+   {
+      "ret" : 1,
+      "name" : "removeComments",
+      "input" : "/* Test\rCase */",
+      "type" : "tfn",
+      "output" : "\\x00"
+   },
+   {
+      "ret" : 1,
+      "input" : "/*Before/* Test\r\nCase ",
+      "type" : "tfn",
+      "name" : "removeComments",
+      "output" : " "
+   },
+   {
+      "output" : "Before  ",
+      "input" : "Before /* Test\nCase ",
+      "type" : "tfn",
+      "name" : "removeComments",
+      "ret" : 1
+   },
+   {
+      "output" : "Before   \r\nCase ",
+      "ret" : 1,
+      "input" : "Before/* T*/ /* e */ /* s */ /* t */\r\nCase ",
+      "name" : "removeComments",
+      "type" : "tfn"
+   },
+   {
+      "input" : "Before /* */ ops */ Test\nCase ",
+      "name" : "removeComments",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "Before  ops */ Test\nCase "
+   },
+   {
+      "ret" : 1,
+      "name" : "removeComments",
+      "input" : "/*Test\r\nCase */After",
+      "type" : "tfn",
+      "output" : "After"
+   },
+   {
+      "output" : "Test\nCase  After",
+      "name" : "removeComments",
+      "input" : "Test\nCase /**/ After",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "output" : "Test\r\nCase */After",
+      "ret" : 1,
+      "name" : "removeComments",
+      "input" : "Test\r\nCase */After",
+      "type" : "tfn"
+   },
+   {
+      "input" : "Test/*\nCase */ After",
+      "name" : "removeComments",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "Test After"
+   }
+]

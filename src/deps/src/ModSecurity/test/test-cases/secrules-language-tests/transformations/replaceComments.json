@@ -1,0 +1,149 @@
+[
+   {
+      "output" : "",
+      "input" : "",
+      "type" : "tfn",
+      "name" : "replaceComments",
+      "ret" : 0
+   },
+   {
+      "input" : "TestCase",
+      "type" : "tfn",
+      "name" : "replaceComments",
+      "ret" : 0,
+      "output" : "TestCase"
+   },
+   {
+      "ret" : 0,
+      "input" : "Test\\u0000Case",
+      "name" : "replaceComments",
+      "type" : "tfn",
+      "output" : "Test\\u0000Case"
+   },
+   {
+      "ret" : 1,
+      "input" : "/* TestCase */",
+      "name" : "replaceComments",
+      "type" : "tfn",
+      "output" : " "
+   },
+   {
+      "output" : " ",
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "/*TestCase*/",
+      "name" : "replaceComments"
+   },
+   {
+      "input" : "/* TestCase*/",
+      "type" : "tfn",
+      "name" : "replaceComments",
+      "ret" : 1,
+      "output" : " "
+   },
+   {
+      "output" : " ",
+      "ret" : 1,
+      "name" : "replaceComments",
+      "input" : "/*TestCase */",
+      "type" : "tfn"
+   },
+   {
+      "output" : "Before After",
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "Before/* TestCase */After",
+      "name" : "replaceComments"
+   },
+   {
+      "output" : "Before   After",
+      "name" : "replaceComments",
+      "input" : "Before /* TestCase */ After",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "type" : "tfn",
+      "input" : "/* Test\\nCase */",
+      "name" : "replaceComments",
+      "ret" : 1,
+      "output" : " "
+   },
+   {
+      "name" : "replaceComments",
+      "input" : "/* Test\r\nCase */",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : " "
+   },
+   {
+      "ret" : 1,
+      "input" : "/* Test\nCase */",
+      "type" : "tfn",
+      "name" : "replaceComments",
+      "output" : " "
+   },
+   {
+      "ret" : 1,
+      "name" : "replaceComments",
+      "input" : "/* Test\rCase */",
+      "type" : "tfn",
+      "output" : " "
+   },
+   {
+      "ret" : 1,
+      "input" : "Before/* Test\r\nCase ",
+      "type" : "tfn",
+      "name" : "replaceComments",
+      "output" : "Before "
+   },
+   {
+      "output" : "Before  ",
+      "input" : "Before /* Test\nCase ",
+      "type" : "tfn",
+      "name" : "replaceComments",
+      "ret" : 1
+   },
+   {
+      "output" : "Before ",
+      "ret" : 1,
+      "input" : "Before/* Test\r\nCase ",
+      "name" : "replaceComments",
+      "type" : "tfn"
+   },
+   {
+      "input" : "Before /* Test\nCase ",
+      "name" : "replaceComments",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "Before  "
+   },
+   {
+      "ret" : 0,
+      "name" : "replaceComments",
+      "input" : "Test\r\nCase */After",
+      "type" : "tfn",
+      "output" : "Test\r\nCase */After"
+   },
+   {
+      "output" : "Test\nCase */ After",
+      "name" : "replaceComments",
+      "input" : "Test\nCase */ After",
+      "type" : "tfn",
+      "ret" : 0
+   },
+   {
+      "output" : "Test\r\nCase */After",
+      "ret" : 0,
+      "name" : "replaceComments",
+      "input" : "Test\r\nCase */After",
+      "type" : "tfn"
+   },
+   {
+      "input" : "Test\nCase */ After",
+      "name" : "replaceComments",
+      "type" : "tfn",
+      "ret" : 0,
+      "output" : "Test\nCase */ After"
+   }
+]

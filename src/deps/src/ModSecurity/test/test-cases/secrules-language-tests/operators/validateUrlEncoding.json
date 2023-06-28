@@ -1,0 +1,100 @@
+[
+   {
+      "input" : "",
+      "param" : "",
+      "name" : "validateUrlEncoding",
+      "type" : "op",
+      "ret" : 0
+   },
+   {
+      "param" : "",
+      "input" : "Hello%20World!",
+      "type" : "op",
+      "ret" : 0,
+      "name" : "validateUrlEncoding"
+   },
+   {
+      "param" : "",
+      "input" : "Hello+World!",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUrlEncoding"
+   },
+   {
+      "input" : "HelloWorld!",
+      "param" : "",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUrlEncoding"
+   },
+   {
+      "param" : "",
+      "input" : "%00Hello%20World!",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUrlEncoding"
+   },
+   {
+      "param" : "",
+      "input" : "Hello%20World!%00",
+      "type" : "op",
+      "ret" : 0,
+      "name" : "validateUrlEncoding"
+   },
+   {
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUrlEncoding",
+      "input" : "%00",
+      "param" : ""
+   },
+   {
+      "param" : "",
+      "input" : "%ff",
+      "name" : "validateUrlEncoding",
+      "ret" : 0,
+      "type" : "op"
+   },
+   {
+      "ret" : 1,
+      "type" : "op",
+      "name" : "validateUrlEncoding",
+      "param" : "",
+      "input" : "%0"
+   },
+   {
+      "input" : "%f",
+      "param" : "",
+      "name" : "validateUrlEncoding",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "name" : "validateUrlEncoding",
+      "ret" : 1,
+      "type" : "op",
+      "param" : "",
+      "input" : "%"
+   },
+   {
+      "name" : "validateUrlEncoding",
+      "type" : "op",
+      "ret" : 1,
+      "input" : "%0z",
+      "param" : ""
+   },
+   {
+      "name" : "validateUrlEncoding",
+      "ret" : 1,
+      "type" : "op",
+      "input" : "%z0",
+      "param" : ""
+   },
+   {
+      "param" : "",
+      "input" : "%0%",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "validateUrlEncoding"
+   }
+]

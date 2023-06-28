@@ -1,0 +1,37 @@
+[
+   {
+      "output" : "",
+      "input" : "",
+      "type" : "tfn",
+      "name" : "removeWhitespace",
+      "ret" : 0
+   },
+   {
+      "output" : "TestCase",
+      "ret" : 0,
+      "name" : "removeWhitespace",
+      "input" : "TestCase",
+      "type" : "tfn"
+   },
+   {
+      "ret" : 0,
+      "input" : "Test\u0000Case",
+      "name" : "removeWhitespace",
+      "type" : "tfn",
+      "output" : "Test\u0000Case"
+   },
+   {
+      "output" : "TestCase",
+      "name" : "removeWhitespace",
+      "input" : "  Test  \t   Case  ",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "input" : "This is a   test case with a tab \t, vtab \u000b, newline \n, return \r, formfeed \f, and a NUL\u0000 in it with a CRLF at the end.\r\n",
+      "type" : "tfn",
+      "name" : "removeWhitespace",
+      "ret" : 1,
+      "output" : "Thisisatestcasewithatab,vtab,newline,return,formfeed,andaNUL\u0000initwithaCRLFattheend."
+   }
+]

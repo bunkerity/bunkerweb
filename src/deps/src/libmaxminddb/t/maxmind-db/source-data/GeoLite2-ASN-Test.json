@@ -1,0 +1,37 @@
+[
+   {
+      "::1.128.0.0/107" : {
+         "autonomous_system_number" : 1221,
+         "autonomous_system_organization" : "Telstra Pty Ltd"
+      }
+   },
+   {
+      "::12.81.92.0/118" : {
+         "autonomous_system_number" : 7018,
+         "autonomous_system_organization" : "AT&T Services"
+      }
+   },
+   {
+      "::12.81.96.0/115" : {
+         "autonomous_system_number" : 7018
+      }
+   },
+   {
+      "2600:6000::/20" : {
+         "autonomous_system_number" : 237,
+         "autonomous_system_organization" : "Merit Network Inc."
+      }
+   },
+   {
+      "2600:7000::/24" : {
+         "autonomous_system_number" : 6939,
+         "autonomous_system_organization" : "Hurricane Electric, Inc."
+      }
+   },
+   {
+      "2600:7100::/24" : {
+         "autonomous_system_number" : 237,
+         "autonomous_system_organization" : "Merit Network Inc."
+      }
+   }
+]

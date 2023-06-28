@@ -1,0 +1,93 @@
+[
+   {
+      "input" : "",
+      "param" : "0",
+      "type" : "op",
+      "ret" : 1,
+      "name" : "eq"
+   },
+   {
+      "param" : "5",
+      "input" : "",
+      "name" : "eq",
+      "ret" : 0,
+      "type" : "op"
+   },
+   {
+      "name" : "eq",
+      "ret" : 1,
+      "type" : "op",
+      "input" : "0",
+      "param" : "xxx"
+   },
+   {
+      "param" : "xxx",
+      "input" : "5",
+      "name" : "eq",
+      "ret" : 0,
+      "type" : "op"
+   },
+   {
+      "input" : "-1",
+      "param" : "xxx",
+      "type" : "op",
+      "ret" : 0,
+      "name" : "eq"
+   },
+   {
+      "param" : "0",
+      "input" : "xxx",
+      "name" : "eq",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "input" : "xxx",
+      "param" : "5",
+      "name" : "eq",
+      "ret" : 0,
+      "type" : "op"
+   },
+   {
+      "name" : "eq",
+      "type" : "op",
+      "ret" : 0,
+      "param" : "0",
+      "input" : "-5"
+   },
+   {
+      "param" : "0",
+      "input" : "0",
+      "name" : "eq",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "type" : "op",
+      "ret" : 0,
+      "name" : "eq",
+      "input" : "5",
+      "param" : "0"
+   },
+   {
+      "input" : "0",
+      "param" : "5",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "eq"
+   },
+   {
+      "input" : "5",
+      "param" : "5",
+      "name" : "eq",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "ret" : 0,
+      "type" : "op",
+      "name" : "eq",
+      "input" : "10",
+      "param" : "5"
+   }
+]
