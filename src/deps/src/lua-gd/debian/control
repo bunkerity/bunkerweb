@@ -1,0 +1,14 @@
+Source: lua-gd
+Priority: optional
+Maintainer: Alexandre Erwin Ittner <alexandre@ittner.com.br>
+Build-Depends: debhelper (>= 4.0.0), liblua5.1-dev
+Standards-Version: 3.6.1
+Section: interpreters
+
+Package: lua-gd
+Architecture: any
+Depends: ${shlibs:Depends}
+Recommends: lua5.1
+Description: GD bindings for the Lua Programming Language
+ Lua-GD is a library that allows you to use the gd graphic library from
+ programs written in the Lua programming language.

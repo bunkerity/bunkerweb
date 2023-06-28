@@ -1,0 +1,1370 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Session Library for OpenResty Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>resty.session</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/resty.session.html">resty.session</a></li>
+  <li><a href="../modules/resty.session.dshm.html">resty.session.dshm</a></li>
+  <li><a href="../modules/resty.session.file.html">resty.session.file</a></li>
+  <li><a href="../modules/resty.session.file.thread.html">resty.session.file.thread</a></li>
+  <li><a href="../modules/resty.session.file.utils.html">resty.session.file.utils</a></li>
+  <li><a href="../modules/resty.session.memcached.html">resty.session.memcached</a></li>
+  <li><a href="../modules/resty.session.mysql.html">resty.session.mysql</a></li>
+  <li><a href="../modules/resty.session.postgres.html">resty.session.postgres</a></li>
+  <li><a href="../modules/resty.session.redis.html">resty.session.redis</a></li>
+  <li><a href="../modules/resty.session.redis.cluster.html">resty.session.redis.cluster</a></li>
+  <li><a href="../modules/resty.session.redis.common.html">resty.session.redis.common</a></li>
+  <li><a href="../modules/resty.session.redis.sentinel.html">resty.session.redis.sentinel</a></li>
+  <li><a href="../modules/resty.session.shm.html">resty.session.shm</a></li>
+  <li><strong>resty.session.utils</strong></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>resty.session.utils</code></h1>
+<p>Common utilities for session library and storage backends</p>
+<p>
+</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#is_fips_mode">is_fips_mode ()</a></td>
+	<td class="summary">Returns whether OpenSSL is in FIPS-mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#bpack">bpack (size, value)</a></td>
+	<td class="summary">Binary pack unsigned integer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#bunpack">bunpack (size, value)</a></td>
+	<td class="summary">Binary unpack unsigned integer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#trim">trim (value)</a></td>
+	<td class="summary">Trim whitespace from the start and from the end of string.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#encode_json">encode_json (value)</a></td>
+	<td class="summary">JSON encode value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#decode_json">decode_json (value)</a></td>
+	<td class="summary">JSON decode value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#encode_base64url">encode_base64url (value)</a></td>
+	<td class="summary">Base64 URL encode value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#decode_base64url">decode_base64url (value)</a></td>
+	<td class="summary">Base64 URL decode value</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#base64_size">base64_size (size)</a></td>
+	<td class="summary">Base64 size from original size (without padding).</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#deflate">deflate (data)</a></td>
+	<td class="summary">Compress the data with deflate algorithm.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#inflate">inflate (data)</a></td>
+	<td class="summary">Decompress the data compressed with deflate algorithm.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rand_bytes">rand_bytes (length)</a></td>
+	<td class="summary">Generate crypto random bytes.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#sha256">sha256 (value)</a></td>
+	<td class="summary">Calculates SHA-256 hash of the value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#derive_hkdf_sha256">derive_hkdf_sha256 (ikm, nonce, usage, size)</a></td>
+	<td class="summary">Derive a new key using HKDF with SHA-256.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#derive_pbkdf2_hmac_sha256">derive_pbkdf2_hmac_sha256 (pass, salt, usage, size, iterations)</a></td>
+	<td class="summary">Derive a new key using PBKDF2 with SHA-256.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#derive_aes_gcm_256_key_and_iv">derive_aes_gcm_256_key_and_iv (ikm, nonce[, safety])</a></td>
+	<td class="summary">Derive a new AES-256 GCM-mode key and initialization vector.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#derive_hmac_sha256_key">derive_hmac_sha256_key (ikm, nonce)</a></td>
+	<td class="summary">Derive HMAC SHA-256 key for message authentication using HDKF with SHA-256,
+ except on FIPS-mode it uses PBKDF2 with SHA-256 (single iteration).</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#encrypt_aes_256_gcm">encrypt_aes_256_gcm (key, iv, plaintext, aad)</a></td>
+	<td class="summary">Encrypt plain text using AES-256 in GCM-mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#decrypt_aes_256_gcm">decrypt_aes_256_gcm (key, iv, plaintext, aad, tag)</a></td>
+	<td class="summary">Decrypt ciphertext using AES-256 in GCM-mode.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#hmac_sha256">hmac_sha256 (key, value)</a></td>
+	<td class="summary">Calculate message authentication code with HMAC with SHA-256.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#load_storage">load_storage (storage[, configuration])</a></td>
+	<td class="summary">Loads session storage and creates a new instance using session configuration.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#errmsg">errmsg ([err], msg, ...)</a></td>
+	<td class="summary">Helper to format error messages.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#get_name">get_name (storage, name, key, subject)</a></td>
+	<td class="summary">Helper to create a delimited key.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#set_flag">set_flag (flags, flag)</a></td>
+	<td class="summary">Helper to turn on a flag.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#unset_flag">unset_flag (flags, flag)</a></td>
+	<td class="summary">Helper to turn off a flag.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#has_flag">has_flag (flags, flag)</a></td>
+	<td class="summary">Helper to check if flag is enabled.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#meta_get_value">meta_get_value (key, exp)</a></td>
+	<td class="summary">Helper to get the value used to store metadata for a certain aud and sub
+ Empty exp means the session id has been invalidated</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#meta_get_next">meta_get_next (val, index)</a></td>
+	<td class="summary">Function to extract the next key and exp from a serialized
+ metadata list, starting from index</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#meta_get_latest">meta_get_latest (sessions)</a></td>
+	<td class="summary">Function to filter out the latest valid key:exp from a
+ serialized list, used to store session metadata</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "is_fips_mode"></a>
+    <strong>is_fips_mode ()</strong>
+    </dt>
+    <dd>
+    Returns whether OpenSSL is in FIPS-mode.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        <code>true</code> if OpenSSL is in FIPS-mode, otherwise <code>false</code>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> is_fips = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.is_fips_mode()</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "bpack"></a>
+    <strong>bpack (size, value)</strong>
+    </dt>
+    <dd>
+    <p>Binary pack unsigned integer. </p>
+
+<p> Returns binary packed version of an integer in little endian unsigned format.</p>
+
+<p> Size can be:</p>
+
+<ul>
+<li><code>1</code>, pack input as a little endian unsigned char (<code>&lt;C</code>)</li>
+<li><code>2</code>, pack input as a little endian unsigned short (<code>&lt;S</code>)</li>
+<li><code>3</code>, pack input as a little endian unsigned integer (truncated) (<code>&lt;I</code>)</li>
+<li><code>4</code>, pack input as a little endian unsigned integer (<code>&lt;I</code>)</li>
+<li><code>5</code>, pack input as a little endian unsigned long (truncated) (<code>&lt;L</code>)</li>
+<li><code>6</code>, pack input as a little endian unsigned long (truncated) (<code>&lt;L</code>)</li>
+<li><code>7</code>, pack input as a little endian unsigned long (truncated) (<code>&lt;L</code>)</li>
+<li><code>8</code>, pack input as a little endian unsigned long (<code>&lt;L</code>)</li>
+</ul>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">size</span>
+            <span class="types"><span class="type">number</span></span>
+         size of binary packed output
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">number</span></span>
+         value to binary pack
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        binary packed value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> packed_128 = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.bpack(<span class="number">1</span>, <span class="number">128</span>)
+<span class="keyword">local</span> packed_now = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.bpack(<span class="number">8</span>, ngx.time())</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "bunpack"></a>
+    <strong>bunpack (size, value)</strong>
+    </dt>
+    <dd>
+    <p>Binary unpack unsigned integer. </p>
+
+<p> Returns number from a little endian unsigned binary packed format.</p>
+
+<p> Size can be:</p>
+
+<ul>
+<li><code>1</code>, unpack input from little endian unsigned char (<code>&lt;C</code>)</li>
+<li><code>2</code>, unpack input from little endian unsigned short (<code>&lt;S</code>)</li>
+<li><code>3</code>, unpack input from little endian unsigned integer (truncated) (<code>&lt;I</code>)</li>
+<li><code>4</code>, unpack input from little endian unsigned integer (<code>&lt;I</code>)</li>
+<li><code>5</code>, unpack input from little endian unsigned integer (truncated) (<code>&lt;L</code>)</li>
+<li><code>6</code>, unpack input from little endian unsigned integer (truncated) (<code>&lt;L</code>)</li>
+<li><code>7</code>, unpack input from little endian unsigned integer (truncated) (<code>&lt;L</code>)</li>
+<li><code>8</code>, unpack input from little endian unsigned long (<code>&lt;L</code>)</li>
+</ul>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">size</span>
+            <span class="types"><span class="type">number</span></span>
+         size of binary packed output
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">number</span></span>
+         value to binary pack
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        binary unpacked value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
+<span class="keyword">local</span> value = <span class="number">128</span>
+<span class="keyword">local</span> packed_value = utils.bpack(<span class="number">1</span>, value)
+<span class="keyword">local</span> unpacked_value = utils.bunpack(<span class="number">1</span>, packed_value)
+<span class="global">print</span>(value == unpacked_value) <span class="comment">-- true</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "trim"></a>
+    <strong>trim (value)</strong>
+    </dt>
+    <dd>
+    <p>Trim whitespace from the start and from the end of string. </p>
+
+<p> Characters that are trimmed:</p>
+
+<ul>
+<li>space <code>&quot; &quot;</code></li>
+<li>tab <code>&quot;\t&quot;</code></li>
+<li>carriage return <code>&quot;\r&quot;</code></li>
+<li>line feed <code>&quot;\n&quot;</code></li>
+<li>vertical tab <code>&quot;\v&quot;</code></li>
+<li>form feed <code>&quot;\f&quot;</code></li>
+</ul>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         string to trim
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        a whitespace trimmed string
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> trimmed = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.trim(<span class="string">"  hello world  "</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "encode_json"></a>
+    <strong>encode_json (value)</strong>
+    </dt>
+    <dd>
+    JSON encode value.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">any</span></span>
+         value to json encode
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        json encoded value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> json = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.encode_json({ hello = <span class="string">"world"</span> })</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "decode_json"></a>
+    <strong>decode_json (value)</strong>
+    </dt>
+    <dd>
+    JSON decode value.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         string to json decode
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">any</span></span>
+        json decoded value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> tbl = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.decode_json(<span class="string">'{ "hello": "world" }'</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "encode_base64url"></a>
+    <strong>encode_base64url (value)</strong>
+    </dt>
+    <dd>
+    Base64 URL encode value.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         string to base64 url encode
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        base64 url encoded value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> encoded = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.encode_base64url(<span class="string">"test"</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "decode_base64url"></a>
+    <strong>decode_base64url (value)</strong>
+    </dt>
+    <dd>
+    Base64 URL decode value
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         string to base64 url decode
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        base64 url decoded value
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
+<span class="keyword">local</span> encoded = utils.encode_base64url(<span class="string">"test"</span>)
+<span class="keyword">local</span> decoded = utils.decode_base64url(encoded)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "base64_size"></a>
+    <strong>base64_size (size)</strong>
+    </dt>
+    <dd>
+    Base64 size from original size (without padding).
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">size</span>
+            <span class="types"><span class="type">number</span></span>
+         original size
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        base64 url encoded size without padding
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> test = <span class="string">"test"</span>
+<span class="keyword">local</span> b64len = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.base64_size(#test)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "deflate"></a>
+    <strong>deflate (data)</strong>
+    </dt>
+    <dd>
+    Compress the data with deflate algorithm.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">data</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         data to deflate
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        deflated data
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> test = <span class="string">"test"</span>
+<span class="keyword">local</span> deflated = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.deflate((<span class="string">"a"</span>):rep(<span class="number">100</span>))</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "inflate"></a>
+    <strong>inflate (data)</strong>
+    </dt>
+    <dd>
+    Decompress the data compressed with deflate algorithm.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">data</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         data to inflate
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        inflated data
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
+<span class="keyword">local</span> deflated = utils.deflate((<span class="string">"a"</span>):rep(<span class="number">100</span>))
+<span class="keyword">local</span> inflated = utils.inflate(deflated)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "rand_bytes"></a>
+    <strong>rand_bytes (length)</strong>
+    </dt>
+    <dd>
+    Generate crypto random bytes.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">length</span>
+            <span class="types"><span class="type">number</span></span>
+         how many bytes of random data to generate
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        random bytes</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        error message</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> bytes = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.rand_bytes(<span class="number">32</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "sha256"></a>
+    <strong>sha256 (value)</strong>
+    </dt>
+    <dd>
+    Calculates SHA-256 hash of the value.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         value from which to calculate hash
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        sha-256 hash (32 bytes)</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        error message</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> hash, err = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.sha256(<span class="string">"hello world"</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "derive_hkdf_sha256"></a>
+    <strong>derive_hkdf_sha256 (ikm, nonce, usage, size)</strong>
+    </dt>
+    <dd>
+    Derive a new key using HKDF with SHA-256.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">ikm</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         initial key material
+        </li>
+        <li><span class="parameter">nonce</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         nonce
+        </li>
+        <li><span class="parameter">usage</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         e.g. <code>&quot;encryption&quot;</code> or <code>&quot;authentication&quot;</code>
+        </li>
+        <li><span class="parameter">size</span>
+            <span class="types"><span class="type">number</span></span>
+         how many bytes to return
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        key material</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        error message</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
+<span class="keyword">local</span> ikm = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> nonce = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> key, err = utils.derive_hkdf_sha256(ikm, nonce, <span class="string">"encryption"</span>, <span class="number">32</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "derive_pbkdf2_hmac_sha256"></a>
+    <strong>derive_pbkdf2_hmac_sha256 (pass, salt, usage, size, iterations)</strong>
+    </dt>
+    <dd>
+    Derive a new key using PBKDF2 with SHA-256.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">pass</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         password
+        </li>
+        <li><span class="parameter">salt</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         salt
+        </li>
+        <li><span class="parameter">usage</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         e.g. <code>&quot;encryption&quot;</code> or <code>&quot;authentication&quot;</code>
+        </li>
+        <li><span class="parameter">size</span>
+            <span class="types"><span class="type">number</span></span>
+         how many bytes to return
+        </li>
+        <li><span class="parameter">iterations</span>
+            <span class="types"><span class="type">number</span></span>
+         how many iterations to run, e.g. <code>10000</code>
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        key material</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        error message</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
+<span class="keyword">local</span> pass = <span class="string">"my-super-secret-password"</span>
+<span class="keyword">local</span> salt = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> key, err = utils.derive_pbkdf2_hmac_sha256(pass, salt, <span class="string">"encryption"</span>, <span class="number">32</span>, <span class="number">10000</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "derive_aes_gcm_256_key_and_iv"></a>
+    <strong>derive_aes_gcm_256_key_and_iv (ikm, nonce[, safety])</strong>
+    </dt>
+    <dd>
+    Derive a new AES-256 GCM-mode key and initialization vector. </p>
+
+<p> Safety can be:
+ <em> <code>nil</code> or <code>&quot;None&quot;</code>: key and iv will be derived using HKDF with SHA-256, except on FIPS-mode uses PBKDF2 with SHA-256 (single iteration)
+ </em> <code>Low</code>: key and iv will be derived using PBKDF2 with SHA-256 (1.000 iterations)
+ <em> <code>Medium</code>: key and iv will be derived using PBKDF2 with SHA-256 (10.000 iterations)
+ </em> <code>High</code>: key and iv will be derived using PBKDF2 with SHA-256 (100.000 iterations)
+ * <code>Very High</code>: key and iv will be derived using PBKDF2 with SHA-256 (1.000.000 iterations)
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">ikm</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         initial key material
+        </li>
+        <li><span class="parameter">nonce</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         nonce
+        </li>
+        <li><span class="parameter">safety</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         safety of key generation
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        key</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        error message</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        initialization vector</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
+<span class="keyword">local</span> ikm = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> nonce = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> key, err, iv = utils.derive_aes_gcm_256_key_and_iv(ikm, nonce, <span class="string">"Medium"</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "derive_hmac_sha256_key"></a>
+    <strong>derive_hmac_sha256_key (ikm, nonce)</strong>
+    </dt>
+    <dd>
+    Derive HMAC SHA-256 key for message authentication using HDKF with SHA-256,
+ except on FIPS-mode it uses PBKDF2 with SHA-256 (single iteration).
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">ikm</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         initial key material
+        </li>
+        <li><span class="parameter">nonce</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         nonce
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        key</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        error message</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
+<span class="keyword">local</span> ikm = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> nonce = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> key, err = utils.derive_hmac_sha256_key(ikm, nonce)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "encrypt_aes_256_gcm"></a>
+    <strong>encrypt_aes_256_gcm (key, iv, plaintext, aad)</strong>
+    </dt>
+    <dd>
+    Encrypt plain text using AES-256 in GCM-mode.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">key</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         encryption key
+        </li>
+        <li><span class="parameter">iv</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         initialization vector
+        </li>
+        <li><span class="parameter">plaintext</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         plain text
+        </li>
+        <li><span class="parameter">aad</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         additional authenticated data
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        ciphertext</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        error message</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        authentication tag</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
+<span class="keyword">local</span> ikm = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> nonce = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> key, err, iv = utils.derive_aes_gcm_256_key_and_iv(ikm, nonce)
+<span class="keyword">local</span> enc, err, tag = utils.encrypt_aes_256_gcm(key, iv, <span class="string">"hello"</span>, <span class="string">"john@doe.com"</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "decrypt_aes_256_gcm"></a>
+    <strong>decrypt_aes_256_gcm (key, iv, plaintext, aad, tag)</strong>
+    </dt>
+    <dd>
+    Decrypt ciphertext using AES-256 in GCM-mode.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">key</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         encryption key
+        </li>
+        <li><span class="parameter">iv</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         initialization vector
+        </li>
+        <li><span class="parameter">plaintext</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         plain text
+        </li>
+        <li><span class="parameter">aad</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         additional authenticated data
+        </li>
+        <li><span class="parameter">tag</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         authentication tag
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        ciphertext</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        error message</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
+<span class="keyword">local</span> ikm = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> nonce = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> key, err, iv = utils.derive_aes_gcm_256_key_and_iv(ikm, nonce)
+<span class="keyword">local</span> enc, err, tag = utils.encrypt_aes_256_gcm(key, iv, <span class="string">"hello"</span>, <span class="string">"john@doe.com"</span>)
+<span class="keyword">local</span> out, err = utils.decrypt_aes_256_gcm(key, iv, ciphertext, <span class="string">"john@doe.com"</span>, tag)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "hmac_sha256"></a>
+    <strong>hmac_sha256 (key, value)</strong>
+    </dt>
+    <dd>
+    Calculate message authentication code with HMAC with SHA-256.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">key</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         key
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         value
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        message authentication code (32 bytes)</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        error message</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
+<span class="keyword">local</span> ikm = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> nonce = utils.rand_bytes(<span class="number">32</span>)
+<span class="keyword">local</span> key, err = utils.derive_hmac_sha256_key(ikm, nonce)
+<span class="keyword">local</span> mac, err = utils.hmac_sha256(key, <span class="string">"hello"</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "load_storage"></a>
+    <strong>load_storage (storage[, configuration])</strong>
+    </dt>
+    <dd>
+    Loads session storage and creates a new instance using session configuration.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">storage</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         name of the storage to load
+        </li>
+        <li><span class="parameter">configuration</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         session configuration
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a> or <span class="type">nil</span></span>
+        instance of session storage</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+        error message</li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> postgres = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.load_storage(<span class="string">"postgres"</span>, {
+  postgres = {
+    host = <span class="string">"127.0.0.1"</span>,
+  }
+})</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "errmsg"></a>
+    <strong>errmsg ([err], msg, ...)</strong>
+    </dt>
+    <dd>
+    Helper to format error messages.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">err</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+         a possible error coming from underlying library
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">msg</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+         error message
+        </li>
+        <li><span class="parameter">...</span>
+            <span class="types"><span class="type">any</span></span>
+         arguments for formatting the msg
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        formatted error message
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
+<span class="keyword">local</span> test = <span class="string">"aaaa"</span>
+<span class="keyword">local</span> data, err = utils.deflate(test)
+<span class="keyword">if</span> <span class="keyword">not</span> data <span class="keyword">then</span>
+  <span class="global">print</span>(utils.errmsg(err, <span class="string">"unable to deflate data '%s'"</span>, test)
+<span class="keyword">end</span></pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "get_name"></a>
+    <strong>get_name (storage, name, key, subject)</strong>
+    </dt>
+    <dd>
+    Helper to create a delimited key.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">storage</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         a storage implementation
+        </li>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         name
+        </li>
+        <li><span class="parameter">key</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         key
+        </li>
+        <li><span class="parameter">subject</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         subject
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        formatted and delimited name
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "set_flag"></a>
+    <strong>set_flag (flags, flag)</strong>
+    </dt>
+    <dd>
+    Helper to turn on a flag.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">flags</span>
+            <span class="types"><span class="type">number</span></span>
+         flags on which the flag is applied
+        </li>
+        <li><span class="parameter">flag</span>
+            <span class="types"><span class="type">number</span></span>
+         flag that is applied
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        flags with the flag applied
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> flags = <span class="number">0x0000</span>
+<span class="keyword">local</span> FLAG_DOG = <span class="number">0x001</span>
+flags = utils.set_flag(flags, FLAG_DOG)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "unset_flag"></a>
+    <strong>unset_flag (flags, flag)</strong>
+    </dt>
+    <dd>
+    Helper to turn off a flag.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">flags</span>
+            <span class="types"><span class="type">number</span></span>
+         flags on which the flag is removed
+        </li>
+        <li><span class="parameter">flag</span>
+            <span class="types"><span class="type">number</span></span>
+         flag that is removed
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        flags with the flag removed
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> options = <span class="number">0x0000</span>
+<span class="keyword">local</span> FLAG_DOG = <span class="number">0x001</span>
+flags = utils.set_flag(options, FLAG_DOG)
+flags = utils.unset_flag(options, FLAG_DOG)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "has_flag"></a>
+    <strong>has_flag (flags, flag)</strong>
+    </dt>
+    <dd>
+    Helper to check if flag is enabled.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">flags</span>
+            <span class="types"><span class="type">number</span></span>
+         flags on which the flag is checked
+        </li>
+        <li><span class="parameter">flag</span>
+            <span class="types"><span class="type">number</span></span>
+         flag that is checked
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        true if flag has is present, otherwise false
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> flags = <span class="number">0x0000</span>
+<span class="keyword">local</span> FLAG_DOG = <span class="number">0x001</span>
+<span class="keyword">local</span> FLAG_BONE = <span class="number">0x010</span>
+flags = utils.set_flag(flags, FLAG_DOG)
+flags = utils.set_flag(flags, FLAG_BONE)
+<span class="global">print</span>(utils.has_flag(flags, FLAG_BONE)</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "meta_get_value"></a>
+    <strong>meta_get_value (key, exp)</strong>
+    </dt>
+    <dd>
+    Helper to get the value used to store metadata for a certain aud and sub
+ Empty exp means the session id has been invalidated
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">key</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         storage key
+        </li>
+        <li><span class="parameter">exp</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         expiration
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        the value to store in the metadata collection
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "meta_get_next"></a>
+    <strong>meta_get_next (val, index)</strong>
+    </dt>
+    <dd>
+    Function to extract the next key and exp from a serialized
+ metadata list, starting from index
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">val</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         list of key:exp;
+        </li>
+        <li><span class="parameter">index</span>
+            <span class="types"><span class="type">number</span></span>
+         start index
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">key</span></span>
+        string session id</li>
+        <li>
+           <span class="types"><span class="type">err</span></span>
+        string error</li>
+        <li>
+           <span class="types"><span class="type">exp</span></span>
+        number expiration</li>
+        <li>
+           <span class="types"><span class="type">index</span></span>
+        number|nil index of the cursor</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "meta_get_latest"></a>
+    <strong>meta_get_latest (sessions)</strong>
+    </dt>
+    <dd>
+    Function to filter out the latest valid key:exp from a
+ serialized list, used to store session metadata
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">sessions</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         list of key:exp;
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        valid sessions and their exp
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-02-15 16:31:40 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

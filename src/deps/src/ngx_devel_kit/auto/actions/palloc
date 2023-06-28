@@ -1,0 +1,8 @@
+
+palloc              (p,pl,sz)       p = %1%_palloc (pl,sz);    if (p == NULL) %A%
+pallocp             (p,pl)          %2%_pallocp (p,pl);        if (p == NULL) %A%
+pallocpn            (p,pl,n)        %2%_pallocpn (p,pl,n);     if (p == NULL) %A%
+pcalloc             (p,pl,sz)       p = %1%_pcalloc (pl,sz);   if (p == NULL) %A%
+pcallocp            (p,pl)          %2%_pcallocp (p,pl);       if (p == NULL) %A%
+pcallocpn           (p,pl,n)        %2%_pcallocpn (p,pl,n);    if (p == NULL) %A%
+

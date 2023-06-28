@@ -1,0 +1,36 @@
+name: unit_tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        luaVersion: ["luajit-openresty"]
+    
+    services:
+      redis:
+        image: bitnami/redis
+        env:
+          REDIS_PASSWORD: password
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      memcached:
+        image: memcached
+        ports:
+          - 11211:11211
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup environment
+        run: docker build dev/ -t resty-session
+
+      - name: Run tests
+        run: docker run --network=host -v $PWD:/test -w /test resty-session bash -c "luarocks make && make unit"

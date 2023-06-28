@@ -1,0 +1,46 @@
+# required for http2 support in curl.
+dist: bionic
+language: c
+sudo: false
+matrix:
+  include:
+    # unfortunately, gcc-4.9 is dropped in bionic
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env:
+         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+
+script:
+- script/.travis-compile.sh
+- script/.travis-before-test.sh
+- script/.travis-test.sh
+after_success:
+- killall nginx
+after_failure:
+- killall nginx
+
