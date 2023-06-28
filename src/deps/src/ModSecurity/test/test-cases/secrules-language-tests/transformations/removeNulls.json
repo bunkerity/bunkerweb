@@ -1,0 +1,58 @@
+[
+   {
+      "input" : "",
+      "type" : "tfn",
+      "name" : "removeNulls",
+      "ret" : 0,
+      "output" : ""
+   },
+   {
+      "ret" : 0,
+      "input" : "TestCase",
+      "type" : "tfn",
+      "name" : "removeNulls",
+      "output" : "TestCase"
+   },
+   {
+      "output" : "Test\\u0001Case",
+      "input" : "Test\\u0001Case",
+      "type" : "tfn",
+      "name" : "removeNulls",
+      "ret" : 0
+   },
+   {
+      "input" : "\\x00TestCase",
+      "type" : "tfn",
+      "name" : "removeNulls",
+      "ret" : 1,
+      "output" : "TestCase"
+   },
+   {
+      "output" : "TestCase",
+      "ret" : 1,
+      "input" : "Test\\x00Case",
+      "name" : "removeNulls",
+      "type" : "tfn"
+   },
+   {
+      "input" : "Test\\x00\\x00Case",
+      "type" : "tfn",
+      "name" : "removeNulls",
+      "ret" : 1,
+      "output" : "TestCase"
+   },
+   {
+      "output" : "TestCase",
+      "ret" : 1,
+      "input" : "TestCase\\x00",
+      "name" : "removeNulls",
+      "type" : "tfn"
+   },
+   {
+      "output" : "TestCase",
+      "type" : "tfn",
+      "input" : "\\x00Test\\x00Case\\x00",
+      "name" : "removeNulls",
+      "ret" : 1
+   }
+]

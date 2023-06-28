@@ -1,0 +1,6 @@
+#!/bin/sh
+echo Content-type: text/plain
+echo
+
+cat > /tmp/luasocket.cat.tmp
+cat /tmp/luasocket.cat.tmp

@@ -1,0 +1,28 @@
+1..8
+ok 1 - Same array different address
+ok 2 - Array must be equal to itself
+not ok 3 - Arrays with different contents
+#   Failed test 'Arrays with different contents'
+#   at t/cmp_mem.c line 12.
+#     Difference starts at offset 0
+#          got: 0x00
+#     expected: 0xff
+not ok 4 - Arrays differ, but start the same
+#   Failed test 'Arrays differ, but start the same'
+#   at t/cmp_mem.c line 13.
+#     Difference starts at offset 2
+#          got: 0x00
+#     expected: 0xff
+ok 5 - Comparing 0 bytes of different arrays
+not ok 6 - got == NULL
+#   Failed test 'got == NULL'
+#   at t/cmp_mem.c line 15.
+#          got: NULL
+#     expected: not NULL
+not ok 7 - expected == NULL
+#   Failed test 'expected == NULL'
+#   at t/cmp_mem.c line 16.
+#          got: not NULL
+#     expected: NULL
+ok 8 - got == expected == NULL
+# Looks like you failed 4 tests of 8 run.

@@ -1,0 +1,45 @@
+[
+   {
+      "name" : "cmd_line",
+      "input" : "",
+      "type" : "tfn",
+      "ret" : 0,
+      "output" : ""
+   },
+   {
+      "name" : "cmd_line",
+      "input" : "test",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "test"
+   },
+   {
+      "name" : "cmd_line",
+      "input" : "C^OMMAND /C DIR",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "command/c dir"
+   },
+   {
+      "name" : "cmd_line",
+      "input" : "C^oMMaNd /C DiR",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "command/c dir"
+   },
+   {
+      "name" : "cmd_line",
+      "input" : "cmd,/c DiR",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "cmd/c dir"
+   },
+   {
+      "name" : "cmd_line",
+      "input" : "\"command\" /c DiR",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "command/c dir"
+   }
+
+]

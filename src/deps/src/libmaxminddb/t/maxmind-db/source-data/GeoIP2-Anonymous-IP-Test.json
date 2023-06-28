@@ -1,0 +1,32 @@
+[
+   {
+      "::1.2.0.0/112" : {
+         "is_anonymous" : true,
+         "is_anonymous_vpn" : true
+      }
+   },
+   {
+      "::71.160.223.0/120" : {
+         "is_anonymous" : true,
+         "is_hosting_provider" : true
+      }
+   },
+   {
+      "::186.30.236.0/120" : {
+         "is_anonymous" : true,
+         "is_public_proxy" : true
+      }
+   },
+   {
+      "::65.0.0.0/109" : {
+         "is_anonymous" : true,
+         "is_tor_exit_node" : true
+      }
+   },
+   {
+      "abcd:1000::/112" : {
+         "is_anonymous" : true,
+         "is_public_proxy" : true
+      }
+   }
+]

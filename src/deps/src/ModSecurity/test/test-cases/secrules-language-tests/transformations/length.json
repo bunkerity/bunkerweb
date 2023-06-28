@@ -1,0 +1,30 @@
+[
+   {
+      "output" : "0",
+      "input" : "",
+      "type" : "tfn",
+      "name" : "length",
+      "ret" : 1
+   },
+   {
+      "output" : "16",
+      "ret" : 1,
+      "input" : "0123456789abcdef",
+      "type" : "tfn",
+      "name" : "length"
+   },
+   {
+      "ret" : 1,
+      "input" : "0123456789\tabcdef",
+      "name" : "length",
+      "type" : "tfn",
+      "output" : "17"
+   },
+   {
+      "output" : "9",
+      "input" : "Test\\u0000Case",
+      "type" : "tfn",
+      "name" : "length",
+      "ret" : 1
+   }
+]

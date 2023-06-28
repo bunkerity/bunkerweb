@@ -1,0 +1,37 @@
+[
+   {
+      "param" : "TestCase",
+      "input" : "",
+      "name" : "strmatch",
+      "type" : "op",
+      "ret" : 0
+   },
+   {
+      "type" : "op",
+      "ret" : 1,
+      "name" : "strmatch",
+      "input" : "abcdefghi",
+      "param" : "abc"
+   },
+   {
+      "param" : "def",
+      "input" : "abcdefghi",
+      "type" : "op",
+      "ret" : 1,
+      "name" : "strmatch"
+   },
+   {
+      "input" : "abcdefghi",
+      "param" : "ghi",
+      "type" : "op",
+      "ret" : 1,
+      "name" : "strmatch"
+   },
+   {
+      "input" : "abcdefghi",
+      "param" : "ghij",
+      "name" : "strmatch",
+      "ret" : 0,
+      "type" : "op"
+   }
+]

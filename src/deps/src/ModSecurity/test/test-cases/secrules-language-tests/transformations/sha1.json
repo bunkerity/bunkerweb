@@ -1,0 +1,23 @@
+[
+   {
+      "type" : "tfn",
+      "input" : "",
+      "name" : "sha1",
+      "ret" : 1,
+      "output" : "\\xda\\x39\\xa3\\xee\\x5e\\x6b\\x4b\\x0d\\x32\\x55\\xbf\\xef\\x95\\x60\\x18\\x90\\xaf\\xd8\\x07\\x09"
+   },
+   {
+      "type" : "tfn",
+      "input" : "TestCase",
+      "name" : "sha1",
+      "ret" : 1,
+      "output" : "\\xa7\\x0c\\xe3\\x83\\x89\\xe3\\x18\\xbd\\x2b\\xe1\\x8a\\x01\\x11\\xc6\\xdc\\x76\\xbd\\x2c\\xd9\\xed"
+   },
+   {
+      "type" : "tfn",
+      "input" : "\\x00\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08",
+      "name" : "sha1",
+      "ret" : 1,
+      "output" : "\\x63\\xbf\\x60\\xc7\\x10\\x5a\\x07\\xa2\\xb1\\x25\\xbb\\xf8\\x9e\\x61\\xab\\xda\\xbc\\x69\\x78\\xc2"
+   }
+]

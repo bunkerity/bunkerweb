@@ -1,0 +1,67 @@
+[
+
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"multipart parser (final CRLF)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=---------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+               "-----------------------------69343412719991675451336310646",
+               "Content-Disposition: form-data; name=\"a\"\r",
+               "\r",
+               "1\r",
+               "1.1\r",
+               "1.2\r",
+               "1.3\r",
+               "-----------------------------69343412719991675451336310646",
+               "Content-Disposition: form-data; name=\"b\"\r",
+               "\r",
+               "2\r",
+               "2.1\r",
+               "2.2\r",
+               "2.3\r",
+               "-----------------------------69343412719991675451336310646--"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Adding request argument \\(BODY\\): name \"b\", value \"22.12.22.3\"",
+      "http_code":403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule MULTIPART_STRICT_ERROR \"@eq 1\" \"phase:2,deny,id:500055\"",
+        "SecRule MULTIPART_UNMATCHED_BOUNDARY \"@eq 1\" \"phase:2,deny,id:500056\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,id:500057\"",
+        "SecRule ARGS_POST \"@eq 1231\" \"phase:2,deny,id:500067\""
+    ]
+  }
+]

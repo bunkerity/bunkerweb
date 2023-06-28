@@ -1,0 +1,14 @@
+[
+   {
+      "::5.83.124.0/118" : {
+         "average_income" : 32323,
+         "population_density" : 1232
+      }
+   },
+   {
+      "::216.160.83.0/120" : {
+         "average_income" : 24626,
+         "population_density" : 1341
+      }
+   }
+]

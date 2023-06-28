@@ -1,0 +1,32 @@
+[
+   {
+      "param" : "\\d{3}-?\\d{2}-?\\d{4}",
+      "input" : "574-57-8065",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "verifyssn"
+   },
+   {
+      "param" : "\\d{3}-?\\d{2}-?\\d{4}",
+      "input" : "asdf 574-57-8065 asdf",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "verifyssn"
+   },
+   {
+      "param" : "\\d{3}-?\\d{2}-?\\d{4}",
+      "input" : "asdf 800-57-8065 asdf",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "verifyssn"
+   },
+   {
+      "param" : "\\d{3}-?\\d{2}-?\\d{4}",
+      "input" : "asdf 123-45-6789 asdf",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "verifyssn"
+   }
+
+
+]

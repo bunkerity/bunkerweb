@@ -1,0 +1,272 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecRuleUpdateActionById (1/n)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"application/lhebs",
+        "Expect":"100-continue"
+      },
+      "uri":"/a=urlencoded?param1=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 200,
+      "debug_log": "Skipped rule id '200005'"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRuleUpdateActionById 200004 \"allow\"",
+        "SecRule ARGS \"@contains value1\" \"phase:3,id:200004,deny\"",
+        "SecRule ARGS \"@contains value1\" \"phase:3,id:200005,log\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecRuleUpdateActionById (2/n)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"application/lhebs",
+        "Expect":"100-continue"
+      },
+      "uri":"/a=urlencoded?param1=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule ARGS \"@contains value1\" \"phase:3,id:200004,deny\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecRuleUpdateActionById (3/n)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"application/lhebs",
+        "Expect":"100-continue"
+      },
+      "uri":"/a=urlencoded?param1=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 200,
+      "debug_log": "Running action: log"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRuleUpdateActionById 200004 \"pass\"",
+        "SecRule ARGS \"@contains value1\" \"phase:3,id:200004,deny\"",
+        "SecRule ARGS \"@contains value1\" \"phase:3,id:200005,log\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecRuleUpdateActionById (4/n)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"application/lhebs",
+        "Expect":"100-continue"
+      },
+      "uri":"/a=urlencoded?param1=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 200,
+      "debug_log": "Running action: log"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRuleUpdateActionById 200004 \"pass\"",
+        "SecDefaultAction \"phase:3,deny\"",
+        "SecRule ARGS \"@contains value1\" \"phase:3,id:200004,block\"",
+        "SecRule ARGS \"@contains value1\" \"phase:3,id:200005,log\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecRuleUpdateActionById (5/n)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"application/lhebs",
+        "Expect":"100-continue"
+      },
+      "uri":"/a=urlencoded?param1=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 200,
+      "debug_log": "Dropping the evaluation of upcoming rules in favor of"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRuleUpdateActionById 200004 \"allow\"",
+        "SecDefaultAction \"phase:3,deny\"",
+        "SecRule ARGS \"@contains value1\" \"phase:3,id:200004,block\"",
+        "SecRule ARGS \"@contains value1\" \"phase:3,id:200005,log\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecRuleUpdateActionById (6/n)",
+    "issue":"2005",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"application/lhebs",
+        "Expect":"100-continue"
+      },
+      "uri":"/a=urlencoded?param1=value1",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 302,
+      "error_log": "Access denied with code 302"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRuleUpdateActionById 200004 \"redirect:'https://%{request_headers.host}/'\"",
+        "SecRule ARGS \"@contains value1\" \"phase:3,id:200004,block,deny\""
+    ]
+  }
+]
+

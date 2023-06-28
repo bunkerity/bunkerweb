@@ -1,0 +1,62 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  luacheck:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: leafo/gh-actions-lua@v8
+      with:
+        luaVersion: "luajit-openresty"
+    - uses: leafo/gh-actions-luarocks@v4
+    - run: luarocks install luacheck
+    - run: luacheck lib
+
+  run_tests:
+    strategy:
+      matrix:
+        openresty_version:
+          - 1.17.8.2
+          - 1.19.9.1
+
+    runs-on: ubuntu-latest
+    container:
+      image: openresty/openresty:${{ matrix.openresty_version }}-alpine-fat
+      # --init runs tinit as PID 1 and prevents the 'WARNING: killing the child process' spam from the test suite
+      options: --init
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install deps
+      run: |
+        apk add --no-cache curl perl bash wget git perl-dev libarchive-tools nodejs
+        ln -s /usr/bin/bsdtar /usr/bin/tar
+
+    - name: Install CPAN
+      run: curl -s -L http://xrl.us/cpanm > /bin/cpanm && chmod +x /bin/cpanm
+
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cpan
+          ~/.cache
+        key: ${{ runner.os }}-${{ matrix.openresty_version }}-cache
+
+    - name: Install Test::Nginx
+      run: cpanm -q -n Test::Nginx
+
+    - name: Install Luacov
+      run: /usr/local/openresty/luajit/bin/luarocks install luacov
+
+    - uses: actions/checkout@v2
+
+    - name: Run tests
+      run: make coverage
+
+    - name: Coverage
+      run: |
+        luacov
+        tail -n 8 luacov.report.out

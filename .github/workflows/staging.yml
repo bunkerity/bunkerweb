@@ -7,6 +7,7 @@ on:
     branches: [staging]
 
 jobs:
+
   # Build Docker images
   build-containers:
     strategy:
@@ -76,8 +77,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
@@ -136,8 +135,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
       - id: set-matrix
         run: |
           tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')

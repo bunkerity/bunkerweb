@@ -1,0 +1,44 @@
+[
+   {
+      "ret" : 0,
+      "input" : "",
+      "type" : "tfn",
+      "name" : "base64DecodeExt",
+      "output" : ""
+   },
+   {
+      "output" : "TestCase",
+      "ret" : 1,
+      "name" : "base64DecodeExt",
+      "input" : "VGVzdENhc2U=",
+      "type" : "tfn"
+   },
+   {
+      "output" : "TestCase1",
+      "name" : "base64DecodeExt",
+      "input" : "VGVzdENhc2Ux",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "ret" : 1,
+      "input" : "VGVzdENhc2UxMg==",
+      "name" : "base64DecodeExt",
+      "type" : "tfn",
+      "output" : "TestCase12"
+   },
+   {
+      "ret" : 1,
+      "input" : "P.HNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==",
+      "name" : "base64DecodeExt",
+      "type" : "tfn",
+      "output" : "<script>alert(1)</script>"
+   },
+   {
+      "output" : "Test\\u0000Case",
+      "input" : "VGVzdABDYXNl",
+      "name" : "base64DecodeExt",
+      "type" : "tfn",
+      "ret" : 1
+   }
+]

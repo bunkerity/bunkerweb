@@ -18,8 +18,6 @@ jobs:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
       - name: Install terraform
         uses: hashicorp/setup-terraform@v2
       - uses: actions/download-artifact@v3

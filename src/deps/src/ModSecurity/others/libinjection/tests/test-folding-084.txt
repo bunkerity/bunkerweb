@@ -1,0 +1,9 @@
+--TEST--
+folding with variables
+--INPUT--
+@version + 1
+--EXPECTED--
+v @version
+
+
+

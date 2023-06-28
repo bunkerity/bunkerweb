@@ -1,0 +1,7 @@
+--TEST--
+sqli test for code coverage, sinle quotes, not sqli
+--INPUT--
+1' INCH
+--EXPECTED--
+
+

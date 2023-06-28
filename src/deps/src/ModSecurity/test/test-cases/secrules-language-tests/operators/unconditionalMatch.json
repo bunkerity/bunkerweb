@@ -1,0 +1,23 @@
+[
+   {
+      "input" : "",
+      "param" : "",
+      "name" : "unconditionalMatch",
+      "ret" : 1,
+      "type" : "op"
+   },
+   {
+      "name" : "unconditionalMatch",
+      "type" : "op",
+      "ret" : 1,
+      "input" : "",
+      "param" : "TestCase"
+   },
+   {
+      "ret" : 1,
+      "type" : "op",
+      "name" : "unconditionalMatch",
+      "input" : "TestCase",
+      "param" : ""
+   }
+]

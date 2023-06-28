@@ -1,0 +1,9 @@
+--TEST--
+doctype, lowercase
+--INPUT--
+<!doctype>
+--EXPECTED--
+DOCTYPE,7,doctype
+
+
+

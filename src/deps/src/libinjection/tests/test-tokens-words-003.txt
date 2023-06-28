@@ -1,0 +1,11 @@
+--TEST--
+keyword parsing
+--INPUT--
+SELECT 1 IN BOOLEAN MODE;
+--EXPECTED--
+E SELECT
+1 1
+k IN
+t BOOLEAN
+n MODE
+; ;

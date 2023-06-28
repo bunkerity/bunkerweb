@@ -1,0 +1,37 @@
+#!/usr/bin/env stap
+
+global begin_rule
+global rules
+global rules_phase
+
+
+# Rules
+probe process("/usr/local/lib/libmodsecurity.so.3").function("evaluate@rule.cc*")
+{
+    begin_rule = gettimeofday_us();
+}
+
+probe process("/usr/local/lib/libmodsecurity.so.3").function("evaluate@rule.cc*").return
+{
+    elapsed_rule = gettimeofday_us() - begin_rule
+    rules[$this->m_ruleId] <<< elapsed_rule
+    rules_phase[$this->m_ruleId] = $this->m_phase
+}
+
+
+# Resume
+probe end
+{
+    foreach ([rule] in rules)
+    {
+        if (@count(rules[rule])) {
+            p = rules_phase[rule] - 1;
+            if (p <= 0) {
+              p = 1
+            }
+            printf("Phase %d;Rule ID: %d %u\n", p, rule, @avg(rules[rule]));
+        }
+    }   
+}
+
+

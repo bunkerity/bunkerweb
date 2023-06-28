@@ -1,0 +1,11 @@
+--TEST--
+repeated semi colons
+--INPUT--
+1; /* foo */; select 2;
+--EXPECTED--
+1 1
+; ;
+E select
+1 2
+; ;
+

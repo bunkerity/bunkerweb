@@ -1,0 +1,226 @@
+[
+   {
+      "name" : "validateUtf8Encoding",
+      "type" : "op",
+      "ret" : 0,
+      "input" : "",
+      "param" : ""
+   },
+   {
+      "name" : "validateUtf8Encoding",
+      "ret" : 0,
+      "type" : "op",
+      "input" : "á½Î±Î»Î¿Î½ ÏÎ±Î³Îµá¿Î½ Î´á½»Î½Î±Î¼Î±Î¹Î ÏÎ¿á¿¦ÏÎ¿ Î¿á½ Î¼Îµ Î²Î»á½±ÏÏÎµÎ¹.",
+      "param" : ""
+   },
+   {
+      "input" : "Je peux manger du verre, Ã§a ne me fait pas de mal.",
+      "param" : "",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUtf8Encoding"
+   },
+   {
+      "input" : "Puedo comer vidrio, no me hace daÃ±o.",
+      "param" : "",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUtf8Encoding"
+   },
+   {
+      "param" : "",
+      "input" : "Mi povas manÄi vitron, Äi ne damaÄas min.",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUtf8Encoding"
+   },
+   {
+      "param" : "",
+      "input" : "Ic mÃ¦g glÃ¦s eotan ond hit ne hearmiaÃ° me.",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUtf8Encoding"
+   },
+   {
+      "name" : "validateUtf8Encoding",
+      "type" : "op",
+      "ret" : 0,
+      "input" : "ÐÐ¾Ð³Ñ ÑÐµÑÑÐ¸ ÑÑÐ°ÐºÐ»Ð¾ Ð° Ð´Ð° Ð¼Ð¸ Ð½Ðµ ÑÐºÐ¾Ð´Ð¸.",
+      "param" : ""
+   },
+   {
+      "param" : "",
+      "input" : "Ð¯ Ð¼Ð¾Ð³Ñ ÐµÑÑÑ ÑÑÐµÐºÐ»Ð¾, Ð¾Ð½Ð¾ Ð¼Ð½Ðµ Ð½Ðµ Ð²ÑÐµÐ´Ð¸Ñ.",
+      "name" : "validateUtf8Encoding",
+      "ret" : 0,
+      "type" : "op"
+   },
+   {
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUtf8Encoding",
+      "param" : "",
+      "input" : "Ô¿ÖÕ¶Õ¡Õ´ Õ¡ÕºÕ¡Õ¯Õ« Õ¸ÖÕ¿Õ¥Õ¬ Ö Õ«Õ¶Õ®Õ« Õ¡Õ¶Õ°Õ¡Õ¶Õ£Õ«Õ½Õ¿ Õ¹Õ¨Õ¶Õ¥ÖÖ"
+   },
+   {
+      "name" : "validateUtf8Encoding",
+      "ret" : 0,
+      "type" : "op",
+      "param" : "",
+      "input" : "Ø¬Ø§Ù ÙÙÙ Ø¨ÙÙØ±Ù Ø¨Ú­Ø§ Ø¶Ø±Ø±Ù Ø·ÙÙÙÙÙØ²"
+   },
+   {
+      "input" : "à¤®à¥à¤ à¤à¤¾à¤à¤ à¤à¤¾ à¤¸à¤à¤¤à¤¾ à¤¹à¥à¤, à¤®à¥à¤à¥ à¤à¤¸ à¤¸à¥ à¤à¥à¤ à¤ªà¥à¤¡à¤¾ à¤¨à¤¹à¥à¤ à¤¹à¥à¤¤à¥.",
+      "param" : "",
+      "name" : "validateUtf8Encoding",
+      "ret" : 0,
+      "type" : "op"
+   },
+   {
+      "name" : "validateUtf8Encoding",
+      "type" : "op",
+      "ret" : 0,
+      "param" : "",
+      "input" : "Ø£ÙØ§ ÙØ§Ø¯Ø± Ø¹ÙÙ Ø£ÙÙ Ø§ÙØ²Ø¬Ø§Ø¬ Ù ÙØ°Ø§ ÙØ§ ÙØ¤ÙÙÙÙ."
+   },
+   {
+      "param" : "",
+      "input" : "×× × ×××× ××××× ××××××ª ××× ×× ××××§ ××.",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUtf8Encoding"
+   },
+   {
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUtf8Encoding",
+      "param" : "",
+      "input" : "ç§ã¯ã¬ã©ã¹ãé£ã¹ããã¾ããããã¯ç§ãå·ã¤ãã¾ããã"
+   },
+   {
+      "param" : "",
+      "input" : "à¸à¸±à¸à¸à¸´à¸à¸à¸£à¸°à¸à¸à¹à¸à¹ à¹à¸à¹à¸¡à¸±à¸à¹à¸¡à¹à¸à¸³à¹à¸«à¹à¸à¸±à¸à¹à¸à¹à¸",
+      "type" : "op",
+      "ret" : 0,
+      "name" : "validateUtf8Encoding"
+   },
+   {
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUtf8Encoding",
+      "param" : "",
+      "input" : "ëë ì ë¦¬ë¥¼ ë¨¹ì ì ìì´ì. ê·¸ëë ìíì§ ììì"
+   },
+   {
+      "input" : "TsÃ©sÇ«Ê¼ yishÄÌÄgo bÃ­Ã­nÃ­shghah dÃ³Ã³ doo shiÅ neezgai da.",
+      "param" : "",
+      "name" : "validateUtf8Encoding",
+      "type" : "op",
+      "ret" : 0
+   },
+   {
+      "input" : "Ãg get etiÃ° gler Ã¡n Ã¾ess aÃ° meiÃ°a mig.",
+      "param" : "",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUtf8Encoding"
+   },
+   {
+      "type" : "op",
+      "ret" : 0,
+      "name" : "validateUtf8Encoding",
+      "input" : "à¤à¤¾à¤à¤ à¤¶à¤à¥à¤¨à¥à¤®à¥à¤¯à¤¤à¥à¤¤à¥à¤®à¥ à¥¤ à¤¨à¥à¤ªà¤¹à¤¿à¤¨à¤¸à¥à¤¤à¤¿ à¤®à¤¾à¤®à¥ à¥¥",
+      "param" : ""
+   },
+   {
+      "input" : "â â â â â â â â â â â â â â â â â â â â â â â â â â â â â â â â ¥â â â â â ",
+      "param" : "",
+      "name" : "validateUtf8Encoding",
+      "ret" : 0,
+      "type" : "op"
+   },
+   {
+      "name" : "validateUtf8Encoding",
+      "type" : "op",
+      "ret" : 0,
+      "param" : "",
+      "input" : "Jeg kan spise glas, det gÃ¸r ikke ondt pÃ¥ mig."
+   },
+   {
+      "name" : "validateUtf8Encoding",
+      "ret" : 0,
+      "type" : "op",
+      "param" : "",
+      "input" : "Meg tudom enni az Ã¼veget, nem lesz tÅle bajom."
+   },
+   {
+      "type" : "op",
+      "ret" : 0,
+      "name" : "validateUtf8Encoding",
+      "param" : "",
+      "input" : "Ma vÃµin klaasi sÃ¼Ã¼a, see ei tee mulle midagi."
+   },
+   {
+      "input" : "Mohu jÃ­st sklo, neublÃ­Å¾Ã­ mi.",
+      "param" : "",
+      "type" : "op",
+      "ret" : 0,
+      "name" : "validateUtf8Encoding"
+   },
+   {
+      "param" : "",
+      "input" : "MÃ´Å¾em jesÅ¥ sklo. NezranÃ­ ma.",
+      "name" : "validateUtf8Encoding",
+      "type" : "op",
+      "ret" : 0
+   },
+   {
+      "param" : "",
+      "input" : "MogÄ jeÅÄ szkÅo i mi nie szkodzi.",
+      "type" : "op",
+      "ret" : 0,
+      "name" : "validateUtf8Encoding"
+   },
+   {
+      "param" : "",
+      "input" : "â®Eâda=Qnâââf(i)=âg(i)âxââ:âxâ=âââxâÎ±â§Â¬Î²=Â¬(Â¬Î±â¨Î²)ââââââ¤âââââââ¥<aâ bâ¡câ¤dâªâ¤â(AâB)2Hâ+Oââ2HâOR=4.7kÎ©â200mmââââ'Â´`âââââ â¡â°â¢3â4ââ5/+5â¢â¦1lI|0OD8Bâ¬",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "validateUtf8Encoding"
+   },
+   {
+      "input" : "\\0\\xe4",
+      "param" : "",
+      "name" : "validateUtf8Encoding",
+      "ret" : 1,
+      "type" : "op"
+   },
+   {
+      "name" : "validateUtf8Encoding",
+      "ret" : 1,
+      "type" : "op",
+      "input" : "\\xe4",
+      "param" : ""
+   },
+   {
+      "name" : "validateUtf8Encoding",
+      "type" : "op",
+      "ret" : 1,
+      "input" : "\\x03\\xbf",
+      "param" : ""
+   },
+   {
+      "type" : "op",
+      "ret" : 1,
+      "name" : "validateUtf8Encoding",
+      "input" : "\\xc9\\x3b",
+      "param" : ""
+   },
+   {
+      "name" : "validateUtf8Encoding",
+      "ret" : 1,
+      "type" : "op",
+      "param" : "",
+      "input" : "\\xFF\\0"
+   }
+]

@@ -1,0 +1,9 @@
+*~
+*.swp
+*.swo
+t/servroot*
+/go
+/reindex
+/a.lua
+*.o
+*.so

@@ -1,0 +1,37 @@
+[
+   {
+      "output" : "-Se\\x90)-B~N\\x14\\x82\\x9aE\\xbc\\xfe\\x89",
+      "ret" : 1,
+      "input" : "zimmerle",
+      "type" : "tfn",
+      "name" : "md5"
+   },
+   {
+      "output" : "\\xd4\\x1d\\x8c\\xd9\\x8f\\x00\\xb2\\x04\\xe9\\x80\\x09\\x98\\xec\\xf8B~",
+      "ret" : 1,
+      "input" : "",
+      "type" : "tfn",
+      "name" : "md5"
+   },
+   {
+      "output" : "\\xc16\\x83Y\\xaa)(\\xa50\\xb5\\x00\\x07\\xd1\\xde\\xeaw",
+      "ret" : 1,
+      "input" : "진 마 리",
+      "name" : "md5",
+      "type" : "tfn"
+   },
+   {
+      "output" : "\\xa6\\xe7\\xd3\\xb4o\\xdf\\xaf\\x0b\\xde*\\x1f\\x83*\\x00\\xd2\\xde",
+      "ret" : 1,
+      "input" : "\\x00\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08",
+      "name" : "md5",
+      "type" : "tfn"
+   },
+   {
+      "input" : "TestCase",
+      "type" : "tfn",
+      "name" : "md5",
+      "ret" : 1,
+      "output" : "\\xc9\\xab\\xa2\\xc3\\xe6\\x01&\\x16\\x9e\\x80\\xe9\\xa2k\\xa2s\\xc1"
+   }
+]

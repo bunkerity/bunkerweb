@@ -1,0 +1,219 @@
+[
+   {
+      "output" : "",
+      "input" : "",
+      "name" : "normalisePathWin",
+      "type" : "tfn",
+      "ret" : 0
+   },
+   {
+      "output" : "/foo/bar/baz",
+      "ret" : 1,
+      "name" : "normalisePathWin",
+      "input" : "\\foo\\bar\\baz",
+      "type" : "tfn"
+   },
+   {
+      "type" : "tfn",
+      "input" : "\\foo\\bar\\u0000\\baz",
+      "name" : "normalisePathWin",
+      "ret" : 1,
+      "output" : "/foo/bar\\u0000/baz"
+   },
+   {
+      "output" : "x",
+      "name" : "normalisePathWin",
+      "input" : "x",
+      "type" : "tfn",
+      "ret" : 0
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : ".",
+      "name" : "normalisePathWin",
+      "output" : ""
+   },
+   {
+      "output" : "",
+      "input" : ".\\",
+      "type" : "tfn",
+      "name" : "normalisePathWin",
+      "ret" : 1
+   },
+   {
+      "type" : "tfn",
+      "input" : ".\\..",
+      "name" : "normalisePathWin",
+      "ret" : 1,
+      "output" : ".."
+   },
+   {
+      "name" : "normalisePathWin",
+      "input" : ".\\..\\",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "../"
+   },
+   {
+      "type" : "tfn",
+      "input" : "..",
+      "name" : "normalisePathWin",
+      "ret" : 0,
+      "output" : ".."
+   },
+   {
+      "ret" : 1,
+      "input" : "..\\",
+      "name" : "normalisePathWin",
+      "type" : "tfn",
+      "output" : "../"
+   },
+   {
+      "name" : "normalisePathWin",
+      "input" : "..\\.",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : ".."
+   },
+   {
+      "input" : "..\\.\\",
+      "type" : "tfn",
+      "name" : "normalisePathWin",
+      "ret" : 1,
+      "output" : "../"
+   },
+   {
+      "output" : "../..",
+      "input" : "..\\..",
+      "type" : "tfn",
+      "name" : "normalisePathWin",
+      "ret" : 1
+   },
+   {
+      "ret" : 1,
+      "input" : "..\\..\\",
+      "name" : "normalisePathWin",
+      "type" : "tfn",
+      "output" : "../../"
+   },
+   {
+      "ret" : 1,
+      "name" : "normalisePathWin",
+      "input" : "\\dir\\foo\\\\bar",
+      "type" : "tfn",
+      "output" : "/dir/foo/bar"
+   },
+   {
+      "output" : "dir/foo/bar/",
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "dir\\foo\\\\bar\\",
+      "name" : "normalisePathWin"
+   },
+   {
+      "output" : "foo",
+      "input" : "dir\\..\\foo",
+      "name" : "normalisePathWin",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "type" : "tfn",
+      "input" : "dir\\..\\..\\foo",
+      "name" : "normalisePathWin",
+      "ret" : 1,
+      "output" : "../foo"
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "dir\\.\\..\\.\\..\\..\\foo\\bar",
+      "name" : "normalisePathWin",
+      "output" : "../../foo/bar"
+   },
+   {
+      "output" : "../../foo/bar",
+      "input" : "dir\\.\\..\\.\\..\\..\\foo\\bar\\.",
+      "type" : "tfn",
+      "name" : "normalisePathWin",
+      "ret" : 1
+   },
+   {
+      "input" : "dir\\.\\..\\.\\..\\..\\foo\\bar\\.\\",
+      "type" : "tfn",
+      "name" : "normalisePathWin",
+      "ret" : 1,
+      "output" : "../../foo/bar/"
+   },
+   {
+      "input" : "dir\\.\\..\\.\\..\\..\\foo\\bar\\..",
+      "name" : "normalisePathWin",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "../../foo"
+   },
+   {
+      "ret" : 1,
+      "name" : "normalisePathWin",
+      "input" : "dir\\.\\..\\.\\..\\..\\foo\\bar\\..\\",
+      "type" : "tfn",
+      "output" : "../../foo/"
+   },
+   {
+      "output" : "../../foo/bar/",
+      "input" : "dir\\.\\..\\.\\..\\..\\foo\\bar\\",
+      "name" : "normalisePathWin",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "output" : "../../foo/bar",
+      "input" : "dir\\\\.\\\\..\\\\.\\\\..\\\\..\\\\foo\\\\bar",
+      "name" : "normalisePathWin",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "output" : "../../foo/bar/",
+      "name" : "normalisePathWin",
+      "input" : "dir\\\\.\\\\..\\\\.\\\\..\\\\..\\\\foo\\\\bar\\\\",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "input" : "dir\\subdir\\subsubdir\\subsubsubdir\\..\\..\\..",
+      "type" : "tfn",
+      "name" : "normalisePathWin",
+      "ret" : 1,
+      "output" : "dir"
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "dir\\.\\subdir\\.\\subsubdir\\.\\subsubsubdir\\..\\..\\..",
+      "name" : "normalisePathWin",
+      "output" : "dir"
+   },
+   {
+      "input" : "dir\\.\\subdir\\..\\subsubdir\\..\\subsubsubdir\\..",
+      "name" : "normalisePathWin",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "dir"
+   },
+   {
+      "output" : "/dir/",
+      "ret" : 1,
+      "input" : "\\dir\\.\\subdir\\..\\subsubdir\\..\\subsubsubdir\\..\\",
+      "type" : "tfn",
+      "name" : "normalisePathWin"
+   },
+   {
+      "output" : "/etc/passwd",
+      "ret" : 1,
+      "input" : "\\.\\..\\.\\..\\..\\..\\..\\..\\..\\..\\\\0\\..\\etc\\.\\passwd",
+      "name" : "normalisePathWin",
+      "type" : "tfn"
+   }
+]

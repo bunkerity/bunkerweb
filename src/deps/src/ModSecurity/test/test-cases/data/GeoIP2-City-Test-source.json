@@ -1,0 +1,44 @@
+[
+   {
+      "::200.249.12.31/120" : {
+         "continent" : {
+            "code" : "SA",
+            "geoname_id" : 123,
+            "names" : {
+               "en" : "South America",
+               "pt-BR" : "America do Sul"
+            }
+         },
+         "country" : {
+            "geoname_id" : 123,
+            "iso_code" : "BR",
+            "names" : {
+               "en" : "Brazil",
+               "pt-BR" : "Brasil"
+            }
+         },
+         "location" : {
+            "accuracy_radius" : 100,
+            "latitude" : "-8.051502",
+            "longitude" : "-34.874919"
+         },
+         "registered_country" : {
+            "geoname_id" : 123,
+            "iso_code" : "BR",
+            "names" : {
+               "en" : "Brazil",
+               "pt-BR" : "Brasil"
+            }
+         },
+         "postal": {
+            "code": "50040090"
+         },
+         "city": {
+            "names": {
+                "en": "Recife"
+            }
+         }
+      }
+   }
+]
+

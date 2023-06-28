@@ -1,0 +1,30 @@
+[
+   {
+      "output" : "",
+      "ret" : 0,
+      "input" : "",
+      "type" : "tfn",
+      "name" : "parityZero7bit"
+   },
+   {
+      "output" : "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "ret" : 0,
+      "input" : "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "name" : "parityZero7bit",
+      "type" : "tfn"
+   },
+   {
+      "output" : "abcdefghijklmnopqrstuvwxyz\\u00000123456789\\u0000ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "ret" : 0,
+      "input" : "abcdefghijklmnopqrstuvwxyz\\u00000123456789\\u0000ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      "type" : "tfn",
+      "name" : "parityZero7bit"
+   },
+   {
+      "output" : "B\\x00\\x00B\\x0fC?",
+      "ret" : 1,
+      "input" : "\\u0000ÿ",
+      "type" : "tfn",
+      "name" : "parityZero7bit"
+   }
+]

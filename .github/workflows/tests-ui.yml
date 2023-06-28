@@ -18,8 +18,6 @@ jobs:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
       - name: Login to private repository
         uses: docker/login-action@v2
         with:

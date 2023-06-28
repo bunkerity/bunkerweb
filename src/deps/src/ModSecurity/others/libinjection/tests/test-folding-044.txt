@@ -1,0 +1,10 @@
+--TEST--
+keywords that can be a function
+--INPUT--
+select foobar();
+--EXPECTED--
+E select
+n foobar
+( (
+) )
+; ;

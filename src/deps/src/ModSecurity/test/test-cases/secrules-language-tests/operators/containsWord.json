@@ -1,0 +1,107 @@
+[
+   {
+      "param" : "",
+      "input" : "",
+      "name" : "containsWord",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "param" : "TestCase",
+      "input" : "",
+      "name" : "containsWord",
+      "type" : "op",
+      "ret" : 0
+   },
+   {
+      "type" : "op",
+      "ret" : 1,
+      "name" : "containsWord",
+      "input" : "TestCase",
+      "param" : ""
+   },
+   {
+      "param" : "abc",
+      "input" : "abcdefghi",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "containsWord"
+   },
+   {
+      "param" : "def",
+      "input" : "abcdefghi",
+      "type" : "op",
+      "ret" : 0,
+      "name" : "containsWord"
+   },
+   {
+      "input" : "abcdefghi",
+      "param" : "ghi",
+      "type" : "op",
+      "ret" : 0,
+      "name" : "containsWord"
+   },
+   {
+      "name" : "containsWord",
+      "type" : "op",
+      "ret" : 1,
+      "param" : "abc",
+      "input" : "abc def ghi"
+   },
+   {
+      "name" : "containsWord",
+      "type" : "op",
+      "ret" : 1,
+      "input" : "abc def ghi",
+      "param" : "def"
+   },
+   {
+      "type" : "op",
+      "ret" : 1,
+      "name" : "containsWord",
+      "param" : "ghi",
+      "input" : "abc def ghi"
+   },
+   {
+      "param" : "abc",
+      "input" : "abc\\0def ghi",
+      "name" : "containsWord",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "param" : "def",
+      "input" : "abc\\0def ghi",
+      "name" : "containsWord",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "name" : "containsWord",
+      "ret" : 1,
+      "type" : "op",
+      "input" : "x",
+      "param" : "x"
+   },
+   {
+      "type" : "op",
+      "ret" : 1,
+      "name" : "containsWord",
+      "param" : "x",
+      "input" : " x "
+   },
+   {
+      "input" : "xyz",
+      "param" : "y",
+      "name" : "containsWord",
+      "ret" : 0,
+      "type" : "op"
+   },
+   {
+      "name" : "containsWord",
+      "ret" : 1,
+      "type" : "op",
+      "input" : "hidingX<-not on word boundary, but is later on->hiding",
+      "param" : "hiding"
+   }
+]

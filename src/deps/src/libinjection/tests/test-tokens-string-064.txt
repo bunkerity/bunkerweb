@@ -1,0 +1,11 @@
+--TEST--
+MySQL N-string
+--INPUT--
+select n N;
+--EXPECTED--
+E select
+n n
+n N
+; ;
+
+

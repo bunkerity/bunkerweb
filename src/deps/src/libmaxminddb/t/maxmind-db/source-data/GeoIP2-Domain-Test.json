@@ -1,0 +1,452 @@
+[
+   {
+      "::1.2.0.0/112" : {
+         "domain" : "maxmind.com"
+      }
+   },
+   {
+      "::71.160.223.0/120" : {
+         "domain" : "verizon.net"
+      }
+   },
+   {
+      "::186.30.236.0/120" : {
+         "domain" : "replaced.com"
+      }
+   },
+   {
+      "2a02:2770:3::/64" : {
+         "domain" : "sgotti.org"
+      }
+   },
+   {
+      "2a02:8420:48f4:b000::/64" : {
+         "domain" : "sfr.net"
+      }
+   },
+   {
+      "::142.217.194.0/119" : {
+         "domain" : "telebecinternet.net"
+      }
+   },
+   {
+      "::142.217.196.0/118" : {
+         "domain" : "telebecinternet.net"
+      }
+   },
+   {
+      "::142.217.200.0/117" : {
+         "domain" : "telebecinternet.net"
+      }
+   },
+   {
+      "::142.217.208.0/118" : {
+         "domain" : "telebecinternet.net"
+      }
+   },
+   {
+      "::142.217.212.0/119" : {
+         "domain" : "telebecinternet.net"
+      }
+   },
+   {
+      "::142.217.214.0/120" : {
+         "domain" : "telebecinternet.net"
+      }
+   },
+   {
+      "::208.110.201.0/120" : {
+         "domain" : "comcastbusiness.net"
+      }
+   },
+   {
+      "::208.110.202.0/119" : {
+         "domain" : "comcastbusiness.net"
+      }
+   },
+   {
+      "::208.110.204.0/118" : {
+         "domain" : "comcastbusiness.net"
+      }
+   },
+   {
+      "::208.110.208.0/116" : {
+         "domain" : "comcastbusiness.net"
+      }
+   },
+   {
+      "::222.230.136.0/118" : {
+         "domain" : "gol.ne.jp"
+      }
+   },
+   {
+      "::65.115.240.0/116" : {
+         "domain" : "qwest.net"
+      }
+   },
+   {
+      "::65.116.0.0/118" : {
+         "domain" : "qwest.net"
+      }
+   },
+   {
+      "::65.116.4.0/120" : {
+         "domain" : "qwest.net"
+      }
+   },
+   {
+      "::65.23.96.0/115" : {
+         "domain" : "nuvox.net"
+      }
+   },
+   {
+      "::66.92.78.0/119" : {
+         "domain" : "speakeasy.net"
+      }
+   },
+   {
+      "::66.92.80.0/116" : {
+         "domain" : "speakeasy.net"
+      }
+   },
+   {
+      "::66.92.96.0/115" : {
+         "domain" : "speakeasy.net"
+      }
+   },
+   {
+      "::66.92.128.0/113" : {
+         "domain" : "speakeasy.net"
+      }
+   },
+   {
+      "::66.93.0.0/113" : {
+         "domain" : "speakeasy.net"
+      }
+   },
+   {
+      "::66.93.128.0/114" : {
+         "domain" : "speakeasy.net"
+      }
+   },
+   {
+      "::66.93.192.0/115" : {
+         "domain" : "speakeasy.net"
+      }
+   },
+   {
+      "::66.93.224.0/116" : {
+         "domain" : "speakeasy.net"
+      }
+   },
+   {
+      "::66.93.240.0/117" : {
+         "domain" : "speakeasy.net"
+      }
+   },
+   {
+      "::66.93.248.0/119" : {
+         "domain" : "speakeasy.net"
+      }
+   },
+   {
+      "::67.43.156.0/120" : {
+         "domain" : "shoesfin.NET"
+      }
+   },
+   {
+      "::69.218.198.0/119" : {
+         "domain" : "ameritech.net"
+      }
+   },
+   {
+      "::69.218.200.0/117" : {
+         "domain" : "ameritech.net"
+      }
+   },
+   {
+      "::69.218.208.0/116" : {
+         "domain" : "ameritech.net"
+      }
+   },
+   {
+      "::69.218.224.0/115" : {
+         "domain" : "ameritech.net"
+      }
+   },
+   {
+      "::69.219.0.0/114" : {
+         "domain" : "ameritech.net"
+      }
+   },
+   {
+      "::69.219.64.0/116" : {
+         "domain" : "ameritech.net"
+      }
+   },
+   {
+      "::69.219.80.0/118" : {
+         "domain" : "ameritech.net"
+      }
+   },
+   {
+      "::69.219.84.0/120" : {
+         "domain" : "ameritech.net"
+      }
+   },
+   {
+      "::70.46.0.0/113" : {
+         "domain" : "nuvox.net"
+      }
+   },
+   {
+      "::70.46.128.0/118" : {
+         "domain" : "nuvox.net"
+      }
+   },
+   {
+      "::70.46.132.0/120" : {
+         "domain" : "nuvox.net"
+      }
+   },
+   {
+      "::71.136.2.0/119" : {
+         "domain" : "pacbell.net"
+      }
+   },
+   {
+      "::71.136.4.0/118" : {
+         "domain" : "pacbell.net"
+      }
+   },
+   {
+      "::71.136.8.0/117" : {
+         "domain" : "pacbell.net"
+      }
+   },
+   {
+      "::71.136.16.0/116" : {
+         "domain" : "pacbell.net"
+      }
+   },
+   {
+      "::71.136.32.0/115" : {
+         "domain" : "pacbell.net"
+      }
+   },
+   {
+      "::71.136.64.0/114" : {
+         "domain" : "pacbell.net"
+      }
+   },
+   {
+      "::71.136.128.0/113" : {
+         "domain" : "pacbell.net"
+      }
+   },
+   {
+      "::71.137.0.0/112" : {
+         "domain" : "pacbell.net"
+      }
+   },
+   {
+      "::71.138.0.0/113" : {
+         "domain" : "pacbell.net"
+      }
+   },
+   {
+      "::71.138.128.0/114" : {
+         "domain" : "pacbell.net"
+      }
+   },
+   {
+      "::71.138.192.0/116" : {
+         "domain" : "pacbell.net"
+      }
+   },
+   {
+      "::71.138.208.0/119" : {
+         "domain" : "pacbell.net"
+      }
+   },
+   {
+      "::74.0.88.0/117" : {
+         "domain" : "covad.net"
+      }
+   },
+   {
+      "::74.0.96.0/115" : {
+         "domain" : "covad.net"
+      }
+   },
+   {
+      "::74.0.128.0/113" : {
+         "domain" : "covad.net"
+      }
+   },
+   {
+      "::74.1.0.0/112" : {
+         "domain" : "covad.net"
+      }
+   },
+   {
+      "::74.2.0.0/113" : {
+         "domain" : "covad.net"
+      }
+   },
+   {
+      "::74.2.128.0/115" : {
+         "domain" : "covad.net"
+      }
+   },
+   {
+      "::74.2.160.0/117" : {
+         "domain" : "covad.net"
+      }
+   },
+   {
+      "::74.2.168.0/118" : {
+         "domain" : "covad.net"
+      }
+   },
+   {
+      "::74.2.172.0/119" : {
+         "domain" : "covad.net"
+      }
+   },
+   {
+      "::74.2.174.0/120" : {
+         "domain" : "covad.net"
+      }
+   },
+   {
+      "::75.77.84.0/118" : {
+         "domain" : "nuvox.net"
+      }
+   },
+   {
+      "::75.77.88.0/117" : {
+         "domain" : "nuvox.net"
+      }
+   },
+   {
+      "::75.77.96.0/115" : {
+         "domain" : "nuvox.net"
+      }
+   },
+   {
+      "::75.77.128.0/113" : {
+         "domain" : "nuvox.net"
+      }
+   },
+   {
+      "::78.26.67.0/120" : {
+         "domain" : "popwifi.it"
+      }
+   },
+   {
+      "::78.26.68.0/118" : {
+         "domain" : "popwifi.it"
+      }
+   },
+   {
+      "::78.26.72.0/117" : {
+         "domain" : "popwifi.it"
+      }
+   },
+   {
+      "::78.26.80.0/116" : {
+         "domain" : "popwifi.it"
+      }
+   },
+   {
+      "::78.26.96.0/117" : {
+         "domain" : "popwifi.it"
+      }
+   },
+   {
+      "::78.26.104.0/118" : {
+         "domain" : "popwifi.it"
+      }
+   },
+   {
+      "::78.26.108.0/119" : {
+         "domain" : "popwifi.it"
+      }
+   },
+   {
+      "::78.26.110.0/120" : {
+         "domain" : "popwifi.it"
+      }
+   },
+   {
+      "::81.2.64.0/115" : {
+         "domain" : "in-addr.arpa"
+      }
+   },
+   {
+      "::83.206.0.0/112" : {
+         "domain" : "oleane.fr"
+      }
+   },
+   {
+      "::89.160.0.0/116" : {
+         "domain" : "bredband2.com"
+      }
+   },
+   {
+      "::89.160.16.0/117" : {
+         "domain" : "bredband2.com"
+      }
+   },
+   {
+      "::89.160.24.0/118" : {
+         "domain" : "bredband2.com"
+      }
+   },
+   {
+      "::89.160.28.0/119" : {
+         "domain" : "bredband2.com"
+      }
+   },
+   {
+      "::89.160.30.0/120" : {
+         "domain" : "bredband2.com"
+      }
+   },
+   {
+      "::89.92.0.0/111" : {
+         "domain" : "bbox.fr"
+      }
+   },
+   {
+      "::89.94.0.0/112" : {
+         "domain" : "bbox.fr"
+      }
+   },
+   {
+      "::89.95.0.0/113" : {
+         "domain" : "bbox.fr"
+      }
+   },
+   {
+      "::89.95.128.0/114" : {
+         "domain" : "bbox.fr"
+      }
+   },
+   {
+      "::89.95.192.0/115" : {
+         "domain" : "bbox.fr"
+      }
+   },
+   {
+      "::89.95.224.0/116" : {
+         "domain" : "bbox.fr"
+      }
+   },
+   {
+      "::89.95.240.0/119" : {
+         "domain" : "bbox.fr"
+      }
+   }
+]

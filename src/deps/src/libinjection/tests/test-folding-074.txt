@@ -1,0 +1,10 @@
+--TEST--
+test folding when prefix operator binary is used
+--INPUT--
+SELECT 1 + binary 1;
+--EXPECTED--
+E SELECT
+1 1
+; ;
+
+

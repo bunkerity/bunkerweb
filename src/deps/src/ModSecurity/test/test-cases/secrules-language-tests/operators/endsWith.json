@@ -1,0 +1,51 @@
+[
+   {
+      "name" : "endsWith",
+      "type" : "op",
+      "ret" : 1,
+      "param" : "",
+      "input" : ""
+   },
+   {
+      "type" : "op",
+      "ret" : 0,
+      "name" : "endsWith",
+      "param" : "TestCase",
+      "input" : ""
+   },
+   {
+      "input" : "TestCase",
+      "param" : "",
+      "type" : "op",
+      "ret" : 1,
+      "name" : "endsWith"
+   },
+   {
+      "input" : "abcdefghi",
+      "param" : "abc",
+      "ret" : 0,
+      "type" : "op",
+      "name" : "endsWith"
+   },
+   {
+      "input" : "abcdefghi",
+      "param" : "def",
+      "type" : "op",
+      "ret" : 0,
+      "name" : "endsWith"
+   },
+   {
+      "input" : "abcdefghi",
+      "param" : "ghi",
+      "name" : "endsWith",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "input" : "abcdef\\0ghi",
+      "param" : "ghi",
+      "type" : "op",
+      "ret" : 1,
+      "name" : "endsWith"
+   }
+]

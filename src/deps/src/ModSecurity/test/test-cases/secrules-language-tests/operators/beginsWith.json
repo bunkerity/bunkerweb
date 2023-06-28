@@ -1,0 +1,44 @@
+[
+   {
+      "input" : "",
+      "param" : "",
+      "name" : "beginsWith",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "param" : "TestCase",
+      "input" : "",
+      "name" : "beginsWith",
+      "ret" : 0,
+      "type" : "op"
+   },
+   {
+      "name" : "beginsWith",
+      "ret" : 1,
+      "type" : "op",
+      "param" : "",
+      "input" : "TestCase"
+   },
+   {
+      "param" : "abcdef",
+      "input" : "abcdef",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "beginsWith"
+   },
+   {
+      "param" : "abcdef",
+      "input" : "abcdefghi",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "beginsWith"
+   },
+   {
+      "name" : "beginsWith",
+      "type" : "op",
+      "ret" : 0,
+      "param" : "abcdef",
+      "input" : "abc"
+   }
+]

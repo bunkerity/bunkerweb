@@ -1,0 +1,51 @@
+[
+   {
+      "param" : "",
+      "input" : "",
+      "name" : "within",
+      "type" : "op",
+      "ret" : 1
+   },
+   {
+      "name" : "within",
+      "type" : "op",
+      "ret" : 1,
+      "input" : "",
+      "param" : "TestCase"
+   },
+   {
+      "param" : "",
+      "input" : "TestCase",
+      "type" : "op",
+      "ret" : 0,
+      "name" : "within"
+   },
+   {
+      "input" : "abc",
+      "param" : "abcdefghi",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "within"
+   },
+   {
+      "type" : "op",
+      "ret" : 1,
+      "name" : "within",
+      "param" : "abcdefghi",
+      "input" : "def"
+   },
+   {
+      "name" : "within",
+      "ret" : 1,
+      "type" : "op",
+      "input" : "ghi",
+      "param" : "abcdefghi"
+   },
+   {
+      "input" : "ghij",
+      "param" : "abcdefghi",
+      "name" : "within",
+      "type" : "op",
+      "ret" : 0
+   }
+]

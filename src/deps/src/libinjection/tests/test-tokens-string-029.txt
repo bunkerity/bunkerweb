@@ -1,0 +1,8 @@
+--TEST--
+pgsql, $-quoted strings
+--INPUT--
+$foo$FOO BAR
+--EXPECTED--
+s $FOO BAR
+
+

@@ -1,0 +1,44 @@
+[
+   {
+      "ret" : 0,
+      "name" : "compressWhitespace",
+      "input" : "",
+      "type" : "tfn",
+      "output" : ""
+   },
+   {
+      "ret" : 0,
+      "type" : "tfn",
+      "input" : "TestCase",
+      "name" : "compressWhitespace",
+      "output" : "TestCase"
+   },
+   {
+      "name" : "compressWhitespace",
+      "input" : "Test\\u0000Case",
+      "type" : "tfn",
+      "ret" : 0,
+      "output" : "Test\\u0000Case"
+   },
+   {
+      "output" : "Test Case",
+      "ret" : 0,
+      "type" : "tfn",
+      "input" : "Test Case",
+      "name" : "compressWhitespace"
+   },
+   {
+      "output" : " Test Case ",
+      "ret" : 1,
+      "input" : "  Test  \t   Case  ",
+      "name" : "compressWhitespace",
+      "type" : "tfn"
+   },
+   {
+      "name" : "compressWhitespace",
+      "input" : "This is a   test case with a tab \t, vtab \u000b, newline \n, return \r, formfeed \f, and a NUL\\u0000 in it with a CRLF at the end.\r\n",
+      "type" : "tfn",
+      "ret" : 1,
+      "output" : "This is a test case with a tab , vtab , newline , return , formfeed , and a NUL\\u0000 in it with a CRLF at the end. "
+   }
+]

@@ -1,0 +1,154 @@
+[
+   {
+      "param" : "test",
+      "input" : "qqtestqq",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "rx"
+   },
+   {
+      "param" : "",
+      "input" : "",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "rx"
+   },
+   {
+      "name" : "rx",
+      "type" : "op",
+      "ret" : 0,
+      "param" : "TestCase",
+      "input" : ""
+   },
+   {
+      "ret" : 1,
+      "type" : "op",
+      "name" : "rx",
+      "param" : "",
+      "input" : "TestCase"
+   },
+   {
+      "param" : "abc",
+      "input" : "abcdefghi",
+      "type" : "op",
+      "ret" : 1,
+      "name" : "rx"
+   },
+   {
+      "param" : "def",
+      "input" : "abcdefghi",
+      "type" : "op",
+      "ret" : 1,
+      "name" : "rx",
+      "re_groups": ["def"]
+   },
+   {
+      "param" : "ghi",
+      "input" : "abcdefghi",
+      "name" : "rx",
+      "type" : "op",
+      "ret" : 1,
+      "re_groups": ["ghi"]
+   },
+   {
+      "ret" : 0,
+      "type" : "op",
+      "name" : "rx",
+      "param" : "ghij",
+      "input" : "abcdefghi"
+   },
+   {
+      "ret" : 1,
+      "type" : "op",
+      "name" : "rx",
+      "param" : "(?i:(sleep\\((\\s*?)(\\d*?)(\\s*?)\\)|benchmark\\((.*?)\\,(.*?)\\)))",
+      "input" : "SELECT pg_sleep(10);"
+   },
+   {
+      "type" : "op",
+      "name" : "rx",
+      "param" : "(abc)(def)",
+      "input" : "abcdef",
+      "ret" : 1,
+      "re_groups": ["abcdef", "abc", "def"]
+   },
+   {
+      "type" : "op",
+      "name" : "rx",
+      "param" : "(a|b|1|2)(a|b|1|2)",
+      "input" : "a2b1",
+      "ret" : 1,
+      "re_groups": ["a2", "a", "2"]
+   },
+   {
+      "type" : "op",
+      "name" : "rx",
+      "param" : "<\\?(?!xml)",
+      "input" : "<?php",
+      "ret" : 1,
+      "re_groups": ["<?"]
+   },
+   {
+      "type" : "op",
+      "name" : "rx",
+      "param" : "<\\?(?!xml)",
+      "input" : "<?xml",
+      "ret" : 0
+   },
+   {
+      "type" : "op",
+      "name" : "rx",
+      "param" : "abc\ndef",
+      "input" : "abc\ndef",
+      "ret" : 1,
+      "re_groups": ["abc\ndef"]
+   },
+   {
+      "type" : "op",
+      "name" : "rx",
+      "param" : "[a-z]\n",
+      "input" : "a\nb\nc\n",
+      "ret" : 1,
+      "re_groups": ["a\n"]
+   },
+   {
+      "type" : "op",
+      "name" : "rx",
+      "param" : "[a-z]*",
+      "input" : "abkjgdsgk",
+      "ret" : 1,
+      "re_groups": ["abkjgdsgk"]
+   },
+   {
+      "type" : "op",
+      "name" : "rx",
+      "param" : "([a-z]*)",
+      "input" : "",
+      "ret" : 1,
+      "re_groups": ["", ""]
+   },
+   {
+      "type" : "op",
+      "name" : "rx",
+      "param" : "[a-z]*",
+      "input" : "aaa0bbb",
+      "ret" : 1,
+      "re_groups": ["aaa"]
+   },
+   {
+      "type" : "op",
+      "name" : "rx",
+      "param" : "[a-z]*",
+      "input" : "aaa00bbb",
+      "ret" : 1,
+      "re_groups": ["aaa"]
+   },
+   {
+      "type" : "op",
+      "name" : "rx",
+      "param" : "(a)(b?)(c)",
+      "input" : "ac",
+      "ret" : 1,
+      "re_groups": ["ac", "a", "", "c"]
+   }
+]

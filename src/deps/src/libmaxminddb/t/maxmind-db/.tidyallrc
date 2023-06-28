@@ -1,0 +1,7 @@
+[PerlTidy]
+select = **/*.{pl,pm,t,psgi}
+ignore = blib/**/*
+argv = --profile=$ROOT/.perltidyallrc
+
+[JSON]
+select = **/*.json

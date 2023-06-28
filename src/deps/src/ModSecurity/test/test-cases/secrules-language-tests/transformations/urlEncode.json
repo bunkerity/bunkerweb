@@ -1,0 +1,149 @@
+[
+   {
+      "name" : "urlEncode",
+      "input" : "",
+      "type" : "tfn",
+      "ret" : 0,
+      "output" : ""
+   },
+   {
+      "output" : "TestCase",
+      "type" : "tfn",
+      "input" : "TestCase",
+      "name" : "urlEncode",
+      "ret" : 0
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : " \\u0000\\u0001\\u0002\\u0003\\u0004\\u0005\\u0006\\u0007\b\t\n\\u000b\f\r\\u000e\\u000f\\u0010\\u0011\\u0012\\u0013\\u0014\\u0015\\u0016\\u0017\\u0018\\u0019\\u001a\\u001b\\u001c\\u001d\\u001e\\u001f",
+      "name" : "urlEncode",
+      "output" : "+%00%01%02%03%04%05%06%07%08%09%0a%0b%0c%0d%0e%0f%10%11%12%13%14%15%16%17%18%19%1a%1b%1c%1d%1e%1f"
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}",
+      "name" : "urlEncode",
+      "output" : "+%21%22%23%24%25%26%27%28%29*%2b%2c%2d%2e%2f0123456789%3a%3b%3c%3d%3e%3f%40ABCDEFGHIJKLMNOPQRSTUVWXYZ%5b%5c%5d%5e%5f%60abcdefghijklmnopqrstuvwxyz%7b%7c%7d"
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ",
+      "name" : "urlEncode",
+      "output" : "%c3%80%c3%81%c3%82%c3%83%c3%84%c3%85%c3%86%c3%87%c3%88%c3%89%c3%8a%c3%8b%c3%8c%c3%8d%c3%8e%c3%8f%c3%90%c3%91%c3%92%c3%93%c3%94%c3%95%c3%96%c3%97%c3%98%c3%99%c3%9a%c3%9b%c3%9c%c3%9d%c3%9e%c3%9f%c3%a0%c3%a1%c3%a2%c3%a3%c3%a4%c3%a5%c3%a6%c3%a7%c3%a8%c3%a9%c3%aa%c3%ab%c3%ac%c3%ad%c3%ae%c3%af%c3%b0%c3%b1%c3%b2%c3%b3%c3%b4%c3%b5%c3%b6%c3%b7%c3%b8%c3%b9%c3%ba%c3%bb%c3%bc%c3%bd%c3%be%c3%bf"
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : " ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿",
+      "name" : "urlEncode",
+      "output" : "%c2%a0%c2%a1%c2%a2%c2%a3%c2%a4%c2%a5%c2%a6%c2%a7%c2%a8%c2%a9%c2%aa%c2%ab%c2%ac%c2%ad%c2%ae%c2%af%c2%b0%c2%b1%c2%b2%c2%b3%c2%b4%c2%b5%c2%b6%c2%b7%c2%b8%c2%b9%c2%ba%c2%bb%c2%bc%c2%bd%c2%be%c2%bf"
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "~",
+      "name" : "urlEncode",
+      "output" : "%7e%7f%c2%80%c2%81%c2%82%c2%83%c2%84%c2%85%c2%86%c2%87%c2%88%c2%89%c2%8a%c2%8b%c2%8c%c2%8d%c2%8e%c2%8f%c2%90%c2%91%c2%92%c2%93%c2%94%c2%95%c2%96%c2%97%c2%98%c2%99%c2%9a%c2%9b%c2%9c%c2%9d%c2%9e%c2%9f"
+   },
+   {
+      "output" : "Test+Case",
+      "name" : "urlEncode",
+      "input" : "Test Case",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "input" : "% ",
+      "type" : "tfn",
+      "name" : "urlEncode",
+      "ret" : 1,
+      "output" : "%25+"
+   },
+   {
+      "output" : "%250g+",
+      "ret" : 1,
+      "input" : "%0g ",
+      "name" : "urlEncode",
+      "type" : "tfn"
+   },
+   {
+      "input" : "%0 ",
+      "type" : "tfn",
+      "name" : "urlEncode",
+      "ret" : 1,
+      "output" : "%250+"
+   },
+   {
+      "ret" : 1,
+      "input" : "%g0 ",
+      "type" : "tfn",
+      "name" : "urlEncode",
+      "output" : "%25g0+"
+   },
+   {
+      "output" : "%25g+",
+      "type" : "tfn",
+      "input" : "%g ",
+      "name" : "urlEncode",
+      "ret" : 1
+   },
+   {
+      "output" : "%250%251%252%253%254%255%256%257%258%259%250%25a%25b%25c%25d%25e%25f",
+      "input" : "%0%1%2%3%4%5%6%7%8%9%0%a%b%c%d%e%f",
+      "name" : "urlEncode",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "output" : "%25g0%25g1%25g2%25g3%25g4%25g5%25g6%25g7%25g8%25g9%25g0%25ga%25gb%25gc%25gd%25ge%25gf",
+      "ret" : 1,
+      "input" : "%g0%g1%g2%g3%g4%g5%g6%g7%g8%g9%g0%ga%gb%gc%gd%ge%gf",
+      "name" : "urlEncode",
+      "type" : "tfn"
+   },
+   {
+      "ret" : 1,
+      "type" : "tfn",
+      "input" : "%0g%1g%2g%3g%4g%5g%6g%7g%8g%9g%0g%ag%bg%cg%dg%eg%fg",
+      "name" : "urlEncode",
+      "output" : "%250g%251g%252g%253g%254g%255g%256g%257g%258g%259g%250g%25ag%25bg%25cg%25dg%25eg%25fg"
+   },
+   {
+      "output" : "%25",
+      "input" : "%",
+      "name" : "urlEncode",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "type" : "tfn",
+      "input" : "%0",
+      "name" : "urlEncode",
+      "ret" : 1,
+      "output" : "%250"
+   },
+   {
+      "output" : "%25%25",
+      "input" : "%%",
+      "type" : "tfn",
+      "name" : "urlEncode",
+      "ret" : 1
+   },
+   {
+      "ret" : 1,
+      "input" : "%0g",
+      "type" : "tfn",
+      "name" : "urlEncode",
+      "output" : "%250g"
+   },
+   {
+      "output" : "%25gg",
+      "type" : "tfn",
+      "input" : "%gg",
+      "name" : "urlEncode",
+      "ret" : 1
+   }
+]

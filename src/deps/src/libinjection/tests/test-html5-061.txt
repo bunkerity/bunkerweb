@@ -1,0 +1,11 @@
+--TEST--
+alternate <% comment %> format used by IE and old safari
+--INPUT--
+<% foo><x foo="%><script>
+--EXPECTED--
+TAG_COMMENT,13, foo><x foo="
+TAG_NAME_OPEN,6,script
+TAG_NAME_CLOSE,1,>
+
+
+

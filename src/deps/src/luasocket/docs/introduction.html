@@ -1,0 +1,333 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" 
+    "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+<meta name="description" content="LuaSocket: Introduction to the core">
+<meta name="keywords" content="Lua, LuaSocket, TCP, UDP, Network,
+Library, Support"> 
+<title>LuaSocket: Introduction to the core</title>
+<link rel="stylesheet" href="reference.css" type="text/css">
+</head>
+
+<body>
+
+<!-- header +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<div class=header>
+<hr>
+<center>
+<table summary="LuaSocket logo">
+<tr><td align=center><a href="http://www.lua.org">
+<img width=128 height=128 border=0 alt="LuaSocket" src="luasocket.png">
+</a></td></tr>
+<tr><td align=center valign=top>Network support for the Lua language
+</td></tr>
+</table>
+<p class=bar>
+<a href="index.html">home</a> &middot;
+<a href="index.html#download">download</a> &middot;
+<a href="installation.html">installation</a> &middot;
+<a href="introduction.html">introduction</a> &middot;
+<a href="reference.html">reference</a> 
+</p>
+</center>
+<hr>
+</div>
+
+<!-- introduction +++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h2>Introduction</h2>
+
+<p>
+LuaSocket  is a  <a href="http://www.lua.org">Lua</a>  extension library
+that is composed by two parts: a C core that provides  support for the TCP
+and UDP transport layers, and a set of Lua modules that add support for
+the SMTP (sending  e-mails),  HTTP  (WWW access)  and  FTP  (uploading  and
+downloading files) protocols and other functionality commonly needed by
+applications that deal with the Internet. This introduction is about the C
+core.
+</p>
+
+<p>
+Communication in LuaSocket is performed via I/O objects. These can
+represent different network domains. Currently, support is provided for TCP
+and UDP, but nothing prevents other developers from implementing SSL, Local
+Domain, Pipes, File Descriptors etc. I/O objects provide a standard
+interface to I/O across different domains and operating systems.
+</p>
+
+<p>
+The API design had two goals in mind. First, users
+experienced with the C API to sockets should feel comfortable using LuaSocket.
+Second, the simplicity and the feel of the Lua language should be
+preserved. To achieve these goals, the LuaSocket API keeps the function names and semantics the C API whenever possible, but their usage in Lua has been greatly simplified.  
+</p>
+
+
+<p>
+One of the simplifications is the receive pattern capability.
+Applications can read  data from stream domains (such as TCP) 
+line  by line, block  by block, or until the connection  is closed.
+All I/O reads are buffered and the performance differences between
+different receive patterns are negligible.  
+</p>
+
+<p>
+Another advantage is the flexible timeout control
+mechanism. As in C, all I/O  operations are blocking by default. For
+example, the  <a href=tcp.html#send><tt>send</tt></a>,  
+<a href=tcp.html#receive><tt>receive</tt></a> and 
+<a href=tcp.html#accept><tt>accept</tt></a> methods
+of the TCP domain will block  the  caller application  until
+the operation  is completed (if ever!). However, with a call to the
+<a href=tcp.html#settimeout><tt>settimeout</tt></a>
+method, an application  can specify upper limits on
+the time it can  be blocked by LuaSocket (the "<tt>total</tt>" timeout), on
+the time  LuaSocket can  internally be  blocked by  any OS call (the
+"<tt>block</tt>" timeout) or a combination of the  two.  Each LuaSocket
+call might perform several OS calls, so that the two timeout values are
+<em>not</em> equivalent.  
+</p>
+
+<p>
+Finally,  the host  name  resolution   is  transparent,  meaning  that  most
+functions and methods accept both  IP addresses and host names. In  case a
+host name is given, the  library  queries the  system's  resolver  and
+tries  the main IP address returned. Note that direct use of IP addresses
+is more efficient, of course. The 
+<a href=dns.html#toip><tt>toip</tt></a> 
+and <a href=dns.html#tohostname><tt>tohostname</tt></a> 
+functions from the DNS module are provided to convert between host names and IP addresses. 
+</p>
+
+<p>
+Together, these changes make network programming in LuaSocket much simpler
+than it is in C, as the following sections will show.
+</p>
+
+<!-- tcp ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h3 id=tcp>TCP</h3>
+
+<p>
+TCP (Transfer  Control Protocol) is  reliable stream protocol.  In other
+words, applications communicating through TCP  can send and receive data as
+an  error free  stream  of  bytes. Data  is  split  in one  end  and
+reassembled transparently on  the other end. There are  no boundaries in
+the  data transfers.  The library  allows users  to read  data from  the
+sockets in  several different granularities: patterns  are available for
+lines, arbitrary sized blocks  or "read up to connection closed", all with
+good performance. 
+</p>
+
+<p>
+The library distinguishes  three types of TCP sockets:  <em>master</em>, 
+<em>client</em> and <em>server</em> sockets. 
+</p>
+
+<p>
+Master sockets are newly created TCP sockets returned by the function
+<a href=tcp.html#tcp><tt>socket.tcp</tt></a>. A master socket is 
+transformed into a server socket
+after it is associated with a <em>local</em> address by a call to the
+<a href=tcp.html#bind><tt>bind</tt></a> method followed by a call to the 
+<a href=tcp.html#listen><tt>listen</tt></a>. Conversely, a master socket 
+can be changed into a client socket with the method 
+<a href=tcp.html#connect><tt>connect</tt></a>, 
+which associates it with a <em>remote</em> address. 
+</p>
+
+<p>
+On server sockets, applications can use the 
+<a href=tcp.html#accept><tt>accept</tt></a> method
+to wait for a client connection. Once a  connection is established, a
+client socket object  is  returned representing  this  connection.  The
+other methods available   for   server   socket  objects   are
+<a href=tcp.html#getsockname><tt>getsockname</tt></a>,  
+<a href=tcp.html#setoption><tt>setoption</tt></a>,
+<a href=tcp.html#settimeout><tt>settimeout</tt></a>, and 
+<a href=tcp.html#close><tt>close</tt></a>. 
+</p>
+
+<p>
+Client sockets are  used to exchange data between  two applications over
+the Internet. Applications can call the  methods 
+<a href=tcp.html#send><tt>send</tt></a> and
+<a href=tcp.html#receive><tt>receive</tt></a> 
+to send and  receive data.  The other methods
+available for  client socket objects are 
+<a href=tcp.html#getsockname><tt>getsockname</tt></a>,
+<a href=tcp.html#getpeername><tt>getpeername</tt></a>, 
+<a href=tcp.html#setoption><tt>setoption</tt></a>,
+<a href=tcp.html#settimeout><tt>settimeout</tt></a>,
+<a href=tcp.html#shutdown><tt>shutdown</tt></a>, and
+<a href=tcp.html#close><tt>close</tt></a>.
+</p>
+
+<p>
+Example:
+</p>
+<blockquote>
+<p>
+A simple echo server, using LuaSocket. The program binds to an ephemeral
+port (one that is chosen by the  operating system) on the local host and
+awaits client connections on that port. When a connection is established,
+the program reads a line from the  remote end and sends it back, closing
+the  connection immediately. You  can  test it  using the  telnet
+program. 
+</p>
+
+<pre class=example>
+-- load namespace
+local socket = require("socket")
+-- create a TCP socket and bind it to the local host, at any port
+local server = assert(socket.bind("*", 0))
+-- find out which port the OS chose for us
+local ip, port = server:getsockname()
+-- print a message informing what's up
+print("Please telnet to localhost on port " .. port)
+print("After connecting, you have 10s to enter a line to be echoed")
+-- loop forever waiting for clients
+while 1 do
+  -- wait for a connection from any client
+  local client = server:accept()
+  -- make sure we don't block waiting for this client's line
+  client:settimeout(10)
+  -- receive the line
+  local line, err = client:receive()
+  -- if there was no error, send it back to the client
+  if not err then client:send(line .. "\n") end
+  -- done with client, close the object
+  client:close()
+end
+</pre>
+</blockquote>
+
+<!-- udp ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h3 id=udp>UDP</h3>
+
+<p>
+UDP (User Datagram Protocol)  is a  non-reliable datagram  protocol. In
+other  words, applications  communicating through  UDP send  and receive
+data as independent blocks, which are  not guaranteed to reach the other
+end. Even when they  do reach the other end, they are  not guaranteed to be
+error free. Data  transfers are atomic, one datagram at  a time. Reading
+only  part of  a  datagram discards  the  rest, so  that  the following read
+operation  will  act  on  the  next  datagram.  The  advantages  are  in
+simplicity (no connection  setup) and performance (no  error checking or
+error correction). 
+</p>
+
+<p>
+Note that although no guarantees are made, these days
+networks are so good that, under normal circumstances, few errors 
+happen in practice.
+</p>
+
+<p>
+An UDP socket object is  created by the 
+<a href=udp.html#udp><tt>socket.udp</tt></a> function. UDP
+sockets  do   not  need   to  be  connected   before  use.   The  method
+<a href=udp.html#sendto><tt>sendto</tt></a>  
+can  be  used  immediately after  creation  to
+send  a datagram to  IP address and port. Host names  are not allowed
+because performing name resolution for each packet would be forbiddingly
+slow.  Methods 
+<a href=udp.html#receive><tt>receive</tt></a>  and 
+<a href=udp.html#receivefrom><tt>receivefrom</tt></a>
+can be used to retrieve datagrams, the latter returning the IP and port of
+the  sender  as  extra  return  values (thus being  slightly  less
+efficient). 
+</p>
+
+<p>
+When  communication  is performed  repeatedly  with  a single  peer,  an
+application  should call  the 
+<a href=udp.html#setpeername><tt>setpeername</tt></a> method to specify a
+permanent partner.  Methods 
+<a href=udp.html#sendto><tt>sendto</tt></a> and
+<a href=udp.html#receivefrom><tt>receivefrom</tt></a> 
+can no longer be used, but the method
+<a href=udp.html#send><tt>send</tt></a> can be used to send data 
+directly  to   the   peer, and the method 
+<a href=udp.html#receive><tt>receive</tt></a> 
+will  only return  datagrams originating
+from that peer. There is about 30% performance gain due to this practice.
+</p>
+
+<p>
+To associate  an UDP socket with  a local address, an  application calls the   
+<a href=udp.html#setsockname><tt>setsockname</tt></a> 
+method <em>before</em> sending any datagrams.   Otherwise, the socket is
+automatically  bound  to an  ephemeral  address  before the  first  data
+transmission and once bound the local address cannot be changed.  
+The   other  methods   available  for  UDP   sockets  are
+<a href=udp.html#getpeername><tt>getpeername</tt></a>,  
+<a href=udp.html#getsockname><tt>getsockname</tt></a>, 
+<a href=udp.html#settimeout><tt>settimeout</tt></a>,
+<a href=udp.html#setoption><tt>setoption</tt></a> and 
+<a href=udp.html#close><tt>close</tt></a>. 
+</p>
+
+<p>
+Example: 
+</p>
+<blockquote>
+<p>
+A simple daytime client, using LuaSocket. The program connects to a remote
+server and tries to retrieve the daytime, printing the answer it got or an
+error message. 
+</p>
+
+<pre class=example>
+-- change here to the host an port you want to contact
+local host, port = "localhost", 13
+-- load namespace
+local socket = require("socket")
+-- convert host name to ip address
+local ip = assert(socket.dns.toip(host))
+-- create a new UDP object
+local udp = assert(socket.udp())
+-- contact daytime host
+assert(udp:sendto("anything", ip, port))
+-- retrieve the answer and print results
+io.write(assert(udp:receive()))
+</pre>
+</blockquote>
+
+<!-- More +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h3 id=more>Support modules</h3>
+
+<p> Although not covered in the introduction, LuaSocket offers 
+much more than TCP and UDP functionality. As the library
+evolved, support for <a href=http.html>HTTP</a>, <a href=ftp.html>FTP</a>,
+and <a href=smtp.html>SMTP</a> were built on top of these. These modules
+and many others are covered by the <a href=reference.html>reference manual</a>. 
+</p>
+
+<!-- footer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<div class=footer>
+<hr>
+<center>
+<p class=bar>
+<a href="index.html">home</a> &middot;
+<a href="index.html#down">download</a> &middot;
+<a href="installation.html">installation</a> &middot;
+<a href="introduction.html">introduction</a> &middot;
+<a href="reference.html">reference</a>
+</p>
+<p>
+<small>
+Last modified by Diego Nehab on <br>
+Thu Apr 20 00:25:36 EDT 2006
+</small>
+</p>
+</center>
+</div>
+
+</body>
+</html>

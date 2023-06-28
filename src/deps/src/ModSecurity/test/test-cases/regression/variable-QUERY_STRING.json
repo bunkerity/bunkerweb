@@ -1,0 +1,123 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: QUERY_STRING",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"27",
+        "Content-Type":"application/x-www-form-urlencoded"
+      },
+      "uri":"/one/two/three?key1=value1&key2=v%20a%20l%20u%20e%202",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"key2=v\\%20a\\%20l\\%20u\\%20e\\%202\" \\(Variable: QUERY_STRING\\)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule QUERY_STRING \"@contains test \" \"id:1,phase:3,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: QUERY_STRING (URI contains fragment)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value#urifrag",
+      "method":"GET",
+      "http_version":1.1
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule QUERY_STRING \"!@contains urifrag\" \"id:1,phase:1,deny,status:403\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: QUERY_STRING (URI contains fragment)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/one/two/testpost.php#urifrag",
+      "method":"GET",
+      "http_version":1.1
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule QUERY_STRING \"@eq 0\" \"id:1,phase:1,t:length,deny,status:403\""
+    ]
+  }
+]

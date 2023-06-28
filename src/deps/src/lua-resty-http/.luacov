@@ -1,0 +1,5 @@
+modules = {
+    ["http"] = "lib/resty/http.lua",
+    ["http_headers"] = "lib/resty/http_headers.lua",
+    ["http_connect"] = "lib/resty/http_connect.lua",
+}

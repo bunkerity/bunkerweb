@@ -1,0 +1,20 @@
+[
+   {
+      "input" : "",
+      "type" : "op",
+      "ret" : 0,
+      "name" : "detectXSS"
+   },
+   {
+      "ret" : 0,
+      "type" : "op",
+      "name" : "detectXSS",
+      "input" : "this is not an XSS"
+   },
+   {
+      "input" : "<a href=\"javascript:alert(1)\">)",
+      "ret" : 1,
+      "type" : "op",
+      "name" : "detectXSS"
+   }
+]

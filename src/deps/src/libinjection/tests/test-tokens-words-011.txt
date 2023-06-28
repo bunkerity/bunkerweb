@@ -1,0 +1,13 @@
+--TEST--
+Word merging for operators
+--INPUT--
+SELECT 1 NOT LIKE 2;
+--EXPECTED--
+E SELECT
+1 1
+o NOT
+o LIKE
+1 2
+; ;
+
+

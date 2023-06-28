@@ -1,0 +1,44 @@
+[
+   {
+      "ret" : 0,
+      "input" : "",
+      "type" : "tfn",
+      "name" : "base64Decode",
+      "output" : ""
+   },
+   {
+      "output" : "TestCase",
+      "ret" : 1,
+      "name" : "base64Decode",
+      "input" : "VGVzdENhc2U=",
+      "type" : "tfn"
+   },
+   {
+      "output" : "TestCase1",
+      "name" : "base64Decode",
+      "input" : "VGVzdENhc2Ux",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "ret" : 1,
+      "input" : "VGVzdENhc2UxMg==",
+      "name" : "base64Decode",
+      "type" : "tfn",
+      "output" : "TestCase12"
+   },
+   {
+      "output" : "Test\\u0000Case",
+      "input" : "VGVzdABDYXNl",
+      "name" : "base64Decode",
+      "type" : "tfn",
+      "ret" : 1
+   },
+   {
+      "type" : "tfn",
+      "input" : "VGVzdENhc2U=\\u0000VGVzdENhc2U=",
+      "name" : "base64Decode",
+      "ret" : 1,
+      "output" : "TestCase"
+   }
+]

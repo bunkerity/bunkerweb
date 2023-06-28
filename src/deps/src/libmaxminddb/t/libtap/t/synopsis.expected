@@ -1,0 +1,9 @@
+1..5
+ok 1 - bronze is less than silver
+not ok 2 - not quite
+#   Failed test 'not quite'
+#   at t/synopsis.c line 7.
+ok 3 - gold is gold
+ok 4 - 2 <= 3
+ok 5 - platinum matches .*inum
+# Looks like you failed 1 test of 5 run.
