@@ -239,9 +239,9 @@ http {
 ❯ opm get bungle/lua-resty-session
 ```
 
-Please note that `opm` doesn't install all the dependencies like LuaRocks does, e.g. you will still need
-to install [lua_pack](https://github.com/Kong/lua-pack). Also check the dependencies for each storage
-driver (there may be additional dependencies).
+OPM repository for `lua-resty-session` is located at https://opm.openresty.org/package/bungle/lua-resty-session/.
+
+Also check the dependencies for each storage (there may be additional dependencies).
 
 ## Using LuaRocks
 

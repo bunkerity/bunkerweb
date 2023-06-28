@@ -168,9 +168,9 @@ git_secure_clone "https://github.com/openresty/lua-resty-lrucache.git" "a79615ec
 echo "ℹ️ Downloading lua-resty-dns"
 git_secure_clone "https://github.com/openresty/lua-resty-dns.git" "869d2fbb009b6ada93a5a10cb93acd1cc12bd53f"
 
-# lua-resty-session v4.0.3
+# lua-resty-session v4.0.4
 echo "ℹ️ Downloading lua-resty-session"
-git_secure_clone "https://github.com/bungle/lua-resty-session.git" "3373d8138930b6d1e255bb80d9127503019301d7"
+git_secure_clone "https://github.com/bungle/lua-resty-session.git" "8b5f8752f3046396c414c5b97850e784c07e1641"
 
 # lua-resty-random v?
 echo "ℹ️ Downloading lua-resty-random"
@@ -254,17 +254,6 @@ git_secure_clone "https://github.com/bungle/lua-resty-template.git" "c08c6bc9e27
 echo "ℹ️ Downloading lua-resty-lock"
 git_secure_clone "https://github.com/openresty/lua-resty-lock.git" "9dc550e56b6f3b1a2f1a31bb270a91813b5b6861"
 
-# lua-pack v2.0.0
-echo "ℹ️ Downloading lua-pack"
-dopatch="no"
-if [ ! -d "deps/src/lua-pack" ] ; then
-	dopatch="yes"
-fi
-git_secure_clone "https://github.com/Kong/lua-pack.git" "495bf30606b9744140258df349862981e3ee7820"
-if [ "$dopatch" = "yes" ] ; then
-	do_and_check_cmd cp deps/misc/lua-pack.Makefile deps/src/lua-pack/Makefile
-fi
-
 # lua-resty-openssl v0.8.22
 echo "ℹ️ Downloading lua-resty-openssl"
 dopatch="no"
@@ -300,6 +289,7 @@ fi
 git_secure_clone "https://github.com/SpiderLabs/ModSecurity.git" "205dac0e8c675182f96b5c2fb06be7d1cf7af2b2"
 if [ "$dopatch" = "yes" ] ; then
 	do_and_check_cmd patch deps/src/ModSecurity/configure.ac deps/misc/modsecurity.patch
+	do_and_check_cmd rm -rf deps/src/ModSecurity/others/libinjection
 fi
 
 # libinjection v3.10.0+

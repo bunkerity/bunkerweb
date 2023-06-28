@@ -12,8 +12,10 @@ local bit = require "bit"
 
 
 local select = select
+local floor = math.floor
 local ceil = math.ceil
 local byte = string.byte
+local char = string.char
 local band = bit.band
 local bnot = bit.bnot
 local bor = bit.bor
@@ -45,49 +47,7 @@ end
 
 
 local bpack, bunpack do
-  local binpack
-  local binunpack
-
-  local SIZE_TO_FORMAT = {
-    [1] = "<C",
-    [2] = "<S",
-    [3] = "<I",
-    [4] = "<I",
-    [5] = "<L",
-    [6] = "<L",
-    [7] = "<L",
-    [8] = "<L",
-  }
-
-  local function bpack_real(size, value)
-    local packed = binpack(SIZE_TO_FORMAT[size], value)
-
-    if size == 3 then
-      return sub(packed, 1, 3)
-    elseif size == 5 then
-      return sub(packed, 1, 5)
-    elseif size == 6 then
-      return sub(packed, 1, 6)
-    elseif size == 7 then
-      return sub(packed, 1, 7)
-    end
-
-    return packed
-  end
-
-  local function bunpack_real(size, value)
-    if size == 5 then
-      value = value .. "\0\0\0"
-    elseif size == 6 then
-      value = value .. "\0\0"
-    elseif size == 3 or size == 7 then
-      value = value .. "\0"
-    end
-
-    local _, unpacked_value = binunpack(value, SIZE_TO_FORMAT[size])
-    return unpacked_value
-  end
-
+  local buf = buffer.new()
 
   ---
   -- Binary pack unsigned integer.
@@ -114,13 +74,15 @@ local bpack, bunpack do
   -- local packed_128 = require "resty.session.utils".bpack(1, 128)
   -- local packed_now = require "resty.session.utils".bpack(8, ngx.time())
   bpack = function(size, value)
-    if not binpack then
-      binpack = require "lua_pack".pack
+    buf:reset()
+    for i = 1, size do
+      buf:put(char(value % 256))
+      if i == size then
+        return buf:get()
+      end
+      value = floor(value / 256)
     end
-    bpack = bpack_real
-    return bpack(size, value)
   end
-
 
   ---
   -- Binary unpack unsigned integer.
@@ -150,11 +112,12 @@ local bpack, bunpack do
   -- local unpacked_value = utils.bunpack(1, packed_value)
   -- print(value == unpacked_value) -- true
   bunpack = function(size, value)
-    if not binunpack then
-      binunpack = require "lua_pack".unpack
+    buf:set(value)
+    value = 0
+    for i = 1, size do
+      value = value + byte(buf:get(1)) * (2 ^ ((i - 1) * 8))
     end
-    bunpack = bunpack_real
-    return bunpack(size, value)
+    return value
   end
 end
 
@@ -274,6 +237,7 @@ end
 
 local encode_base64url, decode_base64url, base64_size do
   local base64
+
   ---
   -- Base64 URL encode value.
   --

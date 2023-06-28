@@ -1,7 +1,8 @@
 return {
   default = {
-    lua     = "resty --shdict 'sessions 1m' --main-conf 'thread_pool default threads=32 max_queue=65536;'",
-    verbose = true,
-    output  = "gtest",
+    lua          = "resty --shdict 'sessions 1m' --main-conf 'thread_pool default threads=32 max_queue=65536;'",
+    verbose      = true,
+    coverage     = true,
+    output       = "gtest",
   }
 }

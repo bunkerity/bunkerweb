@@ -141,10 +141,6 @@ do_and_check_cmd cp -r /tmp/bunkerweb/deps/src/lua-resty-template/lib/resty/* /u
 echo "ℹ️ Installing lua-resty-lock"
 CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-lock" do_and_check_cmd make PREFIX=/usr/share/bunkerweb/deps LUA_LIB_DIR=/usr/share/bunkerweb/deps/lib/lua install
 
-# Installing lua-pack
-echo "ℹ️ Installing lua-pack"
-CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-pack" do_and_check_cmd make INST_LIBDIR=/usr/share/bunkerweb/deps/lib/lua LUA_LIBDIR=-L/usr/share/bunkerweb/deps/lib LUA_INCDIR=-I/usr/share/bunkerweb/deps/include install
-
 # Installing lua-resty-openssl
 echo "ℹ️ Installing lua-resty-openssl"
 CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-openssl" do_and_check_cmd make LUA_LIB_DIR=/usr/share/bunkerweb/deps/lib/lua install
