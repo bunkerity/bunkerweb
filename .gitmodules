@@ -1,3 +1,7 @@
+[submodule "nginx"]
+	path = src/deps/src/nginx
+	url = https://github.com/nginx/nginx.git
+
 [submodule "LuaJIT"]
 	path = src/deps/src/luajit2
 	url = https://github.com/openresty/luajit2.git
