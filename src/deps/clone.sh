@@ -7,7 +7,7 @@ function git_update_checker() {
 	mkdir -p "${main_tmp_folder}"
 	echo "ℹ️ Check updates for ${repo}"
 	folder="$(echo "$repo" | sed -E "s@https://github.com/.*/(.*)\.git@\1@")"
-	output="$(git clone "$repo" "${main_tmp_folder}/${folder}" 2>&1)"
+	output="$(git clone --recursive "$repo" "${main_tmp_folder}/${folder}")"
 	if [ $? -ne 0 ] ; then
 		echo "❌ Error cloning $1"
 		echo "$output"
@@ -64,7 +64,7 @@ function git_secure_clone() {
 	commit="$2"
 	folder="$(echo "$repo" | sed -E "s@https://github.com/.*/(.*)\.git@\1@")"
 	if [ ! -d "deps/src/${folder}" ] ; then
-		output="$(git clone "$repo" "deps/src/${folder}" 2>&1)"
+		output="$(git clone --recursive "$repo" "deps/src/${folder}")"
 		if [ $? -ne 0 ] ; then
 			echo "❌ Error cloning $1"
 			echo "$output"
@@ -152,13 +152,13 @@ fi
 echo "ℹ️ Downloading LuaJIT"
 git_secure_clone "https://github.com/openresty/luajit2.git" "04f33ff01da97905a1641985fb5c840d234f97f1"
 
-# lua-nginx-module v0.10.24
+# lua-nginx-module v0.10.25
 echo "ℹ️ Downloading lua-nginx-module"
-git_secure_clone "https://github.com/openresty/lua-nginx-module.git" "68acad14e4a8f42e31d4a4bb5ed44d6f5b55fc1c"
+git_secure_clone "https://github.com/openresty/lua-nginx-module.git" "c47084b5d719ce507d2419d8660f39544a9d1fea"
 
-# lua-resty-core v0.1.26
+# lua-resty-core v0.1.27
 echo "ℹ️ Downloading lua-resty-core"
-git_secure_clone "https://github.com/openresty/lua-resty-core.git" "407000a9856d3a5aab34e8c73f6ab0f049f8b8d7"
+git_secure_clone "https://github.com/openresty/lua-resty-core.git" "31fae862a1ed64033591f991fadb0dd80358ba0b"
 
 # lua-resty-lrucache v0.13
 echo "ℹ️ Downloading lua-resty-lrucache"

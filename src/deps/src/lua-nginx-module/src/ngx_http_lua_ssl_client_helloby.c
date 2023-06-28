@@ -150,14 +150,16 @@ ngx_http_lua_ssl_client_hello_by_lua(ngx_conf_t *cf, ngx_command_t *cmd,
         lscf->srv.ssl_client_hello_src.len = ngx_strlen(name);
 
     } else {
-        cache_key = ngx_http_lua_gen_file_cache_key(cf, value[1].data,
-                                                    value[1].len);
+        cache_key = ngx_http_lua_gen_chunk_cache_key(cf,
+                                                     "ssl_client_hello_by_lua",
+                                                     value[1].data,
+                                                     value[1].len);
         if (cache_key == NULL) {
             return NGX_CONF_ERROR;
         }
 
         chunkname = ngx_http_lua_gen_chunk_name(cf, "ssl_client_hello_by_lua",
-                                          sizeof("ssl_client_helloo_by_lua")- 1,
+                                          sizeof("ssl_client_hello_by_lua")- 1,
                                           &chunkname_len);
         if (chunkname == NULL) {
             return NGX_CONF_ERROR;
@@ -447,7 +449,7 @@ ngx_http_lua_ssl_client_hello_by_chunk(lua_State *L, ngx_http_request_t *r)
     ngx_int_t                rc;
     lua_State               *co;
     ngx_http_lua_ctx_t      *ctx;
-    ngx_http_cleanup_t      *cln;
+    ngx_pool_cleanup_t      *cln;
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_lua_module);
 
@@ -501,7 +503,7 @@ ngx_http_lua_ssl_client_hello_by_chunk(lua_State *L, ngx_http_request_t *r)
 
     /* register request cleanup hooks */
     if (ctx->cleanup == NULL) {
-        cln = ngx_http_cleanup_add(r, 0);
+        cln = ngx_pool_cleanup_add(r->pool, 0);
         if (cln == NULL) {
             rc = NGX_ERROR;
             ngx_http_lua_finalize_request(r, rc);
