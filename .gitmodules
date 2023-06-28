@@ -1,7 +1,3 @@
-[submodule "cpython"]
-	path = src/deps/src/cpython
-	url = https://github.com/python/cpython.git
-
 [submodule "LuaJIT"]
 	path = src/deps/src/luajit2
 	url = https://github.com/openresty/luajit2.git
@@ -149,6 +145,3 @@
 [submodule "stream-lua-nginx-module"]
 	path = src/deps/src/stream-lua-nginx-module
 	url = https://github.com/openresty/stream-lua-nginx-module.git
-[submodule "nginx"]
-	path = src/deps/src/nginx
-	url = https://github.com/nginx/nginx.git
