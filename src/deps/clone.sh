@@ -64,7 +64,7 @@ function git_secure_clone() {
 	commit="$2"
 	folder="$(echo "$repo" | sed -E "s@https://github.com/.*/(.*)\.git@\1@")"
 	if [ ! -d "deps/src/${folder}" ] ; then
-		output="$(git clone "$repo" "deps/src/${folder}")"
+		output="$(git clone "$repo" "deps/src/${folder}" 2>&1)"
 		if [ $? -ne 0 ] ; then
 			echo "❌ Error cloning $1"
 			echo "$output"
@@ -148,6 +148,62 @@ if [ -f "deps/src/lua-${LUA_VERSION}.tar.gz" ] ; then
 	do_and_check_cmd patch deps/src/lua-${LUA_VERSION}/src/Makefile deps/misc/lua.patch2
 fi
 
+# LuaJIT v2.1-20230410
+echo "ℹ️ Downloading LuaJIT"
+git_secure_clone "https://github.com/openresty/luajit2.git" "04f33ff01da97905a1641985fb5c840d234f97f1"
+
+# lua-nginx-module v0.10.24
+echo "ℹ️ Downloading lua-nginx-module"
+git_secure_clone "https://github.com/openresty/lua-nginx-module.git" "68acad14e4a8f42e31d4a4bb5ed44d6f5b55fc1c"
+
+# lua-resty-core v0.1.26
+echo "ℹ️ Downloading lua-resty-core"
+git_secure_clone "https://github.com/openresty/lua-resty-core.git" "407000a9856d3a5aab34e8c73f6ab0f049f8b8d7"
+
+# lua-resty-lrucache v0.13
+echo "ℹ️ Downloading lua-resty-lrucache"
+git_secure_clone "https://github.com/openresty/lua-resty-lrucache.git" "a79615ec9dc547fdb4aaee59ef8f5a50648ce9fd"
+
+# lua-resty-dns v0.22
+echo "ℹ️ Downloading lua-resty-dns"
+git_secure_clone "https://github.com/openresty/lua-resty-dns.git" "869d2fbb009b6ada93a5a10cb93acd1cc12bd53f"
+
+# lua-resty-session v4.0.3
+echo "ℹ️ Downloading lua-resty-session"
+git_secure_clone "https://github.com/bungle/lua-resty-session.git" "3373d8138930b6d1e255bb80d9127503019301d7"
+
+# lua-resty-random v?
+echo "ℹ️ Downloading lua-resty-random"
+git_secure_clone "https://github.com/bungle/lua-resty-random.git" "17b604f7f7dd217557ca548fc1a9a0d373386480"
+
+# lua-resty-string v0.15
+echo "ℹ️ Downloading lua-resty-string"
+git_secure_clone "https://github.com/openresty/lua-resty-string.git" "b192878f6ed31b0af237935bbc5a8110a3c2256c"
+
+# lua-cjson v2.1.0.12
+echo "ℹ️ Downloading lua-cjson"
+git_secure_clone "https://github.com/openresty/lua-cjson.git" "881accc8fadca5ec02aa34d364df2a1aa25cd2f9"
+
+# lua-gd v2.0.33r3+
+echo "ℹ️ Downloading lua-gd"
+git_secure_clone "https://github.com/ittner/lua-gd.git" "2ce8e478a8591afd71e607506bc8c64b161bbd30"
+
+# lua-resty-http v0.17.1
+echo "ℹ️ Downloading lua-resty-http"
+git_secure_clone "https://github.com/ledgetech/lua-resty-http.git" "4ab4269cf442ba52507aa2c718f606054452fcad"
+
+# lualogging v1.8.2
+echo "ℹ️ Downloading lualogging"
+git_secure_clone "https://github.com/lunarmodules/lualogging.git" "465c994788f1bc18fca950934fa5ec9a909f496c"
+
+# luasocket v3.1.0
+echo "ℹ️ Downloading luasocket"
+git_secure_clone "https://github.com/diegonehab/luasocket.git" "95b7efa9da506ef968c1347edf3fc56370f0deed"
+
+# luasec v1.3.1
+echo "ℹ️ Downloading luasec"
+git_secure_clone "https://github.com/brunoos/luasec.git" "fddde111f7fe9ad5417d75ebbd70429d13eaad97"
+
 # lua-resty-ipmatcher v0.6.1 (3 commits after just in case)
 echo "ℹ️ Downloading lua-resty-ipmatcher"
 dopatch="no"
@@ -159,6 +215,14 @@ if [ "$dopatch" = "yes" ] ; then
 	do_and_check_cmd patch deps/src/lua-resty-ipmatcher/resty/ipmatcher.lua deps/misc/ipmatcher.patch
 fi
 
+# lua-resty-redis v0.30
+echo "ℹ️ Downloading lua-resty-redis"
+git_secure_clone "https://github.com/openresty/lua-resty-redis.git" "d7c25f1b339d79196ff67f061c547a73a920b580"
+
+# lua-resty-upload v0.11
+echo "ℹ️ Downloading lua-resty-upload"
+git_secure_clone "https://github.com/openresty/lua-resty-upload.git" "03704aee42f7135e7782688d8a9af63a16015edc"
+
 # luajit-geoip v2.1.0
 echo "ℹ️ Downloading luajit-geoip"
 dopatch="no"
@@ -169,6 +233,26 @@ git_secure_clone "https://github.com/leafo/luajit-geoip.git" "12a9388207f40c37ad
 if [ "$dopatch" = "yes" ] ; then
 	do_and_check_cmd patch deps/src/luajit-geoip/geoip/mmdb.lua deps/misc/mmdb.patch
 fi
+
+# lbase64 v1.5.3
+echo "ℹ️ Downloading lbase64"
+git_secure_clone "https://github.com/iskolbin/lbase64.git" "c261320edbdf82c16409d893a96c28c704aa0ab8"
+
+# lua-resty-env v0.4.0
+echo "ℹ️ Downloading lua-resty-env"
+git_secure_clone "https://github.com/3scale/lua-resty-env.git" "adb294def823dd910ffa11972d2c61eab7cfce3e"
+
+# lua-resty-mlcache v2.6.0
+echo "ℹ️ Downloading lua-resty-mlcache"
+git_secure_clone "https://github.com/thibaultcha/lua-resty-mlcache.git" "f140f56663cbdb9cdd247d29f75c299c702ff6b4"
+
+# lua-resty-template v2.0
+echo "ℹ️ Downloading lua-resty-template"
+git_secure_clone "https://github.com/bungle/lua-resty-template.git" "c08c6bc9e27710806990f2dec0f03b19406976ac"
+
+# lua-resty-lock v0.09
+echo "ℹ️ Downloading lua-resty-lock"
+git_secure_clone "https://github.com/openresty/lua-resty-lock.git" "9dc550e56b6f3b1a2f1a31bb270a91813b5b6861"
 
 # lua-pack v2.0.0
 echo "ℹ️ Downloading lua-pack"
@@ -238,3 +322,31 @@ if [ "$dopatch" = "yes" ] ; then
 	do_and_check_cmd patch deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_module.c deps/misc/ngx_http_modsecurity_module.c.patch
 	do_and_check_cmd cp deps/misc/ngx_http_modsecurity_access.c deps/src/ModSecurity-nginx/src
 fi
+
+# libmaxminddb v1.7.1
+echo "ℹ️ Downloading libmaxminddb"
+git_secure_clone "https://github.com/maxmind/libmaxminddb.git" "ac4d0d2480032a8664e251588e57d7b306ca630c"
+
+# zlib v1.2.13
+echo "ℹ️ Downloading zlib"
+git_secure_clone "https://github.com/madler/zlib.git" "04f42ceca40f73e2978b50e93806c2a18c1281fc"
+
+# headers-more-nginx-module v0.34
+echo "ℹ️ Downloading headers-more-nginx-module"
+git_secure_clone "https://github.com/openresty/headers-more-nginx-module.git" "bea1be3bbf6af28f6aa8cf0c01c07ee1637e2bd0"
+
+# nginx_cookie_flag_module v1.1.0
+echo "ℹ️ Downloading nginx_cookie_flag_module"
+git_secure_clone "https://github.com/AirisX/nginx_cookie_flag_module.git" "4e48acf132952bbed43b28a8e6af0584dacb7b4c"
+
+# ngx_brotli v1.0.0
+echo "ℹ️ Downloading ngx_brotli"
+git_secure_clone "https://github.com/google/ngx_brotli.git" "6e975bcb015f62e1f303054897783355e2a877dc"
+
+# ngx_devel_kit v0.3.2
+echo "ℹ️ Downloading ngx_devel_kit"
+git_secure_clone "https://github.com/vision5/ngx_devel_kit.git" "b4642d6ca01011bd8cd30b253f5c3872b384fd21"
+
+# stream-lua-nginx-module v0.0.13
+echo "ℹ️ Downloading stream-lua-nginx-module"
+git_secure_clone "https://github.com/openresty/stream-lua-nginx-module.git" "309198abf26266f1a3e53c71388ed7bb9d1e5ea2"
