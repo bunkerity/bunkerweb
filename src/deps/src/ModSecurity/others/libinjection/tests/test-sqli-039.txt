@@ -1,0 +1,10 @@
+--TEST--
+Short
+--INPUT--
+1 and @version < 1
+--EXPECTED--
+1&v
+
+
+
+

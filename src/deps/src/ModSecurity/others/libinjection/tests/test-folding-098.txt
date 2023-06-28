@@ -1,0 +1,12 @@
+--TEST--
+test folding of "n.s" type
+--INPUT--
+foo . `bar`
+--EXPECTED--
+n foo
+
+
+
+
+
+

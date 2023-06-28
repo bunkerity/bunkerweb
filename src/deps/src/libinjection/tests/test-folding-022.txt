@@ -1,0 +1,8 @@
+--TEST--
+"+n+" -> "+"
+--INPUT--
+'foo' + zap + 'bar'
+--EXPECTED--
+s 'foo'
+o +
+s 'bar'

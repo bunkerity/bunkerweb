@@ -1,0 +1,299 @@
+name: Tests
+
+on:
+  pull_request:
+    paths-ignore:
+    - '*.md'
+  push:
+    branches:
+    - master
+    - release/*
+    paths-ignore:
+    - '*.md'
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        include:
+        # TODO: arm64
+        # latest and one version older for valgrind
+        - nginx: "1.19.9"
+          openssl: "1.0.2u"
+          valgrind: "valgrind"
+          lua_nginx_module: "v0.10.20"
+          lua_resty_core: "v0.1.22"
+        - nginx: "1.19.9"
+          openssl: "1.1.1s"
+          valgrind: "valgrind"
+          lua_nginx_module: "v0.10.20"
+          lua_resty_core: "v0.1.22"
+        - nginx: "1.19.9"
+          openssl: "3.0.8"
+          valgrind: "valgrind"
+          openssl_opts: "enable-fips"
+          lua_nginx_module: "v0.10.20"
+          lua_resty_core: "v0.1.22"
+          nginx_cc_opts: "-Wno-error"
+        - nginx: "1.21.4"
+          openssl: "1.0.2u"
+          valgrind: "valgrind"
+          lua_nginx_module: "v0.10.21"
+          lua_resty_core: "v0.1.23"
+        - nginx: "1.21.4"
+          openssl: "1.1.1s"
+          valgrind: "valgrind"
+          lua_nginx_module: "v0.10.21"
+          lua_resty_core: "v0.1.23"
+        - nginx: "1.21.4"
+          openssl: "3.0.8"
+          valgrind: "valgrind"
+          openssl_opts: "enable-fips"
+          lua_nginx_module: "v0.10.21"
+          lua_resty_core: "v0.1.23"
+          nginx_cc_opts: "-Wno-error"
+        - nginx: "1.21.4"
+          openssl: "3.1.0-beta1"
+          valgrind: "valgrind"
+          openssl_opts: "enable-fips"
+          lua_nginx_module: "v0.10.21"
+          lua_resty_core: "v0.1.23"
+          nginx_cc_opts: "-Wno-error"
+        # latest version with EOL 1.1.0
+        - nginx: "1.21.4"
+          openssl: "1.1.0l"
+          lua_nginx_module: "v0.10.21"
+          lua_resty_core: "v0.1.23"
+        # version that kong uses, for fips
+        - nginx: "1.21.4"
+          openssl: "1.0.2u"
+          fips2: "2.0.16"
+          openssl_opts: "fips --with-fipsdir=/home/runner/work/cache/ssl/fips"
+          valgrind: "valgrind"
+          lua_nginx_module: "v0.10.21"
+          lua_resty_core: "v0.1.23"
+        - nginx: "1.21.4"
+          boringssl: "ae223d6138807a13006342edfeef32e813246b39" # fips-20190808
+          valgrind: "valgrind"
+          lua_nginx_module: "v0.10.21"
+          lua_resty_core: "v0.1.23"
+        - nginx: "1.21.4"
+          boringssl: "853ca1ea1168dff08011e5d42d94609cc0ca2e27" # fips-20210429, not active yet
+          valgrind: "valgrind"
+          lua_nginx_module: "v0.10.21"
+          lua_resty_core: "v0.1.23"
+
+    env:
+      JOBS: 3
+      SH: bash
+      NGX_BUILD_JOBS: 3
+      BASE_PATH: /home/runner/work/cache
+      LUAJIT_PREFIX: /home/runner/work/cache/luajit21
+      LUAJIT_LIB: /home/runner/work/cache/luajit21/lib
+      LUAJIT_INC: /home/runner/work/cache/luajit21/include/luajit-2.1
+      LUA_INCLUDE_DIR: /home/runner/work/cache/luajit21/include/luajit-2.1
+      OPENSSL_PREFIX: /home/runner/work/cache/ssl
+      # lib64 since openssl 3.0
+      OPENSSL_LIB: /home/runner/work/cache/ssl/lib64
+      OPENSSL_INC: /home/runner/work/cache/ssl/include
+      TEST_NGINX_SLEEP: 0.005
+      TEST_NGINX_RANDOMIZE: 1
+      LUACHECK_VER: 0.21.1
+      CC: gcc
+      NGX_BUILD_CC: gcc
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v3
+    
+    - name: Setup cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          /home/runner/work/cache
+        key: ${{ runner.os }}-${{ hashFiles('**/tests.yml') }}-nginx-${{ matrix.nginx }}-openssl-${{ matrix.openssl }}-${{ matrix.fips2 }}-boringssl-${{ matrix.boringssl }}
+
+    - name: Setup tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -qq -y cpanminus axel ca-certificates valgrind haveged
+        mkdir -p $OPENSSL_PREFIX $LUAJIT_PREFIX
+        # perl cache
+        pushd /home/runner/work/cache
+        if [ ! -e perl ]; then sudo cpanm --notest Test::Nginx > build.log 2>&1 || (cat build.log && exit 1); cp -r /usr/local/share/perl/ .; else sudo cp -r perl /usr/local/share; fi
+        # build tools at parent directory of cache
+        cd ..
+        git clone https://github.com/openresty/openresty.git ./openresty
+        git clone https://github.com/openresty/nginx-devel-utils.git
+        git clone https://github.com/simpl/ngx_devel_kit.git ./ndk-nginx-module
+        git clone https://github.com/openresty/lua-nginx-module.git ./lua-nginx-module -b ${{ matrix.lua_nginx_module }}
+        git clone https://github.com/openresty/no-pool-nginx.git ./no-pool-nginx
+        git clone https://github.com/fffonion/lua-resty-openssl-aux-module ./lua-resty-openssl-aux-module
+        # lua libraries at parent directory of current repository
+        popd
+        git clone https://github.com/openresty/lua-resty-core.git ../lua-resty-core -b ${{ matrix.lua_resty_core }}
+        git clone https://github.com/openresty/lua-resty-lrucache.git ../lua-resty-lrucache
+        git clone https://github.com/jkeys089/lua-resty-hmac ../lua-resty-hmac && pushd ../lua-resty-hmac && git checkout 79a4929 && popd
+        git clone https://github.com/openresty/lua-resty-string ../lua-resty-string
+    
+    - name: Build OpenSSL
+      if: matrix.boringssl == ''
+      run: |
+        mkdir -p $OPENSSL_PREFIX
+        # fips doesn't seem to support to build parallelly 
+        if [ "X${{ matrix.fips2 }}" != "X" ]; then wget https://www.openssl.org/source/old/fips/openssl-fips-${{ matrix.fips2 }}.tar.gz -qO - | tar zxf - ; pushd openssl-fips-${{ matrix.fips2 }}/; FIPSDIR=$OPENSSL_PREFIX/fips ./config; make; make install; popd; fi
+        if [ "X$OPENSSL_HASH" != "X" ]; then wget https://github.com/openssl/openssl/archive/$OPENSSL_HASH.tar.gz -qO - | tar zxf ; pushd openssl-$OPENSSL_HASH/; fi
+        if [ "X$OPENSSL_HASH" = "X" ] ; then wget https://www.openssl.org/source/openssl-${{ matrix.openssl }}.tar.gz -qO - | tar zxf -; pushd openssl-${{ matrix.openssl }}/; fi
+        if [ ! -e $OPENSSL_PREFIX/include ]; then ./config shared -d --prefix=$OPENSSL_PREFIX -DPURIFY ${{ matrix.openssl_opts }} > build.log 2>&1 || (cat build.log && exit 1); fi
+        if [ ! -e $OPENSSL_PREFIX/include ]; then make -j$JOBS > build.log 2>&1 || (cat build.log && exit 1); fi
+        if [ ! -e $OPENSSL_PREFIX/include ]; then sudo make PATH=$PATH install_sw > build.log 2>&1 || (cat build.log && exit 1); fi
+        if [ -e $OPENSSL_LIB/libcrypto.so.3 ] && [ ! -e $OPENSSL_LIB/ossl-modules/fips.so ]; then mkdir -p $OPENSSL_PREFIX/ssl; sudo make PATH=$PATH install_fips > build.log 2>&1 || (cat build.log && exit 1); fi
+        if [ ! -e $OPENSSL_PREFIX/lib64 ]; then sudo cp -r $OPENSSL_PREFIX/lib $OPENSSL_PREFIX/lib64; fi
+        mkdir -p $OPENSSL_PREFIX/certs/ && sudo cp -r /etc/ssl/certs/* $OPENSSL_PREFIX/certs/
+
+    - name: Build BoringSSL
+      if: matrix.boringssl != ''
+      run: |
+        mkdir -p $OPENSSL_PREFIX
+        if [ ! -e $OPENSSL_PREFIX/include ]; then
+          # libtinfo5 is a dependency of clang7 on ubuntu20.04
+          sudo apt-get install -qq -y cmake libtinfo5 unzip libunwind-dev libgcc-9-dev libstdc++-9-dev
+
+          wget https://releases.llvm.org/7.0.1/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04.tar.xz -qO - |tar Jxf -
+          export HOME="$PWD"
+          printf "set(CMAKE_C_COMPILER \"clang\")\nset(CMAKE_CXX_COMPILER \"clang++\")\n" > ${HOME}/toolchain
+          export PATH="$PWD/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
+          clang --version
+
+          wget https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz -qO - |tar zxf -
+          export GOPATH="$PWD/gopath"
+          export GOROOT="$PWD/go"
+          export PATH="$GOPATH/bin:$GOROOT/bin:$PATH"
+          go version
+
+          wget https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip -q
+          unzip -o ninja-linux.zip
+          export PATH="$PWD:$PATH"
+          ninja --version
+
+          wget https://commondatastorage.googleapis.com/chromium-boringssl-fips/boringssl-${{ matrix.boringssl }}.tar.xz -qO - | tar Jxf -; pushd boringssl
+          if [ "${{ matrix.boringssl }}" == "ae223d6138807a13006342edfeef32e813246b39" ]; then
+            patch -p1 < ../t/fixtures/boringssl_fips.patch
+          fi
+          rm -rf build; mkdir build; pushd build
+          cmake -GNinja -DCMAKE_TOOLCHAIN_FILE=${HOME}/toolchain -DFIPS=1 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=1 ..  > build.log 2>&1 || (cat build.log && exit 1)
+          ninja > build.log 2>&1 || (cat build.log && exit 1)
+
+          ./tool/bssl isfips
+
+          popd; rm -rf $OPENSSL_INC; cp -r include $OPENSSL_INC
+          mkdir -p $OPENSSL_LIB; cp -r build/*/*.so $OPENSSL_LIB
+        fi
+        mkdir -p $OPENSSL_PREFIX/certs/ && sudo cp -r /etc/ssl/certs/* $OPENSSL_PREFIX/certs/
+
+    - name: Build LuaJIT
+      env:
+        LUAJIT_CC_OPTS: ${{ matrix.luajit_cc_opts }}
+      run: |
+        if [ "X${{ matrix.valgrind }}" != "X" ]; then LUAJIT_CC_OPTS="$LUAJIT_CC_OPTS -DLUAJIT_NUMMODE=2 -DLUAJIT_${{ matrix.valgrind }} -DLUAJIT_USE_SYSMALLOC -O0"; fi
+        export
+        cd $LUAJIT_PREFIX
+        if [ ! -e luajit2 ]; then git clone -b v2.1-agentzh https://github.com/openresty/luajit2.git; fi
+        cd luajit2
+        make -j$JOBS CCDEBUG=-g Q= PREFIX=$LUAJIT_PREFIX CC=$CC XCFLAGS="-DLUA_USE_APICHECK -DLUA_USE_ASSERT -DLUAJIT_ENABLE_LUA52COMPAT ${{ matrix.luajit_cc_opts }}" > build.log 2>&1 || (cat build.log && exit 1)
+        make install PREFIX=$LUAJIT_PREFIX > build.log 2>&1 || (cat build.log && exit 1)
+
+    - name: Build lua-cjson
+      run: |
+        if [ ! -e lua-cjson ]; then git clone https://github.com/openresty/lua-cjson.git ./lua-cjson; fi
+        pushd ./lua-cjson && make && sudo PATH=$PATH make install && popd
+
+    - name: Build Nginx
+      env:
+        NGINX_CC_OPTS: ${{ matrix.nginx_cc_opts }}
+      run: |
+        if [ "X${{ matrix.valgrind }}" != "X" ]; then NGINX_CC_OPTS="$NGINX_CC_OPTS -O0"; fi
+        export PATH=$BASE_PATH/work/nginx/sbin:$BASE_PATH/../nginx-devel-utils:$PATH
+        export LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
+        export NGX_LUA_LOC=$BASE_PATH/../lua-nginx-module
+        export NGX_STREAM_LUA_LOC=$BASE_PATH/../stream-lua-nginx-module
+        export
+        cd $BASE_PATH
+        if [ ! -e work ]; then ngx-build ${{ matrix.nginx }} --add-module=../ndk-nginx-module --add-module=../lua-nginx-module --add-module=../lua-resty-openssl-aux-module --with-http_ssl_module --with-cc-opt="-I$OPENSSL_INC $NGINX_CC_OPTS" --with-ld-opt="-L$OPENSSL_LIB -Wl,-rpath,$OPENSSL_LIB" --with-debug > build.log 2>&1 || (cat build.log && exit 1); fi
+        nginx -V
+        ldd `which nginx`|grep -E 'luajit|ssl|pcre'
+
+    - name: Run Test
+      run: |
+        export LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
+        export PATH=$BASE_PATH/work/nginx/sbin:$PATH
+        TEST_NGINX_TIMEOUT=20 prove -j$JOBS -r t/ 2>&1
+
+        echo "Nginx SSL plain FFI"
+        export CI_SKIP_NGINX_C=1
+        TEST_NGINX_TIMEOUT=10 prove -j$JOBS t/openssl/ssl/ 2>&1
+
+    - name: Run Valgrind
+      if: matrix.valgrind != ''
+      run: |
+        export LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
+        export TEST_NGINX_VALGRIND='--num-callers=100 -q --tool=memcheck --leak-check=full --show-possibly-lost=no --gen-suppressions=all --suppressions=valgrind.suppress --track-origins=yes' TEST_NGINX_TIMEOUT=60 TEST_NGINX_SLEEP=1
+        export PATH=$BASE_PATH/work/nginx/sbin:$PATH
+        stdbuf -o 0 -e 0 prove -j$JOBS -r t/ 2>&1 | grep -v "Connection refused" | grep -v "Retry connecting after" | tee output.log
+        if grep -q 'insert_a_suppression_name_here' output.log; then echo "Valgrind found problems"; exit 1; fi
+
+        echo "Nginx SSL plain FFI"
+        export CI_SKIP_NGINX_C=1
+        stdbuf -o 0 -e 0 prove -j$JOBS t/openssl/ssl/ 2>&1 | grep -v "Connection refused" | grep -v "Retry connecting after" | tee output.log
+        if grep -q 'insert_a_suppression_name_here' output.log; then echo "Valgrind found problems"; exit 1; fi
+
+    - name: Run FIPS Test
+      run: |
+        # openssl 3.0
+        if [ -e $OPENSSL_LIB/libcrypto.so.3 ]; then
+          echo "FIPS for OpenSSL 3.0"
+          cp t/fixtures/openssl_fips.cnf $OPENSSL_PREFIX/openssl-fips.cnf
+
+          pushd openssl-${{ matrix.openssl }}/;
+          # LD_LIBRARY_PATH=$OPENSSL_LIB $OPENSSL_PREFIX/bin/openssl fipsinstall -out $OPENSSL_PREFIX/fipsmodule.cnf -module $OPENSSL_LIB/ossl-modules/fips.so
+          # don't activate by default
+          sed -i "/activate = 1/d" $OPENSSL_PREFIX/ssl/fipsmodule.cnf
+          cat $OPENSSL_PREFIX/ssl/fipsmodule.cnf >> $OPENSSL_PREFIX/openssl-fips.cnf
+          export OPENSSL_CONF=$OPENSSL_PREFIX/openssl-fips.cnf
+          popd
+
+          export TEST_NGINX_FIPS=1
+        fi
+
+        # openssl 1.0.2 with fips module
+        if [ "X${{ matrix.fips2 }}" != "X" ]; then
+          echo "FIPS for OpenSSL 1.0.2"
+          export TEST_NGINX_FIPS=1
+        fi
+
+        # BoringSSL
+        if [ "X${{ matrix.boringssl }}" != "X" ]; then
+          echo "FIPS for BoringSSL ${{ matrix.boringssl }}"
+          export TEST_NGINX_FIPS=1
+        fi
+
+        if [ "X$TEST_NGINX_FIPS" != "X" ]; then
+          echo "Running FIPS tests"
+
+          export LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
+          export PATH=$BASE_PATH/work/nginx/sbin:$PATH
+
+          TEST_NGINX_FIPS=1 TEST_NGINX_TIMEOUT=10 prove -j$JOBS -r t/ 2>&1
+
+          TEST_NGINX_TIMEOUT=20 prove -j$JOBS -r t/ 2>&1
+        fi
+        

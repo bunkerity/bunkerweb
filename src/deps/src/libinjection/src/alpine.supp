@@ -1,0 +1,18 @@
+{
+   Alpine1
+   Memcheck:Free
+   fun:free
+   obj:/lib/ld-musl-x86_64.so.1
+}
+
+{
+   Alpine2
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/lib/ld-musl-x86_64.so.1
+   fun:__dls3
+   obj:*
+   obj:*
+   obj:*
+}

@@ -1,0 +1,9 @@
+--TEST--
+IN list handling + folds
+--INPUT--
+1 group by -2
+--EXPECTED--
+1 1
+B group by
+1 2
+

@@ -1,0 +1,8 @@
+--TEST--
+Dangling operator, | or ||
+--INPUT--
+SELECT 1 |
+--EXPECTED--
+E SELECT
+1 1
+o |

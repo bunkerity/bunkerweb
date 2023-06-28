@@ -1,0 +1,7 @@
+--TEST--
+GitHub Issue 25:
+--INPUT--
+foo & foo
+--EXPECTED--
+n foo
+

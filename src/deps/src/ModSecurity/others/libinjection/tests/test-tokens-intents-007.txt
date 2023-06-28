@@ -1,0 +1,9 @@
+--TEST--
+pgsql type intents, plain underscore
+--INPUT--
+SELECT _
+--EXPECTED--
+E SELECT
+n _
+
+

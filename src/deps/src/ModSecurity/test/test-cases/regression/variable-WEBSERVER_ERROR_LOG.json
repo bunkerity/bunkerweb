@@ -1,0 +1,14 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "version_max":0,
+    "title":"Testing Variables :: WEBSERVER_ERROR_LOG (1/1)",
+    "expected":{
+      "parser_error":"Line: 1. Column: 27. Variable VARIABLE_WEBSERVER_ERROR_LOG is not supported by libModSecurity"
+    },
+    "rules":[
+      "secrule WEBSERVER_ERROR_LOG \"@contains test\" \"id:1,t:lowercase,t:none,msg:'This is a test, %{REQUEST_HEADERS:Accept}%'\""
+    ]
+  }
+]

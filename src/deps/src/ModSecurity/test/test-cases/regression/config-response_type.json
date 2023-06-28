@@ -1,0 +1,128 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecResponseBodyMimeType (1/3)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"T \\(0\\) t:trim: \"no need.\""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecResponseBodyAccess On",
+      "SecResponseBodyMimeType text\/plain text\/html text\/xml",
+      "SecRule RESPONSE_BODY \"@contains RESPONSE_CONTENT_TYPE\" \"id:9,pass,t:trim,phase:4\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecResponseBodyMimeType (2/3)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Response Content-Type is text/html. It is not marked to be inspected."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecResponseBodyAccess On",
+      "SecResponseBodyMimeType application\/something",
+      "SecRule RESPONSE_BODY \"@contains RESPONSE_CONTENT_TYPE\" \"id:9,pass,t:trim,phase:4\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecResponseBodyMimeType (3/3)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Response Content-Type is text/html. It is not marked to be inspected."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecResponseBodyAccess On",
+      "SecResponseBodyMimeType text\/plain text\/tml text\/xml",
+      "SecResponseBodyMimeTypesClear",
+      "SecRule RESPONSE_BODY \"@contains RESPONSE_CONTENT_TYPE\" \"id:9,pass,t:trim,phase:4\""
+    ]
+  }
+
+
+]

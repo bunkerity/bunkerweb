@@ -1,0 +1,8 @@
+--TEST--
+Strings, c-style string merging.  Different state
+--INPUT--
+$foo$FOO BAR$foo$more
+--EXPECTED--
+s $FOO BAR$
+n more
+

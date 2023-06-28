@@ -1,0 +1,10 @@
+--TEST--
+non-html tag
+--INPUT--
+<1234 foo
+--EXPECTED--
+DATA_TEXT,1,<
+DATA_TEXT,8,1234 foo
+
+
+

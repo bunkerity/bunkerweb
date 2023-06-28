@@ -1,0 +1,254 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing LUA :: m.set TX (1/6)",
+    "resource":"lua",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"My sweet little browser",
+        "Accept":"*/*",
+        "Content-Length": "0"
+      },
+      "uri":"/whee?res=1",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "audit_log":"",
+      "debug_log":"Target value: \"2\" \\(Variable: TX.lua_set_var\\)",
+      "error_log":""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecAction \"id:1,pass,setvar:TX.lua_set_var=1\"",
+      "SecRuleScript test-cases/data/setvar.lua \"id:2,pass\"",
+      "SecRule TX.lua_set_var \"@contains 2\" \"id:3,t:none\""
+    ]
+ },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing LUA :: m.set IP (2/6)",
+    "resource":"lua",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"My sweet little browser",
+        "Accept":"*/*",
+        "Content-Length": "0"
+      },
+      "uri":"/whee?res=1",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "audit_log":"",
+      "debug_log":"Target value: \"2\" \\(Variable: IP:::::lua_set_var\\)",
+      "error_log":""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecAction \"id:1,pass,setvar:IP.lua_set_var=1\"",
+      "SecRuleScript test-cases/data/setvar.lua \"id:2,pass\"",
+      "SecRule IP.lua_set_var \"@contains 2\" \"id:3,t:none\""
+    ]
+ },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing LUA :: m.set GLOBAL (3/6)",
+    "resource":"lua",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"My sweet little browser",
+        "Accept":"*/*",
+        "Content-Length": "0"
+      },
+      "uri":"/whee?res=1",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "audit_log":"",
+      "debug_log":"Target value: \"2\" \\(Variable: GLOBAL:::::lua_set_var\\)",
+      "error_log":""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecAction \"id:1,pass,setvar:GLOBAL.lua_set_var=1\"",
+      "SecRuleScript test-cases/data/setvar.lua \"id:2,pass\"",
+      "SecRule GLOBAL.lua_set_var \"@contains 2\" \"id:3,t:none\""
+    ]
+ },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing LUA :: m.set RESOURCE (4/6)",
+    "resource":"lua",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"My sweet little browser",
+        "Accept":"*/*",
+        "Content-Length": "0"
+      },
+      "uri":"/whee?res=1",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "audit_log":"",
+      "debug_log":"Target value: \"2\" \\(Variable: RESOURCE:::::lua_set_var\\)",
+      "error_log":""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecAction \"id:1,pass,setvar:RESOURCE.lua_set_var=1\"",
+      "SecRuleScript test-cases/data/setvar.lua \"id:2,pass\"",
+      "SecRule RESOURCE.lua_set_var \"@contains 2\" \"id:3,t:none\""
+    ]
+ },
+   {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing LUA :: m.set SESSION (5/6)",
+    "resource":"lua",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"My sweet little browser",
+        "Accept":"*/*",
+        "Content-Length": "0"
+      },
+      "uri":"/whee?res=1",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "audit_log":"",
+      "debug_log":"Target value: \"2\" \\(Variable: SESSION:::::lua_set_var\\)",
+      "error_log":""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecAction \"id:1,pass,setvar:SESSION.lua_set_var=1\"",
+      "SecRuleScript test-cases/data/setvar.lua \"id:2,pass\"",
+      "SecRule SESSION.lua_set_var \"@contains 2\" \"id:3,t:none\""
+    ]
+ },
+   {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing LUA :: m.set USER (6/6)",
+    "resource":"lua",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"My sweet little browser",
+        "Accept":"*/*",
+        "Content-Length": "0"
+      },
+      "uri":"/whee?res=1",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "audit_log":"",
+      "debug_log":"Target value: \"2\" \\(Variable: USER:::::lua_set_var\\)",
+      "error_log":""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecAction \"id:1,pass,setvar:USER.lua_set_var=1\"",
+      "SecRuleScript test-cases/data/setvar.lua \"id:2,pass\"",
+      "SecRule USER.lua_set_var \"@contains 2\" \"id:3,t:none\""
+    ]
+ }
+]

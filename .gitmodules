@@ -1,14 +1,10 @@
-[submodule "nginx"]
-	path = src/deps/src/nginx
-	url = https://github.com/nginx/nginx.git
+# TODO add nginx ?
+
+# TODO add Lua ?
 
 [submodule "LuaJIT"]
 	path = src/deps/src/luajit2
 	url = https://github.com/openresty/luajit2.git
-
-[submodule "zlib"]
-	path = src/deps/src/zlib
-	url = https://github.com/madler/zlib.git
 
 [submodule "lua-nginx-module"]
 	path = src/deps/src/lua-nginx-module
@@ -17,18 +13,6 @@
 [submodule "lua-resty-core"]
 	path = src/deps/src/lua-resty-core
 	url = https://github.com/openresty/lua-resty-core.git
-
-[submodule "ModSecurity"]
-	path = src/deps/src/ModSecurity
-	url = https://github.com/SpiderLabs/ModSecurity.git
-
-[submodule "libinjection"]
-	path = src/deps/src/libinjection
-	url = https://github.com/libinjection/libinjection.git
-
-[submodule "ModSecurity-nginx"]
-	path = src/deps/src/ModSecurity-nginx
-	url = https://github.com/SpiderLabs/ModSecurity-nginx.git
 
 [submodule "lua-resty-lrucache"]
 	path = src/deps/src/lua-resty-lrucache
@@ -74,9 +58,7 @@
 	path = src/deps/src/luasec
 	url = https://github.com/brunoos/luasec.git
 
-[submodule "lua-resty-ipmatcher"]
-	path = src/deps/src/lua-resty-ipmatcher
-	url = https://github.com/api7/lua-resty-ipmatcher.git
+# TODO add lua-resty-ipmatcher
 
 [submodule "lua-resty-redis"]
 	path = src/deps/src/lua-resty-redis
@@ -86,9 +68,7 @@
 	path = src/deps/src/lua-resty-upload
 	url = https://github.com/openresty/lua-resty-upload.git
 
-[submodule "luajit-geoip"]
-	path = src/deps/src/luajit-geoip
-	url = https://github.com/leafo/luajit-geoip.git
+# TODO add luajit-geoip
 
 [submodule "lbase64"]
 	path = src/deps/src/lbase64
@@ -110,25 +90,25 @@
 	path = src/deps/src/lua-resty-lock
 	url = https://github.com/openresty/lua-resty-lock.git
 
-[submodule "lua-pack"]
-	path = src/deps/src/lua-pack
-	url = https://github.com/kong/lua-pack.git
+# TODO add lua-pack
 
-[submodule "lua-resty-openssl"]
-	path = src/deps/src/lua-resty-openssl
-	url = https://github.com/fffonion/lua-resty-openssl.git
+# TODO add lua-resty-openssl
 
-[submodule "lua-ffi-zlib"]
-	path = src/deps/src/lua-ffi-zlib
-	url = https://github.com/hamishforbes/lua-ffi-zlib.git
+# TODO add lua-ffi-zlib
 
-[submodule "lua-resty-signal"]
-	path = src/deps/src/lua-resty-signal
-	url = https://github.com/openresty/lua-resty-signal.git
+# TODO add lua-resty-signal
+
+# TODO add libinjection
+
+# TODO add ModSecurity-nginx
 
 [submodule "libmaxminddb"]
 	path = src/deps/src/libmaxminddb
 	url = https://github.com/maxmind/libmaxminddb.git
+
+[submodule "zlib"]
+	path = src/deps/src/zlib
+	url = https://github.com/madler/zlib.git
 
 [submodule "headers-more-nginx-module"]
 	path = src/deps/src/headers-more-nginx-module
@@ -149,3 +129,7 @@
 [submodule "stream-lua-nginx-module"]
 	path = src/deps/src/stream-lua-nginx-module
 	url = https://github.com/openresty/stream-lua-nginx-module.git
+
+[submodule "cpython"]
+	path = src/deps/src/cpython
+	url = https://github.com/python/cpython.git

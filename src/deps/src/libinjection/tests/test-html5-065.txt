@@ -1,0 +1,9 @@
+--TEST--
+tag with name starting with '='
+--INPUT--
+<foo =_=xxx
+--EXPECTED--
+TAG_NAME_OPEN,3,foo
+ATTR_NAME,2,=_
+ATTR_VALUE,3,xxx
+
