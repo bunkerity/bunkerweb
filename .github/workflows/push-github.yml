@@ -16,8 +16,6 @@ jobs:
     steps:
       # Checkout
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
       # Get PDF doc
       - name: Get documentation
         uses: actions/download-artifact@v3
@@ -62,3 +60,4 @@ jobs:
           tag_name: v${{ inputs.VERSION }}
           discussion_category_name: Announcements
           files: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
+

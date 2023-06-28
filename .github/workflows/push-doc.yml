@@ -22,14 +22,13 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.BUNKERBOT_TOKEN }}
-          submodules: recursive
       - name: Setup git user
         run: |
           git config --global user.name "BunkerBot"
           git config --global user.email "bunkerbot@bunkerity.com"
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: '3.10'
       - name: Install doc requirements
         run: pip install -r docs/requirements.txt
       - name: Push doc

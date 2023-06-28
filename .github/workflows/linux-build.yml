@@ -42,22 +42,20 @@ jobs:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
       - name: Extract arch
-        run: |
+        run : |
           echo "ARCH=${{ env.PLATFORMS }}" | sed 's/linux//g' | sed 's@/@@g' >> "$GITHUB_ENV"
         env:
           PLATFORMS: ${{ inputs.PLATFORMS }}
       - name: Extract linux arch
         if: inputs.PACKAGE == 'rpm'
-        run: |
+        run : |
           echo "LARCH=${{ env.ARCH }}" | sed 's/amd64/x86_64/g' | sed 's/arm64/aarch64/g' >> "$GITHUB_ENV"
         env:
           ARCH: ${{ env.ARCH }}
       - name: Extract linux arch
         if: inputs.PACKAGE == 'deb'
-        run: |
+        run : |
           echo "LARCH=${{ env.ARCH }}" >> "$GITHUB_ENV"
         env:
           ARCH: ${{ env.ARCH }}

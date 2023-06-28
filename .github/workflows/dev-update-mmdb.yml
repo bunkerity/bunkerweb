@@ -17,7 +17,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.BUNKERBOT_TOKEN }}
           ref: dev
-          submodules: recursive
       - name: Download mmdb files
         run: |
           mkdir -p src/bw/misc/
