@@ -206,8 +206,8 @@ josepy==1.13.0 \
     # via
     #   acme
     #   certbot
-maxminddb==2.3.0 \
-    --hash=sha256:120920dddd955f32ae48c207c6cef6fd5dc8874a889ba94b0f2c1f736ecdf308
+maxminddb==2.4.0 \
+    --hash=sha256:81e54e53408bd502650e5969ccba16780af659ec1db1c44b2c997e4330a5ed96
     # via -r requirements.in
 parsedatetime==2.6 \
     --hash=sha256:4cb368fbb18a0b7231f4d76119165451c8d2e35951455dfee97c62a87b04d455 \
