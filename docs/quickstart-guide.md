@@ -1113,11 +1113,11 @@ REAL_IP_HEADER=proxy_protocol
 !!! warning "Feature is in beta"
 		This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
 
-BunkerWeb can also act as **generic UDP/TCP reverse proxy** : you can protect any network-based applications working at least on layer 4 of the OSI model. Behind the hood, it leverages the [stream module](https://nginx.org/en/docs/stream/ngx_stream_core_module.html) of NGINX instead of using the "classical" http one.
+BunkerWeb offers the capability to function as a **generic UDP/TCP reverse proxy**, allowing you to protect any network-based applications operating at least on layer 4 of the OSI model. Instead of utilizing the "classical" HTTP module, BunkerWeb leverages the [stream module](https://nginx.org/en/docs/stream/ngx_stream_core_module.html) of NGINX.
 
-Please note that not all settings and security features are available when using the stream module. You will find more info about that in the [security tuning](security-tuning.md) and [settings](settings.md) sections of the documentation.
+It's important to note that not all settings and security features are available when using the stream module. Additional information on this can be found in the [security tuning](security-tuning.md) and [settings](settings.md) sections of the documentation.
 
-Configuration for a basic reverse proxy is very similar to the HTTP one because it uses the same `USE_REVERSE_PROXY=yes` and `REVERSE_PROXY_HOST=myapp:4242` settings. Even the settings used when BunkerWeb is [behind a Load Balancer](#behind-load-balancer-or-reverse-proxy) are the same (but for obvious reasons, only **PROXY protocol** is supported).
+Configuring a basic reverse proxy is quite similar to the HTTP setup, as it involves using the same settings: `USE_REVERSE_PROXY=yes` and `REVERSE_PROXY_HOST=myapp:4242`. Even when BunkerWeb is positioned behind a Load Balancer, the settings remain the same (with **PROXY protocol** being the supported option due to evident reasons).
 
 On top of that, the following specific settings are used :
 
@@ -1429,21 +1429,23 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
 
 ## Custom configurations
 
-Because BunkerWeb is based on the NGINX web server, you can add custom NGINX configurations in different NGINX contexts. You can also apply custom configurations for the ModSecurity WAF which is a core component of BunkerWeb (more info [here](security-tuning.md#modsecurity)). Here is the list of custom configurations types :
+To customize and add custom configurations to BunkerWeb, you can take advantage of its NGINX foundation. Custom NGINX configurations can be added in different NGINX contexts, including configurations for the ModSecurity Web Application Firewall (WAF), which is a core component of BunkerWeb. More details about ModSecurity configurations can be found [here](security-tuning.md#modsecurity).
 
-- **http** : http level of NGINX
-- **server-http** : http/server level of NGINX
-- **default-server-http** : server level of NGINX (only apply to the "default server" when the name supplied by the client doesn't match any server name in `SERVER_NAME`)
-- **modsec-crs** : before the OWASP Core Rule Set is loaded
-- **modsec** : after the OWASP Core Rule Set is loaded (also used if CRS is not loaded)
-- **stream** : stream level of NGINX
-- **server-stream** : stream/server level of NGINX
+Here are the available types of custom configurations:
 
-Custom configurations can be applied globally or only for a specific server when applicable and if the multisite mode is enabled.
+- **http**: Configurations at the HTTP level of NGINX.
+- **server-http**: Configurations at the HTTP/Server level of NGINX.
+- **default-server-http**: Configurations at the Server level of NGINX, specifically for the "default server" when the supplied client name doesn't match any server name in `SERVER_NAME`.
+- **modsec-crs**: Configurations applied before the OWASP Core Rule Set is loaded.
+- **modsec**: Configurations applied after the OWASP Core Rule Set is loaded, or used when the Core Rule Set is not loaded.
+- **stream**: Configurations at the Stream level of NGINX.
+- **server-stream**: Configurations at the Stream/Server level of NGINX.
 
-The howto depends on the integration used but under the hood, applying custom configurations is done by adding files ending with the .conf suffix in their name to specific folders. To apply a custom configuration for a specific server, the file is written to a subfolder which is named as the primary server name.
+Custom configurations can be applied globally or specifically for a particular server, depending on the applicable context and whether the [multisite mode](concepts.md#multisite-mode) is enabled.
 
-Some integrations offer a more convenient way of applying configurations such as using [Configs](https://docs.docker.com/engine/swarm/configs/) with Swarm or [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) with Kubernetes.
+The method for applying custom configurations depends on the integration being used. However, the underlying process involves adding files with the `.conf` suffix to specific folders. To apply a custom configuration for a specific server, the file should be placed in a subfolder named after the primary server name.
+
+Some integrations provide more convenient ways to apply configurations, such as using [Configs](https://docs.docker.com/engine/swarm/configs/) in Docker Swarm or [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) in Kubernetes. These options offer simpler approaches for managing and applying configurations.
 
 === "Docker"
 
