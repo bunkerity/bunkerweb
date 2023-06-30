@@ -1,0 +1,163 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REQUEST_COOKIES_NAMES (1/4)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie":"USER_TOKEN=Yes; a=z; t=b"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"USER_TOKEN\" \\(Variable: REQUEST_COOKIES_NAMES:USER_TOKEN\\)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_COOKIES_NAMES \"@contains test \" \"id:1,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REQUEST_COOKIES_NAMES (2/4)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie":"USER_TOKEN=Yes; a=z; t=b"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"a\" \\(Variable: REQUEST_COOKIES_NAMES:a\\)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_COOKIES_NAMES \"@contains test \" \"id:1,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REQUEST_COOKIES_NAMES (3/4)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie":"USER_TOKEN=Yes; a=z; t=b"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"t\" \\(Variable: REQUEST_COOKIES_NAMES:t\\)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_COOKIES_NAMES \"@contains test \" \"id:1,pass,t:trim\""
+    ]
+  },
+{
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REQUEST_COOKIES_NAMES (4/4)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie":"USER_TOKEN=Yes; a=z; t=b;  foobar"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"foobar\""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_COOKIES_NAMES \"@contains foobar \" \"id:1,pass,t:trim\""
+    ]
+  }
+]
+

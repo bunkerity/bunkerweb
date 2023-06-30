@@ -1,0 +1,175 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRequestBodyProcessor=XML (1)",
+    "expected":{
+      "debug_log": "Registered XML namespace href \"http://schemas.xmlsoap.org/soap/envelope/\" prefix \"soap\""
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<bookstore>",
+        "<book category=\"COOKING\">",
+          "<title lang=\"en\">Everyday Italian</title>",
+          "<author>Giada De Laurentiis</author>",
+          "<year>2005</year>",
+          "<price>30.00</price>",
+        "</book>",
+
+        "<book category=\"CHILDREN\">",
+          "<title lang=\"en\">Harry Potter</title>",
+          "<author>J K. Rowling</author>",
+          "<year>2005</year>",
+          "<price>29.99</price>",
+        "</book>",
+
+        "<book category=\"WEB\">",
+          "<title lang=\"en\">XQuery Kick Start</title>",
+          "<author>James McGovern</author>",
+          "<author>Per Bothner</author>",
+          "<author>Kurt Cagle</author>",
+          "<author>James Linn</author>",
+          "<author>Vaidyanathan Nagarajan</author>",
+          "<year>2003</year>",
+          "<price>49.99</price>",
+        "</book>",
+
+        "<book category=\"WEB\">",
+          "<title lang=\"en\">Learning XML</title>",
+          "<author>Erik T. Ray</author>",
+          "<year>2003</year>",
+          "<price>39.95</price>",
+        "</book>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500005,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML:/bookstore/book/price[text()] \"Fred\" \"phase:3,id:123,xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRequestBodyProcessor=XML (2)",
+    "expected":{
+      "debug_log": "Rule returned 0"
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<bookstore>",
+        "<book category=\"COOKING\">",
+          "<title lang=\"en\">Everyday Italian</title>",
+          "<author>Giada De Laurentiis</author>",
+          "<year>2005</year>",
+          "<price>30.00</price>",
+        "</book>",
+
+        "<book category=\"CHILDREN\">",
+          "<title lang=\"en\">Harry Potter</title>",
+          "<author>J K. Rowling</author>",
+          "<year>2005</year>",
+          "<price>29.99</price>",
+        "</book>",
+
+        "<book category=\"WEB\">",
+          "<title lang=\"en\">XQuery Kick Start</title>",
+          "<author>James McGovern</author>",
+          "<author>Per Bothner</author>",
+          "<author>Kurt Cagle</author>",
+          "<author>James Linn</author>",
+          "<author>Vaidyanathan Nagarajan</author>",
+          "<year>2003</year>",
+          "<price>49.99</price>",
+        "</book>",
+
+        "<book category=\"WEB\">",
+          "<title lang=\"en\">Learning XML</title>",
+          "<author>Erik T. Ray</author>",
+          "<year>2003</year>",
+          "<price>39.95</price>",
+        "</book>",
+        "</bookstore>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule XML:/bookstore/book/price[text()] \"Fred\" \"phase:3,id:123,xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'\""
+    ]
+  },
+   {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRequestBodyProcessor=XML (3)",
+    "expected":{
+      "debug_log": "XML: Failed parsing document."
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "not a xml"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500005,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML:/bookstore/book/price[text()] \"Fred\" \"phase:3,id:123,xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'\""
+    ]
+  }
+]

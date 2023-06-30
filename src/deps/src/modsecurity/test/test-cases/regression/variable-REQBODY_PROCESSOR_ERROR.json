@@ -1,0 +1,141 @@
+[  
+  {  
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REQBODY_PROCESSOR_ERROR_MSG (1/2)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "http_version":1.1,
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        "<bookstore>",
+        "<book category=\"COOKING\">",
+          "<title lang=\"en\">Everyday Italian</title>",
+          "<author>Giada De Laurentiis</author>",
+          "<year>2005</year>",
+          "<price>30.00</price>",
+        "</book>",
+
+        "<book category=\"CHILDREN\">",
+          "<title lang=\"en\">Harry Potter</title>",
+          "<author>J K. Rowling</author>",
+          "<year>2005</year>",
+          "<price>29.99</price>",
+        "</book>",
+
+        "<book category=\"WEB\">",
+          "<title lang=\"en\">XQuery Kick Start</title>",
+          "<author>James McGovern</author>",
+          "<author>Per Bothner</author>",
+          "<author>Kurt Cagle</author>",
+          "<author>James Linn</author>",
+          "<author>Vaidyanathan Nagarajan</author>",
+          "<year>2003</year>",
+          "<price>49.99</price>",
+        "</book>",
+
+        "<book category=\"WEB\">",
+          "<title lang=\"en\">Learning XML</title>",
+          "<author>Erik T. Ray</author>",
+          "<year>2003</year>",
+          "<price>39.95</price>",
+        "</bookasdf>",
+        "</bookstore>"
+      ]
+    },
+    "response":{  
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"XML parsing error: XML: Failed parsing document"
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500005,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+      "SecRule REQBODY_PROCESSOR_ERROR \"@contains test\" \"phase:2,id:1,pass,t:trim\"",
+      "SecRule REQBODY_PROCESSOR_ERROR_MSG \"@contains test\" \"phase:2,id:2,pass,t:trim\""
+    ]
+  },
+  {  
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: REQBODY_PROCESSOR_ERROR_MSG (2/2)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Type": "multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2"
+      },
+      "uri":"/?key=value&key=other_value",
+      "http_version":1.1,
+      "method":"POST",
+      "body": [
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "----------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file.."
+      ]
+    },
+    "response":{  
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Multipart parsing error: Multipart: Final boundary missing."
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500005,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+      "SecRule REQBODY_PROCESSOR_ERROR \"@contains test\" \"phase:2,id:1,pass,t:trim\"",
+      "SecRule REQBODY_PROCESSOR_ERROR_MSG \"@contains test\" \"phase:2,id:2,pass,t:trim\""
+    ]
+  }
+]
+
