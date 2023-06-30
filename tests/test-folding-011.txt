@@ -1,0 +1,8 @@
+--TEST--
+two tokens with ending comment
+--INPUT--
+123; /* junk */
+--EXPECTED--
+1 123
+; ;
+c /* junk */

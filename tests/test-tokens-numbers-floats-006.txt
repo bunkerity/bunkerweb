@@ -1,0 +1,8 @@
+--TEST--
+floating point parsing
+--INPUT--
+SELECT .;
+--EXPECTED--
+E SELECT
+. .
+; ;

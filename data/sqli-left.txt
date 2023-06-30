@@ -1,0 +1,7 @@
+# 
+# Yong Deng  reported 2016-10-20
+#
+# Tests that "left" is treated as a function
+#
+# http://www.w3resource.com/mysql/string-functions/mysql-left-function.php
+1'and left(database(),2)>'sa'--+

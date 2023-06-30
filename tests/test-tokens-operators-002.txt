@@ -1,0 +1,10 @@
+--TEST--
+Slash operator has multiple contexts / vs //
+--INPUT--
+SELECT 1 / 2;
+--EXPECTED--
+E SELECT
+1 1
+o /
+1 2
+; ;

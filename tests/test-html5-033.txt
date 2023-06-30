@@ -1,0 +1,9 @@
+--TEST--
+tag with name attribute, quoted value, unclosed
+--INPUT--
+<!--foo-->
+--EXPECTED--
+TAG_COMMENT,3,foo
+
+
+

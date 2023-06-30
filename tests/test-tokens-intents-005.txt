@@ -1,0 +1,11 @@
+--TEST--
+pgsql type intents, not folded
+--INPUT--
+SELECT double precision '1';
+--EXPECTED--
+E SELECT
+t double
+k precision
+s '1'
+; ;
+

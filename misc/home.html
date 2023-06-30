@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>
+<a name="user-content-libinjection" class="anchor" href="#libinjection"><span class="octicon octicon-link"></span></a>LIBINJECTION</h1>
+
+<p>Libinjection is a small C library to detect SQLi attacks in user input with the following goals:</p>
+
+<ul>
+<li>Open.  Source code is on <a href="https://github.com/client9/libinjection/">GitHub</a>.</li>
+<li>Low <em>false-positives</em>.   When there are high false positives, people tend to turn off any WAF or protection.</li>
+<li>Excellent detection of SQLi.</li>
+<li>High performance (currently <a href="https://libinjection.client9.com/cicada/artifacts/libinjection/libinjection-speed/latest/console.txt">over 500,000 TPS</a>)</li>
+<li>Easy to test and QA</li>
+<li>Easy to integrate and extend</li>
+</ul><h3>
+<a name="user-content-try-it-now" class="anchor" href="#try-it-now"><span class="octicon octicon-link"></span></a><a href="/diagnostics">Try it now</a>
+</h3>
+
+<h3>
+<a name="user-content-easy-to-integrate" class="anchor" href="#easy-to-integrate"><span class="octicon octicon-link"></span></a>Easy to integrate</h3>
+
+<ul>
+<li>Standard C code, and compiles as C99 and C++, with bindings to
+
+<ul>
+<li><a href="https://github.com/client9/libinjection/wiki/doc-sqli-python">Python</a></li>
+<li><a href="https://github.com/client9/libinjection/wiki/doc-sqli-php">PHP</a></li>
+<li><a href="https://github.com/client9/libinjection/tree/master/lua">Lua</a></li>
+</ul>
+</li>
+<li>Small - about <a href="https://libinjection.client9.com/cicada/artifacts/libinjection/libinjection-loc/latest/console.txt">1500 lines of code</a> in three files</li>
+<li>Compiles on Linux/Unix/BSD, Mac and Windows</li>
+<li>No threads used and thread safe</li>
+<li>No recursion</li>
+<li>No (heap) memory allocation</li>
+<li>No extenal library dependencies</li>
+<li><a href="https://github.com/client9/libinjection/tree/master/tests">400+ unit tests</a></li>
+<li><a href="https://libinjection.client9.com/cicada/artifacts/libinjection/libinjection-coverage-unittest/latest/lcov-html/libinjection/src/index.html">98% code coverage</a></li>
+<li><a href="https://github.com/client9/libinjection/blob/master/COPYING">BSD License</a></li>
+</ul><h2>
+<a name="user-content-third-party-ports" class="anchor" href="#third-party-ports"><span class="octicon octicon-link"></span></a>Third-Party Ports</h2>
+
+<ul>
+<li><a href="https://github.com/Kanatoko/libinjection-Java">java</a></li>
+<li>At least two .NET ports exists</li>
+<li>Another python wrapper</li>
+</ul><h2>
+<a name="user-content-applications" class="anchor" href="#applications"><span class="octicon octicon-link"></span></a>Applications</h2>
+
+<ul>
+<li>
+<a href="http://www.modsecurity.org/">ModSecurity</a> - since 2.7.4 release</li>
+<li>
+<a href="https://www.ironbee.com">IronBee</a> - since May 2013</li>
+<li>Proprietary Honeypot</li>
+<li>Proprietary WAF, Russia</li>
+<li>Proprietary WAF, Japan</li>
+</ul>{% end %}

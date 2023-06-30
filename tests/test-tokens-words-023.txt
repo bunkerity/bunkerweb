@@ -1,0 +1,9 @@
+--TEST--
+MS Brakcet
+--INPUT--
+SELECT [foo] FROM[bar]
+--EXPECTED--
+E SELECT
+n [foo]
+k FROM
+n [bar]

@@ -1,0 +1,10 @@
+--TEST--
+Short
+--INPUT--
+1 and "a"
+--EXPECTED--
+
+
+
+
+
