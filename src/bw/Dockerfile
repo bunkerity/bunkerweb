@@ -1,4 +1,4 @@
-FROM nginx:1.24.0-alpine AS builder
+FROM nginx:1.25.1-alpine AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev
@@ -45,7 +45,7 @@ COPY src/common/utils /usr/share/bunkerweb/utils
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 COPY misc/*.ascii /usr/share/bunkerweb/misc/
 
-FROM nginx:1.24.0-alpine
+FROM nginx:1.25.1-alpine
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
