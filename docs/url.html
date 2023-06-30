@@ -1,0 +1,328 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" 
+    "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+<meta name="description" content="LuaSocket: URL manipulation">
+<meta name="keywords" content="Lua, LuaSocket, URL, Library, Link, Network, Support"> 
+<title>LuaSocket: URL support</title>
+<link rel="stylesheet" href="reference.css" type="text/css">
+</head>
+
+<body>
+
+<!-- header +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<div class=header>
+<hr>
+<center>
+<table summary="LuaSocket logo">
+<tr><td align=center><a href="http://www.lua.org">
+<img width=128 height=128 border=0 alt="LuaSocket" src="luasocket.png">
+</a></td></tr>
+<tr><td align=center valign=top>Network support for the Lua language
+</td></tr>
+</table>
+<p class=bar>
+<a href="index.html">home</a> &middot;
+<a href="index.html#download">download</a> &middot;
+<a href="installation.html">installation</a> &middot;
+<a href="introduction.html">introduction</a> &middot;
+<a href="reference.html">reference</a> 
+</p>
+</center>
+<hr>
+</div>
+
+<!-- url ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h2 id="url">URL</h2> 
+
+<p>
+The  <tt>url</tt>  namespace provides  functions  to  parse,  protect,
+and build URLs, as well  as functions to compose  absolute URLs
+from base and relative URLs, according to 
+<a href="http://www.ietf.org/rfc/rfc2396.txt">RFC 2396</a>.
+</p>
+
+<p> 
+To obtain the <tt>url</tt> namespace, run:
+</p>
+
+<pre class=example>
+-- loads the URL module 
+local url = require("socket.url")
+</pre>
+
+<p>
+An URL is defined by the following grammar:
+</p>
+
+<blockquote>
+<tt>
+&lt;url&gt; ::= [&lt;scheme&gt;:][//&lt;authority&gt;][/&lt;path&gt;][;&lt;params&gt;][?&lt;query&gt;][#&lt;fragment&gt;]<br>
+&lt;authority&gt; ::= [&lt;userinfo&gt;@]&lt;host&gt;[:&lt;port&gt;]<br>
+&lt;userinfo&gt; ::= &lt;user&gt;[:&lt;password&gt;]<br>
+&lt;path&gt; ::= {&lt;segment&gt;/}&lt;segment&gt;<br>
+</tt>
+</blockquote>
+
+<!-- absolute +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class=name id="absolute">
+url.<b>absolute(</b>base, relative<b>)</b>
+</p>
+
+<p class=description>
+Builds an absolute URL from a base URL and a relative URL. 
+</p>
+
+<p class=parameters>
+<tt>Base</tt> is a string with the base URL or
+a parsed URL table.  <tt>Relative</tt> is a
+string with the relative URL.
+</p>
+
+<p class=return>
+The function returns a string with the absolute URL.
+</p>
+
+<p class=note>
+Note: The rules that
+govern the composition are fairly complex, and are described in detail in
+<a href="http://www.ietf.org/rfc/rfc2396.txt">RFC 2396</a>.
+The example bellow should give an idea of what the rules are.
+</p>
+
+<pre class=example>
+http://a/b/c/d;p?q
+
++
+
+g:h      =  g:h
+g        =  http://a/b/c/g
+./g      =  http://a/b/c/g
+g/       =  http://a/b/c/g/
+/g       =  http://a/g
+//g      =  http://g
+?y       =  http://a/b/c/?y
+g?y      =  http://a/b/c/g?y
+#s       =  http://a/b/c/d;p?q#s
+g#s      =  http://a/b/c/g#s
+g?y#s    =  http://a/b/c/g?y#s
+;x       =  http://a/b/c/;x
+g;x      =  http://a/b/c/g;x
+g;x?y#s  =  http://a/b/c/g;x?y#s
+.        =  http://a/b/c/
+./       =  http://a/b/c/
+..       =  http://a/b/
+../      =  http://a/b/
+../g     =  http://a/b/g
+../..    =  http://a/
+../../   =  http://a/
+../../g  =  http://a/g
+</pre>
+
+<!-- build ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class=name id="build">
+url.<b>build(</b>parsed_url<b>)</b>
+</p>
+
+<p class=description>
+Rebuilds an URL from its parts. 
+</p>
+
+<p class=parameters>
+<tt>Parsed_url</tt> is a table with same components returned by
+<a href="#parse"><tt>parse</tt></a>.
+Lower level components, if specified,
+take  precedence over  high level  components of  the URL grammar. 
+</p>
+
+<p class=return>
+The function returns a string with the built URL.
+</p>
+
+<!-- build_path +++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class=name id="build_path">
+url.<b>build_path(</b>segments, unsafe<b>)</b>
+</p>
+
+<p class=description>
+Builds a <tt>&lt;path&gt;</tt> component from  a list of
+<tt>&lt;segment&gt;</tt> parts. 
+Before composition, any reserved characters found in a segment are escaped into
+their protected  form, so that  the resulting path  is a valid  URL path
+component.  
+</p>
+
+<p class=parameters>
+<tt>Segments</tt> is a list of strings with the <tt>&lt;segment&gt;</tt>
+parts. If <tt>unsafe</tt>  is anything  but <b><tt>nil</tt></b>,  reserved
+characters are left untouched.
+</p>
+
+<p class=return>
+The  function  returns   a string with the  
+built <tt>&lt;path&gt;</tt> component. 
+</p>
+
+<!-- escape +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class=name id="escape">
+url.<b>escape(</b>content<b>)</b>
+</p>
+
+<p class=description>
+Applies the URL escaping content coding to a string
+Each byte is encoded as a percent character followed
+by the two byte hexadecimal representation of its integer 
+value.
+</p>
+
+<p class=parameters>
+<tt>Content</tt> is the string to be encoded.
+</p>
+
+<p class=result>
+The function returns the encoded string.
+</p>
+
+<pre class=example>
+-- load url module
+url = require("socket.url")
+
+code = url.escape("/#?;")
+-- code = "%2f%23%3f%3b"
+</pre>
+
+<!-- parse ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class=name id="parse">
+url.<b>parse(</b>url, default<b>)</b>
+</p>
+
+<p class=description>
+Parses an URL given as a string into a Lua table with its components.
+</p>
+
+<p class=parameters>
+<tt>Url</tt> is the URL to be parsed. If the <tt>default</tt> table is
+present, it is used to store the parsed fields. Only fields present in the
+URL are overwritten. Therefore, this table can be used to pass default
+values for each field.
+</p>
+
+<p class=return>
+The function returns a table with all the URL components:
+</p>
+
+<blockquote><tt>
+parsed_url = {<br>
+&nbsp;&nbsp;url = <i>string</i>,<br>
+&nbsp;&nbsp;scheme = <i>string</i>,<br>
+&nbsp;&nbsp;authority = <i>string</i>,<br>
+&nbsp;&nbsp;path = <i>string</i>,<br>
+&nbsp;&nbsp;params = <i>string</i>,<br>
+&nbsp;&nbsp;query = <i>string</i>,<br>
+&nbsp;&nbsp;fragment = <i>string</i>,<br>
+&nbsp;&nbsp;userinfo = <i>string</i>,<br>
+&nbsp;&nbsp;host = <i>string</i>,<br>
+&nbsp;&nbsp;port = <i>string</i>,<br>
+&nbsp;&nbsp;user = <i>string</i>,<br>
+&nbsp;&nbsp;password = <i>string</i><br>
+}
+</tt></blockquote>
+
+<pre class=example>
+-- load url module
+url = require("socket.url")
+
+parsed_url = url.parse("http://www.example.com/cgilua/index.lua?a=2#there")
+-- parsed_url = {
+--   scheme = "http",
+--   authority = "www.example.com",
+--   path = "/cgilua/index.lua"
+--   query = "a=2",
+--   fragment = "there",
+--   host = "www.puc-rio.br",
+-- }
+
+parsed_url = url.parse("ftp://root:passwd@unsafe.org/pub/virus.exe;type=i")
+-- parsed_url = {
+--   scheme = "ftp",
+--   authority = "root:passwd@unsafe.org",
+--   path = "/pub/virus.exe",
+--   params = "type=i",
+--   userinfo = "root:passwd",
+--   host = "unsafe.org",
+--   user = "root",
+--   password = "passwd",
+-- }
+</pre>
+
+<!-- parse_path +++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class=name id="parse_path">
+url.<b>parse_path(</b>path<b>)</b>
+</p>
+
+<p class=description>
+Breaks a <tt>&lt;path&gt;</tt> URL component into all its 
+<tt>&lt;segment&gt;</tt> parts. 
+</p>
+
+<p class=description>
+<tt>Path</tt> is a string with the path to be parsed.
+</p>
+
+<p class=return>
+Since  some characters   are   reserved   in   URLs,  they must be escaped
+whenever present in a <tt>&lt;path&gt;</tt> component. Therefore, before
+returning a list with all the parsed segments, the function removes
+escaping from all of them. 
+</p>
+
+<!-- unescape +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class=name id="unescape">
+url.<b>unescape(</b>content<b>)</b>
+</p>
+
+<p class=description>
+Removes  the   URL   escaping    content   coding   from   a string.
+</p>
+
+<p class=parameters>
+<tt>Content</tt> is the string to be decoded.
+</p>
+
+<p class=return>
+The function returns the decoded string. 
+</p>
+
+<!-- footer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<div class=footer>
+<hr>
+<center>
+<p class=bar>
+<a href="index.html">home</a> &middot;
+<a href="index.html#down">download</a> &middot;
+<a href="installation.html">installation</a> &middot;
+<a href="introduction.html">introduction</a> &middot;
+<a href="reference.html">reference</a>
+</p>
+<p>
+<small>
+Last modified by Diego Nehab on <br>
+Thu Apr 20 00:26:05 EDT 2006
+</small>
+</p>
+</center>
+</div>
+
+</body>
+</html>
