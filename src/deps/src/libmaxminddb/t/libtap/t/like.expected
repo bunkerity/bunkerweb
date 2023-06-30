@@ -1,4 +1,0 @@
-1..3
-ok 1 - strange ~~ /range/
-ok 2 - strange !~~ /anger/
-ok 3 - matches the regex
