@@ -4,7 +4,8 @@ WORKDIR /tmp
 
 COPY requirements.txt .
 
-RUN MAKEFLAGS="-j $(nproc)" pip install --no-cache -r requirements.txt && \
+RUN apk add --no-cache gcc musl-dev libffi-dev && \
+  MAKEFLAGS="-j $(nproc)" pip install --no-cache -r requirements.txt && \
   rm -f requirements.txt
 
 WORKDIR /opt/tests

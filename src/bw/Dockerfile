@@ -73,7 +73,7 @@ RUN apk add --no-cache pcre bash python3 && \
 	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 # Fix CVEs
-RUN apk add "libx11>=1.8.4-r1"
+RUN apk add "libx11>=1.8.4-r1" "tiff>=4.4.0-r4"
 
 VOLUME /data /etc/nginx
 

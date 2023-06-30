@@ -1,9 +1,0 @@
-1..8
-ok 1 - quux
-ok 2 - thud
-ok 3 - wombat
-ok 4 # skip need to be on windows
-ok 5 - quux
-ok 6 - thud
-ok 7 - wombat
-ok 8 # skip 

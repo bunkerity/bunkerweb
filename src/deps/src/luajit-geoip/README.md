@@ -14,7 +14,7 @@ longer updated.
 ## Install
 
 ```bash
-luarocks install luajit-geoip
+luarocks install --server=http://luarocks.org/manifests/leafo geoip
 ```
 
 # Reference

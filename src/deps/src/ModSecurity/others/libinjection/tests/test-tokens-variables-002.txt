@@ -1,8 +1,0 @@
---TEST--
-Variables
---INPUT--
-SELECT @@;
---EXPECTED--
-E SELECT
-v @@
-; ;

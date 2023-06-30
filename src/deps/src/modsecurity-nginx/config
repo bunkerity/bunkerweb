@@ -1,0 +1,192 @@
+# vim: filetype=sh
+
+# If $NGX_IGNORE_RPATH is set to "YES", we will ignore explicit
+# library path specification on resulting binary, allowing libmodsecurity.so
+# to be relocated across configured library pathes (adjust /etc/ld.so.conf
+# or set $LD_LIBRARY_PATH environment variable to manage them)
+#
+# $YAJL_LIB variable may need to be populated in case of non-standard
+# path of libyajl.so's installation
+
+ngx_feature_name=
+ngx_feature_run=no
+ngx_feature_incs="#include <modsecurity/modsecurity.h>"
+ngx_feature_libs="-lmodsecurity"
+ngx_feature_test='printf("hello");'
+ngx_modsecurity_opt_I=
+ngx_modsecurity_opt_L=
+
+YAJL_EXTRA=
+if test -n "$YAJL_LIB"; then
+    YAJL_EXTRA="-L$YAJL_LIB -lyajl"
+fi
+
+# If $MODSECURITY_INC is specified, lets use it. Otherwise lets try
+# the default paths
+#
+if [ -n "$MODSECURITY_INC" -o -n "$MODSECURITY_LIB" ]; then
+    # explicitly set ModSecurity lib path
+    ngx_feature="ModSecurity library in \"$MODSECURITY_LIB\" and \"$MODSECURITY_INC\" (specified by the MODSECURITY_LIB and MODSECURITY_INC env)"
+    ngx_feature_path="$MODSECURITY_INC"
+    ngx_modsecurity_opt_I="-I$MODSECURITY_INC"
+    ngx_modsecurity_opt_L="-L$MODSECURITY_LIB $YAJL_EXTRA"
+
+    if [ $NGX_RPATH = YES ]; then
+        ngx_feature_libs="-R$MODSECURITY_LIB -L$MODSECURITY_LIB -lmodsecurity $YAJL_EXTRA"
+    elif [ "$NGX_IGNORE_RPATH" != "YES" -a $NGX_SYSTEM = "Linux" ]; then
+        ngx_feature_libs="-Wl,-rpath,$MODSECURITY_LIB -L$MODSECURITY_LIB -lmodsecurity $YAJL_EXTRA"
+    else
+        ngx_feature_libs="-L$MODSECURITY_LIB -lmodsecurity $YAJL_EXTRA"
+    fi
+
+    . auto/feature
+
+    if [ $ngx_found = no ]; then
+        cat << END
+        $0: error: ngx_http_modsecurity_module requires the ModSecurity library and MODSECURITY_LIB is defined as "$MODSECURITY_LIB" and MODSECURITY_INC (path for modsecurity.h) "$MODSECURITY_INC", but we cannot find ModSecurity there.
+END
+        exit 1
+    fi
+else
+    # auto-discovery
+    ngx_feature="ModSecurity library"
+    ngx_feature_libs="-lmodsecurity"
+
+    . auto/feature
+
+    if [ $ngx_found = no ]; then
+        ngx_feature="ModSecurity library in /usr/local/modsecurity"
+        ngx_feature_path="/usr/local/modsecurity/include"
+        if [ $NGX_RPATH = YES ]; then
+            ngx_feature_libs="-R/usr/local/modsecurity/lib -L/usr/local/modsecurity/lib -lmodsecurity"
+        elif [ "$NGX_IGNORE_RPATH" != "YES" -a $NGX_SYSTEM = "Linux" ]; then
+            ngx_feature_libs="-Wl,-rpath,/usr/local/modsecurity/lib -L/usr/local/modsecurity/lib -lmodsecurity"
+        else
+            ngx_feature_libs="-L/usr/local/modsecurity/lib -lmodsecurity"
+        fi
+
+        . auto/feature
+
+    fi
+fi
+
+
+
+if [ $ngx_found = no ]; then
+ cat << END
+ $0: error: ngx_http_modsecurity_module requires the ModSecurity library.
+END
+ exit 1
+fi
+
+
+ngx_addon_name=ngx_http_modsecurity_module
+
+# We must place ngx_http_modsecurity_module after ngx_http_gzip_filter_module
+# in load order list to be able to read response body before it gets compressed
+# (for filter modules later initialization means earlier execution).
+#
+# Nginx implements load ordering only for dynamic modules and only a BEFORE part
+# of "ngx_module_order". So we list all of the modules that come after
+# ngx_http_gzip_filter_module as a BEFORE dependency for
+# ngx_http_modsecurity_module.
+#
+# For static compilation HTTP_FILTER_MODULES will be patched later.
+
+modsecurity_dependency="ngx_http_postpone_filter_module \
+                        ngx_http_ssi_filter_module \
+                        ngx_http_charset_filter_module \
+                        ngx_http_xslt_filter_module \
+                        ngx_http_image_filter_module \
+                        ngx_http_sub_filter_module \
+                        ngx_http_addition_filter_module \
+                        ngx_http_gunzip_filter_module \
+                        ngx_http_userid_filter_module \
+                        ngx_http_headers_filter_module \
+                        ngx_http_copy_filter_module"
+
+
+if test -n "$ngx_module_link"; then
+	ngx_module_type=HTTP_FILTER
+	ngx_module_name="$ngx_addon_name"
+	ngx_module_srcs="$ngx_addon_dir/src/ngx_http_modsecurity_module.c \
+            $ngx_addon_dir/src/ngx_http_modsecurity_pre_access.c \
+            $ngx_addon_dir/src/ngx_http_modsecurity_header_filter.c \
+            $ngx_addon_dir/src/ngx_http_modsecurity_body_filter.c \
+            $ngx_addon_dir/src/ngx_http_modsecurity_log.c \
+            $ngx_addon_dir/src/ngx_http_modsecurity_rewrite.c \
+            "
+	ngx_module_deps="$ngx_addon_dir/src/ddebug.h \
+            $ngx_addon_dir/src/ngx_http_modsecurity_common.h \
+            "
+        ngx_module_libs="$ngx_feature_libs"
+        ngx_module_incs="$ngx_feature_path"
+
+        ngx_module_order="ngx_http_chunked_filter_module \
+                          ngx_http_v2_filter_module \
+                          ngx_http_range_header_filter_module \
+                          ngx_http_gzip_filter_module \
+                          $ngx_module_name \
+                          $modsecurity_dependency";
+
+	. auto/module
+else
+	CFLAGS="$ngx_modsecurity_opt_I $CFLAGS"
+	NGX_LD_OPT="$ngx_modsecurity_opt_L $NGX_LD_OPT"
+
+	CORE_INCS="$CORE_INCS $ngx_feature_path"
+	CORE_LIBS="$CORE_LIBS $ngx_feature_libs"
+
+	HTTP_FILTER_MODULES="$HTTP_FILTER_MODULES ngx_http_modsecurity_module"
+	NGX_ADDON_SRCS="\
+	    $NGX_ADDON_SRCS \
+	    $ngx_addon_dir/src/ngx_http_modsecurity_module.c \
+	    $ngx_addon_dir/src/ngx_http_modsecurity_pre_access.c \
+	    $ngx_addon_dir/src/ngx_http_modsecurity_header_filter.c \
+	    $ngx_addon_dir/src/ngx_http_modsecurity_body_filter.c \
+	    $ngx_addon_dir/src/ngx_http_modsecurity_log.c \
+	    $ngx_addon_dir/src/ngx_http_modsecurity_rewrite.c \
+	    "
+
+	NGX_ADDON_DEPS="\
+	    $NGX_ADDON_DEPS \
+	    $ngx_addon_dir/src/ddebug.h \
+	    $ngx_addon_dir/src/ngx_http_modsecurity_common.h \
+	    "
+fi
+
+#
+# Nginx does not provide reliable way to introduce our module into required
+# place in static ($ngx_module_link=ADDON) compilation mode, so we must
+# explicitly update module "ordering rules".
+#
+if [ "$ngx_module_link" != DYNAMIC ] ; then
+    # Reposition modsecurity module to satisfy $modsecurity_dependency
+    # (this mimics dependency resolution made by ngx_add_module() function
+    # though less optimal in terms of computational complexity).
+    modules=
+    found=
+    for module in $HTTP_FILTER_MODULES; do
+        # skip our module name from the original list
+        if [ "$module" = "$ngx_addon_name" ]; then
+            continue
+        fi
+        if [ -z "${found}" ]; then
+            for item in $modsecurity_dependency; do
+                if [ "$module" = "$item" ]; then
+                    modules="${modules} $ngx_addon_name"
+                    found=1
+                    break
+                fi
+            done
+        fi
+        modules="${modules} $module"
+    done
+    if [ -z "${found}" ]; then
+        # This must never happen since ngx_http_copy_filter_module must be in HTTP_FILTER_MODULES
+        # and we stated dependency on it in $modsecurity_dependency
+        echo "$0: error: cannot reposition modsecurity module in HTTP_FILTER_MODULES list"
+        exit 1
+    fi
+    HTTP_FILTER_MODULES="${modules}"
+fi

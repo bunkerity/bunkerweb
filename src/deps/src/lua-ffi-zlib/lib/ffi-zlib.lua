@@ -95,7 +95,7 @@ unsigned long crc32_combine(unsigned long, unsigned long, long);
 
 ]])
 
-local zlib = ffi.load("/usr/share/bunkerweb/deps/lib/lua/libz.so")
+local zlib = ffi.load(ffi.os == "Windows" and "zlib1" or "z")
 _M.zlib = zlib
 
 -- Default to 16k output buffer
