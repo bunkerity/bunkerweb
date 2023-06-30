@@ -1,0 +1,8 @@
+--TEST--
+keyword unary-operator [1vsnf]
+--INPUT--
+select - 1;
+--EXPECTED--
+E select
+1 1
+; ;

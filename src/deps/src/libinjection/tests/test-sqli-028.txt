@@ -1,0 +1,7 @@
+--TEST--
+sqli for code coverage, not mysql -- but sqli
+--INPUT--
+foo'--'bar'
+--EXPECTED--
+
+

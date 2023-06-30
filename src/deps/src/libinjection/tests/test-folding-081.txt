@@ -1,0 +1,6 @@
+--TEST--
+folding with operator
+--INPUT--
+1 mod (2)
+--EXPECTED--
+1 1

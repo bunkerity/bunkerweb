@@ -1,0 +1,10 @@
+--TEST--
+test of comma, unary, stuff -> ,
+--INPUT--
+1,-junk
+--EXPECTED--
+1 1
+
+
+
+

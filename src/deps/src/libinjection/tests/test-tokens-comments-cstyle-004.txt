@@ -1,0 +1,8 @@
+--TEST--
+Comments, C-style.  Dangle. Note last comment is preserved
+--INPUT--
+SELECT 1 /*
+--EXPECTED--
+E SELECT
+1 1
+c /*

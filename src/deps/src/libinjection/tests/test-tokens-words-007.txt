@@ -1,0 +1,9 @@
+--TEST--
+Just for testing various branches in tokenizer
+--INPUT--
+FOO AND BAR
+--EXPECTED--
+n FOO
+& AND
+n BAR
+

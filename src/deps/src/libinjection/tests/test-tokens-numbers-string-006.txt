@@ -1,0 +1,9 @@
+--TEST--
+mysql b-string, b-lower-case single-quote [10]* single quote
+--INPUT--
+SELECT b'1010101';
+--EXPECTED--
+E SELECT
+1 b'1010101'
+; ;
+

@@ -1,0 +1,7 @@
+--TEST--
+sqli test for code coverage, double quotes
+--INPUT--
+1" UNION ALL SELECT * FROM FOO
+--EXPECTED--
+sUEok
+
