@@ -80,12 +80,6 @@
       "commit": "v0.5"
     },
     {
-      "id": "lua-ffi-zlib",
-      "name": "lua-ffi-zlib",
-      "url": "https://github.com/hamishforbes/lua-ffi-zlib.git",
-      "commit": "v0.5"
-    },
-    {
       "id": "lua-gd",
       "name": "lua-gd v2.0.33r3+",
       "url": "https://github.com/ittner/lua-gd.git",
