@@ -62,6 +62,12 @@
       "commit": "v1.5.3"
     },
     {
+      "id": "libinjection",
+      "name": "libinjection v3.10.0+",
+      "url": "https://github.com/libinjection/libinjection.git",
+      "commit": "49904c42a6e68dc8f16c022c693e897e4010a06c"
+    },
+    {
       "id": "libmaxminddb",
       "name": "libmaxminddb",
       "url": "https://github.com/maxmind/libmaxminddb.git",
