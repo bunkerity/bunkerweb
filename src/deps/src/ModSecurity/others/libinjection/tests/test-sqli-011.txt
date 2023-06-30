@@ -1,7 +1,0 @@
---TEST--
-sqli test, not sqli -- too many fast positives
---INPUT--
-foo--
---EXPECTED--
-
-

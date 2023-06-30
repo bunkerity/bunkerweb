@@ -1,5 +1,0 @@
---TEST--
-empty!
---INPUT--
---EXPECTED--
-

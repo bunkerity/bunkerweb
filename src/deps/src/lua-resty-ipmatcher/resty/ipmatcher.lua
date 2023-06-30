@@ -127,7 +127,7 @@ local mt = {__index = _M}
 
 
 local ngx_log = ngx.log
-local ngx_INFO = ngx.DEBUG
+local ngx_INFO = ngx.INFO
 local function log_info(...)
     if cur_level and ngx_INFO > cur_level then
         return
