@@ -63,23 +63,14 @@ function git_secure_clone() {
 	repo="$1"
 	commit="$2"
 	folder="$(echo "$repo" | sed -E "s@https://github.com/.*/(.*)\.git@\1@")"
-	if [ ! -d "deps/src/${folder}" ] ; then
-		output="$(git clone --recursive "$repo" "deps/src/${folder}")"
+	if [ ! -d "src/deps/src/${folder}" ] ; then
+		output="$(git subtree add --prefix "src/deps/src/${folder}" "$repo" "${commit}^{commit}" --squash)"
 		if [ $? -ne 0 ] ; then
 			echo "❌ Error cloning $1"
 			echo "$output"
 			exit 1
 		fi
-		old_dir="$(pwd)"
-		cd "deps/src/${folder}"
-		output="$(git checkout "${commit}^{commit}" 2>&1)"
-		if [ $? -ne 0 ] ; then
-			echo "❌ Commit hash $commit is absent from repository $repo"
-			echo "$output"
-			exit 1
-		fi
-		cd "$old_dir"
-		output="$(rm -rf "deps/src/${folder}/.git")"
+		output="$(rm -rf "src/deps/src/${folder}/.git")"
 		if [ $? -ne 0 ] ; then
 			echo "❌ Can't delete .git from repository $repo"
 			echo "$output"
@@ -96,14 +87,14 @@ function secure_download() {
 	file="$2"
 	hash="$3"
 	dir="$(echo $file | sed 's/.tar.gz//g')"
-	if [ ! -d "deps/src/${dir}" ] ; then
-		output="$(wget -q -O "deps/src/${file}" "$link" 2>&1)"
+	if [ ! -d "src/deps/src/${dir}" ] ; then
+		output="$(wget -q -O "src/deps/src/${file}" "$link" 2>&1)"
 		if [ $? -ne 0 ] ; then
 			echo "❌ Error downloading $link"
 			echo "$output"
 			exit 1
 		fi
-		check="$(sha512sum "deps/src/${file}" | cut -d ' ' -f 1)"
+		check="$(sha512sum "src/deps/src/${file}" | cut -d ' ' -f 1)"
 		if [ "$check" != "$hash" ] ; then
 			echo "❌️ Wrong hash from file $link (expected $hash got $check)"
 			exit 1
@@ -132,20 +123,20 @@ function do_and_check_cmd() {
 echo "ℹ️ Downloading nginx"
 NGINX_VERSION="1.24.0"
 secure_download "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" "nginx-${NGINX_VERSION}.tar.gz" "1114e37de5664a8109c99cfb2faa1f42ff8ac63c932bcf3780d645e5ed32c0b2ac446f80305b4465994c8f9430604968e176ae464fd80f632d1cb2c8f6007ff3"
-if [ -f "deps/src/nginx-${NGINX_VERSION}.tar.gz" ] ; then
-	do_and_check_cmd tar -xvzf deps/src/nginx-${NGINX_VERSION}.tar.gz -C deps/src
-	do_and_check_cmd rm -f deps/src/nginx-${NGINX_VERSION}.tar.gz
+if [ -f "src/deps/src/nginx-${NGINX_VERSION}.tar.gz" ] ; then
+	do_and_check_cmd tar -xvzf src/deps/src/nginx-${NGINX_VERSION}.tar.gz -C src/deps/src
+	do_and_check_cmd rm -f src/deps/src/nginx-${NGINX_VERSION}.tar.gz
 fi
 
 # Lua 5.1.5
 echo "ℹ️ Downloading Lua"
 LUA_VERSION="5.1.5"
 secure_download "https://www.lua.org/ftp/lua-${LUA_VERSION}.tar.gz" "lua-${LUA_VERSION}.tar.gz" "0142fefcbd13afcd9b201403592aa60620011cc8e8559d4d2db2f92739d18186860989f48caa45830ff4f99bfc7483287fd3ff3a16d4dec928e2767ce4d542a9"
-if [ -f "deps/src/lua-${LUA_VERSION}.tar.gz" ] ; then
-	do_and_check_cmd tar -xvzf deps/src/lua-${LUA_VERSION}.tar.gz -C deps/src
-	do_and_check_cmd rm -f deps/src/lua-${LUA_VERSION}.tar.gz
-	do_and_check_cmd patch deps/src/lua-${LUA_VERSION}/Makefile deps/misc/lua.patch1
-	do_and_check_cmd patch deps/src/lua-${LUA_VERSION}/src/Makefile deps/misc/lua.patch2
+if [ -f "src/deps/src/lua-${LUA_VERSION}.tar.gz" ] ; then
+	do_and_check_cmd tar -xvzf src/deps/src/lua-${LUA_VERSION}.tar.gz -C src/deps/src
+	do_and_check_cmd rm -f src/deps/src/lua-${LUA_VERSION}.tar.gz
+	do_and_check_cmd patch src/deps/src/lua-${LUA_VERSION}/Makefile src/deps/misc/lua.patch1
+	do_and_check_cmd patch src/deps/src/lua-${LUA_VERSION}/src/Makefile src/deps/misc/lua.patch2
 fi
 
 # LuaJIT v2.1-20230410
@@ -207,12 +198,12 @@ git_secure_clone "https://github.com/brunoos/luasec.git" "fddde111f7fe9ad5417d75
 # lua-resty-ipmatcher v0.6.1 (3 commits after just in case)
 echo "ℹ️ Downloading lua-resty-ipmatcher"
 dopatch="no"
-if [ ! -d "deps/src/lua-resty-ipmatcher" ] ; then
+if [ ! -d "src/deps/src/lua-resty-ipmatcher" ] ; then
 	dopatch="yes"
 fi
 git_secure_clone "https://github.com/api7/lua-resty-ipmatcher.git" "7fbb618f7221b1af1451027d3c64e51f3182761c"
 if [ "$dopatch" = "yes" ] ; then
-	do_and_check_cmd patch deps/src/lua-resty-ipmatcher/resty/ipmatcher.lua deps/misc/ipmatcher.patch
+	do_and_check_cmd patch src/deps/src/lua-resty-ipmatcher/resty/ipmatcher.lua src/deps/misc/ipmatcher.patch
 fi
 
 # lua-resty-redis v0.30
@@ -226,12 +217,12 @@ git_secure_clone "https://github.com/openresty/lua-resty-upload.git" "03704aee42
 # luajit-geoip v2.1.0
 echo "ℹ️ Downloading luajit-geoip"
 dopatch="no"
-if [ ! -d "deps/src/luajit-geoip" ] ; then
+if [ ! -d "src/deps/src/luajit-geoip" ] ; then
 	dopatch="yes"
 fi
 git_secure_clone "https://github.com/leafo/luajit-geoip.git" "12a9388207f40c37ad5cf6de2f8e0cc72bf13477"
 if [ "$dopatch" = "yes" ] ; then
-	do_and_check_cmd patch deps/src/luajit-geoip/geoip/mmdb.lua deps/misc/mmdb.patch
+	do_and_check_cmd patch src/deps/src/luajit-geoip/geoip/mmdb.lua src/deps/misc/mmdb.patch
 fi
 
 # lbase64 v1.5.3
@@ -257,23 +248,23 @@ git_secure_clone "https://github.com/openresty/lua-resty-lock.git" "9dc550e56b6f
 # lua-resty-openssl v0.8.23
 echo "ℹ️ Downloading lua-resty-openssl"
 dopatch="no"
-if [ ! -d "deps/src/lua-resty-openssl" ] ; then
+if [ ! -d "src/deps/src/lua-resty-openssl" ] ; then
 	dopatch="yes"
 fi
 git_secure_clone "https://github.com/fffonion/lua-resty-openssl.git" "b23c072a405b749ac60d21e3946cbf57a959b780"
 if [ "$dopatch" == "yes" ] ; then
-	do_and_check_cmd rm -r deps/src/lua-resty-openssl/t
+	do_and_check_cmd rm -r src/deps/src/lua-resty-openssl/t
 fi
 
 # lua-ffi-zlib v0.5.0
 echo "ℹ️ Downloading lua-ffi-zlib"
 dopatch="no"
-if [ ! -d "deps/src/lua-ffi-zlib" ] ; then
+if [ ! -d "src/deps/src/lua-ffi-zlib" ] ; then
 	dopatch="yes"
 fi
 git_secure_clone "https://github.com/hamishforbes/lua-ffi-zlib.git" "1fb69ca505444097c82d2b72e87904f3ed923ae9"
 if [ "$dopatch" = "yes" ] ; then
-	do_and_check_cmd patch deps/src/lua-ffi-zlib/lib/ffi-zlib.lua deps/misc/lua-ffi-zlib.patch
+	do_and_check_cmd patch src/deps/src/lua-ffi-zlib/lib/ffi-zlib.lua src/deps/misc/lua-ffi-zlib.patch
 fi
 
 # lua-resty-signal v0.03
@@ -283,34 +274,34 @@ git_secure_clone "https://github.com/openresty/lua-resty-signal.git" "d07163e8cf
 # ModSecurity v3.0.9
 echo "ℹ️ Downloading ModSecurity"
 dopatch="no"
-if [ ! -d "deps/src/ModSecurity" ] ; then
+if [ ! -d "src/deps/src/ModSecurity" ] ; then
 	dopatch="yes"
 fi
 git_secure_clone "https://github.com/SpiderLabs/ModSecurity.git" "205dac0e8c675182f96b5c2fb06be7d1cf7af2b2"
 if [ "$dopatch" = "yes" ] ; then
-	do_and_check_cmd patch deps/src/ModSecurity/configure.ac deps/misc/modsecurity.patch
-	do_and_check_cmd rm -rf deps/src/ModSecurity/others/libinjection
+	do_and_check_cmd patch src/deps/src/ModSecurity/configure.ac src/deps/misc/modsecurity.patch
+	do_and_check_cmd rm -rf src/deps/src/ModSecurity/others/libinjection
 fi
 
 # libinjection v3.10.0+
 # TODO: check if the latest commit is fine
 echo "ℹ️ Downloading libinjection"
 git_secure_clone "https://github.com/libinjection/libinjection.git" "49904c42a6e68dc8f16c022c693e897e4010a06c"
-do_and_check_cmd cp -r deps/src/libinjection deps/src/ModSecurity/others
+do_and_check_cmd cp -r src/deps/src/libinjection src/deps/src/ModSecurity/others
 
 # ModSecurity-nginx v1.0.3
 echo "ℹ️ Downloading ModSecurity-nginx"
 dopatch="no"
-if [ ! -d "deps/src/ModSecurity-nginx" ] ; then
+if [ ! -d "src/deps/src/ModSecurity-nginx" ] ; then
 	dopatch="yes"
 fi
 git_secure_clone "https://github.com/SpiderLabs/ModSecurity-nginx.git" "d59e4ad121df702751940fd66bcc0b3ecb51a079"
 if [ "$dopatch" = "yes" ] ; then
-	do_and_check_cmd patch deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_log.c deps/misc/modsecurity-nginx.patch
-	do_and_check_cmd patch deps/src/ModSecurity-nginx/config deps/misc/config.patch
-	do_and_check_cmd patch deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_common.h deps/misc/ngx_http_modsecurity_common.h.patch
-	do_and_check_cmd patch deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_module.c deps/misc/ngx_http_modsecurity_module.c.patch
-	do_and_check_cmd cp deps/misc/ngx_http_modsecurity_access.c deps/src/ModSecurity-nginx/src
+	do_and_check_cmd patch src/deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch
+	do_and_check_cmd patch src/deps/src/ModSecurity-nginx/config src/deps/misc/config.patch
+	do_and_check_cmd patch src/deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch
+	do_and_check_cmd patch src/deps/src/ModSecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch
+	do_and_check_cmd cp src/deps/misc/ngx_http_modsecurity_access.c src/deps/src/ModSecurity-nginx/src
 fi
 
 # libmaxminddb v1.7.1
