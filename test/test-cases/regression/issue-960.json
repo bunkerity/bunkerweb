@@ -1,0 +1,124 @@
+[
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "!@within appears to fail (1/3)",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/960",
+  "gihub_issue": 960,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+      "headers": {
+        "Host": "www.google.com"
+      },
+    "uri": "\/test.pl?param1=   test   &param2=test2",
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+    "expected": {
+      "audit_log": "",
+      "debug_log": "\\(Rule: 960032\\) .* Rule returned 0.",
+      "error_log": ""
+    },
+  "rules": [
+    "SecDefaultAction \"phase:1,log,deny,status:418,tag:'Host: %{request_headers.host}'\"",
+    "SecDefaultAction \"phase:2,log,deny,status:418,tag:'Host: %{request_headers.host}'\"",
+    "SecAction \"id:'900012',phase:request,nolog,pass,t:none,setvar:'tx.allowed_methods=GET HEAD POST OPTIONS'\"",
+    "SecRule REQUEST_METHOD \"!@within %{tx.allowed_methods}\" \"msg:'Method is not allowed by policy',severity:'WARNING',id:'960032',phase:request,block,rev:'2',ver:'OWASP_CRS/3.0.0',maturity:'9',accuracy:'9',tag:'application-multi',tag:'language-multi',tag:'platform-multi',tag:'attack-generic',tag:'OWASP_CRS/POLICY/METHOD_NOT_ALLOWED',tag:'WASCTC/WASC-15',tag:'OWASP_TOP_10/A6',tag:'OWASP_AppSensor/RE1',tag:'PCI/12.1',logdata:'%{matched_var}',setvar:'tx.msg=%{rule.msg}',setvar:tx.anomaly_score=+%{tx.warning_anomaly_score},setvar:tx.%{rule.id}-OWASP_CRS/POLICY/METHOD_NOT_ALLOWED-%{matched_var_name}=%{matched_var}\""
+    ]
+},
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "!@within appears to fail (2/3)",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/960",
+  "gihub_issue": 960,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+      "headers": {
+        "Host": "www.google.com"
+      },
+    "uri": "\/test.pl?param1=   test   &param2=test2",
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+    "expected": {
+      "audit_log": "",
+      "error_log": "",
+      "http_code": 418
+    },
+  "rules": [
+    "SecRuleEngine On",
+    "SecDefaultAction \"phase:1,log,deny,status:418,tag:'Host: %{request_headers.host}'\"",
+    "SecDefaultAction \"phase:2,log,deny,status:418,tag:'Host: %{request_headers.host}'\"",
+    "SecAction \"id:'900012',phase:request,nolog,pass,t:none,setvar:'tx.allowed_methods=GET HEAD POST OPTIONS'\"",
+    "SecRule REQUEST_METHOD \"@within %{tx.allowed_methods}\" \"msg:'Method is not allowed by policy',severity:'WARNING',id:'960032',phase:request,block,rev:'2',ver:'OWASP_CRS/3.0.0',maturity:'9',accuracy:'9',tag:'application-multi',tag:'language-multi',tag:'platform-multi',tag:'attack-generic',tag:'OWASP_CRS/POLICY/METHOD_NOT_ALLOWED',tag:'WASCTC/WASC-15',tag:'OWASP_TOP_10/A6',tag:'OWASP_AppSensor/RE1',tag:'PCI/12.1',logdata:'%{matched_var}',setvar:'tx.msg=%{rule.msg}',setvar:tx.anomaly_score=+%{tx.warning_anomaly_score},setvar:tx.%{rule.id}-OWASP_CRS/POLICY/METHOD_NOT_ALLOWED-%{matched_var_name}=%{matched_var}\""
+    ]
+},
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "!@within appears to fail (3/3)",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/960",
+  "gihub_issue": 960,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+      "headers": {
+        "Host": "www.google.com"
+      },
+    "uri": "\/test.pl?param1=   test   &param2=test2",
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+    "expected": {
+      "audit_log": "",
+      "error_log": "",
+      "http_code": 418
+    },
+  "rules": [
+    "SecRuleEngine On",
+    "SecDefaultAction \"phase:1,log,deny,status:418,tag:'Host: %{request_headers.host}'\"",
+    "SecDefaultAction \"phase:2,log,deny,status:418,tag:'Host: %{request_headers.host}'\"",
+    "SecAction \"id:'900012',phase:request,nolog,pass,t:none,setvar:'tx.allowed_methods=HEAD POST OPTIONS'\"",
+    "SecRule REQUEST_METHOD \"!@within %{tx.allowed_methods}\" \"msg:'Method is not allowed by policy',severity:'WARNING',id:'960032',phase:request,block,rev:'2',ver:'OWASP_CRS/3.0.0',maturity:'9',accuracy:'9',tag:'application-multi',tag:'language-multi',tag:'platform-multi',tag:'attack-generic',tag:'OWASP_CRS/POLICY/METHOD_NOT_ALLOWED',tag:'WASCTC/WASC-15',tag:'OWASP_TOP_10/A6',tag:'OWASP_AppSensor/RE1',tag:'PCI/12.1',logdata:'%{matched_var}',setvar:'tx.msg=%{rule.msg}',setvar:tx.anomaly_score=+%{tx.warning_anomaly_score},setvar:tx.%{rule.id}-OWASP_CRS/POLICY/METHOD_NOT_ALLOWED-%{matched_var_name}=%{matched_var}\""
+    ]
+}
+]

@@ -1,0 +1,99 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRuleRemoveTargetById (1)",
+    "expected":{
+      "http_code": 200
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/wp-login.php?whee&pwd=lhebs",
+      "method":"GET",
+      "body": [ ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule REQUEST_FILENAME \"@endsWith /wp-login.php\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveTargetById=1;ARGS:pwd\"",
+        "SecRule ARGS \"@contains lhebs\" \"id:1,phase:3,t:none,status:202,block,deny,tag:'CRS'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRuleRemoveTargetById (2)",
+    "expected":{
+      "debug_log": "Target value: .*Variable: ARGS:pwd"
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/wp-login.php?whee&pwd=lhebs",
+      "method":"GET",
+      "body": [ ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRule REQUEST_FILENAME \"@endsWith /wp-login.php\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveTargetById=123;ARGS:pwd\"",
+        "SecRule ARGS \"@contais whe\" \"id:1,phase:3,t:none,nolog,pass,tag:'CRS2'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRuleRemoveTargetById (3)",
+    "expected":{
+      "http_code": 200
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/wp-login.php?whee&pwd=lhebs",
+      "method":"GET",
+      "body": [ ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRule REQUEST_FILENAME \"@endsWith /wp-login.php\" \"id:9002100,phase:2,t:none,nolog,pass,ctl:ruleRemoveTargetById=1;ARGS\"",
+        "SecRule ARGS \"@contains lhebs\" \"id:1,phase:3,t:none,status:202,block,deny,tag:'CRS'\""
+    ]
+  }
+]

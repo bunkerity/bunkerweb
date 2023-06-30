@@ -1,0 +1,186 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing XML request body parser - validateDTD (validate ok)",
+    "expected":{
+      "debug_log": "XML: Successfully validated payload against DTD: test-cases/data/SoapEnvelope.dtd"
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+        "    <!DOCTYPE Envelope SYSTEM \"SoapEnvelope.dtd\">",
+        "    <Envelope>",
+        "        <Body>",
+        "            <getInput>",
+        "                <id type=\"string\">12123</id>",
+        "            </getInput>",
+        "        </Body>",
+        "    </Envelope>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecXMLExternalEntity On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500008,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML \"@validateDTD test-cases/data/SoapEnvelope.dtd\" \"id:500007,phase:3,deny\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing XML request body parser - validateDTD (validation failed)",
+    "expected":{
+      "debug_log": "XML Error: No declaration for element xBody",
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+        "    <!DOCTYPE Envelope SYSTEM \"SoapEnvelope.dtd\">",
+        "        <Envelope>",
+        "            <xBody>",
+        "                <getInput>",
+        "                    <id type=\"string\">12123</id>",
+        "                </getInput>",
+        "            </xBody>",
+        "        </Envelope>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecXMLExternalEntity On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500008,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML \"@validateDTD test-cases/data/SoapEnvelope.dtd\" \"id:500007,phase:3,deny\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing XML request body parser - validateDTD (bad XML)",
+    "expected":{
+      "debug_log": "XML: DTD validation failed because content is not well formed",
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+        "<!DOCTYPE Envelope SYSTEM \"SoapEnvelope.dtd\">",
+        "    <Envelop>",
+        "        <Body>",
+        "            <getInput>",
+        "                <id type=\"string\">12123</id>",
+        "            </getInput>",
+        "        </Body>",
+        "    </Envelope>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecXMLExternalEntity On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500008,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML \"@validateDTD test-cases/data/SoapEnvelope.dtd\" \"id:500007,phase:3,deny\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing XML request body parser - validateDTD (bad DTD)",
+    "expected":{
+      "debug_log": "Failed to load DTD: test-cases/data/SoapEnvelope-bad.dtd",
+      "http_code": 403
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120",
+        "Content-Type": "text/xml"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"POST",
+      "body": [
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+        "    <!DOCTYPE Envelope SYSTEM \"SoapEnvelope.dtd\">",
+        "        <Envelope>",
+        "            <Body>",
+        "                <getInput>",
+        "                    <id type=\"string\">12123</id>",
+        "                </getInput>",
+        "            </Body>",
+        "        </Envelope>"
+      ]
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecXMLExternalEntity On",
+        "SecRule REQUEST_HEADERS:Content-Type \"^text/xml$\" \"id:500008,phase:1,t:none,t:lowercase,nolog,pass,ctl:requestBodyProcessor=XML\"",
+        "SecRule XML \"@validateDTD test-cases/data/SoapEnvelope-bad.dtd\" \"id:500007,phase:3,deny\""
+    ]
+  }
+]
+

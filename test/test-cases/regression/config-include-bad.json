@@ -1,0 +1,55 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Include - bad rule",
+    "expected":{
+      "parser_error": "Rules error. File: test-cases/data/config_example3.txt. Line: 2. Column: 66. Expecting an action, got:  ops \"id:1000,pass,t:trim\""
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "Include test-cases/data/config_example3.txt",
+      "SecRule ARGS \"@missing_operator test\" \"id:19,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Include - missing file",
+    "expected":{
+      "parser_error": "Rules error. File: config-include-bad.json. Line: 2. Column: 46. test-cases/data/config_example-ops.txt: Not able to open file."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "Include test-cases/data/config_example-ops.txt",
+      "SecRule ARGS \"@contains test\" \"id:19,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Include - missing at include",
+    "expected":{
+      "parser_error": "Rules error. File: test-cases/data/config_example-ops-include.txt. Line: 1. Column: 52. test-cases/data/config_example-not-exist.txt: Not able to open file."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "Include test-cases/data/config_example-ops-include.txt",
+      "SecRule ARGS \"@contains test\" \"id:19,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Include - duplicate id",
+    "expected":{
+      "parser_error": "Rule id: 40 is duplicated"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "Include test-cases/data/config_example.txt",
+      "Include test-cases/data/config_example.txt",
+      "SecRule ARGS \"@missing_operator test\" \"id:19,pass,t:trim\""
+    ]
+  }
+]

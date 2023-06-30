@@ -1,0 +1,97 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"ctl:requestBodyProcessor=URLENCODED",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"application/lhebs",
+        "Expect":"100-continue"
+      },
+      "uri":"/a=urlencoded",
+      "method":"POST",
+      "body":[
+                "param1=value1\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \\\"value1",
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule REQUEST_HEADERS:Content-Type \"@contains lhebs\" \"phase:1,id:122,t:none,log,auditlog,pass,ctl:requestBodyProcessor=URLENCODED\"",
+        "SecRule ARGS_POST \"@contains value1\" \"phase:2,id:123,t:none,deny,log,auditlog\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"ctl:requestBodyProcessor=URLENCODED",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"application/x-www-form-urlencoded",
+        "Expect":"100-continue"
+      },
+      "uri":"/a=urlencoded",
+      "method":"POST",
+      "body":[
+                "param1=value1\r"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \\\"value1",
+      "http_code": 403
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRequestBodyAccess On",
+        "SecRule ARGS_POST \"@contains value1\" \"phase:2,id:123,t:none,deny,log,auditlog\""
+    ]
+  }
+]
