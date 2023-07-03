@@ -1,9 +1,0 @@
---TEST--
-tags
---INPUT--
-<foo
---EXPECTED--
-TAG_NAME_OPEN,3,foo
-
-
-

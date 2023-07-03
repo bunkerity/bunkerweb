@@ -1,4 +1,0 @@
-esse é um texto com acentos
-quoted-printable tem que quebrar linhas longas, com mais que 76 linhas de texto
-fora que as quebras de linhas têm que ser normalizadas
-vamos ver o que dá isso aqui
