@@ -42,6 +42,7 @@ do
   name="$(echo $repo | jq -r .name)"
   url="$(echo $repo | jq -r .url)"
   commit="$(echo $repo | jq -r .commit)"
+  post_install="$(echo $repo | jq -r .post_install)"
 
   echo "ℹ️ Clone ${name} from ${url} at commit/version ${commit}"
 
@@ -55,5 +56,10 @@ do
 
   if [ -d "src/deps/src/${id}/.git" ] ; then
     do_and_check_cmd rm -rf "src/deps/src/${id}/.git"
+  fi
+
+  if [ "$post_install" != "null" ] ; then
+    echo "ℹ️ Running post install script for ${name}"
+    bash -c "$post_install"
   fi
 done
