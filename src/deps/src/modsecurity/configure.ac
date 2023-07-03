@@ -321,14 +321,14 @@ fi
 
 
 # Decide if we want to build the tests or not.
-buildTestUtilities=false
-if test "x$YAJL_FOUND" = "x1"; then
+# buildTestUtilities=false
+# if test "x$YAJL_FOUND" = "x1"; then
     # Regression tests will not be able to run without the logging support.
     # But we still have the unit tests.
     # if test "$debugLogs" = "true"; then
-        buildTestUtilities=true
+#         buildTestUtilities=true
     # fi
-fi
+# fi
 
 
 AM_CONDITIONAL([TEST_UTILITIES], [test $buildTestUtilities = true])
