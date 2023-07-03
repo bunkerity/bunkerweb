@@ -1,0 +1,47 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920230.yaml"
+    description: "Description"
+  tests:
+    -
+      # From old modsec regression tests
+      test_title: 920230-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?parm=%25%37%33%25%36%46%25%36%44%25%36%35%25%37%34%25%36%35%25%37%38%25%37%34%25%35%46%25%33%31%25%33%32%25%33%33%25%33%34"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                  Accept-Language: "en-us,en;q=0.5"
+                  Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                  Keep-Alive: "300"
+                  Proxy-Connection: "keep-alive"
+            output:
+              log_contains: "id \"920230\""
+    -
+      # From old modsec regression tests
+      test_title: 920230-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?parm=%7%6F%6D%65%74%65%78%74%5F%31%32%33%"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                  Accept-Language: "en-us,en;q=0.5"
+                  Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                  Keep-Alive: "300"
+                  Proxy-Connection: "keep-alive"
+            output:
+              no_log_contains: "id \"920230\""

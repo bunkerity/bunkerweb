@@ -1,0 +1,557 @@
+---
+  meta:
+    author: "Christian S.J. Peron, Christoph Hansen, Franziska Buehler"
+    description: None
+    enabled: true
+    name: 942360.yaml
+  tests:
+  -
+    test_title: 942360-1
+    desc: "concatenated basic SQL injection and SQLLFI"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          # 23423 as "sdfsdfs" FROM table
+          data: "var=1234%20AS%20%22foobar%22%20FROM%20tablevar2=whatever"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-2
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "select Char("
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-3
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "SELECT CHAR("
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-4
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "SELECT GROUP_CONCAT("
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-5
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "SELECT group_cOnCat("
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-6
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") as cc FROM"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-7
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") AS orders FROM"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-8
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") AS `carrier_id` from"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-9
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "select load_file("
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-10
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") AS Role FROM"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-11
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "` AS `edit_user_id` from"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-12
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") AS val FROM"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-13
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "pay=%60+REGEXP%20"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-14
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") AS 'Durchschnitt_Importzeit' FROM"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-15
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "` AS `OXTIMESTAMP` from"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-16
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") as col_0_0_ from"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-17
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") AS `count` FROM"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-18
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") AS schlagwoerter FROM"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-19
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") as User from"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-20
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") AS t FROM"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-21
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "(load_file("
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-22
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") as ExecuteTheseSQLCommands FROM"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-23
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ")      AS schlagwoerter      FROM"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-24
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "` AS `documentType` FROM"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-25
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "! As' from"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-26
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ";  As  not  from"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-27
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "SELECT load_file("
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-28
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "6 As\" from"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-29
+    desc: "Detects concatenated basic SQL injection and SQLLFI attempts"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: ") as day1 FROM"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"
+  -
+    test_title: 942360-30
+    desc: GH issue 1580
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /
+          data: ", aside from"
+          version: HTTP/1.0
+        output:
+          no_log_contains: id "942360"
+  -
+    test_title: 942360-31
+    desc: GH issue 1605
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /
+          data: "a=/create"
+          version: HTTP/1.0
+        output:
+          no_log_contains: id "942360"
+  -
+    test_title: 942360-32
+    desc: GH issue 1605
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /
+          data: "a=/CREATE TABLE Persons"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942360"

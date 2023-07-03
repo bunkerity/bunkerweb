@@ -1,0 +1,255 @@
+    -
+      test_title: skeletonid-skeletontest
+      desc: "Argument test includes keyword skeletonkeyword"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "skeletondefaultaddr"
+              port: skeletondefaultport
+              headers:
+                Host: "skeletondefaulthost"
+                User-Agent: "skeletondefaultuseragent"
+                Accept: "skeletondefaultaccept"
+                Accept-Charset: "skeletondefaultacceptcharset"
+                Accept-Encoding: "skeletondefaultacceptencoding"
+                Accept-Language: "skeletondefaultacceptlanguage"
+                Content-Type: "application/x-www-form-urlencoded"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=skeletonkeyword"
+            output:
+              log_contains: "id \"skeletonid\""
+
+    -
+      test_title: skeletonid-skeletontest
+      desc: "Argument name includes keyword skeletonkeyword"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "skeletondefaultaddr"
+              port: skeletondefaultport
+              headers:
+                Host: "skeletondefaulthost"
+                User-Agent: "skeletondefaultuseragent"
+                Accept: "skeletondefaultaccept"
+                Accept-Charset: "skeletondefaultacceptcharset"
+                Accept-Encoding: "skeletondefaultacceptencoding"
+                Accept-Language: "skeletondefaultacceptlanguage"
+                Content-Type: "skeletondefaultcontenttype"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "skeletonkeyword=test"
+            output:
+              log_contains: "id \"skeletonid\""
+
+    -
+      test_title: skeletonid-skeletontest
+      desc: "Cookie test includes keyword skeletonkeyword"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "skeletondefaultaddr"
+              port: skeletondefaultport
+              headers:
+                Host: "skeletondefaulthost"
+                User-Agent: "skeletondefaultuseragent"
+                Accept: "skeletondefaultaccept"
+                Accept-Charset: "skeletondefaultacceptcharset"
+                Accept-Encoding: "skeletondefaultacceptencoding"
+                Accept-Language: "skeletondefaultacceptlanguage"
+                Content-Type: "skeletondefaultcontenttype"
+                Cookie: test=skeletonkeyword
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"skeletonid\""
+
+    -
+      test_title: skeletonid-skeletontest
+      desc: "Cookie name includes keyword skeletonkeyword"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "skeletondefaultaddr"
+              port: skeletondefaultport
+              headers:
+                Host: "skeletondefaulthost"
+                User-Agent: "skeletondefaultuseragent"
+                Accept: "skeletondefaultaccept"
+                Accept-Charset: "skeletondefaultacceptcharset"
+                Accept-Encoding: "skeletondefaultacceptencoding"
+                Accept-Language: "skeletondefaultacceptlanguage"
+                Content-Type: "skeletondefaultcontenttype"
+                Cookie: skeletonkeyword=test
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"skeletonid\""
+
+    -
+      test_title: skeletonid-skeletontest
+      desc: "Request header test includes keyword skeletonkeyword"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "skeletondefaultaddr"
+              port: skeletondefaultport
+              headers:
+                Host: "skeletondefaulthost"
+                User-Agent: "skeletondefaultuseragent"
+                Accept: "skeletondefaultaccept"
+                Accept-Charset: "skeletondefaultacceptcharset"
+                Accept-Encoding: "skeletondefaultacceptencoding"
+                Accept-Language: "skeletondefaultacceptlanguage"
+                Content-Type: "skeletondefaultcontenttype"
+                test: skeletonkeyword
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=value"
+            output:
+              log_contains: "id \"skeletonid\""
+
+    -
+      test_title: skeletonid-skeletontest
+      desc: "XML attribute value includes keyword skeletonkeyword"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "skeletondefaultaddr"
+              port: skeletondefaultport
+              headers:
+                Host: "skeletondefaulthost"
+                User-Agent: "skeletondefaultuseragent"
+                Accept: "skeletondefaultaccept"
+                Accept-Charset: "skeletondefaultacceptcharset"
+                Accept-Encoding: "skeletondefaultacceptencoding"
+                Accept-Language: "skeletondefaultacceptlanguage"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"skeletonkeyword\">element_value</element></xml>"
+            output:
+              log_contains: "id \"skeletonid\""
+
+    -
+      test_title: skeletonid-skeletontest
+      desc: "XML element value includes keyword skeletonkeyword"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "skeletondefaultaddr"
+              port: skeletondefaultport
+              headers:
+                Host: "skeletondefaulthost"
+                User-Agent: "skeletondefaultuseragent"
+                Accept: "skeletondefaultaccept"
+                Accept-Charset: "skeletondefaultacceptcharset"
+                Accept-Encoding: "skeletondefaultacceptencoding"
+                Accept-Language: "skeletondefaultacceptlanguage"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"attribute_value\">skeletonkeyword</element></xml>"
+            output:
+              log_contains: "id \"skeletonid\""
+
+    -
+      test_title: skeletonid-skeletontest
+      desc: "Nested XML element value includes keyword skeletonkeyword"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "skeletondefaultaddr"
+              port: skeletondefaultport
+              headers:
+                Host: "skeletondefaulthost"
+                User-Agent: "skeletondefaultuseragent"
+                Accept: "skeletondefaultaccept"
+                Accept-Charset: "skeletondefaultacceptcharset"
+                Accept-Encoding: "skeletondefaultacceptencoding"
+                Accept-Language: "skeletondefaultacceptlanguage"
+                Content-Type: "application/xml"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "<?xml version=\"1.0\"?><xml><l1><l2><l3><element attribute_name=\"attribute_value\">skeletonkeyword</element></l3></l2></l1></xml>"
+            output:
+              log_contains: "id \"skeletonid\""
+
+    -
+      test_title: skeletonid-skeletontest
+      desc: "Content-Type text/plain includes keyword skeletonkeyword"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "skeletondefaultaddr"
+              port: skeletondefaultport
+              headers:
+                Host: "skeletondefaulthost"
+                User-Agent: "skeletondefaultuseragent"
+                Accept: "skeletondefaultaccept"
+                Accept-Charset: "skeletondefaultacceptcharset"
+                Accept-Encoding: "skeletondefaultacceptencoding"
+                Accept-Language: "skeletondefaultacceptlanguage"
+                Content-Type: "text/plain"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "test=skeletonkeyword"
+            output:
+              log_contains: "id \"skeletonid\""
+
+    -
+      test_title: skeletonid-skeletontest
+      desc: "Content-Type application/json arg value includes keyword skeletonkeyword"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "skeletondefaultaddr"
+              port: skeletondefaultport
+              headers:
+                Host: "skeletondefaulthost"
+                User-Agent: "skeletondefaultuseragent"
+                Accept: "skeletondefaultaccept"
+                Accept-Charset: "skeletondefaultacceptcharset"
+                Accept-Encoding: "skeletondefaultacceptencoding"
+                Accept-Language: "skeletondefaultacceptlanguage"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"test\": \"skeletonkeyword\"}"
+            output:
+              log_contains: "id \"skeletonid\""
+
+    -
+      test_title: skeletonid-skeletontest
+      desc: "Content-Type application/json arg name includes keyword skeletonkeyword"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "skeletondefaultaddr"
+              port: skeletondefaultport
+              headers:
+                Host: "skeletondefaulthost"
+                User-Agent: "skeletondefaultuseragent"
+                Accept: "skeletondefaultaccept"
+                Accept-Charset: "skeletondefaultacceptcharset"
+                Accept-Encoding: "skeletondefaultacceptencoding"
+                Accept-Language: "skeletondefaultacceptlanguage"
+                Content-Type: "application/json"
+              method: "POST"
+              version: "HTTP/1.0"
+              data: "{\"skeletonkeyword\": \"test\"}"
+            output:
+              log_contains: "id \"skeletonid\""

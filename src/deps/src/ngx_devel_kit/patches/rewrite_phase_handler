@@ -1,0 +1,19 @@
+diff -p -r a/src/http/ngx_http_core_module.c b/src/http/ngx_http_core_module.c
+*** a/src/http/ngx_http_core_module.c	2010-09-27 12:48:12.000000000 +0100
+--- b/src/http/ngx_http_core_module.c	2010-10-09 13:44:09.000000000 +0100
+*************** ngx_http_core_rewrite_phase(ngx_http_req
+*** 910,915 ****
+--- 910,922 ----
+          return NGX_AGAIN;
+      }
+  
++ #if defined(nginx_version) && nginx_version >= 8042 && (NDK_REWRITE_PHASE)
++ 
++     if (rc == NGX_AGAIN || rc == NGX_DONE) {
++         return NGX_OK;
++     }
++     
++ #endif
+      /* rc == NGX_OK || rc == NGX_ERROR || rc == NGX_HTTP_...  */
+  
+      ngx_http_finalize_request(r, rc);

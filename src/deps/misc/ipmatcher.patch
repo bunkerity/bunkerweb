@@ -1,0 +1,5 @@
+@@ -129,3 +129,3 @@
+ local ngx_log = ngx.log
+-local ngx_INFO = ngx.INFO
++local ngx_INFO = ngx.DEBUG
+ local function log_info(...)

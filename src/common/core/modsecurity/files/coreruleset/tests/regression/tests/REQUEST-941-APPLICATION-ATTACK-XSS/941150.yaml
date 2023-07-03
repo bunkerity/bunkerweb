@@ -1,0 +1,41 @@
+---
+  meta:
+    author: "zmallen"
+    enabled: true
+    name: "941150.yaml"
+    description: "Tests to trigger, or not trigger 941150"
+  tests:
+  -
+    test_title: 941150-1
+    desc: Disallowed HTML entities, ARGS
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: GET
+          port: 80
+          uri: '/foo'
+          headers:
+            User-Agent: ModSecurity CRS 3 Tests
+            Host: localhost
+          data: '941150-1%3D%3Ca%20href%3D%22test%22'
+        output:
+          log_contains: id "941150"
+  -
+    test_title: 941150-2
+    desc: Disallowed HTML entities, ARGS
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          method: POST
+          port: 80
+          uri: '/'
+          headers:
+            User-Agent: ModSecurity CRS 3 Tests
+            Host: localhost
+          data: "payload=<a href=# language=\"JScript.Encode\" onclick=\"#@~^CAAAAA==C^+.D`8#mgIAAA==^#~@\">XSS</a>"
+        output:
+          log_contains: id "941150"

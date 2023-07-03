@@ -1,0 +1,121 @@
+{%- set ns = namespace(idx=test_idx) %}
+{%- for f in module.fields %}
+  {%- if f.type in tests.types and not f.skip_tests%}
+
+=== TEST {{ ns.idx }}: {{ modname }}:get_{{ f.field }} (AUTOGEN)
+--- http_config eval: $::HttpConfig
+--- config
+    location =/t {
+        content_by_lua_block {
+            local f = io.open("t/fixtures/{{ module.sample }}"):read("*a")
+            local c = myassert(require("resty.openssl.{{ modname }}").new(f))
+
+            local get = myassert(c:get_{{ f.field }}())
+
+            {%- if tests.types[f.type].print %}
+            get = get:{{ tests.types[f.type].print }}()
+            {%- endif %}
+            ngx.print(get)
+        }
+    }
+--- request
+    GET /t
+--- response_body eval
+"{{ f.sample_printable }}"
+--- no_error_log
+[error]
+    {%- set ns.idx = ns.idx + 1 %}
+
+=== TEST {{ ns.idx }}: {{ modname }}:set_{{ f.field }} (AUTOGEN)
+--- http_config eval: $::HttpConfig
+--- config
+    location =/t {
+        content_by_lua_block {
+            local f = io.open("t/fixtures/{{ module.sample }}"):read("*a")
+            local c = myassert(require("resty.openssl.{{ modname }}").new(f))
+
+            {%- if f.type not in LUA_TYPES %}
+            local toset = myassert(require("resty.openssl.{{ f.type }}").{{ tests.types[f.type].new_from }})
+            {%- else %}
+            local toset = {{ tests.types[f.type].new_from }}
+            {%- endif %}
+            local ok = myassert(c:set_{{ f.field }}(toset))
+
+            local get = myassert(c:get_{{ f.field }}())
+
+            {%- if tests.types[f.type].print %}
+            get = get:{{ tests.types[f.type].print }}()
+            toset = toset:{{ tests.types[f.type].print }}()
+            {%- endif %}
+            if get ~= toset then
+              ngx.say(get)
+              ngx.say(toset)
+            else
+              ngx.print("ok")
+            end
+        }
+    }
+--- request
+    GET /t
+--- response_body eval
+"ok"
+--- no_error_log
+[error]
+    {%- set ns.idx = ns.idx + 1 %}
+  {%- endif %}
+  {%- if f.extension_nid and not f.skip_tests %}
+
+=== TEST {{ ns.idx + 1 }}: {{ modname }}:get/set_{{ f.field }}_critical (AUTOGEN)
+--- http_config eval: $::HttpConfig
+--- config
+    location =/t {
+        content_by_lua_block {
+            local f = io.open("t/fixtures/{{ module.sample }}"):read("*a")
+            local c = myassert(require("resty.openssl.{{ modname }}").new(f))
+
+            local crit = myassert(c:get_{{ f.field }}_critical())
+
+            local ok, err = myassert(c:set_{{ f.field }}_critical(not crit))
+
+            ngx.say(c:get_{{ f.field }}_critical() == not crit)
+        }
+    }
+--- request
+    GET /t
+--- response_body
+true
+--- no_error_log
+[error]
+    {%- set ns.idx = ns.idx + 1 %}
+  {%- endif %}
+{%- endfor %}
+
+=== TEST {{ ns.idx + 1 }}: {{ modname }}:get_get_signature_name (AUTOGEN)
+--- http_config eval: $::HttpConfig
+--- config
+    location =/t {
+        content_by_lua_block {
+            local f = io.open("t/fixtures/{{ module.sample }}"):read("*a")
+            local c = myassert(require("resty.openssl.{{ modname }}").new(f))
+
+            local nid = myassert(c:get_signature_nid())
+
+            ngx.say(nid)
+
+            local name = myassert(c:get_signature_name())
+
+            ngx.say(name)
+
+            local name = myassert(c:get_signature_digest_name())
+
+            ngx.say(name)
+        }
+    }
+--- request
+    GET /t
+--- response_body
+{{ module.sample_signature_nid }}
+{{ module.sample_signature_name }}
+{{ module.sample_signature_digest_name }}
+--- no_error_log
+[error]

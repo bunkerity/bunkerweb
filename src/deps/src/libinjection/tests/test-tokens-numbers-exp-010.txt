@@ -1,0 +1,8 @@
+--TEST--
+broken exponential format, end of line
+--INPUT--
+SELECT 123E+
+--EXPECTED--
+E SELECT
+n 123E+
+

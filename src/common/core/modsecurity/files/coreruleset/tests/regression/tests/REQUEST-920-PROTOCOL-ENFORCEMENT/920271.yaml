@@ -1,0 +1,92 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920271.yaml"
+    description: "Description"
+  tests:
+    -
+      test_title: 920271-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1%127"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              log_contains: "id \"920271\""
+    -
+      test_title: 920271-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1%03"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              log_contains: "id \"920271\""
+    -
+      test_title: 920271-3
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test%00=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              log_contains: "id \"920271\""
+    -
+      test_title: 920271-4
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Cookie: hi%13=bye
+            output:
+              log_contains: "id \"920271\""
+    -
+      test_title: 920271-5
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/%20index.html?test=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              no_log_contains: "id \"920271\""
+    -
+      test_title: 920271-6
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/%FFindex.html?test=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              no_log_contains: "id \"920271\""

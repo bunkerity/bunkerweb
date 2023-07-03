@@ -1,0 +1,65 @@
+
+###############
+## FUNCTIONS ##
+###############
+
+# TODO : provide information about checking versions of sed etc
+# TODO : an optional patch function
+
+ndk_generate_files() {
+    echo "building Nginx Development Kit utility functions and macros ..."
+
+    autobuild="$ngx_addon_dir/auto/build"
+    chmod +x $autobuild
+    $autobuild `pwd` $NGX_OBJS/addon/ndk || exit 1
+}
+
+ndk_get_nginx_version() {
+    # We get the Nginx version number from the string form rather than
+    # nginx_version because it is available in more (every?) version
+
+    cat src/core/nginx.h                                |
+    grep  '#define NGINX_VERSION'                       |
+    sed -r                                              \
+        -e 's/[^0-9.]*([0-9.]+).*/\1/'                  \
+        -e 's/([0-9]+\.[0-9]+\.)([0-9]{1})$/\100\2/'    \
+        -e 's/([0-9]+\.[0-9]+\.)([0-9]{2})$/\10\2/'     \
+        -e 's/\.//g'                                    \
+        -e 's/^0+(.*)/\1/'
+}
+
+#####################
+## CONFIG SETTINGS ##
+#####################
+
+ngx_addon_name=ngx_devel_kit
+ngx_objs_dirs="$ngx_addon_dir/objs $NGX_OBJS/addon/ndk"
+
+NDK_SRCS="$ngx_addon_dir/src/ndk.c"
+NDK_DEPS="$ngx_addon_dir/src/ndk.h"
+NDK_INCS="$ngx_addon_dir/src $ngx_objs_dirs"
+
+CORE_INCS="$CORE_INCS $ngx_objs_dirs"
+HTTP_INCS="$HTTP_INCS $ngx_addon_dir/src $ngx_objs_dir"
+
+if test -n "$ngx_module_link"; then
+    ngx_module_type=HTTP
+    ngx_module_name="ndk_http_module"
+    ngx_module_srcs="$NDK_SRCS"
+    ngx_module_deps="$NDK_DEPS"
+    ngx_module_incs="$NDK_INCS"
+
+    . auto/module
+else
+    HTTP_MODULES="$HTTP_MODULES ndk_http_module"
+    NGX_ADDON_SRCS="$NGX_ADDON_SRCS $NDK_SRCS"
+    NGX_ADDON_DEPS="$NGX_ADDON_SRCS $NDK_DEPS"
+fi
+
+have=NDK . auto/have
+
+##############
+## INCLUDES ##
+##############
+
+. $ngx_addon_dir/ngx_auto_lib_core

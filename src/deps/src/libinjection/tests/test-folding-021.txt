@@ -1,0 +1,6 @@
+--TEST--
+merge backquote words into one (mysql)
+--INPUT--
+`foo`.`bar`
+--EXPECTED--
+n foo

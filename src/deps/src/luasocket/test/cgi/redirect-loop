@@ -1,0 +1,3 @@
+#!/bin/sh
+echo Location: http://$HTTP_HOST$REQUEST_URI
+echo

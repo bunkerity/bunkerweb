@@ -1,0 +1,55 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920350.yaml"
+    description: "Description"
+  tests:
+    -
+      test_title: 920350-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "127.0.0.1"
+              protocol: "http"
+              uri: "/"
+            output:
+              log_contains: "id \"920350\""
+    -
+      test_title: 920350-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "localhost"
+              method: "GET"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+              protocol: "http"
+              uri: "/"
+            output:
+              no_log_contains: "id \"920350\""
+    -
+      test_title: 920350-3
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "localhost"
+              method: "GET"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "1.2.3.4"
+              protocol: "http"
+              uri: "/"
+            output:
+              log_contains: "id \"920350\""

@@ -1,0 +1,240 @@
+---
+  meta:
+    author: "lifeforms"
+    enabled: true
+    name: "920480.yaml"
+    description: "Description"
+  tests:
+    - test_title: 920480-1
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded; charset=utf-8"
+              data: "test=value"
+            output:
+              no_log_contains: "id \"920480\""
+    - test_title: 920480-2
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded;charset=UTF-8"
+              data: "test=value"
+            output:
+              no_log_contains: "id \"920480\""
+    - test_title: 920480-3
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded;charset=iso-8859-1"
+              data: "test=value"
+            output:
+              no_log_contains: "id \"920480\""
+    - test_title: 920480-4
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded;charset=ISO-8859-15"
+              data: "test=value"
+            output:
+              no_log_contains: "id \"920480\""
+    - test_title: 920480-5
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded; charset=windows-1252"
+              data: "test=value"
+            output:
+              no_log_contains: "id \"920480\""
+    # TODO: this case is not yet handled by 3.1, future work
+    # - test_title: 920480-6
+    #   stages:
+    #     - stage:
+    #         input:
+    #           dest_addr: "127.0.0.1"
+    #           port: 80
+    #           method: "POST"
+    #           headers:
+    #               User-Agent: "ModSecurity CRS 3 Tests"
+    #               Host: "localhost"
+    #               Content-Type: "application/x-www-form-urlencoded; charset=UTF-80" #trailing garbage after 'UTF-8'
+    #           data: "test=value"
+    #         output:
+    #           log_contains: "id \"920480\""
+    - test_title: 920480-7
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded; charset=garbage"
+              data: "test=value"
+            output:
+              log_contains: "id \"920480\""
+    - test_title: 920480-8
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded;charset=garbage"
+              data: "test=value"
+            output:
+              log_contains: "id \"920480\""
+    # TODO: this test should pass (works with curl), to be researched
+    # - test_title: 920480-9
+    #   stages:
+    #     - stage:
+    #         input:
+    #           dest_addr: "127.0.0.1"
+    #           port: 80
+    #           method: "POST"
+    #           headers:
+    #               User-Agent: "ModSecurity CRS 3 Tests"
+    #               Host: "localhost"
+    #               Content-Type: "application/x-www-form-urlencoded; charset=ibm037" # https://www.slideshare.net/SoroushDalili/waf-bypass-techniques-using-http-standard-and-web-servers-behaviour slide 32
+    #           data: "test=value"
+    #         output:
+    #           log_contains: "id \"920480\""
+    # TODO: this test should pass (works with curl), to be researched
+    # - test_title: 920480-10
+    #   stages:
+    #     - stage:
+    #         input:
+    #           dest_addr: "127.0.0.1"
+    #           port: 80
+    #           method: "POST"
+    #           headers:
+    #               User-Agent: "ModSecurity CRS 3 Tests"
+    #               Host: "localhost"
+    #               Content-Type: "application/x-www-form-urlencoded;charset=ibm037" # https://www.slideshare.net/SoroushDalili/waf-bypass-techniques-using-http-standard-and-web-servers-behaviour slide 32
+    #           data: "test=value"
+    #         output:
+    #           log_contains: "id \"920480\""
+    - test_title: 920480-11
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  # random other IBM charset
+                  Content-Type: "application/x-www-form-urlencoded;charset=ibm038"
+              data: "test=value"
+            output:
+              log_contains: "id \"920480\""
+    # TODO: this case is not yet checked by CRS, future work
+    # - test_title: 920480-12
+    #   stages:
+    #     - stage:
+    #         input:
+    #           dest_addr: "127.0.0.1"
+    #           port: 80
+    #           method: "POST"
+    #           headers:
+    #               User-Agent: "ModSecurity CRS 3 Tests"
+    #               Host: "localhost"
+    #               Content-Type: "application/x-www-form-urlencoded;charset=utf-8;charset=ibm037" #double charset may cause evasion
+    #           data: "test=value"
+    #         output:
+    #           log_contains: "id \"920480\""
+    # TODO: this case is not yet checked by CRS, future work
+    # - test_title: 920480-13
+    #   stages:
+    #     - stage:
+    #         input:
+    #           dest_addr: "127.0.0.1"
+    #           port: 80
+    #           method: "POST"
+    #           headers:
+    #               User-Agent: "ModSecurity CRS 3 Tests"
+    #               Host: "localhost"
+    #               Content-Type: "application/x-www-form-urlencoded;charset=ibm037;charset=UTF-8" #double charset may cause evasion
+    #           data: "test=value"
+    #         output:
+    #           log_contains: "id \"920480\""
+    - test_title: 920480-14
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  # random other IBM charset
+                  Content-Type: "application/x-www-form-urlencoded; charset=\"utf-8\""
+              data: "test=value"
+            output:
+              no_log_contains: "id \"920480\""
+    - test_title: 920480-15
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  # random other IBM charset
+                  Content-Type: "application/x-www-form-urlencoded; charset='utf-8'"
+              data: "test=value"
+            output:
+              no_log_contains: "id \"920480\""
+    - test_title: 920480-16
+      stages:
+        - stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              method: "POST"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  # random other IBM charset
+                  Content-Type: "application/x-www-form-urlencoded; charset=\"garbage\""
+              data: "test=value"
+            output:
+              log_contains: "id \"920480\""

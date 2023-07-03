@@ -1,0 +1,287 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920100.yaml"
+    description: "Tests to trigger, or not trigger 920100"
+  tests:
+    -
+      # Standard GET request
+      test_title: 920100-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+              protocol: "http"
+              uri: "/"
+              version: "HTTP/1.1"
+            output:
+              no_log_contains: "id \"920100\""
+    -
+      # Request has tab (\t) before request method - Apache complains
+      # AH00126: Invalid URI in request      GET / HTTP/1.1
+      test_title: 920100-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "     GET"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+              protocol: "http"
+              uri: "/"
+              version: "HTTP/1.1"
+            output:
+              status: 400
+    -
+      # Perfectly valid OPTIONS request
+      test_title: 920100-3
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "OPTIONS"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+              protocol: "http"
+              uri: "*"
+              version: "HTTP/1.1"
+            output:
+              no_log_contains: "id \"920100\""
+    -
+      # Valid CONNECT request however this is disabled by Apache default
+      test_title: 920100-4
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "CONNECT"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+              protocol: "http"
+              uri: "1.2.3.4:80"
+              version: "HTTP/1.1"
+            output:
+              status: [405, 403]
+    -
+      # invalid Connect request, domains require ports
+      test_title: 920100-5
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "CONNECT"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+              protocol: "http"
+              uri: "www.cnn.com"
+              version: "HTTP/1.1"
+            output:
+              status: 400
+    -
+      # This is an acceptable CONNECT request for SSL tunneling
+      test_title: 920100-6
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "CONNECT"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests #FP"
+                  Host: "localhost"
+              protocol: "http"
+              uri: "www.cnn.com:80"
+              version: "HTTP/1.1"
+            output:
+              log_contains: "id \"920100\""
+    -
+      # Valid request with query and anchor components
+      test_title: 920100-7
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+              protocol: "http"
+              uri: "/index.html?I=Like&Apples=Today#tag"
+              version: "HTTP/1.1"
+            output:
+              no_log_contains: "id \"920100\""
+    -
+      # The colon in the path is not allowed. Apache will block by default
+      # (20024)The given path is misformatted or contained invalid characters: [client 127.0.0.1:4142] AH00127: Cannot map GET /index.html:80?I=Like&Apples=Today#tag HTTP/1.1 to file
+      test_title: 920100-8
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+              protocol: "http"
+              uri: "/index.html:80?I=Like&Apples=Today#tag"
+              version: "HTTP/1.1"
+            output:
+              status: [400, 403]
+    -
+      # Normal Options request with path
+      test_title: 920100-9
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "OPTIONS"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+              protocol: "http"
+              uri: "/"
+              version: "HTTP/1.1"
+            output:
+              no_log_contains: "id \"920100\""
+    -
+      # An invalid method with a long name
+      test_title: 920100-10
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "REALLYLONGUNREALMETHOD"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests # FN"
+                  Host: "localhost"
+              protocol: "http"
+              uri: "/"
+              version: "HTTP/1.1"
+            output:
+              log_contains: "id \"920100\""
+    -
+      # An invalid request because a backslash is used in uri
+      # Apache will end up blocking this before it gets to CRS.
+      # We will need to support OR output tests to fix this
+      test_title: 920100-11
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests # FN"
+                  Host: "localhost"
+              protocol: "http"
+              uri: "\\"
+              version: "HTTP/1.1"
+            output:
+              status: [403, 400]
+              #log_contains: "id \"920100\""
+    -
+      test_title: 920100-12
+      desc: Invalid HTTP Request Line (920100) - Test 1 from old modsec regressions
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: "\tGET"
+            port: 80
+            uri: /
+            version: HTTP/1.1
+          output:
+            status: 400
+    -
+      test_title: 920100-13
+      desc: Invalid HTTP Request Line (920100) - Test 2 from old modsec regressions
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: GET
+            port: 80
+            uri: \index.html
+            version: HTTP\1.0
+          output:
+             status: [403, 400]
+             # log_contains: id "920100"
+    -
+      test_title: 920100-14
+      desc: Invalid HTTP Request Line (920100) - Test 3 from old modsec regressions
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: '|GET'
+            port: 80
+            uri: /
+            version: HTTP/1.0
+          output:
+            log_contains: id "920100"
+    -
+      test_title: 920100-15
+      desc: Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/demo/xss/xml/vuln.xml.php?input=<script xmlns="http://www.w3.org/1999/xhtml">setTimeout("top.frame2.location=\"javascript:(function () {var x = document.createElement(\\\"script\\\");x.src = \\\"//sdl.me/popup.js?//\\\";document.childNodes\[0\].appendChild(x);}());\"",1000)</script>&//'
+            headers:
+              User-Agent: ModSecurity CRS 3 Tests
+              Host: localhost
+          output:
+            status: [403, 400]
+            # log_contains: id "920100"

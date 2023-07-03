@@ -1,0 +1,33 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920320.yaml"
+    description: "Description"
+  tests:
+    -
+      test_title: 920330-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                  User-Agent: ""
+                  Host: "localhost"
+            output:
+              log_contains: "id \"920330\""
+    -
+      test_title: 920330-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests Enterprise"
+                  Host: "localhost"
+            output:
+              no_log_contains: "id \"920330\""

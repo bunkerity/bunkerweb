@@ -1,0 +1,9 @@
+version: "3.5"
+
+services:
+  init:
+    build: init
+    environment:
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./init/certs:/certs

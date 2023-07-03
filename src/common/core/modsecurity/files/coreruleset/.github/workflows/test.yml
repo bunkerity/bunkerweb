@@ -1,0 +1,71 @@
+---
+name: Regression Tests
+
+on:
+  push:
+    paths:
+      - 'rules/**'
+      - 'tests/**'
+      - '.github/**'
+  pull_request:
+    paths:
+      - 'rules/**'
+      - 'tests/**'
+      - '.github/**'
+
+jobs:
+  # "modsec2-apache", "modsec3-apache", "modsec3-nginx"
+  regression:
+    runs-on: ubuntu-latest
+    strategy:
+      # change to true
+      fail-fast: false
+      matrix:
+        modsec_version: [modsec2-apache]
+    steps:
+      - name: "Checkout repo"
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - uses: actions/cache@v2
+        id: cache
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: "Install dependencies"
+        run: |
+          pip install --upgrade setuptools wheel
+          pip install -r tests/regression/requirements.txt
+          pip install pytest-github-actions-annotate-failures
+
+      - name: "Run tests for ${{ matrix.modsec_version }}"
+        run: |
+          mkdir -p tests/logs/${{ matrix.modsec_version }}/{nginx,apache2}
+          docker-compose -f ./tests/docker-compose.yml up -d "${{ matrix.modsec_version }}"
+          # Use mounted volume path
+          py.test -vs --tb=short tests/regression/CRS_Tests.py \
+            --config="${{ matrix.modsec_version }}" \
+            --ruledir_recurse=./tests/regression/tests/
+
+      - name: "Change permissions if failed"
+        if: failure()
+        run: |
+            # we want to get the audit log, so change permissions (file is only for root on docker)
+            sudo chmod 644 tests/logs/${{ matrix.modsec_version }}/modsec_audit.log
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: waf-logs
+          path: tests/logs/${{ matrix.modsec_version }}
+
+      - name: Clean docker-compose
+        run: |
+          docker-compose -f ./tests/docker-compose.yml stop "${{ matrix.modsec_version }}"
+          docker-compose -f ./tests/docker-compose.yml down

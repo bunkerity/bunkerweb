@@ -1,0 +1,39 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    description: None
+    enabled: true
+    name: 941230.yaml
+  tests:
+  -
+    test_title: 941230-1
+    desc: "IE XSS Filters"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          data: "var=<embed src=\"deuce.swf\">&var2=whatever"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941230"
+  -
+    test_title: 941230-2
+    desc: "XSS test based on portswigger XSS cheatsheet"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          data: "payload=<embed src=\"javascript:alert(1)\"></a>"
+          version: HTTP/1.0
+        output:
+          log_contains: id "941230"

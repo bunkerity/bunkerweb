@@ -1,0 +1,23 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    description: None
+    enabled: true
+    name: 942200.yaml
+  tests:
+  -
+    test_title: 942200-1
+    desc: "comment-/space-obfuscated injections and backtick termination"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          data: ",varname%22=somedata"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942200"

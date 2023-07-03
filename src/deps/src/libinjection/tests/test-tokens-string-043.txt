@@ -1,0 +1,8 @@
+--TEST--
+oracle q-string
+--INPUT--
+q'!foo!'
+--EXPECTED--
+s qfooq
+
+

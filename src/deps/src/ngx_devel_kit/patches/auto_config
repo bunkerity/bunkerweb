@@ -1,0 +1,16 @@
+diff -pNr a/src/core/ngx_config.h b/src/core/ngx_config.h
+*** a/src/core/ngx_config.h	2008-09-19 13:47:13.000000000 +0100
+--- b/src/core/ngx_config.h	2010-10-09 17:14:13.000000000 +0100
+*************** typedef intptr_t        ngx_flag_t;
+*** 127,131 ****
+  #define NGX_MAX_UINT32_VALUE  (uint32_t) 0xffffffff
+  #endif
+  
+! 
+  #endif /* _NGX_CONFIG_H_INCLUDED_ */
+--- 127,131 ----
+  #define NGX_MAX_UINT32_VALUE  (uint32_t) 0xffffffff
+  #endif
+  
+! #include <ndk_config.h>
+  #endif /* _NGX_CONFIG_H_INCLUDED_ */

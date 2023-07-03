@@ -1,0 +1,29 @@
+---
+  meta:
+    author: "spartantri"
+    enabled: true
+    name: "944000.yaml"
+    description: "Description"
+  tests:
+    -
+      test_title: 944000-1
+      desc: Using text/plain Content-Type which do not have any bodyprocessor associated
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                Host: "localhost"
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+                Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+                Accept-Encoding: gzip,deflate
+                Accept-Language: en-us,en;q=0.5
+                Content-Type: "text/plain"
+              method: POST
+              version: HTTP/1.0
+              data: "test=value"
+            output:
+              no_log_contains: "id \"944000\""

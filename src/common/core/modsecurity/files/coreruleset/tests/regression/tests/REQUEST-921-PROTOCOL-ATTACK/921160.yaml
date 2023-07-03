@@ -1,0 +1,87 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    enabled: true
+    name: "921160.yaml"
+    description: "Tests for protocol based attacks"
+  tests:
+    -
+      test_title: 921160-1
+      desc: "HTTP Header Injection Attack via payload: w/header, invalid line break, newlines after key"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  Host: "localhost"
+                  User-agent: "user agent"
+              uri: "/script_rule921160.jsp?variableX=bar&variable2=Y&%0d%0Remote-addr%0d%0d%0d:%20foo.bar.com"
+            output:
+              log_contains: id "921160"
+    -
+      test_title: 921160-2
+      desc: "HTTP Header Injection Attack via payload: w/header, correct line break, newlines after key"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  Host: "localhost"
+                  User-agent: "user agent"
+              uri: "/script_rule921160.jsp?variableX=bar&variable2=Y&%0d%0aRemote-addr%0d%0d%0d:%20foo.bar.com"
+            output:
+              log_contains: id "921160"
+    -
+      test_title: 921160-3
+      desc: "HTTP Header Injection Attack via payload: w/header"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  Host: "localhost"
+                  User-agent: "user agent"
+              uri: "/script_rule921160.jsp?variableX=bar&variable2=Y&%0d%0aRemote-addr:%20foo.bar.com"
+            output:
+              log_contains: id "921160"
+    -
+      test_title: 921160-4
+      desc: "HTTP Header Injection Attack via payload: w/header, attack explicitly in value rather than key"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  Host: "localhost"
+                  User-agent: "user agent"
+              uri: "/script_rule921160.jsp?variableX=bar&variable2=%0d%0aRemote-addr:%20foo.bar.com"
+            output:
+              log_contains: id "921160"
+    -
+      test_title: 921160-5
+      desc: "HTTP Header Injection Attack via payload: w/header, attack explicitly in key rather than value"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  Host: "localhost"
+                  User-agent: "user agent"
+              uri: "/script_rule921160.jsp?variableX=bar&%0d%0aRemote-addr:%20foo.bar.com=Y"
+            output:
+              log_contains: id "921160"

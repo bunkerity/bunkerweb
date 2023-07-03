@@ -1,0 +1,245 @@
+---
+  meta:
+    author: theMiddle
+    description: Test for "933210" PHP Variable Function bypass
+    enabled: true
+    name: 933210.yaml
+  tests:
+  -
+    test_title: 933210-1
+    desc: Check for false positive 1
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%5bACME%5d%3a+this+is%2c+%28another%29+test+%28foo%29bar+or+foo%28bar%29.
+        output:
+          no_log_contains: id "933210"
+  -
+    test_title: 933210-2
+    desc: Check for false positive 2
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%28foo%29bar+or+foo%28bar%29+or+%5bfoo%5dbar+or+foo%5bbar%5d
+        output:
+          no_log_contains: id "933210"
+
+  -
+    test_title: 933210-3
+    desc: PHP Variable Function bypass "(system)('uname')"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%28system%29%28%27uname%27%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-4
+    desc: PHP Variable Function bypass "(sy.(st).em)('uname')"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%28sy.%28st%29.em%29%28%27uname%27%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-5
+    desc: PHP Variable Function bypass "(string)'system'('uname')"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%28string%29%22system%22%28%27uname%27%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-6
+    desc: PHP Variable Function bypass "( string ) 'sys'.'t'.'em' ('uname')"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%28+string+%29+%22sys%22.%22t%22.%22em%22+%28%27uname%27%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-7
+    desc: PHP Variable Function bypass "(string) {[system][0]} ('uname')"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%28string%29+%7b%5bsystem%5d%5b0%5d%7d+%28%27uname%27%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-8
+    desc: PHP Variable Function bypass "define('x', 'sys' . 'tem');(x)/* comment */('uname')"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=define%28%27x%27,+%27sys%27+.+%27tem%27%29%3b%28x%29%2f*+comment+*%2f%28%27uname%27%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-9
+    desc: PHP Variable Function bypass "$y = 'sys'.'tem';($y)('uname')"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=$y+=+%27sys%27.%27tem%27%3b%28$y%29%28%27uname%27%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-10
+    desc: PHP Variable Function bypass "define('z', [['sys' .'tem']]);(z)[0][0]('uname')"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=define%28%27z%27,+%5b%5b%27sys%27+.%27tem%27%5d%5d%29%3b%28z%29%5b0%5d%5b0%5d%28%27uname%27%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-11
+    desc: PHP Variable Function bypass "(system)(ls)"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%28system%29%28ls%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-12
+    desc: PHP Variable Function bypass "(/* comment */system)(ls/* comment */)"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%28%2f*+comment+*%2fsystem%29%28ls%2f*+comment+*%2f%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-13
+    desc: PHP Variable Function bypass "[system][0](ls)"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%5bsystem%5d%5b0%5d%28ls%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-14
+    desc: PHP Variable Function bypass "[ system ] [ 0 ] ( ls )"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%5b+system+%5d+%5b+0+%5d+%28+ls+%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-15
+    desc: PHP Variable Function bypass "(['system'])[0]('uname')"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%28%5b%27system%27%5d%29%5b0%5d%28%27uname%27%29
+        output:
+          log_contains: id "933210"
+
+  -
+    test_title: 933210-16
+    desc: PHP Variable Function bypass "(  [  system  ][  0  ])  {/* comment */0}  (  ls  )"
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=%28++%5b++system++%5d%5b++0++%5d%29++%7b%2f*+comment+*%2f0%7d++%28++ls++%29
+        output:
+          log_contains: id "933210"

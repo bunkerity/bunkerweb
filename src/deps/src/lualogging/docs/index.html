@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>LuaLogging: A simple API to use logging features in Lua</title>
+    <link rel="stylesheet" href="doc.css" type="text/css"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+  <div id="product_logo">
+    <img alt="LuaLogging logo" src="images/lualogging-128.png"/>
+  </div>
+  <div id="product_name"><big><strong>LuaLogging</strong></big></div>
+  <div id="product_description">A simple API to use logging features in Lua.</div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+<h1>LuaLogging</h1>
+  <ul>
+    <li><strong>Home</strong></li>
+    <li><a href="manual.html">Manual</a>
+      <ul>
+        <li><a href="manual.html#installation">Installation</a></li>
+        <li><a href="manual.html#logger">Logger objects</a></li>
+        <li><a href="manual.html#examples">Examples</a></li>
+      </ul>
+    </li>
+    <li><a href="manual.html#appenders">Appenders</a>
+      <ul>
+        <li><a href="console.html">Console</a></li>
+        <li><a href="file.html">File</a></li>
+        <li><a href="rolling_file.html">Rolling File</a></li>
+        <li><a href="sql.html">SQL</a></li>
+        <li><a href="socket.html">Socket</a></li>
+        <li><a href="rsyslog.html">Rsyslog</a></li>
+        <li><a href="email.html">Email</a></li>
+        <li><a href="nginx.html">Nginx</a></li>
+      </ul>
+    </li>
+    <li><a href="https://github.com/lunarmodules/lualogging">Project</a></li>
+    <li><a href="license.html">License</a></li>
+  </ul>
+</div> <!-- id="navigation" -->
+
+<div id="content">
+<h2><a name="overview"></a>Overview</h2>
+
+<p>LuaLogging provides a simple API to use logging features in Lua.
+Its design was based on
+<a href="https://logging.apache.org/log4j/docs/index.html">log4j</a>.
+LuaLogging currently supports, through the use of <em><a href="manual.html#appenders">appenders</a></em>,
+console, file, email, socket and sql outputs.</p>
+
+<p>
+LuaLogging is free software and uses the same <a href="license.html">license</a>
+as Lua 5.1.
+</p>
+
+<h2><a name="status"></a>Status</h2>
+
+<p>
+Current version is 1.8.2. It was developed for Lua 5.1+.
+</p>
+
+<h2><a name="download"></a>Download</h2>
+
+<p>
+LuaLogging can be downloaded from its
+<a href="https://github.com/lunarmodules/lualogging/archives/master">GitHub</a>
+downloads page or installed via LuaRocks.
+</p>
+
+<h2><a name="dependencies"></a>Dependencies</h2>
+
+<p>LuaLogging dependencies can be separated by the used appenders:</p>
+
+<dl>
+    <dt><strong>LuaLogging Core, Console and File appenders</strong></dt>
+    <dd>
+        <ul>
+          <li><a href="https://www.lua.org">Lua 5.1+</a></li>
+        </ul>
+    </dd>
+
+    <dt><strong>Socket, Rsyslog, and Email appenders</strong></dt>
+    <dd>
+        <ul>
+          <li><a href="http://w3.impa.br/~diego/software/luasocket/">LuaSocket</a></li>
+        </ul>
+    </dd>
+
+    <dt><strong>SQL appender</strong></dt>
+    <dd>
+        <ul>
+          <li>LuaSQL 2.1.x</li>
+        </ul>
+    </dd>
+</dl>
+
+<h2><a name="history"></a>History</h2>
+
+<dl class="history">
+    <dt><strong>1.8.2</strong> [27/Jan/2023]</dt>
+    <dd><strong>Fix</strong>: allow to work without the debug library.</dd>
+
+    <dt><strong>1.8.1</strong> [23/Jan/2023]</dt>
+    <dd><strong>Fix</strong>: use explicit tostring, don't rely on automatic coercion.</dd>
+    <dd><strong>Fix</strong>: rsyslog appender wouldn't properly clear the socket upon an error.</dd>
+
+    <dt><strong>1.8.0</strong> [22/Oct/2022]</dt>
+    <dd><strong>Added</strong>: new module <code>logging.envconfig</code> to allow log configuration via
+    environment variables.</dd>
+    <dd><strong>Refactor</strong>: refactored the appenders to be more object like. They now return a module table.</dd>
+    <dd><strong>Fix</strong>: add rsyslog appender to makefile install target.</dd>
+    <dd><strong>Fix</strong>: errorhandler in rsyslog was omitting 'self', and also log the failed message itself to stderr.</dd>
+    <dd><strong>Fix</strong>: when using Copas and rsyslog on Lua 5.1, coxpcall is required to yield.</dd>
+    <dd><strong>Fix</strong>: rsyslog; upon failure remove the closed socket from the cache to prevent the retry from using
+    the closed socket.</dd>
+
+    <dt><strong>1.7.0</strong> [21/Sep/2022]</dt>
+    <dd><strong>Added</strong>: new function <code>logging.date</code> is compatible with <code>os.date</code>
+    but supports second-fractions, to be represented by <code>%q</code> placeholder in the
+    <code>timestampPattern</code>.</dd>
+    <dd><strong>Added</strong>: new bundled appender; "rsyslog". This logger will log in syslog format to a remote
+    syslog server. It supports both BSD as well as IETF formats, and supports sending over UDP and TCP, with an option
+    to use Copas for async-sending over TCP.</dd>
+
+    <dt><strong>1.6.0</strong> [09/Nov/2021]</dt>
+    <dd><strong>Added</strong>: the <code>logPattern</code> can now be specified for each log-level individually.
+    This allows use cases like only adding <code>"%source"</code> on debug level, or injecting ansi-color coding
+    in for example the error log-level.</dd>
+    <dd><strong>Added</strong>: new bundled appender; "nginx". This logger has no configuration options, but will
+    simply pass any log messages on to the nginx log. When using LuaLogging in OpenResty, configure this logger.</dd>
+    <dd><strong>Added</strong>: application level defaults. New functions <code>logging.defaultLogPatterns()</code>
+      , <code>logging.defaultTimestampPattern()</code>, <code>logging.defaultLevel()</code>, and <code>logging.defaultLogger()</code>
+      can be used to get/set the global application level defaults.<br/>
+      Use carefully, this is global state, so only applications should set those, libraries should not.</dd>
+    <dd><strong>Added</strong>: the included appenders now have an extra parameter to set
+      log-level upon creation; <code>logLevel</code>.</dd>
+    <dd><strong>Added</strong>: the <code>logPattern</code> can now have new placeholders:<br/>
+      <code>"%file"</code> (source file), <br/>
+      <code>"%line"</code> (source line), <br/>
+      <code>"%function"</code> (function name), and <br/>
+      <code>"%source"</code> (evaluates to <code>"%file:%line in function '%function'"</code>).</dd>
+    <dd><strong>Added</strong>: the console logger has a new optional parameter "destination",
+      which must be either "stderr" or "stdout" (defaults to "stdout")</dd>
+
+    <dt><strong>1.5.2</strong> [12/Aug/2021]</dt>
+    <dd><strong>Fix</strong>: rolling-file, 'seek' can occasionally fail, handle it properly.</dd>
+
+    <dt><strong>1.5.1</strong> [22/Mar/2021]</dt>
+    <dd><strong>Reverted</strong>: Functionality to specify custom log levels.</dd>
+
+    <dt><strong>1.5.0</strong> [22/Mar/2021]</dt>
+    <dd><strong>Added</strong>: Functionality to specify custom log levels.</dd>
+    <dd><strong>Added</strong>: Provide verbose error message when formatting fails.</dd>
+    <dd><strong>Fix</strong>: disable buffering on windows files</dd>
+
+    <dt><strong>1.4.0</strong> [12/Aug/2020]</dt>
+    <dd><strong>Fix</strong>: No more global on Lua 5.3.</dd>
+    <dd><strong>Fix</strong>: Reduced log noise when changing log levels.</dd>
+    <dd><strong>Added</strong>: A new log-level "off" to suspend logging.</dd>
+    <dd><strong>Fix</strong>: Restored the log-level constants on the logger object.</dd>
+    <dd><strong>Fix</strong>: catch exceptions when formatting log messages.</dd>
+    <dd><strong>Change</strong>: creating loggers now always takes a parameters table (consistent
+    across all appenders). The old parameters are now deprecated, but still
+    work for backward compatibility purposes.</dd>
+    <dd><strong>Added</strong>: All appenders have a new property <code>timestampPattern</code>
+    to specify the format of the timestamp in the log message</dd>
+    <dd><strong>Added</strong>: <code>logger:getPrint()</code> function that returns a print-like
+    function, but directs all output to the logger.</dd>
+
+    <dt><strong>1.3.0</strong> [5/Mar/2013]</dt>
+
+    <dt><strong>1.2.0</strong> [20/Apr/2011]</dt>
+    <dd>Improved performance of logging.</dd>
+    <dd>Added Rolling File Appender.</dd>
+
+    <dt><strong>1.1.4</strong> [30/Oct/2007]</dt>
+    <dd>Fixed bug #1719 -
+    inefficient handling of file loggers (Patch by J&uuml;rgen H&ouml;tzel).</dd>
+
+    <dt><strong>1.1.3</strong> [08/Aug/2007]</dt>
+    <dd>New makefile for Windows (using nmake) and configure script for Unix.</dd>
+
+    <dt><strong>1.1.2</strong> [14/Aug/2006]</dt>
+    <dd>Fixed a bug found by Carlos Augusto where tostring() was being
+    incorrectly used with numbers.</dd>
+
+    <dt><strong>1.1.1</strong> [31/Mar/2006]</dt>
+    <dd></dd>
+
+    <dt><strong>1.1.0</strong> [12/Nov/2004]</dt>
+    <dd></dd>
+
+    <dt><strong>1.0.0</strong> [02/Jul/2004]</dt>
+    <dd></dd>
+</dl>
+
+<h2><a name="credits"></a>Credits</h2>
+
+<p>
+LuaLogging 1.2 and 1.3 were maintained by Robert G. Jakabosky.
+</p>
+
+<p>
+LuaLogging 1.1.x was designed by Danilo Tuler and Thiago Ponte
+and implemented by Thiago Ponte.
+</p>
+
+<p>LuaLogging 1.0.0 was designed by Danilo Tuler (and log4j)
+and implemented by Danilo Tuler and Andr&eacute; Carregal.</p>
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+  <p><a href="https://validator.w3.org/check?uri=referer">
+    <img src="https://www.w3.org/Icons/valid-xhtml10" alt="XHTML 1.0 v&aacute;lido!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+
+</body>
+</html>

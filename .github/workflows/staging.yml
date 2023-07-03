@@ -1,0 +1,169 @@
+name: Automatic tests (STAGING)
+
+permissions: read-all
+
+on:
+  push:
+    branches: [staging]
+
+jobs:
+
+  # Build Docker images
+  build-containers:
+    strategy:
+      matrix:
+        image: [bunkerweb, scheduler, autoconf, ui]
+        include:
+          - image: bunkerweb
+            dockerfile: src/bw/Dockerfile
+          - image: scheduler
+            dockerfile: src/scheduler/Dockerfile
+          - image: autoconf
+            dockerfile: src/autoconf/Dockerfile
+          - image: ui
+            dockerfile: src/ui/Dockerfile
+    uses: ./.github/workflows/container-build.yml
+    with:
+      RELEASE: staging
+      ARCH: linux/amd64
+      CACHE: true
+      PUSH: true
+      IMAGE: ${{ matrix.image }}
+      DOCKERFILE: ${{ matrix.dockerfile }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+  # Build Linux packages
+  build-packages:
+    strategy:
+      matrix:
+        linux: [ubuntu, debian, fedora, rhel]
+        include:
+          - linux: ubuntu
+            package: deb
+          - linux: debian
+            package: deb
+          - linux: fedora
+            package: rpm
+          - linux: rhel
+            package: rpm
+    uses: ./.github/workflows/linux-build.yml
+    with:
+      RELEASE: staging
+      LINUX: ${{ matrix.linux }}
+      PACKAGE: ${{ matrix.package }}
+      TEST: true
+      PLATFORMS: linux/amd64
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+  # Code security
+  code-security:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["python"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+          config-file: ./.github/codeql.yml
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{matrix.language}}"
+
+  # Create infrastructures
+  create-infras:
+    needs: [code-security, build-containers, build-packages]
+    strategy:
+      matrix:
+        type: [docker, autoconf, swarm, k8s, linux]
+    uses: ./.github/workflows/staging-create-infra.yml
+    with:
+      TYPE: ${{ matrix.type }}
+    secrets:
+      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+
+  # Perform tests
+  staging-tests:
+    needs: [create-infras]
+    strategy:
+      matrix:
+        type: [docker, autoconf, swarm, k8s, linux]
+        include:
+          - type: docker
+            runs_on: "['self-hosted', 'bw-docker']"
+          - type: autoconf
+            runs_on: "['self-hosted', 'bw-autoconf']"
+          - type: swarm
+            runs_on: "['self-hosted', 'bw-swarm']"
+          - type: k8s
+            runs_on: "['ubuntu-latest']"
+          - type: linux
+            runs_on: "['self-hosted', 'bw-linux']"
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: ${{ matrix.type }}
+      RUNS_ON: ${{ matrix.runs_on }}
+    secrets: inherit
+  tests-ui:
+    needs: [create-infras]
+    uses: ./.github/workflows/tests-ui.yml
+    with:
+      RELEASE: staging
+    secrets:
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  prepare-tests-core:
+    needs: [create-infras]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - id: set-matrix
+        run: |
+          tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
+          echo "::set-output name=tests::$tests"
+    outputs:
+      tests: ${{ steps.set-matrix.outputs.tests }}
+  tests-core:
+    needs: prepare-tests-core
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
+    uses: ./.github/workflows/test-core.yml
+    with:
+      TEST: ${{ matrix.test }}
+      RELEASE: staging
+    secrets:
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+
+  # Delete infrastructures
+  delete-infras:
+    if: ${{ always() }}
+    needs: [staging-tests]
+    strategy:
+      matrix:
+        type: [docker, autoconf, swarm, k8s, linux]
+    uses: ./.github/workflows/staging-delete-infra.yml
+    with:
+      TYPE: ${{ matrix.type }}
+    secrets:
+      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}

@@ -1,0 +1,91 @@
+---
+  meta:
+    author: csanders-git
+    description: Tests functionality of 933130
+    enabled: true
+    name: 933130.yaml
+  tests:
+  -
+    test_title: 933130-1
+    desc: Basic Request nothing should trigger
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /
+        output:
+          no_log_contains: id "933130"
+  -
+    test_title: 933130-2
+    desc: Trigger a basic request
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=$_SERVER['test'];
+        output:
+          log_contains: id "933130"
+  -
+    test_title: 933130-3
+    desc: Non-Server Request
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=$_SE%20RVER['test'];
+        output:
+          no_log_contains: id "933130"
+  -
+    test_title: 933130-4
+    desc: SERVER request URLEncoded
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=$_%53ERVER['test'];
+        output:
+          log_contains: id "933130"
+  -
+    test_title: 933130-5
+    desc: SERVER request URLEncoded
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?%24_COOKIE=value;
+        output:
+          log_contains: id "933130"
+  -
+    test_title: 933130-6
+    desc: SERVER index listed with obfuscated SERVER
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          port: 80
+          uri: /?x=$_%53%20ERVER['request_uri'];
+        output:
+          no_log_contains: id "933130"

@@ -1,0 +1,631 @@
+---
+  meta:
+    author: lifeforms
+    description: None
+    enabled: true
+    name: 933160.yaml
+  tests:
+  -
+    test_title: 933160-1
+    desc: function call regexp
+    stages:
+    - stage:
+        input:
+          data: Shell%5fexec=bla
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=chr%28123%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-2
+    desc: function call regexp
+    stages:
+    - stage:
+        input:
+          data: foo=curl_iNit%28%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-3
+    desc: function call regexp
+    stages:
+    - stage:
+        input:
+          data: eval($foo)
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-4
+    desc: function call regexp
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-5
+    desc: function call regexp
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=exec%0A%28%27bar%27%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-6
+    desc: function call regexp
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=FILE%0D%0A%28%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-7
+    desc: function call regexp
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=file_ExistS%20%28%0A%0A%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-8
+    desc: function call regexp
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=fopen%20%20%28blah%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-9
+    desc: '@ operator'
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=fopen%20%20%28blah%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-10
+    desc: func\t()
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=fopen%20%20%28blah%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-11
+    desc: func//comment\r\n ()
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=fopen%20%20%28blah%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-12
+    desc: 'func #comment\n ()'
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=fopen%20%20%28blah%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-13
+    desc: func#\n ()
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=fopen%20%20%28blah%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-14
+    desc: 'func \t #\n ()'
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=fopen%20%20%28blah%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-15
+    desc: func/*comment*/()
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=fopen%20%20%28blah%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-16
+    desc: func /*com*/ ()
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=fopen%20%20%28blah%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-17
+    desc: func \t/**/\t ()
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=fopen%20%20%28blah%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-18
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=fopen%20%20%28blah%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-19
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /strrev()
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-20
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /strREV%28%24x%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-21
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: ?x=eval%28chr%28112%29.chr%28104%29.chr%28112%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-22
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /eval(gzinflate(str_rot13(base64_decode("")
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-23
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: eval%0D%28%24foo%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /eval%28base64_decode%28%27JGNoZWNrID...
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-24
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: yt=eval%28%22echo+10000000000%2d245205634%3b%22%29%3b
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-25
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: posix_getegid%28%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /getegid
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-26
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /print_r
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-27
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /astrrev()
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-28
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /strrev
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-29
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /strrev(
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-30
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=eval
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-31
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=the%20files%20%28yep%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-32
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=exec%20%28
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-33
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=executor%28%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-34
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=cheval%28%24foo%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-35
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=audi%6ffile%28%24foo%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-36
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=the%20system%20is%20down%28%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-37
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=ecosystem%28%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-38
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=systems%28%29
+        output:
+          log_contains: id "933160"
+  -
+    test_title: 933160-39
+    desc: func\t/*foo\r\nbar*/\t (
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=system%20something%28%29
+        output:
+          log_contains: id "933160"

@@ -1,0 +1,194 @@
+---
+  meta:
+    author: studersi
+    description: None
+    enabled: true
+    name: 931130.yaml
+  tests:
+    -
+      test_title: 931130-1
+      desc: Remote File Inclusion Attack (931130)
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: 127.0.0.1
+              headers:
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Host: localhost
+              method: GET
+              port: 80
+              uri: /?x=file://foo.bar
+              version: HTTP/1.1
+            output:
+              log_contains: id "931130"
+    -
+      test_title: 931130-2
+      desc: Remote File Inclusion Attack (931130)
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: 127.0.0.1
+              headers:
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Host: localhost
+              method: GET
+              port: 80
+              uri: /?x=ftp://foo.bar
+              version: HTTP/1.1
+            output:
+              log_contains: id "931130"
+    -
+      test_title: 931130-3
+      desc: Remote File Inclusion Attack (931130)
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: 127.0.0.1
+              headers:
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Host: localhost
+              method: GET
+              port: 80
+              uri: /?x=ftps://foo.bar
+              version: HTTP/1.1
+            output:
+              log_contains: id "931130"
+    -
+      test_title: 931130-4
+      desc: Remote File Inclusion Attack (931130)
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: 127.0.0.1
+              headers:
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Host: localhost
+              method: GET
+              port: 80
+              uri: /?x=http://foo.bar
+              version: HTTP/1.1
+            output:
+              log_contains: id "931130"
+    -
+      test_title: 931130-5
+      desc: Remote File Inclusion Attack (931130)
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: 127.0.0.1
+              headers:
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Host: localhost
+              method: GET
+              port: 80
+              uri: /?x=https://foo.bar
+              version: HTTP/1.1
+            output:
+              log_contains: id "931130"
+    -
+      test_title: 931130-6
+      desc: Partial match
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: 127.0.0.1
+              headers:
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Host: example.com
+              method: GET
+              port: 80
+              uri: /?x=https://evilexample.com/
+              version: HTTP/1.1
+            output:
+              log_contains: id "931130"
+    -
+      test_title: 931130-7
+      desc: Mismatching domains
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: 127.0.0.1
+              headers:
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Host: example.com
+              method: GET
+              port: 80
+              uri: /?x=https://example.com.evil.com/
+              version: HTTP/1.1
+            output:
+              log_contains: id "931130"
+    -
+      test_title: 931130-8
+      desc: Mismatching ports
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: 127.0.0.1
+              headers:
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Host: example.com
+              method: GET
+              port: 80
+              uri: /?x=https://example.com:1234/
+              version: HTTP/1.1
+            output:
+              log_contains: id "931130"
+    -
+      test_title: 931130-9
+      desc: Matching hosts
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: 127.0.0.1
+              headers:
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Host: example.com
+              method: GET
+              port: 80
+              uri: /?x=https://example.com/
+              version: HTTP/1.1
+            output:
+              no_log_contains: id "931130"
+    -
+      test_title: 931130-10
+      desc: Matching hosts and ports
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: 127.0.0.1
+              headers:
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Host: example.com
+              method: GET
+              port: 80
+              uri: /?x=https://example.com:1234/
+              version: HTTP/1.1
+            output:
+              log_contains: id "931130"
+    -
+      test_title: 931130-11
+      desc: Subdomains
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: 127.0.0.1
+              headers:
+                User-Agent: "ModSecurity CRS 3 Tests"
+                Host: example.com
+              method: GET
+              port: 80
+              uri: /?x=http://www.example.com/some/path
+              version: HTTP/1.1
+            output:
+              no_log_contains: id "931130"

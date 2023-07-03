@@ -1,0 +1,43 @@
+---
+  meta:
+    author: "Jose Nazario"
+    description: None
+    enabled: true
+    name: 942480.yaml
+  tests:
+  -
+    test_title: 942480-1
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: "127.0.0.1"
+          headers:
+            Host: "localhost"
+            Cache-Control: "no-cache, no-store, must-revalidate"
+          method: GET
+          port: 80
+          # variable name boundary attacks
+          uri: "/?'msdasql'"
+          version: HTTP/1.0
+        output:
+          log_contains: "id \"942480"
+  -
+    test_title: 942480-2
+    desc: "SQL Injection Attack"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: "127.0.0.1"
+          headers:
+            Host: "localhost"
+            Cache-Control: "no-cache, no-store, must-revalidate"
+            # variable name boundary attacks
+            Cookie: "'msdasql'"
+          method: POST
+          port: 80
+          version: HTTP/1.0
+        output:
+          log_contains: "id \"942480"

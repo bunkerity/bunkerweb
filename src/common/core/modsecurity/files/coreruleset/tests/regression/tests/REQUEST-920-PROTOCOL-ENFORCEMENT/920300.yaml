@@ -1,0 +1,30 @@
+---
+  meta:
+    author: csanders-git
+    description: None
+    enabled: true
+    name: 920300.yaml
+  tests:
+  -
+    test_title: 920300-1
+    desc: Request Missing an Accept Header (920300) from old modsec regressions
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+            Accept-Encoding: gzip,deflate
+            Accept-Language: en-us,en;q=0.5
+            Host: localhost
+            Keep-Alive: '300'
+            Proxy-Connection: keep-alive
+            User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+          method: GET
+          port: 80
+          uri: /
+          version: HTTP/1.0
+          data: ''
+        output:
+          log_contains: id "920300"

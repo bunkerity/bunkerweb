@@ -1,0 +1,151 @@
+---
+  meta:
+    author: "lifeforms"
+    enabled: true
+    name: "934100.yaml"
+    description: "Tests for rule 934100"
+  tests:
+  -
+    test_title: 934100-0
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=_%24%24ND_FUNC%24%24_
+          version: HTTP/1.0
+        output:
+          log_contains: id "934100"
+  -
+    test_title: 934100-1
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=__js_function
+          version: HTTP/1.0
+        output:
+          log_contains: id "934100"
+  -
+    test_title: 934100-2
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=eval%28String.fromCharCode
+          version: HTTP/1.0
+        output:
+          log_contains: id "934100"
+  -
+    test_title: 934100-3
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=function%28%29+%7B
+          version: HTTP/1.0
+        output:
+          log_contains: id "934100"
+  -
+    test_title: 934100-4
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=new+Function+%28
+          version: HTTP/1.0
+        output:
+          log_contains: id "934100"
+  -
+    test_title: 934100-5
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=this.constructor.constructor
+          version: HTTP/1.0
+        output:
+          log_contains: id "934100"
+  -
+    test_title: 934100-6
+    desc: imported test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=module.exports%3D
+          version: HTTP/1.0
+        output:
+          log_contains: id "934100"
+  -
+    test_title: 934100-7
+    desc: base64 encoded test
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?foo=XyQkTkRfRlVOQyQkXwo=
+          version: HTTP/1.0
+        output:
+          log_contains: id "934100"

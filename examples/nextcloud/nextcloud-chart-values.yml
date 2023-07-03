@@ -1,0 +1,8 @@
+phpClientHttpsFix:
+  enabled: true
+  protocol: https
+
+nextcloud:
+  host: www.example.com
+  username: user
+  password: changeme42

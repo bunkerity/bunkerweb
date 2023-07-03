@@ -1,0 +1,10 @@
+--TEST--
+Oracle's ending [dDfF] suffix, not a suffix
+--INPUT--
+SELECT 1Funion select
+--EXPECTED--
+E SELECT
+1 1F
+U union
+E select
+

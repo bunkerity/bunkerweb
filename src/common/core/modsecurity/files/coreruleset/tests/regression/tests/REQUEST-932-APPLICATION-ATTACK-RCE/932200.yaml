@@ -1,0 +1,61 @@
+---
+  meta:
+    author: theMiddle
+    description: RCE Bypass
+    enabled: true
+    name: 932200.yaml
+  tests:
+  -
+    test_title: 932200-1
+    desc: globbing patterns
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?host=www.google.com;/bin/ca?+/et*/passwd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932200"
+  -
+    test_title: 932200-2
+    desc: uninitialized variable
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?host=www.google.com;cat+/etc/%24%7Ba%7Dpasswd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932200"
+  -
+    test_title: 932200-3
+    desc: bash function
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Accept: "*/*"
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: GET
+          port: 80
+          uri: /?host=www.google.com;cat+/etc/%24%28echo%29passwd
+          version: HTTP/1.0
+        output:
+          log_contains: id "932200"

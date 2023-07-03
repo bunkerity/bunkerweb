@@ -1,0 +1,9 @@
+--TEST--
+this is a bogus input, using the if function/control-flow token
+--INPUT--
+select if 1;
+--EXPECTED--
+E select
+f if
+1 1
+; ;

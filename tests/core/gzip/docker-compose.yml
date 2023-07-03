@@ -1,0 +1,67 @@
+version: "3.5"
+
+services:
+  bw:
+    image: bunkerity/bunkerweb:1.5.1
+    pull_policy: never
+    labels:
+      - "bunkerweb.INSTANCE"
+    environment:
+      API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      HTTP_PORT: "80"
+      USE_BUNKERNET: "no"
+      USE_BLACKLIST: "no"
+      USE_REVERSE_PROXY: "yes"
+      REVERSE_PROXY_HOST: "http://app1:8080"
+      REVERSE_PROXY_URL: "/"
+      LOG_LEVEL: "info"
+
+      # ? GZIP settings
+      USE_GZIP: "no"
+    networks:
+      bw-universe:
+      bw-services:
+        ipv4_address: 192.168.0.2
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.1
+    pull_policy: never
+    depends_on:
+      - bw
+      - bw-docker
+    environment:
+      DOCKER_HOST: "tcp://bw-docker:2375"
+      LOG_LEVEL: "info"
+    networks:
+      - bw-universe
+      - bw-docker
+
+  bw-docker:
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      CONTAINERS: "1"
+    networks:
+      - bw-docker
+
+  app1:
+    image: nginxdemos/nginx-hello
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.4
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24
+  bw-docker:

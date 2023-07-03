@@ -1,0 +1,8 @@
+--TEST--
+Make sure merged keywords work correct
+--INPUT--
+1 and 2 not between 3
+--EXPECTED--
+1 1
+& and
+1 2

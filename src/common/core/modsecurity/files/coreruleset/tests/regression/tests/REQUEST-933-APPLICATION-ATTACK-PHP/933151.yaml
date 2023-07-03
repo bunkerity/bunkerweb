@@ -1,0 +1,86 @@
+---
+  meta:
+    author: lifeforms
+    description: None
+    enabled: true
+    name: 933151.yaml
+  tests:
+  -
+    test_title: 933151-1
+    desc: pmf + chain; must run test in PL2!
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /array_diff%20foo%20%28
+        output:
+          log_contains: id "933151"
+  -
+    test_title: 933151-2
+    desc: pmf + chain; must run test in PL2!
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?date_ADD%28%29
+        output:
+          log_contains: id "933151"
+  -
+    test_title: 933151-3
+    desc: non-dangorous PHP functions, removed to reduce FP
+    stages:
+    - stage:
+        input:
+          data: x=Print_r%28%20%29
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=filemtime%28%24foo%29
+        output:
+          no_log_contains: id "933151"
+  -
+    test_title: 933151-4
+    desc: pmf + chain; must run test in PL2!
+    stages:
+    - stage:
+        input:
+          data: gethostbynamE(
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /gethost
+        output:
+          log_contains: id "933151"
+  -
+    test_title: 933151-5
+    desc: No peren after keyword
+    stages:
+    - stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: ModSecurity CRS 3 Tests
+          method: POST
+          port: 80
+          uri: /?foo=array_diff
+        output:
+          no_log_contains: id "933151"

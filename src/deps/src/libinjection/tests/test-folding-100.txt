@@ -1,0 +1,13 @@
+--TEST--
+test folding of bizzaro mysql bug
+--INPUT--
+SELECT 10.e.`table_name`
+--EXPECTED--
+E SELECT
+n 10.e
+
+
+
+
+
+

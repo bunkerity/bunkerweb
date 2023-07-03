@@ -1,0 +1,63 @@
+name: Push on GitHub (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      VERSION:
+        required: true
+        type: string
+      PRERELEASE:
+        required: true
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout
+      - uses: actions/checkout@v3
+      # Get PDF doc
+      - name: Get documentation
+        uses: actions/download-artifact@v3
+        with:
+          name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
+      # Create tag
+      - uses: rickstaa/action-create-tag@v1
+        name: Create tag
+        with:
+          tag: "v${{ inputs.VERSION }}"
+          message: "v${{ inputs.VERSION }}"
+          force_push_tag: true
+      # Extract changelog
+      - name: Extract changelog
+        id: getchangelog
+        run: |
+          content=$(awk -v n=2 '/##/{n--}; n > 0' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          echo "::set-output name=content::$content"
+      # Create release
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: |
+            Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
+
+            Docker tags : 
+            - `bunkerity/bunkerweb:${{ inputs.VERSION }}`
+            - `bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}`
+            - `bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}`
+            - `bunkerity/bunkerweb-ui:${{ inputs.VERSION }}`
+
+            Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
+
+            Changelog : 
+            ${{ steps.getchangelog.outputs.content }}
+          draft: true
+          prerelease: ${{ inputs.PRERELEASE }}
+          name: v${{ inputs.VERSION }}
+          tag_name: v${{ inputs.VERSION }}
+          discussion_category_name: Announcements
+          files: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
+

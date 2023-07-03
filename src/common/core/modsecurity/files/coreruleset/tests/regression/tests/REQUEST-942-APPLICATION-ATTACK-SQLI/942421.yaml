@@ -1,0 +1,24 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    description: None
+    enabled: true
+    name: 942421.yaml
+  tests:
+  -
+    test_title: 942421-1
+    desc: "Restricted SQL Character Anomaly Detection (cookies): # of special characters exceeded (3)"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Cookie: "cookie=@@@@@@@@@@@@@"
+          method: GET
+          port: 80
+          uri: "/"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942421"

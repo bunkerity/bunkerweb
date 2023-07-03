@@ -1,0 +1,23 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    description: None
+    enabled: true
+    name: 942430.yaml
+  tests:
+  -
+    test_title: 942430-1
+    desc: "Restricted SQL Character Anomaly Detection (args): # of special characters exceeded (12)"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          data: "var=(((((())))))&var2=whatever"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942430"

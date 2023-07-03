@@ -1,0 +1,14 @@
+docs/
+env/
+*/env/
+*.min*
+src/common/core/modsecurity/
+src/deps/src/
+mkdocs.yml
+CHANGELOG.md
+CONTRIBUTING.md
+LICENSE.md
+README.md
+SECURITY.md
+src/ui/static
+examples/*

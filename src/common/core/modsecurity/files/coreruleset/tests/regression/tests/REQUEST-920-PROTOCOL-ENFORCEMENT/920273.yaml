@@ -1,0 +1,79 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920273.yaml"
+    description: "Description"
+  tests:
+    -
+      test_title: 920273-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1%20"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              log_contains: "id \"920273\""
+    -
+      # the '&' is one of the only symbol allowed
+      test_title: 920273-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1&test=t"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              no_log_contains: "id \"920273\""
+    -
+      test_title: 920273-3
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/index.html?test=test1"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+              data: "<hello"
+            output:
+              log_contains: "id \"920273\""
+    -
+      test_title: 920273-4
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1%5FHI"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              no_log_contains: "id \"920273\""
+    -
+      test_title: 920273-5
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?test=test1%60HI"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+            output:
+              log_contains: "id \"920273\""

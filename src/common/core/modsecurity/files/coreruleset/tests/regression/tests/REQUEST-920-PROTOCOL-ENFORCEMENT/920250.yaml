@@ -1,0 +1,68 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: false
+    name: "920250.yaml"
+    description: "Description"
+  tests:
+    -
+      # crs-setup.conf needs to have CRS_VALIDATE_UTF8_ENCODING set
+      # Taken from existing modsec regression
+      test_title: 920250-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?param=%c0%af"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                  Accept-Language: "en-us,en;q=0.5"
+                  Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                  Keep-Alive: "300"
+                  Proxy-Connection: "keep-alive"
+            output:
+              log_contains: "id \"920250\""
+    -
+      # Taken from existing modsec regression
+      test_title: 920250-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?param=%c0"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                  Accept-Language: "en-us,en;q=0.5"
+                  Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                  Keep-Alive: "300"
+                  Proxy-Connection: "keep-alive"
+            output:
+              log_contains: "id \"920250\""
+    -
+      # Taken from existing modsec regression
+      test_title: 920250-3
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              uri: "/?param=%F5%80%BF%BF"
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+                  Accept-Language: "en-us,en;q=0.5"
+                  Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
+                  Keep-Alive: "300"
+                  Proxy-Connection: "keep-alive"
+            output:
+              log_contains: "id \"920250\""

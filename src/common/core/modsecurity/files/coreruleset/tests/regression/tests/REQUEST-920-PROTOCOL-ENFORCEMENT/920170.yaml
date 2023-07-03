@@ -1,0 +1,127 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920170.yaml"
+    description: "A Selection of tests to trigger rule 920170"
+  tests:
+    -
+      # POST Request with data (valid)
+      test_title: 920170-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "POST"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded"
+              data: "hi=test"
+              uri: "/"
+            output:
+              no_log_contains: "id \"920170\""
+    -
+      # GET request with data
+      test_title: 920170-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded"
+              data: "hi=test"
+              uri: "/"
+            output:
+              log_contains: "id \"920170\""
+    -
+      # Head Request with data
+      test_title: 920170-3
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "HEAD"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded"
+              data: "hi=test"
+              uri: "/"
+            output:
+              log_contains: "id \"920170\""
+    -
+      # GET Request but content length is 0 and data is provided
+      # Weird HTTP 1.0 support bug in Apache, without newline causes 408
+      test_title: 920170-5
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests # Possibly shouldn't pass"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded"
+                  Content-Length: "0"
+              data: "hi=test\r\n"
+              stop_magic: true
+              protocol: "http"
+              uri: "/"
+            output:
+              no_log_contains: "id \"920170\""
+    -
+      # GET request with content length 0 and no data.
+      test_title: 920170-6
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded"
+                  Content-Length: "0"
+              data: ""
+              protocol: "http"
+              uri: "/"
+            output:
+              no_log_contains: "id \"920170\""
+    -
+      test_title: 920170-7
+      desc: GET or HEAD Request with Body Content (920170)  from old modsec regressions
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+              Accept-Language: en-us,en;q=0.5
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: GET
+            port: 80
+            uri: /
+            version: HTTP/1.0
+            data: abc
+          output:
+            log_contains: id "920170"

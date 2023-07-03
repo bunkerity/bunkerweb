@@ -1,0 +1,38 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920340.yaml"
+    description: "Description"
+  tests:
+    -
+      test_title: 920340-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Length: "2"
+              data: "xy"
+              stop_magic: true
+            output:
+              log_contains: "id \"920340\""
+    -
+      test_title: 920340-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Length: "50"
+              stop_magic: true
+            output:
+              expect_error: true

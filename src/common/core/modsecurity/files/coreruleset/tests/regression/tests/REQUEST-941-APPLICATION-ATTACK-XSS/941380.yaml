@@ -1,0 +1,26 @@
+---
+  meta:
+    author: "Franziska Buehler"
+    description: None
+    enabled: true
+    name: 941380.yaml
+  tests:
+  -
+    test_title: 941380-1
+    desc: "AngularJS client side template injection detection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            Accept: "*/*"
+            User-Agent: "ModSecurity CRS 3 Tests"
+          method: GET
+          port: 80
+          uri: '/login?user=%20x%20%7B%7Bconstructor.constructor(%27alert(1)%27)()%7D%7D%20.%20ff'
+          # /login?user={{constructor.constructor('alert(1)')()}}
+          version: HTTP/1.1
+        output:
+          log_contains: id "941380"

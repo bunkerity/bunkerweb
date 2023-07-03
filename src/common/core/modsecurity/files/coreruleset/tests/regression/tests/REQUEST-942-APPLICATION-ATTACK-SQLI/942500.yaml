@@ -1,0 +1,23 @@
+---
+  meta:
+    author: "Franziska Buehler"
+    description: None
+    enabled: true
+    name: 942500.yaml
+  tests:
+  -
+    test_title: 942500-1
+    desc: "MySQL in-line comment detection"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: POST
+          port: 80
+          uri: "?id=9999+or+{if+length((/*!5000select+username/*!50000from*/user+where+id=1))>0}"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942500"

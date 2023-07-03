@@ -1,0 +1,14 @@
+FROM python:3.11.4-alpine
+
+WORKDIR /tmp
+
+COPY requirements.txt .
+
+RUN MAKEFLAGS="-j $(nproc)" pip install --no-cache -r requirements.txt && \
+  rm -f requirements.txt
+
+WORKDIR /opt/blacklist_init
+
+COPY main.py .
+
+ENTRYPOINT [ "python3", "main.py" ]

@@ -1,0 +1,90 @@
+---
+  meta:
+    author: "csanders-git"
+    enabled: true
+    name: "920180.yaml"
+    description: "Description"
+  tests:
+    -
+      test_title: 920180-1
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "POST"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded"
+              data: "hi=test"
+              protocol: "http"
+              stop_magic: true
+              uri: "/"
+            output:
+              log_contains: id "920180"
+    -
+      test_title: 920180-2
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "POST"
+              port: 80
+              headers:
+                  User-Agent: "ModSecurity CRS 3 Tests"
+                  Host: "localhost"
+                  Content-Type: "application/x-www-form-urlencoded"
+              data: "hi=test"
+              protocol: "http"
+              uri: "/"
+            output:
+              no_log_contains: id "920180"
+    -
+      test_title: 920180-3
+      desc: POST request missing Content-Length Header (920180) from old modsec regressions
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+              Accept-Language: en-us,en;q=0.5
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: POST
+            port: 80
+            uri: /
+            version: HTTP/1.0
+          output:
+            log_contains: id "920180"
+    -
+      test_title: 920180-4
+      desc: Ignore check of CT header if protocol is HTTP/2
+      stages:
+      -
+        stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+              Accept-Language: en-us,en;q=0.5
+              Content-Type: application/x-www-form-urlencoded
+              Host: localhost
+              Keep-Alive: '300'
+              Proxy-Connection: keep-alive
+              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+            method: POST
+            port: 80
+            uri: /
+            version: HTTP/2.0
+          output:
+            no_log_contains: id "920180"

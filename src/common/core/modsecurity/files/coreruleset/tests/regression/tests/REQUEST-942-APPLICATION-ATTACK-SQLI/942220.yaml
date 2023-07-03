@@ -1,0 +1,24 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    description: None
+    enabled: true
+    name: 942220.yaml
+  tests:
+  -
+    test_title: 942220-1
+    desc: "Integer overflow taken from skipfish"
+    stages:
+    -
+      stage:
+        input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+          method: GET
+          port: 80
+          # NB: not sure about rule 942220
+          uri: "/?string_to_convert=4294967296"
+          version: HTTP/1.0
+        output:
+          log_contains: id "942220"

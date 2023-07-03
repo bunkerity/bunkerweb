@@ -1,0 +1,57 @@
+#!/usr/bin/env lua
+
+local socket = require"socket"
+
+port = 8765
+
+function pcalltest(msg, o, opt)
+  local a = { pcall(o.getoption, o, opt) }
+  if a[1] then
+    print(msg, opt, unpack(a))
+  else
+    print(msg, opt, 'fail: ' .. a[2])
+  end
+end
+
+function options(o)
+    print("options for", o)
+
+    for _, opt in ipairs{
+    		"keepalive", "reuseaddr",
+     		"tcp-nodelay", "tcp-keepidle", "tcp-keepcnt", "tcp-keepintvl"} do
+        pcalltest("getoption", o, opt)
+    end
+
+    r = o:getoption'linger'
+    if r then
+      print("getoption", "linger",
+            "on", r.on,
+            "timeout", r.timeout)
+    else
+      print("getoption", "linger", "no result")
+    end
+end
+
+local m = socket.tcp()
+
+options(m)
+
+assert(m:bind("*", port))
+assert(m:listen())
+
+options(m)
+
+m:close()
+
+local m = socket.bind("*", port)
+
+options(m)
+
+local c = socket.connect("localhost", port)
+
+options(c)
+
+local s = m:accept()
+
+options(s)
+

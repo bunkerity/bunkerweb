@@ -1,0 +1,84 @@
+version: 2
+
+updates:
+  # GHA
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "fl0ppy-d1sk"
+    commit-message:
+      prefix: "deps/gha"
+    target-branch: "dev"
+
+  # BW
+  - package-ecosystem: "docker"
+    directory: "/src/bw"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "fl0ppy-d1sk"
+    commit-message:
+      prefix: "deps/bw"
+    target-branch: "dev"
+
+  # Scheduler
+  - package-ecosystem: "docker"
+    directory: "/src/scheduler"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "fl0ppy-d1sk"
+    commit-message:
+      prefix: "deps/scheduler"
+    target-branch: "dev"
+  - package-ecosystem: "pip"
+    directory: "/src/scheduler"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "fl0ppy-d1sk"
+    commit-message:
+      prefix: "deps/scheduler"
+    target-branch: "dev"
+
+  # Autoconf
+  - package-ecosystem: "docker"
+    directory: "/src/autoconf"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "fl0ppy-d1sk"
+    commit-message:
+      prefix: "deps/autoconf"
+    target-branch: "dev"
+  - package-ecosystem: "pip"
+    directory: "/src/autoconf"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "fl0ppy-d1sk"
+    commit-message:
+      prefix: "deps/autoconf"
+    target-branch: "dev"
+
+  # UI
+  - package-ecosystem: "docker"
+    directory: "/src/ui"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "fl0ppy-d1sk"
+    commit-message:
+      prefix: "deps/ui"
+    target-branch: "dev"
+  - package-ecosystem: "pip"
+    directory: "/src/ui"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "fl0ppy-d1sk"
+    commit-message:
+      prefix: "deps/ui"
+    target-branch: "dev"

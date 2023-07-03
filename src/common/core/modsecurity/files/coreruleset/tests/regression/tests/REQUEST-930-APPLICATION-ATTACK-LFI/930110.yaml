@@ -1,0 +1,100 @@
+---
+  meta:
+    author: "Christian S.J. Peron"
+    enabled: true
+    name: "930110.yaml"
+    description: "Application attacks: Local file include"
+  tests:
+    -
+      test_title: 930110-1
+      desc: "Path Traversal Attack (/../)"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "127.0.0.1"
+              method: "GET"
+              port: 80
+              headers:
+                  Host: "localhost"
+                  FoobarHeader: "/../../../././..\\ ../../etc/master.passwd"
+              uri: "/"
+            output:
+              log_contains: id "930110"
+    -
+      test_title: 930110-2
+      desc: "Path Traversal Attack (/../) query string"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "localhost"
+              method: "GET"
+              port: 80
+              headers:
+                  Host: "localhost"
+                  X-FTW: "This should trip"
+              uri: "/?arg=../../../etc/passwd"
+            output:
+              log_contains: id "930110"
+    -
+      test_title: 930110-3
+      desc: "Path Traversal Attack (/../) query string"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "localhost"
+              method: "POST"
+              port: 80
+              headers:
+                  Host: "localhost"
+              uri: "/"
+              data: "arg=../../../etc/passwd&foo=var"
+            output:
+              log_contains: id "930110"
+    -
+      test_title: 930110-4
+      desc: "Path Traversal Attack (/../) query string"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "localhost"
+              method: "GET"
+              port: 80
+              headers:
+                  Host: "localhost"
+              uri: "/foo../1234"
+            output:
+              no_log_contains: id "930110"
+    -
+      test_title: 930110-5
+      desc: "Path Traversal Attack (/../) query string"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "localhost"
+              method: "GET"
+              port: 80
+              headers:
+                  Host: "localhost"
+              uri: "/foo.../1234"
+            output:
+              no_log_contains: id "930110"
+    -
+      test_title: 930110-6
+      desc: "Path Traversal Attack (/../) query string"
+      stages:
+        -
+          stage:
+            input:
+              dest_addr: "localhost"
+              method: "GET"
+              port: 80
+              headers:
+                  Host: "localhost"
+              uri: "/..foo"
+            output:
+              no_log_contains: id "930110"

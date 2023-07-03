@@ -1,0 +1,8 @@
+--TEST--
+sqli for code coverage, not mysql -- but sqli
+--INPUT--
+x'--sp_password
+--EXPECTED--
+sc
+
+
