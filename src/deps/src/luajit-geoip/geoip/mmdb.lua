@@ -166,7 +166,7 @@ ffi.cdef([[  const char *gai_strerror(int ecode);
                             MMDB_entry_data_s *const entry_data,
                             ...);
 ]])
-local lib = ffi.load("libmaxminddb")
+local lib = ffi.load("/usr/share/bunkerweb/deps/lib/libmaxminddb.so")
 local consume_map, consume_array
 local consume_value
 consume_value = function(current)
