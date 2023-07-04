@@ -77,4 +77,4 @@ networks:
       config:
         - subnet: 192.168.0.0/24
   bw-docker:
-    name: bw-docker
+    external: true

@@ -79,6 +79,9 @@ cleanup_stack () {
 # Cleanup stack on exit
 trap cleanup_stack EXIT
 
+echo "💾 Creating the bw-docker network ..."
+docker network create bw-docker 2>/dev/null
+
 echo "💾 Starting stack ..."
 docker compose up -d 2>/dev/null
 if [ $? -ne 0 ] ; then
