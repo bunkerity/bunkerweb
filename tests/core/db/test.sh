@@ -282,6 +282,15 @@ do
     manual=0
 
     echo " "
+
+    echo "💾 Removing bw-docker network ..."
+
+    docker network rm bw-docker
+
+    if [ $? -ne 0 ] ; then
+        echo "💾 Network removal failed ❌"
+        exit 1
+    fi
 done
 
 end=1
