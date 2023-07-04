@@ -129,11 +129,11 @@ fi
 
 for test in "local" "multisite" "mariadb" "mysql" "postgres"
 do
+    echo "💾 Creating the bw-docker network ..."
+    docker network create bw-docker
+
     if [ "$test" = "local" ] ; then
         echo "💾 Running tests with a local database ..."
-
-        echo "💾 Creating the bw-docker network ..."
-        docker network create bw-docker
     elif [ "$test" = "multisite" ] ; then
         echo "💾 Running tests with MULTISITE set to yes and with multisite settings ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@MULTISITE: "no"$@MULTISITE: "yes"@' {} \;
@@ -147,9 +147,6 @@ do
         sed -i 's@GLOBAL_USE_REVERSE_PROXY@SERVICE_USE_REVERSE_PROXY@' docker-compose.test.yml
         sed -i 's@GLOBAL_REVERSE_PROXY_HOST@SERVICE_REVERSE_PROXY_HOST@' docker-compose.test.yml
         sed -i 's@GLOBAL_REVERSE_PROXY_URL@SERVICE_REVERSE_PROXY_URL@' docker-compose.test.yml
-
-        echo "💾 Creating the bw-docker network ..."
-        docker network create bw-docker
     elif [ "$test" = "mariadb" ] ; then
         echo "💾 Running tests with MariaDB database ..."
         echo "ℹ️ Keeping the MULTISITE variable to yes and multisite settings ..."

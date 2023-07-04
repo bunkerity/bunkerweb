@@ -12,4 +12,4 @@ services:
 
 networks:
   bw-docker:
-    name: bw-docker
+    external: true
