@@ -31,6 +31,11 @@ jobs:
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:${{ inputs.RELEASE }} && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:${{ inputs.RELEASE }} bunkerweb-tests
       - name: Pull Scheduler image
         run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:${{ inputs.RELEASE }} && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:${{ inputs.RELEASE }} scheduler-tests
+      # Temp fix "is not connected to the network" until compose v2.19.1 is available
+      - name: Downgrade compose
+        run: |
+          sudo apt update
+          sudo apt install -y --allow-downgrades moby-compose=2.18.1+azure-ubuntu22.04u2
       # Run test
       - name: Run test
         run: |
