@@ -74,7 +74,7 @@ fi
 
 # Start tests
 
-docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests 2>/dev/null
+docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests
 
 if [ $? -ne 0 ] ; then
     echo "💉 Test \"inject\" failed ❌"

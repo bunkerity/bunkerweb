@@ -180,7 +180,7 @@ do
     if ! [[ "$test" = "user_agent" || "$test" = "user_agent_urls" || "$test" = "uri" || "$test" = "uri_urls" ]] ; then
         echo "🏁 Running global container tests ..."
 
-        docker compose -f docker-compose.test.yml up global-tests --abort-on-container-exit --exit-code-from global-tests 2>/dev/null
+        docker compose -f docker-compose.test.yml up global-tests --abort-on-container-exit --exit-code-from global-tests
 
         if [ $? -ne 0 ] ; then
             echo "🏁 Test \"$test\" failed for global tests ❌"
@@ -194,7 +194,7 @@ do
 
     echo "🏁 Running local container tests ..."
 
-    docker compose -f docker-compose.test.yml up local-tests --abort-on-container-exit --exit-code-from local-tests 2>/dev/null
+    docker compose -f docker-compose.test.yml up local-tests --abort-on-container-exit --exit-code-from local-tests
 
     if [ $? -ne 0 ] ; then
         echo "🏁 Test \"$test\" failed for local tests ❌"

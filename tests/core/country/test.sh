@@ -97,7 +97,7 @@ do
     # Start tests
 
     echo "🌍 Starting the FR container"
-    docker compose -f docker-compose.test.yml up tests-fr --abort-on-container-exit --exit-code-from tests-fr 2>/dev/null
+    docker compose -f docker-compose.test.yml up tests-fr --abort-on-container-exit --exit-code-from tests-fr
 
     if [ $? -ne 0 ] ; then
         echo "🌍 Test \"$test\" failed for the FR container ❌"
@@ -109,7 +109,7 @@ do
     fi
 
     echo "🌍 Starting the US container"
-    docker compose -f docker-compose.test.yml up tests-us --abort-on-container-exit --exit-code-from tests-us 2>/dev/null
+    docker compose -f docker-compose.test.yml up tests-us --abort-on-container-exit --exit-code-from tests-us
 
     if [ $? -ne 0 ] ; then
         echo "🌍 Test \"$test\" failed for the US container ❌"
