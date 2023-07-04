@@ -57,35 +57,6 @@ services:
       bw-services:
         ipv4_address: 192.168.0.4
 
-  bw-maria-db:
-    image: mariadb:10.10
-    environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=db
-      - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=secret
-    networks:
-      - bw-docker
-
-  bw-mysql-db:
-    image: mysql:8.0
-    environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=db
-      - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=secret
-    networks:
-      - bw-docker
-
-  bw-postgres-db:
-    image: postgres:15.1
-    environment:
-      - POSTGRES_USER=bunkerweb
-      - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=db
-    networks:
-      - bw-docker
-
 volumes:
   bw-data:
     name: bw-data
