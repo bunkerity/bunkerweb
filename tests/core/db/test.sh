@@ -66,7 +66,7 @@ cleanup_stack () {
 
     echo "💾 Cleaning up current stack ..."
 
-    docker compose down -v --remove-orphans 2>/dev/null
+    docker compose down -v --remove-orphans
 
     if [ $? -ne 0 ] ; then
         echo "💾 Down failed ❌"
@@ -80,16 +80,16 @@ cleanup_stack () {
 trap cleanup_stack EXIT
 
 echo "💾 Creating the bw-docker network ..."
-docker network create bw-docker 2>/dev/null
+docker network create bw-docker
 
 echo "💾 Starting stack ..."
-docker compose up -d 2>/dev/null
+docker compose up -d
 if [ $? -ne 0 ] ; then
     echo "💾 Up failed, retrying ... ⚠️"
     manual=1
     cleanup_stack
     manual=0
-    docker compose up -d 2>/dev/null
+    docker compose up -d
     if [ $? -ne 0 ] ; then
         echo "💾 Up failed ❌"
         exit 1
@@ -133,7 +133,7 @@ do
         echo "💾 Running tests with a local database ..."
 
         echo "💾 Creating the bw-docker network ..."
-        docker network create bw-docker 2>/dev/null
+        docker network create bw-docker
     elif [ "$test" = "multisite" ] ; then
         echo "💾 Running tests with MULTISITE set to yes and with multisite settings ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@MULTISITE: "no"$@MULTISITE: "yes"@' {} \;
@@ -149,20 +149,20 @@ do
         sed -i 's@GLOBAL_REVERSE_PROXY_URL@SERVICE_REVERSE_PROXY_URL@' docker-compose.test.yml
 
         echo "💾 Creating the bw-docker network ..."
-        docker network create bw-docker 2>/dev/null
+        docker network create bw-docker
     elif [ "$test" = "mariadb" ] ; then
         echo "💾 Running tests with MariaDB database ..."
         echo "ℹ️ Keeping the MULTISITE variable to yes and multisite settings ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "mariadb+pymysql://bunkerweb:secret\@bw-db:3306/db"@' {} \;
 
         echo "💾 Starting mariadb ..."
-        docker compose -f docker-compose.mariadb.yml up -d 2>/dev/null
+        docker compose -f docker-compose.mariadb.yml up -d
         if [ $? -ne 0 ] ; then
             echo "💾 Up failed, retrying ... ⚠️"
             manual=1
             cleanup_stack
             manual=0
-            docker compose -f docker-compose.mariadb.yml up -d 2>/dev/null
+            docker compose -f docker-compose.mariadb.yml up -d
             if [ $? -ne 0 ] ; then
                 echo "💾 Up failed ❌"
                 exit 1
@@ -174,13 +174,13 @@ do
         find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "mysql+pymysql://bunkerweb:secret\@bw-db:3306/db"@' {} \;
 
         echo "💾 Starting mysql ..."
-        docker compose -f docker-compose.mysql.yml up -d 2>/dev/null
+        docker compose -f docker-compose.mysql.yml up -d
         if [ $? -ne 0 ] ; then
             echo "💾 Up failed, retrying ... ⚠️"
             manual=1
             cleanup_stack
             manual=0
-            docker compose -f docker-compose.mysql.yml up -d 2>/dev/null
+            docker compose -f docker-compose.mysql.yml up -d
             if [ $? -ne 0 ] ; then
                 echo "💾 Up failed ❌"
                 exit 1
@@ -192,13 +192,13 @@ do
         find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "postgresql://bunkerweb:secret\@bw-db:5432/db"@' {} \;
 
         echo "💾 Starting postgres ..."
-        docker compose -f docker-compose.postgres.yml up -d 2>/dev/null
+        docker compose -f docker-compose.postgres.yml up -d
         if [ $? -ne 0 ] ; then
             echo "💾 Up failed, retrying ... ⚠️"
             manual=1
             cleanup_stack
             manual=0
-            docker compose -f docker-compose.postgres.yml up -d 2>/dev/null
+            docker compose -f docker-compose.postgres.yml up -d
             if [ $? -ne 0 ] ; then
                 echo "💾 Up failed ❌"
                 exit 1
@@ -207,32 +207,32 @@ do
     fi
 
     echo "💾 Starting stack ..."
-    docker compose up -d 2>/dev/null
+    docker compose up -d
     if [ $? -ne 0 ] ; then
         echo "💾 Up failed, retrying ... ⚠️"
         manual=1
         cleanup_stack
         if [ "$test" = "mariadb" ] ; then
-            docker compose -f docker-compose.mariadb.yml up -d 2>/dev/null
+            docker compose -f docker-compose.mariadb.yml up -d
             if [ $? -ne 0 ] ; then
                 echo "💾 Up failed ❌"
                 exit 1
             fi
         elif [ "$test" = "mysql" ] ; then
-            docker compose -f docker-compose.mysql.yml up -d 2>/dev/null
+            docker compose -f docker-compose.mysql.yml up -d
             if [ $? -ne 0 ] ; then
                 echo "💾 Up failed ❌"
                 exit 1
             fi
         elif [ "$test" = "postgres" ] ; then
-            docker compose -f docker-compose.postgres.yml up -d 2>/dev/null
+            docker compose -f docker-compose.postgres.yml up -d
             if [ $? -ne 0 ] ; then
                 echo "💾 Up failed ❌"
                 exit 1
             fi
         fi
         manual=0
-        docker compose up -d 2>/dev/null
+        docker compose up -d
         if [ $? -ne 0 ] ; then
             echo "💾 Up failed ❌"
             exit 1
