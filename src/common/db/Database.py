@@ -465,6 +465,8 @@ class Database:
             ).delete()
 
             if config:
+                config.pop("DATABASE_URI", None)
+
                 if config.get("MULTISITE", "no") == "yes":
                     global_values = []
                     db_services = (
