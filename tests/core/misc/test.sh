@@ -35,7 +35,7 @@ cleanup_stack () {
 
     echo "🗃️ Cleaning up current stack ..."
 
-    docker compose down -v --remove-orphans 2>/dev/null
+    docker compose down -v --remove-orphans
 
     if [ $? -ne 0 ] ; then
         echo "🗃️ Down failed ❌"
@@ -76,13 +76,13 @@ do
     fi
 
     echo "🗃️ Starting stack ..."
-    docker compose up -d 2>/dev/null
+    docker compose up -d
     if [ $? -ne 0 ] ; then
         echo "🗃️ Up failed, retrying ... ⚠️"
         manual=1
         cleanup_stack
         manual=0
-        docker compose up -d 2>/dev/null
+        docker compose up -d
         if [ $? -ne 0 ] ; then
             echo "🗃️ Up failed ❌"
             exit 1
@@ -117,7 +117,7 @@ do
 
     # Start tests
 
-    docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests 2>/dev/null
+    docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests
 
     if [ $? -ne 0 ] ; then
         echo "🗃️ Test \"$test\" failed ❌"

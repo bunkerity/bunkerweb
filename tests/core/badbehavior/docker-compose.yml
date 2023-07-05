@@ -36,8 +36,9 @@ services:
       DOCKER_HOST: "tcp://bw-docker:2375"
       LOG_LEVEL: "info"
     networks:
-      - bw-universe
-      - bw-docker
+      bw-universe:
+      bw-docker:
+        ipv4_address: 10.10.10.3
 
   bw-docker:
     image: tecnativa/docker-socket-proxy
@@ -46,7 +47,8 @@ services:
     environment:
       CONTAINERS: "1"
     networks:
-      - bw-docker
+      bw-docker:
+        ipv4_address: 10.10.10.2
 
 networks:
   bw-universe:
@@ -63,3 +65,7 @@ networks:
         - subnet: 192.168.0.0/24
   bw-docker:
     name: bw-docker
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.10.10.0/24
