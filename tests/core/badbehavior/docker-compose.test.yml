@@ -15,6 +15,7 @@ services:
       - "www.example.com:192.168.0.2"
     networks:
       bw-docker:
+        ipv4_address: 10.10.10.4
       bw-services:
         ipv4_address: 192.168.0.3
 

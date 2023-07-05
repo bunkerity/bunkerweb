@@ -80,10 +80,10 @@ Here is how you can access the logs, depending on your integration :
     journalctl -u bunkerweb --no-pager
     ```
 
-    Common logs are located inside the `/var/log/nginx` directory :
+    Common logs are located inside the `/var/log/bunkerweb` directory :
     ```shell
-    cat /var/log/nginx/error.log
-    cat /var/log/nginx/access.log
+    cat /var/log/bunkerweb/error.log
+    cat /var/log/bunkerweb/access.log
     ```
 
 === "Ansible"
@@ -93,10 +93,10 @@ Here is how you can access the logs, depending on your integration :
     ansible -i inventory.yml all -a "journalctl -u bunkerweb --no-pager" --become
     ```
 
-    Common logs are located inside the `/var/log/nginx` directory :
+    Common logs are located inside the `/var/log/bunkerweb` directory :
     ```shell
-    ansible -i inventory.yml all -a "cat /var/log/nginx/error.log" --become
-    ansible -i inventory.yml all -a "cat /var/log/nginx/access.log" --become
+    ansible -i inventory.yml all -a "cat /var/log/bunkerweb/error.log" --become
+    ansible -i inventory.yml all -a "cat /var/log/bunkerweb/access.log" --become
     ```
 
 === "Vagrant"
@@ -106,10 +106,10 @@ Here is how you can access the logs, depending on your integration :
     journalctl -u bunkerweb --no-pager
     ```
 
-    Common logs are located inside the `/var/log/nginx` directory :
+    Common logs are located inside the `/var/log/bunkerweb` directory :
     ```shell
-    cat /var/log/nginx/error.log
-    cat /var/log/nginx/access.log
+    cat /var/log/bunkerweb/error.log
+    cat /var/log/bunkerweb/access.log
     ```
 
 ## Permissions
