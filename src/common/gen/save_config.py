@@ -223,6 +223,8 @@ if __name__ == "__main__":
                     logger.info(
                         f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
                     )
+
+            db = Database(logger, config_files.get("DATABASE_URI", None))
         else:
             docker_client = DockerClient(
                 base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
