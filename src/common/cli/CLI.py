@@ -42,8 +42,30 @@ class CLI(ApiCaller):
         self.__logger = setup_logger("CLI", getenv("LOG_LEVEL", "INFO"))
         db_path = Path(sep, "usr", "share", "bunkerweb", "db")
 
+        self.__use_redis = False
+        redis_host = None
+        redis_port = "6379"
+        redis_db = "0"
+        redis_timeout = "1000.0"
+        redis_keepalive_pool = "10"
+        redis_ssl = False
+
         if not db_path.is_dir():
             self.__variables = dotenv_values(join(sep, "etc", "nginx", "variables.env"))
+            self.__use_redis = self.__variables.get("USE_REDIS", "no") == "yes"
+            redis_host = self.__variables.get("REDIS_HOST")
+            redis_port = self.__variables.get("REDIS_PORT", "6379")
+            redis_db = self.__variables.get("REDIS_DB", "0")
+            redis_timeout = self.__variables.get("REDIS_TIMEOUT", "1000.0")
+            redis_keepalive_pool = self.__variables.get("REDIS_KEEPALIVE_POOL", "10")
+            redis_ssl = self.__variables.get("REDIS_SSL", "no") == "yes"
+
+            apis = [
+                API(
+                    f"http://127.0.0.1:{self.__variables.get('API_HTTP_PORT', '5000')}",
+                    host=self.__variables.get("API_SERVER_NAME", "bwapi"),
+                )
+            ]
         else:
             if str(db_path) not in sys_path:
                 sys_path.append(str(db_path))
@@ -54,15 +76,34 @@ class CLI(ApiCaller):
                 self.__logger,
                 sqlalchemy_string=getenv("DATABASE_URI", None),
             )
-            self.__variables = db.get_config()
+            instances = db.get_config()
 
-        self.__integration = self.__detect_integration()
-        self.__use_redis = self.__variables.get("USE_REDIS", "no") == "yes"
+            for config in instances.values():
+                self.__use_redis = (
+                    self.__use_redis or config.get("USE_REDIS", "no") == "yes"
+                )
+                if self.__use_redis:
+                    redis_host = redis_host or config.get("REDIS_HOST")
+                    if redis_port == "6379":
+                        redis_port = config.get("REDIS_PORT", "6379")
+                    if redis_db == "0":
+                        redis_db = config.get("REDIS_DB", "0")
+                    if redis_timeout == "1000.0":
+                        redis_timeout = config.get("REDIS_TIMEOUT", "1000.0")
+                    if redis_keepalive_pool == "10":
+                        redis_keepalive_pool = config.get("REDIS_KEEPALIVE_POOL", "10")
+                    redis_ssl = redis_ssl or config.get("REDIS_SSL", "no") == "yes"
+
+            apis = []
+
+            for instance in db.get_instances():
+                endpoint = f"http://{instance['hostname']}:{instance['port']}"
+                host = instance["server_name"]
+                apis.append(API(endpoint, host=host))
+
         self.__redis = None
         if self.__use_redis:
-            redis_host = self.__variables.get("REDIS_HOST")
             if redis_host:
-                redis_port = self.__variables.get("REDIS_PORT", "6379")
                 if not redis_port.isdigit():
                     self.__logger.error(
                         f"REDIS_PORT is not a valid port number: {redis_port}, defaulting to 6379"
@@ -70,7 +111,6 @@ class CLI(ApiCaller):
                     redis_port = "6379"
                 redis_port = int(redis_port)
 
-                redis_db = self.__variables.get("REDIS_DB", "0")
                 if not redis_db.isdigit():
                     self.__logger.error(
                         f"REDIS_DB is not a valid database number: {redis_db}, defaulting to 0"
@@ -78,7 +118,6 @@ class CLI(ApiCaller):
                     redis_db = "0"
                 redis_db = int(redis_db)
 
-                redis_timeout = self.__variables.get("REDIS_TIMEOUT", "1000.0")
                 if redis_timeout:
                     try:
                         redis_timeout = float(redis_timeout)
@@ -88,9 +127,6 @@ class CLI(ApiCaller):
                         )
                         redis_timeout = 1000.0
 
-                redis_keepalive_pool = self.__variables.get(
-                    "REDIS_KEEPALIVE_POOL", "10"
-                )
                 if not redis_keepalive_pool.isdigit():
                     self.__logger.error(
                         f"REDIS_KEEPALIVE_POOL is not a valid number of connections: {redis_keepalive_pool}, defaulting to 10"
@@ -106,7 +142,7 @@ class CLI(ApiCaller):
                     socket_connect_timeout=redis_timeout,
                     socket_keepalive=True,
                     max_connections=redis_keepalive_pool,
-                    ssl=self.__variables.get("REDIS_SSL", "no") == "yes",
+                    ssl=redis_ssl,
                 )
             else:
                 self.__logger.error(
@@ -114,41 +150,7 @@ class CLI(ApiCaller):
                 )
                 self.__use_redis = False
 
-        if not db_path.is_dir() or self.__integration not in (
-            "kubernetes",
-            "swarm",
-            "autoconf",
-        ):
-            # Docker & Linux case
-            super().__init__(
-                [
-                    API(
-                        f"http://127.0.0.1:{self.__variables.get('API_HTTP_PORT', '5000')}",
-                        host=self.__variables.get("API_SERVER_NAME", "bwapi"),
-                    )
-                ]
-            )
-        else:
-            super().__init__()
-            self.auto_setup(self.__integration)
-
-    def __detect_integration(self) -> str:
-        integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
-        os_release_path = Path(sep, "etc", "os-release")
-        if self.__variables.get("KUBERNETES_MODE", "no").lower() == "yes":
-            return "kubernetes"
-        elif self.__variables.get("SWARM_MODE", "no").lower() == "yes":
-            return "swarm"
-        elif self.__variables.get("AUTOCONF_MODE", "no").lower() == "yes":
-            return "autoconf"
-        elif integration_path.is_file():
-            return integration_path.read_text(encoding="utf-8").strip().lower()
-        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
-            encoding="utf-8"
-        ):
-            return "docker"
-
-        return "linux"
+        super().__init__(apis)
 
     def unban(self, ip: str) -> Tuple[bool, str]:
         if self.__redis:
