@@ -55,7 +55,6 @@ RUN apk add --no-cache bash && \
     mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
     mkdir -p /var/log/nginx/ && touch /var/log/nginx/ui.log && \
     for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-    for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
     chown -R root:ui /data && \
     chmod -R 770 /data && \
     chown -R root:ui /usr/share/bunkerweb/INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/nginx && \

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from os import getenv
 from threading import Lock
 from time import sleep
@@ -89,7 +89,7 @@ class Controller(Config):
             ret = self._db.set_autoconf_load(True)
             if ret:
                 self._logger.warning(
-                    f"Can't set autoconf loaded metadata to true in database: {ret}",
+                    f"Can't set autoconf loaded metadata to true in database: {ret}, scheduler will not work, try restarting the service or check the database connection",
                 )
 
     def get_services(self):
@@ -111,10 +111,8 @@ class Controller(Config):
     def process_events(self):
         pass
 
-    def _is_service_present(self, server_name):
+    def _is_service_present(self, server_name: str):
         for service in self._services:
-            if not "SERVER_NAME" in service or not service["SERVER_NAME"]:
-                continue
-            if server_name == service["SERVER_NAME"].strip().split(" ")[0]:
+            if server_name == service.get("SERVER_NAME", "").strip().split(" ")[0]:
                 return True
         return False

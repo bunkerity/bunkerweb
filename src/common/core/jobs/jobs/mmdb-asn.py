@@ -15,6 +15,7 @@ for deps_path in [
     for paths in (
         ("deps", "python"),
         ("utils",),
+        ("api",),
         ("db",),
     )
 ]:
@@ -24,9 +25,10 @@ for deps_path in [
 from maxminddb import open_database
 from requests import RequestException, get
 
+from API import API  # type: ignore
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import cache_file, cache_hash, file_hash, is_cached_file
+from jobs import cache_file, cache_hash, file_hash, is_cached_file, send_cache_to_api
 
 logger = setup_logger("JOBS.mmdb-asn", getenv("LOG_LEVEL", "INFO"))
 status = 0
@@ -34,8 +36,10 @@ lock = Lock()
 
 try:
     dl_mmdb = True
-    tmp_path = Path(sep, "var", "tmp", "bunkerweb", "asn.mmdb")
-    cache_path = Path(sep, "var", "cache", "bunkerweb", "asn.mmdb")
+    tmp_path = Path(sep, "var", "tmp", "bunkerweb", "mmdb", "asn.mmdb")
+    tmp_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path = Path(sep, "var", "cache", "bunkerweb", "mmdb", "asn.mmdb")
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
     new_hash = None
 
     # Don't go further if the cache match the latest version
@@ -75,7 +79,7 @@ try:
 
     if dl_mmdb:
         # Don't go further if the cache is fresh
-        if is_cached_file(cache_path, "month", db):
+        if is_cached_file(cache_path, "month", None, db):
             logger.info("asn.mmdb is already in cache, skipping download...")
             _exit(0)
 
@@ -107,7 +111,7 @@ try:
 
         # Check if file has changed
         new_hash = file_hash(tmp_path)
-        old_hash = cache_hash(cache_path, db)
+        old_hash = cache_hash(cache_path, None, db)
         if new_hash == old_hash:
             logger.info("New file is identical to cache file, reload is not needed")
             _exit(0)
@@ -119,7 +123,7 @@ try:
 
     # Move it to cache folder
     logger.info("Moving mmdb file to cache ...")
-    cached, err = cache_file(tmp_path, cache_path, new_hash, db)
+    cached, err = cache_file(tmp_path, cache_path, new_hash, None, db)
     if not cached:
         logger.error(f"Error while caching mmdb file : {err}")
         _exit(2)
@@ -129,6 +133,24 @@ try:
         logger.info(f"Downloaded new mmdb from {mmdb_url}")
 
     status = 1
+
+    with lock:
+        bw_instances = db.get_instances()
+
+    apis = []
+    for instance in bw_instances:
+        if instance["hostname"] != "127.0.0.1":
+            sent, res = send_cache_to_api(
+                cache_path.parent,
+                API(
+                    f"http://{instance['hostname']}:{instance['port']}",
+                    host=instance["server_name"],
+                ),
+            )
+            if not sent:
+                logger.error(f"Error while sending mmdb-asn to API : {res}")
+                status = 2
+            logger.info(res)
 except:
     status = 2
     logger.error(f"Exception while running mmdb-asn.py :\n{format_exc()}")

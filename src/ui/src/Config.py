@@ -8,7 +8,7 @@ from json import loads as json_loads
 from pathlib import Path
 from re import search as re_search
 from subprocess import run, DEVNULL, STDOUT
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple
 from uuid import uuid4
 
 
@@ -21,64 +21,53 @@ class Config:
         )
         self.__db = db
 
-    def __gen_conf(self, global_conf: dict, services_conf: list[dict]) -> None:
+    def __gen_conf(
+        self, global_configs: Dict[str, dict], services_configs: Dict[str, List[dict]]
+    ) -> None:
         """Generates the nginx configuration file from the given configuration
 
         Parameters
         ----------
-        variables : dict
-            The configuration to add to the file
+        global_configs : dict
+            The global configuration
+        services_configs : list
+            The services configurations
 
         Raises
         ------
         ConfigGenerationError
             If an error occurred during the generation of the configuration file, raises this exception
         """
-        conf = deepcopy(global_conf)
+        new_configs = {}
 
-        servers = []
-        plugins_settings = self.get_plugins_settings()
-        for service in services_conf:
-            server_name = service["SERVER_NAME"].split(" ")[0]
-            for k in service:
-                key_without_server_name = k.replace(f"{server_name}_", "")
-                if (
-                    plugins_settings[key_without_server_name]["context"] != "global"
-                    if key_without_server_name in plugins_settings
-                    else True
-                ):
-                    if not k.startswith(server_name) or k in plugins_settings:
-                        conf[f"{server_name}_{k}"] = service[k]
-                    else:
-                        conf[k] = service[k]
+        for instance, conf in global_configs.copy().items():
+            servers = []
+            plugins_settings = self.get_plugins_settings()
+            for service in services_configs[instance]:
+                server_name = service["SERVER_NAME"].split(" ")[0]
+                for k in service:
+                    key_without_server_name = k.replace(f"{server_name}_", "")
+                    if (
+                        plugins_settings[key_without_server_name]["context"] != "global"
+                        if key_without_server_name in plugins_settings
+                        else True
+                    ):
+                        if not k.startswith(server_name) or k in plugins_settings:
+                            conf[f"{server_name}_{k}"] = service[k]
+                        else:
+                            conf[k] = service[k]
 
-            servers.append(server_name)
+                servers.append(server_name)
 
-        conf["SERVER_NAME"] = " ".join(servers)
-        env_file = Path(sep, "tmp", f"{uuid4()}.env")
-        env_file.write_text(
-            "\n".join(f"{k}={conf[k]}" for k in sorted(conf)),
-            encoding="utf-8",
-        )
+            conf["SERVER_NAME"] = " ".join(servers)
+            new_configs[instance] = conf
 
-        proc = run(
-            [
-                "python3",
-                join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
-                "--variables",
-                str(env_file),
-                "--method",
-                "ui",
-            ],
-            stdin=DEVNULL,
-            stderr=STDOUT,
-            check=False,
-        )
+        err = self.__db.save_config(new_configs, "ui")
 
-        if proc.returncode != 0:
-            raise Exception(f"Error from generator (return code = {proc.returncode})")
-
-        env_file.unlink()
+        if err:
+            self.__logger.error(
+                f"Can't save config to database, configuration will not work as expected.\nError: {err}"
+            )
 
     def get_plugins_settings(self) -> dict:
         return {
@@ -107,7 +96,9 @@ class Config:
     def get_settings(self) -> dict:
         return self.__settings
 
-    def get_config(self, methods: bool = True) -> dict:
+    def get_config(
+        self, methods: bool = True, *, instances: Optional[List[str]] = None
+    ) -> dict:
         """Get the nginx variables env file and returns it as a dict
 
         Returns
@@ -115,7 +106,7 @@ class Config:
         dict
             The nginx variables env file as a dict
         """
-        return self.__db.get_config(methods=methods)
+        return self.__db.get_config(methods=methods, instances=instances)
 
     def get_services(self, methods: bool = True) -> list[dict]:
         """Get nginx's services
@@ -127,11 +118,15 @@ class Config:
         """
         return self.__db.get_services_settings(methods=methods)
 
-    def check_variables(self, variables: dict, _global: bool = False) -> int:
+    def check_variables(
+        self, instance: str, variables: dict, _global: bool = False
+    ) -> int:
         """Testify that the variables passed are valid
 
         Parameters
         ----------
+        instance : str
+            The instance to check
         variables : dict
             The dict to check
 
@@ -148,7 +143,9 @@ class Config:
             if k in plugins_settings:
                 if _global ^ (plugins_settings[k]["context"] == "global"):
                     error = 1
-                    flash(f"Variable {k} is not valid.", "error")
+                    flash(
+                        f"Variable {k} is not valid for instance {instance}.", "error"
+                    )
                     continue
 
                 setting = k
@@ -159,7 +156,9 @@ class Config:
                     or "multiple" not in plugins_settings[setting]
                 ):
                     error = 1
-                    flash(f"Variable {k} is not valid.", "error")
+                    flash(
+                        f"Variable {k} is not valid for instance {instance}.", "error"
+                    )
                     continue
 
             if not (
@@ -169,7 +168,7 @@ class Config:
 
             if not check:
                 error = 1
-                flash(f"Variable {k} is not valid.", "error")
+                flash(f"Variable {k} is not valid for instance {instance}.", "error")
                 continue
 
         return error
@@ -247,7 +246,7 @@ class Config:
             error,
         )
 
-    def edit_global_conf(self, variables: dict) -> str:
+    def edit_global_conf(self, instances_variables: dict) -> str:
         """Edits the global conf
 
         Parameters
@@ -261,7 +260,8 @@ class Config:
             the confirmation message
         """
         self.__gen_conf(
-            self.get_config(methods=False) | variables, self.get_services(methods=False)
+            self.get_config(methods=False) | instances_variables,
+            self.get_services(methods=False),
         )
         return "The global configuration has been edited."
 

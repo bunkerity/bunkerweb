@@ -12,18 +12,28 @@ from utils import path_to_dict
 
 
 def generate_custom_configs(
-    custom_configs: List[Dict[str, Any]],
+    instances_configs: List[Dict[str, Any]],
     *,
     original_path: Path = Path(sep, "etc", "bunkerweb", "configs"),
 ):
-    original_path.mkdir(parents=True, exist_ok=True)
-    for custom_config in custom_configs:
-        tmp_path = original_path.joinpath(custom_config["type"].replace("_", "-"))
-        if custom_config["service_id"]:
-            tmp_path = tmp_path.joinpath(custom_config["service_id"])
-        tmp_path = tmp_path.joinpath(f"{custom_config['name']}.conf")
-        tmp_path.parent.mkdir(parents=True, exist_ok=True)
-        tmp_path.write_bytes(custom_config["data"])
+    if not isinstance(original_path, Path):
+        original_path = Path(original_path)
+
+    for instance, configs in instances_configs.items():
+        instance_path = original_path.joinpath(
+            instance if instance != "127.0.0.1" else ""
+        )
+        instance_path.mkdir(parents=True, exist_ok=True)
+
+        if configs:
+            for custom_config in configs:
+                tmp_path = instance_path.joinpath(
+                    custom_config["type"].replace("_", "-"),
+                    custom_config["service_id"] or "",
+                    f"{custom_config['name']}.conf",
+                )
+                tmp_path.parent.mkdir(parents=True, exist_ok=True)
+                tmp_path.write_bytes(custom_config["data"])
 
 
 class ConfigFiles:
@@ -45,7 +55,7 @@ class ConfigFiles:
             if custom_configs:
                 self.__logger.info("Refreshing custom configs ...")
                 # Remove old custom configs files
-                for file in glob(join(sep, "etc", "bunkerweb", "configs", "*")):
+                for file in glob(join(sep, "etc", "bunkerweb", "configs", "*", "*")):
                     file = Path(file)
                     if file.is_symlink() or file.is_file():
                         file.unlink()
@@ -56,26 +66,36 @@ class ConfigFiles:
                 self.__logger.info("Custom configs refreshed successfully")
 
     def save_configs(self) -> str:
-        custom_configs = []
-        configs_path = join(sep, "etc", "bunkerweb", "configs")
-        root_dirs = listdir(configs_path)
-        for root, dirs, files in walk(configs_path):
-            if files or (dirs and basename(root) not in root_dirs):
-                path_exploded = root.split("/")
-                for file in files:
-                    with open(join(root, file), "r", encoding="utf-8") as f:
-                        custom_configs.append(
-                            {
-                                "value": f.read(),
-                                "exploded": (
-                                    f"{path_exploded.pop()}"
-                                    if path_exploded[-1] not in root_dirs
-                                    else None,
-                                    path_exploded[-1],
-                                    file.replace(".conf", ""),
-                                ),
-                            }
-                        )
+        custom_configs = {}
+        for instance in self.__db.get_instances():
+            tmp_path = Path(
+                sep,
+                "etc",
+                "bunkerweb",
+                "configs",
+                instance["hostname"] if instance["hostname"] != "127.0.0.1" else "",
+            )
+            custom_configs[instance["hostname"]] = []
+
+            if tmp_path.is_dir():
+                root_dirs = listdir(tmp_path)
+                for root, dirs, files in walk(tmp_path):
+                    if files or (dirs and basename(root) not in root_dirs):
+                        path_exploded = root.split("/")
+                        for file in files:
+                            content = Path(join(root, file)).read_text(encoding="utf-8")
+                            custom_configs[instance["hostname"]].append(
+                                {
+                                    "value": content,
+                                    "exploded": (
+                                        f"{path_exploded.pop()}"
+                                        if path_exploded[-1] not in root_dirs
+                                        else None,
+                                        path_exploded[-1],
+                                        file.replace(".conf", ""),
+                                    ),
+                                }
+                            )
 
         err = self.__db.save_custom_configs(custom_configs, "ui")
         if err:

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-from typing import Literal, Optional, Union
+from time import sleep
+from typing import Literal, Optional, Tuple, Union
 from requests import request
 
 
@@ -25,7 +26,9 @@ class API:
         url: str,
         data: Optional[Union[dict, bytes]] = None,
         files=None,
-        timeout=(10, 30),
+        timeout: Tuple[int, int] = (10, 30),
+        *,
+        retries: int = 3,
     ) -> tuple[bool, str, Optional[int], Optional[dict]]:
         try:
             kwargs = {}
@@ -46,7 +49,19 @@ class API:
                 headers={"User-Agent": "bwapi", "Host": self.__host},
                 **kwargs,
             )
+            resp.raise_for_status()
         except Exception as e:
+            if retries > 0:
+                sleep(2)
+                return self.request(
+                    method,
+                    url,
+                    data=data,
+                    files=files,
+                    timeout=timeout,
+                    retries=retries - 1,
+                )
+
             return False, f"Request failed: {e}", None, None
 
         return True, "ok", resp.status_code, resp.json()

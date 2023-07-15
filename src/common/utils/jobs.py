@@ -4,11 +4,12 @@ from contextlib import suppress
 from datetime import datetime
 from hashlib import sha512
 from inspect import getsourcefile
-from io import BufferedReader
+from io import BufferedReader, BytesIO
 from json import dumps, loads
 from os.path import basename, normpath
 from pathlib import Path
 from sys import _getframe
+from tarfile import open as tar_open
 from threading import Lock
 from traceback import format_exc
 from typing import Literal, Optional, Tuple, Union
@@ -26,6 +27,7 @@ lock = Lock()
 def is_cached_file(
     file: Union[str, Path],
     expire: Union[Literal["hour"], Literal["day"], Literal["week"], Literal["month"]],
+    instance_hostname: str,
     db=None,
 ) -> bool:
     is_cached = False
@@ -37,6 +39,7 @@ def is_cached_file(
             if not db:
                 return False
             cached_file = db.get_job_cache_file(
+                instance_hostname,
                 basename(getsourcefile(_getframe(1))).replace(".py", ""),
                 basename(file),
                 with_info=True,
@@ -71,9 +74,14 @@ def is_cached_file(
 
 
 def get_file_in_db(
-    file: Union[str, Path], db, *, job_name: Optional[str] = None
+    file: Union[str, Path],
+    instance_hostname: str,
+    db,
+    *,
+    job_name: Optional[str] = None,
 ) -> Optional[bytes]:
     cached_file = db.get_job_cache_file(
+        instance_hostname,
         job_name or basename(getsourcefile(_getframe(1))).replace(".py", ""),
         normpath(file),
     )
@@ -85,6 +93,7 @@ def get_file_in_db(
 def set_file_in_db(
     name: str,
     content: bytes,
+    instance_hostname: str,
     db,
     *,
     job_name: Optional[str] = None,
@@ -95,6 +104,7 @@ def set_file_in_db(
     try:
         with lock:
             err = db.update_job_cache(
+                instance_hostname,
                 service_id,
                 name,
                 content,
@@ -110,11 +120,13 @@ def set_file_in_db(
     return ret, err
 
 
-def del_file_in_db(name: str, db) -> Tuple[bool, str]:
+def del_file_in_db(name: str, instance_hostname: str, db) -> Tuple[bool, str]:
     ret, err = True, "success"
     try:
         db.delete_job_cache(
-            name, job_name=basename(getsourcefile(_getframe(1))).replace(".py", "")
+            instance_hostname,
+            name,
+            job_name=basename(getsourcefile(_getframe(1))).replace(".py", ""),
         )
     except:
         return False, f"exception :\n{format_exc()}"
@@ -143,13 +155,16 @@ def bytes_hash(bio: BufferedReader) -> str:
     return _sha512.hexdigest()
 
 
-def cache_hash(cache: Union[str, Path], db=None) -> Optional[str]:
+def cache_hash(
+    cache: Union[str, Path], instance_hostname: str, db=None
+) -> Optional[str]:
     with suppress(BaseException):
         return loads(Path(normpath(f"{cache}.md")).read_text(encoding="utf-8")).get(
             "checksum", None
         )
     if db:
         cached_file = db.get_job_cache_file(
+            instance_hostname,
             basename(getsourcefile(_getframe(1))).replace(".py", ""),
             basename(normpath(cache)),
             with_info=True,
@@ -165,6 +180,7 @@ def cache_file(
     file: Union[str, Path],
     cache: Union[str, Path],
     _hash: Optional[str],
+    instance_hostname: str,
     db=None,
     *,
     delete_file: bool = True,
@@ -190,6 +206,7 @@ def cache_file(
             return set_file_in_db(
                 basename(str(cache)),
                 content,
+                instance_hostname,
                 db,
                 job_name=basename(getsourcefile(_getframe(1))).replace(".py", ""),
                 service_id=service_id,
@@ -199,6 +216,47 @@ def cache_file(
             Path(f"{cache}.md").write_text(
                 dumps(dict(date=datetime.now().timestamp(), checksum=_hash)),
                 encoding="utf-8",
+            )
+    except:
+        return False, f"exception :\n{format_exc()}"
+    return ret, err
+
+
+def send_cache_to_api(cache: Union[str, Path], api) -> Tuple[bool, str]:
+    ret, err = True, "success"
+    try:
+        if not isinstance(cache, Path):
+            cache = Path(normpath(cache))
+
+        if not cache.exists():
+            return False, "cache not found"
+
+        job_category = (
+            cache.parent.name if cache.parent.name != "bunkerweb" else cache.name
+        )
+
+        # Create tarball of cache
+        tgz = BytesIO()
+
+        with tar_open(mode="w:gz", fileobj=tgz, compresslevel=3) as tf:
+            tf.add(str(cache), arcname=".")
+        tgz.seek(0, 0)
+        files = {"archive.tar.gz": tgz}
+
+        sent, err, status, resp = api.request(
+            "POST", f"/cache/{job_category}", files=files
+        )
+        if not sent:
+            ret = False
+            err = (
+                f"Can't send API request to {api.endpoint}/cache/{job_category} : {err}"
+            )
+        elif status != 200:
+            ret = False
+            err = f"Error while sending API request to {api.endpoint}/cache/{job_category} : status = {resp['status']}, msg = {resp['msg']}"
+        else:
+            err = (
+                f"Successfully sent API request to {api.endpoint}/cache/{job_category}"
             )
     except:
         return False, f"exception :\n{format_exc()}"

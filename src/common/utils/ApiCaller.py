@@ -23,16 +23,16 @@ from kubernetes import client as kube_client, config
 
 class ApiCaller:
     def __init__(self, apis: Optional[List[API]] = None):
-        self.__apis = apis or []
+        self._apis = apis or []
         self.__logger = setup_logger("Api", getenv("LOG_LEVEL", "INFO"))
 
     @property
     def apis(self) -> List[API]:
-        return self.__apis
+        return self._apis
 
     @apis.setter
     def apis(self, apis: List[API]):
-        self.__apis = apis
+        self._apis = apis
 
     def auto_setup(self, bw_integration: Optional[str] = None):
         if bw_integration is None:
@@ -58,7 +58,7 @@ class ApiCaller:
                         elif pod_env.name == "API_SERVER_NAME":
                             api_server_name = pod_env.value or "bwapi"
 
-                    self.__apis.append(
+                    self._apis.append(
                         API(
                             f"http://{pod.status.pod_ip}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
                             host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
@@ -85,7 +85,7 @@ class ApiCaller:
                             api_server_name = var.replace("API_SERVER_NAME=", "", 1)
 
                     for task in instance.tasks():
-                        self.__apis.append(
+                        self._apis.append(
                             API(
                                 f"http://{instance.name}.{task['NodeID']}.{task['ID']}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
                                 host=api_server_name
@@ -106,7 +106,7 @@ class ApiCaller:
                     elif var.startswith("API_SERVER_NAME="):
                         api_server_name = var.replace("API_SERVER_NAME=", "", 1)
 
-                self.__apis.append(
+                self._apis.append(
                     API(
                         f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
                         host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
@@ -120,11 +120,14 @@ class ApiCaller:
         files: Optional[Dict[str, BytesIO]] = None,
         data: Optional[Dict[str, Any]] = None,
         response: bool = False,
+        *,
+        apis: Optional[List[API]] = None,
     ) -> Tuple[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
+        apis = apis or self._apis
         ret = True
         url = url if not url.startswith("/") else url[1:]
         responses = {}
-        for api in self.__apis:
+        for api in apis:
             if files is not None:
                 for buffer in files.values():
                     buffer.seek(0, 0)
@@ -156,7 +159,13 @@ class ApiCaller:
             return ret, responses
         return ret
 
-    def send_files(self, path: str, url: str) -> bool:
+    def send_files(
+        self,
+        path: str,
+        url: str,
+        *,
+        apis: Optional[List[API]] = None,
+    ) -> bool:
         ret = True
         with BytesIO() as tgz:
             with tar_open(
@@ -165,6 +174,6 @@ class ApiCaller:
                 tf.add(path, arcname=".")
             tgz.seek(0, 0)
             files = {"archive.tar.gz": tgz}
-            if not self.send_to_apis("POST", url, files=files):
+            if not self.send_to_apis("POST", url, files=files, apis=apis):
                 ret = False
         return ret

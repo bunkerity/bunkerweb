@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
 from argparse import ArgumentParser
-from os import R_OK, X_OK, access, environ, getenv, sep
+from contextlib import suppress
+from os import R_OK, X_OK, _exit, access, environ, getenv, sep
 from os.path import join, normpath
 from pathlib import Path
 from re import compile as re_compile
@@ -18,6 +19,7 @@ for deps_path in [
         sys_path.append(deps_path)
 
 from docker import DockerClient
+from docker.errors import DockerException
 
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
@@ -33,7 +35,7 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
     api_http_port = None
     api_server_name = None
     tmp_config = {}
-    custom_confs = []
+    custom_configs = []
     apis = []
 
     for var in (
@@ -44,7 +46,7 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
         splitted = var.split("=", 1)
         if custom_confs_rx.match(splitted[0]):
             custom_conf = custom_confs_rx.search(splitted[0]).groups()
-            custom_confs.append(
+            custom_configs.append(
                 {
                     "value": f"# CREATED BY ENV\n{splitted[1]}",
                     "exploded": (
@@ -77,7 +79,7 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
         )
     )
 
-    return tmp_config, custom_confs, apis, db
+    return tmp_config, custom_configs, apis, db
 
 
 if __name__ == "__main__":
@@ -191,10 +193,15 @@ if __name__ == "__main__":
                     f"Missing RX rights on directory : {path}",
                 )
                 sys_exit(1)
+        logger.info("✅ Arguments are valid")
+
+        instances = {}
 
         if args.variables:
             variables_path = Path(normpath(args.variables))
             logger.info(f"Variables : {variables_path}")
+
+            instances["127.0.0.1"] = {"config": {}, "custom_configs": []}
 
             # Compute the config
             logger.info("Computing config ...")
@@ -205,12 +212,11 @@ if __name__ == "__main__":
                 str(variables_path),
                 logger,
             )
-            config_files = config.get_config()
-            custom_confs = []
+            instances["127.0.0.1"]["config"] = config.get_config()
             for k, v in environ.items():
                 if custom_confs_rx.match(k):
                     custom_conf = custom_confs_rx.search(k).groups()
-                    custom_confs.append(
+                    instances["127.0.0.1"]["custom_configs"].append(
                         {
                             "value": f"# CREATED BY ENV\n{v}",
                             "exploded": (
@@ -224,32 +230,71 @@ if __name__ == "__main__":
                         f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
                     )
 
-            db = Database(logger, config_files.get("DATABASE_URI", None))
+            db = Database(
+                logger, instances["127.0.0.1"]["config"].get("DATABASE_URI", None)
+            )
         else:
-            docker_client = DockerClient(
-                base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
+            logger.info("Connecting to Docker API ...")
+            docker_client = None
+            retries = 0
+            while not docker_client:
+                try:
+                    docker_client = DockerClient(
+                        base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
+                    )
+                    break
+                except DockerException as e:
+                    retries += 1
+                    if retries > 5:
+                        logger.error(
+                            f"An error occured while connecting to Docker API, exiting ...\n{e}"
+                        )
+                        _exit(1)
+
+                    logger.warning(
+                        f"An error occured while connecting to Docker API, retrying in {wait_retry_interval} seconds ..."
+                    )
+                    sleep(wait_retry_interval)
+            logger.info("✅ Connected to Docker API")
+
+            bunkerweb_instances = docker_client.containers.list(
+                filters={"label": "bunkerweb.INSTANCE"}
             )
 
-            while not docker_client.containers.list(
-                filters={"label": "bunkerweb.INSTANCE"}
-            ):
-                logger.info("Waiting for BunkerWeb instance ...")
-                sleep(5)
+            while not bunkerweb_instances:
+                logger.warning(
+                    f"Waiting for any BunkerWeb instance, retrying in {wait_retry_interval} seconds ..."
+                )
+                sleep(wait_retry_interval)
+                bunkerweb_instances = docker_client.containers.list(
+                    filters={"label": "bunkerweb.INSTANCE"}
+                )
 
-            api_http_port = None
-            api_server_name = None
-            tmp_config = {}
-            custom_confs = []
-            apis = []
+            # Wait for the instances to be ready
+            for instance in bunkerweb_instances:
+                while instance.status != "running":
+                    logger.warning(
+                        f"Waiting for {instance.name} to be ready, retrying in {wait_retry_interval} seconds ..."
+                    )
+                    sleep(wait_retry_interval)
+                logger.info(f"{instance.name} is ready")
 
-            for instance in docker_client.containers.list(
-                filters={"label": "bunkerweb.INSTANCE"}
-            ):
+            for instance in bunkerweb_instances:
+                api_http_port = None
+                api_server_name = None
+
+                if not instance.attrs:
+                    logger.warning(f"Can't get attributes for {instance.name}")
+                    continue
+
+                if instance.name not in instances:
+                    instances[instance.name] = {"config": {}, "custom_configs": []}
+
                 for var in instance.attrs["Config"]["Env"]:
                     splitted = var.split("=", 1)
                     if custom_confs_rx.match(splitted[0]):
                         custom_conf = custom_confs_rx.search(splitted[0]).groups()
-                        custom_confs.append(
+                        instances[instance.name]["custom_configs"].append(
                             {
                                 "value": f"# CREATED BY ENV\n{splitted[1]}",
                                 "exploded": (
@@ -263,14 +308,9 @@ if __name__ == "__main__":
                             f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
                         )
                     else:
-                        tmp_config[splitted[0]] = splitted[1]
+                        instances[instance.name]["config"][splitted[0]] = splitted[1]
 
-                        if not db and splitted[0] == "DATABASE_URI":
-                            db = Database(
-                                logger,
-                                sqlalchemy_string=splitted[1],
-                            )
-                        elif splitted[0] == "API_HTTP_PORT":
+                        if splitted[0] == "API_HTTP_PORT":
                             api_http_port = splitted[1]
                         elif splitted[0] == "API_SERVER_NAME":
                             api_server_name = splitted[1]
@@ -285,19 +325,23 @@ if __name__ == "__main__":
         if not db:
             db = Database(logger)
 
+        config = None
+
         # Compute the config
         if not config_files:
             logger.info("Computing config ...")
-            config = Configurator(
-                args.settings,
-                args.core,
-                external_plugins,
-                tmp_config,
-                logger,
-            )
-            config_files = config.get_config()
 
-        if not db.is_initialized():
+            for instance in instances:
+                config = Configurator(
+                    args.settings,
+                    args.core,
+                    external_plugins,
+                    instances[instance]["config"],
+                    logger,
+                )
+                instances[instance]["config"] = config.get_config()
+
+        if not db.is_initialized() and config:
             logger.info(
                 "Database not initialized, initializing ...",
             )
@@ -344,25 +388,26 @@ if __name__ == "__main__":
         if args.init:
             sys_exit(0)
 
-        err = db.save_config(config_files, args.method)
-
-        if not err:
-            err1 = db.save_custom_configs(custom_confs, args.method)
-        else:
-            err = None
-            err1 = None
-
-        if err or err1:
-            logger.error(
-                f"Can't save config to database : {err or err1}",
-            )
-            sys_exit(1)
-        else:
-            logger.info("Config successfully saved to database")
-
         if args.method != "ui":
             if apis:
                 for api in apis:
+                    logger.info(f"Testing api {api.endpoint} ...")
+
+                    sent, err, status, resp = api.request("GET", "/ping")
+
+                    if not sent:
+                        logger.error(
+                            f"Can't send API request to {api.endpoint}/ping, api will not be added to the database : {err}"
+                        )
+                        continue
+                    elif status != 200:
+                        logger.error(
+                            f"Error while sending API request to {api.endpoint}/ping, api will not be added to the database : status = {resp['status']}, msg = {resp['msg']}"
+                        )
+                        continue
+
+                    logger.info(f"Adding api {api.endpoint} to the database")
+
                     endpoint_data = api.endpoint.replace("http://", "").split(":")
                     err = db.add_instance(
                         endpoint_data[0], endpoint_data[1].replace("/", ""), api.host
@@ -373,12 +418,28 @@ if __name__ == "__main__":
             else:
                 err = db.add_instance(
                     "127.0.0.1",
-                    config_files.get("API_HTTP_PORT", 5000),
-                    config_files.get("API_SERVER_NAME", "bwapi"),
+                    instances["127.0.0.1"]["config"].get("API_HTTP_PORT", 5000),
+                    instances["127.0.0.1"]["config"].get("API_SERVER_NAME", "bwapi"),
                 )
 
                 if err:
                     logger.warning(err)
+
+        err = db.save_config(instances, args.method)
+
+        if not err:
+            err1 = db.save_custom_configs(instances, args.method)
+        else:
+            err1 = None
+
+        if err or err1:
+            logger.error(
+                f"Can't save config to database : {err or err1}",
+            )
+            sys_exit(1)
+        else:
+            logger.info("Config successfully saved to database")
+
     except SystemExit as e:
         raise e
     except:

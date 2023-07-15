@@ -21,8 +21,8 @@ class Templator:
         templates: str,
         core: str,
         plugins: str,
-        output: str,
-        target: str,
+        output: Path,
+        target: Path,
         config: Dict[str, Any],
     ):
         self.__templates = templates
@@ -66,7 +66,7 @@ class Templator:
     def __write_config(
         self, subpath: Optional[str] = None, config: Optional[Dict[str, Any]] = None
     ):
-        real_path = Path(self.__output, subpath or "", "variables.env")
+        real_path = self.__output.joinpath(subpath or "", "variables.env")
         real_path.parent.mkdir(parents=True, exist_ok=True)
         real_path.write_text(
             "\n".join(f"{k}={v}" for k, v in (config or self.__config).items())
@@ -101,7 +101,7 @@ class Templator:
                 for variable, value in self.__config.items():
                     if variable.startswith(f"{server}_"):
                         config[variable.replace(f"{server}_", "", 1)] = value
-                config["NGINX_PREFIX"] = join(self.__target, server) + "/"
+                config["NGINX_PREFIX"] = str(self.__target.joinpath(server)) + "/"
                 server_key = f"{server}_SERVER_NAME"
                 if server_key not in self.__config:
                     config["SERVER_NAME"] = server
@@ -136,7 +136,7 @@ class Templator:
         real_config["has_variable"] = Templator.has_variable
         real_config["random"] = Templator.random
         real_config["read_lines"] = Templator.read_lines
-        real_path = Path(self.__output, subpath or "", name or template)
+        real_path = self.__output.joinpath(subpath or "", name or template)
         jinja_template = self.__jinja_env.get_template(template)
         real_path.parent.mkdir(parents=True, exist_ok=True)
         real_path.write_text(jinja_template.render(real_config))

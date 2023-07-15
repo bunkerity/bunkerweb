@@ -100,6 +100,11 @@ class Settings(Base):
 class Global_values(Base):
     __tablename__ = "bw_global_values"
 
+    instance_hostname = Column(
+        String(256),
+        ForeignKey("bw_instances.hostname", onupdate="cascade", ondelete="cascade"),
+        primary_key=True,
+    )
     setting_id = Column(
         String(256),
         ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"),
@@ -109,6 +114,7 @@ class Global_values(Base):
     suffix = Column(Integer, primary_key=True, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
+    instance = relationship("Instances", back_populates="global_values")
     setting = relationship("Settings", back_populates="global_value")
 
 
@@ -116,6 +122,11 @@ class Services(Base):
     __tablename__ = "bw_services"
 
     id = Column(String(64), primary_key=True)
+    instance_hostname = Column(
+        String(256),
+        ForeignKey("bw_instances.hostname", onupdate="cascade", ondelete="cascade"),
+        nullable=False,
+    )
     method = Column(METHODS_ENUM, nullable=False)
 
     settings = relationship(
@@ -125,6 +136,7 @@ class Services(Base):
         "Custom_configs", back_populates="service", cascade="all"
     )
     jobs_cache = relationship("Jobs_cache", back_populates="service", cascade="all")
+    instance = relationship("Instances", back_populates="services")
 
 
 class Services_settings(Base):
@@ -190,12 +202,19 @@ class Plugin_pages(Base):
 
 class Jobs_cache(Base):
     __tablename__ = "bw_jobs_cache"
-    __table_args__ = (UniqueConstraint("job_name", "service_id", "file_name"),)
+    __table_args__ = (
+        UniqueConstraint("instance_hostname", "job_name", "service_id", "file_name"),
+    )
 
     id = Column(
         Integer,
         Identity(start=1, increment=1),
         primary_key=True,
+    )
+    instance_hostname = Column(
+        String(256),
+        ForeignKey("bw_instances.hostname", onupdate="cascade", ondelete="cascade"),
+        nullable=True,
     )
     job_name = Column(
         String(128),
@@ -215,18 +234,26 @@ class Jobs_cache(Base):
     last_update = Column(DateTime, nullable=True)
     checksum = Column(String(128), nullable=True)
 
+    instance = relationship("Instances", back_populates="jobs_cache")
     job = relationship("Jobs", back_populates="cache")
     service = relationship("Services", back_populates="jobs_cache")
 
 
 class Custom_configs(Base):
     __tablename__ = "bw_custom_configs"
-    __table_args__ = (UniqueConstraint("service_id", "type", "name"),)
+    __table_args__ = (
+        UniqueConstraint("instance_hostname", "service_id", "type", "name"),
+    )
 
     id = Column(
         Integer,
         Identity(start=1, increment=1),
         primary_key=True,
+    )
+    instance_hostname = Column(
+        String(256),
+        ForeignKey("bw_instances.hostname", onupdate="cascade", ondelete="cascade"),
+        nullable=False,
     )
     service_id = Column(
         String(64),
@@ -239,6 +266,7 @@ class Custom_configs(Base):
     checksum = Column(String(128), nullable=False)
     method = Column(METHODS_ENUM, nullable=False)
 
+    instance = relationship("Instances", back_populates="custom_configs")
     service = relationship("Services", back_populates="custom_configs")
 
 
@@ -261,6 +289,17 @@ class Instances(Base):
     hostname = Column(String(256), primary_key=True)
     port = Column(Integer, nullable=False)
     server_name = Column(String(256), nullable=False)
+    custom_configs_changed = Column(Boolean, default=False, nullable=True)
+    config_changed = Column(Boolean, default=False, nullable=True)
+
+    services = relationship("Services", back_populates="instance", cascade="all")
+    global_values = relationship(
+        "Global_values", back_populates="instance", cascade="all"
+    )
+    custom_configs = relationship(
+        "Custom_configs", back_populates="instance", cascade="all"
+    )
+    jobs_cache = relationship("Jobs_cache", back_populates="instance", cascade="all")
 
 
 class Metadata(Base):
@@ -271,8 +310,6 @@ class Metadata(Base):
     first_config_saved = Column(Boolean, nullable=False)
     autoconf_loaded = Column(Boolean, default=False, nullable=True)
     scheduler_first_start = Column(Boolean, nullable=True)
-    custom_configs_changed = Column(Boolean, default=False, nullable=True)
     external_plugins_changed = Column(Boolean, default=False, nullable=True)
-    config_changed = Column(Boolean, default=False, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
     version = Column(String(32), default="1.5.0", nullable=False)

@@ -142,13 +142,15 @@ if __name__ == "__main__":
 
             # Compute the config
             logger.info("Computing config ...")
-            config: Dict[str, Any] = Configurator(
-                str(settings_path),
-                str(core_path),
-                str(plugins_path),
-                str(variables_path),
-                logger,
-            ).get_config()
+            configs: Dict[str, Dict[str, Any]] = {
+                "127.0.0.1": Configurator(
+                    str(settings_path),
+                    str(core_path),
+                    str(plugins_path),
+                    str(variables_path),
+                    logger,
+                ).get_config()
+            }
         else:
             if join(sep, "usr", "share", "bunkerweb", "db") not in sys_path:
                 sys_path.append(join(sep, "usr", "share", "bunkerweb", "db"))
@@ -159,7 +161,7 @@ if __name__ == "__main__":
                 logger,
                 sqlalchemy_string=getenv("DATABASE_URI", None),
             )
-            config: Dict[str, Any] = db.get_config()
+            configs: Dict[str, Dict[str, Any]] = db.get_config()
 
         # Remove old files
         logger.info("Removing old files ...")
@@ -173,15 +175,16 @@ if __name__ == "__main__":
 
         # Render the templates
         logger.info("Rendering templates ...")
-        templator = Templator(
-            str(templates_path),
-            str(core_path),
-            str(plugins_path),
-            str(output_path),
-            str(target_path),
-            config,
-        )
-        templator.render()
+        for instance, config in configs.items():
+            templator = Templator(
+                str(templates_path),
+                str(core_path),
+                str(plugins_path),
+                output_path.joinpath(instance if instance != "127.0.0.1" else ""),
+                target_path,
+                config,
+            )
+            templator.render()
 
         if (
             integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker")

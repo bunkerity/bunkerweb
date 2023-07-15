@@ -5,11 +5,11 @@ from functools import partial
 from glob import glob
 from json import loads
 from logging import Logger
-from os import cpu_count, environ, getenv, sep
+from os import cpu_count, environ, sep
 from os.path import basename, dirname, join
 from pathlib import Path
 from re import match
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from schedule import (
     Job,
     clear as schedule_clear,
@@ -22,32 +22,30 @@ from threading import Lock, Semaphore, Thread
 from traceback import format_exc
 
 for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))
+    join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("api",), ("utils",))
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from Database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
+from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 
 
 class JobScheduler(ApiCaller):
     def __init__(
         self,
-        env: Optional[Dict[str, Any]] = None,
-        logger: Optional[Logger] = None,
+        db,
+        logger: Logger,
         integration: str = "Linux",
         *,
         lock: Optional[Lock] = None,
         apis: Optional[list] = None,
     ):
         super().__init__(apis or [])
-        self.__logger = logger or setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
+        self.__logger = logger
         self.__integration = integration
-        self.__db = Database(self.__logger)
-        self.__env = env or {}
-        self.__env.update(environ)
+        self.__db = db
+        self.__env = environ.copy()
         self.__jobs = self.__get_jobs()
         self.__lock = lock
         self.__thread_lock = Lock()
@@ -65,8 +63,17 @@ class JobScheduler(ApiCaller):
     def set_integration(self, integration: str):
         self.__integration = integration
 
-    def auto_setup(self):
-        super().auto_setup(bw_integration=self.__integration)
+    def auto_setup(self, *, bunkerweb_instances: Optional[List[Dict[str, Any]]] = None):
+        if bunkerweb_instances is None:
+            bunkerweb_instances: List[Dict[str, Any]] = self.__db.get_instances()
+
+        for instance in bunkerweb_instances:
+            self._apis.append(
+                API(
+                    f"http://{instance['hostname']}:{instance['port']}",
+                    host=instance["server_name"],
+                )
+            )
 
     def update_jobs(self):
         self.__jobs = self.__get_jobs()
@@ -158,7 +165,6 @@ class JobScheduler(ApiCaller):
                 ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
                 stdin=DEVNULL,
                 stderr=PIPE,
-                env=self.__env,
                 check=False,
             )
             reload = proc.returncode == 0
@@ -318,10 +324,9 @@ class JobScheduler(ApiCaller):
     def clear(self):
         schedule_clear()
 
-    def reload(self, env: Dict[str, Any], apis: Optional[list] = None) -> bool:
+    def reload(self, apis: Optional[list] = None) -> bool:
         ret = True
         try:
-            self.__env = env
             super().__init__(apis or [])
             self.clear()
             self.__jobs = self.__get_jobs()

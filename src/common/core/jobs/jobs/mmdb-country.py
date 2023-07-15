@@ -12,11 +12,7 @@ from traceback import format_exc
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (
-        ("deps", "python"),
-        ("utils",),
-        ("db",),
-    )
+    for paths in (("deps", "python"), ("utils",), ("db",))
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
@@ -26,7 +22,7 @@ from requests import RequestException, get
 
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import cache_file, cache_hash, file_hash, is_cached_file
+from jobs import cache_file, cache_hash, file_hash, is_cached_file, send_cache_to_api
 
 logger = setup_logger("JOBS.mmdb-country", getenv("LOG_LEVEL", "INFO"))
 status = 0
@@ -34,8 +30,10 @@ lock = Lock()
 
 try:
     dl_mmdb = True
-    tmp_path = Path(sep, "var", "tmp", "bunkerweb", "country.mmdb")
-    cache_path = Path(sep, "var", "cache", "bunkerweb", "country.mmdb")
+    tmp_path = Path(sep, "var", "tmp", "bunkerweb", "mmdb", "country.mmdb")
+    tmp_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path = Path(sep, "var", "cache", "bunkerweb", "mmdb", "country.mmdb")
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
     new_hash = None
 
     # Don't go further if the cache match the latest version
@@ -75,7 +73,7 @@ try:
 
     if dl_mmdb:
         # Don't go further if the cache is fresh
-        if is_cached_file(cache_path, "month", db):
+        if is_cached_file(cache_path, "month", None, db):
             logger.info("country.mmdb is already in cache, skipping download...")
             _exit(0)
 
@@ -107,7 +105,7 @@ try:
 
         # Check if file has changed
         new_hash = file_hash(tmp_path)
-        old_hash = cache_hash(cache_path, db)
+        old_hash = cache_hash(cache_path, None, db)
         if new_hash == old_hash:
             logger.info("New file is identical to cache file, reload is not needed")
             _exit(0)
@@ -119,7 +117,7 @@ try:
 
     # Move it to cache folder
     logger.info("Moving mmdb file to cache ...")
-    cached, err = cache_file(tmp_path, cache_path, new_hash, db)
+    cached, err = cache_file(tmp_path, cache_path, new_hash, None, db)
     if not cached:
         logger.error(f"Error while caching mmdb file : {err}")
         _exit(2)

@@ -79,6 +79,8 @@ VOLUME /data /etc/nginx
 
 EXPOSE 8080/tcp 8443/tcp
 
+WORKDIR /usr/share/bunkerweb
+
 USER nginx:nginx
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=10s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck.sh

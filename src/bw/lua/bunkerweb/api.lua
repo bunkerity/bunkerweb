@@ -81,14 +81,15 @@ api.global.POST["^/stop$"] = function(self)
 end
 
 api.global.POST["^/confs$"] = function(self)
-	local tmp = "/var/tmp/bunkerweb/api_" .. self.ctx.bw.uri:sub(2) .. ".tar.gz"
+	local tmp = "/var/tmp/bunkerweb/api_" .. self.ctx.bw.uri:sub(2):gsub("%/", "_") .. ".tar.gz"
 	local destination = "/usr/share/bunkerweb/" .. self.ctx.bw.uri:sub(2)
 	if self.ctx.bw.uri == "/confs" then
 		destination = "/etc/nginx"
 	elseif self.ctx.bw.uri == "/data" then
 		destination = "/data"
-	elseif self.ctx.bw.uri == "/cache" then
-		destination = "/var/cache/bunkerweb"
+	elseif string.sub(self.ctx.bw.uri, 1, 6) == "/cache" then
+		destination = "/var/cache/bunkerweb" .. self.ctx.bw.uri:sub(7)
+		os.execute("mkdir -p " .. destination)
 	elseif self.ctx.bw.uri == "/custom_configs" then
 		destination = "/etc/bunkerweb/configs"
 	elseif self.ctx.bw.uri == "/plugins" then
@@ -100,6 +101,9 @@ api.global.POST["^/confs$"] = function(self)
 	end
 	form:set_timeout(1000)
 	local file = io.open(tmp, "w+")
+	if not file then
+		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "Failed to open file")
+	end
 	while true do
 		local typ, res, err = form:read()
 		if not typ then
@@ -130,7 +134,7 @@ end
 
 api.global.POST["^/data$"] = api.global.POST["^/confs$"]
 
-api.global.POST["^/cache$"] = api.global.POST["^/confs$"]
+api.global.POST["^/cache"] = api.global.POST["^/confs$"]
 
 api.global.POST["^/custom_configs$"] = api.global.POST["^/confs$"]
 

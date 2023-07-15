@@ -363,24 +363,27 @@ def home():
         remote_version = basename(r.url).strip().replace("v", "")
 
     instances = app.config["INSTANCES"].get_instances()
-    services = app.config["CONFIG"].get_services()
+    instances_services = app.config["CONFIG"].get_services()
     instance_health_count = 0
 
     for instance in instances:
         if instance.health is True:
             instance_health_count += 1
 
+    services_number = 0
     services_scheduler_count = 0
     services_ui_count = 0
     services_autoconf_count = 0
 
-    for service in services:
-        if service["SERVER_NAME"]["method"] == "scheduler":
-            services_scheduler_count += 1
-        elif service["SERVER_NAME"]["method"] == "ui":
-            services_ui_count += 1
-        elif service["SERVER_NAME"]["method"] == "autoconf":
-            services_autoconf_count += 1
+    for services in instances_services.values():
+        for service in services:
+            services_number += 1
+            if service["SERVER_NAME"]["method"] == "scheduler":
+                services_scheduler_count += 1
+            elif service["SERVER_NAME"]["method"] == "ui":
+                services_ui_count += 1
+            elif service["SERVER_NAME"]["method"] == "autoconf":
+                services_autoconf_count += 1
 
     return render_template(
         "home.html",
@@ -388,7 +391,7 @@ def home():
         remote_version=remote_version,
         version=bw_version,
         instances_number=len(instances),
-        services_number=len(services),
+        services_number=services_number,
         plugins_errors=db.get_plugins_errors(),
         instance_health_count=instance_health_count,
         services_scheduler_count=services_scheduler_count,
@@ -579,27 +582,37 @@ def services():
 def global_config():
     if request.method == "POST":
         # Check variables
-        variables = deepcopy(request.form.to_dict())
+        variables = request.form.to_dict().copy()
+        instance = variables.pop("instance", None)
         del variables["csrf_token"]
 
+        if not instance:
+            flash("Missing instance parameter.", "error")
+            return redirect(url_for("loading", next=url_for("global_config")))
+
         # Edit check fields and remove already existing ones
-        config = app.config["CONFIG"].get_config(methods=False)
-        for variable, value in deepcopy(variables).items():
+        configs = app.config["CONFIG"].get_config(methods=False)
+
+        if instance not in configs:
+            flash(f"Instance {instance} doesn't exist.", "error")
+            return redirect(url_for("loading", next=url_for("global_config")))
+
+        for variable, value in variables.copy().items():
             if value == "on":
                 value = "yes"
             elif value == "off":
                 value = "no"
 
-            if value == config.get(variable, None) or not value.strip():
+            if value == configs[instance].get(variable, None):
                 del variables[variable]
 
         if not variables:
             flash(
-                "The global configuration was not edited because no values were changed."
+                "None of the global configuration variables have been modified.",
             )
             return redirect(url_for("loading", next=url_for("global_config")))
 
-        error = app.config["CONFIG"].check_variables(variables, True)
+        error = app.config["CONFIG"].check_variables(instance, variables, True)
 
         if error:
             return redirect(url_for("loading", next=url_for("global_config")))
@@ -612,7 +625,7 @@ def global_config():
             name="Reloading instances",
             args=(
                 "global_config",
-                variables,
+                {instance: variables},
             ),
         ).start()
 

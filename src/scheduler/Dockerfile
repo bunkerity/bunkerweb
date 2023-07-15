@@ -53,7 +53,7 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl libmagic && \
   cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
   echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
   mkdir -p /etc/nginx && \
-  mkdir -p /var/tmp/bunkerweb && \
+  mkdir -p /var/tmp/bunkerweb/mmdb && \
   mkdir -p /var/run/bunkerweb && \
   mkdir -p /var/log/bunkerweb && \
   mkdir -p /var/www && \
@@ -61,7 +61,6 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl libmagic && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
   for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-  for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:scheduler /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
@@ -69,10 +68,10 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl libmagic && \
   chmod 660 /usr/share/bunkerweb/INTEGRATION && \
   chown root:scheduler /usr/share/bunkerweb/INTEGRATION
 
-COPY --chown=root:scheduler src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
-COPY --chown=root:scheduler src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
+COPY --chown=root:scheduler src/bw/misc/asn.mmdb /var/tmp/bunkerweb/mmdb/asn.mmdb
+COPY --chown=root:scheduler src/bw/misc/country.mmdb /var/tmp/bunkerweb/mmdb/country.mmdb
 
-RUN chmod 770 /var/tmp/bunkerweb/asn.mmdb /var/tmp/bunkerweb/country.mmdb
+RUN chmod -R 770 /var/tmp/bunkerweb/mmdb
 
 # Fix CVEs
 # There are no CVE to fix for the moment

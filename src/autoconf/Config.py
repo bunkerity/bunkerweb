@@ -74,6 +74,13 @@ class Config(ConfigCaller):
                     }
                 )
 
+        db_configs = {}
+        for instance in self.__instances:
+            db_configs[instance["name"]] = {
+                "config": self.__config,
+                "custom_configs": custom_configs,
+            }
+
         while not self._db.is_initialized():
             self.__logger.warning(
                 "Database is not initialized, retrying in 5 seconds ...",
@@ -89,7 +96,7 @@ class Config(ConfigCaller):
             self.__logger.error(f"Failed to update instances: {err}")
 
         # save config to database
-        err = self._db.save_config(self.__config, "autoconf")
+        err = self._db.save_config(db_configs, "autoconf")
         if err:
             success = False
             self.__logger.error(
@@ -97,7 +104,7 @@ class Config(ConfigCaller):
             )
 
         # save custom configs to database
-        err = self._db.save_custom_configs(custom_configs, "autoconf")
+        err = self._db.save_custom_configs(db_configs, "autoconf")
         if err:
             success = False
             self.__logger.error(
