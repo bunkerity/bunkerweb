@@ -165,7 +165,7 @@ If you want to use your own certificates, here is the list of related settings :
 | `CUSTOM_SSL_CERT` |         | Full path to the certificate. If you have one or more intermediate certificate(s) in your chain of trust, you will need to provide the bundle (more info [here](https://nginx.org/en/docs/http/configuring_https_servers.html#chains)). |
 | `CUSTOM_SSL_KEY`  |         | Full path to the private key.                                                                                                                                                                                                           |
 
-When `USE_CUSTOM_HTTPS` is set to `yes`, BunkerWeb will check every day if the custom certificate specified in `CUSTOM_HTTPS_CERT` is modified and will reload NGINX if that's the case.
+When `USE_CUSTOM_SSL` is set to `yes`, BunkerWeb will check every day if the custom certificate specified in `CUSTOM_SSL_CERT` is modified and will reload NGINX if that's the case.
 
 When using stream mode, you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
 
