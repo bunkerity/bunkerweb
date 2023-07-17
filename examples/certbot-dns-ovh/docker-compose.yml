@@ -17,9 +17,9 @@ services:
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
-      - USE_CUSTOM_HTTPS=yes
-      - CUSTOM_HTTPS_CERT=/certs/live/example.com/fullchain.pem
-      - CUSTOM_HTTPS_KEY=/certs/live/example.com/privkey.pem
+      - USE_CUSTOM_SSL=yes
+      - CUSTOM_SSL_CERT=/certs/live/example.com/fullchain.pem
+      - CUSTOM_SSL_KEY=/certs/live/example.com/privkey.pem
       - app1.example.com_REVERSE_PROXY_URL=/
       - app1.example.com_REVERSE_PROXY_HOST=http://app1
       - app2.example.com_REVERSE_PROXY_URL=/
