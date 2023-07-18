@@ -65,7 +65,7 @@ RUN apk add --no-cache bash && \
     chown root:ui /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
-# There are no CVE to fix for the moment
+RUN apk add "libcrypto3>=3.1.1-r2" "libssl3>=3.1.1-r2"
 
 VOLUME /data /etc/nginx
 

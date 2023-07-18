@@ -75,7 +75,7 @@ COPY --chown=root:scheduler src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.
 RUN chmod 770 /var/tmp/bunkerweb/asn.mmdb /var/tmp/bunkerweb/country.mmdb
 
 # Fix CVEs
-# There are no CVE to fix for the moment
+RUN apk add "libcrypto3>=3.1.1-r2" "libssl3>=3.1.1-r2"
 
 VOLUME /data /etc/nginx
 

@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 from argparse import ArgumentParser
-from os import R_OK, X_OK, access, environ, getenv, listdir, sep, walk
-from os.path import basename, join, normpath
+from os import R_OK, X_OK, access, environ, getenv, sep
+from os.path import join, normpath
 from pathlib import Path
 from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
