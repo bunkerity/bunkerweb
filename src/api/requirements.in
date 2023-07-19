@@ -1,0 +1,5 @@
+fastapi==0.100.0
+gunicorn==21.2.0
+kombu==5.3.1
+python-magic==0.4.27
+uvicorn[standard]==0.23.1

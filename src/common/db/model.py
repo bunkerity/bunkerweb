@@ -1,5 +1,14 @@
 #!/usr/bin/python3
 
+from os import sep
+from os.path import join
+from sys import path as sys_path
+
+deps_path = join(sep, "usr", "share", "bunkerweb", "deps", "python")
+
+if deps_path not in sys_path:
+    sys_path.append(deps_path)
+
 from sqlalchemy import (
     Boolean,
     Column,
@@ -99,14 +108,16 @@ class Settings(Base):
 
 class Global_values(Base):
     __tablename__ = "bw_global_values"
+    __table_args__ = (UniqueConstraint("setting_id", "suffix"),)
 
+    id = Column(String(64), primary_key=True)
     setting_id = Column(
         String(256),
         ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"),
-        primary_key=True,
+        nullable=False,
     )
     value = Column(String(4096), nullable=False)
-    suffix = Column(Integer, primary_key=True, nullable=True, default=0)
+    suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
     setting = relationship("Settings", back_populates="global_value")
@@ -129,19 +140,21 @@ class Services(Base):
 
 class Services_settings(Base):
     __tablename__ = "bw_services_settings"
+    __table_args__ = (UniqueConstraint("service_id", "setting_id", "suffix"),)
 
+    id = Column(String(64), primary_key=True)
     service_id = Column(
         String(64),
         ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"),
-        primary_key=True,
+        nullable=False,
     )
     setting_id = Column(
         String(256),
         ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"),
-        primary_key=True,
+        nullable=False,
     )
     value = Column(String(4096), nullable=False)
-    suffix = Column(Integer, primary_key=True, nullable=True, default=0)
+    suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
     service = relationship("Services", back_populates="settings")
@@ -170,11 +183,7 @@ class Jobs(Base):
 class Plugin_pages(Base):
     __tablename__ = "bw_plugin_pages"
 
-    id = Column(
-        Integer,
-        Identity(start=1, increment=1),
-        primary_key=True,
-    )
+    id = Column(Integer, primary_key=True, autoincrement=True)
     plugin_id = Column(
         String(64),
         ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"),
@@ -192,11 +201,7 @@ class Jobs_cache(Base):
     __tablename__ = "bw_jobs_cache"
     __table_args__ = (UniqueConstraint("job_name", "service_id", "file_name"),)
 
-    id = Column(
-        Integer,
-        Identity(start=1, increment=1),
-        primary_key=True,
-    )
+    id = Column(Integer, primary_key=True, autoincrement=True)
     job_name = Column(
         String(128),
         ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"),
@@ -223,11 +228,7 @@ class Custom_configs(Base):
     __tablename__ = "bw_custom_configs"
     __table_args__ = (UniqueConstraint("service_id", "type", "name"),)
 
-    id = Column(
-        Integer,
-        Identity(start=1, increment=1),
-        primary_key=True,
-    )
+    id = Column(Integer, primary_key=True, autoincrement=True)
     service_id = Column(
         String(64),
         ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"),

@@ -7,9 +7,10 @@ from hashlib import sha256
 from inspect import getsourcefile
 from logging import Logger
 from os import _exit, getenv, listdir, sep
-from os.path import basename, dirname, join
+from os.path import basename, normpath, join
 from pathlib import Path
 from re import compile as re_compile
+from subprocess import DEVNULL, PIPE, STDOUT, run as subprocess_run
 from sys import _getframe, path as sys_path
 from typing import Any, Dict, List, Optional, Tuple, Union
 from time import sleep
@@ -40,6 +41,8 @@ for deps_path in [
 
 from jobs import file_hash  # type: ignore
 
+from alembic import command
+from alembic.config import Config
 from pymysql import install_as_MySQLdb
 from sqlalchemy import create_engine, text, inspect
 from sqlalchemy.exc import (
@@ -55,12 +58,16 @@ install_as_MySQLdb()
 
 
 class Database:
+    DB_STRING_RX = re_compile(
+        r"^((mariadb|mysql)(\+pymysql)?:|sqlite://|postgresql:)/(/[^\s]+)"
+    )
+    ALEMBIC_FILE_PATH = Path(sep, "var", "lib", "bunkerweb", "alembic.ini")
+    ALEMBIC_DIR = Path(sep, "var", "lib", "bunkerweb", "alembic")
+
     def __init__(
         self,
         logger: Logger,
         sqlalchemy_string: Optional[str] = None,
-        *,
-        ui: bool = False,
     ) -> None:
         """Initialize the database"""
         self.__logger = logger
@@ -72,18 +79,59 @@ class Database:
                 "DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3"
             )
 
+        if not self.DB_STRING_RX.match(sqlalchemy_string):
+            self.__logger.error(
+                f"Invalid database string provided: {sqlalchemy_string}, exiting..."
+            )
+            _exit(1)
+
         if sqlalchemy_string.startswith("sqlite"):
-            if ui:
-                while not Path(sep, "var", "lib", "bunkerweb", "db.sqlite3"):
-                    sleep(1)
-            else:
-                with suppress(FileExistsError):
-                    Path(dirname(sqlalchemy_string.split("///")[1])).mkdir(
-                        parents=True, exist_ok=True
-                    )
-        elif "+" in sqlalchemy_string and "+pymysql" not in sqlalchemy_string:
-            splitted = sqlalchemy_string.split("+")
-            sqlalchemy_string = f"{splitted[0]}:{':'.join(splitted[1].split(':')[1:])}"
+            Path(
+                normpath(self.DB_STRING_RX.match(sqlalchemy_string).groups()[3])
+            ).parent.mkdir(parents=True, exist_ok=True)
+
+        if not self.ALEMBIC_DIR.exists():
+            self.ALEMBIC_DIR.mkdir(parents=True, exist_ok=True)
+
+        if not Path(self.ALEMBIC_FILE_PATH).is_file():
+            proc = subprocess_run(
+                ["python3", "-m", "alembic", "init", str(self.ALEMBIC_DIR)],
+                cwd=str(self.ALEMBIC_FILE_PATH.parent),
+                stdout=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                self.__logger.error(
+                    f"Error when trying to initialize alembic: {proc.stdout.decode()}"
+                )
+                _exit(1)
+
+            # Update the alembic.ini file to use the correct database URI
+            config = self.ALEMBIC_FILE_PATH.read_text()
+            line_to_replace = next(
+                line
+                for line in config.splitlines()
+                if line.startswith("sqlalchemy.url")
+            )
+            config = config.replace(
+                line_to_replace,
+                f"sqlalchemy.url = {sqlalchemy_string}",
+            )
+            self.ALEMBIC_FILE_PATH.write_text(config)
+
+            # Update the alembic/env.py file to use the correct database model
+            env_file = self.ALEMBIC_DIR.joinpath("env.py").read_text()
+            line_to_replace = next(
+                line
+                for line in env_file.splitlines()
+                if line.startswith("target_metadata")
+            )
+            env_file = env_file.replace(
+                line_to_replace,
+                f"from sys import path as sys_path\nfrom os.path import join\n\nsys_path.append(join('{sep}', 'usr', 'share', 'bunkerweb', 'db'))\n\nfrom model import Base\n\ntarget_metadata = Base.metadata",
+            )
+            self.ALEMBIC_DIR.joinpath("env.py").write_text(env_file)
 
         self.database_uri = sqlalchemy_string
         error = False
@@ -342,6 +390,55 @@ class Database:
 
         return ""
 
+    def update_db_schema(self, version: str) -> str:
+        with self.__db_session() as session:
+            metadata = session.query(Metadata).get(1)
+
+            if not metadata:
+                return "The metadata are not set yet, try again"
+            elif metadata.version == version:
+                return "The database is already up to date"
+
+            proc = subprocess_run(
+                [
+                    "python3",
+                    "-m",
+                    "alembic",
+                    "revision",
+                    "--autogenerate",
+                    "-m",
+                    f'"Update to version v{version}"',
+                ],
+                cwd=str(self.ALEMBIC_FILE_PATH.parent),
+                stdout=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                return "Error when trying to generate the migration script"
+
+            proc = subprocess_run(
+                [
+                    "python3",
+                    "-m",
+                    "alembic",
+                    "upgrade",
+                    "head",
+                ],
+                cwd=str(self.ALEMBIC_FILE_PATH.parent),
+                stdout=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                return "Error when trying to apply the migration script"
+
+            metadata.version = version
+
+            session.commit()
+
+        return ""
+
     def init_tables(self, default_plugins: List[dict]) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
         inspector = inspect(self.__sql_engine)
@@ -451,6 +548,32 @@ class Database:
                 session.commit()
             except BaseException:
                 return False, format_exc()
+
+        proc = subprocess_run(
+            ["python3", "-m", "alembic", "revision", "--autogenerate", "-m", '"init"'],
+            cwd=str(self.ALEMBIC_FILE_PATH.parent),
+            stdout=DEVNULL,
+            stderr=PIPE,
+            check=False,
+        )
+        if proc.returncode != 0:
+            return (
+                False,
+                f"Error when trying to generate the migration script: {proc.stderr.decode()}",
+            )
+
+        proc = subprocess_run(
+            ["python3", "-m", "alembic", "upgrade", "head"],
+            cwd=str(self.ALEMBIC_FILE_PATH.parent),
+            stdout=DEVNULL,
+            stderr=PIPE,
+            check=False,
+        )
+        if proc.returncode != 0:
+            return (
+                False,
+                f"Error when trying to apply the migration script: {proc.stderr.decode()}",
+            )
 
         return True, ""
 

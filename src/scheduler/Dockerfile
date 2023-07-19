@@ -6,7 +6,7 @@ COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.1
 COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
 
 RUN mkdir -p /usr/share/bunkerweb/deps && \
-  cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 /tmp/req/requirements.txt.2 > /usr/share/bunkerweb/deps/requirements.txt && \
+  cat /tmp/req/requirements.txt* > /usr/share/bunkerweb/deps/requirements.txt && \
   rm -rf /tmp/req
 
 # Install python dependencies
@@ -15,7 +15,7 @@ RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --upgrade pip && \
-  pip install --no-cache-dir --upgrade wheel && \
+  pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
   mkdir -p /usr/share/bunkerweb/deps/python && \
   pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
 
