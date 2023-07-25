@@ -12,9 +12,9 @@ certbot==2.6.0 \
     --hash=sha256:6513b9fb3d266f1fa3803a1713eb7e415bbc250b624c834e02cb71086b26d800 \
     --hash=sha256:c4de6bb0d092729650ed90a5bdb513932bdc47ec5f7f98049180ab8e4a835dab
     # via -r requirements.in
-certifi==2023.5.7 \
-    --hash=sha256:0f0d56dc5a6ad56fd4ba36484d6cc34451e1c6548c61daad8c320169f91eddc7 \
-    --hash=sha256:c6c2e98f5c7869efca1f8916fed228dd91539f9f1b444c314c06eef02980c716
+certifi==2023.7.22 \
+    --hash=sha256:539cc1d13202e33ca466e88b2807e29f4c13049d6d87031a3c110744495cb082 \
+    --hash=sha256:92d6037539857d8206b8f6ae472e8b77db8058fec5937a1ef3f54304089edbb9
     # via requests
 cffi==1.15.1 \
     --hash=sha256:00a9ed42e88df81ffae7a8ab6d9356b371399b91dbdf0c3cb1e84c03a13aceb5 \
