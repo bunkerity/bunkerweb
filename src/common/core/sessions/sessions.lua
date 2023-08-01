@@ -5,9 +5,9 @@ local session  = require "resty.session"
 
 local sessions = class("sessions", plugin)
 
-function sessions:initialize()
+function sessions:initialize(ctx)
     -- Call parent initialize
-    plugin.initialize(self, "sessions")
+    plugin.initialize(self, "sessions", ctx)
     -- Check if random cookie name and secrets are already generated
     local is_random = {
         "SESSIONS_SECRET",

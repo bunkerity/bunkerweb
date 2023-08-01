@@ -4,9 +4,9 @@ local utils  = require "bunkerweb.utils"
 
 local misc   = class("misc", plugin)
 
-function misc:initialize()
+function misc:initialize(ctx)
     -- Call parent initialize
-    plugin.initialize(self, "misc")
+    plugin.initialize(self, "misc", ctx)
 end
 
 function misc:access()

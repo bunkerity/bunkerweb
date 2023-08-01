@@ -4,9 +4,9 @@ local cjson       = require "cjson"
 
 local letsencrypt = class("letsencrypt", plugin)
 
-function letsencrypt:initialize()
+function letsencrypt:initialize(ctx)
 	-- Call parent initialize
-	plugin.initialize(self, "letsencrypt")
+	plugin.initialize(self, "letsencrypt", ctx)
 end
 
 function letsencrypt:access()

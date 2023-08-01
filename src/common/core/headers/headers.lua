@@ -4,9 +4,9 @@ local utils   = require "bunkerweb.utils"
 
 local headers = class("headers", plugin)
 
-function headers:initialize()
+function headers:initialize(ctx)
   -- Call parent initialize
-  plugin.initialize(self, "headers")
+  plugin.initialize(self, "headers", ctx)
   self.all_headers = {
     ["STRICT_TRANSPORT_SECURITY"] = "Strict-Transport-Security",
     ["CONTENT_SECURITY_POLICY"] = "Content-Security-Policy",
