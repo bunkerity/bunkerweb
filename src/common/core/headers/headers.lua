@@ -71,9 +71,7 @@ end
 
 function headers:header()
   -- Override upstream headers if needed
-  local ssl = self.variables["AUTO_LETS_ENCRYPT"] == "yes" or
-      self.variables["USE_CUSTOM_SSL"] == "yes" or
-      self.variables["GENERATE_SELF_SIGNED_SSL"] == "yes"
+  local ssl = self.ctx.bw.scheme == "https"
   for variable, header in pairs(self.all_headers) do
     if ngx.header[header] == nil or (self.variables[variable] ~= "" and self.variables["KEEP_UPSTREAM_HEADERS"] ~= "*" and utils.regex_match(self.variables["KEEP_UPSTREAM_HEADERS"], "(^| )" .. header .. "($| )") == nil) then
       if (header ~= "Strict-Transport-Security" or ssl) then

@@ -171,6 +171,7 @@ helpers.fill_ctx = function()
             data.http_content_length = ngx.var.http_content_length
             data.http_origin = ngx.var.http_origin
             data.http_version = ngx.req.http_version()
+            data.scheme = ngx.var.scheme
         end
         -- IP data : global
         local ip_is_global, err = utils.ip_is_global(data.remote_addr)
