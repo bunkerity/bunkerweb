@@ -77,7 +77,7 @@ class JobScheduler(ApiCaller):
             with self.__thread_lock:
                 instances = self.__db.get_instances()
             for instance in instances:
-                api = API(f"http://{instance["hostname"]}:{instance["port"]}", host=instance["server_name"])
+                api = API(f"http://{instance['hostname']}:{instance['port']}", host=instance["server_name"])
                 apis.append(api)
         except:
             self.__logger.warning(
