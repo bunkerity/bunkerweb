@@ -68,6 +68,23 @@ class JobScheduler(ApiCaller):
     def auto_setup(self):
         super().auto_setup(bw_integration=self.__integration)
 
+    def update_instances(self):
+        super().apis(self.__get_apis())
+
+    def __get_apis(self):
+        apis = []
+        try:
+            with self.__thread_lock:
+                instances = self.__db.get_instances()
+            for instance in instances:
+                api = API(f"http://{instance["hostname"]}:{instance["port"]}", host=instance["server_name"])
+                apis.append(api)
+        except:
+            self.__logger.warning(
+                f"Exception while getting jobs instances : {format_exc()}",
+            )
+        return apis
+
     def update_jobs(self):
         self.__jobs = self.__get_jobs()
 

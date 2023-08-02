@@ -587,6 +587,7 @@ if __name__ == "__main__":
             CONFIG_NEED_GENERATION = False
             CONFIGS_NEED_GENERATION = False
             PLUGINS_NEED_GENERATION = False
+            INSTANCES_NEED_GENERATION = False
 
             # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
@@ -659,6 +660,11 @@ if __name__ == "__main__":
                     CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
 
+                # check if the instances have changed since last time
+                if changes["instances_changed"]:
+                    logger.info("Instances changed, generating ...")
+                    INSTANCES_NEED_GENERATION = True
+
             FIRST_RUN = False
 
             if NEED_RELOAD:
@@ -683,6 +689,10 @@ if __name__ == "__main__":
                 if CONFIG_NEED_GENERATION:
                     CHANGES.append("config")
                     env = db.get_config()
+
+                if INSTANCES_NEED_GENERATION:
+                    CHANGES.append("instances")
+                    SCHEDULER.update_instances()
     except:
         logger.error(
             f"Exception while executing scheduler : {format_exc()}",
