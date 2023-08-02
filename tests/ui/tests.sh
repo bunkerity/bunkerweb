@@ -52,9 +52,9 @@ fi
 docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from ui-tests
 ret=$?
 if [ $ret -ne 0 ] ; then
-    docker-compose -f docker-compose.test.yml logs
+    docker-compose logs
     echo "❌ Up failed"
 fi
 
 # Exit
-exit $ret
+exit $?

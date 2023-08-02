@@ -10,11 +10,12 @@
 - [BUGFIX] Variable being ignored instead of saved in the database when value is empty
 - [BUGFIX] ALLOWED_METHODS regex working with LOCK/UNLOCK methods
 - [BUGFIX] Custom certificate bug after the refactoring
-- [BUGFIX] Fix wrong variables in header phase (fix CORS feature too)
-- [BUGFIX] Fix UI not working in Ubuntu (python zope module)
+- [BUGFIX] Wrong variables in header phase (fix CORS feature too)
+- [BUGFIX] UI not working in Ubuntu (python zope module)
 - [BUGFIX] Patch ModSecurity to run it after LUA code (should fix whitelist problems)
 - [BUGFIX] Custom configurations from env were not being deleted properly
-- [BUGFIX] Fix concepts image not displayed in the documentation
+- [BUGFIX] Missing concepts image not displayed in the documentation
+- [BUGFIX] Scheduler not picking up new instances IPs in autoconf modes
 - [PERFORMANCE] Reduce CPU and RAM usage of scheduler
 - [PERFORMANCE] Cache ngx.ctx instead of loading it each time
 - [PERFORMANCE] Use per-worker LRU cache for common RO LUA values
