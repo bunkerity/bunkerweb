@@ -7,6 +7,8 @@ from requests import request
 class API:
     def __init__(self, endpoint: str, host: str = "bwapi"):
         self.__endpoint = endpoint
+        if not self.__endpoint.startswith("http"):
+            self.__endpoint = f"http://{self.__endpoint}"
         if not self.__endpoint.endswith("/"):
             self.__endpoint += "/"
         self.__host = host
@@ -21,20 +23,24 @@ class API:
 
     def request(
         self,
-        method: Union[Literal["POST"], Literal["GET"]],
+        method: Literal["POST", "GET", "PATCH", "PUT", "DELETE"],
         url: str,
         data: Optional[Union[dict, bytes]] = None,
         files=None,
+        *,
+        additonal_headers: Optional[dict] = None,
         timeout=(10, 30),
     ) -> tuple[bool, str, Optional[int], Optional[dict]]:
+        additonal_headers = additonal_headers or {}
         try:
             kwargs = {}
-            if isinstance(data, dict):
-                kwargs["json"] = data
-            elif isinstance(data, bytes):
-                kwargs["data"] = data
-            elif data is not None:
-                return False, f"Unsupported data type: {type(data)}", None, None
+            if data is not None:
+                if isinstance(data, dict) and not files:
+                    kwargs["json"] = data
+                elif isinstance(data, bytes) or isinstance(data, dict):
+                    kwargs["data"] = data
+                else:
+                    return False, f"Unsupported data type: {type(data)}", None, None
 
             if files:
                 kwargs["files"] = files
@@ -43,10 +49,14 @@ class API:
                 method,
                 f"{self.__endpoint}{url if not url.startswith('/') else url[1:]}",
                 timeout=timeout,
-                headers={"User-Agent": "bwapi", "Host": self.__host},
+                headers={"User-Agent": "bwapi", "Host": self.__host}
+                | additonal_headers,
                 **kwargs,
             )
         except Exception as e:
             return False, f"Request failed: {e}", None, None
 
-        return True, "ok", resp.status_code, resp.json()
+        if resp.headers.get("Content-Type") == "application/json":
+            return True, "ok", resp.status_code, resp.json()
+
+        return True, "ok", resp.status_code, resp

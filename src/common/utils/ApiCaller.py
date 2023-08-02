@@ -17,9 +17,6 @@ for deps_path in [
 from API import API  # type: ignore
 from logger import setup_logger
 
-from docker import DockerClient
-from kubernetes import client as kube_client, config
-
 
 class ApiCaller:
     def __init__(self, apis: Optional[List[API]] = None):
@@ -42,6 +39,8 @@ class ApiCaller:
                 bw_integration = "Swarm"
 
         if bw_integration == "Kubernetes":
+            from kubernetes import client as kube_client, config
+
             config.load_incluster_config()
             corev1 = kube_client.CoreV1Api()
             for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
@@ -65,6 +64,8 @@ class ApiCaller:
                         )
                     )
         else:
+            from docker import DockerClient
+
             docker_client = DockerClient(
                 base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
             )
@@ -115,12 +116,12 @@ class ApiCaller:
 
     def send_to_apis(
         self,
-        method: Union[Literal["POST"], Literal["GET"]],
+        method: Union[Literal["POST"], Literal["GET"], Literal["DELETE"]],
         url: str,
         files: Optional[Dict[str, BytesIO]] = None,
         data: Optional[Dict[str, Any]] = None,
         response: bool = False,
-    ) -> Tuple[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
+    ) -> Union[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
         ret = True
         url = url if not url.startswith("/") else url[1:]
         responses = {}

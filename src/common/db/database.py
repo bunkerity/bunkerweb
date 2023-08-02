@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from time import sleep
 from traceback import format_exc
 
-from model import (
+from models import (
     Base,
     Instances,
     Plugins,
@@ -27,6 +27,7 @@ from model import (
     Jobs,
     Plugin_pages,
     Jobs_cache,
+    Jobs_runs,
     Custom_configs,
     Selects,
     Metadata,
@@ -41,8 +42,6 @@ for deps_path in [
 
 from jobs import file_hash  # type: ignore
 
-from alembic import command
-from alembic.config import Config
 from pymysql import install_as_MySQLdb
 from sqlalchemy import create_engine, text, inspect
 from sqlalchemy.exc import (
@@ -52,7 +51,7 @@ from sqlalchemy.exc import (
     ProgrammingError,
     SQLAlchemyError,
 )
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 install_as_MySQLdb()
 
@@ -129,7 +128,7 @@ class Database:
             )
             env_file = env_file.replace(
                 line_to_replace,
-                f"from sys import path as sys_path\nfrom os.path import join\n\nsys_path.append(join('{sep}', 'usr', 'share', 'bunkerweb', 'db'))\n\nfrom model import Base\n\ntarget_metadata = Base.metadata",
+                f"from sys import path as sys_path\nfrom os.path import join\n\nsys_path.append(join('{sep}', 'usr', 'share', 'bunkerweb', 'db'))\n\nfrom models import Base\n\ntarget_metadata = Base.metadata",
             )
             self.ALEMBIC_DIR.joinpath("env.py").write_text(env_file)
 
@@ -140,6 +139,7 @@ class Database:
             self.__sql_engine = create_engine(
                 sqlalchemy_string,
                 future=True,
+                connect_args={"check_same_thread": False},
             )
         except ArgumentError:
             self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
@@ -183,6 +183,7 @@ class Database:
                     self.__sql_engine = create_engine(
                         sqlalchemy_string,
                         future=True,
+                        connect_args={"check_same_thread": False},
                     )
                 if "Unknown table" in str(e):
                     not_connected = False
@@ -199,12 +200,9 @@ class Database:
                 )
                 exit(1)
 
-        self.__logger.info("Database connection established")
+        self.__logger.info("✅ Database connection established")
 
-        self.__session = sessionmaker()
-        self.__sql_session = scoped_session(self.__session)
-        self.__sql_session.remove()
-        self.__sql_session.configure(
+        self.__sql_session = sessionmaker(
             bind=self.__sql_engine, autoflush=False, expire_on_commit=False
         )
         self.suffix_rx = re_compile(r"_\d+$")
@@ -212,7 +210,7 @@ class Database:
     def __del__(self) -> None:
         """Close the database"""
         if self.__sql_session:
-            self.__sql_session.remove()
+            self.__sql_session.close_all()
 
         if self.__sql_engine:
             self.__sql_engine.dispose()
@@ -988,51 +986,52 @@ class Database:
                 if setting.context == "multisite":
                     multisite.append(setting.id)
 
-            for service in session.query(Services).with_entities(Services.id).all():
-                checked_settings = []
-                for key, value in deepcopy(config).items():
-                    original_key = key
-                    if self.suffix_rx.search(key):
-                        key = key[: -len(str(key.split("_")[-1])) - 1]
+            if config.get("MULTISITE", "no") == "yes":
+                for service in session.query(Services).with_entities(Services.id).all():
+                    checked_settings = []
+                    for key, value in deepcopy(config).items():
+                        original_key = key
+                        if self.suffix_rx.search(key):
+                            key = key[: -len(str(key.split("_")[-1])) - 1]
 
-                    if key not in multisite:
-                        continue
-                    elif f"{service.id}_{original_key}" not in config:
-                        config[f"{service.id}_{original_key}"] = value
+                        if key not in multisite:
+                            continue
+                        elif f"{service.id}_{original_key}" not in config:
+                            config[f"{service.id}_{original_key}"] = value
 
-                    if original_key not in checked_settings:
-                        checked_settings.append(original_key)
-                    else:
-                        continue
+                        if original_key not in checked_settings:
+                            checked_settings.append(original_key)
+                        else:
+                            continue
 
-                    service_settings = (
-                        session.query(Services_settings)
-                        .with_entities(
-                            Services_settings.value,
-                            Services_settings.suffix,
-                            Services_settings.method,
-                        )
-                        .filter_by(service_id=service.id, setting_id=key)
-                        .all()
-                    )
-
-                    for service_setting in service_settings:
-                        config[
-                            f"{service.id}_{key}"
-                            + (
-                                f"_{service_setting.suffix}"
-                                if service_setting.suffix > 0
-                                else ""
+                        service_settings = (
+                            session.query(Services_settings)
+                            .with_entities(
+                                Services_settings.value,
+                                Services_settings.suffix,
+                                Services_settings.method,
                             )
-                        ] = (
-                            service_setting.value
-                            if methods is False
-                            else {
-                                "value": service_setting.value,
-                                "global": False,
-                                "method": service_setting.method,
-                            }
+                            .filter_by(service_id=service.id, setting_id=key)
+                            .all()
                         )
+
+                        for service_setting in service_settings:
+                            config[
+                                f"{service.id}_{key}"
+                                + (
+                                    f"_{service_setting.suffix}"
+                                    if service_setting.suffix > 0
+                                    else ""
+                                )
+                            ] = (
+                                service_setting.value
+                                if methods is False
+                                else {
+                                    "value": service_setting.value,
+                                    "global": False,
+                                    "method": service_setting.method,
+                                }
+                            )
 
             servers = " ".join(service.id for service in session.query(Services).all())
             config["SERVER_NAME"] = (
@@ -1099,100 +1098,15 @@ class Database:
 
         return services
 
-    def update_job(self, plugin_id: str, job_name: str, success: bool) -> str:
-        """Update the job last_run in the database"""
-        with self.__db_session() as session:
-            job = (
-                session.query(Jobs)
-                .filter_by(plugin_id=plugin_id, name=job_name)
-                .first()
-            )
-
-            if not job:
-                return "Job not found"
-
-            job.last_run = datetime.now()
-            job.success = success
-
-            try:
-                session.commit()
-            except BaseException:
-                return format_exc()
-
-        return ""
-
-    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None):
-        job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
-        with self.__db_session() as session:
-            session.query(Jobs_cache).filter_by(
-                job_name=job_name, file_name=file_name
-            ).delete()
-
-    def update_job_cache(
-        self,
-        service_id: Optional[str],
-        file_name: str,
-        data: bytes,
-        *,
-        job_name: Optional[str] = None,
-        checksum: Optional[str] = None,
-    ) -> str:
-        """Update the plugin cache in the database"""
-        job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
-        with self.__db_session() as session:
-            cache = (
-                session.query(Jobs_cache)
-                .filter_by(
-                    job_name=job_name, service_id=service_id, file_name=file_name
-                )
-                .first()
-            )
-
-            if not cache:
-                session.add(
-                    Jobs_cache(
-                        job_name=job_name,
-                        service_id=service_id,
-                        file_name=file_name,
-                        data=data,
-                        last_update=datetime.now(),
-                        checksum=checksum,
-                    )
-                )
-            else:
-                cache.data = data
-                cache.last_update = datetime.now()
-                cache.checksum = checksum
-
-            try:
-                session.commit()
-            except BaseException:
-                return format_exc()
-
-        return ""
-
     def update_external_plugins(
         self, plugins: List[Dict[str, Any]], *, delete_missing: bool = True
     ) -> str:
         """Update external plugins from the database"""
         to_put = []
         with self.__db_session() as session:
-            db_plugins = (
-                session.query(Plugins)
-                .with_entities(Plugins.id)
-                .filter_by(external=True)
-                .all()
-            )
-
-            db_ids = []
-            if delete_missing and db_plugins:
-                db_ids = [plugin.id for plugin in db_plugins]
-                ids = [plugin["id"] for plugin in plugins]
-                missing_ids = [plugin for plugin in db_ids if plugin not in ids]
-
-                if missing_ids:
-                    # Remove plugins that are no longer in the list
-                    session.query(Plugins).filter(Plugins.id.in_(missing_ids)).delete()
+            if delete_missing:
+                # Delete all the old plugins
+                session.query(Plugins).filter(Plugins.external == True).delete()
 
             for plugin in plugins:
                 settings = plugin.pop("settings", {})
@@ -1779,11 +1693,84 @@ class Database:
                 )
             }
 
-    def get_job_cache_file(
+    def add_job_run(self, job_name: str, success: bool) -> str:
+        """Add a job run."""
+        with self.__db_session() as session:
+            session.add(
+                Jobs_runs(id=datetime.now(), job_name=job_name, success=success)
+            )
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def delete_job_cache(
         self,
         job_name: str,
         file_name: str,
         *,
+        service_id: Optional[str] = None,
+    ):
+        with self.__db_session() as session:
+            session.query(Jobs_cache).filter_by(
+                job_name=job_name, service_id=service_id, file_name=file_name
+            ).delete()
+
+    def update_job_cache(
+        self,
+        job_name: str,
+        file_name: str,
+        data: bytes = None,
+        *,
+        service_id: Optional[str] = None,
+        checksum: Optional[str] = None,
+    ) -> str:
+        """Update the plugin cache in the database"""
+        with self.__db_session() as session:
+            cache = (
+                session.query(Jobs_cache)
+                .filter_by(
+                    job_name=job_name, service_id=service_id, file_name=file_name
+                )
+                .first()
+            )
+
+            if not cache:
+                session.add(
+                    Jobs_cache(
+                        job_name=job_name,
+                        service_id=service_id,
+                        file_name=file_name,
+                        data=data,
+                        last_update=datetime.now(),
+                        checksum=checksum,
+                    )
+                )
+            else:
+                if data:
+                    cache.data = data
+
+                if checksum:
+                    cache.checksum = checksum
+
+                cache.last_update = datetime.now()
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def get_job_cache(
+        self,
+        job_name: str,
+        file_name: str,
+        *,
+        service_id: Optional[str] = None,
         with_info: bool = False,
         with_data: bool = True,
     ) -> Optional[Any]:
@@ -1798,7 +1785,9 @@ class Database:
             return (
                 session.query(Jobs_cache)
                 .with_entities(*entities)
-                .filter_by(job_name=job_name, file_name=file_name)
+                .filter_by(
+                    job_name=job_name, service_id=service_id, file_name=file_name
+                )
                 .first()
             )
 
@@ -1854,13 +1843,7 @@ class Database:
             session.query(Instances).delete()
 
             for instance in instances:
-                to_put.append(
-                    Instances(
-                        hostname=instance["hostname"],
-                        port=instance["env"].get("API_HTTP_PORT", 5000),
-                        server_name=instance["env"].get("API_SERVER_NAME", "bwapi"),
-                    )
-                )
+                to_put.append(Instances(**instance))
 
             try:
                 session.add_all(to_put)
@@ -1887,6 +1870,22 @@ class Database:
                     .all()
                 )
             ]
+
+    def get_instance(self, instance_hostname: str) -> Dict[str, Any]:
+        """Get an instance."""
+        with self.__db_session() as session:
+            instance = (
+                session.query(Instances).filter_by(hostname=instance_hostname).first()
+            )
+
+            if not instance:
+                return {}
+
+            return {
+                "hostname": instance.hostname,
+                "port": instance.port,
+                "server_name": instance.server_name,
+            }
 
     def get_plugin_actions(self, plugin: str) -> Optional[Any]:
         """get actions file for the plugin"""

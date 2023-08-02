@@ -19,7 +19,7 @@ for deps_path in [
 from requests import get
 from logger import setup_logger  # type: ignore
 
-logger = setup_logger("UPDATE-CHECK", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("UPDATE-CHECK", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
@@ -36,13 +36,13 @@ try:
 
     latest_version = basename(response.url)
     if current_version != latest_version:
-        logger.warning(
+        LOGGER.warning(
             f"* \n* \n* 🚨 A new version of BunkerWeb is available: {latest_version} (current: {current_version}) 🚨\n* \n* ",
         )
     else:
-        logger.info(f"Latest version is already installed: {current_version}")
+        LOGGER.info(f"Latest version is already installed: {current_version}")
 except:
     status = 2
-    logger.error(f"Exception while running update-check.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running update-check.py :\n{format_exc()}")
 
 sys_exit(status)

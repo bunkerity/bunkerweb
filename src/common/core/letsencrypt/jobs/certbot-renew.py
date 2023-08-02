@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from os import _exit, environ, getenv, listdir, sep
+from os import _exit, environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
@@ -14,16 +14,17 @@ for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
     for paths in (
         ("deps", "python"),
+        ("api",),
         ("utils",),
-        ("db",),
     )
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from Database import Database  # type: ignore
+from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import get_file_in_db, set_file_in_db
+
+from jobs import get_cache, cache_file
 
 
 def renew(domain: str, letsencrypt_path: Path) -> int:
@@ -59,7 +60,9 @@ def renew(domain: str, letsencrypt_path: Path) -> int:
     ).returncode
 
 
-logger = setup_logger("LETS-ENCRYPT.renew", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("LETS-ENCRYPT.renew", getenv("LOG_LEVEL", "INFO"))
+CORE_API = API(getenv("API_ADDR", ""), "job-certbot-renew")
+API_TOKEN = getenv("API_TOKEN", None)
 status = 0
 
 try:
@@ -77,7 +80,7 @@ try:
                 break
 
     if not use_letsencrypt:
-        logger.info("Let's Encrypt is not activated, skipping renew...")
+        LOGGER.info("Let's Encrypt is not activated, skipping renew...")
         _exit(0)
 
     # Create directory if it doesn't exist
@@ -87,13 +90,7 @@ try:
         parents=True, exist_ok=True
     )
 
-    # Extract letsencrypt folder if it exists in db
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-    )
-
-    tgz = get_file_in_db("folder.tgz", db)
+    tgz = get_cache("folder.tgz", CORE_API, API_TOKEN)
     if tgz:
         # Delete folder if needed
         if letsencrypt_path.exists():
@@ -102,9 +99,9 @@ try:
         # Extract it
         with tar_open(name="folder.tgz", mode="r:gz", fileobj=BytesIO(tgz)) as tf:
             tf.extractall(str(letsencrypt_path))
-        logger.info("Successfully retrieved Let's Encrypt data from db cache")
+        LOGGER.info("Successfully retrieved Let's Encrypt data from db cache")
     else:
-        logger.info("No Let's Encrypt data found in db cache")
+        LOGGER.info("No Let's Encrypt data found in db cache")
 
     if getenv("MULTISITE", "no") == "yes":
         servers = getenv("SERVER_NAME") or []
@@ -128,7 +125,7 @@ try:
 
             if renew(first_server, letsencrypt_path) != 0:
                 status = 2
-                logger.error(
+                LOGGER.error(
                     f"Certificates renewal for {first_server} failed",
                 )
     elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes" and not getenv("SERVER_NAME", ""):
@@ -136,7 +133,7 @@ try:
         if letsencrypt_path.joinpath("etc", "live", first_server, "cert.pem").exists():
             if renew(first_server, letsencrypt_path) != 0:
                 status = 2
-                logger.error(
+                LOGGER.error(
                     f"Certificates renewal for {first_server} failed",
                 )
 
@@ -147,13 +144,14 @@ try:
     bio.seek(0, 0)
 
     # Put tgz in cache
-    cached, err = set_file_in_db("folder.tgz", bio.read(), db)
+    cached, err = cache_file("folder.tgz", bio.read(), CORE_API, API_TOKEN)
+
     if not cached:
-        logger.error(f"Error while saving Let's Encrypt data to db cache : {err}")
+        LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")
     else:
-        logger.info("Successfully saved Let's Encrypt data to db cache")
+        LOGGER.info("Successfully saved Let's Encrypt data to db cache")
 except:
     status = 2
-    logger.error(f"Exception while running certbot-renew.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running certbot-renew.py :\n{format_exc()}")
 
 sys_exit(status)

@@ -4,7 +4,6 @@ from contextlib import suppress
 from ipaddress import ip_address, ip_network
 from os import _exit, getenv, sep
 from os.path import join, normpath
-from pathlib import Path
 from re import IGNORECASE, compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
@@ -12,16 +11,22 @@ from typing import Tuple
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("utils",), ("db",))
+    for paths in (("deps", "python"), ("api",), ("utils",))
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from requests import get
 
-from Database import Database  # type: ignore
+from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import cache_file, cache_hash, is_cached_file, file_hash
+from jobs import (
+    bytes_hash,
+    cache_file,
+    cache_hash,
+    is_cached_file,
+    update_cache_file_info,
+)
 
 rdns_rx = re_compile(rb"^[^ ]+$", IGNORECASE)
 asn_rx = re_compile(rb"^\d+$")
@@ -54,7 +59,9 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
     return False, b""
 
 
-logger = setup_logger("BLACKLIST", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("BLACKLIST", getenv("LOG_LEVEL", "INFO"))
+CORE_API = API(getenv("API_ADDR", ""), "job-blacklist-download")
+API_TOKEN = getenv("API_TOKEN", None)
 status = 0
 
 try:
@@ -74,22 +81,8 @@ try:
         blacklist_activated = True
 
     if not blacklist_activated:
-        logger.info("Blacklist is not activated, skipping downloads...")
+        LOGGER.info("Blacklist is not activated, skipping downloads...")
         _exit(0)
-
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-    )
-
-    # Create directories if they don't exist
-    blacklist_path = Path(sep, "var", "cache", "bunkerweb", "blacklist")
-    blacklist_path.mkdir(parents=True, exist_ok=True)
-    tmp_blacklist_path = Path(sep, "var", "tmp", "bunkerweb", "blacklist")
-    tmp_blacklist_path.mkdir(parents=True, exist_ok=True)
-
-    # Our urls data
-    urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
 
     # Don't go further if the cache is fresh
     kinds_fresh = {
@@ -106,14 +99,14 @@ try:
     }
     all_fresh = True
     for kind in kinds_fresh:
-        if not is_cached_file(blacklist_path.joinpath(f"{kind}.list"), "hour", db):
+        if not is_cached_file(f"{kind}.list", "hour", CORE_API, API_TOKEN)[1]:
             kinds_fresh[kind] = False
             all_fresh = False
-            logger.info(
+            LOGGER.info(
                 f"Blacklist for {kind} is not cached, processing downloads..",
             )
         else:
-            logger.info(
+            LOGGER.info(
                 f"Blacklist for {kind} is already in cache, skipping downloads...",
             )
     if all_fresh:
@@ -144,7 +137,7 @@ try:
         # Write combined data of the kind to a single temp file
         for url in urls_list:
             try:
-                logger.info(f"Downloading blacklist data from {url} ...")
+                LOGGER.info(f"Downloading blacklist data from {url} ...")
                 if url.startswith("file://"):
                     with open(normpath(url[7:]), "rb") as f:
                         iterable = f.readlines()
@@ -152,7 +145,7 @@ try:
                     resp = get(url, stream=True, timeout=10)
 
                     if resp.status_code != 200:
-                        logger.warning(
+                        LOGGER.warning(
                             f"Got status code {resp.status_code}, skipping..."
                         )
                         continue
@@ -174,41 +167,44 @@ try:
                         content += data + b"\n"
                         i += 1
 
-                tmp_blacklist_path.joinpath(f"{kind}.list").write_bytes(content)
+                LOGGER.info(f"Downloaded {i} bad {kind}")
 
-                logger.info(f"Downloaded {i} bad {kind}")
                 # Check if file has changed
-                new_hash = file_hash(tmp_blacklist_path.joinpath(f"{kind}.list"))
-                old_hash = cache_hash(blacklist_path.joinpath(f"{kind}.list"), db)
+                new_hash = bytes_hash(content)
+                old_hash = cache_hash(f"{kind}.list", CORE_API, API_TOKEN)
                 if new_hash == old_hash:
-                    logger.info(
+                    LOGGER.info(
                         f"New file {kind}.list is identical to cache file, reload is not needed",
                     )
+                    # Update file info in cache
+                    cached, err = update_cache_file_info(
+                        f"{kind}.list", CORE_API, API_TOKEN
+                    )
+                    if not cached:
+                        LOGGER.error(f"Error while updating cache info : {err}")
+                        _exit(2)
                 else:
-                    logger.info(
+                    LOGGER.info(
                         f"New file {kind}.list is different than cache file, reload is needed",
                     )
                     # Put file in cache
                     cached, err = cache_file(
-                        tmp_blacklist_path.joinpath(f"{kind}.list"),
-                        blacklist_path.joinpath(f"{kind}.list"),
-                        new_hash,
-                        db,
+                        f"{kind}.list", content, CORE_API, API_TOKEN, checksum=new_hash
                     )
 
                     if not cached:
-                        logger.error(f"Error while caching blacklist : {err}")
+                        LOGGER.error(f"Error while caching blacklist : {err}")
                         status = 2
                     else:
                         status = 1
             except:
                 status = 2
-                logger.error(
+                LOGGER.error(
                     f"Exception while getting blacklist from {url} :\n{format_exc()}"
                 )
 
 except:
     status = 2
-    logger.error(f"Exception while running blacklist-download.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running blacklist-download.py :\n{format_exc()}")
 
 sys_exit(status)

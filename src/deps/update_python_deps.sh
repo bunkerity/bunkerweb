@@ -10,7 +10,7 @@ pip install pip --upgrade > /dev/null && pip install wheel setuptools pip-tools 
 
 echo "Updating requirements.in files"
 
-files=("../../docs/requirements.txt" "../common/db/requirements.in" "../common/gen/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in" "../api/requirements.in")
+files=("../../docs/requirements.txt" "../common/db/requirements.in" "../common/gen/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in" "../core/requirements.in")
 
 for file in $(find ../../tests -iname "requirements.txt")
 do

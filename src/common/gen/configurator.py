@@ -190,7 +190,11 @@ class Configurator:
 
         # Override with variables
         for variable, value in self.__variables.items():
+            if not variable:
+                continue
+
             ret, err = self.__check_var(variable)
+            variable = variable.upper()
             if ret:
                 config[variable] = value
             elif (
@@ -201,13 +205,19 @@ class Configurator:
                 and not variable.startswith("SVC_")
                 and variable
                 not in (
+                    "_",
+                    "DOCKER_HOST",
                     "GPG_KEY",
+                    "HOME",
+                    "HOSTNAME",
                     "LANG",
-                    "PATH",
                     "NGINX_VERSION",
                     "NJS_VERSION",
+                    "PATH",
                     "PKG_RELEASE",
-                    "DOCKER_HOST",
+                    "PWD",
+                    "SHLVL",
+                    "SERVER_SOFTWARE",
                 )
             ):
                 self.__logger.warning(f"Ignoring variable {variable} : {err}")
@@ -233,6 +243,7 @@ class Configurator:
 
     def __check_var(self, variable: str) -> Tuple[bool, str]:
         value = self.__variables[variable]
+        variable = variable.upper()
         # MULTISITE=no
         if not self.__multisite:
             where, real_var = self.__find_var(variable)

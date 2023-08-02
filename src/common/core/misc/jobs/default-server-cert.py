@@ -11,18 +11,20 @@ for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
     for paths in (
         ("deps", "python"),
+        ("api",),
         ("utils",),
-        ("db",),
     )
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from Database import Database  # type: ignore
+from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import set_file_in_db
+from jobs import cache_file, get_cache
 
-logger = setup_logger("DEFAULT-SERVER-CERT", getenv("LOG_LEVEL", "INFO"))
+LOGGER = setup_logger("DEFAULT-SERVER-CERT", getenv("LOG_LEVEL", "INFO"))
+CORE_API = API(getenv("API_ADDR", ""), "job-default-server-cert")
+API_TOKEN = getenv("API_TOKEN", None)
 status = 0
 
 try:
@@ -55,15 +57,28 @@ try:
 
     # Generate the self-signed certificate
     if not need_default_cert:
-        logger.info(
+        LOGGER.info(
             "Skipping generation of self-signed certificate for default server (not needed)",
         )
         _exit(0)
 
     cert_path = Path(sep, "var", "cache", "bunkerweb", "default-server-cert")
     cert_path.mkdir(parents=True, exist_ok=True)
+
     if not cert_path.joinpath("cert.pem").is_file():
-        logger.info("Generating self-signed certificate for default server")
+        cached_pem = get_cache("cert.pem", CORE_API, API_TOKEN)
+
+        if cached_pem:
+            cert_path.joinpath("cert.pem").write_bytes(cached_pem["data"])
+
+    if not cert_path.joinpath("cert.key").is_file():
+        cached_key = get_cache("cert.key", CORE_API, API_TOKEN)
+
+        if cached_key:
+            cert_path.joinpath("cert.key").write_bytes(cached_key["data"])
+
+    if not cert_path.joinpath("cert.pem").is_file():
+        LOGGER.info("Generating self-signed certificate for default server")
 
         if (
             run(
@@ -89,54 +104,51 @@ try:
             ).returncode
             != 0
         ):
-            logger.error(
+            LOGGER.error(
                 "Self-signed certificate generation failed for default server",
             )
             status = 2
         else:
             status = 1
-            logger.info(
+            LOGGER.info(
                 "Successfully generated self-signed certificate for default server",
             )
 
-        db = Database(
-            logger,
-            sqlalchemy_string=getenv("DATABASE_URI", None),
-        )
-
-        cached, err = set_file_in_db(
+        cached, err = cache_file(
             "cert.pem",
             cert_path.joinpath("cert.pem").read_bytes(),
-            db,
+            CORE_API,
+            API_TOKEN,
         )
         if not cached:
-            logger.error(
+            LOGGER.error(
                 f"Error while saving default-server-cert cert.pem file to db cache : {err}"
             )
         else:
-            logger.info(
+            LOGGER.info(
                 "Successfully saved default-server-cert cert.pem file to db cache"
             )
 
-        cached, err = set_file_in_db(
+        cached, err = cache_file(
             "cert.key",
             cert_path.joinpath("cert.key").read_bytes(),
-            db,
+            CORE_API,
+            API_TOKEN,
         )
         if not cached:
-            logger.error(
+            LOGGER.error(
                 f"Error while saving default-server-cert cert.key file to db cache : {err}"
             )
         else:
-            logger.info(
+            LOGGER.info(
                 "Successfully saved default-server-cert cert.key file to db cache"
             )
     else:
-        logger.info(
+        LOGGER.info(
             "Skipping generation of self-signed certificate for default server (already present)",
         )
 except:
     status = 2
-    logger.error(f"Exception while running default-server-cert.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running default-server-cert.py :\n{format_exc()}")
 
 sys_exit(status)

@@ -1,8 +1,10 @@
 FROM python:3.11.4-alpine AS builder
 
+# Install temporary requirements for the dependencies
+RUN apk add --no-cache --virtual .build-deps g++ gcc
+
 # Copy python requirements
-COPY src/api/requirements.txt /tmp/req/requirements.txt
-COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.1
+COPY src/core/requirements.txt /tmp/req/requirements.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
 
 RUN mkdir -p /usr/share/bunkerweb/deps && \
@@ -16,20 +18,24 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   mkdir -p /usr/share/bunkerweb/deps/python && \
   pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
 
+# Clean up temporary dependencies
+RUN apk del .build-deps && \
+  rm -rf /var/cache/apk/*
+
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
 COPY src/common/api /usr/share/bunkerweb/api
 COPY src/common/cli /usr/share/bunkerweb/cli
 COPY src/common/confs /usr/share/bunkerweb/confs
-COPY src/common/db /usr/share/bunkerweb/db
 COPY src/common/core /usr/share/bunkerweb/core
+COPY src/common/db /usr/share/bunkerweb/db
 COPY src/common/gen /usr/share/bunkerweb/gen
 COPY src/common/helpers /usr/share/bunkerweb/helpers
 COPY src/common/settings.json /usr/share/bunkerweb/settings.json
 COPY src/common/utils /usr/share/bunkerweb/utils
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 
-COPY src/api /usr/share/bunkerweb/api
+COPY src/core /usr/share/bunkerweb/core
 
 FROM python:3.11.4-alpine
 
@@ -38,40 +44,46 @@ RUN umask 027
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+RUN mkdir -p /etc/bunkerweb
+COPY  --chown=0:101 src/common/config.yaml /etc/bunkerweb/config.yaml
 
-# Add api user, drop bwcli, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash grep libmagic && \
+# Add core user, drop bwcli, install runtime dependencies, create data folders and set permissions
+RUN apk add --no-cache bash jq grep libmagic && \
   ln -s /usr/local/bin/python3 /usr/bin/python3 && \
-  addgroup -g 101 api && \
-  adduser -h /var/cache/nginx -g api -s /bin/bash -G api -D -H -u 101 api && \
+  addgroup -g 101 core && \
+  adduser -h /var/cache/nginx -g core -s /bin/bash -G core -D -H -u 101 core && \
   cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
   echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
+  mkdir -p /etc/nginx && \
   mkdir -p /var/tmp/bunkerweb && \
   mkdir -p /var/run/bunkerweb && \
-  mkdir -p /etc/bunkerweb && \
+  mkdir -p /var/log/bunkerweb && \
+  mkdir -p /var/www && \
+  mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-  mv /usr/share/bunkerweb/api/api.conf /etc/bunkerweb/api.conf && \
+  mv /usr/share/bunkerweb/core/core.conf /etc/bunkerweb/ && \
   for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-  chown -R root:api /data /usr/bin/bwcli /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb && \
-  chmod -R 770 /data /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb && \
-  chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/api/*.py /usr/share/bunkerweb/api/entrypoint.sh /usr/share/bunkerweb/deps/python/bin/* /usr/bin/bwcli && \
+  for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
+  chown -R root:core /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
+  chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
+  chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/core/*.py /usr/share/bunkerweb/core/entrypoint.sh /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/deps/python/bin/* /usr/bin/bwcli && \
   chmod 660 /usr/share/bunkerweb/INTEGRATION && \
-  chown root:api /usr/share/bunkerweb/INTEGRATION
+  chown root:core /usr/share/bunkerweb/INTEGRATION
 
 # Fix CVEs
 RUN apk add "libcrypto3>=3.1.1-r2" "libssl3>=3.1.1-r2"
 
 VOLUME /data
 
-WORKDIR /usr/share/bunkerweb/api
+WORKDIR /usr/share/bunkerweb/core
 
 EXPOSE 5000
 
-USER api:api
+USER core:core
 
-HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-api.sh
+HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-core.sh
 
 ENV PYTHONPATH /usr/share/bunkerweb/deps/python
 
-ENTRYPOINT ["/usr/share/bunkerweb/api/entrypoint.sh"]
+ENTRYPOINT ["/usr/share/bunkerweb/core/entrypoint.sh"]
 

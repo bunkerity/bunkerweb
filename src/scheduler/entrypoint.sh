@@ -21,24 +21,6 @@ log "ENTRYPOINT" "ℹ️" "Starting the job scheduler v$(cat /usr/share/bunkerwe
 # setup and check /data folder
 /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
 
-if [[ $(echo "$SWARM_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
-	echo "Swarm" > /usr/share/bunkerweb/INTEGRATION
-elif [[ $(echo "$KUBERNETES_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
-	echo "Kubernetes" > /usr/share/bunkerweb/INTEGRATION
-elif [[ $(echo "$AUTOCONF_MODE" | awk '{print tolower($0)}') == "yes" ]] ; then
-	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION
-fi
-
-if ! grep -q "Docker" /usr/share/bunkerweb/INTEGRATION ; then
-	# Init database
-	get_env > "/tmp/variables.env"
-	/usr/share/bunkerweb/gen/save_config.py --variables /tmp/variables.env --init
-	if [ "$?" -ne 0 ] ; then
-		log "ENTRYPOINT" "❌" "Scheduler generator failed"
-		exit 1
-	fi
-fi
-
 # execute jobs
 log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
 /usr/share/bunkerweb/scheduler/main.py &

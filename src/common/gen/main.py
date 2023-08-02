@@ -20,7 +20,7 @@ for deps_path in [
         sys_path.append(deps_path)
 
 from logger import setup_logger  # type: ignore
-from Configurator import Configurator
+from configurator import Configurator
 from Templator import Templator
 
 

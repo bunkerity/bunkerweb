@@ -14,18 +14,21 @@ for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
     for paths in (
         ("deps", "python"),
+        ("api",),
         ("utils",),
-        ("db",),
     )
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from Database import Database  # type: ignore
+from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import get_file_in_db, set_file_in_db
 
-logger = setup_logger("LETS-ENCRYPT.new", getenv("LOG_LEVEL", "INFO"))
+from jobs import get_cache, cache_file
+
+LOGGER = setup_logger("LETS-ENCRYPT.new", getenv("LOG_LEVEL", "INFO"))
+CORE_API = API(getenv("API_ADDR", ""), "job-certbot-new")
+API_TOKEN = getenv("API_TOKEN", None)
 status = 0
 
 
@@ -81,7 +84,7 @@ try:
                 break
 
     if not use_letsencrypt:
-        logger.info("Let's Encrypt is not activated, skipping generation...")
+        LOGGER.info("Let's Encrypt is not activated, skipping generation...")
         _exit(0)
 
     # Create directory if it doesn't exist
@@ -95,13 +98,7 @@ try:
         parents=True, exist_ok=True
     )
 
-    # Extract letsencrypt folder if it exists in db
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-    )
-
-    tgz = get_file_in_db("folder.tgz", db, job_name="certbot-renew")
+    tgz = get_cache("folder.tgz", CORE_API, API_TOKEN, job_name="certbot-renew")
     if tgz:
         # Delete folder if needed
         if letsencrypt_path.exists():
@@ -110,9 +107,9 @@ try:
         # Extract it
         with tar_open(name="folder.tgz", mode="r:gz", fileobj=BytesIO(tgz)) as tf:
             tf.extractall(str(letsencrypt_path))
-        logger.info("Successfully retrieved Let's Encrypt data from db cache")
+        LOGGER.info("Successfully retrieved Let's Encrypt data from db cache")
     else:
-        logger.info("No Let's Encrypt data found in db cache")
+        LOGGER.info("No Let's Encrypt data found in db cache")
 
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
@@ -132,7 +129,7 @@ try:
             )
 
             if letsencrypt_path.joinpath(first_server, "cert.pem").exists():
-                logger.info(
+                LOGGER.info(
                     f"Certificates already exists for domain(s) {domains}",
                 )
                 continue
@@ -144,20 +141,20 @@ try:
             if not real_email:
                 real_email = f"contact@{first_server}"
 
-            logger.info(
+            LOGGER.info(
                 f"Asking certificates for domains : {domains} (email = {real_email}) ...",
             )
             if (
                 certbot_new(domains, real_email, letsencrypt_path, letsencrypt_job_path)
                 != 0
             ):
-                logger.error(
+                LOGGER.error(
                     f"Certificate generation failed for domain(s) {domains} ...",
                 )
                 _exit(2)
             else:
                 status = 1
-                logger.info(
+                LOGGER.info(
                     f"Certificate generation succeeded for domain(s) : {domains}"
                 )
 
@@ -167,13 +164,13 @@ try:
         domains = getenv("SERVER_NAME", "").replace(" ", ",")
 
         if letsencrypt_path.joinpath("etc", "live", first_server, "cert.pem").exists():
-            logger.info(f"Certificates already exists for domain(s) {domains}")
+            LOGGER.info(f"Certificates already exists for domain(s) {domains}")
         else:
             real_email = getenv("EMAIL_LETS_ENCRYPT", f"contact@{first_server}")
             if not real_email:
                 real_email = f"contact@{first_server}"
 
-            logger.info(
+            LOGGER.info(
                 f"Asking certificates for domain(s) : {domains} (email = {real_email}) ...",
             )
             if (
@@ -181,10 +178,10 @@ try:
                 != 0
             ):
                 status = 2
-                logger.error(f"Certificate generation failed for domain(s) : {domains}")
+                LOGGER.error(f"Certificate generation failed for domain(s) : {domains}")
             else:
                 status = 1
-                logger.info(
+                LOGGER.info(
                     f"Certificate generation succeeded for domain(s) : {domains}"
                 )
 
@@ -195,14 +192,16 @@ try:
     bio.seek(0, 0)
 
     # Put tgz in cache
-    cached, err = set_file_in_db("folder.tgz", bio.read(), db, job_name="certbot-renew")
+    cached, err = cache_file(
+        "folder.tgz", bio.read(), CORE_API, API_TOKEN, job_name="certbot-renew"
+    )
 
     if not cached:
-        logger.error(f"Error while saving Let's Encrypt data to db cache : {err}")
+        LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")
     else:
-        logger.info("Successfully saved Let's Encrypt data to db cache")
+        LOGGER.info("Successfully saved Let's Encrypt data to db cache")
 except:
     status = 3
-    logger.error(f"Exception while running certbot-new.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running certbot-new.py :\n{format_exc()}")
 
 sys_exit(status)

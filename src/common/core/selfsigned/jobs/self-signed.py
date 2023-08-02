@@ -13,25 +13,30 @@ for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
     for paths in (
         ("deps", "python"),
+        ("api",),
         ("utils",),
-        ("db",),
     )
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from Database import Database  # type: ignore
+from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import set_file_in_db
+from jobs import cache_file, get_cache
 
-logger = setup_logger("self-signed", getenv("LOG_LEVEL", "INFO"))
-db = None
-lock = Lock()
+LOGGER = setup_logger("self-signed", getenv("LOG_LEVEL", "INFO"))
+CORE_API = API(getenv("API_ADDR", ""), "job-self-signed")
+API_TOKEN = getenv("API_TOKEN", None)
 status = 0
 
 
 def generate_cert(
-    first_server: str, days: str, subj: str, self_signed_path: Path
+    first_server: str,
+    days: str,
+    subj: str,
+    self_signed_path: Path,
+    *,
+    multisite: bool = False,
 ) -> Tuple[bool, int]:
     if self_signed_path.joinpath(f"{first_server}.pem").is_file():
         if (
@@ -51,10 +56,10 @@ def generate_cert(
             ).returncode
             == 0
         ):
-            logger.info(f"Self-signed certificate already present for {first_server}")
+            LOGGER.info(f"Self-signed certificate already present for {first_server}")
             return True, 0
 
-    logger.info(f"Generating self-signed certificate for {first_server}")
+    LOGGER.info(f"Generating self-signed certificate for {first_server}")
     if (
         run(
             [
@@ -79,29 +84,31 @@ def generate_cert(
         ).returncode
         != 0
     ):
-        logger.error(f"Self-signed certificate generation failed for {first_server}")
+        LOGGER.error(f"Self-signed certificate generation failed for {first_server}")
         return False, 2
 
     # Update db
-    cached, err = set_file_in_db(
+    cached, err = cache_file(
         f"{first_server}.pem",
         self_signed_path.joinpath(f"{first_server}.pem").read_bytes(),
-        db,
-        service_id=first_server,
+        CORE_API,
+        API_TOKEN,
+        service_id=first_server if multisite else None,
     )
     if not cached:
-        logger.error(f"Error while caching self-signed {first_server}.pem file : {err}")
+        LOGGER.error(f"Error while caching self-signed {first_server}.pem file : {err}")
 
-    cached, err = set_file_in_db(
+    cached, err = cache_file(
         f"{first_server}.key",
         self_signed_path.joinpath(f"{first_server}.key").read_bytes(),
-        db,
-        service_id=first_server,
+        CORE_API,
+        API_TOKEN,
+        service_id=first_server if multisite else None,
     )
     if not cached:
-        logger.error(f"Error while caching self-signed {first_server}.key file : {err}")
+        LOGGER.error(f"Error while caching self-signed {first_server}.key file : {err}")
 
-    logger.info(f"Successfully generated self-signed certificate for {first_server}")
+    LOGGER.info(f"Successfully generated self-signed certificate for {first_server}")
     return True, 1
 
 
@@ -126,15 +133,28 @@ try:
                     getenv("GENERATE_SELF_SIGNED_SSL", "no"),
                 )
                 != "yes"
-                or self_signed_path.joinpath(f"{first_server}.pem").is_file()
             ):
                 continue
 
-            if not db:
-                db = Database(
-                    logger,
-                    sqlalchemy_string=getenv("DATABASE_URI", None),
+            if not self_signed_path.joinpath(f"{first_server}.pem").is_file():
+                cached_pem = get_cache(
+                    f"{first_server}.pem", CORE_API, API_TOKEN, service_id=first_server
                 )
+
+                if cached_pem:
+                    self_signed_path.joinpath(f"{first_server}.pem").write_bytes(
+                        cached_pem["data"]
+                    )
+
+            if not self_signed_path.joinpath(f"{first_server}.key").is_file():
+                cached_key = get_cache(
+                    f"{first_server}.key", CORE_API, API_TOKEN, service_id=first_server
+                )
+
+                if cached_key:
+                    self_signed_path.joinpath(f"{first_server}.key").write_bytes(
+                        cached_key["data"]
+                    )
 
             ret, ret_status = generate_cert(
                 first_server,
@@ -147,17 +167,30 @@ try:
                     getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/"),
                 ),
                 self_signed_path,
+                multisite=True,
             )
             status = ret_status
 
     # Singlesite case
     elif getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes" and getenv("SERVER_NAME"):
-        db = Database(
-            logger,
-            sqlalchemy_string=getenv("DATABASE_URI", None),
-        )
-
         first_server = getenv("SERVER_NAME", "").split(" ")[0]
+
+        if not self_signed_path.joinpath(f"{first_server}.pem").is_file():
+            cached_pem = get_cache(f"{first_server}.pem", CORE_API, API_TOKEN)
+
+            if cached_pem:
+                self_signed_path.joinpath(f"{first_server}.pem").write_bytes(
+                    cached_pem["data"]
+                )
+
+        if not self_signed_path.joinpath(f"{first_server}.key").is_file():
+            cached_key = get_cache(f"{first_server}.key", CORE_API, API_TOKEN)
+
+            if cached_key:
+                self_signed_path.joinpath(f"{first_server}.key").write_bytes(
+                    cached_key["data"]
+                )
+
         ret, ret_status = generate_cert(
             first_server,
             getenv("SELF_SIGNED_SSL_EXPIRY", "365"),
@@ -167,6 +200,6 @@ try:
         status = ret_status
 except:
     status = 2
-    logger.error(f"Exception while running self-signed.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running self-signed.py :\n{format_exc()}")
 
 sys_exit(status)

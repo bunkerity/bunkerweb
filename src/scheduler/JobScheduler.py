@@ -3,12 +3,16 @@
 from copy import deepcopy
 from functools import partial
 from glob import glob
+from io import BytesIO
 from json import loads
 from logging import Logger
-from os import cpu_count, environ, getenv, sep
+from os import cpu_count, environ, getenv, sep, walk
 from os.path import basename, dirname, join
 from pathlib import Path
 from re import match
+from stat import S_IEXEC
+from tarfile import open as tar_open
+from time import sleep
 from typing import Any, Dict, Optional
 from schedule import (
     Job,
@@ -22,32 +26,29 @@ from threading import Lock, Semaphore, Thread
 from traceback import format_exc
 
 for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))
+    join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("api",))
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from Database import Database  # type: ignore
+from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-from ApiCaller import ApiCaller  # type: ignore
+
+EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 
 
-class JobScheduler(ApiCaller):
+class JobScheduler:
     def __init__(
         self,
+        api: API,
         env: Optional[Dict[str, Any]] = None,
         logger: Optional[Logger] = None,
-        integration: str = "Linux",
         *,
         lock: Optional[Lock] = None,
-        apis: Optional[list] = None,
     ):
-        super().__init__(apis or [])
         self.__logger = logger or setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
-        self.__integration = integration
-        self.__db = Database(self.__logger)
+        self.__api = api
         self.__env = env or {}
-        self.__env.update(environ)
         self.__jobs = self.__get_jobs()
         self.__lock = lock
         self.__thread_lock = Lock()
@@ -58,17 +59,82 @@ class JobScheduler(ApiCaller):
     def env(self) -> Dict[str, Any]:
         return self.__env
 
-    @env.setter
-    def env(self, env: Dict[str, Any]):
-        self.__env = env
+    def update_env(self):
+        retries = 0
+        sent = None
+        status = None
+        while not sent and status != 200 and retries < 3:
+            sent, err, status, resp = self.__api.request(
+                "GET",
+                "/config",
+                additonal_headers={
+                    "Authorization": f"Bearer {self.__env.get('API_TOKEN')}"
+                }
+                if "API_TOKEN" in self.__env
+                else {},
+            )
 
-    def set_integration(self, integration: str):
-        self.__integration = integration
+            if not sent or status != 200:
+                self.__logger.warning(
+                    f"Could not contact core API. Waiting {self.__env.get('WAIT_RETRY_INTERVAL', 5)} seconds before retrying ...",
+                )
+                sleep(int(self.__env.get("WAIT_RETRY_INTERVAL", 5)))
+                retries += 1
+            else:
+                self.__logger.info(
+                    f"Successfully sent API request to {self.__api.endpoint}config",
+                )
 
-    def auto_setup(self):
-        super().auto_setup(bw_integration=self.__integration)
+        if not sent or status != 200:
+            self.__logger.error(
+                f"Could not send core API request to {self.__api.endpoint}config after {retries} retries : {err}, configuration will not work as expected.",
+            )
+            return
+
+        self.__env.update(resp)
 
     def update_jobs(self):
+        retries = 0
+        sent = None
+        status = None
+        while not sent and status != 200 and retries < 3:
+            sent, err, status, resp = self.__api.request(
+                "GET",
+                "/plugins/external/files",
+                additonal_headers={
+                    "Authorization": f"Bearer {self.__env.get('API_TOKEN')}"
+                }
+                if "API_TOKEN" in self.__env
+                else {},
+            )
+
+            if not sent or status != 200:
+                self.__logger.warning(
+                    f"Could not contact core API. Waiting {self.__env.get('WAIT_RETRY_INTERVAL', 5)} seconds before retrying ...",
+                )
+                sleep(int(self.__env.get("WAIT_RETRY_INTERVAL", 5)))
+                retries += 1
+            else:
+                self.__logger.info(
+                    f"Successfully sent API request to {self.__api.endpoint}plugins/external/files",
+                )
+
+        if not sent or status != 200:
+            self.__logger.error(
+                f"Could not send core API request to {self.__api.endpoint}plugins/external/files after {retries} retries : {err}, not all jobs will be available.",
+            )
+        elif resp.content:
+            EXTERNAL_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
+            with tar_open(mode="r:gz", fileobj=BytesIO(resp.content)) as tar:
+                tar.extractall(EXTERNAL_PLUGINS_PATH)
+
+            # Fix potential permission issues
+            for root, _, files in walk(str(EXTERNAL_PLUGINS_PATH)):
+                for f in files:
+                    _path = join(root, f)
+                    st = _path.stat()
+                    _path.chmod(st.st_mode | S_IEXEC)
+
         self.__jobs = self.__get_jobs()
 
     def __get_jobs(self):
@@ -150,33 +216,6 @@ class JobScheduler(ApiCaller):
             return schedule_every().week
         raise ValueError(f"can't convert string {every} to schedule")
 
-    def __reload(self) -> bool:
-        reload = True
-        if self.__integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
-            self.__logger.info("Reloading nginx ...")
-            proc = run(
-                ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
-                stdin=DEVNULL,
-                stderr=PIPE,
-                env=self.__env,
-                check=False,
-            )
-            reload = proc.returncode == 0
-            if reload:
-                self.__logger.info("Successfully reloaded nginx")
-            else:
-                self.__logger.error(
-                    f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode() if proc.stderr else 'Missing stderr'}",
-                )
-        else:
-            self.__logger.info("Reloading nginx ...")
-            reload = self.send_to_apis("POST", "/reload")
-            if reload:
-                self.__logger.info("Successfully reloaded nginx")
-            else:
-                self.__logger.error("Error while reloading nginx")
-        return reload
-
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
         self.__logger.info(
             f"Executing job {name} from plugin {plugin} ...",
@@ -208,21 +247,27 @@ class JobScheduler(ApiCaller):
             with self.__thread_lock:
                 self.__job_success = False
 
-        Thread(target=self.__update_job, args=(plugin, name, success)).start()
+        Thread(target=self.__add_job_run, args=(name, success)).start()
 
         return ret
 
-    def __update_job(self, plugin: str, name: str, success: bool):
-        with self.__thread_lock:
-            err = self.__db.update_job(plugin, name, success)
+    def __add_job_run(self, job_name: str, success: bool):
+        sent, err, status, resp = self.__api.request(
+            "PUT",
+            f"/jobs/{job_name}/run",
+            data={"success": success},
+            additonal_headers={"Authorization": f"Bearer {self.__env.get('API_TOKEN')}"}
+            if "API_TOKEN" in self.__env
+            else {},
+        )
 
-        if not err:
-            self.__logger.info(
-                f"Successfully updated database for the job {name} from plugin {plugin}",
+        if not sent:
+            self.__logger.error(
+                f"Can't send API request to {self.__api.endpoint}jobs/{job_name}/run : {err}, the database will not be updated"
             )
-        else:
-            self.__logger.warning(
-                f"Failed to update database for the job {name} from plugin {plugin}: {err}",
+        elif status != 200:
+            self.__logger.error(
+                f"Error while sending API request to {self.__api.endpoint}jobs/{job_name}/run : status = {status}, resp = {resp}, the database will not be updated",
             )
 
     def setup(self):
@@ -248,35 +293,14 @@ class JobScheduler(ApiCaller):
 
         jobs = [job for job in schedule_jobs if job.should_run]
         success = True
-        reload = False
         for job in jobs:
             ret = job.run()
 
             if not isinstance(ret, int):
                 ret = -1
 
-            if ret == 1:
-                reload = True
-            elif ret < 0 or ret >= 2:
+            if ret < 0 or ret >= 2:
                 success = False
-
-        if reload:
-            try:
-                if self.apis:
-                    cache_path = join(sep, "var", "cache", "bunkerweb")
-                    self.__logger.info(f"Sending {cache_path} folder ...")
-                    if not self.send_files(cache_path, "/cache"):
-                        success = False
-                        self.__logger.error(f"Error while sending {cache_path} folder")
-                    else:
-                        self.__logger.info(f"Successfully sent {cache_path} folder")
-                if not self.__reload():
-                    success = False
-            except:
-                success = False
-                self.__logger.error(
-                    f"Exception while reloading after job scheduling : {format_exc()}",
-                )
 
         if self.__lock:
             self.__lock.release()
@@ -285,7 +309,7 @@ class JobScheduler(ApiCaller):
     def run_once(self) -> bool:
         threads = []
         for plugin, jobs in self.__jobs.items():
-            jobs_jobs = []
+            plugin_jobs = []
 
             for job in jobs:
                 path = job["path"]
@@ -293,10 +317,12 @@ class JobScheduler(ApiCaller):
                 file = job["file"]
 
                 # Add job to the list of jobs to run in the order they are defined
-                jobs_jobs.append(partial(self.__job_wrapper, path, plugin, name, file))
+                plugin_jobs.append(
+                    partial(self.__job_wrapper, path, plugin, name, file)
+                )
 
             # Create a thread for each plugin
-            threads.append(Thread(target=self.__run_in_thread, args=(jobs_jobs,)))
+            threads.append(Thread(target=self.__run_in_thread, args=(plugin_jobs,)))
 
         for thread in threads:
             thread.start()

@@ -1,11 +1,9 @@
 #!/usr/bin/python3
 
-from contextlib import suppress
 from datetime import datetime
 from hashlib import sha512
 from inspect import getsourcefile
-from io import BufferedReader
-from json import dumps, loads
+from io import BufferedReader, BytesIO
 from os.path import basename, normpath
 from pathlib import Path
 from sys import _getframe
@@ -24,98 +22,181 @@ lock = Lock()
 
 
 def is_cached_file(
-    file: Union[str, Path],
+    name: str,
     expire: Union[Literal["hour"], Literal["day"], Literal["week"], Literal["month"]],
-    db=None,
-) -> bool:
+    api,
+    api_token: str = None,
+    *,
+    job_name: Optional[str] = None,
+    service_id: Optional[str] = None,
+) -> Tuple[bool, bool]:
+    cache_info = None
     is_cached = False
-    cached_file = None
+    job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
+
     try:
-        file = normpath(file)
-        file_path = Path(f"{file}.md")
-        if not file_path.is_file():
-            if not db:
-                return False
-            cached_file = db.get_job_cache_file(
-                basename(getsourcefile(_getframe(1))).replace(".py", ""),
-                basename(file),
-                with_info=True,
-            )
+        cache_info = get_cache(
+            name,
+            api,
+            api_token,
+            with_info=True,
+            with_data=False,
+            job_name=job_name,
+            service_id=service_id,
+        )
 
-            if not cached_file:
-                return False
-            cached_time = cached_file.last_update.timestamp()
-        else:
-            cached_time = loads(file_path.read_text())["date"]
-
-        current_time = datetime.now().timestamp()
-        if current_time < cached_time:
-            is_cached = False
-        else:
-            diff_time = current_time - cached_time
-            if expire == "hour":
-                is_cached = diff_time < 3600
-            elif expire == "day":
-                is_cached = diff_time < 86400
-            elif expire == "week":
-                is_cached = diff_time < 604800
-            elif expire == "month":
-                is_cached = diff_time < 2592000
+        if cache_info:
+            current_time = datetime.now().timestamp()
+            if current_time < float(cache_info["date"]):
+                is_cached = False
+            else:
+                diff_time = current_time - float(cache_info["date"])
+                if expire == "hour":
+                    is_cached = diff_time < 3600
+                elif expire == "day":
+                    is_cached = diff_time < 86400
+                elif expire == "week":
+                    is_cached = diff_time < 604800
+                elif expire == "month":
+                    is_cached = diff_time < 2592000
     except:
         is_cached = False
 
-    if is_cached and cached_file:
-        Path(file).write_bytes(cached_file.data)
-
-    return is_cached and cached_file
+    return cache_info is not None, is_cached
 
 
-def get_file_in_db(
-    file: Union[str, Path], db, *, job_name: Optional[str] = None
-) -> Optional[bytes]:
-    cached_file = db.get_job_cache_file(
-        job_name or basename(getsourcefile(_getframe(1))).replace(".py", ""),
-        normpath(file),
-    )
-    if not cached_file:
-        return None
-    return cached_file.data
-
-
-def set_file_in_db(
+def get_cache(
     name: str,
-    content: bytes,
-    db,
+    api,
+    api_token: str = None,
+    *,
+    job_name: Optional[str] = None,
+    service_id: Optional[str] = None,
+    with_info: bool = False,
+    with_data: bool = True,
+) -> Optional[dict]:
+    job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
+
+    sent, _, status, resp = api.request(
+        "GET",
+        f"/jobs/{job_name}/cache/{name}",
+        data={"service_id": service_id, "with_info": with_info, "with_data": with_data},
+        additonal_headers={"Authorization": f"Bearer {api_token}"} if api_token else {},
+    )
+
+    if not sent or status != 200:
+        return None
+
+    return resp
+
+
+def cache_file(
+    name: str,
+    cache_file: Union[bytes, str, Path],
+    api,
+    api_token: str = None,
     *,
     job_name: Optional[str] = None,
     service_id: Optional[str] = None,
     checksum: Optional[str] = None,
 ) -> Tuple[bool, str]:
     ret, err = True, "success"
-    try:
-        with lock:
-            err = db.update_job_cache(
-                service_id,
-                name,
-                content,
-                job_name=job_name
-                or basename(getsourcefile(_getframe(1))).replace(".py", ""),
-                checksum=checksum,
-            )
+    job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
 
-            if err:
-                ret = False
+    if isinstance(cache_file, bytes):
+        content = cache_file
+    else:
+        if isinstance(cache_file, str):
+            cache_file = Path(cache_file)
+        content = cache_file.read_bytes()
+
+    try:
+        sent, err, status, resp = api.request(
+            "POST",
+            f"/jobs/{job_name}/cache/{name}",
+            data={"service_id": service_id, "checksum": checksum},
+            files={"cache_file": content},
+            additonal_headers={"Authorization": f"Bearer {api_token}"}
+            if api_token
+            else {},
+        )
+
+        if not sent:
+            ret = False
+            err = f"Can't send API request to {api.endpoint}jobs/cache/{job_name}/{name}/ : {err}"
+        elif status != 200:
+            ret = False
+            err = (
+                f"Error while sending API request to {api.endpoint}jobs/cache/{job_name}/{name}/ : status = {status}, resp = {resp}",
+            )
     except:
         return False, f"exception :\n{format_exc()}"
     return ret, err
 
 
-def del_file_in_db(name: str, db) -> Tuple[bool, str]:
+def update_cache_file_info(
+    name: str,
+    api,
+    api_token: str = None,
+    *,
+    job_name: Optional[str] = None,
+    service_id: Optional[str] = None,
+) -> Tuple[bool, str]:
     ret, err = True, "success"
+    job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
+
     try:
-        db.delete_job_cache(
-            name, job_name=basename(getsourcefile(_getframe(1))).replace(".py", "")
+        sent, err, status, resp = api.request(
+            "PATCH",
+            f"/jobs/{job_name}/cache/{name}",
+            data={"service_id": service_id},
+            additonal_headers={"Authorization": f"Bearer {api_token}"}
+            if api_token
+            else {},
         )
+
+        if not sent:
+            ret = False
+            err = f"Can't send API request to {api.endpoint}jobs/cache/{job_name}/{name}/ : {err}"
+        elif status != 200:
+            ret = False
+            err = (
+                f"Error while sending API request to {api.endpoint}jobs/cache/{job_name}/{name}/ : status = {status}, resp = {resp}",
+            )
+    except:
+        return False, f"exception :\n{format_exc()}"
+    return ret, err
+
+
+def del_cache(
+    name: str,
+    api,
+    api_token: str = None,
+    *,
+    job_name: Optional[str] = None,
+    service_id: Optional[str] = None,
+) -> Tuple[bool, str]:
+    ret, err = True, "success"
+    job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
+
+    try:
+        sent, err, status, resp = api.request(
+            "DELETE",
+            f"/jobs/{job_name}/cache/{name}",
+            data={"service_id": service_id},
+            additonal_headers={"Authorization": f"Bearer {api_token}"}
+            if api_token
+            else {},
+        )
+
+        if not sent:
+            ret = False
+            err = f"Can't send API request to {api.endpoint}jobs/cache/{job_name}/{name} : {err}"
+        elif status != 200:
+            ret = False
+            err = (
+                f"Error while sending API request to {api.endpoint}jobs/cache/{job_name}/{name} : status = {status}, resp = {resp}",
+            )
     except:
         return False, f"exception :\n{format_exc()}"
     return ret, err
@@ -132,7 +213,11 @@ def file_hash(file: Union[str, Path]) -> str:
     return _sha512.hexdigest()
 
 
-def bytes_hash(bio: BufferedReader) -> str:
+def bytes_hash(bio: Union[bytes, BufferedReader]) -> str:
+    if isinstance(bio, bytes):
+        bio = BytesIO(bio)
+        bio.seek(0, 0)
+
     _sha512 = sha512()
     while True:
         data = bio.read(1024)
@@ -143,63 +228,27 @@ def bytes_hash(bio: BufferedReader) -> str:
     return _sha512.hexdigest()
 
 
-def cache_hash(cache: Union[str, Path], db=None) -> Optional[str]:
-    with suppress(BaseException):
-        return loads(Path(normpath(f"{cache}.md")).read_text(encoding="utf-8")).get(
-            "checksum", None
-        )
-    if db:
-        cached_file = db.get_job_cache_file(
-            basename(getsourcefile(_getframe(1))).replace(".py", ""),
-            basename(normpath(cache)),
-            with_info=True,
-            with_data=False,
-        )
-
-        if cached_file:
-            return cached_file.checksum
-    return None
-
-
-def cache_file(
-    file: Union[str, Path],
-    cache: Union[str, Path],
-    _hash: Optional[str],
-    db=None,
+def cache_hash(
+    name: str,
+    api,
+    api_token: str = None,
     *,
-    delete_file: bool = True,
+    job_name: Optional[str] = None,
     service_id: Optional[str] = None,
-) -> Tuple[bool, str]:
-    ret, err = True, "success"
-    try:
-        if not isinstance(file, Path):
-            file = Path(normpath(file))
-        if not isinstance(cache, Path):
-            cache = Path(normpath(cache))
+) -> Optional[str]:
+    job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
 
-        content = file.read_bytes()
-        cache.write_bytes(content)
+    cache_info = get_cache(
+        name,
+        api,
+        api_token,
+        with_info=True,
+        with_data=False,
+        job_name=job_name,
+        service_id=service_id,
+    )
 
-        if delete_file:
-            file.unlink()
+    if not cache_info:
+        return None
 
-        if not _hash:
-            _hash = file_hash(str(cache))
-
-        if db:
-            return set_file_in_db(
-                basename(str(cache)),
-                content,
-                db,
-                job_name=basename(getsourcefile(_getframe(1))).replace(".py", ""),
-                service_id=service_id,
-                checksum=_hash,
-            )
-        else:
-            Path(f"{cache}.md").write_text(
-                dumps(dict(date=datetime.now().timestamp(), checksum=_hash)),
-                encoding="utf-8",
-            )
-    except:
-        return False, f"exception :\n{format_exc()}"
-    return ret, err
+    return cache_info["checksum"]

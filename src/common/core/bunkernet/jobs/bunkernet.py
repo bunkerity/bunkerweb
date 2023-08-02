@@ -42,20 +42,12 @@ def register() -> Tuple[bool, Optional[int], Union[str, dict]]:
     return request("POST", "/register")
 
 
-def ping(_id: Optional[str] = None) -> Tuple[bool, Optional[int], Union[str, dict]]:
-    return request("GET", "/ping", _id=_id or get_id())
+def ping(_id: Optional[str]) -> Tuple[bool, Optional[int], Union[str, dict]]:
+    return request("GET", "/ping", _id=_id)
 
 
-def data() -> Tuple[bool, Optional[int], Union[str, dict]]:
-    return request("GET", "/db", _id=get_id())
-
-
-def get_id() -> str:
-    return (
-        Path(sep, "var", "cache", "bunkerweb", "bunkernet", "instance.id")
-        .read_text(encoding="utf-8")
-        .strip()
-    )
+def data(_id: Optional[str]) -> Tuple[bool, Optional[int], Union[str, dict]]:
+    return request("GET", "/db", _id=_id)
 
 
 def get_version() -> str:

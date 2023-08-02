@@ -1,16 +1,10 @@
 FROM python:3.11.4-alpine AS builder
 
-# Copy python requirements
-COPY src/scheduler/requirements.txt /tmp/req/requirements.txt
-COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.1
-COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
-
-RUN mkdir -p /usr/share/bunkerweb/deps && \
-  cat /tmp/req/requirements.txt* > /usr/share/bunkerweb/deps/requirements.txt && \
-  rm -rf /tmp/req
-
 # Install python dependencies
 RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev
+
+# Copy python requirements
+COPY src/scheduler/requirements.txt /usr/share/bunkerweb/deps/requirements.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
@@ -27,15 +21,12 @@ RUN apk del .build-deps && \
 # can't exclude specific files/dir from . so we are copying everything by hand
 COPY src/common/api /usr/share/bunkerweb/api
 COPY src/common/cli /usr/share/bunkerweb/cli
-COPY src/common/confs /usr/share/bunkerweb/confs
-COPY src/common/db /usr/share/bunkerweb/db
 COPY src/common/core /usr/share/bunkerweb/core
-COPY src/common/gen /usr/share/bunkerweb/gen
 COPY src/common/helpers /usr/share/bunkerweb/helpers
-COPY src/common/settings.json /usr/share/bunkerweb/settings.json
 COPY src/common/utils /usr/share/bunkerweb/utils
-COPY src/scheduler /usr/share/bunkerweb/scheduler
 COPY src/VERSION /usr/share/bunkerweb/VERSION
+
+COPY src/scheduler /usr/share/bunkerweb/scheduler
 
 FROM python:3.11.4-alpine
 
@@ -44,6 +35,8 @@ RUN umask 027
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
+RUN mkdir -p /etc/bunkerweb
+COPY  --chown=0:101 src/common/config.yaml /etc/bunkerweb/config.yaml
 
 # Add scheduler user, drop bwcli, install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache bash libgcc libstdc++ openssl libmagic && \
@@ -52,20 +45,15 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl libmagic && \
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler && \
   cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
   echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
-  mkdir -p /etc/nginx && \
   mkdir -p /var/tmp/bunkerweb && \
   mkdir -p /var/run/bunkerweb && \
-  mkdir -p /var/log/bunkerweb && \
-  mkdir -p /var/www && \
-  mkdir -p /etc/bunkerweb && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-  for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-  for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
-  chown -R root:scheduler /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
-  chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
+  mv /usr/share/bunkerweb/scheduler/scheduler.conf /etc/bunkerweb/ && \
+  chown -R root:scheduler /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /usr/bin/bwcli && \
+  chmod -R 770 /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb && \
   find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
-  chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/scheduler/entrypoint.sh /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/deps/python/bin/* /usr/bin/bwcli && \
+  chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/scheduler/*.py /usr/share/bunkerweb/scheduler/entrypoint.sh /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/deps/python/bin/* /usr/bin/bwcli && \
   chmod 660 /usr/share/bunkerweb/INTEGRATION && \
   chown root:scheduler /usr/share/bunkerweb/INTEGRATION
 

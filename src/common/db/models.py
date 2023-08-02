@@ -1,34 +1,28 @@
 #!/usr/bin/python3
 
-from os import sep
-from os.path import join
-from sys import path as sys_path
-
-deps_path = join(sep, "usr", "share", "bunkerweb", "deps", "python")
-
-if deps_path not in sys_path:
-    sys_path.append(deps_path)
-
+from pymysql import Timestamp
 from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
     Enum,
     ForeignKey,
-    Identity,
     Integer,
     LargeBinary,
     PrimaryKeyConstraint,
     String,
+    func,
 )
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
+
+Base = declarative_base()
 
 CONTEXTS_ENUM = Enum("global", "multisite", name="contexts_enum")
 SETTINGS_TYPES_ENUM = Enum(
     "password", "text", "check", "select", name="settings_types_enum"
 )
-METHODS_ENUM = Enum("ui", "scheduler", "autoconf", "manual", name="methods_enum")
+METHODS_ENUM = Enum("ui", "core", "autoconf", "manual", name="methods_enum")
 SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week", name="schedules_enum")
 CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "http",
@@ -50,7 +44,6 @@ INTEGRATIONS_ENUM = Enum(
     "Unknown",
     name="integrations_enum",
 )
-Base = declarative_base()
 
 
 class Plugins(Base):
@@ -108,15 +101,13 @@ class Settings(Base):
 
 class Global_values(Base):
     __tablename__ = "bw_global_values"
-    __table_args__ = (UniqueConstraint("setting_id", "suffix"),)
 
-    id = Column(String(64), primary_key=True)
     setting_id = Column(
         String(256),
         ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"),
-        nullable=False,
+        primary_key=True,
     )
-    value = Column(String(4096), nullable=False)
+    value = Column(String(4096), primary_key=True)
     suffix = Column(Integer, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -142,7 +133,7 @@ class Services_settings(Base):
     __tablename__ = "bw_services_settings"
     __table_args__ = (UniqueConstraint("service_id", "setting_id", "suffix"),)
 
-    id = Column(String(64), primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     service_id = Column(
         String(64),
         ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"),
@@ -173,11 +164,10 @@ class Jobs(Base):
     file_name = Column(String(256), nullable=False)
     every = Column(SCHEDULES_ENUM, nullable=False)
     reload = Column(Boolean, default=False, nullable=False)
-    success = Column(Boolean, nullable=True)
-    last_run = Column(DateTime, nullable=True)
 
     plugin = relationship("Plugins", back_populates="jobs")
     cache = relationship("Jobs_cache", back_populates="job", cascade="all")
+    runs = relationship("Jobs_runs", back_populates="job", cascade="all")
 
 
 class Plugin_pages(Base):
@@ -217,11 +207,25 @@ class Jobs_cache(Base):
         nullable=False,
     )
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
-    last_update = Column(DateTime, nullable=True)
+    last_update = Column(DateTime(timezone=True), nullable=True, onupdate=func.now())
     checksum = Column(String(128), nullable=True)
 
     job = relationship("Jobs", back_populates="cache")
     service = relationship("Services", back_populates="jobs_cache")
+
+
+class Jobs_runs(Base):
+    __tablename__ = "bw_jobs_runs"
+
+    id = Column(DateTime(timezone=True), primary_key=True, server_default=func.now())
+    job_name = Column(
+        String(128),
+        ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"),
+        nullable=False,
+    )
+    success = Column(Boolean, nullable=True, default=False)
+
+    job = relationship("Jobs", back_populates="runs")
 
 
 class Custom_configs(Base):
