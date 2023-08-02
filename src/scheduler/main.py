@@ -664,6 +664,7 @@ if __name__ == "__main__":
                 if changes["instances_changed"]:
                     logger.info("Instances changed, generating ...")
                     INSTANCES_NEED_GENERATION = True
+                    NEED_RELOAD = True
 
             FIRST_RUN = False
 
