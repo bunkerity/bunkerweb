@@ -30,7 +30,7 @@ for deps_path in [
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
-
+from API import API  # type: ignore
 
 class JobScheduler(ApiCaller):
     def __init__(
@@ -69,7 +69,7 @@ class JobScheduler(ApiCaller):
         super().auto_setup(bw_integration=self.__integration)
 
     def update_instances(self):
-        super().apis(self.__get_apis())
+        super(JobScheduler, type(self)).apis.fset(self, self.__get_apis())
 
     def __get_apis(self):
         apis = []

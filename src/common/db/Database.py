@@ -92,6 +92,7 @@ class Database:
             self.__sql_engine = create_engine(
                 sqlalchemy_string,
                 future=True,
+                pool_pre_ping=True
             )
         except ArgumentError:
             self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
@@ -135,6 +136,7 @@ class Database:
                     self.__sql_engine = create_engine(
                         sqlalchemy_string,
                         future=True,
+                        pool_pre_ping=True
                     )
                 if "Unknown table" in str(e):
                     not_connected = False
