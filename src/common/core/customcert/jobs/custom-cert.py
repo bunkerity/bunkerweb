@@ -111,6 +111,7 @@ try:
         db = Database(
             logger,
             sqlalchemy_string=getenv("DATABASE_URI", None),
+            pool=False
         )
 
         cert_path = getenv("CUSTOM_SSL_CERT", "")
@@ -142,6 +143,7 @@ try:
                 db = Database(
                     logger,
                     sqlalchemy_string=getenv("DATABASE_URI", None),
+                    pool=False
                 )
 
             cert_path = getenv(f"{first_server}_CUSTOM_SSL_CERT", "")

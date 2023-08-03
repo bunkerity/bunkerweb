@@ -67,6 +67,7 @@ try:
         db = Database(
             logger,
             sqlalchemy_string=getenv("DATABASE_URI", None),
+            pool=False
         )
         lock = Lock()
 

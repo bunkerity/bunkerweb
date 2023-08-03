@@ -50,6 +50,7 @@ from sqlalchemy.exc import (
     SQLAlchemyError,
 )
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 install_as_MySQLdb()
 
@@ -61,6 +62,7 @@ class Database:
         sqlalchemy_string: Optional[str] = None,
         *,
         ui: bool = False,
+        pool: bool = True
     ) -> None:
         """Initialize the database"""
         self.__logger = logger
@@ -92,6 +94,7 @@ class Database:
             self.__sql_engine = create_engine(
                 sqlalchemy_string,
                 future=True,
+                poolclass=None if pool else NullPool,
                 pool_pre_ping=True
             )
         except ArgumentError:
@@ -136,6 +139,7 @@ class Database:
                     self.__sql_engine = create_engine(
                         sqlalchemy_string,
                         future=True,
+                        poolclass=None if pool else NullPool,
                         pool_pre_ping=True
                     )
                 if "Unknown table" in str(e):
