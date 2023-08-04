@@ -87,6 +87,23 @@ try:
         parents=True, exist_ok=True
     )
 
+    # Get env vars
+    bw_integration = "Linux"
+    integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
+    os_release_path = Path(sep, "etc", "os-release")
+    if getenv("KUBERNETES_MODE", "no") == "yes":
+        bw_integration = "Kubernetes"
+    elif getenv("SWARM_MODE", "no") == "yes":
+        bw_integration = "Swarm"
+    elif getenv("AUTOCONF_MODE", "no") == "yes":
+        bw_integration = "Autoconf"
+    elif integration_path.is_file():
+        bw_integration = integration_path.read_text(encoding="utf-8").strip()
+    elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
+        encoding="utf-8"
+    ):
+        bw_integration + "Docker"
+
     # Extract letsencrypt folder if it exists in db
     db = Database(
         logger,
@@ -95,7 +112,7 @@ try:
     )
 
     tgz = get_file_in_db("folder.tgz", db)
-    if tgz:
+    if tgz and bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
         # Delete folder if needed
         if letsencrypt_path.exists():
             rmtree(str(letsencrypt_path), ignore_errors=True)
