@@ -39,14 +39,14 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
   rm -rf /tmp/req
 
 # Compile and install dependencies
-RUN dnf install -y readline-devel python39-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel --skip-broken && \
-  pip3.9 install --no-cache-dir --upgrade pip && \
-  pip3.9 install --no-cache-dir --upgrade pip-tools wheel setuptools && \
+RUN dnf install -y --setopt=install_weak_deps=False readline-devel python39 brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel --skip-broken && \
+  pip install --no-cache-dir --upgrade pip && \
+  pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
   chmod +x /tmp/bunkerweb/deps/install.sh && \
   bash /tmp/bunkerweb/deps/install.sh && \
   mkdir /usr/share/bunkerweb/deps/python && \
   export MAKEFLAGS="-j$(nproc)" && \
-  pip3.9 install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
+  pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
   if [ ! -f /usr/share/bunkerweb/deps/python/zope/__init__.py ] ; then touch /usr/share/bunkerweb/deps/python/zope/__init__.py ; fi
 
 # Copy BW files
