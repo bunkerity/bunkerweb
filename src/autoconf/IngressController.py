@@ -13,7 +13,7 @@ from Controller import Controller
 class IngressController(Controller):
     def __init__(self):
         self.__internal_lock = Lock()
-        super().__init__("kubernetes", self.__internal_lock)
+        super().__init__("kubernetes")
         config.load_incluster_config()
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
@@ -31,7 +31,7 @@ class IngressController(Controller):
     def _to_instances(self, controller_instance) -> List[dict]:
         instance = {}
         instance["name"] = controller_instance.metadata.name
-        instance["hostname"] = controller_instance.status.pod_ip
+        instance["hostname"] = controller_instance.status.pod_ip or controller_instance.metadata.name
         health = False
         if controller_instance.status.conditions:
             for condition in controller_instance.status.conditions:

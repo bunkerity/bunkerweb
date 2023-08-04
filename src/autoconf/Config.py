@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 from os import getenv
-from threading import Lock
 from time import sleep
 from typing import Optional
 
@@ -11,9 +10,8 @@ from logger import setup_logger  # type: ignore
 
 
 class Config(ConfigCaller):
-    def __init__(self, lock: Optional[Lock] = None):
+    def __init__(self):
         super().__init__()
-        self.__lock = lock
         self.__logger = setup_logger("Config", getenv("LOG_LEVEL", "INFO"))
         self.__instances = []
         self.__services = []
@@ -80,9 +78,6 @@ class Config(ConfigCaller):
             )
             sleep(5)
 
-        if self.__lock:
-            self.__lock.acquire()
-
         # update instances in database
         err = self._db.update_instances(self.__instances)
         if err:
@@ -103,8 +98,5 @@ class Config(ConfigCaller):
             self.__logger.error(
                 f"Can't save autoconf custom configs in database: {err}, custom configs may not work as expected",
             )
-
-        if self.__lock:
-            self.__lock.release()
 
         return success

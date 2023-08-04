@@ -2,7 +2,6 @@
 
 from abc import ABC, abstractmethod
 from os import getenv
-from threading import Lock
 from time import sleep
 from typing import Literal, Optional, Union
 
@@ -15,9 +14,8 @@ class Controller(Config):
     def __init__(
         self,
         ctrl_type: Union[Literal["docker"], Literal["swarm"], Literal["kubernetes"]],
-        lock: Optional[Lock] = None,
     ):
-        super().__init__(lock)
+        super().__init__()
         self._type = ctrl_type
         self._instances = []
         self._services = []
