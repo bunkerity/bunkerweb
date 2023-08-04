@@ -102,7 +102,7 @@ try:
     elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
         encoding="utf-8"
     ):
-        bw_integration + "Docker"
+        bw_integration = "Docker"
 
     # Extract letsencrypt folder if it exists in db
     db = Database(
@@ -112,7 +112,7 @@ try:
     )
 
     tgz = get_file_in_db("folder.tgz", db)
-    if tgz and bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
+    if tgz:
         # Delete folder if needed
         if letsencrypt_path.exists():
             rmtree(str(letsencrypt_path), ignore_errors=True)

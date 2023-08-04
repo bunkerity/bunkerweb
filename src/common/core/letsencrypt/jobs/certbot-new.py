@@ -120,7 +120,7 @@ try:
     )
 
     tgz = get_file_in_db("folder.tgz", db, job_name="certbot-renew")
-    if tgz and bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
+    if tgz:
         # Delete folder if needed
         if letsencrypt_path.exists():
             rmtree(str(letsencrypt_path), ignore_errors=True)
