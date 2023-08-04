@@ -16,6 +16,9 @@
 - [BUGFIX] Custom configurations from env were not being deleted properly
 - [BUGFIX] Missing concepts image not displayed in the documentation
 - [BUGFIX] Scheduler not picking up new instances IPs in autoconf modes
+- [BUGFIX] Autoconf deadlock in k8s
+- [BUGFIX] Missing HTTP and HTTPS ports for temp nginx
+- [BUGFIX] Infinite loop when sessions is not valid
 - [PERFORMANCE] Reduce CPU and RAM usage of scheduler
 - [PERFORMANCE] Cache ngx.ctx instead of loading it each time
 - [PERFORMANCE] Use per-worker LRU cache for common RO LUA values
@@ -25,12 +28,14 @@
 - [FEATURE] Add the possibility to download the different lists and plugins from a local file (like the blacklist)
 - [FEATURE] External plugins can now be downloaded from a tar.gz and tar.xz file as well as zip
 - [FEATURE] Add X-Forwarded-Prefix header when using reverse proxy
-- [DOCUMENTATION] Add timezone information to the doc
+- [FEATURE] Add REDIRECT_TO_STATUS_CODE to choose status code 301 or 302 when redirecting
+- [DOCUMENTATION] Add timezone information
+- [DOCUMENTATION] Add timezone informat
 - [MISC] Add LOG_LEVEL=warning for docker socket proxy in docs, examples and boilerplates
 - [MISC] Temp remove VMWare provider for Vagrant integration
 - [MISC] Remove X-Script-Name header and ABSOLUTE_URI variable when using UI
 - [MISC] Move logs to /var/log/bunkerweb folder
-
+- [MISC] Reduce "Got an error reading communication packets" warnings in mariadb/mysql
 
 ## v1.5.0 - 2023/05/23
 
