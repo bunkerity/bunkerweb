@@ -177,6 +177,7 @@ try:
     db = Database(
         logger,
         sqlalchemy_string=getenv("DATABASE_URI"),
+        pool=False
     )
     lock = Lock()
 

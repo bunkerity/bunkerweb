@@ -30,7 +30,7 @@ for deps_path in [
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
-
+from API import API  # type: ignore
 
 class JobScheduler(ApiCaller):
     def __init__(
@@ -67,6 +67,23 @@ class JobScheduler(ApiCaller):
 
     def auto_setup(self):
         super().auto_setup(bw_integration=self.__integration)
+
+    def update_instances(self):
+        super(JobScheduler, type(self)).apis.fset(self, self.__get_apis())
+
+    def __get_apis(self):
+        apis = []
+        try:
+            with self.__thread_lock:
+                instances = self.__db.get_instances()
+            for instance in instances:
+                api = API(f"http://{instance['hostname']}:{instance['port']}", host=instance["server_name"])
+                apis.append(api)
+        except:
+            self.__logger.warning(
+                f"Exception while getting jobs instances : {format_exc()}",
+            )
+        return apis
 
     def update_jobs(self):
         self.__jobs = self.__get_jobs()

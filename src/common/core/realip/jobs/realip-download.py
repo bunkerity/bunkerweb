@@ -76,6 +76,7 @@ try:
     db = Database(
         logger,
         sqlalchemy_string=getenv("DATABASE_URI", None),
+        pool=False
     )
 
     # Don't go further if the cache is fresh

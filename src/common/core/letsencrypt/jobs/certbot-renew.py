@@ -91,6 +91,7 @@ try:
     db = Database(
         logger,
         sqlalchemy_string=getenv("DATABASE_URI", None),
+        pool=False
     )
 
     tgz = get_file_in_db("folder.tgz", db)

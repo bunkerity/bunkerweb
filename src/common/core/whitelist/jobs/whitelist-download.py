@@ -80,6 +80,7 @@ try:
     db = Database(
         logger,
         sqlalchemy_string=getenv("DATABASE_URI", None),
+        pool=False
     )
 
     # Create directories if they don't exist

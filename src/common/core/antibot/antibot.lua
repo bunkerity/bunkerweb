@@ -48,7 +48,7 @@ function antibot:header()
 	end
 
 	local header = "Content-Security-Policy"
-	if utils.get_variable("CONTENT_SECURITY_POLICY_REPORT_ONLY", true) == "yes" then
+	if self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes" then
 		header = header .. "-Report-Only"
 	end
 

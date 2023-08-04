@@ -50,6 +50,7 @@ from sqlalchemy.exc import (
     SQLAlchemyError,
 )
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 install_as_MySQLdb()
 
@@ -61,6 +62,7 @@ class Database:
         sqlalchemy_string: Optional[str] = None,
         *,
         ui: bool = False,
+        pool: bool = True
     ) -> None:
         """Initialize the database"""
         self.__logger = logger
@@ -92,6 +94,8 @@ class Database:
             self.__sql_engine = create_engine(
                 sqlalchemy_string,
                 future=True,
+                poolclass=None if pool else NullPool,
+                pool_pre_ping=True
             )
         except ArgumentError:
             self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
@@ -135,6 +139,8 @@ class Database:
                     self.__sql_engine = create_engine(
                         sqlalchemy_string,
                         future=True,
+                        poolclass=None if pool else NullPool,
+                        pool_pre_ping=True
                     )
                 if "Unknown table" in str(e):
                     not_connected = False
@@ -296,7 +302,7 @@ class Database:
         return ""
 
     def check_changes(self) -> Union[Dict[str, bool], bool, str]:
-        """Check if either the config, the custom configs or plugins have changed inside the database"""
+        """Check if either the config, the custom configs, plugins or instances have changed inside the database"""
         with self.__db_session() as session:
             try:
                 metadata = (
@@ -305,6 +311,7 @@ class Database:
                         Metadata.custom_configs_changed,
                         Metadata.external_plugins_changed,
                         Metadata.config_changed,
+                        Metadata.instances_changed
                     )
                     .filter_by(id=1)
                     .first()
@@ -316,13 +323,14 @@ class Database:
                     external_plugins_changed=metadata is not None
                     and metadata.external_plugins_changed,
                     config_changed=metadata is not None and metadata.config_changed,
+                    instances_changed=metadata is not None and metadata.instances_changed
                 )
             except BaseException:
                 return format_exc()
 
     def checked_changes(self, changes: Optional[List[str]] = None) -> str:
-        """Set that the config, the custom configs and the plugins didn't change"""
-        changes = changes or ["config", "custom_configs", "external_plugins"]
+        """Set that the config, the custom configs, the plugins and instances didn't change"""
+        changes = changes or ["config", "custom_configs", "external_plugins", "instances"]
         with self.__db_session() as session:
             try:
                 metadata = session.query(Metadata).get(1)
@@ -336,6 +344,8 @@ class Database:
                     metadata.custom_configs_changed = False
                 if "external_plugins" in changes:
                     metadata.external_plugins_changed = False
+                if "instances" in changes:
+                    metadata.instances_changed = False
                 session.commit()
             except BaseException:
                 return format_exc()
@@ -1738,6 +1748,11 @@ class Database:
                         server_name=instance["env"].get("API_SERVER_NAME", "bwapi"),
                     )
                 )
+
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.instances_changed = True
 
             try:
                 session.add_all(to_put)

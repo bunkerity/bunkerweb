@@ -134,6 +134,7 @@ try:
                 db = Database(
                     logger,
                     sqlalchemy_string=getenv("DATABASE_URI", None),
+                    pool=False
                 )
 
             ret, ret_status = generate_cert(
@@ -155,6 +156,7 @@ try:
         db = Database(
             logger,
             sqlalchemy_string=getenv("DATABASE_URI", None),
+            pool=False
         )
 
         first_server = getenv("SERVER_NAME", "").split(" ")[0]
