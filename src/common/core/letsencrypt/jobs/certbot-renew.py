@@ -149,7 +149,7 @@ try:
                 logger.error(
                     f"Certificates renewal for {first_server} failed",
                 )
-    elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes" and not getenv("SERVER_NAME", ""):
+    elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes" and getenv("SERVER_NAME", ""):
         first_server = getenv("SERVER_NAME", "").split(" ")[0]
         if letsencrypt_path.joinpath("etc", "live", first_server, "cert.pem").exists():
             if renew(first_server, letsencrypt_path) != 0:

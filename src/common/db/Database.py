@@ -659,7 +659,7 @@ class Database:
                             )
                         )
 
-                    config.pop("SERVER_NAME", None)
+                    #config.pop("SERVER_NAME", None)
 
                     for key, value in config.items():
                         suffix = 0
@@ -921,12 +921,13 @@ class Database:
                             }
                         )
 
-            servers = " ".join(service.id for service in session.query(Services).all())
-            config["SERVER_NAME"] = (
-                servers
-                if methods is False
-                else {"value": servers, "global": True, "method": "default"}
-            )
+            if config["MULTISITE"] == "yes":
+                servers = " ".join(service.id for service in session.query(Services).all())
+                config["SERVER_NAME"] = (
+                    servers
+                    if methods is False
+                    else {"value": servers, "global": True, "method": "default"}
+                )
 
             return config
 

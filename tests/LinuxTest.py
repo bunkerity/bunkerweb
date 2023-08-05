@@ -164,7 +164,7 @@ class LinuxTest(Test):
     def _debug_fail(self):
         self.docker_exec(
             self.__distro,
-            "cat /var/log/nginx/access.log ; cat /var/log/nginx/error.log ; journalctl -u bunkerweb --no-pager",
+            "cat /var/log/bunkerweb/access.log ; cat /var/log/bunkerweb/error.log ; journalctl -u bunkerweb --no-pager",
         )
 
     @staticmethod

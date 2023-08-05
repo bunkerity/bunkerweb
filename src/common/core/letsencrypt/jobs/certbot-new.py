@@ -3,12 +3,13 @@
 from os import _exit, environ, getenv, sep
 from os.path import join
 from pathlib import Path
-from subprocess import DEVNULL, STDOUT, run
+from subprocess import DEVNULL, STDOUT, run, PIPE
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from tarfile import open as tar_open
 from io import BytesIO
 from shutil import rmtree
+from re import findall, MULTILINE
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
@@ -54,15 +55,43 @@ def certbot_new(
             "--email",
             email,
             "--agree-tos",
+            "--expand"
         ]
         + (["--staging"] if getenv("USE_LETS_ENCRYPT_STAGING", "no") == "yes" else []),
         stdin=DEVNULL,
         stderr=STDOUT,
         env=environ.copy()
         | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
-        check=True,
     ).returncode
 
+def certbot_check_domains(domains: list[str], letsencrypt_path: Path) -> int:
+    proc = run(
+        [
+            join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot"),
+            "certificates",
+            "--config-dir",
+            str(letsencrypt_path.joinpath("etc")),
+            "--work-dir",
+            join(sep, "var", "lib", "bunkerweb", "letsencrypt"),
+            "--logs-dir",
+            join(sep, "var", "log", "bunkerweb"),
+        ],
+        stdin=DEVNULL,
+        stdout=PIPE,
+        stderr=STDOUT,
+        text=True,
+        env=environ.copy()
+    )
+    if proc.returncode != 0:
+        logger.error(f"Error while checking certificates :\n{proc.stdout}")
+        return 2
+    first_needed_domain = domains[0]
+    needed_domains = set(domains)
+    for raw_domains in findall(r"^    Domains: (.*)$", proc.stdout, MULTILINE):
+        current_domains = raw_domains.split(" ")
+        if current_domains[0] == first_needed_domain and set(current_domains) == needed_domains:
+            return 1
+    return 0
 
 status = 0
 
@@ -133,7 +162,7 @@ try:
         logger.info("No Let's Encrypt data found in db cache")
 
     # Multisite case
-    if getenv("MULTISITE", "no") == "yes":
+    if getenv("MULTISITE", "no") == "yes" and getenv("SERVER_NAME"):
         for first_server in getenv("SERVER_NAME", "").split(" "):
             if (
                 not first_server
@@ -145,11 +174,8 @@ try:
             ):
                 continue
 
-            domains = getenv(f"{first_server}_SERVER_NAME", first_server).replace(
-                " ", ","
-            )
-
-            if letsencrypt_path.joinpath(first_server, "cert.pem").exists():
+            domains = getenv(f"{first_server}_SERVER_NAME", first_server)
+            if certbot_check_domains(domains.split(" "), letsencrypt_path) == 1:
                 logger.info(
                     f"Certificates already exists for domain(s) {domains}",
                 )
@@ -166,13 +192,13 @@ try:
                 f"Asking certificates for domains : {domains} (email = {real_email}) ...",
             )
             if (
-                certbot_new(domains, real_email, letsencrypt_path, letsencrypt_job_path)
+                certbot_new(domains.replace(" ", ","), real_email, letsencrypt_path, letsencrypt_job_path)
                 != 0
             ):
                 logger.error(
                     f"Certificate generation failed for domain(s) {domains} ...",
                 )
-                _exit(2)
+                continue
             else:
                 status = 1
                 logger.info(
@@ -182,10 +208,12 @@ try:
     # Singlesite case
     elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes" and getenv("SERVER_NAME"):
         first_server = getenv("SERVER_NAME", "").split(" ")[0]
-        domains = getenv("SERVER_NAME", "").replace(" ", ",")
+        domains = getenv("SERVER_NAME", "")
 
-        if letsencrypt_path.joinpath("etc", "live", first_server, "cert.pem").exists():
-            logger.info(f"Certificates already exists for domain(s) {domains}")
+        if certbot_check_domains(domains.split(" "), letsencrypt_path) == 1:
+            logger.info(
+                f"Certificates already exists for domain(s) {domains}",
+            )
         else:
             real_email = getenv("EMAIL_LETS_ENCRYPT", f"contact@{first_server}")
             if not real_email:
@@ -195,7 +223,7 @@ try:
                 f"Asking certificates for domain(s) : {domains} (email = {real_email}) ...",
             )
             if (
-                certbot_new(domains, real_email, letsencrypt_path, letsencrypt_job_path)
+                certbot_new(domains.replace(" ", ","), real_email, letsencrypt_path, letsencrypt_job_path)
                 != 0
             ):
                 status = 2
