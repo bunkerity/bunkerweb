@@ -53,16 +53,18 @@ RUN apk add --no-cache bash && \
     mkdir -p /etc/bunkerweb && \
     mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
     mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-    mkdir -p /var/log/nginx/ && touch /var/log/nginx/ui.log && \
+    mkdir -p /var/log/bunkerweb/ && \
     for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
     for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
     chown -R root:ui /data && \
     chmod -R 770 /data && \
-    chown -R root:ui /usr/share/bunkerweb/INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/nginx && \
-    chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/nginx/ui.log && \
+    chown -R root:ui /usr/share/bunkerweb/INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
+    chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
     chmod 750 /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/ui/*.py /usr/share/bunkerweb/ui/src/*.py /usr/share/bunkerweb/deps/python/bin/* /usr/share/bunkerweb/helpers/*.sh && \
     chmod 660 /usr/share/bunkerweb/INTEGRATION && \
-    chown root:ui /usr/share/bunkerweb/INTEGRATION
+    chown root:ui /usr/share/bunkerweb/INTEGRATION && \
+    ln -s /proc/1/fd/1 /var/log/bunkerweb/ui-access.log && \
+    ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
 
 # Fix CVEs
 RUN apk add "libcrypto3>=3.1.1-r2" "libssl3>=3.1.1-r2"

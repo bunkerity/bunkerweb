@@ -19,6 +19,7 @@
 - [BUGFIX] Autoconf deadlock in k8s
 - [BUGFIX] Missing HTTP and HTTPS ports for temp nginx
 - [BUGFIX] Infinite loop when sessions is not valid
+- [BUGFIX] Missing valid LE certificates in edge cases
 - [PERFORMANCE] Reduce CPU and RAM usage of scheduler
 - [PERFORMANCE] Cache ngx.ctx instead of loading it each time
 - [PERFORMANCE] Use per-worker LRU cache for common RO LUA values

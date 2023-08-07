@@ -85,7 +85,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - USE_GZIP=yes
           - www.example.com_USE_UI=yes
           - www.example.com_USE_REVERSE_PROXY=yes
-          - www.example.com_REVERSE_PROXY_URL=/changeme/
+          - www.example.com_REVERSE_PROXY_URL=/changeme
           - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
           - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
         networks:
@@ -270,7 +270,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - "bunkerweb.SERVER_NAME=www.example.com"
           - "bunkerweb.USE_UI=yes"
           - "bunkerweb.USE_REVERSE_PROXY=yes"
-          - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
+          - "bunkerweb.REVERSE_PROXY_URL=/changeme"
           - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
           - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
 
@@ -423,7 +423,7 @@ Because the web UI is a web application, the recommended installation procedure 
             - "bunkerweb.SERVER_NAME=www.example.com"
             - "bunkerweb.USE_UI=yes"
             - "bunkerweb.USE_REVERSE_PROXY=yes"
-            - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
+            - "bunkerweb.REVERSE_PROXY_URL=/changeme"
             - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
             - "bunkerweb.REVERSE_PROXY_INTERCEPT_ERRORS=no"
             - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
@@ -786,7 +786,7 @@ Because the web UI is a web application, the recommended installation procedure 
         - host: www.example.com
           http:
             paths:
-              - path: /changeme/
+              - path: /changeme
                 pathType: Prefix
                 backend:
                   service:
@@ -831,7 +831,7 @@ Because the web UI is a web application, the recommended installation procedure 
     MULTISITE=yes
     www.example.com_USE_UI=yes
     www.example.com_USE_REVERSE_PROXY=yes
-    www.example.com_REVERSE_PROXY_URL=/changeme/
+    www.example.com_REVERSE_PROXY_URL=/changeme
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     ```
@@ -863,7 +863,7 @@ Because the web UI is a web application, the recommended installation procedure 
     MULTISITE=yes
     www.example.com_USE_UI=yes
     www.example.com_USE_REVERSE_PROXY=yes
-    www.example.com_REVERSE_PROXY_URL=/changeme/
+    www.example.com_REVERSE_PROXY_URL=/changeme
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     ```
@@ -936,7 +936,7 @@ Because the web UI is a web application, the recommended installation procedure 
     MULTISITE=yes
     www.example.com_USE_UI=yes
     www.example.com_USE_REVERSE_PROXY=yes
-    www.example.com_REVERSE_PROXY_URL=/changeme/
+    www.example.com_REVERSE_PROXY_URL=/changeme
     www.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:7000
     www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     ```

@@ -82,7 +82,7 @@ services:
       - "bunkerweb.SERVER_NAME=www.example.com"
       - "bunkerweb.USE_UI=yes"
       - "bunkerweb.USE_REVERSE_PROXY=yes"
-      - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
+      - "bunkerweb.REVERSE_PROXY_URL=/changeme"
       - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
       - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
 
