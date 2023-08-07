@@ -85,8 +85,6 @@ from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from logging import getLogger
 
-# logger = setup_logger("UI", getenv("LOG_LEVEL", "INFO"))
-
 def stop_gunicorn():
     p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
     out, _ = p.communicate()

@@ -22,6 +22,11 @@ function stop_nginx() {
         nginx -s stop
         if [ $? -ne 0 ] ; then
             log "SYSTEMCTL" "❌" "Error while sending stop signal to nginx"
+            log "SYSTEMCTL" "ℹ️ " "Stopping nginx (force)..."
+            kill -TERM $(cat /var/run/bunkerweb/nginx.pid)
+            if [ $? -ne 0 ] ; then
+                log "SYSTEMCTL" "❌" "Error while sending term signal to nginx"
+            fi
         fi
     fi
     count=0
@@ -113,7 +118,7 @@ function start() {
 
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting temp nginx ..."
-    nginx
+    nginx -e /var/log/bunkerweb/error.log
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while executing temp nginx"
         exit 1
