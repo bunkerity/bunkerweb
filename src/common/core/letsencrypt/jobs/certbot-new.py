@@ -81,6 +81,7 @@ def certbot_check_domains(domains: list[str], letsencrypt_path: Path) -> int:
         stderr=STDOUT,
         text=True,
         env=environ.copy()
+        | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
     )
     if proc.returncode != 0:
         logger.error(f"Error while checking certificates :\n{proc.stdout}")
