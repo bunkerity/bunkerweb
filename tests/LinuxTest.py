@@ -9,7 +9,7 @@ from logger import log
 
 class LinuxTest(Test):
     def __init__(self, name, timeout, tests, distro):
-        super().__init__(name, "linux", timeout, tests)
+        super().__init__(name, "linux", timeout, tests, delay=20)
         self._domains = {
             r"www\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
             r"auth\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",

@@ -147,6 +147,7 @@ do
         sed -i 's@GLOBAL_USE_REVERSE_PROXY@SERVICE_USE_REVERSE_PROXY@' docker-compose.test.yml
         sed -i 's@GLOBAL_REVERSE_PROXY_HOST@SERVICE_REVERSE_PROXY_HOST@' docker-compose.test.yml
         sed -i 's@GLOBAL_REVERSE_PROXY_URL@SERVICE_REVERSE_PROXY_URL@' docker-compose.test.yml
+        sed -i 's@GLOBAL_SERVER_NAME@SERVICE_SERVER_NAME@' docker-compose.test.yml
     elif [ "$test" = "mariadb" ] ; then
         echo "💾 Running tests with MariaDB database ..."
         echo "ℹ️ Keeping the MULTISITE variable to yes and multisite settings ..."
