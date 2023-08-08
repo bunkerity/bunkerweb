@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.5.1 - 
+## v1.5.1 - 2023/08/08
 
 - [BUGFIX] New version checker in logs displays "404 not found"
 - [BUGFIX] New version checker in UI
@@ -20,6 +20,8 @@
 - [BUGFIX] Missing HTTP and HTTPS ports for temp nginx
 - [BUGFIX] Infinite loop when sessions is not valid
 - [BUGFIX] Missing valid LE certificates in edge cases
+- [BUGFIX] Wrong service namespace in k8s
+- [BUGFIX] DNS_RESOLVERS regex not accepting hostnames
 - [PERFORMANCE] Reduce CPU and RAM usage of scheduler
 - [PERFORMANCE] Cache ngx.ctx instead of loading it each time
 - [PERFORMANCE] Use per-worker LRU cache for common RO LUA values
