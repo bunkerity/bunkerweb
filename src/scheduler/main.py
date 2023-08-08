@@ -175,6 +175,25 @@ def dict_to_frozenset(d):
         return frozenset((k, dict_to_frozenset(v)) for k, v in d.items())
     return d
 
+def api_to_instance(api):
+    hostname_port = api.endpoint.replace("http://", "").replace("https://", "").replace("/", "").split(":")
+    return {
+        "hostname": hostname_port[0],
+        "env": {
+            "API_HTTP_PORT": int(hostname_port[1]),
+            "API_SERVER_NAME": api.host
+        }
+    }
+
+def update_docker_instances(sc, db, force=False):
+    current_apis = set(sc.apis)
+    sc.auto_setup()
+    if force or current_apis != set(sc.apis):
+        new_instances = []
+        for api in sc.apis:
+            new_instances.append(api_to_instance(api))
+        return db.update_instances(new_instances)
+    return ""
 
 if __name__ == "__main__":
     try:
@@ -290,9 +309,15 @@ if __name__ == "__main__":
         # Instantiate scheduler
         SCHEDULER = JobScheduler(env.copy() | environ.copy(), logger, INTEGRATION)
 
-        if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf", "Docker"):
+        if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
             # Automatically setup the scheduler apis
             SCHEDULER.auto_setup()
+        elif INTEGRATION == "Docker":
+            err = update_docker_instances(SCHEDULER, db, force=True)
+            if err:
+                logger.error(
+                    f"Couldn't save instances to database: {err}",
+                )
 
         scheduler_first_start = db.is_scheduler_first_start()
 
