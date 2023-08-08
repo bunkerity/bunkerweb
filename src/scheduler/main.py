@@ -47,6 +47,9 @@ SCHEDULER: Optional[JobScheduler] = None
 GENERATE = False
 INTEGRATION = "Linux"
 CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
+SCHEDULER_TMP_ENV_PATH = Path(sep, "var", "tmp", "bunkerweb", "scheduler.env")
+SCHEDULER_TMP_ENV_PATH.parent.mkdir(parents=True, exist_ok=True)
+SCHEDULER_TMP_ENV_PATH.touch()
 logger = setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
 
 
@@ -422,8 +425,8 @@ if __name__ == "__main__":
             external_plugin.pop("jobs", None)
             tmp_external_plugins.append(external_plugin)
 
-        changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {
-            hash(dict_to_frozenset(d)) for d in db_plugins
+        changes = {dict_to_frozenset(d) for d in tmp_external_plugins} != {
+            dict_to_frozenset(d) for d in db_plugins
         }
 
         if changes:
@@ -510,6 +513,10 @@ if __name__ == "__main__":
                 logger.info("All jobs in run_once() were successful")
 
             if GENERATE:
+                content = ""
+                for k, v in env.items():
+                    content += f"{k}={v}\n"
+                SCHEDULER_TMP_ENV_PATH.write_text(content)
                 # run the generator
                 proc = subprocess_run(
                     [
@@ -521,12 +528,13 @@ if __name__ == "__main__":
                         join(sep, "usr", "share", "bunkerweb", "confs"),
                         "--output",
                         join(sep, "etc", "nginx"),
-                    ]
-                    + (
-                        ["--variables", str(tmp_variables_path)]
-                        if args.variables and FIRST_RUN
-                        else []
-                    ),
+                        "--variables",
+                        (
+                            str(tmp_variables_path)
+                            if args.variables and FIRST_RUN
+                            else str(SCHEDULER_TMP_ENV_PATH)
+                        ),
+                    ],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -703,11 +711,9 @@ if __name__ == "__main__":
 
                 if CONFIGS_NEED_GENERATION:
                     CHANGES.append("custom_configs")
-                    Thread(
-                        target=generate_custom_configs,
-                        args=(db.get_custom_configs(),),
-                        kwargs={"original_path": configs_path},
-                    ).start()
+                    generate_custom_configs(
+                        db.get_custom_configs(), original_path=configs_path
+                    )
 
                 if PLUGINS_NEED_GENERATION:
                     CHANGES.append("external_plugins")
@@ -720,6 +726,10 @@ if __name__ == "__main__":
                 if CONFIG_NEED_GENERATION:
                     CHANGES.append("config")
                     env = db.get_config()
+                    content = ""
+                    for k, v in env.items():
+                        content += f"{k}={v}\n"
+                    SCHEDULER_TMP_ENV_PATH.write_text(content)
 
                 if INSTANCES_NEED_GENERATION:
                     CHANGES.append("instances")

@@ -879,51 +879,52 @@ class Database:
                 if setting.context == "multisite":
                     multisite.append(setting.id)
 
-            for service in session.query(Services).with_entities(Services.id).all():
-                checked_settings = []
-                for key, value in deepcopy(config).items():
-                    original_key = key
-                    if self.suffix_rx.search(key):
-                        key = key[: -len(str(key.split("_")[-1])) - 1]
+            if config.get("MULTISITE", "no") == "yes":
+                for service in session.query(Services).with_entities(Services.id).all():
+                    checked_settings = []
+                    for key, value in deepcopy(config).items():
+                        original_key = key
+                        if self.suffix_rx.search(key):
+                            key = key[: -len(str(key.split("_")[-1])) - 1]
 
-                    if key not in multisite:
-                        continue
-                    elif f"{service.id}_{original_key}" not in config:
-                        config[f"{service.id}_{original_key}"] = value
+                        if key not in multisite:
+                            continue
+                        elif f"{service.id}_{original_key}" not in config:
+                            config[f"{service.id}_{original_key}"] = value
 
-                    if original_key not in checked_settings:
-                        checked_settings.append(original_key)
-                    else:
-                        continue
+                        if original_key not in checked_settings:
+                            checked_settings.append(original_key)
+                        else:
+                            continue
 
-                    service_settings = (
-                        session.query(Services_settings)
-                        .with_entities(
-                            Services_settings.value,
-                            Services_settings.suffix,
-                            Services_settings.method,
-                        )
-                        .filter_by(service_id=service.id, setting_id=key)
-                        .all()
-                    )
-
-                    for service_setting in service_settings:
-                        config[
-                            f"{service.id}_{key}"
-                            + (
-                                f"_{service_setting.suffix}"
-                                if service_setting.suffix > 0
-                                else ""
+                        service_settings = (
+                            session.query(Services_settings)
+                            .with_entities(
+                                Services_settings.value,
+                                Services_settings.suffix,
+                                Services_settings.method,
                             )
-                        ] = (
-                            service_setting.value
-                            if methods is False
-                            else {
-                                "value": service_setting.value,
-                                "global": False,
-                                "method": service_setting.method,
-                            }
+                            .filter_by(service_id=service.id, setting_id=key)
+                            .all()
                         )
+
+                        for service_setting in service_settings:
+                            config[
+                                f"{service.id}_{key}"
+                                + (
+                                    f"_{service_setting.suffix}"
+                                    if service_setting.suffix > 0
+                                    else ""
+                                )
+                            ] = (
+                                service_setting.value
+                                if methods is False
+                                else {
+                                    "value": service_setting.value,
+                                    "global": False,
+                                    "method": service_setting.method,
+                                }
+                            )
 
             if config["MULTISITE"] == "yes":
                 servers = " ".join(
