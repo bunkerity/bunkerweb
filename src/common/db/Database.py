@@ -62,7 +62,7 @@ class Database:
         sqlalchemy_string: Optional[str] = None,
         *,
         ui: bool = False,
-        pool: bool = True
+        pool: bool = True,
     ) -> None:
         """Initialize the database"""
         self.__logger = logger
@@ -95,7 +95,7 @@ class Database:
                 sqlalchemy_string,
                 future=True,
                 poolclass=None if pool else NullPool,
-                pool_pre_ping=True
+                pool_pre_ping=True,
             )
         except ArgumentError:
             self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
@@ -140,7 +140,7 @@ class Database:
                         sqlalchemy_string,
                         future=True,
                         poolclass=None if pool else NullPool,
-                        pool_pre_ping=True
+                        pool_pre_ping=True,
                     )
                 if "Unknown table" in str(e):
                     not_connected = False
@@ -311,7 +311,7 @@ class Database:
                         Metadata.custom_configs_changed,
                         Metadata.external_plugins_changed,
                         Metadata.config_changed,
-                        Metadata.instances_changed
+                        Metadata.instances_changed,
                     )
                     .filter_by(id=1)
                     .first()
@@ -323,14 +323,20 @@ class Database:
                     external_plugins_changed=metadata is not None
                     and metadata.external_plugins_changed,
                     config_changed=metadata is not None and metadata.config_changed,
-                    instances_changed=metadata is not None and metadata.instances_changed
+                    instances_changed=metadata is not None
+                    and metadata.instances_changed,
                 )
             except BaseException:
                 return format_exc()
 
     def checked_changes(self, changes: Optional[List[str]] = None) -> str:
         """Set that the config, the custom configs, the plugins and instances didn't change"""
-        changes = changes or ["config", "custom_configs", "external_plugins", "instances"]
+        changes = changes or [
+            "config",
+            "custom_configs",
+            "external_plugins",
+            "instances",
+        ]
         with self.__db_session() as session:
             try:
                 metadata = session.query(Metadata).get(1)
@@ -659,8 +665,6 @@ class Database:
                             )
                         )
 
-                    #config.pop("SERVER_NAME", None)
-
                     for key, value in config.items():
                         suffix = 0
                         if self.suffix_rx.search(key):
@@ -922,7 +926,9 @@ class Database:
                         )
 
             if config["MULTISITE"] == "yes":
-                servers = " ".join(service.id for service in session.query(Services).all())
+                servers = " ".join(
+                    service.id for service in session.query(Services).all()
+                )
                 config["SERVER_NAME"] = (
                     servers
                     if methods is False

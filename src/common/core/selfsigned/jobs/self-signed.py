@@ -132,9 +132,7 @@ try:
 
             if not db:
                 db = Database(
-                    logger,
-                    sqlalchemy_string=getenv("DATABASE_URI", None),
-                    pool=False
+                    logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False
                 )
 
             ret, ret_status = generate_cert(
@@ -154,9 +152,7 @@ try:
     # Singlesite case
     elif getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes" and getenv("SERVER_NAME"):
         db = Database(
-            logger,
-            sqlalchemy_string=getenv("DATABASE_URI", None),
-            pool=False
+            logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False
         )
 
         first_server = getenv("SERVER_NAME", "").split(" ")[0]

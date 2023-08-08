@@ -31,7 +31,9 @@ class IngressController(Controller):
     def _to_instances(self, controller_instance) -> List[dict]:
         instance = {}
         instance["name"] = controller_instance.metadata.name
-        instance["hostname"] = controller_instance.status.pod_ip or controller_instance.metadata.name
+        instance["hostname"] = (
+            controller_instance.status.pod_ip or controller_instance.metadata.name
+        )
         health = False
         if controller_instance.status.conditions:
             for condition in controller_instance.status.conditions:

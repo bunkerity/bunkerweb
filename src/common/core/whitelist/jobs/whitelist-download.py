@@ -77,11 +77,7 @@ try:
         logger.info("Whitelist is not activated, skipping downloads...")
         _exit(0)
 
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-        pool=False
-    )
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
 
     # Create directories if they don't exist
     whitelist_path = Path(sep, "var", "cache", "bunkerweb", "whitelist")

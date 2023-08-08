@@ -109,9 +109,7 @@ try:
 
     if getenv("USE_CUSTOM_SSL", "no") == "yes" and getenv("SERVER_NAME", "") != "":
         db = Database(
-            logger,
-            sqlalchemy_string=getenv("DATABASE_URI", None),
-            pool=False
+            logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False
         )
 
         cert_path = getenv("CUSTOM_SSL_CERT", "")
@@ -141,9 +139,7 @@ try:
 
             if not db:
                 db = Database(
-                    logger,
-                    sqlalchemy_string=getenv("DATABASE_URI", None),
-                    pool=False
+                    logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False
                 )
 
             cert_path = getenv(f"{first_server}_CUSTOM_SSL_CERT", "")

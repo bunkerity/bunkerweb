@@ -112,7 +112,8 @@ class LinuxTest(Test):
             setup = f"{test}/setup-linux.sh"
             if isfile(setup):
                 proc = self.docker_exec(
-                    self.__distro, f"cd /opt/{self._name} && ./setup-linux.sh && chown -R nginx:nginx /etc/bunkerweb/configs"
+                    self.__distro,
+                    f"cd /opt/{self._name} && ./setup-linux.sh && chown -R nginx:nginx /etc/bunkerweb/configs",
                 )
                 if proc.returncode != 0:
                     raise Exception("docker exec setup failed (test)")

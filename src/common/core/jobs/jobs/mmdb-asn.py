@@ -68,11 +68,7 @@ try:
                 "Unable to check if asn.mmdb is the latest version, downloading it anyway..."
             )
 
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-        pool=False
-    )
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
 
     if dl_mmdb:
         # Don't go further if the cache is fresh

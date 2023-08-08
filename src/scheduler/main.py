@@ -175,15 +175,19 @@ def dict_to_frozenset(d):
         return frozenset((k, dict_to_frozenset(v)) for k, v in d.items())
     return d
 
+
 def api_to_instance(api):
-    hostname_port = api.endpoint.replace("http://", "").replace("https://", "").replace("/", "").split(":")
+    hostname_port = (
+        api.endpoint.replace("http://", "")
+        .replace("https://", "")
+        .replace("/", "")
+        .split(":")
+    )
     return {
         "hostname": hostname_port[0],
-        "env": {
-            "API_HTTP_PORT": int(hostname_port[1]),
-            "API_SERVER_NAME": api.host
-        }
+        "env": {"API_HTTP_PORT": int(hostname_port[1]), "API_SERVER_NAME": api.host},
     }
+
 
 def update_docker_instances(sc, db, force=False):
     current_apis = set(sc.apis)
@@ -194,6 +198,7 @@ def update_docker_instances(sc, db, force=False):
             new_instances.append(api_to_instance(api))
         return db.update_instances(new_instances)
     return ""
+
 
 if __name__ == "__main__":
     try:

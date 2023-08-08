@@ -58,11 +58,7 @@ try:
 
     # Get ID from cache
     bunkernet_id = None
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-        pool=False
-    )
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
     bunkernet_id = get_file_in_db("instance.id", db)
     if bunkernet_id:
         bunkernet_path.joinpath("bunkernet.id").write_bytes(bunkernet_id)

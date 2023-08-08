@@ -85,6 +85,7 @@ from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from logging import getLogger
 
+
 def stop_gunicorn():
     p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
     out, _ = p.communicate()
@@ -119,8 +120,14 @@ app = Flask(
     template_folder="templates",
 )
 PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
-app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
-gunicorn_logger = getLogger('gunicorn.error')
+app.wsgi_app = ReverseProxied(
+    app.wsgi_app,
+    x_for=PROXY_NUMBERS,
+    x_proto=PROXY_NUMBERS,
+    x_host=PROXY_NUMBERS,
+    x_prefix=PROXY_NUMBERS,
+)
+gunicorn_logger = getLogger("gunicorn.error")
 app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(gunicorn_logger.level)
 
@@ -1526,7 +1533,9 @@ def darkmode():
 def check_reloading():
     if not app.config["RELOADING"] or app.config["LAST_RELOAD"] + 60 < time():
         if app.config["RELOADING"]:
-            app.logger.warning("Reloading took too long, forcing the state to be reloaded")
+            app.logger.warning(
+                "Reloading took too long, forcing the state to be reloaded"
+            )
             flash("Forced the status to be reloaded", "error")
             app.config["RELOADING"] = False
 

@@ -32,6 +32,7 @@ from logger import setup_logger  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 from API import API  # type: ignore
 
+
 class JobScheduler(ApiCaller):
     def __init__(
         self,
@@ -77,7 +78,10 @@ class JobScheduler(ApiCaller):
             with self.__thread_lock:
                 instances = self.__db.get_instances()
             for instance in instances:
-                api = API(f"http://{instance['hostname']}:{instance['port']}", host=instance["server_name"])
+                api = API(
+                    f"http://{instance['hostname']}:{instance['port']}",
+                    host=instance["server_name"],
+                )
                 apis.append(api)
         except:
             self.__logger.warning(

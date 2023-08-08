@@ -61,11 +61,7 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
             tmp_config[splitted[0]] = splitted[1]
 
             if not db and splitted[0] == "DATABASE_URI":
-                db = Database(
-                    logger,
-                    sqlalchemy_string=splitted[1],
-                    pool=False
-                )
+                db = Database(logger, sqlalchemy_string=splitted[1], pool=False)
             elif splitted[0] == "API_HTTP_PORT":
                 api_http_port = splitted[1]
             elif splitted[0] == "API_SERVER_NAME":
@@ -268,9 +264,7 @@ if __name__ == "__main__":
 
                         if not db and splitted[0] == "DATABASE_URI":
                             db = Database(
-                                logger,
-                                sqlalchemy_string=splitted[1],
-                                pool=False
+                                logger, sqlalchemy_string=splitted[1], pool=False
                             )
                         elif splitted[0] == "API_HTTP_PORT":
                             api_http_port = splitted[1]

@@ -55,7 +55,7 @@ def certbot_new(
             "--email",
             email,
             "--agree-tos",
-            "--expand"
+            "--expand",
         ]
         + (["--staging"] if getenv("USE_LETS_ENCRYPT_STAGING", "no") == "yes" else []),
         stdin=DEVNULL,
@@ -63,6 +63,7 @@ def certbot_new(
         env=environ.copy()
         | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
     ).returncode
+
 
 def certbot_check_domains(domains: list[str], letsencrypt_path: Path) -> int:
     proc = run(
@@ -90,9 +91,13 @@ def certbot_check_domains(domains: list[str], letsencrypt_path: Path) -> int:
     needed_domains = set(domains)
     for raw_domains in findall(r"^    Domains: (.*)$", proc.stdout, MULTILINE):
         current_domains = raw_domains.split(" ")
-        if current_domains[0] == first_needed_domain and set(current_domains) == needed_domains:
+        if (
+            current_domains[0] == first_needed_domain
+            and set(current_domains) == needed_domains
+        ):
             return 1
     return 0
+
 
 status = 0
 
@@ -143,11 +148,7 @@ try:
         bw_integration = "Docker"
 
     # Extract letsencrypt folder if it exists in db
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-        pool=False
-    )
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
 
     tgz = get_file_in_db("folder.tgz", db, job_name="certbot-renew")
     if tgz:
@@ -193,7 +194,12 @@ try:
                 f"Asking certificates for domains : {domains} (email = {real_email}) ...",
             )
             if (
-                certbot_new(domains.replace(" ", ","), real_email, letsencrypt_path, letsencrypt_job_path)
+                certbot_new(
+                    domains.replace(" ", ","),
+                    real_email,
+                    letsencrypt_path,
+                    letsencrypt_job_path,
+                )
                 != 0
             ):
                 status = 2
@@ -225,7 +231,12 @@ try:
                 f"Asking certificates for domain(s) : {domains} (email = {real_email}) ...",
             )
             if (
-                certbot_new(domains.replace(" ", ","), real_email, letsencrypt_path, letsencrypt_job_path)
+                certbot_new(
+                    domains.replace(" ", ","),
+                    real_email,
+                    letsencrypt_path,
+                    letsencrypt_job_path,
+                )
                 != 0
             ):
                 status = 2
