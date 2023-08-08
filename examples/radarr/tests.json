@@ -1,6 +1,7 @@
 {
   "name": "radarr",
   "kinds": ["docker", "autoconf", "swarm"],
+  "delay": 120,
   "timeout": 60,
   "tests": [
     {
