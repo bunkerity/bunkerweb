@@ -49,9 +49,7 @@ try:
     # Cluster case
     if bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
         db = Database(
-            logger,
-            sqlalchemy_string=getenv("DATABASE_URI", None),
-            pool=False
+            logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False
         )
         lock = Lock()
         with lock:

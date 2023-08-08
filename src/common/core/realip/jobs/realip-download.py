@@ -73,11 +73,7 @@ try:
     tmp_realip_path = Path(sep, "var", "tmp", "bunkerweb", "realip")
     tmp_realip_path.mkdir(parents=True, exist_ok=True)
 
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-        pool=False
-    )
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
 
     # Don't go further if the cache is fresh
     if is_cached_file(realip_path.joinpath("combined.list"), "hour", db):

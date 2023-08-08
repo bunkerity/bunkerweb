@@ -174,11 +174,7 @@ try:
         external_plugins.append(plugin_file)
         external_plugins_ids.append(plugin_file["id"])
 
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI"),
-        pool=False
-    )
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
     lock = Lock()
 
     for plugin in db.get_plugins(external=True, with_data=True):
