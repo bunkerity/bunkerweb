@@ -28,7 +28,7 @@ RUN apt-get install gnupg2 ca-certificates wget -y && \
     apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~bullseye
 
 # Compile and install dependencies
-RUN apt install --no-install-recommends curl python3 python3-distutils bash libssl-dev git libpcre++-dev zlib1g-dev libxml2-dev libyajl-dev pkgconf libcurl4-openssl-dev libgeoip-dev liblmdb-dev apt-utils bash build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev -y && \
+RUN apt install --no-install-recommends curl python3 python3-distutils python3-dev bash libssl-dev git libpcre++-dev zlib1g-dev libxml2-dev libyajl-dev pkgconf libcurl4-openssl-dev libgeoip-dev liblmdb-dev apt-utils bash build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev -y && \
     curl https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py && \
     python3 /tmp/get-pip.py && \
     pip install --no-cache-dir --upgrade pip && \
