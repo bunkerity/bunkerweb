@@ -21,7 +21,7 @@ from functools import partial
 from os import _exit, cpu_count, environ, listdir, sep, walk
 from os.path import basename, dirname, join
 from pathlib import Path
-from re import compile as re_compile, match as regex_match
+from regex import compile as re_compile, match as regex_match
 from signal import SIGINT, SIGTERM, signal
 from sys import path as sys_path
 from tarfile import open as tar_open
@@ -71,6 +71,7 @@ KOMBU_CONNECTION = None
 
 
 def stop(status):
+    global DB
     Path(sep, "var", "run", "bunkerweb", "core.pid").unlink(missing_ok=True)
     Path(sep, "var", "tmp", "bunkerweb", "core.healthy").unlink(missing_ok=True)
     if DB:
@@ -625,7 +626,7 @@ async def validate_request(request: Request, call_next):
             )
 
     if API_CONFIG.check_token:
-        if request.headers.get("Authorization") != f"Bearer {API_CONFIG.token}":
+        if request.headers.get("Authorization") != f"Bearer {API_CONFIG.TOKEN}":
             LOGGER.warning(
                 f"Unauthorized access attempt from {request.client.host} (invalid token), aborting..."
             )

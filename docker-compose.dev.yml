@@ -1,0 +1,56 @@
+version: "3"
+
+services:
+
+  bunkerweb:
+    image: bunkerweb
+    build:
+      context: .
+      dockerfile: ./src/bw/Dockerfile
+    environment:
+      - API_WHITELIST_IP=127.0.0.0/8 192.168.64.0/24
+    networks:
+      net:
+        ipv4_address: 192.168.64.42
+
+  core:
+    image: core
+    build:
+      context: .
+      dockerfile: ./src/core/Dockerfile
+    ports:
+      - 1337:1337
+    volumes:
+      - data:/data
+    environment:
+      - TOKEN=ChangeMe42!!!
+      - WHITELIST=0.0.0.0/0
+      - BUNKERWEB_INSTANCES=192.168.64.42
+      - CHECK_TOKEN=no
+      - CHECK_WHITELIST=no
+    networks:
+      - net
+
+  scheduler:
+    image: scheduler
+    build:
+      context: .
+      dockerfile: ./src/scheduler/Dockerfile
+    volumes:
+      - data:/data
+    environment:
+      - API_ADDR=http://core:1337
+      - API_TOKEN=ChangeMe42!!!
+    networks:
+      - net
+
+volumes:
+  data:
+
+networks:
+  net:
+    name: net
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.64.0/24
