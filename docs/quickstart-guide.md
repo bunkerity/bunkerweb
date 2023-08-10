@@ -65,7 +65,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - bw-docker
 
       bw-docker:
-        image: tecnativa/docker-socket-proxy
+        image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
@@ -419,7 +419,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - bw-docker
 
       bw-docker:
-        image: tecnativa/docker-socket-proxy
+        image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
@@ -1185,7 +1185,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - bw-docker
 
       bw-docker:
-        image: tecnativa/docker-socket-proxy
+        image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
@@ -1848,7 +1848,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-docker
 
       bw-docker:
-        image: tecnativa/docker-socket-proxy
+        image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
@@ -1939,7 +1939,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - bw-docker
 
       bw-docker:
-        image: tecnativa/docker-socket-proxy
+        image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:

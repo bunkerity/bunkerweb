@@ -105,7 +105,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
 
       bw-docker:
-        image: tecnativa/docker-socket-proxy
+        image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
@@ -232,7 +232,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
 
       bw-docker:
-        image: tecnativa/docker-socket-proxy
+        image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:
@@ -364,7 +364,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - bw-docker
 
       bw-docker:
-        image: tecnativa/docker-socket-proxy
+        image: tecnativa/docker-socket-proxy:nightly
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
         environment:

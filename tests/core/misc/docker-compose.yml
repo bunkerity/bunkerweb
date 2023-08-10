@@ -48,7 +48,7 @@ services:
       - bw-docker
 
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
