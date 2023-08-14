@@ -44,8 +44,6 @@ RUN umask 027
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
-RUN mkdir -p /etc/bunkerweb
-COPY  --chown=0:101 src/common/config.yaml /etc/bunkerweb/config.yaml
 
 # Add core user, drop bwcli, install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache bash jq grep libmagic && \
@@ -61,7 +59,7 @@ RUN apk add --no-cache bash jq grep libmagic && \
   mkdir -p /var/www && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-  mv /usr/share/bunkerweb/core/core.conf /etc/bunkerweb/ && \
+  touch /etc/bunkerweb/core.conf /etc/bunkerweb/config.yaml && \
   for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:core /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \

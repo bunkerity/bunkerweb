@@ -35,8 +35,6 @@ RUN umask 027
 
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
-RUN mkdir -p /etc/bunkerweb
-COPY  --chown=0:101 src/common/config.yaml /etc/bunkerweb/config.yaml
 
 # Add scheduler user, drop bwcli, install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache bash libgcc libstdc++ openssl libmagic && \
@@ -49,7 +47,7 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl libmagic && \
   mkdir -p /var/run/bunkerweb && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-  mv /usr/share/bunkerweb/scheduler/scheduler.conf /etc/bunkerweb/ && \
+  touch /etc/bunkerweb/scheduler.conf /etc/bunkerweb/config.yaml && \
   chown -R root:scheduler /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /data /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb && \
   find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
