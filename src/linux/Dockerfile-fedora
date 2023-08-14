@@ -27,13 +27,13 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
 RUN dnf install -y --setopt=install_weak_deps=False python3 python3-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
     curl https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py && \
     python3 /tmp/get-pip.py && \
+    export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --upgrade pip && \
-    pip3 install --no-cache-dir --upgrade pip-tools wheel setuptools && \
+    pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
     #mkdir -p /usr/share/bunkerweb/deps && \
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /usr/share/bunkerweb/deps/python && \
-    export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
     if [ ! -f /usr/share/bunkerweb/deps/python/zope/__init__.py ] ; then touch /usr/share/bunkerweb/deps/python/zope/__init__.py ; fi
 
@@ -79,8 +79,7 @@ COPY src/linux/scripts /usr/share/bunkerweb/scripts
 COPY src/linux/fpm.sh /usr/share/fpm.sh
 RUN chmod +x /usr/share/bunkerweb/scripts/*.sh /usr/share/fpm.sh
 COPY src/linux/fpm-fedora /usr/share/.fpm
-COPY src/linux/bunkerweb.service /lib/systemd/system/bunkerweb.service
-COPY src/linux/bunkerweb-ui.service /lib/systemd/system/bunkerweb-ui.service
+COPY src/linux/*.service /lib/systemd/system/
 
 # Generate DEB at startup
 VOLUME /data

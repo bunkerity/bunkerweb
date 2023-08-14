@@ -2,7 +2,7 @@
 
 function do_and_check_cmd() {
 	if [ "$CHANGE_DIR" != "" ] ; then
-		cd "$CHANGE_DIR"
+		cd "$CHANGE_DIR" || return 1
 	fi
 	output=$("$@" 2>&1)
 	ret="$?"

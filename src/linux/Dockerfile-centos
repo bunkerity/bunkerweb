@@ -27,12 +27,12 @@ RUN dnf install yum-utils redhat-lsb-core -y && \
 
 # Compile and install dependencies
 RUN dnf install -y python39-pip brotli brotli-devel wget gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-libs && \
+    export MAKEFLAGS="-j$(nproc)" && \
     pip3.9 install --no-cache-dir --upgrade pip && \
     pip3.9 install --no-cache-dir --upgrade pip-tools wheel setuptools && \
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /usr/share/bunkerweb/deps/python && \
-    export MAKEFLAGS="-j$(nproc)" && \
     pip3.9 install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
 
 
@@ -81,8 +81,7 @@ COPY src/linux/scripts /usr/share/bunkerweb/scripts
 COPY src/linux/fpm.sh /usr/share/fpm.sh
 RUN chmod +x /usr/share/bunkerweb/scripts/*.sh /usr/share/fpm.sh
 COPY src/linux/fpm-centos /usr/share/.fpm
-COPY src/linux/bunkerweb.service /lib/systemd/system/bunkerweb.service
-COPY src/linux/bunkerweb-ui.service /lib/systemd/system/bunkerweb-ui.service
+COPY src/linux/*.service /lib/systemd/system/
 
 # Generate DEB at startup
 VOLUME /data

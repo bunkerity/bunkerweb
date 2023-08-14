@@ -32,12 +32,12 @@ RUN apt update && \
 RUN apt install --no-install-recommends bash libssl-dev git libpcre++-dev zlib1g-dev libxml2-dev libyajl-dev pkgconf libcurl4-openssl-dev libgeoip-dev liblmdb-dev apt-utils bash build-essential autoconf libtool automake g++ gcc libxml2-dev make musl-dev gnupg patch libreadline-dev libpcre3-dev libgd-dev python3 python3-dev -y && \
     curl https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py && \
     python3 /tmp/get-pip.py && \
+    export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
     chmod +x /tmp/bunkerweb/deps/install.sh && \
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /usr/share/bunkerweb/deps/python && \
-    export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
     if [ ! -f /usr/share/bunkerweb/deps/python/zope/__init__.py ] ; then touch /usr/share/bunkerweb/deps/python/zope/__init__.py ; fi
 
@@ -83,8 +83,7 @@ COPY src/linux/scripts /usr/share/bunkerweb/scripts
 COPY src/linux/fpm.sh /usr/share/fpm.sh
 RUN chmod +x /usr/share/bunkerweb/scripts/*.sh /usr/share/fpm.sh
 COPY src/linux/fpm-ubuntu /usr/share/.fpm
-COPY src/linux/bunkerweb.service /lib/systemd/system/bunkerweb.service
-COPY src/linux/bunkerweb-ui.service /lib/systemd/system/bunkerweb-ui.service
+COPY src/linux/*.service /lib/systemd/system/
 
 # Generate DEB at startup
 VOLUME /data
