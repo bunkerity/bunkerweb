@@ -7,8 +7,9 @@ const props = defineProps({
   },
 });
 
-const path = reactive({
-  split: props.currPath.split("/"),
+// Get each part of a path
+const pathSplit = computed(() => {
+  return props.currPath.split("/").filter(String);
 });
 
 const emits = defineEmits(["updatePath"]);
@@ -16,7 +17,7 @@ const emits = defineEmits(["updatePath"]);
 // All paths are separated by slashes
 // Split and pop the last one to get the prev path
 function getPrevPath() {
-  const split = path.split;
+  const split = props.currPath.split("/");
   // Case no prev path
   if (split.length < 2) return props.currPath;
   // Send prev path
@@ -28,7 +29,7 @@ function getPrevPath() {
 // For example root/test => <id = 0>/<id = 1>
 // Get click path by removing path with id > clickId
 function getClickPath(id) {
-  const split = path.split;
+  const split = props.currPath.split("/");
   for (let i = 0; split.length - 1 > id; i++) {
     split.pop();
   }
@@ -57,9 +58,9 @@ function getClickPath(id) {
       </button>
     </li>
     <li
-      v-for="(item, id) in path.split"
+      v-for="(item, id) in pathSplit"
       class="file-manager-breadcrumb-item"
-      :aria-current="id === path.split.length - 1 ? 'true' : 'false'"
+      :aria-current="id === pathSplit.length - 1 ? 'true' : 'false'"
     >
       <button
         @click="$emit('updatePath', getClickPath(id))"

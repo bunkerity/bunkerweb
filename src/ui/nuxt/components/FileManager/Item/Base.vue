@@ -15,6 +15,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  canCreateFile: {
+    type: Boolean,
+    required: true,
+  },
   canDelete: {
     type: Boolean,
     required: true,
@@ -41,7 +45,11 @@ const emits = defineEmits(["updatePath", "action"]);
   <div class="file-manager-item-container">
     <button
       class="file-manager-item-nav"
-      @click="props.type === 'folder' ? $emit('updatePath', props.path) : null"
+      @click="
+        props.type === 'folder'
+          ? $emit('updatePath', props.path)
+          : $emit('action', 'view')
+      "
     >
       <FileManagerItemSvgFolder
         v-if="props.type === 'folder'"

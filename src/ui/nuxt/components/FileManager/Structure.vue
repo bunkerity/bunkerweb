@@ -6,12 +6,14 @@ const config = [
     path: "root",
     canDelete: false,
     canEdit: false,
+    canCreateFile: false,
     children: [
       {
         type: "folder",
         path: "root/folder_name",
         canDelete: false,
         canEdit: false,
+        canCreateFile: true,
       },
       {
         type: "file",
@@ -27,6 +29,7 @@ const config = [
     path: "root/folder_name",
     canDelete: false,
     canEdit: false,
+    canCreateFile: true,
     children: [
       {
         type: "folder",
@@ -48,6 +51,8 @@ const config = [
     path: "root/folder_name/folder_nest_name",
     canDelete: false,
     canEdit: false,
+    canCreateFile: false,
+
     children: [
       {
         type: "file",
@@ -60,12 +65,15 @@ const config = [
   },
 ];
 
-// All forders need a path with children that are items inside it
+// All forders need a path with children items inside it
 // When a breadcrumb element or folder is clicked
 // We update currPath and display the folder.path that match currPath
-const currPath = ref(config[0]["path"]);
+const path = reactive({
+  current: config[0]["path"],
+  canCreateFile: config[0]["canCreateFile"],
+});
 
-// Data needed for modal element, setup when an action is clicked on item
+// Data needed for modal element, setup when an action is clicked on item (emit)
 const modal = reactive({
   isOpen: false,
   type: "",
@@ -77,25 +85,37 @@ const modal = reactive({
 // When dropdown action is clicked on item (view, delete...)
 // Action emit with the clicked action value
 // We update data for the current item and display modal
-function updateAction(type, action, path, value) {
+function updateModal(type, action, path, value) {
   modal.type = type;
   modal.action = action;
   modal.path = path;
   modal.value = value;
   modal.isOpen = true;
 }
+
+// Fire when current path changed
+// Get item that match current path to check values using config variable
+// Allow to know canCreateFile whatever component changing path (bread or folder click)
+watch(
+  () => path.current,
+  () => {
+    path.canCreateFile = config.find(
+      (item) => item.path === path.current
+    ).canCreateFile;
+  }
+);
 </script>
 
 <template>
   <div class="w-full bg-white grid-cols-12">
     <FileManagerBreadcrumb
-      :currPath="currPath"
-      @updatePath="(v) => (currPath = v)"
+      :currPath="path.current"
+      @updatePath="(v) => (path.current = v)"
     />
     <FileManagerContainer
       v-for="folder in config"
       :path="folder.path"
-      :currPath="currPath"
+      :currPath="path.current"
     >
       <div v-for="child in folder.children">
         <FileManagerItemBase
@@ -104,17 +124,22 @@ function updateAction(type, action, path, value) {
           :value="child.value || ''"
           :canDelete="child.canDelete"
           :canEdit="child.canEdit"
+          :canCreateFile="child.canCreateFile || false"
           :canDownload="child.canDownload || false"
-          @updatePath="(v) => (currPath = v)"
+          @updatePath="(v) => (path.current = v)"
           @action="
-            (v) => updateAction(child.type, v, child.path, child.value || '')
+            (v) => updateModal(child.type, v, child.path, child.value || '')
           "
         />
       </div>
     </FileManagerContainer>
+    <FileManagerActions
+      @createFile="() => updateModal('file', 'create', `${path.current}/`, '')"
+      :canCreateFile="path.canCreateFile"
+    />
     <FileManagerModal
       :aria-hidden="modal.isOpen ? 'false' : 'true'"
-      v-show="modal.isOpen"
+      v-if="modal.isOpen"
       :type="modal.type"
       :action="modal.action"
       :path="modal.path"

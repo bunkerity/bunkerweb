@@ -26,8 +26,15 @@ const props = defineProps({
 });
 
 // Filter data from path
-const oldName = props.path.split("/")[props.path.split("/").length - 1];
-const prefix = props.path.split(oldName)[0];
+const oldName = computed(() => {
+  return props.path.split("/")[props.path.split("/").length - 1];
+});
+
+const prefix = computed(() => {
+  const arr = props.path.split("/");
+  arr.pop();
+  return `${arr.join("/")}/`;
+});
 
 const emits = defineEmits(["close"]);
 </script>
@@ -37,7 +44,7 @@ const emits = defineEmits(["close"]);
       <div class="file-manager-modal-card">
         <div class="w-full flex justify-between">
           <p class="file-manager-modal-card-title">
-            {{ props.action }}
+            {{ `${props.action} ${props.type}` }}
           </p>
         </div>
         <form class="w-full" id="form-services" method="POST">
@@ -98,6 +105,7 @@ const emits = defineEmits(["close"]);
                 props.action === 'edit' ? 'edit-btn' : '',
                 props.action === 'download' ? 'download-btn' : '',
                 props.action === 'delete' ? 'delete-btn' : '',
+                props.action === 'create' ? 'valid-btn' : '',
               ]"
               class="text-xs ml-2"
             >
