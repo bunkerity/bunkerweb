@@ -22,13 +22,13 @@ do
     echo "Updating $file"
     cd $(dirname $file)
 
-    if [[ $file == *.in ]]; then
+    if [[ "$file" == *.in ]]; then
         mv $(basename $file) $(basename ${file/%.in}.txt)
     fi
 
     echo "all" | pip-upgrade
 
-    if [[ $file == *.in ]]; then
+    if [[ "$file" == *.in ]]; then
         mv $(basename ${file/%.in}.txt) $(basename $file)
         echo "Generating hashes for $file ..."
         pip-compile --generate-hashes --allow-unsafe --resolver=backtracking
