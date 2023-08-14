@@ -1,34 +1,16 @@
 #!/usr/bin/python3
 
-from argparse import ArgumentParser
 from contextlib import suppress
-from glob import glob
-from hashlib import sha256
-from io import BytesIO
-from json import dumps, load as json_load
-from os import (
-    _exit,
-    chmod,
-    environ,
-    getenv,
-    getpid,
-    listdir,
-    sep,
-    walk,
-)
-from os.path import basename, dirname, join, normpath
+from os import _exit, environ, getpid, sep
+from os.path import join
 from pathlib import Path
-from shutil import copy, rmtree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from socket import gaierror, herror
-from stat import S_IEXEC
-from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
-from tarfile import open as tar_open
 from threading import Thread
 from time import sleep
 from traceback import format_exc
-from typing import Any, Dict, List, Optional, Union
+from typing import Optional
 
 
 for deps_path in [
@@ -38,7 +20,7 @@ for deps_path in [
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from kombu import Connection, Consumer, Queue
+from kombu import Connection, Queue
 
 from logger import setup_logger  # type: ignore
 from API import API  # type: ignore

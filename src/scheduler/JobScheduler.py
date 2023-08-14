@@ -6,7 +6,7 @@ from glob import glob
 from io import BytesIO
 from json import loads
 from logging import Logger
-from os import cpu_count, environ, getenv, sep, walk
+from os import cpu_count, getenv, sep, walk
 from os.path import basename, dirname, join
 from pathlib import Path
 from re import match
