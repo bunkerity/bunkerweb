@@ -20,7 +20,9 @@ from requests import get
 
 
 def dict_to_frozenset(d):
-    if isinstance(d, dict):
+    if isinstance(d, list):
+        return tuple(sorted(d))
+    elif isinstance(d, dict):
         return frozenset((k, dict_to_frozenset(v)) for k, v in d.items())
     return d
 

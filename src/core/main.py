@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from contextlib import suppress
+from copy import deepcopy
 from glob import glob
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
@@ -312,14 +313,20 @@ external_plugins = list(chain(manual_plugins, external_plugins))
 if db_is_initialized:
     if not plugin_changes:
         plugins = []
-        for plugin in external_plugins:
+        for plugin in deepcopy(external_plugins):
             plugin.pop("data", None)
             plugin.pop("checksum", None)
             plugin.pop("jobs", None)
+            plugin.pop("method", None)
             plugins.append(plugin)
 
-        plugin_changes = {dict_to_frozenset(d) for d in plugins} != {
-            dict_to_frozenset(d) for d in db_plugins
+        db_plugins = []
+        for db_plugin in db_plugins.copy():
+            db_plugin.pop("method", None)
+            db_plugins.append(db_plugin)
+
+        changes = {hash(dict_to_frozenset(d)) for d in plugins} != {
+            hash(dict_to_frozenset(d)) for d in db_plugins
         }
 
     if plugin_changes:
