@@ -18,7 +18,7 @@
 }
 
 .content-container {
-  @apply absolute xl:pl-75 w-full px-2 sm:px-6 pb-0 pt-20 sm:pt-6 min-h-[89vh] flex flex-col justify-between;
+  @apply z-[1000] absolute xl:pl-75 w-full px-2 sm:px-6 pb-0 pt-20 sm:pt-6 min-h-[89vh] flex flex-col justify-between;
 }
 
 .content-wrap {
@@ -35,7 +35,7 @@
 }
 
 .header-wrap {
-  @apply flex items-center justify-between w-full px-4 py-1 mx-auto flex-wrap-inherit;
+  @apply flex items-center justify-between w-full md:px-4 py-1 mx-auto flex-wrap-inherit;
 }
 
 .header-title {
@@ -46,16 +46,20 @@
   @apply flex flex-col xs:flex-row flex-wrap pt-1 mr-12 bg-transparent rounded-lg sm:mr-16;
 }
 
+.header-breadcrumb-item {
+  @apply whitespace-nowrap capitalize text-sm leading-normal text-white;
+}
+
 .first.header-breadcrumb-item {
-  @apply capitalize text-sm leading-normal text-white opacity-50 dark:opacity-75;
+  @apply opacity-50 dark:opacity-75;
 }
 
 .prev.header-breadcrumb-item {
-  @apply capitalize pl-0 xs:pl-2 text-sm leading-normal text-white opacity-50 dark:opacity-75;
+  @apply pl-0 xs:pl-2  opacity-50 dark:opacity-75;
 }
 
 .active.header-breadcrumb-item {
-  @apply text-sm pl-0 xs:pl-2 capitalize leading-normal text-white;
+  @apply text-sm pl-0 xs:pl-2  leading-normal text-white;
 }
 
 .slash.header-breadcrumb-item {
@@ -138,19 +142,27 @@
 /* POPOVER */
 
 .popover-settings-container {
-  @apply right-0 min-w-20 md:min-w-42 flex justify-center items-center dark:brightness-90 transition z-50 rounded-md p-3  -translate-y-7 bottom-0 absolute bg-blue-500;
+  @apply flex justify-center items-center dark:brightness-90 transition z-50 rounded-md p-3 bg-blue-500;
+}
+
+.desktop.popover-settings-container {
+  @apply absolute -left-20 bottom-6 lg:right-8 lg:bottom-6 min-w-[50vw] lg:min-w-[30vw];
+}
+
+.mobile.popover-settings-container {
+  @apply fixed left-0 bottom-10 w-[90vw];
 }
 
 .popover-background {
-  @apply bg-white w-3 h-3 rounded z-0 translate-x-3 translate-y-1 absolute;
+  @apply bg-white w-3 h-3 rounded  -z-0 translate-x-3 translate-y-1 absolute;
 }
 
 .popover-settings-text {
-  @apply pointer-events-none text-center transition duration-300 ease-in-out font-semibold text-sm text-white dark:text-white m-0;
+  @apply whitespace-normal pointer-events-none text-center transition duration-300 ease-in-out font-semibold text-sm text-white dark:text-white m-0;
 }
 
 .popover-settings-svg {
-  @apply z-10 hover:brightness-95 fill-blue-500 h-5 w-5 ml-2;
+  @apply z-0 hover:brightness-95 fill-blue-500 h-5 w-5 ml-2;
 }
 
 /* TABS */

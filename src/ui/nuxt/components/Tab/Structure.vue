@@ -32,7 +32,7 @@ function updateTab(tabName) {
       :first="id === 0 ? true : false"
       :last="id === props.list.length - 1 ? true : false"
       :tabName="item.name"
-      :desc="item.desc"
+      :desc="item.description"
       :activeTabName="tab.current"
     />
   </TabContainer>

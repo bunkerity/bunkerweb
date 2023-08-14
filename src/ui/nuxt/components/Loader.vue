@@ -42,7 +42,7 @@ onMounted(() => {
   <div data-loader class="loader-container">
     <img
       data-loader-img
-      src="images/logo-menu-2.png"
+      src="/images/logo-menu-2.png"
       class="loader-container-img"
       alt="main logo"
     />
