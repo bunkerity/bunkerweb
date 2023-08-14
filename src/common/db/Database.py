@@ -1135,10 +1135,10 @@ class Database:
                         updates[Plugins.method] = plugin["method"]
 
                     if plugin.get("data") != db_plugin.data:
-                        updates[Plugins.data] = plugin["data"]
+                        updates[Plugins.data] = plugin.get("data")
 
                     if plugin.get("checksum") != db_plugin.checksum:
-                        updates[Plugins.checksum] = plugin["checksum"]
+                        updates[Plugins.checksum] = plugin.get("checksum")
 
                     if updates:
                         session.query(Plugins).filter(
@@ -1152,7 +1152,7 @@ class Database:
                         .all()
                     )
                     db_ids = [setting.id for setting in db_plugin_settings]
-                    setting_ids = [setting["id"] for setting in settings.values()]
+                    setting_ids = [setting for setting in settings]
                     missing_ids = [
                         setting for setting in db_ids if setting not in setting_ids
                     ]
@@ -1222,8 +1222,8 @@ class Database:
                             if value["type"] != db_setting.type:
                                 updates[Settings.type] = value["type"]
 
-                            if value["multiple"] != db_setting.multiple:
-                                updates[Settings.multiple] = value["multiple"]
+                            if value.get("multiple") != db_setting.multiple:
+                                updates[Settings.multiple] = value.get("multiple")
 
                             if updates:
                                 session.query(Settings).filter(
@@ -1237,9 +1237,7 @@ class Database:
                                 .all()
                             )
                             db_values = [select.value for select in db_selects]
-                            select_values = [
-                                select["value"] for select in value.get("select", [])
-                            ]
+                            select_values = value.get("select", [])
                             missing_values = [
                                 select
                                 for select in db_values

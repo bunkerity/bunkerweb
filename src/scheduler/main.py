@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from argparse import ArgumentParser
+from copy import deepcopy
 from glob import glob
 from hashlib import sha256
 from io import BytesIO
@@ -174,7 +175,9 @@ def generate_external_plugins(
 
 
 def dict_to_frozenset(d):
-    if isinstance(d, dict):
+    if isinstance(d, list):
+        return tuple(sorted(d))
+    elif isinstance(d, dict):
         return frozenset((k, dict_to_frozenset(v)) for k, v in d.items())
     return d
 
@@ -419,14 +422,20 @@ if __name__ == "__main__":
                 )
 
         tmp_external_plugins = []
-        for external_plugin in external_plugins.copy():
+        for external_plugin in deepcopy(external_plugins):
             external_plugin.pop("data", None)
             external_plugin.pop("checksum", None)
             external_plugin.pop("jobs", None)
+            external_plugin.pop("method", None)
             tmp_external_plugins.append(external_plugin)
 
-        changes = {dict_to_frozenset(d) for d in tmp_external_plugins} != {
-            dict_to_frozenset(d) for d in db_plugins
+        tmp_db_plugins = []
+        for db_plugin in db_plugins.copy():
+            db_plugin.pop("method", None)
+            tmp_db_plugins.append(db_plugin)
+
+        changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {
+            hash(dict_to_frozenset(d)) for d in tmp_db_plugins
         }
 
         if changes:
