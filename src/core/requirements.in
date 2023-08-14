@@ -1,8 +1,8 @@
 brotlipy==0.7.0
-fastapi==0.101.0
+fastapi==0.101.1
 gunicorn==21.2.0
 kombu==5.3.1
-pydantic_settings==2.0.2
+pydantic_settings==2.0.3
 python-magic==0.4.27
 python_multipart==0.0.6
 PyYAML==6.0.1

@@ -217,13 +217,13 @@ click==8.1.6 \
     --hash=sha256:48ee849951919527a045bfe3bf7baa8a959c423134e1a5b98c05c20ba75a1cbd \
     --hash=sha256:fa244bb30b3b5ee2cae3da8f55c9e5e0c0e86093306301fb418eb9dc40fbded5
     # via uvicorn
-exceptiongroup==1.1.2 \
-    --hash=sha256:12c3e887d6485d16943a309616de20ae5582633e0a2eda17f4e10fd61c1e8af5 \
-    --hash=sha256:e346e69d186172ca7cf029c8c1d16235aa0e04035e5750b4b95039e65204328f
+exceptiongroup==1.1.3 \
+    --hash=sha256:097acd85d473d75af5bb98e41b61ff7fe35efe6675e4f9370ec6ec5126d160e9 \
+    --hash=sha256:343280667a4585d195ca1cf9cef84a4e178c4b6cf2274caef9859782b567d5e3
     # via anyio
-fastapi==0.101.0 \
-    --hash=sha256:494eb3494d89e8079c20859d7ca695f66eaccc40f46fe8c75ab6186d15f05ffd \
-    --hash=sha256:ca2ae65fe42f6a34b5cf6c994337149154b1b400c39809d7b2dccdceb5ae77af
+fastapi==0.101.1 \
+    --hash=sha256:7b32000d14ca9992f7461117b81e4ef9ff0c07936af641b4fe40e67d5f9d63cb \
+    --hash=sha256:aef5f8676eb1b8389952e1fe734abe20f04b71f6936afcc53b320ba79b686a4b
     # via -r requirements.in
 gunicorn==21.2.0 \
     --hash=sha256:3213aa5e8c24949e792bcacfc176fef362e7aac80b76c56f6b5122bf350722f0 \
@@ -397,9 +397,9 @@ pydantic-core==2.4.0 \
     --hash=sha256:ff246c0111076c8022f9ba325c294f2cb5983403506989253e04dbae565e019b \
     --hash=sha256:ffe18407a4d000c568182ce5388bbbedeb099896904e43fc14eee76cfae6dec5
     # via pydantic
-pydantic-settings==2.0.2 \
-    --hash=sha256:342337fff50b23585e807a86dec85037900972364435c55c2fc00d16ff080539 \
-    --hash=sha256:6183a2abeab465d5a3ab69758e9a22d38b0cc2ba193f0b85f6971a252ea630f6
+pydantic-settings==2.0.3 \
+    --hash=sha256:962dc3672495aad6ae96a4390fac7e593591e144625e5112d359f8f67fb75945 \
+    --hash=sha256:ddd907b066622bd67603b75e2ff791875540dc485b7307c4fffc015719da8625
     # via -r requirements.in
 python-dotenv==1.0.0 \
     --hash=sha256:a8df96034aae6d2d50a4ebe8216326c61c3eb64836776504fcca410e5937a3ba \
