@@ -1,7 +1,7 @@
 <script setup>
 useHead({
   bodyAttrs: {
-    class: "bg-primary",
+    class: "bg-primary overflow-hidden",
   },
 });
 useGlobal();

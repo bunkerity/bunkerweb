@@ -12,6 +12,20 @@ const props = defineProps({
 const popover = reactive({
   isOpen: false,
 });
+
+// Different style for desktop and mobile
+const tab = reactive({
+  isMobile: false,
+});
+
+onMounted(() => {
+  // When component is created but before is insert on DOM
+  // Check window width to determine we need to display mobile or desktop tab design
+  tab.isMobile = window.innerWidth >= 768 ? false : true;
+  window.addEventListener("resize", () => {
+    tab.isMobile = window.innerWidth >= 768 ? false : true;
+  });
+});
 </script>
 
 <template>
@@ -20,7 +34,7 @@ const popover = reactive({
     :type="props.tag !== 'button' ? 'button' : false"
     @pointerover="popover.isOpen = true"
     @pointerleave="popover.isOpen = false"
-    class="relative flex justify-start"
+    class="relative flex justify-start w-full"
   >
     <div class="popover-background"></div>
     <svg
@@ -35,7 +49,10 @@ const popover = reactive({
     <div
       :aria-hidden="popover.isOpen ? 'false' : 'true'"
       v-show="popover.isOpen"
-      class="w-30 popover-settings-container"
+      :class="[
+        tab.isMobile ? 'mobile' : 'desktop',
+        'popover-settings-container',
+      ]"
     >
       <p class="popover-settings-text"><slot></slot></p>
     </div>

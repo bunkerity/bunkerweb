@@ -145,12 +145,12 @@ function toggleMenu() {
           :href="currPath === '/home' ? '#' : '/home'"
         >
           <img
-            src="images/logo-menu-2.png"
+            src="/images/logo-menu-2.png"
             class="menu-logo-dark"
             alt="main logo dark"
           />
           <img
-            src="images/logo-menu.png"
+            src="/images/logo-menu.png"
             class="menu-logo-light"
             alt="main logo light"
           />
