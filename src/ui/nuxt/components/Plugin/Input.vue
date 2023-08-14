@@ -9,7 +9,6 @@ const props = defineProps({
 const input = reactive({
   id: props.setting.id,
   type: props.setting.type,
-  values: props.setting.values,
   value: props.setting.value,
   defaultValue: props.setting.defaultValue,
   method: props.setting.method,

@@ -18,7 +18,7 @@
 }
 
 .content-container {
-  @apply z-[1000] absolute xl:pl-75 w-full px-2 sm:px-6 pb-0 pt-20 sm:pt-6 min-h-[89vh] flex flex-col justify-between;
+  @apply z-100 absolute xl:pl-75 w-full px-2 sm:px-6 pb-0 pt-20 sm:pt-6 min-h-[89vh] flex flex-col justify-between;
 }
 
 .content-wrap {
