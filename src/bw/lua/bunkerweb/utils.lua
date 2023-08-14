@@ -486,9 +486,9 @@ utils.check_session          = function(ctx)
 			local key = check[1]
 			local value = check[2]
 			if _session:get(key) ~= value then
+				_session:clear_request_cookie()
 				local ok, err = _session:destroy()
 				if not ok then
-					_session:close()
 					return false, "session:destroy() error : " .. err
 				end
 				logger:log(ngx.WARN, "session check " .. key .. " failed, destroying session")
@@ -506,7 +506,6 @@ utils.check_session          = function(ctx)
 		end
 	end
 	ctx.bw.sessions_is_checked = true
-	_session:close()
 	return true, exists
 end
 

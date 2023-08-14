@@ -83,8 +83,7 @@ from src.User import User
 from utils import check_settings, path_to_dict
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
-
-logger = setup_logger("UI", getenv("LOG_LEVEL", "INFO"))
+from logging import getLogger
 
 
 def stop_gunicorn():
@@ -103,8 +102,8 @@ def stop(status, _stop=True):
 
 
 def handle_stop(signum, frame):
-    logger.info("Catched stop operation")
-    logger.info("Stopping web ui ...")
+    app.logger.info("Catched stop operation")
+    app.logger.info("Stopping web ui ...")
     stop(0, False)
 
 
@@ -120,20 +119,30 @@ app = Flask(
     static_folder="static",
     template_folder="templates",
 )
-app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
+app.wsgi_app = ReverseProxied(
+    app.wsgi_app,
+    x_for=PROXY_NUMBERS,
+    x_proto=PROXY_NUMBERS,
+    x_host=PROXY_NUMBERS,
+    x_prefix=PROXY_NUMBERS,
+)
+gunicorn_logger = getLogger("gunicorn.error")
+app.logger.handlers = gunicorn_logger.handlers
+app.logger.setLevel(gunicorn_logger.level)
 
 if not getenv("ADMIN_USERNAME"):
-    logger.error("ADMIN_USERNAME is not set")
+    app.logger.error("ADMIN_USERNAME is not set")
     stop(1)
 elif not getenv("ADMIN_PASSWORD"):
-    logger.error("ADMIN_PASSWORD is not set")
+    app.logger.error("ADMIN_PASSWORD is not set")
     stop(1)
 
 if not getenv("FLASK_DEBUG", False) and not regex_match(
     r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$",
     getenv("ADMIN_PASSWORD", "changeme"),
 ):
-    logger.error(
+    app.logger.error(
         "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
     )
     stop(1)
@@ -172,12 +181,12 @@ if INTEGRATION in ("Docker", "Swarm", "Autoconf"):
             base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
         )
     except (docker_APIError, DockerException):
-        logger.warning("No docker host found")
+        app.logger.warning("No docker host found")
 elif INTEGRATION == "Kubernetes":
     kube_config.load_incluster_config()
     kubernetes_client = kube_client.CoreV1Api()
 
-db = Database(logger, ui=True)
+db = Database(app.logger, ui=True)
 
 if INTEGRATION in (
     "Swarm",
@@ -185,20 +194,20 @@ if INTEGRATION in (
     "Autoconf",
 ):
     while not db.is_autoconf_loaded():
-        logger.warning(
+        app.logger.warning(
             "Autoconf is not loaded yet in the database, retrying in 5s ...",
         )
         sleep(5)
 
 while not db.is_initialized():
-    logger.warning(
+    app.logger.warning(
         "Database is not initialized, retrying in 5s ...",
     )
     sleep(5)
 
 env = db.get_config()
 while not db.is_first_config_saved() or not env:
-    logger.warning(
+    app.logger.warning(
         "Database doesn't have any config saved yet, retrying in 5s ...",
     )
     sleep(5)
@@ -206,7 +215,7 @@ while not db.is_first_config_saved() or not env:
 
 del env
 
-logger.info("Database is ready")
+app.logger.info("Database is ready")
 Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").write_text("ok", encoding="utf-8")
 bw_version = (
     Path(sep, "usr", "share", "bunkerweb", "VERSION")
@@ -220,7 +229,7 @@ try:
         SECRET_KEY=getenv("FLASK_SECRET", urandom(32)),
         INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION),
         CONFIG=Config(db),
-        CONFIGFILES=ConfigFiles(logger, db),
+        CONFIGFILES=ConfigFiles(app.logger, db),
         WTF_CSRF_SSL_STRICT=False,
         USER=user,
         SEND_FILE_MAX_AGE_DEFAULT=86400,
@@ -231,7 +240,7 @@ try:
         DARK_MODE=False,
     )
 except FileNotFoundError as e:
-    logger.error(repr(e), e.filename)
+    app.logger.error(repr(e), e.filename)
     stop(1)
 
 plugin_id_rx = re_compile(r"^[\w_-]{1,64}$")
@@ -1524,7 +1533,9 @@ def darkmode():
 def check_reloading():
     if not app.config["RELOADING"] or app.config["LAST_RELOAD"] + 60 < time():
         if app.config["RELOADING"]:
-            logger.warning("Reloading took too long, forcing the state to be reloaded")
+            app.logger.warning(
+                "Reloading took too long, forcing the state to be reloaded"
+            )
             flash("Forced the status to be reloaded", "error")
             app.config["RELOADING"] = False
 

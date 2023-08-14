@@ -4,14 +4,13 @@ from contextlib import contextmanager, suppress
 from copy import deepcopy
 from datetime import datetime
 from hashlib import sha256
-from inspect import getsourcefile
 from logging import Logger
 from os import _exit, getenv, listdir, sep
-from os.path import basename, normpath, join
+from os.path import normpath, join
 from pathlib import Path
 from re import compile as re_compile
 from subprocess import DEVNULL, PIPE, STDOUT, run as subprocess_run
-from sys import _getframe, path as sys_path
+from sys import path as sys_path
 from typing import Any, Dict, List, Optional, Tuple, Union
 from time import sleep
 from traceback import format_exc

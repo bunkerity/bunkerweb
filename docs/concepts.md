@@ -1,7 +1,7 @@
 # Concepts
 
 <figure markdown>
-  ![Overwiew](assets/img/concepts.svg){ align=center }
+  ![Overwiew](assets/img/concepts.svg){ align=center, width="600" }
 </figure>
 
 ## Integrations

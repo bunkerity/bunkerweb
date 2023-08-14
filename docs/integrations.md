@@ -164,7 +164,7 @@ services:
       - DOCKER_HOST=tcp://bw-docker:2375
 ...
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -222,7 +222,7 @@ services:
       - bw-docker
 ...
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     networks:
       - bw-docker
 ...
@@ -273,7 +273,7 @@ services:
       - bw-docker
 
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -372,7 +372,7 @@ services:
       - bw-docker
 
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -513,7 +513,7 @@ services:
           - "node.role == worker"
 
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:

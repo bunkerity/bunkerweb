@@ -20,10 +20,10 @@ COPY src/common/gen/requirements.txt /usr/share/bunkerweb/deps/requirements.txt
 
 # Install python requirements
 RUN apk add --no-cache --virtual .build-deps py3-pip && \
-	pip install --no-cache-dir --upgrade pip && \
-	pip install wheel && \
 	mkdir -p /usr/share/bunkerweb/deps/python && \
 	export MAKEFLAGS="-j$(nproc)" && \
+	pip install --no-cache-dir --upgrade pip && \
+	pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
 	pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
 	apk del .build-deps && \
 	rm -rf /var/cache/apk/*
@@ -73,7 +73,7 @@ RUN apk add --no-cache pcre bash python3 && \
 	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 # Fix CVEs
-RUN apk add "libx11>=1.8.4-r1" "tiff>=4.4.0-r4" "libcrypto3>=3.0.9-r2" "libssl3>=3.0.9-r2"
+RUN apk add "libx11>=1.8.4-r1" "tiff>=4.4.0-r4" "libcrypto3>=3.0.9-r2" "libssl3>=3.0.9-r2" "nghttp2-libs>=1.51.0-r1"
 
 VOLUME /data /etc/nginx
 

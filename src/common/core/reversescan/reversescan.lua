@@ -6,9 +6,9 @@ local cjson       = require "cjson"
 
 local reversescan = class("reversescan", plugin)
 
-function reversescan:initialize()
+function reversescan:initialize(ctx)
     -- Call parent initialize
-    plugin.initialize(self, "reversescan")
+    plugin.initialize(self, "reversescan", ctx)
 end
 
 function reversescan:access()

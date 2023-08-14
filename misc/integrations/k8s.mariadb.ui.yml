@@ -317,7 +317,7 @@ spec:
     - host: www.example.com
       http:
         paths:
-          - path: /changeme/
+          - path: /changeme
             pathType: Prefix
             backend:
               service:

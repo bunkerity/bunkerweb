@@ -5,9 +5,9 @@ local cjson  = require "cjson"
 
 local limit  = class("limit", plugin)
 
-function limit:initialize()
+function limit:initialize(ctx)
 	-- Call parent initialize
-	plugin.initialize(self, "limit")
+	plugin.initialize(self, "limit", ctx)
 	-- Load rules if needed
 	if ngx.get_phase() ~= "init" and self:is_needed() then
 		-- Get all rules from datastore

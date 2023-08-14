@@ -13,7 +13,7 @@ from Controller import Controller
 class IngressController(Controller):
     def __init__(self):
         self.__internal_lock = Lock()
-        super().__init__("kubernetes", self.__internal_lock)
+        super().__init__("kubernetes")
         config.load_incluster_config()
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
@@ -31,7 +31,9 @@ class IngressController(Controller):
     def _to_instances(self, controller_instance) -> List[dict]:
         instance = {}
         instance["name"] = controller_instance.metadata.name
-        instance["hostname"] = controller_instance.status.pod_ip
+        instance["hostname"] = (
+            controller_instance.status.pod_ip or controller_instance.metadata.name
+        )
         health = False
         if controller_instance.status.conditions:
             for condition in controller_instance.status.conditions:
@@ -71,7 +73,7 @@ class IngressController(Controller):
     def _to_services(self, controller_service) -> List[dict]:
         if not controller_service.spec or not controller_service.spec.rules:
             return []
-
+        namespace = controller_service.metadata.namespace
         services = []
         # parse rules
         for rule in controller_service.spec.rules:
@@ -110,7 +112,7 @@ class IngressController(Controller):
 
                 service_list = self.__corev1.list_service_for_all_namespaces(
                     watch=False,
-                    field_selector=f"metadata.name={path.backend.service.name}",
+                    field_selector=f"metadata.name={path.backend.service.name},metadata.namespace={namespace}",
                 ).items
 
                 if not service_list:
@@ -119,7 +121,7 @@ class IngressController(Controller):
                     )
                     continue
 
-                reverse_proxy_host = f"http://{path.backend.service.name}.{service_list[0].metadata.namespace}.svc.cluster.local:{path.backend.service.port.number}"
+                reverse_proxy_host = f"http://{path.backend.service.name}.{namespace}.svc.cluster.local:{path.backend.service.port.number}"
                 service.update(
                     {
                         "USE_REVERSE_PROXY": "yes",

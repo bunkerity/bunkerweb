@@ -17,7 +17,7 @@
     "CUSTOM_SSL_CERT": {
       "context": "multisite",
       "default": "",
-      "help": "Full path of the certificate or bundle file.",
+      "help": "Full path of the certificate or bundle file (must be readable by the scheduler).",
       "id": "custom-https-cert",
       "label": "Certificate path",
       "regex": "^(/[\\w. -]+)*/?$",
@@ -26,7 +26,7 @@
     "CUSTOM_SSL_KEY": {
       "context": "multisite",
       "default": "",
-      "help": "Full path of the key file.",
+      "help": "Full path of the key file (must be readable by the scheduler).",
       "id": "custom-https-key",
       "label": "Key path",
       "regex": "^(/[\\w. -]+)*/?$",

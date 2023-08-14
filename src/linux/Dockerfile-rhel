@@ -46,7 +46,7 @@ RUN dnf install -y readline-devel python39-pip brotli brotli-devel gperftools-de
   bash /tmp/bunkerweb/deps/install.sh && \
   mkdir /usr/share/bunkerweb/deps/python && \
   export MAKEFLAGS="-j$(nproc)" && \
-  pip3.9 install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
+  pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
   if [ ! -f /usr/share/bunkerweb/deps/python/zope/__init__.py ] ; then touch /usr/share/bunkerweb/deps/python/zope/__init__.py ; fi
 
 # Copy BW files

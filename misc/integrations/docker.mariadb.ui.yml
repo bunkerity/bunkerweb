@@ -18,7 +18,7 @@ services:
       - USE_GZIP=yes
       - www.example.com_USE_UI=yes
       - www.example.com_USE_REVERSE_PROXY=yes
-      - www.example.com_REVERSE_PROXY_URL=/changeme/
+      - www.example.com_REVERSE_PROXY_URL=/changeme
       - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
       - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     networks:
@@ -38,7 +38,7 @@ services:
       - bw-docker
 
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:

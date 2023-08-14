@@ -39,7 +39,7 @@ if [ -f "/etc/nginx/variables.env" ] ; then
 	log "ENTRYPOINT" "⚠️ " "Looks like BunkerWeb has already been loaded, will not generate temp config"
 else
 	# generate "temp" config
-	echo -e "IS_LOADING=yes\nSERVER_NAME=\nAPI_HTTP_PORT=${API_HTTP_PORT:-5000}\nAPI_SERVER_NAME=${API_SERVER_NAME:-bwapi}\nAPI_WHITELIST_IP=${API_WHITELIST_IP:-127.0.0.0/8}\nUSE_REAL_IP=${USE_REAL_IP:-no}\nUSE_REAL_IP=${USE_REAL_IP:-no}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL:-no}\nREAL_IP_FROM=${REAL_IP_FROM:-192.168.0.0/16 172.16.0.0/12 10.0.0.0/8}\nREAL_IP_HEADER=${REAL_IP_HEADER:-X-Forwarded-For}" > /tmp/variables.env
+	echo -e "IS_LOADING=yes\nSERVER_NAME=\nAPI_HTTP_PORT=${API_HTTP_PORT:-5000}\nAPI_SERVER_NAME=${API_SERVER_NAME:-bwapi}\nAPI_WHITELIST_IP=${API_WHITELIST_IP:-127.0.0.0/8}\nUSE_REAL_IP=${USE_REAL_IP:-no}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL:-no}\nREAL_IP_FROM=${REAL_IP_FROM:-192.168.0.0/16 172.16.0.0/12 10.0.0.0/8}\nREAL_IP_HEADER=${REAL_IP_HEADER:-X-Forwarded-For}\nHTTP_PORT=${HTTP_PORT:-8080}\nHTTPS_PORT=${HTTPS_PORT:-8443}" > /tmp/variables.env
 	python3 /usr/share/bunkerweb/gen/main.py --variables /tmp/variables.env
 fi
 

@@ -36,7 +36,7 @@ RUN apt install --no-install-recommends python3-pip bash libssl-dev git libpcre+
     bash /tmp/bunkerweb/deps/install.sh && \
     mkdir /usr/share/bunkerweb/deps/python && \
     export MAKEFLAGS="-j$(nproc)" && \
-    pip3 install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
+    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt && \
     if [ ! -f /usr/share/bunkerweb/deps/python/zope/__init__.py ] ; then touch /usr/share/bunkerweb/deps/python/zope/__init__.py ; fi
 
 # Copy files

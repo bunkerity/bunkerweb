@@ -279,5 +279,6 @@ class Metadata(Base):
     custom_configs_changed = Column(Boolean, default=False, nullable=True)
     external_plugins_changed = Column(Boolean, default=False, nullable=True)
     config_changed = Column(Boolean, default=False, nullable=True)
+    instances_changed = Column(Boolean, default=False, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.5.0", nullable=False)
+    version = Column(String(32), default="1.5.1", nullable=False)

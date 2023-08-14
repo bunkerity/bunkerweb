@@ -22,6 +22,11 @@ function stop_nginx() {
         nginx -s stop
         if [ $? -ne 0 ] ; then
             log "SYSTEMCTL" "❌" "Error while sending stop signal to nginx"
+            log "SYSTEMCTL" "ℹ️ " "Stopping nginx (force)..."
+            kill -TERM $(cat /var/run/bunkerweb/nginx.pid)
+            if [ $? -ne 0 ] ; then
+                log "SYSTEMCTL" "❌" "Error while sending term signal to nginx"
+            fi
         fi
     fi
     count=0
@@ -85,7 +90,7 @@ function start() {
 
     # Create dummy variables.env
     if [ ! -f /etc/bunkerweb/variables.env ]; then
-        sudo -E -u nginx -g nginx /bin/bash -c "echo -ne '# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nUSE_BUNKERNET=no\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env"
+        sudo -E -u nginx -g nginx /bin/bash -c "echo -ne '# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nDNS_RESOLVERS=8.8.8.8 8.8.4.4\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env"
         log "SYSTEMCTL" "ℹ️" "Created dummy variables.env file"
     fi
 
@@ -113,7 +118,7 @@ function start() {
 
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting temp nginx ..."
-    nginx
+    nginx -e /var/log/bunkerweb/error.log
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while executing temp nginx"
         exit 1

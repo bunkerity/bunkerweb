@@ -5,7 +5,7 @@ local redis  = class("redis", plugin)
 
 function redis:initialize()
 	-- Call parent initialize
-	plugin.initialize(self, "redis")
+	plugin.initialize(self, "redis", ctx)
 end
 
 function redis:init_worker()

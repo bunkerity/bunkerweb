@@ -6,9 +6,9 @@ local env       = require "resty.env"
 
 local whitelist = class("whitelist", plugin)
 
-function whitelist:initialize()
+function whitelist:initialize(ctx)
 	-- Call parent initialize
-	plugin.initialize(self, "whitelist")
+	plugin.initialize(self, "whitelist", ctx)
 	-- Decode lists
 	if ngx.get_phase() ~= "init" and self:is_needed() then
 		local lists, err = self.datastore:get("plugin_whitelist_lists", true)

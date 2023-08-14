@@ -22,6 +22,16 @@
       "label": "Append request URI",
       "regex": "^(yes|no)$",
       "type": "check"
+    },
+    "REDIRECT_TO_STATUS_CODE": {
+      "context": "multisite",
+      "default": "301",
+      "help": "Status code to send to client when redirecting.",
+      "id": "redirect-to-status-code",
+      "label": "Append request URI",
+      "regex": "^(301|302)$",
+      "type": "select",
+      "select": ["301", "302"]
     }
   }
 }

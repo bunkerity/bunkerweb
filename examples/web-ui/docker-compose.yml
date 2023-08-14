@@ -17,7 +17,7 @@ services:
       - www.example.com_USE_UI=yes
       - www.example.com_SERVE_FILES=no
       - www.example.com_USE_REVERSE_PROXY=yes
-      - www.example.com_REVERSE_PROXY_URL=/changeme/ # replace with another url
+      - www.example.com_REVERSE_PROXY_URL=/changeme # replace with another url
       - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
       - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     labels:
@@ -53,7 +53,7 @@ services:
       - bw-docker
 
   bw-docker-proxy:
-    image: tecnativa/docker-socket-proxy:0.1
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
