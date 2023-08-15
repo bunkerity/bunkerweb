@@ -641,7 +641,7 @@
 <h1 id="migrating-from-14x">Migrating from 1.4.X</h1>
 <div class="admonition warning">
 <p class="admonition-title">Read this if you were a 1.4.X user</p>
-<p>A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.5.1/misc/integrations">misc/integrations</a> folder of the repository.</p>
+<p>A lot of things changed since the 1.4.X releases. Container-based integrations stacks contain more services but, trust us, fundamental principles of BunkerWeb are still there. You will find ready to use boilerplates for various integrations in the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/misc/integrations">misc/integrations</a> folder of the repository.</p>
 </div>
 <h2 id="scheduler">Scheduler</h2>
 <p>Back to the 1.4.X releases, jobs (like Let's Encrypt certificate generation/renewal or blacklists download) <strong>were executed in the same container as BunkerWeb</strong>. For the purpose of <a href="https://en.wikipedia.org/wiki/Separation_of_concerns">separation of concerns</a>, we decided to create a <strong>separate service</strong> which is now responsible for managing jobs.</p>
