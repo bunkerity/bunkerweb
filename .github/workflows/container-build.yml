@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Replace VERSION
         if: inputs.RELEASE == 'testing'
-        run: echo -n testing > VERSION
+        run: echo -n testing > VERSION && echo -n testing > src/VERSION
       - name: Setup SSH for ARM node
         if: inputs.CACHE_SUFFIX == 'arm'
         run: |
