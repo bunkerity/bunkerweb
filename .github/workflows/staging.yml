@@ -201,7 +201,7 @@ jobs:
     strategy:
       matrix:
         linux: [ubuntu, debian, fedora, el]
-        arch: [amd64, arm64]
+        arch: [amd64]
         include:
           - release: testing
             repo: bunkerweb
