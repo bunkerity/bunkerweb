@@ -43,6 +43,7 @@ RUN apk add --no-cache bash libgcc libstdc++ openssl libmagic && \
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler && \
   cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
   echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
+  mkdir -p /etc/bunkerweb && \
   mkdir -p /var/tmp/bunkerweb && \
   mkdir -p /var/run/bunkerweb && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \

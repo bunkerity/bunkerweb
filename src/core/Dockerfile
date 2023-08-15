@@ -52,6 +52,7 @@ RUN apk add --no-cache bash jq grep libmagic && \
   adduser -h /var/cache/nginx -g core -s /bin/bash -G core -D -H -u 101 core && \
   cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
   echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
+  mkdir -p /etc/bunkerweb && \
   mkdir -p /etc/nginx && \
   mkdir -p /var/tmp/bunkerweb && \
   mkdir -p /var/run/bunkerweb && \
