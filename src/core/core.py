@@ -284,6 +284,44 @@ class Plugin(BaseModel):
     )
 
 
+class Job(BaseModel):
+    every: str = Field(examples=["hour"])
+    reload: bool = Field(examples=[True])
+    history: List[Dict[str, Union[str, bool]]] = Field(
+        examples=[
+            [
+                {
+                    "date": "2021-01-01T00:00:00.000Z",
+                    "success": True,
+                }
+            ]
+        ]
+    )
+    cache: List[Dict[str, Optional[str]]] = Field(
+        examples=[
+            [
+                {
+                    "service_id": None,
+                    "file_name": "ASN.txt",
+                    "last_update": "2021-01-01T00:00:00.000Z",
+                    "checksum": "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d",
+                }
+            ]
+        ]
+    )
+
+
+class Job_cache(BaseModel):
+    last_update: str = Field(None, examples=["1609459200.0"])
+    checksum: str = Field(
+        None,
+        examples=[
+            "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"
+        ],
+    )
+    data: bytes = Field(None, examples=[b"BunkerWeb forever"])
+
+
 class ErrorMessage(BaseModel):
     message: str
 

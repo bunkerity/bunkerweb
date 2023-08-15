@@ -1659,6 +1659,57 @@ class Database:
         with self.__db_session() as session:
             return session.query(Jobs).filter(Jobs.success == False).count()
 
+    def get_job(self, job_name: str) -> Dict[str, Any]:
+        """Get job."""
+        with self.__db_session() as session:
+            job = (
+                session.query(Jobs)
+                .with_entities(Jobs.name, Jobs.every, Jobs.reload)
+                .filter_by(name=job_name)
+                .first()
+            )
+
+            if job is None:
+                return {}
+
+            return {
+                "every": job.every,
+                "reload": job.reload,
+                "history": [
+                    {
+                        "date": job_run.id.strftime("%Y/%m/%d, %I:%M:%S %p"),
+                        "success": job_run.success,
+                    }
+                    for job_run in session.query(Jobs_runs)
+                    .with_entities(Jobs_runs.id, Jobs_runs.success)
+                    .filter_by(job_name=job.name)
+                    .order_by(Jobs_runs.id.desc())
+                    .limit(10)
+                    .all()
+                ],
+                "cache": [
+                    {
+                        "service_id": cache.service_id,
+                        "file_name": cache.file_name,
+                        "last_update": cache.last_update.strftime(
+                            "%Y/%m/%d, %I:%M:%S %p"
+                        )
+                        if cache.last_update is not None
+                        else "Never",
+                        "checksum": cache.checksum,
+                    }
+                    for cache in session.query(Jobs_cache)
+                    .with_entities(
+                        Jobs_cache.service_id,
+                        Jobs_cache.file_name,
+                        Jobs_cache.last_update,
+                        Jobs_cache.checksum,
+                    )
+                    .filter_by(job_name=job.name)
+                    .all()
+                ],
+            }
+
     def get_jobs(self) -> Dict[str, Dict[str, Any]]:
         """Get jobs."""
         with self.__db_session() as session:
@@ -1666,10 +1717,18 @@ class Database:
                 job.name: {
                     "every": job.every,
                     "reload": job.reload,
-                    "success": job.success,
-                    "last_run": job.last_run.strftime("%Y/%m/%d, %I:%M:%S %p")
-                    if job.last_run is not None
-                    else "Never",
+                    "history": [
+                        {
+                            "date": job_run.id.strftime("%Y/%m/%d, %I:%M:%S %p"),
+                            "success": job_run.success,
+                        }
+                        for job_run in session.query(Jobs_runs)
+                        .with_entities(Jobs_runs.id, Jobs_runs.success)
+                        .filter_by(job_name=job.name)
+                        .order_by(Jobs_runs.id.desc())
+                        .limit(10)
+                        .all()
+                    ],
                     "cache": [
                         {
                             "service_id": cache.service_id,
@@ -1679,12 +1738,14 @@ class Database:
                             )
                             if cache.last_update is not None
                             else "Never",
+                            "checksum": cache.checksum,
                         }
                         for cache in session.query(Jobs_cache)
                         .with_entities(
                             Jobs_cache.service_id,
                             Jobs_cache.file_name,
                             Jobs_cache.last_update,
+                            Jobs_cache.checksum,
                         )
                         .filter_by(job_name=job.name)
                         .all()
@@ -1696,8 +1757,6 @@ class Database:
                         Jobs.name,
                         Jobs.every,
                         Jobs.reload,
-                        Jobs.success,
-                        Jobs.last_run,
                     )
                     .all()
                 )

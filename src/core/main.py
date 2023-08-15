@@ -44,8 +44,17 @@ del deps_path, sys_path
 from configurator import Configurator  # type: ignore
 from database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
+from jobs import bytes_hash  # type: ignore
 
-from fastapi import File, Form, Path as fastapi_Path, Request, Response, status
+from fastapi import (
+    BackgroundTasks,
+    File,
+    Form,
+    Path as fastapi_Path,
+    Request,
+    Response,
+    status,
+)
 from fastapi.responses import JSONResponse, PlainTextResponse
 from kombu import Connection, Queue
 
@@ -58,14 +67,11 @@ from core import (
     CacheFileInfoModel,
     ErrorMessage,
     Instance,
+    Job,
+    Job_cache,
     Plugin,
 )
-from utils import (
-    bytes_hash,
-    dict_to_frozenset,
-    generate_external_plugins,
-    install_plugin,
-)
+from utils import dict_to_frozenset, generate_external_plugins, install_plugin
 
 DB = None
 KOMBU_CONNECTION = None
@@ -525,14 +531,14 @@ if err:
 LOGGER.info("✅ BunkerWeb static instances updated to database")
 
 
-def inform_scheduler_run_once():
-    LOGGER.info("📤 Informing the scheduler to execute jobs...")
+def inform_scheduler(data: dict):
+    LOGGER.info(f"📤 Informing the scheduler with data : {data}")
 
     with KOMBU_CONNECTION:
         with KOMBU_CONNECTION.default_channel as channel:
             with KOMBU_CONNECTION.Producer(channel) as producer:
                 producer.publish(
-                    {"type": "run_once"},
+                    data,
                     routing_key=scheduler_queue.routing_key,
                     serializer="json",
                     exchange=scheduler_queue.exchange,
@@ -554,7 +560,7 @@ if API_CONFIG.integration in ("Linux", "Docker"):
 
         LOGGER.info("✅ Config successfully saved to database")
 
-        Thread(target=inform_scheduler_run_once).start()
+        Thread(target=inform_scheduler, args=({"type": "run_once"},)).start()
 else:
     while not DB.is_autoconf_loaded():
         LOGGER.warning(
@@ -668,7 +674,9 @@ async def get_config() -> JSONResponse:
 
 
 @app.post("/config", tags=["misc"])
-async def update_config(config: dict) -> JSONResponse:
+async def update_config(
+    config: dict, background_tasks: BackgroundTasks
+) -> JSONResponse:
     """Update config in Database"""
     err = DB.save_config(config, "core")
 
@@ -676,9 +684,9 @@ async def update_config(config: dict) -> JSONResponse:
         LOGGER.error(f"Can't save config to database : {err}")
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    LOGGER.info("✅ Config successfully saved to database")
+    background_tasks.add_task(inform_scheduler, {"type": "run_once"})
 
-    Thread(target=inform_scheduler_run_once).start()
+    LOGGER.info("✅ Config successfully saved to database")
 
     return JSONResponse(content={"result": "ok"})
 
@@ -831,7 +839,13 @@ async def get_plugins_files():
     )
 
 
-@app.get("/jobs", tags=["jobs"], summary="Get all jobs", response_description="Jobs")
+@app.get(
+    "/jobs",
+    response_model=Dict[str, Job],
+    tags=["jobs"],
+    summary="Get all jobs",
+    response_description="Jobs",
+)
 async def get_jobs():
     """
     Get all jobs from the database.
@@ -874,8 +888,41 @@ async def add_job_run(job_name: str, data: Dict[Literal["success"], bool]):
     )
 
 
+@app.post(
+    "/jobs/{job_name}/run",
+    tags=["jobs"],
+    summary="Run a job",
+    response_description="Job",
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Job not found",
+            "model": ErrorMessage,
+        }
+    },
+)
+async def run_job(job_name: str, background_tasks: BackgroundTasks):
+    """
+    Run a job.
+    """
+    job = DB.get_job(job_name)
+
+    if not job:
+        LOGGER.warning(f"Job {job_name} not found")
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"message": f"Job {job_name} not found"},
+        )
+
+    background_tasks.add_task(
+        inform_scheduler, {"type": "run_single", "job_name": job_name}
+    )
+
+    return JSONResponse(content={"result": "ok"})
+
+
 @app.get(
     "/jobs/{job_name}/cache/{file_name}",
+    response_model=Job_cache,
     tags=["jobs"],
     summary="Get a file from the cache",
     response_description="Job cache",

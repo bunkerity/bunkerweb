@@ -27,17 +27,6 @@ def dict_to_frozenset(d):
     return d
 
 
-def bytes_hash(bio: BufferedReader) -> str:
-    _sha512 = sha512()
-    while True:
-        data = bio.read(1024)
-        if not data:
-            break
-        _sha512.update(data)
-    bio.seek(0)
-    return _sha512.hexdigest()
-
-
 def install_plugin(
     plugin_url: str, logger: Logger, *, semaphore: Optional[Semaphore] = None
 ):
