@@ -42,6 +42,9 @@ jobs:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
+      - name: Replace VERSION
+        if: inputs.RELEASE == 'testing'
+        run: echo -n testing > VERSION
       - name: Extract arch
         run : |
           echo "ARCH=${{ env.PLATFORMS }}" | sed 's/linux//g' | sed 's@/@@g' >> "$GITHUB_ENV"
