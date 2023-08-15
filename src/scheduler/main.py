@@ -29,17 +29,32 @@ from scheduler import SchedulerConfig
 
 RUN_ONCE = False
 SCHEDULER_HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy")
+SCHEDULER_PID_PATH = Path(sep, "var", "run", "bunkerweb", "scheduler.pid")
 SCHEDULER: Optional[JobScheduler] = None
+CORE_API: Optional[API] = None
 SCHEDULER_CONFIG = SchedulerConfig("scheduler", **environ)
+
 LOGGER = setup_logger("Scheduler", SCHEDULER_CONFIG.log_level)
+
+
+def stop(status):
+    SCHEDULER_PID_PATH.unlink(missing_ok=True)
+    SCHEDULER_HEALTHY_PATH.unlink(missing_ok=True)
+    _exit(status)
+
 
 if not SCHEDULER_CONFIG.API_ADDR:
     LOGGER.error("API_ADDR is not set")
-    _exit(1)
+    stop(1)
 
-if not SCHEDULER_CONFIG.WAIT_RETRY_INTERVAL.isdigit():
-    LOGGER.error("WAIT_RETRY_INTERVAL is not a digit")
-    _exit(1)
+if (
+    not SCHEDULER_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
+    or int(SCHEDULER_CONFIG.WAIT_RETRY_INTERVAL) < 1
+):
+    LOGGER.error(
+        f"Invalid WAIT_RETRY_INTERVAL provided: {SCHEDULER_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
+    )
+    stop(1)
 
 
 def handle_stop(signum, frame):
@@ -54,21 +69,21 @@ signal(SIGTERM, handle_stop)
 
 # Function to catch SIGHUP and reload the scheduler
 def handle_reload(signum, frame):
-    try:
-        pass
+    global CORE_API, SCHEDULER_CONFIG
 
-        # TODO: change this
-        # if SCHEDULER is not None and RUN:
-        #     # Get the env by reading the .env file
-        #     tmp_env = dotenv_values(join(sep, "etc", "bunkerweb", "variables.env"))
-        #     if SCHEDULER.reload(tmp_env):
-        #         LOGGER.info("Reload successful")
-        #     else:
-        #         LOGGER.error("Reload failed")
-        # else:
-        #     LOGGER.warning(
-        #         "Ignored reload operation because scheduler is not running ...",
-        #     )
+    try:
+        if SCHEDULER is not None:
+            SCHEDULER_CONFIG = SchedulerConfig("scheduler", **environ)
+            CORE_API = API(SCHEDULER_CONFIG.API_ADDR, "bw-scheduler")
+
+            if SCHEDULER.reload(SCHEDULER_CONFIG.model_dump(), CORE_API):
+                LOGGER.info("✅ Scheduler successfully reloaded")
+            else:
+                LOGGER.error("❌ Scheduler failed to reload")
+        else:
+            LOGGER.warning(
+                "Ignored reload operation because scheduler is not running ...",
+            )
     except:
         LOGGER.error(
             f"Exception while reloading scheduler : {format_exc()}",
@@ -78,26 +93,17 @@ def handle_reload(signum, frame):
 signal(SIGHUP, handle_reload)
 
 
-def stop(status):
-    Path(sep, "var", "run", "bunkerweb", "scheduler.pid").unlink(missing_ok=True)
-    Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy").unlink(missing_ok=True)
-    _exit(status)
-
-
 if __name__ == "__main__":
     try:
         # Don't execute if pid file exists
-        pid_path = Path(sep, "var", "run", "bunkerweb", "scheduler.pid")
-        if pid_path.is_file():
+        if SCHEDULER_PID_PATH.is_file():
             LOGGER.error(
                 "Scheduler is already running, skipping execution ...",
             )
             _exit(1)
 
         # Write pid to file
-        pid_path.write_text(str(getpid()), encoding="utf-8")
-
-        del pid_path
+        SCHEDULER_PID_PATH.write_text(str(getpid()), encoding="utf-8")
 
         MQ_PATH = None
 
@@ -191,8 +197,20 @@ if __name__ == "__main__":
         def process_message(body, message):
             global RUN_ONCE
             LOGGER.info(f"📥 Received message : {body}")
-            if isinstance(body, dict) and body.get("type") == "run_once":
-                RUN_ONCE = True
+
+            if isinstance(body, dict):
+                _type = body.get("type")
+                if _type == "run_once":
+                    RUN_ONCE = True
+                elif _type == "run_single":
+                    job_name = body.get("job_name")
+
+                    if not job_name:
+                        LOGGER.error("❌ No job name provided in message")
+                        message.ack()
+                        return
+
+                    SCHEDULER.run_single(job_name)
             message.ack()
 
         with KOMBU_CONNECTION:

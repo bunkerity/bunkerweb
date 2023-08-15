@@ -9,18 +9,12 @@ from logging import Logger
 from os import cpu_count, getenv, sep, walk
 from os.path import basename, dirname, join
 from pathlib import Path
-from re import match
+from re import IGNORECASE, compile as re_compile, match
 from stat import S_IEXEC
 from tarfile import open as tar_open
-from time import sleep
+from time import sleep, time
 from typing import Any, Dict, Optional
-from schedule import (
-    Job,
-    clear as schedule_clear,
-    every as schedule_every,
-    jobs as schedule_jobs,
-)
-from subprocess import DEVNULL, PIPE, STDOUT, run
+from subprocess import DEVNULL, STDOUT, run
 from sys import path as sys_path
 from threading import Lock, Semaphore, Thread
 from traceback import format_exc
@@ -30,6 +24,15 @@ for deps_path in [
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
+
+from croniter import croniter
+from schedule import (
+    CancelJob,
+    Job,
+    clear as schedule_clear,
+    every as schedule_every,
+    jobs as schedule_jobs,
+)
 
 from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -54,6 +57,18 @@ class JobScheduler:
         self.__thread_lock = Lock()
         self.__job_success = True
         self.__semaphore = Semaphore(cpu_count() or 1)
+
+        minute_rx = r"[1-5]?\d"
+        day_rx = r"(3[01]|[12][0-9]|[1-9])"
+        month_rx = r"(1[0-2]|[1-9]|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
+        week_day_rx = r"([0-6]|sun|mon|tue|wed|thu|fri|sat)"
+        cron_rx = r"^(?P<minute>(?!,)((^|,)(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?))+)\s(?P<hour>(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?)(,(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?))*)\s(?P<day>(\*(/\d+)?|{day_rx}(-{day_rx}|/\d+)?)(,(\*(/\d+)?|{day_rx}(-{day_rx}|/\d+)?))*)\s(?P<month>(\*(/\d+)?|{month_rx}(-{month_rx}|/\d+)?)(,(\*(/\d+)?|{month_rx}(-{month_rx}|/\d+)?))*)\s(?P<week_day>(\*(/\d+)?|{week_day_rx}(-{week_day_rx}|/\d+)?)(,(\*(/\d+)?|{week_day_rx}(-{week_day_rx}|/\d+)?))*)$".format(
+            minute_rx=minute_rx,
+            day_rx=day_rx,
+            month_rx=month_rx,
+            week_day_rx=week_day_rx,
+        )
+        self.__cron_rx = re_compile(cron_rx, IGNORECASE)
 
     @property
     def env(self) -> Dict[str, Any]:
@@ -214,7 +229,10 @@ class JobScheduler:
             return schedule_every().day
         elif every == "week":
             return schedule_every().week
-        raise ValueError(f"can't convert string {every} to schedule")
+        elif every == "month":
+            return schedule_every().month
+
+        raise ValueError(f"Can't convert string {every} to schedule")
 
     def __job_wrapper(self, path: str, plugin: str, name: str, file: str) -> int:
         self.__logger.info(
@@ -278,7 +296,23 @@ class JobScheduler:
                     name = job["name"]
                     file = job["file"]
                     every = job["every"]
-                    if every != "once":
+                    if self.__cron_rx.match(every):
+                        cron = croniter(every, time())
+                        next_run = cron.get_next()
+
+                        def job_wrapper():
+                            self.__job_wrapper(path, plugin, name, file)
+                            nonlocal next_run
+                            next_run = cron.get_next()
+                            CancelJob  # Cancel the previous job
+
+                            # Reschedule the job
+                            schedule_every(next_run - time.time()).seconds.do(
+                                job_wrapper
+                            )
+
+                        schedule_every(next_run - time.time()).seconds.do(job_wrapper)
+                    elif every != "once":
                         self.__str_to_schedule(every).do(
                             self.__job_wrapper, path, plugin, name, file
                         )
@@ -291,9 +325,14 @@ class JobScheduler:
         if self.__lock:
             self.__lock.acquire()
 
-        jobs = [job for job in schedule_jobs if job.should_run]
         success = True
-        for job in jobs:
+        for job in schedule_jobs:
+            if not job.should_run:
+                continue
+
+            self.__logger.info(
+                f"Job {job.job_func.args[2]} from plugin {job.job_func.args[1]} should run, executing it ..."
+            )
             ret = job.run()
 
             if not isinstance(ret, int):
@@ -335,6 +374,32 @@ class JobScheduler:
 
         return ret
 
+    def run_single(self, job_name: str) -> bool:
+        if self.__lock:
+            self.__lock.acquire()
+
+        success = True
+        for job in schedule_jobs:
+            if job.job_func.args[2] != job_name:
+                continue
+
+            self.__logger.info(
+                f"Running job {job.job_func.args[2]} from plugin {job.job_func.args[1]} ..."
+            )
+            ret = job.run()
+
+            if not isinstance(ret, int):
+                ret = -1
+
+            if ret < 0 or ret >= 2:
+                success = False
+
+            break
+
+        if self.__lock:
+            self.__lock.release()
+        return success
+
     def __run_in_thread(self, jobs: list):
         self.__semaphore.acquire(timeout=60)
         for job in jobs:
@@ -344,13 +409,14 @@ class JobScheduler:
     def clear(self):
         schedule_clear()
 
-    def reload(self, env: Dict[str, Any], apis: Optional[list] = None) -> bool:
+    def reload(self, env: Dict[str, Any], api: Optional[API] = None) -> bool:
         ret = True
         try:
-            self.__env = env
-            super().__init__(apis or [])
+            self.__env.update(env)
+            self.__api = api or self.__api
             self.clear()
-            self.__jobs = self.__get_jobs()
+            self.update_env()
+            self.update_jobs()
             ret = self.run_once()
             self.setup()
         except:

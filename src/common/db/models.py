@@ -23,7 +23,6 @@ SETTINGS_TYPES_ENUM = Enum(
     "password", "text", "check", "select", name="settings_types_enum"
 )
 METHODS_ENUM = Enum("ui", "core", "autoconf", "manual", name="methods_enum")
-SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week", name="schedules_enum")
 CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "http",
     "default_server_http",
@@ -162,7 +161,7 @@ class Jobs(Base):
         ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"),
     )
     file_name = Column(String(256), nullable=False)
-    every = Column(SCHEDULES_ENUM, nullable=False)
+    every = Column(String(256), nullable=False)
     reload = Column(Boolean, default=False, nullable=False)
 
     plugin = relationship("Plugins", back_populates="jobs")
