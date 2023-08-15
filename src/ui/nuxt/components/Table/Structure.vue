@@ -50,7 +50,9 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="min-w-[1000px] w-full grid grid-cols-12 rounded p-2 col-span-12">
+  <div
+    class="min-w-[1000px] w-full grid grid-cols-12 rounded p-2 col-span-12 overflow-x-hidden overflow-y-visible"
+  >
     <TableHeader :items="props.header" :positions="props.positions" />
     <TableContent :items="props.content" :positions="props.positions" />
   </div>

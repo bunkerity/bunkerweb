@@ -13,11 +13,18 @@ const props = defineProps({
     required: false,
     default: "",
   },
+  fullWidth: {
+    type: Boolean,
+    required: false,
+  },
 });
 </script>
 
 <template>
-  <div class="col-span-12 sm:col-span-6 flex flex-col px-2 py-1">
+  <div
+    :class="[props.fullWidth ? '' : 'sm:col-span-6 ']"
+    class="col-span-12 flex flex-col px-2 py-1"
+  >
     <SettingsLabel
       :title="props.title"
       :name="props.name"

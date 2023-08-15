@@ -17,16 +17,22 @@ const { data, pending, error } = await useFetch("/api/jobs", {
     >
       <CardItemList
         :items="[
-          { label: 'jobs total', value: '12' },
-          { label: 'jobs errors', value: '1' },
+          { label: 'plugins total', value: '12' },
+          { label: 'plugins errors', value: '1' },
         ]"
       />
     </CardBase>
     <CardBase
-      class="h-fit col-span-12 md:col-span-8 xl:col-span-8 2xl:col-span-6 3xl:col-span-5"
+      title="upload"
+      class="h-fit col-span-12 md:col-span-8 xl:col-span-8 2xl:col-span-4"
+    >
+      <SettingsUploadStructure />
+    </CardBase>
+    <CardBase
+      class="h-fit col-span-12 md:col-span-8 xl:col-span-8 2xl:col-span-4"
       title="filter"
     >
-      <SettingsLayout title="Search" name="keyword">
+      <SettingsLayout fullWidth title="Search" name="keyword">
         <SettingsInput
           :setting="{
             id: 'keyword',
@@ -36,30 +42,15 @@ const { data, pending, error } = await useFetch("/api/jobs", {
           }"
         />
       </SettingsLayout>
-      <SettingsLayout title="Success state" name="state">
+      <SettingsLayout fullWidth title="Plugin type" name="state">
         <SettingsSelect
           :setting="{
             id: 'state',
             value: 'all',
-            values: ['all', 'true', 'false'],
+            values: ['all', 'internal', 'external'],
           }"
         />
       </SettingsLayout>
-      <SettingsLayout title="Success state" name="state">
-        <SettingsSelect
-          :setting="{
-            id: 'state',
-            value: 'all',
-            values: ['all', 'true', 'false'],
-          }"
-        />
-      </SettingsLayout>
-    </CardBase>
-    <CardBase
-      class="col-span-12 overflow-x-auto overflow-y-visible"
-      title="jobs"
-    >
-      <TableStructure />
     </CardBase>
   </NuxtLayout>
 </template>

@@ -408,11 +408,11 @@
 /* CARD STAT COMPONENT */
 
 .card {
-  @apply dark:brightness-110 hover:translate-y-1 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply dark:brightness-110 hover:translate-y-0.5 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between items-start w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .card-stat {
-  @apply dark:brightness-110 sm:max-h-28 hover:translate-y-1 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply dark:brightness-110 sm:max-h-28 hover:translate-y-0.5 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .card-stat-title {
