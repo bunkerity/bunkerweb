@@ -18,18 +18,29 @@ jobs:
       - uses: actions/checkout@v3
       # Get PDF doc
       - name: Get documentation
+        if: inputs.VERSION != "testing"
         uses: actions/download-artifact@v3
         with:
           name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
       # Create tag
       - uses: rickstaa/action-create-tag@v1
         name: Create tag
+        if: inputs.VERSION != "testing"
         with:
           tag: "v${{ inputs.VERSION }}"
           message: "v${{ inputs.VERSION }}"
           force_push_tag: true
+      # Create tag
+      - uses: rickstaa/action-create-tag@v1
+        name: Create tag
+        if: inputs.VERSION == "testing"
+        with:
+          tag: "${{ inputs.VERSION }}"
+          message: "${{ inputs.VERSION }}"
+          force_push_tag: true
       # Extract changelog
       - name: Extract changelog
+        if: inputs.VERSION != "testing"
         id: getchangelog
         run: |
           content=$(awk -v n=2 '/##/{n--}; n > 0' CHANGELOG.md | grep -v '# Changelog' | grep -v '##' | sed '/^$/d')
@@ -39,6 +50,7 @@ jobs:
           echo "::set-output name=content::$content"
       # Create release
       - name: Create release
+        if: inputs.VERSION != "testing"
         uses: softprops/action-gh-release@v1
         with:
           body: |
@@ -60,4 +72,25 @@ jobs:
           tag_name: v${{ inputs.VERSION }}
           discussion_category_name: Announcements
           files: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
+      # Create release
+      - name: Create release
+        if: inputs.VERSION == "testing"
+        uses: softprops/action-gh-release@v1
+        with:
+          body: |
+            **The testing version of BunkerWeb should not be used in production, please use the latest stable version instead.**
+
+            Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
+
+            Docker tags : 
+            - `bunkerity/bunkerweb:${{ inputs.VERSION }}`
+            - `bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}`
+            - `bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}`
+            - `bunkerity/bunkerweb-ui:${{ inputs.VERSION }}`
+
+            Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
+          draft: false
+          prerelease: ${{ inputs.PRERELEASE }}
+          name: Testing
+          tag_name: ${{ inputs.VERSION }}
 

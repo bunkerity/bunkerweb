@@ -33,13 +33,13 @@ jobs:
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
       - name: Pull BW image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:staging local/bunkerweb-tests:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:testing && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:testing local/bunkerweb-tests:latest
         if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
       - name: Pull Scheduler image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:staging local/scheduler-tests:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:testing && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:testing local/scheduler-tests:latest
         if: contains(fromJSON('["linux", "k8s"]'), inputs.TYPE) != true
       - name: Pull Autoconf image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/autoconf-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/autoconf-tests:staging local/autoconf-tests:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/autoconf-tests:testing && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/autoconf-tests:testing local/autoconf-tests:latest
         if: contains(fromJSON('["autoconf", "swarm"]'), inputs.TYPE)
       - name: Push images to local repo
         run: docker tag local/bunkerweb-tests:latest 192.168.42.100:5000/bunkerweb-tests:latest && docker push 192.168.42.100:5000/bunkerweb-tests:latest && docker tag local/scheduler-tests:latest 192.168.42.100:5000/scheduler-tests:latest && docker push 192.168.42.100:5000/scheduler-tests:latest && docker tag local/autoconf-tests:latest 192.168.42.100:5000/autoconf-tests:latest && docker push 192.168.42.100:5000/autoconf-tests:latest
@@ -59,19 +59,19 @@ jobs:
         if: inputs.TYPE == 'k8s'
       - name: Pull BW linux ubuntu test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/ubuntu-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/ubuntu-tests:staging local/ubuntu:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/ubuntu-tests:testing && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/ubuntu-tests:testing local/ubuntu:latest
       - name: Pull BW linux debian test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/debian-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/debian-tests:staging local/debian:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/debian-tests:testing && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/debian-tests:testing local/debian:latest
       # - name: Pull BW linux centos test image
       #   if: inputs.TYPE == 'linux'
-      #   run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/centos-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/centos-tests:staging local/centos:latest
+      #   run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/centos-tests:testing && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/centos-tests:testing local/centos:latest
       - name: Pull BW linux fedora test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/fedora-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/fedora-tests:staging local/fedora:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/fedora-tests:testing && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/fedora-tests:testing local/fedora:latest
       - name: Pull BW linux rhel test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/rhel-tests:staging && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/rhel-tests:staging local/rhel:latest
+        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/rhel-tests:testing && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/rhel-tests:testing local/rhel:latest
       # Do tests
       - name: Run tests
         if: inputs.TYPE == 'docker'
@@ -99,7 +99,7 @@ jobs:
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
           KUBECONFIG: "/tmp/k8s/kubeconfig"
           PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-          IMAGE_TAG: "staging"
+          IMAGE_TAG: "testing"
       - name: Run Linux ubuntu tests
         if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "ubuntu"

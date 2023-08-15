@@ -90,9 +90,9 @@ jobs:
           registry: ${{ secrets.PRIVATE_REGISTRY }}
           username: registry
           password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-      # Build staging package image
+      # Build testing package image
       - name: Build package image
-        if: inputs.RELEASE == 'staging'
+        if: inputs.RELEASE == 'testing'
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -100,11 +100,11 @@ jobs:
           file: src/linux/Dockerfile-${{ inputs.LINUX }}
           platforms: ${{ inputs.PLATFORMS }}
           tags: local/bunkerweb-${{ inputs.LINUX }}:latest
-          cache-from: type=registry,ref=bunkerity/cache:${{ inputs.LINUX }}-staging
-          cache-to: type=registry,ref=bunkerity/cache:${{ inputs.LINUX }}-staging,mode=min
-      # Build non-staging package image
+          cache-from: type=registry,ref=bunkerity/cache:${{ inputs.LINUX }}-testing
+          cache-to: type=registry,ref=bunkerity/cache:${{ inputs.LINUX }}-testing,mode=min
+      # Build non-testing package image
       - name: Build package image
-        if: inputs.RELEASE != 'staging'
+        if: inputs.RELEASE != 'testing'
         uses: docker/build-push-action@v3
         with:
           context: .
