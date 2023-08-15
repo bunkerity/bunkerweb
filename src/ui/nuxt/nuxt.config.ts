@@ -4,7 +4,10 @@ const plugin = require("tailwindcss/plugin");
 export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
-    apiCore: "http://localhost:1337/",
+    apiAddr: "http://127.0.0.1:1337",
+    apiToken: "",
+    adminUsername: "admin",
+    adminPassword: "changeme",
   },
   modules: ["@nuxtjs/tailwindcss"],
   tailwindcss: {

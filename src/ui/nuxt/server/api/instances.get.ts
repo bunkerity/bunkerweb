@@ -3,8 +3,11 @@ export default defineEventHandler(async (event) => {
   let data;
   try {
     data = await $fetch(`/instances`, {
-      baseURL: config.apiCore,
+      baseURL: config.apiAddr,
       method: "GET",
+      Headers: {
+        "Authorization": `Bearer ${config.apiToken}`
+      }
     });
   } catch (err) {
     data = Promise.reject(new Error("fail getting data"));
