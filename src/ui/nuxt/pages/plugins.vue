@@ -52,5 +52,8 @@ const { data, pending, error } = await useFetch("/api/jobs", {
         />
       </SettingsLayout>
     </CardBase>
+    <CardBase class="h-fit col-span-12" title="plugin list">
+      <PluginList />
+    </CardBase>
   </NuxtLayout>
 </template>
