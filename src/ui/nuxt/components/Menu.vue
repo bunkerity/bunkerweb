@@ -186,7 +186,7 @@ function toggleMenu() {
           <!-- plugins -->
           <ul>
             <li class="w-full mt-4">
-              <h6 class="menu-page-plugin-title">PLUGINS PAGE</h6>
+              <h6 class="menu-page-plugin-title">PLUGIN PAGES</h6>
             </li>
             <li v-if="menu.pagePlugins.length === 0" class="w-full mt-8">
               <h6 class="menu-page-plugin-empty-title">

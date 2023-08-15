@@ -17,7 +17,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="flex flex-col px-2">
+  <div class="col-span-12 sm:col-span-6 flex flex-col px-2 py-1">
     <SettingsLabel
       :title="props.title"
       :name="props.name"

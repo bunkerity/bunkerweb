@@ -11,8 +11,19 @@ const { data, pending, error } = await useFetch("/api/jobs", {
 
 <template>
   <NuxtLayout name="dashboard">
-    <div class="card grid grid-cols-12 col-span-6">
-      <SettingsLayout class="col-span-6" title="Search" name="keyword">
+    <CardBase class="col-span-12 md:col-span-4 3xl:col-span-3" title="info">
+      <CardItemList
+        :items="[
+          { label: 'jobs total', value: '12' },
+          { label: 'jobs errors', value: '1' },
+        ]"
+      />
+    </CardBase>
+    <CardBase
+      class="col-span-12 md:col-span-8 xl:col-span-8 2xl:col-span-6 3xl:col-span-5"
+      title="filter"
+    >
+      <SettingsLayout title="Search" name="keyword">
         <SettingsInput
           :setting="{
             id: 'keyword',
@@ -22,17 +33,27 @@ const { data, pending, error } = await useFetch("/api/jobs", {
           }"
         />
       </SettingsLayout>
-      <SettingsLayout class="col-span-6" title="Type" name="keyword">
+      <SettingsLayout title="Success state" name="state">
         <SettingsSelect
           :setting="{
-            id: 'keyword',
-            type: 'text',
+            id: 'state',
             value: 'all',
-            values: ['all', 'day', 'month'],
-            placeholder: 'keyword',
+            values: ['all', 'true', 'false'],
           }"
         />
       </SettingsLayout>
-    </div>
+      <SettingsLayout title="Success state" name="state">
+        <SettingsSelect
+          :setting="{
+            id: 'state',
+            value: 'all',
+            values: ['all', 'true', 'false'],
+          }"
+        />
+      </SettingsLayout>
+    </CardBase>
+    <CardBase class="col-span-12 overflow-x-auto" title="jobs">
+      <TableStructure />
+    </CardBase>
   </NuxtLayout>
 </template>
