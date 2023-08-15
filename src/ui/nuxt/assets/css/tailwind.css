@@ -438,7 +438,7 @@
 /* CARD INSTANCE COMPONENT */
 
 .card-instance-container {
-  @apply overflow-hidden hover:translate-y-1 transition col-span-12 lg:col-span-6 3xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:brightness-110 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply overflow-hidden hover:translate-y-1 transition col-span-12 lg:col-span-5 2xl:col-span-4 3xl:col-span-3 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:brightness-110 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .card-instance-title {
@@ -450,7 +450,7 @@
 }
 
 .card-instance-info-item {
-  @apply flex flex-col items-center sm:flex-row col-span-1 py-1 sm:py-0;
+  @apply flex flex-row items-center col-span-1 py-1 sm:py-0;
 }
 
 .card-instance-info-item-title {
@@ -462,7 +462,7 @@
 }
 
 .card-instance-actions-container {
-  @apply relative w-full flex justify-center sm:justify-end;
+  @apply relative w-full flex justify-end;
 }
 
 .close-btn {

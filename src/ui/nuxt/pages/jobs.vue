@@ -12,7 +12,7 @@ const { data, pending, error } = await useFetch("/api/jobs", {
 <template>
   <NuxtLayout name="dashboard">
     <CardBase
-      class="h-fit col-span-12 md:col-span-4 3xl:col-span-3"
+      class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
       title="info"
     >
       <CardItemList
@@ -23,7 +23,7 @@ const { data, pending, error } = await useFetch("/api/jobs", {
       />
     </CardBase>
     <CardBase
-      class="h-fit col-span-12 md:col-span-8 xl:col-span-8 2xl:col-span-6 3xl:col-span-5"
+      class="z-10 h-fit col-span-12 md:col-span-8 xl:col-span-8 2xl:col-span-5 3xl:col-span-4"
       title="filter"
     >
       <SettingsLayout title="Search" name="keyword">

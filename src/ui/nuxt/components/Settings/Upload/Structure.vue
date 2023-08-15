@@ -129,7 +129,7 @@ function uploadFile(file) {
 
     <div class="col-span-12 flex flex-col justify-center items-center mt-4">
       <hr class="news-separator z-10 w-full" />
-      <p class="dark:text-gray-500 text-xs text-center mt-1">
+      <p class="dark:text-gray-500 text-xs text-center mt-1 mb-2">
         <span class="mx-0.5">
           <SettingsUploadSvgSuccess class="scale-90" />
         </span>
