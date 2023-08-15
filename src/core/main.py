@@ -27,7 +27,7 @@ from signal import SIGINT, SIGTERM, signal
 from sys import path as sys_path
 from tarfile import open as tar_open
 from time import sleep
-from typing import Annotated, Dict, List, Literal
+from typing import Annotated, Dict, List, Literal, Optional
 
 from fastapi.routing import Mount
 
@@ -114,6 +114,15 @@ BUNKERWEB_INSTANCES_RX = re_compile(r"([^: ]+)(:((\d+):)?(\w+))?")
 
 LOGGER = setup_logger("CORE", API_CONFIG.log_level)
 
+if (
+    not API_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
+    or int(API_CONFIG.WAIT_RETRY_INTERVAL) < 1
+):
+    LOGGER.error(
+        f"Invalid WAIT_RETRY_INTERVAL provided: {API_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
+    )
+    stop(1)
+
 if API_CONFIG.check_token and not regex_match(TOKEN_RX, API_CONFIG.TOKEN):
     LOGGER.error(
         f"Invalid token provided: {API_CONFIG.TOKEN}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
@@ -132,6 +141,8 @@ TMP_ENV_PATH = Path(
 )
 TMP_ENV = dotenv_values(str(TMP_ENV_PATH))
 MQ_PATH = None
+
+LOGGER.info(f"🚀 {API_CONFIG.integration} integration detected")
 
 if API_CONFIG.MQ_URI.startswith("filesystem:///"):
     MQ_PATH = Path(API_CONFIG.MQ_URI.replace("filesystem:///", ""))
@@ -158,7 +169,7 @@ while not KOMBU_CONNECTION.connected and retries < 15:
     LOGGER.warning(
         f"Waiting for Kombu to be connected, retrying in {API_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
     )
-    sleep(API_CONFIG.WAIT_RETRY_INTERVAL)
+    sleep(str(API_CONFIG.WAIT_RETRY_INTERVAL))
     with suppress(ConnectionRefusedError, gaierror, herror):
         KOMBU_CONNECTION.connect()
     retries += 1
@@ -188,6 +199,40 @@ if db_is_initialized:
     db_config = DB.get_config()
     db_plugins = DB.get_plugins(external=True)
 
+
+def extract_plugin_data(filename: str) -> Optional[dict]:
+    plugin_data = json_loads(Path(filename).read_text(encoding="utf-8"))
+
+    if not all(key in plugin_data.keys() for key in PLUGIN_KEYS):
+        LOGGER.warning(
+            f"The plugin {dir_basename} doesn't have a valid plugin.json file, it's missing one or more of the following keys: {', '.join(PLUGIN_KEYS)}, ignoring it..."
+        )
+        return
+    elif not PLUGIN_ID_REGEX.match(plugin_data["id"]):
+        LOGGER.warning(
+            f"The plugin {dir_basename} doesn't have a valid id, the id must match the following regex: {PLUGIN_ID_REGEX.pattern}, ignoring it..."
+        )
+        return
+
+    plugin_content = BytesIO()
+    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
+        tar.add(_dir, arcname=dir_basename, recursive=True)
+    plugin_content.seek(0, 0)
+    checksum = bytes_hash(plugin_content)
+    plugin_content.seek(0, 0)
+
+    plugin_data.update(
+        {
+            "external": True,
+            "page": Path(_dir, "ui").exists(),
+            "data": plugin_content.getvalue(),
+            "checksum": checksum,
+        }
+    )
+
+    return plugin_data
+
+
 LOGGER.info("Checking if any external plugin have been added or removed...")
 
 manual_plugins = []
@@ -204,35 +249,12 @@ for filename in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "plugin.json"))):
     if in_db:
         continue
 
-    plugin_data = json_loads(Path(filename).read_text(encoding="utf-8"))
+    plugin_data = extract_plugin_data(filename)
 
-    if not all(key in plugin_data.keys() for key in PLUGIN_KEYS):
-        LOGGER.warning(
-            f"The manually installed plugin {dir_basename} doesn't have a valid plugin.json file, it's missing one or more of the following keys: {', '.join(PLUGIN_KEYS)}, ignoring it..."
-        )
-        continue
-    elif not PLUGIN_ID_REGEX.match(plugin_data["id"]):
-        LOGGER.warning(
-            f"The manually installed plugin {dir_basename} doesn't have a valid id, the id must match the following regex: {PLUGIN_ID_REGEX.pattern}, ignoring it..."
-        )
+    if not plugin_data:
         continue
 
-    plugin_content = BytesIO()
-    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-        tar.add(_dir, arcname=dir_basename, recursive=True)
-    plugin_content.seek(0, 0)
-    checksum = bytes_hash(plugin_content)
-    plugin_content.seek(0, 0)
-
-    plugin_data.update(
-        {
-            "external": True,
-            "page": Path(_dir, "ui").exists(),
-            "method": "manual",
-            "data": plugin_content.getvalue(),
-            "checksum": checksum,
-        }
-    )
+    plugin_data["method"] = "manuel"
 
     manual_plugins_ids.append(plugin_data["id"])
     manual_plugins.append(plugin_data)
@@ -277,35 +299,12 @@ for filename in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "plugin.json"))):
     if dir_basename in manual_plugins_ids:
         continue
 
-    plugin_data = json_loads(Path(filename).read_text(encoding="utf-8"))
+    plugin_data = extract_plugin_data(filename)
 
-    if not all(key in plugin_data.keys() for key in PLUGIN_KEYS):
-        LOGGER.warning(
-            f"The downloaded plugin {dir_basename} doesn't have a valid plugin.json file, it's missing one or more of the following keys: {', '.join(PLUGIN_KEYS)}, ignoring it..."
-        )
-        continue
-    elif not PLUGIN_ID_REGEX.match(plugin_data["id"]):
-        LOGGER.warning(
-            f"The downloaded plugin {dir_basename} doesn't have a valid id, the id must match the following regex: {PLUGIN_ID_REGEX.pattern}, ignoring it..."
-        )
+    if not plugin_data:
         continue
 
-    plugin_content = BytesIO()
-    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-        tar.add(_dir, arcname=dir_basename, recursive=True)
-    plugin_content.seek(0, 0)
-    checksum = bytes_hash(plugin_content)
-    plugin_content.seek(0, 0)
-
-    plugin_data.update(
-        {
-            "external": True,
-            "page": Path(_dir, "ui").exists(),
-            "method": "core",
-            "data": plugin_content.getvalue(),
-            "checksum": checksum,
-        }
-    )
+    plugin_data["method"] = "core"
 
     external_plugins.append(plugin_data)
 
@@ -320,13 +319,13 @@ if db_is_initialized:
             plugin.pop("method", None)
             plugins.append(plugin)
 
-        db_plugins = []
+        tmp_db_plugins = []
         for db_plugin in db_plugins.copy():
             db_plugin.pop("method", None)
-            db_plugins.append(db_plugin)
+            tmp_db_plugins.append(db_plugin)
 
         changes = {hash(dict_to_frozenset(d)) for d in plugins} != {
-            hash(dict_to_frozenset(d)) for d in db_plugins
+            hash(dict_to_frozenset(d)) for d in tmp_db_plugins
         }
 
     if plugin_changes:
@@ -556,6 +555,12 @@ if API_CONFIG.integration in ("Linux", "Docker"):
         LOGGER.info("✅ Config successfully saved to database")
 
         Thread(target=inform_scheduler_run_once).start()
+else:
+    while not DB.is_autoconf_loaded():
+        LOGGER.warning(
+            f"Autoconf is not loaded yet in the database, retrying in {API_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
+        )
+        sleep(int(API_CONFIG.WAIT_RETRY_INTERVAL))
 
 
 def update_app_mounts():
@@ -662,6 +667,22 @@ async def get_config() -> JSONResponse:
     return JSONResponse(content=DB.get_config())
 
 
+@app.post("/config", tags=["misc"])
+async def update_config(config: dict) -> JSONResponse:
+    """Update config in Database"""
+    err = DB.save_config(config, "core")
+
+    if err:
+        LOGGER.error(f"Can't save config to database : {err}")
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    LOGGER.info("✅ Config successfully saved to database")
+
+    Thread(target=inform_scheduler_run_once).start()
+
+    return JSONResponse(content={"result": "ok"})
+
+
 @app.get(
     "/instances",
     response_model=List[Instance],
@@ -748,18 +769,22 @@ async def add_instance(instance: Instance):
     db_instance = DB.get_instance(instance.hostname)
 
     if db_instance:
+        message = f"Instance {instance.hostname} already exists"
+        LOGGER.warning(message)
         return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT,
-            content={"message": f"Instance {instance.hostname} already exists"},
+            status_code=status.HTTP_409_CONFLICT, content={"message": message}
         )
 
     error = DB.add_instance(**instance.to_dict())
 
     if error:
+        LOGGER.error(f"Can't add instance to database : {error}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": error},
         )
+
+    LOGGER.info(f"✅ Instance {instance.hostname} successfully added to database")
 
     return instance
 
@@ -798,6 +823,7 @@ async def get_plugins_files():
             recursive=True,
         )
     plugins_files.seek(0, 0)
+
     return Response(
         content=plugins_files.getvalue(),
         media_type="application/x-tar",
@@ -832,10 +858,15 @@ async def add_job_run(job_name: str, data: Dict[Literal["success"], bool]):
     err = DB.add_job_run(job_name, data.get("success", False))
 
     if err:
+        LOGGER.error(f"Can't update job {job_name} in database : {err}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": err},
         )
+
+    LOGGER.info(
+        f"✅ Job {job_name} successfully updated in database with run status: {'✅' if data.get('success', False) else '❌'}"
+    )
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
@@ -913,6 +944,7 @@ async def update_cache(
     """
     Upload a file to the cache.
     """
+    # TODO add a background task that sends a request to the instances to update the cache
     err = DB.update_job_cache(
         job_name,
         file_name,
@@ -922,10 +954,13 @@ async def update_cache(
     )
 
     if err:
+        LOGGER.error(f"Can't update job {job_name} cache in database : {err}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": err},
         )
+
+    LOGGER.info(f"✅ Job {job_name} cache successfully updated in database")
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
@@ -957,10 +992,13 @@ async def update_cache_info(job_name: str, file_name: str, data: CacheFileInfoMo
     )
 
     if err:
+        LOGGER.error(f"Can't update job {job_name} cache info in database : {err}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": err},
         )
+
+    LOGGER.info(f"✅ Job {job_name} cache info successfully updated in database")
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
@@ -984,13 +1022,17 @@ async def delete_cache(job_name: str, file_name: str, data: CacheFileModel):
     """
     Delete a file from the cache.
     """
+    # TODO add a background task that sends a request to the instances to delete the cache
     err = DB.delete_job_cache(job_name, file_name, service_id=data.service_id)
 
     if err:
+        LOGGER.error(f"Can't delete job {job_name} cache in database : {err}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": err},
         )
+
+    LOGGER.info(f"✅ Job {job_name} cache successfully deleted from database")
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,

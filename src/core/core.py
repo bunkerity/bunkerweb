@@ -29,8 +29,8 @@ from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type:
 
 class ApiConfig(YamlBaseSettings):
     LISTEN_ADDR: str = "0.0.0.0"
-    LISTEN_PORT: int = 1337
-    WAIT_RETRY_INTERVAL: int = 5
+    LISTEN_PORT: str = "1337"
+    WAIT_RETRY_INTERVAL: str = "5"
     CHECK_WHITELIST: str = "yes"
     WHITELIST: str = "127.0.0.1"
     CHECK_TOKEN: str = "yes"
