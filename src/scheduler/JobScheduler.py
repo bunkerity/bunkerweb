@@ -241,6 +241,7 @@ class JobScheduler:
         success = True
         ret = -1
         try:
+            start_date = time()
             proc = run(
                 join(path, "jobs", file),
                 stdin=DEVNULL,
@@ -248,6 +249,7 @@ class JobScheduler:
                 env=self.__env,
                 check=False,
             )
+            end_date = time()
             ret = proc.returncode
         except BaseException:
             success = False
@@ -265,15 +267,19 @@ class JobScheduler:
             with self.__thread_lock:
                 self.__job_success = False
 
-        Thread(target=self.__add_job_run, args=(name, success)).start()
+        Thread(
+            target=self.__add_job_run, args=(name, success, start_date, end_date)
+        ).start()
 
         return ret
 
-    def __add_job_run(self, job_name: str, success: bool):
+    def __add_job_run(
+        self, job_name: str, success: bool, start_date: float, end_date: float
+    ):
         sent, err, status, resp = self.__api.request(
             "PUT",
             f"/jobs/{job_name}/run",
-            data={"success": success},
+            data={"success": success, "start_date": start_date, "end_date": end_date},
             additonal_headers={"Authorization": f"Bearer {self.__env.get('API_TOKEN')}"}
             if "API_TOKEN" in self.__env
             else {},

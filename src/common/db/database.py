@@ -1719,11 +1719,21 @@ class Database:
                     "reload": job.reload,
                     "history": [
                         {
-                            "date": job_run.id.strftime("%Y/%m/%d, %I:%M:%S %p"),
+                            "start_date": job_run.start_date.strftime(
+                                "%Y/%m/%d, %I:%M:%S %p"
+                            ),
+                            "end_date": job_run.end_date.strftime(
+                                "%Y/%m/%d, %I:%M:%S %p"
+                            ),
                             "success": job_run.success,
                         }
                         for job_run in session.query(Jobs_runs)
-                        .with_entities(Jobs_runs.id, Jobs_runs.success)
+                        .with_entities(
+                            Jobs_runs.id,
+                            Jobs_runs.success,
+                            Jobs_runs.start_date,
+                            Jobs_runs.end_date,
+                        )
                         .filter_by(job_name=job.name)
                         .order_by(Jobs_runs.id.desc())
                         .limit(10)
@@ -1762,11 +1772,23 @@ class Database:
                 )
             }
 
-    def add_job_run(self, job_name: str, success: bool) -> str:
+    def add_job_run(
+        self,
+        job_name: str,
+        success: bool,
+        start_date: datetime,
+        end_date: Optional[datetime] = None,
+    ) -> str:
         """Add a job run."""
         with self.__db_session() as session:
             session.add(
-                Jobs_runs(id=datetime.now(), job_name=job_name, success=success)
+                Jobs_runs(
+                    id=datetime.now(),
+                    job_name=job_name,
+                    success=success,
+                    start_date=start_date,
+                    end_date=end_date,
+                )
             )
 
             try:

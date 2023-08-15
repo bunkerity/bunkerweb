@@ -2,6 +2,7 @@
 
 from contextlib import suppress
 from copy import deepcopy
+from datetime import datetime
 from glob import glob
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
@@ -27,7 +28,7 @@ from signal import SIGINT, SIGTERM, signal
 from sys import path as sys_path
 from tarfile import open as tar_open
 from time import sleep
-from typing import Annotated, Dict, List, Literal, Optional
+from typing import Annotated, Dict, List, Literal, Optional, Union
 
 from fastapi.routing import Mount
 
@@ -859,17 +860,38 @@ async def get_jobs():
     summary="Adds a new job run status to the database",
     response_description="Job",
     responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Missing start_date",
+            "model": ErrorMessage,
+        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Internal server error",
             "model": ErrorMessage,
         },
     },
 )
-async def add_job_run(job_name: str, data: Dict[Literal["success"], bool]):
+async def add_job_run(
+    job_name: str,
+    data: Dict[Literal["success", "start_date", "end_date"], Union[bool, float]],
+):
     """
     Update a job run status in the database.
     """
-    err = DB.add_job_run(job_name, data.get("success", False))
+    start_date = data.get("start_date")
+
+    if not start_date:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"message": "Missing start_date"},
+        )
+
+    start_date = datetime.fromtimestamp(start_date)
+    end_date = data.get("end_date")
+
+    if end_date:
+        end_date = datetime.fromtimestamp(end_date)
+
+    err = DB.add_job_run(job_name, data.get("success", False), start_date, end_date)
 
     if err:
         LOGGER.error(f"Can't update job {job_name} in database : {err}")

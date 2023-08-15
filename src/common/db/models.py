@@ -223,6 +223,8 @@ class Jobs_runs(Base):
         nullable=False,
     )
     success = Column(Boolean, nullable=True, default=False)
+    start_date = Column(DateTime(timezone=True), nullable=False)
+    end_date = Column(DateTime(timezone=True), nullable=True, server_default=func.now())
 
     job = relationship("Jobs", back_populates="runs")
 
