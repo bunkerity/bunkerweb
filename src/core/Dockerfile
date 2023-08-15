@@ -3,20 +3,22 @@ FROM python:3.11.4-alpine AS builder
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache --virtual .build-deps g++ gcc
 
+WORKDIR /usr/share/bunkerweb
+
 # Copy python requirements
 COPY src/core/requirements.txt /tmp/req/requirements.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
 
-RUN mkdir -p /usr/share/bunkerweb/deps && \
-  cat /tmp/req/requirements.txt* > /usr/share/bunkerweb/deps/requirements.txt && \
+RUN mkdir -p deps && \
+  cat /tmp/req/requirements.txt* > deps/requirements.txt && \
   rm -rf /tmp/req
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --upgrade pip && \
   pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
-  mkdir -p /usr/share/bunkerweb/deps/python && \
-  pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
+  mkdir -p deps/python && \
+  pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Clean up temporary dependencies
 RUN apk del .build-deps && \
@@ -24,18 +26,18 @@ RUN apk del .build-deps && \
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
-COPY src/common/api /usr/share/bunkerweb/api
-COPY src/common/cli /usr/share/bunkerweb/cli
-COPY src/common/confs /usr/share/bunkerweb/confs
-COPY src/common/core /usr/share/bunkerweb/core
-COPY src/common/db /usr/share/bunkerweb/db
-COPY src/common/gen /usr/share/bunkerweb/gen
-COPY src/common/helpers /usr/share/bunkerweb/helpers
-COPY src/common/settings.json /usr/share/bunkerweb/settings.json
-COPY src/common/utils /usr/share/bunkerweb/utils
-COPY src/VERSION /usr/share/bunkerweb/VERSION
+COPY src/common/api api
+COPY src/common/cli cli
+COPY src/common/confs confs
+COPY src/common/core core
+COPY src/common/db db
+COPY src/common/gen gen
+COPY src/common/helpers helpers
+COPY src/common/settings.json settings.json
+COPY src/common/utils utils
+COPY src/VERSION VERSION
 
-COPY src/core /usr/share/bunkerweb/core
+COPY src/core core
 
 FROM python:3.11.4-alpine
 
@@ -45,13 +47,15 @@ RUN umask 027
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 
+WORKDIR /usr/share/bunkerweb
+
 # Add core user, drop bwcli, install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache bash jq grep libmagic && \
   ln -s /usr/local/bin/python3 /usr/bin/python3 && \
   addgroup -g 101 core && \
-  adduser -h /var/cache/nginx -g core -s /bin/bash -G core -D -H -u 101 core && \
-  cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
-  echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
+  adduser -h /usr/share/bunkerweb/core -g core -s /bin/bash -G core -D -H -u 101 core && \
+  cp helpers/bwcli /usr/bin/ && \
+  echo "Docker" > INTEGRATION && \
   mkdir -p /etc/bunkerweb && \
   mkdir -p /etc/nginx && \
   mkdir -p /var/tmp/bunkerweb && \
@@ -65,9 +69,9 @@ RUN apk add --no-cache bash jq grep libmagic && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:core /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
-  chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/core/*.py /usr/share/bunkerweb/core/entrypoint.sh /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/deps/python/bin/* /usr/bin/bwcli && \
-  chmod 660 /usr/share/bunkerweb/INTEGRATION && \
-  chown root:core /usr/share/bunkerweb/INTEGRATION
+  chmod 750 cli/main.py core/*.py core/entrypoint.sh helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
+  chmod 660 INTEGRATION && \
+  chown root:core INTEGRATION
 
 # Fix CVEs
 RUN apk add "libcrypto3>=3.1.1-r2" "libssl3>=3.1.1-r2"
@@ -84,5 +88,4 @@ HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr
 
 ENV PYTHONPATH /usr/share/bunkerweb/deps/python
 
-ENTRYPOINT ["/usr/share/bunkerweb/core/entrypoint.sh"]
-
+ENTRYPOINT [ "./entrypoint.sh" ]
