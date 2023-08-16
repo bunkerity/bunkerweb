@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from pymysql import Timestamp
 from sqlalchemy import (
     Boolean,
     Column,
