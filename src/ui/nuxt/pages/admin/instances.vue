@@ -11,7 +11,7 @@ const { data, pending, error } = await useFetch("/api/instances", {
 
 <template>
   <NuxtLayout name="dashboard">
-    <CardInstance
+    <InstanceCard
       v-for="instance in data"
       :id="instance.server_name"
       :name="instance.server_name"

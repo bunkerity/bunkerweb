@@ -5,52 +5,52 @@ const route = useRoute();
 const currPath = route.path;
 
 const navList = [
-  { title: "Home", svg: resolveComponent("SvgMenuHome"), path: "/home" },
+  { title: "Home", svg: resolveComponent("MenuSvgHome"), path: "/home" },
   {
     title: "Instances",
-    svg: resolveComponent("SvgMenuInstances"),
+    svg: resolveComponent("MenuSvgInstances"),
     path: "/instances",
   },
   {
     title: "Global config",
-    svg: resolveComponent("SvgMenuGlobalConf"),
+    svg: resolveComponent("MenuSvgGlobalConf"),
     path: "/global-config",
   },
   {
     title: "Configs",
-    svg: resolveComponent("SvgMenuConfigs"),
+    svg: resolveComponent("MenuSvgConfigs"),
     path: "/configs",
   },
   {
     title: "Plugins",
-    svg: resolveComponent("SvgMenuPlugins"),
+    svg: resolveComponent("MenuSvgPlugins"),
     path: "plugins",
   },
-  { title: "Cache", svg: resolveComponent("SvgMenuCache"), path: "/cache" },
-  { title: "Logs", svg: resolveComponent("SvgMenuLogs"), path: "/logs" },
-  { title: "Jobs", svg: resolveComponent("SvgMenuJobs"), path: "/jobs" },
+  { title: "Cache", svg: resolveComponent("MenuSvgCache"), path: "/cache" },
+  { title: "Logs", svg: resolveComponent("MenuSvgLogs"), path: "/logs" },
+  { title: "Jobs", svg: resolveComponent("MenuSvgJobs"), path: "/jobs" },
 ];
 
 const socialList = [
   {
     title: "link to Twitter",
     href: "https://twitter.com/bunkerity",
-    svg: resolveComponent("SvgMenuTwitter"),
+    svg: resolveComponent("MenuSvgTwitter"),
   },
   {
     title: "link to Linkedin",
     href: "https://www.linkedin.com/company/bunkerity/",
-    svg: resolveComponent("SvgMenuLinkedin"),
+    svg: resolveComponent("MenuSvgLinkedin"),
   },
   {
     title: "link to Discord",
     href: "https://discord.gg/fTf46FmtyD",
-    svg: resolveComponent("SvgMenuDiscord"),
+    svg: resolveComponent("MenuSvgDiscord"),
   },
   {
     title: "link to Github",
     href: "https://github.com/bunkerity",
-    svg: resolveComponent("SvgMenuGithub"),
+    svg: resolveComponent("MenuSvgGithub"),
   },
 ];
 
