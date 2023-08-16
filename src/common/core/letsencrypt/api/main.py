@@ -41,6 +41,8 @@ API_CALLER = ApiCaller()
 
 
 def update_apis():
+    global API_CALLER
+
     apis = []
 
     for instance in DB.get_instances():
