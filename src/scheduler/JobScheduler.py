@@ -277,8 +277,8 @@ class JobScheduler:
         self, job_name: str, success: bool, start_date: float, end_date: float
     ):
         sent, err, status, resp = self.__api.request(
-            "PUT",
-            f"/jobs/{job_name}/run",
+            "POST",
+            f"/jobs/{job_name}/status",
             data={"success": success, "start_date": start_date, "end_date": end_date},
             additonal_headers={"Authorization": f"Bearer {self.__env.get('API_TOKEN')}"}
             if "API_TOKEN" in self.__env
@@ -289,7 +289,7 @@ class JobScheduler:
             self.__logger.error(
                 f"Can't send API request to {self.__api.endpoint}jobs/{job_name}/run : {err}, the database will not be updated"
             )
-        elif status != 200:
+        elif status != 201:
             self.__logger.error(
                 f"Error while sending API request to {self.__api.endpoint}jobs/{job_name}/run : status = {status}, resp = {resp}, the database will not be updated",
             )

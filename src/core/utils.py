@@ -121,8 +121,9 @@ def install_plugin(
 
 
 def generate_external_plugins(
-    plugins: List[Dict[str, Any]],
     logger: Logger,
+    plugins: List[Dict[str, Any]] = None,
+    db=None,
     *,
     original_path: Union[Path, str] = join(sep, "etc", "bunkerweb", "plugins"),
 ):
@@ -137,6 +138,9 @@ def generate_external_plugins(
             file.unlink()
         elif file.is_dir():
             rmtree(str(file), ignore_errors=True)
+
+    if not plugins and db:
+        plugins = db.get_plugins(external=True, with_data=True)
 
     if plugins:
         logger.info("Generating new external plugins ...")

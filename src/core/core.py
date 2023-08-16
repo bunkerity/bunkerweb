@@ -1,3 +1,4 @@
+from datetime import datetime
 from functools import cached_property
 from ipaddress import (
     IPv4Address,
@@ -229,6 +230,7 @@ class Instance(BaseModel):
 
 class Plugin(BaseModel):
     id: str = Field(examples=["blacklist"])
+    stream: str = Field(examples=["partial"])
     name: str = Field(examples=["Blacklist"])
     description: str = Field(
         examples=[
@@ -236,21 +238,55 @@ class Plugin(BaseModel):
         ]
     )
     version: str = Field(examples=["1.0"])
-    stream: str = Field(examples=["partial"])
+    external: bool = Field(examples=[False])
+    method: str = Field(examples=["core"])
+    page: bool = Field(examples=[False])
     settings: Dict[
         str,
         Dict[
-            Literal[
-                "context",
-                "default",
-                "help",
-                "id",
-                "regex",
-                "type",
-                "select",
-                "multiple",
+            Union[
+                Literal[
+                    "context",
+                    "default",
+                    "help",
+                    "id",
+                    "label",
+                    "regex",
+                    "type",
+                ],
+                Literal[
+                    "context",
+                    "default",
+                    "help",
+                    "id",
+                    "label",
+                    "regex",
+                    "type",
+                    "select",
+                    "multiple",
+                ],
+                Literal[
+                    "context",
+                    "default",
+                    "help",
+                    "id",
+                    "label",
+                    "regex",
+                    "type",
+                    "multiple",
+                ],
+                Literal[
+                    "context",
+                    "default",
+                    "help",
+                    "id",
+                    "label",
+                    "regex",
+                    "type",
+                    "select",
+                ],
             ],
-            str,
+            Union[str, List[str]],
         ],
     ] = Field(
         examples=[
@@ -280,6 +316,30 @@ class Plugin(BaseModel):
                     "reload": True,
                 }
             ]
+        ],
+    )
+
+
+class AddedPlugin(Plugin):
+    data: bytes = Field(examples=[b"BunkerWeb forever"])
+    checksum: str = Field(
+        None,
+        examples=[
+            "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"
+        ],
+    )
+    template_file: bytes = Field(None, examples=[b"BunkerWeb forever"])
+    actions_file: bytes = Field(None, examples=[b"BunkerWeb forever"])
+    template_checksum: str = Field(
+        None,
+        examples=[
+            "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"
+        ],
+    )
+    actions_checksum: str = Field(
+        None,
+        examples=[
+            "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"
         ],
     )
 
@@ -337,4 +397,5 @@ class CacheFileDataModel(CacheFileModel):
 
 
 class CacheFileInfoModel(CacheFileModel):
+    last_update: datetime
     checksum: Optional[str] = None

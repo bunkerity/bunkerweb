@@ -35,13 +35,14 @@ from fastapi.routing import Mount
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("utils",), ("db",), ("gen",))
+    for paths in (("deps", "python"), ("api",), ("utils",), ("db",), ("gen",))
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 del deps_path, sys_path
 
+from API import API  # type: ignore
 from configurator import Configurator  # type: ignore
 from database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
@@ -60,12 +61,12 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from kombu import Connection, Queue
 
 from core import (
+    AddedPlugin,
     ApiConfig,
     app,
     BUNKERWEB_VERSION,
     CacheFileModel,
     CacheFileDataModel,
-    CacheFileInfoModel,
     ErrorMessage,
     Instance,
     Job,
@@ -345,7 +346,7 @@ if db_is_initialized:
             )
 
         generate_external_plugins(
-            external_plugins, LOGGER, original_path=EXTERNAL_PLUGINS_PATH
+            LOGGER, external_plugins, original_path=EXTERNAL_PLUGINS_PATH
         )
 
 instances_config = API_CONFIG.model_dump(
@@ -623,7 +624,7 @@ async def validate_request(request: Request, call_next):
                 f'Unauthorized access attempt from {request.client.host} (whitelist check is set to "yes" but the whitelist is empty), aborting...'
             )
             return JSONResponse(
-                status_code=status.HTTP_403_FORBIDDEN, content={"result": "ko"}
+                status_code=status.HTTP_401_UNAUTHORIZED, content={"result": "ko"}
             )
 
         remote_ip = ip_address(request.client.host)
@@ -641,7 +642,7 @@ async def validate_request(request: Request, call_next):
                 f"Unauthorized access attempt from {remote_ip} (not in whitelist), aborting..."
             )
             return JSONResponse(
-                status_code=status.HTTP_403_FORBIDDEN, content={"result": "ko"}
+                status_code=status.HTTP_401_UNAUTHORIZED, content={"result": "ko"}
             )
 
     if API_CONFIG.check_token:
@@ -650,22 +651,22 @@ async def validate_request(request: Request, call_next):
                 f"Unauthorized access attempt from {request.client.host} (invalid token), aborting..."
             )
             return JSONResponse(
-                status_code=status.HTTP_403_FORBIDDEN, content={"result": "ko"}
+                status_code=status.HTTP_401_UNAUTHORIZED, content={"result": "ko"}
             )
 
     return await call_next(request)
 
 
 @app.get("/ping", tags=["misc"])
-async def get_ping() -> PlainTextResponse:
+async def get_ping() -> JSONResponse:
     """Get BunkerWeb API ping"""
-    return PlainTextResponse("pong")
+    return JSONResponse(content={"message": "pong"})
 
 
 @app.get("/version", tags=["misc"])
-async def get_version() -> PlainTextResponse:
+async def get_version() -> JSONResponse:
     """Get BunkerWeb API version"""
-    return PlainTextResponse(BUNKERWEB_VERSION)
+    return JSONResponse(content={"message": BUNKERWEB_VERSION})
 
 
 @app.get("/config", tags=["misc"])
@@ -689,7 +690,7 @@ async def update_config(
 
     LOGGER.info("✅ Config successfully saved to database")
 
-    return JSONResponse(content={"result": "ok"})
+    return JSONResponse(content={"message": "Config successfully saved"})
 
 
 @app.get(
@@ -749,9 +750,8 @@ async def get_instance(
     return db_instance
 
 
-@app.put(
+@app.post(
     "/instances",
-    response_model=Instance,
     status_code=status.HTTP_201_CREATED,
     tags=["instances"],
     summary="Add a BunkerWeb instance",
@@ -767,7 +767,7 @@ async def get_instance(
         },
     },
 )
-async def add_instance(instance: Instance):
+async def add_instance(instance: Instance) -> JSONResponse:
     """
     Add a BunkerWeb instance with the following information:
 
@@ -795,21 +795,300 @@ async def add_instance(instance: Instance):
 
     LOGGER.info(f"✅ Instance {instance.hostname} successfully added to database")
 
-    return instance
+    return JSONResponse(
+        status_code=status.HTTP_201_CREATED,
+        content={"message": "Instance successfully added"},
+    )
+
+
+@app.delete(
+    "/instances/{instance_hostname}",
+    tags=["instances"],
+    summary="Delete a BunkerWeb instance",
+    response_description="A BunkerWeb instance",
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Instance not found",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
+    },
+)
+async def delete_instance(instance_hostname: str) -> JSONResponse:
+    """
+    Delete a BunkerWeb instance
+    """
+    db_instance = DB.get_instance(instance_hostname)
+
+    if not db_instance:
+        message = f"Instance {instance_hostname} not found"
+        LOGGER.warning(message)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
+        )
+
+    error = DB.remove_instance(instance_hostname)
+
+    if error:
+        LOGGER.error(f"Can't remove instance to database : {error}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": error},
+        )
+
+    LOGGER.info(f"✅ Instance {instance_hostname} successfully removed from database")
+
+    return JSONResponse(
+        content={"message": "Instance successfully removed"},
+    )
+
+
+@app.post(
+    "/instances/{instance_hostname}/{action}",
+    tags=["instances"],
+    summary="Send an action to a BunkerWeb instance",
+    response_description="A BunkerWeb instance",
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Instance not found",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Invalid action",
+            "model": ErrorMessage,
+        },
+    },
+)
+async def send_instance_action(
+    instance_hostname: str, action: Literal["start", "stop", "restart", "reload"]
+) -> JSONResponse:
+    """
+    Delete a BunkerWeb instance
+    """
+    db_instance = DB.get_instance(instance_hostname)
+
+    if not db_instance:
+        message = f"Instance {instance_hostname} not found"
+        LOGGER.warning(message)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
+        )
+
+    instance_api = API(
+        f"http://{db_instance['hostname']}:{db_instance['port']}",
+        db_instance["server_name"],
+    )
+
+    sent, err, status_code, resp = instance_api.request("POST", f"/{action}")
+
+    if not sent:
+        error = f"Can't send API request to {instance_api.endpoint}{action} : {err}"
+        LOGGER.error(error)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": error},
+        )
+    else:
+        if status_code != 200:
+            error = f"Error while sending API request to {instance_api.endpoint}{action} : status = {resp['status']}, msg = {resp['msg']}"
+            LOGGER.error(error)
+            return JSONResponse(status_code=status_code, content={"message": error})
+
+    LOGGER.info(f"Successfully sent API request to {instance_api.endpoint}{action}")
+
+    return JSONResponse(content={"message": "Action successfully sent"})
 
 
 @app.get(
-    "/plugins/{_type}",
+    "/plugins",
     response_model=List[Plugin],
     tags=["plugins"],
-    summary="Get either all plugins or only external plugins",
+    summary="Get all plugins",
     response_description="Plugins",
 )
-async def get_plugins(_type: Literal["all", "external"]):
+async def get_plugins():
     """
-    Get plugins of either core or external type from the database.
+    Get core and external plugins from the database.
     """
-    return DB.get_plugins(external=_type == "external")
+    return DB.get_plugins()
+
+
+@app.post(
+    "/plugins",
+    status_code=status.HTTP_201_CREATED,
+    tags=["plugins"],
+    summary="Add a plugin",
+    response_description="Plugins",
+    responses={
+        status.HTTP_409_CONFLICT: {
+            "description": "Plugin already exists",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
+    },
+)
+async def add_plugin(
+    plugin: AddedPlugin, background_tasks: BackgroundTasks
+) -> JSONResponse:
+    """
+    Add a plugin to the database.
+    """
+    error = DB.add_external_plugin(plugin.to_dict())
+
+    if error == "exists":
+        message = f"Plugin {plugin.id} already exists"
+        LOGGER.warning(message)
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT, content={"message": message}
+        )
+    elif error:
+        LOGGER.error(f"Can't add plugin to database : {error}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": error},
+        )
+
+    background_tasks.add_task(inform_scheduler, {"type": "run_once"})
+    background_tasks.add_task(
+        generate_external_plugins, LOGGER, None, DB, original_path=EXTERNAL_PLUGINS_PATH
+    )
+    background_tasks.add_task(update_app_mounts)
+
+    LOGGER.info(f"✅ Plugin {plugin.id} successfully added to database")
+
+    return JSONResponse(
+        status_code=status.HTTP_201_CREATED,
+        content={"message": "Plugin successfully added"},
+    )
+
+
+@app.patch(
+    "/plugins/{plugin_id}",
+    tags=["plugins"],
+    summary="Update a plugin",
+    response_description="Plugins",
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Plugin not found",
+            "model": ErrorMessage,
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Can't update a core plugin",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
+    },
+)
+async def update_plugin(
+    plugin_id: str, plugin: AddedPlugin, background_tasks: BackgroundTasks
+) -> JSONResponse:
+    """
+    Update a plugin from the database.
+    """
+    error = DB.update_external_plugin(plugin_id, plugin.to_dict())
+
+    if error == "not_found":
+        message = f"Plugin {plugin.id} not found"
+        LOGGER.warning(message)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
+        )
+    elif error == "not_external":
+        message = f"Can't update a core plugin ({plugin.id})"
+        LOGGER.warning(message)
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
+        )
+    elif error:
+        LOGGER.error(f"Can't update plugin to database : {error}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": error},
+        )
+
+    background_tasks.add_task(inform_scheduler, {"type": "run_once"})
+    background_tasks.add_task(
+        generate_external_plugins, LOGGER, None, DB, original_path=EXTERNAL_PLUGINS_PATH
+    )
+    background_tasks.add_task(update_app_mounts)
+
+    LOGGER.info(f"✅ Plugin {plugin.id} successfully updated to database")
+
+    return JSONResponse(content={"message": "Plugin successfully updated"})
+
+
+@app.delete(
+    "/plugins/{plugin_id}",
+    tags=["plugins"],
+    summary="Delete a plugin",
+    response_description="Plugins",
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Plugin not found",
+            "model": ErrorMessage,
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Can't delete a core plugin",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
+    },
+)
+async def delete_plugin(
+    plugin_id: str, background_tasks: BackgroundTasks
+) -> JSONResponse:
+    """
+    Delete a plugin from the database.
+    """
+    error = DB.remove_external_plugin(plugin_id)
+
+    if error == "not_found":
+        message = f"Plugin {plugin_id} not found"
+        LOGGER.warning(message)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
+        )
+    elif error == "not_external":
+        message = f"Can't delete a core plugin ({plugin_id})"
+        LOGGER.warning(message)
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
+        )
+    elif error:
+        LOGGER.error(f"Can't delete plugin to database : {error}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": error},
+        )
+
+    background_tasks.add_task(inform_scheduler, {"type": "run_once"})
+    background_tasks.add_task(
+        generate_external_plugins, LOGGER, None, DB, original_path=EXTERNAL_PLUGINS_PATH
+    )
+    background_tasks.add_task(update_app_mounts)
+
+    LOGGER.info(f"✅ Plugin {plugin.id} successfully deleted from database")
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": "Plugin successfully deleted"},
+    )
 
 
 @app.get(
@@ -854,8 +1133,8 @@ async def get_jobs():
     return DB.get_jobs()
 
 
-@app.put(
-    "/jobs/{job_name}/run",
+@app.post(
+    "/jobs/{job_name}/status",
     tags=["jobs"],
     summary="Adds a new job run status to the database",
     response_description="Job",
@@ -873,13 +1152,14 @@ async def get_jobs():
 async def add_job_run(
     job_name: str,
     data: Dict[Literal["success", "start_date", "end_date"], Union[bool, float]],
-):
+) -> JSONResponse:
     """
     Update a job run status in the database.
     """
     start_date = data.get("start_date")
 
     if not start_date:
+        LOGGER.error("Missing start_date")
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"message": "Missing start_date"},
@@ -894,19 +1174,19 @@ async def add_job_run(
     err = DB.add_job_run(job_name, data.get("success", False), start_date, end_date)
 
     if err:
-        LOGGER.error(f"Can't update job {job_name} in database : {err}")
+        LOGGER.error(f"Can't add job {job_name} run in database : {err}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": err},
         )
 
     LOGGER.info(
-        f"✅ Job {job_name} successfully updated in database with run status: {'✅' if data.get('success', False) else '❌'}"
+        f"✅ Job {job_name} run successfully added to database with run status: {'✅' if data.get('success', False) else '❌'}"
     )
 
     return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"message": "Job successfully updated"},
+        status_code=status.HTTP_201_CREATED,
+        content={"message": "Job run successfully added to database"},
     )
 
 
@@ -991,7 +1271,7 @@ async def get_cache(
     )
 
 
-@app.post(
+@app.put(
     "/jobs/{job_name}/cache/{file_name}",
     tags=["jobs"],
     summary="Upload a file to the cache",
@@ -1001,12 +1281,20 @@ async def get_cache(
             "description": "Internal server error",
             "model": ErrorMessage,
         },
+        status.HTTP_201_CREATED: {
+            "description": "File successfully uploaded to cache",
+            "model": ErrorMessage,
+        },
+        status.HTTP_200_OK: {
+            "description": "File successfully updated in cache",
+            "model": ErrorMessage,
+        },
     },
 )
 async def update_cache(
     job_name: str,
     file_name: str,
-    cache_file: Annotated[bytes, File()],
+    cache_file: Annotated[bytes, File()] = None,
     service_id: Annotated[str, Form()] = None,
     checksum: Annotated[str, Form()] = None,
 ):
@@ -1014,7 +1302,7 @@ async def update_cache(
     Upload a file to the cache.
     """
     # TODO add a background task that sends a request to the instances to update the cache
-    err = DB.update_job_cache(
+    resp = DB.update_job_cache(
         job_name,
         file_name,
         cache_file,
@@ -1022,7 +1310,7 @@ async def update_cache(
         checksum=checksum,
     )
 
-    if err:
+    if resp not in ("created", "updated"):
         LOGGER.error(f"Can't update job {job_name} cache in database : {err}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1032,46 +1320,10 @@ async def update_cache(
     LOGGER.info(f"✅ Job {job_name} cache successfully updated in database")
 
     return JSONResponse(
-        status_code=status.HTTP_200_OK,
+        status_code=status.HTTP_200_OK
+        if resp == "updated"
+        else status.HTTP_201_CREATED,
         content={"message": "File successfully uploaded to cache"},
-    )
-
-
-@app.patch(
-    "/jobs/{job_name}/cache/{file_name}",
-    tags=["jobs"],
-    summary="Update the cache file info",
-    response_description="Job cache",
-    responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Internal server error",
-            "model": ErrorMessage,
-        },
-    },
-)
-async def update_cache_info(job_name: str, file_name: str, data: CacheFileInfoModel):
-    """
-    Update the cache file info.
-    """
-    err = DB.update_job_cache(
-        job_name,
-        file_name,
-        service_id=data.service_id,
-        checksum=data.checksum,
-    )
-
-    if err:
-        LOGGER.error(f"Can't update job {job_name} cache info in database : {err}")
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"message": err},
-        )
-
-    LOGGER.info(f"✅ Job {job_name} cache info successfully updated in database")
-
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"message": "File successfully updated in cache"},
     )
 
 

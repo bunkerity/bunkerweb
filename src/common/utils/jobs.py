@@ -112,7 +112,7 @@ def cache_file(
 
     try:
         sent, err, status, resp = api.request(
-            "POST",
+            "PUT",
             f"/jobs/{job_name}/cache/{name}",
             data={"service_id": service_id, "checksum": checksum},
             files={"cache_file": content},
@@ -124,7 +124,7 @@ def cache_file(
         if not sent:
             ret = False
             err = f"Can't send API request to {api.endpoint}jobs/cache/{job_name}/{name}/ : {err}"
-        elif status != 200:
+        elif status not in (200, 201):
             ret = False
             err = (
                 f"Error while sending API request to {api.endpoint}jobs/cache/{job_name}/{name}/ : status = {status}, resp = {resp}",
@@ -147,7 +147,7 @@ def update_cache_file_info(
 
     try:
         sent, err, status, resp = api.request(
-            "PATCH",
+            "PUT",
             f"/jobs/{job_name}/cache/{name}",
             data={"service_id": service_id},
             additonal_headers={"Authorization": f"Bearer {api_token}"}
