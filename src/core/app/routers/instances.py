@@ -60,7 +60,7 @@ async def add_instance(instance: Instance) -> JSONResponse:
             status_code=status.HTTP_409_CONFLICT, content={"message": message}
         )
 
-    error = DB.add_instance(**instance.to_dict())
+    error = DB.add_instance(**instance.model_dump())
 
     if error:
         LOGGER.error(f"Can't add instance to database : {error}")

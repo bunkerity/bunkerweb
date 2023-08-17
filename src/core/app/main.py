@@ -18,6 +18,7 @@ from dotenv import dotenv_values
 from os import cpu_count, listdir, sep, walk
 from os.path import basename, dirname, join
 from pathlib import Path
+from fastapi.datastructures import Address
 from regex import compile as re_compile, match as regex_match
 from sys import path as sys_path
 from tarfile import open as tar_open
@@ -35,7 +36,7 @@ for deps_path in [
 from configurator import Configurator  # type: ignore
 from jobs import bytes_hash  # type: ignore
 
-from fastapi import BackgroundTasks, Request, status
+from fastapi import Request, status
 from fastapi.responses import JSONResponse
 
 from .core import app, BUNKERWEB_VERSION
@@ -76,15 +77,6 @@ CUSTOM_CONFIGS_RX = re_compile(
     r"^([0-9a-z\.-]*)_?CUSTOM_CONF_(HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
 )
 BUNKERWEB_INSTANCES_RX = re_compile(r"([^: ]+)(:((\d+):)?(\w+))?")
-
-if (
-    not API_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
-    or int(API_CONFIG.WAIT_RETRY_INTERVAL) < 1
-):
-    LOGGER.error(
-        f"Invalid WAIT_RETRY_INTERVAL provided: {API_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
-    )
-    stop(1)
 
 if API_CONFIG.check_token and not regex_match(TOKEN_RX, API_CONFIG.TOKEN):
     LOGGER.error(
@@ -473,12 +465,24 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    del DB
+    global DB
+
+    if DB:
+        del DB
     KOMBU_CONNECTION.release()
+    if HEALTHY_PATH.exists():
+        HEALTHY_PATH.unlink(missing_ok=True)
 
 
 @app.middleware("http")
 async def validate_request(request: Request, call_next):
+    try:
+        assert isinstance(request.client, Address)
+    except AssertionError:
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED, content={"result": "ko"}
+        )
+
     if API_CONFIG.check_whitelist:
         if not API_CONFIG.whitelist:
             LOGGER.warning(
@@ -532,9 +536,10 @@ async def get_version() -> JSONResponse:
 
 # Include the routers to the main app
 
-from .routers import config, instances, jobs, plugins
+from .routers import config, custom_configs, instances, jobs, plugins
 
 app.include_router(config.router)
+app.include_router(custom_configs.router)
 app.include_router(instances.router)
 app.include_router(jobs.router)
 app.include_router(plugins.router)
@@ -542,10 +547,20 @@ app.include_router(plugins.router)
 if __name__ == "__main__":
     from uvicorn import run
 
+    if (
+        not API_CONFIG.LISTEN_PORT.isdigit()
+        or int(API_CONFIG.LISTEN_PORT) < 1
+        or int(API_CONFIG.LISTEN_PORT) > 65535
+    ):
+        LOGGER.error(
+            f"Invalid LISTEN_PORT provided: {API_CONFIG.LISTEN_PORT}, It must be an integer between 1 and 65535."
+        )
+        stop(1)
+
     run(
         app,
         host=API_CONFIG.LISTEN_ADDR,
-        port=API_CONFIG.LISTEN_PORT,
+        port=int(API_CONFIG.LISTEN_PORT),
         reload=True,
         proxy_headers=False,
         server_header=False,

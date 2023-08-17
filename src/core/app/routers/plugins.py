@@ -53,7 +53,7 @@ async def add_plugin(
     """
     Add a plugin to the database.
     """
-    error = DB.add_external_plugin(plugin.to_dict())
+    error = DB.add_external_plugin(plugin.model_dump())
 
     if error == "exists":
         message = f"Plugin {plugin.id} already exists"
@@ -108,7 +108,7 @@ async def update_plugin(
     """
     Update a plugin from the database.
     """
-    error = DB.update_external_plugin(plugin_id, plugin.to_dict())
+    error = DB.update_external_plugin(plugin_id, plugin.model_dump())
 
     if error == "not_found":
         message = f"Plugin {plugin.id} not found"

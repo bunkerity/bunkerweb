@@ -128,14 +128,22 @@ if __name__ == "__main__":
     from json import dumps
     from os import _exit, environ
 
-    api_config = ApiConfig("core", **environ)
+    API_CONFIG = ApiConfig("core", **environ)
+
+    if (
+        not API_CONFIG.LISTEN_PORT.isdigit()
+        or int(API_CONFIG.LISTEN_PORT) < 1
+        or int(API_CONFIG.LISTEN_PORT) > 65535
+    ):
+        _exit(1)
+
     data = {
-        "listen_addr": api_config.LISTEN_ADDR,
-        "listen_port": api_config.LISTEN_PORT,
-        "log_level": api_config.LOG_LEVEL,
-        "kubernetes_mode": api_config.kubernetes_mode,
-        "swarm_mode": api_config.swarm_mode,
-        "autoconf_mode": api_config.autoconf_mode,
+        "listen_addr": API_CONFIG.LISTEN_ADDR,
+        "listen_port": API_CONFIG.LISTEN_PORT,
+        "log_level": API_CONFIG.LOG_LEVEL,
+        "kubernetes_mode": API_CONFIG.kubernetes_mode,
+        "swarm_mode": API_CONFIG.swarm_mode,
+        "autoconf_mode": API_CONFIG.autoconf_mode,
     }
 
     print(dumps(data), flush=True)
@@ -195,6 +203,10 @@ tags_metadata = [  # TODO: Add more tags and better descriptions: https://fastap
         "description": "Operations related to configuration management",
     },
     {
+        "name": "custom_configs",
+        "description": "Operations related to custom configuration management",
+    },
+    {
         "name": "jobs",
         "description": "Operations related to job management",
     },
@@ -223,13 +235,6 @@ class Instance(BaseModel):
     hostname: str = Field(examples=["bunkerweb-1"])
     port: int = Field(examples=[5000])
     server_name: str = Field(examples=["bwapi"])
-
-    def to_dict(self):
-        return {
-            "hostname": self.hostname,
-            "port": self.port,
-            "server_name": self.server_name,
-        }
 
 
 class Plugin(BaseModel):

@@ -33,7 +33,9 @@ async def update_global_config(
 
     if err:
         LOGGER.error(f"Can't save global config to database : {err}")
-        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": err}
+        )
 
     background_tasks.add_task(inform_scheduler, {"type": "run_once"})
 
@@ -81,7 +83,9 @@ async def update_service_config(
         )
     elif err:
         LOGGER.error(f"Can't save service {service_name} config to database : {err}")
-        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": err}
+        )
 
     background_tasks.add_task(inform_scheduler, {"type": "run_once"})
 
@@ -128,7 +132,9 @@ async def delete_service_config(
         )
     elif err:
         LOGGER.error(f"Can't delete service {service_name} from the database : {err}")
-        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": err}
+        )
 
     background_tasks.add_task(inform_scheduler, {"type": "run_once"})
 

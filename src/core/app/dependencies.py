@@ -50,7 +50,7 @@ def install_plugin(
             content = Path(normpath(plugin_url[7:])).read_bytes()
         else:
             content = b""
-            resp = get(plugin_url, stream=True, timeout=10)
+            resp = get(plugin_url, stream=True, timeout=10)  # type: ignore
 
             if resp.status_code != 200:
                 logger.warning(f"Got status code {resp.status_code}, skipping...")
@@ -133,7 +133,7 @@ def install_plugin(
 
 def generate_external_plugins(
     logger: Logger,
-    plugins: List[Dict[str, Any]] = None,
+    plugins: Optional[List[Dict[str, Any]]] = None,
     db=None,
     *,
     original_path: Union[Path, str] = join(sep, "etc", "bunkerweb", "plugins"),
@@ -186,13 +186,22 @@ def stop(status):
     _exit(status)
 
 
-signal(SIGINT, partial(stop, 0))
-signal(SIGTERM, partial(stop, 0))
+signal(SIGINT, partial(stop, 0))  # type: ignore
+signal(SIGTERM, partial(stop, 0))  # type: ignore
 
 API_CONFIG = ApiConfig("core", **environ)
 LOGGER = setup_logger("CORE", API_CONFIG.log_level)
-DB = Database(LOGGER, API_CONFIG.DATABASE_URI)
 
+if (
+    not API_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
+    or int(API_CONFIG.WAIT_RETRY_INTERVAL) < 1
+):
+    LOGGER.error(
+        f"Invalid WAIT_RETRY_INTERVAL provided: {API_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
+    )
+    stop(1)
+
+DB = Database(LOGGER, API_CONFIG.DATABASE_URI)
 MQ_PATH = None
 
 LOGGER.info(f"🚀 {API_CONFIG.integration} integration detected")
@@ -222,7 +231,7 @@ while not KOMBU_CONNECTION.connected and retries < 15:
     LOGGER.warning(
         f"Waiting for Kombu to be connected, retrying in {API_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
     )
-    sleep(str(API_CONFIG.WAIT_RETRY_INTERVAL))
+    sleep(int(API_CONFIG.WAIT_RETRY_INTERVAL))
     with suppress(ConnectionRefusedError, gaierror, herror):
         KOMBU_CONNECTION.connect()
     retries += 1
@@ -267,10 +276,15 @@ def update_app_mounts(app):
     for subapi in glob(str(CORE_PLUGINS_PATH.joinpath("*", "api"))) + glob(
         str(EXTERNAL_PLUGINS_PATH.joinpath("*", "api"))
     ):
+        main_file_path = Path(subapi, "main.py")
+
+        if not main_file_path.is_file():
+            continue
+
         subapi_plugin = basename(dirname(subapi))
         LOGGER.info(f"Mounting subapi {subapi_plugin} ...")
         # try:
-        loader = SourceFileLoader(f"{subapi_plugin}_api", join(subapi, "main.py"))
+        loader = SourceFileLoader(f"{subapi_plugin}_api", str(main_file_path))
         subapi_module = loader.load_module()
         root_path = getattr(subapi_module, "root_path", f"/{subapi_plugin}")
 

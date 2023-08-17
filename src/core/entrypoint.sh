@@ -21,6 +21,13 @@ log "ENTRYPOINT" "ℹ️ " "Starting the core v$(cat /usr/share/bunkerweb/VERSIO
 # setup and check /data folder
 /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
 
+python3 /usr/share/bunkerweb/core/app/core.py > /dev/null
+
+if [ $? -ne 0 ] ; then
+  log "ENTRYPOINT" "❌ " "Invalid LISTEN_PORT, It must be an integer between 1 and 65535."
+  exit 1
+fi
+
 read LISTEN_ADDR LISTEN_PORT LOG_LEVEL AUTOCONF_MODE KUBERNETES_MODE SWARM_MODE < <(echo $(python3 /usr/share/bunkerweb/core/app/core.py | jq -r '.listen_addr, .listen_port, .log_level, .autoconf_mode, .kubernetes_mode, .swarm_mode'))
 
 if $AUTOCONF_MODE ; then

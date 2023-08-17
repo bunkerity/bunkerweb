@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from typing import Literal, Optional, Union
-from requests import request
+from requests import Response, request
 
 
 class API:
@@ -30,7 +30,7 @@ class API:
         *,
         additonal_headers: Optional[dict] = None,
         timeout=(10, 30),
-    ) -> tuple[bool, str, Optional[int], Optional[dict]]:
+    ) -> tuple[bool, str, Optional[int], Optional[Union[Response, dict]]]:
         additonal_headers = additonal_headers or {}
         try:
             kwargs = {}

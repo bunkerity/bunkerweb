@@ -19,6 +19,7 @@ from sys import path as sys_path
 from threading import Lock, Semaphore, Thread
 from traceback import format_exc
 
+
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("api",))
 ]:
@@ -26,6 +27,7 @@ for deps_path in [
         sys_path.append(deps_path)
 
 from croniter import croniter
+from requests import Response
 from schedule import (
     CancelJob,
     Job,
@@ -77,7 +79,9 @@ class JobScheduler:
     def update_env(self):
         retries = 0
         sent = None
+        err = None
         status = None
+        resp = {}
         while not sent and status != 200 and retries < 3:
             sent, err, status, resp = self.__api.request(
                 "GET",
@@ -100,7 +104,7 @@ class JobScheduler:
                     f"Successfully sent API request to {self.__api.endpoint}config",
                 )
 
-        if not sent or status != 200:
+        if (not sent or status != 200) and err:
             self.__logger.error(
                 f"Could not send core API request to {self.__api.endpoint}config after {retries} retries : {err}, configuration will not work as expected.",
             )
@@ -111,7 +115,9 @@ class JobScheduler:
     def update_jobs(self):
         retries = 0
         sent = None
+        err = None
         status = None
+        resp = {}
         while not sent and status != 200 and retries < 3:
             sent, err, status, resp = self.__api.request(
                 "GET",
@@ -134,11 +140,19 @@ class JobScheduler:
                     f"Successfully sent API request to {self.__api.endpoint}plugins/external/files",
                 )
 
-        if not sent or status != 200:
+        if (not sent or status != 200) and err:
             self.__logger.error(
                 f"Could not send core API request to {self.__api.endpoint}plugins/external/files after {retries} retries : {err}, not all jobs will be available.",
             )
-        elif resp.content:
+        else:
+            try:
+                assert isinstance(resp, Response)
+            except (AssertionError, AttributeError):
+                self.__logger.error(
+                    f"Could not get external plugins from core API, not all jobs will be available.",
+                )
+                return
+
             EXTERNAL_PLUGINS_PATH.mkdir(parents=True, exist_ok=True)
             with tar_open(mode="r:gz", fileobj=BytesIO(resp.content)) as tar:
                 tar.extractall(EXTERNAL_PLUGINS_PATH)
@@ -146,7 +160,7 @@ class JobScheduler:
             # Fix potential permission issues
             for root, _, files in walk(str(EXTERNAL_PLUGINS_PATH)):
                 for f in files:
-                    _path = join(root, f)
+                    _path = Path(root, f)
                     st = _path.stat()
                     _path.chmod(st.st_mode | S_IEXEC)
 
@@ -229,8 +243,6 @@ class JobScheduler:
             return schedule_every().day
         elif every == "week":
             return schedule_every().week
-        elif every == "month":
-            return schedule_every().month
 
         raise ValueError(f"Can't convert string {every} to schedule")
 
@@ -239,9 +251,10 @@ class JobScheduler:
             f"Executing job {name} from plugin {plugin} ...",
         )
         success = True
+        start_date = time()
+        end_date = None
         ret = -1
         try:
-            start_date = time()
             proc = run(
                 join(path, "jobs", file),
                 stdin=DEVNULL,
@@ -268,7 +281,8 @@ class JobScheduler:
                 self.__job_success = False
 
         Thread(
-            target=self.__add_job_run, args=(name, success, start_date, end_date)
+            target=self.__add_job_run,
+            args=(name, success, start_date, end_date or time()),
         ).start()
 
         return ret
@@ -310,7 +324,7 @@ class JobScheduler:
                             self.__job_wrapper(path, plugin, name, file)
                             nonlocal next_run
                             next_run = cron.get_next()
-                            CancelJob  # Cancel the previous job
+                            CancelJob()  # Cancel the previous job
 
                             # Reschedule the job
                             schedule_every(next_run - time.time()).seconds.do(
@@ -334,6 +348,12 @@ class JobScheduler:
         success = True
         for job in schedule_jobs:
             if not job.should_run:
+                continue
+
+            try:
+                assert job.job_func
+            except (AssertionError, AttributeError):
+                self.__logger.error(f"Job {job} has no job_func attribute, ignoring it")
                 continue
 
             self.__logger.info(
@@ -386,6 +406,12 @@ class JobScheduler:
 
         success = True
         for job in schedule_jobs:
+            try:
+                assert job.job_func
+            except (AssertionError, AttributeError):
+                self.__logger.error(f"Job {job} has no job_func attribute, ignoring it")
+                continue
+
             if job.job_func.args[2] != job_name:
                 continue
 

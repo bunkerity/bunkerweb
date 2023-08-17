@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated, Dict, Literal, Union
+from typing import Annotated, Dict, Literal, Optional, Union
 from fastapi import APIRouter, BackgroundTasks, File, Form, Response, status
 from fastapi.responses import JSONResponse
 
@@ -182,9 +182,9 @@ async def get_cache(
 async def update_cache(
     job_name: str,
     file_name: str,
-    cache_file: Annotated[bytes, File()] = None,
-    service_id: Annotated[str, Form()] = None,
-    checksum: Annotated[str, Form()] = None,
+    cache_file: Optional[Annotated[bytes, File()]] = None,
+    service_id: Optional[Annotated[str, Form()]] = None,
+    checksum: Optional[Annotated[str, Form()]] = None,
 ):
     """
     Upload a file to the cache.
