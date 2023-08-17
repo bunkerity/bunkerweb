@@ -959,7 +959,7 @@ class Database:
                     return "method_conflict"
 
                 session.query(Services).filter(Services.id == service_name).update(
-                    Services.id == first_server_name # type: ignore
+                    Services.id == first_server_name  # type: ignore
                 )
 
             service_name = first_server_name
@@ -2710,7 +2710,7 @@ class Database:
             )
 
             if db_instance is not None:
-                return f"Instance {hostname} already exists, will not be added."
+                return "exists"
 
             session.add(
                 Instances(hostname=hostname, port=port, server_name=server_name)
@@ -2777,6 +2777,16 @@ class Database:
     def remove_instance(self, instance_hostname: str) -> str:
         """Remove an instance."""
         with self.__db_session() as session:
+            db_instance = (
+                session.query(Instances)
+                .with_entities(Instances.hostname)
+                .filter_by(hostname=instance_hostname)
+                .first()
+            )
+
+            if db_instance is None:
+                return "not_found"
+            
             session.query(Instances).filter_by(hostname=instance_hostname).delete()
 
             try:

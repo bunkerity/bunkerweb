@@ -5,13 +5,14 @@ from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from json import loads
 from logging import Logger
-from os import _exit, chmod, environ
+from os import _exit, chmod, cpu_count, environ
 from os.path import basename, dirname, join, normpath, sep
 from pathlib import Path
 from shutil import copytree, rmtree
 from signal import SIGINT, SIGTERM, signal
 from socket import gaierror, herror
 from stat import S_IEXEC
+from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from tarfile import open as tar_open
 from threading import Semaphore
 from time import sleep
@@ -32,6 +33,92 @@ from ApiCaller import ApiCaller  # type: ignore
 from database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
+KOMBU_CONNECTION = None
+DB = None
+HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.healthy")
+SEMAPHORE = Semaphore(cpu_count() or 1)
+
+
+def stop(status):
+    global DB
+    HEALTHY_PATH.unlink(missing_ok=True)
+    if DB:
+        del DB
+    if KOMBU_CONNECTION:
+        KOMBU_CONNECTION.release()
+    _exit(status)
+
+
+signal(SIGINT, partial(stop, 0))  # type: ignore
+signal(SIGTERM, partial(stop, 0))  # type: ignore
+
+CORE_PLUGINS_PATH = Path(sep, "usr", "share", "bunkerweb", "core")
+EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
+SETTINGS_PATH = Path(sep, "usr", "share", "bunkerweb", "settings.json")
+CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
+TMP_ENV_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.env")
+TMP_ENV_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+API_CONFIG = ApiConfig("core", **environ)
+LOGGER = setup_logger("CORE", API_CONFIG.log_level)
+INSTANCES_API_CALLER = ApiCaller()
+
+if (
+    not API_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
+    or int(API_CONFIG.WAIT_RETRY_INTERVAL) < 1
+):
+    LOGGER.error(
+        f"Invalid WAIT_RETRY_INTERVAL provided: {API_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
+    )
+    stop(1)
+
+DB = Database(LOGGER, API_CONFIG.DATABASE_URI)
+MQ_PATH = None
+
+LOGGER.info(f"🚀 {API_CONFIG.integration} integration detected")
+
+if API_CONFIG.MQ_URI.startswith("filesystem:///"):
+    MQ_PATH = Path(API_CONFIG.MQ_URI.replace("filesystem:///", ""))
+    MQ_DATA_OUT_PATH = MQ_PATH.joinpath("data_out")
+    MQ_DATA_IN_PATH = MQ_PATH.joinpath("data_in")
+    MQ_DATA_OUT_PATH.mkdir(parents=True, exist_ok=True)
+    MQ_DATA_IN_PATH.mkdir(parents=True, exist_ok=True)
+
+    KOMBU_CONNECTION = Connection(
+        "filesystem://",
+        transport_options={
+            "data_folder_in": str(MQ_PATH.joinpath("data_in")),
+            "data_folder_out": str(MQ_PATH.joinpath("data_out")),
+        },
+    )
+else:
+    KOMBU_CONNECTION = Connection(API_CONFIG.MQ_URI)
+
+with suppress(ConnectionRefusedError, gaierror, herror):
+    KOMBU_CONNECTION.connect()
+
+retries = 0
+while not KOMBU_CONNECTION.connected and retries < 15:
+    LOGGER.warning(
+        f"Waiting for Kombu to be connected, retrying in {API_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
+    )
+    sleep(int(API_CONFIG.WAIT_RETRY_INTERVAL))
+    with suppress(ConnectionRefusedError, gaierror, herror):
+        KOMBU_CONNECTION.connect()
+    retries += 1
+
+if not KOMBU_CONNECTION.connected:
+    LOGGER.error(
+        f"Coudln't initiate a connection with Kombu with uri {API_CONFIG.MQ_URI}, exiting ..."
+    )
+    stop(1)
+
+KOMBU_CONNECTION.release()
+
+LOGGER.info("✅ Connection to Kombu succeeded")
+
+scheduler_queue = Queue("scheduler", routing_key="scheduler")
+
 
 def dict_to_frozenset(d):
     if isinstance(d, list):
@@ -42,7 +129,7 @@ def dict_to_frozenset(d):
 
 
 def install_plugin(
-    plugin_url: str, logger: Logger, *, semaphore: Optional[Semaphore] = None
+    plugin_url: str, logger: Logger, *, semaphore: Semaphore = SEMAPHORE
 ):
     if semaphore:
         semaphore.acquire(timeout=30)
@@ -172,87 +259,6 @@ def generate_external_plugins(
                 chmod(job_file, st.st_mode | S_IEXEC)
 
 
-KOMBU_CONNECTION = None
-DB = None
-HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.healthy")
-CORE_PLUGINS_PATH = Path(sep, "usr", "share", "bunkerweb", "core")
-EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
-
-
-def stop(status):
-    global DB
-    HEALTHY_PATH.unlink(missing_ok=True)
-    if DB:
-        del DB
-    if KOMBU_CONNECTION:
-        KOMBU_CONNECTION.release()
-    _exit(status)
-
-
-signal(SIGINT, partial(stop, 0))  # type: ignore
-signal(SIGTERM, partial(stop, 0))  # type: ignore
-
-API_CONFIG = ApiConfig("core", **environ)
-LOGGER = setup_logger("CORE", API_CONFIG.log_level)
-INSTANCES_API_CALLER = ApiCaller()
-
-if (
-    not API_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
-    or int(API_CONFIG.WAIT_RETRY_INTERVAL) < 1
-):
-    LOGGER.error(
-        f"Invalid WAIT_RETRY_INTERVAL provided: {API_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
-    )
-    stop(1)
-
-DB = Database(LOGGER, API_CONFIG.DATABASE_URI)
-MQ_PATH = None
-
-LOGGER.info(f"🚀 {API_CONFIG.integration} integration detected")
-
-if API_CONFIG.MQ_URI.startswith("filesystem:///"):
-    MQ_PATH = Path(API_CONFIG.MQ_URI.replace("filesystem:///", ""))
-    MQ_DATA_OUT_PATH = MQ_PATH.joinpath("data_out")
-    MQ_DATA_IN_PATH = MQ_PATH.joinpath("data_in")
-    MQ_DATA_OUT_PATH.mkdir(parents=True, exist_ok=True)
-    MQ_DATA_IN_PATH.mkdir(parents=True, exist_ok=True)
-
-    KOMBU_CONNECTION = Connection(
-        "filesystem://",
-        transport_options={
-            "data_folder_in": str(MQ_PATH.joinpath("data_in")),
-            "data_folder_out": str(MQ_PATH.joinpath("data_out")),
-        },
-    )
-else:
-    KOMBU_CONNECTION = Connection(API_CONFIG.MQ_URI)
-
-with suppress(ConnectionRefusedError, gaierror, herror):
-    KOMBU_CONNECTION.connect()
-
-retries = 0
-while not KOMBU_CONNECTION.connected and retries < 15:
-    LOGGER.warning(
-        f"Waiting for Kombu to be connected, retrying in {API_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
-    )
-    sleep(int(API_CONFIG.WAIT_RETRY_INTERVAL))
-    with suppress(ConnectionRefusedError, gaierror, herror):
-        KOMBU_CONNECTION.connect()
-    retries += 1
-
-if not KOMBU_CONNECTION.connected:
-    LOGGER.error(
-        f"Coudln't initiate a connection with Kombu with uri {API_CONFIG.MQ_URI}, exiting ..."
-    )
-    stop(1)
-
-KOMBU_CONNECTION.release()
-
-LOGGER.info("✅ Connection to Kombu succeeded")
-
-scheduler_queue = Queue("scheduler", routing_key="scheduler")
-
-
 def inform_scheduler(data: dict):
     LOGGER.info(f"📤 Informing the scheduler with data : {data}")
 
@@ -320,3 +326,52 @@ def update_api_caller():
         )
         for instance in DB.get_instances()
     ]
+
+
+def send_plugins_to_instances():  # TODO
+    pass
+
+
+def send_config_to_instances():
+    assert DB
+
+    nginx_prefix = join(sep, "etc", "nginx")
+    content = ""
+    for k, v in DB.get_config().items():
+        content += f"{k}={v}\n"
+    TMP_ENV_PATH.write_text(content)
+
+    # run the generator
+    proc = subprocess_run(
+        [
+            "python3",
+            join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
+            "--settings",
+            str(SETTINGS_PATH),
+            "--templates",
+            join(sep, "usr", "share", "bunkerweb", "confs"),
+            "--output",
+            nginx_prefix,
+            "--variables",
+            str(TMP_ENV_PATH),
+        ],
+        stdin=DEVNULL,
+        stderr=STDOUT,
+        check=False,
+    )
+
+    if proc.returncode != 0:
+        LOGGER.error(
+            "Config generator failed, configuration will not work as expected..."
+        )
+
+    LOGGER.info(f"Sending {nginx_prefix} folder ...")
+    ret = INSTANCES_API_CALLER.send_files(nginx_prefix, "/confs")
+    if not ret:
+        LOGGER.error(
+            "Sending nginx configs failed, configuration will not work as expected...",
+        )
+
+
+def send_custom_configs_to_instances():  # TODO
+    pass

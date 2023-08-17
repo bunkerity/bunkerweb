@@ -1,4 +1,4 @@
-from typing import Annotated, Dict, List, Literal
+from typing import Annotated, Dict, List, Literal, Union
 from fastapi import APIRouter, status, Path as fastapi_Path
 from fastapi.responses import JSONResponse
 
@@ -51,18 +51,15 @@ async def add_instance(instance: Instance) -> JSONResponse:
     - **port**: The port of the instance
     - **server_name**: The server name of the instance
     """
-    db_instance = DB.get_instance(instance.hostname)
+    error = DB.add_instance(**instance.model_dump())
 
-    if db_instance:
+    if error == "exists":
         message = f"Instance {instance.hostname} already exists"
         LOGGER.warning(message)
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT, content={"message": message}
         )
-
-    error = DB.add_instance(**instance.model_dump())
-
-    if error:
+    elif error:
         LOGGER.error(f"Can't add instance to database : {error}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -136,18 +133,15 @@ async def delete_instance(instance_hostname: str) -> JSONResponse:
     """
     Delete a BunkerWeb instance
     """
-    db_instance = DB.get_instance(instance_hostname)
+    error = DB.remove_instance(instance_hostname)
 
-    if not db_instance:
+    if error == "not_found":
         message = f"Instance {instance_hostname} not found"
         LOGGER.warning(message)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
         )
-
-    error = DB.remove_instance(instance_hostname)
-
-    if error:
+    elif error:
         LOGGER.error(f"Can't remove instance to database : {error}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -163,7 +157,7 @@ async def delete_instance(instance_hostname: str) -> JSONResponse:
 
 @router.post(
     "/{instance_hostname}/{action}",
-    response_model=Dict[Literal["message"], str],
+    response_model=Dict[Literal["message"], Union[str, dict]],
     summary="Send an action to a BunkerWeb instance",
     response_description="Message",
     responses={
@@ -182,7 +176,8 @@ async def delete_instance(instance_hostname: str) -> JSONResponse:
     },
 )
 async def send_instance_action(
-    instance_hostname: str, action: Literal["start", "stop", "restart", "reload"]
+    instance_hostname: str,
+    action: Literal["ping", "bans", "start", "stop", "restart", "reload"],
 ) -> JSONResponse:
     """
     Delete a BunkerWeb instance
@@ -201,7 +196,9 @@ async def send_instance_action(
         db_instance["server_name"],
     )
 
-    sent, err, status_code, resp = instance_api.request("POST", f"/{action}")
+    sent, err, status_code, resp = instance_api.request(
+        "GET" if action in ("ping", "bans") else "POST", f"/{action}", timeout=(5, 10)
+    )
 
     if not sent:
         error = f"Can't send API request to {instance_api.endpoint}{action} : {err}"
@@ -218,4 +215,4 @@ async def send_instance_action(
 
     LOGGER.info(f"Successfully sent API request to {instance_api.endpoint}{action}")
 
-    return JSONResponse(content={"message": "Action successfully sent"})
+    return JSONResponse(content={"message": resp})

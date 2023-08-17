@@ -42,6 +42,7 @@ from fastapi.responses import JSONResponse
 from .core import app, BUNKERWEB_VERSION
 from .dependencies import (
     API_CONFIG,
+    CONFIGS_PATH,
     CORE_PLUGINS_PATH,
     DB,
     dict_to_frozenset,
@@ -52,13 +53,11 @@ from .dependencies import (
     install_plugin,
     KOMBU_CONNECTION,
     LOGGER,
+    SETTINGS_PATH,
     stop,
     update_app_mounts,
     update_api_caller,
 )
-
-SETTINGS_PATH = Path(sep, "usr", "share", "bunkerweb", "settings.json")
-CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
 
 PLUGIN_KEYS = [
     "id",
@@ -96,8 +95,6 @@ TMP_ENV_PATH = Path(
     "variables.env",
 )
 TMP_ENV = dotenv_values(str(TMP_ENV_PATH))
-
-SEMAPHORE = Semaphore(cpu_count() or 1)
 
 
 db_is_initialized = DB.is_initialized()
@@ -190,7 +187,6 @@ elif API_CONFIG.EXTERNAL_PLUGIN_URLS != db_config.get("EXTERNAL_PLUGIN_URLS", ""
         thread = Thread(
             target=install_plugin,
             args=(plugin_url, LOGGER),
-            kwargs={"semaphore": SEMAPHORE},
         )
         thread.start()
         threads.append(thread)
