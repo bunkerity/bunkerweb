@@ -21,7 +21,7 @@ log "ENTRYPOINT" "ℹ️ " "Starting the core v$(cat /usr/share/bunkerweb/VERSIO
 # setup and check /data folder
 /usr/share/bunkerweb/helpers/data.sh "ENTRYPOINT"
 
-read LISTEN_ADDR LISTEN_PORT LOG_LEVEL AUTOCONF_MODE KUBERNETES_MODE SWARM_MODE < <(echo $(python3 /usr/share/bunkerweb/core/core.py | jq -r '.listen_addr, .listen_port, .log_level, .autoconf_mode, .kubernetes_mode, .swarm_mode'))
+read LISTEN_ADDR LISTEN_PORT LOG_LEVEL AUTOCONF_MODE KUBERNETES_MODE SWARM_MODE < <(echo $(python3 /usr/share/bunkerweb/core/app/core.py | jq -r '.listen_addr, .listen_port, .log_level, .autoconf_mode, .kubernetes_mode, .swarm_mode'))
 
 if $AUTOCONF_MODE ; then
 	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION

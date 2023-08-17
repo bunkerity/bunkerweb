@@ -69,7 +69,7 @@ RUN apk add --no-cache bash jq grep libmagic && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:core /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
-  chmod 750 cli/main.py core/*.py core/entrypoint.sh helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
+  chmod 750 cli/main.py core/app/*.py core/app/routers/*.py core/entrypoint.sh helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
   chmod 660 INTEGRATION && \
   chown root:core INTEGRATION
 

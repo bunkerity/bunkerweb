@@ -19,7 +19,7 @@ from ApiCaller import ApiCaller  # type: ignore
 from database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
-from core import ApiConfig
+from app.core import ApiConfig  # type: ignore
 
 API_CONFIG = ApiConfig("core", **environ)
 LOGGER = setup_logger("CORE", API_CONFIG.log_level)

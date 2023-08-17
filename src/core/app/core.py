@@ -191,6 +191,10 @@ tags_metadata = [  # TODO: Add more tags and better descriptions: https://fastap
         "description": "Operations related to plugin management",
     },
     {
+        "name": "config",
+        "description": "Operations related to configuration management",
+    },
+    {
         "name": "jobs",
         "description": "Operations related to job management",
     },
