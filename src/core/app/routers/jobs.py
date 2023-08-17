@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Annotated, Dict, Literal, Optional, Union
-from fastapi import APIRouter, BackgroundTasks, File, Form, Response, status
+from fastapi import APIRouter, BackgroundTasks, File, Form, status
 from fastapi.responses import JSONResponse
 
 from ..core import CacheFileDataModel, CacheFileModel, ErrorMessage, Job, Job_cache
@@ -190,7 +190,7 @@ async def update_cache(
     Upload a file to the cache.
     """
     # TODO add a background task that sends a request to the instances to update the cache
-    resp = DB.update_job_cache(
+    resp = DB.upsert_job_cache(
         job_name,
         file_name,
         cache_file,

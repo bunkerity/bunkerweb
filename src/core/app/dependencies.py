@@ -25,9 +25,12 @@ from kombu import Connection, Queue
 from magic import Magic
 from requests import get
 
+
 from .core import ApiConfig
-from logger import setup_logger  # type: ignore
+from API import API  # type: ignore
+from ApiCaller import ApiCaller  # type: ignore
 from database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
 
 
 def dict_to_frozenset(d):
@@ -191,6 +194,7 @@ signal(SIGTERM, partial(stop, 0))  # type: ignore
 
 API_CONFIG = ApiConfig("core", **environ)
 LOGGER = setup_logger("CORE", API_CONFIG.log_level)
+INSTANCES_API_CALLER = ApiCaller()
 
 if (
     not API_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
@@ -283,22 +287,36 @@ def update_app_mounts(app):
 
         subapi_plugin = basename(dirname(subapi))
         LOGGER.info(f"Mounting subapi {subapi_plugin} ...")
-        # try:
-        loader = SourceFileLoader(f"{subapi_plugin}_api", str(main_file_path))
-        subapi_module = loader.load_module()
-        root_path = getattr(subapi_module, "root_path", f"/{subapi_plugin}")
+        try:
+            loader = SourceFileLoader(f"{subapi_plugin}_api", str(main_file_path))
+            subapi_module = loader.load_module()
+            root_path = getattr(subapi_module, "root_path", f"/{subapi_plugin}")
 
-        if hasattr(subapi_module, "app"):
-            app.mount(
-                root_path,
-                getattr(subapi_module, "app"),
-                basename(dirname(subapi)),
-            )
+            if hasattr(subapi_module, "app"):
+                app.mount(
+                    root_path,
+                    getattr(subapi_module, "app"),
+                    basename(dirname(subapi)),
+                )
 
-            LOGGER.info(
-                f"✅ The subapi for the plugin {subapi_plugin} has been mounted successfully, root path: {root_path}"
-            )
-        else:
-            LOGGER.error(f"Couldn't mount subapi {subapi_plugin}, no app found")
-        # except Exception as e:
-        #     LOGGER.error(f"Exception while mounting subapi {subapi_plugin} : {e}")
+                LOGGER.info(
+                    f"✅ The subapi for the plugin {subapi_plugin} has been mounted successfully, root path: {root_path}"
+                )
+            else:
+                LOGGER.error(f"Couldn't mount subapi {subapi_plugin}, no app found")
+        except Exception as e:
+            LOGGER.error(f"Exception while mounting subapi {subapi_plugin} : {e}")
+
+
+def update_api_caller():
+    assert DB
+
+    LOGGER.info("Updating API caller ...")
+
+    INSTANCES_API_CALLER.apis = [
+        API(
+            f"http://{instance['hostname']}:{instance['port']}",
+            instance["server_name"],
+        )
+        for instance in DB.get_instances()
+    ]

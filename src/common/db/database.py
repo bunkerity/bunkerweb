@@ -938,10 +938,10 @@ class Database:
             if not db_service:
                 return "not_found"
 
-            first_server_name = config.get("SERVER_NAME", service_name).split()[0]
+            first_server_name: str = config.get("SERVER_NAME", service_name).split()[0]
 
             if first_server_name != service_name:
-                if db_service.method != method:
+                if db_service.method != method and method not in ("core", "autoconf"):
                     return "method_conflict"
 
                 service_settings = (
@@ -959,7 +959,7 @@ class Database:
                     return "method_conflict"
 
                 session.query(Services).filter(Services.id == service_name).update(
-                    Services.id == first_server_name
+                    Services.id == first_server_name # type: ignore
                 )
 
             service_name = first_server_name
@@ -1321,6 +1321,110 @@ class Database:
                     .all()
                 )
             ]
+
+    def upsert_custom_config(
+        self,
+        service_id: str,
+        config_type: str,
+        name: str,
+        data: bytes,
+        method: str,
+        *,
+        checksum: Optional[str] = None,
+    ) -> str:
+        """Add or update a custom config in the database"""
+        ret = ""
+        with self.__db_session() as session:
+            config = {
+                "data": data,
+                "method": method,
+                "checksum": checksum or sha256(data).hexdigest(),
+                "service_id": service_id,
+                "type": config_type.replace("-", "_").lower(),
+                "name": name,
+            }
+
+            custom_conf = (
+                session.query(Custom_configs)
+                .with_entities(Custom_configs.checksum, Custom_configs.method)
+                .filter_by(
+                    service_id=config["service_id"],
+                    type=config["type"],
+                    name=config["name"],
+                )
+                .first()
+            )
+
+            if not custom_conf:
+                session.add(Custom_configs(**config))
+                ret = "created"
+            elif config["checksum"] != custom_conf.checksum and method in (
+                custom_conf.method,
+                "autoconf",
+            ):
+                session.query(Custom_configs).filter(
+                    Custom_configs.service_id == config["service_id"],
+                    Custom_configs.type == config["type"],
+                    Custom_configs.name == config["name"],
+                ).update(
+                    {
+                        Custom_configs.data: config["data"],
+                        Custom_configs.checksum: config["checksum"],
+                    }
+                    | ({"method": "autoconf"} if method == "autoconf" else {})
+                )
+                ret = "updated"
+
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.custom_configs_changed = True
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ret
+
+    def delete_custom_config(
+        self, service_id: str, config_type: str, name: str, method: str
+    ) -> str:
+        """Delete a custom config from the database"""
+        with self.__db_session() as session:
+            custom_conf = (
+                session.query(Custom_configs)
+                .with_entities(Custom_configs.method)
+                .filter_by(
+                    service_id=service_id,
+                    type=config_type.replace("-", "_").lower(),
+                    name=name,
+                )
+                .first()
+            )
+
+            if not custom_conf:
+                return "not_found"
+            elif custom_conf.method != method and method not in ("core", "autoconf"):
+                return "method_conflict"
+
+            session.query(Custom_configs).filter(
+                Custom_configs.service_id == service_id,
+                Custom_configs.type == config_type.replace("-", "_").lower(),
+                Custom_configs.name == name,
+            ).delete()
+
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.custom_configs_changed = True
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
 
     def get_services_settings(self, methods: bool = False) -> List[Dict[str, Any]]:
         """Get the services' configs from the database"""
@@ -2499,7 +2603,7 @@ class Database:
                 job_name=job_name, service_id=service_id, file_name=file_name
             ).delete()
 
-    def update_job_cache(
+    def upsert_job_cache(
         self,
         job_name: str,
         file_name: str,

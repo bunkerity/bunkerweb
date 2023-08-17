@@ -408,3 +408,22 @@ class CacheFileDataModel(CacheFileModel):
 class CacheFileInfoModel(CacheFileModel):
     last_update: datetime
     checksum: Optional[str] = None
+
+
+class CustomConfigModel(CacheFileModel):
+    type: str = Field(examples=["server_http"])
+
+
+class CustomConfigNameModel(CustomConfigModel):
+    name: str = Field(examples=["my_custom_config"])
+
+
+class CustomConfigDataModel(CustomConfigNameModel):
+    data: bytes = Field(examples=[b"BunkerWeb forever"])
+    checksum: str = Field(
+        None,
+        examples=[
+            "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"
+        ],
+        description="SHA256 checksum of the data",
+    )

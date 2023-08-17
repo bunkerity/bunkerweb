@@ -54,6 +54,7 @@ from .dependencies import (
     LOGGER,
     stop,
     update_app_mounts,
+    update_api_caller,
 )
 
 SETTINGS_PATH = Path(sep, "usr", "share", "bunkerweb", "settings.json")
@@ -433,8 +434,8 @@ if err:
 
 LOGGER.info("✅ BunkerWeb static instances updated to database")
 
+update_api_caller()
 
-# TODO handle when it's on autoconf/swarm/kubernetes mode the global config
 if API_CONFIG.integration in ("Linux", "Docker"):
     if config_files != db_config:
         err = DB.save_config(config_files, "core")

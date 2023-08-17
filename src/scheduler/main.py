@@ -25,7 +25,7 @@ from kombu import Connection, Queue
 from logger import setup_logger  # type: ignore
 from API import API  # type: ignore
 from JobScheduler import JobScheduler
-from scheduler import SchedulerConfig
+from scheduler import SchedulerConfig  # type: ignore
 
 RUN_ONCE = False
 SCHEDULER_HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy")
@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
         scheduler_queue = Queue("scheduler", routing_key="scheduler")
 
-        CORE_API = API(SCHEDULER_CONFIG.API_ADDR, "bw-scheduler")
+        CORE_API: API = API(SCHEDULER_CONFIG.API_ADDR, "bw-scheduler")
 
         LOGGER.info("Test API connection ...")
 
