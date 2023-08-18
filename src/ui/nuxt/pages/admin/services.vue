@@ -4,9 +4,7 @@ useHead({
   meta: [{ name: "description", content: "My amazing site." }],
 });
 
-const { data, pending, error } = await useFetch("/api/jobs", {
-  method: "GET",
-});
+const service = {};
 </script>
 
 <template>

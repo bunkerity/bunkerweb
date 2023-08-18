@@ -26,8 +26,6 @@ const navList = [
     svg: resolveComponent("MenuSvgPlugins"),
     path: "plugins",
   },
-  { title: "Cache", svg: resolveComponent("MenuSvgCache"), path: "/cache" },
-  { title: "Logs", svg: resolveComponent("MenuSvgLogs"), path: "/logs" },
   { title: "Jobs", svg: resolveComponent("MenuSvgJobs"), path: "/jobs" },
 ];
 

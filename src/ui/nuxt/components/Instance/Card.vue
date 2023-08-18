@@ -12,7 +12,7 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  _type: {
+  type: {
     type: String,
     required: true,
   },
@@ -20,16 +20,12 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
-  csrfToken: {
-    type: String,
-    required: true,
-  },
 });
 
 const instance = reactive({
   // Info list to render
   info: [
-    { label: "type", text: props._type },
+    { label: "type", text: props.type },
     { label: "hostname", text: props.hostname },
   ],
 });
@@ -60,10 +56,10 @@ const instance = reactive({
           v-if="props.health"
           type="submit"
           name="operation"
-          :value="props._type === 'local' ? 'restart' : 'reload'"
+          :value="props.type === 'local' ? 'restart' : 'reload'"
           class="edit-btn mx-1 text-xs"
         >
-          {{ props._type === "local" ? "restart" : "reload" }}
+          {{ props.type === "local" ? "restart" : "reload" }}
         </button>
         <button
           type="submit"

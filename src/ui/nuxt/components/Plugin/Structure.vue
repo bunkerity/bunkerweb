@@ -1,6 +1,4 @@
 <script setup>
-import { config } from "process";
-
 const props = defineProps({
   configs: {
     type: Array,
