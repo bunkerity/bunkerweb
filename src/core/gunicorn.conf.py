@@ -7,5 +7,5 @@ accesslog = "-"
 errorlog = "-"
 preload_app = True
 pidfile = join(sep, "var", "run", "bunkerweb", "api.pid")
-worker_class = "app.core.BwUvicornWorker"
+worker_class = "uvicorn_worker.BwUvicornWorker"
 graceful_timeout = 0

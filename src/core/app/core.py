@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from datetime import datetime
 from functools import cached_property
 from ipaddress import (
@@ -16,14 +17,13 @@ from typing import Dict, List, Literal, Optional, Union
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("utils",))
+    for paths in (("deps", "python"), ("api",), ("db",), ("utils",))
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
-from uvicorn.workers import UvicornWorker
 
 from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore (present in /usr/share/bunkerweb/utils/)
 
@@ -150,16 +150,6 @@ if __name__ == "__main__":
     _exit(0)
 
 
-class BwUvicornWorker(UvicornWorker):
-    CONFIG_KWARGS = {
-        "loop": "auto",
-        "http": "auto",
-        "proxy_headers": False,
-        "server_header": False,
-        "date_header": False,
-    }
-
-
 BUNKERWEB_VERSION = (
     Path(sep, "usr", "share", "bunkerweb", "VERSION")
     .read_text(encoding="utf-8")
@@ -212,6 +202,27 @@ tags_metadata = [  # TODO: Add more tags and better descriptions: https://fastap
     },
 ]
 
+from .dependencies import DB, HEALTHY_PATH, KOMBU_CONNECTION, update_app_mounts
+
+
+@asynccontextmanager  # type: ignore
+async def lifespan(app: FastAPI):
+    # ? startup_event()
+    update_app_mounts(app)
+    if not HEALTHY_PATH.exists():
+        HEALTHY_PATH.write_text("ok", encoding="utf-8")
+
+    yield  # ? lifespan of the application
+
+    # ? shutdown_event()
+    global DB
+    if DB:
+        del DB
+    KOMBU_CONNECTION.release()
+    if HEALTHY_PATH.exists():
+        HEALTHY_PATH.unlink(missing_ok=True)
+
+
 app = FastAPI(
     title="BunkerWeb API",
     description=description,
@@ -228,6 +239,7 @@ app = FastAPI(
         "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md",
     },
     openapi_tags=tags_metadata,
+    lifespan=lifespan,
 )
 
 

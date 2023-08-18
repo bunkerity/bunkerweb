@@ -131,8 +131,7 @@ def dict_to_frozenset(d):
 def install_plugin(
     plugin_url: str, logger: Logger, *, semaphore: Semaphore = SEMAPHORE
 ):
-    if semaphore:
-        semaphore.acquire(timeout=30)
+    semaphore.acquire(timeout=30)
 
     # Download Plugin file
     try:
@@ -217,8 +216,7 @@ def install_plugin(
             f"Exception while installing plugin(s) from {plugin_url} :\n{format_exc()}",
         )
 
-    if semaphore:
-        semaphore.release()
+    semaphore.release()
 
 
 def generate_external_plugins(
@@ -259,7 +257,9 @@ def generate_external_plugins(
                 chmod(job_file, st.st_mode | S_IEXEC)
 
 
-def inform_scheduler(data: dict):
+def inform_scheduler(data: dict, *, semaphore: Semaphore = SEMAPHORE):
+    semaphore.acquire(timeout=30)
+
     LOGGER.info(f"📤 Informing the scheduler with data : {data}")
 
     with KOMBU_CONNECTION:
@@ -273,6 +273,8 @@ def inform_scheduler(data: dict):
                     retry=True,
                     declare=[scheduler_queue],
                 )
+
+    semaphore.release()
 
 
 def update_app_mounts(app):

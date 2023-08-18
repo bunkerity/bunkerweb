@@ -13,9 +13,9 @@ from ipaddress import (
 from itertools import chain
 from json import loads as json_loads
 from shutil import rmtree
-from threading import Semaphore, Thread
+from threading import Thread
 from dotenv import dotenv_values
-from os import cpu_count, listdir, sep, walk
+from os import listdir, sep, walk
 from os.path import basename, dirname, join
 from pathlib import Path
 from fastapi.datastructures import Address
@@ -28,7 +28,7 @@ from typing import Optional
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("api",), ("utils",), ("db",), ("gen",))
+    for paths in (("deps", "python"), ("api",), ("db",), ("gen",), ("utils",))
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
@@ -451,24 +451,6 @@ else:
             f"Autoconf is not loaded yet in the database, retrying in {API_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
         )
         sleep(int(API_CONFIG.WAIT_RETRY_INTERVAL))
-
-
-@app.on_event("startup")
-async def startup_event():
-    update_app_mounts(app)
-    if not HEALTHY_PATH.exists():
-        HEALTHY_PATH.write_text("ok", encoding="utf-8")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    global DB
-
-    if DB:
-        del DB
-    KOMBU_CONNECTION.release()
-    if HEALTHY_PATH.exists():
-        HEALTHY_PATH.unlink(missing_ok=True)
 
 
 @app.middleware("http")
