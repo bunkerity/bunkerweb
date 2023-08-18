@@ -2,7 +2,7 @@
 
 from contextlib import contextmanager, suppress
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timedelta
 from hashlib import sha256
 from logging import Logger
 from os import _exit, getenv, listdir, sep
@@ -42,7 +42,7 @@ for deps_path in [
 from jobs import file_hash  # type: ignore
 
 from pymysql import install_as_MySQLdb
-from sqlalchemy import create_engine, text, inspect
+from sqlalchemy import NullPool, create_engine, text, inspect
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
@@ -66,6 +66,8 @@ class Database:
         self,
         logger: Logger,
         sqlalchemy_string: Optional[str] = None,
+        *,
+        pool: bool = True,
     ) -> None:
         """Initialize the database"""
         self.__logger = logger
@@ -85,7 +87,7 @@ class Database:
 
         if sqlalchemy_string.startswith("sqlite"):
             Path(
-                normpath(self.DB_STRING_RX.match(sqlalchemy_string).groups()[3])
+                normpath(self.DB_STRING_RX.match(sqlalchemy_string).groups()[3])  # type: ignore
             ).parent.mkdir(parents=True, exist_ok=True)
 
         if not self.ALEMBIC_DIR.exists():
@@ -139,6 +141,8 @@ class Database:
                 sqlalchemy_string,
                 future=True,
                 connect_args={"check_same_thread": False},
+                poolclass=None if pool else NullPool,
+                pool_pre_ping=True,
             )
         except ArgumentError:
             self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
@@ -183,6 +187,8 @@ class Database:
                         sqlalchemy_string,
                         future=True,
                         connect_args={"check_same_thread": False},
+                        poolclass=None if pool else NullPool,
+                        pool_pre_ping=True,
                     )
                 if "Unknown table" in str(e):
                     not_connected = False
@@ -2574,9 +2580,14 @@ class Database:
     ) -> str:
         """Add a job run."""
         with self.__db_session() as session:
+            current_date = datetime.now()
+
+            while session.query(Jobs_runs).filter_by(id=current_date).first():
+                current_date = current_date + timedelta(microseconds=1)
+
             session.add(
                 Jobs_runs(
-                    id=datetime.now(),
+                    id=current_date,
                     job_name=job_name,
                     success=success,
                     start_date=start_date,
@@ -2786,7 +2797,7 @@ class Database:
 
             if db_instance is None:
                 return "not_found"
-            
+
             session.query(Instances).filter_by(hostname=instance_hostname).delete()
 
             try:
