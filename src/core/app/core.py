@@ -9,7 +9,7 @@ from ipaddress import (
     ip_address,
     ip_network,
 )
-from os import sep
+from os import cpu_count, sep
 from os.path import join
 from pathlib import Path
 from sys import path as sys_path
@@ -27,13 +27,17 @@ from pydantic import BaseModel, Field
 
 from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore (present in /usr/share/bunkerweb/utils/)
 
+CPU_COUNT = cpu_count() or 1
+
 
 class ApiConfig(YamlBaseSettings):
     LISTEN_ADDR: str = "0.0.0.0"
     LISTEN_PORT: str = "1337"
+    MAX_WORKERS: str = str(CPU_COUNT - 1 if CPU_COUNT > 1 else 1)
+    MAX_THREADS: str = str(int(MAX_WORKERS) * 2 if MAX_WORKERS.isdigit() else 2)
     WAIT_RETRY_INTERVAL: str = "5"
     CHECK_WHITELIST: str = "yes"
-    WHITELIST: str = "127.0.0.1"
+    WHITELIST: Union[str, set] = "127.0.0.1"
     CHECK_TOKEN: str = "yes"
     TOKEN: str = "changeme"
     MQ_URI: str = "filesystem:////var/lib/bunkerweb/mq"
@@ -42,9 +46,9 @@ class ApiConfig(YamlBaseSettings):
     LOG_LEVEL: str = "info"
     DATABASE_URI: str = "sqlite:////var/lib/bunkerweb/db.sqlite3"
     EXTERNAL_PLUGIN_URLS: str = ""
+    AUTOCONF_MODE: str = "no"
     KUBERNETES_MODE: str = "no"
     SWARM_MODE: str = "no"
-    AUTOCONF_MODE: str = "no"
 
     # The reading order is:
     # 1. Environment variables
@@ -71,6 +75,10 @@ class ApiConfig(YamlBaseSettings):
         return self.CHECK_TOKEN.lower() == "yes"
 
     @cached_property
+    def autoconf_mode(self) -> bool:
+        return self.AUTOCONF_MODE.lower() == "yes"
+
+    @cached_property
     def kubernetes_mode(self) -> bool:
         return self.KUBERNETES_MODE.lower() == "yes"
 
@@ -79,15 +87,15 @@ class ApiConfig(YamlBaseSettings):
         return self.SWARM_MODE.lower() == "yes"
 
     @cached_property
-    def autoconf_mode(self) -> bool:
-        return self.AUTOCONF_MODE.lower() == "yes"
-
-    @cached_property
     def whitelist(
         self,
-    ) -> List[Union[IPv4Address, IPv6Address, IPv4Network, IPv6Network]]:
-        tmp_whitelist = self.WHITELIST.split(" ")
-        whitelist = []
+    ) -> set[Union[IPv4Address, IPv6Address, IPv4Network, IPv6Network]]:
+        if isinstance(self.WHITELIST, str):
+            tmp_whitelist = self.WHITELIST.split(" ")
+        else:
+            tmp_whitelist = self.WHITELIST
+
+        whitelist = set()
 
         for ip in tmp_whitelist:
             if not ip:
@@ -95,9 +103,9 @@ class ApiConfig(YamlBaseSettings):
 
             try:
                 if "/" in ip:
-                    whitelist.append(ip_network(ip))
+                    whitelist.add(ip_network(ip))
                 else:
-                    whitelist.append(ip_address(ip))
+                    whitelist.add(ip_address(ip))
             except ValueError:
                 continue
 
@@ -136,17 +144,29 @@ if __name__ == "__main__":
         or int(API_CONFIG.LISTEN_PORT) > 65535
     ):
         _exit(1)
+    elif not API_CONFIG.MAX_WORKERS.isdigit() or int(API_CONFIG.MAX_WORKERS) < 1:
+        _exit(2)
+    elif not API_CONFIG.MAX_THREADS.isdigit() or int(API_CONFIG.MAX_THREADS) < 1:
+        _exit(3)
 
     data = {
-        "listen_addr": API_CONFIG.LISTEN_ADDR,
-        "listen_port": API_CONFIG.LISTEN_PORT,
-        "log_level": API_CONFIG.LOG_LEVEL,
-        "kubernetes_mode": API_CONFIG.kubernetes_mode,
-        "swarm_mode": API_CONFIG.swarm_mode,
-        "autoconf_mode": API_CONFIG.autoconf_mode,
+        "LISTEN_ADDR": API_CONFIG.LISTEN_ADDR,
+        "LISTEN_PORT": API_CONFIG.LISTEN_PORT,
+        "MAX_WORKERS": API_CONFIG.MAX_WORKERS,
+        "MAX_THREADS": API_CONFIG.MAX_THREADS,
+        "LOG_LEVEL": API_CONFIG.LOG_LEVEL,
+        "AUTOCONF_MODE": API_CONFIG.autoconf_mode,
+        "KUBERNETES_MODE": API_CONFIG.kubernetes_mode,
+        "SWARM_MODE": API_CONFIG.swarm_mode,
     }
 
-    print(dumps(data), flush=True)
+    content = ""
+    for k, v in data.items():
+        content += f"{k}={v!r}\n"
+
+    with open("/tmp/core.tmp.env", "w", encoding="utf-8") as f:
+        f.write(content)
+
     _exit(0)
 
 

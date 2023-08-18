@@ -23,12 +23,19 @@ log "ENTRYPOINT" "ℹ️ " "Starting the core v$(cat /usr/share/bunkerweb/VERSIO
 
 python3 /usr/share/bunkerweb/core/app/core.py > /dev/null
 
-if [ $? -ne 0 ] ; then
+if [ $? == 1 ] ; then
   log "ENTRYPOINT" "❌ " "Invalid LISTEN_PORT, It must be an integer between 1 and 65535."
+  exit 1
+elif [ $? == 2 ] ; then
+  log "ENTRYPOINT" "❌ " "Invalid MAX_WORKERS, It must be a positive integer."
+  exit 1
+elif [ $? == 3 ] ; then
+  log "ENTRYPOINT" "❌ " "Invalid MAX_THREADS, It must be a positive integer."
   exit 1
 fi
 
-read LISTEN_ADDR LISTEN_PORT LOG_LEVEL AUTOCONF_MODE KUBERNETES_MODE SWARM_MODE < <(echo $(python3 /usr/share/bunkerweb/core/app/core.py | jq -r '.listen_addr, .listen_port, .log_level, .autoconf_mode, .kubernetes_mode, .swarm_mode'))
+source /tmp/core.tmp.env
+rm -f /tmp/core.tmp.env
 
 if $AUTOCONF_MODE ; then
 	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION
@@ -40,7 +47,7 @@ fi
 
 # execute jobs
 log "ENTRYPOINT" "ℹ️ " "Executing core ..."
-python3 -m gunicorn --bind $LISTEN_ADDR:$LISTEN_PORT --log-level $LOG_LEVEL --config /usr/share/bunkerweb/core/gunicorn.conf.py &
+python3 -m gunicorn --bind $LISTEN_ADDR:$LISTEN_PORT --log-level $LOG_LEVEL --workers $MAX_WORKERS --threads $MAX_THREADS --config /usr/share/bunkerweb/core/gunicorn.conf.py &
 pid="$!"
 wait "$pid"
 while [ -f /var/run/bunkerweb/core.pid ] ; do

@@ -6,6 +6,7 @@ pydantic_settings==2.0.3
 python-magic==0.4.27
 python_multipart==0.0.6
 PyYAML==6.0.1
+redis==5.0.0
 requests==2.31.0
 uvicorn[standard]==0.23.2
 regex==2023.8.8

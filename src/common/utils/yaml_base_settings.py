@@ -72,10 +72,10 @@ class YamlConfigSettingsSource(DotEnvSettingsSource):
         self._yaml_data = yaml_config_settings_source(settings_cls, yaml_file) or {}
 
         for k, v in (self._yaml_data.get("global", None) or {}).items():
-            self._yaml_data[k.lower()] = v
+            self._yaml_data[k.upper()] = v
 
         for k, v in (self._yaml_data.get(bw_service, None) or {}).items():
-            self._yaml_data[k.lower()] = v
+            self._yaml_data[k.upper()] = v
 
         super().__init__(
             settings_cls,

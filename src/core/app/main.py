@@ -33,12 +33,12 @@ for deps_path in [
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from configurator import Configurator  # type: ignore
-from jobs import bytes_hash  # type: ignore
-
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
+from redis.client import Redis
 
+from configurator import Configurator  # type: ignore
+from jobs import bytes_hash  # type: ignore
 from .core import app, BUNKERWEB_VERSION
 from .dependencies import (
     API_CONFIG,
@@ -251,6 +251,8 @@ instances_config = API_CONFIG.model_dump(
     exclude=(
         "LISTEN_ADDR",
         "LISTEN_PORT",
+        "MAX_WORKERS",
+        "MAX_THREADS",
         "WAIT_RETRY_INTERVAL",
         "TOKEN",
         "MQ_URI",
@@ -452,11 +454,11 @@ else:
         )
         sleep(int(API_CONFIG.WAIT_RETRY_INTERVAL))
 
-REDIS_HOST = config_files.get("REDIS_HOST", None)
-REDIS_PORT = None
-REDIS_DATABASE = None
-REDIS_SSL = False
-REDIS_TIMEOUT = None
+REDIS_HOST: Optional[str] = config_files.get("REDIS_HOST", None)
+REDIS_PORT: Optional[int] = None
+REDIS_DATABASE: Optional[int] = None
+REDIS_SSL: bool = False
+REDIS_TIMEOUT: Optional[float] = None
 
 
 def listen_dynamic_instances():
@@ -465,6 +467,38 @@ def listen_dynamic_instances():
             "USE_REDIS is set to yes but one or more of the following variables are not defined: REDIS_HOST, REDIS_PORT, REDIS_DATABASE, REDIS_TIMEOUT, app will not listen for dynamic instances"
         )
         return
+
+    assert REDIS_HOST
+    assert REDIS_PORT
+    assert REDIS_DATABASE
+    assert REDIS_SSL
+    assert REDIS_TIMEOUT
+
+    redis_client = Redis(
+        host=REDIS_HOST,
+        port=REDIS_PORT,
+        db=REDIS_DATABASE,
+        ssl=REDIS_SSL,
+        socket_timeout=REDIS_TIMEOUT,
+    )
+
+    retries = 0
+    connected = False
+    while not connected:
+        try:
+            redis_client.ping()
+            connected = True
+        except Exception:
+            retries += 1
+            if retries > 10:
+                LOGGER.error(
+                    f"Couldn't connect to Redis after 10 retries, app will not listen for dynamic instances"
+                )
+                return
+            LOGGER.warning(
+                f"Can't connect to Redis, retrying in {API_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
+            )
+            sleep(int(API_CONFIG.WAIT_RETRY_INTERVAL))
 
 
 if config_files.get("USE_REDIS", "no") == "yes":
@@ -496,7 +530,7 @@ if config_files.get("USE_REDIS", "no") == "yes":
                 f"Invalid REDIS_TIMEOUT provided: {redis_timeout}, It must be a positive integer, timeout will default to 1000 ms"
             )
             redis_timeout = 1000
-        REDIS_TIMEOUT = int(redis_timeout) / 1000
+        REDIS_TIMEOUT = float(int(redis_timeout) / 1000)
         del redis_timeout
 
         Thread(target=listen_dynamic_instances, daemon=True).start()
