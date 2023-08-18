@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from contextlib import suppress
 from copy import deepcopy
 from glob import glob
 from io import BytesIO
@@ -51,10 +52,10 @@ from .dependencies import (
     HEALTHY_PATH,
     inform_scheduler,
     install_plugin,
-    KOMBU_CONNECTION,
     LOGGER,
     SETTINGS_PATH,
     stop,
+    stop_event,
     update_app_mounts,
     update_api_caller,
 )
@@ -468,11 +469,10 @@ def listen_dynamic_instances():
         )
         return
 
-    assert REDIS_HOST
-    assert REDIS_PORT
-    assert REDIS_DATABASE
-    assert REDIS_SSL
-    assert REDIS_TIMEOUT
+    assert REDIS_HOST is not None
+    assert REDIS_PORT is not None
+    assert REDIS_DATABASE is not None
+    assert REDIS_TIMEOUT is not None
 
     redis_client = Redis(
         host=REDIS_HOST,
@@ -481,6 +481,8 @@ def listen_dynamic_instances():
         ssl=REDIS_SSL,
         socket_timeout=REDIS_TIMEOUT,
     )
+
+    LOGGER.info("Trying to connect to Redis ...")
 
     retries = 0
     connected = False
@@ -499,6 +501,44 @@ def listen_dynamic_instances():
                 f"Can't connect to Redis, retrying in {API_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
             )
             sleep(int(API_CONFIG.WAIT_RETRY_INTERVAL))
+
+    LOGGER.info("✅ Connected to Redis")
+
+    pubsub = redis_client.pubsub()
+
+    LOGGER.info('Subscribing to Redis channel "bw-instances" ...')
+
+    while not stop_event.is_set():
+        try:
+            pubsub.subscribe("bw-instances")
+            break
+        except ConnectionError:
+            LOGGER.warning(
+                f"Can't subscribe to Redis channel, retrying in {API_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
+            )
+            sleep(int(API_CONFIG.WAIT_RETRY_INTERVAL))
+
+    LOGGER.info(
+        '✅ Subscribed to Redis channel "bw-instances", starting to listen for dynamic instances'
+    )
+
+    try:
+        while not stop_event.is_set():
+            pubsub_message = None
+            try:
+                pubsub_message = pubsub.get_message(timeout=15)
+            except (ConnectionError, TimeoutError):
+                while not stop_event.is_set():
+                    with suppress(ConnectionError):
+                        pubsub.close()
+                        pubsub.subscribe("bw-instances")
+                        break
+                    sleep(1)
+
+            # TODO handle pubsub_message
+    finally:
+        with suppress(ConnectionError):
+            pubsub.unsubscribe("bw-instances")
 
 
 if config_files.get("USE_REDIS", "no") == "yes":
@@ -533,7 +573,7 @@ if config_files.get("USE_REDIS", "no") == "yes":
         REDIS_TIMEOUT = float(int(redis_timeout) / 1000)
         del redis_timeout
 
-        Thread(target=listen_dynamic_instances, daemon=True).start()
+        Thread(target=listen_dynamic_instances, name="redis_listener").start()
     else:
         LOGGER.warning(
             "USE_REDIS is set to yes but REDIS_HOST is not defined, app will not listen for dynamic instances"

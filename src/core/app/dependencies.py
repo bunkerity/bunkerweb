@@ -14,7 +14,7 @@ from socket import gaierror, herror
 from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from tarfile import open as tar_open
-from threading import Semaphore
+from threading import enumerate as all_threads, Event, Semaphore
 from time import sleep
 from traceback import format_exc
 from typing import Any, Dict, List, Optional, Union
@@ -38,9 +38,18 @@ DB = None
 HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.healthy")
 SEMAPHORE = Semaphore(cpu_count() or 1)
 
+# Create a stop event
+stop_event = Event()
+
 
 def stop(status):
     global DB
+
+    stop_event.set()
+    for thread in all_threads():
+        if thread.name != "MainThread":
+            thread.join()
+
     HEALTHY_PATH.unlink(missing_ok=True)
     if DB:
         del DB

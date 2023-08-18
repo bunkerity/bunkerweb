@@ -133,7 +133,6 @@ class ApiConfig(YamlBaseSettings):
 
 
 if __name__ == "__main__":
-    from json import dumps
     from os import _exit, environ
 
     API_CONFIG = ApiConfig("core", **environ)
@@ -155,9 +154,9 @@ if __name__ == "__main__":
         "MAX_WORKERS": API_CONFIG.MAX_WORKERS,
         "MAX_THREADS": API_CONFIG.MAX_THREADS,
         "LOG_LEVEL": API_CONFIG.LOG_LEVEL,
-        "AUTOCONF_MODE": API_CONFIG.autoconf_mode,
-        "KUBERNETES_MODE": API_CONFIG.kubernetes_mode,
-        "SWARM_MODE": API_CONFIG.swarm_mode,
+        "AUTOCONF_MODE": API_CONFIG.AUTOCONF_MODE,
+        "KUBERNETES_MODE": API_CONFIG.KUBERNETES_MODE,
+        "SWARM_MODE": API_CONFIG.SWARM_MODE,
     }
 
     content = ""
@@ -222,15 +221,14 @@ tags_metadata = [  # TODO: Add more tags and better descriptions: https://fastap
     },
 ]
 
-from .dependencies import HEALTHY_PATH
+from .dependencies import stop
 
 
 @asynccontextmanager  # type: ignore
 async def lifespan(_):
     yield  # ? lifespan of the application
 
-    if HEALTHY_PATH.exists():
-        HEALTHY_PATH.unlink(missing_ok=True)
+    stop(0)
 
 
 app = FastAPI(
