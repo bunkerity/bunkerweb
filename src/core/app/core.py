@@ -202,23 +202,13 @@ tags_metadata = [  # TODO: Add more tags and better descriptions: https://fastap
     },
 ]
 
-from .dependencies import DB, HEALTHY_PATH, KOMBU_CONNECTION, update_app_mounts
+from .dependencies import HEALTHY_PATH
 
 
 @asynccontextmanager  # type: ignore
-async def lifespan(app: FastAPI):
-    # ? startup_event()
-    update_app_mounts(app)
-    if not HEALTHY_PATH.exists():
-        HEALTHY_PATH.write_text("ok", encoding="utf-8")
-
+async def lifespan(_):
     yield  # ? lifespan of the application
 
-    # ? shutdown_event()
-    global DB
-    if DB:
-        del DB
-    KOMBU_CONNECTION.release()
     if HEALTHY_PATH.exists():
         HEALTHY_PATH.unlink(missing_ok=True)
 

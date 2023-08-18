@@ -251,9 +251,8 @@ class JobScheduler:
             f"Executing job {name} from plugin {plugin} ...",
         )
         success = True
-        start_date = time()
-        end_date = None
         ret = -1
+        start_date = time()
         try:
             proc = run(
                 join(path, "jobs", file),
@@ -262,7 +261,6 @@ class JobScheduler:
                 env=self.__env,
                 check=False,
             )
-            end_date = time()
             ret = proc.returncode
         except BaseException:
             success = False
@@ -271,6 +269,7 @@ class JobScheduler:
             )
             with self.__thread_lock:
                 self.__job_success = False
+        end_date = time()
 
         if self.__job_success and ret >= 2:
             success = False
@@ -281,8 +280,7 @@ class JobScheduler:
                 self.__job_success = False
 
         Thread(
-            target=self.__add_job_run,
-            args=(name, success, start_date, end_date or time()),
+            target=self.__add_job_run, args=(name, success, start_date, end_date)
         ).start()
 
         return ret

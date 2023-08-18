@@ -161,7 +161,7 @@ for filename in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "plugin.json"))):
     if not plugin_data:
         continue
 
-    plugin_data["method"] = "manuel"
+    plugin_data["method"] = "manual"
 
     manual_plugins_ids.append(plugin_data["id"])
     manual_plugins.append(plugin_data)
@@ -452,6 +452,59 @@ else:
         )
         sleep(int(API_CONFIG.WAIT_RETRY_INTERVAL))
 
+REDIS_HOST = config_files.get("REDIS_HOST", None)
+REDIS_PORT = None
+REDIS_DATABASE = None
+REDIS_SSL = False
+REDIS_TIMEOUT = None
+
+
+def listen_dynamic_instances():
+    if not any((REDIS_HOST, REDIS_PORT, REDIS_DATABASE, REDIS_TIMEOUT)):
+        LOGGER.warning(
+            "USE_REDIS is set to yes but one or more of the following variables are not defined: REDIS_HOST, REDIS_PORT, REDIS_DATABASE, REDIS_TIMEOUT, app will not listen for dynamic instances"
+        )
+        return
+
+
+if config_files.get("USE_REDIS", "no") == "yes":
+    if REDIS_HOST:
+        redis_port = config_files.get("REDIS_PORT", "6379")
+        if not redis_port.isdigit() or not (1 <= int(redis_port) <= 65535):
+            LOGGER.warning(
+                f"Invalid REDIS_PORT provided: {redis_port}, It must be an integer between 1 and 65535, port will default to 6379"
+            )
+            redis_port = 6379
+        REDIS_PORT = int(redis_port)
+        del redis_port
+
+        redis_database = config_files.get("REDIS_DATABASE", "0")
+        if not redis_database.isdigit() or not (0 <= int(redis_database) <= 15):
+            LOGGER.warning(
+                f"Invalid REDIS_DATABASE provided: {redis_database}, It must be an integer between 0 and 15, database will default to 0"
+            )
+            redis_database = 0
+        REDIS_DATABASE = int(redis_database)
+        del redis_database
+
+        if config_files.get("REDIS_SSL", "no") == "yes":
+            REDIS_SSL = True
+
+        redis_timeout = config_files.get("REDIS_TIMEOUT", "1000")  # ms
+        if not redis_timeout.isdigit() or int(redis_timeout) < 1:
+            LOGGER.warning(
+                f"Invalid REDIS_TIMEOUT provided: {redis_timeout}, It must be a positive integer, timeout will default to 1000 ms"
+            )
+            redis_timeout = 1000
+        REDIS_TIMEOUT = int(redis_timeout) / 1000
+        del redis_timeout
+
+        Thread(target=listen_dynamic_instances, daemon=True).start()
+    else:
+        LOGGER.warning(
+            "USE_REDIS is set to yes but REDIS_HOST is not defined, app will not listen for dynamic instances"
+        )
+
 
 @app.middleware("http")
 async def validate_request(request: Request, call_next):
@@ -522,6 +575,12 @@ app.include_router(custom_configs.router)
 app.include_router(instances.router)
 app.include_router(jobs.router)
 app.include_router(plugins.router)
+
+update_app_mounts(app)
+
+if not HEALTHY_PATH.exists():
+    HEALTHY_PATH.write_text("ok", encoding="utf-8")
+
 
 if __name__ == "__main__":
     from uvicorn import run

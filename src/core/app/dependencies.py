@@ -60,7 +60,10 @@ TMP_ENV_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.env")
 TMP_ENV_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 API_CONFIG = ApiConfig("core", **environ)
-LOGGER = setup_logger("CORE", API_CONFIG.log_level)
+LOGGER = setup_logger(
+    "CORE",
+    API_CONFIG.log_level,
+)
 INSTANCES_API_CALLER = ApiCaller()
 
 if (
@@ -72,7 +75,7 @@ if (
     )
     stop(1)
 
-DB = Database(LOGGER, API_CONFIG.DATABASE_URI)
+DB = Database(LOGGER, API_CONFIG.DATABASE_URI, pool=False)
 MQ_PATH = None
 
 LOGGER.info(f"🚀 {API_CONFIG.integration} integration detected")
