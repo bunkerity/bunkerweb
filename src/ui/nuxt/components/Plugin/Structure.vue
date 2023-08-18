@@ -1,35 +1,30 @@
 <script setup>
 const props = defineProps({
-  configs: {
+  plugins: {
     type: Array,
+  },
+  active: {
+    type: String,
+    required: true,
   },
 });
 
-const config = reactive({
-  activeInstance: props.configs[0].instance,
-  activePlugin: "",
+const plug = reactive({
+  active: props.active,
 });
-
-// NEED TO ADD INSTANCE TAB TO SWITCH
 </script>
 
 <template>
-  <div v-for="config in props.configs">
-    <div v-if="config.instance === config.activeInstance">
-      <PluginContainer
-        :id="config.id"
-        :name="config.name"
-        :activePlugin="config.activePlugin"
-      >
-        <PluginHeader
-          :id="config.id"
-          :name="config.name"
-          :desc="config.desc"
-          :version="props.version"
-        />
-        <PluginSettingSimple :settings="config.setting" />
-        <PluginSettingMultiple :settings="config.setting" />
-      </PluginContainer>
-    </div>
+  <div v-for="plugin in props.plugins">
+    <PluginContainer :id="plugin.id" v-if="plugin.name === plug.active">
+      <PluginHeader
+        :id="plugin.id"
+        :name="plugin.name"
+        :desc="plugin.desc"
+        :version="plugin.version"
+      />
+      <PluginSettingSimple :settings="plugin.setting" />
+      <PluginSettingMultiple :settings="plugin.setting" />
+    </PluginContainer>
   </div>
 </template>

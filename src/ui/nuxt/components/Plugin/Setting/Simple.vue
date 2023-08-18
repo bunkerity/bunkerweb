@@ -4,8 +4,6 @@ const props = defineProps({
     type: Array,
   },
 });
-
-const filterSettings = {};
 </script>
 
 <template>

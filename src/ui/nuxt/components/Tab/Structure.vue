@@ -2,15 +2,19 @@
 const props = defineProps({
   // Tabs to display
   // Prop => [{name : "", desc: ""}]
-  list: {
+  items: {
     type: Array,
+    required: true,
+  },
+  active: {
+    type: String,
     required: true,
   },
 });
 
 const tab = reactive({
   // Allow to change some style when a tab name is current tab
-  current: props.list[0]["name"] || "",
+  active: props.active,
 });
 
 // Allow to access tab name from parent
@@ -19,7 +23,7 @@ const tab = reactive({
 const emits = defineEmits(["tabName"]);
 
 function updateTab(tabName) {
-  tab.current = tabName;
+  tab.active = tabName;
   return tabName;
 }
 </script>
@@ -27,13 +31,13 @@ function updateTab(tabName) {
 <template>
   <TabContainer>
     <TabItem
-      v-for="(item, id) in props.list"
+      v-for="(item, id) in props.items"
       @click="$emit('tabName', updateTab(item.name))"
       :first="id === 0 ? true : false"
-      :last="id === props.list.length - 1 ? true : false"
+      :last="id === props.items.length - 1 ? true : false"
       :tabName="item.name"
       :desc="item.description"
-      :activeTabName="tab.current"
+      :activeTabName="tab.active"
     />
   </TabContainer>
 </template>
