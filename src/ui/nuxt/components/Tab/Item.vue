@@ -45,7 +45,7 @@ onMounted(() => {
   <div
     role="tab"
     :class="[
-      tab.isMobile ? 'settings-tabs-mobile-btn' : 'settings-tabs-tab-btn',
+      tab.isMobile ? 'plugin-tab-mobile-btn' : 'plugin-tab-btn',
       props.activeTabName === props.tabName ? 'active' : '',
       props.first ? 'first' : '',
       props.last ? 'last' : '',
@@ -54,16 +54,10 @@ onMounted(() => {
   >
     <span class="w-full flex justify-between items-center">
       <span
-        :class="[
-          tab.isMobile ? 'settings-tabs-mobile-name' : 'settings-tabs-name',
-        ]"
+        :class="[tab.isMobile ? 'plugin-tab-mobile-name' : 'plugin-tab-name']"
         >{{ props.tabName }}</span
       >
-      <!-- popover -->
-      <div class="relative">
-        <Popover tag="div"> {{ props.desc }}</Popover>
-      </div>
-      <!-- end popover -->
+      <PopoverTab tag="div"> {{ props.desc }}</PopoverTab>
     </span>
   </div>
 </template>

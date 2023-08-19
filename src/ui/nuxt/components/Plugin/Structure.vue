@@ -8,23 +8,24 @@ const props = defineProps({
     required: true,
   },
 });
-
-const plug = reactive({
-  active: props.active,
-});
 </script>
 
 <template>
-  <div v-for="plugin in props.plugins">
-    <PluginContainer :id="plugin.id" v-if="plugin.name === plug.active">
+  <div
+    class="col-span-12 max-h-[65vh] overflow-y-auto overflow-x-hidden"
+    v-for="plugin in props.plugins"
+  >
+    <PluginContainer :id="plugin.id" v-if="plugin.name === props.active">
       <PluginHeader
         :id="plugin.id"
         :name="plugin.name"
-        :desc="plugin.desc"
+        :desc="plugin.description"
         :version="plugin.version"
       />
-      <PluginSettingSimple :settings="plugin.setting" />
-      <PluginSettingMultiple :settings="plugin.setting" />
+      <div class="grid grid-cols-12">
+        <PluginSettingSimple :settings="plugin.settings" />
+        <PluginSettingMultiple :settings="plugin.settings" />
+      </div>
     </PluginContainer>
   </div>
 </template>

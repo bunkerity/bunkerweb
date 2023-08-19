@@ -18,7 +18,7 @@
 }
 
 .content-container {
-  @apply z-100 absolute xl:pl-75 w-full px-2 sm:px-6 pb-0 pt-20 sm:pt-6 min-h-[89vh] flex flex-col justify-between;
+  @apply z-100 absolute xl:pl-75 w-full px-2 sm:px-6 pb-0 pt-20 sm:pt-4 min-h-[89vh] flex flex-col justify-between;
 }
 
 .content-wrap {
@@ -88,7 +88,7 @@
 }
 
 .select-btn {
-  @apply dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 hover:border-gray-600 focus:border-gray-600 flex justify-between align-middle items-center text-left text-sm leading-5.6  w-full rounded-lg border border-solid border-gray-400 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500;
+  @apply dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 hover:border-gray-600 focus:border-gray-600 flex justify-between align-middle items-center text-left text-sm leading-5.6 w-full rounded-lg border border-solid border-gray-400 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500;
 }
 
 .select-btn-svg {
@@ -96,7 +96,7 @@
 }
 
 .select-dropdown-container {
-  @apply z-[20] absolute h-full flex-col w-full mt-2;
+  @apply z-[20] absolute h-full w-full flex-col w-fit mt-2;
 }
 
 .select-dropdown-btn {
@@ -120,7 +120,7 @@
 }
 
 .input-regular {
-  @apply outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 md:py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
+  @apply outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
 }
 
 .input-pw-container {
@@ -142,15 +142,7 @@
 /* POPOVER */
 
 .popover-settings-container {
-  @apply flex justify-center items-center dark:brightness-90 transition z-50 rounded-md p-3 bg-blue-500;
-}
-
-.desktop.popover-settings-container {
-  @apply absolute -left-20 bottom-6 lg:right-8 lg:bottom-6 min-w-[50vw] lg:min-w-[30vw];
-}
-
-.mobile.popover-settings-container {
-  @apply fixed left-0 bottom-10 w-[90vw];
+  @apply z-10 absolute h-fit w-full top-6 -left-20 min-w-[200px] opacity-100 justify-center items-center dark:brightness-90 transition z-50 rounded-md p-3 bg-blue-500;
 }
 
 .popover-background {
@@ -165,49 +157,69 @@
   @apply z-0 hover:brightness-95 fill-blue-500 h-5 w-5 ml-2;
 }
 
+.popover-tab-container {
+  @apply z-10 fixed md:absolute bottom-0 h-fit w-full md:min-w-[200px] opacity-100 justify-center items-center dark:brightness-90 transition z-50 rounded-md p-3 bg-blue-500;
+}
+
+.mobile.popover-tab-container {
+  @apply max-w-[200px];
+}
+
+.desktop.popover-tab-container {
+  @apply top-6 -left-20;
+}
+
+.popover-tab-text {
+  @apply whitespace-normal pointer-events-none text-center transition duration-300 ease-in-out font-semibold text-sm text-white dark:text-white m-0;
+}
+
+.popover-tab-svg {
+  @apply z-0 hover:brightness-95 fill-blue-500 h-5 w-5 ml-2;
+}
+
 /* TABS */
 
-.active.settings-tabs-tab-btn {
-  @apply border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border my-1 relative  px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md brightness-90 z-10;
+.active.plugin-tab-btn {
+  @apply border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border my-1 relative  px-2.5 py-2.5 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal  ease-in tracking-tight-rem shadow-xs hover:shadow-md brightness-90 z-10;
 }
 
-.settings-tabs-tab-btn {
-  @apply whitespace-nowrap md:block border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border m-1 relative  px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
+.plugin-tab-btn {
+  @apply whitespace-nowrap md:block border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border m-1 relative px-2.5 py-2.5 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal  ease-in tracking-tight-rem shadow-xs hover:shadow-md;
 }
 
-.settings-tabs-name {
-  @apply break-words text-left text-primary transition duration-300 ease-in-out pl-3 pr-2 dark:text-gray-300;
+.plugin-tab-name {
+  @apply break-words text-left text-[13px] tracking-normal text-primary transition duration-300 ease-in-out pl-3 pr-2 dark:text-gray-300;
 }
 
-.settings-tabs-mobile-name {
-  @apply break-words max-w-28 text-left text-primary transition duration-300 ease-in-out pl-3 pr-2 dark:text-gray-300;
+.plugin-tab-mobile-name {
+  @apply ml-12 mr-6 break-words max-w-28 text-[13px] tracking-normal text-left text-primary transition duration-300 ease-in-out pl-3 pr-2 dark:text-gray-300;
 }
 
-.settings-tabs-popover-container {
+.plugin-tab-popover-container {
   @apply top-[60px] min-w-[150px] dark:brightness-90 bg-blue-500 transition z-50 rounded-md p-3 left-0 absolute;
 }
 
-.settings-tabs-popover-text {
+.plugin-tab-popover-text {
   @apply font-bold text-sm text-white m-0;
 }
 
-.settings-tabs-mobile-btn {
-  @apply dark:hover:brightness-95 dark:border-slate-600 dark:bg-slate-700  border-primary border-b border-l border-r w-full flex items-center justify-between  my-0 pl-2 pr-4 py-3 font-bold text-center uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-50 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
+.plugin-tab-mobile-btn {
+  @apply whitespace-nowrap md:block border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border-b relative px-2.5 py-2.5 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal  ease-in tracking-tight-rem shadow-xs hover:shadow-md;
 }
 
-.first.settings-tabs-mobile-btn {
+.first.plugin-tab-mobile-btn {
   @apply border-t;
 }
 
-.last.settings-tabs-mobile-btn {
+.last.plugin-tab-mobile-btn {
   @apply rounded-b;
 }
 
-.settings-tabs-mobile-btn-text {
+.plugin-tab-mobile-btn-text {
   @apply transition duration-300 ease-in-out dark:opacity-90 dark:text-gray-300 text-primary;
 }
 
-.active.settings-tabs-mobile-dropdown-btn {
+.active.plugin-tab-mobile-dropdown-btn {
   @apply border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300 z-[1000] dark:bg-primary bg-primary text-gray-300;
 }
 

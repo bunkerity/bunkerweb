@@ -24,7 +24,10 @@ function toggleDrop() {
 
 <template>
   <!-- desktop -->
-  <div role="tablist" class="relative md:block col-span-12 h-full md:h-fit">
+  <div
+    role="tablist"
+    class="z-100 relative md:block col-span-12 h-full md:h-fit"
+  >
     <button
       v-if="tabCtnr.isMobile"
       @click="toggleDrop()"
@@ -44,8 +47,12 @@ function toggleDrop() {
       <!-- end chevron -->
     </button>
     <div
-      v-if="(tabCtnr.isMobile && !tabCtnr.isOpen) || !tabCtnr.isMobile"
-      :class="[tabCtnr.isMobile ? 'absolute' : 'relative flex']"
+      v-if="(tabCtnr.isMobile && tabCtnr.isOpen) || !tabCtnr.isMobile"
+      :class="[
+        tabCtnr.isMobile
+          ? 'absolute max-h-[300px] overflow-y-auto overflow-x-hidden'
+          : 'relative flex flex-wrap',
+      ]"
     >
       <slot></slot>
     </div>

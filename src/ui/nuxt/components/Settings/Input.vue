@@ -1,19 +1,19 @@
 <script setup>
 const props = defineProps({
-  setting: {
+  settings: {
     type: Object,
     required: true,
   },
 });
 
 const input = reactive({
-  id: props.setting.id,
-  type: props.setting.type,
-  value: props.setting.value,
-  placeholder: props.setting.placeholder || "",
-  required: props.setting.required || false,
-  disabled: props.setting.disabled || false,
-  pattern: props.setting.pattern || "",
+  id: props.settings.id,
+  type: props.settings.type,
+  value: props.settings.value,
+  placeholder: props.settings.placeholder || "",
+  required: props.settings.required || false,
+  disabled: props.settings.disabled || false,
+  pattern: props.settings.pattern || "",
 });
 </script>
 

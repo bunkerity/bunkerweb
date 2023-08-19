@@ -1,17 +1,17 @@
 <script setup>
 const props = defineProps({
-  setting: {
+  settings: {
     type: Object,
     required: true,
   },
 });
 
 const select = reactive({
-  id: props.setting.id,
-  values: props.setting.values,
-  value: props.setting.value,
+  id: props.settings.id,
+  values: props.settings.values,
+  value: props.settings.value,
   isOpen: false,
-  disabled: props.setting.disabled || false,
+  disabled: props.settings.disabled || false,
 });
 
 // EVENTS
@@ -47,6 +47,16 @@ function closeOutside(e) {
     select.isOpen = false;
   }
 }
+
+const selectBtn = ref();
+const selectWidth = ref("");
+
+onMounted(() => {
+  selectWidth.value = `${selectBtn.value.clientWidth}px`;
+  window.addEventListener("resize", () => {
+    selectWidth.value = `${selectBtn.value.clientWidth}px`;
+  });
+});
 </script>
 
 <template>
@@ -70,6 +80,7 @@ function closeOutside(e) {
   <!--custom-->
   <div class="relative">
     <button
+      ref="selectBtn"
       aria-description="custom select dropdown button"
       data-select-dropdown
       :disabled="select.disabled"
@@ -93,6 +104,7 @@ function closeOutside(e) {
     </button>
     <!-- dropdown-->
     <div
+      :style="{ width: selectWidth }"
       :aria-hidden="select.isOpen ? 'false' : 'true'"
       :class="[select.isOpen ? 'flex' : 'hidden']"
       class="select-dropdown-container"

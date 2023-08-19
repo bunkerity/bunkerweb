@@ -56,7 +56,7 @@ const emits = defineEmits(["close"]);
         </div>
         <!-- end search inpt-->
       </div>
-      {% include "settings_tabs.html" %}
+
       <!-- new and edit form -->
       <form
         data-services-modal-form

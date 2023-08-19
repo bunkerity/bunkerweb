@@ -8,16 +8,26 @@ export const useModes = () =>
     "SWARM_MODE",
     "KUBERNETES_MODE",
   ]);
+export const useDefaultMethod = () =>
+  useState<string>("defaultMethod", () => "default");
+export const useMethodList = () =>
+  useState<string[]>("methodList", () => ["all", "ui", "default", "scheduler"]);
 
 // Jobs page
-export const useSuccess = () => useState<string>("success", () => "all");
-export const useEvery = () => useState<string>("every", () => "all");
-export const useReload = () => useState<string>("reload", () => "all");
-export const useJobsKey = () => useState<string>("jobsKey", () => "");
+export const useSuccessFilter = () =>
+  useState<string>("successFilter", () => "all");
+export const useEveryFilter = () =>
+  useState<string>("everyFilter", () => "all");
+export const useReloadFilter = () =>
+  useState<string>("reloadFilter", () => "all");
+export const useJobsKeyFilter = () =>
+  useState<string>("jobsKeyFilter", () => "");
 
 // Plugins page
 export const usePluginKey = () => useState<string>("pluginKey", () => "");
 export const usePluginType = () => useState<string>("pluginType", () => "all");
 
 // Services or global_config page
-export const useSettingsKey = () => useState<string>("settingsKey", () => "");
+export const useSettingsKeyFilter = () =>
+  useState<string>("settingsKeyFilter", () => "");
+export const useMethodFilter = () => useState<string>("methodFilter", () => "");

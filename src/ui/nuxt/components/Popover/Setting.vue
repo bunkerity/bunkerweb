@@ -11,6 +11,7 @@ const props = defineProps({
 // Determine popover need to be display
 const popover = reactive({
   isOpen: false,
+  isHover: false,
 });
 
 // Different style for desktop and mobile
@@ -26,15 +27,27 @@ onMounted(() => {
     tab.isMobile = window.innerWidth >= 768 ? false : true;
   });
 });
+
+function showPopover() {
+  popover.isHover = true;
+  setTimeout(() => {
+    popover.isOpen = popover.isHover ? true : false;
+  }, 450);
+}
+
+function hidePopover() {
+  popover.isHover = false;
+  popover.isOpen = false;
+}
 </script>
 
 <template>
   <component
     :is="props.tag"
     :type="props.tag !== 'button' ? 'button' : false"
-    @pointerover="popover.isOpen = true"
-    @pointerleave="popover.isOpen = false"
-    class="relative flex justify-start w-full"
+    @pointerover="showPopover()"
+    @pointerleave="hidePopover()"
+    class="cursor-pointer flex justify-start w-full"
   >
     <div class="popover-background"></div>
     <svg
@@ -46,15 +59,13 @@ onMounted(() => {
         d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z"
       />
     </svg>
-    <div
-      :aria-hidden="popover.isOpen ? 'false' : 'true'"
-      v-show="popover.isOpen"
-      :class="[
-        tab.isMobile ? 'mobile' : 'desktop',
-        'popover-settings-container',
-      ]"
-    >
-      <p class="popover-settings-text"><slot></slot></p>
-    </div>
   </component>
+  <div
+    :style="{ top: popoverTop }"
+    :aria-hidden="popover.isOpen ? 'false' : 'true'"
+    v-show="popover.isOpen"
+    :class="['popover-settings-container']"
+  >
+    <p class="popover-settings-text"><slot></slot></p>
+  </div>
 </template>

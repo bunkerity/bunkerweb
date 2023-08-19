@@ -1,6 +1,6 @@
 <script setup>
 const props = defineProps({
-  title: {
+  label: {
     type: String,
     required: true,
   },
@@ -13,20 +13,19 @@ const props = defineProps({
     required: false,
     default: "",
   },
-  fullWidth: {
+  noLabel: {
     type: Boolean,
     required: false,
+    default: false,
   },
 });
 </script>
 
 <template>
-  <div
-    :class="[props.fullWidth ? '' : 'sm:col-span-6 ']"
-    class="col-span-12 flex flex-col px-2 py-1"
-  >
+  <div class="col-span-12 flex flex-col px-2 py-1">
     <SettingsLabel
-      :title="props.title"
+      v-show="!props.noLabel"
+      :label="props.label"
       :name="props.name"
       :version="props.version"
     />

@@ -1,14 +1,14 @@
 <script setup>
 const props = defineProps({
-  setting: {
+  settings: {
     type: Object,
     required: true,
   },
 });
 
 const checkbox = reactive({
-  id: props.setting.id,
-  value: props.setting.value,
+  id: props.settings.id,
+  value: props.settings.value,
 });
 </script>
 

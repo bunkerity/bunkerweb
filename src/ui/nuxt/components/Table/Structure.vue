@@ -2,7 +2,7 @@
 const props = defineProps({
   content: {
     type: Array,
-    required: true,
+    required: false,
     default: [
       {
         // To render text
@@ -21,7 +21,7 @@ const props = defineProps({
   },
   header: {
     type: Array,
-    required: true,
+    required: false,
     default: [
       "Name",
       "Last run",
@@ -34,7 +34,7 @@ const props = defineProps({
   },
   positions: {
     type: Array,
-    required: true,
+    required: false,
     // Give col-span for each col
     default: [
       "col-span-3",

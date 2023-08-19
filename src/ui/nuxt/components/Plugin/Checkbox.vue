@@ -8,10 +8,10 @@ const props = defineProps({
 
 const checkbox = reactive({
   id: props.setting.id,
-  value: props.setting.value,
-  defaultValue: props.setting.defaultValue,
-  method: props.setting.method,
-  defaultMethod: props.setting.defaultMethod,
+  value: props.setting.value || props.setting.default,
+  defaultValue: props.setting.default,
+  method: props.setting.method || useDefaultMethod(),
+  defaultMethod: useDefaultMethod(),
 });
 
 // Modes with special method and logic

@@ -2,7 +2,7 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
   let data;
   try {
-    data = await $fetch(`/plugins`, {
+    data = await $fetch(`/config`, {
       baseURL: config.apiAddr,
       method: "GET",
       Headers: {

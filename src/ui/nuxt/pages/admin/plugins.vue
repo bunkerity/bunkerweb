@@ -3,17 +3,13 @@ useHead({
   title: "My App",
   meta: [{ name: "description", content: "My amazing site." }],
 });
-
-const { data, pending, error } = await useFetch("/api/jobs", {
-  method: "GET",
-});
 </script>
 
 <template>
   <NuxtLayout name="dashboard">
     <CardBase
       class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
-      title="info"
+      label="info"
     >
       <CardItemList
         :items="[
@@ -23,18 +19,18 @@ const { data, pending, error } = await useFetch("/api/jobs", {
       />
     </CardBase>
     <CardBase
-      title="upload"
+      label="upload"
       class="h-fit col-span-12 md:col-span-8 2xl:col-span-4 3xl:col-span-3"
     >
       <SettingsUploadStructure />
     </CardBase>
     <CardBase
-      class="z-10 h-fit col-start-1 col-end-13 md:col-start-5 md:col-end-13 2xl:col-span-4 3xl:col-span-3"
-      title="filter"
+      class="z-10 h-fit col-start-1 col-end-13 md:col-start-5 md:col-end-13 2xl:col-span-5 3xl:col-span-4"
+      label="filter"
     >
-      <SettingsLayout fullWidth title="Search" name="keyword">
+      <SettingsLayout class="sm:col-span-6" label="Search" name="keyword">
         <SettingsInput
-          :setting="{
+          :settings="{
             id: 'keyword',
             type: 'text',
             value: '',
@@ -42,9 +38,9 @@ const { data, pending, error } = await useFetch("/api/jobs", {
           }"
         />
       </SettingsLayout>
-      <SettingsLayout fullWidth title="Plugin type" name="state">
+      <SettingsLayout class="sm:col-span-6" label="Plugin type" name="state">
         <SettingsSelect
-          :setting="{
+          :settings="{
             id: 'state',
             value: 'all',
             values: ['all', 'internal', 'external'],
@@ -52,7 +48,7 @@ const { data, pending, error } = await useFetch("/api/jobs", {
         />
       </SettingsLayout>
     </CardBase>
-    <CardBase class="h-fit col-span-12" title="plugin list">
+    <CardBase class="h-fit col-span-12" label="plugin list">
       <PluginList />
     </CardBase>
   </NuxtLayout>

@@ -1,7 +1,7 @@
 <script setup>
 const props = defineProps({
   settings: {
-    type: Array,
+    type: Object,
   },
 });
 
@@ -21,7 +21,7 @@ function toggle() {
   <div
     v-for="setting in filterSettings"
     data-setting-container
-    class="mx-0 sm:mx-4 my-2 col-span-12 md:mx-6 md:my-3 md:col-span-6 2xl:mx-6 2xl:my-3 2xl:col-span-4"
+    class="ml-2 mr-4 md:ml-3 md:mr-6 xl:ml-4 xl:mr-8 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4"
   >
     <div
       data-multiple-handler
