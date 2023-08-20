@@ -19,7 +19,7 @@ const emits = defineEmits(["tabName"]);
 </script>
 
 <template>
-  <TabContainer>
+  <TabContainer :active="props.active">
     <TabItem
       v-for="(item, id) in props.items"
       @click="$emit('tabName', item.name)"

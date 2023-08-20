@@ -1,4 +1,10 @@
 <script setup>
+const props = defineProps({
+  active: {
+    type: String,
+    required: true,
+  },
+});
 // Container with dropdown btn for mobile
 // And style to handle tabs
 
@@ -20,23 +26,46 @@ onMounted(() => {
 function toggleDrop() {
   tabCtnr.isOpen = tabCtnr.isOpen ? false : true;
 }
+
+// Close select dropdown when clicked outside element
+watch(tabCtnr, () => {
+  if (tabCtnr.isOpen) {
+    document.querySelector("body").addEventListener("click", closeOutside);
+  } else {
+    document.querySelector("body").removeEventListener("click", closeOutside);
+  }
+});
+
+// Close select when clicked outside logic
+function closeOutside(e) {
+  try {
+    if (!e.target.closest("button").hasAttribute("data-select-tab-container")) {
+      tabCtnr.isOpen = false;
+    }
+  } catch (err) {
+    tabCtnr.isOpen = false;
+  }
+}
 </script>
 
 <template>
   <!-- desktop -->
   <div
     role="tablist"
+    :class="[tabCtnr.isMobile ? 'mt-4' : '']"
     class="z-100 relative md:block col-span-12 h-full md:h-fit"
   >
     <button
+      data-select-tab-container
       v-if="tabCtnr.isMobile"
       @click="toggleDrop()"
-      class="settings-tabs-mobile-dropdown-btn"
+      class="select-btn"
     >
-      <span class="settings-tabs-mobile-btn-text">tab dropdown</span>
+      <span class="select">{{ props.active }}</span>
       <!-- chevron -->
       <svg
-        class="transition-transform h-4 w-4 fill-primary dark:fill-gray-300"
+        :class="[tabCtnr.isOpen ? '-rotate-180' : '']"
+        class="select-btn-svg"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 512 512"
       >
@@ -50,7 +79,7 @@ function toggleDrop() {
       v-if="(tabCtnr.isMobile && tabCtnr.isOpen) || !tabCtnr.isMobile"
       :class="[
         tabCtnr.isMobile
-          ? 'absolute max-h-[300px] overflow-y-auto overflow-x-hidden'
+          ? 'mt-1 absolute max-h-[300px] w-full overflow-y-auto overflow-x-hidden'
           : 'relative flex flex-wrap',
       ]"
     >

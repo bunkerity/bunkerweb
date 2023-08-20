@@ -56,7 +56,9 @@ const selectWidth = ref("");
 onMounted(() => {
   selectWidth.value = `${selectBtn.value.clientWidth}px`;
   window.addEventListener("resize", () => {
-    selectWidth.value = `${selectBtn.value.clientWidth}px`;
+    try {
+      selectWidth.value = `${selectBtn.value.clientWidth}px`;
+    } catch (err) {}
   });
 });
 </script>

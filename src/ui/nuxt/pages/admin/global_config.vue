@@ -36,6 +36,13 @@ const plugins = reactive({
     return filter;
   }),
 });
+
+// Refetch and reset all states
+function reset() {
+  globalConfRef();
+  filters.label = "";
+  plugins.active = globalConfList.value[0]["name"];
+}
 </script>
 
 <template>
@@ -49,7 +56,7 @@ const plugins = reactive({
       >
         <div class="col-span-12 flex">
           <CardLabel label="global config" />
-          <PluginRefresh @refresh="globalConfRef" />
+          <PluginRefresh @refresh="reset()" />
         </div>
         <TabStructure
           :items="plugins.setup"
