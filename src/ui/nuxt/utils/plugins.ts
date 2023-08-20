@@ -9,7 +9,7 @@ interface multiples {
 }
 
 // We want to add config data as value of settings of plugins
-export function addConfToPlugins(plugins: [], config: config): [] {
+export async function addConfToPlugins(plugins: [], config: config) {
   plugins.forEach((plugin) => {
     const settings = plugin["settings"];
 
@@ -30,7 +30,7 @@ export function addConfToPlugins(plugins: [], config: config): [] {
 
 // We want to remove settings that not match context
 // Or even entire plugin if all his settings not match context
-export function getPluginsByContext(plugins: [], context: string): object[] {
+export async function getPluginsByContext(plugins: [], context: string) {
   plugins.forEach((plugin, id) => {
     const settings = plugin["settings"];
 
@@ -107,4 +107,29 @@ export function getSettingsMultipleList(settings: any): object | boolean {
   });
 
   return multiples;
+}
+
+// Filter plugins
+export function getPluginsByFilter(plugins: [], filters: object): object {
+  plugins.forEach((plugin, id) => {
+    const settings = plugin["settings"];
+
+    Object.entries(settings).forEach(([setting, data]: [string, any]) => {
+      // Remove settings that don't match filter
+      for (const [key, value] of Object.entries(filters)) {
+        if (!value || !(key in data)) continue;
+
+        const settingValue = data[key].toLowerCase();
+        const filterValue = value.toLowerCase();
+
+        if (!settingValue.includes(filterValue)) delete settings[setting];
+      }
+    });
+
+    // Case no setting remaining, remove plugin
+    if (Object.keys(plugin["settings"]).length === 0) delete plugins[id];
+  });
+
+  // Update plugins removing empty index (deleted plugins)
+  return plugins.filter(Object);
 }

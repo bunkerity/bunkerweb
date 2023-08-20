@@ -30,4 +30,5 @@ export const usePluginType = () => useState<string>("pluginType", () => "all");
 // Services or global_config page
 export const useSettingsKeyFilter = () =>
   useState<string>("settingsKeyFilter", () => "");
-export const useMethodFilter = () => useState<string>("methodFilter", () => "");
+export const useSettingsMethodFilter = () =>
+  useState<string>("settingsMethodFilter", () => "all");

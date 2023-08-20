@@ -4,42 +4,44 @@ useHead({
   meta: [{ name: "description", content: "My amazing site." }],
 });
 
+// Base data to work with
 const {
-  data: pluginList,
-  pending: pluginPend,
-  error: pluginErr,
-  refresh: pluginRef,
-} = await useFetch("/api/plugins", {
+  data: globalConfList,
+  pending: globalConfPend,
+  error: globalConfErr,
+  refresh: globalConfRef,
+} = await useFetch("/api/global_config", {
   method: "GET",
 });
 
-const {
-  data: configList,
-  pending: configPend,
-  error: configErr,
-  refresh: configRef,
-} = await useFetch("/api/config", {
-  method: "GET",
+// Hide / Show settings and plugin base on that filters
+const filters = reactive({
+  label: "",
 });
 
-const plugin = reactive({
-  active: pluginList.value[0]["name"],
-  setup: getPluginsByContext(
-    addConfToPlugins(pluginList.value, configList.value),
-    "global"
-  ),
+// Plugins data to render components
+const plugins = reactive({
+  // Never modify this unless refetch
+  base: globalConfList.value,
+  // Default plugin to display, first of list (before any filter)
+  active: globalConfList.value[0]["name"],
+  // This run every time reactive data changed (plugin.base or filters)
+  setup: computed(() => {
+    // Filter data to display
+    const cloneBase = JSON.parse(JSON.stringify(plugins.base));
+    const filter = getPluginsByFilter(cloneBase, filters);
+    // Check if prev plugin or no plugin match filter
+    plugins.active =
+      filter.length !== 0 ? filter[0]["name"] : globalConfList.value[0]["name"];
+    return filter;
+  }),
 });
-
-function refreshData() {
-  pluginRef();
-  configRef();
-}
 </script>
 
 <template>
   <NuxtLayout name="dashboard">
     <div
-      v-if="!pluginPend && !pluginErr && !configPend && !configErr"
+      v-if="!globalConfPend && !globalConfErr"
       class="col-span-12 content-wrap"
     >
       <CardBase
@@ -47,12 +49,12 @@ function refreshData() {
       >
         <div class="col-span-12 flex">
           <CardLabel label="global config" />
-          <PluginRefresh @refresh="refreshData()" />
+          <PluginRefresh @refresh="globalConfRef" />
         </div>
         <TabStructure
-          :items="plugin.setup"
-          :active="plugin.active"
-          @tabName="(v) => (plugin.active = v)"
+          :items="plugins.setup"
+          :active="plugins.active"
+          @tabName="(v) => (plugins.active = v)"
         />
       </CardBase>
       <CardBase
@@ -65,11 +67,12 @@ function refreshData() {
           name="keyword"
         >
           <SettingsInput
+            @input="(v) => (filters.label = v.target.value)"
             :settings="{
               id: 'keyword',
               type: 'text',
               value: '',
-              placeholder: 'Search',
+              placeholder: 'label',
             }"
           />
         </SettingsLayout>
@@ -90,7 +93,7 @@ function refreshData() {
       </CardBase>
 
       <CardBase class="col-span-12 grid grid-cols-12 relative">
-        <PluginStructure :plugins="plugin.setup" :active="plugin.active" />
+        <PluginStructure :plugins="plugins.setup" :active="plugins.active" />
       </CardBase>
     </div>
   </NuxtLayout>

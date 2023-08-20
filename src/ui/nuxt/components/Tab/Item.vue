@@ -1,12 +1,12 @@
 <script setup>
 const props = defineProps({
   // Current clicked tab on a group
-  activeTabName: {
+  active: {
     type: String,
     required: true,
   },
   // Name to identify tab and compare with other tabs
-  tabName: {
+  name: {
     type: String,
     required: true,
   },
@@ -46,16 +46,16 @@ onMounted(() => {
     role="tab"
     :class="[
       tab.isMobile ? 'plugin-tab-mobile-btn' : 'plugin-tab-btn',
-      props.activeTabName === props.tabName ? 'active' : '',
+      props.active === props.name ? 'active' : '',
       props.first ? 'first' : '',
       props.last ? 'last' : '',
     ]"
-    :aria-current="props.activeTabName === props.tabName ? 'true' : 'false'"
+    :aria-current="props.active === props.name ? 'true' : 'false'"
   >
     <span class="w-full flex justify-between items-center">
       <span
         :class="[tab.isMobile ? 'plugin-tab-mobile-name' : 'plugin-tab-name']"
-        >{{ props.tabName }}</span
+        >{{ props.name }}</span
       >
       <PopoverTab tag="div"> {{ props.desc }}</PopoverTab>
     </span>
