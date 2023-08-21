@@ -58,4 +58,4 @@ if [ $ret -ne 0 ] ; then
 fi
 
 # Exit
-exit ret
+exit $?
