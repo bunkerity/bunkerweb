@@ -4,7 +4,7 @@ from typing import Dict, List, Literal
 from fastapi import APIRouter, BackgroundTasks, Response, status
 from fastapi.responses import JSONResponse
 
-from ..core import AddedPlugin, ErrorMessage, Plugin
+from ..models import AddedPlugin, ErrorMessage, Plugin
 from ..dependencies import (
     DB,
     LOGGER,

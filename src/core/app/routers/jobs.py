@@ -3,7 +3,7 @@ from typing import Annotated, Dict, Literal, Optional, Union
 from fastapi import APIRouter, BackgroundTasks, File, Form, status
 from fastapi.responses import JSONResponse
 
-from ..core import CacheFileDataModel, CacheFileModel, ErrorMessage, Job, Job_cache
+from ..models import CacheFileDataModel, CacheFileModel, ErrorMessage, Job, Job_cache
 from ..dependencies import DB, LOGGER, inform_scheduler
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])

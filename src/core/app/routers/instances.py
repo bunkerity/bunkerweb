@@ -2,7 +2,7 @@ from typing import Annotated, Dict, List, Literal, Union
 from fastapi import APIRouter, status, Path as fastapi_Path
 from fastapi.responses import JSONResponse
 
-from ..core import ErrorMessage, Instance
+from ..models import ErrorMessage, Instance
 from ..dependencies import DB, LOGGER
 from API import API  # type: ignore
 

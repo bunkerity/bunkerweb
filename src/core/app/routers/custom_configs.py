@@ -2,7 +2,7 @@ from typing import Dict, List, Literal
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 
-from ..core import (
+from ..models import (
     CustomConfigModel,
     CustomConfigDataModel,
     CustomConfigNameModel,

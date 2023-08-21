@@ -2,14 +2,17 @@ from typing import Dict, Literal, Union
 from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
-from ..core import ErrorMessage
+from ..models import ErrorMessage
 from ..dependencies import DB, LOGGER, inform_scheduler
 
 router = APIRouter(prefix="/config", tags=["config"])
 
+
 @router.get(
     "",
-    response_model=Dict[str, Union[str, Dict[Literal["value", "global", "method"], Union[str, bool]]]],
+    response_model=Dict[
+        str, Union[str, Dict[Literal["value", "global", "method"], Union[str, bool]]]
+    ],
     summary="Get config from Database",
     response_description="BunkerWeb config",
 )
