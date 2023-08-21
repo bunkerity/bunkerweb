@@ -37,11 +37,11 @@ fi
 source /tmp/core.tmp.env
 rm -f /tmp/core.tmp.env
 
-if $AUTOCONF_MODE ; then
+if [ $AUTOCONF_MODE == "yes" ] ; then
 	echo "Autoconf" > /usr/share/bunkerweb/INTEGRATION
-elif $KUBERNETES_MODE ; then
+elif [ $KUBERNETES_MODE == "yes" ] ; then
 	echo "Kubernetes" > /usr/share/bunkerweb/INTEGRATION
-elif $SWARM_MODE ; then
+elif [ $SWARM_MODE == "yes" ] ; then
 	echo "Swarm" > /usr/share/bunkerweb/INTEGRATION
 fi
 
