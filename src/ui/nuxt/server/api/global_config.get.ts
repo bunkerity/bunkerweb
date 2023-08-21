@@ -1,4 +1,8 @@
-import { getPluginsByContext, addConfToPlugins } from "../../utils/plugins";
+import {
+  getPluginsByContext,
+  addConfToPlugins,
+  setPluginsData,
+} from "../../utils/plugins";
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
@@ -20,7 +24,8 @@ export default defineEventHandler(async (event) => {
       },
     });
 
-    const mergeConf = await addConfToPlugins(plugins, conf);
+    const setPlugins = await setPluginsData(plugins);
+    const mergeConf = await addConfToPlugins(setPlugins, conf);
     data = await getPluginsByContext(mergeConf, "global");
   } catch (err) {
     data = Promise.reject(new Error("fail getting data"));

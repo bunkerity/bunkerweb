@@ -26,6 +26,7 @@ function closeSelect() {
 function changeValue(newValue) {
   select.value = newValue;
   closeSelect();
+  return select.value;
 }
 
 // Close select dropdown when clicked outside element
@@ -59,6 +60,8 @@ onMounted(() => {
     } catch (err) {}
   });
 });
+
+const emits = defineEmits(["inp"]);
 </script>
 
 <template>
@@ -114,7 +117,7 @@ onMounted(() => {
     >
       <button
         v-for="(value, id) in select.values"
-        @click="changeValue(value)"
+        @click="$emit('inp', changeValue(value))"
         :class="[
           id === 0 ? 'first' : '',
           id === select.values.length - 1 ? 'last' : '',

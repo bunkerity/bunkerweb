@@ -14,12 +14,10 @@ const {
   method: "GET",
 });
 
-onMounted(()=> {console.log(globalConfList.value)})
-
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
-  label: "",
-  
+  keyword: "",
+  method: "",
 });
 
 // Plugins data to render components
@@ -79,7 +77,7 @@ function updateConf() {}
           name="keyword"
         >
           <SettingsInput
-            @inp="(v) => (filters.label = v)"
+            @inp="(v) => (filters.keyword = v)"
             :settings="{
               id: 'keyword',
               type: 'text',
@@ -94,6 +92,7 @@ function updateConf() {}
           name="keyword"
         >
           <SettingsSelect
+            @inp="(v) => (filters.method = v === 'all' ? '' : v)"
             :settings="{
               id: 'keyword',
               value: 'all',

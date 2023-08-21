@@ -16,6 +16,20 @@ interface multiples {
   };
 }
 
+// Set additionnal data to plugins
+export async function setPluginsData(plugins: []) {
+  plugins.forEach((plugin) => {
+    const settings = plugin["settings"];
+
+    Object.entries(settings).forEach(([setting, data]: [string, any]) => {
+      // Add default method for filter
+      if (!("method" in data)) data["method"] = "default";
+    });
+  });
+
+  return plugins;
+}
+
 // We want to add config data as value of settings of plugins
 export async function addConfToPlugins(plugins: [], config: config) {
   plugins.forEach((plugin) => {
@@ -26,6 +40,8 @@ export async function addConfToPlugins(plugins: [], config: config) {
       for (const [confName, confData] of Object.entries(config)) {
         if (!!(setting in confData)) {
           data["value"] = confData["value"];
+          if (!!("method" in data)) data["method"] = confData["method"];
+          if (!("method" in data)) data["method"] = "default";
           // Remove config value if matched (performance)
           try {
             delete config[setting];
@@ -127,12 +143,30 @@ export function getPluginsByFilter(plugins: [], filters: object): object {
     Object.entries(settings).forEach(([setting, data]: [string, any]) => {
       // Remove settings that don't match filter
       for (const [key, value] of Object.entries(filters)) {
-        if (!value || !(key in data)) continue;
-
-        const settingValue = data[key].toLowerCase();
-        const filterValue = value.toLowerCase();
-
-        if (!settingValue.includes(filterValue)) delete settings[setting];
+        // Case no key to check
+        if (!value || (!(key in data) && key !== "keyword")) continue;
+        const filterValue = value.toLowerCase().trim();
+        // Case keyword filter, check multiple keys
+        let isMatch = true;
+        if (key === "keyword") {
+          const label = !!("label" in data)
+            ? data["label"].toLowerCase().trim()
+            : "";
+          const help = !!("help" in data)
+            ? data["help"].toLowerCase().trim()
+            : "";
+          isMatch =
+            label.includes(filterValue) || help.includes(filterValue)
+              ? true
+              : false;
+        }
+        // Case individual filter
+        if (key !== "keyword") {
+          const settingValue = data[key].toLowerCase().trim();
+          isMatch = settingValue.includes(filterValue) ? true : false;
+        }
+        // Result
+        if (!isMatch) delete settings[setting];
       }
     });
 
