@@ -94,10 +94,10 @@ jobs:
     secrets:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  
+
   # Push with dev tag
   push-dev:
-    needs: [tests-core]
+    needs: [tests-ui, tests-core]
     runs-on: ubuntu-latest
     steps:
       - name: Login to Docker Hub

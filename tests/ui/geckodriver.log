@@ -1,8 +1,0 @@
-1682773748597	geckodriver	INFO	Listening on 127.0.0.1:37745
-1682773748615	webdriver::server	WARN	Rejected request with Host header localhost:37745, allowed values are []
-1682773783634	geckodriver	INFO	Listening on 127.0.0.1:38451
-1682773783649	webdriver::server	WARN	Rejected request with Host header localhost:38451, allowed values are []
-1682773795117	geckodriver	INFO	Listening on 127.0.0.1:33351
-1682773795125	webdriver::server	WARN	Rejected request with Host header localhost:33351, allowed values are []
-1682834744519	geckodriver	INFO	Listening on 127.0.0.1:59403
-1682834745017	webdriver::server	WARN	Rejected request with Host header localhost:59403, allowed values are []

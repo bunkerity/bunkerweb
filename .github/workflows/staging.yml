@@ -63,115 +63,114 @@ jobs:
       PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
       PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
-  # # Code security
-  # code-security:
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     actions: read
-  #     contents: read
-  #     security-events: write
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       language: ["python"]
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #     - name: Initialize CodeQL
-  #       uses: github/codeql-action/init@v2
-  #       with:
-  #         languages: ${{ matrix.language }}
-  #         config-file: ./.github/codeql.yml
-  #     - name: Perform CodeQL Analysis
-  #       uses: github/codeql-action/analyze@v2
-  #       with:
-  #         category: "/language:${{matrix.language}}"
+  # Code security
+  code-security:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["python"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+          config-file: ./.github/codeql.yml
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{matrix.language}}"
 
-  # # Create infrastructures
-  # create-infras:
-  #   needs: [code-security, build-containers, build-packages]
-  #   strategy:
-  #     matrix:
-  #       type: [docker, autoconf, swarm, k8s, linux]
-  #   uses: ./.github/workflows/staging-create-infra.yml
-  #   with:
-  #     TYPE: ${{ matrix.type }}
-  #   secrets:
-  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # Create infrastructures
+  create-infras:
+    needs: [code-security, build-containers, build-packages]
+    strategy:
+      matrix:
+        type: [docker, autoconf, swarm, k8s, linux]
+    uses: ./.github/workflows/staging-create-infra.yml
+    with:
+      TYPE: ${{ matrix.type }}
+    secrets:
+      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
-  # # Perform tests
-  # staging-tests:
-  #   needs: [create-infras]
-  #   strategy:
-  #     matrix:
-  #       type: [docker, autoconf, swarm, k8s, linux]
-  #       include:
-  #         - type: docker
-  #           runs_on: "['self-hosted', 'bw-docker']"
-  #         - type: autoconf
-  #           runs_on: "['self-hosted', 'bw-autoconf']"
-  #         - type: swarm
-  #           runs_on: "['self-hosted', 'bw-swarm']"
-  #         - type: k8s
-  #           runs_on: "['ubuntu-latest']"
-  #         - type: linux
-  #           runs_on: "['self-hosted', 'bw-linux']"
-  #   uses: ./.github/workflows/staging-tests.yml
-  #   with:
-  #     TYPE: ${{ matrix.type }}
-  #     RUNS_ON: ${{ matrix.runs_on }}
-  #   secrets: inherit
-  # tests-ui:
-  #   needs: [create-infras]
-  #   uses: ./.github/workflows/tests-ui.yml
-  #   with:
-  #     RELEASE: testing
-  #   secrets:
-  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  # prepare-tests-core:
-  #   needs: [create-infras]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #     - id: set-matrix
-  #       run: |
-  #         tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-  #         echo "::set-output name=tests::$tests"
-  #   outputs:
-  #     tests: ${{ steps.set-matrix.outputs.tests }}
-  # tests-core:
-  #   needs: prepare-tests-core
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
-  #   uses: ./.github/workflows/test-core.yml
-  #   with:
-  #     TEST: ${{ matrix.test }}
-  #     RELEASE: testing
-  #   secrets:
-  #     PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-  #     PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  # Perform tests
+  staging-tests:
+    needs: [create-infras]
+    strategy:
+      matrix:
+        type: [docker, autoconf, swarm, k8s, linux]
+        include:
+          - type: docker
+            runs_on: "['self-hosted', 'bw-docker']"
+          - type: autoconf
+            runs_on: "['self-hosted', 'bw-autoconf']"
+          - type: swarm
+            runs_on: "['self-hosted', 'bw-swarm']"
+          - type: k8s
+            runs_on: "['ubuntu-latest']"
+          - type: linux
+            runs_on: "['self-hosted', 'bw-linux']"
+    uses: ./.github/workflows/staging-tests.yml
+    with:
+      TYPE: ${{ matrix.type }}
+      RUNS_ON: ${{ matrix.runs_on }}
+    secrets: inherit
+  tests-ui:
+    needs: [create-infras]
+    uses: ./.github/workflows/tests-ui.yml
+    with:
+      RELEASE: testing
+    secrets:
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+  prepare-tests-core:
+    needs: [create-infras]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - id: set-matrix
+        run: |
+          tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
+          echo "::set-output name=tests::$tests"
+    outputs:
+      tests: ${{ steps.set-matrix.outputs.tests }}
+  tests-core:
+    needs: prepare-tests-core
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
+    uses: ./.github/workflows/test-core.yml
+    with:
+      TEST: ${{ matrix.test }}
+      RELEASE: testing
+    secrets:
+      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
+      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
-  # # Delete infrastructures
-  # delete-infras:
-  #   if: ${{ always() }}
-  #   needs: [staging-tests]
-  #   strategy:
-  #     matrix:
-  #       type: [docker, autoconf, swarm, k8s, linux]
-  #   uses: ./.github/workflows/staging-delete-infra.yml
-  #   with:
-  #     TYPE: ${{ matrix.type }}
-  #   secrets:
-  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  # Delete infrastructures
+  delete-infras:
+    if: ${{ always() }}
+    needs: [staging-tests]
+    strategy:
+      matrix:
+        type: [docker, autoconf, swarm, k8s, linux]
+    uses: ./.github/workflows/staging-delete-infra.yml
+    with:
+      TYPE: ${{ matrix.type }}
+    secrets:
+      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
 
   # Push Docker images
   push-images:
-    # needs: [staging-tests, tests-ui, tests-core]
-    needs: [build-containers, build-packages]
+    needs: [staging-tests, tests-ui, tests-core]
     runs-on: ubuntu-latest
     steps:
       - name: Login to Docker Hub
@@ -196,8 +195,7 @@ jobs:
 
   # Push Linux packages
   push-packages:
-    # needs: [staging-tests, tests-ui, tests-core]
-    needs: [build-containers, build-packages]
+    needs: [staging-tests, tests-ui, tests-core]
     strategy:
       matrix:
         linux: [ubuntu, debian, fedora, el]
