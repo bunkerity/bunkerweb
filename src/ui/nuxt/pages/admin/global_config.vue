@@ -20,6 +20,8 @@ const filters = reactive({
   method: "",
 });
 
+const conf = useConf();
+
 // Plugins data to render components
 const plugins = reactive({
   // Never modify this unless refetch
