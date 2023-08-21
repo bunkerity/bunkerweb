@@ -96,7 +96,7 @@ jobs:
       # Build testing package image
       - name: Build package image
         if: inputs.RELEASE == 'testing'
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           load: true
@@ -108,7 +108,7 @@ jobs:
       # Build non-testing package image
       - name: Build package image
         if: inputs.RELEASE != 'testing'
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           load: true
@@ -138,7 +138,7 @@ jobs:
       # Build test image
       - name: Build test image
         if: inputs.TEST == true
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: tests/linux/Dockerfile-${{ inputs.LINUX }}
