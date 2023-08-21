@@ -61,7 +61,6 @@ function hidePopover() {
     </svg>
   </component>
   <div
-    :style="{ top: popoverTop }"
     :aria-hidden="popover.isOpen ? 'false' : 'true'"
     v-show="popover.isOpen"
     :class="['popover-settings-container']"

@@ -14,9 +14,12 @@ const {
   method: "GET",
 });
 
+onMounted(()=> {console.log(globalConfList.value)})
+
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
   label: "",
+  
 });
 
 // Plugins data to render components
@@ -43,6 +46,8 @@ function reset() {
   filters.label = "";
   plugins.active = globalConfList.value[0]["name"];
 }
+
+function updateConf() {}
 </script>
 
 <template>
@@ -74,7 +79,7 @@ function reset() {
           name="keyword"
         >
           <SettingsInput
-            @input="(v) => (filters.label = v.target.value)"
+            @inp="(v) => (filters.label = v)"
             :settings="{
               id: 'keyword',
               type: 'text',

@@ -15,11 +15,18 @@ const input = reactive({
   disabled: props.settings.disabled || false,
   pattern: props.settings.pattern || "",
 });
+
+const emits = defineEmits(['inp'])
+
+const inp = ""
+
 </script>
 
 <template>
   <div class="relative flex items-center">
     <input
+      v-model="inp"
+      @input="$emit('inp', inp)"
       :type="
         input.isPassword
           ? input.showInp

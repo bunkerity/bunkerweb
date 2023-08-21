@@ -12,6 +12,8 @@ const props = defineProps({
 const popover = reactive({
   isOpen: false,
   isHover: false,
+  x: "",
+  y: ""
 });
 
 // Different style for desktop and mobile
@@ -20,8 +22,6 @@ const tab = reactive({
 });
 
 const popoverIcon = ref();
-const popoverX = ref("");
-const popoverY = ref("");
 
 onMounted(() => {
   // When component is created but before is insert on DOM
@@ -35,11 +35,10 @@ onMounted(() => {
 function showPopover() {
   popover.isHover = true;
   if (tab.isMobile) {
-    console.log(popoverIcon.value.getBoundingClientRect());
-    popoverX.value = `${
+    popover.x = `${
       popoverIcon.value.getBoundingClientRect().left + window.scrollX + 25
     }px`;
-    popoverY.value = `${popoverIcon.value.getBoundingClientRect().top - 150}px`;
+    popover.y = `${popoverIcon.value.getBoundingClientRect().top - 150}px`;
   }
   setTimeout(() => {
     popover.isOpen = popover.isHover ? true : false;
@@ -80,8 +79,8 @@ function hidePopover() {
     </component>
     <div
       :style="{
-        top: tab.isMobile ? popoverY : null,
-        left: tab.isMobile ? popoverX : null,
+        top: tab.isMobile ? popover.y : null,
+        left: tab.isMobile ? popover.x : null,
       }"
       :aria-hidden="popover.isOpen ? 'false' : 'true'"
       v-show="popover.isOpen"

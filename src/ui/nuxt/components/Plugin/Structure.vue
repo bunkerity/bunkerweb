@@ -24,7 +24,6 @@ const props = defineProps({
       />
       <div class="grid grid-cols-12">
         <PluginSettingSimple :settings="plugin.settings" />
-        <PluginSettingMultiple :settings="plugin.settings" />
       </div>
     </PluginContainer>
   </div>
