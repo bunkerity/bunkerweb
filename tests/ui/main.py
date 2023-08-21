@@ -1,6 +1,7 @@
 from contextlib import suppress
 from datetime import datetime, timedelta
 from os import listdir
+from os.path import join
 from pathlib import Path
 from time import sleep
 from traceback import format_exc
@@ -9,7 +10,9 @@ from requests import get
 from requests.exceptions import RequestException
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
