@@ -879,7 +879,13 @@ class Database:
                 if setting.context == "multisite":
                     multisite.append(setting.id)
 
-            if config.get("MULTISITE", "no") == "yes":
+            is_multisite = (
+                config.get("MULTISITE", {"value": "no"})["value"] == "yes"
+                if methods
+                else config.get("MULTISITE", "no") == "yes"
+            )
+
+            if is_multisite:
                 for service in session.query(Services).with_entities(Services.id).all():
                     checked_settings = []
                     for key, value in deepcopy(config).items():
@@ -926,7 +932,7 @@ class Database:
                                 }
                             )
 
-            if config["MULTISITE"] == "yes":
+            if is_multisite:
                 servers = " ".join(
                     service.id for service in session.query(Services).all()
                 )
@@ -972,19 +978,22 @@ class Database:
                 for service in session.query(Services).with_entities(Services.id).all()
             ]
             for service in service_names:
+                service_settings = []
                 tmp_config = deepcopy(config)
 
                 for key, value in deepcopy(tmp_config).items():
                     if key.startswith(f"{service}_"):
-                        tmp_config[key.replace(f"{service}_", "")] = tmp_config.pop(key)
+                        setting = key.replace(f"{service}_", "")
+                        service_settings.append(setting)
+                        tmp_config[setting] = tmp_config.pop(key)
                     elif any(key.startswith(f"{s}_") for s in service_names):
                         tmp_config.pop(key)
-                    else:
+                    elif key not in service_settings:
                         tmp_config[key] = (
                             {
                                 "value": value["value"],
-                                "global": True,
-                                "method": "default",
+                                "global": value["global"],
+                                "method": value["method"],
                             }
                             if methods is True
                             else value
