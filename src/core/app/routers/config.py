@@ -1,4 +1,4 @@
-from typing import Dict, Literal
+from typing import Dict, Literal, Union
 from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
@@ -7,16 +7,15 @@ from ..dependencies import DB, LOGGER, inform_scheduler
 
 router = APIRouter(prefix="/config", tags=["config"])
 
-
 @router.get(
     "",
-    response_model=Dict[str, str],
+    response_model=Dict[str, Union[str, Dict[Literal["value", "global", "method"], Union[str, bool]]]],
     summary="Get config from Database",
     response_description="BunkerWeb config",
 )
-async def get_config() -> JSONResponse:
+async def get_config(methods: bool = False):
     """Get config from Database"""
-    return JSONResponse(content=DB.get_config())
+    return DB.get_config(methods=methods)
 
 
 @router.put(
