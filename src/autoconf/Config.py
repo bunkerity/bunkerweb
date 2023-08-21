@@ -1,16 +1,17 @@
+#!/usr/bin/python3
+
 from os import getenv
 from time import sleep
+from typing import Optional
 
-from ConfigCaller import ConfigCaller
-from Database import Database
-from logger import setup_logger
+from ConfigCaller import ConfigCaller  # type: ignore
+from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
 
 
 class Config(ConfigCaller):
-    def __init__(self, ctrl_type, lock=None):
+    def __init__(self):
         super().__init__()
-        self.__ctrl_type = ctrl_type
-        self.__lock = lock
         self.__logger = setup_logger("Config", getenv("LOG_LEVEL", "INFO"))
         self.__instances = []
         self.__services = []

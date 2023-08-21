@@ -11,7 +11,7 @@
       "help": "Activate antibot feature.",
       "id": "use-antibot",
       "label": "Antibot challenge",
-      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha)$",
+      "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile)$",
       "type": "select",
       "select": [
         "no",
@@ -19,7 +19,8 @@
         "javascript",
         "captcha",
         "recaptcha",
-        "hcaptcha"
+        "hcaptcha",
+        "turnstile"
       ]
     },
     "ANTIBOT_URI": {
@@ -74,6 +75,24 @@
       "id": "antibot-hcaptcha-secret",
       "label": "hCaptcha secret",
       "regex": "^(0x[a-zA-Z0-9]+)?$",
+      "type": "password"
+    },
+    "ANTIBOT_TURNSTILE_SITEKEY": {
+      "context": "multisite",
+      "default": "",
+      "help": "Sitekey for Turnstile challenge.",
+      "id": "antibot-turnstile-sitekey",
+      "label": "Turnstile sitekey",
+      "regex": "^(0x[\\w-]+)?$",
+      "type": "text"
+    },
+    "ANTIBOT_TURNSTILE_SECRET": {
+      "context": "multisite",
+      "default": "",
+      "help": "Secret for Turnstile challenge.",
+      "id": "antibot-turnstile-secret",
+      "label": "Turnstile secret",
+      "regex": "^(0x[\\w-]+)?$",
       "type": "password"
     },
     "ANTIBOT_TIME_RESOLVE": {

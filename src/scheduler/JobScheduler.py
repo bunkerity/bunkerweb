@@ -1,10 +1,12 @@
+#!/usr/bin/python3
+
 from copy import deepcopy
 from functools import partial
 from glob import glob
 from json import loads
 from logging import Logger
-from os import cpu_count, environ, getenv
-from os.path import basename, dirname
+from os import cpu_count, environ, getenv, sep
+from os.path import basename, dirname, join
 from pathlib import Path
 from re import match
 from typing import Any, Dict, Optional
@@ -19,21 +21,27 @@ from sys import path as sys_path
 from threading import Lock, Semaphore, Thread
 from traceback import format_exc
 
-sys_path.extend(("/usr/share/bunkerweb/utils", "/usr/share/bunkerweb/db"))
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
-from Database import Database
-from logger import setup_logger
-from ApiCaller import ApiCaller
+from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
+from ApiCaller import ApiCaller  # type: ignore
+from API import API  # type: ignore
 
 
 class JobScheduler(ApiCaller):
     def __init__(
         self,
         env: Optional[Dict[str, Any]] = None,
-        lock: Optional[Lock] = None,
-        apis: Optional[list] = None,
         logger: Optional[Logger] = None,
         integration: str = "Linux",
+        *,
+        lock: Optional[Lock] = None,
+        apis: Optional[list] = None,
     ):
         super().__init__(apis or [])
         self.__logger = logger or setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
@@ -47,17 +55,54 @@ class JobScheduler(ApiCaller):
         self.__job_success = True
         self.__semaphore = Semaphore(cpu_count() or 1)
 
+    @property
+    def env(self) -> Dict[str, Any]:
+        return self.__env
+
+    @env.setter
+    def env(self, env: Dict[str, Any]):
+        self.__env = env
+
+    def set_integration(self, integration: str):
+        self.__integration = integration
+
+    def auto_setup(self):
+        super().auto_setup(bw_integration=self.__integration)
+
+    def update_instances(self):
+        super(JobScheduler, type(self)).apis.fset(self, self.__get_apis())
+
+    def __get_apis(self):
+        apis = []
+        try:
+            with self.__thread_lock:
+                instances = self.__db.get_instances()
+            for instance in instances:
+                api = API(
+                    f"http://{instance['hostname']}:{instance['port']}",
+                    host=instance["server_name"],
+                )
+                apis.append(api)
+        except:
+            self.__logger.warning(
+                f"Exception while getting jobs instances : {format_exc()}",
+            )
+        return apis
+
+    def update_jobs(self):
+        self.__jobs = self.__get_jobs()
+
     def __get_jobs(self):
         jobs = {}
-        for plugin_file in list(
-            glob("/usr/share/bunkerweb/core/*/plugin.json")  # core plugins
-        ) + list(
-            glob("/etc/bunkerweb/plugins/*/plugin.json")  # external plugins
-        ):
+        for plugin_file in glob(
+            join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json")
+        ) + glob(  # core plugins
+            join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")
+        ):  # external plugins
             plugin_name = basename(dirname(plugin_file))
             jobs[plugin_name] = []
             try:
-                plugin_data = loads(Path(plugin_file).read_text())
+                plugin_data = loads(Path(plugin_file).read_text(encoding="utf-8"))
                 if not "jobs" in plugin_data:
                     continue
 
@@ -66,12 +111,12 @@ class JobScheduler(ApiCaller):
                 for x, job in enumerate(deepcopy(plugin_jobs)):
                     if not all(
                         key in job.keys()
-                        for key in [
+                        for key in (
                             "name",
                             "file",
                             "every",
                             "reload",
-                        ]
+                        )
                     ):
                         self.__logger.warning(
                             f"missing keys for job {job['name']} in plugin {plugin_name}, must have name, file, every and reload, ignoring job"
@@ -91,7 +136,7 @@ class JobScheduler(ApiCaller):
                         )
                         plugin_jobs.pop(x)
                         continue
-                    elif job["every"] not in ["once", "minute", "hour", "day", "week"]:
+                    elif job["every"] not in ("once", "minute", "hour", "day", "week"):
                         self.__logger.warning(
                             f"Invalid every for job {job['name']} in plugin {plugin_name} (Must be once, minute, hour, day or week), ignoring job"
                         )
@@ -104,7 +149,7 @@ class JobScheduler(ApiCaller):
                         plugin_jobs.pop(x)
                         continue
 
-                    plugin_jobs[x]["path"] = f"{dirname(plugin_file)}/"
+                    plugin_jobs[x]["path"] = dirname(plugin_file)
 
                 jobs[plugin_name] = plugin_jobs
             except FileNotFoundError:
@@ -124,17 +169,18 @@ class JobScheduler(ApiCaller):
             return schedule_every().day
         elif every == "week":
             return schedule_every().week
-        raise Exception(f"can't convert string {every} to schedule")
+        raise ValueError(f"can't convert string {every} to schedule")
 
     def __reload(self) -> bool:
         reload = True
         if self.__integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
             self.__logger.info("Reloading nginx ...")
             proc = run(
-                ["sudo", "/usr/sbin/nginx", "-s", "reload"],
+                ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
                 stdin=DEVNULL,
                 stderr=PIPE,
                 env=self.__env,
+                check=False,
             )
             reload = proc.returncode == 0
             if reload:
@@ -145,7 +191,7 @@ class JobScheduler(ApiCaller):
                 )
         else:
             self.__logger.info("Reloading nginx ...")
-            reload = self._send_to_apis("POST", "/reload")
+            reload = self.send_to_apis("POST", "/reload")
             if reload:
                 self.__logger.info("Successfully reloaded nginx")
             else:
@@ -160,7 +206,11 @@ class JobScheduler(ApiCaller):
         ret = -1
         try:
             proc = run(
-                f"{path}jobs/{file}", stdin=DEVNULL, stderr=STDOUT, env=self.__env
+                join(path, "jobs", file),
+                stdin=DEVNULL,
+                stderr=STDOUT,
+                env=self.__env,
+                check=False,
             )
             ret = proc.returncode
         except BaseException:
@@ -179,6 +229,11 @@ class JobScheduler(ApiCaller):
             with self.__thread_lock:
                 self.__job_success = False
 
+        Thread(target=self.__update_job, args=(plugin, name, success)).start()
+
+        return ret
+
+    def __update_job(self, plugin: str, name: str, success: bool):
         with self.__thread_lock:
             err = self.__db.update_job(plugin, name, success)
 
@@ -190,7 +245,6 @@ class JobScheduler(ApiCaller):
             self.__logger.warning(
                 f"Failed to update database for the job {name} from plugin {plugin}: {err}",
             )
-        return ret
 
     def setup(self):
         for plugin, jobs in self.__jobs.items():
@@ -229,17 +283,14 @@ class JobScheduler(ApiCaller):
 
         if reload:
             try:
-                if self._get_apis():
-                    self.__logger.info("Sending /var/cache/bunkerweb folder ...")
-                    if not self._send_files("/var/cache/bunkerweb", "/cache"):
+                if self.apis:
+                    cache_path = join(sep, "var", "cache", "bunkerweb")
+                    self.__logger.info(f"Sending {cache_path} folder ...")
+                    if not self.send_files(cache_path, "/cache"):
                         success = False
-                        self.__logger.error(
-                            "Error while sending /var/cache/bunkerweb folder"
-                        )
+                        self.__logger.error(f"Error while sending {cache_path} folder")
                     else:
-                        self.__logger.info(
-                            "Successfully sent /var/cache/bunkerweb folder"
-                        )
+                        self.__logger.info(f"Successfully sent {cache_path} folder")
                 if not self.__reload():
                     success = False
             except:
@@ -280,7 +331,7 @@ class JobScheduler(ApiCaller):
         return ret
 
     def __run_in_thread(self, jobs: list):
-        self.__semaphore.acquire()
+        self.__semaphore.acquire(timeout=60)
         for job in jobs:
             job()
         self.__semaphore.release()

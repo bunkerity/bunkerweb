@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.0
+    image: bunkerity/bunkerweb:1.5.1
     ports:
       - 80:8080
       - 443:8443
@@ -25,7 +25,7 @@ services:
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.0
+    image: bunkerity/bunkerweb-scheduler:1.5.1
     depends_on:
       - mybunker
     environment:
@@ -37,11 +37,12 @@ services:
       - bw-docker
 
   bw-docker-proxy:
-    image: tecnativa/docker-socket-proxy:0.1
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
+      - LOG_LEVEL=warning
     networks:
       - bw-docker
 
@@ -53,10 +54,10 @@ services:
       - moodle-files:/bitnami/moodle
       - moodle-data:/bitnami/moodledata
     environment:
-      - MOODLE_USERNAME=admin                # replace with your moodle admin username
-      - MOODLE_PASSWORD=password             # replace with your moodle admin password
-      - MOODLE_EMAIL=moodle@example.com      # replace with your moodle admin email
-      - MOODLE_SITE_NAME=My Moodle           # replace with your moodle site name
+      - MOODLE_USERNAME=admin # replace with your moodle admin username
+      - MOODLE_PASSWORD=password # replace with your moodle admin password
+      - MOODLE_EMAIL=moodle@example.com # replace with your moodle admin email
+      - MOODLE_SITE_NAME=My Moodle # replace with your moodle site name
       - MOODLE_DATABASE_HOST=mydb
       - MOODLE_DATABASE_NAME=moodle
       - MOODLE_DATABASE_USER=user
@@ -69,10 +70,10 @@ services:
     volumes:
       - db-data:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=db-root-pwd      # replace with a stronger password
+      - MYSQL_ROOT_PASSWORD=db-root-pwd # replace with a stronger password
       - MYSQL_DATABASE=moodle
       - MYSQL_USER=user
-      - MYSQL_PASSWORD=db-user-pwd           # replace with a stronger password (must match MOODLE_DATABASE_PASSWORD)
+      - MYSQL_PASSWORD=db-user-pwd # replace with a stronger password (must match MOODLE_DATABASE_PASSWORD)
       - MARIADB_CHARACTER_SET=utf8mb4
       - MARIADB_COLLATE=utf8mb4_unicode_ci
     networks:

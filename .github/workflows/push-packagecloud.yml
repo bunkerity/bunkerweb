@@ -64,6 +64,10 @@ jobs:
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      # Update name
+      # - name: Rename package
+      #   if: inputs.BW_VERSION == 'testing'
+      #   run: sudo apt install -y rename && rename 's/[0-9]\.[0-9]\.[0-9]/testing/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
       # Push package
       - name: Push package to packagecloud
         uses: danielmundi/upload-packagecloud@v1

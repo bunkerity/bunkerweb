@@ -6,7 +6,7 @@ echo "Updating python dependencies"
 echo "Creating virtual environment"
 
 python3 -m venv tmp_venv && source tmp_venv/bin/activate
-pip install pip --upgrade > /dev/null && pip install pip-compile-multi pip-upgrader > /dev/null
+pip install pip --upgrade > /dev/null && pip install wheel setuptools pip-tools pip-compile-multi pip-upgrader > /dev/null
 
 echo "Updating requirements.in files"
 

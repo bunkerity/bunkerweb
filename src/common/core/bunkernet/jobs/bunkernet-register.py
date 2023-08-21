@@ -1,24 +1,27 @@
 #!/usr/bin/python3
 
-from os import _exit, getenv
+from os import _exit, getenv, sep
+from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
-from threading import Lock
 from time import sleep
 from traceback import format_exc
 
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/db",
-        "/usr/share/bunkerweb/core/bunkernet/jobs",
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (
+        ("deps", "python"),
+        ("utils",),
+        ("db",),
+        ("core", "bunkernet", "jobs"),
     )
-)
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
 from bunkernet import register, ping, get_id
-from Database import Database
-from logger import setup_logger
+from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
 from jobs import get_file_in_db, set_file_in_db, del_file_in_db
 
 logger = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
@@ -29,7 +32,7 @@ try:
     bunkernet_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        servers = getenv("SERVER_NAME", [])
+        servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):
             servers = servers.split(" ")
@@ -50,27 +53,23 @@ try:
         _exit(0)
 
     # Create directory if it doesn't exist
-    Path("/var/cache/bunkerweb/bunkernet").mkdir(parents=True, exist_ok=True)
+    bunkernet_path = Path(sep, "var", "cache", "bunkerweb", "bunkernet")
+    bunkernet_path.mkdir(parents=True, exist_ok=True)
 
     # Get ID from cache
     bunkernet_id = None
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-    )
-    if db:
-        bunkernet_id = get_file_in_db("bunkernet-register", "instance.id", db)
-        if bunkernet_id:
-            Path("/var/cache/bunkerweb/bunkernet/instance.id").write_text(
-                bunkernet_id.decode()
-            )
-            logger.info("Successfully retrieved BunkerNet ID from db cache")
-        else:
-            logger.info("No BunkerNet ID found in db cache")
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
+    bunkernet_id = get_file_in_db("instance.id", db)
+    if bunkernet_id:
+        bunkernet_path.joinpath("bunkernet.id").write_bytes(bunkernet_id)
+        logger.info("Successfully retrieved BunkerNet ID from db cache")
+    else:
+        logger.info("No BunkerNet ID found in db cache")
 
     # Register instance
     registered = False
-    if not Path("/var/cache/bunkerweb/bunkernet/instance.id").is_file():
+    instance_id_path = bunkernet_path.joinpath("instance.id")
+    if not instance_id_path.is_file():
         logger.info("Registering instance on BunkerNet API ...")
         ok, status, data = register()
         if not ok:
@@ -108,22 +107,24 @@ try:
             )
             _exit(2)
         bunkernet_id = data["data"]
-        Path("/var/cache/bunkerweb/bunkernet/instance.id").write_text(bunkernet_id)
+        instance_id_path.write_text(bunkernet_id, encoding="utf-8")
         registered = True
         exit_status = 1
         logger.info(
             f"Successfully registered on BunkerNet API with instance id {data['data']}"
         )
     else:
-        bunkernet_id = Path("/var/cache/bunkerweb/bunkernet/instance.id").read_text()
-        logger.info(f"Already registered on BunkerNet API with instance id {get_id()}")
+        bunkernet_id = bunkernet_id or instance_id_path.read_bytes()
+        bunkernet_id = bunkernet_id.decode()
+        logger.info(
+            f"Already registered on BunkerNet API with instance id {bunkernet_id}"
+        )
 
     sleep(1)
 
     # Update cache with new bunkernet ID
-    if db and registered:
-        with open("/var/cache/bunkerweb/bunkernet/instance.id", "rb") as f:
-            cached, err = set_file_in_db(f"bunkernet-register", f"instance.id", f, db)
+    if registered:
+        cached, err = set_file_in_db("instance.id", bunkernet_id.encode(), db)
         if not cached:
             logger.error(f"Error while saving BunkerNet data to db cache : {err}")
         else:
@@ -152,9 +153,8 @@ try:
             logger.warning(
                 "Instance ID is not registered, removing it and retrying a register later...",
             )
-            Path("/var/cache/bunkerweb/bunkernet/instance.id").unlink()
-            if db:
-                del_file_in_db("bunkernet-register", "instance.id", db)
+            instance_id_path.unlink()
+            del_file_in_db("instance.id", db)
             _exit(2)
 
         try:
@@ -181,7 +181,6 @@ try:
     else:
         logger.error("Connectivity with BunkerNet failed ...")
         exit_status = 2
-
 except:
     exit_status = 2
     logger.error(f"Exception while running bunkernet-register.py :\n{format_exc()}")

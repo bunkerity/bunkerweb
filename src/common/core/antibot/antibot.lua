@@ -1,23 +1,87 @@
-local class     = require "middleclass"
-local plugin    = require "bunkerweb.plugin"
-local utils     = require "bunkerweb.utils"
-local datastore = require "bunkerweb.datastore"
-local cjson     = require "cjson"
-local captcha   = require "antibot.captcha"
-local base64    = require "base64"
-local sha256    = require "resty.sha256"
-local str       = require "resty.string"
-local http      = require "resty.http"
-local template  = nil
+local class    = require "middleclass"
+local plugin   = require "bunkerweb.plugin"
+local utils    = require "bunkerweb.utils"
+local cjson    = require "cjson"
+local captcha  = require "antibot.captcha"
+local base64   = require "base64"
+local sha256   = require "resty.sha256"
+local str      = require "resty.string"
+local http     = require "resty.http"
+local template = nil
 if ngx.shared.datastore then
 	template = require "resty.template"
 end
 
 local antibot = class("antibot", plugin)
 
-function antibot:initialize()
+function antibot:initialize(ctx)
 	-- Call parent initialize
-	plugin.initialize(self, "antibot")
+	plugin.initialize(self, "antibot", ctx)
+end
+
+function antibot:header()
+	-- Check if access is needed
+	if self.variables["USE_ANTIBOT"] == "no" then
+		return self:ret(true, "antibot not activated")
+	end
+	-- Check if antibot uri
+	if self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
+		return self:ret(true, "Not antibot uri")
+	end
+
+	-- Get session data
+	local session, err = utils.get_session("antibot", self.ctx)
+	if not session then
+		return self:ret(false, "can't get session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
+	end
+	self.session = session
+	self.session_data = utils.get_session_data(self.session, true, self.ctx)
+	-- Check if session is valid
+	self:check_session()
+
+	-- Don't go further if client resolved the challenge
+	if self.session_data.resolved then
+		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
+			return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
+		end
+		return self:ret(true, "client already resolved the challenge")
+	end
+
+	local header = "Content-Security-Policy"
+	if self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes" then
+		header = header .. "-Report-Only"
+	end
+
+	if self.session_data.type == "recaptcha" then
+		ngx.header[header] =
+				"default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-" ..
+				self.session_data.nonce_script ..
+				"' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ 'unsafe-inline' http: https:; img-src https://www.gstatic.com/recaptcha/ 'self' data:; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/; style-src 'self' 'nonce-" ..
+				self.session_data.nonce_style ..
+				"'; font-src 'self' https://fonts.gstatic.com data:; base-uri 'self';"
+	elseif self.session_data.type == "hcaptcha" then
+		ngx.header[header] =
+				"default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-" ..
+				self.session_data.nonce_script ..
+				"' https://hcaptcha.com https://*.hcaptcha.com 'unsafe-inline' http: https:; img-src 'self' data:; frame-src https://hcaptcha.com https://*.hcaptcha.com; style-src 'self' 'nonce-" ..
+				self.session_data.nonce_style ..
+				"' https://hcaptcha.com https://*.hcaptcha.com; connect-src https://hcaptcha.com https://*.hcaptcha.com; font-src 'self' data:; base-uri 'self';"
+	elseif self.session_data.type == "turnstile" then
+		ngx.header[header] =
+				"default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-" ..
+				self.session_data.nonce_script ..
+				"' https://challenges.cloudflare.com 'unsafe-inline' http: https:; img-src 'self' data:; frame-src https://challenges.cloudflare.com; style-src 'self' 'nonce-" ..
+				self.session_data.nonce_style ..
+				"'; font-src 'self' data:; base-uri 'self';"
+	else
+		ngx.header[header] =
+				"default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-" ..
+				self.session_data.nonce_script ..
+				"' 'unsafe-inline' http: https:; img-src 'self' data:; style-src 'self' 'nonce-" ..
+				self.session_data.nonce_style ..
+				"'; font-src 'self' data:; base-uri 'self';"
+	end
+	return self:ret(true, "Successfully overridden CSP header")
 end
 
 function antibot:access()
@@ -27,18 +91,18 @@ function antibot:access()
 	end
 
 	-- Get session data
-	local session, err = utils.get_session("antibot")
+	local session, err = utils.get_session("antibot", self.ctx)
 	if not session then
 		return self:ret(false, "can't get session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
 	end
 	self.session = session
-	self.session_data = utils.get_session_data(self.session)
+	self.session_data = utils.get_session_data(self.session, true, self.ctx)
 	-- Check if session is valid
 	self:check_session()
 
 	-- Don't go further if client resolved the challenge
 	if self.session_data.resolved then
-		if ngx.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
+		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
 			return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
 		end
 		return self:ret(true, "client already resolved the challenge")
@@ -52,7 +116,7 @@ function antibot:access()
 	end
 
 	-- Redirect to challenge page
-	if ngx.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
+	if self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
 		return self:ret(true, "redirecting client to the challenge uri", nil, self.variables["ANTIBOT_URI"])
 	end
 
@@ -62,13 +126,13 @@ function antibot:access()
 	end
 
 	-- Display challenge needed
-	if ngx.ctx.bw.request_method == "GET" then
-		ngx.ctx.bw.antibot_display_content = true
+	if self.ctx.bw.request_method == "GET" then
+		self.ctx.bw.antibot_display_content = true
 		return self:ret(true, "displaying challenge to client", ngx.OK)
 	end
 
 	-- Check challenge
-	if ngx.ctx.bw.request_method == "POST" then
+	if self.ctx.bw.request_method == "POST" then
 		local ok, err, redirect = self:check_challenge()
 		local set_ok, set_err = self:set_session_data()
 		if not set_ok then
@@ -87,12 +151,12 @@ function antibot:access()
 		if not ok then
 			return self:ret(false, "can't save session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
 		end
-		ngx.ctx.bw.antibot_display_content = true
+		self.ctx.bw.antibot_display_content = true
 		return self:ret(true, "displaying challenge to client", ngx.OK)
 	end
 
 	-- Method is suspicious, let's deny the request
-	return self:ret(true, "unsupported HTTP method for antibot", utils.get_deny_status())
+	return self:ret(true, "unsupported HTTP method for antibot", utils.get_deny_status(self.ctx))
 end
 
 function antibot:content()
@@ -102,17 +166,17 @@ function antibot:content()
 	end
 
 	-- Check if display content is needed
-	if not ngx.ctx.bw.antibot_display_content then
+	if not self.ctx.bw.antibot_display_content then
 		return self:ret(true, "display content not needed", nil, "/")
 	end
 
 	-- Get session data
-	local session, err = utils.get_session("antibot")
+	local session, err = utils.get_session("antibot", self.ctx)
 	if not session then
 		return self:ret(false, "can't get session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
 	end
 	self.session = session
-	self.session_data = utils.get_session_data(self.session)
+	self.session_data = utils.get_session_data(self.session, true, self.ctx)
 
 	-- Direct access without session
 	if not self.session_data.prepared then
@@ -155,7 +219,7 @@ end
 
 function antibot:set_session_data()
 	if self.session_updated then
-		local ok, err = utils.set_session_data(self.session, self.session_data)
+		local ok, err = utils.set_session_data(self.session, self.session_data, true, self.ctx)
 		if not ok then
 			return false, err
 		end
@@ -172,16 +236,18 @@ function antibot:prepare_challenge()
 		self.session_data.time_resolve = ngx.now()
 		self.session_data.type = self.variables["USE_ANTIBOT"]
 		self.session_data.resolved = false
-		self.session_data.original_uri = ngx.ctx.bw.request_uri
-		if ngx.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
+		self.session_data.original_uri = self.ctx.bw.request_uri
+		self.session_data.nonce_script = utils.rand(16)
+		self.session_data.nonce_style = utils.rand(16)
+		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
 			self.session_data.original_uri = "/"
 		end
-		if self.variables["USE_ANTIBOT"] == "cookie" then
+		if self.session_data.type == "cookie" then
 			self.session_data.resolved = true
 			self.session_data.time_valid = ngx.now()
-		elseif self.variables["USE_ANTIBOT"] == "javascript" then
+		elseif self.session_data.type == "javascript" then
 			self.session_data.random = utils.rand(20)
-		elseif self.variables["USE_ANTIBOT"] == "captcha" then
+		elseif self.session_data.type == "captcha" then
 			self.session_data.captcha = utils.rand(6, true)
 		end
 	end
@@ -195,16 +261,18 @@ function antibot:display_challenge()
 
 	-- Common variables for templates
 	local template_vars = {
-		antibot_uri = self.variables["ANTIBOT_URI"]
+		antibot_uri = self.variables["ANTIBOT_URI"],
+		nonce_script = self.session_data.nonce_script,
+		nonce_style = self.session_data.nonce_style,
 	}
 
 	-- Javascript case
-	if self.variables["USE_ANTIBOT"] == "javascript" then
+	if self.session_data.type == "javascript" then
 		template_vars.random = self.session_data.random
 	end
 
 	-- Captcha case
-	if self.variables["USE_ANTIBOT"] == "captcha" then
+	if self.session_data.type == "captcha" then
 		local chall_captcha = captcha.new()
 		chall_captcha:font("/usr/share/bunkerweb/core/antibot/files/font.ttf")
 		chall_captcha:string(self.session_data.captcha)
@@ -213,17 +281,22 @@ function antibot:display_challenge()
 	end
 
 	-- reCAPTCHA case
-	if self.variables["USE_ANTIBOT"] == "recaptcha" then
+	if self.session_data.type == "recaptcha" then
 		template_vars.recaptcha_sitekey = self.variables["ANTIBOT_RECAPTCHA_SITEKEY"]
 	end
 
 	-- hCaptcha case
-	if self.variables["USE_ANTIBOT"] == "hcaptcha" then
+	if self.session_data.type == "hcaptcha" then
 		template_vars.hcaptcha_sitekey = self.variables["ANTIBOT_HCAPTCHA_SITEKEY"]
 	end
 
+	-- Turnstile case
+	if self.session_data.type == "turnstile" then
+		template_vars.turnstile_sitekey = self.variables["ANTIBOT_TURNSTILE_SITEKEY"]
+	end
+
 	-- Render content
-	template.render(self.variables["USE_ANTIBOT"] .. ".html", template_vars)
+	template.render(self.session_data.type .. ".html", template_vars)
 
 	return true, "displayed challenge"
 end
@@ -235,14 +308,12 @@ function antibot:check_challenge()
 	end
 
 	local resolved = false
-	local err = ""
-	local redirect = nil
 
 	self.session_data.prepared = false
 	self.session_updated = true
 
 	-- Javascript case
-	if self.variables["USE_ANTIBOT"] == "javascript" then
+	if self.session_data.type == "javascript" then
 		ngx.req.read_body()
 		local args, err = ngx.req.get_post_args(1)
 		if err == "truncated" or not args or not args["challenge"] then
@@ -261,7 +332,7 @@ function antibot:check_challenge()
 	end
 
 	-- Captcha case
-	if self.variables["USE_ANTIBOT"] == "captcha" then
+	if self.session_data.type == "captcha" then
 		ngx.req.read_body()
 		local args, err = ngx.req.get_post_args(1)
 		if err == "truncated" or not args or not args["captcha"] then
@@ -276,7 +347,7 @@ function antibot:check_challenge()
 	end
 
 	-- reCAPTCHA case
-	if self.variables["USE_ANTIBOT"] == "recaptcha" then
+	if self.session_data.type == "recaptcha" then
 		ngx.req.read_body()
 		local args, err = ngx.req.get_post_args(1)
 		if err == "truncated" or not args or not args["token"] then
@@ -289,8 +360,8 @@ function antibot:check_challenge()
 		local res, err = httpc:request_uri("https://www.google.com/recaptcha/api/siteverify", {
 			method = "POST",
 			body = "secret=" ..
-			self.variables["ANTIBOT_RECAPTCHA_SECRET"] ..
-			"&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
+					self.variables["ANTIBOT_RECAPTCHA_SECRET"] ..
+					"&response=" .. args["token"] .. "&remoteip=" .. self.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}
@@ -312,7 +383,7 @@ function antibot:check_challenge()
 	end
 
 	-- hCaptcha case
-	if self.variables["USE_ANTIBOT"] == "hcaptcha" then
+	if self.session_data.type == "hcaptcha" then
 		ngx.req.read_body()
 		local args, err = ngx.req.get_post_args(1)
 		if err == "truncated" or not args or not args["token"] then
@@ -325,8 +396,8 @@ function antibot:check_challenge()
 		local res, err = httpc:request_uri("https://hcaptcha.com/siteverify", {
 			method = "POST",
 			body = "secret=" ..
-			self.variables["ANTIBOT_HCAPTCHA_SECRET"] ..
-			"&response=" .. args["token"] .. "&remoteip=" .. ngx.ctx.bw.remote_addr,
+					self.variables["ANTIBOT_HCAPTCHA_SECRET"] ..
+					"&response=" .. args["token"] .. "&remoteip=" .. self.ctx.bw.remote_addr,
 			headers = {
 				["Content-Type"] = "application/x-www-form-urlencoded"
 			}
@@ -340,6 +411,42 @@ function antibot:check_challenge()
 			return nil, "error while decoding JSON from hCaptcha API : " .. data, nil
 		end
 		if not hdata.success then
+			return false, "client failed challenge", nil
+		end
+		self.session_data.resolved = true
+		self.session_data.time_valid = ngx.now()
+		return true, "resolved", self.session_data.original_uri
+	end
+
+	-- Turnstile case
+	if self.session_data.type == "turnstile" then
+		ngx.req.read_body()
+		local args, err = ngx.req.get_post_args(1)
+		if err == "truncated" or not args or not args["token"] then
+			return nil, "missing challenge arg", nil
+		end
+		local httpc, err = http.new()
+		if not httpc then
+			return nil, "can't instantiate http object : " .. err, nil, nil
+		end
+		local res, err = httpc:request_uri("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+			method = "POST",
+			body = "secret=" ..
+					self.variables["ANTIBOT_TURNSTILE_SECRET"] ..
+					"&response=" .. args["token"] .. "&remoteip=" .. self.ctx.bw.remote_addr,
+			headers = {
+				["Content-Type"] = "application/x-www-form-urlencoded"
+			}
+		})
+		httpc:close()
+		if not res then
+			return nil, "can't send request to Turnstile API : " .. err, nil
+		end
+		local ok, tdata = pcall(cjson.decode, res.body)
+		if not ok then
+			return nil, "error while decoding JSON from Turnstile API : " .. data, nil
+		end
+		if not tdata.success then
 			return false, "client failed challenge", nil
 		end
 		self.session_data.resolved = true

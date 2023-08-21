@@ -1,5 +1,5 @@
 name: unit_tests
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   test:
@@ -34,3 +34,9 @@ jobs:
 
       - name: Run tests
         run: docker run --network=host -v $PWD:/test -w /test resty-session bash -c "luarocks make && make unit"
+
+      - name: Generate report
+        run: docker run --network=host -v $PWD:/test -w /test resty-session bash -c "luarocks make && luacov"
+
+      - name: Print report summary
+        run: docker run --network=host -v $PWD:/test -w /test resty-session sed -n '/Summary/,$p' luacov.report.out

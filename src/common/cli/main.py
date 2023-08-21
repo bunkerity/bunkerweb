@@ -1,20 +1,19 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 from argparse import ArgumentParser
-from os import _exit, getenv
-from sys import exit as sys_exit, path
+from os import _exit, getenv, sep
+from os.path import join
+from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/cli",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/api",
-    )
-)
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (("deps", "python"), ("utils",), ("api",), ("db",))
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
-from logger import setup_logger
+from logger import setup_logger  # type: ignore
 from CLI import CLI
 
 if __name__ == "__main__":

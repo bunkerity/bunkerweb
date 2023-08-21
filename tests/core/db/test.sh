@@ -3,7 +3,25 @@
 echo "💾 Building db stack ..."
 
 # Starting stack
-docker compose pull bw-docker app1 bw-maria-db bw-mysql-db bw-postgres-db
+docker compose pull bw-docker app1
+if [ $? -ne 0 ] ; then
+    echo "💾 Pull failed ❌"
+    exit 1
+fi
+
+docker compose -f docker-compose.mariadb.yml pull bw-db
+if [ $? -ne 0 ] ; then
+    echo "💾 Pull failed ❌"
+    exit 1
+fi
+
+docker compose -f docker-compose.mysql.yml pull bw-db
+if [ $? -ne 0 ] ; then
+    echo "💾 Pull failed ❌"
+    exit 1
+fi
+
+docker compose -f docker-compose.postgres.yml pull bw-db
 if [ $? -ne 0 ] ; then
     echo "💾 Pull failed ❌"
     exit 1
@@ -48,7 +66,7 @@ cleanup_stack () {
 
     echo "💾 Cleaning up current stack ..."
 
-    docker compose down -v --remove-orphans 2>/dev/null
+    docker compose down -v --remove-orphans
 
     if [ $? -ne 0 ] ; then
         echo "💾 Down failed ❌"
@@ -61,14 +79,17 @@ cleanup_stack () {
 # Cleanup stack on exit
 trap cleanup_stack EXIT
 
+echo "💾 Creating the bw-docker network ..."
+docker network create bw-docker
+
 echo "💾 Starting stack ..."
-docker compose up -d 2>/dev/null
+docker compose up -d
 if [ $? -ne 0 ] ; then
     echo "💾 Up failed, retrying ... ⚠️"
     manual=1
     cleanup_stack
     manual=0
-    docker compose up -d 2>/dev/null
+    docker compose up -d
     if [ $? -ne 0 ] ; then
         echo "💾 Up failed ❌"
         exit 1
@@ -108,6 +129,9 @@ fi
 
 for test in "local" "multisite" "mariadb" "mysql" "postgres"
 do
+    echo "💾 Creating the bw-docker network ..."
+    docker network create bw-docker
+
     if [ "$test" = "local" ] ; then
         echo "💾 Running tests with a local database ..."
     elif [ "$test" = "multisite" ] ; then
@@ -118,33 +142,94 @@ do
         sed -i 's@USE_REVERSE_PROXY@bwadm.example.com_USE_REVERSE_PROXY@' docker-compose.yml
         sed -i 's@REVERSE_PROXY_HOST@bwadm.example.com_REVERSE_PROXY_HOST@' docker-compose.yml
         sed -i 's@REVERSE_PROXY_URL@bwadm.example.com_REVERSE_PROXY_URL@' docker-compose.yml
-        sed -i '16i \      SERVICE_SERVER_NAME: "bwadm.example.com"' docker-compose.test.yml
         sed -i "21i \      CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:2,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" docker-compose.test.yml
         sed -i 's@GLOBAL_USE_REVERSE_PROXY@SERVICE_USE_REVERSE_PROXY@' docker-compose.test.yml
         sed -i 's@GLOBAL_REVERSE_PROXY_HOST@SERVICE_REVERSE_PROXY_HOST@' docker-compose.test.yml
         sed -i 's@GLOBAL_REVERSE_PROXY_URL@SERVICE_REVERSE_PROXY_URL@' docker-compose.test.yml
+        sed -i 's@GLOBAL_SERVER_NAME@SERVICE_SERVER_NAME@' docker-compose.test.yml
     elif [ "$test" = "mariadb" ] ; then
         echo "💾 Running tests with MariaDB database ..."
         echo "ℹ️ Keeping the MULTISITE variable to yes and multisite settings ..."
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "mariadb+pymysql://bunkerweb:secret\@bw-maria-db:3306/db"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "mariadb+pymysql://bunkerweb:secret\@bw-db:3306/db"@' {} \;
+
+        echo "💾 Starting mariadb ..."
+        docker compose -f docker-compose.mariadb.yml up -d
+        if [ $? -ne 0 ] ; then
+            echo "💾 Up failed, retrying ... ⚠️"
+            manual=1
+            cleanup_stack
+            manual=0
+            docker compose -f docker-compose.mariadb.yml up -d
+            if [ $? -ne 0 ] ; then
+                echo "💾 Up failed ❌"
+                exit 1
+            fi
+        fi
     elif [ "$test" = "mysql" ] ; then
         echo "💾 Running tests with MySQL database ..."
         echo "ℹ️ Keeping the MULTISITE variable to yes and multisite settings ..."
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "mysql+pymysql://bunkerweb:secret\@bw-mysql-db:3306/db"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "mysql+pymysql://bunkerweb:secret\@bw-db:3306/db"@' {} \;
+
+        echo "💾 Starting mysql ..."
+        docker compose -f docker-compose.mysql.yml up -d
+        if [ $? -ne 0 ] ; then
+            echo "💾 Up failed, retrying ... ⚠️"
+            manual=1
+            cleanup_stack
+            manual=0
+            docker compose -f docker-compose.mysql.yml up -d
+            if [ $? -ne 0 ] ; then
+                echo "💾 Up failed ❌"
+                exit 1
+            fi
+        fi
     elif [ "$test" = "postgres" ] ; then
         echo "💾 Running tests with PostgreSQL database ..."
         echo "ℹ️ Keeping the MULTISITE variable to yes and multisite settings ..."
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "postgresql://bunkerweb:secret\@bw-postgres-db:5432/db"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "postgresql://bunkerweb:secret\@bw-db:5432/db"@' {} \;
+
+        echo "💾 Starting postgres ..."
+        docker compose -f docker-compose.postgres.yml up -d
+        if [ $? -ne 0 ] ; then
+            echo "💾 Up failed, retrying ... ⚠️"
+            manual=1
+            cleanup_stack
+            manual=0
+            docker compose -f docker-compose.postgres.yml up -d
+            if [ $? -ne 0 ] ; then
+                echo "💾 Up failed ❌"
+                exit 1
+            fi
+        fi
     fi
 
     echo "💾 Starting stack ..."
-    docker compose up -d 2>/dev/null
+    docker compose up -d
     if [ $? -ne 0 ] ; then
         echo "💾 Up failed, retrying ... ⚠️"
         manual=1
         cleanup_stack
+        if [ "$test" = "mariadb" ] ; then
+            docker compose -f docker-compose.mariadb.yml up -d
+            if [ $? -ne 0 ] ; then
+                echo "💾 Up failed ❌"
+                exit 1
+            fi
+        elif [ "$test" = "mysql" ] ; then
+            docker compose -f docker-compose.mysql.yml up -d
+            if [ $? -ne 0 ] ; then
+                echo "💾 Up failed ❌"
+                exit 1
+            fi
+        elif [ "$test" = "postgres" ] ; then
+            docker compose -f docker-compose.postgres.yml up -d
+            if [ $? -ne 0 ] ; then
+                echo "💾 Up failed ❌"
+                exit 1
+            fi
+        fi
         manual=0
-        docker compose up -d 2>/dev/null
+        docker compose up -d
         if [ $? -ne 0 ] ; then
             echo "💾 Up failed ❌"
             exit 1
@@ -181,7 +266,7 @@ do
 
     # Start tests
 
-    docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests 2>/dev/null
+    docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests
 
     if [ $? -ne 0 ] ; then
         echo "💾 Test \"$test\" failed ❌"
@@ -197,6 +282,15 @@ do
     manual=0
 
     echo " "
+
+    echo "💾 Removing bw-docker network ..."
+
+    docker network rm bw-docker
+
+    if [ $? -ne 0 ] ; then
+        echo "💾 Network removal failed ❌"
+        exit 1
+    fi
 done
 
 end=1

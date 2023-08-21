@@ -793,12 +793,12 @@ with webdriver.Firefox(
             driver, By.XPATH, "//div[@data-configs-modal-editor='']/textarea"
         ).send_keys(
             """
-            location /hello {
-                default_type 'text/plain';
-                content_by_lua_block {
-                    ngx.say('hello app1')
-                }
-            }
+location /hello {
+    default_type 'text/plain';
+    content_by_lua_block {
+        ngx.say('hello app1')
+    }
+}
             """
         )
 
@@ -994,26 +994,7 @@ with webdriver.Firefox(
 
         assert_button_click(driver, "//button[@data-cache-modal-submit='']")
 
-        print(
-            "The cache file content is correct, trying to download it ...", flush=True
-        )
-
-        assert_button_click(
-            driver, "//div[@data-cache-action-button='mmdb-asn/asn.mmdb']"
-        )
-
-        assert_button_click(
-            driver,
-            "//div[@data-cache-action-dropdown='mmdb-asn/asn.mmdb']/button[@value='download']",
-        )
-
-        sleep(0.3)
-
-        if len(driver.window_handles) > 1:
-            print("The cache file hasn't been downloaded, exiting ...", flush=True)
-            exit(1)
-
-        print("The cache file has been downloaded, trying logs page ...", flush=True)
+        print("The cache file content is correct, trying logs page ...", flush=True)
 
         access_page(
             driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[8]/a", "logs"

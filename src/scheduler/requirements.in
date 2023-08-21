@@ -1,3 +1,4 @@
-schedule==1.2.0
 certbot==2.6.0
-maxminddb==2.3.0
+maxminddb==2.4.0
+python-magic==0.4.27
+schedule==1.2.0

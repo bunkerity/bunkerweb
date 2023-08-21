@@ -2,10 +2,10 @@
 
 from argparse import ArgumentParser
 from copy import deepcopy
-from glob import glob, iglob
+from glob import glob
 from hashlib import sha256
 from io import BytesIO
-from json import load as json_load
+from json import dumps, load as json_load
 from os import (
     _exit,
     chmod,
@@ -16,7 +16,7 @@ from os import (
     sep,
     walk,
 )
-from os.path import basename, dirname, join
+from os.path import basename, dirname, join, normpath
 from pathlib import Path
 from shutil import copy, rmtree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
@@ -24,37 +24,39 @@ from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
 from tarfile import open as tar_open
+from threading import Thread
 from time import sleep
 from traceback import format_exc
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Union
 
-if "/usr/share/bunkerweb/deps/python" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/deps/python")
-if "/usr/share/bunkerweb/utils" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/utils")
-if "/usr/share/bunkerweb/api" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/api")
-if "/usr/share/bunkerweb/db" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/db")
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (("deps", "python"), ("utils",), ("api",), ("db",))
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
 from dotenv import dotenv_values
 
-from logger import setup_logger
-from Database import Database
+from logger import setup_logger  # type: ignore
+from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
-from ApiCaller import ApiCaller
+from ApiCaller import ApiCaller  # type: ignore
 
-run = True
-scheduler = None
-reloading = False
+RUN = True
+SCHEDULER: Optional[JobScheduler] = None
+GENERATE = False
+INTEGRATION = "Linux"
+CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
+SCHEDULER_TMP_ENV_PATH = Path(sep, "var", "tmp", "bunkerweb", "scheduler.env")
+SCHEDULER_TMP_ENV_PATH.parent.mkdir(parents=True, exist_ok=True)
+SCHEDULER_TMP_ENV_PATH.touch()
 logger = setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
 
 
 def handle_stop(signum, frame):
-    global run, scheduler
-    run = False
-    if scheduler is not None:
-        scheduler.clear()
+    if SCHEDULER is not None:
+        SCHEDULER.clear()
     stop(0)
 
 
@@ -64,13 +66,11 @@ signal(SIGTERM, handle_stop)
 
 # Function to catch SIGHUP and reload the scheduler
 def handle_reload(signum, frame):
-    global reloading, run, scheduler
-    reloading = True
     try:
-        if scheduler is not None and run:
+        if SCHEDULER is not None and RUN:
             # Get the env by reading the .env file
-            env = dotenv_values("/etc/bunkerweb/variables.env")
-            if scheduler.reload(env):
+            tmp_env = dotenv_values(join(sep, "etc", "bunkerweb", "variables.env"))
+            if SCHEDULER.reload(tmp_env):
                 logger.info("Reload successful")
             else:
                 logger.error("Reload failed")
@@ -88,32 +88,43 @@ signal(SIGHUP, handle_reload)
 
 
 def stop(status):
-    Path("/var/tmp/bunkerweb/scheduler.pid").unlink(missing_ok=True)
-    Path("/var/tmp/bunkerweb/scheduler.healthy").unlink(missing_ok=True)
+    Path(sep, "var", "run", "bunkerweb", "scheduler.pid").unlink(missing_ok=True)
+    Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy").unlink(missing_ok=True)
     _exit(status)
 
 
 def generate_custom_configs(
-    custom_configs: List[Dict[str, Any]],
-    integration: str,
-    api_caller: ApiCaller,
+    configs: List[Dict[str, Any]],
     *,
-    original_path: str = join(sep, "etc", "bunkerweb", "configs"),
+    original_path: Union[Path, str] = join(sep, "etc", "bunkerweb", "configs"),
 ):
-    Path(original_path).mkdir(parents=True, exist_ok=True)
-    for custom_config in custom_configs:
-        tmp_path = f"{original_path}/{custom_config['type'].replace('_', '-')}"
-        if custom_config["service_id"]:
-            tmp_path += f"/{custom_config['service_id']}"
-        tmp_path += f"/{custom_config['name']}.conf"
-        Path(dirname(tmp_path)).mkdir(parents=True, exist_ok=True)
-        Path(tmp_path).write_bytes(custom_config["data"])
+    if not isinstance(original_path, Path):
+        original_path = Path(original_path)
 
-    if integration in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
+    # Remove old custom configs files
+    logger.info("Removing old custom configs files ...")
+    for file in glob(str(original_path.joinpath("*", "*"))):
+        file = Path(file)
+        if file.is_symlink() or file.is_file():
+            file.unlink()
+        elif file.is_dir():
+            rmtree(str(file), ignore_errors=True)
+
+    if configs:
+        logger.info("Generating new custom configs ...")
+        original_path.mkdir(parents=True, exist_ok=True)
+        for custom_config in configs:
+            tmp_path = original_path.joinpath(
+                custom_config["type"].replace("_", "-"),
+                custom_config["service_id"] or "",
+                f"{custom_config['name']}.conf",
+            )
+            tmp_path.parent.mkdir(parents=True, exist_ok=True)
+            tmp_path.write_bytes(custom_config["data"])
+
+    if SCHEDULER and SCHEDULER.apis:
         logger.info("Sending custom configs to BunkerWeb")
-        ret = api_caller._send_files(
-            join(sep, "etc", "bunkerweb", "configs"), "/custom_configs"
-        )
+        ret = SCHEDULER.send_files(original_path, "/custom_configs")
 
         if not ret:
             logger.error(
@@ -123,28 +134,39 @@ def generate_custom_configs(
 
 def generate_external_plugins(
     plugins: List[Dict[str, Any]],
-    integration: str,
-    api_caller: ApiCaller,
     *,
-    original_path: str = "/etc/bunkerweb/plugins",
+    original_path: Union[Path, str] = join(sep, "etc", "bunkerweb", "plugins"),
 ):
-    Path(original_path).mkdir(parents=True, exist_ok=True)
-    for plugin in plugins:
-        tmp_path = f"{original_path}/{plugin['id']}/{plugin['name']}.tar.gz"
-        plugin_dir = dirname(tmp_path)
-        Path(plugin_dir).mkdir(parents=True, exist_ok=True)
-        Path(tmp_path).write_bytes(plugin["data"])
-        with tar_open(tmp_path, "r:gz") as tar:
-            tar.extractall(original_path)
-        Path(tmp_path).unlink()
+    if not isinstance(original_path, Path):
+        original_path = Path(original_path)
 
-        for job_file in glob(f"{plugin_dir}/jobs/*"):
-            st = Path(job_file).stat()
-            chmod(job_file, st.st_mode | S_IEXEC)
+    # Remove old external plugins files
+    logger.info("Removing old external plugins files ...")
+    for file in glob(str(original_path.joinpath("*"))):
+        file = Path(file)
+        if file.is_symlink() or file.is_file():
+            file.unlink()
+        elif file.is_dir():
+            rmtree(str(file), ignore_errors=True)
 
-    if integration in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
+    if plugins:
+        logger.info("Generating new external plugins ...")
+        original_path.mkdir(parents=True, exist_ok=True)
+        for plugin in plugins:
+            tmp_path = original_path.joinpath(plugin["id"], f"{plugin['name']}.tar.gz")
+            tmp_path.parent.mkdir(parents=True, exist_ok=True)
+            tmp_path.write_bytes(plugin["data"])
+            with tar_open(str(tmp_path), "r:gz") as tar:
+                tar.extractall(original_path)
+            tmp_path.unlink()
+
+            for job_file in glob(join(str(tmp_path.parent), "jobs", "*")):
+                st = Path(job_file).stat()
+                chmod(job_file, st.st_mode | S_IEXEC)
+
+    if SCHEDULER and SCHEDULER.apis:
         logger.info("Sending plugins to BunkerWeb")
-        ret = api_caller._send_files("/etc/bunkerweb/plugins", "/plugins")
+        ret = SCHEDULER.send_files(original_path, "/plugins")
 
         if not ret:
             logger.error(
@@ -152,17 +174,52 @@ def generate_external_plugins(
             )
 
 
+def dict_to_frozenset(d):
+    if isinstance(d, list):
+        return tuple(sorted(d))
+    elif isinstance(d, dict):
+        return frozenset((k, dict_to_frozenset(v)) for k, v in d.items())
+    return d
+
+
+def api_to_instance(api):
+    hostname_port = (
+        api.endpoint.replace("http://", "")
+        .replace("https://", "")
+        .replace("/", "")
+        .split(":")
+    )
+    return {
+        "hostname": hostname_port[0],
+        "env": {"API_HTTP_PORT": int(hostname_port[1]), "API_SERVER_NAME": api.host},
+    }
+
+
+def update_docker_instances(sc, db, force=False):
+    current_apis = set(sc.apis)
+    sc.auto_setup()
+    if force or current_apis != set(sc.apis):
+        new_instances = []
+        for api in sc.apis:
+            new_instances.append(api_to_instance(api))
+        return db.update_instances(new_instances)
+    return ""
+
+
 if __name__ == "__main__":
     try:
         # Don't execute if pid file exists
-        if Path("/var/tmp/bunkerweb/scheduler.pid").is_file():
+        pid_path = Path(sep, "var", "run", "bunkerweb", "scheduler.pid")
+        if pid_path.is_file():
             logger.error(
                 "Scheduler is already running, skipping execution ...",
             )
             _exit(1)
 
         # Write pid to file
-        Path("/var/tmp/bunkerweb/scheduler.pid").write_text(str(getpid()))
+        pid_path.write_text(str(getpid()), encoding="utf-8")
+
+        del pid_path
 
         # Parse arguments
         parser = ArgumentParser(description="Job scheduler for BunkerWeb")
@@ -172,233 +229,324 @@ if __name__ == "__main__":
             help="path to the file containing environment variables",
         )
         args = parser.parse_args()
-        generate = False
-        integration = "Linux"
-        api_caller = ApiCaller()
 
-        # Define db here because otherwhise it will be undefined for Linux
+        integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
+        os_release_path = Path(sep, "etc", "os-release")
+        if getenv("KUBERNETES_MODE", "no").lower() == "yes":
+            INTEGRATION = "Kubernetes"
+        elif getenv("SWARM_MODE", "no").lower() == "yes":
+            INTEGRATION = "Swarm"
+        elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
+            INTEGRATION = "Autoconf"
+        elif integration_path.is_file():
+            INTEGRATION = integration_path.read_text(encoding="utf-8").strip()
+        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
+            encoding="utf-8"
+        ):
+            INTEGRATION = "Docker"
+
+        del integration_path, os_release_path
+
+        tmp_variables_path = (
+            normpath(args.variables)
+            if args.variables
+            else join(sep, "var", "tmp", "bunkerweb", "variables.env")
+        )
+        tmp_variables_path = Path(tmp_variables_path)
+        nginx_variables_path = Path(sep, "etc", "nginx", "variables.env")
+        dotenv_env = dotenv_values(str(tmp_variables_path))
+
         db = Database(
             logger,
-            sqlalchemy_string=getenv("DATABASE_URI", None),
+            sqlalchemy_string=dotenv_env.get(
+                "DATABASE_URI", getenv("DATABASE_URI", None)
+            ),
         )
-        # END Define db because otherwhise it will be undefined for Linux
+
+        if INTEGRATION in (
+            "Swarm",
+            "Kubernetes",
+            "Autoconf",
+        ):
+            while not db.is_autoconf_loaded():
+                logger.warning(
+                    "Autoconf is not loaded yet in the database, retrying in 5s ...",
+                )
+                sleep(5)
+        elif (
+            not tmp_variables_path.exists()
+            or not nginx_variables_path.exists()
+            or (
+                tmp_variables_path.read_text(encoding="utf-8")
+                != nginx_variables_path.read_text(encoding="utf-8")
+            )
+            or db.is_initialized()
+            and db.get_config() != dotenv_env
+        ):
+            # run the config saver
+            proc = subprocess_run(
+                [
+                    "python3",
+                    join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                    "--settings",
+                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                ]
+                + (["--variables", str(tmp_variables_path)] if args.variables else []),
+                stdin=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                logger.error(
+                    "Config saver failed, configuration will not work as expected...",
+                )
+
+        while not db.is_initialized():
+            logger.warning(
+                "Database is not initialized, retrying in 5s ...",
+            )
+            sleep(5)
+
+        env = db.get_config()
+        while not db.is_first_config_saved() or not env:
+            logger.warning(
+                "Database doesn't have any config saved yet, retrying in 5s ...",
+            )
+            sleep(5)
+            env = db.get_config()
+
+        env["DATABASE_URI"] = db.database_uri
+
+        # Instantiate scheduler
+        SCHEDULER = JobScheduler(env.copy() | environ.copy(), logger, INTEGRATION)
+
+        if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
+            # Automatically setup the scheduler apis
+            SCHEDULER.auto_setup()
+        elif INTEGRATION == "Docker":
+            err = update_docker_instances(SCHEDULER, db, force=True)
+            if err:
+                logger.error(
+                    f"Couldn't save instances to database: {err}",
+                )
+
+        scheduler_first_start = db.is_scheduler_first_start()
 
         logger.info("Scheduler started ...")
 
-        # Checking if the argument variables is true.
-        if args.variables:
-            logger.info(f"Variables : {args.variables}")
-
-            # Read env file
-            env = dotenv_values(args.variables)
-
-            db = Database(
-                logger,
-                sqlalchemy_string=env.get("DATABASE_URI", None),
-            )
-
-            while not db.is_initialized():
-                logger.warning(
-                    "Database is not initialized, retrying in 5s ...",
-                )
-                sleep(5)
-        else:
-            # Read from database
-            integration = "Docker"
-            if Path("/usr/share/bunkerweb/INTEGRATION").exists():
-                with open("/usr/share/bunkerweb/INTEGRATION", "r") as f:
-                    integration = f.read().strip()
-
-            api_caller.auto_setup(bw_integration=integration)
-            db = Database(
-                logger,
-                sqlalchemy_string=getenv("DATABASE_URI", None),
-            )
-
-            if integration in (
-                "Swarm",
-                "Kubernetes",
-                "Autoconf",
-            ):
-                while not db.is_autoconf_loaded():
-                    logger.warning(
-                        "Autoconf is not loaded yet in the database, retrying in 5s ...",
-                    )
-                    sleep(5)
-            elif integration == "Docker" and (
-                not Path("/var/tmp/bunkerweb/variables.env").exists()
-                or db.get_config() != dotenv_values("/var/tmp/bunkerweb/variables.env")
-            ):
-                # run the config saver
-                proc = subprocess_run(
-                    [
-                        "python",
-                        "/usr/share/bunkerweb/gen/save_config.py",
-                        "--settings",
-                        "/usr/share/bunkerweb/settings.json",
-                    ],
-                    stdin=DEVNULL,
-                    stderr=STDOUT,
-                )
-                if proc.returncode != 0:
-                    logger.error(
-                        "Config saver failed, configuration will not work as expected...",
-                    )
-
-            while not db.is_initialized():
-                logger.warning(
-                    "Database is not initialized, retrying in 5s ...",
-                )
-                sleep(5)
-
-            env = db.get_config()
-            while not db.is_first_config_saved() or not env:
-                logger.warning(
-                    "Database doesn't have any config saved yet, retrying in 5s ...",
-                )
-                sleep(5)
-                env = db.get_config()
-
-            env["DATABASE_URI"] = db.get_database_uri()
-
         # Checking if any custom config has been created by the user
-        custom_confs = []
-        root_dirs = listdir(join(sep, "etc", "bunkerweb", "configs"))
-        for root, dirs, files in walk(
-            join(sep, "etc", "bunkerweb", "configs"), topdown=True
-        ):
-            if (
-                root != "configs"
-                and (dirs and not root.split("/")[-1] in root_dirs)
-                or files
-            ):
+        custom_configs = []
+        db_configs = db.get_custom_configs()
+        configs_path = Path(sep, "etc", "bunkerweb", "configs")
+        root_dirs = listdir(str(configs_path))
+        changes = False
+        for root, dirs, files in walk(str(configs_path)):
+            if files or (dirs and basename(root) not in root_dirs):
                 path_exploded = root.split("/")
                 for file in files:
-                    with open(join(root, file), "r") as f:
-                        custom_confs.append(
-                            {
-                                "value": f.read(),
-                                "exploded": (
-                                    f"{path_exploded.pop()}"
-                                    if path_exploded[-1] not in root_dirs
-                                    else "",
-                                    path_exploded[-1],
-                                    file.replace(".conf", ""),
-                                ),
-                            }
-                        )
+                    content = Path(join(root, file)).read_text(encoding="utf-8")
+                    custom_conf = {
+                        "value": content,
+                        "exploded": (
+                            f"{path_exploded.pop()}"
+                            if path_exploded[-1] not in root_dirs
+                            else None,
+                            path_exploded[-1],
+                            file.replace(".conf", ""),
+                        ),
+                    }
 
-        old_configs = None
-        if custom_confs:
-            old_configs = db.get_custom_configs()
+                    saving = True
+                    in_db = False
+                    for db_conf in db_configs:
+                        if (
+                            db_conf["service_id"] == custom_conf["exploded"][0]
+                            and db_conf["name"] == custom_conf["exploded"][2]
+                        ):
+                            in_db = True
+                            if db_conf["method"] != "manual":
+                                saving = False
+                                break
 
-            err = db.save_custom_configs(custom_confs, "manual")
+                    if not in_db and content.startswith("# CREATED BY ENV"):
+                        saving = False
+                        changes = True
+
+                    if saving:
+                        custom_configs.append(custom_conf)
+
+        changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {
+            hash(dict_to_frozenset(d)) for d in db_configs
+        }
+
+        if changes:
+            err = db.save_custom_configs(custom_configs, "manual")
             if err:
                 logger.error(
                     f"Couldn't save some manually created custom configs to database: {err}",
                 )
 
-        custom_configs = db.get_custom_configs()
+        if (scheduler_first_start and db_configs) or changes:
+            Thread(
+                target=generate_custom_configs,
+                args=(db.get_custom_configs(),),
+                kwargs={"original_path": configs_path},
+            ).start()
 
-        if old_configs != custom_configs:
-            generate_custom_configs(custom_configs, integration, api_caller)
+        del custom_configs, db_configs
 
         # Check if any external plugin has been added by the user
         external_plugins = []
-        for filename in iglob(
-            join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")
-        ):
-            with open(filename, "r") as f:
+        db_plugins = db.get_plugins(external=True)
+        plugins_dir = Path(sep, "etc", "bunkerweb", "plugins")
+        for filename in glob(str(plugins_dir.joinpath("*", "plugin.json"))):
+            with open(filename, "r", encoding="utf-8") as f:
                 _dir = dirname(filename)
                 plugin_content = BytesIO()
                 with tar_open(
                     fileobj=plugin_content, mode="w:gz", compresslevel=9
                 ) as tar:
                     tar.add(_dir, arcname=basename(_dir), recursive=True)
-                plugin_content.seek(0)
+                plugin_content.seek(0, 0)
                 value = plugin_content.getvalue()
 
                 external_plugins.append(
                     json_load(f)
                     | {
                         "external": True,
-                        "page": Path(f"{_dir}/ui").exists(),
+                        "page": Path(_dir, "ui").exists(),
                         "method": "manual",
                         "data": value,
                         "checksum": sha256(value).hexdigest(),
                     }
                 )
 
-        if external_plugins:
-            err = db.update_external_plugins(external_plugins, delete_missing=False)
+        tmp_external_plugins = []
+        for external_plugin in deepcopy(external_plugins):
+            external_plugin.pop("data", None)
+            external_plugin.pop("checksum", None)
+            external_plugin.pop("jobs", None)
+            external_plugin.pop("method", None)
+            tmp_external_plugins.append(external_plugin)
+
+        tmp_db_plugins = []
+        for db_plugin in db_plugins.copy():
+            db_plugin.pop("method", None)
+            tmp_db_plugins.append(db_plugin)
+
+        changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {
+            hash(dict_to_frozenset(d)) for d in tmp_db_plugins
+        }
+
+        if changes:
+            err = db.update_external_plugins(external_plugins, delete_missing=True)
             if err:
                 logger.error(
                     f"Couldn't save some manually added plugins to database: {err}",
                 )
 
-        external_plugins = db.get_plugins(external=True)
-        if external_plugins:
-            # Remove old external plugins files
-            logger.info("Removing old external plugins files ...")
-            for file in glob(join(sep, "etc", "bunkerweb", "plugins", "*")):
-                if Path(file).is_symlink() or Path(file).is_file():
-                    Path(file).unlink()
-                elif Path(file).is_dir():
-                    rmtree(file, ignore_errors=True)
-
+        if (scheduler_first_start and db_plugins) or changes:
             generate_external_plugins(
                 db.get_plugins(external=True, with_data=True),
-                integration,
-                api_caller,
+                original_path=plugins_dir,
             )
+            SCHEDULER.update_jobs()
+
+        del tmp_external_plugins, external_plugins, db_plugins
 
         logger.info("Executing scheduler ...")
 
-        generate = not Path(
-            "/var/tmp/bunkerweb/variables.env"
-        ).exists() or env != dotenv_values("/var/tmp/bunkerweb/variables.env")
+        GENERATE = (
+            env != dotenv_env
+            or not tmp_variables_path.exists()
+            or not nginx_variables_path.exists()
+            or (
+                tmp_variables_path.read_text(encoding="utf-8")
+                != nginx_variables_path.read_text(encoding="utf-8")
+            )
+        )
 
-        if not generate:
+        del dotenv_env
+
+        if not GENERATE:
             logger.warning(
                 "Looks like BunkerWeb configuration is already generated, will not generate it again ..."
             )
 
-        first_run = True
+        if scheduler_first_start:
+            ret = db.set_scheduler_first_start()
+
+            if ret:
+                logger.error(
+                    f"An error occurred when setting the scheduler first start : {ret}"
+                )
+                stop(1)
+
+        FIRST_RUN = True
+        CHANGES = []
+        threads = []
+
+        def send_nginx_configs():
+            logger.info(f"Sending {join(sep, 'etc', 'nginx')} folder ...")
+            ret = SCHEDULER.send_files(join(sep, "etc", "nginx"), "/confs")
+            if not ret:
+                logger.error(
+                    "Sending nginx configs failed, configuration will not work as expected...",
+                )
+
+        def send_nginx_cache():
+            logger.info(f"Sending {CACHE_PATH} folder ...")
+            if not SCHEDULER.send_files(CACHE_PATH, "/cache"):
+                logger.error(f"Error while sending {CACHE_PATH} folder")
+            else:
+                logger.info(f"Successfully sent {CACHE_PATH} folder")
+
         while True:
-            # Instantiate scheduler
-            scheduler = JobScheduler(
-                env=deepcopy(env) | environ,
-                apis=api_caller._get_apis(),
-                logger=logger,
-                integration=integration,
-            )
+            threads.clear()
+            ret = db.checked_changes(CHANGES)
+
+            if ret:
+                logger.error(
+                    f"An error occurred when setting the changes to checked in the database : {ret}"
+                )
+                stop(1)
+
+            # Update the environment variables of the scheduler
+            SCHEDULER.env = env.copy() | environ.copy()
+            SCHEDULER.setup()
 
             # Only run jobs once
-            if not scheduler.run_once():
+            if not SCHEDULER.run_once():
                 logger.error("At least one job in run_once() failed")
             else:
                 logger.info("All jobs in run_once() were successful")
 
-            if generate:
+            if GENERATE:
+                content = ""
+                for k, v in env.items():
+                    content += f"{k}={v}\n"
+                SCHEDULER_TMP_ENV_PATH.write_text(content)
                 # run the generator
                 proc = subprocess_run(
                     [
                         "python3",
-                        "/usr/share/bunkerweb/gen/main.py",
+                        join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
                         "--settings",
-                        "/usr/share/bunkerweb/settings.json",
+                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
                         "--templates",
-                        "/usr/share/bunkerweb/confs",
+                        join(sep, "usr", "share", "bunkerweb", "confs"),
                         "--output",
-                        "/etc/nginx",
-                    ]
-                    + (
-                        ["--variables", args.variables]
-                        if args.variables and first_run
-                        else []
-                    ),
+                        join(sep, "etc", "nginx"),
+                        "--variables",
+                        (
+                            str(tmp_variables_path)
+                            if args.variables and FIRST_RUN
+                            else str(SCHEDULER_TMP_ENV_PATH)
+                        ),
+                    ],
                     stdin=DEVNULL,
                     stderr=STDOUT,
+                    check=False,
                 )
 
                 if proc.returncode != 0:
@@ -406,41 +554,48 @@ if __name__ == "__main__":
                         "Config generator failed, configuration will not work as expected...",
                     )
                 else:
-                    copy("/etc/nginx/variables.env", "/var/tmp/bunkerweb/variables.env")
+                    copy(
+                        str(nginx_variables_path),
+                        join(sep, "var", "tmp", "bunkerweb", "variables.env"),
+                    )
 
-                    if len(api_caller._get_apis()) > 0:
+                    if SCHEDULER.apis:
                         # send nginx configs
-                        logger.info("Sending /etc/nginx folder ...")
-                        ret = api_caller._send_files("/etc/nginx", "/confs")
-                        if not ret:
-                            logger.error(
-                                "Sending nginx configs failed, configuration will not work as expected...",
-                            )
+                        thread = Thread(target=send_nginx_configs)
+                        thread.start()
+                        threads.append(thread)
 
             try:
-                if len(api_caller._get_apis()) > 0:
+                if SCHEDULER.apis:
                     # send cache
-                    logger.info("Sending /var/cache/bunkerweb folder ...")
-                    if not api_caller._send_files("/var/cache/bunkerweb", "/cache"):
-                        logger.error("Error while sending /var/cache/bunkerweb folder")
-                    else:
-                        logger.info("Successfully sent /var/cache/bunkerweb folder")
+                    thread = Thread(target=send_nginx_cache)
+                    thread.start()
+                    threads.append(thread)
 
-                # restart nginx
-                if integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
+                    for thread in threads:
+                        thread.join()
+
+                    if SCHEDULER.send_to_apis("POST", "/reload"):
+                        logger.info("Successfully reloaded nginx")
+                    else:
+                        logger.error("Error while reloading nginx")
+                else:
                     # Stop temp nginx
                     logger.info("Stopping temp nginx ...")
                     proc = subprocess_run(
-                        ["sudo", "/usr/sbin/nginx", "-s", "stop"],
+                        ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
                         stdin=DEVNULL,
                         stderr=STDOUT,
-                        env=deepcopy(env),
+                        env=env.copy(),
+                        check=False,
                     )
                     if proc.returncode == 0:
                         logger.info("Successfully sent stop signal to temp nginx")
                         i = 0
                         while i < 20:
-                            if not Path("/var/tmp/bunkerweb/nginx.pid").is_file():
+                            if not Path(
+                                sep, "var", "run", "bunkerweb", "nginx.pid"
+                            ).is_file():
                                 break
                             logger.warning("Waiting for temp nginx to stop ...")
                             sleep(1)
@@ -453,10 +608,11 @@ if __name__ == "__main__":
                             # Start nginx
                             logger.info("Starting nginx ...")
                             proc = subprocess_run(
-                                ["sudo", "/usr/sbin/nginx"],
+                                ["sudo", join(sep, "usr", "sbin", "nginx")],
                                 stdin=DEVNULL,
                                 stderr=STDOUT,
-                                env=deepcopy(env),
+                                env=env.copy(),
+                                check=False,
                             )
                             if proc.returncode == 0:
                                 logger.info("Successfully started nginx")
@@ -468,107 +624,125 @@ if __name__ == "__main__":
                         logger.error(
                             f"Error while sending stop signal to temp nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
                         )
-                else:
-                    if api_caller._send_to_apis("POST", "/reload"):
-                        logger.info("Successfully reloaded nginx")
-                    else:
-                        logger.error("Error while reloading nginx")
             except:
                 logger.error(
                     f"Exception while reloading after running jobs once scheduling : {format_exc()}",
                 )
 
-            generate = True
-            scheduler.setup()
-            need_reload = False
-            first_run = False
+            GENERATE = True
+            NEED_RELOAD = False
+            CONFIG_NEED_GENERATION = False
+            CONFIGS_NEED_GENERATION = False
+            PLUGINS_NEED_GENERATION = False
+            INSTANCES_NEED_GENERATION = False
 
             # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
-            Path("/var/tmp/bunkerweb/scheduler.healthy").write_text("ok")
-            while run and not need_reload:
-                scheduler.run_pending()
+            Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy").write_text(
+                "ok", encoding="utf-8"
+            )
+            while RUN and not NEED_RELOAD:
+                SCHEDULER.run_pending()
                 sleep(1)
 
-                # check if the custom configs have changed since last time
-                tmp_custom_configs = db.get_custom_configs()
-                if custom_configs != tmp_custom_configs:
-                    logger.info("Custom configs changed, generating ...")
-                    logger.debug(f"{tmp_custom_configs=}")
-                    logger.debug(f"{custom_configs=}")
-                    custom_configs = deepcopy(tmp_custom_configs)
+                changes = db.check_changes()
 
-                    # Remove old custom configs files
-                    logger.info("Removing old custom configs files ...")
-                    for file in glob("/etc/bunkerweb/configs/*"):
-                        if Path(file).is_symlink() or Path(file).is_file():
-                            Path(file).unlink()
-                        elif Path(file).is_dir():
-                            rmtree(file, ignore_errors=True)
-
-                    logger.info("Generating new custom configs ...")
-                    generate_custom_configs(custom_configs, integration, api_caller)
-
-                    # reload nginx
-                    logger.info("Reloading nginx ...")
-                    if integration not in (
-                        "Autoconf",
-                        "Swarm",
-                        "Kubernetes",
-                        "Docker",
-                    ):
-                        # Reloading the nginx server.
-                        proc = subprocess_run(
-                            # Reload nginx
-                            ["sudo", "/usr/sbin/nginx", "-s", "reload"],
-                            stdin=DEVNULL,
-                            stderr=STDOUT,
-                            env=deepcopy(env),
-                        )
-                        if proc.returncode == 0:
-                            logger.info("Successfully reloaded nginx")
-                        else:
-                            logger.error(
-                                f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
-                            )
-                    else:
-                        need_reload = True
+                if isinstance(changes, str):
+                    logger.error(
+                        f"An error occurred when checking for changes in the database : {changes}"
+                    )
+                    stop(1)
 
                 # check if the plugins have changed since last time
-                tmp_external_plugins = db.get_plugins(external=True)
-                if external_plugins != tmp_external_plugins:
+                if changes["external_plugins_changed"]:
                     logger.info("External plugins changed, generating ...")
-                    logger.debug(f"{tmp_external_plugins=}")
-                    logger.debug(f"{external_plugins=}")
-                    external_plugins = deepcopy(tmp_external_plugins)
 
-                    # Remove old external plugins files
-                    logger.info("Removing old external plugins files ...")
-                    for file in glob(join(sep, "etc", "bunkerweb", "plugins", "*")):
-                        if Path(file).is_symlink() or Path(file).is_file():
-                            Path(file).unlink()
-                        elif Path(file).is_dir():
-                            rmtree(file, ignore_errors=True)
+                    if FIRST_RUN:
+                        # run the config saver to save potential ignored external plugins settings
+                        logger.info(
+                            "Running config saver to save potential ignored external plugins settings ..."
+                        )
+                        proc = subprocess_run(
+                            [
+                                "python",
+                                join(
+                                    sep,
+                                    "usr",
+                                    "share",
+                                    "bunkerweb",
+                                    "gen",
+                                    "save_config.py",
+                                ),
+                                "--settings",
+                                join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                            ],
+                            stdin=DEVNULL,
+                            stderr=STDOUT,
+                            check=False,
+                        )
+                        if proc.returncode != 0:
+                            logger.error(
+                                "Config saver failed, configuration will not work as expected...",
+                            )
 
-                    logger.info("Generating new external plugins ...")
-                    generate_external_plugins(
-                        db.get_plugins(external=True, with_data=True),
-                        integration,
-                        api_caller,
-                    )
-                    need_reload = True
+                        changes.update(
+                            {
+                                "custom_configs_changed": True,
+                                "config_changed": True,
+                            }
+                        )
+
+                    PLUGINS_NEED_GENERATION = True
+                    NEED_RELOAD = True
+
+                # check if the custom configs have changed since last time
+                if changes["custom_configs_changed"]:
+                    logger.info("Custom configs changed, generating ...")
+                    CONFIGS_NEED_GENERATION = True
+                    NEED_RELOAD = True
 
                 # check if the config have changed since last time
-                tmp_env = db.get_config()
-                tmp_env["DATABASE_URI"] = environ.get(
-                    "DATABASE_URI", tmp_env["DATABASE_URI"]
-                )
-                if env != tmp_env:
+                if changes["config_changed"]:
                     logger.info("Config changed, generating ...")
-                    logger.debug(f"{tmp_env=}")
-                    logger.debug(f"{env=}")
-                    env = deepcopy(tmp_env)
-                    need_reload = True
+                    CONFIG_NEED_GENERATION = True
+                    NEED_RELOAD = True
+
+                # check if the instances have changed since last time
+                if changes["instances_changed"]:
+                    logger.info("Instances changed, generating ...")
+                    INSTANCES_NEED_GENERATION = True
+                    NEED_RELOAD = True
+
+            FIRST_RUN = False
+
+            if NEED_RELOAD:
+                CHANGES.clear()
+
+                if CONFIGS_NEED_GENERATION:
+                    CHANGES.append("custom_configs")
+                    generate_custom_configs(
+                        db.get_custom_configs(), original_path=configs_path
+                    )
+
+                if PLUGINS_NEED_GENERATION:
+                    CHANGES.append("external_plugins")
+                    generate_external_plugins(
+                        db.get_plugins(external=True, with_data=True),
+                        original_path=plugins_dir,
+                    )
+                    SCHEDULER.update_jobs()
+
+                if CONFIG_NEED_GENERATION:
+                    CHANGES.append("config")
+                    env = db.get_config()
+                    content = ""
+                    for k, v in env.items():
+                        content += f"{k}={v}\n"
+                    SCHEDULER_TMP_ENV_PATH.write_text(content)
+
+                if INSTANCES_NEED_GENERATION:
+                    CHANGES.append("instances")
+                    SCHEDULER.update_instances()
     except:
         logger.error(
             f"Exception while executing scheduler : {format_exc()}",

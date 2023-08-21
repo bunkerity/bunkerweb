@@ -27,6 +27,7 @@ function _M.new()
   end
 
   local self = setmetatable({
+    stack_of = STACK,
     ctx = ctx,
     _is_shallow_copy = false,
   }, mt)
@@ -35,16 +36,21 @@ function _M.new()
 end
 
 function _M.istype(l)
-  return l and l.cast and ffi.istype(stack_ptr_ct, l.cast)
+  return l and l.ctx and ffi.istype(stack_ptr_ct, l.ctx)
+           and l.stack_of and l.stack_of == STACK
 end
 
 function _M.dup(ctx)
   if ctx == nil or not ffi.istype(stack_ptr_ct, ctx) then
     return nil, "expect a stack ctx at #1"
   end
-  local dup_ctx = dup(ctx)
+  local dup_ctx, err = dup(ctx)
+  if dup_ctx == nil then
+    return nil, err
+  end
 
   return setmetatable({
+    stack_of = STACK,
     ctx = dup_ctx,
     -- don't let lua gc the original stack to keep its elements
     _dupped_from = ctx,

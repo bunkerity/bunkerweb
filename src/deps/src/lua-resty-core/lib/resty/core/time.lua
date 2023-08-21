@@ -72,12 +72,14 @@ end
 
 
 function ngx.now()
-    return tonumber(ngx_lua_ffi_now())
+    local now = tonumber(ngx_lua_ffi_now())
+    return now
 end
 
 
 function ngx.time()
-    return tonumber(ngx_lua_ffi_time())
+    local time = tonumber(ngx_lua_ffi_time())
+    return time
 end
 
 
@@ -168,7 +170,8 @@ function ngx.parse_http_time(time_str)
         return nil
     end
 
-    return tonumber(res)
+    local time = tonumber(res)
+    return time
 end
 
 end

@@ -15,6 +15,7 @@ services:
       CORS_ALLOW_HEADERS: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range"
     extra_hosts:
       - "www.example.com:192.168.0.2"
+      - "app1.example.com:192.168.0.2"
     networks:
       bw-services:
         ipv4_address: 192.168.0.3

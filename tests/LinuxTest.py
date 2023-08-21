@@ -9,7 +9,7 @@ from logger import log
 
 class LinuxTest(Test):
     def __init__(self, name, timeout, tests, distro):
-        super().__init__(name, "linux", timeout, tests)
+        super().__init__(name, "linux", timeout, tests, delay=20)
         self._domains = {
             r"www\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
             r"auth\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
@@ -112,7 +112,8 @@ class LinuxTest(Test):
             setup = f"{test}/setup-linux.sh"
             if isfile(setup):
                 proc = self.docker_exec(
-                    self.__distro, f"cd /opt/{self._name} && ./setup-linux.sh"
+                    self.__distro,
+                    f"cd /opt/{self._name} && ./setup-linux.sh && chown -R nginx:nginx /etc/bunkerweb/configs",
                 )
                 if proc.returncode != 0:
                     raise Exception("docker exec setup failed (test)")
@@ -164,7 +165,7 @@ class LinuxTest(Test):
     def _debug_fail(self):
         self.docker_exec(
             self.__distro,
-            "cat /var/log/nginx/access.log ; cat /var/log/nginx/error.log ; journalctl -u bunkerweb --no-pager",
+            "cat /var/log/bunkerweb/access.log ; cat /var/log/bunkerweb/error.log ; journalctl -u bunkerweb --no-pager",
         )
 
     @staticmethod

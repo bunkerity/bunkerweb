@@ -18,6 +18,7 @@ services:
       GLOBAL_REVERSE_PROXY_URL: "/"
       GLOBAL_LOG_LEVEL: "info"
       CUSTOM_CONF_MODSEC_test_custom_conf: 'SecRule REQUEST_FILENAME "@rx ^/db" "id:1,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"'
+      GLOBAL_SERVER_NAME: "bwadm.example.com"
     extra_hosts:
       - "bwadm.example.com:192.168.0.2"
     networks:

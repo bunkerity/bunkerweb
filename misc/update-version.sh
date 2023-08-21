@@ -25,3 +25,7 @@ sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" tests/ui/docker-compose.yml
 for test in tests/core/* ; do
     sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" ${test}/docker-compose.yml
 done
+# linux
+sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/linux/scripts/*.sh
+# db
+sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/db/model.py

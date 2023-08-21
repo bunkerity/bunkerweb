@@ -1,4 +1,4 @@
-FROM python:3.11.3-alpine AS builder
+FROM python:3.11.4-alpine AS builder
 
 # Copy python requirements
 COPY src/common/gen/requirements.txt /tmp/req/requirements.txt
@@ -14,12 +14,13 @@ RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
     pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --upgrade wheel && \
+    pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
     mkdir -p /usr/share/bunkerweb/deps/python && \
     pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
 
 # Remove build dependencies
-RUN apk del .build-deps
+RUN apk del .build-deps && \
+    rm -rf /var/cache/apk/*
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
@@ -32,7 +33,7 @@ COPY src/common/helpers /usr/share/bunkerweb/helpers
 COPY src/common/settings.json /usr/share/bunkerweb/settings.json
 COPY src/common/utils /usr/share/bunkerweb/utils
 
-FROM python:3.11.3-alpine
+FROM python:3.11.4-alpine
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -60,7 +61,7 @@ RUN apk add --no-cache bash && \
     chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/bin/bwcli /usr/share/bunkerweb/autoconf/main.py /usr/share/bunkerweb/deps/python/bin/*
 
 # Fix CVEs
-RUN apk add "libcrypto3>=3.0.8-r4" "libssl3>=3.0.8-r4"
+RUN apk add "libcrypto3>=3.1.1-r2" "libssl3>=3.1.1-r2"
 
 VOLUME /data /etc/nginx
 

@@ -62,7 +62,7 @@ SecResponseBodyLimitAction ProcessPartial
 SecAuditEngine {{ MODSECURITY_SEC_AUDIT_ENGINE }}
 SecAuditLogParts {{ MODSECURITY_SEC_AUDIT_LOG_PARTS }}
 SecAuditLogType Serial
-SecAuditLog /var/log/nginx/modsec_audit.log
+SecAuditLog /var/log/bunkerweb/modsec_audit.log
 
 # include OWASP CRS configurations
 {% if USE_MODSECURITY_CRS == "yes" %}

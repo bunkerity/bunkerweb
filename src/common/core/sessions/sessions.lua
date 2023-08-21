@@ -5,9 +5,9 @@ local session  = require "resty.session"
 
 local sessions = class("sessions", plugin)
 
-function sessions:initialize()
+function sessions:initialize(ctx)
     -- Call parent initialize
-    plugin.initialize(self, "sessions")
+    plugin.initialize(self, "sessions", ctx)
     -- Check if random cookie name and secrets are already generated
     local is_random = {
         "SESSIONS_SECRET",
@@ -29,13 +29,13 @@ function sessions:set()
         return self:ret(true, "set not needed")
     end
     local checks = {
-        ["IP"] = ngx.ctx.bw.remote_addr,
-        ["USER_AGENT"] = ngx.ctx.bw.http_user_agent or ""
+        ["IP"] = self.ctx.bw.remote_addr,
+        ["USER_AGENT"] = self.ctx.bw.http_user_agent or ""
     }
-    ngx.ctx.bw.sessions_checks = {}
+    self.ctx.bw.sessions_checks = {}
     for check, value in pairs(checks) do
         if self.variables["SESSIONS_CHECK_" .. check] == "yes" then
-            table.insert(ngx.ctx.bw.sessions_checks, {check, value})
+            table.insert(self.ctx.bw.sessions_checks, { check, value })
         end
     end
     return self:ret(true, "success")

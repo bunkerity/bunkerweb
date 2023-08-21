@@ -2,7 +2,7 @@
   "name": "reverse-proxy-multisite",
   "kinds": ["docker", "autoconf", "swarm", "kubernetes", "linux"],
   "timeout": 60,
-  "delay": 60,
+  "delay": 90,
   "tests": [
     {
       "type": "string",

@@ -4,14 +4,14 @@ local utils       = require "bunkerweb.utils"
 
 local badbehavior = class("badbehavior", plugin)
 
-function badbehavior:initialize()
+function badbehavior:initialize(ctx)
 	-- Call parent initialize
-	plugin.initialize(self, "badbehavior")
+	plugin.initialize(self, "badbehavior", ctx)
 end
 
 function badbehavior:log()
 	-- Check if we are whitelisted
-	if ngx.ctx.bw.is_whitelisted == "yes" then
+	if self.ctx.bw.is_whitelisted == "yes" then
 		return self:ret(true, "client is whitelisted")
 	end
 	-- Check if bad behavior is activated
@@ -23,12 +23,12 @@ function badbehavior:log()
 		return self:ret(true, "not increasing counter")
 	end
 	-- Check if we are already banned
-	local banned, err = self.datastore:get("bans_ip_" .. ngx.ctx.bw.remote_addr)
+	local banned, err = self.datastore:get("bans_ip_" .. self.ctx.bw.remote_addr)
 	if banned then
 		return self:ret(true, "already banned")
 	end
 	-- Call increase function later and with cosocket enabled
-	local ok, err = ngx.timer.at(0, badbehavior.increase, ngx.ctx.bw.remote_addr,
+	local ok, err = ngx.timer.at(0, badbehavior.increase, self.ctx.bw.remote_addr,
 		tonumber(self.variables["BAD_BEHAVIOR_COUNT_TIME"]), tonumber(self.variables["BAD_BEHAVIOR_BAN_TIME"]),
 		tonumber(self.variables["BAD_BEHAVIOR_THRESHOLD"]), self.use_redis)
 	if not ok then

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! -f /var/tmp/bunkerweb/nginx.pid ] ; then
+if [ ! -f /var/run/bunkerweb/nginx.pid ] ; then
 	exit 1
 fi
 

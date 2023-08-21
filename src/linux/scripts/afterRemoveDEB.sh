@@ -54,10 +54,22 @@ function remove {
         do_and_check_cmd rm -rf /usr/share/bunkerweb
     fi
 
-    # Remove /etc/bunkerweb
+    # Remove /var/tmp/bunkerweb
     if test -e "/var/tmp/bunkerweb"; then
         echo "ℹ️ Remove /var/tmp/bunkerweb"
         do_and_check_cmd rm -rf /var/tmp/bunkerweb
+    fi
+
+    # Remove /var/run/bunkerweb
+    if test -e "/var/run/bunkerweb"; then
+        echo "ℹ️ Remove /var/run/bunkerweb"
+        do_and_check_cmd rm -rf /var/run/bunkerweb
+    fi
+
+    # Remove /var/log/bunkerweb
+    if test -e "/var/log/bunkerweb"; then
+        echo "ℹ️ Remove /var/log/bunkerweb"
+        do_and_check_cmd rm -rf /var/log/bunkerweb
     fi
 
     # Remove /var/lib/bunkerweb
@@ -116,9 +128,9 @@ elif [ "$1" = "purge" ]; then
     purge
 else 
     echo "Package is being upgraded"
-    # Check the version of the package and if it's inferior to 1.5.0, we need to copy the variables.env file
+    # Check the version of the package and if it's inferior to 1.5.1, we need to copy the variables.env file
     VERSION=$(dpkg-query -W -f='${Version}' bunkerweb)
-    if [ "$VERSION" <= "1.5.0" ]; then
+    if [ "$VERSION" != "1.5.1" ]; then
         echo "ℹ️ Copyenv variables to /var/tmp/bunkerweb/*.env"
         do_and_check_cmd cp -f /opt/bunkerweb/variables.env /var/tmp/variables.env
         do_and_check_cmd cp -f /opt/bunkerweb/ui.env /var/tmp/ui.env

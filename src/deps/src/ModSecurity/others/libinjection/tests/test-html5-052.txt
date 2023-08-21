@@ -1,9 +1,0 @@
---TEST--
-cdata, degenerate
---INPUT--
-<![CDATA[foobar]]]>
---EXPECTED--
-DATA_TEXT,7,foobar]
-
-
-

@@ -4,10 +4,10 @@ lint:
 	@luacheck -q ./lib
 
 unit:
-	busted --exclude-tags=noci
+	busted --exclude-tags=noci --coverage
 
 unit-all:
-	busted
+	busted --coverage
 
 prove:
 	prove

@@ -5,7 +5,7 @@ test:
 	busted
 
 local: build
-	luarocks make --lua-version=5.1 --local luajit-geoip-dev-1.rockspec
+	luarocks make --lua-version=5.1 --local geoip-dev-1.rockspec
 
 build:
 	moonc geoip

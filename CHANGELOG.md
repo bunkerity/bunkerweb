@@ -1,5 +1,64 @@
 # Changelog
 
+## v1.5.1 - 2023/08/08
+
+- [BUGFIX] New version checker in logs displays "404 not found"
+- [BUGFIX] New version checker in UI
+- [BUGFIX] Only get the right keys from plugin.json files when importing plugins
+- [BUGFIX] Remove external resources for Google fonts in UI
+- [BUGFIX] Support multiple plugin uploads in one zip when using the UI
+- [BUGFIX] Variable being ignored instead of saved in the database when value is empty
+- [BUGFIX] ALLOWED_METHODS regex working with LOCK/UNLOCK methods
+- [BUGFIX] Custom certificate bug after the refactoring
+- [BUGFIX] Wrong variables in header phase (fix CORS feature too)
+- [BUGFIX] UI not working in Ubuntu (python zope module)
+- [BUGFIX] Patch ModSecurity to run it after LUA code (should fix whitelist problems)
+- [BUGFIX] Custom configurations from env were not being deleted properly
+- [BUGFIX] Missing concepts image not displayed in the documentation
+- [BUGFIX] Scheduler not picking up new instances IPs in autoconf modes
+- [BUGFIX] Autoconf deadlock in k8s
+- [BUGFIX] Missing HTTP and HTTPS ports for temp nginx
+- [BUGFIX] Infinite loop when sessions is not valid
+- [BUGFIX] Missing valid LE certificates in edge cases
+- [BUGFIX] Wrong service namespace in k8s
+- [BUGFIX] DNS_RESOLVERS regex not accepting hostnames
+- [PERFORMANCE] Reduce CPU and RAM usage of scheduler
+- [PERFORMANCE] Cache ngx.ctx instead of loading it each time
+- [PERFORMANCE] Use per-worker LRU cache for common RO LUA values
+- [FEATURE] Add Turnstile antibot mode
+- [FEATURE] Add more CORS headers
+- [FEATURE] Add KEEP_UPSTREAM_HEADERS to preserve headers when using reverse proxy
+- [FEATURE] Add the possibility to download the different lists and plugins from a local file (like the blacklist)
+- [FEATURE] External plugins can now be downloaded from a tar.gz and tar.xz file as well as zip
+- [FEATURE] Add X-Forwarded-Prefix header when using reverse proxy
+- [FEATURE] Add REDIRECT_TO_STATUS_CODE to choose status code 301 or 302 when redirecting
+- [DOCUMENTATION] Add timezone information
+- [DOCUMENTATION] Add timezone informat
+- [MISC] Add LOG_LEVEL=warning for docker socket proxy in docs, examples and boilerplates
+- [MISC] Temp remove VMWare provider for Vagrant integration
+- [MISC] Remove X-Script-Name header and ABSOLUTE_URI variable when using UI
+- [MISC] Move logs to /var/log/bunkerweb folder
+- [MISC] Reduce "Got an error reading communication packets" warnings in mariadb/mysql
+
+## v1.5.0 - 2023/05/23
+
+- Refactoring of almost all the components of the project
+- Dedicated scheduler service to manage jobs and configuration
+- Store configuration in a database backend
+- Improved web UI and make it working with all integrations
+- Improved internal LUA code
+- Improved internal cache of BW
+- Add Redis support when using clustered integrations
+- Add RHEL integration
+- Add Vagrant integration
+- Init support of generic TCP/UDP (stream)
+- Init support of IPv6
+- Improved CI/CD : UI tests, core tests and release automation
+- Reduce Docker images size
+- Fix and improved core plugins : antibot, cors, dnsbl, ...
+- Use PCRE regex instead of LUA patterns
+- Connectivity tests at startup/reload with logging
+
 ## v1.5.0-beta - 2023/05/02
 
 - Refactoring of almost all the components of the project

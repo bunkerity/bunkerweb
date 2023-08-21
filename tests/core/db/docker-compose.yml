@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.0
+    image: bunkerity/bunkerweb:1.5.1
     pull_policy: never
     labels:
       - "bunkerweb.INSTANCE"
@@ -24,7 +24,7 @@ services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.0
+    image: bunkerity/bunkerweb-scheduler:1.5.1
     pull_policy: never
     depends_on:
       - bw
@@ -43,7 +43,7 @@ services:
       - bw-docker
 
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -56,35 +56,6 @@ services:
     networks:
       bw-services:
         ipv4_address: 192.168.0.4
-
-  bw-maria-db:
-    image: mariadb:10.10
-    environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=db
-      - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=secret
-    networks:
-      - bw-docker
-
-  bw-mysql-db:
-    image: mysql:8.0
-    environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=db
-      - MYSQL_USER=bunkerweb
-      - MYSQL_PASSWORD=secret
-    networks:
-      - bw-docker
-
-  bw-postgres-db:
-    image: postgres:15.1
-    environment:
-      - POSTGRES_USER=bunkerweb
-      - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=db
-    networks:
-      - bw-docker
 
 volumes:
   bw-data:
@@ -106,4 +77,4 @@ networks:
       config:
         - subnet: 192.168.0.0/24
   bw-docker:
-    name: bw-docker
+    external: true

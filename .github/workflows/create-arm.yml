@@ -39,7 +39,7 @@ jobs:
         id: scw
         uses: scaleway/action-scw@bbcfd65cd2af73456ce439088e0d42c1657c4c38
         with:
-          args: instance server create zone=fr-par-2 type=AMP2-C60 root-volume=block:50GB
+          args: instance server create zone=fr-par-2 type=AMP2-C48 root-volume=block:50GB
           save-config: true
           version: v2.13.0
           access-key: ${{ secrets.SCW_ACCESS_KEY }}

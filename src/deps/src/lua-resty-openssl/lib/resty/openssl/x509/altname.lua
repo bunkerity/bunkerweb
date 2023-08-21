@@ -115,7 +115,10 @@ function _M.dup(ctx)
     return nil, "x509.altname.dup: expect a GENERAL_NAMES* ctx at #1"
   end
 
-  local dup_ctx = dup(ctx)
+  local dup_ctx, err = dup(ctx)
+  if dup_ctx == nil then
+    return nil, err
+  end
 
   return setmetatable({
     cast = ffi_cast("GENERAL_NAMES*", dup_ctx),

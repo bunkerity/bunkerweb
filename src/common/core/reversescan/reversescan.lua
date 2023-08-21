@@ -2,13 +2,13 @@ local class       = require "middleclass"
 local plugin      = require "bunkerweb.plugin"
 local utils       = require "bunkerweb.utils"
 local cachestore  = require "bunkerweb.cachestore"
-local cjson      = require "cjson"
+local cjson       = require "cjson"
 
 local reversescan = class("reversescan", plugin)
 
-function reversescan:initialize()
+function reversescan:initialize(ctx)
     -- Call parent initialize
-    plugin.initialize(self, "reversescan")
+    plugin.initialize(self, "reversescan", ctx)
 end
 
 function reversescan:access()
@@ -22,33 +22,33 @@ function reversescan:access()
     local ret_err = nil
     for port in self.variables["REVERSE_SCAN_PORTS"]:gmatch("%S+") do
         -- Check if the scan is already cached
-        local ok, cached = self:is_in_cache(ngx.ctx.bw.remote_addr .. ":" .. port)
+        local ok, cached = self:is_in_cache(self.ctx.bw.remote_addr .. ":" .. port)
         if not ok then
             ret_threads = false
             ret_err = "error getting info from cachestore : " .. cached
             break
-        -- Deny access if port opened
+            -- Deny access if port opened
         elseif cached == "open" then
             ret_threads = true
-            ret_err = "port " .. port .. " is opened for IP " .. ngx.ctx.bw.remote_addr
+            ret_err = "port " .. port .. " is opened for IP " .. self.ctx.bw.remote_addr
             break
-        -- Perform scan in a thread
+            -- Perform scan in a thread
         elseif not cached then
-            local thread = ngx.thread.spawn(self.scan, ngx.ctx.bw.remote_addr, tonumber(port), tonumber(self.variables["REVERSE_SCAN_TIMEOUT"]))
+            local thread = ngx.thread.spawn(self.scan, self.ctx.bw.remote_addr, tonumber(port), tonumber(self.variables["REVERSE_SCAN_TIMEOUT"]))
             threads[port] = thread
         end
     end
     if ret_threads ~= nil then
-		if #threads > 0 then
-			local wait_threads = {}
-			for port, thread in pairs(threads) do
-				table.insert(wait_threads, thread)
-			end
-			utils.kill_all_threads(wait_threads)
-		end
+        if #threads > 0 then
+            local wait_threads = {}
+            for port, thread in pairs(threads) do
+                table.insert(wait_threads, thread)
+            end
+            utils.kill_all_threads(wait_threads)
+        end
         -- Open port case
         if ret_threads then
-            return self:ret(true, ret_err, utils.get_deny_status())
+            return self:ret(true, ret_err, utils.get_deny_status(self.ctx))
         end
         -- Error case
         return self:ret(false, ret_err)
@@ -58,27 +58,27 @@ function reversescan:access()
     ret_err = nil
     local results = {}
     while true do
-		-- Compute threads to wait
-		local wait_threads = {}
-		for port, thread in pairs(threads) do
-			table.insert(wait_threads, thread)
-		end
-		-- No port opened
-		if #wait_threads == 0 then
-			break
-		end
-		-- Wait for first thread
-		local ok, open, port = ngx.thread.wait(unpack(wait_threads))
-		-- Error case
-		if not ok then
-			ret_threads = false
-			ret_err = "error while waiting thread : " .. open
-			break
-		end
+        -- Compute threads to wait
+        local wait_threads = {}
+        for port, thread in pairs(threads) do
+            table.insert(wait_threads, thread)
+        end
+        -- No port opened
+        if #wait_threads == 0 then
+            break
+        end
+        -- Wait for first thread
+        local ok, open, port = ngx.thread.wait(unpack(wait_threads))
+        -- Error case
+        if not ok then
+            ret_threads = false
+            ret_err = "error while waiting thread : " .. open
+            break
+        end
         port = tostring(port)
-		-- Remove thread from list
-		threads[port] = nil
-		-- Add result to cache
+        -- Remove thread from list
+        threads[port] = nil
+        -- Add result to cache
         local result = "close"
         if open then
             result = "open"
@@ -87,7 +87,7 @@ function reversescan:access()
         -- Port is opened
         if open then
             ret_threads = true
-            ret_err = "port " .. port .. " is opened for IP " .. ngx.ctx.bw.remote_addr
+            ret_err = "port " .. port .. " is opened for IP " .. self.ctx.bw.remote_addr
             break
         end
     end
@@ -101,7 +101,7 @@ function reversescan:access()
     end
     -- Cache results
     for port, result in pairs(results) do
-        local ok, err = self:add_to_cache(ngx.ctx.bw.remote_addr .. ":" .. port, result)
+        local ok, err = self:add_to_cache(self.ctx.bw.remote_addr .. ":" .. port, result)
         if not ok then
             return self:ret(false, "error while adding element to cache : " .. err)
         end
@@ -109,13 +109,13 @@ function reversescan:access()
     if ret_threads ~= nil then
         -- Open port case
         if ret_threads then
-            return self:ret(true, ret_err, utils.get_deny_status())
+            return self:ret(true, ret_err, utils.get_deny_status(self.ctx))
         end
         -- Error case
         return self:ret(false, ret_err)
     end
     -- No port opened
-    return self:ret(true, "no port open for IP " .. ngx.ctx.bw.remote_addr)
+    return self:ret(true, "no port open for IP " .. self.ctx.bw.remote_addr)
 end
 
 function reversescan:preread()

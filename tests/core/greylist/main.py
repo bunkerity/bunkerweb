@@ -52,6 +52,8 @@ try:
 
     print(f"ℹ️ Status code: {status_code}", flush=True)
 
+    sleep(2)
+
     if status_code == 403:
         if not use_greylist:
             print(
@@ -95,6 +97,8 @@ try:
                 )
                 exit(1)
 
+            sleep(2)
+
             print("✅ Request was not rejected, User Agent is in the greylist ...")
             print(
                 "ℹ️ Sending a request to http://www.example.com/?id=/etc/passwd with User-Agent BunkerBot ...",
@@ -127,6 +131,8 @@ try:
                     "❌ Request was rejected, even though URI is supposed to be in the greylist ..."
                 )
                 exit(1)
+
+            sleep(2)
 
             print("✅ Request was not rejected, URI is in the greylist ...")
             print(

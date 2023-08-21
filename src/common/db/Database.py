@@ -1,26 +1,17 @@
+#!/usr/bin/python3
+
 from contextlib import contextmanager, suppress
 from copy import deepcopy
 from datetime import datetime
 from hashlib import sha256
-from logging import (
-    Logger,
-)
-from os import _exit, getenv, listdir
-from os.path import dirname
+from inspect import getsourcefile
+from logging import Logger
+from os import _exit, getenv, listdir, sep
+from os.path import basename, dirname, join
 from pathlib import Path
-from pymysql import install_as_MySQLdb
 from re import compile as re_compile
-from sys import path as sys_path
-from typing import Any, Dict, List, Optional, Tuple
-from sqlalchemy import create_engine, text, inspect
-from sqlalchemy.exc import (
-    ArgumentError,
-    DatabaseError,
-    OperationalError,
-    ProgrammingError,
-    SQLAlchemyError,
-)
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sys import _getframe, path as sys_path
+from typing import Any, Dict, List, Optional, Tuple, Union
 from time import sleep
 from traceback import format_exc
 
@@ -40,16 +31,39 @@ from model import (
     Metadata,
 )
 
-if "/usr/share/bunkerweb/utils" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/utils")
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (("deps", "python"), ("utils",))
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
-from jobs import file_hash
+from jobs import file_hash  # type: ignore
+
+from pymysql import install_as_MySQLdb
+from sqlalchemy import create_engine, text, inspect
+from sqlalchemy.exc import (
+    ArgumentError,
+    DatabaseError,
+    OperationalError,
+    ProgrammingError,
+    SQLAlchemyError,
+)
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 install_as_MySQLdb()
 
 
 class Database:
-    def __init__(self, logger: Logger, sqlalchemy_string: str = None) -> None:
+    def __init__(
+        self,
+        logger: Logger,
+        sqlalchemy_string: Optional[str] = None,
+        *,
+        ui: bool = False,
+        pool: bool = True,
+    ) -> None:
         """Initialize the database"""
         self.__logger = logger
         self.__sql_session = None
@@ -61,10 +75,14 @@ class Database:
             )
 
         if sqlalchemy_string.startswith("sqlite"):
-            with suppress(FileExistsError):
-                Path(dirname(sqlalchemy_string.split("///")[1])).mkdir(
-                    parents=True, exist_ok=True
-                )
+            if ui:
+                while not Path(sep, "var", "lib", "bunkerweb", "db.sqlite3"):
+                    sleep(1)
+            else:
+                with suppress(FileExistsError):
+                    Path(dirname(sqlalchemy_string.split("///")[1])).mkdir(
+                        parents=True, exist_ok=True
+                    )
         elif "+" in sqlalchemy_string and "+pymysql" not in sqlalchemy_string:
             splitted = sqlalchemy_string.split("+")
             sqlalchemy_string = f"{splitted[0]}:{':'.join(splitted[1].split(':')[1:])}"
@@ -76,6 +94,8 @@ class Database:
             self.__sql_engine = create_engine(
                 sqlalchemy_string,
                 future=True,
+                poolclass=None if pool else NullPool,
+                pool_pre_ping=True,
             )
         except ArgumentError:
             self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
@@ -119,6 +139,8 @@ class Database:
                     self.__sql_engine = create_engine(
                         sqlalchemy_string,
                         future=True,
+                        poolclass=None if pool else NullPool,
+                        pool_pre_ping=True,
                     )
                 if "Unknown table" in str(e):
                     not_connected = False
@@ -144,9 +166,6 @@ class Database:
             bind=self.__sql_engine, autoflush=False, expire_on_commit=False
         )
         self.suffix_rx = re_compile(r"_\d+$")
-
-    def get_database_uri(self) -> str:
-        return self.database_uri
 
     def __del__(self) -> None:
         """Close the database"""
@@ -205,6 +224,36 @@ class Database:
             except (ProgrammingError, OperationalError):
                 return False
 
+    def set_scheduler_first_start(self, value: bool = False) -> str:
+        """Set the scheduler_first_start value"""
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                metadata.scheduler_first_start = value
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def is_scheduler_first_start(self) -> bool:
+        """Check if it's the scheduler's first start"""
+        with self.__db_session() as session:
+            try:
+                metadata = (
+                    session.query(Metadata)
+                    .with_entities(Metadata.scheduler_first_start)
+                    .filter_by(id=1)
+                    .first()
+                )
+                return metadata is not None and metadata.scheduler_first_start
+            except (ProgrammingError, OperationalError):
+                return True
+
     def is_first_config_saved(self) -> bool:
         """Check if the first configuration has been saved"""
         with self.__db_session() as session:
@@ -241,10 +290,68 @@ class Database:
                     Metadata(
                         is_initialized=True,
                         first_config_saved=False,
+                        scheduler_first_start=True,
                         version=version,
                         integration=integration,
                     )
                 )
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def check_changes(self) -> Union[Dict[str, bool], bool, str]:
+        """Check if either the config, the custom configs, plugins or instances have changed inside the database"""
+        with self.__db_session() as session:
+            try:
+                metadata = (
+                    session.query(Metadata)
+                    .with_entities(
+                        Metadata.custom_configs_changed,
+                        Metadata.external_plugins_changed,
+                        Metadata.config_changed,
+                        Metadata.instances_changed,
+                    )
+                    .filter_by(id=1)
+                    .first()
+                )
+
+                return dict(
+                    custom_configs_changed=metadata is not None
+                    and metadata.custom_configs_changed,
+                    external_plugins_changed=metadata is not None
+                    and metadata.external_plugins_changed,
+                    config_changed=metadata is not None and metadata.config_changed,
+                    instances_changed=metadata is not None
+                    and metadata.instances_changed,
+                )
+            except BaseException:
+                return format_exc()
+
+    def checked_changes(self, changes: Optional[List[str]] = None) -> str:
+        """Set that the config, the custom configs, the plugins and instances didn't change"""
+        changes = changes or [
+            "config",
+            "custom_configs",
+            "external_plugins",
+            "instances",
+        ]
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                if "config" in changes:
+                    metadata.config_changed = False
+                if "custom_configs" in changes:
+                    metadata.custom_configs_changed = False
+                if "external_plugins" in changes:
+                    metadata.external_plugins_changed = False
+                if "instances" in changes:
+                    metadata.instances_changed = False
                 session.commit()
             except BaseException:
                 return format_exc()
@@ -292,7 +399,19 @@ class Database:
                         jobs = plugin.pop("jobs", [])
                         page = plugin.pop("page", False)
 
-                    to_put.append(Plugins(**plugin))
+                    to_put.append(
+                        Plugins(
+                            id=plugin["id"],
+                            name=plugin["name"],
+                            description=plugin["description"],
+                            version=plugin["version"],
+                            stream=plugin["stream"],
+                            external=plugin.get("external", False),
+                            method=plugin.get("method"),
+                            data=plugin.get("data"),
+                            checksum=plugin.get("checksum"),
+                        )
+                    )
 
                     for setting, value in settings.items():
                         value.update(
@@ -313,20 +432,25 @@ class Database:
                         to_put.append(Jobs(plugin_id=plugin["id"], **job))
 
                     if page:
+                        core_ui_path = Path(
+                            sep, "usr", "share", "bunkerweb", "core", plugin["id"], "ui"
+                        )
                         path_ui = (
-                            Path(f"/usr/share/bunkerweb/core/{plugin['id']}/ui")
-                            if Path(
-                                f"/usr/share/bunkerweb/core/{plugin['id']}/ui"
-                            ).exists()
-                            else Path(f"/etc/bunkerweb/plugins/{plugin['id']}/ui")
+                            core_ui_path
+                            if core_ui_path.exists()
+                            else Path(
+                                sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui"
+                            )
                         )
 
                         if path_ui.exists():
                             if {"template.html", "actions.py"}.issubset(
                                 listdir(str(path_ui))
                             ):
-                                template = Path(f"{path_ui}/template.html").read_bytes()
-                                actions = Path(f"{path_ui}/actions.py").read_bytes()
+                                template = path_ui.joinpath(
+                                    "template.html"
+                                ).read_bytes()
+                                actions = path_ui.joinpath("actions.py").read_bytes()
 
                                 to_put.append(
                                     Plugin_pages(
@@ -357,6 +481,8 @@ class Database:
             ).delete()
 
             if config:
+                config.pop("DATABASE_URI", None)
+
                 if config.get("MULTISITE", "no") == "yes":
                     global_values = []
                     db_services = (
@@ -439,7 +565,6 @@ class Database:
                                 if key != "SERVER_NAME" and (
                                     (key not in config and value == setting.default)
                                     or (key in config and value == config[key])
-                                    or (not value.strip() and not setting.default)
                                 ):
                                     continue
 
@@ -459,7 +584,6 @@ class Database:
                                 if key != "SERVER_NAME" and (
                                     (key not in config and value == setting.default)
                                     or (key in config and value == config[key])
-                                    or (not value.strip() and not setting.default)
                                 ):
                                     session.query(Services_settings).filter(
                                         Services_settings.service_id == server_name,
@@ -493,9 +617,7 @@ class Database:
                             )
 
                             if not global_value:
-                                if value == setting.default or (
-                                    not value.strip() and not setting.default
-                                ):
+                                if value == setting.default:
                                     continue
 
                                 to_put.append(
@@ -510,9 +632,7 @@ class Database:
                                 method in (global_value.method, "autoconf")
                                 and global_value.value != value
                             ):
-                                if value == setting.default or (
-                                    not value.strip() and not setting.default
-                                ):
+                                if value == setting.default:
                                     session.query(Global_values).filter(
                                         Global_values.setting_id == key,
                                         Global_values.suffix == suffix,
@@ -545,8 +665,6 @@ class Database:
                             )
                         )
 
-                    config.pop("SERVER_NAME")
-
                     for key, value in config.items():
                         suffix = 0
                         if self.suffix_rx.search(key):
@@ -571,9 +689,7 @@ class Database:
                         )
 
                         if not global_value:
-                            if value == setting.default or (
-                                not value.strip() and not setting.default
-                            ):
+                            if value == setting.default:
                                 continue
 
                             to_put.append(
@@ -588,9 +704,7 @@ class Database:
                             global_value.method == method
                             and value != global_value.value
                         ):
-                            if value == setting.default or (
-                                not value.strip() and not setting.default
-                            ):
+                            if value == setting.default:
                                 session.query(Global_values).filter(
                                     Global_values.setting_id == key,
                                     Global_values.suffix == suffix,
@@ -604,8 +718,10 @@ class Database:
 
             with suppress(ProgrammingError, OperationalError):
                 metadata = session.query(Metadata).get(1)
-                if metadata is not None and not metadata.first_config_saved:
-                    metadata.first_config_saved = True
+                if metadata is not None:
+                    if not metadata.first_config_saved:
+                        metadata.first_config_saved = True
+                    metadata.config_changed = True
 
             try:
                 session.add_all(to_put)
@@ -698,6 +814,11 @@ class Database:
                         )
                     )
 
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.custom_configs_changed = True
+
             try:
                 session.add_all(to_put)
                 session.commit()
@@ -758,58 +879,68 @@ class Database:
                 if setting.context == "multisite":
                     multisite.append(setting.id)
 
-            for service in session.query(Services).with_entities(Services.id).all():
-                checked_settings = []
-                for key, value in deepcopy(config).items():
-                    original_key = key
-                    if self.suffix_rx.search(key):
-                        key = key[: -len(str(key.split("_")[-1])) - 1]
-
-                    if key not in multisite:
-                        continue
-                    elif f"{service.id}_{original_key}" not in config:
-                        config[f"{service.id}_{original_key}"] = value
-
-                    if original_key not in checked_settings:
-                        checked_settings.append(original_key)
-                    else:
-                        continue
-
-                    service_settings = (
-                        session.query(Services_settings)
-                        .with_entities(
-                            Services_settings.value,
-                            Services_settings.suffix,
-                            Services_settings.method,
-                        )
-                        .filter_by(service_id=service.id, setting_id=key)
-                        .all()
-                    )
-
-                    for service_setting in service_settings:
-                        config[
-                            f"{service.id}_{key}"
-                            + (
-                                f"_{service_setting.suffix}"
-                                if service_setting.suffix > 0
-                                else ""
-                            )
-                        ] = (
-                            service_setting.value
-                            if methods is False
-                            else {
-                                "value": service_setting.value,
-                                "global": False,
-                                "method": service_setting.method,
-                            }
-                        )
-
-            servers = " ".join(service.id for service in session.query(Services).all())
-            config["SERVER_NAME"] = (
-                servers
-                if methods is False
-                else {"value": servers, "global": True, "method": "default"}
+            is_multisite = (
+                config.get("MULTISITE", {"value": "no"})["value"] == "yes"
+                if methods
+                else config.get("MULTISITE", "no") == "yes"
             )
+
+            if is_multisite:
+                for service in session.query(Services).with_entities(Services.id).all():
+                    checked_settings = []
+                    for key, value in deepcopy(config).items():
+                        original_key = key
+                        if self.suffix_rx.search(key):
+                            key = key[: -len(str(key.split("_")[-1])) - 1]
+
+                        if key not in multisite:
+                            continue
+                        elif f"{service.id}_{original_key}" not in config:
+                            config[f"{service.id}_{original_key}"] = value
+
+                        if original_key not in checked_settings:
+                            checked_settings.append(original_key)
+                        else:
+                            continue
+
+                        service_settings = (
+                            session.query(Services_settings)
+                            .with_entities(
+                                Services_settings.value,
+                                Services_settings.suffix,
+                                Services_settings.method,
+                            )
+                            .filter_by(service_id=service.id, setting_id=key)
+                            .all()
+                        )
+
+                        for service_setting in service_settings:
+                            config[
+                                f"{service.id}_{key}"
+                                + (
+                                    f"_{service_setting.suffix}"
+                                    if service_setting.suffix > 0
+                                    else ""
+                                )
+                            ] = (
+                                service_setting.value
+                                if methods is False
+                                else {
+                                    "value": service_setting.value,
+                                    "global": False,
+                                    "method": service_setting.method,
+                                }
+                            )
+
+            if is_multisite:
+                servers = " ".join(
+                    service.id for service in session.query(Services).all()
+                )
+                config["SERVER_NAME"] = (
+                    servers
+                    if methods is False
+                    else {"value": servers, "global": True, "method": "default"}
+                )
 
             return config
 
@@ -847,16 +978,23 @@ class Database:
                 for service in session.query(Services).with_entities(Services.id).all()
             ]
             for service in service_names:
+                service_settings = []
                 tmp_config = deepcopy(config)
 
                 for key, value in deepcopy(tmp_config).items():
                     if key.startswith(f"{service}_"):
-                        tmp_config[key.replace(f"{service}_", "")] = tmp_config.pop(key)
+                        setting = key.replace(f"{service}_", "")
+                        service_settings.append(setting)
+                        tmp_config[setting] = tmp_config.pop(key)
                     elif any(key.startswith(f"{s}_") for s in service_names):
                         tmp_config.pop(key)
-                    else:
+                    elif key not in service_settings:
                         tmp_config[key] = (
-                            {"value": value["value"], "global": True, "method": "default"}
+                            {
+                                "value": value["value"],
+                                "global": value["global"],
+                                "method": value["method"],
+                            }
                             if methods is True
                             else value
                         )
@@ -887,7 +1025,8 @@ class Database:
 
         return ""
 
-    def delete_job_cache(self, job_name: str, file_name: str):
+    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None):
+        job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
         with self.__db_session() as session:
             session.query(Jobs_cache).filter_by(
                 job_name=job_name, file_name=file_name
@@ -895,14 +1034,15 @@ class Database:
 
     def update_job_cache(
         self,
-        job_name: str,
         service_id: Optional[str],
         file_name: str,
         data: bytes,
         *,
+        job_name: Optional[str] = None,
         checksum: Optional[str] = None,
     ) -> str:
         """Update the plugin cache in the database"""
+        job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
         with self.__db_session() as session:
             cache = (
                 session.query(Jobs_cache)
@@ -1004,10 +1144,10 @@ class Database:
                         updates[Plugins.method] = plugin["method"]
 
                     if plugin.get("data") != db_plugin.data:
-                        updates[Plugins.data] = plugin["data"]
+                        updates[Plugins.data] = plugin.get("data")
 
                     if plugin.get("checksum") != db_plugin.checksum:
-                        updates[Plugins.checksum] = plugin["checksum"]
+                        updates[Plugins.checksum] = plugin.get("checksum")
 
                     if updates:
                         session.query(Plugins).filter(
@@ -1021,7 +1161,7 @@ class Database:
                         .all()
                     )
                     db_ids = [setting.id for setting in db_plugin_settings]
-                    setting_ids = [setting["id"] for setting in settings.values()]
+                    setting_ids = [setting for setting in settings]
                     missing_ids = [
                         setting for setting in db_ids if setting not in setting_ids
                     ]
@@ -1091,8 +1231,8 @@ class Database:
                             if value["type"] != db_setting.type:
                                 updates[Settings.type] = value["type"]
 
-                            if value["multiple"] != db_setting.multiple:
-                                updates[Settings.multiple] = value["multiple"]
+                            if value.get("multiple") != db_setting.multiple:
+                                updates[Settings.multiple] = value.get("multiple")
 
                             if updates:
                                 session.query(Settings).filter(
@@ -1106,9 +1246,7 @@ class Database:
                                 .all()
                             )
                             db_values = [select.value for select in db_selects]
-                            select_values = [
-                                select["value"] for select in value.get("select", [])
-                            ]
+                            select_values = value.get("select", [])
                             missing_values = [
                                 select
                                 for select in db_values
@@ -1181,10 +1319,15 @@ class Database:
                                     Jobs.name == job["name"]
                                 ).update(updates)
 
+                    tmp_ui_path = Path(
+                        sep, "var", "tmp", "bunkerweb", "ui", plugin["id"], "ui"
+                    )
                     path_ui = (
-                        Path(f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui")
-                        if Path(f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui").exists()
-                        else Path(f"/etc/bunkerweb/plugins/{plugin['id']}/ui")
+                        tmp_ui_path
+                        if tmp_ui_path.exists()
+                        else Path(
+                            sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui"
+                        )
                     )
 
                     if path_ui.exists():
@@ -1202,8 +1345,10 @@ class Database:
                             )
 
                             if not db_plugin_page:
-                                template = Path(f"{path_ui}/template.html").read_bytes()
-                                actions = Path(f"{path_ui}/actions.py").read_bytes()
+                                template = path_ui.joinpath(
+                                    "template.html"
+                                ).read_bytes()
+                                actions = path_ui.joinpath("actions.py").read_bytes()
 
                                 to_put.append(
                                     Plugin_pages(
@@ -1216,10 +1361,10 @@ class Database:
                                 )
                             else:
                                 updates = {}
-                                template_checksum = file_hash(
-                                    f"{path_ui}/template.html"
-                                )
-                                actions_checksum = file_hash(f"{path_ui}/actions.py")
+                                template_path = path_ui.joinpath("template.html")
+                                actions_path = path_ui.joinpath("actions.py")
+                                template_checksum = file_hash(str(template_path))
+                                actions_checksum = file_hash(str(actions_path))
 
                                 if (
                                     template_checksum
@@ -1227,9 +1372,7 @@ class Database:
                                 ):
                                     updates.update(
                                         {
-                                            Plugin_pages.template_file: Path(
-                                                f"{path_ui}/template.html"
-                                            ).read_bytes(),
+                                            Plugin_pages.template_file: template_path.read_bytes(),
                                             Plugin_pages.template_checksum: template_checksum,
                                         }
                                     )
@@ -1237,9 +1380,7 @@ class Database:
                                 if actions_checksum != db_plugin_page.actions_checksum:
                                     updates.update(
                                         {
-                                            Plugin_pages.actions_file: Path(
-                                                f"{path_ui}/actions.py"
-                                            ).read_bytes(),
+                                            Plugin_pages.actions_file: actions_path.read_bytes(),
                                             Plugin_pages.actions_checksum: actions_checksum,
                                         }
                                     )
@@ -1251,7 +1392,19 @@ class Database:
 
                     continue
 
-                to_put.append(Plugins(**plugin))
+                to_put.append(
+                    Plugins(
+                        id=plugin["id"],
+                        name=plugin["name"],
+                        description=plugin["description"],
+                        version=plugin["version"],
+                        stream=plugin["stream"],
+                        external=True,
+                        method=plugin["method"],
+                        data=plugin.get("data"),
+                        checksum=plugin.get("checksum"),
+                    )
+                )
 
                 for setting, value in settings.items():
                     db_setting = session.query(Settings).filter_by(id=setting).first()
@@ -1298,10 +1451,15 @@ class Database:
                     to_put.append(Jobs(plugin_id=plugin["id"], **job))
 
                 if page:
+                    tmp_ui_path = Path(
+                        sep, "var", "tmp", "bunkerweb", "ui", plugin["id"], "ui"
+                    )
                     path_ui = (
-                        Path(f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui")
-                        if Path(f"/var/tmp/bunkerweb/ui/{plugin['id']}/ui").exists()
-                        else Path(f"/etc/bunkerweb/plugins/{plugin['id']}/ui")
+                        tmp_ui_path
+                        if tmp_ui_path.exists()
+                        else Path(
+                            sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui"
+                        )
                     )
 
                     if path_ui.exists():
@@ -1319,8 +1477,10 @@ class Database:
                             )
 
                             if not db_plugin_page:
-                                template = Path(f"{path_ui}/template.html").read_bytes()
-                                actions = Path(f"{path_ui}/actions.py").read_bytes()
+                                template = path_ui.joinpath(
+                                    "template.html"
+                                ).read_bytes()
+                                actions = path_ui.joinpath("actions.py").read_bytes()
 
                                 to_put.append(
                                     Plugin_pages(
@@ -1333,10 +1493,10 @@ class Database:
                                 )
                             else:
                                 updates = {}
-                                template_checksum = file_hash(
-                                    f"{path_ui}/template.html"
-                                )
-                                actions_checksum = file_hash(f"{path_ui}/actions.py")
+                                template_path = path_ui.joinpath("template.html")
+                                actions_path = path_ui.joinpath("actions.py")
+                                template_checksum = file_hash(str(template_path))
+                                actions_checksum = file_hash(str(actions_path))
 
                                 if (
                                     template_checksum
@@ -1344,9 +1504,7 @@ class Database:
                                 ):
                                     updates.update(
                                         {
-                                            Plugin_pages.template_file: Path(
-                                                f"{path_ui}/template.html"
-                                            ).read_bytes(),
+                                            Plugin_pages.template_file: template_path.read_bytes(),
                                             Plugin_pages.template_checksum: template_checksum,
                                         }
                                     )
@@ -1354,9 +1512,7 @@ class Database:
                                 if actions_checksum != db_plugin_page.actions_checksum:
                                     updates.update(
                                         {
-                                            Plugin_pages.actions_file: Path(
-                                                f"{path_ui}/actions.py"
-                                            ).read_bytes(),
+                                            Plugin_pages.actions_file: actions_path.read_bytes(),
                                             Plugin_pages.actions_checksum: actions_checksum,
                                         }
                                     )
@@ -1365,6 +1521,12 @@ class Database:
                                     session.query(Plugin_pages).filter(
                                         Plugin_pages.plugin_id == plugin["id"]
                                     ).update(updates)
+
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.external_plugins_changed = True
+
             try:
                 session.add_all(to_put)
                 session.commit()
@@ -1574,7 +1736,7 @@ class Database:
             )
 
             if db_instance is not None:
-                return "An instance with the same hostname already exists."
+                return f"Instance {hostname} already exists, will not be added."
 
             session.add(
                 Instances(hostname=hostname, port=port, server_name=server_name)
@@ -1601,6 +1763,11 @@ class Database:
                         server_name=instance["env"].get("API_SERVER_NAME", "bwapi"),
                     )
                 )
+
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).get(1)
+                if metadata is not None:
+                    metadata.instances_changed = True
 
             try:
                 session.add_all(to_put)

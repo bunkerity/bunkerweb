@@ -608,8 +608,10 @@ GET /t
 --- grep_error_log eval
 qr/(received: \w+|lua release ngx.ctx at ref \d+)/
 --- grep_error_log_out eval
-["",
-"lua release ngx.ctx at ref 2
+["lua release ngx.ctx at ref 1
+",
+"lua release ngx.ctx at ref 1
+lua release ngx.ctx at ref 2
 received: 42
 received: 1
 lua release ngx.ctx at ref 2
@@ -674,8 +676,10 @@ closed
 --- grep_error_log eval
 qr/lua release ngx.ctx at ref \d+/
 --- grep_error_log_out eval
-["",
+["lua release ngx.ctx at ref 1
+",
 "lua release ngx.ctx at ref 1
+lua release ngx.ctx at ref 1
 "]
 --- no_error_log
 [error]
@@ -772,15 +776,15 @@ GET /t
 qr/(received: \w+|lua release ngx.ctx at ref \d+)/
 --- grep_error_log_out eval
 ["lua release ngx.ctx at ref 2
-received: 102
+received: 112
 lua release ngx.ctx at ref 2
-received: 102
+received: 112
 lua release ngx.ctx at ref 1
 ",
 "lua release ngx.ctx at ref 2
-received: 102
+received: 112
 lua release ngx.ctx at ref 2
-received: 102
+received: 112
 lua release ngx.ctx at ref 1
 lua release ngx.ctx at ref 2
 received: 112

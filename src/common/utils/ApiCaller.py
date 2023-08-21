@@ -1,26 +1,38 @@
+#!/usr/bin/python3
+
 from io import BytesIO
-from os import getenv
+from os import getenv, sep
+from os.path import join
 from sys import path as sys_path
-from tarfile import open as taropen
+from tarfile import open as tar_open
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
-if "/usr/share/bunkerweb/utils" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/utils")
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (("deps", "python"), ("utils",))
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
+from API import API  # type: ignore
 from logger import setup_logger
-from API import API
 
-if "/usr/share/bunkerweb/deps/python" not in sys_path:
-    sys_path.append("/usr/share/bunkerweb/deps/python")
-
-from kubernetes import client as kube_client, config
 from docker import DockerClient
+from kubernetes import client as kube_client, config
 
 
 class ApiCaller:
-    def __init__(self, apis: List[API] = None):
+    def __init__(self, apis: Optional[List[API]] = None):
         self.__apis = apis or []
         self.__logger = setup_logger("Api", getenv("LOG_LEVEL", "INFO"))
+
+    @property
+    def apis(self) -> List[API]:
+        return self.__apis
+
+    @apis.setter
+    def apis(self, apis: List[API]):
+        self.__apis = apis
 
     def auto_setup(self, bw_integration: Optional[str] = None):
         if bw_integration is None:
@@ -101,13 +113,7 @@ class ApiCaller:
                     )
                 )
 
-    def _set_apis(self, apis: List[API]):
-        self.__apis = apis
-
-    def _get_apis(self):
-        return self.__apis
-
-    def _send_to_apis(
+    def send_to_apis(
         self,
         method: Union[Literal["POST"], Literal["GET"]],
         url: str,
@@ -116,6 +122,7 @@ class ApiCaller:
         response: bool = False,
     ) -> Tuple[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
         ret = True
+        url = url if not url.startswith("/") else url[1:]
         responses = {}
         for api in self.__apis:
             if files is not None:
@@ -125,23 +132,21 @@ class ApiCaller:
             if not sent:
                 ret = False
                 self.__logger.error(
-                    f"Can't send API request to {api.get_endpoint()}{url} : {err}",
+                    f"Can't send API request to {api.endpoint}{url} : {err}",
                 )
             else:
                 if status != 200:
                     ret = False
                     self.__logger.error(
-                        f"Error while sending API request to {api.get_endpoint()}{url} : status = {resp['status']}, msg = {resp['msg']}",
+                        f"Error while sending API request to {api.endpoint}{url} : status = {resp['status']}, msg = {resp['msg']}",
                     )
                 else:
                     self.__logger.info(
-                        f"Successfully sent API request to {api.get_endpoint()}{url}",
+                        f"Successfully sent API request to {api.endpoint}{url}",
                     )
 
                     if response:
-                        instance = (
-                            api.get_endpoint().replace("http://", "").split(":")[0]
-                        )
+                        instance = api.endpoint.replace("http://", "").split(":")[0]
                         if isinstance(resp, dict):
                             responses[instance] = resp
                         else:
@@ -151,15 +156,15 @@ class ApiCaller:
             return ret, responses
         return ret
 
-    def _send_files(self, path: str, url: str) -> bool:
+    def send_files(self, path: str, url: str) -> bool:
         ret = True
         with BytesIO() as tgz:
-            with taropen(
+            with tar_open(
                 mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3
             ) as tf:
                 tf.add(path, arcname=".")
             tgz.seek(0, 0)
             files = {"archive.tar.gz": tgz}
-            if not self._send_to_apis("POST", url, files=files):
+            if not self.send_to_apis("POST", url, files=files):
                 ret = False
         return ret

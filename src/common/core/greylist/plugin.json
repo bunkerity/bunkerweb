@@ -29,7 +29,7 @@
       "help": "List of URLs, separated with spaces, containing good IP/network to put into the greylist.",
       "id": "greylist-ip-urls",
       "label": "Greylist IP/network URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "GREYLIST_RDNS_GLOBAL": {
@@ -56,7 +56,7 @@
       "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.",
       "id": "greylist-rdns-urls",
       "label": "Greylist reverse DNS URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "GREYLIST_ASN": {
@@ -74,7 +74,7 @@
       "help": "List of URLs, separated with spaces, containing ASN to put into the greylist.",
       "id": "greylist-asn-urls",
       "label": "Greylist ASN URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "GREYLIST_USER_AGENT": {
@@ -92,7 +92,7 @@
       "help": "List of URLs, separated with spaces, containing good User-Agent to put into the greylist.",
       "id": "greylist-user-agent-urls",
       "label": "Greylist User-Agent URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "GREYLIST_URI": {
@@ -110,7 +110,7 @@
       "help": "List of URLs, separated with spaces, containing bad URI to put into the greylist.",
       "id": "greylist-uri-urls",
       "label": "Greylist URI URLs",
-      "regex": "^( *(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     }
   },

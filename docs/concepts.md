@@ -1,7 +1,7 @@
 # Concepts
 
 <figure markdown>
-  ![Overwiew](assets/img/concepts.svg){ align=center }
+  ![Overwiew](assets/img/concepts.svg){ align=center, width="600" }
 </figure>
 
 ## Integrations
@@ -52,17 +52,19 @@ USE_BROTLI=no
 
 ## Multisite mode
 
-The multisite mode is a crucial concept to understand when using BunkerWeb. Because the goal is to protect web applications, our solution is intrinsically linked to the concept of "virtual host" or "vhost" (more info [here](https://en.wikipedia.org/wiki/Virtual_hosting)) which makes it possible to serve multiple web applications from a single (or a cluster of) instance.
+Understanding the multisite mode is essential when utilizing BunkerWeb. As our primary focus is safeguarding web applications, our solution is intricately linked to the concept of "virtual hosts" or "vhosts" (more info [here](https://en.wikipedia.org/wiki/Virtual_hosting)). These virtual hosts enable the serving of multiple web applications from a single instance or cluster.
 
-By default, the multisite mode of BunkerWeb is disabled which means that only one web application will be served and all the settings will be applied to it. The typical use case is having a single application to protect : you don't have to worry about the multisite and the default behavior should be the right one for you.
+By default, BunkerWeb has the multisite mode disabled. This means that only one web application will be served, and all settings will be applied to it. This setup is ideal when you have a single application to protect, as you don't need to concern yourself with multisite configurations.
 
-When multisite mode is enabled, BunkerWeb serves and protects multiple web applications. Each web application is identified by a unique server name and have its own set of settings. The typical use case is having multiple applications to protect and you want to use a single (or a cluster depending of the integration) instance of BunkerWeb.
+However, when the multisite mode is enabled, BunkerWeb becomes capable of serving and protecting multiple web applications. Each web application is identified by a unique server name and has its own set of settings. This mode proves beneficial when you have multiple applications to secure, and you prefer to utilize a single instance (or a cluster) of BunkerWeb.
 
-The multisite mode is controlled by the `MULTISITE` setting which can be set to `yes` (enabled) or `no` (disabled, which is the default).
+The activation of the multisite mode is controlled by the `MULTISITE` setting, which can be set to `yes` to enable it or `no` to keep it disabled (which is the default value).
 
-Each setting has a context that defines "where" it can be applied. If the context is global then the setting can't be set per server (or "per site", "per app") but only to the whole configuration. Otherwise, if the context is multisite, the setting can be set globally and per server. Defining a multisite setting to a specific server is done by adding the server name as a prefix of the setting name like `app1.example.com_AUTO_LETS_ENCRYPT` or `app2.example.com_USE_ANTIBOT` for example. When a multisite setting is defined globally (without any server prefix), all the servers will inherit that setting (but can still be overridden if we set the same setting with the server name prefix).
+Each setting within BunkerWeb has a specific context that determines where it can be applied. If the context is set to "global," the setting can't be applied per server or site but is instead applied to the entire configuration as a whole. On the other hand, if the context is "multisite," the setting can be applied globally and per server. To define a multisite setting for a specific server, simply add the server name as a prefix to the setting name. For example, `app1.example.com_AUTO_LETS_ENCRYPT` or `app2.example.com_USE_ANTIBOT` are examples of setting names with server name prefixes. When a multisite setting is defined globally without a server prefix, all servers inherit that setting. However, individual servers can still override the setting if the same setting is defined with a server name prefix.
 
-Here is a dummy example of a multisite BunkerWeb configuration :
+Understanding the intricacies of multisite mode and its associated settings allows you to tailor BunkerWeb's behavior to suit your specific requirements, ensuring optimal protection for your web applications.
+
+Here's a dummy example of a multisite BunkerWeb configuration :
 
 ```conf
 MULTISITE=yes
@@ -79,48 +81,66 @@ app3.example.com_USE_BAD_BEHAVIOR=no
 
 !!! info "Going further"
 
-    You will find concrete examples of multisite mode in the [quickstart guide](quickstart-guide.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.5.0/examples) directory of the repository.
+    You will find concrete examples of multisite mode in the [quickstart guide](quickstart-guide.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.5.1/examples) directory of the repository.
 
 ## Custom configurations
 
-Because meeting all the use cases only using the settings is not an option (even with [external plugins](plugins.md)), you can use custom configurations to solve your specific challenges.
+To address unique challenges and cater to specific use cases, BunkerWeb offers the flexibility of custom configurations. While the provided settings and [external plugins](plugins.md) cover a wide range of scenarios, there may be situations that require additional customization.
 
-Under the hood, BunkerWeb uses the notorious NGINX web server, that's why you can leverage its configuration system for your specific needs. Custom NGINX configurations can be included in different [contexts](https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts) like HTTP or server (all servers and/or specific server block).
+BunkerWeb is built on the renowned NGINX web server, which provides a powerful configuration system. This means you can leverage NGINX's configuration capabilities to meet your specific needs. Custom NGINX configurations can be included in various [contexts](https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/#contexts) such as HTTP or server, allowing you to fine-tune the behavior of BunkerWeb according to your requirements. Whether you need to customize global settings or apply configurations to specific server blocks, BunkerWeb empowers you to optimize its behavior to align perfectly with your use case.
 
-Another core component of BunkerWeb is the ModSecurity Web Application Firewall : you can also use custom configurations to fix some false positives or add custom rules for example.
+Another integral component of BunkerWeb is the ModSecurity Web Application Firewall. With custom configurations, you have the flexibility to address false positives or add custom rules to further enhance the protection provided by ModSecurity. These custom configurations allow you to fine-tune the behavior of the firewall and ensure that it aligns with the specific requirements of your web applications.
+
+By leveraging custom configurations, you unlock a world of possibilities to tailor BunkerWeb's behavior and security measures precisely to your needs. Whether it's adjusting NGINX configurations or fine-tuning ModSecurity, BunkerWeb provides the flexibility to meet your unique challenges effectively.
 
 !!! info "Going further"
 
-    You will find concrete examples of custom configurations in the [quickstart guide](quickstart-guide.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.5.0/examples) directory of the repository.
+    You will find concrete examples of custom configurations in the [quickstart guide](quickstart-guide.md) of the documentation and the [examples](https://github.com/bunkerity/bunkerweb/tree/v1.5.1/examples) directory of the repository.
 
 ## Database
 
-State of the current configuration of BunkerWeb is stored in a backend database which contains the following data :
+BunkerWeb securely stores its current configuration in a backend database, which contains essential data for smooth operation. The following information is stored in the database:
 
-- Settings defined for all the services
-- Custom configurations 
-- BunkerWeb instances
-- Metadata about jobs execution
-- Cached files
+- **Settings for all services**: The database holds the defined settings for all the services provided by BunkerWeb. This ensures that your configurations and preferences are preserved and readily accessible.
 
-Under the hood, when you edit a setting or add a new configuration, everything is stored in the database. We actually support SQLite, MariaDB, MySQL and PostgreSQL as backends.
+- **Custom configurations**: Any custom configurations you create are also stored in the backend database. This includes personalized settings and modifications tailored to your specific requirements.
 
-Database configuration is done by using the `DATABASE_URI` setting which respects the following formats :
+- **BunkerWeb instances**: Information about BunkerWeb instances, including their setup and relevant details, is stored in the database. This allows for easy management and monitoring of multiple instances if applicable.
 
-- SQLite : `sqlite:///var/lib/bunkerweb/db.sqlite3`
-- MariaDB : `mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db`
-- MySQL : `mysql+pymysql://bunkerweb:changeme@bw-db:3306/db`
-- PostgreSQL : `postgresql://bunkerweb:changeme@bw-db:5432/db`
+- **Metadata about job execution**: The database stores metadata related to the execution of various jobs within BunkerWeb. This includes information about scheduled tasks, maintenance processes, and other automated activities.
+
+- **Cached files**: BunkerWeb utilizes caching mechanisms for improved performance. The database holds cached files, ensuring efficient retrieval and delivery of frequently accessed resources.
+
+Under the hood, whenever you edit a setting or add a new configuration, BunkerWeb automatically stores the changes in the database, ensuring data persistence and consistency. BunkerWeb supports multiple backend database options, including SQLite, MariaDB, MySQL, and PostgreSQL.
+
+Configuring the database is straightforward using the `DATABASE_URI` setting, which follows the specified formats for each supported database:
+
+- **SQLite**: `sqlite:///var/lib/bunkerweb/db.sqlite3`
+- **MariaDB**: `mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db`
+- **MySQL**: `mysql+pymysql://bunkerweb:changeme@bw-db:3306/db`
+- **PostgreSQL**: `postgresql://bunkerweb:changeme@bw-db:5432/db`
+
+By specifying the appropriate database URI in the configuration, you can seamlessly integrate BunkerWeb with your preferred database backend, ensuring efficient and reliable storage of your configuration data.
+
+<figure markdown>
+  ![Overview](assets/img/bunkerweb_db.svg){ align=center, width="800" }
+  <figcaption>Database Schema</figcaption>
+</figure>
 
 ## Scheduler
 
-To make things automagically work together, a dedicated service called the scheduler is in charge of :
+For seamless coordination and automation, BunkerWeb employs a specialized service known as the scheduler. The scheduler plays a vital role in ensuring smooth operation by performing the following tasks:
 
-- Storing the settings and custom configurations inside the database
-- Executing various tasks (called jobs)
-- Generating a configuration which is understood by BunkerWeb
-- Being the intermediary for other services (like web UI or autoconf)
+- **Storing settings and custom configurations**: The scheduler is responsible for storing all the settings and custom configurations within the backend database. This centralizes the configuration data, making it easily accessible and manageable.
 
-In other words, the scheduler is the brain of BunkerWeb.
+- **Executing various tasks (jobs)**: The scheduler handles the execution of various tasks, referred to as jobs. These jobs encompass a range of activities, such as periodic maintenance, scheduled updates, or any other automated tasks required by BunkerWeb.
 
-When using container-based integrations, the scheduler is executed in its own container. Whereas, for linux-based integrations scheduler is self-contained in the `bunkerweb` service.
+- **Generating BunkerWeb configuration**: The scheduler generates a configuration that is readily understood by BunkerWeb. This configuration is derived from the stored settings and custom configurations, ensuring that the entire system operates cohesively.
+
+- **Acting as an intermediary for other services**: The scheduler acts as an intermediary, facilitating communication and coordination between different components of BunkerWeb. It interfaces with services such as the web UI or autoconf, ensuring a seamless flow of information and data exchange.
+
+In essence, the scheduler serves as the brain of BunkerWeb, orchestrating various operations and ensuring the smooth functioning of the system.
+
+Depending on the integration approach, the execution environment of the scheduler may differ. In container-based integrations, the scheduler is executed within its dedicated container, providing isolation and flexibility. On the other hand, for Linux-based integrations, the scheduler is self-contained within the bunkerweb service, simplifying the deployment and management process.
+
+By employing the scheduler, BunkerWeb streamlines the automation and coordination of essential tasks, enabling efficient and reliable operation of the entire system.

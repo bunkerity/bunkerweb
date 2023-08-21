@@ -63,6 +63,12 @@ STREAM support :x:
 
 You can automatically remove verbose headers in the HTTP responses by using the `REMOVE_HEADERS` setting (default : `Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version`).
 
+#### Keep upstream headers
+
+STREAM support :x:
+
+You can automatically keep headers from upstream servers and prevent BunkerWeb from overriding them in the HTTP responses by using the `KEEP_UPSTREAM_HEADERS` setting (default : `Content-Security-Policy Permissions-Policy Feature-Policy X-Frame-Options`). A special value `*` is available to keep all headers. List of headers to keep must be separated with a space. Note that if the header is not present in the upstream response, it will be added by BunkerWeb.
+
 #### Cookies
 
 STREAM support :x:
@@ -127,11 +133,9 @@ Besides the HTTPS configuration, the following settings related to HTTPS can be 
 | :---------------------------: | :---------------: | :----------------------------------------------------------------------------------------------------------- |
 |   `REDIRECT_HTTP_TO_HTTPS`    |       `no`        | When set to `yes`, will redirect every HTTP request to HTTPS even if BunkerWeb is not configured with HTTPS. |
 | `AUTO_REDIRECT_HTTP_TO_HTTPS` |       `yes`       | When set to `yes`, will redirect every HTTP request to HTTPS only if BunkerWeb is configured with HTTPS.     |
-|       `HTTPS_PROTOCOLS`       | `TLSv1.2 TLSv1.3` | List of supported SSL/TLS protocols when HTTPS is enabled.                                                   |
+|       `SSL_PROTOCOLS`       | `TLSv1.2 TLSv1.3` | List of supported SSL/TLS protocols when SSL is enabled.                                                   |
 |            `HTTP2`            |       `yes`       | When set to `yes`, will enable HTTP2 protocol support when using HTTPS.                                      |
 |         `LISTEN_HTTP`         |       `yes`       | When set to `no`, BunkerWeb will not listen for HTTP requests. Useful if you want HTTPS only for example.    |
-
-When using stream, the `SSL_PROTOCOLS` can be used which takes the same value as the `HTTPS_PROTOCOLS` one.
 
 ### Let's Encrypt
 
@@ -155,13 +159,14 @@ STREAM support :white_check_mark:
 
 If you want to use your own certificates, here is the list of related settings :
 
-|       Setting       | Default | Description                                                                                                                                                                                                                             |
-| :-----------------: | :-----: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `USE_CUSTOM_SSL`  |  `no`   | When set to `yes`, HTTPS will be enabled with custom certificates.                                                                                                                                                                      |
-| `CUSTOM_SSL_CERT` |         | Full path to the certificate. If you have one or more intermediate certificate(s) in your chain of trust, you will need to provide the bundle (more info [here](https://nginx.org/en/docs/http/configuring_https_servers.html#chains)). |
-| `CUSTOM_SSL_KEY`  |         | Full path to the private key.                                                                                                                                                                                                           |
+|     Setting     |Default| Context |Multiple|                                  Description                                   |
+|-----------------|-------|---------|--------|--------------------------------------------------------------------------------|
+|`USE_CUSTOM_SSL` |`no`   |multisite|no      |Use custom HTTPS certificate.                                                   |
+|`CUSTOM_SSL_CERT`|       |multisite|no      |Full path of the certificate or bundle file (must be readable by the scheduler).|
+|`CUSTOM_SSL_KEY` |       |multisite|no      |Full path of the key file (must be readable by the scheduler).                  |
 
-When `USE_CUSTOM_HTTPS` is set to `yes`, BunkerWeb will check every day if the custom certificate specified in `CUSTOM_HTTPS_CERT` is modified and will reload NGINX if that's the case.
+
+When `USE_CUSTOM_SSL` is set to `yes`, BunkerWeb will check every day if the custom certificate specified in `CUSTOM_SSL_CERT` is modified and will reload NGINX if that's the case.
 
 When using stream mode, you will need to use the `LISTEN_STREAM_PORT_SSL` setting in order to choose your listening SSL/TLS port.
 
@@ -250,6 +255,7 @@ That kind of security is implemented but not enabled by default in BunkerWeb and
 - **Captcha** : force the client to solve a classical captcha (no external dependencies)
 - **hCaptcha** : force the client to solve a captcha from hCaptcha
 - **reCAPTCHA** : force the client to get a minimum score with Google reCAPTCHA
+- **Turnstile** : enforce rate limiting and access control for APIs and web applications using various mechanisms with Coudflare Turnstile
 
 Here is the list of related settings :
 
@@ -262,6 +268,8 @@ Here is the list of related settings :
 |`ANTIBOT_RECAPTCHA_SECRET` |            |multisite|no      |Secret for reCAPTCHA challenge.                                                                                               |
 |`ANTIBOT_HCAPTCHA_SITEKEY` |            |multisite|no      |Sitekey for hCaptcha challenge.                                                                                               |
 |`ANTIBOT_HCAPTCHA_SECRET`  |            |multisite|no      |Secret for hCaptcha challenge.                                                                                                |
+|`ANTIBOT_TURNSTILE_SITEKEY`|            |multisite|no      |Sitekey for Turnstile challenge.                                                                                              |
+|`ANTIBOT_TURNSTILE_SECRET` |            |multisite|no      |Secret for Turnstile challenge.                                                                                               |
 |`ANTIBOT_TIME_RESOLVE`     |`60`        |multisite|no      |Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.|
 |`ANTIBOT_TIME_VALID`       |`86400`     |multisite|no      |Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.                |
 
@@ -476,7 +484,7 @@ You can quickly protect sensitive resources like the admin area for example, by 
 
 ### Auth request
 
-You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.0/examples).
+You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.1/examples).
 
 **Auth request settings are related to reverse proxy rules.**
 

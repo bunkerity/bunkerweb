@@ -1,8 +1,8 @@
-version: "3.5"
+	version: "3.5"
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.5.0
+    image: bunkerity/bunkerweb:1.5.1
     ports:
       - published: 80
         target: 8080
@@ -32,7 +32,7 @@ services:
         - "bunkerweb.INSTANCE"
 
   bw-autoconf:
-    image: bunkerity/bunkerweb-autoconf:1.5.0
+    image: bunkerity/bunkerweb-autoconf:1.5.1
     environment:
       - SWARM_MODE=yes
       - DOCKER_HOST=tcp://bw-docker:2375
@@ -42,7 +42,7 @@ services:
       - bw-docker
 
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -51,6 +51,7 @@ services:
       - SERVICES=1
       - SWARM=1
       - TASKS=1
+      - LOG_LEVEL=warning
     networks:
       - bw-docker
     deploy:
@@ -59,7 +60,7 @@ services:
           - "node.role == manager"
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.0
+    image: bunkerity/bunkerweb-scheduler:1.5.1
     environment:
       - SWARM_MODE=yes
       - DOCKER_HOST=tcp://bw-docker:2375
@@ -85,13 +86,12 @@ services:
       - bw-universe
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.5.0
+    image: bunkerity/bunkerweb-ui:1.5.1
     environment:
       - DATABASE_URI=postgresql://bunkerweb:changeme@bw-db:5432/db
       - DOCKER_HOST=tcp://bw-docker:2375
       - ADMIN_USERNAME=changeme
       - ADMIN_PASSWORD=changeme
-      - ABSOLUTE_URI=http://www.example.com/changeme/
     networks:
       - bw-universe
       - bw-docker
@@ -100,9 +100,8 @@ services:
         - "bunkerweb.SERVER_NAME=www.example.com"
         - "bunkerweb.USE_UI=yes"
         - "bunkerweb.USE_REVERSE_PROXY=yes"
-        - "bunkerweb.REVERSE_PROXY_URL=/changeme/"
+        - "bunkerweb.REVERSE_PROXY_URL=/changeme"
         - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-        - "bunkerweb.REVERSE_PROXY_HEADERS=X-Script-Name /changeme"
         - "bunkerweb.INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504"
 
 volumes:

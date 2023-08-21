@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bunkerweb:
-    image: bunkerity/bunkerweb:1.5.0
+    image: bunkerity/bunkerweb:1.5.1
     ports:
       - 80:8080
       - 443:8443
@@ -14,16 +14,15 @@ services:
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
       - www.example.com_USE_UI=yes
       - www.example.com_USE_REVERSE_PROXY=yes
-      - www.example.com_REVERSE_PROXY_URL=/changeme/
+      - www.example.com_REVERSE_PROXY_URL=/changeme
       - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
-      - www.example.com_REVERSE_PROXY_HEADERS=X-Script-Name /changeme
       - www.example.com_INTERCEPTED_ERROR_CODES=400 404 405 413 429 500 501 502 503 504
     networks:
       - bw-universe
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.0
+    image: bunkerity/bunkerweb-scheduler:1.5.1
     depends_on:
       - bunkerweb
       - bw-docker
@@ -36,16 +35,17 @@ services:
       - bw-docker
 
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - CONTAINERS=1
+      - LOG_LEVEL=warning
     networks:
       - bw-docker
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.5.0
+    image: bunkerity/bunkerweb-ui:1.5.1
     depends_on:
       - bw-docker
     volumes:
@@ -54,7 +54,6 @@ services:
       - DOCKER_HOST=tcp://bw-docker:2375
       - ADMIN_USERNAME=changeme
       - ADMIN_PASSWORD=changeme
-      - ABSOLUTE_URI=http://www.example.com/changeme/
     networks:
       - bw-universe
       - bw-docker

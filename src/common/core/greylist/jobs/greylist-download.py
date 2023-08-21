@@ -2,25 +2,25 @@
 
 from contextlib import suppress
 from ipaddress import ip_address, ip_network
-from os import _exit, getenv
+from os import _exit, getenv, sep
+from os.path import join, normpath
 from pathlib import Path
 from re import IGNORECASE, compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Tuple
 
-sys_path.extend(
-    (
-        "/usr/share/bunkerweb/deps/python",
-        "/usr/share/bunkerweb/utils",
-        "/usr/share/bunkerweb/db",
-    )
-)
+for deps_path in [
+    join(sep, "usr", "share", "bunkerweb", *paths)
+    for paths in (("deps", "python"), ("utils",), ("db",))
+]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
 from requests import get
 
-from Database import Database
-from logger import setup_logger
+from Database import Database  # type: ignore
+from logger import setup_logger  # type: ignore
 from jobs import cache_file, cache_hash, is_cached_file, file_hash
 
 rdns_rx = re_compile(rb"^[^ ]+$", IGNORECASE)
@@ -77,14 +77,13 @@ try:
         logger.info("Greylist is not activated, skipping downloads...")
         _exit(0)
 
-    db = Database(
-        logger,
-        sqlalchemy_string=getenv("DATABASE_URI", None),
-    )
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
 
     # Create directories if they don't exist
-    Path("/var/cache/bunkerweb/greylist").mkdir(parents=True, exist_ok=True)
-    Path("/var/tmp/bunkerweb/greylist").mkdir(parents=True, exist_ok=True)
+    greylist_path = Path(sep, "var", "cache", "bunkerweb", "greylist")
+    greylist_path.mkdir(parents=True, exist_ok=True)
+    tmp_greylist_path = Path(sep, "var", "tmp", "bunkerweb", "greylist")
+    tmp_greylist_path.mkdir(parents=True, exist_ok=True)
 
     # Our urls data
     urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
@@ -99,7 +98,7 @@ try:
     }
     all_fresh = True
     for kind in kinds_fresh:
-        if not is_cached_file(f"/var/cache/bunkerweb/greylist/{kind}.list", "hour", db):
+        if not is_cached_file(greylist_path.joinpath(f"{kind}.list"), "hour", db):
             kinds_fresh[kind] = False
             all_fresh = False
             logger.info(
@@ -127,14 +126,23 @@ try:
         for url in urls_list:
             try:
                 logger.info(f"Downloading greylist data from {url} ...")
-                resp = get(url, stream=True)
+                if url.startswith("file://"):
+                    with open(normpath(url[7:]), "rb") as f:
+                        iterable = f.readlines()
+                else:
+                    resp = get(url, stream=True, timeout=10)
 
-                if resp.status_code != 200:
-                    continue
+                    if resp.status_code != 200:
+                        logger.warning(
+                            f"Got status code {resp.status_code}, skipping..."
+                        )
+                        continue
+
+                    iterable = resp.iter_lines()
 
                 i = 0
                 content = b""
-                for line in resp.iter_lines():
+                for line in iterable:
                     line = line.strip()
 
                     if not line or line.startswith(b"#") or line.startswith(b";"):
@@ -147,12 +155,12 @@ try:
                         content += data + b"\n"
                         i += 1
 
-                Path(f"/var/tmp/bunkerweb/greylist/{kind}.list").write_bytes(content)
+                tmp_greylist_path.joinpath(f"{kind}.list").write_bytes(content)
 
-                logger.info(f"Downloaded {i} grey {kind}")
+                logger.info(f"Downloaded {i} bad {kind}")
                 # Check if file has changed
-                new_hash = file_hash(f"/var/tmp/bunkerweb/greylist/{kind}.list")
-                old_hash = cache_hash(f"/var/cache/bunkerweb/greylist/{kind}.list", db)
+                new_hash = file_hash(tmp_greylist_path.joinpath(f"{kind}.list"))
+                old_hash = cache_hash(greylist_path.joinpath(f"{kind}.list"), db)
                 if new_hash == old_hash:
                     logger.info(
                         f"New file {kind}.list is identical to cache file, reload is not needed",
@@ -163,8 +171,8 @@ try:
                     )
                     # Put file in cache
                     cached, err = cache_file(
-                        f"/var/tmp/bunkerweb/greylist/{kind}.list",
-                        f"/var/cache/bunkerweb/greylist/{kind}.list",
+                        tmp_greylist_path.joinpath(f"{kind}.list"),
+                        greylist_path.joinpath(f"{kind}.list"),
                         new_hash,
                         db,
                     )

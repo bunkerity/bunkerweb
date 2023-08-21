@@ -1,7 +1,5 @@
 local class    = require "middleclass"
 local plugin   = require "bunkerweb.plugin"
-local utils    = require "bunkerweb.utils"
-local cjson    = require "cjson"
 local template = nil
 if ngx.shared.datastore then
 	template = require "resty.template"
@@ -9,9 +7,9 @@ end
 
 local errors = class("errors", plugin)
 
-function errors:initialize()
+function errors:initialize(ctx)
 	-- Call parent initialize
-	plugin.initialize(self, "errors")
+	plugin.initialize(self, "errors", ctx)
 	-- Default error texts
 	self.default_errors = {
 		["400"] = {

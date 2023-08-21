@@ -41,6 +41,10 @@ local function decode(p12, passphrase)
   local px509 = ptr_ptr_of_x509()
   local pstack = ptr_ptr_of_stack()
   local stack = stack_of_x509_new()
+  if stack == nil then
+    return nil, "pkcs12.decode: OPENSSL_sk_new_null() failed"
+  end
+
   -- assign a valid OPENSSL_STACK so gc is taken care of
   pstack[0] = stack
 

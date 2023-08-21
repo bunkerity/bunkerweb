@@ -2,6 +2,15 @@
 ## [Unreleased]
 
 
+<a name="0.8.23"></a>
+## [0.8.23] - 2023-06-20
+### bug fixes
+- **\*:** fix typos and add error check for new_of/dup_of ([#2](https://github.com/fffonion/lua-resty-openssl/issues/2)) [aa6ad47](https://github.com/fffonion/lua-resty-openssl/commit/aa6ad4707845cca9c46282a1550bb9fee7d48698)
+
+### features
+- **tests:** add performance test ([#112](https://github.com/fffonion/lua-resty-openssl/issues/112)) [100b4e4](https://github.com/fffonion/lua-resty-openssl/commit/100b4e43843a597327be6e5356c64b5ce621fa56)
+
+
 <a name="0.8.22"></a>
 ## [0.8.22] - 2023-04-26
 ### bug fixes
@@ -497,7 +506,8 @@
 - **x509:** export pubkey [ede4f81](https://github.com/fffonion/lua-resty-openssl/commit/ede4f817cb0fe092ad6f9ab5d6ecdcde864a9fd8)
 
 
-[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/0.8.22...HEAD
+[Unreleased]: https://github.com/fffonion/lua-resty-openssl/compare/0.8.23...HEAD
+[0.8.23]: https://github.com/fffonion/lua-resty-openssl/compare/0.8.22...0.8.23
 [0.8.22]: https://github.com/fffonion/lua-resty-openssl/compare/0.8.21...0.8.22
 [0.8.21]: https://github.com/fffonion/lua-resty-openssl/compare/0.8.20...0.8.21
 [0.8.20]: https://github.com/fffonion/lua-resty-openssl/compare/0.8.19...0.8.20

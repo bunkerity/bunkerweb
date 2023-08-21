@@ -13,6 +13,7 @@
         "dnsbl"
     ],
     "set": [
+        "sessions",
         "whitelist"
     ],
     "access": [
@@ -30,7 +31,11 @@
         "antibot"
     ],
     "headers": [
-        "cors"
+        "headers",
+        "cors",
+        "reverseproxy",
+        "clientcache",
+        "antibot"
     ],
     "log": [
         "badbheavior",
