@@ -1,7 +1,7 @@
 FROM python:3.11.4-alpine
 
 # Install firefox and geckodriver
-RUN apk add --no-cache --virtual .build-deps curl grep zip && \
+RUN apk add --no-cache --virtual .build-deps curl grep zip wget && \
   apk add --no-cache firefox
 
 # Installing geckodriver for firefox...
