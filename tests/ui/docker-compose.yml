@@ -21,7 +21,7 @@ services:
       www.example.com_USE_UI: "yes"
       www.example.com_SERVE_FILES: "no"
       www.example.com_USE_REVERSE_PROXY: "yes"
-      www.example.com_REVERSE_PROXY_URL: "/admin/"
+      www.example.com_REVERSE_PROXY_URL: "/admin"
       www.example.com_REVERSE_PROXY_HOST: "http://bw-ui:7000"
       www.example.com_INTERCEPTED_ERROR_CODES: "400 405 413 429 500 501 502 503 504"
       CUSTOM_CONF_SERVER_HTTP_port-redirect: "port_in_redirect on;"

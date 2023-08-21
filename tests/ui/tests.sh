@@ -54,7 +54,8 @@ ret=$?
 if [ $ret -ne 0 ] ; then
     docker-compose logs
     echo "❌ Up failed"
+    exit 1
 fi
 
 # Exit
-exit $?
+exit ret
