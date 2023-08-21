@@ -101,6 +101,9 @@ function reset() {
 
       <CardBase class="col-span-12 grid grid-cols-12 relative">
         <PluginStructure :plugins="plugins.setup" :active="plugins.active" />
+        <div class="col-span-12 flex w-full justify-center mt-8 mb-2">
+          <ButtonBase @click="updateConf()" valid>SAVE</ButtonBase>
+        </div>
       </CardBase>
     </div>
   </NuxtLayout>

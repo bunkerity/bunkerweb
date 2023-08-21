@@ -1,5 +1,13 @@
+interface configData {
+  value: string;
+  global: boolean;
+  method: string;
+}
+
 interface config {
-  [key: string]: string;
+  [key: string]: {
+    [key: string]: configData;
+  };
 }
 
 interface multiples {
@@ -15,13 +23,15 @@ export async function addConfToPlugins(plugins: [], config: config) {
 
     Object.entries(settings).forEach(([setting, data]: [string, any]) => {
       // Add config value to config when match
-      if (!!(setting in config)) {
-        data["value"] = config[setting];
+      for (const [confName, confData] of Object.entries(config)) {
+        if (!!(setting in confData)) {
+          data["value"] = confData["value"];
+          // Remove config value if matched (performance)
+          try {
+            delete config[setting];
+          } catch (err) {}
+        }
       }
-      // Remove config value if matched (performance)
-      try {
-        delete config[setting];
-      } catch (err) {}
     });
   });
 
