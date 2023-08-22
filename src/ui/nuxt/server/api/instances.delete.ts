@@ -3,9 +3,9 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   let data;
   try {
-    data = await $fetch(`/instances`, {
+    data = await $fetch(`/instances/${body["hostname"]}`, {
       baseURL: config.apiAddr,
-      method: "POST",
+      method: "DELETE",
       Headers: {
         Authorization: `Bearer ${config.apiToken}`,
       },

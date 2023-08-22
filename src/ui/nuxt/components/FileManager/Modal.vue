@@ -39,17 +39,17 @@ const prefix = computed(() => {
 const emits = defineEmits(["close"]);
 </script>
 <template>
-  <div class="file-manager-modal-container">
-    <div class="file-manager-modal-wrap">
-      <div class="file-manager-modal-card">
+  <div class="modal-container">
+    <div class="modal-wrap">
+      <div class="modal-card">
         <div class="w-full flex justify-between">
-          <p class="file-manager-modal-card-title">
+          <p class="modal-card-title">
             {{ `${props.action} ${props.type}` }}
           </p>
         </div>
         <form class="w-full" id="form-services" method="POST">
-          <div class="file-manager-modal-path">
-            <p class="file-manager-modal-path-text">
+          <div class="modal-path">
+            <p class="modal-path-text">
               {{ prefix }}
             </p>
             <input
@@ -57,15 +57,12 @@ const emits = defineEmits(["close"]);
               name="name"
               id="name"
               :value="oldName"
-              class="file-manager-modal-input"
+              class="modal-input"
               placeholder="path"
               :disabled="props.action === 'view'"
               required
             />
-            <p
-              v-if="props.type === 'file'"
-              class="ml-1 file-manager-modal-path-text"
-            >
+            <p v-if="props.type === 'file'" class="ml-1 modal-path-text">
               .conf
             </p>
           </div>
@@ -81,11 +78,7 @@ const emits = defineEmits(["close"]);
           <input type="hidden" id="_type" :value="props.type" name="type" />
           <textarea class="hidden" id="content" name="content"></textarea>
           <!-- editor-->
-          <div
-            v-if="props.type === 'file'"
-            id="editor"
-            class="file-manager-modal-editor"
-          >
+          <div v-if="props.type === 'file'" id="editor" class="modal-editor">
             {{ props.value }}
           </div>
           <!-- editor-->

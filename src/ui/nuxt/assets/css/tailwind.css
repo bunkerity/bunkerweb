@@ -454,7 +454,7 @@
 }
 
 .card-instance-title {
-  @apply ml-3 mb-1 mt-1 font-bold dark:text-white/90 transition duration-300 ease-in-out;
+  @apply break-words max-w-[80%] ml-3 mb-1 mt-1 font-bold dark:text-white/90 transition duration-300 ease-in-out;
 }
 
 .card-instance-info-container {
@@ -551,35 +551,35 @@
   @apply transition duration-300 ease-in-out text-gray-700 dark:text-gray-300 dark:opacity-80 ml-4 font-bold uppercase;
 }
 
-.file-manager-modal-container {
+.modal-container {
   @apply w-full h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center;
 }
 
-.file-manager-modal-wrap {
+.modal-wrap {
   @apply w-full flex justify-center items-center h-3/4;
 }
 
-.file-manager-modal-card {
+.modal-card {
   @apply mx-1 px-4 py-3 w-full max-w-180 flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
-.file-manager-modal-card-title {
+.modal-card-title {
   @apply dark:text-white mb-2 font-sans font-semibold leading-normal uppercase text-sm;
 }
 
-.file-manager-modal-path {
+.modal-path {
   @apply mb-2 flex flex-wrap justify-start items-center;
 }
 
-.file-manager-modal-path-text {
+.modal-path-text {
   @apply mb-0 dark:text-white/80 text-gray-700/80 text-sm;
 }
 
-.file-manager-modal-input {
+.modal-input {
   @apply dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 sm:ml-1 max-w-40 focus:valid:border-green-500 focus:file:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 dark:disabled:text-gray-300 disabled:text-gray-700;
 }
 
-.file-manager-modal-editor {
+.modal-editor {
   @apply text-base w-full h-48 overflow-hidden overflow-y-auto my-2 border border-gray-300 dark:border-slate-800;
 }
 

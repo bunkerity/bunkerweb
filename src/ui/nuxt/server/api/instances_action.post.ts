@@ -3,13 +3,12 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   let data;
   try {
-    data = await $fetch(`/instances`, {
+    data = await $fetch(`/instances/${body["hostname"]}/${body["operation"]}`, {
       baseURL: config.apiAddr,
       method: "POST",
       Headers: {
         Authorization: `Bearer ${config.apiToken}`,
       },
-      body: body,
     });
   } catch (err) {
     data = Promise.reject(new Error("fail getting data"));
