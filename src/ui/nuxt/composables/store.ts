@@ -6,17 +6,9 @@ interface config {
 export const useConfigStore = defineStore("config", () => {
   const data: config = ref({ global: {}, services: {} });
 
-  function updateConf(
-    context: string,
-    id: string,
-    method: string,
-    value: string
-  ) {
+  function updateConf(context: string, id: string, value: string) {
     if (!context || !id) return;
-    data.value[context][id] = {
-      method: method,
-      value: value,
-    };
+    data.value[context][id] = value;
   }
 
   return { data, updateConf };

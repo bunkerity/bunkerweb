@@ -96,7 +96,7 @@
 }
 
 .select-dropdown-container {
-  @apply z-[20] absolute h-full w-full flex-col w-fit mt-2;
+  @apply z-[20] absolute h-fit w-full flex-col w-fit mt-2;
 }
 
 .select-dropdown-btn {

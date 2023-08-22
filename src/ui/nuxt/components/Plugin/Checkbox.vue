@@ -8,6 +8,7 @@ const props = defineProps({
 
 const checkbox = reactive({
   id: props.setting.id,
+  context: props.setting.context,
   value: props.setting.value || props.setting.default,
   defaultValue: props.setting.default,
   method: props.setting.method || useDefaultMethod(),
@@ -16,12 +17,20 @@ const checkbox = reactive({
 
 // Modes with special method and logic
 const modes = useModes();
+
+const config = useConfigStore();
+config.updateConf(checkbox.context, checkbox.id, checkbox.value);
+
+function updateCheckbox() {
+  checkbox.value = checkbox.value === "yes" ? "no" : "yes";
+  config.updateConf(checkbox.context, checkbox.id, checkbox.value);
+}
 </script>
 
 <template>
   <div class="relative mb-7 md:mb-0 z-10">
     <input
-      @click="checkbox.value = checkbox.value === 'yes' ? 'no' : 'yes'"
+      @click="updateCheckbox()"
       :id="checkbox.id"
       :name="checkbox.id"
       :data-default-method="

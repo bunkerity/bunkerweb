@@ -46,6 +46,18 @@ function reset() {
 }
 
 const config = useConfigStore();
+
+async function sendConf() {
+  const data = JSON.stringify(config.data["global"]);
+  const {
+    data: sendConfList,
+    pending: sendConfPend,
+    error: sendConfErr,
+  } = await useFetch("/api/global_config", {
+    method: "PUT",
+    body: data,
+  });
+}
 </script>
 
 <template>
@@ -106,7 +118,7 @@ const config = useConfigStore();
       <CardBase class="col-span-12 grid grid-cols-12 relative">
         <PluginStructure :plugins="plugins.setup" :active="plugins.active" />
         <div class="col-span-12 flex w-full justify-center mt-8 mb-2">
-          <ButtonBase @click="updateConf()" valid>SAVE</ButtonBase>
+          <ButtonBase @click="sendConf()" valid>SAVE</ButtonBase>
         </div>
       </CardBase>
     </div>

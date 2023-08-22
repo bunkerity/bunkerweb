@@ -8,6 +8,7 @@ const props = defineProps({
 
 const select = reactive({
   id: props.setting.id,
+  context: props.setting.context,
   values: props.setting.select,
   value: props.setting.value || props.setting.default,
   defaultValue: props.setting.default,
@@ -25,8 +26,13 @@ function closeSelect() {
   select.isOpen = false;
 }
 
+const config = useConfigStore();
+config.updateConf(select.context, select.id, select.value);
+
 function changeValue(newValue) {
   select.value = newValue;
+  config.updateConf(select.context, select.id, select.value);
+  console.log(config.data);
   closeSelect();
 }
 
@@ -53,8 +59,11 @@ function closeOutside(e) {
 const selectBtn = ref();
 const selectWidth = ref("");
 
-onMounted(() => {
+onBeforeUpdate(() => {
   selectWidth.value = `${selectBtn.value.clientWidth}px`;
+});
+
+onMounted(() => {
   window.addEventListener("resize", () => {
     try {
       selectWidth.value = `${selectBtn.value.clientWidth}px`;

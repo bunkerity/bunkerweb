@@ -22,21 +22,13 @@ const input = reactive({
 });
 
 const config = useConfigStore();
-config.updateConf(input.context, input.id, input.method, input.value);
+config.updateConf(input.context, input.id, input.value);
 </script>
 
 <template>
   <div class="relative flex items-center">
     <input
-      @input="
-        (e) =>
-          config.updateConf(
-            input.context,
-            input.id,
-            input.method,
-            e.target.value
-          )
-      "
+      @input="(e) => config.updateConf(input.context, input.id, e.target.value)"
       :type="
         input.isPassword
           ? input.showInp
