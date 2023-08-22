@@ -16,7 +16,18 @@ class Config(ConfigCaller):
         self.__logger = setup_logger("Config", getenv("LOG_LEVEL", "INFO"))
         self.__instances = []
         self.__services = []
-        self.__configs = {}
+        self._supported_config_types = [
+            "http",
+            "stream",
+            "server-http",
+            "server-stream",
+            "default-server-http",
+            "modsec",
+            "modsec-crs",
+        ]
+        self.__configs = {
+            config_type: {} for config_type in self._supported_config_types
+        }
         self.__config = {}
 
         self._db = Database(self.__logger)
@@ -44,7 +55,7 @@ class Config(ConfigCaller):
             return True
         return False
 
-    def apply(self, instances, services, configs={}) -> bool:
+    def apply(self, instances, services, configs={}, first=False) -> bool:
         success = True
 
         # update types
@@ -56,21 +67,21 @@ class Config(ConfigCaller):
 
         }
         changes = []
-        if instances != self.__instances:
+        if instances != self.__instances or first:
             self.__instances = instances
             updates["instances"] = True
             changes.append("instances")
-        if services != self.__services:
+        if services != self.__services or first:
             self.__services = services
             updates["services"] = True
-        if configs != self.__configs:
+        if configs != self.__configs or first:
             self.__configs = configs
             updates["configs"] = True
             changes.append("custom_configs")
         if updates["instances"] or updates["services"]:
             old_env = self.__get_full_env()
             self.__config = self.__get_full_env()
-            if self.__config != old_env:
+            if self.__config != old_env or first:
                 updates["config"] = True
                 changes.append("config")
 

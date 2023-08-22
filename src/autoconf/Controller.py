@@ -16,18 +16,10 @@ class Controller(Config):
         ctrl_type: Union[Literal["docker"], Literal["swarm"], Literal["kubernetes"]],
     ):
         super().__init__()
+        self._loaded = False
         self._type = ctrl_type
         self._instances = []
         self._services = []
-        self._supported_config_types = [
-            "http",
-            "stream",
-            "server-http",
-            "server-stream",
-            "default-server-http",
-            "modsec",
-            "modsec-crs",
-        ]
         self._configs = {
             config_type: {} for config_type in self._supported_config_types
         }
@@ -83,12 +75,14 @@ class Controller(Config):
         pass
 
     def _set_autoconf_load_db(self):
-        if not self._db.is_autoconf_loaded():
+        if not self._loaded:
             ret = self._db.set_autoconf_load(True)
             if ret:
                 self._logger.warning(
                     f"Can't set autoconf loaded metadata to true in database: {ret}",
                 )
+            else:
+                self._loaded = True
 
     def get_services(self):
         services = []
