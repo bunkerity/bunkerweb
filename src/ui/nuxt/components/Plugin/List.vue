@@ -3,10 +3,6 @@ const props = defineProps({
   items: {
     type: Array,
     required: true,
-    default: [
-      { name: "Antibot", external: false },
-      { name: "Blacklist", external: false },
-    ],
   },
 });
 </script>

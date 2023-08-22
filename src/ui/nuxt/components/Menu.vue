@@ -5,28 +5,28 @@ const route = useRoute();
 const currPath = route.path;
 
 const navList = [
-  { title: "Home", svg: resolveComponent("MenuSvgHome"), path: "/home" },
+  { title: "Home", svg: resolveComponent("MenuSvgHome"), path: "/admin/home" },
   {
     title: "Instances",
     svg: resolveComponent("MenuSvgInstances"),
-    path: "/instances",
+    path: "/admin/instances",
   },
   {
     title: "Global config",
     svg: resolveComponent("MenuSvgGlobalConf"),
-    path: "/global-config",
+    path: "/admin/global_config",
   },
   {
     title: "Configs",
     svg: resolveComponent("MenuSvgConfigs"),
-    path: "/configs",
+    path: "/admin/configs",
   },
   {
     title: "Plugins",
     svg: resolveComponent("MenuSvgPlugins"),
-    path: "plugins",
+    path: "/admin/plugins",
   },
-  { title: "Jobs", svg: resolveComponent("MenuSvgJobs"), path: "/jobs" },
+  { title: "Jobs", svg: resolveComponent("MenuSvgJobs"), path: "/admin/jobs" },
 ];
 
 const socialList = [

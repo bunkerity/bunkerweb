@@ -30,7 +30,7 @@ const plugins = reactive({
   setup: computed(() => {
     // Filter data to display
     const cloneBase = JSON.parse(JSON.stringify(plugins.base));
-    const filter = getPluginsByFilter(cloneBase, filters);
+    const filter = getSettingsByFilter(cloneBase, filters);
     // Check if prev plugin or no plugin match filter
     plugins.active =
       filter.length !== 0 ? filter[0]["name"] : globalConfList.value[0]["name"];
@@ -104,7 +104,7 @@ async function sendConf() {
           name="keyword"
         >
           <SettingsSelect
-            @inp="(v) => (filters.method = v === 'all' ? '' : v)"
+            @inp="(v) => (filters.method = v)"
             :settings="{
               id: 'keyword',
               value: 'all',
