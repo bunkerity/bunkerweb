@@ -18,9 +18,9 @@ interface multiples {
 
 // Set additionnal data to plugins
 export async function setPluginsData(plugins: []) {
-  plugins.forEach((plugin) => {
+  plugins.forEach((plugin: any) => {
     const settings = plugin["settings"];
-
+    // Replace some settings data
     Object.entries(settings).forEach(([setting, data]: [string, any]) => {
       // Add default method for filter
       if (!("method" in data)) data["method"] = "default";
@@ -135,8 +135,8 @@ export function getSettingsMultipleList(settings: any): object | boolean {
   return multiples;
 }
 
-// Filter plugins
-export function getPluginsByFilter(plugins: [], filters: object): object {
+// Filter plugins by settings
+export function getSettingsByFilter(plugins: [], filters: object): object {
   plugins.forEach((plugin, id) => {
     const settings = plugin["settings"];
 
@@ -144,27 +144,36 @@ export function getPluginsByFilter(plugins: [], filters: object): object {
       // Remove settings that don't match filter
       for (const [key, value] of Object.entries(filters)) {
         // Case no key to check
-        if (!value || (!(key in data) && key !== "keyword")) continue;
-        const filterValue = value.toLowerCase().trim();
-        // Case keyword filter, check multiple keys
+        if ((!(key in data) && key !== "keyword") || value === "all") continue;
         let isMatch = true;
-        if (key === "keyword") {
-          const label = !!("label" in data)
-            ? data["label"].toLowerCase().trim()
-            : "";
-          const help = !!("help" in data)
-            ? data["help"].toLowerCase().trim()
-            : "";
-          isMatch =
-            label.includes(filterValue) || help.includes(filterValue)
-              ? true
-              : false;
+        const checkType = typeof value;
+
+        if (checkType === "string") {
+          const filterValue = value.toLowerCase().trim();
+          // Case keyword filter, check multiple keys
+          if (key === "keyword") {
+            const label = !!("label" in data)
+              ? data["label"].toLowerCase().trim()
+              : "";
+            const help = !!("help" in data)
+              ? data["help"].toLowerCase().trim()
+              : "";
+            isMatch =
+              label.includes(filterValue) || help.includes(filterValue)
+                ? true
+                : false;
+          }
+          // Case individual filter
+          if (key !== "keyword") {
+            const settingValue = data[key].toLowerCase().trim();
+            isMatch = settingValue.includes(filterValue) ? true : false;
+          }
         }
-        // Case individual filter
-        if (key !== "keyword") {
-          const settingValue = data[key].toLowerCase().trim();
-          isMatch = settingValue.includes(filterValue) ? true : false;
+
+        if (checkType === "boolean") {
+          isMatch = data[key] === value ? true : false;
         }
+
         // Result
         if (!isMatch) delete settings[setting];
       }
@@ -176,4 +185,32 @@ export function getPluginsByFilter(plugins: [], filters: object): object {
 
   // Update plugins removing empty index (deleted plugins)
   return plugins.filter(Object);
+}
+
+// Filter plugins
+export function getPluginsByFilter(plugins: any[], filters: object): object {
+  plugins.forEach((plugin: any, id: number) => {
+    for (const [key, value] of Object.entries(filters)) {
+      // Case no key to check
+      if (!(key in plugin) || value === "all") continue;
+      const checkType = typeof value;
+      let isMatch = true;
+
+      if (checkType === "string") {
+        const filterValue = value.toLowerCase().trim();
+        const checkValue = plugin[key].toLowerCase().trim();
+        isMatch = checkValue.includes(filterValue) ? true : false;
+      }
+
+      if (checkType === "boolean") {
+        isMatch = value === plugin[key] ? true : false;
+      }
+
+      // Result
+      if (!isMatch) plugins[id] = "";
+    }
+  });
+
+  // Update plugins removing empty index (deleted plugins)
+  return plugins.filter(String);
 }

@@ -3,6 +3,38 @@ useHead({
   title: "My App",
   meta: [{ name: "description", content: "My amazing site." }],
 });
+
+const {
+  data: pluginList,
+  pending: pluginPend,
+  error: pluginErr,
+} = await useFetch("/api/global_config", {
+  method: "GET",
+});
+
+// Hide / Show settings and plugin base on that filters
+const filters = reactive({
+  name: "",
+  type: "",
+});
+
+// Plugins data to render components
+const plugins = reactive({
+  // Never modify this unless refetch
+  base: pluginList.value,
+  total: pluginList.value.length,
+  internal: pluginList.value.filter((item) => item["external"] === false)
+    .length,
+  external: pluginList.value.filter((item) => item["external"] === true).length,
+  // This run every time reactive data changed (plugin.base or filters)
+  setup: computed(() => {
+    // Filter data to display
+    const cloneBase = JSON.parse(JSON.stringify(plugins.base));
+    const filter = getPluginsByFilter(cloneBase, filters);
+    console.log(filter);
+    return filter;
+  }),
+});
 </script>
 
 <template>
@@ -13,8 +45,9 @@ useHead({
     >
       <CardItemList
         :items="[
-          { label: 'plugins total', value: '12' },
-          { label: 'plugins errors', value: '1' },
+          { label: 'plugins total', value: plugins.total },
+          { label: 'plugins internal', value: plugins.internal },
+          { label: 'plugins external', value: plugins.external },
         ]"
       />
     </CardBase>
@@ -30,6 +63,7 @@ useHead({
     >
       <SettingsLayout class="sm:col-span-6" label="Search" name="keyword">
         <SettingsInput
+          @inp="(v) => (filters.name = v)"
           :settings="{
             id: 'keyword',
             type: 'text',
@@ -40,6 +74,11 @@ useHead({
       </SettingsLayout>
       <SettingsLayout class="sm:col-span-6" label="Plugin type" name="state">
         <SettingsSelect
+          @inp="
+            (v) =>
+              (filters.external =
+                v === 'all' ? 'all' : v === 'external' ? true : false)
+          "
           :settings="{
             id: 'state',
             value: 'all',
@@ -48,8 +87,12 @@ useHead({
         />
       </SettingsLayout>
     </CardBase>
-    <CardBase class="h-fit col-span-12" label="plugin list">
-      <PluginList />
+    <CardBase
+      v-if="!pluginPend && !pluginErr"
+      class="h-fit col-span-12"
+      label="plugin list"
+    >
+      <PluginList :items="plugins.setup" />
     </CardBase>
   </NuxtLayout>
 </template>
