@@ -9,15 +9,48 @@ export async function jobsFormat(jobs: any) {
   return jobsArr;
 }
 
+// Get success number
+export function getJobsSuccessNum(jobs: any[]): number {
+  let count = 0;
+  jobs.forEach((job, id) => {
+    const jobName = Object.keys(job).join();
+    const data = job[jobName];
+    if (data["history"][0]["success"]) count++;
+  });
+  return count;
+}
+
+// Get reload  number
+export function getJobsReloadNum(jobs: any[]): number {
+  let count = 0;
+  jobs.forEach((job, id) => {
+    const jobName = Object.keys(job).join();
+    const data = job[jobName];
+    if (data["reload"]) count++;
+  });
+  return count;
+}
+
+// Format cache data for select
+export function getJobsCacheNames(caches: any[]): string[] {
+  const names: string[] = [];
+  caches.forEach((cache) => {
+    names.push(cache["file_name"]);
+  });
+  return names;
+}
+
 // Filter plugins
 export function getJobsByFilter(jobs: any[], filters: object): object {
+  console.log(jobs);
   jobs.forEach((job, id) => {
     const jobName = Object.keys(job).join();
     const data = job[jobName];
     for (const [key, value] of Object.entries(filters)) {
       // Check specific cases
       if (
-        (!(key in data) && key != "name" && key != "success") ||
+        (!(key in data) && key !== "name" && key !== "success") ||
+        (key === "name" && value === "") ||
         value === "all"
       )
         continue;

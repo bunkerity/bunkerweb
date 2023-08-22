@@ -9,6 +9,20 @@ const props = defineProps({
     required: true,
   },
 });
+
+async function downloadFile(data) {
+  const {
+    data: file,
+    pending: filePend,
+    error: fileErr,
+    refresh: fileRef,
+  } = await useFetch(
+    `/api/cache?job-name=${data.jobName}&file-name=${data.fileName}`,
+    {
+      method: "GET",
+    }
+  );
+}
 </script>
 
 <template>
@@ -19,63 +33,32 @@ const props = defineProps({
       class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5"
     >
       <div
-        v-for="(value, key, index) in item"
-        :data-key="key"
-        :class="[
-          props.positions[index],
-          typeof value === 'boolean' ? 'ml-3.5' : '',
-          'my-1 dark:text-gray-400 text-sm',
-          Array.isArray(value) ? 'mr-6' : '',
-        ]"
+        class="break-words flex items-center col-span-12 grid grid-cols-12 text-sm text-gray-400"
+        v-for="(data, key) in item"
       >
-        <button
-          v-if="value.constructor.name === 'Object'"
-          type="submit"
-          name="run"
-          value="reload"
-          class="valid-btn mx-1 text-xs"
-        >
-          run
-        </button>
-        <p class="m-0" v-if="typeof value === 'string'">
-          {{ value }}
-        </p>
-        <div
-          class="dark:opacity-80 -translate-y-0.5"
-          v-if="typeof value === 'boolean'"
-        >
-          <div
-            class="bg-white w-3 h-3 rounded -z-10 translate-x-1 translate-y-1.5 absolute"
-          ></div>
-          <svg
-            v-if="value"
-            class="fill-green-500 h-5 w-5 z-10"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 512 512"
-          >
-            <path
-              d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
-            />
-          </svg>
-          <svg
-            v-if="!value"
-            class="fill-red-500 h-5 w-5 z-10"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 512 512"
-          >
-            <path
-              d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"
-            />
-          </svg>
+        <span :class="[props.positions[0]]">{{ key }}</span>
+        <span :class="[props.positions[1]]">{{ data["every"] }}</span>
+        <span :class="[props.positions[2]]">{{ "history" }}</span>
+        <div class="translate-x-3" :class="[props.positions[3]]">
+          <JobsSvgState :success="data['reload']" />
         </div>
-        <SettingsSelect
-          v-if="Array.isArray(value)"
-          :setting="{
-            id: 'state',
-            value: 'all',
-            values: ['all', 'true', 'false'],
-          }"
-        />
+        <div class="translate-x-4" :class="[props.positions[4]]">
+          <JobsSvgState :success="data['history'][0]['success']" />
+        </div>
+        <div :class="[props.positions[5]]">
+          <span>{{ data["history"][0]["end_date"] }}</span>
+        </div>
+        <div :class="[props.positions[6]]">
+          <SettingsSelect
+            v-if="data['cache'].length > 0"
+            @inp="(v) => downloadFile({ jobName: key, fileName: v })"
+            :settings="{
+              id: 'cache-files',
+              value: 'select to download',
+              values: getJobsCacheNames(data['cache']),
+            }"
+          />
+        </div>
       </div>
     </li>
     <!-- end job item-->

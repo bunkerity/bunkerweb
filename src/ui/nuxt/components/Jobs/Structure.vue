@@ -1,6 +1,6 @@
 <script setup>
 const props = defineProps({
-  content: {
+  items: {
     type: Array,
     required: true,
   },
@@ -10,26 +10,17 @@ const props = defineProps({
   },
   positions: {
     type: Array,
-    required: false,
+    required: true,
     // Give col-span for each col
-    default: [
-      "col-span-3",
-      "col-span-2",
-      "col-span-1",
-      "col-span-1",
-      "col-span-1",
-      "col-span-3",
-      "col-span-1",
-    ],
   },
 });
 </script>
 
 <template>
   <div
-    class="min-w-[1000px] w-full grid grid-cols-12 rounded p-2 col-span-12 overflow-x-hidden overflow-y-visible"
+    class="min-w-[1100px] w-full grid grid-cols-12 rounded p-2 col-span-12 overflow-x-hidden overflow-y-visible"
   >
     <JobsHeader :items="props.header" :positions="props.positions" />
-    <JobsContent :items="props.content" :positions="props.positions" />
+    <JobsContent :items="props.items" :positions="props.positions" />
   </div>
 </template>

@@ -15,16 +15,18 @@ const {
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
   name: "",
-  reload: "",
-  success: "",
-  every: "",
+  reload: "all",
+  success: "all",
+  every: "all",
 });
 
 // Plugins data to render components
 const jobs = reactive({
   // Never modify this unless refetch
   base: jobsList.value,
-  total: Object.values(jobsList.value).length,
+  total: jobsList.value.length,
+  reload: getJobsReloadNum(jobsList.value),
+  success: getJobsSuccessNum(jobsList.value),
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
     // Filter data to display
@@ -48,7 +50,8 @@ onMounted(() => {
       <CardItemList
         :items="[
           { label: 'jobs total', value: jobs.total },
-          { label: 'jobs errors', value: '1' },
+          { label: 'jobs reload', value: jobs.reload },
+          { label: 'jobs success', value: jobs.success },
         ]"
       />
     </CardBase>
@@ -118,7 +121,27 @@ onMounted(() => {
       class="col-span-12 overflow-x-auto overflow-y-visible"
       label="jobs"
     >
-      <JobsStructure />
+      <JobsStructure
+        :positions="[
+          'col-span-3',
+          'col-span-1',
+          'col-span-1',
+          'col-span-1',
+          'col-span-1',
+          'col-span-2',
+          'col-span-3',
+        ]"
+        :items="jobs.setup"
+        :header="[
+          'Name',
+          'Every',
+          'History',
+          'Reload',
+          'Success',
+          'Last run',
+          'Cache',
+        ]"
+      />
     </CardBase>
   </NuxtLayout>
 </template>
