@@ -1,5 +1,4 @@
-from contextlib import suppress
-from functools import partial
+from functools import partial, wraps
 from glob import glob
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
@@ -10,36 +9,36 @@ from os.path import basename, dirname, join, normpath, sep
 from pathlib import Path
 from shutil import copytree, rmtree
 from signal import SIGINT, SIGTERM, signal
-from socket import gaierror, herror
 from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from tarfile import open as tar_open
-from threading import enumerate as all_threads, Event, Semaphore
+from threading import Thread, enumerate as all_threads, Event, Semaphore
 from time import sleep
 from traceback import format_exc
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Union
 from uuid import uuid4
 from zipfile import ZipFile
-from fastapi.routing import Mount
 
-from kombu import Connection, Queue
+from fastapi.routing import Mount
 from magic import Magic
 from requests import get
 
 
-from .core import ApiConfig
+from .core import CoreConfig
+from .job_scheduler import JobScheduler
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
 from database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
-KOMBU_CONNECTION = None
 DB = None
 HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.healthy")
 SEMAPHORE = Semaphore(cpu_count() or 1)
 
-# Create a stop event
+# Create thread events
 stop_event = Event()
+scheduler_initialized = Event()
+api_started = Event()
 
 
 def stop(status):
@@ -53,8 +52,6 @@ def stop(status):
     HEALTHY_PATH.unlink(missing_ok=True)
     if DB:
         del DB
-    if KOMBU_CONNECTION:
-        KOMBU_CONNECTION.release()
     _exit(status)
 
 
@@ -63,73 +60,43 @@ signal(SIGTERM, partial(stop, 0))  # type: ignore
 
 CORE_PLUGINS_PATH = Path(sep, "usr", "share", "bunkerweb", "core")
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
+CUSTOM_CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
 SETTINGS_PATH = Path(sep, "usr", "share", "bunkerweb", "settings.json")
 CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
+CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
 TMP_ENV_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.env")
 TMP_ENV_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-API_CONFIG = ApiConfig("core", **environ)
+CORE_CONFIG = CoreConfig("core", **environ)
 LOGGER = setup_logger(
     "CORE",
-    API_CONFIG.log_level,
+    CORE_CONFIG.log_level,
 )
 INSTANCES_API_CALLER = ApiCaller()
 
 if (
-    not API_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
-    or int(API_CONFIG.WAIT_RETRY_INTERVAL) < 1
+    not CORE_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
+    or int(CORE_CONFIG.WAIT_RETRY_INTERVAL) < 1
 ):
     LOGGER.error(
-        f"Invalid WAIT_RETRY_INTERVAL provided: {API_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
+        f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
     )
     stop(1)
 
-DB = Database(LOGGER, API_CONFIG.DATABASE_URI, pool=False)
-MQ_PATH = None
+DB = Database(LOGGER, CORE_CONFIG.DATABASE_URI, pool=False)
 
-LOGGER.info(f"🚀 {API_CONFIG.integration} integration detected")
+LOGGER.info(f"🚀 {CORE_CONFIG.integration} integration detected")
 
-if API_CONFIG.MQ_URI.startswith("filesystem:///"):
-    MQ_PATH = Path(API_CONFIG.MQ_URI.replace("filesystem:///", ""))
-    MQ_DATA_OUT_PATH = MQ_PATH.joinpath("data_out")
-    MQ_DATA_IN_PATH = MQ_PATH.joinpath("data_in")
-    MQ_DATA_OUT_PATH.mkdir(parents=True, exist_ok=True)
-    MQ_DATA_IN_PATH.mkdir(parents=True, exist_ok=True)
-
-    KOMBU_CONNECTION = Connection(
-        "filesystem://",
-        transport_options={
-            "data_folder_in": str(MQ_PATH.joinpath("data_in")),
-            "data_folder_out": str(MQ_PATH.joinpath("data_out")),
-        },
-    )
-else:
-    KOMBU_CONNECTION = Connection(API_CONFIG.MQ_URI)
-
-with suppress(ConnectionRefusedError, gaierror, herror):
-    KOMBU_CONNECTION.connect()
-
-retries = 0
-while not KOMBU_CONNECTION.connected and retries < 15:
-    LOGGER.warning(
-        f"Waiting for Kombu to be connected, retrying in {API_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
-    )
-    sleep(int(API_CONFIG.WAIT_RETRY_INTERVAL))
-    with suppress(ConnectionRefusedError, gaierror, herror):
-        KOMBU_CONNECTION.connect()
-    retries += 1
-
-if not KOMBU_CONNECTION.connected:
-    LOGGER.error(
-        f"Coudln't initiate a connection with Kombu with uri {API_CONFIG.MQ_URI}, exiting ..."
-    )
-    stop(1)
-
-KOMBU_CONNECTION.release()
-
-LOGGER.info("✅ Connection to Kombu succeeded")
-
-scheduler_queue = Queue("scheduler", routing_key="scheduler")
+# Instantiate scheduler
+SCHEDULER = JobScheduler(
+    API(f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "bw-scheduler"),
+    env=CORE_CONFIG.model_dump()
+    | {
+        "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
+        "API_TOKEN": CORE_CONFIG.TOKEN,
+    },
+    logger=LOGGER,
+)
 
 
 def dict_to_frozenset(d):
@@ -138,6 +105,53 @@ def dict_to_frozenset(d):
     elif isinstance(d, dict):
         return frozenset((k, dict_to_frozenset(v)) for k, v in d.items())
     return d
+
+
+def update_app_mounts(app):
+    LOGGER.info("Updating app mounts ...")
+
+    for route in app.routes:
+        if isinstance(route, Mount):
+            # remove the subapp from the routes
+            app.routes.remove(route)
+
+    for subinstance_api in glob(
+        str(CORE_PLUGINS_PATH.joinpath("*", "instance_api"))
+    ) + glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "instance_api"))):
+        main_file_path = Path(subinstance_api, "main.py")
+
+        if not main_file_path.is_file():
+            continue
+
+        subinstance_api_plugin = basename(dirname(subinstance_api))
+        LOGGER.info(f"Mounting subinstance_api {subinstance_api_plugin} ...")
+        try:
+            loader = SourceFileLoader(
+                f"{subinstance_api_plugin}_instance_api", str(main_file_path)
+            )
+            subinstance_api_module = loader.load_module()
+            root_path = getattr(
+                subinstance_api_module, "root_path", f"/{subinstance_api_plugin}"
+            )
+
+            if hasattr(subinstance_api_module, "app"):
+                app.mount(
+                    root_path,
+                    getattr(subinstance_api_module, "app"),
+                    basename(dirname(subinstance_api)),
+                )
+
+                LOGGER.info(
+                    f"✅ The subinstance_api for the plugin {subinstance_api_plugin} has been mounted successfully, root path: {root_path}"
+                )
+            else:
+                LOGGER.error(
+                    f"Couldn't mount subinstance_api {subinstance_api_plugin}, no app found"
+                )
+        except Exception as e:
+            LOGGER.error(
+                f"Exception while mounting subinstance_api {subinstance_api_plugin} : {e}"
+            )
 
 
 def install_plugin(
@@ -232,17 +246,16 @@ def install_plugin(
 
 
 def generate_external_plugins(
-    logger: Logger,
     plugins: Optional[List[Dict[str, Any]]] = None,
-    db=None,
     *,
-    original_path: Union[Path, str] = join(sep, "etc", "bunkerweb", "plugins"),
+    original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH,
+    send_plugins: bool = False,
 ):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
 
     # Remove old external plugins files
-    logger.info("Removing old external plugins files ...")
+    LOGGER.info("Removing old external plugins files ...")
     for file in glob(str(original_path.joinpath("*"))):
         file = Path(file)
         if file.is_symlink() or file.is_file():
@@ -250,11 +263,12 @@ def generate_external_plugins(
         elif file.is_dir():
             rmtree(str(file), ignore_errors=True)
 
-    if not plugins and db:
-        plugins = db.get_plugins(external=True, with_data=True)
+    if not plugins:
+        assert DB
+        plugins = DB.get_plugins(external=True, with_data=True)
 
     if plugins:
-        logger.info("Generating new external plugins ...")
+        LOGGER.info("Generating new external plugins ...")
         original_path.mkdir(parents=True, exist_ok=True)
         for plugin in plugins:
             tmp_path = original_path.joinpath(plugin["id"], f"{plugin['name']}.tar.gz")
@@ -268,124 +282,365 @@ def generate_external_plugins(
                 st = Path(job_file).stat()
                 chmod(job_file, st.st_mode | S_IEXEC)
 
-
-def inform_scheduler(data: dict, *, semaphore: Semaphore = SEMAPHORE):
-    semaphore.acquire(timeout=30)
-
-    LOGGER.info(f"📤 Informing the scheduler with data : {data}")
-
-    with KOMBU_CONNECTION:
-        with KOMBU_CONNECTION.default_channel as channel:
-            with KOMBU_CONNECTION.Producer(channel) as producer:
-                producer.publish(
-                    data,
-                    routing_key=scheduler_queue.routing_key,
-                    serializer="json",
-                    exchange=scheduler_queue.exchange,
-                    retry=True,
-                    declare=[scheduler_queue],
-                )
-
-    semaphore.release()
+    if send_plugins:
+        send_to_instances({"plugins"})
 
 
-def update_app_mounts(app):
-    LOGGER.info("Updating app mounts ...")
+def generate_custom_configs(
+    configs: Optional[List[Dict[str, Any]]] = None,
+    *,
+    original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH,
+):
+    if not isinstance(original_path, Path):
+        original_path = Path(original_path)
 
-    for route in app.routes:
-        if isinstance(route, Mount):
-            # remove the subapp from the routes
-            app.routes.remove(route)
+    # Remove old custom configs files
+    LOGGER.info("Removing old custom configs files ...")
+    for file in glob(str(original_path.joinpath("*", "*"))):
+        file = Path(file)
+        if file.is_symlink() or file.is_file():
+            file.unlink()
+        elif file.is_dir():
+            rmtree(str(file), ignore_errors=True)
 
-    for subapi in glob(str(CORE_PLUGINS_PATH.joinpath("*", "api"))) + glob(
-        str(EXTERNAL_PLUGINS_PATH.joinpath("*", "api"))
-    ):
-        main_file_path = Path(subapi, "main.py")
+    if not configs:
+        assert DB
+        configs = DB.get_custom_configs()
 
-        if not main_file_path.is_file():
-            continue
-
-        subapi_plugin = basename(dirname(subapi))
-        LOGGER.info(f"Mounting subapi {subapi_plugin} ...")
-        try:
-            loader = SourceFileLoader(f"{subapi_plugin}_api", str(main_file_path))
-            subapi_module = loader.load_module()
-            root_path = getattr(subapi_module, "root_path", f"/{subapi_plugin}")
-
-            if hasattr(subapi_module, "app"):
-                app.mount(
-                    root_path,
-                    getattr(subapi_module, "app"),
-                    basename(dirname(subapi)),
-                )
-
-                LOGGER.info(
-                    f"✅ The subapi for the plugin {subapi_plugin} has been mounted successfully, root path: {root_path}"
-                )
-            else:
-                LOGGER.error(f"Couldn't mount subapi {subapi_plugin}, no app found")
-        except Exception as e:
-            LOGGER.error(f"Exception while mounting subapi {subapi_plugin} : {e}")
+    if configs:
+        LOGGER.info("Generating new custom configs ...")
+        original_path.mkdir(parents=True, exist_ok=True)
+        for custom_config in configs:
+            tmp_path = original_path.joinpath(
+                custom_config["type"].replace("_", "-"),
+                custom_config["service_id"] or "",
+                f"{custom_config['name']}.conf",
+            )
+            tmp_path.parent.mkdir(parents=True, exist_ok=True)
+            tmp_path.write_bytes(custom_config["data"])
 
 
-def update_api_caller():
-    assert DB
+def generate_config(function: Optional[Callable] = None):
+    @wraps(function)  # type: ignore (if function is None, no error is raised)
+    def wrap(*args, **kwargs):
+        assert DB
 
-    LOGGER.info("Updating API caller ...")
+        nginx_prefix = join(sep, "etc", "nginx")
+        content = ""
+        for k, v in DB.get_config().items():
+            content += f"{k}={v}\n"
+        TMP_ENV_PATH.write_text(content)
 
-    INSTANCES_API_CALLER.apis = [
-        API(
-            f"http://{instance['hostname']}:{instance['port']}",
-            instance["server_name"],
+        # run the generator
+        proc = subprocess_run(
+            [
+                "python3",
+                join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
+                "--settings",
+                str(SETTINGS_PATH),
+                "--templates",
+                join(sep, "usr", "share", "bunkerweb", "confs"),
+                "--output",
+                nginx_prefix,
+                "--variables",
+                str(TMP_ENV_PATH),
+            ],
+            stdin=DEVNULL,
+            stderr=STDOUT,
+            check=False,
         )
-        for instance in DB.get_instances()
-    ]
+
+        if proc.returncode != 0:
+            LOGGER.error(
+                "Config generator failed, configuration will not work as expected..."
+            )
+
+        if function:
+            return function(*args, **kwargs)
+
+    if function:
+        return wrap
+    wrap()
 
 
-def send_plugins_to_instances():  # TODO
-    pass
+def send_plugins_to_instances(api_caller: ApiCaller = None):
+    if not api_caller:
+        assert DB
+        api_caller = ApiCaller(
+            [
+                API(
+                    f"http://{instance['hostname']}:{instance['port']}",
+                    instance["server_name"],
+                )
+                for instance in DB.get_instances()
+            ]
+        )
 
+    generate_external_plugins(original_path=EXTERNAL_PLUGINS_PATH)
+    instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
-def send_config_to_instances():
-    assert DB
-
-    nginx_prefix = join(sep, "etc", "nginx")
-    content = ""
-    for k, v in DB.get_config().items():
-        content += f"{k}={v}\n"
-    TMP_ENV_PATH.write_text(content)
-
-    # run the generator
-    proc = subprocess_run(
-        [
-            "python3",
-            join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
-            "--settings",
-            str(SETTINGS_PATH),
-            "--templates",
-            join(sep, "usr", "share", "bunkerweb", "confs"),
-            "--output",
-            nginx_prefix,
-            "--variables",
-            str(TMP_ENV_PATH),
-        ],
-        stdin=DEVNULL,
-        stderr=STDOUT,
-        check=False,
+    LOGGER.info(
+        f"Sending {EXTERNAL_PLUGINS_PATH} folder to instances {instances_endpoints} ..."
     )
-
-    if proc.returncode != 0:
-        LOGGER.error(
-            "Config generator failed, configuration will not work as expected..."
-        )
-
-    LOGGER.info(f"Sending {nginx_prefix} folder ...")
-    ret = INSTANCES_API_CALLER.send_files(nginx_prefix, "/confs")
+    ret = api_caller.send_files(EXTERNAL_PLUGINS_PATH, "/plugins")
     if not ret:
         LOGGER.error(
-            "Sending nginx configs failed, configuration will not work as expected...",
+            "Not all instances have received the plugins, configuration will not work as expected...",
         )
 
 
-def send_custom_configs_to_instances():  # TODO
-    pass
+@generate_config
+def send_config_to_instances(api_caller: ApiCaller = None):
+    if not api_caller:
+        assert DB
+        api_caller = ApiCaller(
+            [
+                API(
+                    f"http://{instance['hostname']}:{instance['port']}",
+                    instance["server_name"],
+                )
+                for instance in DB.get_instances()
+            ]
+        )
+
+    nginx_prefix = Path(sep, "etc", "nginx")
+    instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
+
+    if not nginx_prefix.is_dir():
+        LOGGER.error(
+            f"{nginx_prefix} is not a directory, configuration will not be sent to instances {instances_endpoints}"
+        )
+        return 1
+
+    LOGGER.info(f"Sending {nginx_prefix} folder to instances {instances_endpoints} ...")
+    ret = api_caller.send_files(nginx_prefix, "/confs")
+    if not ret:
+        LOGGER.error(
+            "Not all instances have received the configuration, configuration will not work as expected...",
+        )
+
+
+def send_custom_configs_to_instances(api_caller: ApiCaller = None):
+    if not api_caller:
+        assert DB
+        api_caller = ApiCaller(
+            [
+                API(
+                    f"http://{instance['hostname']}:{instance['port']}",
+                    instance["server_name"],
+                )
+                for instance in DB.get_instances()
+            ]
+        )
+
+    generate_custom_configs(original_path=CUSTOM_CONFIGS_PATH)
+    instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
+
+    LOGGER.info(
+        f"Sending {CUSTOM_CONFIGS_PATH} folder to instances {instances_endpoints} ..."
+    )
+    ret = api_caller.send_files(CUSTOM_CONFIGS_PATH, "/custom_configs")
+    if not ret:
+        LOGGER.error(
+            "Not all instances have received the custom configs, configuration will not work as expected...",
+        )
+
+
+def send_cache_to_instances(api_caller: ApiCaller = None):
+    if not api_caller:
+        assert DB
+        api_caller = ApiCaller(
+            [
+                API(
+                    f"http://{instance['hostname']}:{instance['port']}",
+                    instance["server_name"],
+                )
+                for instance in DB.get_instances()
+            ]
+        )
+
+    instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
+
+    LOGGER.info(f"Sending {CACHE_PATH} folder to instances {instances_endpoints} ...")
+    ret = api_caller.send_files(CACHE_PATH, "/cache")
+    if not ret:
+        LOGGER.error(
+            "Not all instances have received the cache, configuration will not work as expected...",
+        )
+
+
+def reload_instances(api_caller: ApiCaller = None):
+    if not api_caller:
+        assert DB
+        api_caller = ApiCaller(
+            [
+                API(
+                    f"http://{instance['hostname']}:{instance['port']}",
+                    instance["server_name"],
+                )
+                for instance in DB.get_instances()
+            ]
+        )
+
+    LOGGER.info(
+        f"Reloading instances {', '.join(api.endpoint for api in api_caller.apis)} ..."
+    )
+    ret = api_caller.send_to_apis("POST", "/reload")
+    if not ret:
+        LOGGER.error(
+            "Not all instances have been reloaded, configuration will not work as expected...",
+        )
+
+
+def send_to_instances(
+    types: Union[
+        Literal["all"],
+        set[Literal["plugins", "custom_configs", "config", "cache", "reload"]],
+    ],
+    *,
+    instance_api: Optional[API] = None,
+    caller: Optional[ApiCaller] = None,
+    no_reload: bool = False,
+) -> int:
+    api_caller = caller or (ApiCaller([instance_api]) if instance_api else None)
+
+    if api_caller is None:
+        assert DB
+        api_caller = ApiCaller(
+            [
+                API(
+                    f"http://{instance['hostname']}:{instance['port']}",
+                    instance["server_name"],
+                )
+                for instance in DB.get_instances()
+            ]
+        )
+
+    if types != "all" and not types:
+        LOGGER.error("No type provided, nothing to do...")
+        return 1
+
+    if types == "all" or "plugins" in types:
+        send_plugins_to_instances(api_caller) or None  # type: ignore
+    if types == "all" or "custom_configs" in types:
+        send_custom_configs_to_instances(api_caller) or None  # type: ignore
+    if types == "all" or "config" in types:
+        send_config_to_instances(api_caller) or None  # type: ignore
+    if types == "all" or "cache" in types:
+        send_cache_to_instances(api_caller) or None  # type: ignore
+    if not no_reload and (types == "all" or types):
+        reload_instances(api_caller) or None  # type: ignore
+    return 0
+
+
+def seen_instance(instance_hostname: str):
+    SEMAPHORE.acquire(timeout=30)
+
+    error = DB.seen_instance(instance_hostname)
+    if error:
+        LOGGER.error(
+            f"Couldn't update instance {instance_hostname} last_seen to database: {error}"
+        )
+        return False
+
+    SEMAPHORE.release()
+
+    return True
+
+
+def test_and_send_to_instances(
+    types: Union[
+        Literal["all"],
+        set[Literal["plugins", "custom_configs", "config", "cache", "reload"]],
+    ],
+    instance_apis: Union[set[API], ApiCaller] = None,
+    *,
+    no_reload: bool = False,
+) -> int:
+    if instance_apis is None:
+        assert DB
+        instance_apis = ApiCaller(
+            [
+                API(
+                    f"http://{instance['hostname']}:{instance['port']}",
+                    instance["server_name"],
+                )
+                for instance in DB.get_instances()
+            ]
+        )
+
+    for instance_api in (
+        instance_apis.copy() if isinstance(instance_apis, set) else instance_apis.apis
+    ):
+        sent, err, status, resp = instance_api.request("GET", "ping")
+        if not sent:
+            LOGGER.warning(
+                f"Can't send API request to {instance_api.endpoint}ping : {err}, data will not be sent to it ...",
+            )
+            instance_apis.remove(instance_api)
+            continue
+        else:
+            if status != 200:
+                LOGGER.warning(
+                    f"Error while sending API request to {instance_api.endpoint}ping : status = {resp['status']}, msg = {resp['msg']}, data will not be sent to it ...",
+                )
+                instance_apis.remove(instance_api)
+                continue
+            else:
+                LOGGER.info(
+                    f"Successfully sent API request to {instance_api.endpoint}ping, sending data to it ..."
+                )
+
+        Thread(
+            target=seen_instance,
+            args=(instance_api.endpoint.replace("http://", "").split(":")[0],),
+        ).start()
+
+    if instance_apis if isinstance(instance_apis, set) else instance_apis.apis:
+        api_caller = (
+            instance_apis
+            if isinstance(instance_apis, ApiCaller)
+            else ApiCaller(instance_apis)
+        )
+
+        return send_to_instances(types, caller=api_caller, no_reload=no_reload)
+    return 0
+
+
+def run_jobs():
+    if not api_started.is_set():
+        local_api = API(f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "bw-scheduler")
+        sent = False
+        status = 0
+
+        while not sent or status != 200:
+            sent, err, status, resp = local_api.request(
+                "GET",
+                "/ping",
+                additonal_headers={"Authorization": f"Bearer {CORE_CONFIG.TOKEN}"}
+                if CORE_CONFIG.TOKEN
+                else {},
+            )
+            sleep(1)
+
+    assert DB
+    SCHEDULER.reload(
+        DB.get_config()
+        | {
+            "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
+            "API_TOKEN": CORE_CONFIG.TOKEN,
+        }
+    )
+
+    # Only run jobs once
+    if not SCHEDULER.run_once():
+        LOGGER.error("At least one job in run_once() failed")
+    else:
+        LOGGER.info("All jobs in run_once() were successful")
+
+    if test_and_send_to_instances({"cache"}) != 0:
+        LOGGER.warning(
+            "Can't send data to BunkerWeb instances, configuration will not work as expected"
+        )
+
+    api_started.set()

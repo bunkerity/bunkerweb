@@ -1,9 +1,9 @@
 from typing import Annotated, Dict, List, Literal, Union
-from fastapi import APIRouter, status, Path as fastapi_Path
+from fastapi import APIRouter, BackgroundTasks, status, Path as fastapi_Path
 from fastapi.responses import JSONResponse
 
-from ..models import ErrorMessage, Instance
-from ..dependencies import DB, LOGGER
+from ..models import ErrorMessage, Instance, InstanceWithMethod
+from ..dependencies import DB, LOGGER, test_and_send_to_instances
 from API import API  # type: ignore
 
 router = APIRouter(prefix="/instances", tags=["instances"])
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/instances", tags=["instances"])
 
 @router.get(
     "",
-    response_model=List[Instance],
+    response_model=List[InstanceWithMethod],
     summary="Get BunkerWeb instances",
     response_description="BunkerWeb instances",
 )
@@ -22,15 +22,16 @@ async def get_instances():
     - **hostname**: The hostname of the instance
     - **port**: The port of the instance
     - **server_name**: The server name of the instance
+    - **method**: The method of the instance
     """
     return DB.get_instances()
 
 
-@router.post(
+@router.put(
     "",
     response_model=Dict[Literal["message"], str],
     status_code=status.HTTP_201_CREATED,
-    summary="Add a BunkerWeb instance",
+    summary="Upsert a BunkerWeb instance",
     response_description="Message",
     responses={
         status.HTTP_409_CONFLICT: {
@@ -43,7 +44,9 @@ async def get_instances():
         },
     },
 )
-async def add_instance(instance: Instance) -> JSONResponse:
+async def upsert_instance(
+    instance: Instance, background_tasks: BackgroundTasks, method: str = "manual"
+) -> JSONResponse:
     """
     Add a BunkerWeb instance with the following information:
 
@@ -51,7 +54,7 @@ async def add_instance(instance: Instance) -> JSONResponse:
     - **port**: The port of the instance
     - **server_name**: The server name of the instance
     """
-    error = DB.add_instance(**instance.model_dump())
+    error = DB.upsert_instance(**instance.model_dump(), method=method)
 
     if error == "exists":
         message = f"Instance {instance.hostname} already exists"
@@ -59,24 +62,28 @@ async def add_instance(instance: Instance) -> JSONResponse:
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT, content={"message": message}
         )
-    elif error:
-        LOGGER.error(f"Can't add instance to database : {error}")
+    elif error not in ("created", "updated"):
+        LOGGER.error(f"Can't upsert instance to database : {error}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": error},
         )
 
-    LOGGER.info(f"✅ Instance {instance.hostname} successfully added to database")
+    LOGGER.info(f"✅ Instance {instance.hostname} successfully {error} to database")
+
+    background_tasks.add_task(test_and_send_to_instances, "all", {instance.to_api()})
 
     return JSONResponse(
-        status_code=status.HTTP_201_CREATED,
+        status_code=status.HTTP_201_CREATED
+        if error == "created"
+        else status.HTTP_200_OK,
         content={"message": "Instance successfully added"},
     )
 
 
 @router.get(
     "/{instance_hostname}",
-    response_model=Instance,
+    response_model=InstanceWithMethod,
     summary="Get a BunkerWeb instance",
     response_description="A BunkerWeb instance",
     responses={

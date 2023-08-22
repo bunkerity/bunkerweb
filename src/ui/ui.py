@@ -56,23 +56,27 @@ if __name__ == "__main__":
     from os import _exit, environ
     from regex import match as regex_match
 
-    ui_config = UiConfig("ui", **environ)
+    UI_CONFIG = UiConfig("ui", **environ)
 
     if not regex_match(
         r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$",
-        ui_config.ADMIN_PASSWORD,
+        UI_CONFIG.ADMIN_PASSWORD,
     ):
         _exit(1)
+    elif not UI_CONFIG.LISTEN_PORT.isdigit() or not (
+        1 <= int(UI_CONFIG.LISTEN_PORT) <= 65535
+    ):
+        _exit(2)
 
     data = {
-        "HOST": ui_config.LISTEN_ADDR,
-        "PORT": ui_config.LISTEN_PORT,
-        "NUXT_CORE_ADDR": ui_config.CORE_ADDR,
-        "NUXT_CORE_TOKEN": ui_config.CORE_TOKEN,
-        "NUXT_ADMIN_USERNAME": ui_config.ADMIN_USERNAME,
-        "NUXT_ADMIN_PASSWORD": ui_config.ADMIN_PASSWORD,
-        "NUXT_LOG_LEVEL": ui_config.log_level,
-        "NUXT_REVERSE_PROXY_IPS": ui_config.reverse_proxy_ips,
+        "HOST": UI_CONFIG.LISTEN_ADDR,
+        "PORT": UI_CONFIG.LISTEN_PORT,
+        "NUXT_CORE_ADDR": UI_CONFIG.CORE_ADDR,
+        "NUXT_CORE_TOKEN": UI_CONFIG.CORE_TOKEN,
+        "NUXT_ADMIN_USERNAME": UI_CONFIG.ADMIN_USERNAME,
+        "NUXT_ADMIN_PASSWORD": UI_CONFIG.ADMIN_PASSWORD,
+        "NUXT_LOG_LEVEL": UI_CONFIG.log_level,
+        "NUXT_REVERSE_PROXY_IPS": UI_CONFIG.reverse_proxy_ips,
     }
 
     content = ""

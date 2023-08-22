@@ -3,7 +3,7 @@ from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
 from ..models import ErrorMessage
-from ..dependencies import DB, LOGGER, inform_scheduler
+from ..dependencies import DB, LOGGER, send_to_instances
 
 router = APIRouter(prefix="/config", tags=["config"])
 
@@ -39,9 +39,10 @@ async def update_global_config(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": err}
         )
 
-    background_tasks.add_task(inform_scheduler, {"type": "run_once"})
-
     LOGGER.info("✅ Global config successfully saved to database")
+
+    # background_tasks.add_task(inform_scheduler, {"type": "run_once"}) # TODO: change this
+    background_tasks.add_task(send_to_instances, {"config"})
 
     return JSONResponse(content={"message": "Global config successfully saved"})
 
@@ -89,9 +90,10 @@ async def update_service_config(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": err}
         )
 
-    background_tasks.add_task(inform_scheduler, {"type": "run_once"})
-
     LOGGER.info(f"✅ Service {service_name} config successfully saved to database")
+
+    # background_tasks.add_task(inform_scheduler, {"type": "run_once"}) # TODO: change this
+    background_tasks.add_task(send_to_instances, {"config"})
 
     return JSONResponse(
         content={"message": f"Service {service_name} config successfully saved"}
@@ -138,9 +140,10 @@ async def delete_service_config(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": err}
         )
 
-    background_tasks.add_task(inform_scheduler, {"type": "run_once"})
-
     LOGGER.info(f"✅ Service {service_name} successfully deleted from the database")
+
+    # background_tasks.add_task(inform_scheduler, {"type": "run_once"}) # TODO: change this
+    background_tasks.add_task(send_to_instances, {"config"})
 
     return JSONResponse(
         content={"message": f"Service {service_name} successfully deleted"}

@@ -1,8 +1,0 @@
-certbot==2.6.0
-croniter==1.4.1
-kombu==5.3.1
-maxminddb==2.4.0
-pydantic_settings==2.0.3
-python-magic==0.4.27
-PyYAML==6.0.1
-schedule==1.2.0

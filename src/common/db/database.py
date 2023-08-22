@@ -87,7 +87,7 @@ class Database:
 
         if sqlalchemy_string.startswith("sqlite"):
             Path(
-                normpath(self.DB_STRING_RX.match(sqlalchemy_string).groups()[3])  # type: ignore
+                normpath(self.DB_STRING_RX.match(sqlalchemy_string).groups()[3].split("?")[0])  # type: ignore
             ).parent.mkdir(parents=True, exist_ok=True)
 
         if not self.ALEMBIC_DIR.exists():
@@ -140,7 +140,6 @@ class Database:
             self.__sql_engine = create_engine(
                 sqlalchemy_string,
                 future=True,
-                connect_args={"check_same_thread": False},
                 poolclass=None if pool else NullPool,
                 pool_pre_ping=True,
             )
@@ -2445,7 +2444,7 @@ class Database:
                     metadata.external_plugins_changed = True
 
             try:
-                session.query(Plugins).filter_by(id=plugin_id).delete()
+                session.query(Plugins).filter(Plugins.id == plugin_id).delete()
                 session.commit()
             except BaseException:
                 return format_exc()
@@ -2610,8 +2609,10 @@ class Database:
         service_id: Optional[str] = None,
     ):
         with self.__db_session() as session:
-            session.query(Jobs_cache).filter_by(
-                job_name=job_name, service_id=service_id, file_name=file_name
+            session.query(Jobs_cache).filter(
+                Jobs_cache.job_name == job_name,
+                Jobs_cache.service_id == service_id,
+                Jobs_cache.file_name == file_name,
             ).delete()
 
     def upsert_job_cache(
@@ -2710,7 +2711,9 @@ class Database:
                 )
             ]
 
-    def add_instance(self, hostname: str, port: int, server_name: str) -> str:
+    def add_instance(
+        self, hostname: str, port: int, server_name: str, method: str
+    ) -> str:
         """Add instance."""
         with self.__db_session() as session:
             db_instance = (
@@ -2724,7 +2727,9 @@ class Database:
                 return "exists"
 
             session.add(
-                Instances(hostname=hostname, port=port, server_name=server_name)
+                Instances(
+                    hostname=hostname, port=port, server_name=server_name, method=method
+                )
             )
 
             try:
@@ -2734,14 +2739,14 @@ class Database:
 
         return ""
 
-    def update_instances(self, instances: List[Dict[str, Any]]) -> str:
+    def refresh_instances(self, instances: List[Dict[str, Any]], method: str) -> str:
         """Update instances."""
         to_put = []
         with self.__db_session() as session:
-            session.query(Instances).delete()
+            session.query(Instances).filter(Instances.method == method).delete()
 
             for instance in instances:
-                to_put.append(Instances(**instance))
+                to_put.append(Instances(**instance | {"method": method}))
 
             try:
                 session.add_all(to_put)
@@ -2751,6 +2756,46 @@ class Database:
 
         return ""
 
+    def upsert_instance(
+        self, hostname: str, port: int, server_name: str, method: str
+    ) -> str:
+        """Update instance."""
+        ret = ""
+        with self.__db_session() as session:
+            db_instance = (
+                session.query(Instances)
+                .with_entities(Instances.hostname, Instances.method)
+                .filter_by(hostname=hostname)
+                .first()
+            )
+
+            if db_instance is None:
+                session.add(
+                    Instances(
+                        hostname=hostname,
+                        port=port,
+                        server_name=server_name,
+                        method=method,
+                    )
+                )
+                ret = "created"
+            else:
+                session.query(Instances).filter_by(hostname=hostname).update(
+                    {
+                        Instances.port: port,
+                        Instances.server_name: server_name,
+                        Instances.method: method,
+                    }
+                )
+                ret = "updated"
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ret
+
     def get_instances(self) -> List[Dict[str, Any]]:
         """Get instances."""
         with self.__db_session() as session:
@@ -2759,11 +2804,15 @@ class Database:
                     "hostname": instance.hostname,
                     "port": instance.port,
                     "server_name": instance.server_name,
+                    "method": instance.method,
                 }
                 for instance in (
                     session.query(Instances)
                     .with_entities(
-                        Instances.hostname, Instances.port, Instances.server_name
+                        Instances.hostname,
+                        Instances.port,
+                        Instances.server_name,
+                        Instances.method,
                     )
                     .all()
                 )
@@ -2783,6 +2832,7 @@ class Database:
                 "hostname": instance.hostname,
                 "port": instance.port,
                 "server_name": instance.server_name,
+                "method": instance.method,
             }
 
     def remove_instance(self, instance_hostname: str) -> str:
@@ -2798,7 +2848,33 @@ class Database:
             if db_instance is None:
                 return "not_found"
 
-            session.query(Instances).filter_by(hostname=instance_hostname).delete()
+            session.query(Instances).filter(
+                Instances.hostname == instance_hostname
+            ).delete()
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def seen_instance(self, instance_hostname: str) -> str:
+        """Update last_seen for an instance."""
+        with self.__db_session() as session:
+            db_instance = (
+                session.query(Instances)
+                .with_entities(Instances.hostname)
+                .filter_by(hostname=instance_hostname)
+                .first()
+            )
+
+            if db_instance is None:
+                return "not_found"
+
+            session.query(Instances).filter(
+                Instances.hostname == instance_hostname
+            ).update({Instances.last_seen: datetime.now()})
 
             try:
                 session.commit()

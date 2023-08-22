@@ -21,7 +21,6 @@ CONTEXTS_ENUM = Enum("global", "multisite", name="contexts_enum")
 SETTINGS_TYPES_ENUM = Enum(
     "password", "text", "check", "select", name="settings_types_enum"
 )
-METHODS_ENUM = Enum("ui", "core", "autoconf", "manual", name="methods_enum")
 CUSTOM_CONFIGS_TYPES_ENUM = Enum(
     "http",
     "default_server_http",
@@ -53,7 +52,7 @@ class Plugins(Base):
     version = Column(String(32), nullable=False)
     stream = Column(String(16), nullable=False)
     external = Column(Boolean, default=False, nullable=False)
-    method = Column(METHODS_ENUM, default="manual", nullable=False)
+    method = Column(String(32), default="manual", nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     checksum = Column(String(128), nullable=True)
 
@@ -107,7 +106,7 @@ class Global_values(Base):
     )
     value = Column(String(4096), primary_key=True)
     suffix = Column(Integer, nullable=True, default=0)
-    method = Column(METHODS_ENUM, nullable=False)
+    method = Column(String(32), nullable=False)
 
     setting = relationship("Settings", back_populates="global_value")
 
@@ -116,7 +115,7 @@ class Services(Base):
     __tablename__ = "bw_services"
 
     id = Column(String(64), primary_key=True)
-    method = Column(METHODS_ENUM, nullable=False)
+    method = Column(String(32), nullable=False)
 
     settings = relationship(
         "Services_settings", back_populates="service", cascade="all"
@@ -144,7 +143,7 @@ class Services_settings(Base):
     )
     value = Column(String(4096), nullable=False)
     suffix = Column(Integer, nullable=True, default=0)
-    method = Column(METHODS_ENUM, nullable=False)
+    method = Column(String(32), nullable=False)
 
     service = relationship("Services", back_populates="settings")
     setting = relationship("Settings", back_populates="services")
@@ -242,7 +241,7 @@ class Custom_configs(Base):
     name = Column(String(256), nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     checksum = Column(String(128), nullable=False)
-    method = Column(METHODS_ENUM, nullable=False)
+    method = Column(String(32), nullable=False)
 
     service = relationship("Services", back_populates="custom_configs")
 
@@ -266,6 +265,8 @@ class Instances(Base):
     hostname = Column(String(256), primary_key=True)
     port = Column(Integer, nullable=False)
     server_name = Column(String(256), nullable=False)
+    last_seen = Column(DateTime(timezone=True), nullable=True)
+    method = Column(String(32), nullable=False)
 
 
 class Metadata(Base):

@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-from datetime import datetime
 from functools import cached_property
 from ipaddress import (
     IPv4Address,
@@ -13,7 +12,7 @@ from os import cpu_count, sep
 from os.path import join
 from pathlib import Path
 from sys import path as sys_path
-from typing import Dict, List, Literal, Optional, Union
+from typing import Union
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
@@ -23,14 +22,13 @@ for deps_path in [
         sys_path.append(deps_path)
 
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
 
 from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore (present in /usr/share/bunkerweb/utils/)
 
 CPU_COUNT = cpu_count() or 1
 
 
-class ApiConfig(YamlBaseSettings):
+class CoreConfig(YamlBaseSettings):
     LISTEN_ADDR: str = "0.0.0.0"
     LISTEN_PORT: str = "1337"
     MAX_WORKERS: str = str(CPU_COUNT - 1 if CPU_COUNT > 1 else 1)
@@ -40,7 +38,6 @@ class ApiConfig(YamlBaseSettings):
     WHITELIST: Union[str, set] = "127.0.0.1"
     CHECK_TOKEN: str = "yes"
     TOKEN: str = "changeme"
-    MQ_URI: str = "filesystem:////var/lib/bunkerweb/mq"
     BUNKERWEB_INSTANCES: str = ""
 
     LOG_LEVEL: str = "info"
@@ -135,28 +132,26 @@ class ApiConfig(YamlBaseSettings):
 if __name__ == "__main__":
     from os import _exit, environ
 
-    API_CONFIG = ApiConfig("core", **environ)
+    CORE_CONFIG = CoreConfig("core", **environ)
 
-    if (
-        not API_CONFIG.LISTEN_PORT.isdigit()
-        or int(API_CONFIG.LISTEN_PORT) < 1
-        or int(API_CONFIG.LISTEN_PORT) > 65535
+    if not CORE_CONFIG.LISTEN_PORT.isdigit() or not (
+        1 <= int(CORE_CONFIG.LISTEN_PORT) <= 65535
     ):
         _exit(1)
-    elif not API_CONFIG.MAX_WORKERS.isdigit() or int(API_CONFIG.MAX_WORKERS) < 1:
+    elif not CORE_CONFIG.MAX_WORKERS.isdigit() or int(CORE_CONFIG.MAX_WORKERS) < 1:
         _exit(2)
-    elif not API_CONFIG.MAX_THREADS.isdigit() or int(API_CONFIG.MAX_THREADS) < 1:
+    elif not CORE_CONFIG.MAX_THREADS.isdigit() or int(CORE_CONFIG.MAX_THREADS) < 1:
         _exit(3)
 
     data = {
-        "LISTEN_ADDR": API_CONFIG.LISTEN_ADDR,
-        "LISTEN_PORT": API_CONFIG.LISTEN_PORT,
-        "MAX_WORKERS": API_CONFIG.MAX_WORKERS,
-        "MAX_THREADS": API_CONFIG.MAX_THREADS,
-        "LOG_LEVEL": API_CONFIG.LOG_LEVEL,
-        "AUTOCONF_MODE": API_CONFIG.AUTOCONF_MODE,
-        "KUBERNETES_MODE": API_CONFIG.KUBERNETES_MODE,
-        "SWARM_MODE": API_CONFIG.SWARM_MODE,
+        "LISTEN_ADDR": CORE_CONFIG.LISTEN_ADDR,
+        "LISTEN_PORT": CORE_CONFIG.LISTEN_PORT,
+        "MAX_WORKERS": CORE_CONFIG.MAX_WORKERS,
+        "MAX_THREADS": CORE_CONFIG.MAX_THREADS,
+        "LOG_LEVEL": CORE_CONFIG.LOG_LEVEL,
+        "AUTOCONF_MODE": CORE_CONFIG.AUTOCONF_MODE,
+        "KUBERNETES_MODE": CORE_CONFIG.KUBERNETES_MODE,
+        "SWARM_MODE": CORE_CONFIG.SWARM_MODE,
     }
 
     content = ""

@@ -4,7 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, File, Form, status
 from fastapi.responses import JSONResponse
 
 from ..models import CacheFileDataModel, CacheFileModel, ErrorMessage, Job, Job_cache
-from ..dependencies import DB, LOGGER, inform_scheduler
+from ..dependencies import DB, LOGGER
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -104,9 +104,9 @@ async def run_job(job_name: str, background_tasks: BackgroundTasks):
             content={"message": f"Job {job_name} not found"},
         )
 
-    background_tasks.add_task(
-        inform_scheduler, {"type": "run_single", "job_name": job_name}
-    )
+    # background_tasks.add_task(
+    #     inform_scheduler, {"type": "run_single", "job_name": job_name}
+    # ) # TODO: change this
 
     return JSONResponse(content={"message": "Successfully sent task to scheduler"})
 
@@ -149,7 +149,9 @@ async def get_cache(
         {}
         | (
             {
-                "last_update": cached_file.last_update.timestamp(),
+                "last_update": cached_file.last_update.timestamp()
+                if cached_file.last_update
+                else None,
                 "checksum": cached_file.checksum,
             }
             if data.with_info

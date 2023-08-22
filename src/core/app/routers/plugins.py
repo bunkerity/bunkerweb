@@ -10,7 +10,6 @@ from ..dependencies import (
     LOGGER,
     EXTERNAL_PLUGINS_PATH,
     generate_external_plugins,
-    inform_scheduler,
     update_app_mounts,
 )
 
@@ -68,9 +67,12 @@ async def add_plugin(
             content={"message": error},
         )
 
-    background_tasks.add_task(inform_scheduler, {"type": "run_once"})
+    # background_tasks.add_task(inform_scheduler, {"type": "run_once"}) # TODO: change this
     background_tasks.add_task(
-        generate_external_plugins, LOGGER, None, DB, original_path=EXTERNAL_PLUGINS_PATH
+        generate_external_plugins,
+        None,
+        original_path=EXTERNAL_PLUGINS_PATH,
+        send_plugins=True,
     )
     background_tasks.add_task(update_app_mounts, router)
 
@@ -129,9 +131,12 @@ async def update_plugin(
             content={"message": error},
         )
 
-    background_tasks.add_task(inform_scheduler, {"type": "run_once"})
+    # background_tasks.add_task(inform_scheduler, {"type": "run_once"}) # TODO: change this
     background_tasks.add_task(
-        generate_external_plugins, LOGGER, None, DB, original_path=EXTERNAL_PLUGINS_PATH
+        generate_external_plugins,
+        None,
+        original_path=EXTERNAL_PLUGINS_PATH,
+        send_plugins=True,
     )
     background_tasks.add_task(update_app_mounts, router)
 
@@ -187,9 +192,12 @@ async def delete_plugin(
             content={"message": error},
         )
 
-    background_tasks.add_task(inform_scheduler, {"type": "run_once"})
+    # background_tasks.add_task(inform_scheduler, {"type": "run_once"}) # TODO: change this
     background_tasks.add_task(
-        generate_external_plugins, LOGGER, None, DB, original_path=EXTERNAL_PLUGINS_PATH
+        generate_external_plugins,
+        None,
+        original_path=EXTERNAL_PLUGINS_PATH,
+        send_plugins=True,
     )
     background_tasks.add_task(update_app_mounts, router)
 

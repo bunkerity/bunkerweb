@@ -3,11 +3,23 @@ from typing import Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
+from API import API  # type: ignore
+
 
 class Instance(BaseModel):
     hostname: str = Field(examples=["bunkerweb-1"])
     port: int = Field(examples=[5000])
     server_name: str = Field(examples=["bwapi"])
+
+    def to_api(self) -> API:
+        return API(
+            f"http://{self.hostname}:{self.port}",
+            self.server_name,
+        )
+
+
+class InstanceWithMethod(Instance):
+    method: str = Field(examples=["static"])
 
 
 class Plugin(BaseModel):
@@ -155,8 +167,8 @@ class Job(BaseModel):
 
 
 class Job_cache(BaseModel):
-    last_update: str = Field(None, examples=["1609459200.0"])
-    checksum: str = Field(
+    last_update: Optional[float] = Field(None, examples=["1609459200.0"])
+    checksum: Optional[str] = Field(
         None,
         examples=[
             "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"
@@ -179,7 +191,7 @@ class CacheFileDataModel(CacheFileModel):
 
 
 class CacheFileInfoModel(CacheFileModel):
-    last_update: datetime
+    last_update: Union[datetime, float]
     checksum: Optional[str] = None
 
 

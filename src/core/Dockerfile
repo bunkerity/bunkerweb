@@ -1,13 +1,14 @@
 FROM python:3.11.4-alpine AS builder
 
 # Install temporary requirements for the dependencies
-RUN apk add --no-cache --virtual .build-deps g++ gcc
+RUN apk add --no-cache --virtual .build-deps g++ gcc build-base linux-headers
 
 WORKDIR /usr/share/bunkerweb
 
 # Copy python requirements
 COPY src/core/requirements.txt /tmp/req/requirements.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
+COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.3
 
 RUN mkdir -p deps && \
   cat /tmp/req/requirements.txt* > deps/requirements.txt && \
@@ -69,9 +70,15 @@ RUN apk add --no-cache bash jq grep libmagic && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:core /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
+  find core/*/jobs/* -type f -exec chmod 750 {} \; && \
   chmod 750 cli/main.py core/app/*.py core/app/routers/*.py core/entrypoint.sh helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
   chmod 660 INTEGRATION && \
   chown root:core INTEGRATION
+
+COPY --chown=root:core src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
+COPY --chown=root:core src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
+
+RUN chmod 770 /var/tmp/bunkerweb/asn.mmdb /var/tmp/bunkerweb/country.mmdb
 
 # Fix CVEs
 RUN apk add "libcrypto3>=3.1.1-r2" "libssl3>=3.1.1-r2"

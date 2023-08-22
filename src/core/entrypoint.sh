@@ -12,6 +12,8 @@ function trap_exit() {
 }
 trap "trap_exit" TERM INT QUIT
 
+# TODO handle reload
+
 if [ -f /var/run/bunkerweb/core.pid ] ; then
 	rm -f /var/run/bunkerweb/core.pid
 fi

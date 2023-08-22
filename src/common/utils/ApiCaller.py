@@ -19,17 +19,20 @@ from logger import setup_logger
 
 
 class ApiCaller:
-    def __init__(self, apis: Optional[List[API]] = None):
+    def __init__(self, apis: Optional[Union[List[API], set[API]]] = None):
         self.__apis = apis or []
         self.__logger = setup_logger("Api", getenv("LOG_LEVEL", "INFO"))
 
     @property
-    def apis(self) -> List[API]:
-        return self.__apis
+    def apis(self) -> Union[List[API], set[API]]:
+        return self.__apis.copy()
 
     @apis.setter
-    def apis(self, apis: List[API]):
+    def apis(self, apis: Union[List[API], set[API]]):
         self.__apis = apis
+
+    def remove(self, api: API):
+        self.__apis.remove(api)
 
     def send_to_apis(
         self,

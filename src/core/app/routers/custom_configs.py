@@ -1,5 +1,5 @@
 from typing import Dict, List, Literal
-from fastapi import APIRouter, status
+from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
 from ..models import (
@@ -8,7 +8,7 @@ from ..models import (
     CustomConfigNameModel,
     ErrorMessage,
 )
-from ..dependencies import DB, LOGGER
+from ..dependencies import DB, LOGGER, send_to_instances
 
 router = APIRouter(prefix="/custom_configs", tags=["custom_configs"])
 
@@ -42,7 +42,9 @@ async def get_custom_configs():
         },
     },
 )
-async def update_custom_config(custom_config: CustomConfigNameModel, method: str):
+async def update_custom_config(
+    custom_config: CustomConfigNameModel, method: str, background_tasks: BackgroundTasks
+):
     """Update a custom config"""
     err = DB.upsert_custom_config(custom_config.model_dump() | {"method": method})
 
@@ -67,7 +69,9 @@ async def update_custom_config(custom_config: CustomConfigNameModel, method: str
             content={"message": err},
         )
 
-    # TODO: add a background task that sends the custom configs to the instances
+    LOGGER.info(f"✅ Custom config {custom_config.name} {err} to database")
+
+    background_tasks.add_task(send_to_instances, {"custom_configs"})
 
     return JSONResponse(
         status_code=status.HTTP_200_OK if err == "updated" else status.HTTP_201_CREATED,
@@ -96,7 +100,10 @@ async def update_custom_config(custom_config: CustomConfigNameModel, method: str
     },
 )
 async def delete_custom_config(
-    custom_config_name: str, custom_config: CustomConfigModel, method: str
+    custom_config_name: str,
+    custom_config: CustomConfigModel,
+    method: str,
+    background_tasks: BackgroundTasks,
 ):
     """Update a custom config"""
     err = DB.delete_custom_config(
@@ -130,7 +137,9 @@ async def delete_custom_config(
             content={"message": err},
         )
 
-    # TODO: add a background task that sends the custom configs to the instances
+    LOGGER.info(f"✅ Custom config {custom_config_name} deleted from database")
+
+    background_tasks.add_task(send_to_instances, {"custom_configs"})
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
