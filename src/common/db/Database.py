@@ -329,8 +329,8 @@ class Database:
             except BaseException:
                 return format_exc()
 
-    def checked_changes(self, changes: Optional[List[str]] = None) -> str:
-        """Set that the config, the custom configs, the plugins and instances didn't change"""
+    def checked_changes(self, changes: Optional[List[str]] = None, value: Optional[bool] = False) -> str:
+        """Set changed bit for config, custom configs, instances and plugins"""
         changes = changes or [
             "config",
             "custom_configs",
@@ -345,13 +345,13 @@ class Database:
                     return "The metadata are not set yet, try again"
 
                 if "config" in changes:
-                    metadata.config_changed = False
+                    metadata.config_changed = value
                 if "custom_configs" in changes:
-                    metadata.custom_configs_changed = False
+                    metadata.custom_configs_changed = value
                 if "external_plugins" in changes:
-                    metadata.external_plugins_changed = False
+                    metadata.external_plugins_changed = value
                 if "instances" in changes:
-                    metadata.instances_changed = False
+                    metadata.instances_changed = value
                 session.commit()
             except BaseException:
                 return format_exc()
@@ -470,7 +470,7 @@ class Database:
 
         return True, ""
 
-    def save_config(self, config: Dict[str, Any], method: str) -> str:
+    def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> str:
         """Save the config in the database"""
         to_put = []
         with self.__db_session() as session:
@@ -716,12 +716,13 @@ class Database:
                                 Global_values.suffix == suffix,
                             ).update({Global_values.value: value})
 
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    if not metadata.first_config_saved:
-                        metadata.first_config_saved = True
-                    metadata.config_changed = True
+            if changed:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        if not metadata.first_config_saved:
+                            metadata.first_config_saved = True
+                        metadata.config_changed = True
 
             try:
                 session.add_all(to_put)
@@ -732,7 +733,7 @@ class Database:
         return ""
 
     def save_custom_configs(
-        self, custom_configs: List[Dict[str, Tuple[str, List[str]]]], method: str
+        self, custom_configs: List[Dict[str, Tuple[str, List[str]]]], method: str, changed: Optional[bool] = True
     ) -> str:
         """Save the custom configs in the database"""
         message = ""
@@ -813,11 +814,11 @@ class Database:
                             else {}
                         )
                     )
-
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    metadata.custom_configs_changed = True
+            if changed:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        metadata.custom_configs_changed = True
 
             try:
                 session.add_all(to_put)
@@ -1749,7 +1750,7 @@ class Database:
 
         return ""
 
-    def update_instances(self, instances: List[Dict[str, Any]]) -> str:
+    def update_instances(self, instances: List[Dict[str, Any]], changed: Optional[bool] = True) -> str:
         """Update instances."""
         to_put = []
         with self.__db_session() as session:
@@ -1764,10 +1765,11 @@ class Database:
                     )
                 )
 
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    metadata.instances_changed = True
+            if changed:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        metadata.instances_changed = True
 
             try:
                 session.add_all(to_put)
