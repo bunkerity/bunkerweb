@@ -43,7 +43,7 @@ class LinuxTest(Test):
             if distro in ("ubuntu", "debian"):
                 LinuxTest.docker_exec(
                     distro,
-                    "DEBIAN_FRONTEND=noninteractive apt-get install -y php-fpm unzip",
+                    "DEBIAN_FRONTEND=noninteractive apt-get install -y php-fpm unzip ; echo force-bad-version >> /etc/dpkg/dpkg.cfg",
                 )
                 if distro == "ubuntu":
                     LinuxTest.docker_cp(
