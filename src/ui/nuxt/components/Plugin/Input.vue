@@ -8,6 +8,7 @@ const props = defineProps({
 
 const input = reactive({
   id: props.setting.id,
+  context: props.setting.context,
   type: props.setting.type,
   value: props.setting.value || props.setting.default,
   defaultValue: props.setting.default,
@@ -19,11 +20,23 @@ const input = reactive({
   isPassword: props.setting.isPassword || false,
   showInp: false,
 });
+
+const config = useConfigStore();
+config.updateConf(input.context, input.id, input.method, input.value);
 </script>
 
 <template>
   <div class="relative flex items-center">
     <input
+      @input="
+        (e) =>
+          config.updateConf(
+            input.context,
+            input.id,
+            input.method,
+            e.target.value
+          )
+      "
       :type="
         input.isPassword
           ? input.showInp

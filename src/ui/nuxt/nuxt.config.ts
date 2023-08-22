@@ -9,7 +9,7 @@ export default defineNuxtConfig({
     adminUsername: "admin",
     adminPassword: "changeme",
   },
-  modules: ["@nuxtjs/tailwindcss"],
+  modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt"],
   tailwindcss: {
     config: {
       content: [

@@ -15,7 +15,7 @@ const props = defineProps({
     class="col-span-12 max-h-[65vh] overflow-y-auto overflow-x-hidden"
     v-for="plugin in props.plugins"
   >
-    <PluginContainer :id="plugin.id" v-if="plugin.name === props.active">
+    <PluginContainer :id="plugin.id" v-show="plugin.name === props.active">
       <PluginHeader
         :id="plugin.id"
         :name="plugin.name"
