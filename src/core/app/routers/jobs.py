@@ -4,7 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, File, Form, status
 from fastapi.responses import JSONResponse
 
 from ..models import CacheFileDataModel, CacheFileModel, ErrorMessage, Job, Job_cache
-from ..dependencies import DB, LOGGER
+from ..dependencies import DB, LOGGER, run_job as deps_run_job
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -104,9 +104,7 @@ async def run_job(job_name: str, background_tasks: BackgroundTasks):
             content={"message": f"Job {job_name} not found"},
         )
 
-    # background_tasks.add_task(
-    #     inform_scheduler, {"type": "run_single", "job_name": job_name}
-    # ) # TODO: change this
+    background_tasks.add_task(deps_run_job, job_name)
 
     return JSONResponse(content={"message": "Successfully sent task to scheduler"})
 
@@ -191,7 +189,7 @@ async def update_cache(
     """
     Upload a file to the cache.
     """
-    # TODO add a background task that sends a request to the instances to update the cache
+    # TODO add a background task that sends a request to the instances to update the cache when soft reload will be available
     resp = DB.upsert_job_cache(
         job_name,
         file_name,
@@ -233,7 +231,7 @@ async def delete_cache(job_name: str, file_name: str, data: CacheFileModel):
     """
     Delete a file from the cache.
     """
-    # TODO add a background task that sends a request to the instances to delete the cache
+    # TODO add a background task that sends a request to the instances to delete the cache when soft reload will be available
     err = DB.delete_job_cache(job_name, file_name, service_id=data.service_id)
 
     if err:

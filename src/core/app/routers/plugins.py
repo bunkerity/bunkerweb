@@ -10,6 +10,8 @@ from ..dependencies import (
     LOGGER,
     EXTERNAL_PLUGINS_PATH,
     generate_external_plugins,
+    run_jobs,
+    send_to_instances,
     update_app_mounts,
 )
 
@@ -67,13 +69,13 @@ async def add_plugin(
             content={"message": error},
         )
 
-    # background_tasks.add_task(inform_scheduler, {"type": "run_once"}) # TODO: change this
     background_tasks.add_task(
         generate_external_plugins,
         None,
         original_path=EXTERNAL_PLUGINS_PATH,
-        send_plugins=True,
     )
+    background_tasks.add_task(run_jobs)
+    background_tasks.add_task(send_to_instances, {"plugins", "cache"})
     background_tasks.add_task(update_app_mounts, router)
 
     LOGGER.info(f"✅ Plugin {plugin.id} successfully added to database")
@@ -131,13 +133,13 @@ async def update_plugin(
             content={"message": error},
         )
 
-    # background_tasks.add_task(inform_scheduler, {"type": "run_once"}) # TODO: change this
     background_tasks.add_task(
         generate_external_plugins,
         None,
         original_path=EXTERNAL_PLUGINS_PATH,
-        send_plugins=True,
     )
+    background_tasks.add_task(run_jobs)
+    background_tasks.add_task(send_to_instances, {"plugins", "cache"})
     background_tasks.add_task(update_app_mounts, router)
 
     LOGGER.info(f"✅ Plugin {plugin.id} successfully updated to database")
@@ -192,13 +194,13 @@ async def delete_plugin(
             content={"message": error},
         )
 
-    # background_tasks.add_task(inform_scheduler, {"type": "run_once"}) # TODO: change this
     background_tasks.add_task(
         generate_external_plugins,
         None,
         original_path=EXTERNAL_PLUGINS_PATH,
-        send_plugins=True,
     )
+    background_tasks.add_task(run_jobs)
+    background_tasks.add_task(send_to_instances, {"plugins", "cache"})
     background_tasks.add_task(update_app_mounts, router)
 
     LOGGER.info(f"✅ Plugin {plugin_id} successfully deleted from database")

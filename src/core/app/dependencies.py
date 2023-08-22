@@ -249,7 +249,6 @@ def generate_external_plugins(
     plugins: Optional[List[Dict[str, Any]]] = None,
     *,
     original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH,
-    send_plugins: bool = False,
 ):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
@@ -281,9 +280,6 @@ def generate_external_plugins(
             for job_file in glob(join(str(tmp_path.parent), "jobs", "*")):
                 st = Path(job_file).stat()
                 chmod(job_file, st.st_mode | S_IEXEC)
-
-    if send_plugins:
-        send_to_instances({"plugins"})
 
 
 def generate_custom_configs(
@@ -644,3 +640,13 @@ def run_jobs():
         )
 
     api_started.set()
+
+
+def run_job(job_name: str):
+    SCHEDULER.run_single(job_name)
+
+    # TODO: remove this when the soft reload will be available
+    if test_and_send_to_instances({"cache"}) != 0:
+        LOGGER.warning(
+            "Can't send data to BunkerWeb instances, configuration will not work as expected"
+        )

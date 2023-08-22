@@ -452,6 +452,7 @@ if CORE_CONFIG.integration in ("Linux", "Docker"):
 
         LOGGER.info("✅ Config successfully saved to database")
 
+    LOGGER.info("Executing scheduler ...")
     scheduler_initialized.set()
     threads = [
         Thread(
