@@ -14,6 +14,15 @@ export const useMethodList = () =>
   useState<string[]>("methodList", () => ["all", "ui", "default", "scheduler"]);
 
 // Jobs page
+export const useIntervalList = () =>
+  useState<string[]>("intervalList", () => [
+    "all",
+    "once",
+    "hour",
+    "day",
+    "week",
+  ]);
+
 export const useSuccessFilter = () =>
   useState<string>("successFilter", () => "all");
 export const useEveryFilter = () =>
