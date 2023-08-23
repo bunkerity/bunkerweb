@@ -39,6 +39,54 @@ const jobs = reactive({
 onMounted(() => {
   console.log(jobs.base);
 });
+
+const positions = [
+  "col-span-2",
+  "col-span-1",
+  "col-span-1",
+  "col-span-1",
+  "col-span-1",
+  "col-span-2",
+  "col-span-3",
+  "col-span-1",
+];
+
+const header = [
+  "Name",
+  "Every",
+  "History",
+  "Reload",
+  "Success",
+  "Last run",
+  "Cache",
+  "Run",
+];
+
+async function downloadFile(data) {
+  const {
+    data: file,
+    pending: filePend,
+    error: fileErr,
+    refresh: fileRef,
+  } = await useFetch(
+    `/api/cache?job-name=${data["job-name"]}&file-name=${data["file-name"]}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+async function runJob(data) {
+  const {
+    data: file,
+    pending: filePend,
+    error: fileErr,
+    refresh: fileRef,
+  } = await useFetch(`/api/jobs-run`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
 </script>
 
 <template>
@@ -121,29 +169,15 @@ onMounted(() => {
       class="col-span-12 max-w-[1200px] overflow-x-auto overflow-y-visible"
       label="jobs"
     >
-      <JobsStructure
-        :positions="[
-          'col-span-2',
-          'col-span-1',
-          'col-span-1',
-          'col-span-1',
-          'col-span-1',
-          'col-span-2',
-          'col-span-3',
-          'col-span-1',
-        ]"
-        :items="jobs.setup"
-        :header="[
-          'Name',
-          'Every',
-          'History',
-          'Reload',
-          'Success',
-          'Last run',
-          'Cache',
-          'Run',
-        ]"
-      />
+      <JobsStructure>
+        <JobsHeader :header="header" :positions="positions" />
+        <JobsContent
+          @cache="(v) => downloadFile(v)"
+          @run="(v) => runJob(v)"
+          :items="jobs.setup"
+          :positions="positions"
+        />
+      </JobsStructure>
     </CardBase>
   </NuxtLayout>
 </template>

@@ -1,6 +1,6 @@
 <script setup>
 const props = defineProps({
-  items: {
+  header: {
     type: Array,
     required: true,
   },
@@ -14,7 +14,7 @@ const props = defineProps({
 <template>
   <ul class="w-full col-span-12 grid grid-cols-12">
     <li
-      v-for="(item, id) in props.items"
+      v-for="(item, id) in props.header"
       :class="[
         props.positions[id],
         id === props.positions.length - 1 ? 'pl-5' : '',
