@@ -12,6 +12,14 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  method: {
+    type: String,
+    required: true,
+  },
+  port: {
+    type: String,
+    required: true,
+  },
   type: {
     type: String,
     required: true,
@@ -24,7 +32,11 @@ const props = defineProps({
 
 const instance = reactive({
   // Info list to render
-  info: [{ label: "hostname", text: props.hostname }],
+  info: [
+    { label: "hostname", text: props.hostname },
+    { label: "method", text: props.method },
+    { label: "port", text: props.port },
+  ],
 });
 
 const emits = defineEmits(["action", "delete"]);
@@ -73,7 +85,10 @@ const emits = defineEmits(["action", "delete"]);
         </div>
       </div>
       <div class="card-instance-actions-container">
-        <button
+        <ButtonBase
+          color="edit"
+          size="xl"
+          class="text-xs mx-1"
           @click="
             $emit('action', {
               hostname: props.hostname,
@@ -83,11 +98,13 @@ const emits = defineEmits(["action", "delete"]);
           v-if="props.health"
           name="operation"
           :value="props.type === 'local' ? 'restart' : 'reload'"
-          class="edit-btn mx-1 text-xs"
         >
           {{ props.type === "local" ? "restart" : "reload" }}
-        </button>
-        <button
+        </ButtonBase>
+        <ButtonBase
+          :color="props.health ? 'delete' : 'valid'"
+          size="xl"
+          class="text-xs mx-1"
           @click="
             $emit('action', {
               hostname: props.hostname,
@@ -96,10 +113,9 @@ const emits = defineEmits(["action", "delete"]);
           "
           name="operation"
           :value="props.health ? 'stop' : 'start'"
-          :class="['mx-1 text-xs', props.health ? 'delete-btn' : 'valid-btn']"
         >
           {{ props.health ? "stop" : "start" }}
-        </button>
+        </ButtonBase>
       </div>
     </form>
   </div>

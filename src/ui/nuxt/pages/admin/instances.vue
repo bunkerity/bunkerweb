@@ -17,7 +17,7 @@ async function updateInstance(data) {
     data: instAction,
     pending: instActionPend,
     error: instActionErr,
-  } = await useFetch(`/api/instances_action`, {
+  } = await useFetch(`/api/instances-action`, {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -52,6 +52,8 @@ function openDelModal(hostname) {
       :id="instance.server_name"
       :serverName="instance.server_name"
       :hostname="instance.hostname"
+      :port="instance.port"
+      :method="instance.method"
       _type="unknown"
       :health="true"
       csrfToken="random"

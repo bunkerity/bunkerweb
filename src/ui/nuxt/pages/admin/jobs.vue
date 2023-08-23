@@ -118,18 +118,19 @@ onMounted(() => {
       </SettingsLayout>
     </CardBase>
     <CardBase
-      class="col-span-12 overflow-x-auto overflow-y-visible"
+      class="col-span-12 max-w-[1200px] overflow-x-auto overflow-y-visible"
       label="jobs"
     >
       <JobsStructure
         :positions="[
-          'col-span-3',
+          'col-span-2',
           'col-span-1',
           'col-span-1',
           'col-span-1',
           'col-span-1',
           'col-span-2',
           'col-span-3',
+          'col-span-1',
         ]"
         :items="jobs.setup"
         :header="[
@@ -140,6 +141,7 @@ onMounted(() => {
           'Success',
           'Last run',
           'Cache',
+          'Run',
         ]"
       />
     </CardBase>

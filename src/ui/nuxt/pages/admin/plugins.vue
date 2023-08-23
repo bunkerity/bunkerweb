@@ -8,7 +8,7 @@ const {
   data: pluginList,
   pending: pluginPend,
   error: pluginErr,
-} = await useFetch("/api/global_config", {
+} = await useFetch("/api/global-config", {
   method: "GET",
 });
 

@@ -14,7 +14,7 @@ const navList = [
   {
     title: "Global config",
     svg: resolveComponent("MenuSvgGlobalConf"),
-    path: "/admin/global_config",
+    path: "/admin/global-config",
   },
   {
     title: "Configs",

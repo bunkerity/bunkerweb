@@ -1,25 +1,18 @@
 <script setup>
 const props = defineProps({
-  valid: {
-    type: Boolean,
+  // valid || delete || info
+  color: {
+    type: String,
   },
-  delete: {
-    type: Boolean,
-  },
-  info: {
-    type: Boolean,
+  // sm ||normal || lg || xl
+  size: {
+    type: String,
   },
 });
 </script>
 
 <template>
-  <button
-    :class="[
-      props.valid ? 'valid-btn' : '',
-      props.delete ? 'delete-btn' : '',
-      props.info ? 'info-btn' : '',
-    ]"
-  >
+  <button :class="[`btn-${props.color} btn-${props.size}`]">
     <slot></slot>
   </button>
 </template>

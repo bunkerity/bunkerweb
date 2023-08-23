@@ -17,11 +17,23 @@ async function downloadFile(data) {
     error: fileErr,
     refresh: fileRef,
   } = await useFetch(
-    `/api/cache?job-name=${data.jobName}&file-name=${data.fileName}`,
+    `/api/cache?job-name=${data["job-name"]}&file-name=${data["file-name"]}`,
     {
       method: "GET",
     }
   );
+}
+
+async function runJob(data) {
+  const {
+    data: file,
+    pending: filePend,
+    error: fileErr,
+    refresh: fileRef,
+  } = await useFetch(`/api/jobs-run`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 }
 </script>
 
@@ -51,13 +63,21 @@ async function downloadFile(data) {
         <div :class="[props.positions[6]]">
           <SettingsSelect
             v-if="data['cache'].length > 0"
-            @inp="(v) => downloadFile({ jobName: key, fileName: v })"
+            @inp="(v) => downloadFile({ 'job-name': key, 'file-name': v })"
             :settings="{
               id: 'cache-files',
               value: 'select to download',
               values: getJobsCacheNames(data['cache']),
             }"
           />
+        </div>
+        <div :class="[props.positions[7], 'flex justify-center']">
+          <button
+            @click="(v) => runJob({ 'job-name': key })"
+            :class="['btn-valid btn-lg']"
+          >
+            run
+          </button>
         </div>
       </div>
     </li>
