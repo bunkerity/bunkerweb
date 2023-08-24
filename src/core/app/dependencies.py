@@ -26,8 +26,9 @@ from requests import get
 
 from .core import CoreConfig
 from .job_scheduler import JobScheduler
+
 from API import API  # type: ignore
-from ApiCaller import ApiCaller  # type: ignore
+from api_caller import ApiCaller  # type: ignore
 from database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
@@ -80,6 +81,15 @@ if (
 ):
     LOGGER.error(
         f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
+    )
+    stop(1)
+
+if (
+    not CORE_CONFIG.HEALTHCHECK_INTERVAL.isdigit()
+    or int(CORE_CONFIG.HEALTHCHECK_INTERVAL) < 1
+):
+    LOGGER.error(
+        f"Invalid HEALTHCHECK_INTERVAL provided: {CORE_CONFIG.HEALTHCHECK_INTERVAL}, It must be a positive integer."
     )
     stop(1)
 

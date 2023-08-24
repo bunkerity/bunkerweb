@@ -37,10 +37,10 @@ for deps_path in [
 from fastapi import Request, status
 from fastapi.datastructures import Address
 from fastapi.responses import JSONResponse
-from fastapi_restful.tasks import repeat_every
 from redis.client import Redis
 
 from API import API  # type: ignore
+from api_caller import ApiCaller  # type: ignore
 from configurator import Configurator  # type: ignore
 from jobs import bytes_hash  # type: ignore
 from .core import app, BUNKERWEB_VERSION
@@ -60,6 +60,7 @@ from .dependencies import (
     scheduler_initialized,
     SEMAPHORE,
     SETTINGS_PATH,
+    seen_instance,
     stop,
     stop_event,
     test_and_send_to_instances,
@@ -259,6 +260,7 @@ instances_config = CORE_CONFIG.model_dump(
         "MAX_WORKERS",
         "MAX_THREADS",
         "WAIT_RETRY_INTERVAL",
+        "HEALTHCHECK_INTERVAL",
         "TOKEN",
         "BUNKERWEB_INSTANCES",
         "log_level",
@@ -643,43 +645,67 @@ def listen_dynamic_instances():
     SEMAPHORE.release()
 
 
-if config_files.get("USE_REDIS", "no") == "yes":
-    if REDIS_HOST:
-        redis_port = config_files.get("REDIS_PORT", "6379")
-        if not redis_port.isdigit() or not (1 <= int(redis_port) <= 65535):
-            LOGGER.warning(
-                f"Invalid REDIS_PORT provided: {redis_port}, It must be an integer between 1 and 65535, port will default to 6379"
-            )
-            redis_port = 6379
-        REDIS_PORT = int(redis_port)
-        del redis_port
-
-        redis_database = config_files.get("REDIS_DATABASE", "0")
-        if not redis_database.isdigit() or not (0 <= int(redis_database) <= 15):
-            LOGGER.warning(
-                f"Invalid REDIS_DATABASE provided: {redis_database}, It must be an integer between 0 and 15, database will default to 0"
-            )
-            redis_database = 0
-        REDIS_DATABASE = int(redis_database)
-        del redis_database
-
-        if config_files.get("REDIS_SSL", "no") == "yes":
-            REDIS_SSL = True
-
-        redis_timeout = config_files.get("REDIS_TIMEOUT", "1000")  # ms
-        if not redis_timeout.isdigit() or int(redis_timeout) < 1:
-            LOGGER.warning(
-                f"Invalid REDIS_TIMEOUT provided: {redis_timeout}, It must be a positive integer, timeout will default to 1000 ms"
-            )
-            redis_timeout = 1000
-        REDIS_TIMEOUT = float(int(redis_timeout) / 1000)
-        del redis_timeout
-
-        Thread(target=listen_dynamic_instances, name="redis_listener").start()
-    else:
+def run_pending_jobs() -> None:
+    while not scheduler_initialized.is_set():
         LOGGER.warning(
-            "USE_REDIS is set to yes but REDIS_HOST is not defined, app will not listen for dynamic instances"
+            f"Scheduler is not initialized yet, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
         )
+        sleep(
+            int(CORE_CONFIG.WAIT_RETRY_INTERVAL) - 1
+            if int(CORE_CONFIG.WAIT_RETRY_INTERVAL) > 0
+            else 0
+        )
+
+    SCHEDULER.run_pending()
+
+
+def instances_healthcheck() -> None:
+    if not DB:
+        return
+
+    instance_apis = {
+        instance["hostname"]: API(
+            f"http://{instance['hostname']}:{instance['port']}",
+            instance["server_name"],
+        )
+        for instance in DB.get_instances()
+    }
+
+    if not instance_apis:
+        LOGGER.warning("No instances found in database, skipping healthcheck ...")
+        return
+
+    for instance, instance_api in instance_apis.items():
+        sent, err, status, resp = instance_api.request("GET", "ping")
+        if not sent:
+            LOGGER.warning(
+                f"Can't send API request to {instance_api.endpoint}ping : {err}, healthcheck will be retried in 30 seconds ..."
+            )
+            continue
+        else:
+            if status != 200:
+                LOGGER.warning(
+                    f"Error while sending API request to {instance_api.endpoint}ping : status = {resp['status']}, msg = {resp['msg']}, healthcheck will be retried in 30 seconds ..."
+                )
+                continue
+            else:
+                LOGGER.info(
+                    f"Successfully sent API request to {instance_api.endpoint}ping, marking instance as seen ..."
+                )
+
+                Thread(target=seen_instance, args=(instance,)).start()
+
+
+def run_repeatedly(delay: int, func, *, wait_first: bool = False, **kwargs):
+    SEMAPHORE.acquire()
+
+    while not stop_event.is_set():
+        if not wait_first:
+            func(**kwargs)
+        sleep(delay)
+        wait_first = False
+
+    SEMAPHORE.release()
 
 
 @app.middleware("http")
@@ -742,22 +768,6 @@ async def get_version() -> JSONResponse:
     return JSONResponse(content={"message": BUNKERWEB_VERSION})
 
 
-@app.on_event("startup")
-@repeat_every(seconds=1)
-def run_pending_jobs() -> None:
-    while not scheduler_initialized.is_set():
-        LOGGER.warning(
-            f"Scheduler is not initialized yet, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
-        )
-        sleep(
-            int(CORE_CONFIG.WAIT_RETRY_INTERVAL) - 1
-            if int(CORE_CONFIG.WAIT_RETRY_INTERVAL) > 0
-            else 0
-        )
-
-    SCHEDULER.run_pending()
-
-
 # Include the routers to the main app
 
 from .routers import config, custom_configs, instances, jobs, plugins
@@ -769,6 +779,54 @@ app.include_router(jobs.router)
 app.include_router(plugins.router)
 
 update_app_mounts(app)
+
+if config_files.get("USE_REDIS", "no") == "yes":
+    if REDIS_HOST:
+        redis_port = config_files.get("REDIS_PORT", "6379")
+        if not redis_port.isdigit() or not (1 <= int(redis_port) <= 65535):
+            LOGGER.warning(
+                f"Invalid REDIS_PORT provided: {redis_port}, It must be an integer between 1 and 65535, port will default to 6379"
+            )
+            redis_port = 6379
+        REDIS_PORT = int(redis_port)
+        del redis_port
+
+        redis_database = config_files.get("REDIS_DATABASE", "0")
+        if not redis_database.isdigit() or not (0 <= int(redis_database) <= 15):
+            LOGGER.warning(
+                f"Invalid REDIS_DATABASE provided: {redis_database}, It must be an integer between 0 and 15, database will default to 0"
+            )
+            redis_database = 0
+        REDIS_DATABASE = int(redis_database)
+        del redis_database
+
+        if config_files.get("REDIS_SSL", "no") == "yes":
+            REDIS_SSL = True
+
+        redis_timeout = config_files.get("REDIS_TIMEOUT", "1000")  # ms
+        if not redis_timeout.isdigit() or int(redis_timeout) < 1:
+            LOGGER.warning(
+                f"Invalid REDIS_TIMEOUT provided: {redis_timeout}, It must be a positive integer, timeout will default to 1000 ms"
+            )
+            redis_timeout = 1000
+        REDIS_TIMEOUT = float(int(redis_timeout) / 1000)
+        del redis_timeout
+
+        Thread(target=listen_dynamic_instances, name="redis_listener").start()
+    else:
+        LOGGER.warning(
+            "USE_REDIS is set to yes but REDIS_HOST is not defined, app will not listen for dynamic instances"
+        )
+
+Thread(
+    target=run_repeatedly,
+    args=(int(CORE_CONFIG.HEALTHCHECK_INTERVAL), instances_healthcheck),
+    kwargs={"wait_first": True},
+    name="instances_healthcheck",
+).start()
+Thread(
+    target=run_repeatedly, args=(1, run_pending_jobs), name="run_pending_jobs"
+).start()
 
 if not HEALTHY_PATH.exists():
     HEALTHY_PATH.write_text("ok", encoding="utf-8")

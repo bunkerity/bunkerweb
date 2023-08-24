@@ -2,7 +2,6 @@ brotlipy==0.7.0
 certbot==2.6.0
 croniter==1.4.1
 fastapi==0.101.1
-fastapi_restful==0.5.0
 gunicorn==21.2.0
 maxminddb==2.4.0
 pydantic_settings==2.0.3
@@ -12,6 +11,5 @@ PyYAML==6.0.1
 redis==5.0.0
 requests==2.31.0
 schedule==1.2.0
-typing_inspect==0.9.0
 uvicorn[standard]==0.23.2
 regex==2023.8.8

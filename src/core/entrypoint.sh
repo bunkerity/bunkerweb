@@ -47,7 +47,7 @@ elif [ $SWARM_MODE == "yes" ] ; then
 	echo "Swarm" > /usr/share/bunkerweb/INTEGRATION
 fi
 
-# execute jobs
+# Execute core
 log "ENTRYPOINT" "ℹ️ " "Executing core ..."
 python3 -m gunicorn --bind $LISTEN_ADDR:$LISTEN_PORT --log-level $LOG_LEVEL --workers $MAX_WORKERS --threads $MAX_THREADS --config /usr/share/bunkerweb/core/gunicorn.conf.py &
 pid="$!"

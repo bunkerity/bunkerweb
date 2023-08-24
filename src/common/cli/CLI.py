@@ -13,7 +13,7 @@ if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
 
 from API import API  # type: ignore
-from ApiCaller import ApiCaller  # type: ignore
+from api_caller import ApiCaller  # type: ignore
 from logger import setup_logger  # type: ignore
 
 

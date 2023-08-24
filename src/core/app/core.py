@@ -34,6 +34,7 @@ class CoreConfig(YamlBaseSettings):
     MAX_WORKERS: str = str(CPU_COUNT - 1 if CPU_COUNT > 1 else 1)
     MAX_THREADS: str = str(int(MAX_WORKERS) * 2 if MAX_WORKERS.isdigit() else 2)
     WAIT_RETRY_INTERVAL: str = "5"
+    HEALTHCHECK_INTERVAL: str = "30"
     CHECK_WHITELIST: str = "yes"
     WHITELIST: Union[str, set] = "127.0.0.1"
     CHECK_TOKEN: str = "yes"

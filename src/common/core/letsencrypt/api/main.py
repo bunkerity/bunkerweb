@@ -15,7 +15,7 @@ for deps_path in [
 from fastapi import FastAPI, Form, Request
 
 from API import API  # type: ignore
-from ApiCaller import ApiCaller  # type: ignore
+from api_caller import ApiCaller  # type: ignore
 from database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
