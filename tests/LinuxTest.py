@@ -33,7 +33,7 @@ class LinuxTest(Test):
             if distro in ("ubuntu", "debian"):
                 cmd = "echo force-bad-version >> /etc/dpkg/dpkg.cfg ; apt install -y /opt/\\$(ls /opt | grep deb)"
             elif distro in ("centos", "fedora", "rhel"):
-                cmd = "dnf install -y /opt/\\$(ls /opt | grep rpm)"
+                cmd = "dnf install -y /opt/\$(ls /opt | grep rpm)"
             proc = LinuxTest.docker_exec(distro, cmd)
             if proc.returncode != 0:
                 raise Exception("docker exec apt install failed (linux stack)")
