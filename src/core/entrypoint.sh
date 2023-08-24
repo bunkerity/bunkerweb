@@ -12,7 +12,23 @@ function trap_exit() {
 }
 trap "trap_exit" TERM INT QUIT
 
-# TODO handle reload
+reloading=0
+
+# trap SIGHUP
+function trap_reload() {
+	log "ENTRYPOINT" "ℹ️ " "Catched reload operation"
+	if [ -f "/var/run/bunkerweb/core.pid" ] ; then
+		reloading=1
+		log "ENTRYPOINT" "ℹ️ " "Stopping core ..."
+		kill -s TERM "$(cat /var/run/bunkerweb/core.pid)"
+		log "ENTRYPOINT" "ℹ️ " "Reloading core ..."
+		python3 -m gunicorn --bind $LISTEN_ADDR:$LISTEN_PORT --log-level $LOG_LEVEL --workers $MAX_WORKERS --threads $MAX_THREADS --config /usr/share/bunkerweb/core/gunicorn.conf.py &
+		pid="$!"
+		reloading=0
+	fi
+	log "ENTRYPOINT" "ℹ️ " "Reloaded"
+}
+trap "trap_reload" HUP
 
 if [ -f /var/run/bunkerweb/core.pid ] ; then
 	rm -f /var/run/bunkerweb/core.pid
@@ -52,7 +68,7 @@ log "ENTRYPOINT" "ℹ️ " "Executing core ..."
 python3 -m gunicorn --bind $LISTEN_ADDR:$LISTEN_PORT --log-level $LOG_LEVEL --workers $MAX_WORKERS --threads $MAX_THREADS --config /usr/share/bunkerweb/core/gunicorn.conf.py &
 pid="$!"
 wait "$pid"
-while [ -f /var/run/bunkerweb/core.pid ] ; do
+while [ -f /var/run/bunkerweb/core.pid ] || [ reloading == 1 ] ; do
     wait "$pid"
 done
 
