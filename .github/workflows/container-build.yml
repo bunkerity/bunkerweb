@@ -79,6 +79,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
+          username: ""
           password: ${{ secrets.GITHUB_TOKEN }}
       # Compute metadata
       - name: Extract metadata
