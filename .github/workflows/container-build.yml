@@ -128,7 +128,7 @@ jobs:
       # Push image
       - name: Push image
         if: inputs.PUSH == true
-        run: docker tag local/$IMAGE ghcr.io/bunkerity/$IMAGE:$TAG && docker push ghcr.io/bunkerity/$IMAGE:$TAG
+        run: docker tag local/$IMAGE ghcr.io/bunkerity/$IMAGE-tests:$TAG && docker push ghcr.io/bunkerity/$IMAGE-tests:$TAG
         env:
           IMAGE: "${{ inputs.IMAGE }}"
           TAG: "${{ inputs.RELEASE }}"
