@@ -91,8 +91,9 @@ jobs:
   push-dev:
     needs: [tests-ui, tests-core]
     runs-on: ubuntu-latest
-    contents: read
-    packages: write
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
