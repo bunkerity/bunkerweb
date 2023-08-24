@@ -272,9 +272,9 @@ urllib3==2.0.4 \
     #   docker
     #   kubernetes
     #   requests
-websocket-client==1.6.1 \
-    --hash=sha256:c951af98631d24f8df89ab1019fc365f2227c0892f12fd150e935607c79dd0dd \
-    --hash=sha256:f1f9f2ad5291f0225a49efad77abf9e700b6fef553900623060dad6e26503b9d
+websocket-client==1.6.2 \
+    --hash=sha256:53e95c826bf800c4c465f50093a8c4ff091c7327023b10bfaff40cf1ef170eaa \
+    --hash=sha256:ce54f419dfae71f4bdba69ebe65bf7f0a93fe71bc009ad3a010aacc3eebad537
     # via
     #   docker
     #   kubernetes
