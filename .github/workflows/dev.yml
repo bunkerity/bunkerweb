@@ -107,7 +107,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ""
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push BW image
         run: docker pull ghcr.io/bunkerity/$FROM-tests:dev && docker tag ghcr.io/bunkerity/$FROM-tests:dev bunkerity/$TO:dev && docker tag ghcr.io/bunkerity/$FROM-tests:dev ghcr.io/bunkerity/$TO:dev && docker push bunkerity/$TO:dev && docker push ghcr.io/bunkerity/$TO:dev
