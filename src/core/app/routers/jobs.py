@@ -4,7 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, File, Form, status
 from fastapi.responses import JSONResponse
 
 from ..models import CacheFileDataModel, CacheFileModel, ErrorMessage, Job, Job_cache
-from ..dependencies import DB, LOGGER, run_job as deps_run_job
+from ..dependencies import CORE_CONFIG, DB, run_job as deps_run_job
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -48,7 +48,7 @@ async def add_job_run(
     start_date = data.get("start_date")
 
     if not start_date:
-        LOGGER.error("Missing start_date")
+        CORE_CONFIG.logger.error("Missing start_date")
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"message": "Missing start_date"},
@@ -63,13 +63,13 @@ async def add_job_run(
     err = DB.add_job_run(job_name, data.get("success", False), start_date, end_date)
 
     if err:
-        LOGGER.error(f"Can't add job {job_name} run in database : {err}")
+        CORE_CONFIG.logger.error(f"Can't add job {job_name} run in database : {err}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": err},
         )
 
-    LOGGER.info(
+    CORE_CONFIG.logger.info(
         f"✅ Job {job_name} run successfully added to database with run status: {'✅' if data.get('success', False) else '❌'}"
     )
 
@@ -98,7 +98,7 @@ async def run_job(job_name: str, background_tasks: BackgroundTasks):
     job = DB.get_job(job_name)
 
     if not job:
-        LOGGER.warning(f"Job {job_name} not found")
+        CORE_CONFIG.logger.warning(f"Job {job_name} not found")
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": f"Job {job_name} not found"},
@@ -199,13 +199,15 @@ async def update_cache(
     )
 
     if resp not in ("created", "updated"):
-        LOGGER.error(f"Can't update job {job_name} cache in database : {resp}")
+        CORE_CONFIG.logger.error(
+            f"Can't update job {job_name} cache in database : {resp}"
+        )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},
         )
 
-    LOGGER.info(f"✅ Job {job_name} cache successfully updated in database")
+    CORE_CONFIG.logger.info(f"✅ Job {job_name} cache successfully updated in database")
 
     return JSONResponse(
         status_code=status.HTTP_200_OK
@@ -235,13 +237,17 @@ async def delete_cache(job_name: str, file_name: str, data: CacheFileModel):
     err = DB.delete_job_cache(job_name, file_name, service_id=data.service_id)
 
     if err:
-        LOGGER.error(f"Can't delete job {job_name} cache in database : {err}")
+        CORE_CONFIG.logger.error(
+            f"Can't delete job {job_name} cache in database : {err}"
+        )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": err},
         )
 
-    LOGGER.info(f"✅ Job {job_name} cache successfully deleted from database")
+    CORE_CONFIG.logger.info(
+        f"✅ Job {job_name} cache successfully deleted from database"
+    )
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,

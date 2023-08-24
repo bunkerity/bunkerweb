@@ -7,7 +7,6 @@ from pathlib import Path
 from re import compile as re_compile
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
-from traceback import format_exc
 from typing import Any
 
 for deps_path in [
@@ -378,9 +377,7 @@ if __name__ == "__main__":
     except SystemExit as e:
         raise e
     except:
-        logger.error(
-            f"Exception while executing config saver : {format_exc()}",
-        )
+        logger.exception("Exception while executing config saver")
         sys_exit(1)
 
     # We're done

@@ -3,7 +3,7 @@ from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
 from ..models import ErrorMessage
-from ..dependencies import DB, LOGGER, run_jobs, send_to_instances
+from ..dependencies import CORE_CONFIG, DB, run_jobs, send_to_instances
 
 router = APIRouter(prefix="/config", tags=["config"])
 
@@ -34,12 +34,12 @@ async def update_global_config(
     err = DB.save_global_config(config, method)
 
     if err:
-        LOGGER.error(f"Can't save global config to database : {err}")
+        CORE_CONFIG.logger.error(f"Can't save global config to database : {err}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": err}
         )
 
-    LOGGER.info("✅ Global config successfully saved to database")
+    CORE_CONFIG.logger.info("✅ Global config successfully saved to database")
 
     background_tasks.add_task(run_jobs)
     background_tasks.add_task(send_to_instances, {"config", "cache"})
@@ -74,23 +74,27 @@ async def update_service_config(
 
     if err == "not_found":
         message = f"Service {service_name} not found"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
         )
     elif err == "method_conflict":
         message = f"Can't rename service {service_name} because its method or one of its setting's method belongs to the core or the autoconf and the method isn't one of them"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
         )
     elif err:
-        LOGGER.error(f"Can't save service {service_name} config to database : {err}")
+        CORE_CONFIG.logger.error(
+            f"Can't save service {service_name} config to database : {err}"
+        )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": err}
         )
 
-    LOGGER.info(f"✅ Service {service_name} config successfully saved to database")
+    CORE_CONFIG.logger.info(
+        f"✅ Service {service_name} config successfully saved to database"
+    )
 
     background_tasks.add_task(run_jobs)
     background_tasks.add_task(send_to_instances, {"config", "cache"})
@@ -124,23 +128,27 @@ async def delete_service_config(
 
     if err == "not_found":
         message = f"Service {service_name} not found"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
         )
     elif err == "method_conflict":
         message = f"Can't delete service {service_name} because it was created by either the core or the autoconf and the method isn't one of them"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
         )
     elif err:
-        LOGGER.error(f"Can't delete service {service_name} from the database : {err}")
+        CORE_CONFIG.logger.error(
+            f"Can't delete service {service_name} from the database : {err}"
+        )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": err}
         )
 
-    LOGGER.info(f"✅ Service {service_name} successfully deleted from the database")
+    CORE_CONFIG.logger.info(
+        f"✅ Service {service_name} successfully deleted from the database"
+    )
 
     background_tasks.add_task(run_jobs)
     background_tasks.add_task(send_to_instances, {"config", "cache"})

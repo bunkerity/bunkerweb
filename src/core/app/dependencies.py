@@ -14,7 +14,6 @@ from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from tarfile import open as tar_open
 from threading import Thread, enumerate as all_threads, Event, Semaphore
 from time import sleep
-from traceback import format_exc
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
 from uuid import uuid4
 from zipfile import ZipFile
@@ -30,7 +29,6 @@ from .job_scheduler import JobScheduler
 from API import API  # type: ignore
 from api_caller import ApiCaller  # type: ignore
 from database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
 
 DB = None
 HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.healthy")
@@ -69,43 +67,39 @@ TMP_ENV_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.env")
 TMP_ENV_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 CORE_CONFIG = CoreConfig("core", **environ)
-LOGGER = setup_logger(
-    "CORE",
-    CORE_CONFIG.log_level,
-)
 INSTANCES_API_CALLER = ApiCaller()
 
-if (
+if not isinstance(CORE_CONFIG.WAIT_RETRY_INTERVAL, int) and (
     not CORE_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
     or int(CORE_CONFIG.WAIT_RETRY_INTERVAL) < 1
 ):
-    LOGGER.error(
+    CORE_CONFIG.logger.error(
         f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
     )
     stop(1)
 
-if (
+if not isinstance(CORE_CONFIG.HEALTHCHECK_INTERVAL, int) and (
     not CORE_CONFIG.HEALTHCHECK_INTERVAL.isdigit()
     or int(CORE_CONFIG.HEALTHCHECK_INTERVAL) < 1
 ):
-    LOGGER.error(
+    CORE_CONFIG.logger.error(
         f"Invalid HEALTHCHECK_INTERVAL provided: {CORE_CONFIG.HEALTHCHECK_INTERVAL}, It must be a positive integer."
     )
     stop(1)
 
-DB = Database(LOGGER, CORE_CONFIG.DATABASE_URI, pool=False)
+DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI, pool=False)
 
-LOGGER.info(f"🚀 {CORE_CONFIG.integration} integration detected")
+CORE_CONFIG.logger.info(f"🚀 {CORE_CONFIG.integration} integration detected")
 
 # Instantiate scheduler
 SCHEDULER = JobScheduler(
     API(f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "bw-scheduler"),
-    env=CORE_CONFIG.model_dump()
+    env=CORE_CONFIG.settings
     | {
         "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
         "API_TOKEN": CORE_CONFIG.TOKEN,
     },
-    logger=LOGGER,
+    logger=CORE_CONFIG.logger,
 )
 
 
@@ -118,7 +112,7 @@ def dict_to_frozenset(d):
 
 
 def update_app_mounts(app):
-    LOGGER.info("Updating app mounts ...")
+    CORE_CONFIG.logger.info("Updating app mounts ...")
 
     for route in app.routes:
         if isinstance(route, Mount):
@@ -134,7 +128,9 @@ def update_app_mounts(app):
             continue
 
         subinstance_api_plugin = basename(dirname(subinstance_api))
-        LOGGER.info(f"Mounting subinstance_api {subinstance_api_plugin} ...")
+        CORE_CONFIG.logger.info(
+            f"Mounting subinstance_api {subinstance_api_plugin} ..."
+        )
         try:
             loader = SourceFileLoader(
                 f"{subinstance_api_plugin}_instance_api", str(main_file_path)
@@ -151,15 +147,15 @@ def update_app_mounts(app):
                     basename(dirname(subinstance_api)),
                 )
 
-                LOGGER.info(
+                CORE_CONFIG.logger.info(
                     f"✅ The subinstance_api for the plugin {subinstance_api_plugin} has been mounted successfully, root path: {root_path}"
                 )
             else:
-                LOGGER.error(
+                CORE_CONFIG.logger.error(
                     f"Couldn't mount subinstance_api {subinstance_api_plugin}, no app found"
                 )
         except Exception as e:
-            LOGGER.error(
+            CORE_CONFIG.logger.error(
                 f"Exception while mounting subinstance_api {subinstance_api_plugin} : {e}"
             )
 
@@ -186,8 +182,8 @@ def install_plugin(
                 if chunk:
                     content += chunk
     except:
-        logger.error(
-            f"Exception while downloading plugin(s) from {plugin_url} :\n{format_exc()}",
+        logger.exception(
+            f"Exception while downloading plugin(s) from {plugin_url}",
         )
         return
 
@@ -212,8 +208,8 @@ def install_plugin(
             )
             return
     except:
-        logger.error(
-            f"Exception while decompressing plugin(s) from {plugin_url} :\n{format_exc()}",
+        logger.exception(
+            f"Exception while decompressing plugin(s) from {plugin_url}",
         )
         return
 
@@ -248,8 +244,8 @@ def install_plugin(
                     f"Skipping installation of plugin {basename(dirname(plugin_dir))} (already installed)",
                 )
     except:
-        logger.error(
-            f"Exception while installing plugin(s) from {plugin_url} :\n{format_exc()}",
+        logger.exception(
+            f"Exception while installing plugin(s) from {plugin_url}",
         )
 
     semaphore.release()
@@ -264,20 +260,20 @@ def generate_external_plugins(
         original_path = Path(original_path)
 
     # Remove old external plugins files
-    LOGGER.info("Removing old external plugins files ...")
+    CORE_CONFIG.logger.info("Removing old external plugins files ...")
     for file in glob(str(original_path.joinpath("*"))):
         file = Path(file)
         if file.is_symlink() or file.is_file():
             file.unlink()
         elif file.is_dir():
-            rmtree(str(file), ignore_errors=True)
+            rmtree(file, ignore_errors=True)
 
     if not plugins:
         assert DB
         plugins = DB.get_plugins(external=True, with_data=True)
 
     if plugins:
-        LOGGER.info("Generating new external plugins ...")
+        CORE_CONFIG.logger.info("Generating new external plugins ...")
         original_path.mkdir(parents=True, exist_ok=True)
         for plugin in plugins:
             tmp_path = original_path.joinpath(plugin["id"], f"{plugin['name']}.tar.gz")
@@ -301,20 +297,20 @@ def generate_custom_configs(
         original_path = Path(original_path)
 
     # Remove old custom configs files
-    LOGGER.info("Removing old custom configs files ...")
+    CORE_CONFIG.logger.info("Removing old custom configs files ...")
     for file in glob(str(original_path.joinpath("*", "*"))):
         file = Path(file)
         if file.is_symlink() or file.is_file():
             file.unlink()
         elif file.is_dir():
-            rmtree(str(file), ignore_errors=True)
+            rmtree(file, ignore_errors=True)
 
     if not configs:
         assert DB
         configs = DB.get_custom_configs()
 
     if configs:
-        LOGGER.info("Generating new custom configs ...")
+        CORE_CONFIG.logger.info("Generating new custom configs ...")
         original_path.mkdir(parents=True, exist_ok=True)
         for custom_config in configs:
             tmp_path = original_path.joinpath(
@@ -357,7 +353,7 @@ def generate_config(function: Optional[Callable] = None):
         )
 
         if proc.returncode != 0:
-            LOGGER.error(
+            CORE_CONFIG.logger.error(
                 "Config generator failed, configuration will not work as expected..."
             )
 
@@ -385,12 +381,12 @@ def send_plugins_to_instances(api_caller: ApiCaller = None):
     generate_external_plugins(original_path=EXTERNAL_PLUGINS_PATH)
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
-    LOGGER.info(
+    CORE_CONFIG.logger.info(
         f"Sending {EXTERNAL_PLUGINS_PATH} folder to instances {instances_endpoints} ..."
     )
     ret = api_caller.send_files(EXTERNAL_PLUGINS_PATH, "/plugins")
     if not ret:
-        LOGGER.error(
+        CORE_CONFIG.logger.error(
             "Not all instances have received the plugins, configuration will not work as expected...",
         )
 
@@ -413,15 +409,17 @@ def send_config_to_instances(api_caller: ApiCaller = None):
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
     if not nginx_prefix.is_dir():
-        LOGGER.error(
+        CORE_CONFIG.logger.error(
             f"{nginx_prefix} is not a directory, configuration will not be sent to instances {instances_endpoints}"
         )
         return 1
 
-    LOGGER.info(f"Sending {nginx_prefix} folder to instances {instances_endpoints} ...")
+    CORE_CONFIG.logger.info(
+        f"Sending {nginx_prefix} folder to instances {instances_endpoints} ..."
+    )
     ret = api_caller.send_files(nginx_prefix, "/confs")
     if not ret:
-        LOGGER.error(
+        CORE_CONFIG.logger.error(
             "Not all instances have received the configuration, configuration will not work as expected...",
         )
 
@@ -442,12 +440,12 @@ def send_custom_configs_to_instances(api_caller: ApiCaller = None):
     generate_custom_configs(original_path=CUSTOM_CONFIGS_PATH)
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
-    LOGGER.info(
+    CORE_CONFIG.logger.info(
         f"Sending {CUSTOM_CONFIGS_PATH} folder to instances {instances_endpoints} ..."
     )
     ret = api_caller.send_files(CUSTOM_CONFIGS_PATH, "/custom_configs")
     if not ret:
-        LOGGER.error(
+        CORE_CONFIG.logger.error(
             "Not all instances have received the custom configs, configuration will not work as expected...",
         )
 
@@ -467,10 +465,12 @@ def send_cache_to_instances(api_caller: ApiCaller = None):
 
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
-    LOGGER.info(f"Sending {CACHE_PATH} folder to instances {instances_endpoints} ...")
+    CORE_CONFIG.logger.info(
+        f"Sending {CACHE_PATH} folder to instances {instances_endpoints} ..."
+    )
     ret = api_caller.send_files(CACHE_PATH, "/cache")
     if not ret:
-        LOGGER.error(
+        CORE_CONFIG.logger.error(
             "Not all instances have received the cache, configuration will not work as expected...",
         )
 
@@ -488,12 +488,12 @@ def reload_instances(api_caller: ApiCaller = None):
             ]
         )
 
-    LOGGER.info(
+    CORE_CONFIG.logger.info(
         f"Reloading instances {', '.join(api.endpoint for api in api_caller.apis)} ..."
     )
     ret = api_caller.send_to_apis("POST", "/reload")
     if not ret:
-        LOGGER.error(
+        CORE_CONFIG.logger.error(
             "Not all instances have been reloaded, configuration will not work as expected...",
         )
 
@@ -523,7 +523,7 @@ def send_to_instances(
         )
 
     if types != "all" and not types:
-        LOGGER.error("No type provided, nothing to do...")
+        CORE_CONFIG.logger.error("No type provided, nothing to do...")
         return 1
 
     if types == "all" or "plugins" in types:
@@ -544,7 +544,7 @@ def seen_instance(instance_hostname: str):
 
     error = DB.seen_instance(instance_hostname)
     if error:
-        LOGGER.error(
+        CORE_CONFIG.logger.error(
             f"Couldn't update instance {instance_hostname} last_seen to database: {error}"
         )
         return False
@@ -580,20 +580,20 @@ def test_and_send_to_instances(
     ):
         sent, err, status, resp = instance_api.request("GET", "ping")
         if not sent:
-            LOGGER.warning(
+            CORE_CONFIG.logger.warning(
                 f"Can't send API request to {instance_api.endpoint}ping : {err}, data will not be sent to it ...",
             )
             instance_apis.remove(instance_api)
             continue
         else:
             if status != 200:
-                LOGGER.warning(
+                CORE_CONFIG.logger.warning(
                     f"Error while sending API request to {instance_api.endpoint}ping : status = {resp['status']}, msg = {resp['msg']}, data will not be sent to it ...",
                 )
                 instance_apis.remove(instance_api)
                 continue
             else:
-                LOGGER.info(
+                CORE_CONFIG.logger.info(
                     f"Successfully sent API request to {instance_api.endpoint}ping, sending data to it ..."
                 )
 
@@ -640,12 +640,12 @@ def run_jobs():
 
     # Only run jobs once
     if not SCHEDULER.run_once():
-        LOGGER.error("At least one job in run_once() failed")
+        CORE_CONFIG.logger.error("At least one job in run_once() failed")
     else:
-        LOGGER.info("All jobs in run_once() were successful")
+        CORE_CONFIG.logger.info("All jobs in run_once() were successful")
 
     if test_and_send_to_instances({"cache"}) != 0:
-        LOGGER.warning(
+        CORE_CONFIG.logger.warning(
             "Can't send data to BunkerWeb instances, configuration will not work as expected"
         )
 
@@ -657,6 +657,6 @@ def run_job(job_name: str):
 
     # TODO: remove this when the soft reload will be available
     if test_and_send_to_instances({"cache"}) != 0:
-        LOGGER.warning(
+        CORE_CONFIG.logger.warning(
             "Can't send data to BunkerWeb instances, configuration will not work as expected"
         )

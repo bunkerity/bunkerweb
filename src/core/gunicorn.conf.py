@@ -14,4 +14,4 @@ workers = MAX_WORKERS
 threads = MAX_WORKERS * 2
 worker_class = "uvicorn_worker.BwUvicornWorker"
 graceful_timeout = 5
-max_requests_jitter = 8 if MAX_WORKERS > 8 else MAX_WORKERS
+max_requests_jitter = min(8, MAX_WORKERS)

@@ -8,7 +8,7 @@ from ..models import (
     CustomConfigNameModel,
     ErrorMessage,
 )
-from ..dependencies import DB, LOGGER, send_to_instances
+from ..dependencies import CORE_CONFIG, DB, send_to_instances
 
 router = APIRouter(prefix="/custom_configs", tags=["custom_configs"])
 
@@ -58,18 +58,18 @@ async def update_custom_config(
             )
             + " because it was created by either the core or the autoconf and the method isn't one of them"
         )
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
         )
     elif err and err not in ("created", "updated"):
-        LOGGER.error(f"Can't upsert custom config: {err}")
+        CORE_CONFIG.logger.error(f"Can't upsert custom config: {err}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": err},
         )
 
-    LOGGER.info(f"✅ Custom config {custom_config.name} {err} to database")
+    CORE_CONFIG.logger.info(f"✅ Custom config {custom_config.name} {err} to database")
 
     background_tasks.add_task(send_to_instances, {"custom_configs"})
 
@@ -112,7 +112,7 @@ async def delete_custom_config(
 
     if err == "not_found":
         message = f"Custom config {custom_config_name} not found"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
         )
@@ -126,18 +126,20 @@ async def delete_custom_config(
             )
             + " because it was created by either the core or the autoconf and the method isn't one of them"
         )
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
         )
     elif err:
-        LOGGER.error(f"Can't upsert custom config: {err}")
+        CORE_CONFIG.logger.error(f"Can't upsert custom config: {err}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": err},
         )
 
-    LOGGER.info(f"✅ Custom config {custom_config_name} deleted from database")
+    CORE_CONFIG.logger.info(
+        f"✅ Custom config {custom_config_name} deleted from database"
+    )
 
     background_tasks.add_task(send_to_instances, {"custom_configs"})
 

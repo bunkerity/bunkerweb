@@ -4,7 +4,6 @@ from argparse import ArgumentParser
 from os import _exit, getenv, sep
 from os.path import join
 from sys import exit as sys_exit, path as sys_path
-from traceback import format_exc
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
@@ -74,5 +73,5 @@ if __name__ == "__main__":
     except SystemExit as se:
         sys_exit(se.code)
     except:
-        logger.error(f"Error while executing bwcli :\n{format_exc()}")
+        logger.exception("Error while executing bwcli")
         sys_exit(1)

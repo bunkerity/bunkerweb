@@ -6,8 +6,8 @@ from fastapi.responses import JSONResponse
 
 from ..models import AddedPlugin, ErrorMessage, Plugin
 from ..dependencies import (
+    CORE_CONFIG,
     DB,
-    LOGGER,
     EXTERNAL_PLUGINS_PATH,
     generate_external_plugins,
     run_jobs,
@@ -58,12 +58,12 @@ async def add_plugin(
 
     if error == "exists":
         message = f"Plugin {plugin.id} already exists"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT, content={"message": message}
         )
     elif error:
-        LOGGER.error(f"Can't add plugin to database : {error}")
+        CORE_CONFIG.logger.error(f"Can't add plugin to database : {error}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": error},
@@ -78,7 +78,7 @@ async def add_plugin(
     background_tasks.add_task(send_to_instances, {"plugins", "cache"})
     background_tasks.add_task(update_app_mounts, router)
 
-    LOGGER.info(f"✅ Plugin {plugin.id} successfully added to database")
+    CORE_CONFIG.logger.info(f"✅ Plugin {plugin.id} successfully added to database")
 
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
@@ -116,18 +116,18 @@ async def update_plugin(
 
     if error == "not_found":
         message = f"Plugin {plugin.id} not found"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
         )
     elif error == "not_external":
         message = f"Can't update a core plugin ({plugin.id})"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
         )
     elif error:
-        LOGGER.error(f"Can't update plugin to database : {error}")
+        CORE_CONFIG.logger.error(f"Can't update plugin to database : {error}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": error},
@@ -142,7 +142,7 @@ async def update_plugin(
     background_tasks.add_task(send_to_instances, {"plugins", "cache"})
     background_tasks.add_task(update_app_mounts, router)
 
-    LOGGER.info(f"✅ Plugin {plugin.id} successfully updated to database")
+    CORE_CONFIG.logger.info(f"✅ Plugin {plugin.id} successfully updated to database")
 
     return JSONResponse(content={"message": "Plugin successfully updated"})
 
@@ -177,18 +177,18 @@ async def delete_plugin(
 
     if error == "not_found":
         message = f"Plugin {plugin_id} not found"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
         )
     elif error == "not_external":
         message = f"Can't delete a core plugin ({plugin_id})"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
         )
     elif error:
-        LOGGER.error(f"Can't delete plugin to database : {error}")
+        CORE_CONFIG.logger.error(f"Can't delete plugin to database : {error}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": error},
@@ -203,7 +203,7 @@ async def delete_plugin(
     background_tasks.add_task(send_to_instances, {"plugins", "cache"})
     background_tasks.add_task(update_app_mounts, router)
 
-    LOGGER.info(f"✅ Plugin {plugin_id} successfully deleted from database")
+    CORE_CONFIG.logger.info(f"✅ Plugin {plugin_id} successfully deleted from database")
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,

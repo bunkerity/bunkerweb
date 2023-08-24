@@ -46,6 +46,7 @@ RUN apk add --no-cache bash jq nodejs npm && \
     cp helpers/bwcli /usr/bin/ && \
     echo "Docker" > INTEGRATION && \
     mkdir -p /etc/bunkerweb && \
+    mkdir -p /run/secrets && \
     mkdir -p /var/tmp/bunkerweb && \
     mkdir -p /var/run/bunkerweb && \
     mkdir -p /var/log/bunkerweb && \

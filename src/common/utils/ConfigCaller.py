@@ -6,7 +6,6 @@ from os import sep
 from os.path import join
 from pathlib import Path
 from re import match
-from traceback import format_exc
 from typing import Any, Dict, Literal, Union
 
 from logger import setup_logger
@@ -32,8 +31,8 @@ class ConfigCaller:
                     f'Error while loading plugin metadata file at {plugin} : missing "settings" key',
                 )
             except JSONDecodeError:
-                self.__logger.error(
-                    f"Exception while loading plugin metadata file at {plugin} :\n{format_exc()}",
+                self.__logger.exception(
+                    f"Exception while loading plugin metadata file at {plugin}"
                 )
 
     def _is_setting(self, setting) -> bool:

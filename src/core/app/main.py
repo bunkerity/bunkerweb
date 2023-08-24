@@ -15,12 +15,9 @@ from itertools import chain
 from json import JSONDecodeError, loads as json_loads
 from shutil import rmtree
 from threading import Thread
-from traceback import format_exc
-from dotenv import dotenv_values
 from os import listdir, sep, walk
 from os.path import basename, dirname, join
 from pathlib import Path
-from regex import compile as re_compile, match as regex_match
 from sys import path as sys_path
 from tarfile import open as tar_open
 from time import sleep
@@ -34,10 +31,12 @@ for deps_path in [
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+from dotenv import dotenv_values
 from fastapi import Request, status
 from fastapi.datastructures import Address
 from fastapi.responses import JSONResponse
 from redis.client import Redis
+from regex import compile as re_compile, match as regex_match
 
 from API import API  # type: ignore
 from api_caller import ApiCaller  # type: ignore
@@ -54,7 +53,6 @@ from .dependencies import (
     generate_external_plugins,
     HEALTHY_PATH,
     install_plugin,
-    LOGGER,
     SCHEDULER,
     run_jobs,
     scheduler_initialized,
@@ -78,16 +76,13 @@ PLUGIN_KEYS = [
 
 TOKEN_RX = r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$"
 PLUGIN_ID_REGEX = re_compile(r"^[\w.-]{1,64}$")
-EXTERNAL_PLUGIN_URLS_RX = re_compile(
-    r"^( *((https?://|file:///)[-\w@:%.+~#=]+[-\w()!@:%+.~?&/=$#]*)(?!.*\2(?!.)) *)*$"
-)
 CUSTOM_CONFIGS_RX = re_compile(
     r"^([0-9a-z\.-]*)_?CUSTOM_CONF_(HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
 )
 BUNKERWEB_INSTANCES_RX = re_compile(r"([^: ]+)(:((\d+):)?(\w+))?")
 
 if CORE_CONFIG.check_token and not regex_match(TOKEN_RX, CORE_CONFIG.TOKEN):
-    LOGGER.error(
+    CORE_CONFIG.logger.error(
         f"Invalid token provided: {CORE_CONFIG.TOKEN}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
     )
     stop(1)
@@ -119,12 +114,12 @@ def extract_plugin_data(filename: str) -> Optional[dict]:
     plugin_data = json_loads(Path(filename).read_text(encoding="utf-8"))
 
     if not all(key in plugin_data.keys() for key in PLUGIN_KEYS):
-        LOGGER.warning(
+        CORE_CONFIG.logger.warning(
             f"The plugin {dir_basename} doesn't have a valid plugin.json file, it's missing one or more of the following keys: {', '.join(PLUGIN_KEYS)}, ignoring it..."
         )
         return
     elif not PLUGIN_ID_REGEX.match(plugin_data["id"]):
-        LOGGER.warning(
+        CORE_CONFIG.logger.warning(
             f"The plugin {dir_basename} doesn't have a valid id, the id must match the following regex: {PLUGIN_ID_REGEX.pattern}, ignoring it..."
         )
         return
@@ -148,7 +143,7 @@ def extract_plugin_data(filename: str) -> Optional[dict]:
     return plugin_data
 
 
-LOGGER.info("Checking if any external plugin have been added or removed...")
+CORE_CONFIG.logger.info("Checking if any external plugin have been added or removed...")
 
 manual_plugins = []
 manual_plugins_ids = []
@@ -174,27 +169,27 @@ for filename in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "plugin.json"))):
     manual_plugins_ids.append(plugin_data["id"])
     manual_plugins.append(plugin_data)
 
-if not EXTERNAL_PLUGIN_URLS_RX.match(CORE_CONFIG.EXTERNAL_PLUGIN_URLS):
-    LOGGER.error(
-        f"Invalid external plugin URLs provided: {CORE_CONFIG.EXTERNAL_PLUGIN_URLS}, plugin download will be skipped"
-    )
-elif CORE_CONFIG.EXTERNAL_PLUGIN_URLS != db_config.get("EXTERNAL_PLUGIN_URLS", ""):
+if CORE_CONFIG.external_plugin_urls_str != db_config.get("EXTERNAL_PLUGIN_URLS", ""):
     if db_is_initialized:
-        LOGGER.info("External plugins urls changed, refreshing external plugins...")
+        CORE_CONFIG.logger.info(
+            "External plugins urls changed, refreshing external plugins..."
+        )
         for db_plugin in db_plugins:
             rmtree(
                 str(EXTERNAL_PLUGINS_PATH.joinpath(db_plugin["id"])),
                 ignore_errors=True,
             )
     else:
-        LOGGER.info("Found external plugins to download, starting download...")
+        CORE_CONFIG.logger.info(
+            "Found external plugins to download, starting download..."
+        )
 
     plugin_changes = True
     threads = []
-    for plugin_url in CORE_CONFIG.EXTERNAL_PLUGIN_URLS.strip().split(" "):
+    for plugin_url in CORE_CONFIG.external_plugin_urls:
         thread = Thread(
             target=install_plugin,
-            args=(plugin_url, LOGGER),
+            args=(plugin_url, CORE_CONFIG.logger),
         )
         thread.start()
         threads.append(thread)
@@ -202,7 +197,7 @@ elif CORE_CONFIG.EXTERNAL_PLUGIN_URLS != db_config.get("EXTERNAL_PLUGIN_URLS", "
     for thread in threads:
         thread.join()
 
-    LOGGER.info("External plugins download finished")
+    CORE_CONFIG.logger.info("External plugins download finished")
 
 # Check if any external plugin has been added by the user
 external_plugins = []
@@ -243,56 +238,29 @@ if db_is_initialized:
         }
 
     if plugin_changes:
-        LOGGER.info("External plugins changed, refreshing database...")
+        CORE_CONFIG.logger.info("External plugins changed, refreshing database...")
 
         err = DB.update_external_plugins(external_plugins, delete_missing=True)
         if err:
-            LOGGER.error(
+            CORE_CONFIG.logger.error(
                 f"Couldn't save some manually added plugins to database: {err}",
             )
 
         generate_external_plugins(external_plugins, original_path=EXTERNAL_PLUGINS_PATH)
 
-instances_config = CORE_CONFIG.model_dump(
-    exclude=(
-        "LISTEN_ADDR",
-        "LISTEN_PORT",
-        "MAX_WORKERS",
-        "MAX_THREADS",
-        "WAIT_RETRY_INTERVAL",
-        "HEALTHCHECK_INTERVAL",
-        "TOKEN",
-        "BUNKERWEB_INSTANCES",
-        "log_level",
-        "check_whitelist",
-        "CHECK_WHITELIST",
-        "check_token",
-        "CHECK_TOKEN",
-        "kubernetes_mode",
-        "swarm_mode",
-        "autoconf_mode",
-        "whitelist",
-        "WHITELIST",
-        "integration",
-    )
-)
-
-if CORE_CONFIG.kubernetes_mode or CORE_CONFIG.swarm_mode or CORE_CONFIG.autoconf_mode:
-    instances_config["MULTISITE"] = "yes"
-
-LOGGER.info("Computing config ...")
+CORE_CONFIG.logger.info("Computing config ...")
 
 config = Configurator(
     str(SETTINGS_PATH),
     str(CORE_PLUGINS_PATH),
     external_plugins,
-    instances_config,
-    LOGGER,
+    CORE_CONFIG.settings,
+    CORE_CONFIG.logger,
 )
 config_files = config.get_config()
 
 if not db_is_initialized:
-    LOGGER.info(
+    CORE_CONFIG.logger.info(
         "Database not initialized, initializing ...",
     )
     ret, err = DB.init_tables(
@@ -305,42 +273,44 @@ if not db_is_initialized:
 
     # Initialize database tables
     if err:
-        LOGGER.error(
+        CORE_CONFIG.logger.error(
             f"Exception while initializing database : {err}",
         )
         stop(1)
     elif not ret:
-        LOGGER.info(
+        CORE_CONFIG.logger.info(
             "Database tables are already initialized, skipping creation ...",
         )
     else:
-        LOGGER.info("Database tables initialized")
+        CORE_CONFIG.logger.info("Database tables initialized")
 
     err = DB.initialize_db(
         version=BUNKERWEB_VERSION, integration=CORE_CONFIG.integration
     )
 
     if err:
-        LOGGER.error(
+        CORE_CONFIG.logger.error(
             f"Can't Initialize database : {err}",
         )
         stop(1)
     else:
-        LOGGER.info("✅ Database initialized")
+        CORE_CONFIG.logger.info("✅ Database initialized")
 else:
     err: str = DB.update_db_schema(BUNKERWEB_VERSION)
 
     if err and not err.startswith("The database"):
-        LOGGER.error(f"Can't update database schema : {err}")
+        CORE_CONFIG.logger.error(f"Can't update database schema : {err}")
         stop(1)
     elif not err:
-        LOGGER.info("✅ Database schema updated to latest version successfully")
+        CORE_CONFIG.logger.info(
+            "✅ Database schema updated to latest version successfully"
+        )
 
-LOGGER.info("Checking if any custom config have been added or removed...")
+CORE_CONFIG.logger.info("Checking if any custom config have been added or removed...")
 
 db_configs = DB.get_custom_configs()
 env_custom_configs = []
-for k, v in instances_config.copy().items():
+for k, v in CORE_CONFIG.settings.copy().items():
     match = CUSTOM_CONFIGS_RX.search(k)
     if match:
         custom_conf = match.groups()
@@ -355,7 +325,7 @@ for k, v in instances_config.copy().items():
                 ),
             }
         )
-        LOGGER.info(
+        CORE_CONFIG.logger.info(
             f"🛠️ Found custom conf env var \"{name}\"{' for service ' + custom_conf[0] if custom_conf[0] else ''} with type {custom_conf[1]}"
         )
 
@@ -364,11 +334,11 @@ if {hash(dict_to_frozenset(d)) for d in env_custom_configs} != {
 }:
     err = DB.save_custom_configs(env_custom_configs, "core")
     if err:
-        LOGGER.error(
+        CORE_CONFIG.logger.error(
             f"Couldn't save some custom configs from env to database: {err}",
         )
 
-    LOGGER.info("✅ Custom configs from env saved to database")
+    CORE_CONFIG.logger.info("✅ Custom configs from env saved to database")
 
 files_custom_configs = []
 custom_configs_changes = False
@@ -412,49 +382,43 @@ if {hash(dict_to_frozenset(d)) for d in files_custom_configs} != {
 }:
     err = DB.save_custom_configs(files_custom_configs, "manual")
     if err:
-        LOGGER.error(
+        CORE_CONFIG.logger.error(
             f"Couldn't save some manually created custom configs to database: {err}",
         )
 
-    LOGGER.info("✅ Custom configs from files saved to database")
-
-static_bunkerweb_instances = []
-for bw_instance in BUNKERWEB_INSTANCES_RX.findall(CORE_CONFIG.BUNKERWEB_INSTANCES):
-    static_bunkerweb_instances.append(
-        {
-            "hostname": bw_instance[0],
-            "port": bw_instance[-2] or 5000,
-            "server_name": bw_instance[-1] or "bwapi",
-        }
-    )
+    CORE_CONFIG.logger.info("✅ Custom configs from files saved to database")
 
 err = DB.refresh_instances([], "dynamic")
 
 if err:
-    LOGGER.error(f"Can't clear dynamic BunkerWeb instances to database : {err}")
+    CORE_CONFIG.logger.error(
+        f"Can't clear dynamic BunkerWeb instances to database : {err}"
+    )
     stop(1)
 
-err = DB.refresh_instances(static_bunkerweb_instances, "static")
+err = DB.refresh_instances(CORE_CONFIG.bunkerweb_instances, "static")
 
 if err:
-    LOGGER.error(f"Can't refresh static BunkerWeb instances to database : {err}")
+    CORE_CONFIG.logger.error(
+        f"Can't refresh static BunkerWeb instances to database : {err}"
+    )
     stop(1)
 
-LOGGER.info("✅ BunkerWeb static instances updated to database")
+CORE_CONFIG.logger.info("✅ BunkerWeb static instances updated to database")
 
 if CORE_CONFIG.integration in ("Linux", "Docker"):
     if config_files != db_config:
         err = DB.save_config(config_files, "core")
 
         if err:
-            LOGGER.error(
+            CORE_CONFIG.logger.error(
                 f"Can't save config to database : {err}",
             )
             stop(1)
 
-        LOGGER.info("✅ Config successfully saved to database")
+        CORE_CONFIG.logger.info("✅ Config successfully saved to database")
 
-    LOGGER.info("Executing scheduler ...")
+    CORE_CONFIG.logger.info("Executing scheduler ...")
     scheduler_initialized.set()
     threads = [
         Thread(
@@ -469,7 +433,7 @@ if CORE_CONFIG.integration in ("Linux", "Docker"):
         thread.start()
 else:
     while not DB.is_autoconf_loaded():
-        LOGGER.warning(
+        CORE_CONFIG.logger.warning(
             f"Autoconf is not loaded yet in the database, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
         )
         sleep(int(CORE_CONFIG.WAIT_RETRY_INTERVAL))
@@ -485,7 +449,7 @@ def listen_dynamic_instances():
     SEMAPHORE.acquire()
 
     if not any((REDIS_HOST, REDIS_PORT, REDIS_DATABASE, REDIS_TIMEOUT)):
-        LOGGER.warning(
+        CORE_CONFIG.logger.warning(
             "USE_REDIS is set to yes but one or more of the following variables are not defined: REDIS_HOST, REDIS_PORT, REDIS_DATABASE, REDIS_TIMEOUT, app will not listen for dynamic instances"
         )
         SEMAPHORE.release()
@@ -504,7 +468,7 @@ def listen_dynamic_instances():
         socket_timeout=REDIS_TIMEOUT,
     )
 
-    LOGGER.info("USE_REDIS is set to yes, trying to connect to Redis ...")
+    CORE_CONFIG.logger.info("USE_REDIS is set to yes, trying to connect to Redis ...")
 
     retries = 0
     connected = False
@@ -515,33 +479,33 @@ def listen_dynamic_instances():
         except Exception:
             retries += 1
             if retries > 10:
-                LOGGER.error(
+                CORE_CONFIG.logger.error(
                     f"Couldn't connect to Redis after 10 retries, app will not listen for dynamic instances"
                 )
                 SEMAPHORE.release()
                 return
-            LOGGER.warning(
+            CORE_CONFIG.logger.warning(
                 f"Can't connect to Redis, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
             )
             sleep(int(CORE_CONFIG.WAIT_RETRY_INTERVAL))
 
-    LOGGER.info("✅ Connected to Redis")
+    CORE_CONFIG.logger.info("✅ Connected to Redis")
 
     pubsub = redis_client.pubsub()
 
-    LOGGER.info('Subscribing to Redis channel "bw-instances" ...')
+    CORE_CONFIG.logger.info('Subscribing to Redis channel "bw-instances" ...')
 
     while not stop_event.is_set():
         try:
             pubsub.subscribe("bw-instances")
             break
         except ConnectionError:
-            LOGGER.warning(
+            CORE_CONFIG.logger.warning(
                 f"Can't subscribe to Redis channel, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
             )
             sleep(int(CORE_CONFIG.WAIT_RETRY_INTERVAL))
 
-    LOGGER.info(
+    CORE_CONFIG.logger.info(
         '✅ Subscribed to Redis channel "bw-instances", starting to listen for dynamic instances ...'
     )
 
@@ -556,29 +520,33 @@ def listen_dynamic_instances():
                         pubsub.close()
                         pubsub.subscribe("bw-instances")
                         break
-                    sleep(1)
+                    sleep(int(CORE_CONFIG.WAIT_RETRY_INTERVAL))
 
             try:
                 if (
                     isinstance(pubsub_message, dict)
                     and pubsub_message.get("type") == "message"
                 ):
-                    LOGGER.info(f"Redis - New message received: {pubsub_message}")
+                    CORE_CONFIG.logger.info(
+                        f"Redis - New message received: {pubsub_message}"
+                    )
                     try:
                         message = json_loads(pubsub_message["data"])
                     except JSONDecodeError:
-                        LOGGER.warning(
+                        CORE_CONFIG.logger.warning(
                             f"Can't decode message data: {pubsub_message['data']}, ignoring it ..."
                         )
                         continue
 
                     if message.get("type") != "startup":
-                        LOGGER.warning(
+                        CORE_CONFIG.logger.warning(
                             f"Invalid message type: {message.get('type', 'missing key')}, ignoring it ..."
                         )
                         continue
                     elif "data" not in message:
-                        LOGGER.warning(f"Missing message data, ignoring it ...")
+                        CORE_CONFIG.logger.warning(
+                            f"Missing message data, ignoring it ..."
+                        )
                         continue
 
                     data = message["data"]
@@ -587,22 +555,24 @@ def listen_dynamic_instances():
                         key in data
                         for key in ("hostname", "listening_port", "server_name")
                     ):
-                        LOGGER.warning(f"Invalid message data: {data}, ignoring it ...")
+                        CORE_CONFIG.logger.warning(
+                            f"Invalid message data: {data}, ignoring it ..."
+                        )
                         continue
                     elif len(data["hostname"]) > 256:
-                        LOGGER.warning(
+                        CORE_CONFIG.logger.warning(
                             f"Invalid hostname provided: {data['hostname']}, it must be less than 256 characters, ignoring it ..."
                         )
                         continue
                     elif not data["listening_port"].isdigit() or not (
                         1 <= int(data["listening_port"]) <= 65535
                     ):
-                        LOGGER.warning(
+                        CORE_CONFIG.logger.warning(
                             f"Invalid listening_port provided: {data['listening_port']}, it must be an integer between 1 and 65535, ignoring it ..."
                         )
                         continue
                     elif len(data["server_name"]) > 256:
-                        LOGGER.warning(
+                        CORE_CONFIG.logger.warning(
                             f"Invalid server_name provided: {data['server_name']}, it must be less than 256 characters, ignoring it ..."
                         )
                         continue
@@ -615,12 +585,12 @@ def listen_dynamic_instances():
                     )
 
                     if error and error not in ("created", "updated"):
-                        LOGGER.error(
+                        CORE_CONFIG.logger.error(
                             f"Couldn't save instance to database: {error}, ignoring it ..."
                         )
                         continue
 
-                    LOGGER.info(
+                    CORE_CONFIG.logger.info(
                         f"✅ Instance {data['hostname']}:{data['listening_port']}:{data['server_name']} successfully {error} to database"
                     )
                     instance_api = API(
@@ -631,12 +601,12 @@ def listen_dynamic_instances():
                     if not test_and_send_to_instances("all", {instance_api}):
                         continue
 
-                    LOGGER.info(
+                    CORE_CONFIG.logger.info(
                         f"Successfully sent data to instance {instance_api.endpoint}"
                     )
             except Exception:
-                LOGGER.exception(
-                    f"Exception while parsing message: {pubsub_message}: {format_exc()}"
+                CORE_CONFIG.logger.exception(
+                    f"Exception while parsing message: {pubsub_message}"
                 )
     finally:
         with suppress(ConnectionError):
@@ -647,7 +617,7 @@ def listen_dynamic_instances():
 
 def run_pending_jobs() -> None:
     while not scheduler_initialized.is_set():
-        LOGGER.warning(
+        CORE_CONFIG.logger.warning(
             f"Scheduler is not initialized yet, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
         )
         sleep(
@@ -672,24 +642,26 @@ def instances_healthcheck() -> None:
     }
 
     if not instance_apis:
-        LOGGER.warning("No instances found in database, skipping healthcheck ...")
+        CORE_CONFIG.logger.warning(
+            "No instances found in database, skipping healthcheck ..."
+        )
         return
 
     for instance, instance_api in instance_apis.items():
         sent, err, status, resp = instance_api.request("GET", "ping")
         if not sent:
-            LOGGER.warning(
+            CORE_CONFIG.logger.warning(
                 f"Can't send API request to {instance_api.endpoint}ping : {err}, healthcheck will be retried in 30 seconds ..."
             )
             continue
         else:
             if status != 200:
-                LOGGER.warning(
+                CORE_CONFIG.logger.warning(
                     f"Error while sending API request to {instance_api.endpoint}ping : status = {resp['status']}, msg = {resp['msg']}, healthcheck will be retried in 30 seconds ..."
                 )
                 continue
             else:
-                LOGGER.info(
+                CORE_CONFIG.logger.info(
                     f"Successfully sent API request to {instance_api.endpoint}ping, marking instance as seen ..."
                 )
 
@@ -719,7 +691,7 @@ async def validate_request(request: Request, call_next):
 
     if CORE_CONFIG.check_whitelist and request.client.host != "127.0.0.1":
         if not CORE_CONFIG.whitelist:
-            LOGGER.warning(
+            CORE_CONFIG.logger.warning(
                 f'Unauthorized access attempt from {request.client.host} (whitelist check is set to "yes" but the whitelist is empty), aborting...'
             )
             return JSONResponse(
@@ -728,16 +700,14 @@ async def validate_request(request: Request, call_next):
 
         remote_ip = ip_address(request.client.host)
         for whitelist in CORE_CONFIG.whitelist:
-            if isinstance(whitelist, IPv4Network) or isinstance(whitelist, IPv6Network):
+            if isinstance(whitelist, (IPv4Network, IPv6Network)):
                 if remote_ip in whitelist:
                     break
-            elif isinstance(whitelist, IPv4Address) or isinstance(
-                whitelist, IPv6Address
-            ):
+            elif isinstance(whitelist, (IPv4Address, IPv6Address)):
                 if remote_ip == whitelist:
                     break
         else:
-            LOGGER.warning(
+            CORE_CONFIG.logger.warning(
                 f"Unauthorized access attempt from {remote_ip} (not in whitelist), aborting..."
             )
             return JSONResponse(
@@ -746,7 +716,7 @@ async def validate_request(request: Request, call_next):
 
     if CORE_CONFIG.check_token:
         if request.headers.get("Authorization") != f"Bearer {CORE_CONFIG.TOKEN}":
-            LOGGER.warning(
+            CORE_CONFIG.logger.warning(
                 f"Unauthorized access attempt from {request.client.host} (invalid token), aborting..."
             )
             return JSONResponse(
@@ -784,7 +754,7 @@ if config_files.get("USE_REDIS", "no") == "yes":
     if REDIS_HOST:
         redis_port = config_files.get("REDIS_PORT", "6379")
         if not redis_port.isdigit() or not (1 <= int(redis_port) <= 65535):
-            LOGGER.warning(
+            CORE_CONFIG.logger.warning(
                 f"Invalid REDIS_PORT provided: {redis_port}, It must be an integer between 1 and 65535, port will default to 6379"
             )
             redis_port = 6379
@@ -793,7 +763,7 @@ if config_files.get("USE_REDIS", "no") == "yes":
 
         redis_database = config_files.get("REDIS_DATABASE", "0")
         if not redis_database.isdigit() or not (0 <= int(redis_database) <= 15):
-            LOGGER.warning(
+            CORE_CONFIG.logger.warning(
                 f"Invalid REDIS_DATABASE provided: {redis_database}, It must be an integer between 0 and 15, database will default to 0"
             )
             redis_database = 0
@@ -805,7 +775,7 @@ if config_files.get("USE_REDIS", "no") == "yes":
 
         redis_timeout = config_files.get("REDIS_TIMEOUT", "1000")  # ms
         if not redis_timeout.isdigit() or int(redis_timeout) < 1:
-            LOGGER.warning(
+            CORE_CONFIG.logger.warning(
                 f"Invalid REDIS_TIMEOUT provided: {redis_timeout}, It must be a positive integer, timeout will default to 1000 ms"
             )
             redis_timeout = 1000
@@ -814,7 +784,7 @@ if config_files.get("USE_REDIS", "no") == "yes":
 
         Thread(target=listen_dynamic_instances, name="redis_listener").start()
     else:
-        LOGGER.warning(
+        CORE_CONFIG.logger.warning(
             "USE_REDIS is set to yes but REDIS_HOST is not defined, app will not listen for dynamic instances"
         )
 
@@ -835,10 +805,11 @@ if not HEALTHY_PATH.exists():
 if __name__ == "__main__":
     from uvicorn import run
 
-    if not CORE_CONFIG.LISTEN_PORT.isdigit() or not (
-        1 <= int(CORE_CONFIG.LISTEN_PORT) <= 65535
+    if not isinstance(CORE_CONFIG.LISTEN_PORT, int) and (
+        not CORE_CONFIG.LISTEN_PORT.isdigit()
+        or not (1 <= int(CORE_CONFIG.LISTEN_PORT) <= 65535)
     ):
-        LOGGER.error(
+        CORE_CONFIG.logger.error(
             f"Invalid LISTEN_PORT provided: {CORE_CONFIG.LISTEN_PORT}, It must be an integer between 1 and 65535."
         )
         stop(1)

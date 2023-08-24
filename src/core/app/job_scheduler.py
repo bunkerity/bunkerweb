@@ -13,7 +13,6 @@ from time import time
 from typing import Any, Dict, Optional
 from subprocess import DEVNULL, STDOUT, run
 from threading import Lock, Semaphore, Thread
-from traceback import format_exc
 
 
 from croniter import croniter
@@ -132,8 +131,8 @@ class JobScheduler:
             except FileNotFoundError:
                 pass
             except:
-                self.__logger.warning(
-                    f"Exception while getting jobs for plugin {plugin_name} : {format_exc()}",
+                self.__logger.exception(
+                    f"Exception while getting jobs for plugin {plugin_name}",
                 )
         return jobs
 
@@ -167,8 +166,8 @@ class JobScheduler:
             ret = proc.returncode
         except BaseException:
             success = False
-            self.__logger.error(
-                f"Exception while executing job {name} from plugin {plugin} :\n{format_exc()}",
+            self.__logger.exception(
+                f"Exception while executing job {name} from plugin {plugin}"
             )
             with self.__thread_lock:
                 self.__job_success = False
@@ -238,8 +237,8 @@ class JobScheduler:
                             self.__job_wrapper, path, plugin, name, file
                         )
                 except:
-                    self.__logger.error(
-                        f"Exception while scheduling jobs for plugin {plugin} : {format_exc()}",
+                    self.__logger.exception(
+                        f"Exception while scheduling jobs for plugin {plugin}",
                     )
 
     def run_pending(self) -> bool:
@@ -352,8 +351,6 @@ class JobScheduler:
             ret = self.run_once()
             self.setup()
         except:
-            self.__logger.error(
-                f"Exception while reloading scheduler {format_exc()}",
-            )
+            self.__logger.exception("Exception while reloading scheduler")
             return False
         return ret

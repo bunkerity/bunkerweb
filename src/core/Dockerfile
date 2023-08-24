@@ -59,6 +59,7 @@ RUN apk add --no-cache bash jq grep libmagic && \
   echo "Docker" > INTEGRATION && \
   mkdir -p /etc/bunkerweb && \
   mkdir -p /etc/nginx && \
+  mkdir -p /run/secrets && \
   mkdir -p /var/tmp/bunkerweb && \
   mkdir -p /var/run/bunkerweb && \
   mkdir -p /var/log/bunkerweb && \

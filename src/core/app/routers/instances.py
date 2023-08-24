@@ -3,7 +3,7 @@ from fastapi import APIRouter, BackgroundTasks, status, Path as fastapi_Path
 from fastapi.responses import JSONResponse
 
 from ..models import ErrorMessage, Instance, InstanceWithMethod
-from ..dependencies import DB, LOGGER, test_and_send_to_instances
+from ..dependencies import CORE_CONFIG, DB, test_and_send_to_instances
 from API import API  # type: ignore
 
 router = APIRouter(prefix="/instances", tags=["instances"])
@@ -58,18 +58,20 @@ async def upsert_instance(
 
     if error == "exists":
         message = f"Instance {instance.hostname} already exists"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT, content={"message": message}
         )
     elif error not in ("created", "updated"):
-        LOGGER.error(f"Can't upsert instance to database : {error}")
+        CORE_CONFIG.logger.error(f"Can't upsert instance to database : {error}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": error},
         )
 
-    LOGGER.info(f"✅ Instance {instance.hostname} successfully {error} to database")
+    CORE_CONFIG.logger.info(
+        f"✅ Instance {instance.hostname} successfully {error} to database"
+    )
 
     background_tasks.add_task(test_and_send_to_instances, "all", {instance.to_api()})
 
@@ -112,7 +114,7 @@ async def get_instance(
 
     if not db_instance:
         message = f"Instance {instance_hostname} not found"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
         )
@@ -144,18 +146,20 @@ async def delete_instance(instance_hostname: str) -> JSONResponse:
 
     if error == "not_found":
         message = f"Instance {instance_hostname} not found"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
         )
     elif error:
-        LOGGER.error(f"Can't remove instance to database : {error}")
+        CORE_CONFIG.logger.error(f"Can't remove instance to database : {error}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": error},
         )
 
-    LOGGER.info(f"✅ Instance {instance_hostname} successfully removed from database")
+    CORE_CONFIG.logger.info(
+        f"✅ Instance {instance_hostname} successfully removed from database"
+    )
 
     return JSONResponse(
         content={"message": "Instance successfully removed"},
@@ -193,7 +197,7 @@ async def send_instance_action(
 
     if not db_instance:
         message = f"Instance {instance_hostname} not found"
-        LOGGER.warning(message)
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
         )
@@ -209,7 +213,7 @@ async def send_instance_action(
 
     if not sent:
         error = f"Can't send API request to {instance_api.endpoint}{action} : {err}"
-        LOGGER.error(error)
+        CORE_CONFIG.logger.error(error)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": error},
@@ -217,9 +221,11 @@ async def send_instance_action(
     else:
         if status_code != 200:
             error = f"Error while sending API request to {instance_api.endpoint}{action} : status = {resp['status']}, msg = {resp['msg']}"
-            LOGGER.error(error)
+            CORE_CONFIG.logger.error(error)
             return JSONResponse(status_code=status_code, content={"message": error})
 
-    LOGGER.info(f"Successfully sent API request to {instance_api.endpoint}{action}")
+    CORE_CONFIG.logger.info(
+        f"Successfully sent API request to {instance_api.endpoint}{action}"
+    )
 
     return JSONResponse(content={"message": resp})

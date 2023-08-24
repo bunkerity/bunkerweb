@@ -12,7 +12,6 @@ from re import compile as re_compile, search as re_search
 from sys import path as sys_path
 from tarfile import open as tar_open
 from threading import Lock, Semaphore, Thread
-from traceback import format_exc
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
@@ -159,9 +158,7 @@ class Configurator:
                 with self.__thread_lock:
                     self.__core_plugins.append(data)
         except:
-            self.__logger.error(
-                f"Exception while loading JSON from {file} : {format_exc()}",
-            )
+            self.__logger.exception(f"Exception while loading JSON from {file}")
         self.__semaphore.release()
 
     def __load_variables(self, path: str) -> Dict[str, Any]:

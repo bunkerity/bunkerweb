@@ -9,7 +9,6 @@ from shutil import rmtree
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
-from traceback import format_exc
 from typing import Any, Dict
 
 for deps_path in [
@@ -215,9 +214,7 @@ if __name__ == "__main__":
     except SystemExit as e:
         raise e
     except:
-        logger.error(
-            f"Exception while executing generator : {format_exc()}",
-        )
+        logger.exception("Exception while executing generator")
         sys_exit(1)
 
     # We're done

@@ -3,6 +3,7 @@
 
 from os import getenv
 from pathlib import Path
+from re import compile as re_compile
 from typing import Any, Dict, Literal, Mapping, Optional, Tuple, Type, Union
 
 from pydantic._internal._utils import deep_update
@@ -23,8 +24,32 @@ class YamlSettingsConfigDict(SettingsConfigDict, total=False):
     yaml_file: str
 
 
+def replace_secrets(secrets_dir: Path, data: str) -> str:
+    """
+    Replace "<file:xxxx>" secrets in given data
+
+    """
+    pattern = re_compile(r"\<file\:([^>]*)\>")
+
+    for match in pattern.findall(data):
+        relpath = Path(match)
+        path = secrets_dir / relpath
+
+        if not path.exists():
+            print(
+                f"Secret file referenced in yaml file not found: {path}, settings will not be loaded from secret file.",
+                flush=True,
+            )
+        else:
+            data = data.replace(f"<file:{match.upper()}>", path.read_text("utf-8"))
+    return data
+
+
 def yaml_config_settings_source(
-    settings: "YamlBaseSettings", yaml_file: str = None
+    settings: "YamlBaseSettings",
+    *,
+    yaml_file: Optional[Union[str, Path]] = None,
+    secrets_dir: Optional[Union[str, Path]] = None,
 ) -> Dict[str, Any]:
     """Loads settings from a YAML file at `Config.yaml_file`
 
@@ -33,15 +58,19 @@ def yaml_config_settings_source(
     """
     if yaml_file is None:
         yaml_file = settings.model_config.get("yaml_file")
+    if secrets_dir is None:
+        secrets_dir = settings.model_config.get("secrets_dir")
 
     assert yaml_file, "Settings.yaml_file not properly configured"
+    assert secrets_dir, "Settings.secrets_dir not properly configured"
 
     path = Path(yaml_file)
+    secrets_path = Path(secrets_dir)
 
     if not path.exists():
         raise FileNotFoundError(f"Could not open yaml settings file at: {path}")
 
-    return safe_load(path.read_text("utf-8"))
+    return safe_load(replace_secrets(secrets_path, path.read_text("utf-8")))
 
 
 class YamlConfigSettingsSource(DotEnvSettingsSource):
@@ -54,22 +83,21 @@ class YamlConfigSettingsSource(DotEnvSettingsSource):
     def __init__(
         self,
         settings_cls: type[DotEnvSettingsSource],
-        bw_service: Optional[
-            Union[
-                Literal["core"],
-                Literal["scheduler"],
-                Literal["autoconf"],
-                Literal["ui"],
-            ]
-        ] = None,
+        bw_service: Optional[Literal["core", "autoconf", "ui"]] = None,
         yaml_file: Optional[str] = None,
-        env_file: DotenvType | None = ENV_FILE_SENTINEL,
-        env_file_encoding: str | None = None,
-        case_sensitive: bool | None = None,
-        env_prefix: str | None = None,
-        env_nested_delimiter: str | None = None,
+        env_file: Optional[DotenvType] = ENV_FILE_SENTINEL,
+        env_file_encoding: Optional[str] = None,
+        case_sensitive: Optional[bool] = None,
+        env_prefix: Optional[str] = None,
+        env_nested_delimiter: Optional[str] = None,
+        secrets_dir: Optional[Union[str, Path]] = None,
     ) -> None:
-        self._yaml_data = yaml_config_settings_source(settings_cls, yaml_file) or {}
+        self._yaml_data = (
+            yaml_config_settings_source(
+                settings_cls, yaml_file=yaml_file, secrets_dir=secrets_dir
+            )
+            or {}
+        )
 
         for k, v in (self._yaml_data.get("global", None) or {}).items():
             self._yaml_data[k.upper()] = v
@@ -137,16 +165,14 @@ class YamlBaseSettings(BaseSettings):
 
     def __init__(
         __pydantic_self__,
-        _bw_service: Union[
-            Literal["core"], Literal["scheduler"], Literal["autoconf"], Literal["ui"]
-        ],
+        _bw_service: Optional[Literal["core", "autoconf", "ui"]] = None,
         _yaml_file: Optional[str] = None,
-        _case_sensitive: bool | None = None,
-        _env_prefix: str | None = None,
-        _env_file: DotenvType | None = ENV_FILE_SENTINEL,
-        _env_file_encoding: str | None = None,
-        _env_nested_delimiter: str | None = None,
-        _secrets_dir: str | Path | None = None,
+        _case_sensitive: Optional[bool] = None,
+        _env_prefix: Optional[str] = None,
+        _env_file: Optional[DotenvType] = ENV_FILE_SENTINEL,
+        _env_file_encoding: Optional[str] = None,
+        _env_nested_delimiter: Optional[str] = None,
+        _secrets_dir: Optional[Union[str, Path]] = None,
         **values: Any,
     ) -> None:
         # Uses something other than `self` the first arg to allow "self" as a settable attribute
@@ -290,6 +316,7 @@ class YamlBaseSettings(BaseSettings):
             return {}
 
     model_config = SettingsConfigDict(
+        secrets_dir=getenv("SETTINGS_SECRETS_DIR", "/etc/secrets"),
         yaml_file=getenv("SETTINGS_YAML_FILE", "/etc/config/config.yaml"),
     )
 
