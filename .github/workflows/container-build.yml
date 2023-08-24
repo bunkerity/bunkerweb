@@ -42,9 +42,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       # Prepare
       - name: Checkout source code

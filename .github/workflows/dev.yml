@@ -9,6 +9,9 @@ on:
 jobs:
   # Containers
   build-containers:
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui]
