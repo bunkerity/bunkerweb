@@ -10,15 +10,25 @@ router = APIRouter(prefix="/config", tags=["config"])
 
 @router.get(
     "",
-    response_model=Dict[
-        str, Union[str, Dict[Literal["value", "global", "method"], Union[str, bool]]]
+    response_model=Union[
+        Dict[
+            str,
+            Union[str, Dict[Literal["value", "global", "method"], Union[str, bool]]],
+        ],
+        Dict[
+            Literal["global", "services"],
+            Dict[
+                str,
+                Union[str, Dict[Literal["value", "method"], str]],
+            ],
+        ],
     ],
     summary="Get config from Database",
     response_description="BunkerWeb config",
 )
-async def get_config(methods: bool = False):
+async def get_config(methods: bool = False, new_format: bool = False):
     """Get config from Database"""
-    return DB.get_config(methods=methods)
+    return DB.get_config(methods=methods, new_format=new_format)
 
 
 @router.put(

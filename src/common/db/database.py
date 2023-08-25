@@ -1195,10 +1195,19 @@ class Database:
 
         return message
 
-    def get_config(self, methods: bool = False) -> Dict[str, Any]:
+    def get_config(
+        self, methods: bool = False, *, new_format: bool = False
+    ) -> Dict[str, Any]:
         """Get the config from the database"""
         with self.__db_session() as session:
-            config = {}
+            config: dict = (
+                {
+                    "global": {},
+                    "services": {},
+                }
+                if new_format
+                else {}
+            )
             multisite = []
             for setting in (
                 session.query(Settings)
@@ -1211,11 +1220,17 @@ class Database:
                 .all()
             ):
                 default = setting.default or ""
-                config[setting.id] = (
-                    default
-                    if methods is False
-                    else {"value": default, "global": True, "method": "default"}
-                )
+
+                if new_format:
+                    config["global"][setting.id] = (
+                        {"value": default, "method": "default"} if methods else default
+                    )
+                else:
+                    config[setting.id] = (
+                        {"value": default, "global": True, "method": "default"}
+                        if methods
+                        else default
+                    )
 
                 global_values = (
                     session.query(Global_values)
@@ -1227,28 +1242,38 @@ class Database:
                 )
 
                 for global_value in global_values:
-                    config[
-                        setting.id
-                        + (
-                            f"_{global_value.suffix}"
-                            if setting.multiple and global_value.suffix > 0
-                            else ""
-                        )
-                    ] = (
-                        global_value.value
-                        if methods is False
-                        else {
-                            "value": global_value.value,
-                            "global": True,
-                            "method": global_value.method,
-                        }
+                    setting_key = setting.id + (
+                        f"_{global_value.suffix}"
+                        if setting.multiple and global_value.suffix > 0
+                        else ""
                     )
+                    if new_format:
+                        config["global"][setting_key] = (
+                            {
+                                "value": global_value.value,
+                                "method": global_value.method,
+                            }
+                            if methods
+                            else global_value.value
+                        )
+                    else:
+                        config[setting_key] = (
+                            {
+                                "value": global_value.value,
+                                "global": True,
+                                "method": global_value.method,
+                            }
+                            if methods
+                            else global_value.value
+                        )
 
                 if setting.context == "multisite":
                     multisite.append(setting.id)
 
             if config.get("MULTISITE", "no") == "yes":
                 for service in session.query(Services).with_entities(Services.id).all():
+                    if new_format and service not in config["services"]:
+                        config["services"][service.id] = {}
                     checked_settings = []
                     for key, value in deepcopy(config).items():
                         original_key = key
@@ -1258,7 +1283,10 @@ class Database:
                         if key not in multisite:
                             continue
                         elif f"{service.id}_{original_key}" not in config:
-                            config[f"{service.id}_{original_key}"] = value
+                            if new_format:
+                                config["services"][service.id][original_key] = value
+                            else:
+                                config[f"{service.id}_{original_key}"] = value
 
                         if original_key not in checked_settings:
                             checked_settings.append(original_key)
@@ -1277,29 +1305,44 @@ class Database:
                         )
 
                         for service_setting in service_settings:
-                            config[
-                                f"{service.id}_{key}"
-                                + (
-                                    f"_{service_setting.suffix}"
-                                    if service_setting.suffix > 0
-                                    else ""
-                                )
-                            ] = (
-                                service_setting.value
-                                if methods is False
-                                else {
-                                    "value": service_setting.value,
-                                    "global": False,
-                                    "method": service_setting.method,
-                                }
+                            setting_key = key + (
+                                f"_{service_setting.suffix}"
+                                if service_setting.suffix > 0
+                                else ""
                             )
+                            if new_format:
+                                config["services"][service.id][setting_key] = (
+                                    {
+                                        "value": service_setting.value,
+                                        "method": service_setting.method,
+                                    }
+                                    if methods
+                                    else service_setting.value
+                                )
+                            else:
+                                config[f"{service.id}_{setting_key}"] = (
+                                    {
+                                        "value": service_setting.value,
+                                        "global": False,
+                                        "method": service_setting.method,
+                                    }
+                                    if methods
+                                    else service_setting.value
+                                )
 
-            servers = " ".join(service.id for service in session.query(Services).all())
-            config["SERVER_NAME"] = (
-                servers
-                if methods is False
-                else {"value": servers, "global": True, "method": "default"}
-            )
+            servers = " ".join(service.id for service in session.query(Services).all()) # type: ignore
+            if new_format:
+                config["global"]["SERVER_NAME"] = (
+                    {"value": servers, "method": "default"}
+                    if methods
+                    else servers
+                )
+            else:
+                config["SERVER_NAME"] = (
+                    {"value": servers, "global": True, "method": "default"}
+                    if methods
+                    else servers
+                )
 
             return config
 
