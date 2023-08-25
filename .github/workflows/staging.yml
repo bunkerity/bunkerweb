@@ -10,6 +10,9 @@ jobs:
 
   # Build Docker images
   build-containers:
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui]
@@ -33,11 +36,12 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Build Linux packages
   build-packages:
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         linux: [ubuntu, debian, fedora, rhel]
@@ -60,8 +64,6 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Code security
   code-security:
@@ -126,9 +128,6 @@ jobs:
     uses: ./.github/workflows/tests-ui.yml
     with:
       RELEASE: testing
-    secrets:
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
   prepare-tests-core:
     needs: [create-infras]
     runs-on: ubuntu-latest
@@ -151,9 +150,6 @@ jobs:
     with:
       TEST: ${{ matrix.test }}
       RELEASE: testing
-    secrets:
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Delete infrastructures
   delete-infras:
@@ -172,26 +168,29 @@ jobs:
   push-images:
     needs: [staging-tests, tests-ui, tests-core]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Login to private repository
+      - name: Login to ghcr
         uses: docker/login-action@v2
         with:
-          registry: ${{ secrets.PRIVATE_REGISTRY }}
-          username: registry
-          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push BW image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:testing && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:testing bunkerity/bunkerweb:testing && docker push bunkerity/bunkerweb:testing
+        run: docker pull ghcr.io/bunkerweb-tests:testing && docker tag ghcr.io/bunkerweb-tests:testing bunkerity/bunkerweb:testing && docker push bunkerity/bunkerweb:testing && docker tag bunkerity/bunkerweb:testing ghcr.io/bunkerity/bunkerweb:testing && docker push ghcr.io/bunkerity/bunkerweb:testing
       - name: Push scheduler image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:testing && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:testing bunkerity/bunkerweb-scheduler:testing && docker push bunkerity/bunkerweb-scheduler:testing
+        run: docker pull ghcr.io/scheduler-tests:testing && docker tag ghcr.io/scheduler-tests:testing bunkerity/bunkerweb-scheduler:testing && docker push bunkerity/bunkerweb-scheduler:testing && docker tag bunkerity/bunkerweb-scheduler:testing ghcr.io/bunkerity/bunkerweb-scheduler:testing && docker push ghcr.io/bunkerity/bunkerweb-scheduler:testing
       - name: Push UI image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/ui-tests:testing && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/ui-tests:testing bunkerity/bunkerweb-ui:testing && docker push bunkerity/bunkerweb-ui:testing
+        run: docker pull ghcr.io/ui-tests:testing && docker tag ghcr.io/ui-tests:testing bunkerity/bunkerweb-ui:testing && docker push bunkerity/bunkerweb-ui:testing && docker tag bunkerity/bunkerweb-ui:testing ghcr.io/bunkerity/bunkerweb-ui:testing && docker push ghcr.io/bunkerity/bunkerweb-ui:testing
       - name: Push autoconf image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/autoconf-tests:testing && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/autoconf-tests:testing bunkerity/bunkerweb-autoconf:testing && docker push bunkerity/bunkerweb-autoconf:testing
+        run: docker pull ghcr.io/autoconf-tests:testing && docker tag ghcr.io/autoconf-tests:testing bunkerity/bunkerweb-autoconf:testing && docker push bunkerity/bunkerweb-autoconf:testing && docker tag bunkerity/bunkerweb-autoconf:testing ghcr.io/bunkerity/bunkerweb-autoconf:testing && docker push ghcr.io/bunkerity/bunkerweb-autoconf:testing
 
   # Push Linux packages
   push-packages:

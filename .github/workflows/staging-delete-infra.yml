@@ -20,11 +20,18 @@ jobs:
         uses: actions/checkout@v3
       - name: Install terraform
         uses: hashicorp/setup-terraform@v2
+
       - uses: actions/download-artifact@v3
         with:
           name: tf-${{ inputs.TYPE }}
           path: /tmp
-      - run: tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
+      - run: |
+          echo "$SECRET_KEY" > /tmp/.secret_key
+          openssl dec -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -pass file:/tmp/.secret_key -out /tmp/terraform.tar
+          rm -f /tmp/.secret_key
+          tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
       - uses: azure/setup-kubectl@v3
         if: inputs.TYPE == 'k8s'
       # Remove infra

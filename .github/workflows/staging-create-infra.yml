@@ -41,10 +41,18 @@ jobs:
       - run: ./tests/create.sh ${{ inputs.TYPE }}
         env:
           CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      - run: tar -cvf terraform.tar /tmp/${{ inputs.TYPE }}
+          REG_USER: ${{ github.actor }}
+          REG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          tar -cvf terraform.tar /tmp/${{ inputs.TYPE }}
+          echo "$SECRET_KEY" > /tmp/.secret_key
+          openssl enc -in terraform.tar -aes-256-cbc -pbkdf2 -pass file:/tmp/.secret_key -out terraform.tar.enc
+          rm -f /tmp/.secret_key
         if: always()
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
       - uses: actions/upload-artifact@v3
         if: always()
         with:
           name: tf-${{ inputs.TYPE }}
-          path: terraform.tar
+          path: terraform.tar.enc

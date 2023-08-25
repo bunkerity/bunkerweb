@@ -2,10 +2,12 @@
 variable "docker_ip" {
   type     = string
   nullable = false
+  sensitive = true
 }
 variable "docker_ip_id" {
   type     = string
   nullable = false
+  sensitive = true
 }
 
 # Create cicd_bw_docker SSH key
@@ -25,7 +27,7 @@ resource "scaleway_instance_server" "instance" {
 
 # Create Ansible inventory file
 resource "local_file" "ansible_inventory" {
-  content = templatefile("templates/docker_inventory.tftpl", {
+  sensitive_content = templatefile("templates/docker_inventory.tftpl", {
     public_ip = var.docker_ip
   })
   filename = "/tmp/docker_inventory"

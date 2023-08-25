@@ -2,10 +2,12 @@
 variable "autoconf_ip" {
   type     = string
   nullable = false
+  sensitive = true
 }
 variable "autoconf_ip_id" {
   type     = string
   nullable = false
+  sensitive = true
 }
 
 # Create cicd_bw_autoconf SSH key
@@ -25,7 +27,7 @@ resource "scaleway_instance_server" "instance" {
 
 # Create Ansible inventory file
 resource "local_file" "ansible_inventory" {
-  content = templatefile("templates/autoconf_inventory.tftpl", {
+  sensitive_content = templatefile("templates/autoconf_inventory.tftpl", {
     public_ip = var.autoconf_ip
   })
   filename = "/tmp/autoconf_inventory"
