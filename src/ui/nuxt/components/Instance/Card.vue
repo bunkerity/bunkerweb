@@ -17,7 +17,7 @@ const props = defineProps({
     required: true,
   },
   port: {
-    type: String,
+    type: Number,
     required: true,
   },
   type: {

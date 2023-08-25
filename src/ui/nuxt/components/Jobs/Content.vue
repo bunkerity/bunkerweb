@@ -21,7 +21,7 @@ const emits = defineEmits(["cache", "run"]);
       class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5"
     >
       <div
-        class="break-words flex items-center col-span-12 grid grid-cols-12 text-sm text-gray-400"
+        class="break-words flex items-center col-span-12 grid grid-cols-12 text-sm dark:text-gray-400"
         v-for="(data, key) in item"
       >
         <span :class="[props.positions[0]]">{{ key }}</span>

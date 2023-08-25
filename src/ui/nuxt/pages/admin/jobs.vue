@@ -8,6 +8,7 @@ const {
   data: jobsList,
   pending: jobsPen,
   error: jobsErr,
+  refresh: jobsRefresh,
 } = await useFetch("/api/jobs", {
   method: "GET",
 });
@@ -34,10 +35,6 @@ const jobs = reactive({
     const filter = getJobsByFilter(cloneBase, filters);
     return filter;
   }),
-});
-
-onMounted(() => {
-  console.log(jobs.base);
 });
 
 const positions = [
@@ -166,7 +163,7 @@ async function runJob(data) {
       </SettingsLayout>
     </CardBase>
     <CardBase
-      class="col-span-12 max-w-[1200px] overflow-x-auto overflow-y-visible"
+      class="col-span-12 max-w-[1200px] max-h-[55vh] overflow-x-auto overflow-y-visible"
       label="jobs"
     >
       <JobsStructure>
