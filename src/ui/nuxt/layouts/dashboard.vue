@@ -13,6 +13,7 @@ useGlobal();
   >
   <Loader />
   <Menu />
+  <Feedback />
   <News />
   <Header />
 

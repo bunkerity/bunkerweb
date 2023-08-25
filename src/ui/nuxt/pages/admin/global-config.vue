@@ -14,6 +14,8 @@ const {
   method: "GET",
 });
 
+onMounted(() => {});
+
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
   keyword: "",
@@ -23,9 +25,9 @@ const filters = reactive({
 // Plugins data to render components
 const plugins = reactive({
   // Never modify this unless refetch
-  base: globalConfList.value,
+  base: globalConfList.value.data,
   // Default plugin to display, first of list (before any filter)
-  active: globalConfList.value[0]["name"],
+  active: globalConfList.value.data[0]["name"],
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
     // Filter data to display
@@ -33,7 +35,9 @@ const plugins = reactive({
     const filter = getSettingsByFilter(cloneBase, filters);
     // Check if prev plugin or no plugin match filter
     plugins.active =
-      filter.length !== 0 ? filter[0]["name"] : globalConfList.value[0]["name"];
+      filter.length !== 0
+        ? filter[0]["name"]
+        : globalConfList.value.data[0]["name"];
     return filter;
   }),
 });
@@ -42,7 +46,7 @@ const plugins = reactive({
 function reset() {
   globalConfRef();
   filters.label = "";
-  plugins.active = globalConfList.value[0]["name"];
+  plugins.active = globalConfList.value.data[0]["name"];
 }
 
 const config = useConfigStore();

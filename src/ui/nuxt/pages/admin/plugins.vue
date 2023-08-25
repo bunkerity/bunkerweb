@@ -31,7 +31,6 @@ const plugins = reactive({
     // Filter data to display
     const cloneBase = JSON.parse(JSON.stringify(plugins.base));
     const filter = getPluginsByFilter(cloneBase, filters);
-    console.log(filter);
     return filter;
   }),
 });

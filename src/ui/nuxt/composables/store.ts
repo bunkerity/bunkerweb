@@ -14,8 +14,18 @@ export const useConfigStore = defineStore("config", () => {
   return { data, updateConf };
 });
 
-export const usePluginStore = defineStore("plugin", () => {
-  const data = ref({});
+export const useFeedbackStore = defineStore("feedback", () => {
+  const data: any = ref([
+    { type: "success", message: "test feedback", status: 200 },
+  ]);
 
-  return { data };
+  async function addFeedback(type: string, status: string, message: string) {
+    data.value.push({ type: type, status: status, message: message });
+  }
+
+  function removeFeedback(id: number) {
+    data.value.splice(id, 1);
+  }
+
+  return { data, addFeedback, removeFeedback };
 });
