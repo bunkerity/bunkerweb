@@ -262,17 +262,26 @@ if __name__ == "__main__":
                 "DATABASE_URI", getenv("DATABASE_URI", None)
             ),
         )
+        env = {}
 
         if INTEGRATION in (
             "Swarm",
             "Kubernetes",
             "Autoconf",
         ):
+            while not db.is_initialized():
+                logger.warning(
+                    "Database is not initialized, retrying in 5s ...",
+                )
+                sleep(5)
+
             while not db.is_autoconf_loaded():
                 logger.warning(
                     "Autoconf is not loaded yet in the database, retrying in 5s ...",
                 )
                 sleep(5)
+
+            env = db.get_config()
         elif (
             not tmp_variables_path.exists()
             or not nginx_variables_path.exists()
@@ -301,21 +310,21 @@ if __name__ == "__main__":
                     "Config saver failed, configuration will not work as expected...",
                 )
 
-        while not db.is_initialized():
-            logger.warning(
-                "Database is not initialized, retrying in 5s ...",
-            )
-            sleep(5)
+            while not db.is_initialized():
+                logger.warning(
+                    "Database is not initialized, retrying in 5s ...",
+                )
+                sleep(5)
 
-        env = db.get_config()
-        while not db.is_first_config_saved() or not env:
-            logger.warning(
-                "Database doesn't have any config saved yet, retrying in 5s ...",
-            )
-            sleep(5)
             env = db.get_config()
+            while not db.is_first_config_saved() or not env:
+                logger.warning(
+                    "Database doesn't have any config saved yet, retrying in 5s ...",
+                )
+                sleep(5)
+                env = db.get_config()
 
-        env["DATABASE_URI"] = db.database_uri
+            env["DATABASE_URI"] = db.database_uri
 
         # Instantiate scheduler
         SCHEDULER = JobScheduler(env.copy() | environ.copy(), logger, INTEGRATION)

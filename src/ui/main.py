@@ -205,16 +205,6 @@ while not db.is_initialized():
     )
     sleep(5)
 
-env = db.get_config()
-while not db.is_first_config_saved() or not env:
-    app.logger.warning(
-        "Database doesn't have any config saved yet, retrying in 5s ...",
-    )
-    sleep(5)
-    env = db.get_config()
-
-del env
-
 app.logger.info("Database is ready")
 Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").write_text("ok", encoding="utf-8")
 bw_version = (
