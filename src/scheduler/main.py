@@ -324,7 +324,7 @@ if __name__ == "__main__":
                 sleep(5)
                 env = db.get_config()
 
-            env["DATABASE_URI"] = db.database_uri
+        env["DATABASE_URI"] = db.database_uri
 
         # Instantiate scheduler
         SCHEDULER = JobScheduler(env.copy() | environ.copy(), logger, INTEGRATION)
@@ -744,10 +744,7 @@ if __name__ == "__main__":
                 if CONFIG_NEED_GENERATION:
                     CHANGES.append("config")
                     env = db.get_config()
-                    content = ""
-                    for k, v in env.items():
-                        content += f"{k}={v}\n"
-                    SCHEDULER_TMP_ENV_PATH.write_text(content)
+                    env["DATABASE_URI"] = db.database_uri
 
                 if INSTANCES_NEED_GENERATION:
                     CHANGES.append("instances")
