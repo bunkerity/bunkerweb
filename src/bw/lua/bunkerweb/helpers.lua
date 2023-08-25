@@ -47,7 +47,7 @@ end
 
 helpers.order_plugins = function(plugins)
     -- Extract orders
-    local file, err, nb = io.open("/usr/share/bunkerweb/core/order.json", "r")
+    local file, err, nb = io.open("/usr/share/bunkerweb/core_plugins/order.json", "r")
     if not file then
         return false, err .. " (nb = " .. tostring(nb) .. ")"
     end

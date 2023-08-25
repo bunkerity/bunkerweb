@@ -8,9 +8,9 @@ from redis import StrictRedis
 from sys import path as sys_path
 from typing import Tuple
 
-
-if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
-    sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
+deps_path = join(sep, "usr", "share", "bunkerweb", "utils")
+if deps_path not in sys_path:
+    sys_path.append(deps_path)
 
 from API import API  # type: ignore
 from api_caller import ApiCaller  # type: ignore
@@ -38,7 +38,7 @@ def format_remaining_time(seconds):
 
 
 class CLI(ApiCaller):
-    def __init__(self):
+    def __init__(self):  # TODO: Use the Core API instead
         self.__logger = setup_logger("CLI", getenv("LOG_LEVEL", "INFO"))
         db_path = Path(sep, "usr", "share", "bunkerweb", "db")
 

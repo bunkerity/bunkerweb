@@ -44,7 +44,7 @@ if __name__ == "__main__":
         )
         parser.add_argument(
             "--core",
-            default=join(sep, "usr", "share", "bunkerweb", "core"),
+            default=join(sep, "usr", "share", "bunkerweb", "core_plugins"),
             type=str,
             help="directory containing the core plugins",
         )

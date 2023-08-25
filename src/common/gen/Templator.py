@@ -2,6 +2,7 @@
 
 from glob import glob
 from importlib import import_module
+from os import sep
 from os.path import basename, join
 from pathlib import Path
 from random import choice
@@ -9,8 +10,9 @@ from string import ascii_letters, digits
 from sys import path as sys_path
 from typing import Any, Dict, List, Optional
 
-if join("usr", "share", "bunkerweb", "deps", "python") in sys_path:
-    sys_path.append(join("usr", "share", "bunkerweb", "deps", "python"))
+deps_path = join(sep, "usr", "share", "bunkerweb", "deps", "python")
+if deps_path not in sys_path:
+    sys_path.append(deps_path)
 
 from jinja2 import Environment, FileSystemLoader
 

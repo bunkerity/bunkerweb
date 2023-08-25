@@ -19,12 +19,11 @@ from api_caller import ApiCaller  # type: ignore
 from database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
-from app.core import ApiConfig  # type: ignore
+from app.core import CoreConfig  # type: ignore
 
-API_CONFIG = ApiConfig("core", **environ)
-LOGGER = setup_logger("CORE", API_CONFIG.log_level)
+CORE_CONFIG = CoreConfig("core", **environ)
 
-DB = Database(LOGGER, API_CONFIG.DATABASE_URI)
+DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI)
 
 description = """## API's description
 

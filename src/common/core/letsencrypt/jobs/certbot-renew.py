@@ -46,7 +46,7 @@ def renew(domain: str, letsencrypt_path: Path) -> int:
                 "usr",
                 "share",
                 "bunkerweb",
-                "core",
+                "core_plugins",
                 "letsencrypt",
                 "jobs",
                 "certbot-deploy.py",

@@ -14,8 +14,9 @@ from tarfile import open as tar_open
 from threading import Lock, Semaphore, Thread
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
-if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
-    sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
+deps_path = join(sep, "usr", "share", "bunkerweb", "utils")
+if deps_path not in sys_path:
+    sys_path.append(deps_path)
 
 
 class Configurator:

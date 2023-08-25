@@ -39,7 +39,7 @@ COPY src/bw/misc misc
 COPY src/common/api api
 COPY src/common/cli cli
 COPY src/common/confs confs
-COPY src/common/core core
+COPY src/common/core core_plugins
 COPY src/common/gen gen
 COPY src/common/helpers helpers
 COPY src/common/settings.json settings.json

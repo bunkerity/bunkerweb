@@ -24,7 +24,7 @@ RUN apk del .build-deps && \
 COPY src/autoconf autoconf
 COPY src/common/api api
 COPY src/common/cli cli
-COPY src/common/core core
+COPY src/common/core core_plugins
 COPY src/common/db db
 COPY src/common/helpers helpers
 COPY src/common/settings.json settings.json

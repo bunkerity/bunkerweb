@@ -129,7 +129,7 @@ try:
     letsencrypt_path.mkdir(parents=True, exist_ok=True)
 
     letsencrypt_job_path = Path(
-        sep, "usr", "share", "bunkerweb", "core", "letsencrypt", "jobs"
+        sep, "usr", "share", "bunkerweb", "core_plugins", "letsencrypt", "jobs"
     )
     Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(
         parents=True, exist_ok=True

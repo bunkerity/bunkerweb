@@ -13,7 +13,7 @@ for deps_path in [
         ("deps", "python"),
         ("api",),
         ("utils",),
-        ("core", "bunkernet", "jobs"),
+        ("core_plugins", "bunkernet", "jobs"),
     )
 ]:
     if deps_path not in sys_path:

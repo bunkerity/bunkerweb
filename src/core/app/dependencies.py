@@ -57,7 +57,7 @@ def stop(status):
 signal(SIGINT, partial(stop, 0))  # type: ignore
 signal(SIGTERM, partial(stop, 0))  # type: ignore
 
-CORE_PLUGINS_PATH = Path(sep, "usr", "share", "bunkerweb", "core")
+CORE_PLUGINS_PATH = Path(sep, "usr", "share", "bunkerweb", "core_plugins")
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 CUSTOM_CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
 SETTINGS_PATH = Path(sep, "usr", "share", "bunkerweb", "settings.json")
@@ -66,7 +66,22 @@ CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
 TMP_ENV_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.env")
 TMP_ENV_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-CORE_CONFIG = CoreConfig("core", **environ)
+integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
+os_release_path = Path(sep, "etc", "os-release")
+if (
+    integration_path.is_file()
+    and integration_path.read_text(encoding="utf-8").strip().lower()
+    in ("autoconf", "kubernetes", "swarm")
+) or (
+    os_release_path.is_file()
+    and "Alpine" in os_release_path.read_text(encoding="utf-8")
+):
+    CORE_CONFIG = CoreConfig("core", **environ)
+else:
+    CORE_CONFIG = CoreConfig("core")
+
+del integration_path, os_release_path
+
 INSTANCES_API_CALLER = ApiCaller()
 
 if not isinstance(CORE_CONFIG.WAIT_RETRY_INTERVAL, int) and (

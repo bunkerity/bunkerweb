@@ -274,7 +274,7 @@ function antibot:display_challenge()
 	-- Captcha case
 	if self.session_data.type == "captcha" then
 		local chall_captcha = captcha.new()
-		chall_captcha:font("/usr/share/bunkerweb/core/antibot/files/font.ttf")
+		chall_captcha:font("/usr/share/bunkerweb/core_plugins/antibot/files/font.ttf")
 		chall_captcha:string(self.session_data.captcha)
 		chall_captcha:generate()
 		template_vars.captcha = base64.encode(chall_captcha:jpegStr(70))

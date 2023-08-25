@@ -30,7 +30,7 @@ RUN apk del .build-deps && \
 COPY src/common/api api
 COPY src/common/cli cli
 COPY src/common/confs confs
-COPY src/common/core core
+COPY src/common/core core_plugins
 COPY src/common/db db
 COPY src/common/gen gen
 COPY src/common/helpers helpers
@@ -51,7 +51,7 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Add core user, drop bwcli, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash jq grep libmagic && \
+RUN apk add --no-cache bash grep libmagic && \
   ln -s /usr/local/bin/python3 /usr/bin/python3 && \
   addgroup -g 101 core && \
   adduser -h /usr/share/bunkerweb/core -g core -s /bin/bash -G core -D -H -u 101 core && \
@@ -71,7 +71,7 @@ RUN apk add --no-cache bash jq grep libmagic && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:core /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
   chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
-  find core/*/jobs/* -type f -exec chmod 750 {} \; && \
+  find core_plugins/*/jobs/* -type f -exec chmod 750 {} \; && \
   chmod 750 cli/main.py core/app/*.py core/app/routers/*.py core/entrypoint.sh helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
   chmod 660 INTEGRATION && \
   chown root:core INTEGRATION

@@ -71,7 +71,7 @@ class JobScheduler:
     def __get_jobs(self):
         jobs = {}
         for plugin_file in glob(
-            join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json")
+            join(sep, "usr", "share", "bunkerweb", "core_plugins", "*", "plugin.json")
         ) + glob(  # core plugins
             join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")
         ):  # external plugins
