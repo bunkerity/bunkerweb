@@ -174,7 +174,7 @@ class Job_cache(BaseModel):
             "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"
         ],
     )
-    data: bytes = Field(None, examples=[b"BunkerWeb forever"])
+    data: Optional[bytes] = Field(None, examples=[b"BunkerWeb forever"])
 
 
 class ErrorMessage(BaseModel):
