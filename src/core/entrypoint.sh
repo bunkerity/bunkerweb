@@ -10,15 +10,19 @@ function stop() {
 }
 
 function start() {
-	python3 /usr/share/bunkerweb/core/app/core.py > /dev/null
+	output="$(python3 /usr/share/bunkerweb/core/app/core.py 2>&1)"
 
 	if [ $? == 1 ] ; then
-		log "ENTRYPOINT" "❌ " "Invalid LISTEN_PORT, It must be an integer between 1 and 65535."
+		# Show the output of the core
+		log "ENTRYPOINT" "❌ " "$output"
 		exit 1
 	elif [ $? == 2 ] ; then
-		log "ENTRYPOINT" "❌ " "Invalid MAX_WORKERS, It must be a positive integer."
+		log "ENTRYPOINT" "❌ " "Invalid LISTEN_PORT, It must be an integer between 1 and 65535."
 		exit 1
 	elif [ $? == 3 ] ; then
+		log "ENTRYPOINT" "❌ " "Invalid MAX_WORKERS, It must be a positive integer."
+		exit 1
+	elif [ $? == 4 ] ; then
 		log "ENTRYPOINT" "❌ " "Invalid MAX_THREADS, It must be a positive integer."
 		exit 1
 	fi

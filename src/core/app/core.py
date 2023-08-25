@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager, suppress
+from contextlib import asynccontextmanager
 from functools import cached_property
 from ipaddress import (
     IPv4Address,
@@ -14,7 +14,7 @@ from os.path import join, normpath
 from pathlib import Path
 from re import compile as re_compile
 from sys import path as sys_path
-from typing import Dict, List, Literal, Optional, Union
+from typing import Dict, List, Literal, Union
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
@@ -315,15 +315,15 @@ if __name__ == "__main__":
         not CORE_CONFIG.LISTEN_PORT.isdigit()
         or not (1 <= int(CORE_CONFIG.LISTEN_PORT) <= 65535)
     ):
-        _exit(1)
+        _exit(2)
     elif not isinstance(CORE_CONFIG.MAX_WORKERS, int) and (
         not CORE_CONFIG.MAX_WORKERS.isdigit() or int(CORE_CONFIG.MAX_WORKERS) < 1
     ):
-        _exit(2)
+        _exit(3)
     elif not isinstance(CORE_CONFIG.MAX_THREADS, int) and (
         not CORE_CONFIG.MAX_THREADS.isdigit() or int(CORE_CONFIG.MAX_THREADS) < 1
     ):
-        _exit(3)
+        _exit(4)
 
     data = {
         "LISTEN_ADDR": CORE_CONFIG.LISTEN_ADDR,

@@ -15,6 +15,11 @@ function do_and_check_cmd() {
     return 0
 }
 
+# Create the config.yaml file if it doesn't exist 
+if [ ! -f /etc/bunkerweb/config.yaml ]; then
+    touch /etc/bunkerweb/config.yaml
+fi
+
 # Give all the permissions to the nginx user
 echo "Setting ownership for all necessary directories to nginx user and group..."
 do_and_check_cmd chown -R nginx:nginx /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
@@ -23,6 +28,11 @@ do_and_check_cmd chown -R nginx:nginx /usr/share/bunkerweb /var/cache/bunkerweb 
 echo "Stop and disable nginx on boot..."
 do_and_check_cmd systemctl stop bunkerweb
 do_and_check_cmd systemctl disable bunkerweb
+
+# Stop and disable bunkerweb-core on boot
+echo "Stop and disable bunkerweb-core on boot..."
+do_and_check_cmd systemctl stop bunkerweb-core
+do_and_check_cmd systemctl disable bunkerweb-core
 
 # Auto start BW service on boot and start it now
 echo "Enabling and starting bunkerweb service..."
@@ -33,11 +43,6 @@ do_and_check_cmd systemctl start bunkerweb
 echo "Enabling and starting bunkerweb-core service..."
 do_and_check_cmd systemctl enable bunkerweb-core
 do_and_check_cmd systemctl start bunkerweb-core
-
-# Auto start scheduler service on boot and start it now
-echo "Enabling and starting bunkerweb-scheduler service..."
-do_and_check_cmd systemctl enable bunkerweb-scheduler
-do_and_check_cmd systemctl start bunkerweb-scheduler
 
 # Create /var/www/html if needed
 if [ ! -d /var/www/html ] ; then

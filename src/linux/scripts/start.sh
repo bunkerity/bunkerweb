@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Source the utils script
-source utils.sh
+source /usr/share/bunkerweb/helpers/utils.sh
+source /usr/share/bunkerweb/scripts/utils.sh
 
 # Start the bunkerweb service
 function start() {

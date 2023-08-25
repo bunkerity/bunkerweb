@@ -59,3 +59,6 @@ function stop() {
 
     log "SYSTEMCTL" "ℹ️ " "$service_name is stopped"
 }
+
+export -f display_help
+export -f stop

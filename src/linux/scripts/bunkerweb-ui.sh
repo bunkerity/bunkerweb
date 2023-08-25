@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Source the utils script
-source utils.sh
+source /usr/share/bunkerweb/helpers/utils.sh
+source /usr/share/bunkerweb/scripts/utils.sh
 
 # Create the ui.conf file if it doesn't exist 
 if [ ! -f /etc/bunkerweb/ui.conf ]; then
