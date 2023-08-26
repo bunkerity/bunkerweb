@@ -57,10 +57,10 @@ jobs:
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
 
             Docker tags : 
-            - `bunkerity/bunkerweb:${{ inputs.VERSION }}`
-            - `bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}`
-            - `bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}`
-            - `bunkerity/bunkerweb-ui:${{ inputs.VERSION }}`
+            - BunkerWeb : `bunkerity/bunkerweb:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb:${{ inputs.VERSION }}`
+            - Scheduler : `bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}`
+            - Autoconf : `bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}`
+            - UI : `bunkerity/bunkerweb-ui:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-ui:${{ inputs.VERSION }}`
 
             Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
 
@@ -83,12 +83,14 @@ jobs:
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
 
             Docker tags : 
-            - `bunkerity/bunkerweb:${{ inputs.VERSION }}`
-            - `bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}`
-            - `bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}`
-            - `bunkerity/bunkerweb-ui:${{ inputs.VERSION }}`
+            - BunkerWeb : `bunkerity/bunkerweb:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb:${{ inputs.VERSION }}`
+            - Scheduler : `bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}`
+            - Autoconf : `bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}`
+            - UI : `bunkerity/bunkerweb-ui:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-ui:${{ inputs.VERSION }}`
 
             Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
+
+            Please note that when using Linux Debian or Ubuntu integration, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing the testing version of BunkerWeb.
           draft: false
           prerelease: ${{ inputs.PRERELEASE }}
           name: Testing

@@ -975,6 +975,9 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     sudo apt install -y nginx=1.24.0-1~$(lsb_release -cs)
     ```
 
+    !!! warning "Testing version"
+        If you use the `testing` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
+
     And finally install BunkerWeb 1.5.1 :
 
     ```shell
@@ -1008,6 +1011,9 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     sudo apt update && \
     sudo apt install -y nginx=1.24.0-1~jammy
     ```
+
+    !!! warning "Testing version"
+        If you use the `testing` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
 
     And finally install BunkerWeb 1.5.1 :
 

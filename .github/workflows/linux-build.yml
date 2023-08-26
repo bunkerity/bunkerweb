@@ -146,5 +146,5 @@ jobs:
           file: tests/linux/Dockerfile-${{ inputs.LINUX }}
           platforms: ${{ inputs.PLATFORMS }}
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ghcr.io/bunkerity/${{ inputs.LINUX }}-tests:${{ inputs.RELEASE }}
           labels: ${{ steps.meta.outputs.labels }}
