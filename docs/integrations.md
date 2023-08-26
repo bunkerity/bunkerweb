@@ -24,6 +24,12 @@ Whether you're conducting tests, developing applications, or deploying BunkerWeb
 docker pull bunkerity/bunkerweb:1.5.1
 ```
 
+Docker images are also available on [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) and can be downloaded using the `ghcr.io` repository address :
+
+```shell
+docker pull ghcr.io/bunkerity/bunkerweb:1.5.1
+```
+
 Alternatively, if you prefer a more hands-on approach, you have the option to build the Docker image directly from the [source](https://github.com/bunkerity/bunkerweb). Building the image from source gives you greater control and customization over the deployment process. However, please note that this method may take some time to complete, depending on your hardware configuration.
 
 While the image is being built, you can take a moment to relax and enjoy a cup of coffee ☕, as the process may require some patience. Once the image is successfully built, you can proceed to deploy and utilize BunkerWeb within your Docker environment. This method allows you to tailor the image to your specific requirements and ensures a more personalized deployment of BunkerWeb.
