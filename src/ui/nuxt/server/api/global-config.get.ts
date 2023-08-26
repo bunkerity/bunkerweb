@@ -1,4 +1,4 @@
-import { response, setupResponse } from "../../utils/api";
+import { fetchApi, setResponse } from "../../utils/api";
 import {
   getPluginsByContext,
   addConfToPlugins,
@@ -7,34 +7,40 @@ import {
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
+  const auth = `Bearer ${config.apiToken}`;
   let data: any, conf: any, plugins: any;
-  const res: response = { type: "", status: "", message: "", data: null };
+
+  // Get default config from core api
   try {
-    conf = await $fetch(`/config?methods=true&new_format=1`, {
-      baseURL: config.apiAddr,
-      method: "GET",
-      Headers: {
-        Authorization: `Bearer ${config.apiToken}`,
-      },
-    }).catch((err) => {
-      setupResponse(res, "error", err.status, err.data["message"], []);
-    });
-
-    plugins = await $fetch(`/plugins`, {
-      baseURL: config.apiAddr,
-      method: "GET",
-      Headers: {
-        Authorization: `Bearer ${config.apiToken}`,
-      },
-    }).catch((err) => {
-      setupResponse(res, "error", err.status, err.data["message"], []);
-    });
-
-    const setPlugins = await setPluginsData(plugins);
-    const mergeConf = await addConfToPlugins(setPlugins, conf);
-    data = await getPluginsByContext(mergeConf, "global");
-    return await setupResponse(res, "success", 200, "", data);
+    conf = await fetchApi(
+      config.apiAddr,
+      "/config?methods=true&new_format=1",
+      "GET",
+      auth
+    );
   } catch (err) {
-    return res;
+    return await conf;
+  }
+
+  // Get default plugins from core api
+  try {
+    plugins = await fetchApi(config.apiAddr, "/plugins", "GET", auth);
+  } catch (err) {
+    return await plugins;
+  }
+
+  // Format core api data
+  try {
+    const setPlugins = await setPluginsData(plugins.data);
+    const mergeConf = await addConfToPlugins(setPlugins, conf.data["global"]);
+    data = await getPluginsByContext(mergeConf, "global");
+    return await setResponse("success", 200, "", data);
+  } catch (err) {
+    return setResponse(
+      "error",
+      500,
+      "Error while formatting plugins and config to get global config.",
+      []
+    );
   }
 });

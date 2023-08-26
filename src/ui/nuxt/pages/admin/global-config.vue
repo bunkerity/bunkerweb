@@ -8,7 +8,6 @@ useHead({
 const {
   data: globalConfList,
   pending: globalConfPend,
-  error: globalConfErr,
   refresh: globalConfRef,
 } = await useFetch("/api/global-config", {
   method: "GET",
@@ -24,12 +23,17 @@ const filters = reactive({
 
 // Plugins data to render components
 const plugins = reactive({
+  isErr: globalConfList.value.type === "error" ? true : false,
   // Never modify this unless refetch
-  base: globalConfList.value.data,
+  base: globalConfList.value.type === "error" ? [] : globalConfList.value.data,
   // Default plugin to display, first of list (before any filter)
-  active: globalConfList.value.data[0]["name"],
+  active:
+    globalConfList.value.type === "error"
+      ? ""
+      : globalConfList.value.data[0]["name"],
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
+    if (plugins.isErr) return plugins.base;
     // Filter data to display
     const cloneBase = JSON.parse(JSON.stringify(plugins.base));
     const filter = getSettingsByFilter(cloneBase, filters);
@@ -66,8 +70,33 @@ async function sendConf() {
 
 <template>
   <NuxtLayout name="dashboard">
+    <CardBase
+      class="col-span-4 col-start-5"
+      :class="[
+        plugins.isErr && !globalConfPend ? '!bg-red-500' : '',
+        !plugins.isErr && !globalConfPend && plugins.setup.length === 0
+          ? '!bg-sky-500'
+          : '',
+        !plugins.isErr && globalConfPend === 0 ? '!bg-yellow-500' : '',
+      ]"
+      v-if="plugins.isErr || globalConfPend"
+    >
+      <div class="col-span-12 flex items-center justify-center">
+        <p class="m-0 dark:text-white">
+          {{
+            plugins.isErr && !globalConfPend
+              ? "Error accessing api"
+              : !plugins.isErr && !globalConfPend && plugins.setup.length === 0
+              ? "No data to display"
+              : !plugins.isErr && globalConfPend
+              ? "Fetching data"
+              : ""
+          }}
+        </p>
+      </div>
+    </CardBase>
     <div
-      v-if="!globalConfPend && !globalConfErr"
+      v-if="!plugins.isErr && !globalConfPend"
       class="col-span-12 content-wrap"
     >
       <CardBase
