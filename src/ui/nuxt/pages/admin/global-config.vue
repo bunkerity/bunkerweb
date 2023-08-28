@@ -4,21 +4,29 @@ useHead({
   meta: [{ name: "description", content: "My amazing site." }],
 });
 
-// Base data to work with
+const feedbackStore = useFeedbackStore();
+const config = useConfigStore();
+
+// Hide / Show settings and plugin base on that filters
+const filters = reactive({
+  keyword: "",
+  method: "",
+});
+
 const {
   data: globalConfList,
   pending: globalConfPend,
   refresh: globalConfRef,
 } = await useFetch("/api/global-config", {
   method: "GET",
-});
-
-onMounted(() => {});
-
-// Hide / Show settings and plugin base on that filters
-const filters = reactive({
-  keyword: "",
-  method: "",
+  onResponse({ request, response, options }) {
+    // Process the response data
+    feedbackStore.addFeedback(
+      response._data.type,
+      response._data.status,
+      response._data.message
+    );
+  },
 });
 
 // Plugins data to render components
@@ -33,7 +41,7 @@ const plugins = reactive({
       : globalConfList.value.data[0]["name"],
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
-    if (plugins.isErr) return plugins.base;
+    if (globalConfList.value.type === "error") return [];
     // Filter data to display
     const cloneBase = JSON.parse(JSON.stringify(plugins.base));
     const filter = getSettingsByFilter(cloneBase, filters);
@@ -47,23 +55,29 @@ const plugins = reactive({
 });
 
 // Refetch and reset all states
-function reset() {
-  globalConfRef();
+function resetValues() {
   filters.label = "";
   plugins.active = globalConfList.value.data[0]["name"];
 }
 
-const config = useConfigStore();
+function refresh() {
+  globalConfRef();
+  resetValues();
+}
 
 async function sendConf() {
   const data = JSON.stringify(config.data["global"]);
-  const {
-    data: sendConfList,
-    pending: sendConfPend,
-    error: sendConfErr,
-  } = await useFetch("/api/global-config", {
+  await useFetch("/api/global-config", {
     method: "PUT",
     body: data,
+    onResponse({ request, response, options }) {
+      // Process the response data
+      feedbackStore.addFeedback(
+        response._data.type,
+        response._data.status,
+        response._data.message
+      );
+    },
   });
 }
 </script>
@@ -104,7 +118,7 @@ async function sendConf() {
       >
         <div class="col-span-12 flex">
           <CardLabel label="global config" />
-          <PluginRefresh @refresh="reset()" />
+          <PluginRefresh @refresh="refresh()" />
         </div>
         <TabStructure
           :items="plugins.setup"
@@ -151,9 +165,9 @@ async function sendConf() {
       <CardBase class="col-span-12 grid grid-cols-12 relative">
         <PluginStructure :plugins="plugins.setup" :active="plugins.active" />
         <div class="col-span-12 flex w-full justify-center mt-8 mb-2">
-          <ButtonBase @click="sendConf()" color="valid" size="lg"
-            >SAVE</ButtonBase
-          >
+          <ButtonBase @click="sendConf()" color="valid" size="lg">
+            SAVE
+          </ButtonBase>
         </div>
       </CardBase>
     </div>

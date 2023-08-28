@@ -23,42 +23,50 @@ export async function setResponse(
 
 // Fetch api
 export async function fetchApi(
-  baseUrl: string,
   api: string,
   method: any,
-  auth: string,
-  defaultData: any = {}
+  body: any,
+  resErr: response
 ) {
-  return await $fetch(api, {
-    baseURL: baseUrl,
+  const defaultData: any = {};
+  const config = useRuntimeConfig();
+  const options = {
+    baseURL: config.apiAddr,
     method: method,
     Headers: {
-      Authorization: auth,
+      Authorization: `Bearer ${config.apiToken}`,
     },
-  })
+    // Only when exist and possible
+    ...(body &&
+      method.toUpperCase() !== "GET" && { body: JSON.stringify(body) }),
+  };
+  return await $fetch(api, options)
     .then((data: any) => {
-      if (method !== "GET")
+      // Data and message logic change with GET
+      if (method.toUpperCase() !== "GET") {
         return setResponse(
           "success",
           200,
-          data["message"] || `${method} /${api} succeed.`,
+          data["message"] || `${method.toUpperCase()} ${api} succeed.`,
           defaultData
         );
+      }
 
-      if (method === "GET")
+      if (method.toUpperCase() === "GET")
         return setResponse(
           "success",
           200,
-          `${method} /${api} succeed.`,
+          `${method.toUpperCase()} ${api} succeed.`,
           data || defaultData
         );
     })
     .catch((err) => {
+      // Set custom error data before throwing err
       return setResponse(
-        "error",
-        err.status || 500,
-        err.data["message"] || `${method} /${api} succeed.`,
-        defaultData
+        resErr["type"] || "error",
+        err.status || resErr["status"] || 500,
+        err.data["message"] || resErr["message"] || `Internal Server Error`,
+        resErr["data"] || defaultData
       );
     });
 }
