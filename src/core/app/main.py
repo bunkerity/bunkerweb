@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from contextlib import suppress
+from contextlib import asynccontextmanager, suppress
 from copy import deepcopy
 from glob import glob
 from io import BytesIO
@@ -14,15 +14,15 @@ from ipaddress import (
 from itertools import chain
 from json import JSONDecodeError, loads as json_loads
 from shutil import rmtree
-from threading import Thread
-from os import listdir, sep, walk
+from threading import enumerate as all_threads, Event, Thread
+from os import _exit, listdir, sep, walk
 from os.path import basename, dirname, join
 from pathlib import Path
+from signal import SIGINT, SIGTERM, signal
 from sys import path as sys_path
 from tarfile import open as tar_open
 from time import sleep
 from typing import Optional
-
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
@@ -32,7 +32,7 @@ for deps_path in [
         sys_path.append(deps_path)
 
 from dotenv import dotenv_values
-from fastapi import Request, status
+from fastapi import FastAPI, Request, status
 from fastapi.datastructures import Address
 from fastapi.responses import JSONResponse
 from redis.client import Redis
@@ -42,7 +42,7 @@ from API import API  # type: ignore
 from api_caller import ApiCaller  # type: ignore
 from configurator import Configurator  # type: ignore
 from jobs import bytes_hash  # type: ignore
-from .core import app, BUNKERWEB_VERSION
+from .core import BUNKERWEB_VERSION, description, tags_metadata
 from .dependencies import (
     CORE_CONFIG,
     CONFIGS_PATH,
@@ -55,12 +55,9 @@ from .dependencies import (
     install_plugin,
     SCHEDULER,
     run_jobs,
-    scheduler_initialized,
     SEMAPHORE,
     SETTINGS_PATH,
     seen_instance,
-    stop,
-    stop_event,
     test_and_send_to_instances,
     update_app_mounts,
 )
@@ -81,9 +78,80 @@ CUSTOM_CONFIGS_RX = re_compile(
 )
 BUNKERWEB_INSTANCES_RX = re_compile(r"([^: ]+)(:((\d+):)?(\w+))?")
 
-if CORE_CONFIG.check_token and not regex_match(TOKEN_RX, CORE_CONFIG.TOKEN):
+stop_event = Event()
+
+
+def stop(status):
+    global DB
+
+    stop_event.set()
+    for thread in all_threads():
+        if thread.name != "MainThread":
+            thread.join()
+
+    HEALTHY_PATH.unlink(missing_ok=True)
+    if DB:
+        del DB
+    _exit(status)
+
+
+def exit_handler(signum, frame):
+    CORE_CONFIG.logger.info("Stop signal received, exiting...")
+    stop(0)
+
+
+signal(SIGINT, exit_handler)
+signal(SIGTERM, exit_handler)
+
+
+@asynccontextmanager
+async def lifespan(_):
+    yield  # ? lifespan of the application
+
+    stop(0)
+
+
+# ? APP
+app = FastAPI(
+    title="BunkerWeb API",
+    description=description,
+    summary="The API used by BunkerWeb to communicate with the database and the instances",
+    version=BUNKERWEB_VERSION,
+    contact={
+        "name": "BunkerWeb Team",
+        "url": "https://bunkerweb.io",
+        "email": "contact@bunkerity.com",
+    },
+    license_info={
+        "name": "GNU Affero General Public License v3.0",
+        "identifier": "AGPL-3.0",
+        "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md",
+    },
+    openapi_tags=tags_metadata,
+    lifespan=lifespan,
+)
+
+if not isinstance(CORE_CONFIG.WAIT_RETRY_INTERVAL, int) and (
+    not CORE_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
+    or int(CORE_CONFIG.WAIT_RETRY_INTERVAL) < 1
+):
     CORE_CONFIG.logger.error(
-        f"Invalid token provided: {CORE_CONFIG.TOKEN}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
+        f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
+    )
+    stop(1)
+
+if not isinstance(CORE_CONFIG.HEALTHCHECK_INTERVAL, int) and (
+    not CORE_CONFIG.HEALTHCHECK_INTERVAL.isdigit()
+    or int(CORE_CONFIG.HEALTHCHECK_INTERVAL) < 1
+):
+    CORE_CONFIG.logger.error(
+        f"Invalid HEALTHCHECK_INTERVAL provided: {CORE_CONFIG.HEALTHCHECK_INTERVAL}, It must be a positive integer."
+    )
+    stop(1)
+
+if CORE_CONFIG.check_token and not regex_match(TOKEN_RX, CORE_CONFIG.CORE_TOKEN):
+    CORE_CONFIG.logger.error(
+        f"Invalid token provided: {CORE_CONFIG.CORE_TOKEN}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
     )
     stop(1)
 
@@ -99,6 +167,7 @@ TMP_ENV_PATH = Path(
 )
 TMP_ENV = dotenv_values(str(TMP_ENV_PATH))
 
+INSTANCES_API_CALLER = ApiCaller()
 
 db_is_initialized = DB.is_initialized()
 
@@ -106,6 +175,7 @@ db_config = {}
 db_plugins = []
 plugin_changes = False
 if db_is_initialized:
+    DB.set_scheduler_initialized(False)
     db_config = DB.get_config()
     db_plugins = DB.get_plugins(external=True)
 
@@ -406,20 +476,20 @@ if err:
 
 CORE_CONFIG.logger.info("✅ BunkerWeb static instances updated to database")
 
+if config_files != db_config:
+    err = DB.save_config(config_files, "core")
+
+    if err:
+        CORE_CONFIG.logger.error(
+            f"Can't save config to database : {err}",
+        )
+        stop(1)
+
+    CORE_CONFIG.logger.info("✅ Config successfully saved to database")
+
 if CORE_CONFIG.integration in ("Linux", "Docker"):
-    if config_files != db_config:
-        err = DB.save_config(config_files, "core")
-
-        if err:
-            CORE_CONFIG.logger.error(
-                f"Can't save config to database : {err}",
-            )
-            stop(1)
-
-        CORE_CONFIG.logger.info("✅ Config successfully saved to database")
-
     CORE_CONFIG.logger.info("Executing scheduler ...")
-    scheduler_initialized.set()
+    DB.set_scheduler_initialized()
     threads = [
         Thread(
             target=test_and_send_to_instances,
@@ -431,12 +501,6 @@ if CORE_CONFIG.integration in ("Linux", "Docker"):
 
     for thread in threads:
         thread.start()
-else:
-    while not DB.is_autoconf_loaded():
-        CORE_CONFIG.logger.warning(
-            f"Autoconf is not loaded yet in the database, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
-        )
-        sleep(int(CORE_CONFIG.WAIT_RETRY_INTERVAL))
 
 REDIS_HOST: Optional[str] = config_files.get("REDIS_HOST", None)
 REDIS_PORT: Optional[int] = None
@@ -450,7 +514,7 @@ def listen_dynamic_instances():
 
     if not any((REDIS_HOST, REDIS_PORT, REDIS_DATABASE, REDIS_TIMEOUT)):
         CORE_CONFIG.logger.warning(
-            "USE_REDIS is set to yes but one or more of the following variables are not defined: REDIS_HOST, REDIS_PORT, REDIS_DATABASE, REDIS_TIMEOUT, app will not listen for dynamic instances"
+            "listen_dynamic_instances - USE_REDIS is set to yes but one or more of the following variables are not defined: REDIS_HOST, REDIS_PORT, REDIS_DATABASE, REDIS_TIMEOUT, app will not listen for dynamic instances"
         )
         SEMAPHORE.release()
         return
@@ -468,7 +532,9 @@ def listen_dynamic_instances():
         socket_timeout=REDIS_TIMEOUT,
     )
 
-    CORE_CONFIG.logger.info("USE_REDIS is set to yes, trying to connect to Redis ...")
+    CORE_CONFIG.logger.info(
+        "listen_dynamic_instances - USE_REDIS is set to yes, trying to connect to Redis ..."
+    )
 
     retries = 0
     connected = False
@@ -480,20 +546,22 @@ def listen_dynamic_instances():
             retries += 1
             if retries > 10:
                 CORE_CONFIG.logger.error(
-                    f"Couldn't connect to Redis after 10 retries, app will not listen for dynamic instances"
+                    f"listen_dynamic_instances - Couldn't connect to Redis after 10 retries, app will not listen for dynamic instances"
                 )
                 SEMAPHORE.release()
                 return
             CORE_CONFIG.logger.warning(
-                f"Can't connect to Redis, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
+                f"listen_dynamic_instances - Can't connect to Redis, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
             )
             sleep(int(CORE_CONFIG.WAIT_RETRY_INTERVAL))
 
-    CORE_CONFIG.logger.info("✅ Connected to Redis")
+    CORE_CONFIG.logger.info("listen_dynamic_instances - ✅ Connected to Redis")
 
     pubsub = redis_client.pubsub()
 
-    CORE_CONFIG.logger.info('Subscribing to Redis channel "bw-instances" ...')
+    CORE_CONFIG.logger.info(
+        'listen_dynamic_instances - Subscribing to Redis channel "bw-instances" ...'
+    )
 
     while not stop_event.is_set():
         try:
@@ -501,12 +569,12 @@ def listen_dynamic_instances():
             break
         except ConnectionError:
             CORE_CONFIG.logger.warning(
-                f"Can't subscribe to Redis channel, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
+                f"listen_dynamic_instances - Can't subscribe to Redis channel, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
             )
             sleep(int(CORE_CONFIG.WAIT_RETRY_INTERVAL))
 
     CORE_CONFIG.logger.info(
-        '✅ Subscribed to Redis channel "bw-instances", starting to listen for dynamic instances ...'
+        'listen_dynamic_instances - ✅ Subscribed to Redis channel "bw-instances", starting to listen for dynamic instances ...'
     )
 
     try:
@@ -528,24 +596,24 @@ def listen_dynamic_instances():
                     and pubsub_message.get("type") == "message"
                 ):
                     CORE_CONFIG.logger.info(
-                        f"Redis - New message received: {pubsub_message}"
+                        f"listen_dynamic_instances - Redis - New message received: {pubsub_message}"
                     )
                     try:
                         message = json_loads(pubsub_message["data"])
                     except JSONDecodeError:
                         CORE_CONFIG.logger.warning(
-                            f"Can't decode message data: {pubsub_message['data']}, ignoring it ..."
+                            f"listen_dynamic_instances - Can't decode message data: {pubsub_message['data']}, ignoring it ..."
                         )
                         continue
 
                     if message.get("type") != "startup":
                         CORE_CONFIG.logger.warning(
-                            f"Invalid message type: {message.get('type', 'missing key')}, ignoring it ..."
+                            f"listen_dynamic_instances - Invalid message type: {message.get('type', 'missing key')}, ignoring it ..."
                         )
                         continue
                     elif "data" not in message:
                         CORE_CONFIG.logger.warning(
-                            f"Missing message data, ignoring it ..."
+                            f"listen_dynamic_instances - Missing message data, ignoring it ..."
                         )
                         continue
 
@@ -556,24 +624,24 @@ def listen_dynamic_instances():
                         for key in ("hostname", "listening_port", "server_name")
                     ):
                         CORE_CONFIG.logger.warning(
-                            f"Invalid message data: {data}, ignoring it ..."
+                            f"listen_dynamic_instances - Invalid message data: {data}, ignoring it ..."
                         )
                         continue
                     elif len(data["hostname"]) > 256:
                         CORE_CONFIG.logger.warning(
-                            f"Invalid hostname provided: {data['hostname']}, it must be less than 256 characters, ignoring it ..."
+                            f"listen_dynamic_instances - Invalid hostname provided: {data['hostname']}, it must be less than 256 characters, ignoring it ..."
                         )
                         continue
                     elif not data["listening_port"].isdigit() or not (
                         1 <= int(data["listening_port"]) <= 65535
                     ):
                         CORE_CONFIG.logger.warning(
-                            f"Invalid listening_port provided: {data['listening_port']}, it must be an integer between 1 and 65535, ignoring it ..."
+                            f"listen_dynamic_instances - Invalid listening_port provided: {data['listening_port']}, it must be an integer between 1 and 65535, ignoring it ..."
                         )
                         continue
                     elif len(data["server_name"]) > 256:
                         CORE_CONFIG.logger.warning(
-                            f"Invalid server_name provided: {data['server_name']}, it must be less than 256 characters, ignoring it ..."
+                            f"listen_dynamic_instances - Invalid server_name provided: {data['server_name']}, it must be less than 256 characters, ignoring it ..."
                         )
                         continue
 
@@ -586,27 +654,32 @@ def listen_dynamic_instances():
 
                     if error and error not in ("created", "updated"):
                         CORE_CONFIG.logger.error(
-                            f"Couldn't save instance to database: {error}, ignoring it ..."
+                            f"listen_dynamic_instances - Couldn't save instance to database: {error}, ignoring it ..."
                         )
                         continue
 
                     CORE_CONFIG.logger.info(
-                        f"✅ Instance {data['hostname']}:{data['listening_port']}:{data['server_name']} successfully {error} to database"
+                        f"listen_dynamic_instances - ✅ Instance {data['hostname']}:{data['listening_port']}:{data['server_name']} successfully {error} to database"
                     )
-                    instance_api = API(
-                        f"http://{data['hostname']}:{data['listening_port']}",
-                        data["server_name"],
-                    )
+                    if error != "updated":
+                        instance_api = API(
+                            f"http://{data['hostname']}:{data['listening_port']}",
+                            data["server_name"],
+                        )
 
-                    if not test_and_send_to_instances("all", {instance_api}):
-                        continue
+                        if not test_and_send_to_instances("all", {instance_api}):
+                            continue
 
-                    CORE_CONFIG.logger.info(
-                        f"Successfully sent data to instance {instance_api.endpoint}"
-                    )
+                        CORE_CONFIG.logger.info(
+                            f"listen_dynamic_instances - Successfully sent data to instance {instance_api.endpoint}"
+                        )
+                    else:
+                        CORE_CONFIG.logger.info(
+                            f"listen_dynamic_instances - Skipping sending data to instance {data['hostname']}:{data['listening_port']}:{data['server_name']} because it's already in database"
+                        )
             except Exception:
                 CORE_CONFIG.logger.exception(
-                    f"Exception while parsing message: {pubsub_message}"
+                    f"listen_dynamic_instances - Exception while parsing message: {pubsub_message}"
                 )
     finally:
         with suppress(ConnectionError):
@@ -616,9 +689,9 @@ def listen_dynamic_instances():
 
 
 def run_pending_jobs() -> None:
-    while not scheduler_initialized.is_set():
+    while not DB.is_scheduler_initialized():
         CORE_CONFIG.logger.warning(
-            f"Scheduler is not initialized yet, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
+            f"run_pending_jobs - Scheduler is not initialized yet, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ..."
         )
         sleep(
             int(CORE_CONFIG.WAIT_RETRY_INTERVAL) - 1
@@ -643,7 +716,7 @@ def instances_healthcheck() -> None:
 
     if not instance_apis:
         CORE_CONFIG.logger.warning(
-            "No instances found in database, skipping healthcheck ..."
+            "instances_healthcheck - No instances found in database, skipping healthcheck ..."
         )
         return
 
@@ -651,18 +724,18 @@ def instances_healthcheck() -> None:
         sent, err, status, resp = instance_api.request("GET", "ping")
         if not sent:
             CORE_CONFIG.logger.warning(
-                f"Can't send API request to {instance_api.endpoint}ping : {err}, healthcheck will be retried in 30 seconds ..."
+                f"instances_healthcheck - Can't send API request to {instance_api.endpoint}ping : {err}, healthcheck will be retried in 30 seconds ..."
             )
             continue
         else:
             if status != 200:
                 CORE_CONFIG.logger.warning(
-                    f"Error while sending API request to {instance_api.endpoint}ping : status = {resp['status']}, msg = {resp['msg']}, healthcheck will be retried in 30 seconds ..."
+                    f"instances_healthcheck - Error while sending API request to {instance_api.endpoint}ping : status = {resp['status']}, msg = {resp['msg']}, healthcheck will be retried in 30 seconds ..."
                 )
                 continue
             else:
                 CORE_CONFIG.logger.info(
-                    f"Successfully sent API request to {instance_api.endpoint}ping, marking instance as seen ..."
+                    f"instances_healthcheck - Successfully sent API request to {instance_api.endpoint}ping, marking instance as seen ..."
                 )
 
                 Thread(target=seen_instance, args=(instance,)).start()
@@ -715,7 +788,7 @@ async def validate_request(request: Request, call_next):
             )
 
     if CORE_CONFIG.check_token:
-        if request.headers.get("Authorization") != f"Bearer {CORE_CONFIG.TOKEN}":
+        if request.headers.get("Authorization") != f"Bearer {CORE_CONFIG.CORE_TOKEN}":
             CORE_CONFIG.logger.warning(
                 f"Unauthorized access attempt from {request.client.host} (invalid token), aborting..."
             )

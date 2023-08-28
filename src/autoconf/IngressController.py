@@ -147,7 +147,7 @@ class IngressController(Controller):
                         continue
 
                     variable = annotation.replace("bunkerweb.io/", "", 1)
-                    server_name = service["SERVER_NAME"].strip().split(" ")[0]
+                    server_name = service["SERVER_NAME"].strip().split()[0]
                     if not variable.startswith(f"{server_name}_"):
                         continue
                     variable = variable.replace(f"{server_name}_", "", 1)
@@ -176,7 +176,7 @@ class IngressController(Controller):
             variables = {env.name: env.value or "" for env in pod.env}
 
         if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():
-            for server_name in variables["SERVER_NAME"].strip().split(" "):
+            for server_name in variables["SERVER_NAME"].strip().split():
                 service = {"SERVER_NAME": server_name}
                 for variable, value in variables.items():
                     prefix = variable.split("_")[0]
@@ -269,8 +269,6 @@ class IngressController(Controller):
                             self._logger.info(
                                 "Successfully deployed new configuration 🚀",
                             )
-
-                            self._set_autoconf_load_db()
                     except:
                         self._logger.error(
                             f"Exception while deploying new configuration :\n{format_exc()}",
@@ -301,7 +299,6 @@ class IngressController(Controller):
         return self.apply(self._instances, self._services, configs=self._configs)
 
     def process_events(self):
-        self._set_autoconf_load_db()
         watch_types = ("pod", "ingress", "configmap", "service")
         threads = [
             Thread(target=self.__watch, args=(watch_type,))

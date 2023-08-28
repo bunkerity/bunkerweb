@@ -87,7 +87,7 @@ try:
         ssl_context.verify_mode = CERT_NONE
         ssl_sock = ssl_context.wrap_socket(sock, server_hostname="www.example.com")
 
-        if ssl_sock.version() not in ssl_protocols.split(" "):
+        if ssl_sock.version() not in ssl_protocols.split():
             print(
                 f"❌ SSL_PROTOCOLS is set to {ssl_protocols}, but the socket is using {ssl_sock.version()}, exiting ...",
                 flush=True,
@@ -271,7 +271,7 @@ try:
     )
 
     status_code, http_version = (
-        proc.stdout.splitlines()[-1].replace("'", "").strip().split(" ")
+        proc.stdout.splitlines()[-1].replace("'", "").strip().split()
     )
 
     if status_code not in ("200", "404"):

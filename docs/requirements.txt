@@ -1,6 +1,6 @@
 mkdocs==1.5.2
-mkdocs-material==9.2.3
+mkdocs-material==9.2.5
 pytablewriter==1.0.0
 mike==1.1.2
 jinja2<3.1.0
-mkdocs-print-site-plugin==2.3.5
+mkdocs-print-site-plugin==2.3.6

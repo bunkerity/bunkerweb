@@ -1,7 +1,7 @@
 brotlipy==0.7.0
 certbot==2.6.0
 croniter==1.4.1
-fastapi==0.101.1
+fastapi==0.103.0
 gunicorn==21.2.0
 maxminddb==2.4.0
 pydantic_settings==2.0.3

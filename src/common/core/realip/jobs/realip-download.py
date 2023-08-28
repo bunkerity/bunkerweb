@@ -46,7 +46,7 @@ def check_line(line):
 
 LOGGER = setup_logger("REALIP", getenv("LOG_LEVEL", "INFO"))
 CORE_API = API(getenv("API_ADDR", ""), "job-realip-download")
-API_TOKEN = getenv("API_TOKEN", None)
+CORE_TOKEN = getenv("CORE_TOKEN", None)
 status = 0
 
 try:
@@ -57,7 +57,7 @@ try:
         servers = getenv("SERVER_NAME", [])
 
         if isinstance(servers, str):
-            servers = servers.split(" ")
+            servers = servers.split()
 
         for first_server in servers:
             if (
@@ -80,14 +80,14 @@ try:
     realip_path.mkdir(parents=True, exist_ok=True)
 
     # Don't go further if the cache is fresh
-    if is_cached_file("combined.list", "hour", CORE_API, API_TOKEN):
+    if is_cached_file("combined.list", "hour", CORE_API, CORE_TOKEN):
         LOGGER.info("RealIP list is already in cache, skipping download...")
         _exit(0)
 
     # Download and write data to temp file
     i = 0
     content = b""
-    for url in getenv("REAL_IP_FROM_URLS", "").split(" "):
+    for url in getenv("REAL_IP_FROM_URLS", "").split():
         if not url:
             continue
 
@@ -123,11 +123,11 @@ try:
 
     # Check if file has changed
     new_hash = bytes_hash(content)
-    old_hash = cache_hash("combined.list", CORE_API, API_TOKEN)
+    old_hash = cache_hash("combined.list", CORE_API, CORE_TOKEN)
     if new_hash == old_hash:
         LOGGER.info("New file is identical to cache file, reload is not needed")
         # Update file info in cache
-        cached, err = update_cache_file_info("combined.list", CORE_API, API_TOKEN)
+        cached, err = update_cache_file_info("combined.list", CORE_API, CORE_TOKEN)
         if not cached:
             LOGGER.error(f"Error while updating cache info : {err}")
             _exit(2)
@@ -138,7 +138,7 @@ try:
         "combined.list",
         content,
         CORE_API,
-        API_TOKEN,
+        CORE_TOKEN,
         checksum=new_hash,
     )
     if not cached:

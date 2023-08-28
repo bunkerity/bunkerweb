@@ -32,6 +32,32 @@ async def get_config(methods: bool = False, new_format: bool = False):
 
 
 @router.put(
+    "",
+    response_model=Dict[Literal["message"], str],
+    summary="Update whole config in Database",
+    response_description="Message",
+)
+async def update_config(
+    config: Dict[str, str], method: str, background_tasks: BackgroundTasks
+) -> JSONResponse:
+    """Update whole config in Database"""
+    err = DB.save_config(config, method)
+
+    if err:
+        CORE_CONFIG.logger.error(f"Can't save config to database : {err}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": err}
+        )
+
+    CORE_CONFIG.logger.info("✅ Config successfully saved to database")
+
+    background_tasks.add_task(run_jobs)
+    background_tasks.add_task(send_to_instances, {"config", "cache"})
+
+    return JSONResponse(content={"message": "Config successfully saved"})
+
+
+@router.put(
     "/global",
     response_model=Dict[Literal["message"], str],
     summary="Update global config in Database",

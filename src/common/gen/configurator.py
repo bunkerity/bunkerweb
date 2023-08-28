@@ -80,7 +80,7 @@ class Configurator:
         if not self.__multisite or not "SERVER_NAME" in self.__variables:
             return {}
         servers = {}
-        for server_name in self.__variables["SERVER_NAME"].strip().split(" "):
+        for server_name in self.__variables["SERVER_NAME"].strip().split():
             if not re_search(self.__settings["SERVER_NAME"]["regex"], server_name):
                 self.__logger.warning(
                     f"Ignoring server name {server_name} because regex is not valid",
@@ -99,7 +99,7 @@ class Configurator:
                     names = (
                         self.__variables[f"{server_name}_SERVER_NAME"]
                         .strip()
-                        .split(" ")
+                        .split()
                     )
 
             servers[server_name] = names
@@ -192,7 +192,6 @@ class Configurator:
                 continue
 
             ret, err = self.__check_var(variable)
-            variable = variable.upper()
             if ret:
                 config[variable] = value
             elif (
@@ -221,7 +220,7 @@ class Configurator:
                 self.__logger.warning(f"Ignoring variable {variable} : {err}")
         # Expand variables to each sites if MULTISITE=yes and if not present
         if config.get("MULTISITE", "no") == "yes":
-            for server_name in config["SERVER_NAME"].split(" "):
+            for server_name in config["SERVER_NAME"].split():
                 server_name = server_name.strip()
                 if not server_name:
                     continue
@@ -241,7 +240,6 @@ class Configurator:
 
     def __check_var(self, variable: str) -> Tuple[bool, str]:
         value = self.__variables[variable]
-        variable = variable.upper()
         # MULTISITE=no
         if not self.__multisite:
             where, real_var = self.__find_var(variable)

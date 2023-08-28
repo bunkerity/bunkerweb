@@ -29,7 +29,7 @@ from jobs import get_cache, cache_file
 
 LOGGER = setup_logger("LETS-ENCRYPT.new", getenv("LOG_LEVEL", "INFO"))
 CORE_API = API(getenv("API_ADDR", ""), "job-certbot-new")
-API_TOKEN = getenv("API_TOKEN", None)
+CORE_TOKEN = getenv("CORE_TOKEN", None)
 status = 0
 
 
@@ -95,7 +95,7 @@ def certbot_check_domains(domains: list[str], letsencrypt_path: Path) -> int:
     first_needed_domain = domains[0]
     needed_domains = set(domains)
     for raw_domains in findall(r"^    Domains: (.*)$", proc.stdout, MULTILINE):
-        current_domains = raw_domains.split(" ")
+        current_domains = raw_domains.split()
         if (
             current_domains[0] == first_needed_domain
             and set(current_domains) == needed_domains
@@ -112,7 +112,7 @@ try:
     if getenv("AUTO_LETS_ENCRYPT", "no") == "yes":
         use_letsencrypt = True
     elif getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "").split(" "):
+        for first_server in getenv("SERVER_NAME", "").split():
             if (
                 first_server
                 and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes"
@@ -135,7 +135,7 @@ try:
         parents=True, exist_ok=True
     )
 
-    tgz = get_cache("folder.tgz", CORE_API, API_TOKEN, job_name="certbot-renew")
+    tgz = get_cache("folder.tgz", CORE_API, CORE_TOKEN, job_name="certbot-renew")
     if tgz:
         # Delete folder if needed
         if letsencrypt_path.exists():
@@ -150,7 +150,7 @@ try:
 
     # Multisite case
     if getenv("MULTISITE", "no") == "yes" and getenv("SERVER_NAME"):
-        for first_server in getenv("SERVER_NAME", "").split(" "):
+        for first_server in getenv("SERVER_NAME", "").split():
             if (
                 not first_server
                 or getenv(
@@ -203,10 +203,10 @@ try:
 
     # Singlesite case
     elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes" and getenv("SERVER_NAME"):
-        first_server = getenv("SERVER_NAME", "").split(" ")[0]
+        first_server = getenv("SERVER_NAME", "").split()[0]
         domains = getenv("SERVER_NAME", "")
 
-        if certbot_check_domains(domains.split(" "), letsencrypt_path) == 1:
+        if certbot_check_domains(domains.split(), letsencrypt_path) == 1:
             LOGGER.info(
                 f"Certificates already exists for domain(s) {domains}",
             )
@@ -243,7 +243,7 @@ try:
 
     # Put tgz in cache
     cached, err = cache_file(
-        "folder.tgz", bio.read(), CORE_API, API_TOKEN, job_name="certbot-renew"
+        "folder.tgz", bio.read(), CORE_API, CORE_TOKEN, job_name="certbot-renew"
     )
 
     if not cached:

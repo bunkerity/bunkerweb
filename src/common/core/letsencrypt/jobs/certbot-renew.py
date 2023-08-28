@@ -62,7 +62,7 @@ def renew(domain: str, letsencrypt_path: Path) -> int:
 
 LOGGER = setup_logger("LETS-ENCRYPT.renew", getenv("LOG_LEVEL", "INFO"))
 CORE_API = API(getenv("API_ADDR", ""), "job-certbot-renew")
-API_TOKEN = getenv("API_TOKEN", None)
+CORE_TOKEN = getenv("CORE_TOKEN", None)
 status = 0
 
 try:
@@ -71,7 +71,7 @@ try:
     if getenv("AUTO_LETS_ENCRYPT", "no") == "yes":
         use_letsencrypt = True
     elif getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "").split(" "):
+        for first_server in getenv("SERVER_NAME", "").split():
             if (
                 first_server
                 and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes"
@@ -90,7 +90,7 @@ try:
         parents=True, exist_ok=True
     )
 
-    tgz = get_cache("folder.tgz", CORE_API, API_TOKEN)
+    tgz = get_cache("folder.tgz", CORE_API, CORE_TOKEN)
     if tgz:
         # Delete folder if needed
         if letsencrypt_path.exists():
@@ -107,7 +107,7 @@ try:
         servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):
-            servers = servers.split(" ")
+            servers = servers.split()
 
         for first_server in servers:
             if (
@@ -129,7 +129,7 @@ try:
                     f"Certificates renewal for {first_server} failed",
                 )
     elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes" and getenv("SERVER_NAME", ""):
-        first_server = getenv("SERVER_NAME", "").split(" ")[0]
+        first_server = getenv("SERVER_NAME", "").split()[0]
         if letsencrypt_path.joinpath("etc", "live", first_server, "cert.pem").exists():
             if renew(first_server, letsencrypt_path) != 0:
                 status = 2
@@ -144,7 +144,7 @@ try:
     bio.seek(0, 0)
 
     # Put tgz in cache
-    cached, err = cache_file("folder.tgz", bio.read(), CORE_API, API_TOKEN)
+    cached, err = cache_file("folder.tgz", bio.read(), CORE_API, CORE_TOKEN)
 
     if not cached:
         LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")

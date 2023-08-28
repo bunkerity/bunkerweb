@@ -26,7 +26,7 @@ from jobs import cache_file, del_cache, get_cache
 
 LOGGER = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
 CORE_API = API(getenv("API_ADDR", ""), "job-bunkernet-register")
-API_TOKEN = getenv("API_TOKEN", None)
+CORE_TOKEN = getenv("CORE_TOKEN", None)
 exit_status = 0
 
 try:
@@ -37,7 +37,7 @@ try:
         servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):
-            servers = servers.split(" ")
+            servers = servers.split()
 
         for first_server in servers:
             if (
@@ -55,7 +55,7 @@ try:
         _exit(0)
 
     # Get ID from cache
-    bunkernet_id: Optional[bytes] = get_cache("instance.id", CORE_API, API_TOKEN)
+    bunkernet_id: Optional[bytes] = get_cache("instance.id", CORE_API, CORE_TOKEN)
     if bunkernet_id:
         LOGGER.info("Successfully retrieved BunkerNet ID from db cache")
     else:
@@ -117,7 +117,7 @@ try:
     # Update cache with new bunkernet ID
     if registered:
         cached, err = cache_file(
-            "instance.id", bunkernet_id.encode(), CORE_API, API_TOKEN
+            "instance.id", bunkernet_id.encode(), CORE_API, CORE_TOKEN
         )
         if not cached:
             LOGGER.error(f"Error while saving BunkerNet data to db cache : {err}")
@@ -147,7 +147,7 @@ try:
             LOGGER.warning(
                 "Instance ID is not registered, removing it and retrying a register later...",
             )
-            del_cache("instance.id", CORE_API, API_TOKEN)
+            del_cache("instance.id", CORE_API, CORE_TOKEN)
             _exit(2)
 
         try:

@@ -39,7 +39,7 @@ class Config:
         servers = []
         plugins_settings = self.get_plugins_settings()
         for service in services_conf:
-            server_name = service["SERVER_NAME"].split(" ")[0]
+            server_name = service["SERVER_NAME"].split()[0]
             for k in service:
                 key_without_server_name = k.replace(f"{server_name}_", "")
                 if (
@@ -201,10 +201,10 @@ class Config:
         for i, service in enumerate(services):
             if service["SERVER_NAME"] == variables["SERVER_NAME"] or service[
                 "SERVER_NAME"
-            ] in variables["SERVER_NAME"].split(" "):
+            ] in variables["SERVER_NAME"].split():
                 if not edit:
                     return (
-                        f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
+                        f"Service {service['SERVER_NAME'].split()[0]} already exists.",
                         1,
                     )
 
@@ -213,7 +213,7 @@ class Config:
         services.append(variables)
         self.__gen_conf(self.get_config(methods=False), services)
         return (
-            f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.",
+            f"Configuration for {variables['SERVER_NAME'].split()[0]} has been generated.",
             0,
         )
 
@@ -243,7 +243,7 @@ class Config:
             return message, error
 
         return (
-            f"Configuration for {old_server_name.split(' ')[0]} has been edited.",
+            f"Configuration for {old_server_name.split()[0]} has been edited.",
             error,
         )
 
@@ -283,14 +283,14 @@ class Config:
         Exception
             raises this if the service_name given isn't found
         """
-        service_name = service_name.split(" ")[0]
+        service_name = service_name.split()[0]
         full_env = self.get_config(methods=False)
         services = self.get_services(methods=False)
         new_services = []
         found = False
 
         for service in services:
-            if service["SERVER_NAME"].split(" ")[0] == service_name:
+            if service["SERVER_NAME"].split()[0] == service_name:
                 found = True
             else:
                 new_services.append(service)
@@ -299,7 +299,7 @@ class Config:
             return f"Can't delete missing {service_name} configuration.", 1
 
         full_env["SERVER_NAME"] = " ".join(
-            [s for s in full_env["SERVER_NAME"].split(" ") if s != service_name]
+            [s for s in full_env["SERVER_NAME"].split() if s != service_name]
         )
 
         new_env = deepcopy(full_env)

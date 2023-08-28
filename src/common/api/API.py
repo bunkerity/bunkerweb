@@ -37,7 +37,7 @@ class API:
             if data is not None:
                 if isinstance(data, dict) and not files:
                     kwargs["json"] = data
-                elif isinstance(data, bytes) or isinstance(data, dict):
+                elif isinstance(data, (bytes, dict)):
                     kwargs["data"] = data
                 else:
                     return False, f"Unsupported data type: {type(data)}", None, None

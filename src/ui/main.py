@@ -538,8 +538,8 @@ def services():
             args=(
                 "services",
                 variables,
-                request.form.get("OLD_SERVER_NAME", "").split(" ")[0],
-                variables.get("SERVER_NAME", "").split(" ")[0],
+                request.form.get("OLD_SERVER_NAME", "").split()[0],
+                variables.get("SERVER_NAME", "").split()[0],
             ),
             kwargs={"operation": request.form["operation"]},
         ).start()
@@ -547,11 +547,11 @@ def services():
         message = ""
 
         if request.form["operation"] == "new":
-            message = f"Creating service {variables['SERVER_NAME'].split(' ')[0]}"
+            message = f"Creating service {variables['SERVER_NAME'].split()[0]}"
         elif request.form["operation"] == "edit":
-            message = f"Saving configuration for service {request.form['OLD_SERVER_NAME'].split(' ')[0]}"
+            message = f"Saving configuration for service {request.form['OLD_SERVER_NAME'].split()[0]}"
         elif request.form["operation"] == "delete":
-            message = f"Deleting service {request.form['SERVER_NAME'].split(' ')[0]}"
+            message = f"Deleting service {request.form['SERVER_NAME'].split()[0]}"
 
         return redirect(url_for("loading", next=url_for("services"), message=message))
 
@@ -562,7 +562,7 @@ def services():
         services=[
             {
                 "SERVER_NAME": {
-                    "value": service["SERVER_NAME"]["value"].split(" ")[0],
+                    "value": service["SERVER_NAME"]["value"].split()[0],
                     "method": service["SERVER_NAME"]["method"],
                 },
                 "USE_REVERSE_PROXY": service["USE_REVERSE_PROXY"],
@@ -735,7 +735,7 @@ def configs():
                 db_data=db.get_custom_configs(),
                 services=app.config["CONFIG"]
                 .get_config(methods=False)["SERVER_NAME"]
-                .split(" "),
+                .split(),
             )
         ],
         dark_mode=app.config["DARK_MODE"],
@@ -1181,7 +1181,7 @@ def cache():
                 db_data=db.get_jobs_cache_files(),
                 services=app.config["CONFIG"]
                 .get_config(methods=False)["SERVER_NAME"]
-                .split(" "),
+                .split(),
             )
         ],
         dark_mode=app.config["DARK_MODE"],
@@ -1252,7 +1252,7 @@ def logs_linux():
                 logs_error.append("\n".join(temp_multiple_lines))
 
             temp_multiple_lines = [
-                f"{datetime.strptime(' '.join(line.strip().split(' ')[0:2]), '%Y/%m/%d %H:%M:%S').replace(tzinfo=timezone.utc).timestamp()} {line}"
+                f"{datetime.strptime(' '.join(line.strip().split()[0:2]), '%Y/%m/%d %H:%M:%S').replace(tzinfo=timezone.utc).timestamp()} {line}"
             ]
         elif (
             all(f"[{log_level}]" not in line_lower for log_level in NGINX_LOG_LEVELS)
@@ -1261,7 +1261,7 @@ def logs_linux():
             temp_multiple_lines.append(line)
         else:
             logs_error.append(
-                f"{datetime.strptime(' '.join(line.strip().split(' ')[0:2]), '%Y/%m/%d %H:%M:%S').replace(tzinfo=timezone.utc).timestamp()} {line}"
+                f"{datetime.strptime(' '.join(line.strip().split()[0:2]), '%Y/%m/%d %H:%M:%S').replace(tzinfo=timezone.utc).timestamp()} {line}"
             )
 
     if temp_multiple_lines:
@@ -1273,7 +1273,7 @@ def logs_linux():
     ]
     raw_logs = logs_error + logs_access
     raw_logs.sort(
-        key=lambda x: float(x.split(" ")[0]) if x.split(" ")[0].isdigit() else 0
+        key=lambda x: float(x.split()[0]) if x.split()[0].isdigit() else 0
     )
 
     logs = []
@@ -1299,7 +1299,7 @@ def logs_linux():
 
         logs.append(
             {
-                "content": " ".join(log.strip().split(" ")[1:]),
+                "content": " ".join(log.strip().split()[1:]),
                 "type": error_type,
             }
         )
@@ -1403,7 +1403,7 @@ def logs_container(container_id):
             )
 
     for log in tmp_logs:
-        splitted = log.split(" ")
+        splitted = log.split()
         timestamp = splitted[0]
 
         if to_date is not None and dateutil_parse(timestamp).timestamp() > to_date:

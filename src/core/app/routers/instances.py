@@ -30,14 +30,9 @@ async def get_instances():
 @router.put(
     "",
     response_model=Dict[Literal["message"], str],
-    status_code=status.HTTP_201_CREATED,
-    summary="Upsert a BunkerWeb instance",
+    summary="Upsert one or more BunkerWeb instances",
     response_description="Message",
     responses={
-        status.HTTP_409_CONFLICT: {
-            "description": "Instance already exists",
-            "model": ErrorMessage,
-        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Internal server error",
             "model": ErrorMessage,
@@ -45,41 +40,78 @@ async def get_instances():
     },
 )
 async def upsert_instance(
-    instance: Instance, background_tasks: BackgroundTasks, method: str = "manual"
+    instances: Union[Instance, List[Instance]],
+    background_tasks: BackgroundTasks,
+    method: str = "manual",
+    reload: bool = True,
 ) -> JSONResponse:
     """
-    Add a BunkerWeb instance with the following information:
+    Upsert one or more BunkerWeb instances with the following information:
 
     - **hostname**: The hostname of the instance
     - **port**: The port of the instance
     - **server_name**: The server name of the instance
     """
-    error = DB.upsert_instance(**instance.model_dump(), method=method)
+    decisions = {
+        "created": [],
+        "updated": [],
+    }
+    status_code = None
 
-    if error == "exists":
-        message = f"Instance {instance.hostname} already exists"
-        CORE_CONFIG.logger.warning(message)
-        return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT, content={"message": message}
+    if isinstance(instances, Instance):
+        error = DB.upsert_instance(**instances.model_dump(), method=method)
+
+        if error not in ("created", "updated"):
+            CORE_CONFIG.logger.error(f"Can't upsert instance to database : {error}")
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"message": error},
+            )
+
+        decisions[error].append(instances)
+    else:
+        error = DB.refresh_instances(
+            [instance.model_dump() for instance in instances], method=method
         )
-    elif error not in ("created", "updated"):
-        CORE_CONFIG.logger.error(f"Can't upsert instance to database : {error}")
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"message": error},
+
+        if error:
+            CORE_CONFIG.logger.error(f"Can't refresh instances to database : {error}")
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"message": error},
+            )
+
+        decisions["created"] = instances
+        status_code = status.HTTP_200_OK
+
+    message = "✅ Instance(s) "
+
+    if decisions["created"]:
+        message += f"{', '.join(instance.hostname for instance in decisions['created'])} successfully created"
+    if decisions["updated"]:
+        if decisions["created"]:
+            message += "and "
+        message += f"{', '.join(instance.hostname for instance in decisions['updated'])} successfully updated"
+    CORE_CONFIG.logger.info(f"{message} in the database")
+
+    if decisions["created"] and reload:
+        background_tasks.add_task(
+            test_and_send_to_instances,
+            "all",
+            {instance.to_api() for instance in decisions["created"]},
         )
 
-    CORE_CONFIG.logger.info(
-        f"✅ Instance {instance.hostname} successfully {error} to database"
-    )
-
-    background_tasks.add_task(test_and_send_to_instances, "all", {instance.to_api()})
+    if decisions["updated"]:
+        CORE_CONFIG.logger.info(
+            f"Skipping sending data to instance{'s' if len(decisions) > 1 else ''} : {', '.join(instance.hostname for instance in decisions['updated'])}, as {'all' if len(decisions) > 1 else 'this'} instance{'s' if len(decisions) > 1 else ''} was/were already in the database"
+        )
 
     return JSONResponse(
-        status_code=status.HTTP_201_CREATED
-        if error == "created"
-        else status.HTTP_200_OK,
-        content={"message": "Instance successfully added"},
+        status_code=status_code
+        or (
+            status.HTTP_201_CREATED if not decisions["updated"] else status.HTTP_200_OK
+        ),
+        content={"message": message},
     )
 
 

@@ -34,7 +34,7 @@ set +a # turn off automatic exporting
 
 rm -f /tmp/ui.tmp.env
 
-# execute jobs
+# execute ui
 log "ENTRYPOINT" "ℹ️ " "Executing UI ..."
 node nuxt/.output/server/index.mjs &
 pid="$!"

@@ -20,6 +20,8 @@ function start() {
     # Stop nginx if it's running
     stop
 
+    # TODO change this to the new format
+
     # Generate temp conf for jobs and start nginx
     HTTP_PORT="$(grep "^HTTP_PORT=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
     if [ "$HTTP_PORT" = "" ] ; then

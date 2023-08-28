@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from copy import deepcopy
 from datetime import datetime, timedelta
 from hashlib import sha256
@@ -11,7 +11,7 @@ from pathlib import Path
 from re import compile as re_compile
 from subprocess import DEVNULL, PIPE, STDOUT, run as subprocess_run
 from sys import path as sys_path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 from time import sleep
 from traceback import format_exc
 
@@ -238,63 +238,34 @@ class Database:
         finally:
             session.close()
 
-    def set_autoconf_load(self, value: bool = True) -> str:
-        """Set the autoconf_loaded value"""
+    def set_scheduler_initialized(self, value: bool = True) -> str:
+        """Set the scheduler_initialized value"""
         with self.__db_session() as session:
             try:
-                metadata = session.query(Metadata).get(1)
+                metadata = session.query(Metadata).with_for_update().get(1)
 
                 if not metadata:
                     return "The metadata are not set yet, try again"
 
-                metadata.autoconf_loaded = value
+                metadata.scheduler_initialized = value
                 session.commit()
             except BaseException:
                 return format_exc()
 
         return ""
 
-    def is_autoconf_loaded(self) -> bool:
-        """Check if the autoconf is loaded"""
+    def is_scheduler_initialized(self) -> bool:
+        """Check if it's the scheduler is initialized"""
         with self.__db_session() as session:
             try:
                 metadata = (
                     session.query(Metadata)
-                    .with_entities(Metadata.autoconf_loaded)
+                    .with_entities(Metadata.scheduler_initialized)
                     .filter_by(id=1)
+                    .with_for_update(read=True)
                     .first()
                 )
-                return metadata is not None and metadata.autoconf_loaded
-            except (ProgrammingError, OperationalError):
-                return False
-
-    def set_scheduler_first_start(self, value: bool = False) -> str:
-        """Set the scheduler_first_start value"""
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).get(1)
-
-                if not metadata:
-                    return "The metadata are not set yet, try again"
-
-                metadata.scheduler_first_start = value
-                session.commit()
-            except BaseException:
-                return format_exc()
-
-        return ""
-
-    def is_scheduler_first_start(self) -> bool:
-        """Check if it's the scheduler's first start"""
-        with self.__db_session() as session:
-            try:
-                metadata = (
-                    session.query(Metadata)
-                    .with_entities(Metadata.scheduler_first_start)
-                    .filter_by(id=1)
-                    .first()
-                )
-                return metadata is not None and metadata.scheduler_first_start
+                return metadata is not None and metadata.scheduler_initialized
             except (ProgrammingError, OperationalError):
                 return True
 
@@ -306,6 +277,7 @@ class Database:
                     session.query(Metadata)
                     .with_entities(Metadata.first_config_saved)
                     .filter_by(id=1)
+                    .with_for_update(read=True)
                     .first()
                 )
                 return metadata is not None and metadata.first_config_saved
@@ -320,6 +292,7 @@ class Database:
                     session.query(Metadata)
                     .with_entities(Metadata.is_initialized)
                     .filter_by(id=1)
+                    .with_for_update(read=True)
                     .first()
                 )
                 return metadata is not None and metadata.is_initialized
@@ -332,60 +305,9 @@ class Database:
             try:
                 session.add(
                     Metadata(
-                        is_initialized=True,
-                        first_config_saved=False,
-                        scheduler_first_start=True,
-                        version=version,
-                        integration=integration,
+                        is_initialized=True, version=version, integration=integration
                     )
                 )
-                session.commit()
-            except BaseException:
-                return format_exc()
-
-        return ""
-
-    def check_changes(self) -> Union[Dict[str, bool], bool, str]:
-        """Check if either the config, the custom configs or plugins have changed inside the database"""
-        with self.__db_session() as session:
-            try:
-                metadata = (
-                    session.query(Metadata)
-                    .with_entities(
-                        Metadata.custom_configs_changed,
-                        Metadata.external_plugins_changed,
-                        Metadata.config_changed,
-                    )
-                    .filter_by(id=1)
-                    .first()
-                )
-
-                return dict(
-                    custom_configs_changed=metadata is not None
-                    and metadata.custom_configs_changed,
-                    external_plugins_changed=metadata is not None
-                    and metadata.external_plugins_changed,
-                    config_changed=metadata is not None and metadata.config_changed,
-                )
-            except BaseException:
-                return format_exc()
-
-    def checked_changes(self, changes: Optional[List[str]] = None) -> str:
-        """Set that the config, the custom configs and the plugins didn't change"""
-        changes = changes or ["config", "custom_configs", "external_plugins"]
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).get(1)
-
-                if not metadata:
-                    return "The metadata are not set yet, try again"
-
-                if "config" in changes:
-                    metadata.config_changed = False
-                if "custom_configs" in changes:
-                    metadata.custom_configs_changed = False
-                if "external_plugins" in changes:
-                    metadata.external_plugins_changed = False
                 session.commit()
             except BaseException:
                 return format_exc()
@@ -394,7 +316,7 @@ class Database:
 
     def update_db_schema(self, version: str) -> str:
         with self.__db_session() as session:
-            metadata = session.query(Metadata).get(1)
+            metadata = session.query(Metadata).with_for_update().get(1)
 
             if not metadata:
                 return "The metadata are not set yet, try again"
@@ -584,10 +506,12 @@ class Database:
         to_put = []
         with self.__db_session() as session:
             # Delete all the old config
-            session.query(Global_values).filter(Global_values.method == method).delete()
+            session.query(Global_values).filter(
+                Global_values.method == method
+            ).with_for_update().delete()
             session.query(Services_settings).filter(
                 Services_settings.method == method
-            ).delete()
+            ).with_for_update().delete()
 
             if config:
                 config.pop("DATABASE_URI", None)
@@ -597,13 +521,14 @@ class Database:
                     db_services = (
                         session.query(Services)
                         .with_entities(Services.id, Services.method)
+                        .with_for_update(read=True)
                         .all()
                     )
                     db_ids = [service.id for service in db_services]
                     services = config.get("SERVER_NAME", [])
 
                     if isinstance(services, str):
-                        services = services.split(" ")
+                        services = services.split()
 
                     if db_services:
                         missing_ids = [
@@ -616,7 +541,7 @@ class Database:
                             # Remove services that are no longer in the list
                             session.query(Services).filter(
                                 Services.id.in_(missing_ids)
-                            ).delete()
+                            ).with_for_update().delete()
 
                     for key, value in deepcopy(config).items():
                         suffix = 0
@@ -629,6 +554,7 @@ class Database:
                             session.query(Settings)
                             .with_entities(Settings.default)
                             .filter_by(id=key)
+                            .with_for_update(read=True)
                             .first()
                         )
 
@@ -651,6 +577,7 @@ class Database:
                                 session.query(Settings)
                                 .with_entities(Settings.default)
                                 .filter_by(id=key)
+                                .with_for_update(read=True)
                                 .first()
                             )
 
@@ -667,6 +594,7 @@ class Database:
                                     setting_id=key,
                                     suffix=suffix,
                                 )
+                                .with_for_update(read=True)
                                 .first()
                             )
 
@@ -698,14 +626,14 @@ class Database:
                                         Services_settings.service_id == server_name,
                                         Services_settings.setting_id == key,
                                         Services_settings.suffix == suffix,
-                                    ).delete()
+                                    ).with_for_update().delete()
                                     continue
 
                                 session.query(Services_settings).filter(
                                     Services_settings.service_id == server_name,
                                     Services_settings.setting_id == key,
                                     Services_settings.suffix == suffix,
-                                ).update(
+                                ).with_for_update().update(
                                     {
                                         Services_settings.value: value,
                                         Services_settings.method: method,
@@ -722,6 +650,7 @@ class Database:
                                     setting_id=key,
                                     suffix=suffix,
                                 )
+                                .with_for_update(read=True)
                                 .first()
                             )
 
@@ -745,13 +674,13 @@ class Database:
                                     session.query(Global_values).filter(
                                         Global_values.setting_id == key,
                                         Global_values.suffix == suffix,
-                                    ).delete()
+                                    ).with_for_update().delete()
                                     continue
 
                                 session.query(Global_values).filter(
                                     Global_values.setting_id == key,
                                     Global_values.suffix == suffix,
-                                ).update(
+                                ).with_for_update().update(
                                     {
                                         Global_values.value: value,
                                         Global_values.method: method,
@@ -764,13 +693,14 @@ class Database:
                         and not (
                             session.query(Services)
                             .with_entities(Services.id)
-                            .filter_by(id=config["SERVER_NAME"].split(" ")[0])
+                            .filter_by(id=config["SERVER_NAME"].split()[0])
+                            .with_for_update(read=True)
                             .first()
                         )
                     ):
                         to_put.append(
                             Services(
-                                id=config["SERVER_NAME"].split(" ")[0], method=method
+                                id=config["SERVER_NAME"].split()[0], method=method
                             )
                         )
 
@@ -784,6 +714,7 @@ class Database:
                             session.query(Settings)
                             .with_entities(Settings.default)
                             .filter_by(id=key)
+                            .with_for_update(read=True)
                             .first()
                         )
 
@@ -794,6 +725,7 @@ class Database:
                             session.query(Global_values)
                             .with_entities(Global_values.value, Global_values.method)
                             .filter_by(setting_id=key, suffix=suffix)
+                            .with_for_update(read=True)
                             .first()
                         )
 
@@ -817,20 +749,13 @@ class Database:
                                 session.query(Global_values).filter(
                                     Global_values.setting_id == key,
                                     Global_values.suffix == suffix,
-                                ).delete()
+                                ).with_for_update().delete()
                                 continue
 
                             session.query(Global_values).filter(
                                 Global_values.setting_id == key,
                                 Global_values.suffix == suffix,
-                            ).update({Global_values.value: value})
-
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    if not metadata.first_config_saved:
-                        metadata.first_config_saved = True
-                    metadata.config_changed = True
+                            ).with_for_update().update({Global_values.value: value})
 
             try:
                 session.add_all(to_put)
@@ -845,7 +770,9 @@ class Database:
         to_put = []
         with self.__db_session() as session:
             # Delete all the old global config
-            session.query(Global_values).filter(Global_values.method == method).delete()
+            session.query(Global_values).filter(
+                Global_values.method == method
+            ).with_for_update().delete()
 
             if config:
                 config.pop("DATABASE_URI", None)
@@ -855,12 +782,13 @@ class Database:
                     and not (
                         session.query(Services)
                         .with_entities(Services.id)
-                        .filter_by(id=config["SERVER_NAME"].split(" ")[0])
+                        .filter_by(id=config["SERVER_NAME"].split()[0])
+                        .with_for_update(read=True)
                         .first()
                     )
                 ):
                     to_put.append(
-                        Services(id=config["SERVER_NAME"].split(" ")[0], method=method)
+                        Services(id=config["SERVER_NAME"].split()[0], method=method)
                     )
 
                 for key, value in config.items():
@@ -873,6 +801,7 @@ class Database:
                         session.query(Settings)
                         .with_entities(Settings.default)
                         .filter_by(id=key)
+                        .with_for_update(read=True)
                         .first()
                     )
 
@@ -883,6 +812,7 @@ class Database:
                         session.query(Global_values)
                         .with_entities(Global_values.value, Global_values.method)
                         .filter_by(setting_id=key, suffix=suffix)
+                        .with_for_update(read=True)
                         .first()
                     )
 
@@ -903,20 +833,13 @@ class Database:
                             session.query(Global_values).filter(
                                 Global_values.setting_id == key,
                                 Global_values.suffix == suffix,
-                            ).delete()
+                            ).with_for_update().delete()
                             continue
 
                         session.query(Global_values).filter(
                             Global_values.setting_id == key,
                             Global_values.suffix == suffix,
-                        ).update({Global_values.value: value})
-
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    if not metadata.first_config_saved:
-                        metadata.first_config_saved = True
-                    metadata.config_changed = True
+                        ).with_for_update().update({Global_values.value: value})
 
             try:
                 session.add_all(to_put)
@@ -937,6 +860,7 @@ class Database:
                 session.query(Services)
                 .with_entities(Services.id, Services.method)
                 .filter_by(id=service_name)
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -953,6 +877,7 @@ class Database:
                     session.query(Services_settings)
                     .with_entities(Services_settings.method)
                     .filter_by(service_id=service_name)
+                    .with_for_update(read=True)
                     .all()
                 )
 
@@ -963,7 +888,9 @@ class Database:
                 ):
                     return "method_conflict"
 
-                session.query(Services).filter(Services.id == service_name).update(
+                session.query(Services).filter(
+                    Services.id == service_name
+                ).with_for_update().update(
                     Services.id == first_server_name  # type: ignore
                 )
 
@@ -972,7 +899,7 @@ class Database:
             session.query(Services_settings).filter(
                 Services_settings.method == method,
                 Services_settings.service_id == service_name,
-            ).delete()
+            ).with_for_update().delete()
 
             if config:
                 for key, value in deepcopy(config).items():
@@ -985,6 +912,7 @@ class Database:
                         session.query(Settings)
                         .with_entities(Settings.default)
                         .filter_by(id=key)
+                        .with_for_update(read=True)
                         .first()
                     )
 
@@ -998,6 +926,7 @@ class Database:
                         session.query(Settings)
                         .with_entities(Settings.default)
                         .filter_by(id=key)
+                        .with_for_update(read=True)
                         .first()
                     )
 
@@ -1014,6 +943,7 @@ class Database:
                             setting_id=key,
                             suffix=suffix,
                         )
+                        .with_for_update(read=True)
                         .first()
                     )
 
@@ -1045,26 +975,19 @@ class Database:
                                 Services_settings.service_id == service_name,
                                 Services_settings.setting_id == key,
                                 Services_settings.suffix == suffix,
-                            ).delete()
+                            ).with_for_update().delete()
                             continue
 
                         session.query(Services_settings).filter(
                             Services_settings.service_id == service_name,
                             Services_settings.setting_id == key,
                             Services_settings.suffix == suffix,
-                        ).update(
+                        ).with_for_update().update(
                             {
                                 Services_settings.value: value,
                                 Services_settings.method: method,
                             }
                         )
-
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    if not metadata.first_config_saved:
-                        metadata.first_config_saved = True
-                    metadata.config_changed = True
 
             try:
                 session.add_all(to_put)
@@ -1082,6 +1005,7 @@ class Database:
                 session.query(Services)
                 .with_entities(Services.id, Services.method)
                 .filter_by(id=service_name)
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -1090,7 +1014,9 @@ class Database:
             elif db_service.method != method:
                 return "method_conflict"
 
-            session.query(Services).filter(Services.id == service_name).delete()
+            session.query(Services).filter(
+                Services.id == service_name
+            ).with_for_update().delete()
 
             try:
                 session.commit()
@@ -1108,7 +1034,7 @@ class Database:
             # Delete all the old config
             session.query(Custom_configs).filter(
                 Custom_configs.method == method
-            ).delete()
+            ).with_for_update().delete()
 
             to_put = []
             endl = "\n"
@@ -1126,6 +1052,7 @@ class Database:
                         not session.query(Services)
                         .with_entities(Services.id)
                         .filter_by(id=custom_config["exploded"][0])
+                        .with_for_update(read=True)
                         .first()
                     ):
                         message += f"{endl if message else ''}Service {custom_config['exploded'][0]} not found, please check your config"
@@ -1157,6 +1084,7 @@ class Database:
                         type=config["type"],
                         name=config["name"],
                     )
+                    .with_for_update(read=True)
                     .first()
                 )
 
@@ -1170,7 +1098,7 @@ class Database:
                         Custom_configs.service_id == config.get("service_id", None),
                         Custom_configs.type == config["type"],
                         Custom_configs.name == config["name"],
-                    ).update(
+                    ).with_for_update().update(
                         {
                             Custom_configs.data: config["data"],
                             Custom_configs.checksum: config["checksum"],
@@ -1181,11 +1109,6 @@ class Database:
                             else {}
                         )
                     )
-
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    metadata.custom_configs_changed = True
 
             try:
                 session.add_all(to_put)
@@ -1217,6 +1140,7 @@ class Database:
                     Settings.default,
                     Settings.multiple,
                 )
+                .with_for_update(read=True)
                 .all()
             ):
                 default = setting.default or ""
@@ -1238,6 +1162,7 @@ class Database:
                         Global_values.value, Global_values.suffix, Global_values.method
                     )
                     .filter_by(setting_id=setting.id)
+                    .with_for_update(read=True)
                     .all()
                 )
 
@@ -1270,8 +1195,20 @@ class Database:
                 if setting.context == "multisite":
                     multisite.append(setting.id)
 
-            if config.get("MULTISITE", "no") == "yes":
-                for service in session.query(Services).with_entities(Services.id).all():
+            is_multisite = (
+                config.get("global", config).get("MULTISITE", {"value": "no"})["value"]
+                == "yes"
+                if methods
+                else config.get("global", config).get("MULTISITE", "no") == "yes"
+            )
+
+            if is_multisite:
+                for service in (
+                    session.query(Services)
+                    .with_entities(Services.id)
+                    .with_for_update(read=True)
+                    .all()
+                ):
                     if new_format and service not in config["services"]:
                         config["services"][service.id] = {}
                     checked_settings = []
@@ -1301,6 +1238,7 @@ class Database:
                                 Services_settings.method,
                             )
                             .filter_by(service_id=service.id, setting_id=key)
+                            .with_for_update(read=True)
                             .all()
                         )
 
@@ -1330,19 +1268,18 @@ class Database:
                                     else service_setting.value
                                 )
 
-            servers = " ".join(service.id for service in session.query(Services).all()) # type: ignore
-            if new_format:
-                config["global"]["SERVER_NAME"] = (
-                    {"value": servers, "method": "default"}
-                    if methods
-                    else servers
-                )
-            else:
-                config["SERVER_NAME"] = (
-                    {"value": servers, "global": True, "method": "default"}
-                    if methods
-                    else servers
-                )
+            if is_multisite:
+                servers = " ".join(service.id for service in session.query(Services).with_for_update(read=True).all())  # type: ignore
+                if new_format:
+                    config["global"]["SERVER_NAME"] = (
+                        {"value": servers, "method": "default"} if methods else servers
+                    )
+                else:
+                    config["SERVER_NAME"] = (
+                        {"value": servers, "global": True, "method": "default"}
+                        if methods
+                        else servers
+                    )
 
             return config
 
@@ -1366,6 +1303,7 @@ class Database:
                         Custom_configs.data,
                         Custom_configs.method,
                     )
+                    .with_for_update(read=True)
                     .all()
                 )
             ]
@@ -1400,6 +1338,7 @@ class Database:
                     type=config["type"],
                     name=config["name"],
                 )
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -1414,7 +1353,7 @@ class Database:
                     Custom_configs.service_id == config["service_id"],
                     Custom_configs.type == config["type"],
                     Custom_configs.name == config["name"],
-                ).update(
+                ).with_for_update().update(
                     {
                         Custom_configs.data: config["data"],
                         Custom_configs.checksum: config["checksum"],
@@ -1422,11 +1361,6 @@ class Database:
                     | ({"method": "autoconf"} if method == "autoconf" else {})
                 )
                 ret = "updated"
-
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    metadata.custom_configs_changed = True
 
             try:
                 session.commit()
@@ -1448,6 +1382,7 @@ class Database:
                     type=config_type.replace("-", "_").lower(),
                     name=name,
                 )
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -1460,12 +1395,7 @@ class Database:
                 Custom_configs.service_id == service_id,
                 Custom_configs.type == config_type.replace("-", "_").lower(),
                 Custom_configs.name == name,
-            ).delete()
-
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    metadata.custom_configs_changed = True
+            ).with_for_update().delete()
 
             try:
                 session.commit()
@@ -1481,7 +1411,10 @@ class Database:
         with self.__db_session() as session:
             service_names = [
                 service.id
-                for service in session.query(Services).with_entities(Services.id).all()
+                for service in session.query(Services)
+                .with_entities(Services.id)
+                .with_for_update(read=True)
+                .all()
             ]
             for service in service_names:
                 tmp_config = deepcopy(config)
@@ -1516,6 +1449,7 @@ class Database:
                 session.query(Plugins)
                 .with_entities(Plugins.id)
                 .filter_by(external=True)
+                .with_for_update(read=True)
                 .all()
             )
 
@@ -1527,7 +1461,9 @@ class Database:
 
                 if missing_ids:
                     # Remove plugins that are no longer in the list
-                    session.query(Plugins).filter(Plugins.id.in_(missing_ids)).delete()
+                    session.query(Plugins).filter(
+                        Plugins.id.in_(missing_ids)
+                    ).with_for_update().delete()
 
             for plugin in plugins:
                 settings = plugin.pop("settings", {})
@@ -1547,6 +1483,7 @@ class Database:
                         Plugins.external,
                     )
                     .filter_by(id=plugin["id"])
+                    .with_for_update(read=True)
                     .first()
                 )
 
@@ -1583,12 +1520,13 @@ class Database:
                     if updates:
                         session.query(Plugins).filter(
                             Plugins.id == plugin["id"]
-                        ).update(updates)
+                        ).with_for_update().update(updates)
 
                     db_plugin_settings = (
                         session.query(Settings)
                         .with_entities(Settings.id)
                         .filter_by(plugin_id=plugin["id"])
+                        .with_for_update(read=True)
                         .all()
                     )
                     db_ids = [setting.id for setting in db_plugin_settings]
@@ -1601,7 +1539,7 @@ class Database:
                         # Remove settings that are no longer in the list
                         session.query(Settings).filter(
                             Settings.id.in_(missing_ids)
-                        ).delete()
+                        ).with_for_update().delete()
 
                     for setting, value in settings.items():
                         value.update(
@@ -1624,6 +1562,7 @@ class Database:
                                 Settings.multiple,
                             )
                             .filter_by(id=setting)
+                            .with_for_update(read=True)
                             .first()
                         )
 
@@ -1668,12 +1607,13 @@ class Database:
                             if updates:
                                 session.query(Settings).filter(
                                     Settings.id == setting
-                                ).update(updates)
+                                ).with_for_update().update(updates)
 
                             db_selects = (
                                 session.query(Selects)
                                 .with_entities(Selects.value)
                                 .filter_by(setting_id=setting)
+                                .with_for_update(read=True)
                                 .all()
                             )
                             db_values = [select.value for select in db_selects]
@@ -1688,7 +1628,7 @@ class Database:
                                 # Remove selects that are no longer in the list
                                 session.query(Selects).filter(
                                     Selects.value.in_(missing_values)
-                                ).delete()
+                                ).with_for_update().delete()
 
                             for select in value.get("select", []):
                                 if select not in db_values:
@@ -1700,6 +1640,7 @@ class Database:
                         session.query(Jobs)
                         .with_entities(Jobs.name)
                         .filter_by(plugin_id=plugin["id"])
+                        .with_for_update(read=True)
                         .all()
                     )
                     db_names = [job.name for job in db_jobs]
@@ -1710,13 +1651,14 @@ class Database:
                         # Remove jobs that are no longer in the list
                         session.query(Jobs).filter(
                             Jobs.name.in_(missing_names)
-                        ).delete()
+                        ).with_for_update().delete()
 
                     for job in jobs:
                         db_job = (
                             session.query(Jobs)
                             .with_entities(Jobs.file_name, Jobs.every, Jobs.reload)
                             .filter_by(name=job["name"], plugin_id=plugin["id"])
+                            .with_for_update(read=True)
                             .first()
                         )
 
@@ -1745,10 +1687,10 @@ class Database:
                                 updates[Jobs.last_run] = None
                                 session.query(Jobs_cache).filter(
                                     Jobs_cache.job_name == job["name"]
-                                ).delete()
+                                ).with_for_update().delete()
                                 session.query(Jobs).filter(
                                     Jobs.name == job["name"]
-                                ).update(updates)
+                                ).with_for_update().update(updates)
 
                     tmp_ui_path = Path(
                         sep, "var", "tmp", "bunkerweb", "ui", plugin["id"], "ui"
@@ -1772,6 +1714,7 @@ class Database:
                                     Plugin_pages.actions_checksum,
                                 )
                                 .filter_by(plugin_id=plugin["id"])
+                                .with_for_update(read=True)
                                 .first()
                             )
 
@@ -1819,7 +1762,7 @@ class Database:
                                 if updates:
                                     session.query(Plugin_pages).filter(
                                         Plugin_pages.plugin_id == plugin["id"]
-                                    ).update(updates)
+                                    ).with_for_update().update(updates)
 
                     continue
 
@@ -1838,7 +1781,12 @@ class Database:
                 )
 
                 for setting, value in settings.items():
-                    db_setting = session.query(Settings).filter_by(id=setting).first()
+                    db_setting = (
+                        session.query(Settings)
+                        .filter_by(id=setting)
+                        .with_for_update(read=True)
+                        .first()
+                    )
 
                     if db_setting is not None:
                         self.__logger.warning(
@@ -1868,6 +1816,7 @@ class Database:
                         session.query(Jobs)
                         .with_entities(Jobs.file_name, Jobs.every, Jobs.reload)
                         .filter_by(name=job["name"], plugin_id=plugin["id"])
+                        .with_for_update(read=True)
                         .first()
                     )
 
@@ -1904,6 +1853,7 @@ class Database:
                                     Plugin_pages.actions_checksum,
                                 )
                                 .filter_by(plugin_id=plugin["id"])
+                                .with_for_update(read=True)
                                 .first()
                             )
 
@@ -1951,12 +1901,7 @@ class Database:
                                 if updates:
                                     session.query(Plugin_pages).filter(
                                         Plugin_pages.plugin_id == plugin["id"]
-                                    ).update(updates)
-
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    metadata.external_plugins_changed = True
+                                    ).with_for_update().update(updates)
 
             try:
                 session.add_all(to_put)
@@ -1985,6 +1930,7 @@ class Database:
                     Plugins.data,
                     Plugins.checksum,
                 )
+                .with_for_update(read=True)
                 .all()
                 if with_data
                 else session.query(Plugins)
@@ -1997,6 +1943,7 @@ class Database:
                     Plugins.external,
                     Plugins.method,
                 )
+                .with_for_update(read=True)
                 .all()
             ):
                 if external and not plugin.external:
@@ -2006,6 +1953,7 @@ class Database:
                     session.query(Plugin_pages)
                     .with_entities(Plugin_pages.id)
                     .filter_by(plugin_id=plugin.id)
+                    .with_for_update(read=True)
                     .first()
                 )
                 data = {
@@ -2038,6 +1986,7 @@ class Database:
                         Settings.multiple,
                     )
                     .filter_by(plugin_id=plugin.id)
+                    .with_for_update(read=True)
                     .all()
                 ):
                     data["settings"][setting.id] = {
@@ -2056,6 +2005,7 @@ class Database:
                             for select in session.query(Selects)
                             .with_entities(Selects.value)
                             .filter_by(setting_id=setting.id)
+                            .with_for_update(read=True)
                             .all()
                         ]
 
@@ -2071,6 +2021,7 @@ class Database:
                 session.query(Plugins)
                 .with_entities(Plugins.id)
                 .filter_by(id=plugin["id"])
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -2099,7 +2050,12 @@ class Database:
             )
 
             for setting, value in settings.items():
-                db_setting = session.query(Settings).filter_by(id=setting).first()
+                db_setting = (
+                    session.query(Settings)
+                    .filter_by(id=setting)
+                    .with_for_update(read=True)
+                    .first()
+                )
 
                 if db_setting is not None:
                     self.__logger.warning(
@@ -2129,6 +2085,7 @@ class Database:
                     session.query(Jobs)
                     .with_entities(Jobs.file_name, Jobs.every, Jobs.reload)
                     .filter_by(name=job["name"], plugin_id=plugin["id"])
+                    .with_for_update(read=True)
                     .first()
                 )
 
@@ -2163,11 +2120,6 @@ class Database:
                         f"Plugin \"{plugin['id']}\" has a page but no template or actions file, skipping page addition.",
                     )
 
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    metadata.external_plugins_changed = True
-
             try:
                 session.add_all(to_put)
                 session.commit()
@@ -2195,6 +2147,7 @@ class Database:
                     Plugins.external,
                 )
                 .filter_by(id=plugin_id)
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -2237,12 +2190,15 @@ class Database:
                 updates[Plugins.checksum] = plugin_data.get("checksum")
 
             if updates:
-                session.query(Plugins).filter(Plugins.id == plugin_id).update(updates)
+                session.query(Plugins).filter(
+                    Plugins.id == plugin_id
+                ).with_for_update().update(updates)
 
             db_plugin_settings = (
                 session.query(Settings)
                 .with_entities(Settings.id)
                 .filter_by(plugin_id=plugin_id)
+                .with_for_update(read=True)
                 .all()
             )
             db_ids = [setting.id for setting in db_plugin_settings]
@@ -2251,7 +2207,9 @@ class Database:
 
             if missing_ids:
                 # Remove settings that are no longer in the list
-                session.query(Settings).filter(Settings.id.in_(missing_ids)).delete()
+                session.query(Settings).filter(
+                    Settings.id.in_(missing_ids)
+                ).with_for_update().delete()
 
             for setting, value in settings.items():
                 value.update(
@@ -2270,6 +2228,7 @@ class Database:
                         Settings.multiple,
                     )
                     .filter_by(id=setting)
+                    .with_for_update(read=True)
                     .first()
                 )
 
@@ -2309,14 +2268,15 @@ class Database:
                         updates[Settings.multiple] = value.get("multiple")
 
                     if updates:
-                        session.query(Settings).filter(Settings.id == setting).update(
-                            updates
-                        )
+                        session.query(Settings).filter(
+                            Settings.id == setting
+                        ).with_for_update().update(updates)
 
                     db_selects = (
                         session.query(Selects)
                         .with_entities(Selects.value)
                         .filter_by(setting_id=setting)
+                        .with_for_update(read=True)
                         .all()
                     )
                     db_values = [select.value for select in db_selects]
@@ -2329,7 +2289,7 @@ class Database:
                         # Remove selects that are no longer in the list
                         session.query(Selects).filter(
                             Selects.value.in_(missing_values)
-                        ).delete()
+                        ).with_for_update().delete()
 
                     for select in value.get("select", []):
                         if select not in db_values:
@@ -2339,6 +2299,7 @@ class Database:
                 session.query(Jobs)
                 .with_entities(Jobs.name)
                 .filter_by(plugin_id=plugin_id)
+                .with_for_update(read=True)
                 .all()
             )
             db_names = [job.name for job in db_jobs]
@@ -2347,13 +2308,16 @@ class Database:
 
             if missing_names:
                 # Remove jobs that are no longer in the list
-                session.query(Jobs).filter(Jobs.name.in_(missing_names)).delete()
+                session.query(Jobs).filter(
+                    Jobs.name.in_(missing_names)
+                ).with_for_update().delete()
 
             for job in jobs:
                 db_job = (
                     session.query(Jobs)
                     .with_entities(Jobs.file_name, Jobs.every, Jobs.reload)
                     .filter_by(name=job["name"], plugin_id=plugin_id)
+                    .with_for_update(read=True)
                     .first()
                 )
 
@@ -2380,10 +2344,10 @@ class Database:
                         updates[Jobs.last_run] = None
                         session.query(Jobs_cache).filter(
                             Jobs_cache.job_name == job["name"]
-                        ).delete()
-                        session.query(Jobs).filter(Jobs.name == job["name"]).update(
-                            updates
-                        )
+                        ).with_for_update().delete()
+                        session.query(Jobs).filter(
+                            Jobs.name == job["name"]
+                        ).with_for_update().update(updates)
 
             if page:
                 if template_file and actions_file:
@@ -2396,6 +2360,7 @@ class Database:
                             Plugin_pages.actions_checksum,
                         )
                         .filter_by(plugin_id=plugin_id)
+                        .with_for_update(read=True)
                         .first()
                     )
 
@@ -2442,21 +2407,16 @@ class Database:
                         if updates:
                             session.query(Plugin_pages).filter(
                                 Plugin_pages.plugin_id == plugin_id
-                            ).update(updates)
+                            ).with_for_update().update(updates)
 
                 else:
                     session.query(Plugin_pages).filter(
                         Plugin_pages.plugin_id == plugin_id
-                    ).delete()
+                    ).with_for_update().delete()
 
                     self.__logger.warning(
                         f'Plugin "{plugin_id}" has a page but no template or actions file, skipping page addition and removing existing page.',
                     )
-
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    metadata.external_plugins_changed = True
 
             try:
                 session.add_all(to_put)
@@ -2473,6 +2433,7 @@ class Database:
                 session.query(Plugins)
                 .with_entities(Plugins.external)
                 .filter_by(id=plugin_id)
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -2481,13 +2442,10 @@ class Database:
             elif db_plugin.external is False:
                 return "not_external"
 
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    metadata.external_plugins_changed = True
-
             try:
-                session.query(Plugins).filter(Plugins.id == plugin_id).delete()
+                session.query(Plugins).filter(
+                    Plugins.id == plugin_id
+                ).with_for_update().delete()
                 session.commit()
             except BaseException:
                 return format_exc()
@@ -2498,7 +2456,12 @@ class Database:
         """Get plugins errors."""
         # TODO edit this function to return the number of errors from the new history
         with self.__db_session() as session:
-            return session.query(Jobs).filter(Jobs.success == False).count()
+            return (
+                session.query(Jobs)
+                .filter(Jobs.success == False)
+                .with_for_update(read=True)
+                .count()
+            )
 
     def get_job(self, job_name: str) -> Dict[str, Any]:
         """Get job."""
@@ -2507,6 +2470,7 @@ class Database:
                 session.query(Jobs)
                 .with_entities(Jobs.name, Jobs.every, Jobs.reload)
                 .filter_by(name=job_name)
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -2526,6 +2490,7 @@ class Database:
                     .filter_by(job_name=job.name)
                     .order_by(Jobs_runs.id.desc())
                     .limit(10)
+                    .with_for_update(read=True)
                     .all()
                 ],
                 "cache": [
@@ -2547,6 +2512,7 @@ class Database:
                         Jobs_cache.checksum,
                     )
                     .filter_by(job_name=job.name)
+                    .with_for_update(read=True)
                     .all()
                 ],
             }
@@ -2578,6 +2544,7 @@ class Database:
                         .filter_by(job_name=job.name)
                         .order_by(Jobs_runs.id.desc())
                         .limit(10)
+                        .with_for_update(read=True)
                         .all()
                     ],
                     "cache": [
@@ -2599,6 +2566,7 @@ class Database:
                             Jobs_cache.checksum,
                         )
                         .filter_by(job_name=job.name)
+                        .with_for_update(read=True)
                         .all()
                     ],
                 }
@@ -2609,6 +2577,7 @@ class Database:
                         Jobs.every,
                         Jobs.reload,
                     )
+                    .with_for_update(read=True)
                     .all()
                 )
             }
@@ -2624,7 +2593,12 @@ class Database:
         with self.__db_session() as session:
             current_date = datetime.now()
 
-            while session.query(Jobs_runs).filter_by(id=current_date).first():
+            while (
+                session.query(Jobs_runs)
+                .filter_by(id=current_date)
+                .with_for_update(read=True)
+                .first()
+            ):
                 current_date = current_date + timedelta(microseconds=1)
 
             session.add(
@@ -2656,13 +2630,13 @@ class Database:
                 Jobs_cache.job_name == job_name,
                 Jobs_cache.service_id == service_id,
                 Jobs_cache.file_name == file_name,
-            ).delete()
+            ).with_for_update().delete()
 
     def upsert_job_cache(
         self,
         job_name: str,
         file_name: str,
-        data: bytes = None,
+        data: Optional[bytes] = None,
         *,
         service_id: Optional[str] = None,
         checksum: Optional[str] = None,
@@ -2675,6 +2649,7 @@ class Database:
                 .filter_by(
                     job_name=job_name, service_id=service_id, file_name=file_name
                 )
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -2730,6 +2705,7 @@ class Database:
                 .filter_by(
                     job_name=job_name, service_id=service_id, file_name=file_name
                 )
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -2750,6 +2726,7 @@ class Database:
                         Jobs_cache.service_id,
                         Jobs_cache.file_name,
                     )
+                    .with_for_update(read=True)
                     .all()
                 )
             ]
@@ -2763,6 +2740,7 @@ class Database:
                 session.query(Instances)
                 .with_entities(Instances.hostname)
                 .filter_by(hostname=hostname)
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -2786,7 +2764,9 @@ class Database:
         """Update instances."""
         to_put = []
         with self.__db_session() as session:
-            session.query(Instances).filter(Instances.method == method).delete()
+            session.query(Instances).filter(
+                Instances.method == method
+            ).with_for_update().delete()
 
             for instance in instances:
                 to_put.append(Instances(**instance | {"method": method}))
@@ -2809,6 +2789,7 @@ class Database:
                 session.query(Instances)
                 .with_entities(Instances.hostname, Instances.method)
                 .filter_by(hostname=hostname)
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -2823,7 +2804,9 @@ class Database:
                 )
                 ret = "created"
             else:
-                session.query(Instances).filter_by(hostname=hostname).update(
+                session.query(Instances).filter_by(
+                    hostname=hostname
+                ).with_for_update().update(
                     {
                         Instances.port: port,
                         Instances.server_name: server_name,
@@ -2857,6 +2840,7 @@ class Database:
                         Instances.server_name,
                         Instances.method,
                     )
+                    .with_for_update(read=True)
                     .all()
                 )
             ]
@@ -2865,7 +2849,10 @@ class Database:
         """Get an instance."""
         with self.__db_session() as session:
             instance = (
-                session.query(Instances).filter_by(hostname=instance_hostname).first()
+                session.query(Instances)
+                .filter_by(hostname=instance_hostname)
+                .with_for_update(read=True)
+                .first()
             )
 
             if not instance:
@@ -2885,6 +2872,7 @@ class Database:
                 session.query(Instances)
                 .with_entities(Instances.hostname)
                 .filter_by(hostname=instance_hostname)
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -2893,7 +2881,7 @@ class Database:
 
             session.query(Instances).filter(
                 Instances.hostname == instance_hostname
-            ).delete()
+            ).with_for_update().delete()
 
             try:
                 session.commit()
@@ -2909,6 +2897,7 @@ class Database:
                 session.query(Instances)
                 .with_entities(Instances.hostname)
                 .filter_by(hostname=instance_hostname)
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -2917,7 +2906,7 @@ class Database:
 
             session.query(Instances).filter(
                 Instances.hostname == instance_hostname
-            ).update({Instances.last_seen: datetime.now()})
+            ).with_for_update().update({Instances.last_seen: datetime.now()})
 
             try:
                 session.commit()
@@ -2933,6 +2922,7 @@ class Database:
                 session.query(Plugin_pages)
                 .with_entities(Plugin_pages.actions_file)
                 .filter_by(plugin_id=plugin)
+                .with_for_update(read=True)
                 .first()
             )
 
@@ -2948,6 +2938,7 @@ class Database:
                 session.query(Plugin_pages)
                 .with_entities(Plugin_pages.template_file)
                 .filter_by(plugin_id=plugin)
+                .with_for_update(read=True)
                 .first()
             )
 

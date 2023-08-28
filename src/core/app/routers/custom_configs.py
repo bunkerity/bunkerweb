@@ -1,4 +1,4 @@
-from typing import Dict, List, Literal
+from typing import Dict, List, Literal, Union
 from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
@@ -29,7 +29,7 @@ async def get_custom_configs():
 @router.put(
     "",
     response_model=Dict[Literal["message"], str],
-    summary="Update a custom config",
+    summary="Update one or more custom configs",
     response_description="Message",
     responses={
         status.HTTP_403_FORBIDDEN: {
@@ -43,39 +43,62 @@ async def get_custom_configs():
     },
 )
 async def update_custom_config(
-    custom_config: CustomConfigNameModel, method: str, background_tasks: BackgroundTasks
+    custom_configs: Union[CustomConfigNameModel, List[CustomConfigNameModel]],
+    method: str,
+    background_tasks: BackgroundTasks,
+    reload: bool = True,
 ):
-    """Update a custom config"""
-    err = DB.upsert_custom_config(custom_config.model_dump() | {"method": method})
+    """Update one or more custom configs"""
+    err = "created"
+    status_code = None
 
-    if err == "method_conflict":
-        message = (
-            f"Can't upsert custom config {custom_config.name}"
-            + (
-                f" from service {custom_config.service_id}"
-                if custom_config.service_id
-                else ""
+    if isinstance(custom_configs, CustomConfigNameModel):
+        err = DB.upsert_custom_config(custom_configs.model_dump() | {"method": method})
+
+        if err == "method_conflict":
+            message = (
+                f"Can't upsert custom config {custom_configs.name}"
+                + (
+                    f" from service {custom_configs.service_id}"
+                    if custom_configs.service_id
+                    else ""
+                )
+                + " because it was created by either the core or the autoconf and the method isn't one of them"
             )
-            + " because it was created by either the core or the autoconf and the method isn't one of them"
-        )
-        CORE_CONFIG.logger.warning(message)
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
-        )
-    elif err and err not in ("created", "updated"):
-        CORE_CONFIG.logger.error(f"Can't upsert custom config: {err}")
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"message": err},
-        )
+            CORE_CONFIG.logger.warning(message)
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
+            )
+        elif err and err not in ("created", "updated"):
+            CORE_CONFIG.logger.error(f"Can't upsert custom config: {err}")
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"message": err},
+            )
 
-    CORE_CONFIG.logger.info(f"✅ Custom config {custom_config.name} {err} to database")
+        message = f"Custom config {custom_configs.name} {err}"
+    else:
+        err = DB.save_custom_configs([c.model_dump() for c in custom_configs], method)
 
-    background_tasks.add_task(send_to_instances, {"custom_configs"})
+        if err:
+            CORE_CONFIG.logger.error(f"Can't upsert custom config: {err}")
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"message": err},
+            )
+
+        message = f"Custom configs {', '.join(c.name for c in custom_configs)} {err}"
+        status_code = status.HTTP_200_OK
+
+    CORE_CONFIG.logger.info(f"✅ {message} to database")
+
+    if reload:
+        background_tasks.add_task(send_to_instances, {"custom_configs"})
 
     return JSONResponse(
-        status_code=status.HTTP_200_OK if err == "updated" else status.HTTP_201_CREATED,
-        content={"message": f"Custom config {custom_config.name} {err}"},
+        status_code=status_code
+        or (status.HTTP_200_OK if err == "updated" else status.HTTP_201_CREATED),
+        content={"message": message},
     )
 
 

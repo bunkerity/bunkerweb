@@ -74,7 +74,7 @@ class SwarmController(Controller):
                 value = env.replace(f"{variable}=", "", 1)
                 variables[variable] = value
         if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():
-            for server_name in variables["SERVER_NAME"].strip().split(" "):
+            for server_name in variables["SERVER_NAME"].strip().split():
                 service = {}
                 service["SERVER_NAME"] = server_name
                 for variable, value in variables.items():
@@ -180,7 +180,6 @@ class SwarmController(Controller):
                     sleep(10)
 
     def process_events(self):
-        self._set_autoconf_load_db()
         event_types = ("service", "config")
         threads = [
             Thread(target=self.__event, args=(event_type,))

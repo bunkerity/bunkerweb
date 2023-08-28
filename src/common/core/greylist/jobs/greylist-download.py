@@ -61,7 +61,7 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
 
 LOGGER = setup_logger("GREYLIST", getenv("LOG_LEVEL", "INFO"))
 CORE_API = API(getenv("API_ADDR", ""), "job-greylist-download")
-API_TOKEN = getenv("API_TOKEN", None)
+CORE_TOKEN = getenv("CORE_TOKEN", None)
 status = 0
 
 try:
@@ -69,7 +69,7 @@ try:
     greylist_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "").split(" "):
+        for first_server in getenv("SERVER_NAME", "").split():
             if (
                 getenv(f"{first_server}_USE_GREYLIST", getenv("USE_GREYLIST", "yes"))
                 == "yes"
@@ -94,7 +94,7 @@ try:
     }
     all_fresh = True
     for kind in kinds_fresh:
-        if not is_cached_file(f"{kind}.list", "hour", CORE_API, API_TOKEN)[1]:
+        if not is_cached_file(f"{kind}.list", "hour", CORE_API, CORE_TOKEN)[1]:
             kinds_fresh[kind] = False
             all_fresh = False
             LOGGER.info(
@@ -110,7 +110,7 @@ try:
     # Get URLs
     urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
     for kind in urls:
-        for url in getenv(f"GREYLIST_{kind}_URLS", "").split(" "):
+        for url in getenv(f"GREYLIST_{kind}_URLS", "").split():
             if url and url not in urls[kind]:
                 urls[kind].append(url)
 
@@ -155,14 +155,14 @@ try:
 
                 # Check if file has changed
                 new_hash = bytes_hash(content)
-                old_hash = cache_hash(f"{kind}.list", CORE_API, API_TOKEN)
+                old_hash = cache_hash(f"{kind}.list", CORE_API, CORE_TOKEN)
                 if new_hash == old_hash:
                     LOGGER.info(
                         f"New file {kind}.list is identical to cache file, reload is not needed",
                     )
                     # Update file info in cache
                     cached, err = update_cache_file_info(
-                        f"{kind}.list", CORE_API, API_TOKEN
+                        f"{kind}.list", CORE_API, CORE_TOKEN
                     )
                     if not cached:
                         LOGGER.error(f"Error while updating cache info : {err}")
@@ -173,7 +173,7 @@ try:
                     )
                     # Put file in cache
                     cached, err = cache_file(
-                        f"{kind}.list", content, CORE_API, API_TOKEN, checksum=new_hash
+                        f"{kind}.list", content, CORE_API, CORE_TOKEN, checksum=new_hash
                     )
 
                     if not cached:

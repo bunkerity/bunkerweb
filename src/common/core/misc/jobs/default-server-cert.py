@@ -24,14 +24,14 @@ from jobs import cache_file, get_cache
 
 LOGGER = setup_logger("DEFAULT-SERVER-CERT", getenv("LOG_LEVEL", "INFO"))
 CORE_API = API(getenv("API_ADDR", ""), "job-default-server-cert")
-API_TOKEN = getenv("API_TOKEN", None)
+CORE_TOKEN = getenv("CORE_TOKEN", None)
 status = 0
 
 try:
     # Check if we need to generate a self-signed default cert for non-SNI "clients"
     need_default_cert = False
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "").split(" "):
+        for first_server in getenv("SERVER_NAME", "").split():
             for check_var in (
                 "USE_CUSTOM_SSL",
                 "AUTO_LETS_ENCRYPT",
@@ -66,13 +66,13 @@ try:
     cert_path.mkdir(parents=True, exist_ok=True)
 
     if not cert_path.joinpath("cert.pem").is_file():
-        cached_pem = get_cache("cert.pem", CORE_API, API_TOKEN)
+        cached_pem = get_cache("cert.pem", CORE_API, CORE_TOKEN)
 
         if cached_pem:
             cert_path.joinpath("cert.pem").write_bytes(cached_pem["data"])
 
     if not cert_path.joinpath("cert.key").is_file():
-        cached_key = get_cache("cert.key", CORE_API, API_TOKEN)
+        cached_key = get_cache("cert.key", CORE_API, CORE_TOKEN)
 
         if cached_key:
             cert_path.joinpath("cert.key").write_bytes(cached_key["data"])
@@ -118,7 +118,7 @@ try:
             "cert.pem",
             cert_path.joinpath("cert.pem").read_bytes(),
             CORE_API,
-            API_TOKEN,
+            CORE_TOKEN,
         )
         if not cached:
             LOGGER.error(
@@ -133,7 +133,7 @@ try:
             "cert.key",
             cert_path.joinpath("cert.key").read_bytes(),
             CORE_API,
-            API_TOKEN,
+            CORE_TOKEN,
         )
         if not cached:
             LOGGER.error(

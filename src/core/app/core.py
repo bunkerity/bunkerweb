@@ -49,7 +49,7 @@ class CoreConfig(YamlBaseSettings):
     CHECK_WHITELIST: Union[str, bool] = "yes"
     WHITELIST: Union[str, set] = "127.0.0.1"
     CHECK_TOKEN: Union[str, bool] = "yes"
-    TOKEN: str = "changeme"
+    CORE_TOKEN: str = "changeme"
     BUNKERWEB_INSTANCES: Union[str, List[str]] = []
 
     LOG_LEVEL: Literal[
@@ -253,7 +253,7 @@ class CoreConfig(YamlBaseSettings):
                 "MAX_THREADS",
                 "WAIT_RETRY_INTERVAL",
                 "HEALTHCHECK_INTERVAL",
-                "TOKEN",
+                "CORE_TOKEN",
                 "BUNKERWEB_INSTANCES",
                 "bunkerweb_instances",
                 "external_plugin_urls",
@@ -358,7 +358,7 @@ The BunkerWeb Internal API is designed to manage BunkerWeb's instances, communic
 
 ## Authentication
 
-If the API is configured to check the authentication token, the token must be provided in the request header. Each request should include an authentication token in the request header. The token can be set in the configuration file or as an environment variable (`API_TOKEN`).
+If the API is configured to check the authentication token, the token must be provided in the request header. Each request should include an authentication token in the request header. The token can be set in the configuration file or as an environment variable (`CORE_TOKEN`).
 
 Example:
 
@@ -397,32 +397,3 @@ tags_metadata = [  # TODO: Add more tags and better descriptions: https://fastap
         "description": "Operations related to job management",
     },
 ]
-
-from .dependencies import stop
-
-
-@asynccontextmanager  # type: ignore
-async def lifespan(_):
-    yield  # ? lifespan of the application
-
-    stop(0)
-
-
-app = FastAPI(
-    title="BunkerWeb API",
-    description=description,
-    summary="The API used by BunkerWeb to communicate with the database and the instances",
-    version=BUNKERWEB_VERSION,
-    contact={
-        "name": "BunkerWeb Team",
-        "url": "https://bunkerweb.io",
-        "email": "contact@bunkerity.com",
-    },
-    license_info={
-        "name": "GNU Affero General Public License v3.0",
-        "identifier": "AGPL-3.0",
-        "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md",
-    },
-    openapi_tags=tags_metadata,
-    lifespan=lifespan,
-)

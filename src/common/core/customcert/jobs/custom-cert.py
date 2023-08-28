@@ -25,7 +25,7 @@ from jobs import cache_file, cache_hash, file_hash
 
 LOGGER = setup_logger("CUSTOM-CERT", getenv("LOG_LEVEL", "INFO"))
 CORE_API = API(getenv("API_ADDR", ""), "job-custom-cert")
-API_TOKEN = getenv("API_TOKEN", None)
+CORE_TOKEN = getenv("CORE_TOKEN", None)
 
 
 def check_cert(
@@ -47,7 +47,7 @@ def check_cert(
             return False
 
         cert_hash = file_hash(cert_path)
-        old_hash = cache_hash("cert.pem", CORE_API, API_TOKEN, service_id=first_server)
+        old_hash = cache_hash("cert.pem", CORE_API, CORE_TOKEN, service_id=first_server)
         if old_hash == cert_hash:
             return False
 
@@ -55,7 +55,7 @@ def check_cert(
             "cert.pem",
             cert_path,
             CORE_API,
-            API_TOKEN,
+            CORE_TOKEN,
             service_id=first_server,
             checksum=cert_hash,
         )
@@ -63,13 +63,13 @@ def check_cert(
             LOGGER.error(f"Error while caching custom-cert cert.pem file : {err}")
 
         key_hash = file_hash(key_path)
-        old_hash = cache_hash("key.pem", CORE_API, API_TOKEN, service_id=first_server)
+        old_hash = cache_hash("key.pem", CORE_API, CORE_TOKEN, service_id=first_server)
         if old_hash != key_hash:
             cached, err = cache_file(
                 "key.pem",
                 key_path,
                 CORE_API,
-                API_TOKEN,
+                CORE_TOKEN,
                 service_id=first_server,
                 checksum=key_hash,
             )
@@ -108,7 +108,7 @@ try:
         servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):
-            servers = servers.split(" ")
+            servers = servers.split()
 
         for first_server in servers:
             if not first_server or (

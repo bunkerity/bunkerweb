@@ -23,7 +23,7 @@ from logger import setup_logger  # type: ignore
 
 LOGGER = setup_logger("Lets-encrypt.deploy", getenv("LOG_LEVEL", "INFO"))
 CORE_API = API(getenv("API_ADDR", ""), "job-certbot-deploy")
-API_TOKEN = getenv("API_TOKEN", None)
+CORE_TOKEN = getenv("CORE_TOKEN", None)
 status = 0
 
 try:
@@ -45,7 +45,7 @@ try:
         "POST",
         "/lets-encrypt/certificates",
         files=files,
-        additonal_headers={"Authorization": f"Bearer {API_TOKEN}"} if API_TOKEN else {},
+        additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"} if CORE_TOKEN else {},
     )
     if not sent:
         status = 1
@@ -65,8 +65,8 @@ try:
         sent, err, status, resp = CORE_API.request(
             "POST",
             "/reload",
-            additonal_headers={"Authorization": f"Bearer {API_TOKEN}"}
-            if API_TOKEN
+            additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"}
+            if CORE_TOKEN
             else {},
         )
         if not sent:

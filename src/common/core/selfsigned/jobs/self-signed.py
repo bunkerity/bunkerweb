@@ -26,7 +26,7 @@ from jobs import cache_file, get_cache
 
 LOGGER = setup_logger("self-signed", getenv("LOG_LEVEL", "INFO"))
 CORE_API = API(getenv("API_ADDR", ""), "job-self-signed")
-API_TOKEN = getenv("API_TOKEN", None)
+CORE_TOKEN = getenv("CORE_TOKEN", None)
 status = 0
 
 
@@ -92,7 +92,7 @@ def generate_cert(
         f"{first_server}.pem",
         self_signed_path.joinpath(f"{first_server}.pem").read_bytes(),
         CORE_API,
-        API_TOKEN,
+        CORE_TOKEN,
         service_id=first_server if multisite else None,
     )
     if not cached:
@@ -102,7 +102,7 @@ def generate_cert(
         f"{first_server}.key",
         self_signed_path.joinpath(f"{first_server}.key").read_bytes(),
         CORE_API,
-        API_TOKEN,
+        CORE_TOKEN,
         service_id=first_server if multisite else None,
     )
     if not cached:
@@ -123,7 +123,7 @@ try:
         servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):
-            servers = servers.split(" ")
+            servers = servers.split()
 
         for first_server in servers:
             if (
@@ -138,7 +138,7 @@ try:
 
             if not self_signed_path.joinpath(f"{first_server}.pem").is_file():
                 cached_pem = get_cache(
-                    f"{first_server}.pem", CORE_API, API_TOKEN, service_id=first_server
+                    f"{first_server}.pem", CORE_API, CORE_TOKEN, service_id=first_server
                 )
 
                 if cached_pem:
@@ -148,7 +148,7 @@ try:
 
             if not self_signed_path.joinpath(f"{first_server}.key").is_file():
                 cached_key = get_cache(
-                    f"{first_server}.key", CORE_API, API_TOKEN, service_id=first_server
+                    f"{first_server}.key", CORE_API, CORE_TOKEN, service_id=first_server
                 )
 
                 if cached_key:
@@ -173,10 +173,10 @@ try:
 
     # Singlesite case
     elif getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes" and getenv("SERVER_NAME"):
-        first_server = getenv("SERVER_NAME", "").split(" ")[0]
+        first_server = getenv("SERVER_NAME", "").split()[0]
 
         if not self_signed_path.joinpath(f"{first_server}.pem").is_file():
-            cached_pem = get_cache(f"{first_server}.pem", CORE_API, API_TOKEN)
+            cached_pem = get_cache(f"{first_server}.pem", CORE_API, CORE_TOKEN)
 
             if cached_pem:
                 self_signed_path.joinpath(f"{first_server}.pem").write_bytes(
@@ -184,7 +184,7 @@ try:
                 )
 
         if not self_signed_path.joinpath(f"{first_server}.key").is_file():
-            cached_key = get_cache(f"{first_server}.key", CORE_API, API_TOKEN)
+            cached_key = get_cache(f"{first_server}.key", CORE_API, CORE_TOKEN)
 
             if cached_key:
                 self_signed_path.joinpath(f"{first_server}.key").write_bytes(

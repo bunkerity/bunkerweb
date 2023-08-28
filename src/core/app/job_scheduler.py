@@ -194,8 +194,8 @@ class JobScheduler:
             "POST",
             f"/jobs/{job_name}/status",
             data={"success": success, "start_date": start_date, "end_date": end_date},
-            additonal_headers={"Authorization": f"Bearer {self.__env.get('API_TOKEN')}"}
-            if "API_TOKEN" in self.__env
+            additonal_headers={"Authorization": f"Bearer {self.__env.get('CORE_TOKEN')}"}
+            if "CORE_TOKEN" in self.__env
             else {},
         )
 

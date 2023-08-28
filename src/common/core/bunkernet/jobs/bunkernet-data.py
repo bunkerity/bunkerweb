@@ -24,7 +24,7 @@ from jobs import bytes_hash, cache_file, cache_hash, get_cache, is_cached_file
 
 LOGGER = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
 CORE_API = API(getenv("API_ADDR", ""), "job-bunkernet-data")
-API_TOKEN = getenv("API_TOKEN", None)
+CORE_TOKEN = getenv("CORE_TOKEN", None)
 exit_status = 0
 
 try:
@@ -32,7 +32,7 @@ try:
     bunkernet_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "").split(" "):
+        for first_server in getenv("SERVER_NAME", "").split():
             if (
                 getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes"))
                 == "yes"
@@ -48,7 +48,7 @@ try:
         _exit(0)
 
     # Get ID from cache
-    bunkernet_id = get_cache("instance.id", CORE_API, API_TOKEN)
+    bunkernet_id = get_cache("instance.id", CORE_API, CORE_TOKEN)
     if bunkernet_id:
         LOGGER.info("Successfully retrieved BunkerNet ID from db cache")
     else:
@@ -58,7 +58,7 @@ try:
         _exit(2)
 
     # Don't go further if the cache is fresh
-    in_cache, is_cached = is_cached_file("ip.list", "day", CORE_API, API_TOKEN)
+    in_cache, is_cached = is_cached_file("ip.list", "day", CORE_API, CORE_TOKEN)
     if is_cached:
         LOGGER.info(
             "BunkerNet list is already in cache, skipping download...",
@@ -109,7 +109,7 @@ try:
     if in_cache:
         # Check if file has changed
         new_hash = bytes_hash(content)
-        old_hash = cache_hash("ip.list", CORE_API, API_TOKEN)
+        old_hash = cache_hash("ip.list", CORE_API, CORE_TOKEN)
         if new_hash == old_hash:
             LOGGER.info(
                 "New file is identical to cache file, reload is not needed",
@@ -117,7 +117,7 @@ try:
             _exit(0)
 
     # Put file in cache
-    cached, err = cache_file("ip.list", content, CORE_API, API_TOKEN, checksum=new_hash)
+    cached, err = cache_file("ip.list", content, CORE_API, CORE_TOKEN, checksum=new_hash)
     if not cached:
         LOGGER.error(f"Error while caching BunkerNet data : {err}")
         _exit(2)

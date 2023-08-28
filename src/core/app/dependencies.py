@@ -1,18 +1,17 @@
-from functools import partial, wraps
+from functools import wraps
 from glob import glob
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from json import loads
 from logging import Logger
-from os import _exit, chmod, cpu_count, environ
+from os import chmod, cpu_count, environ
 from os.path import basename, dirname, join, normpath, sep
 from pathlib import Path
 from shutil import copytree, rmtree
-from signal import SIGINT, SIGTERM, signal
 from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from tarfile import open as tar_open
-from threading import Thread, enumerate as all_threads, Event, Semaphore
+from threading import Thread, Event, Semaphore
 from time import sleep
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
 from uuid import uuid4
@@ -35,27 +34,7 @@ HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.healthy")
 SEMAPHORE = Semaphore(cpu_count() or 1)
 
 # Create thread events
-stop_event = Event()
-scheduler_initialized = Event()
 api_started = Event()
-
-
-def stop(status):
-    global DB
-
-    stop_event.set()
-    for thread in all_threads():
-        if thread.name != "MainThread":
-            thread.join()
-
-    HEALTHY_PATH.unlink(missing_ok=True)
-    if DB:
-        del DB
-    _exit(status)
-
-
-signal(SIGINT, partial(stop, 0))  # type: ignore
-signal(SIGTERM, partial(stop, 0))  # type: ignore
 
 CORE_PLUGINS_PATH = Path(sep, "usr", "share", "bunkerweb", "core_plugins")
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
@@ -82,25 +61,9 @@ else:
 
 del integration_path, os_release_path
 
+
 INSTANCES_API_CALLER = ApiCaller()
 
-if not isinstance(CORE_CONFIG.WAIT_RETRY_INTERVAL, int) and (
-    not CORE_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
-    or int(CORE_CONFIG.WAIT_RETRY_INTERVAL) < 1
-):
-    CORE_CONFIG.logger.error(
-        f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
-    )
-    stop(1)
-
-if not isinstance(CORE_CONFIG.HEALTHCHECK_INTERVAL, int) and (
-    not CORE_CONFIG.HEALTHCHECK_INTERVAL.isdigit()
-    or int(CORE_CONFIG.HEALTHCHECK_INTERVAL) < 1
-):
-    CORE_CONFIG.logger.error(
-        f"Invalid HEALTHCHECK_INTERVAL provided: {CORE_CONFIG.HEALTHCHECK_INTERVAL}, It must be a positive integer."
-    )
-    stop(1)
 
 DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI, pool=False)
 
@@ -112,7 +75,7 @@ SCHEDULER = JobScheduler(
     env=CORE_CONFIG.settings
     | {
         "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
-        "API_TOKEN": CORE_CONFIG.TOKEN,
+        "CORE_TOKEN": CORE_CONFIG.CORE_TOKEN,
     },
     logger=CORE_CONFIG.logger,
 )
@@ -638,8 +601,8 @@ def run_jobs():
             sent, err, status, resp = local_api.request(
                 "GET",
                 "/ping",
-                additonal_headers={"Authorization": f"Bearer {CORE_CONFIG.TOKEN}"}
-                if CORE_CONFIG.TOKEN
+                additonal_headers={"Authorization": f"Bearer {CORE_CONFIG.CORE_TOKEN}"}
+                if CORE_CONFIG.CORE_TOKEN
                 else {},
             )
             sleep(1)
@@ -649,7 +612,7 @@ def run_jobs():
         DB.get_config()
         | {
             "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
-            "API_TOKEN": CORE_CONFIG.TOKEN,
+            "CORE_TOKEN": CORE_CONFIG.CORE_TOKEN,
         }
     )
 
@@ -664,6 +627,8 @@ def run_jobs():
             "Can't send data to BunkerWeb instances, configuration will not work as expected"
         )
 
+    if not DB.is_scheduler_initialized():
+        DB.set_scheduler_initialized()
     api_started.set()
 
 

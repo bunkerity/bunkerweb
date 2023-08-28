@@ -274,12 +274,6 @@ class Metadata(Base):
 
     id = Column(Integer, primary_key=True, default=1)
     is_initialized = Column(Boolean, nullable=False)
-    first_config_saved = Column(Boolean, nullable=False)
-    autoconf_loaded = Column(Boolean, default=False, nullable=True)
-    scheduler_first_start = Column(Boolean, nullable=True)
-    custom_configs_changed = Column(Boolean, default=False, nullable=True)
-    external_plugins_changed = Column(Boolean, default=False, nullable=True)
-    config_changed = Column(Boolean, default=False, nullable=True)
-    instances_changed = Column(Boolean, default=False, nullable=True)
+    scheduler_initialized = Column(Boolean, default=False, nullable=False)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
     version = Column(String(32), default="1.5.1", nullable=False)

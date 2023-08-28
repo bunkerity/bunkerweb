@@ -1,21 +1,31 @@
 #!/usr/bin/python3
 
-from abc import ABC, abstractmethod
-from os import getenv
+from abc import abstractmethod
 from time import sleep
-from typing import Literal, Optional, Union
+from typing import List, Literal, Optional
 
 from Config import Config
 
+from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
 
 
 class Controller(Config):
     def __init__(
         self,
-        ctrl_type: Union[Literal["docker"], Literal["swarm"], Literal["kubernetes"]],
+        ctrl_type: Literal["docker", "swarm", "kubernetes"],
+        core_api: API,
+        *,
+        log_level: str = "INFO",
+        api_token: Optional[str] = None,
+        wait_retry_interval: int = 5,
     ):
-        super().__init__()
+        super().__init__(
+            core_api,
+            log_level=log_level,
+            api_token=api_token,
+            wait_retry_interval=wait_retry_interval,
+        )
         self._type = ctrl_type
         self._instances = []
         self._services = []
@@ -31,9 +41,7 @@ class Controller(Config):
         self._configs = {
             config_type: {} for config_type in self._supported_config_types
         }
-        self._logger = setup_logger(
-            f"{self._type}-controller", getenv("LOG_LEVEL", "INFO")
-        )
+        self._logger = setup_logger(f"{self._type}-controller", log_level)
 
     def wait(self, wait_time: int) -> list:
         all_ready = False
@@ -57,11 +65,11 @@ class Controller(Config):
         return self._instances
 
     @abstractmethod
-    def _get_controller_instances(self):
+    def _get_controller_instances(self) -> list:
         pass
 
     @abstractmethod
-    def _to_instances(self, controller_instance):
+    def _to_instances(self, controller_instance) -> List[dict]:
         pass
 
     def get_instances(self):
@@ -71,24 +79,16 @@ class Controller(Config):
         return instances
 
     @abstractmethod
-    def _get_controller_services(self):
+    def _get_controller_services(self) -> list:
         pass
 
     @abstractmethod
-    def _to_services(self, controller_service):
+    def _to_services(self, controller_service) -> List[dict]:
         pass
 
     @abstractmethod
-    def _get_static_services(self):
+    def _get_static_services(self) -> List[dict]:
         pass
-
-    def _set_autoconf_load_db(self):
-        if not self._db.is_autoconf_loaded():
-            ret = self._db.set_autoconf_load(True)
-            if ret:
-                self._logger.warning(
-                    f"Can't set autoconf loaded metadata to true in database: {ret}",
-                )
 
     def get_services(self):
         services = []
@@ -113,6 +113,6 @@ class Controller(Config):
         for service in self._services:
             if not "SERVER_NAME" in service or not service["SERVER_NAME"]:
                 continue
-            if server_name == service["SERVER_NAME"].strip().split(" ")[0]:
+            if server_name == service["SERVER_NAME"].strip().split()[0]:
                 return True
         return False
