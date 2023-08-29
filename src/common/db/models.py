@@ -51,8 +51,8 @@ class Plugins(Base):
     description = Column(String(256), nullable=False)
     version = Column(String(32), nullable=False)
     stream = Column(String(16), nullable=False)
-    external = Column(Boolean, default=False, nullable=False)
-    method = Column(String(32), default="manual", nullable=False)
+    external = Column(Boolean, nullable=True, default=False)
+    method = Column(String(32), nullable=True, default="manual")
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     checksum = Column(String(128), nullable=True)
 
@@ -104,8 +104,8 @@ class Global_values(Base):
         ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"),
         primary_key=True,
     )
-    value = Column(String(4096), primary_key=True)
-    suffix = Column(Integer, nullable=True, default=0)
+    value = Column(String(4096), nullable=False)
+    suffix = Column(Integer, primary_key=True, nullable=True, default=0)
     method = Column(String(32), nullable=False)
 
     setting = relationship("Settings", back_populates="global_value")
@@ -160,7 +160,7 @@ class Jobs(Base):
     )
     file_name = Column(String(256), nullable=False)
     every = Column(String(256), nullable=False)
-    reload = Column(Boolean, default=False, nullable=False)
+    reload = Column(Boolean, default=True, nullable=False)
 
     plugin = relationship("Plugins", back_populates="jobs")
     cache = relationship("Jobs_cache", back_populates="job", cascade="all")
@@ -214,7 +214,7 @@ class Jobs_cache(Base):
 class Jobs_runs(Base):
     __tablename__ = "bw_jobs_runs"
 
-    id = Column(DateTime(timezone=True), primary_key=True, server_default=func.now())
+    id = Column(Integer, primary_key=True, autoincrement=True)
     job_name = Column(
         String(128),
         ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"),
@@ -274,6 +274,6 @@ class Metadata(Base):
 
     id = Column(Integer, primary_key=True, default=1)
     is_initialized = Column(Boolean, nullable=False)
-    scheduler_initialized = Column(Boolean, default=False, nullable=False)
-    integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.5.1", nullable=False)
+    scheduler_initialized = Column(Boolean, nullable=True, default=False)
+    integration = Column(INTEGRATIONS_ENUM, nullable=True, default="Unknown")
+    version = Column(String(32), nullable=True, default="1.5.1")

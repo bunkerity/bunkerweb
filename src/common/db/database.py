@@ -185,7 +185,6 @@ class Database:
                     self.__sql_engine = create_engine(
                         sqlalchemy_string,
                         future=True,
-                        connect_args={"check_same_thread": False},
                         poolclass=None if pool else NullPool,
                         pool_pre_ping=True,
                     )
@@ -667,7 +666,7 @@ class Database:
                                     )
                                 )
                             elif (
-                                method in (global_value.method, "autoconf")
+                                method in (global_value.method, "core")
                                 and global_value.value != value
                             ):
                                 if value == setting.default:
@@ -699,9 +698,7 @@ class Database:
                         )
                     ):
                         to_put.append(
-                            Services(
-                                id=config["SERVER_NAME"].split()[0], method=method
-                            )
+                            Services(id=config["SERVER_NAME"].split()[0], method=method)
                         )
 
                     for key, value in config.items():
@@ -742,7 +739,7 @@ class Database:
                                 )
                             )
                         elif (
-                            global_value.method == method
+                            method in (global_value.method, "core")
                             and value != global_value.value
                         ):
                             if value == setting.default:
@@ -2486,9 +2483,9 @@ class Database:
                         "success": job_run.success,
                     }
                     for job_run in session.query(Jobs_runs)
-                    .with_entities(Jobs_runs.id, Jobs_runs.success)
+                    .with_entities(Jobs_runs.end_date, Jobs_runs.success)
                     .filter_by(job_name=job.name)
-                    .order_by(Jobs_runs.id.desc())
+                    .order_by(Jobs_runs.end_date.desc())
                     .limit(10)
                     .with_for_update(read=True)
                     .all()
@@ -2536,13 +2533,10 @@ class Database:
                         }
                         for job_run in session.query(Jobs_runs)
                         .with_entities(
-                            Jobs_runs.id,
-                            Jobs_runs.success,
-                            Jobs_runs.start_date,
-                            Jobs_runs.end_date,
+                            Jobs_runs.success, Jobs_runs.start_date, Jobs_runs.end_date
                         )
                         .filter_by(job_name=job.name)
-                        .order_by(Jobs_runs.id.desc())
+                        .order_by(Jobs_runs.end_date.desc())
                         .limit(10)
                         .with_for_update(read=True)
                         .all()
@@ -2591,19 +2585,8 @@ class Database:
     ) -> str:
         """Add a job run."""
         with self.__db_session() as session:
-            current_date = datetime.now()
-
-            while (
-                session.query(Jobs_runs)
-                .filter_by(id=current_date)
-                .with_for_update(read=True)
-                .first()
-            ):
-                current_date = current_date + timedelta(microseconds=1)
-
             session.add(
                 Jobs_runs(
-                    id=current_date,
                     job_name=job_name,
                     success=success,
                     start_date=start_date,

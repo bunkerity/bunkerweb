@@ -128,6 +128,7 @@ class Config:
                     full_env[f"{server_name}_{k}"] = v
         # Replace with services values
         full_env = full_env | env_services
+        full_env["MULTISITE"] = "yes"
         return full_env
 
     def apply(

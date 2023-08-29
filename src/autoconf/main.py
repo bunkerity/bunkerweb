@@ -77,6 +77,7 @@ try:
             additonal_headers={"Authorization": f"Bearer {AUTOCONF_CONFIG.CORE_TOKEN}"}
             if AUTOCONF_CONFIG.CORE_TOKEN
             else {},
+            timeout=3,
         )
 
         if not sent or status != 200:
