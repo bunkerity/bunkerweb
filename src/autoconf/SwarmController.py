@@ -1,27 +1,45 @@
 #!/usr/bin/python3
 
+from base64 import b64decode
+from re import compile as re_compile
 from time import sleep
 from traceback import format_exc
 from threading import Thread, Lock
-from typing import Any, Dict, List
-from docker import DockerClient
-from base64 import b64decode
+from typing import Any, Dict, List, Optional
 
-from docker.models.services import Service
+from API import API  # type: ignore
 from Controller import Controller
+
+from docker import DockerClient
+from docker.models.services import Service
 
 
 class SwarmController(Controller):
-    def __init__(self, docker_host):
-        super().__init__("swarm")
+    def __init__(
+        self,
+        docker_host: str,
+        core_api: API,
+        log_level: str = "INFO",
+        *,
+        api_token: Optional[str] = None,
+        wait_retry_interval: int = 5,
+    ):
+        super().__init__(
+            "swarm",
+            core_api,
+            log_level=log_level,
+            api_token=api_token,
+            wait_retry_interval=wait_retry_interval,
+        )
         self.__client = DockerClient(base_url=docker_host)
         self.__internal_lock = Lock()
+        self.__env_rx = re_compile(r"^(?![#\s])([^=]+)=([^\n]*)$")
 
     def _get_controller_instances(self) -> List[Service]:
-        return self.__client.services.list(filters={"label": "bunkerweb.INSTANCE"})
+        return self.__client.services.list(filters={"label": "bunkerweb.INSTANCE"})  # type: ignore
 
     def _get_controller_services(self) -> List[Service]:
-        return self.__client.services.list(filters={"label": "bunkerweb.SERVER_NAME"})
+        return self.__client.services.list(filters={"label": "bunkerweb.SERVER_NAME"})  # type: ignore
 
     def _to_instances(self, controller_instance) -> List[dict]:
         instances = []
@@ -29,10 +47,12 @@ class SwarmController(Controller):
         for env in controller_instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
             "Env"
         ]:
-            variable = env.split("=")[0]
-            value = env.replace(f"{variable}=", "", 1)
-            if self._is_setting(variable):
-                instance_env[variable] = value
+            match = self.__env_rx.search(env)
+            if match is None:
+                continue
+            groups = match.groups()
+            if self._is_setting(groups[0]):
+                instance_env[groups[0]] = groups[1]
 
         for task in controller_instance.tasks():
             if task["DesiredState"] != "running":
@@ -70,9 +90,11 @@ class SwarmController(Controller):
                 continue
 
             for env in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
-                variable = env.split("=")[0]
-                value = env.replace(f"{variable}=", "", 1)
-                variables[variable] = value
+                match = self.__env_rx.search(env)
+                if match is None:
+                    continue
+                groups = match.groups()
+                variables[groups[0]] = groups[1]
         if "SERVER_NAME" in variables and variables["SERVER_NAME"].strip():
             for server_name in variables["SERVER_NAME"].strip().split():
                 service = {}
@@ -148,6 +170,7 @@ class SwarmController(Controller):
                         ):
                             self.__internal_lock.release()
                             locked = False
+                            sleep(1)
                             continue
                         self._logger.info(
                             f"Catched Swarm event ({event_type}), deploying new configuration ..."

@@ -96,11 +96,20 @@ try:
     if AUTOCONF_CONFIG.swarm_mode:
         LOGGER.info("🐝 Swarm mode detected")
         controller = SwarmController(
-            AUTOCONF_CONFIG.DOCKER_HOST, AUTOCONF_CONFIG.log_level
+            AUTOCONF_CONFIG.DOCKER_HOST,
+            CORE_API,
+            AUTOCONF_CONFIG.log_level,
+            api_token=AUTOCONF_CONFIG.CORE_TOKEN,
+            wait_retry_interval=AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL,
         )
     elif AUTOCONF_CONFIG.kubernetes_mode:
         LOGGER.info("☸️ Kubernetes mode detected")
-        controller = IngressController(AUTOCONF_CONFIG.log_level)
+        controller = IngressController(
+            CORE_API,
+            AUTOCONF_CONFIG.log_level,
+            api_token=AUTOCONF_CONFIG.CORE_TOKEN,
+            wait_retry_interval=AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL,
+        )
     else:
         LOGGER.info("🐳 Docker mode detected")
         controller = DockerController(

@@ -2,18 +2,33 @@
 
 from time import sleep
 from traceback import format_exc
-from typing import List
-from kubernetes import client, config, watch
-from kubernetes.client.exceptions import ApiException
+from typing import List, Optional
 from threading import Thread, Lock
 
+from API import API  # type: ignore
 from Controller import Controller
+
+from kubernetes import client, config, watch
+from kubernetes.client.exceptions import ApiException
 
 
 class IngressController(Controller):
-    def __init__(self):
+    def __init__(
+        self,
+        core_api: API,
+        log_level: str = "INFO",
+        *,
+        api_token: Optional[str] = None,
+        wait_retry_interval: int = 5,
+    ):
         self.__internal_lock = Lock()
-        super().__init__("kubernetes")
+        super().__init__(
+            "kubernetes",
+            core_api,
+            log_level=log_level,
+            api_token=api_token,
+            wait_retry_interval=wait_retry_interval,
+        )
         config.load_incluster_config()
         self.__corev1 = client.CoreV1Api()
         self.__networkingv1 = client.NetworkingV1Api()
@@ -29,11 +44,12 @@ class IngressController(Controller):
         ]
 
     def _to_instances(self, controller_instance) -> List[dict]:
-        instance = {}
-        instance["name"] = controller_instance.metadata.name
-        instance["hostname"] = (
-            controller_instance.status.pod_ip or controller_instance.metadata.name
-        )
+        instance = {
+            "name": controller_instance.metadata.name,
+            "hostname": controller_instance.status.pod_ip
+            or controller_instance.metadata.name,
+            "env": {},
+        }
         health = False
         if controller_instance.status.conditions:
             for condition in controller_instance.status.conditions:
@@ -41,7 +57,6 @@ class IngressController(Controller):
                     health = True
                     break
         instance["health"] = health
-        instance["env"] = {}
         pod = None
         for container in controller_instance.spec.containers:
             if container.name == "bunkerweb":
@@ -255,6 +270,7 @@ class IngressController(Controller):
                     ):
                         self.__internal_lock.release()
                         locked = False
+                        sleep(1)
                         continue
                     self._logger.info(
                         f"Catched kubernetes event ({watch_type}), deploying new configuration ...",
