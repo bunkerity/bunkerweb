@@ -46,7 +46,7 @@ RUN apk add --no-cache bash && \
     chmod 750 autoconf/entrypoint.sh cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/*.py deps/python/bin/*
 
 # Fix CVEs
-RUN apk add "libcrypto3>=3.1.1-r2" "libssl3>=3.1.1-r2"
+# There are no CVE to fix for the moment
 
 WORKDIR /usr/share/bunkerweb/autoconf
 
