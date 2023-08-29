@@ -67,7 +67,7 @@ RUN apk add --no-cache bash && \
     ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
 
 # Fix CVEs
-RUN apk add "libcrypto3>=3.1.1-r2" "libssl3>=3.1.1-r2"
+# There are no CVE to fix for the moment
 
 VOLUME /data /etc/nginx
 

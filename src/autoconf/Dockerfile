@@ -61,7 +61,7 @@ RUN apk add --no-cache bash && \
     chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/bin/bwcli /usr/share/bunkerweb/autoconf/main.py /usr/share/bunkerweb/deps/python/bin/*
 
 # Fix CVEs
-# RUN apk add "libcrypto3>=3.1.1-r2" "libssl3>=3.1.1-r2" # testing purposes only
+# There are no CVE to fix for the moment
 
 VOLUME /data /etc/nginx
 
