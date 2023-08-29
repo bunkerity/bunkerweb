@@ -1,4 +1,4 @@
-FROM python:3.11.4-alpine AS builder
+FROM python:3.11.5-alpine AS builder
 
 # Copy python requirements
 COPY src/ui/requirements.txt /tmp/req/requirements.txt
@@ -35,7 +35,7 @@ COPY src/common/helpers /usr/share/bunkerweb/helpers
 COPY src/ui /usr/share/bunkerweb/ui
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 
-FROM python:3.11.4-alpine
+FROM python:3.11.5-alpine
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -67,7 +67,7 @@ RUN apk add --no-cache bash && \
     ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
 
 # Fix CVEs
-RUN apk add "libcrypto3>=3.1.1-r2" "libssl3>=3.1.1-r2"
+# There are no CVE to fix for the moment
 
 VOLUME /data /etc/nginx
 

@@ -101,6 +101,34 @@ function start() {
     stop_nginx
 
     # Generate temp conf for jobs and start nginx
+    API_HTTP_PORT="$(grep "^API_HTTP_PORT=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    if [ "$API_HTTP_PORT" = "" ] ; then
+        API_HTTP_PORT="5000"
+    fi
+    API_SERVER_NAME="$(grep "^API_SERVER_NAME=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    if [ "$API_SERVER_NAME" = "" ] ; then
+        API_SERVER_NAME="bwapi"
+    fi
+    API_WHITELIST_IP="$(grep "^API_WHITELIST_IP=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    if [ "$API_WHITELIST_IP" = "" ] ; then
+        API_WHITELIST_IP="127.0.0.0/8"
+    fi
+    USE_REAL_IP="$(grep "^USE_REAL_IP=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    if [ "$USE_REAL_IP" = "" ] ; then
+        USE_REAL_IP="no"
+    fi
+    USE_PROXY_PROTOCOL="$(grep "^USE_PROXY_PROTOCOL=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    if [ "$USE_PROXY_PROTOCOL" = "" ] ; then
+        USE_PROXY_PROTOCOL="no"
+    fi
+    REAL_IP_FROM="$(grep "^REAL_IP_FROM=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    if [ "$REAL_IP_FROM" = "" ] ; then
+        REAL_IP_FROM="192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
+    fi
+    REAL_IP_HEADER="$(grep "^REAL_IP_HEADER=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    if [ "$REAL_IP_HEADER" = "" ] ; then
+        REAL_IP_HEADER="X-Forwarded-For"
+    fi
     HTTP_PORT="$(grep "^HTTP_PORT=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
     if [ "$HTTP_PORT" = "" ] ; then
         HTTP_PORT="8080"
@@ -109,7 +137,7 @@ function start() {
     if [ "$HTTPS_PORT" = "" ] ; then
         HTTPS_PORT="8443"
     fi
-    sudo -E -u nginx -g nginx /bin/bash -c "echo -ne 'IS_LOADING=yes\nUSE_BUNKERNET=no\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /var/tmp/bunkerweb/tmp.env"
+    sudo -E -u nginx -g nginx /bin/bash -c "echo -ne 'IS_LOADING=yes\nUSE_BUNKERNET=no\nSERVER_NAME=\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\n' > /var/tmp/bunkerweb/tmp.env"
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env --no-linux-reload"
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
