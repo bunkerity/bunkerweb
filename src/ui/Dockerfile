@@ -1,4 +1,4 @@
-FROM python:3.11.4-alpine AS builder
+FROM python:3.11.5-alpine AS builder
 
 # Copy python requirements
 COPY src/ui/requirements.txt /tmp/req/requirements.txt
@@ -35,7 +35,7 @@ COPY src/common/helpers /usr/share/bunkerweb/helpers
 COPY src/ui /usr/share/bunkerweb/ui
 COPY src/VERSION /usr/share/bunkerweb/VERSION
 
-FROM python:3.11.4-alpine
+FROM python:3.11.5-alpine
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
