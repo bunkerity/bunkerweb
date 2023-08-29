@@ -1,4 +1,4 @@
-FROM python:3.11.4-alpine AS builder
+FROM python:3.11.5-alpine AS builder
 
 # Install python dependencies
 # RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev file make
@@ -29,7 +29,7 @@ COPY src/VERSION VERSION
 
 COPY src/ui ui
 
-FROM python:3.11.4-alpine
+FROM python:3.11.5-alpine
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

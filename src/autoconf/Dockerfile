@@ -1,4 +1,4 @@
-FROM python:3.11.4-alpine AS builder
+FROM python:3.11.5-alpine AS builder
 
 WORKDIR /usr/share/bunkerweb
 
@@ -21,7 +21,7 @@ COPY src/common/helpers helpers
 COPY src/common/utils utils
 COPY src/VERSION VERSION
 
-FROM python:3.11.4-alpine
+FROM python:3.11.5-alpine
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

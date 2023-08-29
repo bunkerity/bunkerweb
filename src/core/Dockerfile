@@ -1,4 +1,4 @@
-FROM python:3.11.4-alpine AS builder
+FROM python:3.11.5-alpine AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache --virtual .build-deps g++ gcc build-base linux-headers
@@ -40,7 +40,7 @@ COPY src/VERSION VERSION
 
 COPY src/core core
 
-FROM python:3.11.4-alpine
+FROM python:3.11.5-alpine
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
