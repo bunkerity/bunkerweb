@@ -25,7 +25,7 @@ def is_cached_file(
     name: str,
     expire: Union[Literal["hour"], Literal["day"], Literal["week"], Literal["month"]],
     api,
-    api_token: str = None,
+    api_token: Optional[str] = None,
     *,
     job_name: Optional[str] = None,
     service_id: Optional[str] = None,
@@ -68,7 +68,7 @@ def is_cached_file(
 def get_cache(
     name: str,
     api,
-    api_token: str = None,
+    api_token: Optional[str] = None,
     *,
     job_name: Optional[str] = None,
     service_id: Optional[str] = None,
@@ -94,7 +94,7 @@ def cache_file(
     name: str,
     cache_file: Union[bytes, str, Path],
     api,
-    api_token: str = None,
+    api_token: Optional[str] = None,
     *,
     job_name: Optional[str] = None,
     service_id: Optional[str] = None,
@@ -137,7 +137,7 @@ def cache_file(
 def update_cache_file_info(
     name: str,
     api,
-    api_token: str = None,
+    api_token: Optional[str] = None,
     *,
     job_name: Optional[str] = None,
     service_id: Optional[str] = None,
@@ -171,7 +171,7 @@ def update_cache_file_info(
 def del_cache(
     name: str,
     api,
-    api_token: str = None,
+    api_token: Optional[str] = None,
     *,
     job_name: Optional[str] = None,
     service_id: Optional[str] = None,
@@ -231,7 +231,7 @@ def bytes_hash(bio: Union[bytes, BufferedReader]) -> str:
 def cache_hash(
     name: str,
     api,
-    api_token: str = None,
+    api_token: Optional[str] = None,
     *,
     job_name: Optional[str] = None,
     service_id: Optional[str] = None,

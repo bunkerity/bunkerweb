@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 from glob import glob
-from hashlib import sha256
 from io import BytesIO
 from json import loads
 from logging import Logger
@@ -17,6 +16,8 @@ from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 deps_path = join(sep, "usr", "share", "bunkerweb", "utils")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
+
+from jobs import bytes_hash  # type: ignore
 
 
 class Configurator:
@@ -97,9 +98,7 @@ class Configurator:
                     )
                 else:
                     names = (
-                        self.__variables[f"{server_name}_SERVER_NAME"]
-                        .strip()
-                        .split()
+                        self.__variables[f"{server_name}_SERVER_NAME"].strip().split()
                     )
 
             servers[server_name] = names
@@ -149,7 +148,7 @@ class Configurator:
                         "page": "ui" in listdir(dirname(file)),
                         "method": "manual",
                         "data": value,
-                        "checksum": sha256(value).hexdigest(),
+                        "checksum": bytes_hash(value).hexdigest(),
                     }
                 )
 

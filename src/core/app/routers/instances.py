@@ -1,8 +1,9 @@
+from datetime import datetime, timedelta
 from typing import Annotated, Dict, List, Literal, Union
 from fastapi import APIRouter, BackgroundTasks, status, Path as fastapi_Path
 from fastapi.responses import JSONResponse
 
-from ..models import ErrorMessage, Instance, InstanceWithMethod
+from ..models import ErrorMessage, Instance, InstanceWithInfo, InstanceWithMethod
 from ..dependencies import CORE_CONFIG, DB, test_and_send_to_instances
 from API import API  # type: ignore
 
@@ -11,7 +12,7 @@ router = APIRouter(prefix="/instances", tags=["instances"])
 
 @router.get(
     "",
-    response_model=List[InstanceWithMethod],
+    response_model=List[InstanceWithInfo],
     summary="Get BunkerWeb instances",
     response_description="BunkerWeb instances",
 )
@@ -24,7 +25,21 @@ async def get_instances():
     - **server_name**: The server name of the instance
     - **method**: The method of the instance
     """
-    return DB.get_instances()
+    tmp_instances = DB.get_instances()
+    instances = []
+    for instance in tmp_instances:
+        last_seen = instance.pop("last_seen")
+        data = instance.copy()
+        data["status"] = (
+            "up"
+            if last_seen
+            and last_seen
+            >= datetime.now()
+            - timedelta(seconds=int(CORE_CONFIG.HEALTHCHECK_INTERVAL) * 2)
+            else "down"
+        )
+        instances.append(data)
+    return instances
 
 
 @router.put(

@@ -2,8 +2,7 @@
 
 from contextlib import contextmanager
 from copy import deepcopy
-from datetime import datetime, timedelta
-from hashlib import sha256
+from datetime import datetime
 from logging import Logger
 from os import _exit, getenv, listdir, sep
 from os.path import normpath, join
@@ -39,7 +38,7 @@ for deps_path in [
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from jobs import file_hash  # type: ignore
+from jobs import bytes_hash, file_hash  # type: ignore
 
 from pymysql import install_as_MySQLdb
 from sqlalchemy import NullPool, create_engine, text, inspect
@@ -460,9 +459,13 @@ class Database:
                                     Plugin_pages(
                                         plugin_id=plugin["id"],
                                         template_file=template,
-                                        template_checksum=sha256(template).hexdigest(),
+                                        template_checksum=bytes_hash(
+                                            template
+                                        ).hexdigest(),
                                         actions_file=actions,
-                                        actions_checksum=sha256(actions).hexdigest(),
+                                        actions_checksum=bytes_hash(
+                                            actions
+                                        ).hexdigest(),
                                     )
                                 )
 
@@ -1042,7 +1045,7 @@ class Database:
                     else custom_config["value"],
                     "method": method,
                 }
-                config["checksum"] = sha256(config["data"]).hexdigest()
+                config["checksum"] = bytes_hash(config["data"]).hexdigest()
 
                 if custom_config["exploded"][0]:
                     if (
@@ -1321,7 +1324,7 @@ class Database:
             config = {
                 "data": data,
                 "method": method,
-                "checksum": checksum or sha256(data).hexdigest(),
+                "checksum": checksum or bytes_hash(data).hexdigest(),
                 "service_id": service_id,
                 "type": config_type.replace("-", "_").lower(),
                 "name": name,
@@ -1725,9 +1728,13 @@ class Database:
                                     Plugin_pages(
                                         plugin_id=plugin["id"],
                                         template_file=template,
-                                        template_checksum=sha256(template).hexdigest(),
+                                        template_checksum=bytes_hash(
+                                            template
+                                        ).hexdigest(),
                                         actions_file=actions,
-                                        actions_checksum=sha256(actions).hexdigest(),
+                                        actions_checksum=bytes_hash(
+                                            actions
+                                        ).hexdigest(),
                                     )
                                 )
                             else:
@@ -1864,9 +1871,13 @@ class Database:
                                     Plugin_pages(
                                         plugin_id=plugin["id"],
                                         template_file=template,
-                                        template_checksum=sha256(template).hexdigest(),
+                                        template_checksum=bytes_hash(
+                                            template
+                                        ).hexdigest(),
                                         actions_file=actions,
-                                        actions_checksum=sha256(actions).hexdigest(),
+                                        actions_checksum=bytes_hash(
+                                            actions
+                                        ).hexdigest(),
                                     )
                                 )
                             else:
@@ -2106,10 +2117,10 @@ class Database:
                             plugin_id=plugin["id"],
                             template_file=template_file,
                             template_checksum=template_checksum
-                            or sha256(template_file).hexdigest(),
+                            or bytes_hash(template_file).hexdigest(),
                             actions_file=template_file,
                             actions_checksum=actions_checksum
-                            or sha256(actions_file).hexdigest(),
+                            or bytes_hash(actions_file).hexdigest(),
                         )
                     )
                 else:
@@ -2367,19 +2378,19 @@ class Database:
                                 plugin_id=plugin_data["id"],
                                 template_file=template_file,
                                 template_checksum=template_checksum
-                                or sha256(template_file).hexdigest(),
+                                or bytes_hash(template_file).hexdigest(),
                                 actions_file=template_file,
                                 actions_checksum=actions_checksum
-                                or sha256(actions_file).hexdigest(),
+                                or bytes_hash(actions_file).hexdigest(),
                             )
                         )
                     else:
                         updates = {}
                         template_checksum = (
-                            template_checksum or sha256(template_file).hexdigest()
+                            template_checksum or bytes_hash(template_file).hexdigest()
                         )
                         actions_checksum = (
-                            actions_checksum or sha256(actions_file).hexdigest()
+                            actions_checksum or bytes_hash(actions_file).hexdigest()
                         )
 
                         if plugin_data["id"] != db_plugin.id:
@@ -2813,6 +2824,7 @@ class Database:
                     "hostname": instance.hostname,
                     "port": instance.port,
                     "server_name": instance.server_name,
+                    "last_seen": instance.last_seen,
                     "method": instance.method,
                 }
                 for instance in (
@@ -2821,6 +2833,7 @@ class Database:
                         Instances.hostname,
                         Instances.port,
                         Instances.server_name,
+                        Instances.last_seen,
                         Instances.method,
                     )
                     .with_for_update(read=True)
