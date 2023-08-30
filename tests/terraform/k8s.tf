@@ -60,7 +60,7 @@ provider "kubernetes" {
   config_path = "${local_file.kubeconfig.filename}"
 }
 resource "kubernetes_secret" "reg" {
-  metadata = {
+  metadata {
     name = "secret-registry"
   }
   type = "kubernetes.io/dockerconfigjson"

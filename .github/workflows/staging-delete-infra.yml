@@ -29,7 +29,7 @@ jobs:
           echo "$SECRET_KEY" > /tmp/.secret_key
           openssl dec -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -pass file:/tmp/.secret_key -out /tmp/terraform.tar
           rm -f /tmp/.secret_key
-          tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
+          tar xf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
       - uses: azure/setup-kubectl@v3
