@@ -6,12 +6,20 @@ import {
   setPluginsData,
 } from "../../utils/plugins";
 
+const resOK: response = {
+  type: "success",
+  status: 200,
+  message: "Get global config",
+  data: {},
+};
+
 const resErr: response = {
   type: "error",
   status: 500,
   message: "Impossible to get global config",
   data: {},
 };
+
 // Get global config
 export default defineEventHandler(async (event) => {
   let data: any, conf: any, plugins: any;
@@ -21,12 +29,13 @@ export default defineEventHandler(async (event) => {
     "/config?methods=true&new_format=1",
     "GET",
     false,
+    resOK,
     resErr
   );
   if (conf.type === "error") return await conf;
 
   // Get default plugins from core api
-  plugins = await fetchApi("/plugins", "GET", false, resErr);
+  plugins = await fetchApi("/plugins", "GET", false, resOK, resErr);
   if (conf.type === "error") return await plugins;
 
   // Format core api data
@@ -34,7 +43,12 @@ export default defineEventHandler(async (event) => {
     const setPlugins = await setPluginsData(plugins.data);
     const mergeConf = await addConfToPlugins(setPlugins, conf.data["global"]);
     data = await getPluginsByContext(mergeConf, "global");
-    return await setResponse("success", 200, "Get global config", data);
+    return await setResponse(
+      resOK["type"],
+      resOK["status"],
+      resOK["message"],
+      data
+    );
   } catch (err) {
     return resErr;
   }

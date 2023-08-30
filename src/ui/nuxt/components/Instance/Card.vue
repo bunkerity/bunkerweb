@@ -39,6 +39,8 @@ const instance = reactive({
   ],
 });
 
+// action => return action to execute with instance name
+// delete => return instance name to delete
 const emits = defineEmits(["action", "delete"]);
 </script>
 

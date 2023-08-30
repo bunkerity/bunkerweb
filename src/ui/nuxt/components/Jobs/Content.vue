@@ -10,6 +10,8 @@ const props = defineProps({
   },
 });
 
+// cache => return cache file name to download
+// run => return the job name that need to be run/rerun
 const emits = defineEmits(["cache", "run"]);
 </script>
 

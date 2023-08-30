@@ -9,7 +9,7 @@ const props = defineProps({
     required: true,
   },
   count: {
-    type: String,
+    type: Number,
     required: true,
   },
   detailArr: {

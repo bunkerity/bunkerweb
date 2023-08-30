@@ -7,9 +7,16 @@ const resErr: response = {
   data: {},
 };
 
+const resOK: response = {
+  type: "success",
+  status: 200,
+  message: "Updated global config",
+  data: {},
+};
+
 export default defineEventHandler(async (event) => {
   // Update global config
   const body = await readBody(event);
 
-  return await fetchApi("/config/global", "PUT", body, resErr);
+  return await fetchApi("/config/global", "PUT", body, resOK, resErr);
 });

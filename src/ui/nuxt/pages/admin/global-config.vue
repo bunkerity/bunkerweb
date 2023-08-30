@@ -84,31 +84,12 @@ async function sendConf() {
 
 <template>
   <NuxtLayout name="dashboard">
-    <CardBase
+    <ApiState
       class="col-span-4 col-start-5"
-      :class="[
-        plugins.isErr && !globalConfPend ? '!bg-red-500' : '',
-        !plugins.isErr && !globalConfPend && plugins.setup.length === 0
-          ? '!bg-sky-500'
-          : '',
-        !plugins.isErr && globalConfPend === 0 ? '!bg-yellow-500' : '',
-      ]"
-      v-if="plugins.isErr || globalConfPend"
-    >
-      <div class="col-span-12 flex items-center justify-center">
-        <p class="m-0 dark:text-white">
-          {{
-            plugins.isErr && !globalConfPend
-              ? "Error accessing api"
-              : !plugins.isErr && !globalConfPend && plugins.setup.length === 0
-              ? "No data to display"
-              : !plugins.isErr && globalConfPend
-              ? "Fetching data"
-              : ""
-          }}
-        </p>
-      </div>
-    </CardBase>
+      :isErr="plugins.isErr"
+      :isPend="globalConfPend"
+      :isData="plugins.setup.length > 0 ? true : false"
+    />
     <div
       v-if="!plugins.isErr && !globalConfPend"
       class="col-span-12 content-wrap"

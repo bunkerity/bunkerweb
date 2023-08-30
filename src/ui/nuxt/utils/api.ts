@@ -26,13 +26,14 @@ export async function fetchApi(
   api: string,
   method: any,
   body: any,
+  resSuccess: response,
   resErr: response
 ) {
   const defaultData: any = {};
   const config = useRuntimeConfig();
   const options = {
     baseURL: config.apiAddr,
-    method: method,
+    method: method.toUpperCase(),
     Headers: {
       Authorization: `Bearer ${config.apiToken}`,
     },
@@ -42,23 +43,19 @@ export async function fetchApi(
   };
   return await $fetch(api, options)
     .then((data: any) => {
-      // Data and message logic change with GET
-      if (method.toUpperCase() !== "GET") {
-        return setResponse(
-          "success",
-          200,
-          data["message"] || `${method.toUpperCase()} ${api} succeed.`,
-          defaultData
-        );
-      }
+      // Set info
+      const type = resSuccess["type"] || "success";
+      const status = resSuccess["status"] || 200;
+      const message =
+        method.toUpperCase() === "GET"
+          ? resSuccess["message"] || `${method.toUpperCase()} ${api} succeed.`
+          : data["message"] ||
+            resSuccess["message"] ||
+            `${method.toUpperCase()} ${api} succeed.`;
+      const dataRes =
+        method.toUpperCase() === "GET" ? data || defaultData : defaultData;
 
-      if (method.toUpperCase() === "GET")
-        return setResponse(
-          "success",
-          200,
-          `${method.toUpperCase()} ${api} succeed.`,
-          data || defaultData
-        );
+      return setResponse(type, status, message, dataRes);
     })
     .catch((err) => {
       // Set custom error data before throwing err

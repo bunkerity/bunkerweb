@@ -1,9 +1,9 @@
 <script setup>
-// DATA
-
 const route = useRoute();
 const currPath = route.path;
 
+// Navigation with components
+// resolveComponent allow to replace a tag by a real Vue component
 const navList = [
   { title: "Home", svg: resolveComponent("MenuSvgHome"), path: "/admin/home" },
   {
@@ -29,6 +29,7 @@ const navList = [
   { title: "Jobs", svg: resolveComponent("MenuSvgJobs"), path: "/admin/jobs" },
 ];
 
+// Social links
 const socialList = [
   {
     title: "link to Twitter",
@@ -53,15 +54,13 @@ const socialList = [
 ];
 
 const menu = reactive({
-  pagePlugins: [],
-  csrfToken: "random",
-  darkMode: useDarkMode(),
-  isActive: false,
-  //expand logic exclude with desktop
-  isDesktop: true,
+  pagePlugins: [], // Render custom page plugins links
+  darkMode: useDarkMode(), // Apply dark mode state
+  isActive: false, // Handle menu display/expand
+  isDesktop: true, // Expand logic exclude with desktop
 });
 
-// check if desktop from breakpoint
+// Check device desktop using breakpoint
 onMounted(() => {
   menu.isDesktop = window.innerWidth < 1200 ? false : true;
   window.addEventListener("resize", () => {
@@ -71,7 +70,7 @@ onMounted(() => {
 
 // EVENTS
 
-// Toggle
+// Toggle dark mode
 function switchMode() {
   menu.darkMode = menu.darkMode ? false : true;
   menu.darkMode

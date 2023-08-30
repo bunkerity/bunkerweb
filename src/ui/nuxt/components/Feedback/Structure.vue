@@ -1,31 +1,48 @@
 <script setup>
+// Handle feedback history panel
 const dropdown = reactive({
   isOpen: false,
 });
 
+// Share feedback store
+// Get changes from another component and display alert
 const feedback = useFeedbackStore();
+
+// Delay new last alert should be display
 const showDelay = 4000;
 const alert = reactive({
-  show: true,
-  prevNum: 0,
+  show: true, // Show by default
+  showNum: 0, // Track alert num with timeout
+  prevNum: 0, // Number of alerts before watcher
 });
 
+// First alert should be hidden after amount of time
 onMounted(() => {
   setTimeout(() => {
     alert.show = false;
   }, showDelay);
 });
 
+// Everytime feedback change
 watch(feedback, () => {
+  // Case new feedback alert
   if (alert.prevNum < feedback.data.length) {
+    // Set an alert number
+    alert.showNum++;
+    const currAlertNum = alert.showNum;
+    // Track alert num for condition
     alert.prevNum = feedback.data.length;
     alert.show = true;
 
     setTimeout(() => {
+      // Exclude hidden logic if another alert is show (share same variable)
+      if (currAlertNum !== alert.showNum) return;
+      // Case alert fired is same after timeout
       alert.show = false;
     }, showDelay);
   }
 
+  // Case feedback array changed but no new alert
   if (alert.prevNum > feedback.data.length)
     alert.prevNum = feedback.data.length;
 });
