@@ -4,6 +4,31 @@ const dropdown = reactive({
 });
 
 const feedback = useFeedbackStore();
+const showDelay = 4000;
+const alert = reactive({
+  show: true,
+  prevNum: 0,
+});
+
+onMounted(() => {
+  setTimeout(() => {
+    alert.show = false;
+  }, showDelay);
+});
+
+watch(feedback, () => {
+  if (alert.prevNum < feedback.data.length) {
+    alert.prevNum = feedback.data.length;
+    alert.show = true;
+
+    setTimeout(() => {
+      alert.show = false;
+    }, showDelay);
+  }
+
+  if (alert.prevNum > feedback.data.length)
+    alert.prevNum = feedback.data.length;
+});
 </script>
 
 <template>
@@ -26,7 +51,7 @@ const feedback = useFeedbackStore();
       </svg>
     </button>
     <div
-      class="dark:brightness-95 px-2 translate-x-2 bottom-0 right-0 absolute rounded-full bg-white"
+      class="pointer-events-none dark:brightness-95 px-2 translate-x-2 bottom-0 right-0 absolute rounded-full bg-white"
     >
       <p class="mb-0 text-sm text-bold text-red-500">
         {{ feedback.data.length }}
@@ -34,6 +59,19 @@ const feedback = useFeedbackStore();
     </div>
   </div>
   <!-- end float button-->
+
+  <div
+    class="flex justify-center fixed right-0 bottom-0 w-full sm:max-w-[300px] z-[1000]"
+  >
+    <FeedbackAlert
+      v-if="alert.show"
+      :type="feedback.data[feedback.data.length - 1].type"
+      :id="feedback.data[feedback.data.length - 1].id"
+      :status="feedback.data[feedback.data.length - 1].status"
+      :message="feedback.data[feedback.data.length - 1].message"
+      @close="alert.show = false"
+    />
+  </div>
 
   <!-- right sidebar -->
   <aside
@@ -82,37 +120,15 @@ const feedback = useFeedbackStore();
       class="flex flex-col justify-start items-center h-full m-2 overflow-y-auto"
     >
       <!-- flash message-->
-      <div
+      <FeedbackAlert
         v-for="(item, id) in feedback.data"
-        data-flash-message
-        :class="[
-          item.type === 'error' ? 'bg-red-500' : '',
-          item.type === 'success' ? 'bg-green-500' : '',
-          item.type !== 'success' && item.type !== 'error' ? 'bg-sky-500' : '',
-        ]"
-        class="my-2 border relative p-4 w-11/12 min-h-20 rounded-lg hover:scale-102 transition shadow-md break-words dark:brightness-90"
-      >
-        <div class="flex justify-between align-top items-start">
-          <h5 class="text-lg mb-0 text-white">{{ item.status + item.type }}</h5>
-          <button
-            @click="feedback.removeFeedback(id)"
-            data-close-flash-message
-            type="button"
-            class="absolute right-8 top-2"
-          >
-            <svg
-              class="cursor-pointer fill-white dark:opacity-80 absolute h-5 w-5"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 320 512"
-            >
-              <path
-                d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
-              ></path>
-            </svg>
-          </button>
-        </div>
-        <p class="text-white mt-2 mb-0 text-sm">{{ item.message }}</p>
-      </div>
+        :type="item.type"
+        :id="item.id"
+        :status="item.status"
+        :message="item.message"
+        @close="feedback.removeFeedback(item.id)"
+      />
+
       <!-- end flash message-->
     </div>
     <!-- end messages -->

@@ -159,7 +159,7 @@ function toggleMenu() {
       <!-- end logo version -->
 
       <!-- list items -->
-      <div class="menu-nav-list-container">
+      <div class="menu-nav-list-container h-full">
         <ul class="menu-nav-list">
           <!-- item -->
           <li v-for="item in navList" class="mt-0.5 w-full">

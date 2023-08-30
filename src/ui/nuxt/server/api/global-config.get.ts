@@ -10,7 +10,7 @@ const resErr: response = {
   type: "error",
   status: 500,
   message: "Impossible to get global config",
-  data: [],
+  data: {},
 };
 // Get global config
 export default defineEventHandler(async (event) => {

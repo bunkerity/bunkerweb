@@ -15,16 +15,25 @@ export const useConfigStore = defineStore("config", () => {
 });
 
 export const useFeedbackStore = defineStore("feedback", () => {
-  const data: any = ref([
-    { type: "success", message: "test feedback", status: 200 },
-  ]);
+  const data: any = ref([]);
+  let feedID: number = 0;
 
   async function addFeedback(type: string, status: string, message: string) {
-    data.value.push({ type: type, status: status, message: message });
+    feedID++;
+    data.value.push({
+      id: feedID,
+      isNew: true,
+      type: type,
+      status: status,
+      message: message,
+    });
   }
 
   function removeFeedback(id: number) {
-    data.value.splice(id, 1);
+    data.value.splice(
+      data.value.findIndex((item: any) => item["id"] === id),
+      1
+    );
   }
 
   return { data, addFeedback, removeFeedback };
