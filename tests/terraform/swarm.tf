@@ -35,8 +35,8 @@ resource "scaleway_instance_server" "instances" {
 }
 
 # Create Ansible inventory file
-resource "local_file" "ansible_inventory" {
-  sensitive_content = templatefile("templates/swarm_inventory.tftpl", {
+resource "local_sensitive_file" "ansible_inventory" {
+  content = templatefile("templates/swarm_inventory.tftpl", {
     public_ips = var.swarm_ips
   })
   filename = "/tmp/swarm_inventory"

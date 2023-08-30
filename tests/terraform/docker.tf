@@ -26,8 +26,8 @@ resource "scaleway_instance_server" "instance" {
 }
 
 # Create Ansible inventory file
-resource "local_file" "ansible_inventory" {
-  sensitive_content = templatefile("templates/docker_inventory.tftpl", {
+resource "local_sensitive_file" "ansible_inventory" {
+  content = templatefile("templates/docker_inventory.tftpl", {
     public_ip = var.docker_ip
   })
   filename = "/tmp/docker_inventory"
