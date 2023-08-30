@@ -46,7 +46,7 @@ jobs:
       - run: |
           tar -cf terraform.tar /tmp/${{ inputs.TYPE }}
           echo "$SECRET_KEY" > /tmp/.secret_key
-          openssl enc -in terraform.tar -aes-256-cbc -md sha256 -pass file:/tmp/.secret_key -out terraform.tar.enc
+          openssl enc -in terraform.tar -aes-256-cbc -pbkdf2 -iter 100000 -pass file:/tmp/.secret_key -out terraform.tar.enc
           rm -f /tmp/.secret_key
         if: always()
         env:
