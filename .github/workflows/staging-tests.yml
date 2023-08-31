@@ -62,16 +62,16 @@ jobs:
         if: inputs.TYPE == 'k8s'
       - name: Pull BW linux ubuntu test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/ubuntu-tests:testing && docker tag ghcr.io/bunkerity ubuntu-tests:testing local/ubuntu:latest
+        run: docker pull ghcr.io/bunkerity/ubuntu-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-tests:testing local/ubuntu:latest
       - name: Pull BW linux debian test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/debian-tests:testing && docker tag ghcr.io/bunkerity debian-tests:testing local/debian:latest
+        run: docker pull ghcr.io/bunkerity/debian-tests:testing && docker tag ghcr.io/bunkerity/debian-tests:testing local/debian:latest
       - name: Pull BW linux fedora test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/fedora-tests:testing && docker tag ghcr.io/bunkerity fedora-tests:testing local/fedora:latest
+        run: docker pull ghcr.io/bunkerity/fedora-tests:testing && docker tag ghcr.io/bunkerity/fedora-tests:testing local/fedora:latest
       - name: Pull BW linux rhel test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/rhel-tests:testing && docker tag ghcr.io/bunkerity rhel-tests:testing local/rhel:latest
+        run: docker pull ghcr.io/bunkerity/rhel-tests:testing && docker tag ghcr.io/bunkerity/rhel-tests:testing local/rhel:latest
       # Do tests
       - name: Run tests
         if: inputs.TYPE == 'docker'
