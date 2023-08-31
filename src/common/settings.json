@@ -195,7 +195,7 @@
     "help": "Server name (virtual host) for the API.",
     "id": "api-server-name",
     "label": "API server name",
-    "regex": "^(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\\.?$",
+    "regex": "^[^ ]{1,255}$",
     "type": "text"
   },
   "API_WHITELIST_IP": {
