@@ -100,6 +100,8 @@ jobs:
       TYPE: ${{ matrix.type }}
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      K8S_IP: ${{ secrets.K8S_IP }}
 
   # Perform tests
   staging-tests:
@@ -163,6 +165,7 @@ jobs:
       TYPE: ${{ matrix.type }}
     secrets:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
   # Push Docker images
   push-images:

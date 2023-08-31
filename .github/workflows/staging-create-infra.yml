@@ -9,6 +9,10 @@ on:
     secrets:
       CICD_SECRETS:
         required: true
+      SECRET_KEY:
+        required: true
+      K8S_IP:
+        required: true
 
 jobs:
   create:
@@ -43,6 +47,7 @@ jobs:
           CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
           REG_USER: ${{ github.actor }}
           REG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          K8S_IP: ${{ secrets.K8S_IP }}
       - run: |
           tar -cf terraform.tar /tmp/${{ inputs.TYPE }}
           echo "$SECRET_KEY" > /tmp/.secret_key
