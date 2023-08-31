@@ -54,7 +54,7 @@ jobs:
           rm -f /tmp/.secret_key
           tar xf /tmp/terraform.tar -C /
           mkdir /tmp/reg
-          cp tests/terraform/k8s.tf /tmp/reg
+          cp tests/terraform/k8s-reg.tf /tmp/reg
           cp tests/terraform/providers.tf /tmp/reg
           cd /tmp/reg
           export TF_VAR_k8s_reg_user=${REG_USER}
