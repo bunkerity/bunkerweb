@@ -50,7 +50,7 @@ jobs:
         if: inputs.TYPE == 'k8s'
       - run: |
           echo "$SECRET_KEY" > /tmp/.secret_key
-          openssl enc -d -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -iter 100000 -pass file:/tmp/.secret_key -out /tmp/terraform.tar 
+          openssl enc -d -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -iter 100000 -md sha256 -pass file:/tmp/.secret_key -out /tmp/terraform.tar 
           rm -f /tmp/.secret_key
           tar xf /tmp/terraform.tar -C /
         env:
