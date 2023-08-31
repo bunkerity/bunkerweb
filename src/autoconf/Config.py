@@ -113,6 +113,20 @@ class Config(ConfigCaller):
             )
             sleep(5)
 
+        # wait until changes are applied
+        while True:
+            changes = self._db.check_changes()
+            if isinstance(changes, str):
+                self.__logger.error(
+                    f"An error occurred when checking for changes in the database : {changes}"
+                )
+            elif not any(changes.values()):
+                break
+            else:
+                self.__logger.warning(
+                    "Scheduler is already applying a configuration, retrying in 5 seconds ...",
+                )
+            sleep(5)
         # update instances in database
         if updates["instances"]:
             err = self._db.update_instances(self.__instances, changed=False)
