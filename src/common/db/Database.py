@@ -329,7 +329,9 @@ class Database:
             except BaseException:
                 return format_exc()
 
-    def checked_changes(self, changes: Optional[List[str]] = None, value: Optional[bool] = False) -> str:
+    def checked_changes(
+        self, changes: Optional[List[str]] = None, value: Optional[bool] = False
+    ) -> str:
         """Set changed bit for config, custom configs, instances and plugins"""
         changes = changes or [
             "config",
@@ -470,7 +472,9 @@ class Database:
 
         return True, ""
 
-    def save_config(self, config: Dict[str, Any], method: str, changed: Optional[bool] = True) -> str:
+    def save_config(
+        self, config: Dict[str, Any], method: str, changed: Optional[bool] = True
+    ) -> str:
         """Save the config in the database"""
         to_put = []
         with self.__db_session() as session:
@@ -733,7 +737,10 @@ class Database:
         return ""
 
     def save_custom_configs(
-        self, custom_configs: List[Dict[str, Tuple[str, List[str]]]], method: str, changed: Optional[bool] = True
+        self,
+        custom_configs: List[Dict[str, Tuple[str, List[str]]]],
+        method: str,
+        changed: Optional[bool] = True,
     ) -> str:
         """Save the custom configs in the database"""
         message = ""
@@ -1750,7 +1757,9 @@ class Database:
 
         return ""
 
-    def update_instances(self, instances: List[Dict[str, Any]], changed: Optional[bool] = True) -> str:
+    def update_instances(
+        self, instances: List[Dict[str, Any]], changed: Optional[bool] = True
+    ) -> str:
         """Update instances."""
         to_put = []
         with self.__db_session() as session:

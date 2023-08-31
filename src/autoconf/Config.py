@@ -63,8 +63,7 @@ class Config(ConfigCaller):
             "instances": False,
             "services": False,
             "configs": False,
-            "config": False
-
+            "config": False,
         }
         changes = []
         if instances != self.__instances or first:
@@ -142,7 +141,9 @@ class Config(ConfigCaller):
                 )
         # save custom configs to database
         if updates["configs"]:
-            err = self._db.save_custom_configs(custom_configs, "autoconf", changed=False)
+            err = self._db.save_custom_configs(
+                custom_configs, "autoconf", changed=False
+            )
             if err:
                 success = False
                 self.__logger.error(
