@@ -14,6 +14,7 @@ jobs:
   delete:
     if: ${{ always() }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       # Prepare
       - name: Checkout source code
