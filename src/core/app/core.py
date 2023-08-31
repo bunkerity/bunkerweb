@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from contextlib import asynccontextmanager
 from functools import cached_property
 from ipaddress import (
@@ -29,7 +31,9 @@ from logger import setup_logger  # type: ignore
 from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore (present in /usr/share/bunkerweb/utils/)
 
 CPU_COUNT = cpu_count() or 1
-BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"([^ :]{1,255})(:(\d+))?(:(\w+))?")
+BUNKERWEB_STATIC_INSTANCES_RX = re_compile(
+    r"(?P<hostname>(?<![:@])\b[^:@ ]+\b)(:(?P<port>\d+))?(@(?P<server_name>(?=[^ ]{1,255})[^ ]+))?"
+)
 EXTERNAL_PLUGIN_URLS_RX = re_compile(
     r"^( *((https?://|file:///)[-\w@:%.+~#=]+[-\w()!@:%+.~?&/=$#]*)(?!.*\2(?!.)) *)*$"
 )
@@ -195,24 +199,22 @@ class CoreConfig(YamlBaseSettings):
 
             match = BUNKERWEB_STATIC_INSTANCES_RX.search(bw_instance)
             if match:
-                groups = match.groups()
-
-                if groups[0] in hostnames:
+                if match.group("hostname") in hostnames:
                     self.logger.warning(
-                        f"Duplicate BunkerWeb instance hostname {groups[0]}, skipping it"
+                        f"Duplicate BunkerWeb instance hostname {match.group('hostname')}, skipping it"
                     )
 
-                hostnames.add(groups[0])
+                hostnames.add(match.group("hostname"))
                 bunkerweb_instances.append(
                     {
-                        "hostname": groups[0],
-                        "port": groups[2] or 5000,
-                        "server_name": groups[-1] or "bwapi",
+                        "hostname": match.group("hostname"),
+                        "port": match.group("port") or 5000,
+                        "server_name": match.group("server_name") or "bwapi",
                     }
                 )
             else:
                 self.logger.warning(
-                    f"Invalid BunkerWeb instance {bw_instance}, it should match the following regex: {self.bunkerweb_static_instance_rx.pattern}, skipping it"
+                    f"Invalid BunkerWeb instance {bw_instance}, it should match the following regex: <hostname>(:<port>)(@<server_name>) ({self.bunkerweb_static_instance_rx.pattern}), skipping it"
                 )
 
         return bunkerweb_instances

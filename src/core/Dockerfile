@@ -88,7 +88,7 @@ VOLUME /data
 
 WORKDIR /usr/share/bunkerweb/core
 
-EXPOSE 5000
+EXPOSE 1337
 
 USER core:core
 

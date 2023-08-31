@@ -81,7 +81,7 @@ RUN apk add --no-cache pcre bash python3 && \
 
 VOLUME /data /etc/nginx
 
-EXPOSE 8080/tcp 8443/tcp
+EXPOSE 8080 8443
 
 USER nginx:nginx
 

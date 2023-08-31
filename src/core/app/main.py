@@ -14,8 +14,8 @@ from ipaddress import (
 from itertools import chain
 from json import JSONDecodeError, loads as json_loads
 from shutil import rmtree
-from threading import enumerate as all_threads, Event, Thread
-from os import _exit, listdir, sep, walk
+from threading import Event, Thread
+from os import listdir, sep, walk
 from os.path import basename, dirname, join
 from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
@@ -36,7 +36,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.datastructures import Address
 from fastapi.responses import JSONResponse
 from redis.client import Redis
-from regex import compile as re_compile, match as regex_match
+from regex import compile as re_compile
 
 from API import API  # type: ignore
 from api_caller import ApiCaller  # type: ignore
@@ -58,6 +58,7 @@ from .dependencies import (
     SEMAPHORE,
     SETTINGS_PATH,
     seen_instance,
+    stop,
     test_and_send_to_instances,
     update_app_mounts,
 )
@@ -71,33 +72,22 @@ PLUGIN_KEYS = [
     "settings",
 ]
 
-TOKEN_RX = r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$"
 PLUGIN_ID_REGEX = re_compile(r"^[\w.-]{1,64}$")
 CUSTOM_CONFIGS_RX = re_compile(
-    r"^([0-9a-z\.-]*)_?CUSTOM_CONF_(HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
+    r"^((?P<service_id>[^ ]{,255})_)?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(?P<name>.+)$"
 )
-BUNKERWEB_INSTANCES_RX = re_compile(r"([^: ]+)(:((\d+):)?(\w+))?")
 
 stop_event = Event()
 
 
-def stop(status):
-    global DB
-
+def stop_app(status):
     stop_event.set()
-    for thread in all_threads():
-        if thread.name != "MainThread":
-            thread.join()
-
-    HEALTHY_PATH.unlink(missing_ok=True)
-    if DB:
-        del DB
-    _exit(status)
+    stop(status)
 
 
 def exit_handler(signum, frame):
     CORE_CONFIG.logger.info("Stop signal received, exiting...")
-    stop(0)
+    stop_app(0)
 
 
 signal(SIGINT, exit_handler)
@@ -108,7 +98,7 @@ signal(SIGTERM, exit_handler)
 async def lifespan(_):
     yield  # ? lifespan of the application
 
-    stop(0)
+    stop_app(0)
 
 
 # ? APP
@@ -131,29 +121,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-if not isinstance(CORE_CONFIG.WAIT_RETRY_INTERVAL, int) and (
-    not CORE_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
-    or int(CORE_CONFIG.WAIT_RETRY_INTERVAL) < 1
-):
-    CORE_CONFIG.logger.error(
-        f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
-    )
-    stop(1)
-
-if not isinstance(CORE_CONFIG.HEALTHCHECK_INTERVAL, int) and (
-    not CORE_CONFIG.HEALTHCHECK_INTERVAL.isdigit()
-    or int(CORE_CONFIG.HEALTHCHECK_INTERVAL) < 1
-):
-    CORE_CONFIG.logger.error(
-        f"Invalid HEALTHCHECK_INTERVAL provided: {CORE_CONFIG.HEALTHCHECK_INTERVAL}, It must be a positive integer."
-    )
-    stop(1)
-
-if CORE_CONFIG.check_token and not regex_match(TOKEN_RX, CORE_CONFIG.CORE_TOKEN):
-    CORE_CONFIG.logger.error(
-        f"Invalid token provided: {CORE_CONFIG.CORE_TOKEN}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
-    )
-    stop(1)
 
 TMP_ENV_PATH = Path(
     sep,
@@ -346,7 +313,7 @@ if not db_is_initialized:
         CORE_CONFIG.logger.error(
             f"Exception while initializing database : {err}",
         )
-        stop(1)
+        stop_app(1)
     elif not ret:
         CORE_CONFIG.logger.info(
             "Database tables are already initialized, skipping creation ...",
@@ -362,7 +329,7 @@ if not db_is_initialized:
         CORE_CONFIG.logger.error(
             f"Can't Initialize database : {err}",
         )
-        stop(1)
+        stop_app(1)
     else:
         CORE_CONFIG.logger.info("✅ Database initialized")
 else:
@@ -370,7 +337,7 @@ else:
 
     if err and not err.startswith("The database"):
         CORE_CONFIG.logger.error(f"Can't update database schema : {err}")
-        stop(1)
+        stop_app(1)
     elif not err:
         CORE_CONFIG.logger.info(
             "✅ Database schema updated to latest version successfully"
@@ -383,20 +350,19 @@ env_custom_configs = []
 for k, v in CORE_CONFIG.settings.copy().items():
     match = CUSTOM_CONFIGS_RX.search(k)
     if match:
-        custom_conf = match.groups()
-        name = custom_conf[2].replace(".conf", "")
+        name = match.group("name").replace(".conf", "")
         env_custom_configs.append(
             {
                 "value": v,
                 "exploded": (
-                    custom_conf[0],
-                    custom_conf[1],
+                    match.group("service_id"),
+                    match.group("type"),
                     name,
                 ),
             }
         )
         CORE_CONFIG.logger.info(
-            f"🛠️ Found custom conf env var \"{name}\"{' for service ' + custom_conf[0] if custom_conf[0] else ''} with type {custom_conf[1]}"
+            f"🛠️ Found custom conf env var \"{name}\"{' for service ' + match.group('service_id') if match.group('service_id') else ''} with type {match.group('type')}"
         )
 
 if {hash(dict_to_frozenset(d)) for d in env_custom_configs} != {
@@ -464,7 +430,7 @@ if err:
     CORE_CONFIG.logger.error(
         f"Can't clear dynamic BunkerWeb instances to database : {err}"
     )
-    stop(1)
+    stop_app(1)
 
 err = DB.refresh_instances(CORE_CONFIG.bunkerweb_instances, "static")
 
@@ -472,7 +438,7 @@ if err:
     CORE_CONFIG.logger.error(
         f"Can't refresh static BunkerWeb instances to database : {err}"
     )
-    stop(1)
+    stop_app(1)
 
 CORE_CONFIG.logger.info("✅ BunkerWeb static instances updated to database")
 
@@ -483,7 +449,7 @@ if config_files != db_config:
         CORE_CONFIG.logger.error(
             f"Can't save config to database : {err}",
         )
-        stop(1)
+        stop_app(1)
 
     CORE_CONFIG.logger.info("✅ Config successfully saved to database")
 
@@ -885,7 +851,7 @@ if __name__ == "__main__":
         CORE_CONFIG.logger.error(
             f"Invalid LISTEN_PORT provided: {CORE_CONFIG.LISTEN_PORT}, It must be an integer between 1 and 65535."
         )
-        stop(1)
+        stop_app(1)
 
     run(
         app,

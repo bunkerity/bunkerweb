@@ -1,17 +1,19 @@
+#!/usr/bin/python3
+
 from functools import wraps
 from glob import glob
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from json import loads
 from logging import Logger
-from os import chmod, cpu_count, environ
+from os import _exit, chmod, cpu_count, environ
 from os.path import basename, dirname, join, normpath, sep
 from pathlib import Path
 from shutil import copytree, rmtree
 from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from tarfile import open as tar_open
-from threading import Thread, Event, Semaphore
+from threading import enumerate as all_threads, Event, Semaphore, Thread
 from time import sleep
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
 from uuid import uuid4
@@ -19,31 +21,29 @@ from zipfile import ZipFile
 
 from fastapi.routing import Mount
 from magic import Magic
+from regex import match
 from requests import get
+
+TMP_FOLDER = Path(sep, "var", "tmp", "bunkerweb")
+DB = None
+HEALTHY_PATH = TMP_FOLDER.joinpath("core.healthy")
+
+
+def stop(status):
+    global DB
+
+    for thread in all_threads():
+        if thread.name != "MainThread":
+            thread.join()
+
+    HEALTHY_PATH.unlink(missing_ok=True)
+    if DB:
+        del DB
+    _exit(status)
 
 
 from .core import CoreConfig
-from .job_scheduler import JobScheduler
 
-from API import API  # type: ignore
-from api_caller import ApiCaller  # type: ignore
-from database import Database  # type: ignore
-
-DB = None
-HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.healthy")
-SEMAPHORE = Semaphore(cpu_count() or 1)
-
-# Create thread events
-api_started = Event()
-
-CORE_PLUGINS_PATH = Path(sep, "usr", "share", "bunkerweb", "core_plugins")
-EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
-CUSTOM_CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
-SETTINGS_PATH = Path(sep, "usr", "share", "bunkerweb", "settings.json")
-CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
-CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
-TMP_ENV_PATH = Path(sep, "var", "tmp", "bunkerweb", "core.env")
-TMP_ENV_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
 os_release_path = Path(sep, "etc", "os-release")
@@ -61,13 +61,60 @@ else:
 
 del integration_path, os_release_path
 
-
-INSTANCES_API_CALLER = ApiCaller()
-
-
-DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI, pool=False)
-
 CORE_CONFIG.logger.info(f"🚀 {CORE_CONFIG.integration} integration detected")
+
+if not isinstance(CORE_CONFIG.WAIT_RETRY_INTERVAL, int) and (
+    not CORE_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
+    or int(CORE_CONFIG.WAIT_RETRY_INTERVAL) < 1
+):
+    CORE_CONFIG.logger.error(
+        f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
+    )
+    stop(1)
+
+if not isinstance(CORE_CONFIG.HEALTHCHECK_INTERVAL, int) and (
+    not CORE_CONFIG.HEALTHCHECK_INTERVAL.isdigit()
+    or int(CORE_CONFIG.HEALTHCHECK_INTERVAL) < 1
+):
+    CORE_CONFIG.logger.error(
+        f"Invalid HEALTHCHECK_INTERVAL provided: {CORE_CONFIG.HEALTHCHECK_INTERVAL}, It must be a positive integer."
+    )
+    stop(1)
+
+if CORE_CONFIG.check_token and not match(
+    r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$",
+    CORE_CONFIG.CORE_TOKEN,
+):
+    CORE_CONFIG.logger.error(
+        f"Invalid token provided: {CORE_CONFIG.CORE_TOKEN}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
+    )
+    stop(1)
+
+from .job_scheduler import JobScheduler
+
+from API import API  # type: ignore (imported from /usr/share/bunkerweb/utils)
+from api_caller import ApiCaller  # type: ignore (imported from /usr/share/bunkerweb/utils)
+from database import Database  # type: ignore (imported from /usr/share/bunkerweb/utils)
+
+# Create a semaphore to limit the number of threads to the number of CPUs - 1
+MAX_THREADS = cpu_count() or 1
+SEMAPHORE = Semaphore(MAX_THREADS - 1 if MAX_THREADS > 1 else 1)
+
+# Create thread events
+api_started = Event()
+
+# Create static paths
+CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
+CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
+CORE_PLUGINS_PATH = Path(sep, "usr", "share", "bunkerweb", "core_plugins")
+CUSTOM_CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
+EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
+SETTINGS_PATH = Path(sep, "usr", "share", "bunkerweb", "settings.json")
+TMP_ENV_PATH = TMP_FOLDER.joinpath("core.env")
+
+# Instantiate database and api caller
+DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI, pool=False)
+INSTANCES_API_CALLER = ApiCaller()
 
 # Instantiate scheduler
 SCHEDULER = JobScheduler(
@@ -82,6 +129,7 @@ SCHEDULER = JobScheduler(
 
 
 def dict_to_frozenset(d):
+    """Converts a dict to a frozenset recursively."""
     if isinstance(d, list):
         return tuple(sorted(d))
     elif isinstance(d, dict):
@@ -90,57 +138,57 @@ def dict_to_frozenset(d):
 
 
 def update_app_mounts(app):
+    """Update the app mounts with the api plugins"""
     CORE_CONFIG.logger.info("Updating app mounts ...")
 
+    # remove the subapps from the routes
     for route in app.routes:
         if isinstance(route, Mount):
-            # remove the subapp from the routes
             app.routes.remove(route)
 
-    for subinstance_api in glob(
-        str(CORE_PLUGINS_PATH.joinpath("*", "instance_api"))
-    ) + glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "instance_api"))):
-        main_file_path = Path(subinstance_api, "main.py")
+    # loop over every core + external plugins that have an api subfolder
+    for subapi in glob(str(CORE_PLUGINS_PATH.joinpath("*", "api"))) + glob(
+        str(EXTERNAL_PLUGINS_PATH.joinpath("*", "api"))
+    ):
+        main_file_path = Path(subapi, "main.py")
 
         if not main_file_path.is_file():
             continue
 
-        subinstance_api_plugin = basename(dirname(subinstance_api))
-        CORE_CONFIG.logger.info(
-            f"Mounting subinstance_api {subinstance_api_plugin} ..."
-        )
+        subapi_plugin = basename(dirname(subapi))
+        CORE_CONFIG.logger.info(f"Mounting subapi {subapi_plugin} ...")
         try:
-            loader = SourceFileLoader(
-                f"{subinstance_api_plugin}_instance_api", str(main_file_path)
-            )
-            subinstance_api_module = loader.load_module()
-            root_path = getattr(
-                subinstance_api_module, "root_path", f"/{subinstance_api_plugin}"
-            )
+            # load the subapi module
+            loader = SourceFileLoader(f"{subapi_plugin}_api", str(main_file_path))
+            subapi_module = loader.load_module()
+            # get the subapi root path if it exists or set it to /{subapi_plugin}
+            root_path = getattr(subapi_module, "root_path", f"/{subapi_plugin}")
 
-            if hasattr(subinstance_api_module, "app"):
+            # If the subapi has an app attribute, mount it
+            if hasattr(subapi_module, "app"):
                 app.mount(
                     root_path,
-                    getattr(subinstance_api_module, "app"),
-                    basename(dirname(subinstance_api)),
+                    getattr(subapi_module, "app"),
+                    basename(dirname(subapi)),
                 )
 
                 CORE_CONFIG.logger.info(
-                    f"✅ The subinstance_api for the plugin {subinstance_api_plugin} has been mounted successfully, root path: {root_path}"
+                    f"✅ The subapi for the plugin {subapi_plugin} has been mounted successfully, root path: {root_path}"
                 )
             else:
                 CORE_CONFIG.logger.error(
-                    f"Couldn't mount subinstance_api {subinstance_api_plugin}, no app found"
+                    f"Couldn't mount subapi {subapi_plugin}, no app found"
                 )
         except Exception as e:
             CORE_CONFIG.logger.error(
-                f"Exception while mounting subinstance_api {subinstance_api_plugin} : {e}"
+                f"Exception while mounting subapi {subapi_plugin} : {e}"
             )
 
 
 def install_plugin(
     plugin_url: str, logger: Logger, *, semaphore: Semaphore = SEMAPHORE
 ):
+    """Install a plugin from a url"""
     semaphore.acquire(timeout=30)
 
     # Download Plugin file
@@ -149,7 +197,7 @@ def install_plugin(
             content = Path(normpath(plugin_url[7:])).read_bytes()
         else:
             content = b""
-            resp = get(plugin_url, stream=True, timeout=10)  # type: ignore
+            resp = get(plugin_url, stream=True, timeout=10)
 
             if resp.status_code != 200:
                 logger.warning(f"Got status code {resp.status_code}, skipping...")
@@ -166,9 +214,9 @@ def install_plugin(
         return
 
     # Extract it to tmp folder
-    temp_dir = join(sep, "var", "tmp", "bunkerweb", "plugins", str(uuid4()))
+    temp_dir = TMP_FOLDER.joinpath("plugins", str(uuid4()))
     try:
-        Path(temp_dir).mkdir(parents=True, exist_ok=True)
+        temp_dir.mkdir(parents=True, exist_ok=True)
         file_type = Magic(mime=True).from_buffer(content)
 
         if file_type == "application/zip":
@@ -193,33 +241,33 @@ def install_plugin(
 
     # Install plugins
     try:
-        for plugin_dir in glob(join(temp_dir, "**", "plugin.json"), recursive=True):
+        for plugin_dir in glob(
+            str(temp_dir.joinpath("**", "plugin.json")), recursive=True
+        ):
+            plugin_dir = Path(plugin_dir).parent
             try:
-                plugin_dir = dirname(plugin_dir)
                 # Load plugin.json
                 metadata = loads(
-                    Path(plugin_dir, "plugin.json").read_text(encoding="utf-8")
+                    plugin_dir.joinpath("plugin.json").read_text(encoding="utf-8")
                 )
                 # Don't go further if plugin is already installed
-                if Path(
-                    "etc", "bunkerweb", "plugins", metadata["id"], "plugin.json"
+                if EXTERNAL_PLUGINS_PATH.joinpath(
+                    metadata["id"], "plugin.json"
                 ).is_file():
                     logger.warning(
                         f"Skipping installation of plugin {metadata['id']} (already installed)",
                     )
                     return
                 # Copy the plugin
-                copytree(
-                    plugin_dir, join(sep, "etc", "bunkerweb", "plugins", metadata["id"])
-                )
+                copytree(plugin_dir, EXTERNAL_PLUGINS_PATH.joinpath(metadata["id"]))
                 # Add u+x permissions to jobs files
-                for job_file in glob(join(plugin_dir, "jobs", "*")):
+                for job_file in glob(str(plugin_dir.joinpath("jobs", "*"))):
                     st = Path(job_file).stat()
                     chmod(job_file, st.st_mode | S_IEXEC)
                 logger.info(f"Plugin {metadata['id']} installed")
             except FileExistsError:
                 logger.warning(
-                    f"Skipping installation of plugin {basename(dirname(plugin_dir))} (already installed)",
+                    f"Skipping installation of plugin {plugin_dir.parent.name} (already installed)",
                 )
     except:
         logger.exception(
@@ -234,6 +282,7 @@ def generate_external_plugins(
     *,
     original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH,
 ):
+    """Generate external plugins from the database or from a list of plugins if provided"""
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
 
@@ -254,6 +303,7 @@ def generate_external_plugins(
         CORE_CONFIG.logger.info("Generating new external plugins ...")
         original_path.mkdir(parents=True, exist_ok=True)
         for plugin in plugins:
+            # Extract plugin data
             tmp_path = original_path.joinpath(plugin["id"], f"{plugin['name']}.tar.gz")
             tmp_path.parent.mkdir(parents=True, exist_ok=True)
             tmp_path.write_bytes(plugin["data"])
@@ -261,6 +311,7 @@ def generate_external_plugins(
                 tar.extractall(original_path)
             tmp_path.unlink()
 
+            # Add u+x permissions to jobs files
             for job_file in glob(join(str(tmp_path.parent), "jobs", "*")):
                 st = Path(job_file).stat()
                 chmod(job_file, st.st_mode | S_IEXEC)
@@ -271,6 +322,7 @@ def generate_custom_configs(
     *,
     original_path: Union[Path, str] = CUSTOM_CONFIGS_PATH,
 ):
+    """Generate custom configs from the database or from a list of configs if provided"""
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
 
@@ -291,6 +343,7 @@ def generate_custom_configs(
         CORE_CONFIG.logger.info("Generating new custom configs ...")
         original_path.mkdir(parents=True, exist_ok=True)
         for custom_config in configs:
+            # Extract custom config data
             tmp_path = original_path.joinpath(
                 custom_config["type"].replace("_", "-"),
                 custom_config["service_id"] or "",
@@ -301,11 +354,12 @@ def generate_custom_configs(
 
 
 def generate_config(function: Optional[Callable] = None):
+    """A decorator that also can be used as a context manager to generate the config before running the function"""
+
     @wraps(function)  # type: ignore (if function is None, no error is raised)
     def wrap(*args, **kwargs):
         assert DB
 
-        nginx_prefix = join(sep, "etc", "nginx")
         content = ""
         for k, v in DB.get_config().items():
             content += f"{k}={v}\n"
@@ -321,7 +375,7 @@ def generate_config(function: Optional[Callable] = None):
                 "--templates",
                 join(sep, "usr", "share", "bunkerweb", "confs"),
                 "--output",
-                nginx_prefix,
+                join(sep, "etc", "nginx"),
                 "--variables",
                 str(TMP_ENV_PATH),
             ],
@@ -344,6 +398,7 @@ def generate_config(function: Optional[Callable] = None):
 
 
 def send_plugins_to_instances(api_caller: ApiCaller = None):
+    """Send the plugins to the instances"""
     if not api_caller:
         assert DB
         api_caller = ApiCaller(
@@ -371,6 +426,7 @@ def send_plugins_to_instances(api_caller: ApiCaller = None):
 
 @generate_config
 def send_config_to_instances(api_caller: ApiCaller = None):
+    """Send the config to the instances"""
     if not api_caller:
         assert DB
         api_caller = ApiCaller(
@@ -403,6 +459,7 @@ def send_config_to_instances(api_caller: ApiCaller = None):
 
 
 def send_custom_configs_to_instances(api_caller: ApiCaller = None):
+    """Send the custom configs to the instances"""
     if not api_caller:
         assert DB
         api_caller = ApiCaller(
@@ -429,6 +486,7 @@ def send_custom_configs_to_instances(api_caller: ApiCaller = None):
 
 
 def send_cache_to_instances(api_caller: ApiCaller = None):
+    """Send the cache to the instances"""
     if not api_caller:
         assert DB
         api_caller = ApiCaller(
@@ -454,6 +512,7 @@ def send_cache_to_instances(api_caller: ApiCaller = None):
 
 
 def reload_instances(api_caller: ApiCaller = None):
+    """Reload the instances"""
     if not api_caller:
         assert DB
         api_caller = ApiCaller(
@@ -486,6 +545,7 @@ def send_to_instances(
     caller: Optional[ApiCaller] = None,
     no_reload: bool = False,
 ) -> int:
+    """Send the data to the instances"""
     api_caller = caller or (ApiCaller([instance_api]) if instance_api else None)
 
     if api_caller is None:
@@ -505,19 +565,20 @@ def send_to_instances(
         return 1
 
     if types == "all" or "plugins" in types:
-        send_plugins_to_instances(api_caller) or None  # type: ignore
+        send_plugins_to_instances(api_caller)
     if types == "all" or "custom_configs" in types:
-        send_custom_configs_to_instances(api_caller) or None  # type: ignore
+        send_custom_configs_to_instances(api_caller)
     if types == "all" or "config" in types:
-        send_config_to_instances(api_caller) or None  # type: ignore
+        send_config_to_instances(api_caller)  # type: ignore
     if types == "all" or "cache" in types:
-        send_cache_to_instances(api_caller) or None  # type: ignore
+        send_cache_to_instances(api_caller)
     if not no_reload and (types == "all" or types):
-        reload_instances(api_caller) or None  # type: ignore
+        reload_instances(api_caller)
     return 0
 
 
 def seen_instance(instance_hostname: str):
+    """Update the last_seen of an instance in the database"""
     SEMAPHORE.acquire(timeout=30)
 
     error = DB.seen_instance(instance_hostname)
@@ -541,6 +602,7 @@ def test_and_send_to_instances(
     *,
     no_reload: bool = False,
 ) -> int:
+    """Test and send the data to the instances"""
     if instance_apis is None:
         assert DB
         instance_apis = ApiCaller(
@@ -592,6 +654,7 @@ def test_and_send_to_instances(
 
 
 def run_jobs():
+    """Run plugins jobs"""
     if not api_started.is_set():
         local_api = API(f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "bw-scheduler")
         sent = False
@@ -633,6 +696,15 @@ def run_jobs():
 
 
 def run_job(job_name: str):
+    """Run a job"""
+    assert DB
+    SCHEDULER.reload(
+        DB.get_config()
+        | {
+            "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
+            "CORE_TOKEN": CORE_CONFIG.CORE_TOKEN,
+        }
+    )
     SCHEDULER.run_single(job_name)
 
     # TODO: remove this when the soft reload will be available
