@@ -79,9 +79,10 @@ class Config(ConfigCaller):
             updates["configs"] = True
             changes.append("custom_configs")
         if updates["instances"] or updates["services"]:
-            old_env = self.__get_full_env()
-            self.__config = self.__get_full_env()
-            if self.__config != old_env or first:
+            old_env = deepcopy(self.__config)
+            new_env = self.__get_full_env()
+            if old_env != new_env or first:
+                self.__config = new_env
                 updates["config"] = True
                 changes.append("config")
 

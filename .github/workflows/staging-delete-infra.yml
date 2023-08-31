@@ -35,7 +35,12 @@ jobs:
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
       - if: inputs.TYPE == 'k8s'
-        run: cd /tmp/${{ inputs.TYPE }} && terraform state rm kubernetes_secret.reg
+        run: |
+          cd /tmp/${{ inputs.TYPE }}
+          terraform state rm kubernetes_secret.reg
+          terraform state rm kubectl_manifest.lb
+          terraform state rm local_sensitive_file.lb_yml
+          terraform state rm local_sensitive_file.kubeconfig
       - uses: azure/setup-kubectl@v3
         if: inputs.TYPE == 'k8s'
       # Remove infra
