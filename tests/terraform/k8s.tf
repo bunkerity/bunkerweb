@@ -4,16 +4,6 @@ variable "k8s_ip" {
   nullable = false
   sensitive = true
 }
-variable "k8s_reg_user" {
-  type = string
-  nullable = false
-  sensitive = true
-}
-variable "k8s_reg_token" {
-  type = string
-  nullable = false
-  sensitive = true
-}
 
 # Create k8s cluster
 resource "scaleway_k8s_cluster" "cluster" {
@@ -53,26 +43,4 @@ resource "local_sensitive_file" "lb_yml" {
 resource "kubectl_manifest" "lb" {
   depends_on = [local_sensitive_file.lb_yml]
   yaml_body = local_sensitive_file.lb_yml.content
-}
-
-# Setup registry
-provider "kubernetes" {
-  config_path = "${local_sensitive_file.kubeconfig.filename}"
-}
-resource "kubernetes_secret" "reg" {
-  metadata {
-    name = "secret-registry"
-  }
-  type = "kubernetes.io/dockerconfigjson"
-  data = {
-    ".dockerconfigjson" = jsonencode({
-      auths = {
-        "ghcr.io" = {
-          "username" = var.k8s_reg_user
-          "password" = var.k8s_reg_token
-          "auth"     = base64encode("${var.k8s_reg_user}:${var.k8s_reg_token}")
-        }
-      }
-    })
-  }
 }
