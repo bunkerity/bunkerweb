@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from contextlib import asynccontextmanager
 from functools import cached_property
 from ipaddress import (
     IPv4Address,
@@ -24,8 +23,6 @@ for deps_path in [
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
-
-from fastapi import FastAPI
 
 from logger import setup_logger  # type: ignore
 from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore (present in /usr/share/bunkerweb/utils/)

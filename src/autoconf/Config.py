@@ -170,42 +170,50 @@ class Config:
 
         if instances_changed:
             self.__logger.info("Instances changed, updating ...")
-            # Send new instances to API
-            sent, err, status, resp = self._api.request(
-                "PUT",
-                f"/instances?method=autoconf&reload={'false' if configs_changed or config_changed else 'true'}",
-                data=dumps(
-                    [
-                        {
-                            "hostname": instance["hostname"],
-                            "port": self.__config.get("API_HTTP_PORT", "5000"),
-                            "server_name": self.__config.get(
-                                "API_SERVER_NAME", "bwapi"
-                            ),
-                        }
-                        for instance in instances
-                    ]
-                ).encode(),
-                additonal_headers={"Authorization": f"Bearer {self._api_token}"}
-                if self._api_token
-                else {},
-            )
+            status = 503
+            while status == 503:
+                # Send new instances to API
+                sent, err, status, resp = self._api.request(
+                    "PUT",
+                    f"/instances?method=autoconf&reload={'false' if configs_changed or config_changed else 'true'}",
+                    data=dumps(
+                        [
+                            {
+                                "hostname": instance["hostname"],
+                                "port": self.__config.get("API_HTTP_PORT", "5000"),
+                                "server_name": self.__config.get(
+                                    "API_SERVER_NAME", "bwapi"
+                                ),
+                            }
+                            for instance in instances
+                        ]
+                    ).encode(),
+                    additonal_headers={"Authorization": f"Bearer {self._api_token}"}
+                    if self._api_token
+                    else {},
+                )
 
-            if not sent or status != 200:
-                self.__logger.warning(resp)
-                self.__logger.warning(
-                    f"Could not contact core API. Instances may not be updated: {err}",
-                )
-                success = False
-            else:
-                self.__logger.info(
-                    f"Successfully sent API request to {self._api.endpoint}instances",
-                )
+                if not sent or status not in (200, 503):
+                    self.__logger.warning(resp)
+                    self.__logger.warning(
+                        f"Could not contact core API. Instances may not be updated: {err}",
+                    )
+                    success = False
+                elif status == 503:
+                    retry_after = resp.headers.get("Retry-After", 1)
+                    retry_after = float(retry_after)
+                    self.__logger.warning(
+                        f"Core API is busy, waiting {retry_after} seconds before retrying ...",
+                    )
+                    sleep(retry_after)
+                else:
+                    self.__logger.info(
+                        f"Successfully sent API request to {self._api.endpoint}instances",
+                    )
 
         if configs_changed:
             self.__logger.info("Custom configs changed, updating ...")
             self.__configs = configs or {}
-            # Send new custom configs to API
             custom_configs = []
             for config_type, config_files in self.__configs.items():
                 for file, data in config_files.items():
@@ -224,44 +232,63 @@ class Config:
                         }
                     )
 
-            sent, err, status, resp = self._api.request(
-                "PUT",
-                f"/custom_configs?method=autoconf&reload={'false' if config_changed else 'true'}",
-                data=dumps(custom_configs).encode(),
-                additonal_headers={"Authorization": f"Bearer {self._api_token}"}
-                if self._api_token
-                else {},
-            )
+            status = 503
+            while status == 503:
+                # Send new custom configs to API
+                sent, err, status, resp = self._api.request(
+                    "PUT",
+                    f"/custom_configs?method=autoconf&reload={'false' if config_changed else 'true'}",
+                    data=dumps(custom_configs).encode(),
+                    additonal_headers={"Authorization": f"Bearer {self._api_token}"}
+                    if self._api_token
+                    else {},
+                )
 
-            if not sent or status != 200:
-                self.__logger.warning(
-                    f"Could not contact core API. Custom configs may not be updated: {err}",
-                )
-                success = False
-            else:
-                self.__logger.info(
-                    f"Successfully sent API request to {self._api.endpoint}custom_configs",
-                )
+                if not sent or status not in (200, 503):
+                    self.__logger.warning(
+                        f"Could not contact core API. Custom configs may not be updated: {err}",
+                    )
+                    success = False
+                elif status == 503:
+                    retry_after = resp.headers.get("Retry-After", 1)
+                    retry_after = float(retry_after)
+                    self.__logger.warning(
+                        f"Core API is busy, waiting {retry_after} seconds before retrying ...",
+                    )
+                    sleep(retry_after)
+                else:
+                    self.__logger.info(
+                        f"Successfully sent API request to {self._api.endpoint}custom_configs",
+                    )
 
         if config_changed:
-            # Send new config to API
-            sent, err, status, resp = self._api.request(
-                "PUT",
-                f"/config?method=autoconf",
-                data=config,
-                additonal_headers={"Authorization": f"Bearer {self._api_token}"}
-                if self._api_token
-                else {},
-            )
+            status = 503
+            while status == 503:
+                # Send new config to API
+                sent, err, status, resp = self._api.request(
+                    "PUT",
+                    f"/config?method=autoconf",
+                    data=config,
+                    additonal_headers={"Authorization": f"Bearer {self._api_token}"}
+                    if self._api_token
+                    else {},
+                )
 
-            if not sent or status != 200:
-                self.__logger.warning(
-                    f"Could not contact core API. Config may not be updated: {err}",
-                )
-                success = False
-            else:
-                self.__logger.info(
-                    f"Successfully sent API request to {self._api.endpoint}config",
-                )
+                if not sent or status not in (200, 503):
+                    self.__logger.warning(
+                        f"Could not contact core API. Config may not be updated: {err}, config will not work as expected",
+                    )
+                    success = False
+                elif status == 503:
+                    retry_after = resp.headers.get("Retry-After", 1)
+                    retry_after = float(retry_after)
+                    self.__logger.warning(
+                        f"Core API is busy, waiting {retry_after} seconds before retrying ...",
+                    )
+                    sleep(retry_after)
+                else:
+                    self.__logger.info(
+                        f"Successfully sent API request to {self._api.endpoint}config",
+                    )
 
         return success

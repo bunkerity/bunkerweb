@@ -113,7 +113,7 @@ SETTINGS_PATH = Path(sep, "usr", "share", "bunkerweb", "settings.json")
 TMP_ENV_PATH = TMP_FOLDER.joinpath("core.env")
 
 # Instantiate database and api caller
-DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI, pool=False)
+DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI)
 INSTANCES_API_CALLER = ApiCaller()
 
 # Instantiate scheduler

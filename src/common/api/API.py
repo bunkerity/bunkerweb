@@ -30,7 +30,7 @@ class API:
         *,
         additonal_headers: Optional[dict] = None,
         timeout=(10, 30),
-    ) -> tuple[bool, str, Optional[int], Optional[Union[Response, dict]]]:
+    ) -> tuple[bool, str, Optional[int], Optional[Response]]:
         additonal_headers = additonal_headers or {}
         try:
             kwargs = {}
@@ -55,8 +55,5 @@ class API:
             )
         except Exception as e:
             return False, f"Request failed: {e}", None, None
-
-        if resp.headers.get("Content-Type") == "application/json":
-            return True, "ok", resp.status_code, resp.json()
 
         return True, "ok", resp.status_code, resp

@@ -1272,9 +1272,7 @@ def logs_linux():
         for line in raw_logs_access
     ]
     raw_logs = logs_error + logs_access
-    raw_logs.sort(
-        key=lambda x: float(x.split()[0]) if x.split()[0].isdigit() else 0
-    )
+    raw_logs.sort(key=lambda x: float(x.split()[0]) if x.split()[0].isdigit() else 0)
 
     logs = []
     for log in raw_logs:

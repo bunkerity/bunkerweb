@@ -94,13 +94,6 @@ signal(SIGINT, exit_handler)
 signal(SIGTERM, exit_handler)
 
 
-@asynccontextmanager
-async def lifespan(_):
-    yield  # ? lifespan of the application
-
-    stop_app(0)
-
-
 # ? APP
 app = FastAPI(
     title="BunkerWeb API",
@@ -118,7 +111,6 @@ app = FastAPI(
         "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md",
     },
     openapi_tags=tags_metadata,
-    lifespan=lifespan,
 )
 
 

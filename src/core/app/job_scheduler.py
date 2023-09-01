@@ -9,7 +9,7 @@ from os import cpu_count, getenv, sep
 from os.path import basename, dirname, join
 from pathlib import Path
 from re import IGNORECASE, compile as re_compile, match
-from time import time
+from time import sleep, time
 from typing import Any, Dict, Optional
 from subprocess import DEVNULL, STDOUT, run
 from threading import Lock, Semaphore, Thread
@@ -194,7 +194,9 @@ class JobScheduler:
             "POST",
             f"/jobs/{job_name}/status",
             data={"success": success, "start_date": start_date, "end_date": end_date},
-            additonal_headers={"Authorization": f"Bearer {self.__env.get('CORE_TOKEN')}"}
+            additonal_headers={
+                "Authorization": f"Bearer {self.__env.get('CORE_TOKEN')}"
+            }
             if "CORE_TOKEN" in self.__env
             else {},
         )
@@ -203,6 +205,17 @@ class JobScheduler:
             self.__logger.error(
                 f"Can't send API request to {self.__api.endpoint}jobs/{job_name}/run : {err}, the database will not be updated"
             )
+        elif status == 503:
+            retry_after = resp.headers.get("Retry-After", 1)
+            retry_after = float(retry_after)
+            self.__logger.warning(
+                f"Can't send API request to {self.__api.endpoint}jobs/{job_name}/run : status = {status}, resp = {resp}, retrying in {retry_after} seconds"
+            )
+            sleep(retry_after)
+            Thread(
+                target=self.__add_job_run,
+                args=(job_name, success, start_date, end_date),
+            ).start()
         elif status != 201:
             self.__logger.error(
                 f"Error while sending API request to {self.__api.endpoint}jobs/{job_name}/run : status = {status}, resp = {resp}, the database will not be updated",

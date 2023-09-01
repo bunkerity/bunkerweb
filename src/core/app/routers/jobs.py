@@ -1,4 +1,5 @@
 from datetime import datetime
+from random import uniform
 from typing import Annotated, Dict, Literal, Optional, Union
 from fastapi import APIRouter, BackgroundTasks, File, Form, status
 from fastapi.responses import JSONResponse
@@ -32,6 +33,10 @@ async def get_jobs():
             "description": "Missing start_date",
             "model": ErrorMessage,
         },
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Internal server error",
             "model": ErrorMessage,
@@ -60,13 +65,27 @@ async def add_job_run(
     if end_date:
         end_date = datetime.fromtimestamp(end_date)
 
-    err = DB.add_job_run(job_name, data.get("success", False), start_date, end_date)
+    resp = DB.add_job_run(job_name, data.get("success", False), start_date, end_date)
 
-    if err:
-        CORE_CONFIG.logger.error(f"Can't add job {job_name} run in database : {err}")
+    CORE_CONFIG.logger.warning(resp)
+
+    if "database is locked" in resp or "file is not a database" in resp:
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(
+            f"Can't add job {job_name} run in database : database is locked or had trouble handling the request, retry in {retry_in} seconds"
+        )
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={
+                "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
+            },
+            headers={"Retry-After": retry_in},
+        )
+    elif resp:
+        CORE_CONFIG.logger.error(f"Can't add job {job_name} run in database : {resp}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"message": err},
+            content={"message": resp},
         )
 
     CORE_CONFIG.logger.info(
@@ -82,7 +101,7 @@ async def add_job_run(
 @router.post(
     "/{job_name}/run",
     response_model=Dict[Literal["message"], str],
-    summary="Run a job",
+    summary="Send a task to the scheduler to run a job asynchronously",
     response_description="Job",
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -165,16 +184,12 @@ async def get_cache(
     summary="Upload a file to the cache",
     response_description="Message",
     responses={
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Internal server error",
-            "model": ErrorMessage,
-        },
-        status.HTTP_201_CREATED: {
-            "description": "File successfully uploaded to cache",
-            "model": ErrorMessage,
-        },
-        status.HTTP_200_OK: {
-            "description": "File successfully updated in cache",
             "model": ErrorMessage,
         },
     },
@@ -198,7 +213,21 @@ async def update_cache(
         checksum=checksum,
     )
 
-    if resp not in ("created", "updated"):
+    CORE_CONFIG.logger.warning(resp)
+
+    if "database is locked" in resp or "file is not a database" in resp:
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(
+            f"Can't update job {job_name} cache in database : database is locked or had trouble handling the request, retry in {retry_in} seconds"
+        )
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={
+                "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
+            },
+            headers={"Retry-After": retry_in},
+        )
+    elif resp not in ("created", "updated"):
         CORE_CONFIG.logger.error(
             f"Can't update job {job_name} cache in database : {resp}"
         )
@@ -223,6 +252,10 @@ async def update_cache(
     summary="Delete a file from the cache",
     response_description="Message",
     responses={
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Internal server error",
             "model": ErrorMessage,
@@ -234,15 +267,27 @@ async def delete_cache(job_name: str, file_name: str, data: CacheFileModel):
     Delete a file from the cache.
     """
     # TODO add a background task that sends a request to the instances to delete the cache when soft reload will be available
-    err = DB.delete_job_cache(job_name, file_name, service_id=data.service_id)
+    resp = DB.delete_job_cache(job_name, file_name, service_id=data.service_id)
 
-    if err:
+    if "database is locked" in resp or "file is not a database" in resp:
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(
+            f"Can't delete job {job_name} cache in database : database is locked or had trouble handling the request, retry in {retry_in} seconds"
+        )
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={
+                "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
+            },
+            headers={"Retry-After": retry_in},
+        )
+    elif resp:
         CORE_CONFIG.logger.error(
-            f"Can't delete job {job_name} cache in database : {err}"
+            f"Can't delete job {job_name} cache in database : {resp}"
         )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"message": err},
+            content={"message": resp},
         )
 
     CORE_CONFIG.logger.info(

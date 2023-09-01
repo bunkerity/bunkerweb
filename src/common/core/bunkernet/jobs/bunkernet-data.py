@@ -117,7 +117,9 @@ try:
             _exit(0)
 
     # Put file in cache
-    cached, err = cache_file("ip.list", content, CORE_API, CORE_TOKEN, checksum=new_hash)
+    cached, err = cache_file(
+        "ip.list", content, CORE_API, CORE_TOKEN, checksum=new_hash
+    )
     if not cached:
         LOGGER.error(f"Error while caching BunkerNet data : {err}")
         _exit(2)

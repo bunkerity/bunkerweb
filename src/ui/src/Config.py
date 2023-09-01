@@ -199,9 +199,10 @@ class Config:
         """
         services = self.get_services(methods=False)
         for i, service in enumerate(services):
-            if service["SERVER_NAME"] == variables["SERVER_NAME"] or service[
-                "SERVER_NAME"
-            ] in variables["SERVER_NAME"].split():
+            if (
+                service["SERVER_NAME"] == variables["SERVER_NAME"]
+                or service["SERVER_NAME"] in variables["SERVER_NAME"].split()
+            ):
                 if not edit:
                     return (
                         f"Service {service['SERVER_NAME'].split()[0]} already exists.",

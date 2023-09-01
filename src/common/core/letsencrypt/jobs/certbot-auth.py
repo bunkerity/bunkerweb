@@ -32,7 +32,9 @@ try:
         "POST",
         "/lets-encrypt/challenge",
         data={"token": token, "validation": validation},
-        additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"} if CORE_TOKEN else {},
+        additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"}
+        if CORE_TOKEN
+        else {},
     )
     if not sent:
         status = 1

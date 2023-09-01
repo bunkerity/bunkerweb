@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from random import uniform
 from typing import Annotated, Dict, List, Literal, Union
 from fastapi import APIRouter, BackgroundTasks, status, Path as fastapi_Path
 from fastapi.responses import JSONResponse
@@ -48,6 +49,10 @@ async def get_instances():
     summary="Upsert one or more BunkerWeb instances",
     response_description="Message",
     responses={
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Internal server error",
             "model": ErrorMessage,
@@ -67,33 +72,54 @@ async def upsert_instance(
     - **port**: The port of the instance
     - **server_name**: The server name of the instance
     """
-    decisions = {
-        "created": [],
-        "updated": [],
-    }
+    decisions = {"created": [], "updated": []}
     status_code = None
 
     if isinstance(instances, Instance):
-        error = DB.upsert_instance(**instances.model_dump(), method=method)
+        resp = DB.upsert_instance(**instances.model_dump(), method=method)
 
-        if error not in ("created", "updated"):
-            CORE_CONFIG.logger.error(f"Can't upsert instance to database : {error}")
+        if "database is locked" in resp or "file is not a database" in resp:
+            retry_in = str(uniform(1.0, 5.0))
+            CORE_CONFIG.logger.warning(
+                f"Can't upsert instance to database : {resp}, retry in {retry_in} seconds"
+            )
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={
+                    "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
+                },
+                headers={"Retry-After": retry_in},
+            )
+        elif resp not in ("created", "updated"):
+            CORE_CONFIG.logger.error(f"Can't upsert instance to database : {resp}")
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"message": error},
+                content={"message": resp},
             )
 
-        decisions[error].append(instances)
+        decisions[resp].append(instances)
     else:
-        error = DB.refresh_instances(
+        resp = DB.refresh_instances(
             [instance.model_dump() for instance in instances], method=method
         )
 
-        if error:
-            CORE_CONFIG.logger.error(f"Can't refresh instances to database : {error}")
+        if "database is locked" in resp or "file is not a database" in resp:
+            retry_in = str(uniform(1.0, 5.0))
+            CORE_CONFIG.logger.warning(
+                f"Can't upsert instances to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds"
+            )
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={
+                    "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
+                },
+                headers={"Retry-After": retry_in},
+            )
+        elif resp:
+            CORE_CONFIG.logger.error(f"Can't refresh instances to database : {resp}")
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"message": error},
+                content={"message": resp},
             )
 
         decisions["created"] = instances
@@ -139,7 +165,7 @@ async def upsert_instance(
         status.HTTP_404_NOT_FOUND: {
             "description": "Instance not found",
             "model": ErrorMessage,
-        }
+        },
     },
 )
 async def get_instance(
@@ -179,6 +205,10 @@ async def get_instance(
             "description": "Instance not found",
             "model": ErrorMessage,
         },
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Internal server error",
             "model": ErrorMessage,
@@ -189,19 +219,31 @@ async def delete_instance(instance_hostname: str) -> JSONResponse:
     """
     Delete a BunkerWeb instance
     """
-    error = DB.remove_instance(instance_hostname)
+    resp = DB.remove_instance(instance_hostname)
 
-    if error == "not_found":
+    if resp == "not_found":
         message = f"Instance {instance_hostname} not found"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
         )
-    elif error:
-        CORE_CONFIG.logger.error(f"Can't remove instance to database : {error}")
+    elif "database is locked" in resp or "file is not a database" in resp:
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(
+            f"Can't remove instance to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds"
+        )
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={
+                "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
+            },
+            headers={"Retry-After": retry_in},
+        )
+    elif resp:
+        CORE_CONFIG.logger.error(f"Can't remove instance to database : {resp}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"message": error},
+            content={"message": resp},
         )
 
     CORE_CONFIG.logger.info(
@@ -227,7 +269,7 @@ async def delete_instance(instance_hostname: str) -> JSONResponse:
             "description": "Internal server error",
             "model": ErrorMessage,
         },
-        status.HTTP_400_BAD_REQUEST: {
+        status.HTTP_400_BAD_REQUEST: {  # ? BunkerWeb instances sometimes may return 400
             "description": "Invalid action",
             "model": ErrorMessage,
         },
