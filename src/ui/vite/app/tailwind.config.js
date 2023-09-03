@@ -1,8 +1,10 @@
+const plugin = require("tailwindcss/plugin");
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/pages/**/*.{js,vue,ts,jsx,tsx,mdx, html}",
+    "./src/components/**/*.{js,vue,ts,jsx,tsx,mdx}",
   ],
   important: true,
   darkMode: "class",
