@@ -3,18 +3,26 @@ import Dashboard from "@layouts/Dashboard.vue";
 import ApiState from "@components/Api/State.vue";
 import HomeCardStructure from "@components/Home/Card/Structure.vue";
 import HomeCardSvgVersion from "@components/Home/Card/Svg/Version.vue";
+import { reactive, computed, onMounted } from "vue";
 import { useFeedbackStore } from "@store/global.js";
-import { reactive, computed } from "vue";
-import { fetchAPI } from "@utils/api.js";
 
 const feedbackStore = useFeedbackStore();
 
 const instances = reactive({
-  isFetch: false,
   isPend: false,
   isErr: false,
-  data: {},
-  count: computed(() => 1),
+  data: [],
+  count: computed(() => instances.data.length),
+});
+
+onMounted(async () => {
+  await fetchAPI(
+    "api/instances",
+    "GET",
+    null,
+    instances.isPend,
+    instances.isErr
+  );
 });
 </script>
 

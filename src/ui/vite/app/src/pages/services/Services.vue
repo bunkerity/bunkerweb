@@ -6,6 +6,10 @@ import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import TableStructure from "@components/Table/Structure.vue";
+import { fetchAPI } from "@utils/api.js";
+import { useFeedbackStore } from "@store/global.js";
+
+const feedbackStore = useFeedbackStore();
 </script>
 
 <template>

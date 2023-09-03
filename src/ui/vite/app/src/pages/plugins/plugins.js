@@ -1,5 +1,6 @@
 import { createApp } from "vue";
-import "./style.css";
 import Plugins from "./Plugins.vue";
+import { createPinia } from "pinia";
+const pinia = createPinia();
 
-createApp(Plugins).mount("#app");
+createApp(Plugins).use(pinia).mount("#app");

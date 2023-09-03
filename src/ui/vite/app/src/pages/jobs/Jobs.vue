@@ -8,39 +8,17 @@ import SettingsSelect from "@components/Settings/Select.vue";
 import JobsStructure from "@components/Jobs/Structure.vue";
 import JobsHeader from "@components/Jobs/Header.vue";
 import JobsContent from "@components/Jobs/Content.vue";
+import { fetchAPI } from "@utils/api.js";
+import { useFeedbackStore } from "@store/global.js";
+import { reactive, computed, onMounted } from "vue";
+import {
+  getJobsReloadNum,
+  getJobsSuccessNum,
+  getJobsByFilter,
+  getJobsIntervalList,
+} from "@utils/jobs.js";
 
-const {
-  data: jobsList,
-  pending: jobsPen,
-  error: jobsErr,
-  refresh: jobsRefresh,
-} = await useFetch("/api/jobs", {
-  method: "GET",
-});
-
-// Hide / Show settings and plugin base on that filters
-const filters = reactive({
-  name: "",
-  reload: "all",
-  success: "all",
-  every: "all",
-});
-
-// Plugins data to render components
-const jobs = reactive({
-  // Never modify this unless refetch
-  base: jobsList.value,
-  total: jobsList.value.length,
-  reload: getJobsReloadNum(jobsList.value),
-  success: getJobsSuccessNum(jobsList.value),
-  // This run every time reactive data changed (plugin.base or filters)
-  setup: computed(() => {
-    // Filter data to display
-    const cloneBase = JSON.parse(JSON.stringify(jobs.base));
-    const filter = getJobsByFilter(cloneBase, filters);
-    return filter;
-  }),
-});
+const feedbackStore = useFeedbackStore();
 
 const positions = [
   "col-span-2",
@@ -64,31 +42,68 @@ const header = [
   "Run",
 ];
 
-async function downloadFile(data) {
-  const {
-    data: file,
-    pending: filePend,
-    error: fileErr,
-    refresh: fileRef,
-  } = await useFetch(
-    `/api/cache?job-name=${data["job-name"]}&file-name=${data["file-name"]}`,
-    {
-      method: "GET",
-    }
+// Hide / Show settings and plugin base on that filters
+const filters = reactive({
+  name: "",
+  reload: "all",
+  success: "all",
+  every: "all",
+});
+
+// Plugins data to render components
+const jobs = reactive({
+  isPend: false,
+  isErr: false,
+  // Never modify this unless refetch
+  base: [],
+  total: computed(() => jobs.base.length),
+  reload: computed(() => getJobsReloadNum(jobs.base)),
+  success: computed(() => getJobsSuccessNum(jobs.base)),
+  // This run every time reactive data changed (plugin.base or filters)
+  setup: computed(() => {
+    // Filter data to display
+    const cloneBase = JSON.parse(JSON.stringify(jobs.base));
+    const filter = getJobsByFilter(cloneBase, filters);
+    return filter;
+  }),
+});
+
+async function getJobs() {
+  await fetchAPI("api/jobs", "GET", null, jobs.isPend, jobs.isErr);
+}
+
+const run = reactive({
+  isPend: false,
+  isErr: false,
+});
+
+async function runJob(data) {
+  await fetchAPI(
+    "/api/jobs-run",
+    "GET",
+    JSON.stringify(data),
+    run.isPend,
+    run.isErr
   );
 }
 
-async function runJob(data) {
-  const {
-    data: file,
-    pending: filePend,
-    error: fileErr,
-    refresh: fileRef,
-  } = await useFetch(`/api/jobs-run`, {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+const download = reactive({
+  isPend: false,
+  isErr: false,
+});
+
+async function downloadFile(data) {
+  await fetchAPI(
+    `/api/cache?job-name=${data["job-name"]}&file-name=${data["file-name"]}`,
+    "GET",
+    download.isPend,
+    download.isErr
+  );
 }
+
+onMounted(async () => {
+  await getJobs();
+});
 </script>
 
 <template>
@@ -162,7 +177,7 @@ async function runJob(data) {
           :settings="{
             id: 'every',
             value: 'all',
-            values: useIntervalList(),
+            values: getJobsIntervalList(),
           }"
         />
       </SettingsLayout>

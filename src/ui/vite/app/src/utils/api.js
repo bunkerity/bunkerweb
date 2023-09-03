@@ -10,9 +10,11 @@ export async function setResponse(type, status, message, data) {
 }
 
 // Fetch api
-export async function fetchAPI(api, method, body, resSuccess, resErr) {
-  const options = {
-    baseURL: "http://localhost:1337",
+export async function fetchAPI(api, method, body = false, pendState, errState) {
+  const baseURL = "http://localhost:1337";
+  pendState = true;
+
+  return await fetch(`${baseURL}${api}`, {
     method: method.toUpperCase(),
     Headers: {
       Authorization: `Bearer ${""}`,
@@ -20,9 +22,11 @@ export async function fetchAPI(api, method, body, resSuccess, resErr) {
     // Only when exist and possible
     ...(body &&
       method.toUpperCase() !== "GET" && { body: JSON.stringify(body) }),
-  };
-  return await fetch(api, options)
+  })
     .then((data) => {
+      pendState = false;
+      errState = false;
+
       // Set info
       const type = resSuccess["type"] || "success";
       const status = resSuccess["status"] || 200;
@@ -37,12 +41,14 @@ export async function fetchAPI(api, method, body, resSuccess, resErr) {
       return setResponse(type, status, message, dataRes);
     })
     .catch((err) => {
+      pendState = false;
+      errState = true;
       // Set custom error data before throwing err
       return setResponse(
-        resErr["type"] || "error",
-        err.status || resErr["status"] || 500,
-        err.data["message"] || resErr["message"] || `Internal Server Error`,
-        resErr["data"] || {}
+        "error",
+        err.status || 500,
+        err.data?.message || `Internal Server Error`,
+        {}
       );
     });
 }

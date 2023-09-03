@@ -2,36 +2,11 @@
 import Dashboard from "@layouts/Dashboard.vue";
 import InstanceCard from "@components/Instance/Card.vue";
 import InstanceModalDelete from "@components/Instance/Modal/Delete.vue";
+import { reactive, computed, onMounted } from "vue";
+import { fetchAPI } from "@utils/api.js";
+import { useFeedbackStore } from "@store/global.js";
 
-const {
-  data: instList,
-  pending: instPend,
-  error: instErr,
-} = await useFetch("/api/instances", {
-  method: "GET",
-});
-
-async function updateInstance(data) {
-  const {
-    data: instAction,
-    pending: instActionPend,
-    error: instActionErr,
-  } = await useFetch(`/api/instances-action`, {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-}
-
-async function deleteInstance(data) {
-  const {
-    data: instAction,
-    pending: instActionPend,
-    error: instActionErr,
-  } = await useFetch(`/api/instances`, {
-    method: "DELETE",
-    body: JSON.stringify(data),
-  });
-}
+const feedbackStore = useFeedbackStore();
 
 const modal = reactive({
   isOpen: false,
@@ -42,12 +17,54 @@ function openDelModal(hostname) {
   modal.hostname = hostname;
   modal.isOpen = true;
 }
+
+const instances = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+  count: computed(() => 1),
+});
+
+async function getInstances() {
+  await fetchAPI(
+    "api/instances",
+    "GET",
+    null,
+    instances.isPend,
+    instances.isErr
+  );
+}
+
+async function updateInstance(data) {
+  await fetchAPI(
+    "/api/instances-action",
+    "POST",
+    JSON.stringify(data),
+    instances.isPend,
+    instances.isErr
+  );
+}
+
+async function deleteInstance(data) {
+  await fetchAPI(
+    "api/instances",
+    "DELETE",
+    JSON.stringify(data),
+    instances.isPend,
+    instances.isErr
+  );
+  getInstances();
+}
+
+onMounted(async () => {
+  getInstances();
+});
 </script>
 
 <template>
   <Dashboard>
     <InstanceCard
-      v-for="instance in instList"
+      v-for="instance in instances.data"
       :id="instance.server_name"
       :serverName="instance.server_name"
       :hostname="instance.hostname"

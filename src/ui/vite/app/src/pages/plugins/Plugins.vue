@@ -7,14 +7,12 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import SettingsUploadStructure from "@components/Settings/Upload/Structure.vue";
 import PluginList from "@components/Plugin/List.vue";
+import { reactive, computed, onMounted } from "vue";
+import { fetchAPI } from "@utils/api.js";
+import { useFeedbackStore } from "@store/global.js";
+import { getPluginsByFilter } from "@utils/plugins.js";
 
-const {
-  data: pluginList,
-  pending: pluginPend,
-  error: pluginErr,
-} = await useFetch("/api/global-config", {
-  method: "GET",
-});
+const feedbackStore = useFeedbackStore();
 
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
@@ -24,12 +22,17 @@ const filters = reactive({
 
 // Plugins data to render components
 const plugins = reactive({
+  isPend: false,
+  isErr: false,
   // Never modify this unless refetch
-  base: pluginList.value,
-  total: pluginList.value.length,
-  internal: pluginList.value.filter((item) => item["external"] === false)
-    .length,
-  external: pluginList.value.filter((item) => item["external"] === true).length,
+  base: [],
+  total: computed(() => plugins.base.length),
+  internal: computed(
+    () => plugins.base.filter((item) => item["external"] === false).length
+  ),
+  external: computed(
+    () => plugins.base.filter((item) => item["external"] === true).length
+  ),
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
     // Filter data to display
@@ -37,6 +40,20 @@ const plugins = reactive({
     const filter = getPluginsByFilter(cloneBase, filters);
     return filter;
   }),
+});
+
+async function getPlugins() {
+  await fetchAPI(
+    "/api/global-config",
+    "GET",
+    null,
+    plugins.isPend,
+    plugins.isErr
+  );
+}
+
+onMounted(async () => {
+  await getPlugins();
 });
 </script>
 
@@ -91,7 +108,7 @@ const plugins = reactive({
       </SettingsLayout>
     </CardBase>
     <CardBase
-      v-if="!pluginPend && !pluginErr"
+      v-if="!plugins.isPend && !plugins.isErr"
       class="h-fit col-span-12"
       label="plugin list"
     >
