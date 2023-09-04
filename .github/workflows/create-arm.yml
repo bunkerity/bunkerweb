@@ -34,7 +34,7 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Create ARM VM
         id: scw
         uses: scaleway/action-scw@bbcfd65cd2af73456ce439088e0d42c1657c4c38
