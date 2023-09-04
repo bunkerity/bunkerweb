@@ -37,7 +37,7 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Replace VERSION
         if: inputs.RELEASE == 'testing'
         run: ./misc/update-version.sh testing

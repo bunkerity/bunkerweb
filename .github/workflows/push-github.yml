@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # Get PDF doc
       - name: Get documentation
         if: inputs.VERSION != 'testing'
