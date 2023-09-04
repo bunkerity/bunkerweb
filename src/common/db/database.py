@@ -209,6 +209,11 @@ class Database:
         self.__sql_session = scoped_session(session_factory)
         self.suffix_rx = re_compile(r"_\d+$")
 
+        if match.group("database").startswith("sqlite"):
+            with self.__db_session() as session:
+                session.execute(text("PRAGMA journal_mode=WAL"))
+                session.commit()
+
     def __del__(self) -> None:
         """Close the database"""
         if self.__sql_session:
@@ -230,6 +235,7 @@ class Database:
         try:
             yield session
         except BaseException:
+            session.rollback()
             self.__exceptions[getpid()] = [format_exc()]
             raise
         finally:
