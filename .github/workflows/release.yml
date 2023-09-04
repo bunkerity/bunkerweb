@@ -177,7 +177,7 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el]
+        linux: [ubuntu, debian, fedora, rhel]
         arch: [amd64, arm64]
         include:
           - release: latest
