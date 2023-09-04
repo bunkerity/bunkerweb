@@ -166,6 +166,11 @@ class Database:
             bind=self.__sql_engine, autoflush=False, expire_on_commit=False
         )
         self.suffix_rx = re_compile(r"_\d+$")
+        
+        if sqlalchemy_string.startswith("sqlite"):
+            with self.__db_session() as session:
+                session.execute(text("PRAGMA journal_mode=WAL"))
+                session.commit()
 
     def __del__(self) -> None:
         """Close the database"""
