@@ -127,7 +127,7 @@ Here is some examples of possible values for `CORS_ALLOW_ORIGIN` setting :
 
 ## HTTPS / SSL/TLS
 
-Besides the HTTPS configuration, the following settings related to HTTPS can be set :
+Besides the HTTPS / SSL/TLS configuration, the following settings related to HTTPS / SSL/TLS can be set :
 
 |            Setting            |      Default      | Description                                                                                                  |
 | :---------------------------: | :---------------: | :----------------------------------------------------------------------------------------------------------- |
@@ -141,13 +141,13 @@ Besides the HTTPS configuration, the following settings related to HTTPS can be 
 
 STREAM support :white_check_mark:
 
-BunkerWeb comes with automatic Let's Encrypt certificate generation and renewal. This is the easiest way of getting HTTPS working out of the box for public-facing web applications. Please note that you will need to set up proper DNS A record(s) for each of your domains pointing to your public IP(s) where BunkerWeb is accessible.
+BunkerWeb comes with automatic Let's Encrypt certificate generation and renewal. This is the easiest way of getting HTTPS / SSL/TLS working out of the box for public-facing web applications. Please note that you will need to set up proper DNS A record(s) for each of your domains pointing to your public IP(s) where BunkerWeb is accessible.
 
 Here is the list of related settings :
 
 |          Setting           |         Default          | Description                                                                                                                                                        |
 | :------------------------: | :----------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|    `AUTO_LETS_ENCRYPT`     |           `no`           | When set to `yes`, HTTPS will be enabled with automatic certificate generation and renewal from Let's Encrypt.                                                     |
+|    `AUTO_LETS_ENCRYPT`     |           `no`           | When set to `yes`, HTTPS / SSL/TLS will be enabled with automatic certificate generation and renewal from Let's Encrypt.                                                     |
 |    `EMAIL_LETS_ENCRYPT`    | `contact@{FIRST_SERVER}` | Email to use when generating certificates. Let's Encrypt will send notifications to that email like certificate expiration.                                        |
 | `USE_LETS_ENCRYPT_STAGING` |           `no`           | When set to `yes`, the staging server of Let's Encrypt will be used instead of the production one. Useful when doing tests to avoid being "blocked" due to limits. |
 
@@ -161,7 +161,7 @@ If you want to use your own certificates, here is the list of related settings :
 
 |     Setting     |Default| Context |Multiple|                                  Description                                   |
 |-----------------|-------|---------|--------|--------------------------------------------------------------------------------|
-|`USE_CUSTOM_SSL` |`no`   |multisite|no      |Use custom HTTPS certificate.                                                   |
+|`USE_CUSTOM_SSL` |`no`   |multisite|no      |Use custom HTTPS / SSL/TLS certificate.                                                   |
 |`CUSTOM_SSL_CERT`|       |multisite|no      |Full path of the certificate or bundle file (must be readable by the scheduler).|
 |`CUSTOM_SSL_KEY` |       |multisite|no      |Full path of the key file (must be readable by the scheduler).                  |
 
@@ -174,11 +174,11 @@ When using stream mode, you will need to use the `LISTEN_STREAM_PORT_SSL` settin
 
 STREAM support :white_check_mark:
 
-If you want to quickly test HTTPS for staging/dev environment you can configure BunkerWeb to generate self-signed certificates, here is the list of related settings :
+If you want to quickly test HTTPS / SSL/TLS for staging/dev environment you can configure BunkerWeb to generate self-signed certificates, here is the list of related settings :
 
 |          Setting           |        Default         | Description                                                                                                                |
 | :------------------------: | :--------------------: | :------------------------------------------------------------------------------------------------------------------------- |
-| `GENERATE_SELF_SIGNED_SSL` |          `no`          | When set to `yes`, HTTPS will be enabled with automatic self-signed certificate generation and renewal from Let's Encrypt. |
+| `GENERATE_SELF_SIGNED_SSL` |          `no`          | When set to `yes`, HTTPS / SSL/TLS will be enabled with automatic self-signed certificate generation and renewal from Let's Encrypt. |
 |  `SELF_SIGNED_SSL_EXPIRY`  |         `365`          | Number of days for the certificate expiration (**-days** value used with **openssl**).                                     |
 |   `SELF_SIGNED_SSL_SUBJ`   | `/CN=www.example.com/` | Certificate subject to use (**-subj** value used with **openssl**).                                                        |
 
