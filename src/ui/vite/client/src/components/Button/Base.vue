@@ -6,7 +6,7 @@ const props = defineProps({
   color: {
     type: String,
   },
-  // sm ||normal || lg || xl
+  // sm || normal || lg || xl
   size: {
     type: String,
   },

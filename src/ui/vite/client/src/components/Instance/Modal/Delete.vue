@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps, defineEmits } from "vue";
-
+import ButtonBase from "@components/Button/Base.vue";
 // Open after instance delete action is fired
 const props = defineProps({
   // File or folder
@@ -36,24 +36,28 @@ const emits = defineEmits(["close", "delete"]);
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
           <div class="mt-2 w-full justify-end flex">
-            <button
+            <ButtonBase
+              color="close"
+              size="lg"
               @click="$emit('close')"
               type="button"
-              class="close-btn text-xs"
+              class="text-xs"
             >
               Close
-            </button>
-            <button
+            </ButtonBase>
+            <ButtonBase
+              color="delete"
+              size="lg"
               @click="
                 () => {
                   $emit('close');
                   $emit('delete', { hostname: props.hostname });
                 }
               "
-              class="delete-btn text-xs ml-2"
+              class="text-xs ml-2"
             >
               DELETE
-            </button>
+            </ButtonBase>
           </div>
         </form>
       </div>

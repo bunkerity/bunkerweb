@@ -22,27 +22,28 @@ const instances = reactive({
   isPend: false,
   isErr: false,
   data: [],
-  count: computed(() => 1),
+  count: computed(() => instances.data.length),
 });
 
 async function getInstances() {
   await fetchAPI(
-    "api/instances",
+    "/api/instances",
     "GET",
     null,
-    instances.isPend,
-    instances.isErr
+    instances,
+    feedbackStore.addFeedback
   );
 }
 
 async function updateInstance(data) {
   await fetchAPI(
-    "/api/instances-action",
+    "/api/instances",
     "POST",
     JSON.stringify(data),
-    instances.isPend,
-    instances.isErr
+    instances,
+    feedbackStore.addFeedback
   );
+  await getInstances();
 }
 
 async function deleteInstance(data) {
@@ -50,14 +51,14 @@ async function deleteInstance(data) {
     "api/instances",
     "DELETE",
     JSON.stringify(data),
-    instances.isPend,
-    instances.isErr
+    instances,
+    feedbackStore.addFeedback
   );
-  getInstances();
+  await getInstances();
 }
 
 onMounted(async () => {
-  getInstances();
+  await getInstances();
 });
 </script>
 

@@ -8,7 +8,7 @@ from config import API_URL
 from utils import set_res_from_req
 from models import Plugin, AddedPlugin, ResponseModel
 
-router = APIRouter(prefix="/plugins", tags=["plugins"])
+router = APIRouter(prefix="/api/plugins", tags=["plugins"])
 
 
 @router.get(

@@ -5,7 +5,10 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi import FastAPI
 import requests
 from utils import set_res_from_req
-from config import API_URL, app_name, description, summary, version, contact, license_info, openapi_tags
+from config import dev_mode, API_URL, app_name, description, summary, version, contact, license_info, openapi_tags
+
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(
     title=app_name,
@@ -16,6 +19,21 @@ app = FastAPI(
     license_info=license_info,
     openapi_tags=openapi_tags
 )
+
+if dev_mode :
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    @app.get("/test")
+    async def test():
+        return {"test": "test"}
+
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request, exc):

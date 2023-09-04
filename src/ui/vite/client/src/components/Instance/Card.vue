@@ -58,7 +58,7 @@ const emits = defineEmits(["action", "delete"]);
             class="h-4 w-4 rounded-full"
           ></div>
           <h5 class="card-instance-title">
-            {{ props.serverName + "fesfesfesfesfesfefesfesfes" }}
+            {{ props.serverName }}
           </h5>
         </div>
         <div class="col-span-2 flex justify-end">

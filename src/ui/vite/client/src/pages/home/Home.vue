@@ -4,6 +4,7 @@ import ApiState from "@components/Api/State.vue";
 import HomeCardStructure from "@components/Home/Card/Structure.vue";
 import HomeCardSvgVersion from "@components/Home/Card/Svg/Version.vue";
 import { reactive, computed, onMounted } from "vue";
+import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 
 const feedbackStore = useFeedbackStore();
@@ -13,16 +14,26 @@ const instances = reactive({
   isErr: false,
   data: [],
   count: computed(() => instances.data.length),
+  up: computed(() =>
+    instances.data.filter((item) => item.status === "up").length.toString()
+  ),
+  down: computed(() =>
+    instances.data.filter((item) => item.status !== "up").length.toString()
+  ),
 });
 
-onMounted(async () => {
+async function getInstances() {
   await fetchAPI(
-    "api/instances",
+    "/api/instances",
     "GET",
     null,
-    instances.isPend,
-    instances.isErr
+    instances,
+    feedbackStore.addFeedback
   );
+}
+
+onMounted(async () => {
+  await getInstances();
 });
 </script>
 
@@ -41,16 +52,16 @@ onMounted(async () => {
       :count="instances.count"
       :detailArr="[
         {
-          text: 'error',
-          num: '0',
-          textClass: 'text-red-500',
-          numClass: 'text-red-500',
-        },
-        {
-          text: 'working',
-          num: '3',
+          text: 'up',
+          num: instances.up,
           textClass: 'text-green-500',
           numClass: 'text-green-500',
+        },
+        {
+          text: 'stop',
+          num: instances.down,
+          textClass: 'text-red-500',
+          numClass: 'text-red-500',
         },
       ]"
     >

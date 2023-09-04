@@ -11,7 +11,7 @@ const props = defineProps({
     required: true,
   },
   status: {
-    type: Number,
+    type: [Number, String],
     required: true,
   },
   message: {

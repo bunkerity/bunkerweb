@@ -8,7 +8,7 @@ from config import API_URL
 from utils import set_res_from_req
 from models import Instance, ResponseModel
 
-router = APIRouter(prefix="/instances", tags=["instances"])
+router = APIRouter(prefix="/api/instances", tags=["instances"])
 
 
 @router.get(

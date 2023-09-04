@@ -8,7 +8,7 @@ from config import API_URL
 from utils import set_res_from_req
 from models import Plugin, ResponseModel
 
-router = APIRouter(prefix="/config", tags=["config"])
+router = APIRouter(prefix="/api/config", tags=["config"])
 
 
 @router.get(
