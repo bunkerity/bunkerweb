@@ -200,7 +200,7 @@ jobs:
     needs: [staging-tests, tests-ui, tests-core]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el]
+        linux: [ubuntu, debian, fedora, rhel]
         arch: [amd64]
         include:
           - release: testing
