@@ -1,78 +1,33 @@
 from typing import Union
-
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import PlainTextResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi import FastAPI
 import requests
 from utils import set_res_from_req
-from config import API_URL
+from config import API_URL, app_name, description, summary, version, contact, license_info, openapi_tags
 
 app = FastAPI(
-    title="BunkerWeb UI API",
-    description="""# BunkerWeb Internal API Documentation
-
-The BunkerWeb Internal API is designed to manage BunkerWeb's instances, communicate with a Database, and interact with various BunkerWeb services, including the scheduler, autoconf, and Web UI. This API provides the necessary endpoints for performing operations related to instance management, database communication, and service interaction.
-
-## Authentication
-
-If the API is configured to check the authentication token, the token must be provided in the request header. Each request should include an authentication token in the request header. The token can be set in the configuration file or as an environment variable (`CORE_TOKEN`).
-
-Example:
-
-```
-Authorization: Bearer YOUR_AUTH_TOKEN
-```
-
-## Whitelist
-
-If the API is configured to check the whitelist, the IP address of the client must be in the whitelist. The whitelist can be set in the configuration file or as an environment variable (`API_WHITELIST`). The whitelist can contain IP addresses and/or IP networks.
-""",
-    summary="The API used for UI to communicate with core API",
-    version="1",
-    contact={
-        "name": "BunkerWeb Team",
-        "url": "https://bunkerweb.io",
-        "email": "contact@bunkerity.com",
-    },
-    license_info={
-        "name": "GNU Affero General Public License v3.0",
-        "identifier": "AGPL-3.0",
-        "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md",
-    },
-    openapi_tags= [  # TODO: Add more tags and better descriptions: https://fastapi.tiangolo.com/tutorial/metadata/?h=swagger#metadata-for-tags
-    {
-        "name": "misc",
-        "description": "Miscellaneous operations",
-    },
-    {
-        "name": "instances",
-        "description": "Operations related to instance management",
-    },
-    {
-        "name": "plugins",
-        "description": "Operations related to plugin management",
-    },
-    {
-        "name": "config",
-        "description": "Operations related to configuration management",
-    },
-    {
-        "name": "custom_configs",
-        "description": "Operations related to custom configuration management",
-    },
-    {
-        "name": "jobs",
-        "description": "Operations related to job management",
-    },
-],
+    title=app_name,
+    description=description,
+    summary=summary,
+    version=version,
+    contact=contact,
+    license_info=license_info,
+    openapi_tags=openapi_tags
 )
 
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request, exc):
+    print(request, exc)
+    return PlainTextResponse(str({"type" : "error", "status" : exc.status_code, "message": exc.detail, "data" : {}}), status_code=exc.status_code)
 
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return PlainTextResponse(str({"type" : "error", "status" : 400, "message": "Invalid data send on request", "data" : {}}), status_code=400)
 
 from routers import instances, plugins, config
-
 
 app.include_router(instances.router)
 app.include_router(plugins.router)
