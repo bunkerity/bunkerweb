@@ -1,6 +1,10 @@
 <script setup>
 import ButtonBase from "@components/Button/Base.vue";
-import { reactive, defineProps, defineEmits } from "vue";
+import { reactive, defineProps, defineEmits, markRaw } from "vue";
+import InstanceSvgBans from "@components/Instance/Svg/Bans.vue";
+import InstanceSvgPing from "@components/Instance/Svg/Ping.vue";
+import InstanceSvgStop from "@components/Instance/Svg/Stop.vue";
+import InstanceSvgDelete from "@components/Instance/Svg/Delete.vue";
 
 const props = defineProps({
   id: {
@@ -23,12 +27,8 @@ const props = defineProps({
     type: Number,
     required: true,
   },
-  type: {
+  status: {
     type: String,
-    required: true,
-  },
-  health: {
-    type: Boolean,
     required: true,
   },
 });
@@ -40,6 +40,40 @@ const instance = reactive({
     { label: "method", text: props.method },
     { label: "port", text: props.port },
   ],
+  actions:
+    props.status === "up"
+      ? [
+          { name: "stop", color: "delete" },
+          { name: "reload", color: "edit" },
+          { name: "restart", color: "valid" },
+        ]
+      : [
+          { name: "reload", color: "edit" },
+          { name: "restart", color: "valid" },
+        ],
+  checks: [
+    {
+      name: "delete",
+      class: "bg-red-500",
+      svg: markRaw(InstanceSvgDelete),
+      popup: false,
+      emit: "delete",
+    },
+    {
+      name: "bans",
+      class: "bg-amber-500",
+      svg: markRaw(InstanceSvgBans),
+      popup: false,
+      emit: "action",
+    },
+    {
+      name: "ping",
+      class: "bg-sky-500",
+      svg: markRaw(InstanceSvgPing),
+      popup: false,
+      emit: "action",
+    },
+  ],
 });
 
 // action => return action to execute with instance name
@@ -49,39 +83,47 @@ const emits = defineEmits(["action", "delete"]);
 
 <template>
   <div class="card-instance-container h-max">
-    <form @submit.prevent class="w-full" method="POST">
+    <form @submit.prevent class="w-full relative" method="POST">
       <input type="hidden" name="csrf_token" :value="props.csrfToken" />
       <div class="grid grid-cols-12 items-center">
         <div class="col-span-10 flex items-center">
           <div
-            :class="[props.health ? 'bg-green-500' : 'bg-red-500']"
+            :class="[props.status === 'up' ? 'bg-green-500' : 'bg-red-500']"
             class="h-4 w-4 rounded-full"
           ></div>
           <h5 class="card-instance-title">
             {{ props.serverName }}
           </h5>
         </div>
-        <div class="col-span-2 flex justify-end">
-          <button
-            @click="$emit('delete', props.hostname)"
-            class="hover:brightness-95 dark:hover:brightness-90 ml-2 rounded-full p-1 bg-red-500 scale-90"
+      </div>
+      <div class="absolute flex flex-col justify-end items-end right-0 top-0">
+        <button
+          v-for="action in instance.checks"
+          :color="action.color"
+          @click="
+            $emit(
+              action.emit,
+              action.emit === 'action'
+                ? {
+                    hostname: props.hostname,
+                    operation: action.name,
+                  }
+                : props.hostname
+            )
+          "
+          @pointerover="action.popup = true"
+          @pointerleave="action.popup = false"
+          :class="[action.popup ? 'pl-2 p-1' : 'w-10 p-1', `${action.class}`]"
+          class="h-10 hover:brightness-95 dark:hover:brightness-90 ml-2 my-1 rounded-full p-1 scale-90"
+        >
+          <component :is="action.svg"></component>
+          <span
+            class="text-normal font-normal mx-1 mr-2 text-white whitespace-nowrap"
+            v-show="action.popup"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="pointer-events-none w-6 h-6 stroke-white fill-red-500"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-              />
-            </svg>
-          </button>
-        </div>
+            {{ action.name }}
+          </span>
+        </button>
       </div>
       <div class="card-instance-info-container">
         <div v-for="item in instance.info" class="card-instance-info-item">
@@ -91,35 +133,18 @@ const emits = defineEmits(["action", "delete"]);
       </div>
       <div class="card-instance-actions-container">
         <ButtonBase
-          color="edit"
-          size="xl"
-          class="text-xs mx-1"
+          v-for="action in instance.actions"
+          :color="action.color"
           @click="
             $emit('action', {
               hostname: props.hostname,
-              operation: props.type === 'local' ? 'restart' : 'reload',
+              operation: action.name,
             })
           "
-          v-if="props.health"
-          name="operation"
-          :value="props.type === 'local' ? 'restart' : 'reload'"
+          size="normal"
+          class="text-sm mx-1 my-1 w-full xs:w-fit max-w-[200px]"
         >
-          {{ props.type === "local" ? "restart" : "reload" }}
-        </ButtonBase>
-        <ButtonBase
-          :color="props.health ? 'delete' : 'valid'"
-          size="xl"
-          class="text-xs mx-1"
-          @click="
-            $emit('action', {
-              hostname: props.hostname,
-              operation: props.health ? 'stop' : 'start',
-            })
-          "
-          name="operation"
-          :value="props.health ? 'stop' : 'start'"
-        >
-          {{ props.health ? "stop" : "start" }}
+          {{ action.name }}
         </ButtonBase>
       </div>
     </form>

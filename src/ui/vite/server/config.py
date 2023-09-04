@@ -25,12 +25,14 @@ contact = {
         "name": "BunkerWeb Team",
         "url": "https://bunkerweb.io",
         "email": "contact@bunkerity.com",
-    },
+    }
+
 license_info = {
         "name": "GNU Affero General Public License v3.0",
         "identifier": "AGPL-3.0",
         "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md",
-    },
+    }
+
 openapi_tags  =  [  # TODO: Add more tags and better descriptions: https://fastapi.tiangolo.com/tutorial/metadata/?h=swagger#metadata-for-tags
     {
         "name": "misc",
@@ -56,4 +58,4 @@ openapi_tags  =  [  # TODO: Add more tags and better descriptions: https://fasta
         "name": "jobs",
         "description": "Operations related to job management",
     },
-],
+]

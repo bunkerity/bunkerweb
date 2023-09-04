@@ -37,9 +37,9 @@ async function getInstances() {
 
 async function updateInstance(data) {
   await fetchAPI(
-    "/api/instances",
+    `/api/${data.hostname}/${data.operation}`,
     "POST",
-    JSON.stringify(data),
+    null,
     instances,
     feedbackStore.addFeedback
   );
@@ -71,9 +71,7 @@ onMounted(async () => {
       :hostname="instance.hostname"
       :port="instance.port"
       :method="instance.method"
-      _type="unknown"
-      :health="true"
-      csrfToken="random"
+      :status="instance.status"
       @action="(v) => updateInstance(v)"
       @delete="(hostname) => openDelModal(hostname)"
     />

@@ -37,7 +37,6 @@ if dev_mode :
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request, exc):
-    print(request, exc)
     return PlainTextResponse(str({"type" : "error", "status" : exc.status_code, "message": exc.detail, "data" : {}}), status_code=exc.status_code)
 
 

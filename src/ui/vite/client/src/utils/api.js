@@ -46,7 +46,11 @@ export async function fetchAPI(
       state.isErr = true;
       state.data = {};
       addFeedback
-        ? addFeedback(err["type"], err["status"], err["message"])
+        ? addFeedback(
+            err["type"] || "error",
+            err["status"] || 500,
+            err["message"] || "Internal Server Error"
+          )
         : false;
       // Set custom error data before throwing err
       return err;

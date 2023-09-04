@@ -461,7 +461,7 @@ body {
 /* CARD INSTANCE COMPONENT */
 
 .card-instance-container {
-  @apply overflow-hidden hover:translate-y-1 transition col-span-12 lg:col-span-5 2xl:col-span-4 3xl:col-span-3 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:brightness-110 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply overflow-hidden hover:translate-y-1 transition col-span-12 md:col-span-6 3xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:brightness-110 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .card-instance-title {
@@ -473,7 +473,7 @@ body {
 }
 
 .card-instance-info-item {
-  @apply flex flex-row items-center col-span-1 py-1 sm:py-0;
+  @apply flex flex-col xs:flex-row items-start xs:items-center col-span-1 py-1 xs:py-0 mr-12 xs:mr-8 ml-1;
 }
 
 .card-instance-info-item-title {
@@ -481,11 +481,11 @@ body {
 }
 
 .card-instance-info-item-content {
-  @apply transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white text-gray-700 dark:opacity-80;
+  @apply transition duration-300 ease-in-out xs:pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white text-gray-700 dark:opacity-80;
 }
 
 .card-instance-actions-container {
-  @apply relative w-full flex justify-end;
+  @apply pt-4 relative w-full flex flex-col items-center xs:flex-row justify-center xs:justify-end flex-wrap;
 }
 
 .btn-close {

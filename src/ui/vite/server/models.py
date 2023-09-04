@@ -23,9 +23,9 @@ class ResponseModel(BaseModel):
         examples=["Get global config succeed"],
         description="Feedback message to display on UI",
     )
-    data: str = Field(
+    data: str | dict | list = Field(
         examples=[""],
-        description="Any stringify data that will be used on UI",
+        description="Any type of data that can be convert to string",
     )
 
 
