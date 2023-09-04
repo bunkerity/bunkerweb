@@ -114,12 +114,12 @@ class Config(ConfigCaller):
 
         # wait until changes are applied
         while True:
-            changes = self._db.check_changes()
-            if isinstance(changes, str):
+            curr_changes = self._db.check_changes()
+            if isinstance(curr_changes, str):
                 self.__logger.error(
-                    f"An error occurred when checking for changes in the database : {changes}"
+                    f"An error occurred when checking for changes in the database : {curr_changes}"
                 )
-            elif not any(changes.values()):
+            elif not any(curr_changes.values()):
                 break
             else:
                 self.__logger.warning(
