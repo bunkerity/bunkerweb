@@ -106,7 +106,12 @@ class DockerController(Controller):
         return configs
 
     def apply_config(self) -> bool:
-        return self.apply(self._instances, self._services, configs=self._configs, first=not self._loaded)
+        return self.apply(
+            self._instances,
+            self._services,
+            configs=self._configs,
+            first=not self._loaded,
+        )
 
     def process_events(self):
         self._set_autoconf_load_db()

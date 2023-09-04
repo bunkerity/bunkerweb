@@ -50,13 +50,21 @@ jobs:
         if: inputs.TYPE == 'k8s'
       - run: |
           echo "$SECRET_KEY" > /tmp/.secret_key
-          openssl dec -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -pass file:/tmp/.secret_key -out /tmp/terraform.tar
+          openssl enc -d -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -iter 100000 -md sha256 -pass file:/tmp/.secret_key -out /tmp/terraform.tar 
           rm -f /tmp/.secret_key
-          tar xvf /tmp/terraform.tar -C /
+          tar xf /tmp/terraform.tar -C /
+          mkdir /tmp/reg
+          cp tests/terraform/k8s-reg.tf /tmp/reg
+          cp tests/terraform/providers.tf /tmp/reg
+          cd /tmp/reg
+          export TF_VAR_k8s_reg_user=${REG_USER}
+          export TF_VAR_k8s_reg_token=${REG_TOKEN}
+          terraform init
+          terraform apply -auto-approve
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        if: inputs.TYPE == 'k8s'
-      - run: tar xvf /tmp/terraform.tar -C /
+          REG_USER: ${{ github.actor }}
+          REG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: inputs.TYPE == 'k8s'
       - uses: azure/setup-kubectl@v3
         if: inputs.TYPE == 'k8s'
@@ -64,16 +72,16 @@ jobs:
         if: inputs.TYPE == 'k8s'
       - name: Pull BW linux ubuntu test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/ubuntu-tests:testing && docker tag ghcr.io/bunkerity ubuntu-tests:testing local/ubuntu:latest
+        run: docker pull ghcr.io/bunkerity/ubuntu-tests:testing && docker tag ghcr.io/bunkerity/ubuntu-tests:testing local/ubuntu:latest
       - name: Pull BW linux debian test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/debian-tests:testing && docker tag ghcr.io/bunkerity debian-tests:testing local/debian:latest
+        run: docker pull ghcr.io/bunkerity/debian-tests:testing && docker tag ghcr.io/bunkerity/debian-tests:testing local/debian:latest
       - name: Pull BW linux fedora test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/fedora-tests:testing && docker tag ghcr.io/bunkerity fedora-tests:testing local/fedora:latest
+        run: docker pull ghcr.io/bunkerity/fedora-tests:testing && docker tag ghcr.io/bunkerity/fedora-tests:testing local/fedora:latest
       - name: Pull BW linux rhel test image
         if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/rhel-tests:testing && docker tag ghcr.io/bunkerity rhel-tests:testing local/rhel:latest
+        run: docker pull ghcr.io/bunkerity/rhel-tests:testing && docker tag ghcr.io/bunkerity/rhel-tests:testing local/rhel:latest
       # Do tests
       - name: Run tests
         if: inputs.TYPE == 'docker'

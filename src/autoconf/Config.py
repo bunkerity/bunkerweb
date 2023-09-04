@@ -63,8 +63,7 @@ class Config(ConfigCaller):
             "instances": False,
             "services": False,
             "configs": False,
-            "config": False
-
+            "config": False,
         }
         changes = []
         if instances != self.__instances or first:
@@ -79,9 +78,10 @@ class Config(ConfigCaller):
             updates["configs"] = True
             changes.append("custom_configs")
         if updates["instances"] or updates["services"]:
-            old_env = self.__get_full_env()
-            self.__config = self.__get_full_env()
-            if self.__config != old_env or first:
+            old_env = deepcopy(self.__config)
+            new_env = self.__get_full_env()
+            if old_env != new_env or first:
+                self.__config = new_env
                 updates["config"] = True
                 changes.append("config")
 
@@ -112,6 +112,20 @@ class Config(ConfigCaller):
             )
             sleep(5)
 
+        # wait until changes are applied
+        while True:
+            curr_changes = self._db.check_changes()
+            if isinstance(curr_changes, str):
+                self.__logger.error(
+                    f"An error occurred when checking for changes in the database : {curr_changes}"
+                )
+            elif not any(curr_changes.values()):
+                break
+            else:
+                self.__logger.warning(
+                    "Scheduler is already applying a configuration, retrying in 5 seconds ...",
+                )
+            sleep(5)
         # update instances in database
         if updates["instances"]:
             err = self._db.update_instances(self.__instances, changed=False)
@@ -127,7 +141,9 @@ class Config(ConfigCaller):
                 )
         # save custom configs to database
         if updates["configs"]:
-            err = self._db.save_custom_configs(custom_configs, "autoconf", changed=False)
+            err = self._db.save_custom_configs(
+                custom_configs, "autoconf", changed=False
+            )
             if err:
                 success = False
                 self.__logger.error(

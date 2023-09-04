@@ -9,27 +9,29 @@ on:
     secrets:
       CICD_SECRETS:
         required: true
+      SECRET_KEY:
+        required: true
 
 jobs:
   delete:
     if: ${{ always() }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@v3
       - name: Install terraform
         uses: hashicorp/setup-terraform@v2
-
       - uses: actions/download-artifact@v3
         with:
           name: tf-${{ inputs.TYPE }}
           path: /tmp
       - run: |
           echo "$SECRET_KEY" > /tmp/.secret_key
-          openssl dec -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -pass file:/tmp/.secret_key -out /tmp/terraform.tar
+          openssl enc -d -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -iter 100000 -md sha256 -pass file:/tmp/.secret_key -out /tmp/terraform.tar
           rm -f /tmp/.secret_key
-          tar xvf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
+          tar xf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
       - uses: azure/setup-kubectl@v3

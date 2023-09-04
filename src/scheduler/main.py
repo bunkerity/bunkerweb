@@ -511,14 +511,15 @@ if __name__ == "__main__":
                 logger.info(f"Successfully sent {CACHE_PATH} folder")
 
         while True:
-            threads.clear()
-            ret = db.checked_changes(CHANGES)
+            if not FIRST_RUN:
+                threads.clear()
+                ret = db.checked_changes(CHANGES)
 
-            if ret:
-                logger.error(
-                    f"An error occurred when setting the changes to checked in the database : {ret}"
-                )
-                stop(1)
+                if ret:
+                    logger.error(
+                        f"An error occurred when setting the changes to checked in the database : {ret}"
+                    )
+                    stop(1)
 
             # Update the environment variables of the scheduler
             SCHEDULER.env = env.copy() | environ.copy()
