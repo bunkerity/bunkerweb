@@ -1,4 +1,4 @@
-FROM redhat/ubi8:8.7
+FROM redhat/ubi8:8.8
 
 ENV OS=rhel
 ENV NGINX_VERSION 1.24.0
