@@ -67,8 +67,6 @@ async def add_job_run(
 
     resp = DB.add_job_run(job_name, data.get("success", False), start_date, end_date)
 
-    CORE_CONFIG.logger.warning(resp)
-
     if "database is locked" in resp or "file is not a database" in resp:
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(
@@ -212,8 +210,6 @@ async def update_cache(
         service_id=service_id,
         checksum=checksum,
     )
-
-    CORE_CONFIG.logger.warning(resp)
 
     if "database is locked" in resp or "file is not a database" in resp:
         retry_in = str(uniform(1.0, 5.0))

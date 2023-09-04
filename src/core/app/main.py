@@ -134,9 +134,28 @@ db_config = {}
 db_plugins = []
 plugin_changes = False
 if db_is_initialized:
-    DB.set_scheduler_initialized(False)
+    resp = DB.set_scheduler_initialized(False)
+
+    if resp:
+        CORE_CONFIG.logger.error(
+            f"Can't set scheduler as not initialized : {resp}",
+        )
+
     db_config = DB.get_config()
+
+    if isinstance(db_config, str):
+        CORE_CONFIG.logger.error(
+            f"Can't get config from database : {db_config}",
+        )
+        stop_app(1)
+
     db_plugins = DB.get_plugins(external=True)
+
+    if isinstance(db_plugins, str):
+        CORE_CONFIG.logger.warning(
+            f"Can't get plugins from database : {db_plugins}",
+        )
+        db_plugins = []
 
 
 def extract_plugin_data(filename: str) -> Optional[dict]:

@@ -136,13 +136,14 @@ class Database:
         self.database_uri = sqlalchemy_string
         error = False
 
+        engine_kwargs = {
+            "future": True,
+            "poolclass": SingletonThreadPool,
+            "pool_pre_ping": True,
+        }
+
         try:
-            self.__sql_engine = create_engine(
-                sqlalchemy_string,
-                future=True,
-                poolclass=SingletonThreadPool,
-                pool_pre_ping=True,
-            )
+            self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
         except ArgumentError:
             self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
             error = True
@@ -183,10 +184,7 @@ class Database:
                     )
                     self.__sql_engine.dispose(close=True)
                     self.__sql_engine = create_engine(
-                        sqlalchemy_string,
-                        future=True,
-                        poolclass=SingletonThreadPool,
-                        pool_pre_ping=True,
+                        sqlalchemy_string, **engine_kwargs
                     )
                 if "Unknown table" in str(e):
                     not_connected = False
@@ -232,7 +230,6 @@ class Database:
         try:
             yield session
         except BaseException:
-            session.rollback()
             self.__exceptions[getpid()] = [format_exc()]
             raise
         finally:
@@ -241,15 +238,15 @@ class Database:
     def set_scheduler_initialized(self, value: bool = True) -> str:
         """Set the scheduler_initialized value"""
         with suppress(BaseException), self.__db_session() as session:
-            with session.begin(nested=True):
-                metadata = session.query(Metadata).with_for_update().get(1)
+            metadata = session.query(Metadata).with_for_update().get(1)
 
-                if not metadata:
-                    return "The metadata are not set yet, try again"
+            if not metadata:
+                return "The metadata are not set yet, try again"
 
-                metadata.scheduler_initialized = value
+            metadata.scheduler_initialized = value
+            session.commit()
 
-        return ""
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def is_scheduler_initialized(self) -> bool:
         """Check if it's the scheduler is initialized"""
@@ -302,64 +299,66 @@ class Database:
     def initialize_db(self, version: str, integration: str = "Unknown") -> str:
         """Initialize the database"""
         with suppress(BaseException), self.__db_session() as session:
-            with session.begin(nested=True):
-                session.add(
-                    Metadata(
-                        is_initialized=True,
-                        version=version,
-                        integration=integration,
-                    )
+            session.add(
+                Metadata(
+                    is_initialized=True,
+                    version=version,
+                    integration=integration,
                 )
+            )
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def update_db_schema(self, version: str) -> str:
         with suppress(BaseException), self.__db_session() as session:
-            with session.begin(nested=True):
-                metadata = session.query(Metadata).with_for_update().get(1)
+            metadata = session.query(Metadata).with_for_update().get(1)
 
-                if not metadata:
-                    return "The metadata are not set yet, try again"
-                elif metadata.version == version:
-                    return "The database is already up to date"
+            if not metadata:
+                return "The metadata are not set yet, try again"
+            elif metadata.version == version:
+                return "The database is already up to date"
 
-                proc = subprocess_run(
-                    [
-                        "python3",
-                        "-m",
-                        "alembic",
-                        "revision",
-                        "--autogenerate",
-                        "-m",
-                        f'"Update to version v{version}"',
-                    ],
-                    cwd=str(self.ALEMBIC_FILE_PATH.parent),
-                    stdout=DEVNULL,
-                    stderr=STDOUT,
-                    check=False,
-                )
-                if proc.returncode != 0:
-                    return "Error when trying to generate the migration script"
+            proc = subprocess_run(
+                [
+                    "python3",
+                    "-m",
+                    "alembic",
+                    "revision",
+                    "--autogenerate",
+                    "-m",
+                    f'"Update to version v{version}"',
+                ],
+                cwd=str(self.ALEMBIC_FILE_PATH.parent),
+                stdout=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                session.rollback()
+                return "Error when trying to generate the migration script"
 
-                proc = subprocess_run(
-                    [
-                        "python3",
-                        "-m",
-                        "alembic",
-                        "upgrade",
-                        "head",
-                    ],
-                    cwd=str(self.ALEMBIC_FILE_PATH.parent),
-                    stdout=DEVNULL,
-                    stderr=STDOUT,
-                    check=False,
-                )
-                if proc.returncode != 0:
-                    return "Error when trying to apply the migration script"
+            proc = subprocess_run(
+                [
+                    "python3",
+                    "-m",
+                    "alembic",
+                    "upgrade",
+                    "head",
+                ],
+                cwd=str(self.ALEMBIC_FILE_PATH.parent),
+                stdout=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                session.rollback()
+                return "Error when trying to apply the migration script"
 
-                metadata.version = version
+            metadata.version = version
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def init_tables(self, default_plugins: List[dict]) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
@@ -468,8 +467,8 @@ class Database:
                             )
 
         with suppress(BaseException), self.__db_session() as session:
-            with session.begin(nested=True):
-                session.add_all(to_put)
+            session.add_all(to_put)
+            session.commit()
 
         if self.__exceptions.get(getpid()):
             return False, self.__exceptions[getpid()]
@@ -507,13 +506,12 @@ class Database:
         to_put = []
         with suppress(BaseException), self.__db_session() as session:
             # Delete all the old config
-            with session.begin(nested=True):
-                session.query(Global_values).filter(
-                    Global_values.method == method
-                ).with_for_update().delete()
-                session.query(Services_settings).filter(
-                    Services_settings.method == method
-                ).with_for_update().delete()
+            session.query(Global_values).filter(
+                Global_values.method == method
+            ).with_for_update().delete()
+            session.query(Services_settings).filter(
+                Services_settings.method == method
+            ).with_for_update().delete()
 
             if config:
                 config.pop("DATABASE_URI", None)
@@ -541,10 +539,9 @@ class Database:
 
                         if missing_ids:
                             # Remove services that are no longer in the list
-                            with session.begin(nested=True):
-                                session.query(Services).filter(
-                                    Services.id.in_(missing_ids)
-                                ).with_for_update().delete()
+                            session.query(Services).filter(
+                                Services.id.in_(missing_ids)
+                            ).with_for_update().delete()
 
                     for key, value in deepcopy(config).items():
                         suffix = 0
@@ -621,28 +618,27 @@ class Database:
                                 method in (service_setting.method, "autoconf")
                                 and service_setting.value != value
                             ):
-                                with session.begin(nested=True):
-                                    if key != "SERVER_NAME" and (
-                                        (key not in config and value == setting.default)
-                                        or (key in config and value == config[key])
-                                    ):
-                                        session.query(Services_settings).filter(
-                                            Services_settings.service_id == server_name,
-                                            Services_settings.setting_id == key,
-                                            Services_settings.suffix == suffix,
-                                        ).with_for_update().delete()
-                                        continue
-
+                                if key != "SERVER_NAME" and (
+                                    (key not in config and value == setting.default)
+                                    or (key in config and value == config[key])
+                                ):
                                     session.query(Services_settings).filter(
                                         Services_settings.service_id == server_name,
                                         Services_settings.setting_id == key,
                                         Services_settings.suffix == suffix,
-                                    ).with_for_update().update(
-                                        {
-                                            Services_settings.value: value,
-                                            Services_settings.method: method,
-                                        }
-                                    )
+                                    ).with_for_update().delete()
+                                    continue
+
+                                session.query(Services_settings).filter(
+                                    Services_settings.service_id == server_name,
+                                    Services_settings.setting_id == key,
+                                    Services_settings.suffix == suffix,
+                                ).with_for_update().update(
+                                    {
+                                        Services_settings.value: value,
+                                        Services_settings.method: method,
+                                    }
+                                )
                         elif setting and original_key not in global_values:
                             global_values.append(original_key)
                             global_value = (
@@ -674,23 +670,22 @@ class Database:
                                 method in (global_value.method, "core")
                                 and global_value.value != value
                             ):
-                                with session.begin(nested=True):
-                                    if value == setting.default:
-                                        session.query(Global_values).filter(
-                                            Global_values.setting_id == key,
-                                            Global_values.suffix == suffix,
-                                        ).with_for_update().delete()
-                                        continue
-
+                                if value == setting.default:
                                     session.query(Global_values).filter(
                                         Global_values.setting_id == key,
                                         Global_values.suffix == suffix,
-                                    ).with_for_update().update(
-                                        {
-                                            Global_values.value: value,
-                                            Global_values.method: method,
-                                        }
-                                    )
+                                    ).with_for_update().delete()
+                                    continue
+
+                                session.query(Global_values).filter(
+                                    Global_values.setting_id == key,
+                                    Global_values.suffix == suffix,
+                                ).with_for_update().update(
+                                    {
+                                        Global_values.value: value,
+                                        Global_values.method: method,
+                                    }
+                                )
                 else:
                     if (
                         "SERVER_NAME" in config
@@ -748,33 +743,31 @@ class Database:
                             method in (global_value.method, "core")
                             and value != global_value.value
                         ):
-                            with session.begin(nested=True):
-                                if value == setting.default:
-                                    session.query(Global_values).filter(
-                                        Global_values.setting_id == key,
-                                        Global_values.suffix == suffix,
-                                    ).with_for_update().delete()
-                                    continue
-
+                            if value == setting.default:
                                 session.query(Global_values).filter(
                                     Global_values.setting_id == key,
                                     Global_values.suffix == suffix,
-                                ).with_for_update().update({Global_values.value: value})
+                                ).with_for_update().delete()
+                                continue
 
-            with session.begin(nested=True):
-                session.add_all(to_put)
+                            session.query(Global_values).filter(
+                                Global_values.setting_id == key,
+                                Global_values.suffix == suffix,
+                            ).with_for_update().update({Global_values.value: value})
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+            session.add_all(to_put)
+            session.commit()
+
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def save_global_config(self, config: Dict[str, Any], method: str) -> str:
         """Save the global config in the database"""
         to_put = []
         with suppress(BaseException), self.__db_session() as session:
             # Delete all the old global config
-            with session.begin(nested=True):
-                session.query(Global_values).filter(
-                    Global_values.method == method
-                ).with_for_update().delete()
+            session.query(Global_values).filter(
+                Global_values.method == method
+            ).with_for_update().delete()
 
             if config:
                 config.pop("DATABASE_URI", None)
@@ -831,23 +824,22 @@ class Database:
                             )
                         )
                     elif global_value.method == method and value != global_value.value:
-                        with session.begin(nested=True):
-                            if value == setting.default:
-                                session.query(Global_values).filter(
-                                    Global_values.setting_id == key,
-                                    Global_values.suffix == suffix,
-                                ).with_for_update().delete()
-                                continue
-
+                        if value == setting.default:
                             session.query(Global_values).filter(
                                 Global_values.setting_id == key,
                                 Global_values.suffix == suffix,
-                            ).with_for_update().update({Global_values.value: value})
+                            ).with_for_update().delete()
+                            continue
 
-            with session.begin(nested=True):
-                session.add_all(to_put)
+                        session.query(Global_values).filter(
+                            Global_values.setting_id == key,
+                            Global_values.suffix == suffix,
+                        ).with_for_update().update({Global_values.value: value})
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+            session.add_all(to_put)
+            session.commit()
+
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def save_service_config(
         self, service_name: str, config: Dict[str, Any], method: str
@@ -888,20 +880,18 @@ class Database:
                 ):
                     return "method_conflict"
 
-                with session.begin(nested=True):
-                    session.query(Services).filter(
-                        Services.id == service_name
-                    ).with_for_update().update(
-                        Services.id == first_server_name  # type: ignore
-                    )
+                session.query(Services).filter(
+                    Services.id == service_name
+                ).with_for_update().update(
+                    Services.id == first_server_name  # type: ignore
+                )
 
             service_name = first_server_name
 
-            with session.begin(nested=True):
-                session.query(Services_settings).filter(
-                    Services_settings.method == method,
-                    Services_settings.service_id == service_name,
-                ).with_for_update().delete()
+            session.query(Services_settings).filter(
+                Services_settings.method == method,
+                Services_settings.service_id == service_name,
+            ).with_for_update().delete()
 
             if config:
                 for key, value in deepcopy(config).items():
@@ -969,33 +959,32 @@ class Database:
                         method in (service_setting.method, "autoconf")
                         and service_setting.value != value
                     ):
-                        with session.begin(nested=True):
-                            if key != "SERVER_NAME" and (
-                                (key not in config and value == setting.default)
-                                or (key in config and value == config[key])
-                            ):
-                                session.query(Services_settings).filter(
-                                    Services_settings.service_id == service_name,
-                                    Services_settings.setting_id == key,
-                                    Services_settings.suffix == suffix,
-                                ).with_for_update().delete()
-                                continue
-
+                        if key != "SERVER_NAME" and (
+                            (key not in config and value == setting.default)
+                            or (key in config and value == config[key])
+                        ):
                             session.query(Services_settings).filter(
                                 Services_settings.service_id == service_name,
                                 Services_settings.setting_id == key,
                                 Services_settings.suffix == suffix,
-                            ).with_for_update().update(
-                                {
-                                    Services_settings.value: value,
-                                    Services_settings.method: method,
-                                }
-                            )
+                            ).with_for_update().delete()
+                            continue
 
-            with session.begin(nested=True):
-                session.add_all(to_put)
+                        session.query(Services_settings).filter(
+                            Services_settings.service_id == service_name,
+                            Services_settings.setting_id == key,
+                            Services_settings.suffix == suffix,
+                        ).with_for_update().update(
+                            {
+                                Services_settings.value: value,
+                                Services_settings.method: method,
+                            }
+                        )
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+            session.add_all(to_put)
+            session.commit()
+
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def remove_service(self, service_name: str, method: str) -> str:
         """Remove a service from the database"""
@@ -1014,12 +1003,12 @@ class Database:
             elif db_service.method != method:
                 return "method_conflict"
 
-            with session.begin(nested=True):
-                session.query(Services).filter(
-                    Services.id == service_name
-                ).with_for_update().delete()
+            session.query(Services).filter(
+                Services.id == service_name
+            ).with_for_update().delete()
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def save_custom_configs(
         self, custom_configs: List[Dict[str, Tuple[str, List[str]]]], method: str
@@ -1028,10 +1017,9 @@ class Database:
         message = ""
         with suppress(BaseException), self.__db_session() as session:
             # Delete all the old config
-            with session.begin(nested=True):
-                session.query(Custom_configs).filter(
-                    Custom_configs.method == method
-                ).with_for_update().delete()
+            session.query(Custom_configs).filter(
+                Custom_configs.method == method
+            ).with_for_update().delete()
 
             to_put = []
             endl = "\n"
@@ -1091,31 +1079,30 @@ class Database:
                     custom_conf.method,
                     "autoconf",
                 ):
-                    with session.begin(nested=True):
-                        session.query(Custom_configs).filter(
-                            Custom_configs.service_id == config.get("service_id", None),
-                            Custom_configs.type == config["type"],
-                            Custom_configs.name == config["name"],
-                        ).with_for_update().update(
-                            {
-                                Custom_configs.data: config["data"],
-                                Custom_configs.checksum: config["checksum"],
-                            }
-                            | (
-                                {Custom_configs.method: "autoconf"}
-                                if method == "autoconf"
-                                else {}
-                            )
+                    session.query(Custom_configs).filter(
+                        Custom_configs.service_id == config.get("service_id", None),
+                        Custom_configs.type == config["type"],
+                        Custom_configs.name == config["name"],
+                    ).with_for_update().update(
+                        {
+                            Custom_configs.data: config["data"],
+                            Custom_configs.checksum: config["checksum"],
+                        }
+                        | (
+                            {Custom_configs.method: "autoconf"}
+                            if method == "autoconf"
+                            else {}
                         )
+                    )
 
             try:
-                with session.begin(nested=True):
-                    session.add_all(to_put)
+                session.add_all(to_put)
+                session.commit()
             except BaseException:
                 session.rollback()
                 return f"{f'{message}{endl}' if message else ''}{format_exc()}"
 
-        return message
+        return (self.__exceptions.get(getpid()) or [message]).pop()
 
     def get_config(
         self, methods: bool = False, *, new_format: bool = False
@@ -1280,7 +1267,7 @@ class Database:
                         else servers
                     )
 
-        return self.__exceptions.get(getpid(), [config]).pop()
+        return (self.__exceptions.get(getpid()) or [config]).pop()
 
     def get_custom_configs(self) -> Union[str, List[Dict[str, Any]]]:
         """Get the custom configs from the database"""
@@ -1306,8 +1293,9 @@ class Database:
                     .all()
                 )
             ]
-        return self.__exceptions.get(
-            getpid(), ["An error occured, couldn't fetch the traceback"]
+        return (
+            self.__exceptions.get(getpid())
+            or ["An error occured, couldn't fetch the traceback"]
         ).pop()
 
     def upsert_custom_config(
@@ -1323,49 +1311,49 @@ class Database:
         """Add or update a custom config in the database"""
         ret = ""
         with suppress(BaseException), self.__db_session() as session:
-            with session.begin(nested=True):
-                config = {
-                    "data": data,
-                    "method": method,
-                    "checksum": checksum or bytes_hash(data).hexdigest(),
-                    "service_id": service_id,
-                    "type": config_type.replace("-", "_").lower(),
-                    "name": name,
-                }
+            config = {
+                "data": data,
+                "method": method,
+                "checksum": checksum or bytes_hash(data).hexdigest(),
+                "service_id": service_id,
+                "type": config_type.replace("-", "_").lower(),
+                "name": name,
+            }
 
-                custom_conf = (
-                    session.query(Custom_configs)
-                    .with_entities(Custom_configs.checksum, Custom_configs.method)
-                    .filter_by(
-                        service_id=config["service_id"],
-                        type=config["type"],
-                        name=config["name"],
-                    )
-                    .with_for_update(read=True)
-                    .first()
+            custom_conf = (
+                session.query(Custom_configs)
+                .with_entities(Custom_configs.checksum, Custom_configs.method)
+                .filter_by(
+                    service_id=config["service_id"],
+                    type=config["type"],
+                    name=config["name"],
                 )
+                .with_for_update(read=True)
+                .first()
+            )
 
-                if not custom_conf:
-                    session.add(Custom_configs(**config))
-                    ret = "created"
-                elif config["checksum"] != custom_conf.checksum and method in (
-                    custom_conf.method,
-                    "autoconf",
-                ):
-                    session.query(Custom_configs).filter(
-                        Custom_configs.service_id == config["service_id"],
-                        Custom_configs.type == config["type"],
-                        Custom_configs.name == config["name"],
-                    ).with_for_update().update(
-                        {
-                            Custom_configs.data: config["data"],
-                            Custom_configs.checksum: config["checksum"],
-                        }
-                        | ({"method": "autoconf"} if method == "autoconf" else {})
-                    )
-                    ret = "updated"
+            if not custom_conf:
+                session.add(Custom_configs(**config))
+                ret = "created"
+            elif config["checksum"] != custom_conf.checksum and method in (
+                custom_conf.method,
+                "autoconf",
+            ):
+                session.query(Custom_configs).filter(
+                    Custom_configs.service_id == config["service_id"],
+                    Custom_configs.type == config["type"],
+                    Custom_configs.name == config["name"],
+                ).with_for_update().update(
+                    {
+                        Custom_configs.data: config["data"],
+                        Custom_configs.checksum: config["checksum"],
+                    }
+                    | ({"method": "autoconf"} if method == "autoconf" else {})
+                )
+                ret = "updated"
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [ret]).pop()
+        return (self.__exceptions.get(getpid()) or [ret]).pop()
 
     def delete_custom_config(
         self, service_id: str, config_type: str, name: str, method: str
@@ -1389,14 +1377,14 @@ class Database:
             elif custom_conf.method != method and method not in ("core", "autoconf"):
                 return "method_conflict"
 
-            with session.begin(nested=True):
-                session.query(Custom_configs).filter(
-                    Custom_configs.service_id == service_id,
-                    Custom_configs.type == config_type.replace("-", "_").lower(),
-                    Custom_configs.name == name,
-                ).with_for_update().delete()
+            session.query(Custom_configs).filter(
+                Custom_configs.service_id == service_id,
+                Custom_configs.type == config_type.replace("-", "_").lower(),
+                Custom_configs.name == name,
+            ).with_for_update().delete()
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def get_services_settings(self, methods: bool = False) -> List[Dict[str, Any]]:
         """Get the services' configs from the database"""
@@ -1455,10 +1443,9 @@ class Database:
 
                 if missing_ids:
                     # Remove plugins that are no longer in the list
-                    with session.begin(nested=True):
-                        session.query(Plugins).filter(
-                            Plugins.id.in_(missing_ids)
-                        ).with_for_update().delete()
+                    session.query(Plugins).filter(
+                        Plugins.id.in_(missing_ids)
+                    ).with_for_update().delete()
 
             for plugin in plugins:
                 settings = plugin.pop("settings", {})
@@ -1513,10 +1500,9 @@ class Database:
                         updates[Plugins.checksum] = plugin.get("checksum")
 
                     if updates:
-                        with session.begin(nested=True):
-                            session.query(Plugins).filter(
-                                Plugins.id == plugin["id"]
-                            ).with_for_update().update(updates)
+                        session.query(Plugins).filter(
+                            Plugins.id == plugin["id"]
+                        ).with_for_update().update(updates)
 
                     db_plugin_settings = (
                         session.query(Settings)
@@ -1533,10 +1519,9 @@ class Database:
 
                     if missing_ids:
                         # Remove settings that are no longer in the list
-                        with session.begin(nested=True):
-                            session.query(Settings).filter(
-                                Settings.id.in_(missing_ids)
-                            ).with_for_update().delete()
+                        session.query(Settings).filter(
+                            Settings.id.in_(missing_ids)
+                        ).with_for_update().delete()
 
                     for setting, value in settings.items():
                         value.update(
@@ -1602,10 +1587,9 @@ class Database:
                                 updates[Settings.multiple] = value.get("multiple")
 
                             if updates:
-                                with session.begin(nested=True):
-                                    session.query(Settings).filter(
-                                        Settings.id == setting
-                                    ).with_for_update().update(updates)
+                                session.query(Settings).filter(
+                                    Settings.id == setting
+                                ).with_for_update().update(updates)
 
                             db_selects = (
                                 session.query(Selects)
@@ -1624,10 +1608,9 @@ class Database:
 
                             if missing_values:
                                 # Remove selects that are no longer in the list
-                                with session.begin(nested=True):
-                                    session.query(Selects).filter(
-                                        Selects.value.in_(missing_values)
-                                    ).with_for_update().delete()
+                                session.query(Selects).filter(
+                                    Selects.value.in_(missing_values)
+                                ).with_for_update().delete()
 
                             for select in value.get("select", []):
                                 if select not in db_values:
@@ -1648,10 +1631,9 @@ class Database:
 
                     if missing_names:
                         # Remove jobs that are no longer in the list
-                        with session.begin(nested=True):
-                            session.query(Jobs).filter(
-                                Jobs.name.in_(missing_names)
-                            ).with_for_update().delete()
+                        session.query(Jobs).filter(
+                            Jobs.name.in_(missing_names)
+                        ).with_for_update().delete()
 
                     for job in jobs:
                         db_job = (
@@ -1685,13 +1667,12 @@ class Database:
 
                             if updates:
                                 updates[Jobs.last_run] = None
-                                with session.begin(nested=True):
-                                    session.query(Jobs_cache).filter(
-                                        Jobs_cache.job_name == job["name"]
-                                    ).with_for_update().delete()
-                                    session.query(Jobs).filter(
-                                        Jobs.name == job["name"]
-                                    ).with_for_update().update(updates)
+                                session.query(Jobs_cache).filter(
+                                    Jobs_cache.job_name == job["name"]
+                                ).with_for_update().delete()
+                                session.query(Jobs).filter(
+                                    Jobs.name == job["name"]
+                                ).with_for_update().update(updates)
 
                     tmp_ui_path = Path(
                         sep, "var", "tmp", "bunkerweb", "ui", plugin["id"], "ui"
@@ -1765,10 +1746,9 @@ class Database:
                                     )
 
                                 if updates:
-                                    with session.begin(nested=True):
-                                        session.query(Plugin_pages).filter(
-                                            Plugin_pages.plugin_id == plugin["id"]
-                                        ).with_for_update().update(updates)
+                                    session.query(Plugin_pages).filter(
+                                        Plugin_pages.plugin_id == plugin["id"]
+                                    ).with_for_update().update(updates)
 
                     continue
 
@@ -1909,15 +1889,14 @@ class Database:
                                     )
 
                                 if updates:
-                                    with session.begin(nested=True):
-                                        session.query(Plugin_pages).filter(
-                                            Plugin_pages.plugin_id == plugin["id"]
-                                        ).with_for_update().update(updates)
+                                    session.query(Plugin_pages).filter(
+                                        Plugin_pages.plugin_id == plugin["id"]
+                                    ).with_for_update().update(updates)
 
-            with session.begin(nested=True):
-                session.add_all(to_put)
+            session.add_all(to_put)
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def get_plugins(
         self, *, external: bool = False, with_data: bool = False
@@ -2128,10 +2107,10 @@ class Database:
                         f"Plugin \"{plugin['id']}\" has a page but no template or actions file, skipping page addition.",
                     )
 
-            with session.begin(nested=True):
-                session.add_all(to_put)
+            session.add_all(to_put)
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def update_external_plugin(
         self, plugin_id: str, plugin_data: Dict[str, Any]
@@ -2195,10 +2174,9 @@ class Database:
                 updates[Plugins.checksum] = plugin_data.get("checksum")
 
             if updates:
-                with session.begin(nested=True):
-                    session.query(Plugins).filter(
-                        Plugins.id == plugin_id
-                    ).with_for_update().update(updates)
+                session.query(Plugins).filter(
+                    Plugins.id == plugin_id
+                ).with_for_update().update(updates)
 
             db_plugin_settings = (
                 session.query(Settings)
@@ -2213,10 +2191,9 @@ class Database:
 
             if missing_ids:
                 # Remove settings that are no longer in the list
-                with session.begin(nested=True):
-                    session.query(Settings).filter(
-                        Settings.id.in_(missing_ids)
-                    ).with_for_update().delete()
+                session.query(Settings).filter(
+                    Settings.id.in_(missing_ids)
+                ).with_for_update().delete()
 
             for setting, value in settings.items():
                 value.update(
@@ -2275,10 +2252,9 @@ class Database:
                         updates[Settings.multiple] = value.get("multiple")
 
                     if updates:
-                        with session.begin(nested=True):
-                            session.query(Settings).filter(
-                                Settings.id == setting
-                            ).with_for_update().update(updates)
+                        session.query(Settings).filter(
+                            Settings.id == setting
+                        ).with_for_update().update(updates)
 
                     db_selects = (
                         session.query(Selects)
@@ -2295,10 +2271,9 @@ class Database:
 
                     if missing_values:
                         # Remove selects that are no longer in the list
-                        with session.begin(nested=True):
-                            session.query(Selects).filter(
-                                Selects.value.in_(missing_values)
-                            ).with_for_update().delete()
+                        session.query(Selects).filter(
+                            Selects.value.in_(missing_values)
+                        ).with_for_update().delete()
 
                     for select in value.get("select", []):
                         if select not in db_values:
@@ -2317,10 +2292,9 @@ class Database:
 
             if missing_names:
                 # Remove jobs that are no longer in the list
-                with session.begin(nested=True):
-                    session.query(Jobs).filter(
-                        Jobs.name.in_(missing_names)
-                    ).with_for_update().delete()
+                session.query(Jobs).filter(
+                    Jobs.name.in_(missing_names)
+                ).with_for_update().delete()
 
             for job in jobs:
                 db_job = (
@@ -2352,13 +2326,12 @@ class Database:
 
                     if updates:
                         updates[Jobs.last_run] = None
-                        with session.begin(nested=True):
-                            session.query(Jobs_cache).filter(
-                                Jobs_cache.job_name == job["name"]
-                            ).with_for_update().delete()
-                            session.query(Jobs).filter(
-                                Jobs.name == job["name"]
-                            ).with_for_update().update(updates)
+                        session.query(Jobs_cache).filter(
+                            Jobs_cache.job_name == job["name"]
+                        ).with_for_update().delete()
+                        session.query(Jobs).filter(
+                            Jobs.name == job["name"]
+                        ).with_for_update().update(updates)
 
             if page:
                 if template_file and actions_file:
@@ -2416,25 +2389,23 @@ class Database:
                             )
 
                         if updates:
-                            with session.begin(nested=True):
-                                session.query(Plugin_pages).filter(
-                                    Plugin_pages.plugin_id == plugin_id
-                                ).with_for_update().update(updates)
+                            session.query(Plugin_pages).filter(
+                                Plugin_pages.plugin_id == plugin_id
+                            ).with_for_update().update(updates)
 
                 else:
-                    with session.begin(nested=True):
-                        session.query(Plugin_pages).filter(
-                            Plugin_pages.plugin_id == plugin_id
-                        ).with_for_update().delete()
+                    session.query(Plugin_pages).filter(
+                        Plugin_pages.plugin_id == plugin_id
+                    ).with_for_update().delete()
 
                     self.__logger.warning(
                         f'Plugin "{plugin_id}" has a page but no template or actions file, skipping page addition and removing existing page.',
                     )
 
-            with session.begin(nested=True):
-                session.add_all(to_put)
+            session.add_all(to_put)
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def remove_external_plugin(self, plugin_id: str) -> str:
         """Delete an external plugin from the database."""
@@ -2452,12 +2423,12 @@ class Database:
             elif db_plugin.external is False:
                 return "not_external"
 
-            with session.begin(nested=True):
-                session.query(Plugins).filter(
-                    Plugins.id == plugin_id
-                ).with_for_update().delete()
+            session.query(Plugins).filter(
+                Plugins.id == plugin_id
+            ).with_for_update().delete()
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def get_plugins_errors(self) -> int:
         """Get plugins errors."""
@@ -2469,6 +2440,9 @@ class Database:
                 .with_for_update(read=True)
                 .count()
             )
+
+        if self.__exceptions.get(getpid()):
+            self.__logger.error(self.__exceptions[getpid()].pop())
         return 0
 
     def get_job(self, job_name: str) -> Dict[str, Any]:
@@ -2524,7 +2498,10 @@ class Database:
                     .all()
                 ],
             }
-        return self.__exceptions.get(getpid(), [""]).pop()
+
+        if self.__exceptions.get(getpid()):
+            self.__logger.error(self.__exceptions[getpid()].pop())
+        return {}
 
     def get_jobs(self) -> Dict[str, Dict[str, Any]]:
         """Get jobs."""
@@ -2587,7 +2564,10 @@ class Database:
                     .all()
                 )
             }
-        return self.__exceptions.get(getpid(), [""]).pop()
+
+        if self.__exceptions.get(getpid()):
+            self.__logger.error(self.__exceptions[getpid()].pop())
+        return {}
 
     def add_job_run(
         self,
@@ -2598,17 +2578,17 @@ class Database:
     ) -> str:
         """Add a job run."""
         with suppress(BaseException), self.__db_session() as session:
-            with session.begin(nested=True):
-                session.add(
-                    Jobs_runs(
-                        job_name=job_name,
-                        success=success,
-                        start_date=start_date,
-                        end_date=end_date,
-                    )
+            session.add(
+                Jobs_runs(
+                    job_name=job_name,
+                    success=success,
+                    start_date=start_date,
+                    end_date=end_date,
                 )
+            )
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def delete_job_cache(
         self,
@@ -2618,14 +2598,14 @@ class Database:
         service_id: Optional[str] = None,
     ) -> str:
         with suppress(BaseException), self.__db_session() as session:
-            with session.begin(nested=True):
-                session.query(Jobs_cache).filter(
-                    Jobs_cache.job_name == job_name,
-                    Jobs_cache.service_id == service_id,
-                    Jobs_cache.file_name == file_name,
-                ).with_for_update().delete()
+            session.query(Jobs_cache).filter(
+                Jobs_cache.job_name == job_name,
+                Jobs_cache.service_id == service_id,
+                Jobs_cache.file_name == file_name,
+            ).with_for_update().delete()
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def upsert_job_cache(
         self,
@@ -2639,41 +2619,41 @@ class Database:
         """Update the plugin cache in the database"""
         resp = ""
         with suppress(BaseException), self.__db_session() as session:
-            with session.begin(nested=True):
-                cache = (
-                    session.query(Jobs_cache)
-                    .filter_by(
+            cache = (
+                session.query(Jobs_cache)
+                .filter_by(
+                    job_name=job_name,
+                    service_id=service_id,
+                    file_name=file_name,
+                )
+                .with_for_update(read=True)
+                .first()
+            )
+
+            if not cache:
+                session.add(
+                    Jobs_cache(
                         job_name=job_name,
                         service_id=service_id,
                         file_name=file_name,
+                        data=data,
+                        last_update=datetime.now(),
+                        checksum=checksum,
                     )
-                    .with_for_update(read=True)
-                    .first()
                 )
+                resp = "created"
+            else:
+                if data:
+                    cache.data = data
 
-                if not cache:
-                    session.add(
-                        Jobs_cache(
-                            job_name=job_name,
-                            service_id=service_id,
-                            file_name=file_name,
-                            data=data,
-                            last_update=datetime.now(),
-                            checksum=checksum,
-                        )
-                    )
-                    resp = "created"
-                else:
-                    if data:
-                        cache.data = data
+                if checksum:
+                    cache.checksum = checksum
 
-                    if checksum:
-                        cache.checksum = checksum
+                cache.last_update = datetime.now()
+                resp = "updated"
+            session.commit()
 
-                    cache.last_update = datetime.now()
-                    resp = "updated"
-
-        return self.__exceptions.get(getpid(), [resp]).pop()
+        return (self.__exceptions.get(getpid()) or [resp]).pop()
 
     def get_job_cache(
         self,
@@ -2701,7 +2681,7 @@ class Database:
                 .with_for_update(read=True)
                 .first()
             )
-        return self.__exceptions.get(getpid(), [None]).pop()
+        return (self.__exceptions.get(getpid()) or [None]).pop()
 
     def get_jobs_cache_files(self) -> List[Dict[str, Any]]:
         """Get jobs cache files."""
@@ -2724,7 +2704,10 @@ class Database:
                     .all()
                 )
             ]
-        return self.__exceptions.get(getpid(), [""]).pop()
+
+        if self.__exceptions.get(getpid()):
+            self.__logger.error(self.__exceptions[getpid()].pop())
+        return []
 
     def add_instance(
         self, hostname: str, port: int, server_name: str, method: str
@@ -2743,37 +2726,36 @@ class Database:
                 return "exists"
 
             try:
-                with session.begin(nested=True):
-                    session.add(
-                        Instances(
-                            hostname=hostname,
-                            port=port,
-                            server_name=server_name,
-                            method=method,
-                        )
+                session.add(
+                    Instances(
+                        hostname=hostname,
+                        port=port,
+                        server_name=server_name,
+                        method=method,
                     )
+                )
+                session.commit()
             except BaseException:
                 session.rollback()
                 return f"An error occurred while adding the instance {hostname} (port: {port}, server name: {server_name}).\n{format_exc()}"
 
-        return ""
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def refresh_instances(self, instances: List[Dict[str, Any]], method: str) -> str:
         """Update instances."""
         to_put = []
         with suppress(BaseException), self.__db_session() as session:
-            with session.begin(nested=True):
-                session.query(Instances).filter(
-                    Instances.method == method
-                ).with_for_update().delete()
+            session.query(Instances).filter(
+                Instances.method == method
+            ).with_for_update().delete()
 
             for instance in instances:
                 to_put.append(Instances(**instance | {"method": method}))
 
-            with session.begin(nested=True):
-                session.add_all(to_put)
+            session.add_all(to_put)
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def upsert_instance(
         self, hostname: str, port: int, server_name: str, method: str
@@ -2781,38 +2763,38 @@ class Database:
         """Update instance."""
         ret = ""
         with suppress(BaseException), self.__db_session() as session:
-            with session.begin(nested=True):
-                db_instance = (
-                    session.query(Instances)
-                    .with_entities(Instances.hostname, Instances.method)
-                    .filter_by(hostname=hostname)
-                    .with_for_update(read=True)
-                    .first()
+            db_instance = (
+                session.query(Instances)
+                .with_entities(Instances.hostname, Instances.method)
+                .filter_by(hostname=hostname)
+                .with_for_update(read=True)
+                .first()
+            )
+
+            if db_instance is None:
+                session.add(
+                    Instances(
+                        hostname=hostname,
+                        port=port,
+                        server_name=server_name,
+                        method=method,
+                    )
                 )
+                ret = "created"
+            else:
+                session.query(Instances).filter_by(
+                    hostname=hostname
+                ).with_for_update().update(
+                    {
+                        Instances.port: port,
+                        Instances.server_name: server_name,
+                        Instances.method: method,
+                    }
+                )
+                ret = "updated"
+            session.commit()
 
-                if db_instance is None:
-                    session.add(
-                        Instances(
-                            hostname=hostname,
-                            port=port,
-                            server_name=server_name,
-                            method=method,
-                        )
-                    )
-                    ret = "created"
-                else:
-                    session.query(Instances).filter_by(
-                        hostname=hostname
-                    ).with_for_update().update(
-                        {
-                            Instances.port: port,
-                            Instances.server_name: server_name,
-                            Instances.method: method,
-                        }
-                    )
-                    ret = "updated"
-
-        return self.__exceptions.get(getpid(), [ret]).pop()
+        return (self.__exceptions.get(getpid()) or [ret]).pop()
 
     def get_instances(self) -> List[Dict[str, Any]]:
         """Get instances."""
@@ -2838,7 +2820,10 @@ class Database:
                     .all()
                 )
             ]
-        return self.__exceptions.get(getpid(), [""]).pop()
+
+        if self.__exceptions.get(getpid()):
+            self.__logger.error(self.__exceptions[getpid()].pop())
+        return []
 
     def get_instance(self, instance_hostname: str) -> Dict[str, Any]:
         """Get an instance."""
@@ -2859,7 +2844,10 @@ class Database:
                 "server_name": instance.server_name,
                 "method": instance.method,
             }
-        return self.__exceptions.get(getpid(), [""]).pop()
+
+        if self.__exceptions.get(getpid()):
+            self.__logger.error(self.__exceptions[getpid()].pop())
+        return {}
 
     def remove_instance(self, instance_hostname: str) -> str:
         """Remove an instance."""
@@ -2875,12 +2863,12 @@ class Database:
             if db_instance is None:
                 return "not_found"
 
-            with session.begin(nested=True):
-                session.query(Instances).filter(
-                    Instances.hostname == instance_hostname
-                ).with_for_update().delete()
+            session.query(Instances).filter(
+                Instances.hostname == instance_hostname
+            ).with_for_update().delete()
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def seen_instance(self, instance_hostname: str) -> str:
         """Update last_seen for an instance."""
@@ -2896,12 +2884,12 @@ class Database:
             if db_instance is None:
                 return "not_found"
 
-            with session.begin(nested=True):
-                session.query(Instances).filter(
-                    Instances.hostname == instance_hostname
-                ).with_for_update().update({Instances.last_seen: datetime.now()})
+            session.query(Instances).filter(
+                Instances.hostname == instance_hostname
+            ).with_for_update().update({Instances.last_seen: datetime.now()})
+            session.commit()
 
-        return self.__exceptions.get(getpid(), [""]).pop()
+        return (self.__exceptions.get(getpid()) or [""]).pop()
 
     def get_plugin_actions(self, plugin: str) -> Optional[Any]:
         """get actions file for the plugin"""
@@ -2919,6 +2907,9 @@ class Database:
 
             return page.actions_file
 
+        if self.__exceptions.get(getpid()):
+            self.__logger.error(self.__exceptions[getpid()].pop())
+
     def get_plugin_template(self, plugin: str) -> Optional[Any]:
         """get template file for the plugin"""
         with suppress(BaseException), self.__db_session() as session:
@@ -2934,3 +2925,6 @@ class Database:
                 return None
 
             return page.template_file
+
+        if self.__exceptions.get(getpid()):
+            self.__logger.error(self.__exceptions[getpid()].pop())
