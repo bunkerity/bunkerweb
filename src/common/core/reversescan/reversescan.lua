@@ -34,7 +34,8 @@ function reversescan:access()
             break
             -- Perform scan in a thread
         elseif not cached then
-            local thread = ngx.thread.spawn(self.scan, self.ctx.bw.remote_addr, tonumber(port), tonumber(self.variables["REVERSE_SCAN_TIMEOUT"]))
+            local thread = ngx.thread.spawn(self.scan, self.ctx.bw.remote_addr, tonumber(port),
+                tonumber(self.variables["REVERSE_SCAN_TIMEOUT"]))
             threads[port] = thread
         end
     end
