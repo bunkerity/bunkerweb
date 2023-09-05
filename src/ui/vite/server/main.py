@@ -37,11 +37,13 @@ if dev_mode :
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request, exc):
+    print(exc)
     return PlainTextResponse(str({"type" : "error", "status" : exc.status_code, "message": exc.detail, "data" : {}}), status_code=exc.status_code)
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
+    print(exc)
     return PlainTextResponse(str({"type" : "error", "status" : 400, "message": "Invalid data send on request", "data" : {}}), status_code=400)
 
 from routers import instances, plugins, config

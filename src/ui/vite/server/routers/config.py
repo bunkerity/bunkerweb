@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 from random import uniform
-from typing import Annotated, Dict, List, Literal, Union
-from fastapi import APIRouter, BackgroundTasks, status, Path as fastapi_Path
+from typing import Annotated, Dict, List, Literal, Union, Any
+from fastapi import Body, APIRouter, BackgroundTasks, status, Path as fastapi_Path
 from fastapi.responses import JSONResponse
 import requests
 from config import API_URL
 from utils import set_res_from_req
-from models import Plugin, ResponseModel
+from models import  ResponseModel
 import json
 
 router = APIRouter(prefix="/api/config", tags=["config"])
@@ -38,9 +38,9 @@ async def update_config(config: Dict[str, str], method: str):
     response_model=ResponseModel,
     summary="Update global config",
 )
-async def update_global_config(config: Dict[str, str], method: str):
-    print(type(config))
-    req = requests.put(f'{API_URL}/config/global?method={method}', data=json.dumps(config))
+async def update_global_config(config: Annotated[dict, Body()], method: str):
+    data = json.dumps(config,  skipkeys = True,allow_nan = True, indent = 6)
+    req = requests.put(f'{API_URL}/config/global?method={method}', data=data)
     res = set_res_from_req(req, "PUT", "Update global config")
     return res
 

@@ -26,8 +26,9 @@ export async function fetchAPI(
   state.isPend = true;
   return await fetch(`${baseURL}${api}`, {
     method: method.toUpperCase(),
-    Headers: {
+    headers: {
       Authorization: `Bearer ${""}`,
+      "Content-Type": "application/json",
     },
     // Only when exist and possible
     ...(body &&
