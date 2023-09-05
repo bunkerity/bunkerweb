@@ -20,7 +20,7 @@
       "help": "Root folder containing files in the remote PHP-FPM instance.",
       "id": "remote-php-path",
       "label": "Remote PHP path",
-      "regex": "^(/[\\w. -]+)*/?$",
+      "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     },
     "LOCAL_PHP": {
@@ -29,7 +29,7 @@
       "help": "Path to the PHP-FPM socket file.",
       "id": "local",
       "label": "Local PHP",
-      "regex": "^(/[\\w. -]+)*/?$",
+      "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     },
     "LOCAL_PHP_PATH": {
@@ -38,7 +38,7 @@
       "help": "Root folder containing files in the local PHP-FPM instance.",
       "id": "local-php-path",
       "label": "Local PHP path",
-      "regex": "^(/[\\w. -]+)*/?$",
+      "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     }
   }

@@ -65,7 +65,7 @@
       "help": "Root folder containing files to serve (/var/www/html/{server_name} if unset).",
       "id": "root-folder",
       "label": "Root folder",
-      "regex": "^(/[\\w. -]+)*/?$",
+      "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     },
     "SSL_PROTOCOLS": {
@@ -146,7 +146,7 @@
       "help": "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
       "id": "external-plugin-urls",
       "label": "External plugin URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "DENY_HTTP_STATUS": {

@@ -2,10 +2,12 @@
 variable "linux_ip" {
   type     = string
   nullable = false
+  sensitive = true
 }
 variable "linux_ip_id" {
   type     = string
   nullable = false
+  sensitive = true
 }
 
 # Create cicd_bw_linux SSH key
@@ -24,7 +26,7 @@ resource "scaleway_instance_server" "instance" {
 }
 
 # Create Ansible inventory file
-resource "local_file" "ansible_inventory" {
+resource "local_sensitive_file" "ansible_inventory" {
   content = templatefile("templates/linux_inventory.tftpl", {
     public_ip = var.linux_ip
   })

@@ -50,9 +50,9 @@ try:
             "http://www.example.com/?id=/etc/passwd",
             headers={"Host": "www.example.com"},
         )
-        sleep(1)
+        sleep(1.5)
 
-    sleep(1)
+    sleep(3)
 
     status_code = get(
         f"http://www.example.com",

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from argparse import ArgumentParser
+from copy import deepcopy
 from glob import glob
 from hashlib import sha256
 from io import BytesIO
@@ -174,7 +175,9 @@ def generate_external_plugins(
 
 
 def dict_to_frozenset(d):
-    if isinstance(d, dict):
+    if isinstance(d, list):
+        return tuple(sorted(d))
+    elif isinstance(d, dict):
         return frozenset((k, dict_to_frozenset(v)) for k, v in d.items())
     return d
 
@@ -259,17 +262,26 @@ if __name__ == "__main__":
                 "DATABASE_URI", getenv("DATABASE_URI", None)
             ),
         )
+        env = {}
 
         if INTEGRATION in (
             "Swarm",
             "Kubernetes",
             "Autoconf",
         ):
+            while not db.is_initialized():
+                logger.warning(
+                    "Database is not initialized, retrying in 5s ...",
+                )
+                sleep(5)
+
             while not db.is_autoconf_loaded():
                 logger.warning(
                     "Autoconf is not loaded yet in the database, retrying in 5s ...",
                 )
                 sleep(5)
+
+            env = db.get_config()
         elif (
             not tmp_variables_path.exists()
             or not nginx_variables_path.exists()
@@ -298,19 +310,19 @@ if __name__ == "__main__":
                     "Config saver failed, configuration will not work as expected...",
                 )
 
-        while not db.is_initialized():
-            logger.warning(
-                "Database is not initialized, retrying in 5s ...",
-            )
-            sleep(5)
+            while not db.is_initialized():
+                logger.warning(
+                    "Database is not initialized, retrying in 5s ...",
+                )
+                sleep(5)
 
-        env = db.get_config()
-        while not db.is_first_config_saved() or not env:
-            logger.warning(
-                "Database doesn't have any config saved yet, retrying in 5s ...",
-            )
-            sleep(5)
             env = db.get_config()
+            while not db.is_first_config_saved() or not env:
+                logger.warning(
+                    "Database doesn't have any config saved yet, retrying in 5s ...",
+                )
+                sleep(5)
+                env = db.get_config()
 
         env["DATABASE_URI"] = db.database_uri
 
@@ -419,14 +431,20 @@ if __name__ == "__main__":
                 )
 
         tmp_external_plugins = []
-        for external_plugin in external_plugins.copy():
+        for external_plugin in deepcopy(external_plugins):
             external_plugin.pop("data", None)
             external_plugin.pop("checksum", None)
             external_plugin.pop("jobs", None)
+            external_plugin.pop("method", None)
             tmp_external_plugins.append(external_plugin)
 
-        changes = {dict_to_frozenset(d) for d in tmp_external_plugins} != {
-            dict_to_frozenset(d) for d in db_plugins
+        tmp_db_plugins = []
+        for db_plugin in db_plugins.copy():
+            db_plugin.pop("method", None)
+            tmp_db_plugins.append(db_plugin)
+
+        changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {
+            hash(dict_to_frozenset(d)) for d in tmp_db_plugins
         }
 
         if changes:
@@ -493,14 +511,15 @@ if __name__ == "__main__":
                 logger.info(f"Successfully sent {CACHE_PATH} folder")
 
         while True:
-            threads.clear()
-            ret = db.checked_changes(CHANGES)
+            if not FIRST_RUN:
+                threads.clear()
+                ret = db.checked_changes(CHANGES)
 
-            if ret:
-                logger.error(
-                    f"An error occurred when setting the changes to checked in the database : {ret}"
-                )
-                stop(1)
+                if ret:
+                    logger.error(
+                        f"An error occurred when setting the changes to checked in the database : {ret}"
+                    )
+                    stop(1)
 
             # Update the environment variables of the scheduler
             SCHEDULER.env = env.copy() | environ.copy()
@@ -726,10 +745,7 @@ if __name__ == "__main__":
                 if CONFIG_NEED_GENERATION:
                     CHANGES.append("config")
                     env = db.get_config()
-                    content = ""
-                    for k, v in env.items():
-                        content += f"{k}={v}\n"
-                    SCHEDULER_TMP_ENV_PATH.write_text(content)
+                    env["DATABASE_URI"] = db.database_uri
 
                 if INSTANCES_NEED_GENERATION:
                     CHANGES.append("instances")

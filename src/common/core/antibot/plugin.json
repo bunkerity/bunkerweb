@@ -29,7 +29,7 @@
       "help": "Unused URI that clients will be redirected to to solve the challenge.",
       "id": "antibot-uri",
       "label": "Antibot URL",
-      "regex": "^/[\\w\\].~:/?#[@!$&'()*+,;=-]*$",
+      "regex": "^\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*$",
       "type": "text"
     },
     "ANTIBOT_RECAPTCHA_SCORE": {
@@ -47,7 +47,7 @@
       "help": "Sitekey for reCAPTCHA challenge.",
       "id": "antibot-recaptcha-sitekey",
       "label": "reCAPTCHA sitekey",
-      "regex": "^[\\w-]*$",
+      "regex": "^[\\w\\-]*$",
       "type": "text"
     },
     "ANTIBOT_RECAPTCHA_SECRET": {
@@ -56,7 +56,7 @@
       "help": "Secret for reCAPTCHA challenge.",
       "id": "antibot-recaptcha-secret",
       "label": "reCAPTCHA secret",
-      "regex": "^[\\w-]*$",
+      "regex": "^[\\w\\-]*$",
       "type": "password"
     },
     "ANTIBOT_HCAPTCHA_SITEKEY": {
@@ -65,7 +65,7 @@
       "help": "Sitekey for hCaptcha challenge.",
       "id": "antibot-hcaptcha-sitekey",
       "label": "hCaptcha sitekey",
-      "regex": "^[a-zA-Z0-9-]*$",
+      "regex": "^[a-zA-Z0-9\\-]*$",
       "type": "text"
     },
     "ANTIBOT_HCAPTCHA_SECRET": {
@@ -83,7 +83,7 @@
       "help": "Sitekey for Turnstile challenge.",
       "id": "antibot-turnstile-sitekey",
       "label": "Turnstile sitekey",
-      "regex": "^(0x[\\w-]+)?$",
+      "regex": "^(0x[\\w\\-]+)?$",
       "type": "text"
     },
     "ANTIBOT_TURNSTILE_SECRET": {
@@ -92,7 +92,7 @@
       "help": "Secret for Turnstile challenge.",
       "id": "antibot-turnstile-secret",
       "label": "Turnstile secret",
-      "regex": "^(0x[\\w-]+)?$",
+      "regex": "^(0x[\\w\\-]+)?$",
       "type": "password"
     },
     "ANTIBOT_TIME_RESOLVE": {

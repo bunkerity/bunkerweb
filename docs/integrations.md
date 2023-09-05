@@ -24,6 +24,12 @@ Whether you're conducting tests, developing applications, or deploying BunkerWeb
 docker pull bunkerity/bunkerweb:1.5.1
 ```
 
+Docker images are also available on [GitHub packages](https://github.com/orgs/bunkerity/packages?repo_name=bunkerweb) and can be downloaded using the `ghcr.io` repository address :
+
+```shell
+docker pull ghcr.io/bunkerity/bunkerweb:1.5.1
+```
+
 Alternatively, if you prefer a more hands-on approach, you have the option to build the Docker image directly from the [source](https://github.com/bunkerity/bunkerweb). Building the image from source gives you greater control and customization over the deployment process. However, please note that this method may take some time to complete, depending on your hardware configuration.
 
 While the image is being built, you can take a moment to relax and enjoy a cup of coffee ☕, as the process may require some patience. Once the image is successfully built, you can proceed to deploy and utilize BunkerWeb within your Docker environment. This method allows you to tailor the image to your specific requirements and ensures a more personalized deployment of BunkerWeb.
@@ -164,7 +170,7 @@ services:
       - DOCKER_HOST=tcp://bw-docker:2375
 ...
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -222,7 +228,7 @@ services:
       - bw-docker
 ...
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     networks:
       - bw-docker
 ...
@@ -273,7 +279,7 @@ services:
       - bw-docker
 
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -372,7 +378,7 @@ services:
       - bw-docker
 
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -513,7 +519,7 @@ services:
           - "node.role == worker"
 
   bw-docker:
-    image: tecnativa/docker-socket-proxy
+    image: tecnativa/docker-socket-proxy:nightly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
@@ -969,6 +975,9 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     sudo apt install -y nginx=1.24.0-1~$(lsb_release -cs)
     ```
 
+    !!! warning "Testing version"
+        If you use the `testing` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
+
     And finally install BunkerWeb 1.5.1 :
 
     ```shell
@@ -1002,6 +1011,9 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     sudo apt update && \
     sudo apt install -y nginx=1.24.0-1~jammy
     ```
+
+    !!! warning "Testing version"
+        If you use the `testing` version, you will need to add the `force-bad-version` directive to your `/etc/dpkg/dpkg.cfg` file before installing BunkerWeb.
 
     And finally install BunkerWeb 1.5.1 :
 

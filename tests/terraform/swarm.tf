@@ -2,10 +2,12 @@
 variable "swarm_ips" {
   type     = list(string)
   nullable = false
+  sensitive = true
 }
 variable "swarm_ips_id" {
   type     = list(string)
   nullable = false
+  sensitive = true
 }
 
 # Create cicd_bw_swarm SSH key
@@ -33,7 +35,7 @@ resource "scaleway_instance_server" "instances" {
 }
 
 # Create Ansible inventory file
-resource "local_file" "ansible_inventory" {
+resource "local_sensitive_file" "ansible_inventory" {
   content = templatefile("templates/swarm_inventory.tftpl", {
     public_ips = var.swarm_ips
   })

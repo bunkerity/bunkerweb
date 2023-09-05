@@ -1,60 +1,38 @@
 {
-    "init": [
-        "sessions",
-        "whitelist",
-        "blacklist",
-        "greylist",
-        "bunkernet",
-        "limit"
-    ],
-    "init_worker": [
-        "redis",
-        "bunkernet",
-        "dnsbl"
-    ],
-    "set": [
-        "sessions",
-        "whitelist"
-    ],
-    "access": [
-        "whitelist",
-        "letsencrypt",
-        "blacklist",
-        "greylist",
-        "country",
-        "dnsbl",
-        "bunkernet",
-        "reversescan",
-        "limit",
-        "misc",
-        "cors",
-        "antibot"
-    ],
-    "headers": [
-        "headers",
-        "cors",
-        "reverseproxy",
-        "clientcache",
-        "antibot"
-    ],
-    "log": [
-        "badbheavior",
-        "bunkernet"
-    ],
-    "preread": [
-        "whitelist",
-        "blacklist",
-        "greylist",
-        "country",
-        "dnsbl",
-        "reversescan"
-    ],
-    "log_stream": [
-        "badbehavior",
-        "bunkernet"
-    ],
-    "log_default": [
-        "badbheavior",
-        "bunkernet"
-    ]
+  "init": [
+    "sessions",
+    "whitelist",
+    "blacklist",
+    "greylist",
+    "bunkernet",
+    "limit"
+  ],
+  "init_worker": ["redis", "bunkernet", "dnsbl"],
+  "set": ["sessions", "whitelist"],
+  "access": [
+    "whitelist",
+    "letsencrypt",
+    "blacklist",
+    "greylist",
+    "country",
+    "dnsbl",
+    "bunkernet",
+    "reversescan",
+    "limit",
+    "misc",
+    "cors",
+    "antibot"
+  ],
+  "headers": ["headers", "cors", "reverseproxy", "clientcache", "antibot"],
+  "log": ["badbheavior", "bunkernet"],
+  "preread": [
+    "whitelist",
+    "blacklist",
+    "greylist",
+    "country",
+    "dnsbl",
+    "reversescan"
+  ],
+  "log_stream": ["badbehavior", "bunkernet"],
+  "log_default": ["badbheavior", "bunkernet"]
 }

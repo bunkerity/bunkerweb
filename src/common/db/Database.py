@@ -167,6 +167,11 @@ class Database:
         )
         self.suffix_rx = re_compile(r"_\d+$")
 
+        if sqlalchemy_string.startswith("sqlite"):
+            with self.__db_session() as session:
+                session.execute(text("PRAGMA journal_mode=WAL"))
+                session.commit()
+
     def __del__(self) -> None:
         """Close the database"""
         if self.__sql_session:
@@ -329,8 +334,10 @@ class Database:
             except BaseException:
                 return format_exc()
 
-    def checked_changes(self, changes: Optional[List[str]] = None) -> str:
-        """Set that the config, the custom configs, the plugins and instances didn't change"""
+    def checked_changes(
+        self, changes: Optional[List[str]] = None, value: Optional[bool] = False
+    ) -> str:
+        """Set changed bit for config, custom configs, instances and plugins"""
         changes = changes or [
             "config",
             "custom_configs",
@@ -345,13 +352,13 @@ class Database:
                     return "The metadata are not set yet, try again"
 
                 if "config" in changes:
-                    metadata.config_changed = False
+                    metadata.config_changed = value
                 if "custom_configs" in changes:
-                    metadata.custom_configs_changed = False
+                    metadata.custom_configs_changed = value
                 if "external_plugins" in changes:
-                    metadata.external_plugins_changed = False
+                    metadata.external_plugins_changed = value
                 if "instances" in changes:
-                    metadata.instances_changed = False
+                    metadata.instances_changed = value
                 session.commit()
             except BaseException:
                 return format_exc()
@@ -470,7 +477,9 @@ class Database:
 
         return True, ""
 
-    def save_config(self, config: Dict[str, Any], method: str) -> str:
+    def save_config(
+        self, config: Dict[str, Any], method: str, changed: Optional[bool] = True
+    ) -> str:
         """Save the config in the database"""
         to_put = []
         with self.__db_session() as session:
@@ -716,12 +725,13 @@ class Database:
                                 Global_values.suffix == suffix,
                             ).update({Global_values.value: value})
 
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    if not metadata.first_config_saved:
-                        metadata.first_config_saved = True
-                    metadata.config_changed = True
+            if changed:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        if not metadata.first_config_saved:
+                            metadata.first_config_saved = True
+                        metadata.config_changed = True
 
             try:
                 session.add_all(to_put)
@@ -732,7 +742,10 @@ class Database:
         return ""
 
     def save_custom_configs(
-        self, custom_configs: List[Dict[str, Tuple[str, List[str]]]], method: str
+        self,
+        custom_configs: List[Dict[str, Tuple[str, List[str]]]],
+        method: str,
+        changed: Optional[bool] = True,
     ) -> str:
         """Save the custom configs in the database"""
         message = ""
@@ -813,11 +826,11 @@ class Database:
                             else {}
                         )
                     )
-
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    metadata.custom_configs_changed = True
+            if changed:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        metadata.custom_configs_changed = True
 
             try:
                 session.add_all(to_put)
@@ -879,7 +892,13 @@ class Database:
                 if setting.context == "multisite":
                     multisite.append(setting.id)
 
-            if config.get("MULTISITE", "no") == "yes":
+            is_multisite = (
+                config.get("MULTISITE", {"value": "no"})["value"] == "yes"
+                if methods
+                else config.get("MULTISITE", "no") == "yes"
+            )
+
+            if is_multisite:
                 for service in session.query(Services).with_entities(Services.id).all():
                     checked_settings = []
                     for key, value in deepcopy(config).items():
@@ -926,7 +945,7 @@ class Database:
                                 }
                             )
 
-            if config["MULTISITE"] == "yes":
+            if is_multisite:
                 servers = " ".join(
                     service.id for service in session.query(Services).all()
                 )
@@ -972,19 +991,22 @@ class Database:
                 for service in session.query(Services).with_entities(Services.id).all()
             ]
             for service in service_names:
+                service_settings = []
                 tmp_config = deepcopy(config)
 
                 for key, value in deepcopy(tmp_config).items():
                     if key.startswith(f"{service}_"):
-                        tmp_config[key.replace(f"{service}_", "")] = tmp_config.pop(key)
+                        setting = key.replace(f"{service}_", "")
+                        service_settings.append(setting)
+                        tmp_config[setting] = tmp_config.pop(key)
                     elif any(key.startswith(f"{s}_") for s in service_names):
                         tmp_config.pop(key)
-                    else:
+                    elif key not in service_settings:
                         tmp_config[key] = (
                             {
                                 "value": value["value"],
-                                "global": True,
-                                "method": "default",
+                                "global": value["global"],
+                                "method": value["method"],
                             }
                             if methods is True
                             else value
@@ -1135,10 +1157,10 @@ class Database:
                         updates[Plugins.method] = plugin["method"]
 
                     if plugin.get("data") != db_plugin.data:
-                        updates[Plugins.data] = plugin["data"]
+                        updates[Plugins.data] = plugin.get("data")
 
                     if plugin.get("checksum") != db_plugin.checksum:
-                        updates[Plugins.checksum] = plugin["checksum"]
+                        updates[Plugins.checksum] = plugin.get("checksum")
 
                     if updates:
                         session.query(Plugins).filter(
@@ -1152,7 +1174,7 @@ class Database:
                         .all()
                     )
                     db_ids = [setting.id for setting in db_plugin_settings]
-                    setting_ids = [setting["id"] for setting in settings.values()]
+                    setting_ids = [setting for setting in settings]
                     missing_ids = [
                         setting for setting in db_ids if setting not in setting_ids
                     ]
@@ -1222,8 +1244,8 @@ class Database:
                             if value["type"] != db_setting.type:
                                 updates[Settings.type] = value["type"]
 
-                            if value["multiple"] != db_setting.multiple:
-                                updates[Settings.multiple] = value["multiple"]
+                            if value.get("multiple") != db_setting.multiple:
+                                updates[Settings.multiple] = value.get("multiple")
 
                             if updates:
                                 session.query(Settings).filter(
@@ -1237,9 +1259,7 @@ class Database:
                                 .all()
                             )
                             db_values = [select.value for select in db_selects]
-                            select_values = [
-                                select["value"] for select in value.get("select", [])
-                            ]
+                            select_values = value.get("select", [])
                             missing_values = [
                                 select
                                 for select in db_values
@@ -1742,7 +1762,9 @@ class Database:
 
         return ""
 
-    def update_instances(self, instances: List[Dict[str, Any]]) -> str:
+    def update_instances(
+        self, instances: List[Dict[str, Any]], changed: Optional[bool] = True
+    ) -> str:
         """Update instances."""
         to_put = []
         with self.__db_session() as session:
@@ -1757,10 +1779,11 @@ class Database:
                     )
                 )
 
-            with suppress(ProgrammingError, OperationalError):
-                metadata = session.query(Metadata).get(1)
-                if metadata is not None:
-                    metadata.instances_changed = True
+            if changed:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        metadata.instances_changed = True
 
             try:
                 session.add_all(to_put)

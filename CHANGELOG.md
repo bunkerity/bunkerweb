@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.5.2 - 
+
+- [BUGFIX] Fix UI fetching only default values from the database (fixes no thrash button too)
+- [BUGFIX] Fix infinite loop when using autoconf
+- [MISC] Push Docker images to GitHub packages (ghcr.io repository)
+- [MISC] Improved CI/CD
+
 ## v1.5.1 - 2023/08/08
 
 - [BUGFIX] New version checker in logs displays "404 not found"

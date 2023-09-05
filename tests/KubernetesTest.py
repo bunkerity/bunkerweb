@@ -62,17 +62,17 @@ class KubernetesTest(Test):
             Test.replace_in_file(
                 deploy,
                 r"bunkerity/bunkerweb:.*$",
-                f"{getenv('PRIVATE_REGISTRY')}/infra/bunkerweb-tests:{getenv('IMAGE_TAG')}",
+                f"ghcr.io/bunkerity/bunkerweb-tests:{getenv('IMAGE_TAG')}",
             )
             Test.replace_in_file(
                 deploy,
                 r"bunkerity/bunkerweb-autoconf:.*$",
-                f"{getenv('PRIVATE_REGISTRY')}/infra/autoconf-tests:{getenv('IMAGE_TAG')}",
+                f"ghcr.io/bunkerity/autoconf-tests:{getenv('IMAGE_TAG')}",
             )
             Test.replace_in_file(
                 deploy,
                 r"bunkerity/bunkerweb-scheduler:.*$",
-                f"{getenv('PRIVATE_REGISTRY')}/infra/scheduler-tests:{getenv('IMAGE_TAG')}",
+                f"ghcr.io/bunkerity/scheduler-tests:{getenv('IMAGE_TAG')}",
             )
             proc = run(
                 "kubectl apply -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True

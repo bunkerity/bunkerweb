@@ -29,7 +29,7 @@
       "help": "Value of the Access-Control-Expose-Headers header.",
       "id": "cors-expose-headers",
       "label": "Access-Control-Expose-Headers value",
-      "regex": "^(\\*|(?![, ]+)(,? ?([\\w-]+)(?!.*\\3(?!.)))*)?$",
+      "regex": "^(\\*|(?![, ]+)(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
       "type": "text"
     },
     "CROSS_ORIGIN_OPENER_POLICY": {
@@ -40,12 +40,7 @@
       "label": "Cross-Origin-Opener-Policy",
       "regex": "^(unsafe-none|same-origin-allow-popups|same-origin)?$",
       "type": "select",
-      "select": [
-        "",
-        "unsafe-none",
-        "same-origin-allow-popups",
-        "same-origin"
-      ]
+      "select": ["", "unsafe-none", "same-origin-allow-popups", "same-origin"]
     },
     "CROSS_ORIGIN_EMBEDDER_POLICY": {
       "context": "multisite",
@@ -55,12 +50,7 @@
       "label": "Cross-Origin-Embedder-Policy",
       "regex": "^(unsafe-none|require-corp|credentialless)?$",
       "type": "select",
-      "select": [
-        "",
-        "unsafe-none",
-        "require-corp",
-        "credentialless"
-      ]
+      "select": ["", "unsafe-none", "require-corp", "credentialless"]
     },
     "CROSS_ORIGIN_RESOURCE_POLICY": {
       "context": "multisite",
@@ -70,12 +60,7 @@
       "label": "Cross-Origin-Resource-Policy",
       "regex": "^(same-site|same-origin|cross-origin)?$",
       "type": "select",
-      "select": [
-        "",
-        "same-site",
-        "same-origin",
-        "cross-origin"
-      ]
+      "select": ["", "same-site", "same-origin", "cross-origin"]
     },
     "CORS_MAX_AGE": {
       "context": "multisite",
@@ -110,7 +95,7 @@
       "help": "Value of the Access-Control-Allow-Headers header.",
       "id": "cors-allow-headers",
       "label": "Access-Control-Allow-Headers value",
-      "regex": "^(\\*|(?![, ])(,? ?([\\w-]+)(?!.*\\3(?!.)))*)?$",
+      "regex": "^(\\*|(?![, ])(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
       "type": "text"
     },
     "CORS_DENY_REQUEST": {

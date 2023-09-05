@@ -127,7 +127,12 @@ class SwarmController(Controller):
         return configs
 
     def apply_config(self) -> bool:
-        return self.apply(self._instances, self._services, configs=self._configs)
+        return self.apply(
+            self._instances,
+            self._services,
+            configs=self._configs,
+            first=not self._loaded,
+        )
 
     def __event(self, event_type):
         while True:

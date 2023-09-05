@@ -69,3 +69,5 @@ extra:
 plugins:
   - search
   - print-site
+  - mike:
+      canonical_version: latest

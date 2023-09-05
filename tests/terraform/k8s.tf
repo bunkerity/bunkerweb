@@ -2,10 +2,7 @@
 variable "k8s_ip" {
   type     = string
   nullable = false
-}
-variable "k8s_dockerconfigjson" {
-  type = string
-  nullable = false
+  sensitive = true
 }
 
 # Create k8s cluster
@@ -26,37 +23,24 @@ resource "scaleway_k8s_pool" "pool" {
 }
 
 # Get kubeconfig file
-resource "local_file" "kubeconfig" {
+resource "local_sensitive_file" "kubeconfig" {
   depends_on = [scaleway_k8s_pool.pool]
   content = scaleway_k8s_cluster.cluster.kubeconfig[0].config_file
   filename = "/tmp/k8s/kubeconfig"
 }
 provider "kubectl" {
-  config_path = "${local_file.kubeconfig.filename}"
+  config_path = "${local_sensitive_file.kubeconfig.filename}"
 }
 
 # Setup LB
-resource "local_file" "lb_yml" {
-  depends_on = [local_file.kubeconfig]
+resource "local_sensitive_file" "lb_yml" {
+  depends_on = [local_sensitive_file.kubeconfig]
   content = templatefile("templates/lb.yml.tftpl", {
     lb_ip = var.k8s_ip
   })
   filename = "/tmp/k8s/lb.yml"
 }
 resource "kubectl_manifest" "lb" {
-  depends_on = [local_file.lb_yml]
-  yaml_body = local_file.lb_yml.content
-}
-
-# Setup registry
-resource "local_file" "reg_yml" {
-  depends_on = [local_file.kubeconfig]
-  content = templatefile("templates/reg.yml.tftpl", {
-    dockerconfigjson = var.k8s_dockerconfigjson
-  })
-  filename = "/tmp/k8s/reg.yml"
-}
-resource "kubectl_manifest" "reg" {
-  depends_on = [local_file.reg_yml]
-  yaml_body = local_file.reg_yml.content
+  depends_on = [local_sensitive_file.lb_yml]
+  yaml_body = local_sensitive_file.lb_yml.content
 }

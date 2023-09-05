@@ -132,7 +132,7 @@ jobs:
       versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Get VERSION
         id: getversion
         run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"
@@ -177,7 +177,7 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el]
+        linux: [ubuntu, debian, fedora, rhel]
         arch: [amd64, arm64]
         include:
           - release: latest

@@ -38,7 +38,7 @@
       "help": "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.",
       "id": "real-ip-from-urls",
       "label": "Real IP from URLs",
-      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
+      "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "REAL_IP_HEADER": {
@@ -47,7 +47,7 @@
       "help": "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.",
       "id": "real-ip-header",
       "label": "Real IP header",
-      "regex": "^(?! )(( ?(?!proxy_protocol)[\\w-]+)*|proxy_protocol)$",
+      "regex": "^(?! )(( ?(?!proxy_protocol)[\\w\\-]+)*|proxy_protocol)$",
       "type": "text"
     },
     "REAL_IP_RECURSIVE": {
