@@ -20,7 +20,7 @@
       "help": "URL of the protected resource or sitewide value.",
       "id": "auth-basic-location",
       "label": "Auth basic Location",
-      "regex": "^(sitewide|/[a-zA-Z0-9-./]*)$",
+      "regex": "^(sitewide|/[a-zA-Z0-9.\\/\\-]*)$",
       "type": "text"
     },
     "AUTH_BASIC_USER": {
@@ -29,7 +29,7 @@
       "help": "Username",
       "id": "auth-basic-user",
       "label": "Auth basic Username",
-      "regex": "^[\\w-]+",
+      "regex": "^[\\w\\-]+",
       "type": "text"
     },
     "AUTH_BASIC_PASSWORD": {
