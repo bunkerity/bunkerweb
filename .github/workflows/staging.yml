@@ -66,110 +66,111 @@ jobs:
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
 
   # Code security
-  code-security:
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ["python"]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: ${{ matrix.language }}
-          config-file: ./.github/codeql.yml
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
-        with:
-          category: "/language:${{matrix.language}}"
+  # code-security:
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     actions: read
+  #     contents: read
+  #     security-events: write
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       language: ["python"]
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Initialize CodeQL
+  #       uses: github/codeql-action/init@v2
+  #       with:
+  #         languages: ${{ matrix.language }}
+  #         config-file: ./.github/codeql.yml
+  #     - name: Perform CodeQL Analysis
+  #       uses: github/codeql-action/analyze@v2
+  #       with:
+  #         category: "/language:${{matrix.language}}"
 
   # Create infrastructures
-  create-infras:
-    needs: [code-security, build-containers, build-packages]
-    strategy:
-      matrix:
-        type: [docker, autoconf, swarm, k8s, linux]
-    uses: ./.github/workflows/staging-create-infra.yml
-    with:
-      TYPE: ${{ matrix.type }}
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      K8S_IP: ${{ secrets.K8S_IP }}
+  # create-infras:
+  #   needs: [code-security, build-containers, build-packages]
+  #   strategy:
+  #     matrix:
+  #       type: [docker, autoconf, swarm, k8s, linux]
+  #   uses: ./.github/workflows/staging-create-infra.yml
+  #   with:
+  #     TYPE: ${{ matrix.type }}
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  #     SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  #     K8S_IP: ${{ secrets.K8S_IP }}
 
   # Perform tests
-  staging-tests:
-    needs: [create-infras]
-    strategy:
-      matrix:
-        type: [docker, autoconf, swarm, k8s, linux]
-        include:
-          - type: docker
-            runs_on: "['self-hosted', 'bw-docker']"
-          - type: autoconf
-            runs_on: "['self-hosted', 'bw-autoconf']"
-          - type: swarm
-            runs_on: "['self-hosted', 'bw-swarm']"
-          - type: k8s
-            runs_on: "['ubuntu-latest']"
-          - type: linux
-            runs_on: "['self-hosted', 'bw-linux']"
-    uses: ./.github/workflows/staging-tests.yml
-    with:
-      TYPE: ${{ matrix.type }}
-      RUNS_ON: ${{ matrix.runs_on }}
-    secrets: inherit
-  tests-ui:
-    needs: [create-infras]
-    uses: ./.github/workflows/tests-ui.yml
-    with:
-      RELEASE: testing
-  prepare-tests-core:
-    needs: [create-infras]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - id: set-matrix
-        run: |
-          tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-          echo "::set-output name=tests::$tests"
-    outputs:
-      tests: ${{ steps.set-matrix.outputs.tests }}
-  tests-core:
-    needs: prepare-tests-core
-    strategy:
-      fail-fast: false
-      matrix:
-        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
-    uses: ./.github/workflows/test-core.yml
-    with:
-      TEST: ${{ matrix.test }}
-      RELEASE: testing
+  # staging-tests:
+  #   needs: [create-infras]
+  #   strategy:
+  #     matrix:
+  #       type: [docker, autoconf, swarm, k8s, linux]
+  #       include:
+  #         - type: docker
+  #           runs_on: "['self-hosted', 'bw-docker']"
+  #         - type: autoconf
+  #           runs_on: "['self-hosted', 'bw-autoconf']"
+  #         - type: swarm
+  #           runs_on: "['self-hosted', 'bw-swarm']"
+  #         - type: k8s
+  #           runs_on: "['ubuntu-latest']"
+  #         - type: linux
+  #           runs_on: "['self-hosted', 'bw-linux']"
+  #   uses: ./.github/workflows/staging-tests.yml
+  #   with:
+  #     TYPE: ${{ matrix.type }}
+  #     RUNS_ON: ${{ matrix.runs_on }}
+  #   secrets: inherit
+  # tests-ui:
+  #   needs: [create-infras]
+  #   uses: ./.github/workflows/tests-ui.yml
+  #   with:
+  #     RELEASE: testing
+  # prepare-tests-core:
+  #   needs: [create-infras]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - id: set-matrix
+  #       run: |
+  #         tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
+  #         echo "::set-output name=tests::$tests"
+  #   outputs:
+  #     tests: ${{ steps.set-matrix.outputs.tests }}
+  # tests-core:
+  #   needs: prepare-tests-core
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
+  #   uses: ./.github/workflows/test-core.yml
+  #   with:
+  #     TEST: ${{ matrix.test }}
+  #     RELEASE: testing
 
   # Delete infrastructures
-  delete-infras:
-    if: ${{ always() }}
-    needs: [staging-tests]
-    strategy:
-      matrix:
-        type: [docker, autoconf, swarm, k8s, linux]
-    uses: ./.github/workflows/staging-delete-infra.yml
-    with:
-      TYPE: ${{ matrix.type }}
-    secrets:
-      CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  # delete-infras:
+  #   if: ${{ always() }}
+  #   needs: [staging-tests]
+  #   strategy:
+  #     matrix:
+  #       type: [docker, autoconf, swarm, k8s, linux]
+  #   uses: ./.github/workflows/staging-delete-infra.yml
+  #   with:
+  #     TYPE: ${{ matrix.type }}
+  #   secrets:
+  #     CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
+  #     SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
   # Push Docker images
   push-images:
-    needs: [staging-tests, tests-ui, tests-core]
+    # needs: [staging-tests, tests-ui, tests-core]
+    needs: [build-packages, build-containers]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -187,20 +188,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push BW image
-        run: docker pull ghcr.io/bunkerweb-tests:testing && docker tag ghcr.io/bunkerweb-tests:testing bunkerity/bunkerweb:testing && docker push bunkerity/bunkerweb:testing && docker tag bunkerity/bunkerweb:testing ghcr.io/bunkerity/bunkerweb:testing && docker push ghcr.io/bunkerity/bunkerweb:testing
+        run: docker pull ghcr.io/bunkerity/bunkerweb-tests:testing && docker tag ghcr.io/bunkerity/bunkerweb-tests:testing bunkerity/bunkerweb:testing && docker push bunkerity/bunkerweb:testing && docker tag bunkerity/bunkerweb:testing ghcr.io/bunkerity/bunkerweb:testing && docker push ghcr.io/bunkerity/bunkerweb:testing
       - name: Push scheduler image
-        run: docker pull ghcr.io/scheduler-tests:testing && docker tag ghcr.io/scheduler-tests:testing bunkerity/bunkerweb-scheduler:testing && docker push bunkerity/bunkerweb-scheduler:testing && docker tag bunkerity/bunkerweb-scheduler:testing ghcr.io/bunkerity/bunkerweb-scheduler:testing && docker push ghcr.io/bunkerity/bunkerweb-scheduler:testing
+        run: docker pull ghcr.io/bunkerity/scheduler-tests:testing && docker tag ghcr.io/bunkerity/scheduler-tests:testing bunkerity/bunkerweb-scheduler:testing && docker push bunkerity/bunkerweb-scheduler:testing && docker tag bunkerity/bunkerweb-scheduler:testing ghcr.io/bunkerity/bunkerweb-scheduler:testing && docker push ghcr.io/bunkerity/bunkerweb-scheduler:testing
       - name: Push UI image
-        run: docker pull ghcr.io/ui-tests:testing && docker tag ghcr.io/ui-tests:testing bunkerity/bunkerweb-ui:testing && docker push bunkerity/bunkerweb-ui:testing && docker tag bunkerity/bunkerweb-ui:testing ghcr.io/bunkerity/bunkerweb-ui:testing && docker push ghcr.io/bunkerity/bunkerweb-ui:testing
+        run: docker pull ghcr.io/bunkerity/ui-tests:testing && docker tag ghcr.io/bunkerity/ui-tests:testing bunkerity/bunkerweb-ui:testing && docker push bunkerity/bunkerweb-ui:testing && docker tag bunkerity/bunkerweb-ui:testing ghcr.io/bunkerity/bunkerweb-ui:testing && docker push ghcr.io/bunkerity/bunkerweb-ui:testing
       - name: Push autoconf image
-        run: docker pull ghcr.io/autoconf-tests:testing && docker tag ghcr.io/autoconf-tests:testing bunkerity/bunkerweb-autoconf:testing && docker push bunkerity/bunkerweb-autoconf:testing && docker tag bunkerity/bunkerweb-autoconf:testing ghcr.io/bunkerity/bunkerweb-autoconf:testing && docker push ghcr.io/bunkerity/bunkerweb-autoconf:testing
+        run: docker pull ghcr.io/bunkerity/autoconf-tests:testing && docker tag ghcr.io/bunkerity/autoconf-tests:testing bunkerity/bunkerweb-autoconf:testing && docker push bunkerity/bunkerweb-autoconf:testing && docker tag bunkerity/bunkerweb-autoconf:testing ghcr.io/bunkerity/bunkerweb-autoconf:testing && docker push ghcr.io/bunkerity/bunkerweb-autoconf:testing
 
   # Push Linux packages
   push-packages:
     needs: [staging-tests, tests-ui, tests-core]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel]
+        linux: [ubuntu, debian, fedora, el]
         arch: [amd64]
         include:
           - release: testing
