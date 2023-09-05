@@ -1,6 +1,10 @@
 <script setup>
 import { computed, defineProps } from "vue";
-
+import { getSettingsSimple } from "@utils/settings.js";
+import PluginSettingHeader from "@components/Plugin/Setting/Header.vue";
+import PluginInput from "@components/Plugin/Input.vue";
+import PluginSelect from "@components/Plugin/Select.vue";
+import PluginCheckbox from "@components/Plugin/Checkbox.vue";
 const props = defineProps({
   settings: {
     type: Object,

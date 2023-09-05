@@ -10,12 +10,19 @@ import TabStructure from "@components/Tab/Structure.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
-
+import { reactive, computed, onMounted } from "vue";
+import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
+import {
+  setPluginsData,
+  addConfToPlugins,
+  getPluginsByContext,
+} from "@utils/plugins.js";
+import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
 
-const feedbackStore = useFeedbackStore();
 const config = useConfigStore();
+const feedbackStore = useFeedbackStore();
 
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
@@ -23,45 +30,70 @@ const filters = reactive({
   method: "",
 });
 
-const {
-  data: globalConfList,
-  pending: globalConfPend,
-  refresh: globalConfRef,
-} = await useFetch("/api/global-config", {
-  method: "GET",
-  onResponse({ request, response, options }) {
-    // Process the response data
-    feedbackStore.addFeedback(
-      response._data.type,
-      response._data.status,
-      response._data.message
-    );
-  },
-});
-
 // Plugins data to render components
 const plugins = reactive({
-  isErr: globalConfList.value.type === "error" ? true : false,
-  // Never modify this unless refetch
-  base: globalConfList.value.type === "error" ? [] : globalConfList.value.data,
+  isPend: false,
+  isErr: false,
+  // Data from fetch
+  data: [],
   // Default plugin to display, first of list (before any filter)
-  active:
-    globalConfList.value.type === "error"
-      ? ""
-      : globalConfList.value.data[0]["name"],
+  active: "",
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
-    if (globalConfList.value.type === "error") return [];
+    if (
+      plugins.isErr ||
+      plugins.isPend ||
+      !plugins.data ||
+      plugins.data.length === 0 ||
+      conf.isErr ||
+      conf.isPend ||
+      !conf.data ||
+      conf.data.length === 0
+    ) {
+      plugins.active = "";
+      return [];
+    }
+    // Duplicate base data
+    const clonePlugin = JSON.parse(JSON.stringify(plugins.data));
+    const cloneConf = JSON.parse(JSON.stringify(conf.data));
+    // Format and keep only global config
+    const setPlugins = setPluginsData(clonePlugin);
+    const mergeConf = addConfToPlugins(setPlugins, cloneConf["global"]);
+    const globalConf = getPluginsByContext(mergeConf, "global");
     // Filter data to display
-    const cloneBase = JSON.parse(JSON.stringify(plugins.base));
-    const filter = getSettingsByFilter(cloneBase, filters);
+    const filter = getSettingsByFilter(globalConf, filters);
     // Check if prev plugin or no plugin match filter
-    plugins.active =
-      filter.length !== 0
-        ? filter[0]["name"]
-        : globalConfList.value.data[0]["name"];
+    plugins.active = filter.length !== 0 ? filter[0]["name"] : "";
     return filter;
   }),
+});
+
+const conf = reactive({
+  isPend: false,
+  isErr: false,
+  // Data from fetch
+  data: [],
+});
+
+async function getGlobalConf() {
+  await fetchAPI(
+    "/api/config?methods=1&new_format=1",
+    "GET",
+    null,
+    conf,
+    feedbackStore.addFeedback
+  );
+  await fetchAPI(
+    "/api/plugins",
+    "GET",
+    null,
+    plugins,
+    feedbackStore.addFeedback
+  );
+}
+
+onMounted(async () => {
+  await getGlobalConf();
 });
 
 // Refetch and reset all states
@@ -71,24 +103,18 @@ function resetValues() {
 }
 
 function refresh() {
-  globalConfRef();
+  getGlobalConf();
   resetValues();
 }
 
 async function sendConf() {
-  const data = JSON.stringify(config.data["global"]);
-  await useFetch("/api/global-config", {
-    method: "PUT",
-    body: data,
-    onResponse({ request, response, options }) {
-      // Process the response data
-      feedbackStore.addFeedback(
-        response._data.type,
-        response._data.status,
-        response._data.message
-      );
-    },
-  });
+  await fetchAPI(
+    "/api/config/global?method=manual",
+    "PUT",
+    config.data["global"],
+    null,
+    feedbackStore.addFeedback
+  );
 }
 </script>
 
@@ -97,11 +123,11 @@ async function sendConf() {
     <ApiState
       class="col-span-4 col-start-5"
       :isErr="plugins.isErr"
-      :isPend="globalConfPend"
-      :isData="plugins.setup.length > 0 ? true : false"
+      :isPend="plugins.isPend"
+      :isData="true"
     />
     <div
-      v-if="!plugins.isErr && !globalConfPend"
+      v-if="!plugins.isErr && !plugins.isPend"
       class="col-span-12 content-wrap"
     >
       <CardBase
@@ -119,7 +145,7 @@ async function sendConf() {
       </CardBase>
       <CardBase
         label="filter"
-        class="z-10 col-span-12 2xl:col-span-3 row-start-1 row-end-2 md:row-start-0 2xl:row-auto row-end-1 grid grid-cols-12 relative"
+        class="z-10 col-span-12 2xl:col-span-3 row-start-1 row-end-2 md:row-start-0 2xl:row-auto grid grid-cols-12 relative"
       >
         <SettingsLayout
           class="flex w-full col-span-12 md:col-span-6 2xl:col-span-12"
@@ -146,7 +172,7 @@ async function sendConf() {
             :settings="{
               id: 'keyword',
               value: 'all',
-              values: useMethodList(),
+              values: getMethodList(),
               placeholder: 'Search',
             }"
           />

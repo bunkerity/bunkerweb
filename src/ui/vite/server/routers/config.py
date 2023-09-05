@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/config", tags=["config"])
     summary="Get complete config",
 )
 async def get_config(methods: bool = False, new_format: bool = False):
-    req = requests.get(f'{API_URL}/plugins?methods={methods}&new_format={new_format}')
+    req = requests.get(f'{API_URL}/config?methods={methods}&new_format={new_format}')
     res = set_res_from_req(req, "GET", "Retrieve config")
     return res
 
@@ -32,7 +32,6 @@ async def update_config(config: Dict[str, str], method: str):
     res = set_res_from_req(req, "PUT", "Update config")
     return res
 
-
 @router.put(
     "/global",
     response_model=ResponseModel,
@@ -42,7 +41,6 @@ async def update_global_config(config: Dict[str, str], method: str):
     req = requests.put(f'{API_URL}/config/global?method={method}', data=config)
     res = set_res_from_req(req, "PUT", "Update global config")
     return res
-
 
 @router.put(
     "/service/{service_name}",

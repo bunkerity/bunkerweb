@@ -15,9 +15,12 @@ export async function fetchAPI(
   api,
   method,
   body = false,
-  state = { isPend: false, isErr: false },
+  state = null,
   addFeedback = null
 ) {
+  // Block scope state object if any passed to avoid error
+  !state ? (state = { isPend: false, isErr: false, data: {} }) : false;
+  // Fetch
   const baseURL = "http://localhost:8000";
   state.isPend = true;
   return await fetch(`${baseURL}${api}`, {

@@ -1,5 +1,6 @@
 <script setup>
 import { defineProps } from "vue";
+import PopoverSetting from "@components/Popover/Setting.vue";
 
 const props = defineProps({
   label: {
