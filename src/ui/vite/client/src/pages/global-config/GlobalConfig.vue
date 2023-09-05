@@ -76,6 +76,8 @@ const conf = reactive({
 });
 
 async function getGlobalConf() {
+  conf.isPend = true;
+  plugins.isPend = true;
   await fetchAPI(
     "/api/config?methods=1&new_format=1",
     "GET",
@@ -109,7 +111,7 @@ function refresh() {
 
 async function sendConf() {
   await fetchAPI(
-    "/api/config/global?method=manual",
+    "/api/config/global?method=ui",
     "PUT",
     config.data["global"],
     null,

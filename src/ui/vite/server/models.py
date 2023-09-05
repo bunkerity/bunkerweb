@@ -6,7 +6,6 @@ from typing import Dict, List, Literal, Optional, Union
 from pydantic import BaseModel, Field, validator
 
 
-
 class Instance(BaseModel):
     hostname: str = Field(examples=["bunkerweb-1"], description="The server hostname")
     port: int = Field(examples=[5000], description="The server port")

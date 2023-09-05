@@ -7,6 +7,7 @@ import requests
 from config import API_URL
 from utils import set_res_from_req
 from models import Plugin, ResponseModel
+import json
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 
@@ -38,7 +39,8 @@ async def update_config(config: Dict[str, str], method: str):
     summary="Update global config",
 )
 async def update_global_config(config: Dict[str, str], method: str):
-    req = requests.put(f'{API_URL}/config/global?method={method}', data=config)
+    print(type(config))
+    req = requests.put(f'{API_URL}/config/global?method={method}', data=json.dumps(config))
     res = set_res_from_req(req, "PUT", "Update global config")
     return res
 
