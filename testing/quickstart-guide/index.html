@@ -2034,7 +2034,7 @@ app2.example.com_LISTEN_STREAM_PORT=20000
 <span class="w">        </span><span class="no">default_type &#39;text/plain&#39;;</span>
 <span class="w">        </span><span class="no">content_by_lua_block {</span>
 <span class="w">          </span><span class="no">ngx.say(&#39;world&#39;)</span>
-<span class="w">        </span><span class="no">}</span>
+<span class="w">          </span><span class="no">}</span>
 <span class="w">      </span><span class="no">}</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div>
@@ -2055,8 +2055,8 @@ app2.example.com_LISTEN_STREAM_PORT=20000
 chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
 </code></pre></div>
 <p>When starting the scheduler container, you will need to mount the folder on /data :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">mybunker</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb:testing</span>
+<div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
@@ -2088,7 +2088,8 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <span class="w">        </span><span class="no">default_type &#39;text/plain&#39;;</span>
 <span class="w">        </span><span class="no">content_by_lua_block {</span>
 <span class="w">            </span><span class="no">ngx.say(&#39;world&#39;)</span>
-<span class="w">      </span><span class="no">}</span>
+<span class="w">        </span><span class="no">}</span>
+<span class="w">        </span><span class="no">}</span>
 <span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 </code></pre></div>
 <p><strong>Using files</strong></p>
@@ -2108,7 +2109,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span><span class="w"> </span>bw-data
 </code></pre></div>
 <p>When starting the scheduler container, you will need to mount the folder on /data :</p>
-<div class="highlight"><pre><span></span><code><span class="nt">myautoconf</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><code><span class="nt">bw-scheduler</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-scheduler:testing</span>
 <span class="w">  </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./bw-data:/data</span>
