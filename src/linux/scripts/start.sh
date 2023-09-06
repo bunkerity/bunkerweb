@@ -144,6 +144,11 @@ function start() {
         exit 1
     fi
 
+    if [ ! -f /var/run/bunkerweb ] ; then
+        mkdir -p /var/run/bunkerweb
+        chown nginx:nginx /var/run/bunkerweb
+    fi
+
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting temp nginx ..."
     nginx -e /var/log/bunkerweb/error.log
