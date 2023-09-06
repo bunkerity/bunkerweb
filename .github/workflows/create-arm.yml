@@ -72,4 +72,3 @@ jobs:
         run: ssh root@$SSH_IP "curl -fsSL https://test.docker.com -o test-docker.sh ; sh test-docker.sh"
         env:
           SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
-

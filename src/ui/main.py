@@ -541,11 +541,15 @@ def services():
         message = ""
 
         if request.form["operation"] == "new":
-            message = f"Creating service {variables.get('SERVER_NAME', '').split(' ')[0]}"
+            message = (
+                f"Creating service {variables.get('SERVER_NAME', '').split(' ')[0]}"
+            )
         elif request.form["operation"] == "edit":
             message = f"Saving configuration for service {request.form.get('OLD_SERVER_NAME', '').split(' ')[0]}"
         elif request.form["operation"] == "delete":
-            message = f"Deleting service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
+            message = (
+                f"Deleting service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
+            )
 
         return redirect(url_for("loading", next=url_for("services"), message=message))
 
@@ -728,7 +732,8 @@ def configs():
                 join(sep, "etc", "bunkerweb", "configs"),
                 db_data=db.get_custom_configs(),
                 services=app.config["CONFIG"]
-                .get_config(methods=False).get("SERVER_NAME", "")
+                .get_config(methods=False)
+                .get("SERVER_NAME", "")
                 .split(" "),
             )
         ],
@@ -1174,7 +1179,8 @@ def cache():
                 is_cache=True,
                 db_data=db.get_jobs_cache_files(),
                 services=app.config["CONFIG"]
-                .get_config(methods=False).get("SERVER_NAME", "")
+                .get_config(methods=False)
+                .get("SERVER_NAME", "")
                 .split(" "),
             )
         ],

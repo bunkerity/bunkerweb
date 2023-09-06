@@ -7,7 +7,6 @@ on:
     branches: [master]
 
 jobs:
-
   # Build amd64 + 386 containers images
   build-containers:
     strategy:
@@ -145,7 +144,8 @@ jobs:
     needs: [create-arm, wait-builds]
     strategy:
       matrix:
-        image: [bunkerweb, bunkerweb-scheduler, bunkerweb-autoconf, bunkerweb-ui]
+        image:
+          [bunkerweb, bunkerweb-scheduler, bunkerweb-autoconf, bunkerweb-ui]
         include:
           - release: latest
           - image: bunkerweb
