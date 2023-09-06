@@ -532,8 +532,8 @@ def services():
             args=(
                 "services",
                 variables,
-                request.form.get("OLD_SERVER_NAME", "").split()[0],
-                variables.get("SERVER_NAME", "").split()[0],
+                request.form.get("OLD_SERVER_NAME", "").split(" ")[0],
+                variables.get("SERVER_NAME", "").split(" ")[0],
             ),
             kwargs={"operation": request.form["operation"]},
         ).start()
@@ -541,11 +541,11 @@ def services():
         message = ""
 
         if request.form["operation"] == "new":
-            message = f"Creating service {variables['SERVER_NAME'].split()[0]}"
+            message = f"Creating service {variables.get('SERVER_NAME', '').split(' ')[0]}"
         elif request.form["operation"] == "edit":
-            message = f"Saving configuration for service {request.form['OLD_SERVER_NAME'].split()[0]}"
+            message = f"Saving configuration for service {request.form.get('OLD_SERVER_NAME', '').split(' ')[0]}"
         elif request.form["operation"] == "delete":
-            message = f"Deleting service {request.form['SERVER_NAME'].split()[0]}"
+            message = f"Deleting service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
 
         return redirect(url_for("loading", next=url_for("services"), message=message))
 
@@ -556,7 +556,7 @@ def services():
         services=[
             {
                 "SERVER_NAME": {
-                    "value": service["SERVER_NAME"]["value"].split()[0],
+                    "value": service["SERVER_NAME"]["value"].split(" ")[0],
                     "method": service["SERVER_NAME"]["method"],
                 },
                 "USE_REVERSE_PROXY": service["USE_REVERSE_PROXY"],
@@ -728,8 +728,8 @@ def configs():
                 join(sep, "etc", "bunkerweb", "configs"),
                 db_data=db.get_custom_configs(),
                 services=app.config["CONFIG"]
-                .get_config(methods=False)["SERVER_NAME"]
-                .split(),
+                .get_config(methods=False).get("SERVER_NAME", "")
+                .split(" "),
             )
         ],
         dark_mode=app.config["DARK_MODE"],
@@ -1174,8 +1174,8 @@ def cache():
                 is_cache=True,
                 db_data=db.get_jobs_cache_files(),
                 services=app.config["CONFIG"]
-                .get_config(methods=False)["SERVER_NAME"]
-                .split(),
+                .get_config(methods=False).get("SERVER_NAME", "")
+                .split(" "),
             )
         ],
         dark_mode=app.config["DARK_MODE"],
@@ -1276,7 +1276,7 @@ def logs_linux():
         to_date = None
 
     def date_filter(log: str):
-        log_date = log.split()[0]
+        log_date = log.split(" ")[0]
         log_date = float(log_date) if regex_match(r"^\d+\.\d+$", log_date) else 0
         if to_date is not None and log_date > int(to_date):
             return False
@@ -1305,7 +1305,7 @@ def logs_linux():
 
         logs.append(
             {
-                "content": " ".join(log.strip().split()[1:]),
+                "content": " ".join(log.strip().split(" ")[1:]),
                 "type": error_type,
             }
         )
@@ -1409,7 +1409,7 @@ def logs_container(container_id):
             )
 
     for log in tmp_logs:
-        splitted = log.split()
+        splitted = log.split(" ")
         timestamp = splitted[0]
 
         if to_date is not None and dateutil_parse(timestamp).timestamp() > to_date:
