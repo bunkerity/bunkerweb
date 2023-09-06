@@ -7,51 +7,35 @@ on:
     branches: [ui]
 
 jobs:
-
   # Containers
-  build-bw:
+  build-containers:
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        image: [bunkerweb, scheduler, ui]
+        include:
+          - image: bunkerweb
+            dockerfile: src/bw/Dockerfile
+          - image: scheduler
+            dockerfile: src/scheduler/Dockerfile
+          - image: ui
+            dockerfile: src/ui/Dockerfile
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: ui
+      CACHE: true
       ARCH: linux/amd64
-      IMAGE: bunkerweb
-      DOCKERFILE: src/bw/Dockerfile
+      IMAGE: ${{ matrix.image }}
+      DOCKERFILE: ${{ matrix.dockerfile }}
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-sc:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: ui
-      ARCH: linux/amd64
-      IMAGE: scheduler
-      DOCKERFILE: src/scheduler/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  build-ui:
-    uses: ./.github/workflows/container-build.yml
-    with:
-      RELEASE: ui
-      ARCH: linux/amd64
-      IMAGE: ui
-      DOCKERFILE: src/ui/Dockerfile
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # UI tests
   tests-ui:
-    needs: [build-bw, build-sc, build-ui]
+    needs: [build-containers]
     uses: ./.github/workflows/tests-ui.yml
     with:
       RELEASE: ui
-    secrets:
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
