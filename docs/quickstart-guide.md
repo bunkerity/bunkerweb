@@ -1475,7 +1475,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
             default_type 'text/plain';
             content_by_lua_block {
               ngx.say('world')
-    	    }
+    	      }
           }
       ...
     ```
@@ -1509,8 +1509,8 @@ Some integrations provide more convenient ways to apply configurations, such as 
     When starting the scheduler container, you will need to mount the folder on /data :
 
     ```yaml
-    mybunker:
-      image: bunkerity/bunkerweb:1.5.1
+    bw-scheduler:
+      image: bunkerity/bunkerweb-scheduler:1.5.1
       volumes:
         - ./bw-data:/data
       ...
@@ -1545,7 +1545,8 @@ Some integrations provide more convenient ways to apply configurations, such as 
             default_type 'text/plain';
             content_by_lua_block {
                 ngx.say('world')
-    	  }
+            }
+    	    }
       ...
     ```
 
@@ -1578,7 +1579,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     When starting the scheduler container, you will need to mount the folder on /data :
 
     ```yaml
-    myautoconf:
+    bw-scheduler:
       image: bunkerity/bunkerweb-scheduler:1.5.1
       volumes:
         - ./bw-data:/data

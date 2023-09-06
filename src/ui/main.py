@@ -242,6 +242,10 @@ app.jinja_env.globals.update(check_settings=check_settings)
 csrf = CSRFProtect()
 csrf.init_app(app)
 
+LOG_RX = re_compile(
+    r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$"
+)
+
 
 def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
     # Do the operation
@@ -528,8 +532,8 @@ def services():
             args=(
                 "services",
                 variables,
-                request.form.get("OLD_SERVER_NAME", "").split(" ")[0],
-                variables.get("SERVER_NAME", "").split(" ")[0],
+                request.form.get("OLD_SERVER_NAME", "").split()[0],
+                variables.get("SERVER_NAME", "").split()[0],
             ),
             kwargs={"operation": request.form["operation"]},
         ).start()
@@ -537,11 +541,11 @@ def services():
         message = ""
 
         if request.form["operation"] == "new":
-            message = f"Creating service {variables['SERVER_NAME'].split(' ')[0]}"
+            message = f"Creating service {variables['SERVER_NAME'].split()[0]}"
         elif request.form["operation"] == "edit":
-            message = f"Saving configuration for service {request.form['OLD_SERVER_NAME'].split(' ')[0]}"
+            message = f"Saving configuration for service {request.form['OLD_SERVER_NAME'].split()[0]}"
         elif request.form["operation"] == "delete":
-            message = f"Deleting service {request.form['SERVER_NAME'].split(' ')[0]}"
+            message = f"Deleting service {request.form['SERVER_NAME'].split()[0]}"
 
         return redirect(url_for("loading", next=url_for("services"), message=message))
 
@@ -552,7 +556,7 @@ def services():
         services=[
             {
                 "SERVER_NAME": {
-                    "value": service["SERVER_NAME"]["value"].split(" ")[0],
+                    "value": service["SERVER_NAME"]["value"].split()[0],
                     "method": service["SERVER_NAME"]["method"],
                 },
                 "USE_REVERSE_PROXY": service["USE_REVERSE_PROXY"],
@@ -725,7 +729,7 @@ def configs():
                 db_data=db.get_custom_configs(),
                 services=app.config["CONFIG"]
                 .get_config(methods=False)["SERVER_NAME"]
-                .split(" "),
+                .split(),
             )
         ],
         dark_mode=app.config["DARK_MODE"],
@@ -1171,7 +1175,7 @@ def cache():
                 db_data=db.get_jobs_cache_files(),
                 services=app.config["CONFIG"]
                 .get_config(methods=False)["SERVER_NAME"]
-                .split(" "),
+                .split(),
             )
         ],
         dark_mode=app.config["DARK_MODE"],
@@ -1202,22 +1206,9 @@ def logs_linux():
             404,
         )
 
-    last_update = request.args.get("last_update")
-    raw_logs_access = []
-    raw_logs_error = []
-
-    nginx_error_file = Path(sep, "var", "log", "nginx", "error.log")
-    if nginx_error_file.is_file():
-        raw_logs_access = nginx_error_file.read_text(encoding="utf-8").splitlines()[
-            int(last_update.split(".")[0]) if last_update else 0 :
-        ]
-
-    nginx_access_file = Path(sep, "var", "log", "nginx", "access.log")
-    if nginx_access_file.is_file():
-        raw_logs_error = nginx_access_file.read_text(encoding="utf-8").splitlines()[
-            int(last_update.split(".")[1]) if last_update else 0 :
-        ]
-
+    last_update = request.args.get("last_update", "0.0")
+    from_date = request.args.get("from_date", None)
+    to_date = request.args.get("to_date", None)
     logs_error = []
     temp_multiple_lines = []
     NGINX_LOG_LEVELS = [
@@ -1230,44 +1221,69 @@ def logs_linux():
         "alert",
         "emerg",
     ]
-    for line in raw_logs_error:
-        line_lower = line.lower()
 
-        if (
-            ("[info]" in line_lower or "ℹ️" in line_lower)
-            and line.endswith(":")
-            or ("[error]" in line_lower or "❌" in line_lower)
-        ):
-            if temp_multiple_lines:
-                logs_error.append("\n".join(temp_multiple_lines))
+    nginx_error_file = Path(sep, "var", "log", "bunkerweb", "error.log")
+    if nginx_error_file.is_file():
+        with open(nginx_error_file, encoding="utf-8") as f:
+            for line in f.readlines()[
+                int(last_update.split(".")[0]) if last_update else 0 :
+            ]:
+                match = LOG_RX.search(line)
+                if not match:
+                    continue
+                date = match.group("date")
+                level = match.group("level")
 
-            temp_multiple_lines = [
-                f"{datetime.strptime(' '.join(line.strip().split(' ')[0:2]), '%Y/%m/%d %H:%M:%S').replace(tzinfo=timezone.utc).timestamp()} {line}"
-            ]
-        elif (
-            all(f"[{log_level}]" not in line_lower for log_level in NGINX_LOG_LEVELS)
-            and temp_multiple_lines
-        ):
-            temp_multiple_lines.append(line)
-        else:
-            logs_error.append(
-                f"{datetime.strptime(' '.join(line.strip().split(' ')[0:2]), '%Y/%m/%d %H:%M:%S').replace(tzinfo=timezone.utc).timestamp()} {line}"
-            )
+                if not date:
+                    if logs_error:
+                        logs_error[-1] += f"\n{line}"
+                        continue
+                    logs_error.append(line)
+                elif (
+                    all(f"[{log_level}]" != level for log_level in NGINX_LOG_LEVELS)
+                    and temp_multiple_lines
+                ):
+                    temp_multiple_lines.append(line)
+                else:
+                    logs_error.append(
+                        f"{datetime.strptime(date, '%Y/%m/%d %H:%M:%S').replace(tzinfo=timezone.utc).timestamp()} {line}"
+                    )
 
     if temp_multiple_lines:
         logs_error.append("\n".join(temp_multiple_lines))
 
-    logs_access = [
-        f"{datetime.strptime(line[line.find('[') + 1: line.find(']')], '%d/%b/%Y:%H:%M:%S %z').timestamp()} {line}"
-        for line in raw_logs_access
-    ]
+    logs_access = []
+    nginx_access_file = Path(sep, "var", "log", "bunkerweb", "access.log")
+    if nginx_access_file.is_file():
+        with open(nginx_access_file, encoding="utf-8") as f:
+            for line in f.readlines()[
+                int(last_update.split(".")[1]) if last_update else 0 :
+            ]:
+                logs_access.append(
+                    f"{datetime.strptime(line[line.find('[') + 1: line.find(']')], '%d/%b/%Y:%H:%M:%S %z').replace(tzinfo=timezone.utc).timestamp()} {line}"
+                )
+
     raw_logs = logs_error + logs_access
-    raw_logs.sort(
-        key=lambda x: float(x.split(" ")[0]) if x.split(" ")[0].isdigit() else 0
-    )
+
+    if from_date and from_date.isdigit():
+        from_date = int(from_date) // 1000
+    else:
+        from_date = 0
+
+    if to_date and to_date.isdigit():
+        to_date = int(to_date) // 1000
+    else:
+        to_date = None
+
+    def date_filter(log: str):
+        log_date = log.split()[0]
+        log_date = float(log_date) if regex_match(r"^\d+\.\d+$", log_date) else 0
+        if to_date is not None and log_date > int(to_date):
+            return False
+        return log_date > from_date
 
     logs = []
-    for log in raw_logs:
+    for log in filter(date_filter, raw_logs):
         if "[48;2" in log or not log.strip():
             continue
 
@@ -1289,7 +1305,7 @@ def logs_linux():
 
         logs.append(
             {
-                "content": " ".join(log.strip().split(" ")[1:]),
+                "content": " ".join(log.strip().split()[1:]),
                 "type": error_type,
             }
         )
@@ -1393,7 +1409,7 @@ def logs_container(container_id):
             )
 
     for log in tmp_logs:
-        splitted = log.split(" ")
+        splitted = log.split()
         timestamp = splitted[0]
 
         if to_date is not None and dateutil_parse(timestamp).timestamp() > to_date:
