@@ -1,9 +1,9 @@
-local utils = require "bunkerweb.utils"
-local cjson = require "cjson"
+local utils            = require "bunkerweb.utils"
+local cjson            = require "cjson"
 
-local helpers = {}
+local helpers          = {}
 
-helpers.load_plugin = function(json)
+helpers.load_plugin    = function(json)
     -- Open file
     local file, err, nb = io.open(json, "r")
     if not file then
@@ -45,7 +45,7 @@ helpers.load_plugin = function(json)
     return true, plugin
 end
 
-helpers.order_plugins = function(plugins)
+helpers.order_plugins  = function(plugins)
     -- Extract orders
     local file, err, nb = io.open("/usr/share/bunkerweb/core/order.json", "r")
     if not file then
@@ -108,7 +108,7 @@ helpers.require_plugin = function(id)
     return plugin_lua, "require() call successful for plugin " .. id
 end
 
-helpers.new_plugin = function(plugin_lua, ctx)
+helpers.new_plugin     = function(plugin_lua, ctx)
     -- Require call
     local ok, plugin_obj = pcall(plugin_lua.new, plugin_lua, ctx)
     if not ok then
@@ -117,7 +117,7 @@ helpers.new_plugin = function(plugin_lua, ctx)
     return true, plugin_obj
 end
 
-helpers.call_plugin = function(plugin, method)
+helpers.call_plugin    = function(plugin, method)
     -- Check if method is present
     if plugin[method] == nil then
         return nil, "missing " .. method .. "() method for plugin " .. plugin:get_id()
@@ -145,7 +145,7 @@ helpers.call_plugin = function(plugin, method)
     return true, ret
 end
 
-helpers.fill_ctx = function()
+helpers.fill_ctx       = function()
     -- Return errors as table
     local errors = {}
     local ctx = ngx.ctx
@@ -246,12 +246,12 @@ function helpers.load_variables(all_variables, plugins)
         end
         if data.multiple then
             for variable, value in pairs(all_variables) do
-                local found, _, prefix = variable:find("^([^_]*)_?" .. setting .. "_[0-9]+$")
-                if found then
-                    if multisite and prefix and prefix ~= "" then
-                        variables[prefix][variable] = value
+                local _, server_name, multiple_setting = variable:match("((%S*)_)(" .. setting .. "_%d+)")
+                if multiple_setting then
+                    if multisite and server_name and server_name ~= "" then
+                        variables[server_name][multiple_setting] = value
                     end
-                    variables["global"][variable] = value
+                    variables["global"][multiple_setting] = value
                 end
             end
         end
