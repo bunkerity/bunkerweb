@@ -102,7 +102,7 @@ A volume is needed to store the SQLite database that will be used by the schedul
 ```yaml
 ...
 services:
-  mybunker:
+  bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.5.1
     volumes:
       - bw-data:/data
