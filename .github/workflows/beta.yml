@@ -7,7 +7,6 @@ on:
     branches: [beta]
 
 jobs:
-
   # Build amd64 + 386 containers images
   build-containers:
     strategy:
@@ -132,7 +131,7 @@ jobs:
       versionrpm: ${{ steps.getversionrpm.outputs.versionrpm }}
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Get VERSION
         id: getversion
         run: echo "version=$(cat src/VERSION | tr -d '\n')" >> "$GITHUB_OUTPUT"
@@ -145,7 +144,8 @@ jobs:
     needs: [create-arm, wait-builds]
     strategy:
       matrix:
-        image: [bunkerweb, bunkerweb-scheduler, bunkerweb-autoconf, bunkerweb-ui]
+        image:
+          [bunkerweb, bunkerweb-scheduler, bunkerweb-autoconf, bunkerweb-ui]
         include:
           - release: beta
           - image: bunkerweb
@@ -177,7 +177,7 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el]
+        linux: [ubuntu, debian, fedora, rhel]
         arch: [amd64, arm64]
         include:
           - release: beta
@@ -281,5 +281,3 @@ jobs:
       SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
       SCW_DEFAULT_PROJECT_ID: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
       SCW_DEFAULT_ORGANIZATION_ID: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
-
-

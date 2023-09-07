@@ -22,6 +22,7 @@ COPY src/common/utils utils
 COPY src/VERSION VERSION
 
 FROM python:3.11.5-alpine
+FROM python:3.11.5-alpine
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

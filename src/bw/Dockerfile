@@ -1,7 +1,7 @@
 FROM nginx:1.24.0-alpine AS builder
 
 # Install temporary requirements for the dependencies
-RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev
+RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools
 
 WORKDIR /usr/share/bunkerweb
 
@@ -58,8 +58,8 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
-RUN apk add --no-cache pcre bash python3 && \
-	cp helpers/bwcli /usr/bin/ && \
+RUN apk add --no-cache pcre bash python3 yajl && \
+	cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
 	mkdir -p /var/tmp/bunkerweb && \
 	mkdir -p /var/run/bunkerweb && \
 	mkdir -p /var/log/bunkerweb && \

@@ -20,7 +20,7 @@
       "help": "Address of the BunkerNet API.",
       "id": "bunkernet-server",
       "label": "BunkerNet server",
-      "regex": "^https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*$",
+      "regex": "^https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*$",
       "type": "text"
     }
   },

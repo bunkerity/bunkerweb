@@ -130,7 +130,12 @@ class DockerController(Controller):
         return configs
 
     def apply_config(self) -> bool:
-        return self.apply(self._instances, self._services, configs=self._configs)
+        return self.apply(
+            self._instances,
+            self._services,
+            configs=self._configs,
+            first=not self._loaded,
+        )
 
     def process_events(self):
         for _ in self.__client.events(decode=True, filters={"type": "container"}):

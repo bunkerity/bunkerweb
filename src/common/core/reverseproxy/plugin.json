@@ -59,7 +59,7 @@
       "help": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
       "id": "reverse-proxy-headers",
       "label": "Reverse proxy headers",
-      "regex": "^(?![; ])(;? ?([\\w-]+)(?!.*\\2 ) [^;]+)*$",
+      "regex": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -69,7 +69,7 @@
       "help": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
       "id": "reverse-proxy-headers-client",
       "label": "Reverse proxy headers-client",
-      "regex": "^(?![; ])(;? ?([\\w-]+)(?!.*\\2 ) [^;]+)*$",
+      "regex": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -99,7 +99,7 @@
       "help": "Enable authentication using an external provider (value of auth_request directive).",
       "id": "reverse-proxy-auth-request",
       "label": "Reverse proxy auth request",
-      "regex": "^(/[\\w\\].~:/?#[@!$&'()*+,;=-]*|off)?$",
+      "regex": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -109,7 +109,7 @@
       "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
       "id": "reverse-proxy-auth-request-signin-url",
       "label": "Auth request signin URL",
-      "regex": "^(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)?$",
+      "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
       "type": "text",
       "multiple": "reverse-proxy"
     },
@@ -119,7 +119,7 @@
       "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
       "id": "reverse-proxy-auth-request-set",
       "label": "Reverse proxy auth request set",
-      "regex": "^(?! ;)(;? ?(\\$[a-z_-]+)(?!.*\\2 ) [^;]+)*$",
+      "regex": "^(?! ;)(;? ?(\\$[a-z_\\-]+)(?!.*\\2 ) [^;]+)*$",
       "type": "text",
       "multiple": "reverse-proxy"
     },

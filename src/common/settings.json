@@ -14,7 +14,7 @@
     "help": "Where nginx will search for configurations.",
     "id": "nginx-prefix",
     "label": "nginx prefix",
-    "regex": "^(/[\\w. -]+)*/$",
+    "regex": "^(\\/[\\-\\w.\\s]+)*\\/$",
     "type": "text"
   },
   "HTTP_PORT": {

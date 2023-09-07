@@ -17,41 +17,41 @@ function headers:initialize(ctx)
     ["X_CONTENT_TYPE_OPTIONS"] = "X-Content-Type-Options",
     ["X_XSS_PROTECTION"] = "X-XSS-Protection"
   }
-	-- Load data from datastore if needed
-	if ngx.get_phase() ~= "init" then
-		-- Get custom headers from datastore
-		local custom_headers, err = self.datastore:get("plugin_headers_custom_headers", true)
-		if not custom_headers then
-			self.logger:log(ngx.ERR, err)
-			return
-		end
-		self.custom_headers = {}
-		-- Extract global headers
-		if custom_headers.global then
-			for k, v in pairs(custom_headers.global) do
-				self.custom_headers[k] = v
-			end
-		end
-		-- Extract and overwrite if needed server headers
-		if custom_headers[self.ctx.bw.server_name] then
-			for k, v in pairs(custom_headers[self.ctx.bw.server_name]) do
-				self.custom_headers[k] = v
-			end
-		end
-	end
+  -- Load data from datastore if needed
+  if ngx.get_phase() ~= "init" then
+    -- Get custom headers from datastore
+    local custom_headers, err = self.datastore:get("plugin_headers_custom_headers", true)
+    if not custom_headers then
+      self.logger:log(ngx.ERR, err)
+      return
+    end
+    self.custom_headers = {}
+    -- Extract global headers
+    if custom_headers.global then
+      for k, v in pairs(custom_headers.global) do
+        self.custom_headers[k] = v
+      end
+    end
+    -- Extract and overwrite if needed server headers
+    if custom_headers[self.ctx.bw.server_name] then
+      for k, v in pairs(custom_headers[self.ctx.bw.server_name]) do
+        self.custom_headers[k] = v
+      end
+    end
+  end
 end
 
 function headers:init()
-	-- Get variables
-	local variables, err = utils.get_multiple_variables({ "CUSTOM_HEADER" })
-	if variables == nil then
-		return self:ret(false, err)
-	end
-	-- Store custom headers name and value
-	local data = {}
-	local i = 0
-	for srv, vars in pairs(variables) do
-		for var, value in pairs(vars) do
+  -- Get variables
+  local variables, err = utils.get_multiple_variables({ "CUSTOM_HEADER" })
+  if variables == nil then
+    return self:ret(false, err)
+  end
+  -- Store custom headers name and value
+  local data = {}
+  local i = 0
+  for srv, vars in pairs(variables) do
+    for var, value in pairs(vars) do
       if data[srv] == nil then
         data[srv] = {}
       end
@@ -60,13 +60,13 @@ function headers:init()
         data[srv][m[1]] = m[2]
       end
       i = i + 1
-		end
-	end
-	local ok, err = self.datastore:set("plugin_headers_custom_headers", data, nil, true)
-	if not ok then
-		return self:ret(false, err)
-	end
-	return self:ret(true, "successfully loaded " .. tostring(i) .. " custom headers")
+    end
+  end
+  local ok, err = self.datastore:set("plugin_headers_custom_headers", data, nil, true)
+  if not ok then
+    return self:ret(false, err)
+  end
+  return self:ret(true, "successfully loaded " .. tostring(i) .. " custom headers")
 end
 
 function headers:header()

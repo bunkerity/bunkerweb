@@ -32,10 +32,6 @@ on:
         required: true
       DOCKER_TOKEN:
         required: true
-      PRIVATE_REGISTRY:
-        required: false
-      PRIVATE_REGISTRY_TOKEN:
-        required: false
       ARM_SSH_KEY:
         required: false
       ARM_SSH_IP:
@@ -49,7 +45,10 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Replace VERSION
+        if: inputs.RELEASE == 'testing'
+        run: ./misc/update-version.sh testing
       - name: Setup SSH for ARM node
         if: inputs.CACHE_SUFFIX == 'arm'
         run: |
@@ -75,36 +74,44 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Login to private repository
+      - name: Login to ghcr
         if: inputs.PUSH == true
         uses: docker/login-action@v2
         with:
-          registry: ${{ secrets.PRIVATE_REGISTRY }}
-          username: registry
-          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Compute metadata
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: bunkerity/${{ inputs.IMAGE }}
       # Build cached image
       - name: Build image
         if: inputs.CACHE == true
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
           platforms: ${{ inputs.ARCH }}
           load: true
           tags: local/${{ inputs.IMAGE }}
-          cache-from: type=registry,ref=bunkerity/cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}
-          cache-to: type=registry,ref=bunkerity/cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }},mode=min
+          cache-from: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }}
+          cache-to: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }},mode=min
+          labels: ${{ steps.meta.outputs.labels }}
       # Build non-cached image
       - name: Build image
         if: inputs.CACHE != true
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
           platforms: ${{ inputs.ARCH }}
           load: ${{ inputs.CACHE_SUFFIX != 'arm' }}
           tags: local/${{ inputs.IMAGE }}
-          cache-to: type=registry,ref=bunkerity/cache:${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=min
+          cache-to: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=min
+          labels: ${{ steps.meta.outputs.labels }}
       # Check OS vulnerabilities
       - name: Check OS vulnerabilities
         if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
@@ -121,6 +128,7 @@ jobs:
       # Push image
       - name: Push image
         if: inputs.PUSH == true
-        run: docker tag local/${{ inputs.IMAGE }} ${{ secrets.PRIVATE_REGISTRY }}/infra/${{ inputs.IMAGE }}-tests:$TAG && docker push ${{ secrets.PRIVATE_REGISTRY }}/infra/${{ inputs.IMAGE }}-tests:$TAG
+        run: docker tag local/$IMAGE ghcr.io/bunkerity/$IMAGE-tests:$TAG && docker push ghcr.io/bunkerity/$IMAGE-tests:$TAG
         env:
+          IMAGE: "${{ inputs.IMAGE }}"
           TAG: "${{ inputs.RELEASE }}"

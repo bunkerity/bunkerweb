@@ -9,6 +9,9 @@ on:
 jobs:
   # Containers
   build-containers:
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui]
@@ -31,8 +34,6 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Python code security
   code-security:
@@ -47,7 +48,7 @@ jobs:
         language: ["python"]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
@@ -64,9 +65,6 @@ jobs:
     uses: ./.github/workflows/tests-ui.yml
     with:
       RELEASE: dev
-    secrets:
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
 
   # Core tests
   prepare-tests-core:
@@ -74,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - id: set-matrix
         run: |
           tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
@@ -91,31 +89,43 @@ jobs:
     with:
       TEST: ${{ matrix.test }}
       RELEASE: dev
-    secrets:
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
-  
+
   # Push with dev tag
   push-dev:
-    needs: [tests-core]
+    needs: [tests-ui, tests-core]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Login to private repository
+      - name: Login to ghcr
         uses: docker/login-action@v2
         with:
-          registry: ${{ secrets.PRIVATE_REGISTRY }}
-          username: registry
-          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push BW image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:dev && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:dev bunkerity/bunkerweb:dev && docker push bunkerity/bunkerweb:dev
+        run: docker pull ghcr.io/bunkerity/$FROM-tests:dev && docker tag ghcr.io/bunkerity/$FROM-tests:dev bunkerity/$TO:dev && docker tag ghcr.io/bunkerity/$FROM-tests:dev ghcr.io/bunkerity/$TO:dev && docker push bunkerity/$TO:dev && docker push ghcr.io/bunkerity/$TO:dev
+        env:
+          FROM: "bunkerweb"
+          TO: "bunkerweb"
       - name: Push scheduler image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:dev && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:dev bunkerity/bunkerweb-scheduler:dev && docker push bunkerity/bunkerweb-scheduler:dev
+        run: docker pull ghcr.io/bunkerity/$FROM-tests:dev && docker tag ghcr.io/bunkerity/$FROM-tests:dev bunkerity/$TO:dev && docker tag ghcr.io/bunkerity/$FROM-tests:dev ghcr.io/bunkerity/$TO:dev && docker push bunkerity/$TO:dev && docker push ghcr.io/bunkerity/$TO:dev
+        env:
+          FROM: "scheduler"
+          TO: "bunkerweb-scheduler"
       - name: Push UI image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/ui-tests:dev && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/ui-tests:dev bunkerity/bunkerweb-ui:dev && docker push bunkerity/bunkerweb-ui:dev
+        run: docker pull ghcr.io/bunkerity/$FROM-tests:dev && docker tag ghcr.io/bunkerity/$FROM-tests:dev bunkerity/$TO:dev && docker tag ghcr.io/bunkerity/$FROM-tests:dev ghcr.io/bunkerity/$TO:dev && docker push bunkerity/$TO:dev && docker push ghcr.io/bunkerity/$TO:dev
+        env:
+          FROM: "ui"
+          TO: "bunkerweb-ui"
       - name: Push autoconf image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/autoconf-tests:dev && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/autoconf-tests:dev bunkerity/bunkerweb-autoconf:dev && docker push bunkerity/bunkerweb-autoconf:dev
+        run: docker pull ghcr.io/bunkerity/$FROM-tests:dev && docker tag ghcr.io/bunkerity/$FROM-tests:dev bunkerity/$TO:dev && docker tag ghcr.io/bunkerity/$FROM-tests:dev ghcr.io/bunkerity/$TO:dev && docker push bunkerity/$TO:dev && docker push ghcr.io/bunkerity/$TO:dev
+        env:
+          FROM: "autoconf"
+          TO: "bunkerweb-autoconf"

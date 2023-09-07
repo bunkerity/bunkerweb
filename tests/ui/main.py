@@ -699,7 +699,7 @@ with webdriver.Firefox(
 
                 ready = status_code < 400
 
-            if retries > 10:
+            if retries > 20:
                 print("The service took too long to be ready, exiting ...", flush=True)
                 exit(1)
             elif not ready:

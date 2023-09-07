@@ -34,10 +34,10 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Create ARM VM
         id: scw
-        uses: scaleway/action-scw@bbcfd65cd2af73456ce439088e0d42c1657c4c38
+        uses: scaleway/action-scw@c718eca1fcb9fec1fb1433752d61599c6a0ad2e9
         with:
           args: instance server create zone=fr-par-2 type=AMP2-C48 root-volume=block:50GB
           save-config: true
@@ -72,4 +72,3 @@ jobs:
         run: ssh root@$SSH_IP "curl -fsSL https://test.docker.com -o test-docker.sh ; sh test-docker.sh"
         env:
           SSH_IP: ${{ fromJson(steps.scw.outputs.json).public_ip.address }}
-

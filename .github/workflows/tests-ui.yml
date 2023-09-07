@@ -6,30 +6,25 @@ on:
       RELEASE:
         required: true
         type: string
-    secrets:
-      PRIVATE_REGISTRY:
-        required: true
-      PRIVATE_REGISTRY_TOKEN:
-        required: true
 jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Login to private repository
+        uses: actions/checkout@v4
+      - name: Login to ghcr
         uses: docker/login-action@v2
         with:
-          registry: ${{ secrets.PRIVATE_REGISTRY }}
-          username: registry
-          password: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull BW image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:${{ inputs.RELEASE }} && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/bunkerweb-tests:${{ inputs.RELEASE }} bunkerweb-tests
+        run: docker pull ghcr.io/bunkerity/bunkerweb-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/bunkerweb-tests:${{ inputs.RELEASE }} bunkerweb-tests
       - name: Pull Scheduler image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:${{ inputs.RELEASE }} && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/scheduler-tests:${{ inputs.RELEASE }} scheduler-tests
+        run: docker pull ghcr.io/bunkerity/scheduler-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/scheduler-tests:${{ inputs.RELEASE }} scheduler-tests
       - name: Pull UI image
-        run: docker pull ${{ secrets.PRIVATE_REGISTRY }}/infra/ui-tests:${{ inputs.RELEASE }} && docker tag ${{ secrets.PRIVATE_REGISTRY }}/infra/ui-tests:${{ inputs.RELEASE }} ui-tests
+        run: docker pull ghcr.io/bunkerity/ui-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/ui-tests:${{ inputs.RELEASE }} ui-tests
       # Do tests
       - name: Run tests
         run: ./tests/ui/tests.sh

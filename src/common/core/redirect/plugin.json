@@ -11,7 +11,7 @@
       "help": "Redirect a whole site to another one.",
       "id": "redirect-to",
       "label": "Redirect to",
-      "regex": "^(https?:\\/\\/[-\\w@:%.+~#=]+[-\\w()!@:%+.~#?&\\/=$]*)?$",
+      "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
       "type": "text"
     },
     "REDIRECT_TO_REQUEST_URI": {

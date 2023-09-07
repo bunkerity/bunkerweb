@@ -1,4 +1,4 @@
-FROM redhat/ubi8:8.7
+FROM redhat/ubi8:8.8
 
 ENV OS=rhel
 ENV NGINX_VERSION 1.24.0
@@ -41,10 +41,10 @@ RUN mkdir -p deps && \
   rm -rf /tmp/req
 
 # Compile and install dependencies
-RUN dnf install -y readline-devel python39-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel --skip-broken && \
+RUN dnf install -y --setopt=install_weak_deps=False readline-devel python39 python39-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel --skip-broken && \
   export MAKEFLAGS="-j$(nproc)" && \
-  pip3.9 install --no-cache-dir --upgrade pip && \
-  pip3.9 install --no-cache-dir --upgrade pip-tools wheel setuptools && \
+  pip install --no-cache-dir --upgrade pip && \
+  pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
   chmod +x /tmp/bunkerweb/deps/install.sh && \
   bash /tmp/bunkerweb/deps/install.sh && \
   mkdir deps/python && \

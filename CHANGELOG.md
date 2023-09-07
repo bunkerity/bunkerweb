@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.5.2 - 
+
+- [BUGFIX] Fix UI fetching only default values from the database (fixes no trash button too)
+- [BUGFIX] Fix infinite loop when using autoconf
+- [BUGFIX] Fix BunkerWeb fails to start after reboot on Fedora and Rhel
+- [BUGFIX] Fix logs page not working in UI on Linux integrations
+- [BUGFIX] Fix settings regex that had issues in general and with the UI
+- [BUGFIX] Fix scheduler error with external plugins when reloading
+- [MISC] Push Docker images to GitHub packages (ghcr.io repository)
+- [MISC] Improved CI/CD
+- [MISC] Updated python dependencies
+- [MISC] Updated Python Docker image to 3.11.5-alpine in Dockerfiles
+- [MISC] Add support for ModSecurity JSON LogFormat
+
 ## v1.5.1 - 2023/08/08
 
 - [BUGFIX] New version checker in logs displays "404 not found"

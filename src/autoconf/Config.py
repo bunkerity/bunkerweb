@@ -24,7 +24,18 @@ class Config:
         self._wait_retry_interval = wait_retry_interval
         self.__instances = []
         self.__services = []
-        self.__configs = []
+        self._supported_config_types = [
+            "http",
+            "stream",
+            "server-http",
+            "server-stream",
+            "default-server-http",
+            "modsec",
+            "modsec-crs",
+        ]
+        self.__configs = {
+            config_type: {} for config_type in self._supported_config_types
+        }
         self.__config = {}
         self._settings = {}
 
