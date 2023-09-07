@@ -39,7 +39,7 @@ async def update_config(config: Dict[str, str], method: str):
     summary="Update global config",
 )
 async def update_global_config(config: Annotated[dict, Body()], method: str):
-    data = json.dumps(config,  skipkeys = True,allow_nan = True, indent = 6)
+    data = json.dumps(config,  skipkeys = True, allow_nan = True, indent = 6)
     req = requests.put(f'{API_URL}/config/global?method={method}', data=data)
     res = set_res_from_req(req, "PUT", "Update global config")
     return res

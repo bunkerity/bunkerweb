@@ -15,6 +15,11 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  serviceName: {
+    type: String,
+    required: false,
+    default: "",
+  },
 });
 
 const select = reactive({
@@ -38,12 +43,9 @@ function closeSelect() {
 }
 
 const config = useConfigStore();
-config.updateConf(select.context, select.id, select.value);
 
 function changeValue(newValue) {
   select.value = newValue;
-  config.updateConf(select.context, select.id, select.value);
-  console.log(config.data);
   closeSelect();
 }
 
@@ -135,7 +137,16 @@ onMounted(() => {
   >
     <button
       v-for="(value, id) in select.values"
-      @click="changeValue(value)"
+      @click="
+        () => {
+          changeValue(value);
+          config.updateConf(
+            props.serviceName || select.context,
+            select.id,
+            select.value
+          );
+        }
+      "
       :class="[
         id === 0 ? 'first' : '',
         id === select.values.length - 1 ? 'last' : '',

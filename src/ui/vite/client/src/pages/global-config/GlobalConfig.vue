@@ -10,7 +10,7 @@ import TabStructure from "@components/Tab/Structure.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed, onMounted, onUpdated, watch } from "vue";
 import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
 import {
   setPluginsData,
@@ -54,14 +54,16 @@ const plugins = reactive({
       return [];
     }
     // Duplicate base data
-    const clonePlugin = JSON.parse(JSON.stringify(plugins.data));
-    const cloneConf = JSON.parse(JSON.stringify(conf.data));
+    const cloneGlobalPlugin = getPluginsByContext(
+      JSON.parse(JSON.stringify(plugins.data)),
+      "global"
+    );
+    const cloneGlobalConf = JSON.parse(JSON.stringify(conf.data["global"]));
     // Format and keep only global config
-    const setPlugins = setPluginsData(clonePlugin);
-    const mergeConf = addConfToPlugins(setPlugins, cloneConf["global"]);
-    const globalConf = getPluginsByContext(mergeConf, "global");
+    const setPlugins = setPluginsData(cloneGlobalPlugin);
+    const mergeConf = addConfToPlugins(setPlugins, cloneGlobalConf);
     // Filter data to display
-    const filter = getSettingsByFilter(globalConf, filters);
+    const filter = getSettingsByFilter(mergeConf, filters);
     // Check if prev plugin or no plugin match filter
     plugins.active = filter.length !== 0 ? filter[0]["name"] : "";
     return filter;
@@ -101,7 +103,7 @@ onMounted(async () => {
 // Refetch and reset all states
 function resetValues() {
   filters.label = "";
-  plugins.active = globalConfList.value.data[0]["name"];
+  config.$reset();
 }
 
 function refresh() {

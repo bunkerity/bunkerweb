@@ -1,14 +1,21 @@
 <script setup>
 import { useConfigStore } from "@store/settings.js";
 import { getDefaultMethod } from "@utils/settings.js";
-import { reactive, defineProps } from "vue";
+import { reactive, defineProps, KeepAlive, computed } from "vue";
 
 const props = defineProps({
   setting: {
     type: Object,
     required: true,
   },
+  serviceName: {
+    type: String,
+    required: false,
+    default: "",
+  },
 });
+
+const config = useConfigStore();
 
 const input = reactive({
   id: props.setting.id,
@@ -21,22 +28,25 @@ const input = reactive({
   pattern: props.setting.regex,
   placeholder: props.setting.placeholder || "",
   required: props.setting.required || false,
-  isPassword: props.setting.isPassword || false,
   showInp: false,
 });
-
-const config = useConfigStore();
-config.updateConf(input.context, input.id, input.value);
 </script>
 
 <template>
   <div class="relative flex items-center">
     <input
-      @input="(e) => config.updateConf(input.context, input.id, e.target.value)"
+      v-model="input.value"
+      @input="
+        config.updateConf(
+          props.serviceName || input.context,
+          input.id,
+          input.value
+        )
+      "
       :type="
-        input.isPassword
+        input.type === 'password'
           ? input.showInp
-            ? input.type
+            ? 'text'
             : 'password'
           : input.type
       "
@@ -49,14 +59,14 @@ config.updateConf(input.context, input.id, input.value);
       :placeholder="input.placeholder"
       :pattern="input.pattern"
       :aria-hidden="
-        input.isPassword ? (input.showInp ? 'true' : 'false') : 'false'
+        input.type === 'password' ? (input.showInp ? 'true' : 'false') : 'false'
       "
       :data-default-value="input.defaultValue"
       :data-default-method="input.defaultMethod"
       :name="input.id"
       :value="input.value ? input.value : input.defaultValue"
     />
-    <div v-if="input.isPassword" class="input-pw-container">
+    <div v-if="input.type === 'password'" class="input-pw-container">
       <button
         type="button"
         @click="input.showInp = input.showInp ? false : true"

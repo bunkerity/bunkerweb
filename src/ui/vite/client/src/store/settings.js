@@ -4,12 +4,24 @@ import { ref } from "vue";
 export const useConfigStore = defineStore("config", () => {
   const data = ref({ global: {}, services: {} });
 
-  function updateConf(context, id, value) {
-    if (!context || !id) return;
-    data.value[context][id] = value;
+  function updateConf(name, id, value) {
+    if (!name || !id) return;
+
+    if (name === "global") data.value[name][id] = value;
+    if (name !== "global") {
+      if (!(name in data.value["services"])) data.value["services"][name] = {};
+      data.value["services"][name][id] = value;
+    }
   }
 
-  return { data, updateConf };
+  function $reset() {
+    data.value = {
+      global: {},
+      services: {},
+    };
+  }
+
+  return { data, $reset, updateConf };
 });
 
 export const useModesStore = defineStore("modes", () => {

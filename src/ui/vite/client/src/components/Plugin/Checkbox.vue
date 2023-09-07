@@ -8,6 +8,11 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  serviceName: {
+    type: String,
+    required: false,
+    default: "",
+  },
 });
 
 const checkbox = reactive({
@@ -23,18 +28,25 @@ const checkbox = reactive({
 const modes = getModes();
 
 const config = useConfigStore();
-config.updateConf(checkbox.context, checkbox.id, checkbox.value);
 
 function updateCheckbox() {
   checkbox.value = checkbox.value === "yes" ? "no" : "yes";
-  config.updateConf(checkbox.context, checkbox.id, checkbox.value);
 }
 </script>
 
 <template>
   <div class="relative mb-7 md:mb-0 z-10">
     <input
-      @click="updateCheckbox()"
+      @click="
+        () => {
+          updateCheckbox();
+          config.updateConf(
+            props.serviceName || checkbox.context,
+            checkbox.id,
+            checkbox.value
+          );
+        }
+      "
       :id="checkbox.id"
       :name="checkbox.id"
       :data-default-method="

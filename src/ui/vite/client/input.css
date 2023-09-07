@@ -13,7 +13,7 @@
 
 /* DASHBOARD LAYOUT */
 body {
-  @apply bg-primary h-full w-full overflow-hidden;
+  @apply bg-primary h-full w-full overflow-x-hidden;
 }
 
 .no-script {
@@ -488,12 +488,8 @@ body {
   @apply pt-4 relative w-full flex flex-col items-center xs:flex-row justify-center xs:justify-end flex-wrap;
 }
 
-.btn-close {
-  @apply dark:brightness-90  inline-block  font-bold text-center text-red-500 border border-red-500 uppercase align-middle transition-all rounded-lg cursor-pointer dark:bg-gray-200 dark:hover:brightness-75 bg-white hover:bg-white/80 focus:bg-white/80 leading-normal ease-in tracking-tight-rem shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md;
-}
-
-.btn-valid {
-  @apply tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md;
+.btn {
+  @apply tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer  leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md;
 }
 
 .btn-xl {
@@ -512,16 +508,28 @@ body {
   @apply px-2 py-1;
 }
 
-.btn-delete {
-  @apply tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md;
+.btn-close {
+  @apply bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80;
+}
+
+.btn-valid {
+  @apply bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80;
 }
 
 .btn-edit {
-  @apply tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-yellow-500 hover:bg-yellow-500/80 focus:bg-yellow-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md;
+  @apply bg-yellow-500 hover:bg-yellow-500/80 focus:bg-yellow-500/80;
 }
 
 .btn-info {
-  @apply tracking-wide dark:brightness-90 inline-block  font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md;
+  @apply bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80;
+}
+
+.btn-primary {
+  @apply bg-primary hover:bg-primary/80 focus:bg-primary/80;
+}
+
+.btn-secondary {
+  @apply bg-secondary hover:bg-secondary/80 focus:bg-secondary/80;
 }
 
 /* FILE MANAGER */

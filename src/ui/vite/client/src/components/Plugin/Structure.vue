@@ -2,7 +2,7 @@
 import PluginContainer from "@components/Plugin/Container.vue";
 import PluginHeader from "@components/Plugin/Header.vue";
 import PluginSettingSimple from "@components/Plugin/Setting/Simple.vue";
-import { defineProps } from "vue";
+import { defineProps, KeepAlive } from "vue";
 
 const props = defineProps({
   plugins: {
@@ -11,6 +11,11 @@ const props = defineProps({
   active: {
     type: String,
     required: true,
+  },
+  serviceName: {
+    type: String,
+    required: false,
+    default: "",
   },
 });
 </script>
@@ -28,7 +33,10 @@ const props = defineProps({
         :version="plugin.version"
       />
       <div class="grid grid-cols-12">
-        <PluginSettingSimple :settings="plugin.settings" />
+        <PluginSettingSimple
+          :serviceName="props.serviceName"
+          :settings="plugin.settings"
+        />
       </div>
     </PluginContainer>
   </div>
