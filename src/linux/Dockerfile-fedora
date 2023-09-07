@@ -24,7 +24,7 @@ RUN mkdir -p /usr/share/bunkerweb/deps && \
     rm -rf /tmp/req
 
 # Compile and install dependencies
-RUN dnf install -y --setopt=install_weak_deps=False python3 python3-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
+RUN dnf install -y --setopt=install_weak_deps=False python3 python3-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
     curl https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py && \
     python3 /tmp/get-pip.py && \
     pip install --no-cache-dir --upgrade pip && \

@@ -7,7 +7,6 @@ on:
     branches: [staging]
 
 jobs:
-
   # Build Docker images
   build-containers:
     permissions:

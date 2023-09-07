@@ -95,4 +95,3 @@ jobs:
           prerelease: ${{ inputs.PRERELEASE }}
           name: Testing
           tag_name: ${{ inputs.VERSION }}
-

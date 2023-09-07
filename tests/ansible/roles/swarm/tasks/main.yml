@@ -26,7 +26,7 @@
     name: urllib3<2
     state: forcereinstall
     executable: pip3
-    extra_args: 
+    extra_args:
 
 - name: Init Docker Swarm
   community.general.docker_swarm:

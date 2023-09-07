@@ -45,7 +45,6 @@ from ApiCaller import ApiCaller  # type: ignore
 
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
-GENERATE = False
 INTEGRATION = "Linux"
 CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
 SCHEDULER_TMP_ENV_PATH = Path(sep, "var", "tmp", "bunkerweb", "scheduler.env")
@@ -465,22 +464,7 @@ if __name__ == "__main__":
 
         logger.info("Executing scheduler ...")
 
-        GENERATE = (
-            env != dotenv_env
-            or not tmp_variables_path.exists()
-            or not nginx_variables_path.exists()
-            or (
-                tmp_variables_path.read_text(encoding="utf-8")
-                != nginx_variables_path.read_text(encoding="utf-8")
-            )
-        )
-
         del dotenv_env
-
-        if not GENERATE:
-            logger.warning(
-                "Looks like BunkerWeb configuration is already generated, will not generate it again ..."
-            )
 
         if scheduler_first_start:
             ret = db.set_scheduler_first_start()
@@ -511,15 +495,14 @@ if __name__ == "__main__":
                 logger.info(f"Successfully sent {CACHE_PATH} folder")
 
         while True:
-            if not FIRST_RUN:
-                threads.clear()
-                ret = db.checked_changes(CHANGES)
+            threads.clear()
+            ret = db.checked_changes(CHANGES)
 
-                if ret:
-                    logger.error(
-                        f"An error occurred when setting the changes to checked in the database : {ret}"
-                    )
-                    stop(1)
+            if ret:
+                logger.error(
+                    f"An error occurred when setting the changes to checked in the database : {ret}"
+                )
+                stop(1)
 
             # Update the environment variables of the scheduler
             SCHEDULER.env = env.copy() | environ.copy()
@@ -531,49 +514,48 @@ if __name__ == "__main__":
             else:
                 logger.info("All jobs in run_once() were successful")
 
-            if GENERATE:
-                content = ""
-                for k, v in env.items():
-                    content += f"{k}={v}\n"
-                SCHEDULER_TMP_ENV_PATH.write_text(content)
-                # run the generator
-                proc = subprocess_run(
-                    [
-                        "python3",
-                        join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
-                        "--settings",
-                        join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                        "--templates",
-                        join(sep, "usr", "share", "bunkerweb", "confs"),
-                        "--output",
-                        join(sep, "etc", "nginx"),
-                        "--variables",
-                        (
-                            str(tmp_variables_path)
-                            if args.variables and FIRST_RUN
-                            else str(SCHEDULER_TMP_ENV_PATH)
-                        ),
-                    ],
-                    stdin=DEVNULL,
-                    stderr=STDOUT,
-                    check=False,
+            content = ""
+            for k, v in env.items():
+                content += f"{k}={v}\n"
+            SCHEDULER_TMP_ENV_PATH.write_text(content)
+            # run the generator
+            proc = subprocess_run(
+                [
+                    "python3",
+                    join(sep, "usr", "share", "bunkerweb", "gen", "main.py"),
+                    "--settings",
+                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                    "--templates",
+                    join(sep, "usr", "share", "bunkerweb", "confs"),
+                    "--output",
+                    join(sep, "etc", "nginx"),
+                    "--variables",
+                    (
+                        str(tmp_variables_path)
+                        if args.variables and FIRST_RUN
+                        else str(SCHEDULER_TMP_ENV_PATH)
+                    ),
+                ],
+                stdin=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+
+            if proc.returncode != 0:
+                logger.error(
+                    "Config generator failed, configuration will not work as expected...",
+                )
+            else:
+                copy(
+                    str(nginx_variables_path),
+                    join(sep, "var", "tmp", "bunkerweb", "variables.env"),
                 )
 
-                if proc.returncode != 0:
-                    logger.error(
-                        "Config generator failed, configuration will not work as expected...",
-                    )
-                else:
-                    copy(
-                        str(nginx_variables_path),
-                        join(sep, "var", "tmp", "bunkerweb", "variables.env"),
-                    )
-
-                    if SCHEDULER.apis:
-                        # send nginx configs
-                        thread = Thread(target=send_nginx_configs)
-                        thread.start()
-                        threads.append(thread)
+                if SCHEDULER.apis:
+                    # send nginx configs
+                    thread = Thread(target=send_nginx_configs)
+                    thread.start()
+                    threads.append(thread)
 
             try:
                 if SCHEDULER.apis:
@@ -639,7 +621,6 @@ if __name__ == "__main__":
                     f"Exception while reloading after running jobs once scheduling : {format_exc()}",
                 )
 
-            GENERATE = True
             NEED_RELOAD = False
             CONFIG_NEED_GENERATION = False
             CONFIGS_NEED_GENERATION = False
