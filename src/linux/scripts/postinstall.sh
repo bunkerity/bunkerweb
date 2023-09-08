@@ -24,6 +24,7 @@ function do_and_check_cmd() {
 # Give all the permissions to the nginx user
 echo "Setting ownership for all necessary directories to nginx user and group..."
 do_and_check_cmd chown -R nginx:nginx /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
+do_and_check_cmd chmod -R 770 /usr/share/bunkerweb /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb
 
 # Stop and disable nginx on boot
 echo "Stop and disable nginx on boot..."
