@@ -81,21 +81,21 @@ tests:
             port: 80
             uri: /
             version: HTTP/1.1
-            data:
-              - --0000
-              - 'Content-Disposition: form-data; name="name"'
-              - ''
-              - John Smith
-              - --0000
-              - 'Content-Disposition: form-data; name="email"'
-              - ''
-              - john.smith@example.com
-              - --0000
-              - 'Content-Disposition: form-data; name="image"; filename="image.jpg"'
-              - 'Content-Type: image/jpeg'
-              - ''
-              - BINARYDATA
-              - --0000--
+            data: |
+              --0000
+              Content-Disposition: form-data; name="name"
+
+              John Smith
+              --0000
+              Content-Disposition: form-data; name="email"
+
+              john.smith@example.com
+              --0000
+              Content-Disposition: form-data; name="image"; filename="image.jpg"
+              Content-Type: image/jpeg
+
+              BINARYDATA
+              --0000--
           output:
             log_contains: id "920420"
   - test_title: 920420-6
@@ -118,21 +118,21 @@ tests:
             port: 80
             uri: /
             version: HTTP/1.1
-            data:
-              - --0000
-              - 'Content-Disposition: form-data; name="name"'
-              - ''
-              - John Smith
-              - --0000
-              - 'Content-Disposition: form-data; name="email"'
-              - ''
-              - john.smith@example.com
-              - --0000
-              - 'Content-Disposition: form-data; name="image"; filename="image.jpg"'
-              - 'Content-Type: image/jpeg'
-              - ''
-              - BINARYDATA
-              - --0000--
+            data: |
+              --0000
+              Content-Disposition: form-data; name="name"
+
+              John Smith
+              --0000
+              Content-Disposition: form-data; name="email"
+
+              john.smith@example.com
+              --0000
+              Content-Disposition: form-data; name="image"; filename="image.jpg"
+              Content-Type: image/jpeg
+
+              BINARYDATA
+              --0000--
           output:
             log_contains: id "920420"
   - test_title: 920420-7
@@ -155,21 +155,21 @@ tests:
             port: 80
             uri: /
             version: HTTP/1.1
-            data:
-              - --0000
-              - 'Content-Disposition: form-data; name="name"'
-              - ''
-              - John Smith
-              - --0000
-              - 'Content-Disposition: form-data; name="email"'
-              - ''
-              - john.smith@example.com
-              - --0000
-              - 'Content-Disposition: form-data; name="image"; filename="image.jpg"'
-              - 'Content-Type: image/jpeg'
-              - ''
-              - BINARYDATA
-              - --0000--
+            data: |
+              --0000
+              Content-Disposition: form-data; name="name"
+
+              John Smith
+              --0000
+              Content-Disposition: form-data; name="email"
+
+              john.smith@example.com
+              --0000
+              Content-Disposition: form-data; name="image"; filename="image.jpg"
+              Content-Type: image/jpeg
+
+              BINARYDATA
+              --0000--
           output:
             log_contains: id "920420"
   - test_title: 920420-8

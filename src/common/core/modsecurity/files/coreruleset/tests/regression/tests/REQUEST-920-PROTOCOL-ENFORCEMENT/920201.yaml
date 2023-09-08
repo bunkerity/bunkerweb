@@ -1,16 +1,14 @@
 ---
-  meta:
-    author: "csanders-git"
-    enabled: true
-    name: "920201.yaml"
-    description: "Tests for 920201"
-  tests:
-    -
-      test_title: 920201-1
-      desc: This should FAIL with rule 920201 (PL2)
-      stages:
-      -
-        stage:
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "920201.yaml"
+  description: "Tests for 920201"
+tests:
+  - test_title: 920201-1
+    desc: This should FAIL with rule 920201 (PL2)
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             headers:

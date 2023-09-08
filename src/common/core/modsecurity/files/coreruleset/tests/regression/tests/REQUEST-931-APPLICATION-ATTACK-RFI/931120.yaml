@@ -1,50 +1,44 @@
 ---
-  meta:
-    author: studersi
-    description: None
-    enabled: true
-    name: 931120.yaml
-  tests:
-  -
-    test_title: 931120-1
+meta:
+  author: studersi
+  description: None
+  enabled: true
+  name: 931120.yaml
+tests:
+  - test_title: 931120-1
     desc: Remote File Inclusion Attack (931120)
     stages:
-    -
-      stage:
-        input:
-          dest_addr: 127.0.0.1
-          headers:
-            User-Agent: "ModSecurity CRS 3 Tests"
-            Host: localhost
-          method: GET
-          port: 80
-          uri: /?x=file?
-          version: HTTP/1.1
-        output:
-          log_contains: id "931120"
-  -
-    test_title: 931120-2
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: localhost
+            method: GET
+            port: 80
+            uri: /?x=file?
+            version: HTTP/1.1
+          output:
+            log_contains: id "931120"
+  - test_title: 931120-2
     desc: Remote File Inclusion Attack (931120)
     stages:
-    -
-      stage:
-        input:
-          dest_addr: 127.0.0.1
-          headers:
-            User-Agent: "ModSecurity CRS 3 Tests"
-            Host: localhost
-          method: GET
-          port: 80
-          uri: /?x=ftp?
-          version: HTTP/1.1
-        output:
-          log_contains: id "931120"
-  -
-    test_title: 931120-3
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: localhost
+            method: GET
+            port: 80
+            uri: /?x=ftp?
+            version: HTTP/1.1
+          output:
+            log_contains: id "931120"
+  - test_title: 931120-3
     desc: Remote File Inclusion Attack (931120)
     stages:
-      -
-        stage:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             headers:
@@ -56,29 +50,25 @@
             version: HTTP/1.1
           output:
             log_contains: id "931120"
-  -
-    test_title: 931120-4
+  - test_title: 931120-4
     desc: Remote File Inclusion Attack (931120)
     stages:
-    -
-      stage:
-        input:
-          dest_addr: 127.0.0.1
-          headers:
-            User-Agent: "ModSecurity CRS 3 Tests"
-            Host: localhost
-          method: GET
-          port: 80
-          uri: /?x=http?
-          version: HTTP/1.1
-        output:
-          log_contains: id "931120"
-  -
-    test_title: 931120-5
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: localhost
+            method: GET
+            port: 80
+            uri: /?x=http?
+            version: HTTP/1.1
+          output:
+            log_contains: id "931120"
+  - test_title: 931120-5
     desc: Remote File Inclusion Attack (931120)
     stages:
-      -
-        stage:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             headers:
@@ -90,12 +80,10 @@
             version: HTTP/1.1
           output:
             log_contains: id "931120"
-  -
-    test_title: 931120-6
+  - test_title: 931120-6
     desc: Remote File Inclusion Attack (931120)
     stages:
-      -
-        stage:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             headers:
@@ -107,12 +95,10 @@
             version: HTTP/1.1
           output:
             log_contains: id "931120"
-  -
-    test_title: 931120-7
+  - test_title: 931120-7
     desc: Remote File Inclusion Attack (931120)
     stages:
-      -
-        stage:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             headers:
@@ -124,12 +110,10 @@
             version: HTTP/1.1
           output:
             no_log_contains: id "931120"
-  -
-    test_title: 931120-8
+  - test_title: 931120-8
     desc: Remote File Inclusion Attack (931120)
     stages:
-      -
-        stage:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             headers:

@@ -14,44 +14,32 @@ on:
       - '.github/**'
 
 jobs:
-  # "modsec2-apache", "modsec3-apache", "modsec3-nginx"
   regression:
     runs-on: ubuntu-latest
     strategy:
-      # change to true
-      fail-fast: false
       matrix:
         modsec_version: [modsec2-apache]
     steps:
       - name: "Checkout repo"
-        uses: actions/checkout@v2
-
-      - name: Set up Python 3
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-      - uses: actions/cache@v2
-        id: cache
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+        uses: actions/checkout@v3
 
       - name: "Install dependencies"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GO_FTW_VERSION: '0.4.6'
         run: |
-          pip install --upgrade setuptools wheel
-          pip install -r tests/regression/requirements.txt
-          pip install pytest-github-actions-annotate-failures
+          gh release download -R coreruleset/go-ftw v${GO_FTW_VERSION} -p "ftw_${GO_FTW_VERSION}_linux_amd64.tar.gz" -O - | tar -xzvf - ftw
 
       - name: "Run tests for ${{ matrix.modsec_version }}"
         run: |
           mkdir -p tests/logs/${{ matrix.modsec_version }}/{nginx,apache2}
           docker-compose -f ./tests/docker-compose.yml up -d "${{ matrix.modsec_version }}"
-          # Use mounted volume path
-          py.test -vs --tb=short tests/regression/CRS_Tests.py \
-            --config="${{ matrix.modsec_version }}" \
-            --ruledir_recurse=./tests/regression/tests/
+          docker-compose -f ./tests/docker-compose.yml logs
+          [ $(docker inspect ${{ matrix.modsec_version }} --format='{{.State.Running}}') = 'true' ]
+          ./ftw check -d tests/regression/tests
+          ./ftw run -d tests/regression/tests --show-failures-only
+        env:
+          FTW_LOGFILE: './tests/logs/modsec2-apache/error.log'
 
       - name: "Change permissions if failed"
         if: failure()
