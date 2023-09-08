@@ -74,7 +74,7 @@
       "help": "Secret for hCaptcha challenge.",
       "id": "antibot-hcaptcha-secret",
       "label": "hCaptcha secret",
-      "regex": "^(0x[a-zA-Z0-9]+)?$",
+      "regex": "^\\w*$",
       "type": "password"
     },
     "ANTIBOT_TURNSTILE_SITEKEY": {
