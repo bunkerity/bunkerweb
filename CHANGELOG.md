@@ -8,11 +8,13 @@
 - [BUGFIX] Fix logs page not working in UI on Linux integrations
 - [BUGFIX] Fix settings regex that had issues in general and with the UI
 - [BUGFIX] Fix scheduler error with external plugins when reloading
+- [BUGFIX] Fix permissions with folders in linux integrations
 - [MISC] Push Docker images to GitHub packages (ghcr.io repository)
 - [MISC] Improved CI/CD
 - [MISC] Updated python dependencies
 - [MISC] Updated Python Docker image to 3.11.5-alpine in Dockerfiles
 - [MISC] Add support for ModSecurity JSON LogFormat
+- [MISC] Updated OWASP coreruleset to 3.3.5
 
 ## v1.5.1 - 2023/08/08
 
