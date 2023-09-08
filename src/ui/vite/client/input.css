@@ -394,7 +394,7 @@ body {
 /* FOOTER */
 
 .footer-container {
-  @apply dark:bg-green-500/90 relative mt-4 rounded-lg w-full h-max py-2 lg:py-4 mb-2 bg-secondary;
+  @apply -z-10 dark:bg-green-500/90 relative mt-4 rounded-lg w-full h-max py-2 lg:py-4 mb-2 bg-secondary;
 }
 
 .footer-wrap {
@@ -512,6 +512,10 @@ body {
   @apply bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80;
 }
 
+.btn-delete {
+  @apply bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80;
+}
+
 .btn-valid {
   @apply bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80;
 }
@@ -595,7 +599,7 @@ body {
 }
 
 .modal-card {
-  @apply mx-1 px-4 py-3 w-full max-w-180 flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply overflow-hidden px-4 py-3 w-full max-w-180 max-h-[70vh] flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .modal-card-title {

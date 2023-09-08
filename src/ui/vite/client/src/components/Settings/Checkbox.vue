@@ -2,6 +2,7 @@
 import { reactive, defineProps } from "vue";
 
 const props = defineProps({
+  // id && value && method
   settings: {
     type: Object,
     required: true,
@@ -9,20 +10,18 @@ const props = defineProps({
 });
 
 const checkbox = reactive({
-  id: props.settings.id,
-  value: props.settings.value,
-});
+  value : props.settings.value
+})
 </script>
 
 <template>
   <div class="relative mb-7 md:mb-0 z-10">
     <input
       @click="checkbox.value = checkbox.value === 'yes' ? 'no' : 'yes'"
-      :id="checkbox.id"
-      :name="checkbox.id"
+      :id="props.settings.id"
+      :name="props.settings.id"
       :disabled="
-        modes.indexOf(checkbox.method) !== -1 ||
-        (checkbox.method !== 'ui' && checkbox.method !== 'default')
+        (props.settings.method !== 'ui' && props.settings.method !== 'default')
           ? true
           : false
       "

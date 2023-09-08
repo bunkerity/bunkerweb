@@ -60,13 +60,6 @@ const instance = reactive({
       emit: "delete",
     },
     {
-      name: "bans",
-      class: "bg-amber-500",
-      svg: markRaw(InstanceSvgBans),
-      popup: false,
-      emit: "action",
-    },
-    {
       name: "ping",
       class: "bg-sky-500",
       svg: markRaw(InstanceSvgPing),

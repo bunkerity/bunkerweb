@@ -51,12 +51,21 @@ function changeValue(newValue) {
 
 // Close select dropdown when clicked outside element
 watch(select, () => {
+  updateTop();
   if (select.isOpen) {
     document.querySelector("body").addEventListener("click", closeOutside);
+    window.addEventListener('scroll', closeSelect)
+    selectBtn.value.closest('.plugin-structure').addEventListener('scroll', closeSelect)
   } else {
     document.querySelector("body").removeEventListener("click", closeOutside);
+    window.removeEventListener('scroll', closeSelect)
+    selectBtn.value.closest('.plugin-structure').removeEventListener('scroll', closeSelect)
   }
 });
+
+function updateTop() {
+  selectTop.value = `${Math.abs(selectBtn.value.closest('.plugin-structure').scrollTop - selectBtn.value.offsetTop) + selectBtn.value.clientHeight}px`
+}
 
 // Close select when clicked outside logic
 function closeOutside(e) {
@@ -71,6 +80,7 @@ function closeOutside(e) {
 
 const selectBtn = ref();
 const selectWidth = ref("");
+const selectTop = ref("");
 
 onBeforeUpdate(() => {
   selectWidth.value = `${selectBtn.value.clientWidth}px`;
@@ -129,7 +139,7 @@ onMounted(() => {
     </svg>
   </button>
   <div
-    :style="{ width: selectWidth }"
+    :style="{ width: selectWidth, top : selectTop }"
     :aria-hidden="select.isOpen ? 'false' : 'true'"
     :class="[select.isOpen ? 'flex' : 'hidden']"
     class="select-dropdown-container"

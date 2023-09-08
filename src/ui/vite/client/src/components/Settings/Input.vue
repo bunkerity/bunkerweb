@@ -2,47 +2,34 @@
 import { reactive, defineEmits, defineProps } from "vue";
 
 const props = defineProps({
+  // id && type && disabled && required && value
   settings: {
     type: Object,
     required: true,
   },
 });
 
-const input = reactive({
-  id: props.settings.id,
-  type: props.settings.type,
-  value: props.settings.value,
-  placeholder: props.settings.placeholder || "",
-  required: props.settings.required || false,
-  disabled: props.settings.disabled || false,
-  pattern: props.settings.pattern || "",
-});
+const inp = reactive({
+  value : props.settings.value,
+})
 
 const emits = defineEmits(["inp"]);
-
-const inp = "";
 </script>
 
 <template>
   <div class="relative flex items-center">
     <input
-      v-model="inp"
-      @input="$emit('inp', inp)"
-      :type="
-        input.isPassword
-          ? input.showInp
-            ? input.type
-            : 'password'
-          : input.type
-      "
-      :id="input.id"
+      v-model="inp.value"
+      @input="$emit('inp', inp.value)"
+      :type="props.settings.type"
+      :id="props.settings.id"
       class="input-regular"
-      :required="input.id === 'SERVER_NAME' || input.required ? true : false"
-      :disabled="input.disabled"
-      :placeholder="input.placeholder"
-      :pattern="input.pattern"
-      :name="input.id"
-      :value="input.value"
+      :required="props.settings.id === 'SERVER_NAME' || props.settings.required || false ? true : false"
+      :disabled="props.settings.disabled || false"
+      :placeholder="props.settings.placeholder || ''"
+      :pattern="props.settings.pattern || ''"
+      :name="props.settings.id"
+      :value="inp.value"
     />
   </div>
 </template>

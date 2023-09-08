@@ -1,5 +1,6 @@
 <script setup>
 import { computed, defineProps, defineEmits } from "vue";
+import ModalBase from "@components/Modal/Base.vue";
 
 // Open after a file manager item (folder / file) action is clicked
 // With the current folder / file data
@@ -41,9 +42,7 @@ const prefix = computed(() => {
 const emits = defineEmits(["close"]);
 </script>
 <template>
-  <div class="modal-container">
-    <div class="modal-wrap">
-      <div class="modal-card">
+<ModalBase>
         <div class="w-full flex justify-between">
           <p class="modal-card-title">
             {{ `${props.action} ${props.type}` }}
@@ -108,7 +107,5 @@ const emits = defineEmits(["close"]);
             </button>
           </div>
         </form>
-      </div>
-    </div>
-  </div>
+      </ModalBase>
 </template>

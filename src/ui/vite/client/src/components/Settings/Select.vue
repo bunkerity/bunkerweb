@@ -2,6 +2,7 @@
 import { ref, reactive, watch, onMounted, defineEmits, defineProps } from "vue";
 
 const props = defineProps({
+  // id && value && values && disabled
   settings: {
     type: Object,
     required: true,
@@ -9,11 +10,8 @@ const props = defineProps({
 });
 
 const select = reactive({
-  id: props.settings.id,
-  values: props.settings.values,
-  value: props.settings.value,
+  value : props.settings.value, 
   isOpen: false,
-  disabled: props.settings.disabled || false,
 });
 
 // EVENTS
@@ -69,13 +67,13 @@ const emits = defineEmits(["inp"]);
 <template>
   <!-- default hidden-->
   <select
-    :id="select.id"
-    :name="select.id"
+    :id="props.settings.id"
+    :name="props.settings.id"
     aria-description="Communicate with a custom visible select."
     class="hidden"
   >
     <option
-      v-for="value in select.values"
+      v-for="value in props.settings.values"
       :value="value"
       :selected="value === select.value ? true : false"
     >
@@ -90,7 +88,7 @@ const emits = defineEmits(["inp"]);
       ref="selectBtn"
       aria-description="custom select dropdown button"
       data-select-dropdown
-      :disabled="select.disabled"
+      :disabled="props.settings.disabled || false"
       :aria-expanded="select.isOpen ? 'true' : 'false'"
       @click="toggleSelect()"
       class="select-btn"
@@ -118,11 +116,11 @@ const emits = defineEmits(["inp"]);
       aria-description="custom select dropdown"
     >
       <button
-        v-for="(value, id) in select.values"
+        v-for="(value, id) in props.settings.values"
         @click="$emit('inp', changeValue(value))"
         :class="[
           id === 0 ? 'first' : '',
-          id === select.values.length - 1 ? 'last' : '',
+          id === props.settings.values.length - 1 ? 'last' : '',
           value === select.value ? 'active' : '',
           'select-dropdown-btn',
         ]"
