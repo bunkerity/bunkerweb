@@ -1,87 +1,74 @@
 ---
-  meta:
-    author: "csanders-git"
-    enabled: true
-    name: "920210.yaml"
-    description: "Tests that trigger rule 920210"
-  tests:
-    -
-      test_title: 920210-1
-      stages:
-        -
-          stage:
-            input:
-              dest_addr: "127.0.0.1"
-              port: 80
-              headers:
-                  User-Agent: "ModSecurity CRS 3 Tests"
-                  Host: "localhost"
-                  Connection: "keep-alive"
-            output:
-              no_log_contains: "id \"920210\""
-    -
-      test_title: 920210-2
-      stages:
-        -
-          stage:
-            input:
-              dest_addr: "127.0.0.1"
-              port: 80
-              headers:
-                  User-Agent: "ModSecurity CRS 3 Tests"
-                  Host: "localhost"
-                  Connection: "keep-alive,keep-alive"
-            output:
-              log_contains: "id \"920210\""
-    -
-      test_title: 920210-3
-      stages:
-        -
-          stage:
-            input:
-              dest_addr: "127.0.0.1"
-              port: 80
-              headers:
-                  User-Agent: "ModSecurity CRS 3 Tests"
-                  Host: "localhost"
-                  Connection: "keep-alive,close"
-            output:
-              log_contains: "id \"920210\""
-    -
-      test_title: 920210-4
-      stages:
-        -
-          stage:
-            input:
-              dest_addr: "127.0.0.1"
-              port: 80
-              headers:
-                  User-Agent: "ModSecurity CRS 3 Tests"
-                  Host: "localhost"
-                  Connection: "close,close"
-            output:
-              log_contains: "id \"920210\""
-    -
-      test_title: 920210-5
-      stages:
-        -
-          stage:
-            input:
-              dest_addr: "127.0.0.1"
-              port: 80
-              headers:
-                  User-Agent: "ModSecurity CRS 3 Tests"
-                  Host: "localhost"
-                  Connection: "User-Agent"
-            output:
-              no_log_contains: "id \"920210\""
-    -
-      test_title: 920210-6
-      desc: Multiple/Conflicting Connection Header Data Found (920210)  from old modsec
-        regressions
-      stages:
-      -
-        stage:
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "920210.yaml"
+  description: "Tests that trigger rule 920210"
+tests:
+  - test_title: 920210-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: "localhost"
+              Connection: "keep-alive"
+          output:
+            no_log_contains: "id \"920210\""
+  - test_title: 920210-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: "localhost"
+              Connection: "keep-alive,keep-alive"
+          output:
+            log_contains: "id \"920210\""
+  - test_title: 920210-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: "localhost"
+              Connection: "keep-alive,close"
+          output:
+            log_contains: "id \"920210\""
+  - test_title: 920210-4
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: "localhost"
+              Connection: "close,close"
+          output:
+            log_contains: "id \"920210\""
+  - test_title: 920210-5
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: "localhost"
+              Connection: "User-Agent"
+          output:
+            no_log_contains: "id \"920210\""
+  - test_title: 920210-6
+    desc: Multiple/Conflicting Connection Header Data Found (920210)  from old modsec regressions
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             headers:
@@ -99,13 +86,10 @@
             version: HTTP/1.1
           output:
             log_contains: id "920210"
-    -
-      test_title: 920210-7
-      desc: Multiple/Conflicting Connection Header Data Found (920210)  from old modsec
-        regressions
-      stages:
-      -
-        stage:
+  - test_title: 920210-7
+    desc: Multiple/Conflicting Connection Header Data Found (920210)  from old modsec regressions
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             headers:

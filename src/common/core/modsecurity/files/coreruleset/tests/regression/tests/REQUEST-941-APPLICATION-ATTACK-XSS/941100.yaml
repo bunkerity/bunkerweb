@@ -1,16 +1,14 @@
 ---
-  meta:
-    author: "csanders-git"
-    enabled: true
-    name: "941100.yaml"
-    description: "Tests to trigger, or not trigger 941100"
-  tests:
-    -
-      test_title: 941100-1
-      desc: Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
-      stages:
-      -
-        stage:
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "941100.yaml"
+  description: "Tests to trigger, or not trigger 941100"
+tests:
+  - test_title: 941100-1
+    desc: Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -21,12 +19,10 @@
               Host: localhost
           output:
             log_contains: id "941100"
-    -
-      test_title: 941100-2
-      desc: XSS in XML Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
-      stages:
-      -
-        stage:
+  - test_title: 941100-2
+    desc: XSS in XML Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -37,12 +33,10 @@
               Host: localhost
           output:
             log_contains: id "941100"
-    -
-      test_title: 941100-3
-      desc: XSS testing of libinjection in User-Agent
-      stages:
-      -
-        stage:
+  - test_title: 941100-3
+    desc: XSS testing of libinjection in User-Agent
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -53,12 +47,10 @@
               Host: localhost
           output:
             log_contains: id "941100"
-    -
-      test_title: 941100-4
-      desc: XSS testing of libinjection in User-Agent
-      stages:
-      -
-        stage:
+  - test_title: 941100-4
+    desc: XSS testing of libinjection in User-Agent
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -70,12 +62,10 @@
               Host: localhost
           output:
             no_log_contains: id "941100"
-    -
-      test_title: 941100-5FN
-      desc: XSS testing of libinjection in User-Agent
-      stages:
-      -
-        stage:
+  - test_title: 941100-5FN
+    desc: XSS testing of libinjection in User-Agent
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET

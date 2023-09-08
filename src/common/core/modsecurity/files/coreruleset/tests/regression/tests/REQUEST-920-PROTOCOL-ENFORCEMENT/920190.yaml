@@ -1,33 +1,29 @@
 ---
-  meta:
-    author: "csanders-git"
-    enabled: true
-    name: "920190.yaml"
-    description: "Description"
-  tests:
-    -
-      test_title: 920190-1
-      stages:
-        -
-          stage:
-            input:
-              dest_addr: "127.0.0.1"
-              method: "GET"
-              port: 80
-              headers:
-                  User-Agent: "ModSecurity CRS 3 Tests"
-                  Host: "localhost"
-                  Range: "0-1"
-              protocol: "http"
-              uri: "/"
-            output:
-              no_log_contains: id "920190"
-    -
-      test_title: 920190-2
-      desc: 'Range: Invalid Last Byte Value (920190) from old modsec regressions'
-      stages:
-      -
-        stage:
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "920190.yaml"
+  description: "Description"
+tests:
+  - test_title: 920190-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: "localhost"
+              Range: "0-1"
+            protocol: "http"
+            uri: "/"
+          output:
+            no_log_contains: id "920190"
+  - test_title: 920190-2
+    desc: 'Range: Invalid Last Byte Value (920190) from old modsec regressions'
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             headers:

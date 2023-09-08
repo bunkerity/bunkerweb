@@ -1,10 +1,13 @@
 ## GOLD SPONSORS
 
-* VMWare (Avi Networks)
-* F5/NGINX
+* Edgio
+* Google
 * Microsoft
+* Nginx (Part of F5)
+* United Security Providers
+* VMWare
 
 ## SILVER SPONSORS
 
 * Bug Bounty Switzerland
-* Google Cloud Armor
+
