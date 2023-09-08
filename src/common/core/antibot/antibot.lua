@@ -47,6 +47,11 @@ function antibot:header()
 		return self:ret(true, "client already resolved the challenge")
 	end
 
+	if self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
+		return self:ret(true, "Not antibot uri")
+	end
+
+
 	local header = "Content-Security-Policy"
 	if self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes" then
 		header = header .. "-Report-Only"
