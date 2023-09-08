@@ -75,7 +75,14 @@ const services = reactive({
 
     for (const [key, value] of Object.entries(cloneServConf)) {
       const currServPlugin = JSON.parse(JSON.stringify(cloneMultisitePlugin));
-      const currServConf = JSON.parse(JSON.stringify(cloneServConf[key]));
+      const currServConf = cloneServConf[key];
+      // Add current name
+      if(!('SERVER_NAME' in currServConf)) {
+        currServConf['SERVER_NAME'] = {
+          "value": key,
+          "method": "default"
+        };
+      }
       cloneServConf[key] = addConfToPlugins(currServPlugin, currServConf);
     }
 
@@ -94,8 +101,7 @@ const services = reactive({
     cloneServConf[services.activeService].length !== 0
       ? cloneServConf[services.activeService][0]["name"]
       : "";
-
-    console.log(cloneServConf)
+    
     return cloneServConf;
   }),
 });
@@ -135,6 +141,12 @@ function resetValues() {
 function refresh() {
   getGlobalConf();
   resetValues();
+}
+
+function changeServ(servName) {
+  services.activeService = servName;
+  // Remove previous config services changes
+  config.$reset();
 }
 
 // Show service data logic
@@ -178,7 +190,7 @@ onMounted(async () => {
           name="services-list"
         >
           <SettingsSelect
-            @inp="(v) => (services.activeService = v)"
+            @inp="(v) => changeServ(v)"
             :settings="{
               id: 'services-list',
               value: 'Service name',

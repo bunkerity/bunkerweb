@@ -19,17 +19,14 @@ export function addConfToPlugins(plugins, config) {
 
     Object.entries(settings).forEach(([setting, data]) => {
       // Add config value to config when match
-      for (const [confName, confData] of Object.entries(config)) {
-        if (!!(setting in confData)) {
-          data["value"] = confData["value"];
-          if (!!("method" in data)) data["method"] = confData["method"];
-          if (!("method" in data)) data["method"] = "default";
-          // Remove config value if matched (performance)
-          try {
-            delete config[setting];
-          } catch (err) {}
-        }
+      try {
+        data["value"] = config[setting]["value"];
+        data["method"] = config[setting]["method"];
+        delete config[setting];
+      }catch(err) {
+
       }
+     
     });
   });
 
