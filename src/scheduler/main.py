@@ -530,11 +530,7 @@ if __name__ == "__main__":
                     "--output",
                     join(sep, "etc", "nginx"),
                     "--variables",
-                    (
-                        str(tmp_variables_path)
-                        if args.variables and FIRST_RUN
-                        else str(SCHEDULER_TMP_ENV_PATH)
-                    ),
+                    str(SCHEDULER_TMP_ENV_PATH),
                 ],
                 stdin=DEVNULL,
                 stderr=STDOUT,
