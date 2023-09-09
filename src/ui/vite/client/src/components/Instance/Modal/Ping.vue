@@ -27,7 +27,7 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(["close", "delete"]);
+const emits = defineEmits(["close"]);
 </script>
 <template>
   <ModalBase title="ping instance" v-if="props.isOpen">

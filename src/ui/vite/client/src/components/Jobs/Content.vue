@@ -1,9 +1,10 @@
 <script setup>
 import JobsSvgState from "@components/Jobs/Svg/State.vue";
+import JobsSvgHistory from "@components/Jobs/Svg/History.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import { defineProps, defineEmits } from "vue";
-
+import { getJobsCacheNames } from "@utils/jobs";
 const props = defineProps({
   items: {
     type: Array,
@@ -17,7 +18,7 @@ const props = defineProps({
 
 // cache => return cache file name to download
 // run => return the job name that need to be run/rerun
-const emits = defineEmits(["cache", "run"]);
+const emits = defineEmits(["cache", "run", "history"]);
 </script>
 
 <template>
@@ -25,15 +26,20 @@ const emits = defineEmits(["cache", "run"]);
     <!-- job item-->
     <li
       v-for="(item, id) in props.items"
-      class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5"
+      class="hover:bg-gray-100 dark:hover:bg-slate-800 items-center grid grid-cols-12 border-gray-300 py-2.5"
+      :class="[id === props.items.length - 1 ? '' : 'border-b']"
     >
       <div
-        class="break-words flex items-center col-span-12 grid grid-cols-12 text-sm dark:text-gray-400"
+        class="break-words items-center col-span-12 grid grid-cols-12 text-sm dark:text-gray-400"
         v-for="(data, key) in item"
       >
-        <span :class="[props.positions[0]]">{{ key }}</span>
+        <span class="pl-4" :class="[props.positions[0]]">{{ key }}</span>
         <span :class="[props.positions[1]]">{{ data["every"] }}</span>
-        <span :class="[props.positions[2]]">{{ "history" }}</span>
+        <div :class="[props.positions[2], 'ml-2']">
+          <button @click="$emit('history', { jobName: key })">
+            <JobsSvgHistory />
+          </button>
+        </div>
         <div class="translate-x-3" :class="[props.positions[3]]">
           <JobsSvgState :success="data['reload']" />
         </div>
@@ -46,7 +52,7 @@ const emits = defineEmits(["cache", "run"]);
         <div :class="[props.positions[6]]">
           <SettingsSelect
             v-if="data['cache'].length > 0"
-            @inp="(v) => $emit('cache', { 'job-name': key, 'file-name': v })"
+            @inp="(v) => $emit('cache', { jobName: key, cacheName: v })"
             :settings="{
               id: 'cache-files',
               value: 'select to download',
@@ -58,7 +64,7 @@ const emits = defineEmits(["cache", "run"]);
           <ButtonBase
             color="valid"
             size="lg"
-            @click="$emit('run', { 'job-name': key })"
+            @click="$emit('run', { jobName: key })"
           >
             run
           </ButtonBase>

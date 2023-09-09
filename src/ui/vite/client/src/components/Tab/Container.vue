@@ -55,7 +55,7 @@ function closeOutside(e) {
   <div
     role="tablist"
     :class="[tabCtnr.isMobile ? 'mt-4' : '']"
-    class="z-100 relative md:block col-span-12 h-full md:h-fit"
+    class="z-100 relative md:block col-span-12 h-fit"
   >
     <button
       data-select-tab-container

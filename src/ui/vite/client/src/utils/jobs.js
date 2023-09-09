@@ -13,28 +13,6 @@ export async function jobsFormat(jobs) {
   return jobsArr;
 }
 
-// Get success number
-export function getJobsSuccessNum(jobs) {
-  let count = 0;
-  jobs.forEach((job, id) => {
-    const jobName = Object.keys(job).join();
-    const data = job[jobName];
-    if (data["history"][0]["success"]) count++;
-  });
-  return count;
-}
-
-// Get reload  number
-export function getJobsReloadNum(jobs) {
-  let count = 0;
-  jobs.forEach((job, id) => {
-    const jobName = Object.keys(job).join();
-    const data = job[jobName];
-    if (data["reload"]) count++;
-  });
-  return count;
-}
-
 // Format cache data for select
 export function getJobsCacheNames(caches) {
   const names = [];
@@ -46,7 +24,6 @@ export function getJobsCacheNames(caches) {
 
 // Filter plugins
 export function getJobsByFilter(jobs, filters) {
-  console.log(jobs);
   jobs.forEach((job, id) => {
     const jobName = Object.keys(job).join();
     const data = job[jobName];
@@ -64,24 +41,20 @@ export function getJobsByFilter(jobs, filters) {
       if (checkType === "string" && key === "name") {
         const filterValue = value.toLowerCase().trim();
         const checkValue = jobName.toLowerCase().trim();
-        console.log("check name : " + filterValue + " " + checkValue);
         isMatch = checkValue.includes(filterValue) ? true : false;
       }
 
       if (checkType === "string" && key !== "name") {
         const filterValue = value.toLowerCase().trim();
         const checkValue = data[key].toLowerCase().trim();
-        console.log("check every", filterValue, checkValue);
         isMatch = checkValue.includes(filterValue) ? true : false;
       }
 
       if (checkType === "boolean" && key === "success") {
-        console.log("success : " + data["history"][0][key]);
         isMatch = value === data["history"][0][key] ? true : false;
       }
 
       if (checkType === "boolean" && key !== "success") {
-        console.log("check reload");
         isMatch = value === data[key] ? true : false;
       }
 

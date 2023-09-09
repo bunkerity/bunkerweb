@@ -713,6 +713,18 @@ h6 {
   z-index: 1000 !important;
 }
 
+.z-\[100\] {
+  z-index: 100 !important;
+}
+
+.z-\[101\] {
+  z-index: 101 !important;
+}
+
+.z-\[102\] {
+  z-index: 102 !important;
+}
+
 .z-sticky {
   z-index: 1020 !important;
 }
@@ -739,6 +751,10 @@ h6 {
 
 .col-span-4 {
   grid-column: span 4 / span 4 !important;
+}
+
+.col-span-5 {
+  grid-column: span 5 / span 5 !important;
 }
 
 .col-start-1 {
@@ -818,6 +834,11 @@ h6 {
 .my-3 {
   margin-top: 0.75rem !important;
   margin-bottom: 0.75rem !important;
+}
+
+.my-2\.5 {
+  margin-top: 0.625rem !important;
+  margin-bottom: 0.625rem !important;
 }
 
 .mb-0 {
@@ -1046,12 +1067,16 @@ h6 {
   min-width: 0px !important;
 }
 
-.min-w-\[1100px\] {
-  min-width: 1100px !important;
+.min-w-\[1200px\] {
+  min-width: 1200px !important;
 }
 
-.max-w-\[1200px\] {
-  max-width: 1200px !important;
+.min-w-\[1000px\] {
+  min-width: 1000px !important;
+}
+
+.min-w-\[1100px\] {
+  min-width: 1100px !important;
 }
 
 .max-w-\[200px\] {
@@ -1060,6 +1085,10 @@ h6 {
 
 .max-w-full {
   max-width: 100% !important;
+}
+
+.max-w-\[1200px\] {
+  max-width: 1200px !important;
 }
 
 .flex-auto {
@@ -1272,6 +1301,10 @@ h6 {
   overflow-x: hidden !important;
 }
 
+.overflow-y-hidden {
+  overflow-y: hidden !important;
+}
+
 .overflow-y-visible {
   overflow-y: visible !important;
 }
@@ -1408,6 +1441,11 @@ h6 {
 .bg-yellow-500 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(251 177 64 / var(--tw-bg-opacity)) !important;
+}
+
+.bg-gray-800 {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(37 47 64 / var(--tw-bg-opacity)) !important;
 }
 
 .bg-gradient-to-tl {
@@ -1573,6 +1611,11 @@ h6 {
   padding-bottom: 0.75rem !important;
 }
 
+.px-4 {
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
 .pb-0 {
   padding-bottom: 0px !important;
 }
@@ -1595,6 +1638,18 @@ h6 {
 
 .pt-4 {
   padding-top: 1rem !important;
+}
+
+.pb-1 {
+  padding-bottom: 0.25rem !important;
+}
+
+.pl-3 {
+  padding-left: 0.75rem !important;
+}
+
+.pl-4 {
+  padding-left: 1rem !important;
 }
 
 .text-left {
@@ -5242,6 +5297,16 @@ body {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important;
 }
 
+.hover\:border-gray-400:hover {
+  --tw-border-opacity: 1 !important;
+  border-color: rgb(206 212 218 / var(--tw-border-opacity)) !important;
+}
+
+.hover\:border-gray-700:hover {
+  --tw-border-opacity: 1 !important;
+  border-color: rgb(73 80 87 / var(--tw-border-opacity)) !important;
+}
+
 .hover\:bg-gray-100:hover {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(235 239 244 / var(--tw-bg-opacity)) !important;
@@ -5285,6 +5350,11 @@ body {
 
 .hover\:brightness-95:hover {
   --tw-brightness: brightness(.95) !important;
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow) !important;
+}
+
+.hover\:brightness-90:hover {
+  --tw-brightness: brightness(.9) !important;
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow) !important;
 }
 
@@ -5424,6 +5494,11 @@ body {
   background-color: rgb(58 65 111 / var(--tw-bg-opacity)) !important;
 }
 
+:is(.dark .dark\:hover\:bg-gray-800:hover) {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(37 47 64 / var(--tw-bg-opacity)) !important;
+}
+
 :is(.dark .dark\:hover\:brightness-105:hover) {
   --tw-brightness: brightness(1.05) !important;
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow) !important;
@@ -5534,11 +5609,6 @@ body {
     display: block !important;
   }
 
-  .md\:h-fit {
-    height: -moz-fit-content !important;
-    height: fit-content !important;
-  }
-
   .md\:text-base {
     font-size: 1rem !important;
     line-height: 1.5rem !important;
@@ -5546,8 +5616,8 @@ body {
 }
 
 @media (min-width: 992px) {
-  .lg\:col-span-12 {
-    grid-column: span 12 / span 12 !important;
+  .lg\:col-span-3 {
+    grid-column: span 3 / span 3 !important;
   }
 
   .lg\:col-span-4 {

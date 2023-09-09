@@ -19,7 +19,7 @@ const emits = defineEmits(["close", "delete"]);
 </script>
 <template>
   <ModalBase title="delete instance" v-if="props.isOpen">
-    <form @submit.prevent class="w-full" method="POST">
+    <div class="w-full">
       <div class="flex justify-center">
         <div class="modal-path">
           <p class="modal-path-text">
@@ -55,6 +55,6 @@ const emits = defineEmits(["close", "delete"]);
           DELETE
         </ButtonBase>
       </div>
-    </form>
+    </div>
   </ModalBase>
 </template>

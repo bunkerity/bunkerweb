@@ -44,6 +44,7 @@ const services = reactive({
   // Default plugin to display, first of list (before any filter)
   activeTab: "",
   activeService: "",
+  pluginsName: [],
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
     if (
@@ -67,6 +68,13 @@ const services = reactive({
       )
     );
 
+    services.pluginsName = [];
+    cloneMultisitePlugin.forEach((item) => {
+      services.pluginsName.push(item["name"]);
+    });
+
+    console.log(cloneMultisitePlugin);
+
     // Get only services custom conf
     const cloneServConf = JSON.parse(JSON.stringify(conf.data["services"]));
 
@@ -77,10 +85,10 @@ const services = reactive({
       const currServPlugin = JSON.parse(JSON.stringify(cloneMultisitePlugin));
       const currServConf = cloneServConf[key];
       // Add current name
-      if(!('SERVER_NAME' in currServConf)) {
-        currServConf['SERVER_NAME'] = {
-          "value": key,
-          "method": "default"
+      if (!("SERVER_NAME" in currServConf)) {
+        currServConf["SERVER_NAME"] = {
+          value: key,
+          method: "default",
         };
       }
       cloneServConf[key] = addConfToPlugins(currServPlugin, currServConf);
@@ -88,7 +96,7 @@ const services = reactive({
 
     // Add new service with all default values
     // Will not be add to config store until a default value is change
-    cloneServConf['new'] = JSON.parse(JSON.stringify(cloneMultisitePlugin))
+    cloneServConf["new"] = JSON.parse(JSON.stringify(cloneMultisitePlugin));
 
     // Filter data to display for each service
     for (const [key, value] of Object.entries(cloneServConf)) {
@@ -97,11 +105,11 @@ const services = reactive({
 
     // Check if prev plugin or no plugin match filter for current display service
     services.activeTab =
-    services.activeService &&
-    cloneServConf[services.activeService].length !== 0
-      ? cloneServConf[services.activeService][0]["name"]
-      : "";
-    
+      services.activeService &&
+      cloneServConf[services.activeService].length !== 0
+        ? cloneServConf[services.activeService][0]["name"]
+        : "";
+
     return cloneServConf;
   }),
 });
@@ -168,18 +176,27 @@ onMounted(async () => {
       class="col-span-12 content-wrap"
     >
       <CardBase
-        class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
+        class="z-[102] h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
         label="info"
       >
         <CardItemList
           :items="[
-            { label: 'services total', value: Object.keys(services.setup).length - 1},
+            {
+              label: 'total',
+              value: Object.keys(services.setup).length - 1,
+            },
+            {
+              label: 'scheduler',
+              value: '',
+            },
+            {
+              label: 'ui',
+              value: '',
+            },
           ]"
         />
       </CardBase>
-      <CardBase
-      class="z-100 h-fit col-span-12 md:col-span-8 lg:col-span-4"
-      >
+      <CardBase class="z-[101] h-fit col-span-12 md:col-span-8 lg:col-span-4">
         <div class="col-span-12 flex">
           <CardLabel label="services" />
           <PluginRefresh @refresh="refresh()" />
@@ -194,22 +211,45 @@ onMounted(async () => {
             :settings="{
               id: 'services-list',
               value: 'Service name',
-              values: Object.keys(services.setup).filter(item => item !== 'new'),
+              values: Object.keys(services.setup).filter(
+                (item) => item !== 'new'
+              ),
               placeholder: 'Services',
             }"
           />
         </SettingsLayout>
         <div class="col-span-12 flex justify-center mt-2">
-          <ButtonBase @click="services.activeService = 'new'" color="valid" size="normal" class="text-sm">Create new service</ButtonBase>
+          <ButtonBase
+            @click="services.activeService = 'new'"
+            color="valid"
+            size="normal"
+            class="text-sm"
+            >Create new service</ButtonBase
+          >
         </div>
       </CardBase>
       <CardBase
-        label="filter"
-        class="z-10 col-span-12 md:col-span-12 lg:col-span-4 2xl:col-span-3 3xl:col-span-2 grid grid-cols-12 relative"
+        label="plugins"
+        class="z-[100] col-span-12 md:col-span-12 lg:col-span-4 grid grid-cols-12 relative"
       >
         <SettingsLayout
-          class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
-          label="Search"
+          class="flex w-full col-span-12 md:col-span-6"
+          label="Select plugin"
+          name="plugins"
+        >
+          <SettingsSelect
+            @inp="(v) => (services.activeTab = v)"
+            :settings="{
+              id: 'plugins',
+              value: services.pluginsName[0],
+              values: services.pluginsName,
+              placeholder: 'Search',
+            }"
+          />
+        </SettingsLayout>
+        <SettingsLayout
+          class="flex w-full col-span-12 md:col-span-6"
+          label="Setting search"
           name="keyword"
         >
           <SettingsInput
@@ -223,8 +263,8 @@ onMounted(async () => {
           />
         </SettingsLayout>
         <SettingsLayout
-          class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
-          label="Method"
+          class="flex w-full col-span-12 md:col-span-6"
+          label="Setting method"
           name="keyword"
         >
           <SettingsSelect
@@ -238,12 +278,39 @@ onMounted(async () => {
           />
         </SettingsLayout>
       </CardBase>
-      <CardBase v-if="services.activeService" class="col-span-12 grid grid-cols-12 relative">
-        <CardLabel :label="services.activeService === 'new' ? 'CREATE NEW SERVICE' : `SERVICE ${services.activeService}`" />
+
+      <CardBase
+        v-if="services.activeService"
+        class="z-10 col-span-12 grid grid-cols-12 relative"
+      >
+        <CardLabel
+          class="mb-4 text-xl"
+          :label="
+            services.activeService === 'new'
+              ? 'CREATE NEW SERVICE'
+              : `SERVICE ${services.activeService}`
+          "
+        />
+        <SettingsLayout
+          v-if="false"
+          class="flex w-full col-span-12 md:col-span-6 lg:col-span-3 mb-4"
+          label="Select plugin"
+          name="plugins"
+        >
+          <SettingsSelect
+            @inp="(v) => (services.activeTab = v)"
+            :settings="{
+              id: 'plugins',
+              value: services.pluginsName[0],
+              values: services.pluginsName,
+              placeholder: 'Search',
+            }"
+          />
+        </SettingsLayout>
         <div class="col-span-12" v-for="(value, key) in services.setup">
           <TabStructure
             class="mb-4"
-            v-if="services.activeService === key"
+            v-if="false && services.activeService === key"
             :items="value"
             :active="services.activeTab"
             @tabName="(v) => (services.activeTab = v)"

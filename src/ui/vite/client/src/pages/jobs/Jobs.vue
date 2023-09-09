@@ -8,15 +8,11 @@ import SettingsSelect from "@components/Settings/Select.vue";
 import JobsStructure from "@components/Jobs/Structure.vue";
 import JobsHeader from "@components/Jobs/Header.vue";
 import JobsContent from "@components/Jobs/Content.vue";
+import JobsModalHistory from "@components/Jobs/Modal/History.vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { reactive, computed, onMounted } from "vue";
-import {
-  getJobsReloadNum,
-  getJobsSuccessNum,
-  getJobsByFilter,
-  getJobsIntervalList,
-} from "@utils/jobs.js";
+import { getJobsByFilter, getJobsIntervalList } from "@utils/jobs.js";
 
 const feedbackStore = useFeedbackStore();
 
@@ -39,7 +35,7 @@ const header = [
   "Success",
   "Last run",
   "Cache",
-  "Run",
+  "Action",
 ];
 
 // Hide / Show settings and plugin base on that filters
@@ -55,50 +51,77 @@ const jobs = reactive({
   isPend: false,
   isErr: false,
   // Never modify this unless refetch
-  base: [],
-  total: computed(() => jobs.base.length),
-  reload: computed(() => getJobsReloadNum(jobs.base)),
-  success: computed(() => getJobsSuccessNum(jobs.base)),
-  // This run every time reactive data changed (plugin.base or filters)
+  data: [],
+  total: computed(() => Object.keys(jobs.data).length),
+  reload: computed(() => {
+    return Object.values(jobs.data).filter((item) => item["reload"] !== false)
+      .length;
+  }),
+  success: computed(() => {
+    return Object.values(jobs.data).filter(
+      (item) => item["history"][0]["success"] !== false
+    ).length;
+  }),
   setup: computed(() => {
+    // Change to array and keep name
+    const cloneData = JSON.parse(JSON.stringify(jobs.data));
+    const dataArr = [];
+    for (const [key, value] of Object.entries(cloneData)) {
+      dataArr.push({ [key]: cloneData[key] });
+    }
+
     // Filter data to display
-    const cloneBase = JSON.parse(JSON.stringify(jobs.base));
-    const filter = getJobsByFilter(cloneBase, filters);
+    const filter = getJobsByFilter(dataArr, filters);
     return filter;
   }),
 });
 
 async function getJobs() {
-  await fetchAPI("api/jobs", "GET", null, jobs.isPend, jobs.isErr);
+  await fetchAPI("/api/jobs", "GET", null, jobs, feedbackStore.addFeedback);
 }
 
 const run = reactive({
   isPend: false,
   isErr: false,
+  data: [],
 });
 
 async function runJob(data) {
   await fetchAPI(
-    "/api/jobs-run",
-    "GET",
-    JSON.stringify(data),
-    run.isPend,
-    run.isErr
+    `/api/jobs/${data.jobName}/run`,
+    "POST",
+    null,
+    run,
+    feedbackStore.addFeedback
   );
 }
 
 const download = reactive({
   isPend: false,
   isErr: false,
+  data: [],
 });
 
 async function downloadFile(data) {
   await fetchAPI(
-    `/api/cache?job-name=${data["job-name"]}&file-name=${data["file-name"]}`,
+    `/api/jobs/${data.jobName}/cache/${data.cacheName}`,
     "GET",
-    download.isPend,
-    download.isErr
+    null,
+    download,
+    feedbackStore.addFeedback
   );
+}
+
+const history = reactive({
+  isOpen: false,
+  jobName: "",
+  data: [],
+});
+
+function showHistory(data) {
+  history.jobName = data.jobName;
+  history.data = jobs.data[data.jobName]["history"];
+  history.isOpen = true;
 }
 
 onMounted(async () => {
@@ -183,18 +206,29 @@ onMounted(async () => {
       </SettingsLayout>
     </CardBase>
     <CardBase
-      class="col-span-12 max-w-[1200px] max-h-[55vh] overflow-x-auto overflow-y-visible"
+      class="col-span-12 max-w-[1200px] overflow-x-auto overflow-y-hidden"
       label="jobs"
     >
-      <JobsStructure>
-        <JobsHeader :header="header" :positions="positions" />
+      <JobsHeader
+        class="min-w-[1100px]"
+        :header="header"
+        :positions="positions"
+      />
+      <JobsStructure class="min-w-[1100px] max-h-[55vh]">
         <JobsContent
           @cache="(v) => downloadFile(v)"
           @run="(v) => runJob(v)"
+          @history="(v) => showHistory(v)"
           :items="jobs.setup"
           :positions="positions"
         />
       </JobsStructure>
     </CardBase>
+    <JobsModalHistory
+      :history="history.data"
+      :jobName="history.jobName"
+      :isOpen="history.isOpen"
+      @close="history.isOpen = false"
+    />
   </Dashboard>
 </template>
