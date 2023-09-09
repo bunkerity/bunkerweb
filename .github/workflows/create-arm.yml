@@ -52,6 +52,8 @@ jobs:
           echo "ip=${{ fromJson(steps.scw.outputs.json).public_ip.address }}" >> "$GITHUB_OUTPUT"
       - name: Wait for VM
         run: scw instance server wait ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2
+      - name: Configure boot volume
+        run: scw instance server update ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2 volumes.0.boot=true
       - name: Start VM
         run: scw instance server start ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2
       - name: Wait for SSH
