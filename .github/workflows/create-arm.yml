@@ -52,6 +52,8 @@ jobs:
           echo "ip=${{ fromJson(steps.scw.outputs.json).public_ip.address }}" >> "$GITHUB_OUTPUT"
       - name: Wait for VM
         run: scw instance server wait ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2
+      - name: Start VM
+        run: scw instance server start ${{ fromJson(steps.scw.outputs.json).ID }} zone=fr-par-2
       - name: Wait for SSH
         uses: iFaxity/wait-on-action@628831cec646e6dacca502f34a6c6b46e131e51d
         with:
