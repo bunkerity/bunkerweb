@@ -46,8 +46,9 @@ async def validation_exception_handler(request, exc):
     print(exc)
     return PlainTextResponse(str({"type" : "error", "status" : 400, "message": "Invalid data send on request", "data" : {}}), status_code=400)
 
-from routers import instances, plugins, config
+from routers import instances, plugins, config, misc
 
+app.include_router(misc.router)
 app.include_router(instances.router)
 app.include_router(plugins.router)
 app.include_router(config.router)

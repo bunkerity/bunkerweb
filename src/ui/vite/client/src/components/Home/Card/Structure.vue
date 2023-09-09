@@ -13,7 +13,7 @@ const props = defineProps({
     required: true,
   },
   count: {
-    type: Number,
+    type: [Number, String],
     required: true,
   },
   detailArr: {
