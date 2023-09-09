@@ -31,17 +31,20 @@ const emits = defineEmits(["close"]);
 </script>
 <template>
   <ModalBase :title="`history ${props.jobName}`" v-if="props.isOpen">
-    <ListBase class="mt-2 col-span-12" :header="header" :positions="positions">
-      <ListItem v-for="item in props.history">
-        <div class="list-content-item-wrap">
-          <div class="translate-x-3 col-span-2" :class="[positions[0]]">
-            <JobsSvgState :success="item['success']" />
+    <div class="col-span-12 overflow-x-auto overflow-y-hidden">
+      <ListBase class="min-w-[500px]" :header="header" :positions="positions">
+        <ListItem v-for="item in props.history">
+          <div class="list-content-item-wrap">
+            <div class="translate-x-3 col-span-2" :class="[positions[0]]">
+              <JobsSvgState :success="item['success']" />
+            </div>
+            <span :class="[positions[1]]">{{ item["start_date"] }}</span>
+            <span :class="[positions[2]]">{{ item["end_date"] }}</span>
           </div>
-          <span :class="[positions[1]]">{{ item["start_date"] }}</span>
-          <span :class="[positions[2]]">{{ item["end_date"] }}</span>
-        </div>
-      </ListItem>
-    </ListBase>
+        </ListItem>
+      </ListBase>
+    </div>
+
     <div class="w-full mt-2">
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase

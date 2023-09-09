@@ -13,14 +13,14 @@ import Header from "@components/Header.vue";
     >Your browser does not support JavaScript!</noscript
   >
   <Loader />
-  <Menu />
-  <FeedbackStructure />
-  <News />
-  <Header />
 
   <!-- info -->
   <main class="content-container">
+    <Menu />
+    <FeedbackStructure />
+    <News />
     <div class="content-wrap">
+      <Header />
       <slot></slot>
     </div>
     <Footer />

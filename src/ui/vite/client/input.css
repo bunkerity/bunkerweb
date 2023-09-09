@@ -21,7 +21,7 @@ body {
 }
 
 .content-container {
-  @apply z-100 absolute xl:pl-75 w-full px-2 sm:px-6 pb-0 pt-20 sm:pt-8 min-h-[89vh] flex flex-col justify-between;
+  @apply z-10 absolute xl:pl-75 w-full px-2 sm:px-6 pb-0 pt-20 sm:pt-3 min-h-screen flex flex-col justify-between;
 }
 
 .content-wrap {
@@ -30,15 +30,15 @@ body {
 
 /* HEADER */
 .header-container {
-  @apply w-full relative h-full max-h-screen transition-all duration-200 ease-in-out xl:ml-68 rounded-xl;
+  @apply col-span-12 w-full relative h-full max-h-screen transition-all duration-200 ease-in-out rounded-xl;
 }
 
 .header-el {
-  @apply relative flex flex-wrap items-center justify-between px-0 py-2 mx-6 transition-all ease-in shadow-none duration-250 rounded-2xl lg:flex-nowrap lg:justify-start;
+  @apply relative flex flex-wrap items-center justify-between px-0 py-2 mr-6 transition-all ease-in shadow-none duration-250 rounded-2xl lg:flex-nowrap lg:justify-start;
 }
 
 .header-wrap {
-  @apply flex items-center justify-between w-full md:px-4 py-1 mx-auto flex-wrap-inherit;
+  @apply flex items-center justify-between w-full p-1 mx-auto flex-wrap-inherit;
 }
 
 .header-title {
@@ -237,7 +237,11 @@ body {
 }
 
 .menu-container {
-  @apply fixed flex inset-y-0 flex-wrap justify-between w-full p-0 my-4 overflow-y-auto antialiased transition-transform duration-200 bg-white border-0 shadow-xl dark:shadow-none dark:bg-slate-850 dark:brightness-110 max-w-64 z-[1000] xl:ml-6 rounded-2xl xl:left-0;
+  @apply fixed xl:absolute flex inset-y-0 flex-wrap justify-between w-full p-0 my-4 overflow-y-auto antialiased transition-transform duration-200 bg-white border-0 shadow-xl dark:shadow-none dark:bg-slate-850 dark:brightness-110 max-w-64 z-[1000] xl:ml-6 rounded-2xl xl:left-0;
+}
+
+.active.menu-container {
+  @apply -translate-x-[120%];
 }
 
 .menu-logo-container {
@@ -591,7 +595,7 @@ body {
 }
 
 .modal-container {
-  @apply w-full h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center;
+  @apply w-full h-screen fixed bg-gray-600/50 z-[10000] top-0 left-0 justify-center items-center;
 }
 
 .modal-wrap {
@@ -664,7 +668,7 @@ body {
 }
 
 .list-content-item {
-  @apply border-b hover:bg-gray-100 dark:hover:bg-slate-800 items-center grid grid-cols-12 border-gray-300 py-2.5;
+  @apply border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5;
 }
 
 .list-content-item-wrap {

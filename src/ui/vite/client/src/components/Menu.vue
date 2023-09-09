@@ -126,7 +126,7 @@ function toggleMenu() {
   <aside
     id="sidebar-menu"
     data-sidebar-menu
-    :class="[menu.isActive ? '' : '-translate-x-full']"
+    :class="[menu.isDesktop ? true : menu.isActive ? '' : 'active']"
     class="menu-container xl:translate-x-0"
     :aria-expanded="menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'"
     :aria-hidden="menu.isDesktop ? 'false' : menu.isActive ? 'false' : 'true'"
