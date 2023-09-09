@@ -9,6 +9,9 @@ on:
 jobs:
   # Build amd64 + 386 containers images
   build-containers:
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui]
@@ -55,6 +58,9 @@ jobs:
 
   # Build arm64 + arm/v7 images
   build-containers-arm:
+    permissions:
+      contents: read
+      packages: write
     needs: [create-arm]
     strategy:
       matrix:
@@ -116,8 +122,6 @@ jobs:
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      PRIVATE_REGISTRY: ${{ secrets.PRIVATE_REGISTRY }}
-      PRIVATE_REGISTRY_TOKEN: ${{ secrets.PRIVATE_REGISTRY_TOKEN }}
       ARM_SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
       ARM_SSH_IP: ${{ needs.create-arm.outputs.ip }}
       ARM_SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
@@ -141,6 +145,9 @@ jobs:
 
   # Push Docker images
   push-images:
+    permissions:
+      contents: read
+      packages: write
     needs: [create-arm, wait-builds]
     strategy:
       matrix:
