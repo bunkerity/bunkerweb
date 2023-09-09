@@ -41,7 +41,6 @@ jobs:
         with:
           args: instance server create zone=fr-par-2 type=AMP2-C48 root-volume=block:50GB
           save-config: true
-          version: v2.13.0
           access-key: ${{ secrets.SCW_ACCESS_KEY }}
           secret-key: ${{ secrets.SCW_SECRET_KEY }}
           default-project-id: ${{ secrets.SCW_DEFAULT_PROJECT_ID }}
