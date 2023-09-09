@@ -509,7 +509,7 @@ body {
 }
 
 .btn-close {
-  @apply bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80;
+  @apply bg-white text-red-500 border border-red-500 hover:border-red-500/80 focus:border-red-500/80 hover:text-red-500/80 focus:text-red-500/80;
 }
 
 .btn-delete {

@@ -1702,6 +1702,11 @@ h6 {
   color: rgb(245 57 57 / var(--tw-text-opacity)) !important;
 }
 
+.text-sky-500 {
+  --tw-text-opacity: 1 !important;
+  color: rgb(14 165 233 / var(--tw-text-opacity)) !important;
+}
+
 .text-slate-700 {
   --tw-text-opacity: 1 !important;
   color: rgb(52 71 103 / var(--tw-text-opacity)) !important;
@@ -1710,6 +1715,11 @@ h6 {
 .text-white {
   --tw-text-opacity: 1 !important;
   color: rgb(255 255 255 / var(--tw-text-opacity)) !important;
+}
+
+.text-yellow-500 {
+  --tw-text-opacity: 1 !important;
+  color: rgb(251 177 64 / var(--tw-text-opacity)) !important;
 }
 
 .opacity-0 {
@@ -4491,16 +4501,23 @@ body {
 }
 
 .btn-close {
+  border-width: 1px;
+  --tw-border-opacity: 1;
+  border-color: rgb(245 57 57 / var(--tw-border-opacity));
   --tw-bg-opacity: 1;
-  background-color: rgb(245 57 57 / var(--tw-bg-opacity));
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+  --tw-text-opacity: 1;
+  color: rgb(245 57 57 / var(--tw-text-opacity));
 }
 
 .btn-close:hover {
-  background-color: rgb(245 57 57 / 0.8);
+  border-color: rgb(245 57 57 / 0.8);
+  color: rgb(245 57 57 / 0.8);
 }
 
 .btn-close:focus {
-  background-color: rgb(245 57 57 / 0.8);
+  border-color: rgb(245 57 57 / 0.8);
+  color: rgb(245 57 57 / 0.8);
 }
 
 .btn-delete {

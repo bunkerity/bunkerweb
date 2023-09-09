@@ -76,7 +76,7 @@ const emits = defineEmits(["action", "delete"]);
 
 <template>
   <div class="card-instance-container h-max">
-    <form @submit.prevent class="w-full relative" method="POST">
+    <div class="w-full relative">
       <input type="hidden" name="csrf_token" :value="props.csrfToken" />
       <div class="grid grid-cols-12 items-center">
         <div class="col-span-10 flex items-center">
@@ -140,6 +140,6 @@ const emits = defineEmits(["action", "delete"]);
           {{ action.name }}
         </ButtonBase>
       </div>
-    </form>
+    </div>
   </div>
 </template>

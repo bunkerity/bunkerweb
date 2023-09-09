@@ -2,6 +2,7 @@
 import Dashboard from "@layouts/Dashboard.vue";
 import InstanceCard from "@components/Instance/Card.vue";
 import InstanceModalDelete from "@components/Instance/Modal/Delete.vue";
+import InstanceModalPing from "@components/Instance/Modal/Ping.vue";
 import { reactive, computed, onMounted } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
@@ -9,13 +10,14 @@ import { useFeedbackStore } from "@store/global.js";
 const feedbackStore = useFeedbackStore();
 
 const modal = reactive({
-  isOpen: false,
+  delIsOpen: false,
+  pingIsOpen: false,
   hostname: "",
 });
 
 function openDelModal(hostname) {
   modal.hostname = hostname;
-  modal.isOpen = true;
+  modal.delIsOpen = true;
 }
 
 const instances = reactive({
@@ -35,7 +37,23 @@ async function getInstances() {
   );
 }
 
-async function updateInstance(data) {
+async function actionInstance(data) {
+  modal.hostname = data.hostname;
+  if (data.operation === "ping") {
+    ping.isPend = true;
+    ping.isErr = false;
+    ping.data = [];
+    modal.pingIsOpen = true;
+    await fetchAPI(
+      `/api/instances/${data.hostname}/${data.operation}`,
+      "POST",
+      null,
+      ping,
+      feedbackStore.addFeedback
+    );
+    return;
+  }
+
   await fetchAPI(
     `/api/${data.hostname}/${data.operation}`,
     "POST",
@@ -45,6 +63,12 @@ async function updateInstance(data) {
   );
   await getInstances();
 }
+
+const ping = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+});
 
 async function deleteInstance(data) {
   await fetchAPI(
@@ -72,13 +96,18 @@ onMounted(async () => {
       :port="instance.port"
       :method="instance.method"
       :status="instance.status"
-      @action="(v) => updateInstance(v)"
+      @action="(v) => actionInstance(v)"
       @delete="(hostname) => openDelModal(hostname)"
     />
     <InstanceModalDelete
       @delete="(v) => deleteInstance(v)"
-      @close="modal.isOpen = false"
-      :isOpen="modal.isOpen"
+      @close="modal.delIsOpen = false"
+      :isOpen="modal.delIsOpen"
+      :hostname="modal.hostname"
+    />
+    <InstanceModalPing
+      @close="modal.pingIsOpen = false"
+      :isOpen="modal.pingIsOpen"
       :hostname="modal.hostname"
     />
   </Dashboard>
