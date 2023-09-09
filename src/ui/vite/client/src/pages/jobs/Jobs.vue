@@ -5,10 +5,10 @@ import CardItemList from "@components/Card/Item/List.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
-import JobsStructure from "@components/Jobs/Structure.vue";
-import JobsHeader from "@components/Jobs/Header.vue";
-import JobsContent from "@components/Jobs/Content.vue";
 import JobsModalHistory from "@components/Jobs/Modal/History.vue";
+import ListBase from "@components/List/Base.vue";
+import JobsItems from "@components/Jobs/Items.vue";
+
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { reactive, computed, onMounted } from "vue";
@@ -206,23 +206,23 @@ onMounted(async () => {
       </SettingsLayout>
     </CardBase>
     <CardBase
-      class="col-span-12 max-w-[1200px] overflow-x-auto overflow-y-hidden"
+      class="col-span-12 overflow-x-auto overflow-y-hidden"
       label="jobs"
     >
-      <JobsHeader
-        class="min-w-[1100px]"
+      <ListBase
+        class="min-w-[1100px] col-span-12"
         :header="header"
         :positions="positions"
-      />
-      <JobsStructure class="min-w-[1100px] max-h-[55vh]">
-        <JobsContent
+      >
+        <JobsItems
           @cache="(v) => downloadFile(v)"
           @run="(v) => runJob(v)"
           @history="(v) => showHistory(v)"
-          :items="jobs.setup"
           :positions="positions"
-        />
-      </JobsStructure>
+          :items="jobs.setup"
+        >
+        </JobsItems>
+      </ListBase>
     </CardBase>
     <JobsModalHistory
       :history="history.data"

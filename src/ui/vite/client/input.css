@@ -649,3 +649,40 @@ body {
 .disabled.file-manager-actions-svg {
   @apply fill-gray-700 stroke-gray-100 stroke-gray-600;
 }
+
+/* LIST */
+.list-container {
+  @apply w-full grid grid-cols-12;
+}
+
+.list-content-container {
+  @apply w-full grid grid-cols-12 rounded px-2 col-span-12 overflow-x-hidden overflow-y-visible;
+}
+
+.list-content-wrap {
+  @apply col-span-12 w-full;
+}
+
+.list-content-item {
+  @apply border-b hover:bg-gray-100 dark:hover:bg-slate-800 items-center grid grid-cols-12 border-gray-300 py-2.5;
+}
+
+.list-content-item-wrap {
+  @apply break-words items-center col-span-12 grid grid-cols-12 text-sm dark:text-gray-400;
+}
+
+.list-header-container {
+  @apply w-full col-span-12 grid grid-cols-12 pl-2;
+}
+
+.list-header-item {
+  @apply dark:text-gray-300 pb-1 text-sm font-bold m-0 border-b border-gray-400;
+}
+
+.first.list-header-item {
+  @apply pl-3;
+}
+
+.last.list-header-item {
+  @apply pl-5;
+}
