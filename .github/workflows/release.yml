@@ -9,9 +9,6 @@ on:
 jobs:
   # Build amd64 + 386 containers images
   build-containers:
-    permissions:
-      contents: read
-      packages: write
     strategy:
       matrix:
         image: [bunkerweb, scheduler, autoconf, ui]
@@ -58,9 +55,6 @@ jobs:
 
   # Build arm64 + arm/v7 images
   build-containers-arm:
-    permissions:
-      contents: read
-      packages: write
     needs: [create-arm]
     strategy:
       matrix:
@@ -169,7 +163,8 @@ jobs:
             dockerfile: src/ui/Dockerfile
     uses: ./.github/workflows/push-docker.yml
     with:
-      IMAGE: bunkerity/${{ matrix.image }}:${{ matrix.release }},bunkerity/${{ matrix.image }}:${{ needs.wait-builds.outputs.version }}
+      IMAGE: ${{ matrix.image }}
+      TAGS: bunkerity/${{ matrix.image }}:${{ matrix.release }},bunkerity/${{ matrix.image }}:${{ needs.wait-builds.outputs.version }},ghcr.io/bunkerity/${{ matrix.image }}:${{ matrix.release }},ghcr.io/bunkerity/${{ matrix.image }}:${{ needs.wait-builds.outputs.version }}
       CACHE_FROM: ${{ matrix.cache_from }}-${{ matrix.release }}
       DOCKERFILE: ${{ matrix.dockerfile }}
     secrets:
