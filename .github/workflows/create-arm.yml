@@ -46,9 +46,11 @@ jobs:
           default-organization-id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
       - name: Extract ARM type
         run: |
-          TYPE=$(echo "${{ steps.availabilities.outputs.json }}" | jq '.servers | with_entries(select(.key | contains("AMP"))) | with_entries(select(.value.availability != "shortage")) | keys[] | select(. | test("^AMP2-C[0-9]+$")) | sub("AMP2-C"; "") | tonumber' | sort -n | tail -n 1 | xargs -I {} echo "AMP2-C{}")
+          TYPE=$(echo "$JSON" | jq '.servers | with_entries(select(.key | contains("AMP"))) | with_entries(select(.value.availability != "shortage")) | keys[] | select(. | test("^AMP2-C[0-9]+$")) | sub("AMP2-C"; "") | tonumber' | sort -n | tail -n 1 | xargs -I {} echo "AMP2-C{}")
           echo "Type is $TYPE"
           echo "TYPE=$TYPE" >> "$GITHUB_ENV"
+        env:
+          JSON: ${{ steps.availabilities.outputs.json }}
       - name: Create ARM VM
         id: scw
         uses: scaleway/action-scw@c718eca1fcb9fec1fb1433752d61599c6a0ad2e9
