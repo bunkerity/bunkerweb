@@ -33,6 +33,11 @@ const select = reactive({
   isOpen: false,
 });
 
+const selectBtn = ref();
+const selectWidth = ref("");
+const selectTop = ref("");
+const config = useConfigStore();
+
 // EVENTS
 function toggleSelect() {
   select.isOpen = select.isOpen ? false : true;
@@ -42,8 +47,6 @@ function closeSelect() {
   select.isOpen = false;
 }
 
-const config = useConfigStore();
-
 function changeValue(newValue) {
   select.value = newValue;
   closeSelect();
@@ -51,36 +54,34 @@ function changeValue(newValue) {
 
 // Close select dropdown when clicked outside element
 watch(select, () => {
-  updateTop();
   if (select.isOpen) {
     document.querySelector("body").addEventListener("click", closeOutside);
-    window.addEventListener('scroll', closeSelect)
-    selectBtn.value.closest('.plugin-structure').addEventListener('scroll', closeSelect)
+    window.addEventListener("scroll", updateTop);
   } else {
     document.querySelector("body").removeEventListener("click", closeOutside);
-    window.removeEventListener('scroll', closeSelect)
-    selectBtn.value.closest('.plugin-structure').removeEventListener('scroll', closeSelect)
+    window.removeEventListener("scroll", updateTop);
   }
 });
 
 function updateTop() {
-  selectTop.value = `${Math.abs(selectBtn.value.closest('.plugin-structure').scrollTop - selectBtn.value.offsetTop) + selectBtn.value.clientHeight}px`
+  selectTop.value = `${
+    Math.abs(
+      selectBtn.value.closest(".plugin-structure").scrollTop -
+        selectBtn.value.offsetTop
+    ) + selectBtn.value.clientHeight
+  }px`;
 }
 
 // Close select when clicked outside logic
 function closeOutside(e) {
   try {
-    if (!e.target.closest("button").hasAttribute("data-select-dropdown")) {
+    if (e.target !== selectBtn.value) {
       select.isOpen = false;
     }
   } catch (err) {
     select.isOpen = false;
   }
 }
-
-const selectBtn = ref();
-const selectWidth = ref("");
-const selectTop = ref("");
 
 onBeforeUpdate(() => {
   selectWidth.value = `${selectBtn.value.clientWidth}px`;
@@ -118,7 +119,7 @@ onMounted(() => {
   <button
     ref="selectBtn"
     aria-description="custom select dropdown button"
-    data-select-dropdown
+    :data-select-dropdown="props.setting.id"
     :disabled="
       select.method !== 'ui' && select.method !== 'default' ? true : false
     "
@@ -139,7 +140,7 @@ onMounted(() => {
     </svg>
   </button>
   <div
-    :style="{ width: selectWidth, top : selectTop }"
+    :style="{ width: selectWidth, top: selectTop }"
     :aria-hidden="select.isOpen ? 'false' : 'true'"
     :class="[select.isOpen ? 'flex' : 'hidden']"
     class="select-dropdown-container"

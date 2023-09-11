@@ -9,10 +9,27 @@ const props = defineProps({
   },
 });
 
-const select = reactive({
-  value : props.settings.value, 
-  isOpen: false,
+// When mounted or when props changed, we want select to display new props values
+// When component value change itself, we want to switch to select.value
+// To avoid component to send and stick to props values (bad behavior)
+// Trick is to use select.value || props.settings.value on template
+watch(props, (newProp, oldProp) => {
+  if (newProp.settings.value !== oldProp.settings.value) {
+    select.value = "";
+  }
 });
+
+const select = reactive({
+  isOpen: false,
+  // On mounted value is null to display props value
+  // Then on new select we will switch to select.value
+  // If we use select.value : props.settings.value
+  // Component will not re-render after props.settings.value change
+  value: "",
+});
+
+const selectBtn = ref();
+const selectWidth = ref("");
 
 // EVENTS
 function toggleSelect() {
@@ -24,9 +41,11 @@ function closeSelect() {
 }
 
 function changeValue(newValue) {
+  // Allow on template to switch from prop value to component own value
+  // Then send the new value to parent
   select.value = newValue;
   closeSelect();
-  return select.value;
+  return newValue;
 }
 
 // Close select dropdown when clicked outside element
@@ -41,16 +60,13 @@ watch(select, () => {
 // Close select when clicked outside logic
 function closeOutside(e) {
   try {
-    if (!e.target.closest("button").hasAttribute("data-select-dropdown")) {
+    if (e.target !== selectBtn.value) {
       select.isOpen = false;
     }
   } catch (err) {
     select.isOpen = false;
   }
 }
-
-const selectBtn = ref();
-const selectWidth = ref("");
 
 onMounted(() => {
   selectWidth.value = `${selectBtn.value.clientWidth}px`;
@@ -75,7 +91,7 @@ const emits = defineEmits(["inp"]);
     <option
       v-for="value in props.settings.values"
       :value="value"
-      :selected="value === select.value ? true : false"
+      :selected="value === props.settings.value ? true : false"
     >
       {{ value }}
     </option>
@@ -93,7 +109,7 @@ const emits = defineEmits(["inp"]);
       @click="toggleSelect()"
       class="select-btn"
     >
-      <span>{{ select.value }}</span>
+      <span>{{ select.value || props.settings.value }}</span>
       <!-- chevron -->
       <svg
         :class="[select.isOpen ? '-rotate-180' : '']"
@@ -121,11 +137,11 @@ const emits = defineEmits(["inp"]);
         :class="[
           id === 0 ? 'first' : '',
           id === props.settings.values.length - 1 ? 'last' : '',
-          value === select.value ? 'active' : '',
+          value === props.settings.value ? 'active' : '',
           'select-dropdown-btn',
         ]"
         aria-description="custom select option"
-        :aria-current="value === select.value ? 'true' : 'false'"
+        :aria-current="value === props.settings.value ? 'true' : 'false'"
       >
         {{ value }}
       </button>

@@ -25,10 +25,6 @@ import { useConfigStore } from "@store/settings.js";
 const config = useConfigStore();
 const feedbackStore = useFeedbackStore();
 
-watch(config, () => {
-  console.log(config.data);
-});
-
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
   keyword: "",
@@ -42,9 +38,11 @@ const services = reactive({
   // Data from fetch
   data: [],
   // Default plugin to display, first of list (before any filter)
-  activeTab: "",
+  activePlugin: "",
   activeService: "",
   pluginsName: [],
+  servicesName: [],
+  activePlugins: [],
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
     if (
@@ -68,20 +66,14 @@ const services = reactive({
       )
     );
 
-    services.pluginsName = [];
-    cloneMultisitePlugin.forEach((item) => {
-      services.pluginsName.push(item["name"]);
-    });
-
-    console.log(cloneMultisitePlugin);
-
     // Get only services custom conf
     const cloneServConf = JSON.parse(JSON.stringify(conf.data["services"]));
 
     // For each service, get all multisite plugins and add custom service conf
     // Merge everything on related service
-
+    services.servicesName = [];
     for (const [key, value] of Object.entries(cloneServConf)) {
+      services.servicesName.push(key);
       const currServPlugin = JSON.parse(JSON.stringify(cloneMultisitePlugin));
       const currServConf = cloneServConf[key];
       // Add current name
@@ -103,12 +95,38 @@ const services = reactive({
       cloneServConf[key] = getSettingsByFilter(cloneServConf[key], filters);
     }
 
-    // Check if prev plugin or no plugin match filter for current display service
-    services.activeTab =
-      services.activeService &&
-      cloneServConf[services.activeService].length !== 0
-        ? cloneServConf[services.activeService][0]["name"]
-        : "";
+    // Set first service as active if none
+    if (!services.activeService)
+      services.activeService = services.servicesName[0];
+
+    // Get remain plugin after filter
+    // Use active service but is impersonal (no specific service logic)
+    const remainPlugins = [];
+    cloneServConf[services.activeService].forEach((item) => {
+      remainPlugins.push(item.name);
+    });
+    services.activePlugins = remainPlugins;
+
+    // Set first plugin as active if none
+    if (!services.activePlugin)
+      services.activePlugin =
+        services.activePlugins.length > 0 ? services.activePlugins[0] : "none";
+    // Case active plugin before update, need some check
+    if (services.activePlugin) {
+      // Case prev active plugin passed filter
+      const isPlugin =
+        services.activePlugins.indexOf(services.activePlugin) !== -1
+          ? true
+          : false;
+
+      // Case not, set first passed one or empty
+      if (!isPlugin) {
+        services.activePlugin =
+          cloneServConf[services.activeService].length > 0
+            ? cloneServConf[services.activeService][0]["name"]
+            : "none";
+      }
+    }
 
     return cloneServConf;
   }),
@@ -208,9 +226,10 @@ onMounted(async () => {
         >
           <SettingsSelect
             @inp="(v) => changeServ(v)"
+            v-if="services.activeService"
             :settings="{
               id: 'services-list',
-              value: 'Service name',
+              value: services.activeService,
               values: Object.keys(services.setup).filter(
                 (item) => item !== 'new'
               ),
@@ -238,11 +257,11 @@ onMounted(async () => {
           name="plugins"
         >
           <SettingsSelect
-            @inp="(v) => (services.activeTab = v)"
+            @inp="(v) => (services.activePlugin = v)"
             :settings="{
               id: 'plugins',
-              value: services.pluginsName[0],
-              values: services.pluginsName,
+              value: services.activePlugin,
+              values: services.activePlugins,
               placeholder: 'Search',
             }"
           />
@@ -284,42 +303,19 @@ onMounted(async () => {
         class="z-10 col-span-12 grid grid-cols-12 relative"
       >
         <CardLabel
-          class="mb-4 text-xl"
+          class="text-xl border-b pb-2 mb-4"
           :label="
             services.activeService === 'new'
               ? 'CREATE NEW SERVICE'
               : `SERVICE ${services.activeService}`
           "
         />
-        <SettingsLayout
-          v-if="false"
-          class="flex w-full col-span-12 md:col-span-6 lg:col-span-3 mb-4"
-          label="Select plugin"
-          name="plugins"
-        >
-          <SettingsSelect
-            @inp="(v) => (services.activeTab = v)"
-            :settings="{
-              id: 'plugins',
-              value: services.pluginsName[0],
-              values: services.pluginsName,
-              placeholder: 'Search',
-            }"
-          />
-        </SettingsLayout>
         <div class="col-span-12" v-for="(value, key) in services.setup">
-          <TabStructure
-            class="mb-4"
-            v-if="false && services.activeService === key"
-            :items="value"
-            :active="services.activeTab"
-            @tabName="(v) => (services.activeTab = v)"
-          />
           <PluginStructure
             v-if="services.activeService === key"
             :serviceName="key"
             :plugins="value"
-            :active="services.activeTab"
+            :active="services.activePlugin"
           />
         </div>
         <div class="col-span-12 flex w-full justify-center mt-8 mb-2">

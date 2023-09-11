@@ -608,7 +608,7 @@ h4 {
 }
 
 h5 {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   line-height: 1.375;
 }
 
@@ -1006,10 +1006,6 @@ h6 {
   min-height: 5rem !important;
 }
 
-.min-h-\[70vh\] {
-  min-height: 70vh !important;
-}
-
 .w-10 {
   width: 2.5rem !important;
 }
@@ -1054,20 +1050,12 @@ h6 {
   width: 100% !important;
 }
 
-.w-screen {
-  width: 100vw !important;
-}
-
 .min-w-0 {
   min-width: 0px !important;
 }
 
 .min-w-\[1100px\] {
   min-width: 1100px !important;
-}
-
-.min-w-\[600px\] {
-  min-width: 600px !important;
 }
 
 .min-w-\[500px\] {
@@ -1273,10 +1261,6 @@ h6 {
 
 .overflow-hidden {
   overflow: hidden !important;
-}
-
-.overflow-scroll {
-  overflow: scroll !important;
 }
 
 .overflow-x-auto {
@@ -1574,6 +1558,10 @@ h6 {
 
 .pb-0 {
   padding-bottom: 0px !important;
+}
+
+.pb-2 {
+  padding-bottom: 0.5rem !important;
 }
 
 .pl-1 {
@@ -2201,17 +2189,18 @@ body {
   margin-top: 0.5rem;
   height: -moz-fit-content;
   height: fit-content;
-  width: 100%;
+  max-height: 200px;
   width: -moz-fit-content;
   width: fit-content;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .select-dropdown-btn {
   position: relative;
   margin-top: 0px;
   margin-bottom: 0px;
-  min-height: 38px;
   cursor: pointer;
   border-radius: 0px;
   border-bottom-width: 1px;
@@ -5621,10 +5610,6 @@ body {
 }
 
 @media (min-width: 992px) {
-  .lg\:col-span-3 {
-    grid-column: span 3 / span 3 !important;
-  }
-
   .lg\:col-span-4 {
     grid-column: span 4 / span 4 !important;
   }

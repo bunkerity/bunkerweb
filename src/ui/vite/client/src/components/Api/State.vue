@@ -22,7 +22,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div v-if="isErr || isPend || !isData" class="min-h-[70vh]">
+  <div v-if="isErr || isPend || !isData">
     <CardBase :color="props.isErr ? 'error' : 'default'">
       <div class="col-span-12 flex items-center justify-center">
         <p class="m-0 dark:text-white">
