@@ -3,6 +3,7 @@ import Dashboard from "@layouts/Dashboard.vue";
 import ApiState from "@components/Api/State.vue";
 import { reactive, computed, onMounted } from "vue";
 import { fetchAPI } from "@utils/api.js";
+import { generateConfTree } from "@utils/custom_configs.js";
 import { useFeedbackStore } from "@store/global.js";
 import FileManagerStructure from "@components/FileManager/Structure.vue";
 
@@ -12,6 +13,9 @@ const customConf = reactive({
   isPend: false,
   isErr: false,
   data: [],
+  setup: computed(() => {
+    return generateConfTree(customConf.data);
+  }),
 });
 
 async function getConfigs() {
@@ -37,6 +41,6 @@ onMounted(async () => {
       :isPend="customConf.isPend"
       :isData="customConf.data ? true : false"
     />
-    <FileManagerStructure class="col-span-12" />
+    <FileManagerStructure :config="customConf.setup" class="col-span-12" />
   </Dashboard>
 </template>

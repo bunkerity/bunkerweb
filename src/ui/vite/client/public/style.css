@@ -998,6 +998,10 @@ h6 {
   max-height: 65vh !important;
 }
 
+.\!min-h-\[400px\] {
+  min-height: 400px !important;
+}
+
 .min-h-12 {
   min-height: 3rem !important;
 }
@@ -5561,12 +5565,12 @@ body {
     grid-column: span 8 / span 8 !important;
   }
 
-  .md\:col-start-5 {
-    grid-column-start: 5 !important;
-  }
-
   .md\:col-start-4 {
     grid-column-start: 4 !important;
+  }
+
+  .md\:col-start-5 {
+    grid-column-start: 5 !important;
   }
 
   .md\:col-end-13 {
@@ -5669,18 +5673,6 @@ body {
 
   .\32xl\:col-span-9 {
     grid-column: span 9 / span 9 !important;
-  }
-
-  .\32xl\:col-start-4 {
-    grid-column-start: 4 !important;
-  }
-
-  .\32xl\:col-start-6 {
-    grid-column-start: 6 !important;
-  }
-
-  .\32xl\:col-start-3 {
-    grid-column-start: 3 !important;
   }
 
   .\32xl\:col-start-5 {
