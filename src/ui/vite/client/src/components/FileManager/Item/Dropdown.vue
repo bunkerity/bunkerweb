@@ -3,7 +3,7 @@ import FileManagerButtonView from "@components/FileManager/Button/View.vue";
 import FileManagerButtonEdit from "@components/FileManager/Button/Edit.vue";
 import FileManagerButtonDownload from "@components/FileManager/Button/Download.vue";
 import FileManagerButtonDelete from "@components/FileManager/Button/Delete.vue";
-
+import { reactive, watch, defineEmits } from "vue";
 // Dropdown toggle logic and buttons list with @action emit value on click
 // The value of the clicked button will be emit itself to be retrieved by FileManagerBase
 const props = defineProps({

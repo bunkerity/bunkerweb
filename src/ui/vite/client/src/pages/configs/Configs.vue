@@ -4,6 +4,7 @@ import ApiState from "@components/Api/State.vue";
 import { reactive, computed, onMounted } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
+import FileManagerStructure from "@components/FileManager/Structure.vue";
 
 const feedbackStore = useFeedbackStore();
 
@@ -36,5 +37,6 @@ onMounted(async () => {
       :isPend="customConf.isPend"
       :isData="customConf.data ? true : false"
     />
+    <FileManagerStructure class="col-span-12" />
   </Dashboard>
 </template>

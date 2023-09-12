@@ -1,4 +1,5 @@
 <script setup>
+import { reactive } from "vue";
 const props = defineProps({
   path: {
     type: String,
