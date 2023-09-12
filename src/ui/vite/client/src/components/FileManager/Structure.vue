@@ -5,7 +5,8 @@ import FileManagerBreadcrumb from "@components/FileManager/breadcrumb.vue";
 import FileManagerContainer from "@components/FileManager/Container.vue";
 import FileManagerItemBase from "@components/FileManager/Item/Base.vue";
 import CardBase from "@components/Card/Base.vue";
-import { reactive, watch } from "vue";
+import { onUpdated, reactive, ref, watch } from "vue";
+import { generateItem } from "@utils/custom_configs.js";
 
 const props = defineProps({
   config: {
@@ -13,13 +14,17 @@ const props = defineProps({
   },
 });
 
+const config = reactive({
+  data: props.config,
+});
+
 // All forders need a path with children items inside it
 // When a breadcrumb element or folder is clicked
 // We update currPath and display the folder.path that match currPath
 const path = reactive({
-  current: props.config[0]["path"],
-  canCreateFile: props.config[0]["canCreateFile"],
-  canCreateFolder: props.config[0]["canCreateFolder"],
+  current: config.data[0]["path"],
+  canCreateFile: config.data[0]["canCreateFile"],
+  canCreateFolder: config.data[0]["canCreateFolder"],
 });
 
 // Data needed for modal element, setup when an action is clicked on item (emit)
@@ -46,12 +51,43 @@ function updateModal(type, action, path, value) {
 // Get item that match current path to check values using config variable
 // Allow to know if can crate folder or file whatever component changing path (bread or folder click)
 watch(path, () => {
-  props.config.forEach((item) => {
+  config.data.forEach((item) => {
     if (path.current === item.path) {
       path.canCreateFile = item.canCreateFile;
       path.canCreateFolder = item.canCreateFolder;
     }
   });
+});
+
+function handleCreate(data) {
+  modal.isOpen = false;
+  // Case create folder
+  if (data.type === "folder") {
+    const newFolder = generateItem(
+      "folder",
+      `${data.path}${data.name}`.replace("root/", ""),
+      true,
+      false,
+      true,
+      true
+    );
+    const formatPath = data.path.slice(0, -1);
+    config.data.forEach((item) => {
+      if (item["path"] === formatPath) {
+        item["children"].push(newFolder);
+      }
+    });
+
+    config.data.push(newFolder);
+  }
+
+  // Case create file
+  if (data.type === "file") {
+  }
+}
+
+onUpdated(() => {
+  console.log(config.data);
 });
 </script>
 
@@ -66,13 +102,15 @@ watch(path, () => {
           @updatePath="(v) => (path.current = v)"
         />
         <FileManagerContainer
-          v-for="folder in props.config"
+          v-for="(folder, folderID) in config.data"
+          :key="folderID"
           :path="folder.path"
           :currPath="path.current"
         >
           <div
             class="col-span-12 md:col-span-6 lg:col-span-6 2xl:col-span-4 3xl:col-span-3"
-            v-for="child in folder.children"
+            v-for="(child, childID) in folder.children"
+            :key="childID"
           >
             <FileManagerItemBase
               :type="child.type"
@@ -93,12 +131,16 @@ watch(path, () => {
           @createFile="
             () => updateModal('file', 'create', `${path.current}/`, '')
           "
+          @createFolder="
+            () => updateModal('folder', 'create', `${path.current}/`, '')
+          "
           :canCreateFile="path.canCreateFile"
           :canCreateFolder="path.canCreateFolder"
         />
       </div>
     </CardBase>
     <FileManagerModal
+      @create="(v) => handleCreate(v)"
       :aria-hidden="modal.isOpen ? 'false' : 'true'"
       v-if="modal.isOpen"
       :type="modal.type"

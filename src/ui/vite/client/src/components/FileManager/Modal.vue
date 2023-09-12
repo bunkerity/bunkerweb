@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineProps, defineEmits } from "vue";
+import { computed, defineProps, defineEmits, reactive } from "vue";
 import ModalBase from "@components/Modal/Base.vue";
 import ButtonBase from "@components/Button/Base.vue";
 
@@ -40,7 +40,11 @@ const prefix = computed(() => {
   return `${arr.join("/")}/`;
 });
 
-const emits = defineEmits(["close"]);
+const inp = reactive({
+  name: "",
+});
+
+const emits = defineEmits(["create", "close"]);
 </script>
 <template>
   <ModalBase :title="`${props.action} ${props.type}`">
@@ -50,6 +54,8 @@ const emits = defineEmits(["close"]);
           {{ prefix }}
         </p>
         <input
+          @input="inp.name = $event.target.value"
+          ref="inpData"
           type="text"
           name="name"
           id="name"
@@ -73,9 +79,19 @@ const emits = defineEmits(["close"]);
           Close
         </ButtonBase>
         <ButtonBase
+          @click="
+            () => {
+              if (props.type === 'folder' && !inp.name) return;
+              $emit('create', {
+                type: props.type,
+                action: props.action,
+                path: props.path,
+                name: inp.name,
+              });
+            }
+          "
           size="lg"
           v-if="props.action !== 'view'"
-          type="submit"
           :class="[
             props.action === 'edit' ? 'btn-edit' : '',
             props.action === 'download' ? 'btn-download' : '',
