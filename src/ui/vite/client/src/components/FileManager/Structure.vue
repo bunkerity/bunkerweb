@@ -56,51 +56,56 @@ watch(path, () => {
 </script>
 
 <template>
-  <CardBase class="col-span-12">
-    <div
-      class="!min-h-[400px] w-full col-span-12 flex flex-col h-full justify-between"
-    >
-      <FileManagerBreadcrumb
-        :currPath="path.current"
-        @updatePath="(v) => (path.current = v)"
-      />
-      <FileManagerContainer
-        v-for="folder in props.config"
-        :path="folder.path"
-        :currPath="path.current"
+  <div class="col-span-12">
+    <CardBase>
+      <div
+        class="!min-h-[400px] w-full col-span-12 flex flex-col h-full justify-between"
       >
-        <div v-for="child in folder.children">
-          <FileManagerItemBase
-            :type="child.type"
-            :path="child.path"
-            :value="child.value || ''"
-            :canDelete="child.canDelete"
-            :canEdit="child.canEdit"
-            :canCreateFile="child.canCreateFile || false"
-            :canDownload="child.canDownload || false"
-            @updatePath="(v) => (path.current = v)"
-            @action="
-              (v) => updateModal(child.type, v, child.path, child.value || '')
-            "
-          />
-        </div>
-      </FileManagerContainer>
-      <FileManagerActions
-        @createFile="
-          () => updateModal('file', 'create', `${path.current}/`, '')
-        "
-        :canCreateFile="path.canCreateFile"
-        :canCreateFolder="path.canCreateFolder"
-      />
-      <FileManagerModal
-        :aria-hidden="modal.isOpen ? 'false' : 'true'"
-        v-if="modal.isOpen"
-        :type="modal.type"
-        :action="modal.action"
-        :path="modal.path"
-        :value="modal.value"
-        @close="modal.isOpen = false"
-      />
-    </div>
-  </CardBase>
+        <FileManagerBreadcrumb
+          :currPath="path.current"
+          @updatePath="(v) => (path.current = v)"
+        />
+        <FileManagerContainer
+          v-for="folder in props.config"
+          :path="folder.path"
+          :currPath="path.current"
+        >
+          <div
+            class="col-span-12 md:col-span-6 lg:col-span-6 2xl:col-span-4 3xl:col-span-3"
+            v-for="child in folder.children"
+          >
+            <FileManagerItemBase
+              :type="child.type"
+              :path="child.path"
+              :value="child.value || ''"
+              :canDelete="child.canDelete"
+              :canEdit="child.canEdit"
+              :canCreateFile="child.canCreateFile || false"
+              :canDownload="child.canDownload || false"
+              @updatePath="(v) => (path.current = v)"
+              @action="
+                (v) => updateModal(child.type, v, child.path, child.value || '')
+              "
+            />
+          </div>
+        </FileManagerContainer>
+        <FileManagerActions
+          @createFile="
+            () => updateModal('file', 'create', `${path.current}/`, '')
+          "
+          :canCreateFile="path.canCreateFile"
+          :canCreateFolder="path.canCreateFolder"
+        />
+      </div>
+    </CardBase>
+    <FileManagerModal
+      :aria-hidden="modal.isOpen ? 'false' : 'true'"
+      v-if="modal.isOpen"
+      :type="modal.type"
+      :action="modal.action"
+      :path="modal.path"
+      :value="modal.value"
+      @close="modal.isOpen = false"
+    />
+  </div>
 </template>

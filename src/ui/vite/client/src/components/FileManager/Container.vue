@@ -20,7 +20,7 @@ const props = defineProps({
   <div
     :aria-current="props.path === props.currPath ? 'true' : 'false'"
     v-if="props.path === props.currPath"
-    class="w-full grid grid-cols-3 gap-4"
+    class="w-full grid grid-cols-12 gap-4 mt-4"
   >
     <slot></slot>
   </div>

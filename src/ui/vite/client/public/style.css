@@ -836,6 +836,11 @@ h6 {
   margin-bottom: 0.75rem !important;
 }
 
+.my-4 {
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
 .mb-0 {
   margin-bottom: 0px !important;
 }
@@ -1203,12 +1208,12 @@ h6 {
   grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
 }
 
-.grid-cols-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-}
-
 .flex-col {
   flex-direction: column !important;
+}
+
+.flex-col-reverse {
+  flex-direction: column-reverse !important;
 }
 
 .flex-wrap {
@@ -5070,6 +5075,7 @@ body {
 
 .file-manager-actions-container {
   grid-column: span 12 / span 12;
+  margin-top: 1.5rem;
   display: flex;
   width: 100%;
   flex-direction: column;
@@ -5085,8 +5091,15 @@ body {
 
 .file-manager-actions-list {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+@media (min-width: 576px) {
+  .file-manager-actions-list {
+    flex-direction: row;
+  }
 }
 
 .file-manager-actions-item {
@@ -5611,6 +5624,10 @@ body {
     display: block !important;
   }
 
+  .md\:flex-col {
+    flex-direction: column !important;
+  }
+
   .md\:text-base {
     font-size: 1rem !important;
     line-height: 1.5rem !important;
@@ -5638,6 +5655,14 @@ body {
 
   .xl\:col-span-8 {
     grid-column: span 8 / span 8 !important;
+  }
+
+  .xl\:col-span-4 {
+    grid-column: span 4 / span 4 !important;
+  }
+
+  .xl\:col-span-6 {
+    grid-column: span 6 / span 6 !important;
   }
 
   .xl\:ml-4 {

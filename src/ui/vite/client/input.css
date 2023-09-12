@@ -627,11 +627,11 @@ body {
 }
 
 .file-manager-actions-container {
-  @apply col-span-12 md:col-span-4 w-full flex flex-col justify-center items-center;
+  @apply mt-6 col-span-12 md:col-span-4 w-full flex flex-col justify-center items-center;
 }
 
 .file-manager-actions-list {
-  @apply flex justify-center items-center;
+  @apply flex flex-col sm:flex-row justify-center items-center;
 }
 
 .file-manager-actions-item {

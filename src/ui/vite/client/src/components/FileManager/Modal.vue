@@ -1,6 +1,7 @@
 <script setup>
 import { computed, defineProps, defineEmits } from "vue";
 import ModalBase from "@components/Modal/Base.vue";
+import ButtonBase from "@components/Button/Base.vue";
 
 // Open after a file manager item (folder / file) action is clicked
 // With the current folder / file data
@@ -42,70 +43,50 @@ const prefix = computed(() => {
 const emits = defineEmits(["close"]);
 </script>
 <template>
-<ModalBase>
-        <div class="w-full flex justify-between">
-          <p class="modal-card-title">
-            {{ `${props.action} ${props.type}` }}
-          </p>
-        </div>
-        <form class="w-full" id="form-services" method="POST">
-          <div class="modal-path">
-            <p class="modal-path-text">
-              {{ prefix }}
-            </p>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              :value="oldName"
-              class="modal-input"
-              placeholder="path"
-              :disabled="props.action === 'view'"
-              required
-            />
-            <p v-if="props.type === 'file'" class="ml-1 modal-path-text">
-              .conf
-            </p>
-          </div>
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-          <input
-            type="hidden"
-            id="operation"
-            :value="props.action"
-            name="operation"
-          />
-          <input type="hidden" id="path" :value="props.path" name="path" />
-          <input type="hidden" id="old_name" :value="oldName" name="old_name" />
-          <input type="hidden" id="_type" :value="props.type" name="type" />
-          <textarea class="hidden" id="content" name="content"></textarea>
-          <!-- editor-->
-          <div v-if="props.type === 'file'" id="editor" class="modal-editor">
-            {{ props.value }}
-          </div>
-          <!-- editor-->
+  <ModalBase :title="`${props.action} ${props.type}`">
+    <div class="w-full">
+      <div class="modal-path">
+        <p class="modal-path-text">
+          {{ prefix }}
+        </p>
+        <input
+          type="text"
+          name="name"
+          id="name"
+          :value="oldName"
+          class="modal-input"
+          placeholder="path"
+          :disabled="props.action === 'view'"
+          required
+        />
+        <p v-if="props.type === 'file'" class="ml-1 modal-path-text">.conf</p>
+      </div>
 
-          <div class="mt-2 w-full justify-end flex">
-            <button
-              @click="$emit('close')"
-              type="button"
-              class="close-btn text-xs"
-            >
-              Close
-            </button>
-            <button
-              v-if="props.action !== 'view'"
-              type="submit"
-              :class="[
-                props.action === 'edit' ? 'edit-btn' : '',
-                props.action === 'download' ? 'download-btn' : '',
-                props.action === 'delete' ? 'delete-btn' : '',
-                props.action === 'create' ? 'valid-btn' : '',
-              ]"
-              class="text-xs ml-2"
-            >
-              {{ props.action }}
-            </button>
-          </div>
-        </form>
-      </ModalBase>
+      <!-- editor-->
+      <div v-if="props.type === 'file'" id="editor" class="modal-editor">
+        {{ props.value }}
+      </div>
+      <!-- editor-->
+
+      <div class="mt-2 w-full justify-end flex">
+        <ButtonBase size="lg" @click="$emit('close')" class="btn-close text-xs">
+          Close
+        </ButtonBase>
+        <ButtonBase
+          size="lg"
+          v-if="props.action !== 'view'"
+          type="submit"
+          :class="[
+            props.action === 'edit' ? 'btn-edit' : '',
+            props.action === 'download' ? 'btn-download' : '',
+            props.action === 'delete' ? 'btn-delete' : '',
+            props.action === 'create' ? 'btn-valid' : '',
+          ]"
+          class="text-xs ml-2"
+        >
+          {{ props.action }}
+        </ButtonBase>
+      </div>
+    </div>
+  </ModalBase>
 </template>
