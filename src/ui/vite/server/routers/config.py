@@ -60,7 +60,7 @@ async def update_service_config(config: Dict[str, str], method: str, service_nam
     response_model=ResponseModel,
     summary="Delete service config",
 )
-async def update_service_config(method: str, service_name: str):
+async def delete_service_config(method: str, service_name: str):
     req = requests.delete(f'{API_URL}/config/service/{service_name}?method={method}')
-    res = set_res_from_req(req, "PUT", f'Delete service config {service_name}')
+    res = set_res_from_req(req, "DELETE", f'Delete service config {service_name}')
     return res

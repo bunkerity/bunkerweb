@@ -37,7 +37,7 @@ async def run_job(job_name:str):
     response_model=ResponseModel,
     summary="Get a file from cache related to a job",
 )
-async def get_jobs(job_name:str, file_name:str):
+async def get_job_cache_file(job_name:str, file_name:str):
     req = requests.get(f'{API_URL}/jobs/{job_name}/cache/{file_name}')
     res = set_res_from_req(req, "GET", "Get file from cache")
     return res
@@ -57,7 +57,7 @@ async def delete_jobs(job_name:str, file_name:str, data: CacheFileModel):
     response_model=ResponseModel,
     summary="Upload a file from cache related to a job",
 )
-async def update_jobs(
+async def upload_job_file(
     job_name:str, 
     file_name:str,    
     cache_file: Optional[Annotated[bytes, File()]] = None,
