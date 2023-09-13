@@ -57,7 +57,7 @@ const inp = reactive({
 });
 
 // Ace editor vanilla logic
-class FolderEditor {
+class FileEditor {
   constructor() {
     this.editor = ace.edit("editor");
     this.darkMode = document.querySelector("[data-dark-toggle]");
@@ -111,14 +111,14 @@ let editor = null;
 // Use ace editor
 onMounted(() => {
   try {
-    editor = new FolderEditor();
+    editor = new FileEditor();
     console.log(editor);
   } catch (err) {}
 });
 
 onUpdated(() => {
   try {
-    editor = new FolderEditor();
+    editor = new FileEditor();
   } catch (err) {}
 });
 
@@ -140,10 +140,10 @@ function showAlert(type, message) {
   alert.isOpen = true;
 }
 
-const emits = defineEmits(["create", "close"]);
+const emits = defineEmits(["createFile", "close"]);
 </script>
 <template>
-  <ModalBase :title="`${props.action} ${props.type}`">
+  <ModalBase :title="`${props.action} file`">
     <div class="w-full">
       <div class="modal-path">
         <p class="modal-path-text">
@@ -156,15 +156,15 @@ const emits = defineEmits(["create", "close"]);
           id="name"
           :value="inp.name || oldName"
           class="modal-input"
-          :placeholder="props.type === 'file' ? 'filename' : 'path'"
+          :placeholder="'filename'"
           :disabled="props.action === 'view'"
           required
         />
-        <p v-if="props.type === 'file'" class="ml-1 modal-path-text">.conf</p>
+        <p class="ml-1 modal-path-text">.conf</p>
       </div>
 
       <!-- editor-->
-      <div v-if="props.type === 'file'" id="editor" class="modal-editor">
+      <div id="editor" class="modal-editor">
         {{ props.value }}
       </div>
       <!-- editor-->
@@ -184,22 +184,19 @@ const emits = defineEmits(["create", "close"]);
               if (!inp.name)
                 return showAlert(
                   'error',
-                  `${
-                    props.type === 'file' ? 'Filename' : 'Path'
-                  } missing to create element.`
+                  `Filename missing to create element.`
                 );
 
-              if (props.type === 'file' && !editor.getValue()) {
+              if (!editor.getValue()) {
                 inp.name = inp.name;
                 return showAlert('error', 'Missing content to create file.');
               }
 
-              $emit('create', {
-                type: props.type,
+              $emit('createFile', {
                 action: props.action,
                 path: props.path,
                 name: inp.name,
-                data: editor ? editor.getValue() : '',
+                data: editor.getValue(),
               });
             }
           "

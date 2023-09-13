@@ -11,24 +11,42 @@ import FileManagerStructure from "@components/FileManager/Structure.vue";
 
 const feedbackStore = useFeedbackStore();
 
+const conf = reactive({
+  isPend: false,
+  isErr: false,
+  // Data from fetch
+  data: [],
+});
+
 const customConf = reactive({
   isPend: false,
   isErr: false,
   data: [],
-  total: computed(() => customConf.data.length),
+  total: computed(() => customConf.data.length || 0),
   global: computed(
-    () => customConf.data.filter((item) => !item["service_id"]).length
+    () => customConf.data.filter((item) => !item["service_id"]).length || 0
   ),
   service: computed(
-    () => customConf.data.filter((item) => item["service_id"]).length
+    () => customConf.data.filter((item) => item["service_id"]).length || 0
   ),
   setup: computed(() => {
-    const conf = generateConfTree(customConf.data);
-    return conf;
+    if (
+      conf.isPend ||
+      conf.isErr ||
+      conf.data.length === 0 ||
+      customConf.isPend ||
+      customConf.isErr
+    ) {
+      return [];
+    }
+    const config = JSON.parse(JSON.stringify(conf.data));
+    const services = Object.keys(config["services"]);
+    const fileManager = generateConfTree(customConf.data, services);
+    return fileManager;
   }),
 });
 
-async function getConfigs() {
+async function getCustomConf() {
   await fetchAPI(
     "/api/custom_configs",
     "GET",
@@ -38,8 +56,19 @@ async function getConfigs() {
   );
 }
 
+async function getConfig() {
+  await fetchAPI(
+    "/api/config?methods=1&new_format=1",
+    "GET",
+    null,
+    conf,
+    feedbackStore.addFeedback
+  );
+}
+
 onMounted(async () => {
-  await getConfigs();
+  await getConfig();
+  await getCustomConf();
 });
 </script>
 
@@ -63,6 +92,10 @@ onMounted(async () => {
       :isPend="customConf.isPend"
       :isData="customConf.data ? true : false"
     />
-    <FileManagerStructure :config="customConf.setup" class="col-span-12" />
+    <FileManagerStructure
+      v-if="customConf.setup.length > 0"
+      :config="customConf.setup"
+      class="col-span-12"
+    />
   </Dashboard>
 </template>

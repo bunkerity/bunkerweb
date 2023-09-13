@@ -20,7 +20,9 @@ export function getBaseConfig() {
   // Base folders are after root
   const types = getTypes();
   for (let i = 0; i < types.length; i++) {
-    baseConfig.push(generateItem("folder", types[i], true, true, false, false));
+    baseConfig.push(
+      generateItem("folder", types[i], true, false, false, false)
+    );
   }
 
   return baseConfig;
@@ -57,13 +59,44 @@ export function generateItem(
   };
 }
 
-export function generateConfTree(configs) {
+export function generateConfTree(configs, services) {
   const baseConf = getBaseConfig();
+
+  // Add services to base folders
+  // Exclude some base folders that can only have roots
+  const rootOnly = ["http", "default_server_http", "stream"];
+  const servItems = [];
+  for (let i = 0; i < services.length; i++) {
+    const servName = services[i];
+
+    baseConf.forEach((folder) => {
+      // Target only base folder (pathLevel 1)
+      if (folder.pathLevel !== 1) return;
+      // Case exclude
+      const folderName = folder["path"].replace("root/", "");
+      if (rootOnly.includes(folderName)) return;
+
+      // Case not excluse
+      const path = folder["path"].replace("root/", "");
+      const servItem = generateItem(
+        "folder",
+        `${path}/${servName}`,
+        true,
+        false,
+        false,
+        false
+      );
+      folder.children.push(servItem);
+      servItems.push(servItem);
+    });
+  }
+  const conf = [...baseConf, ...servItems];
+  console.log(conf);
 
   // Fetch config is always file type with data and actions
   // Retrieve file data and format
   for (let i = 0; i < configs.length; i++) {
-    baseConf.push(
+    conf.push(
       generateItem(
         "file",
         `${configs[i].type}${
@@ -83,9 +116,9 @@ export function generateConfTree(configs) {
   // First we need to be sure that a parent exist or create it
   // (May not exist because fetch only file and not intermediate folders)
   const parents = [];
-  for (let i = 0; i < baseConf.length; i++) {
+  for (let i = 0; i < conf.length; i++) {
     // Check only pathLevel > 2 because 0 = root, 1 = base
-    const item = baseConf[i];
+    const item = conf[i];
     if (item.pathLevel < 2) continue;
     // Get prev item path (parent)
     const splitPath = item["path"].split("/");
@@ -93,7 +126,7 @@ export function generateConfTree(configs) {
     const prevPath = splitPath.join("/");
     // Check if parent on base or on created ones
     const isParent =
-      baseConf.filter((item) => item["path"] === prevPath).length === 0 &&
+      conf.filter((item) => item["path"] === prevPath).length === 0 &&
       parents.filter((item) => item["path"] === prevPath).length === 0
         ? false
         : true;
@@ -118,12 +151,12 @@ export function generateConfTree(configs) {
 
   // Then we need to set children
   // children must be only one path level more than parent
-  for (let i = 0; i < baseConf.length; i++) {
-    const item = baseConf[i];
+  for (let i = 0; i < conf.length; i++) {
+    const item = conf[i];
 
     // Get children and set them to parent
     const children = [];
-    baseConf.forEach((child) => {
+    conf.forEach((child) => {
       const isChild =
         child["path"].startsWith(item["path"]) &&
         child["pathLevel"] === item["pathLevel"] + 1
@@ -136,5 +169,5 @@ export function generateConfTree(configs) {
     item["children"] = children;
   }
 
-  return baseConf;
+  return conf;
 }

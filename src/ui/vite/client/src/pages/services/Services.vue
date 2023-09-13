@@ -7,11 +7,10 @@ import CardItemList from "@components/Card/Item/List.vue";
 import CardLabel from "@components/Card/Label.vue";
 import PluginRefresh from "@components/Plugin/Refresh.vue";
 import PluginStructure from "@components/Plugin/Structure.vue";
-import TabStructure from "@components/Tab/Structure.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
-import { reactive, computed, onMounted, KeepAlive, watch } from "vue";
+import { reactive, computed, onMounted } from "vue";
 import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
 import {
   setPluginsData,

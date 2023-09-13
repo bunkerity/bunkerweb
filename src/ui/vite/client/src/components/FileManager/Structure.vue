@@ -28,7 +28,6 @@ const config = reactive({
 const path = reactive({
   current: config.data[0]["path"],
   canCreateFile: config.data[0]["canCreateFile"],
-  canCreateFolder: config.data[0]["canCreateFolder"],
 });
 
 // Data needed for modal element, setup when an action is clicked on item (emit)
@@ -58,7 +57,6 @@ watch(path, () => {
   config.data.forEach((item) => {
     if (path.current === item.path) {
       path.canCreateFile = item.canCreateFile;
-      path.canCreateFolder = item.canCreateFolder;
     }
   });
 });
@@ -113,46 +111,24 @@ async function deleteConfig(data) {
 
 function handleCreate(data) {
   modal.isOpen = false;
-  // Case create folder
-  if (data.type === "folder") {
-    const newFolder = generateItem(
-      "folder",
-      `${data.path}${data.name}`.replace("root/", ""),
-      true,
-      false,
-      true,
-      true
-    );
-    const formatPath = data.path.slice(0, -1);
-    config.data.forEach((item) => {
-      if (item["path"] === formatPath) {
-        item["children"].push(newFolder);
-      }
-    });
 
-    config.data.push(newFolder);
-  }
+  const splitPath = data.path.replace("root/", "").trim().split("/");
+  !splitPath[splitPath.length - 1] ? splitPath.pop() : false;
+  const type = splitPath[0].replaceAll("-", "_");
+  const serviceID = splitPath[1] ? splitPath[1] : "";
 
-  // Case create file
-  if (data.type === "file") {
-    const splitPath = data.path.replace("root/", "").trim().split("/");
-    !splitPath[splitPath.length - 1] ? splitPath.pop() : false;
-    const type = splitPath[0].replaceAll("-", "_");
-    const serviceID = splitPath[1] ? splitPath[1] : "";
+  const newConf = [
+    {
+      service_id: serviceID,
+      type: type,
+      name: data.name,
+      data: data.data,
+    },
+  ];
 
-    const newConf = [
-      {
-        service_id: serviceID,
-        type: type,
-        name: data.name,
-        data: data.data,
-      },
-    ];
-
-    if (data.action === "create") createConfig(newConf);
-    if (data.action === "edit") updateConfig(newConf);
-    if (data.action === "delete") deleteConfig(newConf);
-  }
+  if (data.action === "create") createConfig(newConf);
+  if (data.action === "edit") updateConfig(newConf);
+  if (data.action === "delete") deleteConfig(newConf);
 }
 </script>
 
@@ -197,16 +173,12 @@ function handleCreate(data) {
           @createFile="
             () => updateModal('file', 'create', `${path.current}/`, '')
           "
-          @createFolder="
-            () => updateModal('folder', 'create', `${path.current}/`, '')
-          "
           :canCreateFile="path.canCreateFile"
-          :canCreateFolder="path.canCreateFolder"
         />
       </div>
     </CardBase>
     <FileManagerModal
-      @create="(v) => handleCreate(v)"
+      @createFile="(v) => handleCreate(v)"
       :aria-hidden="modal.isOpen ? 'false' : 'true'"
       v-if="modal.isOpen"
       :type="modal.type"
