@@ -11,6 +11,15 @@
   font-family: "Open Sans", sans-serif !important;
 }
 
+.ace_editor,
+.ace_editor div,
+.ace_content {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", "source-code-pro",
+    monospace !important;
+  font-size: 16px !important;
+  font-weight: normal !important;
+}
+
 /* DASHBOARD LAYOUT */
 body {
   @apply bg-primary h-full w-full overflow-x-hidden;
@@ -559,11 +568,11 @@ body {
 }
 
 .file-manager-breadcrumb-item-btn {
-  @apply mr-2 dark:text-gray-500 text-gray-600 after:float-right after:pl-2 after:text-gray-600 dark:after:text-gray-500 after:content-['/'] after:hover:brightness-125 hover:brightness-75;
+  @apply text-base mr-2 dark:text-gray-500 text-gray-600 after:float-right after:pl-2 after:text-gray-600 dark:after:text-gray-500 after:content-['/'] after:hover:brightness-125 hover:brightness-75;
 }
 
 .file-manager-item-container {
-  @apply relative w-full min-h-20 w-full h-full transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800;
+  @apply relative w-full min-h-20  h-full transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800;
 }
 
 .file-manager-item-nav {
@@ -639,7 +648,7 @@ body {
 }
 
 .file-manager-actions-item-btn {
-  @apply dark:text-gray-300 text-primary disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 whitespace-nowrap md:block border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border m-1 relative pl-4 pr-5 pb-2.5 pt-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
+  @apply rounded dark:text-gray-300 text-primary disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 whitespace-nowrap md:block border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border m-1 relative pl-4 pr-5 pb-2.5 pt-3 font-bold text-center uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
 }
 
 .file-manager-actions-svg {
@@ -651,7 +660,7 @@ body {
 }
 
 .disabled.file-manager-actions-svg {
-  @apply fill-gray-700 stroke-gray-100 stroke-gray-600;
+  @apply fill-gray-700  stroke-gray-600;
 }
 
 /* LIST */

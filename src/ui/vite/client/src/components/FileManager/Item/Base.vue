@@ -16,6 +16,10 @@ const props = defineProps({
     type: String,
     required: false,
   },
+  pathLevel: {
+    type: Number,
+    required: false,
+  },
   value: {
     type: String,
     required: true,
@@ -63,7 +67,7 @@ const emits = defineEmits(["updatePath", "action"]);
       <FileManagerItemSvgFile v-if="props.type === 'file'" />
 
       <span class="file-manager-item-name">
-        {{ path.name }}
+        {{ props.pathLevel === 1 ? path.name.replaceAll("_", "-") : path.name }}
       </span>
     </button>
     <FileManagerItemDropdown

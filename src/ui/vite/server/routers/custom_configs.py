@@ -22,13 +22,24 @@ async def get_custom_configs():
     res = set_res_from_req(req, "GET", "Retrieve custom configs")
     return res
 
+@router.post(
+    "",
+    response_model=ResponseModel,
+    summary="Create one or more custom configs",
+)
+async def create_custom_configs(custom_config:  List[dict], method: str):
+    data = json.dumps(custom_config,  skipkeys = True, allow_nan = True, indent = 6)
+    print(data)
+    req = requests.post(f'{API_URL}/custom_configs?method={method}', data=data)
+    res = set_res_from_req(req, "POST", "Create custom configs")
+    return res
 
 @router.put(
     "",
     response_model=ResponseModel,
     summary="Update one or more custom configs",
 )
-async def update_custom_configs(custom_config:  Annotated[dict, Body()], method: str):
+async def update_custom_configs(custom_config:  List[dict], method: str):
     data = json.dumps(custom_config,  skipkeys = True, allow_nan = True, indent = 6)
     req = requests.put(f'{API_URL}/custom_configs?method={method}', data=data)
     res = set_res_from_req(req, "PUT", "Update custom configs")

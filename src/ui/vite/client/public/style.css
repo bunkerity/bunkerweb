@@ -685,6 +685,10 @@ h6 {
   top: 0.5rem !important;
 }
 
+.top-3 {
+  top: 0.75rem !important;
+}
+
 .top-4 {
   top: 1rem !important;
 }
@@ -836,11 +840,6 @@ h6 {
   margin-bottom: 0.75rem !important;
 }
 
-.my-4 {
-  margin-top: 1rem !important;
-  margin-bottom: 1rem !important;
-}
-
 .mb-0 {
   margin-bottom: 0px !important;
 }
@@ -891,6 +890,10 @@ h6 {
 
 .mr-4 {
   margin-right: 1rem !important;
+}
+
+.mr-8 {
+  margin-right: 2rem !important;
 }
 
 .mt-0 {
@@ -1210,10 +1213,6 @@ h6 {
 
 .flex-col {
   flex-direction: column !important;
-}
-
-.flex-col-reverse {
-  flex-direction: column-reverse !important;
 }
 
 .flex-wrap {
@@ -1545,6 +1544,11 @@ h6 {
   padding-right: 0.75rem !important;
 }
 
+.px-4 {
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
 .px-6 {
   padding-left: 1.5rem !important;
   padding-right: 1.5rem !important;
@@ -1558,6 +1562,16 @@ h6 {
 .py-1\.5 {
   padding-top: 0.375rem !important;
   padding-bottom: 0.375rem !important;
+}
+
+.py-2 {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.py-2\.5 {
+  padding-top: 0.625rem !important;
+  padding-bottom: 0.625rem !important;
 }
 
 .py-3 {
@@ -1786,6 +1800,15 @@ h6 {
 
 * {
   font-family: "Open Sans", sans-serif !important;
+}
+
+.ace_editor,
+.ace_editor div,
+.ace_content {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", "source-code-pro",
+    monospace !important;
+  font-size: 16px !important;
+  font-weight: normal !important;
 }
 
 /* DASHBOARD LAYOUT */
@@ -4633,6 +4656,8 @@ body {
 
 .file-manager-breadcrumb-item-btn {
   margin-right: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
   --tw-text-opacity: 1;
   color: rgb(108 117 125 / var(--tw-text-opacity));
 }
@@ -5122,7 +5147,7 @@ body {
   margin: 0.25rem;
   cursor: pointer;
   white-space: nowrap;
-  border-radius: 0px;
+  border-radius: 0.25rem;
   border-width: 1px;
   --tw-border-opacity: 1;
   border-color: rgb(8 85 119 / var(--tw-border-opacity));
@@ -5220,7 +5245,6 @@ body {
 
 .disabled.file-manager-actions-svg {
   fill: #495057;
-  stroke: #ebeff4;
   stroke: #6c757d;
 }
 
@@ -5624,10 +5648,6 @@ body {
     display: block !important;
   }
 
-  .md\:flex-col {
-    flex-direction: column !important;
-  }
-
   .md\:text-base {
     font-size: 1rem !important;
     line-height: 1.5rem !important;
@@ -5655,14 +5675,6 @@ body {
 
   .xl\:col-span-8 {
     grid-column: span 8 / span 8 !important;
-  }
-
-  .xl\:col-span-4 {
-    grid-column: span 4 / span 4 !important;
-  }
-
-  .xl\:col-span-6 {
-    grid-column: span 6 / span 6 !important;
   }
 
   .xl\:ml-4 {

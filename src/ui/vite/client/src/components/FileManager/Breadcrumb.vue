@@ -69,7 +69,7 @@ function getClickPath(id) {
         type="button"
         class="file-manager-breadcrumb-item-btn"
       >
-        {{ item }}
+        {{ item === "root" ? "" : item }}
       </button>
     </li>
   </ul>

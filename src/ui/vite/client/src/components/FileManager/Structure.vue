@@ -5,14 +5,18 @@ import FileManagerBreadcrumb from "@components/FileManager/breadcrumb.vue";
 import FileManagerContainer from "@components/FileManager/Container.vue";
 import FileManagerItemBase from "@components/FileManager/Item/Base.vue";
 import CardBase from "@components/Card/Base.vue";
-import { onUpdated, reactive, ref, watch } from "vue";
+import { reactive, watch } from "vue";
 import { generateItem } from "@utils/custom_configs.js";
+import { useFeedbackStore } from "@store/global.js";
+import { fetchAPI } from "@utils/api.js";
 
 const props = defineProps({
   config: {
     type: Array,
   },
 });
+
+const feedbackStore = useFeedbackStore();
 
 const config = reactive({
   data: props.config,
@@ -59,6 +63,54 @@ watch(path, () => {
   });
 });
 
+const updateConfigs = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+});
+
+async function updateConfig(data) {
+  await fetchAPI(
+    "/api/custom_configs?method=ui",
+    "PUT",
+    data,
+    updateConfigs,
+    feedbackStore.addFeedback
+  );
+}
+
+const createConfigs = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+});
+
+async function createConfig(data) {
+  await fetchAPI(
+    "/api/custom_configs?method=ui",
+    "POST",
+    data,
+    createConfigs,
+    feedbackStore.addFeedback
+  );
+}
+
+const deleteConfigs = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+});
+
+async function deleteConfig(data) {
+  await fetchAPI(
+    "/api/custom_configs?method=ui",
+    "DELETE",
+    data,
+    deleteConfigs,
+    feedbackStore.addFeedback
+  );
+}
+
 function handleCreate(data) {
   modal.isOpen = false;
   // Case create folder
@@ -83,12 +135,25 @@ function handleCreate(data) {
 
   // Case create file
   if (data.type === "file") {
+    const splitPath = data.path.replace("root/", "").trim().split("/");
+    !splitPath[splitPath.length - 1] ? splitPath.pop() : false;
+    const type = splitPath[0].replaceAll("-", "_");
+    const serviceID = splitPath[1] ? splitPath[1] : "";
+
+    const newConf = [
+      {
+        service_id: serviceID,
+        type: type,
+        name: data.name,
+        data: data.data,
+      },
+    ];
+
+    if (data.action === "create") createConfig(newConf);
+    if (data.action === "edit") updateConfig(newConf);
+    if (data.action === "delete") deleteConfig(newConf);
   }
 }
-
-onUpdated(() => {
-  console.log(config.data);
-});
 </script>
 
 <template>
@@ -115,6 +180,7 @@ onUpdated(() => {
             <FileManagerItemBase
               :type="child.type"
               :path="child.path"
+              :pathLevel="child.pathLevel"
               :value="child.value || ''"
               :canDelete="child.canDelete"
               :canEdit="child.canEdit"

@@ -1,7 +1,19 @@
 <script setup>
-import { computed, defineProps, defineEmits, reactive } from "vue";
+import {
+  computed,
+  defineProps,
+  defineEmits,
+  reactive,
+  onMounted,
+  onUnmounted,
+  onUpdated,
+} from "vue";
 import ModalBase from "@components/Modal/Base.vue";
 import ButtonBase from "@components/Button/Base.vue";
+import AlertBase from "@components/Alert/Base.vue";
+import "@assets/script/editor/ace.js";
+import "@assets/script/editor/theme-dracula.js";
+import "@assets/script/editor/theme-dawn.js";
 
 // Open after a file manager item (folder / file) action is clicked
 // With the current folder / file data
@@ -44,6 +56,90 @@ const inp = reactive({
   name: "",
 });
 
+// Ace editor vanilla logic
+class FolderEditor {
+  constructor() {
+    this.editor = ace.edit("editor");
+    this.darkMode = document.querySelector("[data-dark-toggle]");
+    this.initEditor();
+    this.listenDarkToggle();
+  }
+
+  initEditor() {
+    //editor options
+    this.editor.setShowPrintMargin(false);
+    this.setDarkMode();
+  }
+
+  //listen to dark toggle button to change theme
+  listenDarkToggle() {
+    this.darkMode.addEventListener("click", (e) => {
+      this.darkMode.checked
+        ? this.changeDarkMode(true)
+        : this.changeDarkMode(false);
+    });
+  }
+
+  setDarkMode() {
+    document.querySelector("html").className.includes("dark")
+      ? this.editor.setTheme("ace/theme/dracula")
+      : this.editor.setTheme("ace/theme/dawn");
+  }
+
+  //change theme according to mode
+  changeDarkMode(bool) {
+    bool
+      ? this.editor.setTheme("ace/theme/dracula")
+      : this.editor.setTheme("ace/theme/dawn");
+  }
+
+  readOnlyBool(bool) {
+    this.editor.setReadOnly(bool);
+  }
+
+  destroy() {
+    this.editor.destroy();
+  }
+
+  getValue() {
+    return this.editor.getValue();
+  }
+}
+
+let editor = null;
+
+// Use ace editor
+onMounted(() => {
+  try {
+    editor = new FolderEditor();
+    console.log(editor);
+  } catch (err) {}
+});
+
+onUpdated(() => {
+  try {
+    editor = new FolderEditor();
+  } catch (err) {}
+});
+
+onUnmounted(() => {
+  try {
+    editor.destroy();
+  } catch (err) {}
+});
+
+const alert = reactive({
+  isOpen: false,
+  message: "",
+  type: "",
+});
+
+function showAlert(type, message) {
+  alert.message = message;
+  alert.type = type;
+  alert.isOpen = true;
+}
+
 const emits = defineEmits(["create", "close"]);
 </script>
 <template>
@@ -55,13 +151,12 @@ const emits = defineEmits(["create", "close"]);
         </p>
         <input
           @input="inp.name = $event.target.value"
-          ref="inpData"
           type="text"
           name="name"
           id="name"
-          :value="oldName"
+          :value="inp.name || oldName"
           class="modal-input"
-          placeholder="path"
+          :placeholder="props.type === 'file' ? 'filename' : 'path'"
           :disabled="props.action === 'view'"
           required
         />
@@ -73,7 +168,12 @@ const emits = defineEmits(["create", "close"]);
         {{ props.value }}
       </div>
       <!-- editor-->
-
+      <AlertBase
+        :message="alert.message"
+        :type="alert.type"
+        v-if="alert.isOpen"
+        @close="alert.isOpen = false"
+      />
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase size="lg" @click="$emit('close')" class="btn-close text-xs">
           Close
@@ -81,12 +181,25 @@ const emits = defineEmits(["create", "close"]);
         <ButtonBase
           @click="
             () => {
-              if (props.type === 'folder' && !inp.name) return;
+              if (!inp.name)
+                return showAlert(
+                  'error',
+                  `${
+                    props.type === 'file' ? 'Filename' : 'Path'
+                  } missing to create element.`
+                );
+
+              if (props.type === 'file' && !editor.getValue()) {
+                inp.name = inp.name;
+                return showAlert('error', 'Missing content to create file.');
+              }
+
               $emit('create', {
                 type: props.type,
                 action: props.action,
                 path: props.path,
                 name: inp.name,
+                data: editor ? editor.getValue() : '',
               });
             }
           "

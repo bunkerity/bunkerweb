@@ -3,7 +3,7 @@ import FileManagerButtonView from "@components/FileManager/Button/View.vue";
 import FileManagerButtonEdit from "@components/FileManager/Button/Edit.vue";
 import FileManagerButtonDownload from "@components/FileManager/Button/Download.vue";
 import FileManagerButtonDelete from "@components/FileManager/Button/Delete.vue";
-import { reactive, watch, defineEmits } from "vue";
+import { reactive, watch, defineEmits, ref } from "vue";
 // Dropdown toggle logic and buttons list with @action emit value on click
 // The value of the clicked button will be emit itself to be retrieved by FileManagerBase
 const props = defineProps({
@@ -25,6 +25,8 @@ const dropdown = reactive({
   isOpen: false,
 });
 
+const dropdownBtn = ref();
+
 // Close dropdown when clicked outside element
 watch(dropdown, () => {
   if (dropdown.isOpen) {
@@ -37,7 +39,7 @@ watch(dropdown, () => {
 // Close dropdown when clicked outside logic
 function closeOutside(e) {
   try {
-    if (!e.target.closest("button").hasAttribute("data-action-dropdown")) {
+    if (e.target !== dropdownBtn.value) {
       dropdown.isOpen = false;
     }
   } catch (err) {
@@ -50,6 +52,7 @@ const emits = defineEmits(["action"]);
 
 <template>
   <button
+    ref="dropdownBtn"
     @click="dropdown.isOpen = dropdown.isOpen ? false : true"
     data-action-dropdown
     :aria-expanded="dropdown.isOpen ? 'true' : 'false'"

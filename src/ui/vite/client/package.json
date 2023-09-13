@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "ace-builds": "^1.24.2",
     "pinia": "^2.1.6",
     "vue": "^3.3.4"
   },
