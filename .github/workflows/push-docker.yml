@@ -63,7 +63,7 @@ jobs:
       # Compute metadata
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: bunkerity/${{ inputs.IMAGE }}
       # Build and push
