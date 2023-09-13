@@ -92,7 +92,7 @@ jobs:
       # Build testing package image
       - name: Build package image
         if: inputs.RELEASE == 'testing'
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           load: true
@@ -104,7 +104,7 @@ jobs:
       # Build non-testing package image
       - name: Build package image
         if: inputs.RELEASE != 'testing'
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           load: true
@@ -140,7 +140,7 @@ jobs:
           images: ghcr.io/bunkerity/${{ inputs.LINUX }}-tests:${{ inputs.RELEASE }}
       - name: Build test image
         if: inputs.TEST == true
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: tests/linux/Dockerfile-${{ inputs.LINUX }}
