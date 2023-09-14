@@ -22,7 +22,7 @@ function updateValue() {
 </script>
 
 <template>
-  <div class="relative mb-7 md:mb-0 z-10">
+  <div class="relative z-10">
     <input
       @click="$emit('inp', updateValue())"
       :id="props.settings.id"

@@ -21,6 +21,7 @@ const feedbackStore = useFeedbackStore();
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
   pathKeyword: "",
+  nameKeyword: "",
   showServices: "yes",
   showOnlyCaseConf: "no",
 });
@@ -114,6 +115,21 @@ onMounted(async () => {
           @inp="(v) => (filters.pathKeyword = v)"
           :settings="{
             id: 'pathKeyword',
+            type: 'text',
+            value: '',
+            placeholder: 'label',
+          }"
+        />
+      </SettingsLayout>
+      <SettingsLayout
+        class="flex w-full col-span-12 md:col-span-6"
+        label="Search name"
+        name="nameKeyword"
+      >
+        <SettingsInput
+          @inp="(v) => (filters.nameKeyword = v)"
+          :settings="{
+            id: 'nameKeyword',
             type: 'text',
             value: '',
             placeholder: 'label',

@@ -177,6 +177,8 @@ export function getCustomConfByFilter(items, filters) {
   items.forEach((item, id) => {
     let isMatch = true;
     const path = item.path.replace("root/", "");
+    const splitPath = path.split("/");
+    const name = splitPath.pop();
     const pathLevel = item.pathLevel;
     // root exclude to avoid break
     if (pathLevel === 0) return;
@@ -186,9 +188,14 @@ export function getCustomConfByFilter(items, filters) {
       // Case no match by a previous filter
       if (!isMatch) continue;
 
-      // Case keyword
+      // Case path keyword
       if (key === "pathKeyword" && value) {
         isMatch = path.includes(value) ? true : false;
+      }
+
+      // Case name keyword
+      if (key === "nameKeyword" && value) {
+        isMatch = name.includes(value) ? true : false;
       }
 
       // Case services folders
