@@ -91,7 +91,6 @@ export function generateConfTree(configs, services) {
     });
   }
   const conf = [...baseConf, ...servItems];
-  console.log(conf);
 
   // Fetch config is always file type with data and actions
   // Retrieve file data and format
@@ -170,4 +169,86 @@ export function generateConfTree(configs, services) {
   }
 
   return conf;
+}
+
+// Filter custom configs
+export function getCustomConfByFilter(items, filters) {
+  const itemsToDel = [];
+  items.forEach((item, id) => {
+    let isMatch = true;
+    const path = item.path.replace("root/", "");
+    const pathLevel = item.pathLevel;
+    // root exclude to avoid break
+    if (pathLevel === 0) return;
+
+    // Check every filter
+    for (const [key, value] of Object.entries(filters)) {
+      // Case no match by a previous filter
+      if (!isMatch) continue;
+
+      // Case keyword
+      if (key === "pathKeyword" && value) {
+        isMatch = path.includes(value) ? true : false;
+      }
+
+      // Case services folders
+      if (key === "showServices" && value === "no" && pathLevel === 2) {
+        isMatch = false;
+      }
+
+      // Case check for .conf at end of path
+      if (key === "showOnlyCaseConf" && value === "yes") {
+        isMatch =
+          items.filter(
+            (item) => item.pathLevel === 3 && item.path.includes(path)
+          ).length === 0
+            ? false
+            : true;
+      }
+    }
+
+    // Case no match
+    if (!isMatch) itemsToDel.push(items[id]);
+  });
+
+  // For items that didn't pass filter
+  // We need to remove them itself as item and as other items children
+  itemsToDel.forEach((itemDel) => {
+    const delPath = itemDel.path;
+    const delPathLevel = itemDel.pathLevel;
+    // Get prev path level
+    const prevPathLevel = itemDel.pathLevel - 1;
+    // Avoid remove root
+    if (prevPathLevel === -1) return;
+    // Get prev path
+    const splitPath = itemDel.path.split("/");
+    splitPath.pop();
+    const prevPath = splitPath.join("/");
+
+    // Remove item as children
+    items.forEach((item) => {
+      const path = item.path;
+      const pathLevel = item.pathLevel;
+      if (prevPathLevel !== pathLevel || prevPath !== path) return;
+      // Get item that match
+      const children = item.children;
+      const matchIds = [];
+      children.forEach((child, id) => {
+        if (child.path !== delPath || child.pathLevel !== delPathLevel) return;
+        matchIds.push(id);
+      });
+
+      // Remove them using id
+      matchIds.forEach((id) => {
+        children[id] = "";
+      });
+      item.children = children.filter((item) => typeof item !== "string");
+
+      // At the end remove item itself
+      item = "";
+    });
+  });
+
+  // Update items removing empty string
+  return items.filter((item) => typeof item !== "string");
 }

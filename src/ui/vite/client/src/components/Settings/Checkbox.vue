@@ -10,21 +10,23 @@ const props = defineProps({
 });
 
 const checkbox = reactive({
-  value : props.settings.value
-})
+  value: props.settings.value,
+});
+
+const emits = defineEmits(["inp"]);
+
+function updateValue() {
+  checkbox.value = checkbox.value === "yes" ? "no" : "yes";
+  return checkbox.value;
+}
 </script>
 
 <template>
   <div class="relative mb-7 md:mb-0 z-10">
     <input
-      @click="checkbox.value = checkbox.value === 'yes' ? 'no' : 'yes'"
+      @click="$emit('inp', updateValue())"
       :id="props.settings.id"
       :name="props.settings.id"
-      :disabled="
-        (props.settings.method !== 'ui' && props.settings.method !== 'default')
-          ? true
-          : false
-      "
       :aria-checked="checkbox.value === 'yes' ? 'true' : 'false'"
       :checked="checkbox.value === 'yes' ? true : false"
       :class="[checkbox.value === 'yes' ? 'check' : '', 'checkbox']"

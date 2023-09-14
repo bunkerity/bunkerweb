@@ -5,11 +5,25 @@ import CardBase from "@components/Card/Base.vue";
 import CardItemList from "@components/Card/Item/List.vue";
 import { reactive, computed, onMounted } from "vue";
 import { fetchAPI } from "@utils/api.js";
-import { generateConfTree } from "@utils/custom_configs.js";
+import {
+  generateConfTree,
+  getCustomConfByFilter,
+} from "@utils/custom_configs.js";
+import SettingsLayout from "@components/Settings/Layout.vue";
+import SettingsInput from "@components/Settings/Input.vue";
+import SettingsSelect from "@components/Settings/Select.vue";
+import SettingsCheckbox from "@components/Settings/Checkbox.vue";
 import { useFeedbackStore } from "@store/global.js";
 import FileManagerStructure from "@components/FileManager/Structure.vue";
 
 const feedbackStore = useFeedbackStore();
+
+// Hide / Show settings and plugin base on that filters
+const filters = reactive({
+  pathKeyword: "",
+  showServices: "yes",
+  showOnlyCaseConf: "no",
+});
 
 const conf = reactive({
   isPend: false,
@@ -41,8 +55,9 @@ const customConf = reactive({
     }
     const config = JSON.parse(JSON.stringify(conf.data));
     const services = Object.keys(config["services"]);
-    const fileManager = generateConfTree(customConf.data, services);
-    return fileManager;
+    const confTree = generateConfTree(customConf.data, services);
+    const filterManager = getCustomConfByFilter(confTree, filters);
+    return filterManager;
   }),
 });
 
@@ -85,6 +100,52 @@ onMounted(async () => {
           { label: 'configs services', value: customConf.service },
         ]"
       />
+    </CardBase>
+    <CardBase
+      label="configs"
+      class="z-[100] col-span-12 md:col-span-12 lg:col-span-6 2xl:col-span-5 3xl:col-span-4 grid grid-cols-12 relative"
+    >
+      <SettingsLayout
+        class="flex w-full col-span-12 md:col-span-6"
+        label="Search path"
+        name="pathKeyword"
+      >
+        <SettingsInput
+          @inp="(v) => (filters.pathKeyword = v)"
+          :settings="{
+            id: 'pathKeyword',
+            type: 'text',
+            value: '',
+            placeholder: 'label',
+          }"
+        />
+      </SettingsLayout>
+      <SettingsLayout
+        class="flex w-full col-span-12 md:col-span-6"
+        label="Show services folders"
+        name="show-service"
+      >
+        <SettingsCheckbox
+          @inp="(v) => (filters.showServices = v)"
+          :settings="{
+            id: 'show-service',
+            value: 'yes',
+          }"
+        />
+      </SettingsLayout>
+      <SettingsLayout
+        class="flex w-full col-span-12 md:col-span-6"
+        label="Only path with .conf"
+        name="show-only-conf"
+      >
+        <SettingsCheckbox
+          @inp="(v) => (filters.showOnlyCaseConf = v)"
+          :settings="{
+            id: 'show-only-conf',
+            value: 'no',
+          }"
+        />
+      </SettingsLayout>
     </CardBase>
     <ApiState
       class="col-span-12 md:col-start-4 md:col-span-6 2xl:col-span-4 2xl:col-start-5"

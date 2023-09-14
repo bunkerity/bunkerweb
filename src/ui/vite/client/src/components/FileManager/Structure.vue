@@ -18,16 +18,12 @@ const props = defineProps({
 
 const feedbackStore = useFeedbackStore();
 
-const config = reactive({
-  data: props.config,
-});
-
 // All forders need a path with children items inside it
 // When a breadcrumb element or folder is clicked
 // We update currPath and display the folder.path that match currPath
 const path = reactive({
-  current: config.data[0]["path"],
-  canCreateFile: config.data[0]["canCreateFile"],
+  current: props.config[0]["path"],
+  canCreateFile: props.config[0]["canCreateFile"],
 });
 
 // Data needed for modal element, setup when an action is clicked on item (emit)
@@ -54,7 +50,7 @@ function updateModal(type, action, path, value) {
 // Get item that match current path to check values using config variable
 // Allow to know if can crate folder or file whatever component changing path (bread or folder click)
 watch(path, () => {
-  config.data.forEach((item) => {
+  props.config.forEach((item) => {
     if (path.current === item.path) {
       path.canCreateFile = item.canCreateFile;
     }
@@ -143,7 +139,7 @@ function handleCreate(data) {
           @updatePath="(v) => (path.current = v)"
         />
         <FileManagerContainer
-          v-for="(folder, folderID) in config.data"
+          v-for="(folder, folderID) in props.config"
           :key="folderID"
           :path="folder.path"
           :currPath="path.current"

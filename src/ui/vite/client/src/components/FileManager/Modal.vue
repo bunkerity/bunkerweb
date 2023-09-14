@@ -112,7 +112,6 @@ let editor = null;
 onMounted(() => {
   try {
     editor = new FileEditor();
-    console.log(editor);
   } catch (err) {}
 });
 
