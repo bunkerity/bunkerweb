@@ -52,6 +52,7 @@ from flask_login import (
     logout_user,
 )
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+from glob import glob
 from hashlib import sha256
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
@@ -251,10 +252,23 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
     # Do the operation
     if method == "services":
         error = False
+        editing = False
+        service_custom_confs = glob(
+            join(sep, "etc", "bunkerweb", "configs", "*", args[1])
+        )
 
         if operation == "new":
             operation, error = app.config["CONFIG"].new_service(args[0])
         elif operation == "edit":
+            editing = True
+            if args[1] != args[2] and service_custom_confs:
+                for service_custom_conf in service_custom_confs:
+                    move(
+                        service_custom_conf,
+                        service_custom_conf.replace(
+                            f"{sep}{args[1]}", f"{sep}{args[2]}"
+                        ).replace(join(sep, "etc"), join(sep, "var", "tmp")),
+                    )
             operation, error = app.config["CONFIG"].edit_service(args[1], args[0])
         elif operation == "delete":
             operation, error = app.config["CONFIG"].delete_service(args[2])
@@ -263,6 +277,24 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
             app.config["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
             app.config["TO_FLASH"].append({"content": operation, "type": "success"})
+
+            if editing and args[1] != args[2] and service_custom_confs:
+                for tmp_service_custom_conf in glob(
+                    join(sep, "var", "tmp", "bunkerweb", "configs", "*", args[2])
+                ):
+                    move(
+                        tmp_service_custom_conf,
+                        tmp_service_custom_conf.replace(
+                            join(sep, "var", "tmp"),
+                            join(sep, "etc"),
+                        ),
+                    )
+                error = app.config["CONFIGFILES"].save_configs()
+                if error:
+                    app.config["TO_FLASH"].append({"content": error, "type": "error"})
+                rmtree(
+                    join(sep, "var", "tmp", "bunkerweb", "configs"), ignore_errors=True
+                )
     if method == "global_config":
         operation = app.config["CONFIG"].edit_global_conf(args[0])
         app.config["TO_FLASH"].append({"content": operation, "type": "success"})

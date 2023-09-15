@@ -35,6 +35,7 @@ class ApiCaller:
         self.__apis = apis
 
     def auto_setup(self, bw_integration: Optional[str] = None):
+        self.__apis.clear()
         if bw_integration is None:
             if getenv("KUBERNETES_MODE", "no") == "yes":
                 bw_integration = "Kubernetes"

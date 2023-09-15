@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -15,12 +15,7 @@
 
 #include "src/actions/transformations/remove_whitespace.h"
 
-#include <iostream>
 #include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
 
 #include "modsecurity/transaction.h"
 #include "src/actions/transformations/transformation.h"
@@ -37,28 +32,27 @@ RemoveWhitespace::RemoveWhitespace(const std::string &action)
 
 std::string RemoveWhitespace::evaluate(const std::string &val,
     Transaction *transaction) {
-    std::string value(val);
+    std::string transformed_value;
+    transformed_value.reserve(val.size());
 
-    int64_t i = 0;
+    size_t i = 0;
     const char nonBreakingSpaces = 0xa0;
     const char nonBreakingSpaces2 = 0xc2;
 
     // loop through all the chars
-    while (i < value.size()) {
+    while (i < val.size()) {
         // remove whitespaces and non breaking spaces (NBSP)
-        if (std::isspace(static_cast<unsigned char>(value[i]))
-            || (value[i] == nonBreakingSpaces)
-            || value[i] == nonBreakingSpaces2) {
-            value.erase(i, 1);
+        if (std::isspace(static_cast<unsigned char>(val[i]))
+            || (val[i] == nonBreakingSpaces)
+            || val[i] == nonBreakingSpaces2) {
+            // don't copy; continue on to next char in original val
         } else {
-          /* if the space is not a whitespace char, increment counter
-           counter should not be incremented if a character is erased because
-           the index erased will be replaced by the following character */
-          i++;
+            transformed_value += val.at(i);
         }
+        i++;
     }
 
-    return value;
+    return transformed_value;
 }
 
 }  // namespace transformations

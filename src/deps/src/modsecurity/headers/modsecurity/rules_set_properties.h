@@ -379,6 +379,7 @@ class RulesSetProperties {
                                     from->m_responseBodyLimitAction,
                                     PropertyNotSetBodyLimitAction);
 
+        to->m_pcreMatchLimit.merge(&from->m_pcreMatchLimit);
         to->m_uploadFileLimit.merge(&from->m_uploadFileLimit);
         to->m_uploadFileMode.merge(&from->m_uploadFileMode);
         to->m_uploadDirectory.merge(&from->m_uploadDirectory);
@@ -470,6 +471,7 @@ class RulesSetProperties {
     ConfigDouble m_requestBodyLimit;
     ConfigDouble m_requestBodyNoFilesLimit;
     ConfigDouble m_responseBodyLimit;
+    ConfigInt m_pcreMatchLimit;
     ConfigInt m_uploadFileLimit;
     ConfigInt m_uploadFileMode;
     DebugLog *m_debugLog;

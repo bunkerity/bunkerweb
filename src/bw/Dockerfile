@@ -73,7 +73,7 @@ RUN apk add --no-cache pcre bash python3 yajl && \
 	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 # Fix CVEs
-# There are no CVE to fix for the moment
+RUN apk add --no-cache "libwebp>=1.2.4-r3"
 
 VOLUME /data /etc/nginx
 

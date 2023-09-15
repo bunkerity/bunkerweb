@@ -26,6 +26,7 @@
 <br/>
 <h1>resty.session</h1>
 
+
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
@@ -215,7 +216,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> is_fips = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.is_fips_mode()</pre>
+        <pre class="example"><span class="keyword">local</span> is_fips = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">is_fips_mode</span>()</pre>
     </ul>
 
 </dd>
@@ -267,8 +268,8 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> packed_128 = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.bpack(<span class="number">1</span>, <span class="number">128</span>)
-<span class="keyword">local</span> packed_now = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.bpack(<span class="number">8</span>, ngx.time())</pre>
+        <pre class="example"><span class="keyword">local</span> packed_128 = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">bpack</span>(<span class="number">1</span>, <span class="number">128</span>)
+<span class="keyword">local</span> packed_now = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">bpack</span>(<span class="number">8</span>, ngx.<span class="function-name">time</span>())</pre>
     </ul>
 
 </dd>
@@ -322,8 +323,8 @@
     <ul>
         <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
 <span class="keyword">local</span> value = <span class="number">128</span>
-<span class="keyword">local</span> packed_value = utils.bpack(<span class="number">1</span>, value)
-<span class="keyword">local</span> unpacked_value = utils.bunpack(<span class="number">1</span>, packed_value)
+<span class="keyword">local</span> packed_value = utils.<span class="function-name">bpack</span>(<span class="number">1</span>, value)
+<span class="keyword">local</span> unpacked_value = utils.<span class="function-name">bunpack</span>(<span class="number">1</span>, packed_value)
 <span class="global">print</span>(value == unpacked_value) <span class="comment">-- true</span></pre>
     </ul>
 
@@ -368,7 +369,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> trimmed = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.trim(<span class="string">"  hello world  "</span>)</pre>
+        <pre class="example"><span class="keyword">local</span> trimmed = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">trim</span>(<span class="string">"  hello world  "</span>)</pre>
     </ul>
 
 </dd>
@@ -399,7 +400,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> json = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.encode_json({ hello = <span class="string">"world"</span> })</pre>
+        <pre class="example"><span class="keyword">local</span> json = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">encode_json</span>({ hello = <span class="string">"world"</span> })</pre>
     </ul>
 
 </dd>
@@ -430,7 +431,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> tbl = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.decode_json(<span class="string">'{ "hello": "world" }'</span>)</pre>
+        <pre class="example"><span class="keyword">local</span> tbl = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">decode_json</span>(<span class="string">'{ "hello": "world" }'</span>)</pre>
     </ul>
 
 </dd>
@@ -461,7 +462,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> encoded = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.encode_base64url(<span class="string">"test"</span>)</pre>
+        <pre class="example"><span class="keyword">local</span> encoded = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">encode_base64url</span>(<span class="string">"test"</span>)</pre>
     </ul>
 
 </dd>
@@ -493,8 +494,8 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
-<span class="keyword">local</span> encoded = utils.encode_base64url(<span class="string">"test"</span>)
-<span class="keyword">local</span> decoded = utils.decode_base64url(encoded)</pre>
+<span class="keyword">local</span> encoded = utils.<span class="function-name">encode_base64url</span>(<span class="string">"test"</span>)
+<span class="keyword">local</span> decoded = utils.<span class="function-name">decode_base64url</span>(encoded)</pre>
     </ul>
 
 </dd>
@@ -526,7 +527,7 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> test = <span class="string">"test"</span>
-<span class="keyword">local</span> b64len = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.base64_size(#test)</pre>
+<span class="keyword">local</span> b64len = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">base64_size</span>(#test)</pre>
     </ul>
 
 </dd>
@@ -558,7 +559,7 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> test = <span class="string">"test"</span>
-<span class="keyword">local</span> deflated = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.deflate((<span class="string">"a"</span>):rep(<span class="number">100</span>))</pre>
+<span class="keyword">local</span> deflated = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">deflate</span>((<span class="string">"a"</span>):<span class="function-name">rep</span>(<span class="number">100</span>))</pre>
     </ul>
 
 </dd>
@@ -590,8 +591,8 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
-<span class="keyword">local</span> deflated = utils.deflate((<span class="string">"a"</span>):rep(<span class="number">100</span>))
-<span class="keyword">local</span> inflated = utils.inflate(deflated)</pre>
+<span class="keyword">local</span> deflated = utils.<span class="function-name">deflate</span>((<span class="string">"a"</span>):<span class="function-name">rep</span>(<span class="number">100</span>))
+<span class="keyword">local</span> inflated = utils.<span class="function-name">inflate</span>(deflated)</pre>
     </ul>
 
 </dd>
@@ -625,7 +626,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> bytes = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.rand_bytes(<span class="number">32</span>)</pre>
+        <pre class="example"><span class="keyword">local</span> bytes = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)</pre>
     </ul>
 
 </dd>
@@ -659,7 +660,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> hash, err = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.sha256(<span class="string">"hello world"</span>)</pre>
+        <pre class="example"><span class="keyword">local</span> hash, err = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">sha256</span>(<span class="string">"hello world"</span>)</pre>
     </ul>
 
 </dd>
@@ -706,9 +707,9 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
-<span class="keyword">local</span> ikm = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> nonce = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> key, err = utils.derive_hkdf_sha256(ikm, nonce, <span class="string">"encryption"</span>, <span class="number">32</span>)</pre>
+<span class="keyword">local</span> ikm = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> nonce = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> key, err = utils.<span class="function-name">derive_hkdf_sha256</span>(ikm, nonce, <span class="string">"encryption"</span>, <span class="number">32</span>)</pre>
     </ul>
 
 </dd>
@@ -760,8 +761,8 @@
     <ul>
         <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
 <span class="keyword">local</span> pass = <span class="string">"my-super-secret-password"</span>
-<span class="keyword">local</span> salt = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> key, err = utils.derive_pbkdf2_hmac_sha256(pass, salt, <span class="string">"encryption"</span>, <span class="number">32</span>, <span class="number">10000</span>)</pre>
+<span class="keyword">local</span> salt = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> key, err = utils.<span class="function-name">derive_pbkdf2_hmac_sha256</span>(pass, salt, <span class="string">"encryption"</span>, <span class="number">32</span>, <span class="number">10000</span>)</pre>
     </ul>
 
 </dd>
@@ -815,9 +816,9 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
-<span class="keyword">local</span> ikm = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> nonce = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> key, err, iv = utils.derive_aes_gcm_256_key_and_iv(ikm, nonce, <span class="string">"Medium"</span>)</pre>
+<span class="keyword">local</span> ikm = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> nonce = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> key, err, iv = utils.<span class="function-name">derive_aes_gcm_256_key_and_iv</span>(ikm, nonce, <span class="string">"Medium"</span>)</pre>
     </ul>
 
 </dd>
@@ -857,9 +858,9 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
-<span class="keyword">local</span> ikm = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> nonce = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> key, err = utils.derive_hmac_sha256_key(ikm, nonce)</pre>
+<span class="keyword">local</span> ikm = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> nonce = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> key, err = utils.<span class="function-name">derive_hmac_sha256_key</span>(ikm, nonce)</pre>
     </ul>
 
 </dd>
@@ -909,10 +910,10 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
-<span class="keyword">local</span> ikm = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> nonce = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> key, err, iv = utils.derive_aes_gcm_256_key_and_iv(ikm, nonce)
-<span class="keyword">local</span> enc, err, tag = utils.encrypt_aes_256_gcm(key, iv, <span class="string">"hello"</span>, <span class="string">"john@doe.com"</span>)</pre>
+<span class="keyword">local</span> ikm = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> nonce = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> key, err, iv = utils.<span class="function-name">derive_aes_gcm_256_key_and_iv</span>(ikm, nonce)
+<span class="keyword">local</span> enc, err, tag = utils.<span class="function-name">encrypt_aes_256_gcm</span>(key, iv, <span class="string">"hello"</span>, <span class="string">"john@doe.com"</span>)</pre>
     </ul>
 
 </dd>
@@ -963,11 +964,11 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
-<span class="keyword">local</span> ikm = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> nonce = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> key, err, iv = utils.derive_aes_gcm_256_key_and_iv(ikm, nonce)
-<span class="keyword">local</span> enc, err, tag = utils.encrypt_aes_256_gcm(key, iv, <span class="string">"hello"</span>, <span class="string">"john@doe.com"</span>)
-<span class="keyword">local</span> out, err = utils.decrypt_aes_256_gcm(key, iv, ciphertext, <span class="string">"john@doe.com"</span>, tag)</pre>
+<span class="keyword">local</span> ikm = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> nonce = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> key, err, iv = utils.<span class="function-name">derive_aes_gcm_256_key_and_iv</span>(ikm, nonce)
+<span class="keyword">local</span> enc, err, tag = utils.<span class="function-name">encrypt_aes_256_gcm</span>(key, iv, <span class="string">"hello"</span>, <span class="string">"john@doe.com"</span>)
+<span class="keyword">local</span> out, err = utils.<span class="function-name">decrypt_aes_256_gcm</span>(key, iv, ciphertext, <span class="string">"john@doe.com"</span>, tag)</pre>
     </ul>
 
 </dd>
@@ -1006,10 +1007,10 @@
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
-<span class="keyword">local</span> ikm = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> nonce = utils.rand_bytes(<span class="number">32</span>)
-<span class="keyword">local</span> key, err = utils.derive_hmac_sha256_key(ikm, nonce)
-<span class="keyword">local</span> mac, err = utils.hmac_sha256(key, <span class="string">"hello"</span>)</pre>
+<span class="keyword">local</span> ikm = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> nonce = utils.<span class="function-name">rand_bytes</span>(<span class="number">32</span>)
+<span class="keyword">local</span> key, err = utils.<span class="function-name">derive_hmac_sha256_key</span>(ikm, nonce)
+<span class="keyword">local</span> mac, err = utils.<span class="function-name">hmac_sha256</span>(key, <span class="string">"hello"</span>)</pre>
     </ul>
 
 </dd>
@@ -1048,7 +1049,7 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> postgres = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.load_storage(<span class="string">"postgres"</span>, {
+        <pre class="example"><span class="keyword">local</span> postgres = <span class="global">require</span> <span class="string">"resty.session.utils"</span>.<span class="function-name">load_storage</span>(<span class="string">"postgres"</span>, {
   postgres = {
     host = <span class="string">"127.0.0.1"</span>,
   }
@@ -1094,9 +1095,9 @@
     <ul>
         <pre class="example"><span class="keyword">local</span> utils = <span class="global">require</span> <span class="string">"resty.session.utils"</span>
 <span class="keyword">local</span> test = <span class="string">"aaaa"</span>
-<span class="keyword">local</span> data, err = utils.deflate(test)
+<span class="keyword">local</span> data, err = utils.<span class="function-name">deflate</span>(test)
 <span class="keyword">if</span> <span class="keyword">not</span> data <span class="keyword">then</span>
-  <span class="global">print</span>(utils.errmsg(err, <span class="string">"unable to deflate data '%s'"</span>, test)
+  <span class="global">print</span>(utils.<span class="function-name">errmsg</span>(err, <span class="string">"unable to deflate data '%s'"</span>, test)
 <span class="keyword">end</span></pre>
     </ul>
 
@@ -1173,7 +1174,7 @@
     <ul>
         <pre class="example"><span class="keyword">local</span> flags = <span class="number">0x0000</span>
 <span class="keyword">local</span> FLAG_DOG = <span class="number">0x001</span>
-flags = utils.set_flag(flags, FLAG_DOG)</pre>
+flags = utils.<span class="function-name">set_flag</span>(flags, FLAG_DOG)</pre>
     </ul>
 
 </dd>
@@ -1210,8 +1211,8 @@ flags = utils.set_flag(flags, FLAG_DOG)</pre>
     <ul>
         <pre class="example"><span class="keyword">local</span> options = <span class="number">0x0000</span>
 <span class="keyword">local</span> FLAG_DOG = <span class="number">0x001</span>
-flags = utils.set_flag(options, FLAG_DOG)
-flags = utils.unset_flag(options, FLAG_DOG)</pre>
+flags = utils.<span class="function-name">set_flag</span>(options, FLAG_DOG)
+flags = utils.<span class="function-name">unset_flag</span>(options, FLAG_DOG)</pre>
     </ul>
 
 </dd>
@@ -1249,9 +1250,9 @@ flags = utils.unset_flag(options, FLAG_DOG)</pre>
         <pre class="example"><span class="keyword">local</span> flags = <span class="number">0x0000</span>
 <span class="keyword">local</span> FLAG_DOG = <span class="number">0x001</span>
 <span class="keyword">local</span> FLAG_BONE = <span class="number">0x010</span>
-flags = utils.set_flag(flags, FLAG_DOG)
-flags = utils.set_flag(flags, FLAG_BONE)
-<span class="global">print</span>(utils.has_flag(flags, FLAG_BONE)</pre>
+flags = utils.<span class="function-name">set_flag</span>(flags, FLAG_DOG)
+flags = utils.<span class="function-name">set_flag</span>(flags, FLAG_BONE)
+<span class="global">print</span>(utils.<span class="function-name">has_flag</span>(flags, FLAG_BONE)</pre>
     </ul>
 
 </dd>
@@ -1362,8 +1363,8 @@ flags = utils.set_flag(flags, FLAG_BONE)
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2023-06-05 17:05:22 </i>
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-08-16 18:11:28 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

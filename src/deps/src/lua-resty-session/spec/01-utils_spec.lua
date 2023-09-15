@@ -136,4 +136,50 @@ describe("Testing utils", function()
       end
     end)
   end)
+  describe("load_storage", function()
+    -- "dshm" is disabled as it currently cannot be checked by CI
+    for _, strategy in ipairs({ "memcached", "mysql", "postgres", "redis" }) do
+      it("respects pool parameters #" .. strategy, function()
+        local storage = assert(utils.load_storage(strategy, {
+          [strategy] = {
+            pool = "doge",
+            pool_size = 10,
+            backlog = 20,
+          },
+        }))
+
+        assert.equal("doge", storage.options.pool)
+        assert.equal(10, storage.options.pool_size)
+        assert.equal(20, storage.options.backlog)
+      end)
+    end
+    it("respects pool parameters #redis-sentinel", function()
+      local storage = assert(utils.load_storage("redis", {
+        redis = {
+          pool = "doge",
+          pool_size = 10,
+          backlog = 20,
+          sentinels = {},
+        },
+      }))
+
+      assert.equal("doge", storage.connector.config.connection_options.pool)
+      assert.equal(10, storage.connector.config.connection_options.pool_size)
+      assert.equal(20, storage.connector.config.connection_options.backlog)
+    end)
+    it("respects pool parameters #redis-cluster", function()
+      local storage = assert(utils.load_storage("redis", {
+        redis = {
+          pool = "doge",
+          pool_size = 10,
+          backlog = 20,
+          nodes = {},
+        },
+      }))
+
+      assert.equal("doge", storage.options.connect_opts.pool)
+      assert.equal(10, storage.options.connect_opts.pool_size)
+      assert.equal(20, storage.options.connect_opts.backlog)
+    end)
+  end)
 end)

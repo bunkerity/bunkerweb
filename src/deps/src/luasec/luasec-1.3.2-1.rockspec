@@ -1,8 +1,8 @@
 package = "LuaSec"
-version = "1.3.1-1"
+version = "1.3.2-1"
 source = {
   url = "git+https://github.com/brunoos/luasec",
-  tag = "v1.3.1",
+  tag = "v1.3.2",
 }
 description = {
    summary = "A binding for OpenSSL library to provide TLS/SSL communication over LuaSocket.",

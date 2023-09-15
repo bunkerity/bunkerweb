@@ -41,8 +41,6 @@ body:
         ⚠️ DON'T FORGET TO REMOVE PRIVATE DATA LIKE IP ADDRESSES ! ⚠️
       placeholder: Log output
       render: shell
-    validations:
-      required: true
   - type: input
     id: version
     attributes:

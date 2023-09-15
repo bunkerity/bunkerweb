@@ -1,6 +1,6 @@
 |// Low-level VM code for x86 CPUs.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 |
 |.if P64
 |.arch x64
@@ -2917,7 +2917,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  mov BASE, L:RB->base
   |.endif
 #endif
-  |  test RD, RD; js >9			// Check for error from exit.
+  |  cmp RD, -LUA_ERRERR; jae >9	// Check for error from exit.
   |  mov L:RB, SAVE_L
   |  mov MULTRES, RD
   |  mov LFUNC:KBASE, [BASE-8]
@@ -2932,6 +2932,8 @@ static void build_subroutines(BuildCtx *ctx)
   |  movzx OP, RCL
   |  add PC, 4
   |  shr RC, 16
+  |  cmp MULTRES, -17			// Static dispatch?
+  |  je >5
   |  cmp OP, BC_FUNCF			// Function header?
   |  jb >3
   |  cmp OP, BC_FUNCC+2			// Fast function?
@@ -2956,6 +2958,19 @@ static void build_subroutines(BuildCtx *ctx)
   |  mov KBASE, LFUNC:KBASE->pc
   |  mov KBASE, [KBASE+PC2PROTO(k)]
   |  jmp <2
+  |
+  |5:  // Dispatch to static entry of original ins replaced by BC_JLOOP.
+  |  mov RA, [DISPATCH+DISPATCH_J(trace)]
+  |  mov TRACE:RA, [RA+RD*4]
+  |  mov RC, TRACE:RA->startins
+  |  movzx RA, RCH
+  |  movzx OP, RCL
+  |  shr RC, 16
+  |.if X64
+  |  jmp aword [DISPATCH+OP*8+GG_DISP2STATIC]
+  |.else
+  |  jmp aword [DISPATCH+OP*4+GG_DISP2STATIC]
+  |.endif
   |
   |9:  // Rethrow error from the right C frame.
   |  mov FCARG2, RD
@@ -3314,19 +3329,25 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |  // Copy stack slots.
   |  movzx ecx, byte CCSTATE->nsp
-  |  sub ecx, 1
+  |.if X64
+  |  sub ecx, 8
   |  js >2
   |1:
-  |.if X64
-  |  mov rax, [CCSTATE+rcx*8+offsetof(CCallState, stack)]
-  |  mov [rsp+rcx*8+CCALL_SPS_EXTRA*8], rax
-  |.else
-  |  mov eax, [CCSTATE+ecx*4+offsetof(CCallState, stack)]
-  |  mov [esp+ecx*4], eax
-  |.endif
-  |  sub ecx, 1
+  |  mov rax, [CCSTATE+rcx+offsetof(CCallState, stack)]
+  |  mov [rsp+rcx+CCALL_SPS_EXTRA*8], rax
+  |  sub ecx, 8
   |  jns <1
   |2:
+  |.else
+  |  sub ecx, 4
+  |  js >2
+  |1:
+  |  mov eax, [CCSTATE+ecx+offsetof(CCallState, stack)]
+  |  mov [esp+ecx], eax
+  |  sub ecx, 4
+  |  jns <1
+  |2:
+  |.endif
   |
   |.if X64
   |  movzx eax, byte CCSTATE->nfpr

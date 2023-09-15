@@ -34,6 +34,12 @@ namespace Utils {
 
 #define OVECCOUNT 900
 
+enum class RegexResult {
+    Ok,
+    ErrorMatchLimit,
+    ErrorOther,
+};
+
 class SMatch {
  public:
     SMatch() :
@@ -76,13 +82,15 @@ class Regex {
         return (m_pc == NULL);
     }
     std::list<SMatch> searchAll(const std::string& s) const;
-    bool searchOneMatch(const std::string& s, std::vector<SMatchCapture>& captures) const;
-    bool searchGlobal(const std::string& s, std::vector<SMatchCapture>& captures) const;
+    RegexResult searchOneMatch(const std::string& s, std::vector<SMatchCapture>& captures, unsigned long match_limit = 0) const;
+    RegexResult searchGlobal(const std::string& s, std::vector<SMatchCapture>& captures, unsigned long match_limit = 0) const;
     int search(const std::string &s, SMatch *match) const;
     int search(const std::string &s) const;
 
     const std::string pattern;
  private:
+    RegexResult to_regex_result(int pcre_exec_result) const;
+
 #if WITH_PCRE2
     pcre2_code *m_pc;
     int m_pcje;

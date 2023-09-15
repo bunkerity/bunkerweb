@@ -3,7 +3,7 @@
 <head>
 <title>Installation</title>
 <meta charset="utf-8">
-<meta name="Copyright" content="Copyright (C) 2005-2022">
+<meta name="Copyright" content="Copyright (C) 2005-2023">
 <meta name="Language" content="en">
 <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
 <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
@@ -20,7 +20,7 @@ table.compat tr.compathead td {
   font-weight: bold;
   border-bottom: 2px solid #bfcfff;
 }
-td.compatname, td.compatver {
+td.compatname {
   width: 10%;
 }
 td.compatbits {
@@ -69,18 +69,18 @@ td.compatx {
 <a href="ext_profiler.html">Profiler</a>
 </li></ul>
 </li><li>
-<a href="status.html">Status</a>
+<a href="https://luajit.org/status.html">Status <span class="ext">&raquo;</span></a>
 </li><li>
-<a href="faq.html">FAQ</a>
+<a href="https://luajit.org/faq.html">FAQ <span class="ext">&raquo;</span></a>
 </li><li>
 <a href="https://luajit.org/list.html">Mailing List <span class="ext">&raquo;</span></a>
 </li></ul>
 </div>
 <div id="main">
 <p>
-LuaJIT is only distributed as a source package. This page explains
-how to build and install LuaJIT with different operating systems
-and C&nbsp;compilers.
+LuaJIT is only distributed as source code &mdash; get it from the
+<a href="https://luajit.org/download.html"><span class="ext">&raquo;</span>&nbsp;git repository</a>. This page explains how to build
+and install the LuaJIT binary and library for different operating systems.
 </p>
 <p>
 For the impatient (on POSIX systems):
@@ -90,201 +90,21 @@ make &amp;&amp; sudo make install
 </pre>
 
 <h2 id="req">Requirements</h2>
-<h3 id="systems">Systems</h3>
 <p>
-LuaJIT currently builds out-of-the box on most systems:
+LuaJIT currently builds out-of-the box on most systems. Please check the
+supported operating systems and CPU architectures on the
+<a href="https://luajit.org/status.html"><span class="ext">&raquo;</span>&nbsp;status page</a>.
 </p>
-<table class="compat">
-<tr class="compathead">
-<td class="compatname">OS</td>
-<td class="compatver">Min. Version</td>
-<td class="compatx">Requirements</td>
-<td class="compatx">LuaJIT Versions</td>
-</tr>
-<tr class="odd separate">
-<td class="compatname"><a href="#windows">Windows</a></td>
-<td class="compatver">7</td>
-<td class="compatx">x86 or x64, ARM64: TBA</td>
-<td class="compatx">v2.0 &ndash;</td>
-</tr>
-<tr class="even">
-<td class="compatname"><a href="#posix">Linux</a></td>
-<td class="compatver">&nbsp;</td>
-<td class="compatx">&nbsp;</td>
-<td class="compatx">v2.0 &ndash;</td>
-</tr>
-<tr class="odd">
-<td class="compatname"><a href="#posix">*BSD</a></td>
-<td class="compatver">&nbsp;</td>
-<td class="compatx">&nbsp;</td>
-<td class="compatx">v2.0 &ndash;</td>
-</tr>
-<tr class="even">
-<td class="compatname"><a href="#posix">macOS (OSX)</a></td>
-<td class="compatver">10.4</td>
-<td class="compatx">&nbsp;</td>
-<td class="compatx">v2.1 &ndash;</td>
-</tr>
-<tr class="odd">
-<td class="compatname"><a href="#posix">POSIX</a></td>
-<td class="compatver">&nbsp;</td>
-<td class="compatx">mmap, dlopen</td>
-<td class="compatx">v2.0 &ndash;</td>
-</tr>
-<tr class="even separate">
-<td class="compatname"><a href="#android">Android</a></td>
-<td class="compatver">4.0</td>
-<td class="compatx">Recent Android NDK</td>
-<td class="compatx">v2.0 &ndash;</td>
-</tr>
-<tr class="odd">
-<td class="compatname"><a href="#ios">iOS</a></td>
-<td class="compatver">3.0</td>
-<td class="compatx">Xcode iOS SDK</td>
-<td class="compatx">v2.1 &ndash;</td>
-</tr>
-<tr class="even separate">
-<td class="compatname"><a href="#consoles">PS3</a></td>
-<td class="compatver">&nbsp;</td>
-<td class="compatx">PS3 SDK</td>
-<td class="compatx">v2.0 &ndash; v2.1 EOL</td>
-</tr>
-<tr class="odd">
-<td class="compatname"><a href="#consoles">PS4</a></td>
-<td class="compatver">&nbsp;</td>
-<td class="compatx">PS4 SDK (ORBIS)</td>
-<td class="compatx">v2.0 &ndash;</td>
-</tr>
-<tr class="even">
-<td class="compatname"><a href="#consoles">PS5</a></td>
-<td class="compatver">&nbsp;</td>
-<td class="compatx">PS5 SDK (PROSPERO)</td>
-<td class="compatx">v2.1 &ndash;</td>
-</tr>
-<tr class="odd">
-<td class="compatname"><a href="#consoles">PS Vita</a></td>
-<td class="compatver">&nbsp;</td>
-<td class="compatx">PS Vita SDK (PSP2)</td>
-<td class="compatx">v2.0 &ndash; v2.1 EOL</td>
-</tr>
-<tr class="even">
-<td class="compatname"><a href="#consoles">Xbox 360</a></td>
-<td class="compatver">&nbsp;</td>
-<td class="compatx">Xbox 360 SDK (XEDK)</td>
-<td class="compatx">v2.0 &ndash; v2.1 EOL</td>
-</tr>
-<tr class="odd">
-<td class="compatname"><a href="#consoles">Xbox One</a></td>
-<td class="compatver">&nbsp;</td>
-<td class="compatx">Xbox One SDK (DURANGO)</td>
-<td class="compatx">v2.1 &ndash;</td>
-</tr>
-<tr class="even">
-<td class="compatname"><a href="#consoles">Nintendo Switch</a></td>
-<td class="compatver">&nbsp;</td>
-<td class="compatx">NintendoSDK + NX Addon</td>
-<td class="compatx">v2.1 &ndash;</td>
-</tr>
-</table>
-<p>
-The codebase has compatibility defines for some more systems, but
-without official support.
-</p>
-<h3 id="toolchains">Toolchains</h3>
 <p>
 Building LuaJIT requires a recent toolchain based on GCC, Clang/LLVM or
 MSVC++.
 </p>
 <p>
 The Makefile-based build system requires GNU Make and supports
-cross-builds. Batch files are provided for MSVC++ builds and console
 cross-builds.
 </p>
-<h3 id="architectures">CPU Architectures</h3>
-<table class="compat">
-<tr class="compathead">
-<td class="compatname">CPU</td>
-<td class="compatbits">Bits</td>
-<td class="compatx">Requirements</td>
-<td class="compatx">Variants</td>
-<td class="compatx">LuaJIT Versions</td>
-</tr>
-<tr class="odd separate">
-<td class="compatname">x86</td>
-<td class="compatbits">32</td>
-<td class="compatx">v2.1+: SSE2</td>
-<td class="compatx">&nbsp;</td>
-<td class="compatx">v2.0 &ndash;</td>
-</tr>
-<tr class="even">
-<td class="compatname">x64</td>
-<td class="compatbits">64</td>
-<td class="compatx">&nbsp;</td>
-<td class="compatx">&nbsp;</td>
-<td class="compatx">v2.0 &ndash;</td>
-</tr>
-<tr class="odd">
-<td class="compatname">ARM</td>
-<td class="compatbits">32</td>
-<td class="compatx">ARMv5+, ARM9E+</td>
-<td class="compatx">hard-fp + soft-fp</td>
-<td class="compatx">v2.0 &ndash;</td>
-</tr>
-<tr class="even">
-<td class="compatname">ARM64</td>
-<td class="compatbits">64</td>
-<td class="compatx">&nbsp;</td>
-<td class="compatx">ARM64le + ARM64be</td>
-<td class="compatx">v2.1 &ndash;</td>
-</tr>
-<tr class="odd">
-<td class="compatname">PPC32</td>
-<td class="compatbits">32</td>
-<td class="compatx">&nbsp;</td>
-<td class="compatx">hard-fp + soft-fp</td>
-<td class="compatx">v2.0 &ndash; v2.1 EOL</td>
-</tr>
-<tr class="even">
-<td class="compatname">PPC/e500</td>
-<td class="compatbits">32</td>
-<td class="compatx">e500v2</td>
-<td class="compatx">&nbsp;</td>
-<td class="compatx">v2.0 EOL</td>
-</tr>
-<tr class="odd">
-<td class="compatname">MIPS32</td>
-<td class="compatbits">32</td>
-<td class="compatx">MIPS32r1 &ndash; r5</td>
-<td class="compatx">hard-fp + soft-fp</td>
-<td class="compatx">v2.0 &ndash;</td>
-</tr>
-<tr class="even">
-<td class="compatname">MIPS64</td>
-<td class="compatbits">64</td>
-<td class="compatx">MIPS64r1 &ndash; r5</td>
-<td class="compatx">hard-fp + soft-fp</td>
-<td class="compatx">v2.1 &ndash;</td>
-</tr>
-<tr class="odd">
-<td class="compatname">MIPS64</td>
-<td class="compatbits">64</td>
-<td class="compatx">MIPS64r6</td>
-<td class="compatx">hard-fp + soft-fp</td>
-<td class="compatx">v2.1 EOL</td>
-</tr>
-<tr class="even">
-<td class="compatname">RISC-V</td>
-<td class="compatbits">64</td>
-<td class="compatx">RVA22+</td>
-<td class="compatx">&nbsp;</td>
-<td class="compatx">TBA</td>
-</tr>
-</table>
 <p>
-There are no plans to add historic architectures or to continue support
-for end-of-life (EOL) architectures, for which no new CPUs are commonly
-available anymore. Likewise, there are no plans to support marginal
-and/or de-facto-dead architectures.
+Batch files are provided for MSVC++ builds and console cross-builds.
 </p>
 
 <h2>Configuring LuaJIT</h2>
@@ -294,7 +114,6 @@ Usually there is no need to tweak the settings. The following files
 hold all user-configurable settings:
 </p>
 <ul>
-<li><tt>src/luaconf.h</tt> sets some configuration variables.</li>
 <li><tt>Makefile</tt> has settings for <b>installing</b> LuaJIT (POSIX
 only).</li>
 <li><tt>src/Makefile</tt> has settings for <b>compiling</b> LuaJIT
@@ -317,23 +136,11 @@ Please check the note about the
 <h2 id="posix">POSIX Systems (Linux, macOS, *BSD etc.)</h2>
 <h3>Prerequisites</h3>
 <p>
-Depending on your distribution, you may need to install a package for
-GCC, the development headers and/or a complete SDK. E.g. on a current
-Debian/Ubuntu, install <tt>libc6-dev</tt> with the package manager.
+Depending on your distribution, you may need to install a package for a
+compiler (GCC or Clang/LLVM), the development headers and/or a complete SDK.
+E.g. on a current Debian/Ubuntu, install <tt>build-essential</tt> with the
+package manager.
 </p>
-<p>
-The recommended way to fetch the latest version is to do a pull from
-the git repository.
-</p>
-<p>
-Alternatively, download the latest source package of LuaJIT (pick the .tar.gz).
-Move it to a directory of your choice, open a terminal window and change
-to this directory. Now unpack the archive and change to the newly created
-directory (replace XX.YY.ZZ with the version you downloaded):
-</p>
-<pre class="code">
-tar zxf LuaJIT-XX.YY.ZZ.tar.gz
-cd LuaJIT-XX.YY.ZZ
 </pre>
 <h3>Building LuaJIT</h3>
 <p>
@@ -394,15 +201,10 @@ Either install one of the open source SDKs
 GCC plus the required development headers.
 Or install Microsoft's Visual Studio (MSVC).
 </p>
-<p>
-Next, pull from the git repository or download the source package and
-unpack it using an archive manager (e.g. the Windows Explorer) to
-a directory of your choice.
-</p>
 <h3>Building with MSVC</h3>
 <p>
 Open a "Visual Studio Command Prompt" (either x86 or x64), <tt>cd</tt> to the
-directory where you've unpacked the sources and run these commands:
+directory with the source code and run these commands:
 </p>
 <pre class="code">
 cd src
@@ -415,8 +217,8 @@ Then follow the installation instructions below.
 <h3>Building with MinGW or Cygwin</h3>
 <p>
 Open a command prompt window and make sure the MinGW or Cygwin programs
-are in your path. Then <tt>cd</tt> to the directory of the git repository
-or where you've unpacked the sources. Then run this command for MinGW:
+are in your path. Then <tt>cd</tt> to the directory of the git repository.
+Then run this command for MinGW:
 </p>
 <pre class="code">
 mingw32-make
@@ -518,15 +320,15 @@ make HOST_CC="gcc -m32" CROSS=arm-linux-gnueabi- \
 make HOST_CC="gcc -m32" CROSS=arm-linux-gnueabihf-
 
 # ARM64
-make CROSS=aarch64-linux-
+make CROSS=aarch64-linux-gnu-
 
 # PPC
 make HOST_CC="gcc -m32" CROSS=powerpc-linux-gnu-
 
 # MIPS32 big-endian
-make HOST_CC="gcc -m32" CROSS=mips-linux-
+make HOST_CC="gcc -m32" CROSS=mips-linux-gnu-
 # MIPS32 little-endian
-make HOST_CC="gcc -m32" CROSS=mipsel-linux-
+make HOST_CC="gcc -m32" CROSS=mipsel-linux-gnu-
 
 # MIPS64 big-endian
 make CROSS=mips-linux- TARGET_CFLAGS="-mips64r2 -mabi=64"
@@ -605,8 +407,8 @@ make HOST_CC="gcc -m32" CROSS=ppu-lv2-
 To cross-compile for the other consoles from a Windows host, open a
 "Native Tools Command Prompt for VS". You need to choose either the 32
 or the 64&nbsp;bit version of the host compiler to match the target.
-Then <tt>cd</tt> to the <tt>src</tt> directory below where you've
-unpacked the sources and run the build command given in the table:
+Then <tt>cd</tt> to the <tt>src</tt> directory below the source code
+and run the build command given in the table:
 </p>
 <table class="compat">
 <tr class="compathead">
@@ -766,7 +568,7 @@ to me (the upstream) and not you (the package maintainer), anyway.
 </div>
 <div id="foot">
 <hr class="hide">
-Copyright &copy; 2005-2022
+Copyright &copy; 2005-2023
 <span class="noprint">
 &middot;
 <a href="contact.html">Contact</a>

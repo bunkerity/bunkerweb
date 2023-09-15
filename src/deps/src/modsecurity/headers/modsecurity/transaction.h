@@ -134,6 +134,8 @@ class TransactionAnchoredVariables {
         m_variableInboundDataError(t, "INBOUND_DATA_ERROR"),
         m_variableMatchedVar(t, "MATCHED_VAR"),
         m_variableMatchedVarName(t, "MATCHED_VAR_NAME"),
+        m_variableMscPcreError(t, "MSC_PCRE_ERROR"),
+        m_variableMscPcreLimitsExceeded(t, "MSC_PCRE_LIMITS_EXCEEDED"),
         m_variableMultipartBoundaryQuoted(t, "MULTIPART_BOUNDARY_QUOTED"),
         m_variableMultipartBoundaryWhiteSpace(t,
             "MULTIPART_BOUNDARY_WHITESPACE"),
@@ -219,6 +221,8 @@ class TransactionAnchoredVariables {
     AnchoredVariable m_variableInboundDataError;
     AnchoredVariable m_variableMatchedVar;
     AnchoredVariable m_variableMatchedVarName;
+    AnchoredVariable m_variableMscPcreError;
+    AnchoredVariable m_variableMscPcreLimitsExceeded;
     AnchoredVariable m_variableMultipartBoundaryQuoted;
     AnchoredVariable m_variableMultipartBoundaryWhiteSpace;
     AnchoredVariable m_variableMultipartCrlfLFLines;

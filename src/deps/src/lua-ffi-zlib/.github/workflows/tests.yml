@@ -1,0 +1,57 @@
+name: Tests
+
+on:
+  pull_request:
+    paths-ignore:
+    - '*.md'
+  push:
+    branches:
+    - master
+    - release/*
+    paths-ignore:
+    - '*.md'
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    container:
+      image: openresty/openresty:${{ matrix.openresty }}-jammy
+
+    strategy:
+      fail-fast: false
+      matrix:
+        openresty: ["1.19.9.1-14", "1.21.4.1-0"]
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v3
+
+    - name: Install valgrind
+      run: |
+        apt-get update
+        apt-get install -y valgrind
+
+    # ensure the library works even without dev packages installed (libz.so.1 instead of libz.so)
+    - name: Remove dev packages
+      run: |
+        apt-get purge -y libc-dev-bin
+
+    - name: Run test with LuaJIT
+      run: |
+        luajit test.lua /usr/local/openresty/nginx/sbin/nginx 65536000
+
+    - name: Run test with resty-cli
+      run: |
+        resty --no-stream test.lua /usr/local/openresty/nginx/sbin/nginx 65536000
+
+    - name: Run test with resty-cli (valgrind)
+      if: contains(matrix.extras, 'valgrind')
+      run: |
+        resty --no-stream --valgrind test.lua /usr/local/openresty/nginx/sbin/nginx 65536000

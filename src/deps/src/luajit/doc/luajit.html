@@ -3,7 +3,7 @@
 <head>
 <title>LuaJIT</title>
 <meta charset="utf-8">
-<meta name="Copyright" content="Copyright (C) 2005-2022">
+<meta name="Copyright" content="Copyright (C) 2005-2023">
 <meta name="Language" content="en">
 <link rel="stylesheet" type="text/css" href="bluequad.css" media="screen">
 <link rel="stylesheet" type="text/css" href="bluequad-print.css" media="print">
@@ -67,30 +67,6 @@ table.fcompat td {
   background-image: -o-linear-gradient(#41bfbf 10%, #b0ffff 95%);
   background-image: -ms-linear-gradient(#41bfbf 10%, #b0ffff 95%);
 }
-table.stats td {
-  color: #ffffff;
-  background: #a0a0a0;
-  background-image: linear-gradient(#808080 10%, #d0d0d0 95%);
-  background-image: -moz-linear-gradient(#808080 10%, #d0d0d0 95%);
-  background-image: -webkit-linear-gradient(#808080 10%, #d0d0d0 95%);
-  background-image: -o-linear-gradient(#808080 10%, #d0d0d0 95%);
-  background-image: -ms-linear-gradient(#808080 10%, #d0d0d0 95%);
-}
-table.stats td.speed {
-  color: #ff4020;
-}
-table.stats td.kb {
-  color: #ffff80;
-  background: #808080;
-  background-image: linear-gradient(#606060 10%, #c0c0c0 95%);
-  background-image: -moz-linear-gradient(#606060 10%, #c0c0c0 95%);
-  background-image: -webkit-linear-gradient(#606060 10%, #c0c0c0 95%);
-  background-image: -o-linear-gradient(#606060 10%, #c0c0c0 95%);
-  background-image: -ms-linear-gradient(#606060 10%, #c0c0c0 95%);
-}
-table.feature small {
-  font-size: 50%;
-}
 </style>
 </head>
 <body>
@@ -131,9 +107,9 @@ table.feature small {
 <a href="ext_profiler.html">Profiler</a>
 </li></ul>
 </li><li>
-<a href="status.html">Status</a>
+<a href="https://luajit.org/status.html">Status <span class="ext">&raquo;</span></a>
 </li><li>
-<a href="faq.html">FAQ</a>
+<a href="https://luajit.org/faq.html">FAQ <span class="ext">&raquo;</span></a>
 </li><li>
 <a href="https://luajit.org/list.html">Mailing List <span class="ext">&raquo;</span></a>
 </li></ul>
@@ -146,7 +122,7 @@ Lua is a powerful, dynamic and light-weight programming language.
 It may be embedded or used as a general-purpose, stand-alone language.
 </p>
 <p>
-LuaJIT is Copyright &copy; 2005-2022 Mike Pall, released under the
+LuaJIT is Copyright &copy; 2005-2023 Mike Pall, released under the
 <a href="https://www.opensource.org/licenses/mit-license.php"><span class="ext">&raquo;</span>&nbsp;MIT open source license</a>.
 </p>
 <p>
@@ -173,23 +149,20 @@ LuaJIT is Copyright &copy; 2005-2022 Mike Pall, released under the
 </table>
 
 <h2>Overview</h2>
-<table class="feature stats">
-<tr>
-<td class="speed">3x<br>-&nbsp;&nbsp;100x</td>
-<td class="kb">115&nbsp;<small>KB</small><br>VM</td>
-<td class="kb">90&nbsp;<small>KB</small><br>JIT</td>
-<td class="kloc">63&nbsp;<small>KLOC</small><br>C</td>
-<td class="kloc">24&nbsp;<small>KLOC</small><br>ASM</td>
-<td class="kloc">11&nbsp;<small>KLOC</small><br>Lua</td>
-</tr>
-</table>
 <p style="margin-top: 1em;">
 LuaJIT has been successfully used as a <b>scripting middleware</b> in
 games, appliances, network and graphics apps, numerical simulations,
-trading platforms and many other specialty applications. It scales from
-embedded devices, smartphones, desktops up to server farms. It combines
-high flexibility with high performance
-and an unmatched <b>low memory footprint</b>.
+trading platforms and many other specialty applications.
+</p>
+<p>
+LuaJIT is part of a hundred million web sites, huge SaaS installations,
+network switches, set-top boxes and other embedded devices. You've probably
+already used LuaJIT without knowing about it.
+</p>
+<p>
+LuaJIT scales from embedded devices, smartphones, desktops up to server
+farms. It combines high flexibility with high performance and an unmatched
+<b>low memory footprint</b>.
 </p>
 <p>
 LuaJIT has been in continuous development since 2005. It's widely
@@ -220,7 +193,7 @@ Please select a sub-topic in the navigation bar to learn more about LuaJIT.
 </div>
 <div id="foot">
 <hr class="hide">
-Copyright &copy; 2005-2022
+Copyright &copy; 2005-2023
 <span class="noprint">
 &middot;
 <a href="contact.html">Contact</a>

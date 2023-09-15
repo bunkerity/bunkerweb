@@ -1,6 +1,12 @@
 # Changelog
 
-## v1.5.2 - 
+## v1.5.3 - 
+
+- [BUGFIX] Fix BunkerWeb not loading his own settings after a docker restart
+- [BUGFIX] Fix Custom configs not following the service name after an update on the UI
+- [MISC] Updated core dependencies
+
+## v1.5.2 - 2023/10/10
 
 - [BUGFIX] Fix UI fetching only default values from the database (fixes no trash button too)
 - [BUGFIX] Fix infinite loop when using autoconf

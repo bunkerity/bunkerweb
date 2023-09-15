@@ -2,7 +2,7 @@
 -- Lua script to dump the bytecode of the library functions written in Lua.
 -- The resulting 'buildvm_libbc.h' is used for the build process of LuaJIT.
 ----------------------------------------------------------------------------
--- Copyright (C) 2005-2022 Mike Pall. All rights reserved.
+-- Copyright (C) 2005-2023 Mike Pall. All rights reserved.
 -- Released under the MIT license. See Copyright Notice in luajit.h
 ----------------------------------------------------------------------------
 
