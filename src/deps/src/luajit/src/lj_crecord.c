@@ -1,6 +1,6 @@
 /*
 ** Trace recorder for C data operations.
-** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_ffrecord_c
@@ -1118,6 +1118,12 @@ static TRef crec_call_args(jit_State *J, RecordFFData *rd,
     ngpr = 1;
   else if (ctype_cconv(ct->info) == CTCC_FASTCALL)
     ngpr = 2;
+#elif LJ_TARGET_ARM64
+#if LJ_ABI_WIN
+#error "NYI: ARM64 Windows ABI calling conventions"
+#elif LJ_TARGET_OSX
+  int ngpr = CCALL_NARG_GPR;
+#endif
 #endif
 
   /* Skip initial attributes. */
@@ -1143,6 +1149,14 @@ static TRef crec_call_args(jit_State *J, RecordFFData *rd,
     } else {
       if (!(ct->info & CTF_VARARG))
 	lj_trace_err(J, LJ_TRERR_NYICALL);  /* Too many arguments. */
+#if LJ_TARGET_ARM64 && LJ_TARGET_OSX
+      if (ngpr >= 0) {
+	ngpr = -1;
+	args[n++] = TREF_NIL;  /* Marker for start of varargs. */
+	if (n >= CCI_NARGS_MAX)
+	  lj_trace_err(J, LJ_TRERR_NYICALL);
+      }
+#endif
       did = lj_ccall_ctid_vararg(cts, o);  /* Infer vararg type. */
     }
     d = ctype_raw(cts, did);
@@ -1151,6 +1165,15 @@ static TRef crec_call_args(jit_State *J, RecordFFData *rd,
       lj_trace_err(J, LJ_TRERR_NYICALL);
     tr = crec_ct_tv(J, d, 0, *base, o);
     if (ctype_isinteger_or_bool(d->info)) {
+#if LJ_TARGET_ARM64 && LJ_TARGET_OSX
+      if (!ngpr) {
+	/* Fixed args passed on the stack use their unpromoted size. */
+	if (d->size != lj_ir_type_size[tref_type(tr)]) {
+	  lj_assertJ(d->size == 1 || d->size==2, "unexpected size %d", d->size);
+	  tr = emitconv(tr, d->size==1 ? IRT_U8 : IRT_U16, tref_type(tr), 0);
+	}
+      } else
+#endif
       if (d->size < 4) {
 	if ((d->info & CTF_UNSIGNED))
 	  tr = emitconv(tr, IRT_INT, d->size==1 ? IRT_U8 : IRT_U16, 0);
@@ -1188,6 +1211,10 @@ static TRef crec_call_args(jit_State *J, RecordFFData *rd,
       }
     }
 #endif
+#elif LJ_TARGET_ARM64 && LJ_TARGET_OSX
+    if (!ctype_isfp(d->info) && ngpr) {
+      ngpr--;
+    }
 #endif
     args[n] = tr;
   }

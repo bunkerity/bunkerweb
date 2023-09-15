@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2022 Mike Pall.
+/* Copyright (C) 2004-2023 Mike Pall.
  *
  * You are welcome to use the general ideas of this design for your own sites.
  * But please do not steal the stylesheet, the layout or the color scheme.
@@ -206,11 +206,9 @@ img.right {
 .ext {
   color: #ff8000;
 }
-.new {
-  font-size: 6pt;
-  vertical-align: middle;
-  background: #ff8000;
-  color: #ffffff;
+.note {
+  padding: 0.5em 1em;
+  border-left: 3px solid #bfcfff;
 }
 #site {
   clear: both;

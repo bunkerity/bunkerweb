@@ -3,7 +3,7 @@
 ** AA: Alias Analysis using high-level semantic disambiguation.
 ** FWD: Load Forwarding (L2L) + Store Forwarding (S2L).
 ** DSE: Dead-Store Elimination.
-** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_opt_mem_c
@@ -186,6 +186,7 @@ static TRef fwd_ahload(jit_State *J, IRRef xref)
 	fwd_aa_tab_clear(J, tab, tab)) {
       /* A NEWREF with a number key may end up pointing to the array part.
       ** But it's referenced from HSTORE and not found in the ASTORE chain.
+      ** Or a NEWREF may rehash the table and move unrelated number keys.
       ** For now simply consider this a conflict without forwarding anything.
       */
       if (xr->o == IR_AREF) {
@@ -196,6 +197,11 @@ static TRef fwd_ahload(jit_State *J, IRRef xref)
 	    goto cselim;
 	  ref2 = newref->prev;
 	}
+      } else {
+	IRIns *key = IR(xr->op2);
+	if (key->o == IR_KSLOT) key = IR(key->op1);
+	if (irt_isnum(key->t) && J->chain[IR_NEWREF] > tab)
+	  goto cselim;
       }
       /* NEWREF inhibits CSE for HREF, and dependent FLOADs from HREFK/AREF.
       ** But the above search for conflicting stores was limited by xref.
@@ -223,8 +229,8 @@ static TRef fwd_ahload(jit_State *J, IRRef xref)
 	if (key->o == IR_KSLOT) key = IR(key->op1);
 	lj_ir_kvalue(J->L, &keyv, key);
 	tv = lj_tab_get(J->L, ir_ktab(IR(ir->op1)), &keyv);
-	lj_assertJ(itype2irt(tv) == irt_type(fins->t),
-		   "mismatched type in constant table");
+	if (itype2irt(tv) != irt_type(fins->t))
+	  return 0;  /* Type instability in loop-carried dependency. */
 	if (irt_isnum(fins->t))
 	  return lj_ir_knum_u64(J, tv->u64);
 	else if (LJ_DUALNUM && irt_isint(fins->t))

@@ -1,6 +1,6 @@
 |// Low-level VM code for MIPS CPUs.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 |//
 |// MIPS soft-float support contributed by Djordje Kovacevic and
 |// Stefan Pejic from RT-RK.com, sponsored by Cisco Systems, Inc.
@@ -2466,7 +2466,8 @@ static void build_subroutines(BuildCtx *ctx)
   |   addiu DISPATCH, JGL, -GG_DISP2G-32768
   |  sw BASE, L->base
   |1:
-  |  bltz CRET1, >9			// Check for error from exit.
+  |  sltiu TMP0, CRET1, -LUA_ERRERR	// Check for error from exit.
+  |  beqz TMP0, >9
   |.  lw LFUNC:RB, FRAME_FUNC(BASE)
   |    .FPU lui TMP3, 0x59c0			// TOBIT = 2^52 + 2^51 (float).
   |  sll MULTRES, CRET1, 3
@@ -2480,14 +2481,16 @@ static void build_subroutines(BuildCtx *ctx)
   |    .FPU cvt.d.s TOBIT, TOBIT
   |  // Modified copy of ins_next which handles function header dispatch, too.
   |  lw INS, 0(PC)
-  |   addiu PC, PC, 4
+  |  addiu CRET1, CRET1, 17		// Static dispatch?
   |    // Assumes TISNIL == ~LJ_VMST_INTERP == -1
   |    sw TISNIL, DISPATCH_GL(vmstate)(DISPATCH)
+  |   decode_RD8a RD, INS
+  |  beqz CRET1, >5
+  |.  addiu PC, PC, 4
   |  decode_OP4a TMP1, INS
   |  decode_OP4b TMP1
-  |    sltiu TMP2, TMP1, BC_FUNCF*4
   |  addu TMP0, DISPATCH, TMP1
-  |   decode_RD8a RD, INS
+  |    sltiu TMP2, TMP1, BC_FUNCF*4
   |  lw AT, 0(TMP0)
   |   decode_RA8a RA, INS
   |    beqz TMP2, >2
@@ -2514,6 +2517,22 @@ static void build_subroutines(BuildCtx *ctx)
   |  addiu RC, MULTRES, -8
   |  jr AT
   |.  addu RA, RA, BASE
+  |
+  |5:  // Dispatch to static entry of original ins replaced by BC_JLOOP.
+  |  lw TMP0, DISPATCH_J(trace)(DISPATCH)
+  |  decode_RD4b RD
+  |  addu TMP0, TMP0, RD
+  |  lw TRACE:TMP2, 0(TMP0)
+  |  lw INS, TRACE:TMP2->startins
+  |  decode_OP4a TMP1, INS
+  |  decode_OP4b TMP1
+  |  addu TMP0, DISPATCH, TMP1
+  |   decode_RD8a RD, INS
+  |  lw AT, GG_DISP2STATIC(TMP0)
+  |   decode_RA8a RA, INS
+  |   decode_RD8b RD
+  |  jr AT
+  |.  decode_RA8b RA
   |
   |9:  // Rethrow error from the right C frame.
   |  load_got lj_err_trace
@@ -2932,7 +2951,6 @@ static void build_subroutines(BuildCtx *ctx)
   |  move TMP2, sp
   |  subu sp, sp, TMP1
   |  sw ra, -4(TMP2)
-  |   sll CARG2, CARG2, 2
   |  sw r16, -8(TMP2)
   |  sw CCSTATE, -12(TMP2)
   |  move r16, TMP2

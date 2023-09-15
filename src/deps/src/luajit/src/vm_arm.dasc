@@ -1,6 +1,6 @@
 |// Low-level VM code for ARM CPUs.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 |
 |.arch arm
 |.section code_op, code_sub
@@ -2196,8 +2196,8 @@ static void build_subroutines(BuildCtx *ctx)
   |.if JIT
   |  ldr L, SAVE_L
   |1:
-  |  cmp CARG1, #0
-  |  blt >9				// Check for error from exit.
+  |  cmn CARG1, #LUA_ERRERR
+  |  bhs >9				// Check for error from exit.
   |   lsl RC, CARG1, #3
   |  ldr LFUNC:CARG2, [BASE, FRAME_FUNC]
   |   str RC, SAVE_MULTRES
@@ -2213,6 +2213,8 @@ static void build_subroutines(BuildCtx *ctx)
   |   ldr INS, [PC], #4
   |     lsl MASKR8, MASKR8, #3		// MASKR8 = 255*8.
   |    st_vmstate CARG4
+  |  cmn CARG1, #17			// Static dispatch?
+  |  beq >5
   |  cmp OP, #BC_FUNCC+2		// Fast function?
   |  bhs >4
   |2:
@@ -2237,6 +2239,17 @@ static void build_subroutines(BuildCtx *ctx)
   |  ldr CARG3, LFUNC:CARG3->field_pc
   |  ldr KBASE, [CARG3, #PC2PROTO(k)]
   |  b <2
+  |
+  |5:  // Dispatch to static entry of original ins replaced by BC_JLOOP.
+  |  ldr CARG1, [DISPATCH, #DISPATCH_J(trace)]
+  |  decode_RD RC, INS
+  |  ldr TRACE:CARG1, [CARG1, RC, lsl #2]
+  |  ldr INS, TRACE:CARG1->startins
+  |  decode_OP OP, INS
+  |   decode_RA8 RA, INS
+  |  add OP, DISPATCH, OP, lsl #2
+  |   decode_RD RC, INS
+  |  ldr pc, [OP, #GG_DISP2STATIC]
   |
   |9:  // Rethrow error from the right C frame.
   |  rsb CARG2, CARG1, #0
@@ -2558,16 +2571,16 @@ static void build_subroutines(BuildCtx *ctx)
   |.endif
   |  mov r11, sp
   |  sub sp, sp, CARG1			// Readjust stack.
-  |   subs CARG2, CARG2, #1
+  |   subs CARG2, CARG2, #4
   |.if HFABI
   |  vldm RB, {d0-d7}
   |.endif
   |    ldr RB, CCSTATE->func
   |   bmi >2
   |1:  // Copy stack slots.
-  |  ldr CARG4, [CARG3, CARG2, lsl #2]
-  |  str CARG4, [sp, CARG2, lsl #2]
-  |  subs CARG2, CARG2, #1
+  |  ldr CARG4, [CARG3, CARG2]
+  |  str CARG4, [sp, CARG2]
+  |  subs CARG2, CARG2, #4
   |  bpl <1
   |2:
   |  ldrd CARG12, CCSTATE->gpr[0]

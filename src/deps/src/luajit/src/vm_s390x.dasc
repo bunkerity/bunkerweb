@@ -2180,7 +2180,6 @@ static void build_subroutines(BuildCtx *ctx)
   |  br r14
   |
   |2:
-  |  sll r1, 3
   |  la r10, (offsetof(CCallState, stack))(CCSTATE)	// Source.
   |  la r11, (CCALL_SPS_EXTRA*8)(sp)			// Destination.
   |3:
