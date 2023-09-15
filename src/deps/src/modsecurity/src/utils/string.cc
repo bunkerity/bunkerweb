@@ -225,7 +225,7 @@ void chomp(std::string *str) {
 }
 
 
-unsigned char x2c(unsigned char *what) {
+unsigned char x2c(const unsigned char *what) {
     unsigned char digit;
 
     digit = (what[0] >= 'A' ? ((what[0] & 0xdf) - 'A') + 10 : (what[0] - '0'));
@@ -239,7 +239,7 @@ unsigned char x2c(unsigned char *what) {
 /**
  * Converts a single hexadecimal digit into a decimal value.
  */
-unsigned char xsingle2c(unsigned char *what) {
+unsigned char xsingle2c(const unsigned char *what) {
     unsigned char digit;
 
     digit = (what[0] >= 'A' ? ((what[0] & 0xdf) - 'A') + 10 : (what[0] - '0'));
