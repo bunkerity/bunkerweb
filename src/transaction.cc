@@ -167,6 +167,8 @@ Transaction::Transaction(ModSecurity *ms, RulesSet *rules, void *logCbData)
         + std::to_string(modsecurity::utils::generate_transaction_unique_id())));
 
     m_variableUrlEncodedError.set("0", 0);
+    m_variableMscPcreError.set("0", 0);
+    m_variableMscPcreLimitsExceeded.set("0", 0);
 
     ms_dbg(4, "Initializing transaction");
 
@@ -238,6 +240,8 @@ Transaction::Transaction(ModSecurity *ms, RulesSet *rules, char *id, void *logCb
     TransactionAnchoredVariables(this) {
 
     m_variableUrlEncodedError.set("0", 0);
+    m_variableMscPcreError.set("0", 0);
+    m_variableMscPcreLimitsExceeded.set("0", 0);
 
     ms_dbg(4, "Initializing transaction");
 

@@ -73,8 +73,8 @@ void replaceAll(std::string *str, const std::string& from,
 std::string removeWhiteSpacesIfNeeded(std::string a);
 std::string parserSanitizer(std::string a);
 
-unsigned char x2c(unsigned char *what);
-unsigned char xsingle2c(unsigned char *what);
+unsigned char x2c(const unsigned char *what);
+unsigned char xsingle2c(const unsigned char *what);
 unsigned char *c2x(unsigned what, unsigned char *where);
 
 }  // namespace string

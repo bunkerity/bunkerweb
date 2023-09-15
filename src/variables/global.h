@@ -106,8 +106,8 @@ class Global_DynamicElement : public Variable {
             t->m_rules->m_secWebAppId.m_value);
     }
 
-    static void storeOrUpdateFirst(Transaction *t, std::string var,
-        std::string value) {
+    static void storeOrUpdateFirst(Transaction *t, const std::string &var,
+        const std::string &value) {
         t->m_collections.m_global_collection->storeOrUpdateFirst(
             var, t->m_collections.m_global_collection_key,
             t->m_rules->m_secWebAppId.m_value,

@@ -1,3 +1,32 @@
+v3.0.10 - 2023-Jul-25
+---------------------
+
+  - Fix: worst-case time in implementation of four transformations
+    [Issue #2934 - @martinhsv]
+  - Add TX synonym for MSC_PCRE_LIMITS_EXCEEDED
+    [Issue #2901 - @airween]
+  - Make MULTIPART_PART_HEADERS accessible to lua
+    [Issue #2916 - @martinhsv]
+  - Fix: Lua scripts cannot read whole collection at once
+    [Issue #2900 - @udi-aharon, @airween, @martinhsv]
+  - Fix: quoted Include config with wildcard
+    [Issue #2905 - @wiseelf, @airween, @martinhsv]
+  - Support isolated PCRE match limits
+    [Issue #2736 - @brandonpayton, @martinhsv]
+  - Fix: meta actions not applied if multiMatch in first rule of chain
+    [Issue #2867, #2868 - @mlevogiannis, @martinhsv]
+  - Fix: audit log may omit tags when multiMatch
+    [Issue #2866 - @mlevogiannis]
+  - Exclude CRLF from MULTIPART_PART_HEADER value
+    [Issue #2870 - @airween, @martinhsv]
+  - Configure: use AS_ECHO_N instead echo -n
+    [Issue #2894 - @liudongmiao, @martinhsv]
+  - Adjust position of memset from 2890
+    [Issue #2891 - @mirkodziadzka-avi, @martinhsv]
+  - Add test: empty lines in ipMatchFromFile test
+    [Issue #2846 - @tomsommer]
+
+
 v3.0.9 - 2023-Apr-12
 --------------------
 
