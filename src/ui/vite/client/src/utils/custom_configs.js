@@ -257,5 +257,9 @@ export function getCustomConfByFilter(items, filters) {
   });
 
   // Update items removing empty string
-  return items.filter((item) => typeof item !== "string");
+  return items
+    .filter((item) => typeof item !== "string")
+    .sort((a, b) => {
+      if (a.type === "file" && b.type === "folder") return -1;
+    });
 }

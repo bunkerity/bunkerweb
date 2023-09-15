@@ -4731,19 +4731,28 @@ body {
   cursor: pointer;
   overflow: hidden;
   overflow-wrap: break-word;
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-  padding-left: 4rem;
-  padding-right: 4rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  padding-left: 3rem;
+  padding-right: 3rem;
   text-align: center;
+}
+
+@media (min-width: 576px) {
+  .file-manager-item-nav {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
 }
 
 .file-manager-item-svg {
   position: absolute;
   left: 0.75rem;
-  top: 1.25rem;
-  height: 2.5rem;
-  width: 2.5rem;
+  top: 1.5rem;
+  height: 2rem;
+  width: 2rem;
   fill: #085577;
   stroke: #ebeff4;
 }
@@ -4754,13 +4763,19 @@ body {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
+@media (min-width: 576px) {
+  .file-manager-item-svg {
+    top: 1.25rem;
+    height: 2.5rem;
+    width: 2.5rem;
+  }
+}
+
 .file-manager-item-name {
   pointer-events: none;
   margin-right: 1.75rem;
   margin-bottom: 0px;
   max-height: 2rem;
-  font-size: 0.875rem;
-  line-height: 1.5rem;
   --tw-text-opacity: 1;
   color: rgb(52 71 103 / var(--tw-text-opacity));
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter;
@@ -4777,11 +4792,25 @@ body {
   opacity: 0.9;
 }
 
+.base.file-manager-item-name {
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
 @media (min-width: 768px) {
-  .file-manager-item-name {
+  .base.file-manager-item-name {
     font-size: 1rem;
     line-height: 1.5rem;
   }
+}
+
+.sm.file-manager-item-name {
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
+.xs.file-manager-item-name {
+  font-size: 0.8rem;
 }
 
 .file-manager-item-dropdown {

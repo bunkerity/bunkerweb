@@ -117,7 +117,7 @@ onMounted(async () => {
             id: 'pathKeyword',
             type: 'text',
             value: '',
-            placeholder: 'label',
+            placeholder: 'base/service/conf',
           }"
         />
       </SettingsLayout>

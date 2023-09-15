@@ -66,7 +66,12 @@ const emits = defineEmits(["updatePath", "action"]);
       />
       <FileManagerItemSvgFile v-if="props.type === 'file'" />
 
-      <span class="file-manager-item-name">
+      <span
+        :class="[
+          path.name.length > 50 ? 'xs' : path.name.length > 50 ? 'sm' : 'base',
+        ]"
+        class="file-manager-item-name"
+      >
         {{ props.pathLevel === 1 ? path.name.replaceAll("_", "-") : path.name }}
       </span>
     </button>
