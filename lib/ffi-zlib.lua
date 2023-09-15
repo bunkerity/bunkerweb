@@ -6,7 +6,7 @@ local ffi_copy = ffi.copy
 local tonumber = tonumber
 
 local _M = {
-    _VERSION = '0.5.0',
+    _VERSION = '0.6.0',
 }
 
 local mt = { __index = _M }
@@ -95,7 +95,17 @@ unsigned long crc32_combine(unsigned long, unsigned long, long);
 
 ]])
 
-local zlib = ffi.load(ffi.os == "Windows" and "zlib1" or "z")
+local zlib
+if ffi.os == "Windows" then
+    zlib = ffi.load("zlib1")
+elseif ffi.os == "OSX" then
+    zlib = ffi.load("z")
+elseif ffi.os == "Linux" then
+    zlib = ffi.load("libz.so.1")
+else
+    error("lua-ffi-zlib doesn't support platform: " .. ffi.os)
+end
+
 _M.zlib = zlib
 
 -- Default to 16k output buffer
