@@ -109,7 +109,9 @@ const emits = defineEmits(["inp"]);
       @click="toggleSelect()"
       class="select-btn"
     >
-      <span>{{ select.value || props.settings.value }}</span>
+      <span class="select-btn-name">
+        {{ select.value || props.settings.value }}
+      </span>
       <!-- chevron -->
       <svg
         :class="[select.isOpen ? '-rotate-180' : '']"

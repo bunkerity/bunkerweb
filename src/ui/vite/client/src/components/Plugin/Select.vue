@@ -127,7 +127,7 @@ onMounted(() => {
     @click="toggleSelect()"
     class="select-btn"
   >
-    <span>{{ select.value }}</span>
+    <span class="select-btn-name">{{ select.value }}</span>
     <svg
       :class="[select.isOpen ? '-rotate-180' : '']"
       class="select-btn-svg"

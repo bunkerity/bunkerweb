@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineProps, onUpdated } from "vue";
+import { computed, defineProps, onMounted } from "vue";
 import { getSettingsSimple } from "@utils/settings.js";
 import PluginSettingHeader from "@components/Plugin/Setting/Header.vue";
 import PluginInput from "@components/Plugin/Input.vue";
@@ -16,7 +16,9 @@ const props = defineProps({
   },
 });
 
-const filterSettings = computed(() => getSettingsSimple(props.settings));
+const filterSettings = computed(() =>
+  getSettingsSimple(JSON.parse(JSON.stringify(props.settings)))
+);
 </script>
 
 <template>

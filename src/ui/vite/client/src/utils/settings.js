@@ -91,34 +91,61 @@ export function getSettingsMultipleList(settings) {
   // Case no multiple settings
   if (Object.keys(multipleSettings).length === 0) return false;
 
-  // Case multiple, create list from this
+  // Case multiple, create better list
   const multiples = {};
-  const multiplesName = [];
+  const multGroups = {};
 
-  // Get number of multiple group by name
+  // Get group names and base data
+  // Match only when end by _num
+  const regex = new RegExp(/(_\d*).$/gm);
+
   Object.entries(multipleSettings).forEach(([setting, data]) => {
     if (!!("multiple" in data)) {
-      const multipleName = data["multiple"];
-      multiplesName.includes(multipleName)
-        ? true
-        : multiplesName.push(multipleName);
+      // Add name group if doesn't exist
+      const multName = data["multiple"];
+      if (!(multName in multGroups)) multGroups[multName] = {};
+      // Add setting if base one
+      const suffix =
+        setting.match(regex) === null ? null : setting.match(regex).join();
+      // Case base
+      if (!suffix && !("base" in multGroups[multName]))
+        multGroups[multName]["base"] = {};
+      if (!suffix) return (multGroups[multName]["base"][setting] = data);
+      const suffixNum = suffix.replace("_", "");
+      if (suffix && !(suffixNum in multGroups[multName]))
+        multGroups[multName][suffixNum] = {};
+      if (suffix) multGroups[multName][suffixNum][setting] = data;
     }
   });
 
-  // Case no multiple group found
-  if (multiplesName.length === 0) return false;
+  // Case no multiple group
+  if (multGroups.length === 0) return false;
 
-  // Case multiple group, order them by multiples.name
-  multiplesName.forEach((name) => {
-    // Create plugin.multiple.name
-    if (!(name in multiples)) multiples[name] = {};
-    // Add settings that match the name and remove them from initial place
-    Object.entries(settings).forEach(([setting, data]) => {
-      if (!!("multiple" in data) && data["multiple"] === name) {
-        multiples[name][setting] = data;
-      }
+  // Some group can have only few settings custom
+  // We have to fill missing settings using base data
+  Object.entries(multGroups).forEach(([groupName, groupSettings]) => {
+    // Base to compare
+    const baseSettings = groupSettings["base"];
+    const baseLength = Object.keys(baseSettings).length;
+
+    Object.entries(groupSettings).forEach(([settingName, settings]) => {
+      // Stop if base itself or already fill
+      if (settingName === "base" || Object.keys(settings).length === baseLength)
+        return;
+      // Else, check for every setting if exist, if not create it
+      Object.entries(settings).forEach(([settingName, data]) => {
+        const suffix = settingName.match(regex).join();
+        Object.entries(baseSettings).forEach(
+          ([baseSettingName, baseSettingData]) => {
+            // Case setting match base
+            if (settingName.startsWith(baseSettingName)) return;
+            // Case not, create
+            settings[`${baseSettingName}${suffix}`] = baseSettingData;
+          }
+        );
+      });
     });
   });
 
-  return multiples;
+  return multGroups;
 }

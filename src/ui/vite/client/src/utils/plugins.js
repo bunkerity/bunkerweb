@@ -17,17 +17,47 @@ export function addConfToPlugins(plugins, config) {
   plugins.forEach((plugin) => {
     const settings = plugin["settings"];
 
-    Object.entries(settings).forEach(([setting, data]) => {
-      // Add config value to config when match
-      try {
-        data["value"] = config[setting]["value"];
-        data["method"] = config[setting]["method"];
-        delete config[setting];
-      }catch(err) {
-
+    // Case not multiple, add direct custom value to setting
+    Object.entries(settings).forEach(([settingName, settingData]) => {
+      if (!("multiple" in settingData)) {
+        try {
+          settingData["value"] = config[settingName]["value"];
+          settingData["method"] = config[settingName]["method"];
+          delete config[settingName];
+        } catch (err) {}
       }
-     
     });
+
+    // Case multiple, format on config is setting_num
+    // Multiples need to add a setting next to base one
+    // To avoid loop issue by adding a setting
+    // We need to add them after loop
+    const multiples = [];
+    Object.entries(settings).forEach(([settingName, settingData]) => {
+      if (!!("multiple" in settingData)) {
+        // We need to look on config
+        // When a base name match config custom multiple
+        Object.entries(config).forEach(([multipleName, multipleData]) => {
+          if (!multipleName.startsWith(settingName)) return;
+          // Case match, add multiple
+          // Using base multiple model
+          const cloneSetting = JSON.parse(JSON.stringify(settingData));
+          cloneSetting["value"] = multipleData["value"];
+          cloneSetting["method"] = multipleData["method"];
+          multiples.push({ [multipleName]: cloneSetting });
+        });
+      }
+    });
+
+    // Append custom multiple as regular settings
+    // We may have only one custom setting on a group
+    // We will fill empty settings from a group on settings multiple component logic
+    for (let i = 0; i < multiples.length; i++) {
+      const multSetting = multiples[i];
+      const multName = Object.keys(multSetting).join();
+      const multData = multSetting[multName];
+      settings[multName] = multData;
+    }
   });
 
   return plugins;

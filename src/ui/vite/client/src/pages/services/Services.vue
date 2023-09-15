@@ -11,7 +11,11 @@ import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import { reactive, computed, onMounted } from "vue";
-import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
+import {
+  getMethodList,
+  getSettingsByFilter,
+  getSettingsMultiple,
+} from "@utils/settings.js";
 import {
   setPluginsData,
   addConfToPlugins,
@@ -82,6 +86,19 @@ const services = reactive({
           method: "default",
         };
       }
+      // test multiple only
+      currServConf["LIMIT_REQ_URL_1"] = {
+        value: "/",
+        method: "default",
+      };
+      currServConf["LIMIT_REQ_RATE_1"] = {
+        value: "",
+        method: "default",
+      };
+      currServConf["LIMIT_REQ_URL_2"] = {
+        value: "/test",
+        method: "default",
+      };
       cloneServConf[key] = addConfToPlugins(currServPlugin, currServConf);
     }
 
@@ -193,7 +210,7 @@ onMounted(async () => {
       class="col-span-12 content-wrap"
     >
       <CardBase
-        class="z-[102] h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
+        class="z-[102] h-fit col-span-12 md:col-span-4 lg:col-span-3 3xl:col-span-2"
         label="info"
       >
         <CardItemList
@@ -213,7 +230,9 @@ onMounted(async () => {
           ]"
         />
       </CardBase>
-      <CardBase class="z-[101] h-fit col-span-12 md:col-span-8 lg:col-span-4">
+      <CardBase
+        class="z-[101] h-fit col-span-12 md:col-span-8 lg:col-span-4 3xl:col-span-3"
+      >
         <div class="col-span-12 flex">
           <CardLabel label="services" />
           <PluginRefresh @refresh="refresh()" />
@@ -248,10 +267,10 @@ onMounted(async () => {
       </CardBase>
       <CardBase
         label="plugins"
-        class="z-[100] col-span-12 md:col-span-12 lg:col-span-4 grid grid-cols-12 relative"
+        class="z-[100] col-span-12 md:col-span-12 lg:col-span-5 3xl:col-span-4 grid grid-cols-12 relative"
       >
         <SettingsLayout
-          class="flex w-full col-span-12 md:col-span-6"
+          class="flex w-full col-span-12 2xl:col-span-6"
           label="Select plugin"
           name="plugins"
         >
@@ -266,7 +285,7 @@ onMounted(async () => {
           />
         </SettingsLayout>
         <SettingsLayout
-          class="flex w-full col-span-12 md:col-span-6"
+          class="flex w-full col-span-12 2xl:col-span-6"
           label="Setting search"
           name="keyword"
         >
@@ -281,7 +300,7 @@ onMounted(async () => {
           />
         </SettingsLayout>
         <SettingsLayout
-          class="flex w-full col-span-12 md:col-span-6"
+          class="flex w-full col-span-12 2xl:col-span-6"
           label="Setting method"
           name="keyword"
         >

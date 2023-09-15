@@ -104,7 +104,7 @@ onMounted(async () => {
     </CardBase>
     <CardBase
       label="configs"
-      class="z-[100] col-span-12 md:col-span-12 lg:col-span-6 2xl:col-span-5 3xl:col-span-4 grid grid-cols-12 relative"
+      class="z-[100] col-span-12 md:col-span-8 lg:col-span-6 2xl:col-span-5 3xl:col-span-4 grid grid-cols-12 relative"
     >
       <SettingsLayout
         class="flex w-full col-span-12 md:col-span-6"
