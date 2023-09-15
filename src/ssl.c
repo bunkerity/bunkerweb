@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------------
- * LuaSec 1.3.1
+ * LuaSec 1.3.2
  *
  * Copyright (C) 2014-2023 Kim Alvefur, Paul Aurich, Tobias Markmann, Matthew Wild
  * Copyright (C) 2006-2023 Bruno Silvestre
@@ -47,8 +47,8 @@ static int lsec_socket_error()
 #if defined(WIN32)
   return WSAGetLastError();
 #else
-#if defined(LSEC_OPENSSL_1_1_1)
-  // Bug in OpenSSL 1.1.1
+#if defined(LSEC_OPENSSL_ERRNO_BUG)
+  // Bug in OpenSSL
   if (errno == 0)
     return LSEC_IO_SSL;
 #endif
@@ -947,7 +947,7 @@ static int meth_getalpn(lua_State *L)
 
 static int meth_copyright(lua_State *L)
 {
-  lua_pushstring(L, "LuaSec 1.3.1 - Copyright (C) 2006-2023 Bruno Silvestre, UFG"
+  lua_pushstring(L, "LuaSec 1.3.2 - Copyright (C) 2006-2023 Bruno Silvestre, UFG"
 #if defined(WITH_LUASOCKET)
                     "\nLuaSocket 3.0-RC1 - Copyright (C) 2004-2013 Diego Nehab"
 #endif
