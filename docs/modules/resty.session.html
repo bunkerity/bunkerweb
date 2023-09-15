@@ -26,6 +26,7 @@
 <br/>
 <h1>resty.session</h1>
 
+
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
@@ -315,12 +316,12 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.open()
+        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>()
 <span class="keyword">if</span> <span class="keyword">not</span> exists <span class="keyword">then</span>
-  session:set_data({
+  session:<span class="function-name">set_data</span>({
     cart = {},
   })
-  session:save()
+  session:<span class="function-name">save</span>()
 <span class="keyword">end</span></pre>
     </ul>
 
@@ -345,10 +346,10 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.open()
+        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>()
 <span class="keyword">if</span> exists <span class="keyword">then</span>
-  <span class="keyword">local</span> data = session:get_data()
-  ngx.req.set_header(<span class="string">"Authorization"</span>, <span class="string">"Bearer "</span> .. data.access_token)
+  <span class="keyword">local</span> data = session:<span class="function-name">get_data</span>()
+  ngx.req.<span class="function-name">set_header</span>(<span class="string">"Authorization"</span>, <span class="string">"Bearer "</span> .. data.access_token)
 <span class="keyword">end</span></pre>
     </ul>
 
@@ -409,10 +410,10 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.open()
+        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>()
 <span class="keyword">if</span> exists <span class="keyword">then</span>
-  <span class="keyword">local</span> access_token = session:get(<span class="string">"access-token"</span>)
-  ngx.req.set_header(<span class="string">"Authorization"</span>, <span class="string">"Bearer "</span> .. access_token)
+  <span class="keyword">local</span> access_token = session:<span class="function-name">get</span>(<span class="string">"access-token"</span>)
+  ngx.req.<span class="function-name">set_header</span>(<span class="string">"Authorization"</span>, <span class="string">"Bearer "</span> .. access_token)
 <span class="keyword">end</span></pre>
     </ul>
 
@@ -438,8 +439,8 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.new()
-session.set_audience(<span class="string">"my-service"</span>)</pre>
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">new</span>()
+session.<span class="function-name">set_audience</span>(<span class="string">"my-service"</span>)</pre>
     </ul>
 
 </dd>
@@ -484,8 +485,8 @@ session.set_audience(<span class="string">"my-service"</span>)</pre>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.new()
-session.set_subject(<span class="string">"john@doe.com"</span>)</pre>
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">new</span>()
+session.<span class="function-name">set_subject</span>(<span class="string">"john@doe.com"</span>)</pre>
     </ul>
 
 </dd>
@@ -509,9 +510,9 @@ session.set_subject(<span class="string">"john@doe.com"</span>)</pre>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.open()
+        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>()
 <span class="keyword">if</span> exists <span class="keyword">then</span>
-  <span class="keyword">local</span> subject = session.get_subject()
+  <span class="keyword">local</span> subject = session.<span class="function-name">get_subject</span>()
 <span class="keyword">end</span></pre>
     </ul>
 
@@ -546,9 +547,9 @@ session.set_subject(<span class="string">"john@doe.com"</span>)</pre>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.open()
+        <pre class="example"><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>()
 <span class="keyword">if</span> exists <span class="keyword">then</span>
-  <span class="keyword">local</span> timeout = session.get_property(<span class="string">"timeout"</span>)
+  <span class="keyword">local</span> timeout = session.<span class="function-name">get_property</span>(<span class="string">"timeout"</span>)
 <span class="keyword">end</span></pre>
     </ul>
 
@@ -1037,7 +1038,7 @@ session.set_subject(<span class="string">"john@doe.com"</span>)</pre>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="global">require</span> <span class="string">"resty.session"</span>.init({
+        <pre class="example"><span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">init</span>({
   audience = <span class="string">"my-application"</span>,
   storage = <span class="string">"redis"</span>,
   redis = {
@@ -1082,9 +1083,9 @@ session.set_subject(<span class="string">"john@doe.com"</span>)</pre>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.new()
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">new</span>()
 <span class="comment">-- OR
-</span><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.new({
+</span><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">new</span>({
   audience = <span class="string">"my-application"</span>,
 })</pre>
     </ul>
@@ -1131,9 +1132,9 @@ session.set_subject(<span class="string">"john@doe.com"</span>)</pre>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.open()
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>()
 <span class="comment">-- OR
-</span><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.open({
+</span><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">open</span>({
   audience = <span class="string">"my-application"</span>,
 })</pre>
     </ul>
@@ -1180,9 +1181,9 @@ session.set_subject(<span class="string">"john@doe.com"</span>)</pre>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.start()
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">start</span>()
 <span class="comment">-- OR
-</span><span class="keyword">local</span> session, err, exists, refreshed = <span class="global">require</span> <span class="string">"resty.session"</span>.start({
+</span><span class="keyword">local</span> session, err, exists, refreshed = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">start</span>({
   audience = <span class="string">"my-application"</span>,
 })</pre>
     </ul>
@@ -1238,9 +1239,9 @@ session.set_subject(<span class="string">"john@doe.com"</span>)</pre>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="global">require</span> <span class="string">"resty.session"</span>.logout()
+        <pre class="example"><span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">logout</span>()
 <span class="comment">-- OR
-</span><span class="keyword">local</span> ok, err, exists, logged_out = <span class="global">require</span> <span class="string">"resty.session"</span>.logout({
+</span><span class="keyword">local</span> ok, err, exists, logged_out = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">logout</span>({
   audience = <span class="string">"my-application"</span>,
 })</pre>
     </ul>
@@ -1285,9 +1286,9 @@ session.set_subject(<span class="string">"john@doe.com"</span>)</pre>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example"><span class="global">require</span> <span class="string">"resty.session"</span>.destroy()
+        <pre class="example"><span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">destroy</span>()
 <span class="comment">-- OR
-</span><span class="keyword">local</span> ok, err, exists, destroyed = <span class="global">require</span> <span class="string">"resty.session"</span>.destroy({
+</span><span class="keyword">local</span> ok, err, exists, destroyed = <span class="global">require</span> <span class="string">"resty.session"</span>.<span class="function-name">destroy</span>({
   cookie_name = <span class="string">"auth"</span>,
 })</pre>
     </ul>
@@ -1299,8 +1300,8 @@ session.set_subject(<span class="string">"john@doe.com"</span>)</pre>
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2023-06-05 17:05:22 </i>
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2023-08-16 18:11:28 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
