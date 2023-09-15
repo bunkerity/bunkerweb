@@ -2,6 +2,12 @@
 
 All notable changes to `lua-resty-session` will be documented in this file.
 
+
+## [4.0.5] - 2023-08-16
+### Fixed
+- fix(dshm/memcached): add a missing return parameter as otherwise pool parameters are not respected, fix #171
+
+
 ## [4.0.4] - 2023-06-05
 ### Changed
 - chore(utils): remove dependency for lua_pack, fix #158

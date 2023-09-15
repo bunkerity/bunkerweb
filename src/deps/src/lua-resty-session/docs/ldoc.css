@@ -294,6 +294,7 @@ pre .library { color: #0e7c6b; }
 pre .marker { color: #512b1e; background: #fedc56; font-weight: bold; }
 pre .string { color: #8080ff; }
 pre .number { color: #f8660d; }
+pre .function-name { color: #60447f; }
 pre .operator { color: #2239a8; font-weight: bold; }
 pre .preprocessor, pre .prepro { color: #a33243; }
 pre .global { color: #800080; }
