@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------------
- * LuaSec 1.3.1
+ * LuaSec 1.3.2
  *
  * Copyright (C) 2006-2023 Bruno Silvestre
  *
@@ -48,8 +48,8 @@
 
 //------------------------------------------------------------------------------
 
-#if !defined(LIBRESSL_VERSION_NUMBER) && ((OPENSSL_VERSION_NUMBER & 0xFFFFF000L) == 0x10101000L)
-#define LSEC_OPENSSL_1_1_1
+#if !defined(LIBRESSL_VERSION_NUMBER) && ((OPENSSL_VERSION_NUMBER & 0xFFFFF000L) == 0x10101000L || (OPENSSL_VERSION_NUMBER & 0xFFFFF000L) == 0x30000000L)
+#define LSEC_OPENSSL_ERRNO_BUG
 #endif
 
 //------------------------------------------------------------------------------

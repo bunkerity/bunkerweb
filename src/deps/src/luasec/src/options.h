@@ -2,7 +2,7 @@
 #define LSEC_OPTIONS_H
 
 /*--------------------------------------------------------------------------
- * LuaSec 1.3.1
+ * LuaSec 1.3.2
  *
  * Copyright (C) 2006-2023 Bruno Silvestre
  *
