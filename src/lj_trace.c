@@ -1,6 +1,6 @@
 /*
 ** Trace management.
-** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_trace_c
@@ -153,6 +153,9 @@ static void trace_save(jit_State *J, GCtrace *T)
   newwhite(J2G(J), T);
   T->gct = ~LJ_TTRACE;
   T->ir = (IRIns *)p - J->cur.nk;  /* The IR has already been copied above. */
+#if LJ_ABI_PAUTH
+  T->mcauth = lj_ptr_sign((ASMFunction)T->mcode, T);
+#endif
   p += szins;
   TRACE_APPENDVEC(snap, nsnap, SnapShot)
   TRACE_APPENDVEC(snapmap, nsnapmap, SnapEntry)
@@ -429,6 +432,12 @@ static void trace_start(jit_State *J)
       setbc_op(J->pc, (int)bc_op(*J->pc)+(int)BC_ILOOP-(int)BC_LOOP);
       J->pt->flags |= PROTO_ILOOP;
     }
+    J->state = LJ_TRACE_IDLE;  /* Silently ignored. */
+    return;
+  }
+
+  /* Ensuring forward progress for BC_ITERN can trigger hotcount again. */
+  if (!J->parent && bc_op(*J->pc) == BC_JLOOP) {  /* Already compiled. */
     J->state = LJ_TRACE_IDLE;  /* Silently ignored. */
     return;
   }
@@ -873,7 +882,7 @@ int LJ_FASTCALL lj_trace_exit(jit_State *J, void *exptr)
   ExitDataCP exd;
   int errcode, exitcode = J->exitcode;
   TValue exiterr;
-  const BCIns *pc;
+  const BCIns *pc, *retpc;
   void *cf;
   GCtrace *T;
 
@@ -925,25 +934,10 @@ int LJ_FASTCALL lj_trace_exit(jit_State *J, void *exptr)
   } else {
     trace_hotside(J, pc);
   }
-  if (bc_op(*pc) == BC_JLOOP) {
-    BCIns *retpc = &traceref(J, bc_d(*pc))->startins;
-    int isret = bc_isret(bc_op(*retpc));
-    if (isret || bc_op(*retpc) == BC_ITERN) {
-      if (J->state == LJ_TRACE_RECORD) {
-	J->patchins = *pc;
-	J->patchpc = (BCIns *)pc;
-	*J->patchpc = *retpc;
-	J->bcskip = 1;
-      } else if (isret) {
-	pc = retpc;
-	setcframe_pc(cf, pc);
-      }
-    }
-  }
 #ifdef LUA_USE_TRACE_LOGS
   lj_log_trace_normal_exit(L, (int) T->traceno, pc);
 #endif
-  /* Return MULTRES or 0. */
+  /* Return MULTRES or 0 or -17. */
   ERRNO_RESTORE
   switch (bc_op(*pc)) {
   case BC_CALLM: case BC_CALLMT:
@@ -952,6 +946,18 @@ int LJ_FASTCALL lj_trace_exit(jit_State *J, void *exptr)
     return (int)((BCReg)(L->top - L->base) + 1 - bc_a(*pc) - bc_d(*pc));
   case BC_TSETM:
     return (int)((BCReg)(L->top - L->base) + 1 - bc_a(*pc));
+  case BC_JLOOP:
+    retpc = &traceref(J, bc_d(*pc))->startins;
+    if (bc_isret(bc_op(*retpc)) || bc_op(*retpc) == BC_ITERN) {
+      /* Dispatch to original ins to ensure forward progress. */
+      if (J->state != LJ_TRACE_RECORD) return -17;
+      /* Unpatch bytecode when recording. */
+      J->patchins = *pc;
+      J->patchpc = (BCIns *)pc;
+      *J->patchpc = *retpc;
+      J->bcskip = 1;
+    }
+    return 0;
   default:
     if (bc_op(*pc) >= BC_FUNCF)
       return (int)((BCReg)(L->top - L->base) + 1);

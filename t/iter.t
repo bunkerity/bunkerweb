@@ -25,11 +25,11 @@ end
 print("total = " .. total)
 --- out
 total = 5050
---- err
-[TRACE   1 test.lua:3 loop]
+--- err eval
+qr#\Q[TRACE   1 test.lua:3 loop]
 [TRACE   2 test.lua:8 loop]
-[TRACE   3 (2/1) test.lua:8 stitch print]
-
+\E(\Q[TRACE   3 (2/1) test.lua:8 stitch print]
+\E)?#ms
 
 
 === TEST 2: explicit next() in loops

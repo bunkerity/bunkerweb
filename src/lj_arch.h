@@ -1,6 +1,6 @@
 /*
 ** Target architecture selection.
-** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #ifndef _LJ_ARCH_H
@@ -267,6 +267,9 @@
 #define LJ_ARCH_NAME		"arm64"
 #define LJ_ARCH_ENDIAN		LUAJIT_LE
 #endif
+#if !defined(LJ_ABI_PAUTH) && defined(__arm64e__)
+#define LJ_ABI_PAUTH		1
+#endif
 #define LJ_TARGET_ARM64		1
 #define LJ_TARGET_EHRETREG	0
 #define LJ_TARGET_EHRAREG	30
@@ -301,7 +304,7 @@
 #define LJ_ARCH_NAME		"ppc"
 
 #if !defined(LJ_ARCH_HASFPU)
-#if defined(_SOFT_FLOAT) || defined(_SOFT_DOUBLE)
+#if defined(_SOFT_FLOAT) || defined(_SOFT_DOUBLE) || defined(__NO_FPRS__)
 #define LJ_ARCH_HASFPU		0
 #else
 #define LJ_ARCH_HASFPU		1
@@ -309,7 +312,7 @@
 #endif
 
 #if !defined(LJ_ABI_SOFTFP)
-#if defined(_SOFT_FLOAT) || defined(_SOFT_DOUBLE)
+#if defined(_SOFT_FLOAT) || defined(_SOFT_DOUBLE) || defined(__NO_FPRS__)
 #define LJ_ABI_SOFTFP		1
 #else
 #define LJ_ABI_SOFTFP		0
@@ -532,9 +535,6 @@
 #error "No support for ILP32 model on ARM64"
 #endif
 #elif LJ_TARGET_PPC
-#if defined(__NO_FPRS__) && !defined(_SOFT_FLOAT)
-#error "No support for PPC/e500 anymore (use LuaJIT 2.0)"
-#endif
 #elif LJ_TARGET_MIPS32
 #if !((defined(_MIPS_SIM_ABI32) && _MIPS_SIM == _MIPS_SIM_ABI32) || (defined(_ABIO32) && _MIPS_SIM == _ABIO32))
 #error "Only o32 ABI supported for MIPS32"
@@ -632,6 +632,10 @@
 #endif
 #define LJ_SOFTFP		(!LJ_ARCH_HASFPU)
 #define LJ_SOFTFP32		(LJ_SOFTFP && LJ_32)
+
+#ifndef LJ_ABI_PAUTH
+#define LJ_ABI_PAUTH		0
+#endif
 
 #if LJ_ARCH_ENDIAN == LUAJIT_BE
 #define LJ_LE			0

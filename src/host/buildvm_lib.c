@@ -1,6 +1,6 @@
 /*
 ** LuaJIT VM builder: library definition compiler.
-** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #include "buildvm.h"
@@ -378,7 +378,8 @@ void emit_lib(BuildCtx *ctx)
       char *p;
       /* Simplistic pre-processor. Only handles top-level #if/#endif. */
       if (buf[0] == '#' && buf[1] == 'i' && buf[2] == 'f') {
-	int ok = 1, len = strlen(buf);
+	int ok = 1;
+	size_t len = strlen(buf);
 	if (buf[len-1] == '\n') {
 	  buf[len-1] = 0;
 	  if (buf[len-2] == '\r') {
@@ -391,7 +392,7 @@ void emit_lib(BuildCtx *ctx)
 	  ok = LJ_HASJIT;
 	else if (!strcmp(buf, "#if LJ_HASFFI"))
 	  ok = LJ_HASFFI;
-	else if (!strcmp(buf, "#if LJ_HASBUFFER\n"))
+	else if (!strcmp(buf, "#if LJ_HASBUFFER"))
 	  ok = LJ_HASBUFFER;
 	if (!ok) {
 	  int lvl = 1;

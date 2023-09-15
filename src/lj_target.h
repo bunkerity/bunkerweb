@@ -1,6 +1,6 @@
 /*
 ** Definitions for target CPU.
-** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #ifndef _LJ_TARGET_H
@@ -57,8 +57,10 @@ typedef uint32_t RegSP;
 */
 #if LJ_TARGET_PPC || LJ_TARGET_MIPS || LJ_TARGET_ARM64
 typedef uint64_t RegSet;
+#define RSET_BITS		6
 #else
 typedef uint32_t RegSet;
+#define RSET_BITS		5
 #endif
 
 #define RID2RSET(r)		(((RegSet)1) << (r))
@@ -70,11 +72,11 @@ typedef uint32_t RegSet;
 #define rset_clear(rs, r)	(rs &= ~RID2RSET(r))
 #define rset_exclude(rs, r)	(rs & ~RID2RSET(r))
 #if LJ_TARGET_PPC || LJ_TARGET_MIPS || LJ_TARGET_ARM64
-#define rset_picktop(rs)	((Reg)(__builtin_clzll(rs)^63))
-#define rset_pickbot(rs)	((Reg)__builtin_ctzll(rs))
+#define rset_picktop_(rs)	((Reg)(__builtin_clzll(rs)^63))
+#define rset_pickbot_(rs)	((Reg)__builtin_ctzll(rs))
 #else
-#define rset_picktop(rs)	((Reg)lj_fls(rs))
-#define rset_pickbot(rs)	((Reg)lj_ffs(rs))
+#define rset_picktop_(rs)	((Reg)lj_fls(rs))
+#define rset_pickbot_(rs)	((Reg)lj_ffs(rs))
 #endif
 
 /* -- Register allocation cost -------------------------------------------- */

@@ -31,6 +31,9 @@ if exist minilua.exe.manifest^
 minilua %DASM% -LN %DASMFLAGS% -o host\buildvm_arch.h vm_x64.dasc
 @if errorlevel 1 goto :BAD
 
+if exist ..\.git ( git show -s --format=%%ct >luajit_relver.txt ) else ( type ..\.relver >luajit_relver.txt )
+minilua host\genversion.lua
+
 %LJCOMPILE% /I "." /I %DASMDIR% /D_DURANGO host\buildvm*.c
 @if errorlevel 1 goto :BAD
 %LJLINK% /out:buildvm.exe buildvm*.obj
