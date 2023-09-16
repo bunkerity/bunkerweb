@@ -14,7 +14,7 @@ const props = defineProps({
 // To avoid component to send and stick to props values (bad behavior)
 // Trick is to use select.value || props.settings.value on template
 watch(props, (newProp, oldProp) => {
-  if (newProp.settings.value !== oldProp.settings.value) {
+  if (newProp.settings.value !== select.value) {
     select.value = "";
   }
 });

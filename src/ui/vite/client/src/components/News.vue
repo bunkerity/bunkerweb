@@ -59,7 +59,7 @@ onMounted(() => {
         <p class="news-sidebar-subtitle">Stay up to date.</p>
       </div>
     </div>
-    <hr class="news-separator" />
+    <hr class="line-separator" />
     <!-- end header -->
     <!-- news-->
     <div v-if="news.posts.length === 0" class="flex-auto overflow-auto">
@@ -70,7 +70,7 @@ onMounted(() => {
     <!-- end news-->
 
     <!-- newsletter -->
-    <hr class="news-separator" />
+    <hr class="line-separator" />
 
     <form
       action="https://bunkerity.us1.list-manage.com/subscribe/post?u=ec5b1577cf427972b9bd491a6&amp;id=37076d9d67"

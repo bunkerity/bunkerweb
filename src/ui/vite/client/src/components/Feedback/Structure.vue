@@ -136,6 +136,8 @@ watch(feedback, () => {
     </div>
     <!-- end header -->
 
+    <hr class="line-separator w-full" />
+
     <!-- messages-->
     <div
       class="flex flex-col justify-start items-center h-full m-2 overflow-y-auto"

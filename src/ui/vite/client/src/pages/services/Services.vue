@@ -10,12 +10,9 @@ import PluginStructure from "@components/Plugin/Structure.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
+import SettingsUploadSvgWarning from "@components/Settings/Upload/Svg/Warning.vue";
 import { reactive, computed, onMounted } from "vue";
-import {
-  getMethodList,
-  getSettingsByFilter,
-  getSettingsMultiple,
-} from "@utils/settings.js";
+import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
 import {
   setPluginsData,
   addConfToPlugins,
@@ -86,19 +83,7 @@ const services = reactive({
           method: "default",
         };
       }
-      // test multiple only
-      currServConf["LIMIT_REQ_URL_1"] = {
-        value: "/",
-        method: "default",
-      };
-      currServConf["LIMIT_REQ_RATE_1"] = {
-        value: "",
-        method: "default",
-      };
-      currServConf["LIMIT_REQ_URL_2"] = {
-        value: "/test",
-        method: "default",
-      };
+
       cloneServConf[key] = addConfToPlugins(currServPlugin, currServConf);
     }
 
@@ -247,7 +232,8 @@ onMounted(async () => {
             v-if="services.activeService"
             :settings="{
               id: 'services-list',
-              value: services.activeService,
+              value:
+                services.activeService === 'new' ? '' : services.activeService,
               values: Object.keys(services.setup).filter(
                 (item) => item !== 'new'
               ),
@@ -263,6 +249,15 @@ onMounted(async () => {
             class="text-sm"
             >Create new service</ButtonBase
           >
+        </div>
+        <div class="col-span-12 flex flex-col justify-center items-center mt-2">
+          <hr class="line-separator z-10 w-full" />
+          <p class="dark:text-gray-500 text-xs text-center mt-1 mb-2">
+            <span class="mx-0.5">
+              <SettingsUploadSvgWarning class="scale-90" />
+            </span>
+            Switching services will reset unsaved changes
+          </p>
         </div>
       </CardBase>
       <CardBase

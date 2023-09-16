@@ -104,7 +104,7 @@ body {
 }
 
 .select-btn-name {
-  @apply pointer-events-none;
+  @apply pointer-events-none min-h-[22px];
 }
 
 .select-btn-svg {
@@ -366,10 +366,6 @@ body {
   @apply text-center col-span-12 relative w-full p-4 text-blue-500 rounded-lg;
 }
 
-.news-separator {
-  @apply h-px mx-0 mt-2 mb-1 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent;
-}
-
 .news-newsletter-form {
   @apply px-6 pt-4 pb-0 mb-0 border-b-0 min-h-52;
 }
@@ -523,6 +519,10 @@ body {
 
 .btn-sm {
   @apply px-2 py-1;
+}
+
+.btn-xs {
+  @apply px-1 py-0.5;
 }
 
 .btn-close {
@@ -714,4 +714,10 @@ body {
 
 .last.list-header-item {
   @apply pl-5;
+}
+
+/** MISC **/
+
+.line-separator {
+  @apply h-px mx-0 mt-2 mb-1 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent;
 }

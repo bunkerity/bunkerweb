@@ -239,6 +239,8 @@ function toggleMenu() {
 
     <!-- bottom sidebar  -->
     <div class="w-full flex flex-col justify-end m-4">
+      <hr class="line-separator" />
+
       <!-- dark/light mode -->
       <div class="menu-mode-container">
         <input

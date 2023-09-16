@@ -105,7 +105,6 @@ function uploadFile(file) {
       ]"
       class="hover:bg-gray-100 dark:hover:bg-slate-700/50 cursor-pointer col-span-12 border-2 rounded-lg p-2 border-primary dark:brightness-125 drop-zone"
     >
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <input
         @change="uploadFiles(fileInp.files)"
         ref="fileInp"
@@ -132,7 +131,7 @@ function uploadFile(file) {
     <!-- end dropzone -->
 
     <div class="col-span-12 flex flex-col justify-center items-center mt-4">
-      <hr class="news-separator z-10 w-full" />
+      <hr class="line-separator z-10 w-full" />
       <p class="dark:text-gray-500 text-xs text-center mt-1 mb-2">
         <span class="mx-0.5">
           <SettingsUploadSvgSuccess class="scale-90" />
