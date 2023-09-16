@@ -25,7 +25,6 @@ const multiple = reactive({
     const filter = getSettingsMultipleList(
       JSON.parse(JSON.stringify(props.settings))
     );
-
     // Remove delete item
     Object.entries(multiple.delete).forEach(
       ([multGroupName, settingsGroupList]) => {
@@ -39,6 +38,7 @@ const multiple = reactive({
     Object.entries(multiple.new).forEach(([multGroupName, groupData]) => {
       Object.assign(filter[multGroupName], groupData);
     });
+
     return filter;
   }),
   new: {},
@@ -177,16 +177,14 @@ function deleteMultToGroup(multGroupName, settingsGroupName) {
         </ButtonBase>
       </div>
       <div class="col-span-12 mx-4" v-if="multiple.isShow">
-        <div
-          v-for="(settingsGroup, settingsGroupName) in multGroup"
-          :key="settingsGroup"
-        >
+        <div v-for="(settingsGroup, settingsGroupName) in multGroup">
           <div
             class="relative grid grid-cols-12 bg-gray-50 dark:bg-slate-900/30 w-full my-6 border dark:border-gray-700 rounded"
             v-if="settingsGroupName !== 'base'"
           >
             <div
               v-for="(setting, settingName) in settingsGroup"
+              :class="[setting.isMatchFilter ? '' : 'hidden']"
               class="ml-2 mr-4 md:ml-3 md:mr-6 xl:ml-4 xl:mr-8 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4"
             >
               <PluginSettingHeader :label="settingName" :help="setting.help" />

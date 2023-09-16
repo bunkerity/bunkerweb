@@ -6,10 +6,6 @@ const news = reactive({
   isActive: false,
   posts: [],
 });
-
-onMounted(() => {
-  console.log(news.isActive);
-});
 </script>
 
 <template>

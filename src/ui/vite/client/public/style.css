@@ -1474,14 +1474,6 @@ h6 {
   fill: #fbb140 !important;
 }
 
-.fill-gray-50 {
-  fill: #f8f9fa !important;
-}
-
-.fill-gray-100 {
-  fill: #ebeff4 !important;
-}
-
 .stroke-blue-400 {
   stroke: #60a5fa !important;
 }
@@ -1524,10 +1516,6 @@ h6 {
 
 .stroke-yellow-500 {
   stroke: #fbb140 !important;
-}
-
-.stroke-yellow-400 {
-  stroke: #fbcf33 !important;
 }
 
 .stroke-yellow-600 {
@@ -5660,6 +5648,14 @@ body {
 
   .md\:col-span-8 {
     grid-column: span 8 / span 8 !important;
+  }
+
+  .md\:col-span-5 {
+    grid-column: span 5 / span 5 !important;
+  }
+
+  .md\:col-span-7 {
+    grid-column: span 7 / span 7 !important;
   }
 
   .md\:col-start-4 {

@@ -14,15 +14,26 @@ export function getDefaultMethod() {
 export function getSettingsByFilter(plugins, filters) {
   plugins.forEach((plugin, id) => {
     const settings = plugin["settings"];
+    // We will check if all settings failed to determine plugin display
+    const settingsNum = Object.keys(settings).length;
+    let noMatchCount = 0;
 
     Object.entries(settings).forEach(([setting, data]) => {
-      // Remove settings that don't match filter
+      // Check if setting match
+      let isMatch = true;
+      // Look for every filter
       for (const [key, value] of Object.entries(filters)) {
-        // Case no key to check
-        if ((!(key in data) && key !== "keyword") || value === "all") continue;
-        let isMatch = true;
+        // Case one filter already fail
+        if (!isMatch) continue;
+
+        // Case nothing to check
+        if ((!(key in data) && key !== "keyword") || value === "all") {
+          settings[setting]["isMatchFilter"] = true;
+          continue;
+        }
         const checkType = typeof value;
 
+        // Case filter is string like input or select
         if (checkType === "string") {
           const filterValue = value.toLowerCase().trim();
           // Case keyword filter, check multiple keys
@@ -38,28 +49,31 @@ export function getSettingsByFilter(plugins, filters) {
                 ? true
                 : false;
           }
-          // Case individual filter
+          // Case individual filter like method
           if (key !== "keyword") {
             const settingValue = data[key].toLowerCase().trim();
+
             isMatch = settingValue.includes(filterValue) ? true : false;
           }
         }
 
+        // Case filter is checkbox-like
         if (checkType === "boolean") {
           isMatch = data[key] === value ? true : false;
         }
-
-        // Result
-        if (!isMatch) delete settings[setting];
       }
+
+      // After every filter check
+      settings[setting]["isMatchFilter"] = isMatch;
+      isMatch ? true : noMatchCount++;
     });
 
-    // Case no setting remaining, remove plugin
-    if (Object.keys(plugin["settings"]).length === 0) delete plugins[id];
+    // Case no settings match, hide plugin
+    plugin["isMatchFilter"] = settingsNum === noMatchCount ? false : true;
   });
 
   // Update plugins removing empty index (deleted plugins)
-  return plugins.filter(Object);
+  return plugins;
 }
 
 // Keep only simple settings for specific plugin

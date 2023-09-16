@@ -19,8 +19,6 @@ const props = defineProps({
     default: "",
   },
 });
-
-onMounted(() => console.log(props.plugins));
 </script>
 
 <template>

@@ -104,14 +104,15 @@ const services = reactive({
     // Use active service but is impersonal (no specific service logic)
     const remainPlugins = [];
     cloneServConf[services.activeService].forEach((item) => {
-      remainPlugins.push(item.name);
+      item["isMatchFilter"] ? remainPlugins.push(item.name) : false;
     });
     services.activePlugins = remainPlugins;
 
     // Set first plugin as active if none
     if (!services.activePlugin)
       services.activePlugin =
-        services.activePlugins.length > 0 ? services.activePlugins[0] : "none";
+        services.activePlugins.length > 0 ? services.activePlugins[0] : "";
+
     // Case active plugin before update, need some check
     if (services.activePlugin) {
       // Case prev active plugin passed filter
@@ -123,9 +124,7 @@ const services = reactive({
       // Case not, set first passed one or empty
       if (!isPlugin) {
         services.activePlugin =
-          cloneServConf[services.activeService].length > 0
-            ? cloneServConf[services.activeService][0]["name"]
-            : "none";
+          services.activePlugins.length > 0 ? services.activePlugins[0] : "";
       }
     }
 

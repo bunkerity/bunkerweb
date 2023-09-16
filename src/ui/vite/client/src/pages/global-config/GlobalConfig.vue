@@ -37,7 +37,8 @@ const plugins = reactive({
   // Data from fetch
   data: [],
   // Default plugin to display, first of list (before any filter)
-  active: "",
+  activePlugin: "",
+  activePlugins: [],
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
     if (
@@ -64,8 +65,35 @@ const plugins = reactive({
     const mergeConf = addConfToPlugins(setPlugins, cloneGlobalConf);
     // Filter data to display
     const filter = getSettingsByFilter(mergeConf, filters);
-    // Check if prev plugin or no plugin match filter
-    plugins.active = filter.length !== 0 ? filter[0]["name"] : "";
+
+    // Get remain plugin after filter
+    // Use active service but is impersonal (no specific service logic)
+    const remainPlugins = [];
+    filter.forEach((item) => {
+      item["isMatchFilter"] ? remainPlugins.push(item.name) : false;
+    });
+    plugins.activePlugins = remainPlugins;
+
+    // Set first plugin as active if none
+    if (!plugins.activePlugin)
+      plugins.activePlugin =
+        plugins.activePlugins.length > 0 ? plugins.activePlugins[0] : "";
+
+    // Case active plugin before update, need some check
+    if (plugins.activePlugin) {
+      // Case prev active plugin passed filter
+      const isPlugin =
+        plugins.activePlugins.indexOf(plugins.activePlugin) !== -1
+          ? true
+          : false;
+
+      // Case not, set first passed one or empty
+      if (!isPlugin) {
+        plugins.activePlugin =
+          plugins.activePlugins.length > 0 ? plugins.activePlugins[0] : "";
+      }
+    }
+
     return filter;
   }),
 });
@@ -135,24 +163,34 @@ async function sendConf() {
       class="col-span-12 content-wrap"
     >
       <CardBase
-        class="z-100 col-span-12 2xl:col-span-9 row-start-0 row-end-1 md:row-start-2 md:row-end-2 lg:row-auto grid grid-cols-12 relative"
+        class="z-100 h-fit col-span-12 md:col-span-5 lg:col-span-4 3xl:col-span-3 grid grid-cols-12 relative"
       >
         <div class="col-span-12 flex">
           <CardLabel label="global config" />
           <PluginRefresh @refresh="refresh()" />
         </div>
-        <TabStructure
-          :items="plugins.setup"
-          :active="plugins.active"
-          @tabName="(v) => (plugins.active = v)"
-        />
+        <SettingsLayout
+          class="flex w-full col-span-12"
+          label="Select plugin"
+          name="plugins"
+        >
+          <SettingsSelect
+            @inp="(v) => (plugins.activePlugin = v)"
+            :settings="{
+              id: 'plugins',
+              value: plugins.activePlugin,
+              values: plugins.activePlugins,
+              placeholder: 'Search',
+            }"
+          />
+        </SettingsLayout>
       </CardBase>
       <CardBase
         label="filter"
-        class="z-10 col-span-12 2xl:col-span-3 row-start-1 row-end-2 md:row-start-0 2xl:row-auto grid grid-cols-12 relative"
+        class="z-10 h-fit col-span-12 md:col-span-7 lg:col-span-5 3xl:col-span-3 grid grid-cols-12 relative"
       >
         <SettingsLayout
-          class="flex w-full col-span-12 md:col-span-6 2xl:col-span-12"
+          class="flex w-full col-span-12 md:col-span-6"
           label="Search"
           name="keyword"
         >
@@ -167,7 +205,7 @@ async function sendConf() {
           />
         </SettingsLayout>
         <SettingsLayout
-          class="flex w-full col-span-12 md:col-span-6 2xl:col-span-12"
+          class="flex w-full col-span-12 md:col-span-6"
           label="Method"
           name="keyword"
         >
@@ -184,7 +222,10 @@ async function sendConf() {
       </CardBase>
 
       <CardBase class="col-span-12 grid grid-cols-12 relative">
-        <PluginStructure :plugins="plugins.setup" :active="plugins.active" />
+        <PluginStructure
+          :plugins="plugins.setup"
+          :active="plugins.activePlugin"
+        />
         <div class="col-span-12 flex w-full justify-center mt-8 mb-2">
           <ButtonBase @click="sendConf()" color="valid" size="lg">
             SAVE
