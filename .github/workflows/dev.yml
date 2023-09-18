@@ -27,10 +27,38 @@ jobs:
     uses: ./.github/workflows/container-build.yml
     with:
       RELEASE: dev
-      CACHE: true
       ARCH: linux/amd64
+      CACHE: true
       IMAGE: ${{ matrix.image }}
       DOCKERFILE: ${{ matrix.dockerfile }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+
+  # Build Linux packages
+  build-packages:
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        linux: [ubuntu, debian, fedora, rhel]
+        include:
+          - linux: ubuntu
+            package: deb
+          - linux: debian
+            package: deb
+          - linux: fedora
+            package: rpm
+          - linux: rhel
+            package: rpm
+    uses: ./.github/workflows/linux-build.yml
+    with:
+      RELEASE: dev
+      LINUX: ${{ matrix.linux }}
+      PACKAGE: ${{ matrix.package }}
+      TEST: true
+      PLATFORMS: linux/amd64
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
@@ -68,7 +96,7 @@ jobs:
 
   # Core tests
   prepare-tests-core:
-    needs: [code-security, build-containers]
+    needs: [code-security, build-containers, build-packages]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -86,6 +114,16 @@ jobs:
       matrix:
         test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
     uses: ./.github/workflows/test-core.yml
+    with:
+      TEST: ${{ matrix.test }}
+      RELEASE: dev
+  tests-core-linux:
+    needs: prepare-tests-core
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
+    uses: ./.github/workflows/test-core-linux.yml
     with:
       TEST: ${{ matrix.test }}
       RELEASE: dev
@@ -129,3 +167,59 @@ jobs:
         env:
           FROM: "autoconf"
           TO: "bunkerweb-autoconf"
+
+  # Push Linux packages
+  push-packages:
+    needs: [staging-tests, tests-ui, tests-core]
+    strategy:
+      matrix:
+        linux: [ubuntu, debian, fedora, el]
+        arch: [amd64]
+        include:
+          - release: dev
+            repo: bunkerweb
+          - linux: ubuntu
+            separator: _
+            suffix: ""
+            version: jammy
+            package: deb
+          - linux: debian
+            separator: _
+            suffix: ""
+            version: bullseye
+            package: deb
+          - linux: fedora
+            separator: "-"
+            suffix: "1."
+            version: 38
+            package: rpm
+          - linux: el
+            separator: "-"
+            suffix: "1."
+            version: 8
+            package: rpm
+          - linux: ubuntu
+            arch: amd64
+            package_arch: amd64
+          - linux: debian
+            arch: amd64
+            package_arch: amd64
+          - linux: fedora
+            arch: amd64
+            package_arch: x86_64
+          - linux: el
+            arch: amd64
+            package_arch: x86_64
+    uses: ./.github/workflows/push-packagecloud.yml
+    with:
+      SEPARATOR: ${{ matrix.separator }}
+      SUFFIX: ${{ matrix.suffix }}
+      REPO: ${{ matrix.repo }}
+      LINUX: ${{ matrix.linux }}
+      VERSION: ${{ matrix.version }}
+      PACKAGE: ${{ matrix.package }}
+      BW_VERSION: ${{ matrix.release }}
+      PACKAGE_ARCH: ${{ matrix.package_arch }}
+      ARCH: ${{ matrix.arch }}
+    secrets:
+      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
