@@ -130,7 +130,7 @@ jobs:
 
   # Push with dev tag
   push-dev:
-    needs: [tests-ui, tests-core]
+    needs: [tests-ui, tests-core, tests-core-linux]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -170,7 +170,7 @@ jobs:
 
   # Push Linux packages
   push-packages:
-    needs: [staging-tests, tests-ui, tests-core]
+    needs: [tests-ui, tests-core, tests-core-linux]
     strategy:
       matrix:
         linux: [ubuntu, debian, fedora, el]
