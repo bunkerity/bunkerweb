@@ -309,6 +309,7 @@ async def send_instance_action(
         )
     else:
         if status_code != 200:
+            resp = resp.json()
             error = f"Error while sending API request to {instance_api.endpoint}{action} : status = {resp['status']}, msg = {resp['msg']}"
             CORE_CONFIG.logger.error(error)
             return JSONResponse(status_code=status_code, content={"message": error})
@@ -317,4 +318,4 @@ async def send_instance_action(
         f"Successfully sent API request to {instance_api.endpoint}{action}"
     )
 
-    return JSONResponse(content={"message": resp})
+    return JSONResponse(content={"message": resp.json()})
