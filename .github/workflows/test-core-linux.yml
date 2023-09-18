@@ -45,7 +45,7 @@ jobs:
           apt update
           apt install -y nginx=1.24.0-1~jammy
           # Install BunkerWeb
-          apt install -y /tmp/bunkerweb_deb/bunkerweb.deb
+          apt install -y /tmp/bunkerweb.deb
       - name: Edit configuration files
         run: |
           echo "www.example.com 127.0.0.1" >> /etc/hosts
