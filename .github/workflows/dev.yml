@@ -127,6 +127,7 @@ jobs:
     with:
       TEST: ${{ matrix.test }}
       RELEASE: dev
+    secrets: inherit
 
   # Push with dev tag
   push-dev:
