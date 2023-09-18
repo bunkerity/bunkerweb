@@ -47,6 +47,14 @@ jobs:
           # Install BunkerWeb
           echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
           sudo apt install -fy /tmp/bunkerweb.deb
+      - name: Install Firefox
+        run: |
+          sudo apt install -y firefox curl grep zip wget
+          GECKODRIVER_VERSION=`curl -i https://github.com/mozilla/geckodriver/releases/latest | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+'` && \
+          wget -O geckodriver.tar.gz -w 5 https://github.com/mozilla/geckodriver/releases/download/$GECKODRIVER_VERSION/geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
+          sudo tar -C /usr/local/bin -xzvf geckodriver.tar.gz && \
+          sudo chmod +x /usr/local/bin/geckodriver && \
+          rm geckodriver.tar.gz
       - name: Edit configuration files
         run: |
           echo "www.example.com 127.0.0.1" | sudo tee -a /etc/hosts
@@ -61,4 +69,5 @@ jobs:
       - name: Run tests
         run: |
           cd ./tests/core/${{ inputs.TEST }}
+          MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install -r {} \;
           sudo ./test.sh "linux"
