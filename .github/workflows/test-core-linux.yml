@@ -29,9 +29,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull BW linux ubuntu test image
-        run: docker pull ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }} local/ubuntu:latest
+        run: docker pull ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }}
       - name: Run BW linux ubuntu test image
-        run: docker run --rm -v /tmp/bunkerweb_deb:/data local/ubuntu:latest
+        run: docker run --rm -v /tmp/bunkerweb_deb:/data ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }}
       - name: Install BunkerWeb
         run: |
           # Install NGINX
