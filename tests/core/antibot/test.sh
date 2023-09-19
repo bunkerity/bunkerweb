@@ -26,7 +26,9 @@ if [ "$integration" = "docker" ] ; then
     fi
 else
     systemctl stop bunkerweb
-    { echo "USE_ANTIBOT=no"; echo "ANTIBOT_URI=/challenge"; } >> /etc/bunkerweb/variables.env
+    echo "USE_ANTIBOT=no" | tee -a /etc/bunkerweb/variables.env
+    echo "ANTIBOT_URI=/challenge" | tee -a /etc/bunkerweb/variables.env
+    touch /var/www/html/index.html
 fi
 
 manual=0
@@ -36,10 +38,10 @@ cleanup_stack () {
     if [[ $end -eq 1 || $exit_code = 1 ]] || [[ $end -eq 0 && $exit_code = 0 ]] && [ $manual = 0 ] ; then
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_ANTIBOT: ".*"$@USE_ANTIBOT: "no"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@ANTIBOT_URI: ".*"@ANTIBOT_URI: "/challenge"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@ANTIBOT_URI: ".*"$@ANTIBOT_URI: "/challenge"@' {} \;
         else
             sed -i 's@USE_ANTIBOT=.*$@USE_ANTIBOT=no@' /etc/bunkerweb/variables.env
-            sed -i 's@ANTIBOT_URI=.*@ANTIBOT_URI=/challenge@' /etc/bunkerweb/variables.env
+            sed -i 's@ANTIBOT_URI=.*$@ANTIBOT_URI=/challenge@' /etc/bunkerweb/variables.env
             unset USE_ANTIBOT
             unset ANTIBOT_URI
         fi
@@ -54,6 +56,7 @@ cleanup_stack () {
         docker compose down -v --remove-orphans
     else
         systemctl stop bunkerweb
+        truncate -s 0 /var/log/bunkerweb/error.log
     fi
 
     if [ $? -ne 0 ] ; then
@@ -74,9 +77,9 @@ do
     elif [ "$test" = "endpoint" ] ; then
         echo "🤖 Running tests where antibot is on a different endpoint ..."
         if [ "$integration" == "docker" ] ; then
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@ANTIBOT_URI: ".*"@ANTIBOT_URI: "/custom"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@ANTIBOT_URI: ".*"$@ANTIBOT_URI: "/custom"@' {} \;
         else
-            sed -i 's@ANTIBOT_URI=.*@ANTIBOT_URI=/custom@' /etc/bunkerweb/variables.env
+            sed -i 's@ANTIBOT_URI=.*$@ANTIBOT_URI=/custom@' /etc/bunkerweb/variables.env
             export ANTIBOT_URI="/custom"
         fi
     elif [ "$test" != "deactivated" ] ; then
@@ -150,6 +153,10 @@ do
         done
         if [ $i -ge 120 ] ; then
             journalctl -u bunkerweb --no-pager
+            echo "🛡️ Showing BunkerWeb error logs ..."
+            cat /var/log/bunkerweb/error.log
+            echo "🛡️ Showing BunkerWeb access logs ..."
+            cat /var/log/bunkerweb/access.log
             echo "🤖 Linux stack is not healthy ❌"
             exit 1
         fi
@@ -170,8 +177,12 @@ do
             docker compose logs bw bw-scheduler
         else
             journalctl -u bunkerweb --no-pager
+            echo "🛡️ Showing BunkerWeb error logs ..."
             cat /var/log/bunkerweb/error.log
+            echo "🛡️ Showing BunkerWeb access logs ..."
             cat /var/log/bunkerweb/access.log
+            echo "🛡️ Showing Geckodriver logs ..."
+            cat geckodriver.log
         fi
         exit 1
     else
