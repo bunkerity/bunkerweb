@@ -84,6 +84,6 @@ jobs:
       - name: Run tests
         run: |
           cd ./tests/core/${{ inputs.TEST }}
+          MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec sudo pip install -r {} \;
           sudo -i
-          MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install -r {} \;
           ./test.sh "linux"
