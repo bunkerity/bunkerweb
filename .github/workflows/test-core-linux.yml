@@ -22,20 +22,21 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-      - name: Install Firefox
+      - name: Install Firefox and dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y firefox nodejs curl grep zip wget
+      - name: Download geckodriver
         uses: nick-fields/retry@v2
         with:
-          max_attempts: 5
-          retry_on: error
+          max_attempts: 3
           timeout_seconds: 5
           command: |
-            sudo apt update
-            sudo apt install -y firefox curl grep zip wget
             GECKODRIVER_VERSION=`curl -i https://github.com/mozilla/geckodriver/releases/latest | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+'` && \
             wget -O geckodriver.tar.gz -w 5 https://github.com/mozilla/geckodriver/releases/download/$GECKODRIVER_VERSION/geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz && \
             sudo tar -C /usr/local/bin -xzvf geckodriver.tar.gz && \
             sudo chmod +x /usr/local/bin/geckodriver && \
-            rm geckodriver.tar.gz
+            rm -f geckodriver.tar.gz
       - name: Login to ghcr
         uses: docker/login-action@v3
         with:
@@ -51,7 +52,6 @@ jobs:
           docker rm "$container_id"
       - name: Install BunkerWeb
         run: |
-          sudo apt update
           sudo apt install -y curl gnupg2 ca-certificates lsb-release ubuntu-keyring
           curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
           echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
