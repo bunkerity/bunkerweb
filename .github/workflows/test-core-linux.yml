@@ -29,7 +29,7 @@ jobs:
           sudo apt install --no-install-recommends -y nodejs tar wget curl grep libappindicator3-1 libasound2 libdbus-glib-1-2 libxtst6 libxt6
           wget -O firefox-setup.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64"
           tar xjf firefox-setup.tar.bz2 -C /opt/
-          ln -s /opt/firefox/firefox /usr/bin/firefox
+          sudo ln -s /opt/firefox/firefox /usr/bin/firefox
           rm -f firefox-setup.tar.bz2
       - name: Download geckodriver
         uses: nick-fields/retry@v2

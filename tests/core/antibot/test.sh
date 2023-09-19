@@ -40,6 +40,8 @@ cleanup_stack () {
         else
             sed -i 's@USE_ANTIBOT=.*$@USE_ANTIBOT=no@' /etc/bunkerweb/variables.env
             sed -i 's@ANTIBOT_URI=.*@ANTIBOT_URI=/challenge@' /etc/bunkerweb/variables.env
+            unset USE_ANTIBOT
+            unset ANTIBOT_URI
         fi
         if [[ $end -eq 1 && $exit_code = 0 ]] ; then
             return
@@ -75,6 +77,7 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@ANTIBOT_URI: ".*"@ANTIBOT_URI: "/custom"@' {} \;
         else
             sed -i 's@ANTIBOT_URI=.*@ANTIBOT_URI=/custom@' /etc/bunkerweb/variables.env
+            export ANTIBOT_URI="/custom"
         fi
     elif [ "$test" != "deactivated" ] ; then
         echo "🤖 Running tests with antibot \"$test\" ..."
@@ -82,6 +85,7 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_ANTIBOT: ".*"$@USE_ANTIBOT: "'"${test}"'"@' {} \;
         else
             sed -i 's@USE_ANTIBOT=.*$@USE_ANTIBOT='"${test}"'@' /etc/bunkerweb/variables.env
+            export USE_ANTIBOT="${test}"
         fi
     fi
 
@@ -156,9 +160,6 @@ do
     if [ "$integration" == "docker" ] ; then
         docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests
     else
-        set -a
-        source /etc/bunkerweb/variables.env
-        set +a
         python3 main.py
     fi
 
