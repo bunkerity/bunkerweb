@@ -24,6 +24,7 @@ jobs:
           cache: "pip"
       - name: Install Firefox and dependencies
         run: |
+          sudo snap remove firefox
           sudo add-apt-repository -y ppa:mozillateam/ppa
           echo '
             Package: *
