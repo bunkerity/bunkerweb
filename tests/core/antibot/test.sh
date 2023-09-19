@@ -60,7 +60,7 @@ cleanup_stack () {
     fi
 
     if [ $? -ne 0 ] ; then
-        echo "🤖 cleanup failed ❌"
+        echo "🤖 Cleanup failed ❌"
         exit 1
     fi
 
@@ -116,8 +116,8 @@ do
 
     # Check if stack is healthy
     echo "🤖 Waiting for stack to be healthy ..."
+    i=0
     if [ "$integration" == "docker" ] ; then
-        i=0
         while [ $i -lt 120 ] ; do
             containers=("antibot-bw-1" "antibot-bw-scheduler-1")
             healthy="true"
@@ -141,7 +141,6 @@ do
             exit 1
         fi
     else
-        i=0
         while [ $i -lt 120 ] ; do
             check="$(sudo cat /var/log/bunkerweb/error.log | grep "BunkerWeb is ready")"
             if ! [ -z "$check" ] ; then

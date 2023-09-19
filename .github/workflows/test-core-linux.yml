@@ -26,7 +26,7 @@ jobs:
         run: |
           sudo apt purge -y firefox
           sudo apt update
-          sudo apt install --no-install-recommends -y nodejs tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 libasound2 libdbus-glib-1-2 libxtst6 libxt6
+          sudo apt install --no-install-recommends -y git nodejs tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 libasound2 libdbus-glib-1-2 libxtst6 libxt6 php-fpm unzip
           wget -O firefox-setup.tar.bz2 "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64"
           tar -xjf firefox-setup.tar.bz2 -C /opt/
           sudo ln -s /opt/firefox/firefox /usr/bin/firefox
@@ -71,7 +71,13 @@ jobs:
         run: sudo apt install -fy /tmp/bunkerweb.deb
       - name: Edit configuration files
         run: |
+          # Misc
           echo "127.0.0.1 www.example.com" | sudo tee -a /etc/hosts
+          echo "127.0.0.1 bwadm.example.com" | sudo tee -a /etc/hosts
+          sudo cp ./tests/www-deb.conf /etc/php/8.1/fpm/pool.d/www.conf
+          sudo systemctl stop php8.1-fpm
+          sudo systemctl start php8.1-fpm
+          # BunkerWeb
           echo "SERVER_NAME=www.example.com" | sudo tee /etc/bunkerweb/variables.env
           echo "HTTP_PORT=80" | sudo tee -a /etc/bunkerweb/variables.env
           echo "HTTPS_PORT=443" | sudo tee -a /etc/bunkerweb/variables.env
