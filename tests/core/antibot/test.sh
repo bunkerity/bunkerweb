@@ -25,10 +25,10 @@ if [ "$integration" = "docker" ] ; then
         exit 1
     fi
 else
-    systemctl stop bunkerweb
-    echo "USE_ANTIBOT=no" | tee -a /etc/bunkerweb/variables.env
-    echo "ANTIBOT_URI=/challenge" | tee -a /etc/bunkerweb/variables.env
-    touch /var/www/html/index.html
+    sudo systemctl stop bunkerweb
+    echo "USE_ANTIBOT=no" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "ANTIBOT_URI=/challenge" | sudo tee -a /etc/bunkerweb/variables.env
+    sudo touch /var/www/html/index.html
 fi
 
 manual=0
@@ -40,8 +40,8 @@ cleanup_stack () {
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_ANTIBOT: ".*"$@USE_ANTIBOT: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@ANTIBOT_URI: ".*"$@ANTIBOT_URI: "/challenge"@' {} \;
         else
-            sed -i 's@USE_ANTIBOT=.*$@USE_ANTIBOT=no@' /etc/bunkerweb/variables.env
-            sed -i 's@ANTIBOT_URI=.*$@ANTIBOT_URI=/challenge@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@USE_ANTIBOT=.*$@USE_ANTIBOT=no@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@ANTIBOT_URI=.*$@ANTIBOT_URI=/challenge@' /etc/bunkerweb/variables.env
             unset USE_ANTIBOT
             unset ANTIBOT_URI
         fi
@@ -55,8 +55,8 @@ cleanup_stack () {
     if [ "$integration" == "docker" ] ; then
         docker compose down -v --remove-orphans
     else
-        systemctl stop bunkerweb
-        truncate -s 0 /var/log/bunkerweb/error.log
+        sudo systemctl stop bunkerweb
+        sudo truncate -s 0 /var/log/bunkerweb/error.log
     fi
 
     if [ $? -ne 0 ] ; then
@@ -79,7 +79,7 @@ do
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@ANTIBOT_URI: ".*"$@ANTIBOT_URI: "/custom"@' {} \;
         else
-            sed -i 's@ANTIBOT_URI=.*$@ANTIBOT_URI=/custom@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@ANTIBOT_URI=.*$@ANTIBOT_URI=/custom@' /etc/bunkerweb/variables.env
             export ANTIBOT_URI="/custom"
         fi
     elif [ "$test" != "deactivated" ] ; then
@@ -87,7 +87,7 @@ do
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_ANTIBOT: ".*"$@USE_ANTIBOT: "'"${test}"'"@' {} \;
         else
-            sed -i 's@USE_ANTIBOT=.*$@USE_ANTIBOT='"${test}"'@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@USE_ANTIBOT=.*$@USE_ANTIBOT='"${test}"'@' /etc/bunkerweb/variables.env
             export USE_ANTIBOT="${test}"
         fi
     fi
@@ -143,7 +143,7 @@ do
     else
         i=0
         while [ $i -lt 120 ] ; do
-            check="$(cat /var/log/bunkerweb/error.log | grep "BunkerWeb is ready")"
+            check="$(sudo cat /var/log/bunkerweb/error.log | grep "BunkerWeb is ready")"
             if ! [ -z "$check" ] ; then
                 echo "🤖 Linux stack is healthy ✅"
                 break
@@ -152,11 +152,11 @@ do
             i=$((i+1))
         done
         if [ $i -ge 120 ] ; then
-            journalctl -u bunkerweb --no-pager
+            sudo journalctl -u bunkerweb --no-pager
             echo "🛡️ Showing BunkerWeb error logs ..."
-            cat /var/log/bunkerweb/error.log
+            sudo cat /var/log/bunkerweb/error.log
             echo "🛡️ Showing BunkerWeb access logs ..."
-            cat /var/log/bunkerweb/access.log
+            sudo cat /var/log/bunkerweb/access.log
             echo "🤖 Linux stack is not healthy ❌"
             exit 1
         fi
@@ -176,13 +176,13 @@ do
         if [ "$integration" == "docker" ] ; then
             docker compose logs bw bw-scheduler
         else
-            journalctl -u bunkerweb --no-pager
+            sudo journalctl -u bunkerweb --no-pager
             echo "🛡️ Showing BunkerWeb error logs ..."
-            cat /var/log/bunkerweb/error.log
+            sudo cat /var/log/bunkerweb/error.log
             echo "🛡️ Showing BunkerWeb access logs ..."
-            cat /var/log/bunkerweb/access.log
+            sudo cat /var/log/bunkerweb/access.log
             echo "🛡️ Showing Geckodriver logs ..."
-            cat geckodriver.log
+            sudo cat geckodriver.log
         fi
         exit 1
     else
