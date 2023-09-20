@@ -71,6 +71,7 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
     mkdir -p /var/lib/bunkerweb && \
     mkdir /var/www/html && \
     echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
+    mkdir -p /etc/bunkerweb/plugins && \
     for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
     #It's a find command that will find all files in the bunkerweb directory, excluding the ui/deps directory, and then chmod them to 0740.
     find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec chmod 0740 {} \; && \
