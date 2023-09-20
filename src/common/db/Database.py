@@ -657,15 +657,11 @@ class Database:
                                     }
                                 )
                 else:
-                    if (
-                        "SERVER_NAME" in config
-                        and config["SERVER_NAME"] != ""
-                        and not (
-                            session.query(Services)
-                            .with_entities(Services.id)
-                            .filter_by(id=config["SERVER_NAME"].split(" ")[0])
-                            .first()
-                        )
+                    if config.get("SERVER_NAME", "") != "" and not (
+                        session.query(Services)
+                        .with_entities(Services.id)
+                        .filter_by(id=config["SERVER_NAME"].split(" ")[0])
+                        .first()
                     ):
                         to_put.append(
                             Services(

@@ -231,11 +231,11 @@ do
             sed -i 's@USE_REVERSE_PROXY@bwadm.example.com_USE_REVERSE_PROXY@' docker-compose.yml
             sed -i 's@REVERSE_PROXY_HOST@bwadm.example.com_REVERSE_PROXY_HOST@' docker-compose.yml
             sed -i 's@REVERSE_PROXY_URL@bwadm.example.com_REVERSE_PROXY_URL@' docker-compose.yml
+            sed -i '16i \      SERVICE_SERVER_NAME: "bwadm.example.com"' docker-compose.test.yml
             sed -i "21i \      CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:10001,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" docker-compose.test.yml
             sed -i 's@GLOBAL_USE_REVERSE_PROXY@SERVICE_USE_REVERSE_PROXY@' docker-compose.test.yml
             sed -i 's@GLOBAL_REVERSE_PROXY_HOST@SERVICE_REVERSE_PROXY_HOST@' docker-compose.test.yml
             sed -i 's@GLOBAL_REVERSE_PROXY_URL@SERVICE_REVERSE_PROXY_URL@' docker-compose.test.yml
-            sed -i 's@GLOBAL_SERVER_NAME@SERVICE_SERVER_NAME@' docker-compose.test.yml
         else
             sudo sed -i 's@MULTISITE=.*$@MULTISITE=yes@' /etc/bunkerweb/variables.env
             echo "bwadm.example.com_SERVER_NAME=bwadm.example.com" | sudo tee -a /etc/bunkerweb/variables.env
