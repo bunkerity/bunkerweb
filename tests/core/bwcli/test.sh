@@ -154,8 +154,6 @@ if [ $? -ne 0 ] ; then
         sudo cat /var/log/bunkerweb/error.log
         echo "🛡️ Showing BunkerWeb access logs ..."
         sudo cat /var/log/bunkerweb/access.log
-        echo "🛡️ Showing Geckodriver logs ..."
-        sudo cat geckodriver.log
     fi
     exit 1
 else

@@ -8,13 +8,20 @@ from uvicorn import run
 
 
 app = FastAPI()
-fastapi_proc = Process(target=run, args=(app,), kwargs=dict(host="0.0.0.0", port=80))
+fastapi_proc = Process(
+    target=run,
+    args=(app,),
+    kwargs=dict(
+        host="0.0.0.0" if getenv("TEST_TYPE", "docker") == "docker" else "127.0.0.1",
+        port=80,
+    ),
+)
 fastapi_proc.start()
 
 sleep(1)
 
 try:
-    use_reverse_scan = getenv("USE_REVERSE_SCAN", "no") == "yes"
+    use_reverse_scan = getenv("USE_REVERSE_SCAN", "yes") == "yes"
     reverse_scan_ports = getenv("REVERSE_SCAN_PORTS", "22 80 443 3128 8000 8080")
 
     print(f"ℹ️ Trying to access http://www.example.com ...", flush=True)

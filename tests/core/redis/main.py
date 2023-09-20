@@ -15,13 +15,13 @@ from uvicorn import run
 fastapi_proc = None
 
 try:
-    redis_host = getenv("REDIS_HOST")
+    redis_host = getenv("REDIS_HOST", "127.0.0.1")
 
     if not redis_host:
         print("❌ Redis host is not set, exiting ...", flush=True)
         exit(1)
 
-    redis_port = getenv("REDIS_PORT", "")
+    redis_port = getenv("REDIS_PORT", "6379")
 
     if not redis_port.isdigit():
         print("❌ Redis port doesn't seem to be a number, exiting ...", flush=True)
@@ -29,7 +29,7 @@ try:
 
     redis_port = int(redis_port)
 
-    redis_db = getenv("REDIS_DATABASE", "")
+    redis_db = getenv("REDIS_DATABASE", "0")
 
     if not redis_db.isdigit():
         print("❌ Redis database doesn't seem to be a number, exiting ...", flush=True)
@@ -63,7 +63,14 @@ try:
         print("ℹ️ Testing Reverse Scan, starting FastAPI ...", flush=True)
         app = FastAPI()
         fastapi_proc = Process(
-            target=run, args=(app,), kwargs=dict(host="0.0.0.0", port=8080)
+            target=run,
+            args=(app,),
+            kwargs=dict(
+                host="0.0.0.0"
+                if getenv("TEST_TYPE", "docker") == "docker"
+                else "127.0.0.1",
+                port=8080,
+            ),
         )
         fastapi_proc.start()
 

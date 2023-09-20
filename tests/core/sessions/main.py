@@ -58,7 +58,10 @@ try:
 
     print("ℹ️ Reloading BunkerWeb ...", flush=True)
 
-    response = post("http://192.168.0.2:5000/reload", headers={"Host": "bwapi"})
+    response = post(
+        f"http://{'192.168.0.2' if getenv('TEST_TYPE', 'docker') == 'docker' else '127.0.0.1'}:5000/reload",
+        headers={"Host": "bwapi"},
+    )
 
     if response.status_code != 200:
         print("❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True)

@@ -88,9 +88,6 @@ if [ "$integration" == "docker" ] ; then
         exit 1
     fi
 else
-    echo "🔏 Installing openssl ..."
-    sudo apt-get install openssl -y
-
     echo "🔏 Generating certificate for www.example.com ..."
     openssl req -nodes -x509 -newkey rsa:4096 -keyout /tmp/privatekey.key -out /tmp/certificate.pem -days 365 -subj /CN=www.example.com/
     if [ $? -ne 0 ] ; then
@@ -202,8 +199,6 @@ do
             sudo cat /var/log/bunkerweb/error.log
             echo "🛡️ Showing BunkerWeb access logs ..."
             sudo cat /var/log/bunkerweb/access.log
-            echo "🛡️ Showing Geckodriver logs ..."
-            sudo cat geckodriver.log
         fi
         exit 1
     else
