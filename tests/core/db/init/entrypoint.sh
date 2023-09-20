@@ -8,8 +8,6 @@ echo "ℹ️ Extracting ClamAV plugin ..."
 
 cp -r bunkerweb-plugins/clamav /plugins/
 
-cd ..
-
 echo "ℹ️ Extracting settings.json file, db and core directory ..."
 
 cp bunkerweb/settings.json /bunkerweb/

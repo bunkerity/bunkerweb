@@ -138,6 +138,7 @@ cleanup_stack () {
 # Cleanup stack on exit
 trap cleanup_stack EXIT
 
+echo "💾 Initializing workspace ..."
 if [ "$integration" == "docker" ] ; then
     echo "💾 Creating the bw-docker network ..."
     docker network create bw-docker
@@ -155,10 +156,7 @@ if [ "$integration" == "docker" ] ; then
             exit 1
         fi
     fi
-fi
 
-echo "💾 Initializing workspace ..."
-if [ "$integration" == "docker" ] ; then
     rm -rf init/plugins init/bunkerweb
     mkdir -p init/plugins init/bunkerweb
     docker compose -f docker-compose.init.yml up --build
