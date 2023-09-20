@@ -36,6 +36,7 @@ if [ "$integration" = "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb
+    sudo pip install -r requirements.txt
     sudo sed -i 's@SERVER_NAME=.*$@SERVER_NAME=bwadm.example.com@' /etc/bunkerweb/variables.env
     echo "MULTISITE=no" | sudo tee -a /etc/bunkerweb/variables.env
     echo "USE_REVERSE_PROXY=yes" | sudo tee -a /etc/bunkerweb/variables.env

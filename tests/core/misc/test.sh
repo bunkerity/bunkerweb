@@ -40,6 +40,7 @@ else
     echo "LISTEN_HTTP=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "DENY_HTTP_STATUS=403" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
+    export TEST_TYPE="linux"
 fi
 
 manual=0

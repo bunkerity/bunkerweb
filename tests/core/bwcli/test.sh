@@ -26,6 +26,7 @@ if [ "$integration" = "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb
+    sudo pip install -r requirements.txt
 
     echo "⌨️ Installing Redis ..."
     sudo apt install --no-install-recommends -y redis
