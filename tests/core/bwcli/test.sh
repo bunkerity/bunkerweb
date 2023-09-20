@@ -140,7 +140,7 @@ fi
 if [ "$integration" == "docker" ] ; then
     docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests
 else
-    python3 linux.py
+    sudo python3 linux.py
 fi
 
 if [ $? -ne 0 ] ; then

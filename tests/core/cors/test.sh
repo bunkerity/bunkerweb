@@ -58,14 +58,14 @@ cleanup_stack () {
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_METHODS: "GET, HEAD, POST, OPTIONS"@CORS_ALLOW_METHODS: "GET, POST, OPTIONS"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_HEADERS: "X-Test"@CORS_ALLOW_HEADERS: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range"@' {} \;
         else
-            sed -i 's@USE_CORS=.*$@USE_CORS=no@' /etc/bunkerweb/variables.env
-            sed -i 's@GENERATE_SELF_SIGNED_SSL=.*$@GENERATE_SELF_SIGNED_SSL=no@' /etc/bunkerweb/variables.env
-            sed -i 's@CORS_ALLOW_ORIGIN=.*$@CORS_ALLOW_ORIGIN=*@' /etc/bunkerweb/variables.env
-            sed -i 's@CORS_EXPOSE_HEADERS=.*$@CORS_EXPOSE_HEADERS=Content-Length,Content-Range@' /etc/bunkerweb/variables.env
-            sed -i 's@CORS_MAX_AGE=.*$@CORS_MAX_AGE=86400@' /etc/bunkerweb/variables.env
-            sed -i 's@CORS_ALLOW_CREDENTIALS=.*$@CORS_ALLOW_CREDENTIALS=no@' /etc/bunkerweb/variables.env
-            sed -i 's@CORS_ALLOW_METHODS=.*$@CORS_ALLOW_METHODS=GET, POST, OPTIONS@' /etc/bunkerweb/variables.env
-            sed -i 's@CORS_ALLOW_HEADERS=.*$@CORS_ALLOW_HEADERS=DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@USE_CORS=.*$@USE_CORS=no@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@GENERATE_SELF_SIGNED_SSL=.*$@GENERATE_SELF_SIGNED_SSL=no@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_ALLOW_ORIGIN=.*$@CORS_ALLOW_ORIGIN=*@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_EXPOSE_HEADERS=.*$@CORS_EXPOSE_HEADERS=Content-Length,Content-Range@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_MAX_AGE=.*$@CORS_MAX_AGE=86400@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_ALLOW_CREDENTIALS=.*$@CORS_ALLOW_CREDENTIALS=no@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_ALLOW_METHODS=.*$@CORS_ALLOW_METHODS=GET, POST, OPTIONS@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_ALLOW_HEADERS=.*$@CORS_ALLOW_HEADERS=DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range@' /etc/bunkerweb/variables.env
             unset USE_CORS
             unset GENERATE_SELF_SIGNED_SSL
             unset CORS_ALLOW_ORIGIN
@@ -121,7 +121,7 @@ do
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_CORS: "no"@USE_CORS: "yes"@' {} \;
         else
-            sed -i 's@USE_CORS=.*$@USE_CORS=yes@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@USE_CORS=.*$@USE_CORS=yes@' /etc/bunkerweb/variables.env
             export USE_CORS="yes"
         fi
     elif [ "$test" = "allow_origin" ] ; then
@@ -129,7 +129,7 @@ do
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_ORIGIN: "\*"@CORS_ALLOW_ORIGIN: "^http://app1\\\\.example\\\\.com$$"@' {} \;
         else
-            sed -i 's@CORS_ALLOW_ORIGIN=.*$@CORS_ALLOW_ORIGIN=^http://app1\\.example\\.com$$@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_ALLOW_ORIGIN=.*$@CORS_ALLOW_ORIGIN=^http://app1\\.example\\.com$$@' /etc/bunkerweb/variables.env
             export CORS_ALLOW_ORIGIN="^http://app1\\.example\\.com\$"
         fi
     elif [ "$test" = "tweaked_settings" ] ; then
@@ -143,13 +143,13 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_METHODS: "GET, POST, OPTIONS"@CORS_ALLOW_METHODS: "GET, HEAD, POST, OPTIONS"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CORS_ALLOW_HEADERS: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range"@CORS_ALLOW_HEADERS: "X-Test"@' {} \;
         else
-            sed -i 's@GENERATE_SELF_SIGNED_SSL=.*$@GENERATE_SELF_SIGNED_SSL=yes@' /etc/bunkerweb/variables.env
-            sed -i 's@CORS_ALLOW_ORIGIN=.*$@CORS_ALLOW_ORIGIN=^https://app1\\.example\\.com\$@' /etc/bunkerweb/variables.env
-            sed -i 's@CORS_EXPOSE_HEADERS=.*$@CORS_EXPOSE_HEADERS=X-Test@' /etc/bunkerweb/variables.env
-            sed -i 's@CORS_MAX_AGE=.*$@CORS_MAX_AGE=3600@' /etc/bunkerweb/variables.env
-            sed -i 's@CORS_ALLOW_CREDENTIALS=.*$@CORS_ALLOW_CREDENTIALS=yes@' /etc/bunkerweb/variables.env
-            sed -i 's@CORS_ALLOW_METHODS=.*$@CORS_ALLOW_METHODS=GET, HEAD, POST, OPTIONS@' /etc/bunkerweb/variables.env
-            sed -i 's@CORS_ALLOW_HEADERS=.*$@CORS_ALLOW_HEADERS=X-Test@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@GENERATE_SELF_SIGNED_SSL=.*$@GENERATE_SELF_SIGNED_SSL=yes@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_ALLOW_ORIGIN=.*$@CORS_ALLOW_ORIGIN=^https://app1\\.example\\.com\$@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_EXPOSE_HEADERS=.*$@CORS_EXPOSE_HEADERS=X-Test@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_MAX_AGE=.*$@CORS_MAX_AGE=3600@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_ALLOW_CREDENTIALS=.*$@CORS_ALLOW_CREDENTIALS=yes@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_ALLOW_METHODS=.*$@CORS_ALLOW_METHODS=GET, HEAD, POST, OPTIONS@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CORS_ALLOW_HEADERS=.*$@CORS_ALLOW_HEADERS=X-Test@' /etc/bunkerweb/variables.env
             export GENERATE_SELF_SIGNED_SSL="yes"
             export CORS_ALLOW_ORIGIN="^https://app1\\.example\\.com\$"
             export CORS_EXPOSE_HEADERS="X-Test"

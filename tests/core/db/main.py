@@ -43,10 +43,7 @@ try:
     print(f"ℹ️ Connecting to database: {database_uri}", flush=True)
 
     try:
-        sql_engine = create_engine(
-            database_uri,
-            future=True,
-        )
+        sql_engine = create_engine(database_uri, future=True)
     except ArgumentError:
         print(f"❌ Invalid database URI: {database_uri}", flush=True)
         error = True
