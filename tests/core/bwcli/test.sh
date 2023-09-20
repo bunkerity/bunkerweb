@@ -28,7 +28,7 @@ else
     sudo systemctl stop bunkerweb
 
     echo "⌨️ Installing Redis ..."
-    sudo apt install -y redis
+    sudo apt install --no-install-recommends -y redis
     redis-server --daemonize yes
     if [ $? -ne 0 ] ; then
         echo "⌨️ Redis start failed ❌"
@@ -38,6 +38,8 @@ else
     
     echo "USE_REDIS=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REDIS_HOST=127.0.0.1" | sudo tee -a /etc/bunkerweb/variables.env
+    export USE_REDIS="yes"
+    export REDIS_HOST="127.0.0.1"
     sudo touch /var/www/html/index.html
 fi
 
@@ -81,7 +83,7 @@ if [ "$integration" == "docker" ] ; then
 else
     sudo systemctl start bunkerweb
     if [ $? -ne 0 ] ; then
-        echo "⌨️ Up failed ❌"
+        echo "⌨️ Start failed ❌"
         exit 1
     fi
 fi
@@ -138,7 +140,7 @@ fi
 if [ "$integration" == "docker" ] ; then
     docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests
 else
-    python3 main.py
+    python3 linux.py
 fi
 
 if [ $? -ne 0 ] ; then

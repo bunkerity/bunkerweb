@@ -97,7 +97,7 @@ do
     else
         sudo systemctl start bunkerweb
         if [ $? -ne 0 ] ; then
-            echo "📦 Up failed ❌"
+            echo "📦 Start failed ❌"
             exit 1
         fi
     fi

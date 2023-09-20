@@ -1,5 +1,6 @@
 from contextlib import suppress
 from datetime import datetime
+from re import search
 from docker import DockerClient
 from os import getenv
 from requests import get
@@ -97,24 +98,34 @@ try:
                 flush=True,
             )
 
-            docker_host = getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
-            docker_client = DockerClient(base_url=docker_host)
-
-            bw_instances = docker_client.containers.list(
-                filters={"label": "bunkerweb.INSTANCE"}
-            )
-
-            if not bw_instances:
-                print("❌ BunkerWeb instance not found ...", flush=True)
-                exit(1)
-
-            bw_instance = bw_instances[0]
-
             found = False
-            for log in bw_instance.logs(since=current_time).split(b"\n"):
-                if b"decreased counter for IP 192.168.0.3 (0/10)" in log:
-                    found = True
-                    break
+            if getenv("TEST_TYPE", "docker") == "docker":
+                docker_host = getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
+                docker_client = DockerClient(base_url=docker_host)
+
+                bw_instances = docker_client.containers.list(
+                    filters={"label": "bunkerweb.INSTANCE"}
+                )
+
+                if not bw_instances:
+                    print("❌ BunkerWeb instance not found ...", flush=True)
+                    exit(1)
+
+                bw_instance = bw_instances[0]
+
+                for log in bw_instance.logs(since=current_time).split(b"\n"):
+                    if b"decreased counter for IP 192.168.0.3 (0/10)" in log:
+                        found = True
+                        break
+            else:
+                with open("/var/log/bunkerweb/error.log", "r") as f:
+                    for line in f.readlines():
+                        if search(
+                            r"decreased counter for IP \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} \(0/10\)",
+                            line,
+                        ):
+                            found = True
+                            break
 
             if not found:
                 print("❌ Bad Behavior's count time didn't changed ...", flush=True)

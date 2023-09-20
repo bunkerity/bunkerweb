@@ -26,21 +26,9 @@ if [ "$integration" = "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb
-
-    echo "🔏 Installing openssl ..."
-    sudo apt-get install openssl -y
-
-    echo "🔏 Generating certificate for www.example.com ..."
-    openssl req -nodes -x509 -newkey rsa:4096 -keyout /tmp/privatekey.key -out /tmp/certificate.pem -days 365 -subj /CN=www.example.com/
-    if [ $? -ne 0 ] ; then
-        echo "🔏 Certificate generation failed ❌"
-        exit 1
-    fi
-    sudo chmod 777 /tmp/privatekey.key /tmp/certificate.pem
-
     echo "USE_CUSTOM_SSL=no" | sudo tee -a /etc/bunkerweb/variables.env
     echo "CUSTOM_SSL_CERT=/tmp/certificate.pem" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "CUSTOM_SSL_KEY=/tmp/certificate.key" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "CUSTOM_SSL_KEY=/tmp/privatekey.key" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
 fi
 
@@ -99,6 +87,17 @@ if [ "$integration" == "docker" ] ; then
         echo "🔏 privatekey.key not found ❌"
         exit 1
     fi
+else
+    echo "🔏 Installing openssl ..."
+    sudo apt-get install openssl -y
+
+    echo "🔏 Generating certificate for www.example.com ..."
+    openssl req -nodes -x509 -newkey rsa:4096 -keyout /tmp/privatekey.key -out /tmp/certificate.pem -days 365 -subj /CN=www.example.com/
+    if [ $? -ne 0 ] ; then
+        echo "🔏 Certificate generation failed ❌"
+        exit 1
+    fi
+    sudo chmod 777 /tmp/privatekey.key /tmp/certificate.pem
 fi
 
 for test in "deactivated" "activated"
@@ -132,7 +131,7 @@ do
     else
         sudo systemctl start bunkerweb
         if [ $? -ne 0 ] ; then
-            echo "🔏 Up failed ❌"
+            echo "🔏 Start failed ❌"
             exit 1
         fi
     fi

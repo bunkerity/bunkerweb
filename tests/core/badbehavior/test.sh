@@ -32,6 +32,7 @@ else
     echo "BAD_BEHAVIOR_THRESHOLD=10" | sudo tee -a /etc/bunkerweb/variables.env
     echo "BAD_BEHAVIOR_COUNT_TIME=60" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
+    export TEST_TYPE="linux"
 fi
 
 manual=0
@@ -92,7 +93,7 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_BAD_BEHAVIOR: "yes"@USE_BAD_BEHAVIOR: "no"@' {} \;
         else
             sudo sed -i 's@USE_BAD_BEHAVIOR=.*$@USE_BAD_BEHAVIOR=no@' /etc/bunkerweb/variables.env
-            unset USE_BAD_BEHAVIOR
+            export USE_BAD_BEHAVIOR="no"
         fi
     elif [ "$test" = "status_codes" ] ; then
         echo "📟 Running tests with badbehavior's 403 status code removed from the list ..."
@@ -102,8 +103,8 @@ do
         else
             sudo sed -i 's@USE_BAD_BEHAVIOR=.*$@USE_BAD_BEHAVIOR=yes@' /etc/bunkerweb/variables.env
             sudo sed -i 's@BAD_BEHAVIOR_STATUS_CODES=.*$@BAD_BEHAVIOR_STATUS_CODES=400 401 404 405 429 444@' /etc/bunkerweb/variables.env
-            unset USE_BAD_BEHAVIOR
-            unset BAD_BEHAVIOR_STATUS_CODES
+            export USE_BAD_BEHAVIOR="yes"
+            export BAD_BEHAVIOR_STATUS_CODES="400 401 404 405 429 444"
         fi
     elif [ "$test" = "ban_time" ] ; then
         echo "📟 Running tests with badbehavior's ban time changed to 60 seconds ..."
@@ -113,8 +114,8 @@ do
         else
             sudo sed -i 's@BAD_BEHAVIOR_STATUS_CODES=.*$@BAD_BEHAVIOR_STATUS_CODES=400 401 403 404 405 429 444@' /etc/bunkerweb/variables.env
             sudo sed -i 's@BAD_BEHAVIOR_BAN_TIME=.*$@BAD_BEHAVIOR_BAN_TIME=60@' /etc/bunkerweb/variables.env
-            unset BAD_BEHAVIOR_STATUS_CODES
-            unset BAD_BEHAVIOR_BAN_TIME
+            export BAD_BEHAVIOR_STATUS_CODES="400 401 403 404 405 429 444"
+            export BAD_BEHAVIOR_BAN_TIME="60"
         fi
     elif [ "$test" = "threshold" ] ; then
         echo "📟 Running tests with badbehavior's threshold set to 20 ..."
@@ -124,8 +125,8 @@ do
         else
             sudo sed -i 's@BAD_BEHAVIOR_BAN_TIME=.*$@BAD_BEHAVIOR_BAN_TIME=86400@' /etc/bunkerweb/variables.env
             sudo sed -i 's@BAD_BEHAVIOR_THRESHOLD=.*$@BAD_BEHAVIOR_THRESHOLD=20@' /etc/bunkerweb/variables.env
-            unset BAD_BEHAVIOR_BAN_TIME
-            unset BAD_BEHAVIOR_THRESHOLD
+            export BAD_BEHAVIOR_BAN_TIME="86400"
+            export BAD_BEHAVIOR_THRESHOLD="20"
         fi
     elif [ "$test" = "count_time" ] ; then
         echo "📟 Running tests with badbehavior's count time set to 30 seconds ..."
@@ -135,8 +136,8 @@ do
         else
             sudo sed -i 's@BAD_BEHAVIOR_THRESHOLD=.*$@BAD_BEHAVIOR_THRESHOLD=10@' /etc/bunkerweb/variables.env
             sudo sed -i 's@BAD_BEHAVIOR_COUNT_TIME=.*$@BAD_BEHAVIOR_COUNT_TIME=30@' /etc/bunkerweb/variables.env
-            unset BAD_BEHAVIOR_THRESHOLD
-            unset BAD_BEHAVIOR_COUNT_TIME
+            export BAD_BEHAVIOR_THRESHOLD="10"
+            export BAD_BEHAVIOR_COUNT_TIME="30"
         fi
     fi
 
@@ -157,7 +158,7 @@ do
     else
         sudo systemctl start bunkerweb
         if [ $? -ne 0 ] ; then
-            echo "📟 Up failed ❌"
+            echo "📟 Start failed ❌"
             exit 1
         fi
     fi

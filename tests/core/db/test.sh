@@ -36,19 +36,21 @@ if [ "$integration" = "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb
+    sudo sed -i 's@SERVER_NAME=.*$@SERVER_NAME=bwadm.example.com@' /etc/bunkerweb/variables.env
     echo "MULTISITE=no" | sudo tee -a /etc/bunkerweb/variables.env
     echo "USE_REVERSE_PROXY=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REVERSE_PROXY_HOST=http://app1:8080" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REVERSE_PROXY_URL=/" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "DATABASE_URI=sqlite:////var/ib/bunkerweb/db.sqlite3" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "DATABASE_URI=sqlite:////var/lib/bunkerweb/db.sqlite3" | sudo tee -a /etc/bunkerweb/variables.env
     echo 'SecRule REQUEST_FILENAME "@rx ^/db" "id:10000,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"' | sudo tee /etc/bunkerweb/configs/modsec/test_custom_conf.conf
     sudo chown -R nginx:nginx /etc/bunkerweb
+    sudo chmod 777 /etc/bunkerweb/configs/modsec/test_custom_conf.conf
     sudo touch /var/www/html/index.html
 
+    export TEST_TYPE="linux"
     export GLOBAL_SERVER_NAME="bwadm.example.com"
-    export GLOBAL_API_WHITELIST_IP="127.0.0.0/8"
     export GLOBAL_HTTP_PORT="80"
-    export GLOBAL_HTTPS_PORT="433"
+    export GLOBAL_HTTPS_PORT="443"
     export GLOBAL_DNS_RESOLVERS="9.9.9.9 8.8.8.8 8.8.4.4"
     export GLOBAL_LOG_LEVEL="info"
     export GLOBAL_USE_BUNKERNET="no"
@@ -92,24 +94,24 @@ cleanup_stack () {
                 sed -i '20d' docker-compose.test.yml
             fi
         else
-            sudo rm -rf /etc/bunkerweb/plugins
-            sed -i 's@MULTISITE=.*$@MULTISITE=no@' /etc/bunkerweb/variables.env
-            sed -i 's@DATABASE_URI=.*$@DATABASE_URI=sqlite:////var/lib/bunkerweb/db.sqlite3@' /etc/bunkerweb/variables.env
-            sed -i 's@bwadm.example.com_@@g' /etc/bunkerweb/variables.env
+            sudo rm -rf /etc/bunkerweb/plugins/*
+            sudo sed -i 's@MULTISITE=.*$@MULTISITE=no@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@DATABASE_URI=.*$@DATABASE_URI=sqlite:////var/lib/bunkerweb/db.sqlite3@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@bwadm.example.com_@@g' /etc/bunkerweb/variables.env
 
             if [[ $(sudo tail -n 1 /etc/bunkerweb/variables.env) = "SERVER_NAME=bwadm.example.com" ]] ; then
                 sudo sed -i '$ d' /etc/bunkerweb/variables.env
             fi
 
+            unset GLOBAL_MULTISITE
             unset SERVICE_USE_REVERSE_PROXY
             unset SERVICE_REVERSE_PROXY_HOST
             unset SERVICE_REVERSE_PROXY_URL
             unset CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf
-            export GLOBAL_SERVER_NAME="bwadm.example.com"
             export GLOBAL_USE_REVERSE_PROXY="yes"
             export GLOBAL_REVERSE_PROXY_HOST="http://app1:8080"
             export GLOBAL_REVERSE_PROXY_URL="/"
-            sudo rm -f /etc/bunkerweb/configs/modsec-crs/test_service_conf.conf
+            sudo rm -f /etc/bunkerweb/configs/modsec-crs/bwadm.example.com/test_service_conf.conf
         fi
         if [[ $end -eq 1 && $exit_code = 0 ]] ; then
             return
@@ -193,8 +195,8 @@ else
 
     echo "💾 Extracting ClamAV plugin ..."
     mkdir external
-    sudo cp -r bunkerweb-plugins/clamav external/
-    sudo cp -r external/clamav /etc/bunkerweb/plugins/
+    sudo cp -r bunkerweb-plugins/clamav external/clamav
+    sudo cp -r external/clamav /etc/bunkerweb/plugins/clamav
     rm -rf bunkerweb-plugins
 
     echo "💾 Extracting settings.json file, db and core directory ..."
@@ -215,8 +217,10 @@ fi
 
 for test in $tests
 do
-    echo "💾 Creating the bw-docker network ..."
-    docker network create bw-docker
+    if [ "$integration" == "docker" ] ; then
+        echo "💾 Creating the bw-docker network ..."
+        docker network create bw-docker
+    fi
 
     if [ "$test" = "local" ] ; then
         echo "💾 Running tests with a local database ..."
@@ -235,13 +239,17 @@ do
             sed -i 's@GLOBAL_REVERSE_PROXY_URL@SERVICE_REVERSE_PROXY_URL@' docker-compose.test.yml
             sed -i 's@GLOBAL_SERVER_NAME@SERVICE_SERVER_NAME@' docker-compose.test.yml
         else
-            sed -i 's@MULTISITE=.*$@MULTISITE=yes@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@MULTISITE=.*$@MULTISITE=yes@' /etc/bunkerweb/variables.env
             echo "bwadm.example.com_SERVER_NAME=bwadm.example.com" | sudo tee -a /etc/bunkerweb/variables.env
-            echo 'SecRule REQUEST_FILENAME "@rx ^/test" "id:10001,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"' | sudo tee /etc/bunkerweb/configs/modsec-crs/test_service_conf.conf
-            sed -i 's@USE_REVERSE_PROXY@bwadm.example.com_USE_REVERSE_PROXY@' /etc/bunkerweb/variables.env
-            sed -i 's@REVERSE_PROXY_HOST@bwadm.example.com_REVERSE_PROXY_HOST@' /etc/bunkerweb/variables.env
-            sed -i 's@REVERSE_PROXY_URL@bwadm.example.com_REVERSE_PROXY_URL@' /etc/bunkerweb/variables.env
+            sudo mkdir -p /etc/bunkerweb/configs/modsec-crs/bwadm.example.com
+            echo 'SecRule REQUEST_FILENAME "@rx ^/test" "id:10001,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"' | sudo tee /etc/bunkerweb/configs/modsec-crs/bwadm.example.com/test_service_conf.conf
+            sudo chown -R nginx:nginx /etc/bunkerweb
+            sudo chmod 777 /etc/bunkerweb/configs/modsec-crs/bwadm.example.com/test_service_conf.conf
+            sudo sed -i 's@USE_REVERSE_PROXY@bwadm.example.com_USE_REVERSE_PROXY@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@REVERSE_PROXY_HOST@bwadm.example.com_REVERSE_PROXY_HOST@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@REVERSE_PROXY_URL@bwadm.example.com_REVERSE_PROXY_URL@' /etc/bunkerweb/variables.env
 
+            export GLOBAL_MULTISITE="yes"
             export CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf='SecRule REQUEST_FILENAME "@rx ^/test" "id:10001,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"'
             export SERVICE_USE_REVERSE_PROXY=$GLOBAL_USE_REVERSE_PROXY
             export SERVICE_REVERSE_PROXY_HOST=$GLOBAL_REVERSE_PROXY_HOST
@@ -250,7 +258,6 @@ do
             unset GLOBAL_USE_REVERSE_PROXY
             unset GLOBAL_REVERSE_PROXY_HOST
             unset GLOBAL_REVERSE_PROXY_URL
-            unset GLOBAL_SERVER_NAME
         fi
     elif [ "$test" = "mariadb" ] ; then
         echo "💾 Running tests with MariaDB database ..."
@@ -344,7 +351,7 @@ do
     else
         sudo systemctl start bunkerweb
         if [ $? -ne 0 ] ; then
-            echo "💾 Up failed ❌"
+            echo "💾 Start failed ❌"
             exit 1
         fi
     fi

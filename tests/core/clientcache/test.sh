@@ -31,6 +31,7 @@ else
     echo "CLIENT_CACHE_ETAG=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "CLIENT_CACHE_CONTROL=public, max-age=15552000" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
+    sudo cp image.png /var/www/html/image.png
 fi
 
 manual=0
@@ -139,7 +140,7 @@ do
     else
         sudo systemctl start bunkerweb
         if [ $? -ne 0 ] ; then
-            echo "📝 Up failed ❌"
+            echo "📝 Start failed ❌"
             exit 1
         fi
     fi

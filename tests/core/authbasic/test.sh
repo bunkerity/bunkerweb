@@ -30,7 +30,7 @@ else
     echo "AUTH_BASIC_LOCATION=sitewide" | sudo tee -a /etc/bunkerweb/variables.env
     echo "AUTH_BASIC_USER=bunkerity" | sudo tee -a /etc/bunkerweb/variables.env
     echo "AUTH_BASIC_PASSWORD=Secr3tP@ssw0rd" | sudo tee -a /etc/bunkerweb/variables.env
-    sudo touch /var/www/html/index.html
+    sudo wget -O /var/www/html/index.html https://github.com/nginxinc/NGINX-Demos/raw/master/nginx-hello-nonroot/html-version/index.html
 fi
 
 manual=0
@@ -47,7 +47,7 @@ cleanup_stack () {
             sudo sed -i 's@USE_AUTH_BASIC=.*$@USE_AUTH_BASIC=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@AUTH_BASIC_LOCATION=.*$@AUTH_BASIC_LOCATION=sitewide@' /etc/bunkerweb/variables.env
             sudo sed -i 's@AUTH_BASIC_USER=.*$@AUTH_BASIC_USER=bunkerity@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@AUTH_BASIC_PASSWORD=.*$@AUTH_BASIC_PASSWORD=Secr3tP@ssw0rd@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@AUTH_BASIC_PASSWORD=.*$@AUTH_BASIC_PASSWORD=Secr3tP\@ssw0rd@' /etc/bunkerweb/variables.env
             unset USE_AUTH_BASIC
             unset AUTH_BASIC_LOCATION
             unset AUTH_BASIC_USER
@@ -136,7 +136,7 @@ do
     else
         sudo systemctl start bunkerweb
         if [ $? -ne 0 ] ; then
-            echo "🔐 Up failed ❌"
+            echo "🔐 Start failed ❌"
             exit 1
         fi
     fi
