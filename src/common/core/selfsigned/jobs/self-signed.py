@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+from datetime import timedelta
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
@@ -52,7 +55,26 @@ def generate_cert(
             == 0
         ):
             logger.info(f"Self-signed certificate already present for {first_server}")
-            return True, 0
+
+            certificate = x509.load_pem_x509_certificate(
+                self_signed_path.joinpath(f"{first_server}.pem").read_bytes(),
+                default_backend(),
+            )
+            if sorted(
+                attribute.rfc4514_string() for attribute in certificate.subject
+            ) != sorted(v for v in subj.split("/") if v):
+                logger.warning(
+                    f"Subject of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ..."
+                )
+            elif (
+                certificate.not_valid_after - certificate.not_valid_before
+                != timedelta(days=int(days))
+            ):
+                logger.warning(
+                    f"Expiration date of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ..."
+                )
+            else:
+                return True, 0
 
     logger.info(f"Generating self-signed certificate for {first_server}")
     if (
