@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 
 from datetime import timedelta
-from cryptography import x509
-from cryptography.hazmat.backends import default_backend
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
@@ -22,6 +20,9 @@ for deps_path in [
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
+
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
 
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
