@@ -98,6 +98,7 @@ jobs:
           sudo chmod 777 /etc/bunkerweb/variables.env /etc/bunkerweb/ui.env
       - name: Run tests
         run: |
+          sudo systemctl start bunkerweb-ui
           cd ./tests/ui
           MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install -r {} \;
           touch test.txt
