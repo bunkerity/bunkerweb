@@ -113,6 +113,6 @@ jobs:
             }' | tee plugin.json
           zip discord.zip plugin.json
           rm plugin.json
-          ./test.sh "linux"
+          ./tests.sh "linux"
         env:
           MODE: ${{ inputs.RELEASE }}
