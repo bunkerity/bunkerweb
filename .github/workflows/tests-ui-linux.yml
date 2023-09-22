@@ -98,19 +98,18 @@ jobs:
           sudo chmod 777 /etc/bunkerweb/variables.env /etc/bunkerweb/ui.env
       - name: Run tests
         run: |
-          sudo systemctl start bunkerweb-ui
           cd ./tests/ui
           MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install -r {} \;
           touch test.txt
           zip test.zip test.txt
           rm test.txt
-          echo '{ \
-            "id": "discord", \
-            "name": "Discord", \
-            "description": "Send alerts to a Discord channel (using webhooks).", \
-            "version": "0.1", \
-            "stream": "no", \
-            "settings": {} \
+          echo '{
+            "id": "discord",
+            "name": "Discord",
+            "description": "Send alerts to a Discord channel (using webhooks).",
+            "version": "0.1",
+            "stream": "no",
+            "settings": {}
             }' | tee plugin.json
           zip discord.zip plugin.json
           rm plugin.json

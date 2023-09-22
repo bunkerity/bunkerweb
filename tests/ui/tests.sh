@@ -34,6 +34,11 @@ if [ "$integration" = "docker" ] ; then
             exit 1
         fi
     fi
+else
+    sudo systemctl stop bunkerweb bunkerweb-ui
+    sudo mkdir /var/www/html/app1.example.com
+    sudo touch /var/www/html/app1.example.com/index.html
+    export TEST_TYPE="linux"
 fi
 
 i=0
@@ -61,6 +66,7 @@ if [ "$integration" == "docker" ] ; then
         exit 1
     fi
 else
+    sudo systemctl start bunkerweb bunkerweb-ui
     while [ $i -lt 120 ] ; do
         check="$(sudo cat /var/log/bunkerweb/error.log | grep "BunkerWeb is ready")"
         if ! [ -z "$check" ] ; then
