@@ -21,7 +21,7 @@ from requests import get
 
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import cache_file, cache_hash, is_cached_file, file_hash
+from jobs import cache_file, cache_hash, del_file_in_db, is_cached_file, file_hash
 
 rdns_rx = re_compile(rb"^[^ ]+$", IGNORECASE)
 asn_rx = re_compile(rb"^\d+$")
@@ -85,8 +85,12 @@ try:
     tmp_greylist_path = Path(sep, "var", "tmp", "bunkerweb", "greylist")
     tmp_greylist_path.mkdir(parents=True, exist_ok=True)
 
-    # Our urls data
+    # Get URLs
     urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
+    for kind in urls:
+        for url in getenv(f"GREYLIST_{kind}_URLS", "").split(" "):
+            if url and url not in urls[kind]:
+                urls[kind].append(url)
 
     # Don't go further if the cache is fresh
     kinds_fresh = {
@@ -108,15 +112,14 @@ try:
             logger.info(
                 f"Greylist for {kind} is already in cache, skipping downloads...",
             )
+
+            if not urls[kind]:
+                greylist_path.joinpath(f"{kind}.list").unlink(missing_ok=True)
+                deleted, err = del_file_in_db(f"{kind}.list", db)
+                if not deleted:
+                    logger.warning(f"Coudn't delete {kind}.list from cache : {err}")
     if all_fresh:
         _exit(0)
-
-    # Get URLs
-    urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
-    for kind in urls:
-        for url in getenv(f"GREYLIST_{kind}_URLS", "").split(" "):
-            if url and url not in urls[kind]:
-                urls[kind].append(url)
 
     # Loop on kinds
     for kind, urls_list in urls.items():
