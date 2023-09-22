@@ -93,6 +93,11 @@ jobs:
     uses: ./.github/workflows/tests-ui.yml
     with:
       RELEASE: dev
+  tests-ui-linux:
+    needs: [code-security, build-packages]
+    uses: ./.github/workflows/tests-ui-linux.yml
+    with:
+      RELEASE: dev
 
   # Core tests
   prepare-tests-core:
@@ -171,7 +176,7 @@ jobs:
 
   # Push Linux packages
   push-packages:
-    needs: [tests-core-linux]
+    needs: [tests-ui-linux, tests-core-linux]
     strategy:
       matrix:
         linux: [ubuntu, debian, fedora, el]
