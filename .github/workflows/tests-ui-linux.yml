@@ -3,9 +3,6 @@ name: Core test Linux (REUSABLE)
 on:
   workflow_call:
     inputs:
-      TEST:
-        required: true
-        type: string
       RELEASE:
         required: true
         type: string
@@ -117,3 +114,5 @@ jobs:
           zip discord.zip plugin.json
           rm plugin.json
           ./test.sh "linux"
+        env:
+          MODE: ${{ inputs.RELEASE }}
