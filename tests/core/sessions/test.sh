@@ -26,6 +26,7 @@ if [ "$integration" = "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb
+    sudo pip install -r requirements.txt
     echo "USE_ANTIBOT=cookie" | sudo tee -a /etc/bunkerweb/variables.env
     echo "SESSIONS_SECRET=random" | sudo tee -a /etc/bunkerweb/variables.env
     echo "SESSIONS_NAME=random" | sudo tee -a /etc/bunkerweb/variables.env
