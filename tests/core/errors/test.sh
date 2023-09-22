@@ -29,7 +29,7 @@ else
     echo "ERRORS=" | sudo tee -a /etc/bunkerweb/variables.env
     echo "INTERCEPTED_ERROR_CODES=400 401 403 404 405 413 429 500 501 502 503 504" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
-    mkdir -p /var/www/html/errors
+    sudo mkdir -p /var/www/html/errors
     sudo cp "403.html" "/var/www/html/errors/403.html"
 fi
 
