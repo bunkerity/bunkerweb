@@ -94,8 +94,8 @@ jobs:
           echo "ADMIN_USERNAME=admin" | sudo tee /etc/bunkerweb/ui.env
           echo "ADMIN_PASSWORD=S\$cr3tP@ssw0rd" | sudo tee -a /etc/bunkerweb/ui.env
 
-          sudo chown nginx:nginx /etc/bunkerweb/*.env
-          sudo chmod 777 /etc/bunkerweb/*.env
+          sudo chown nginx:nginx /etc/bunkerweb/variables.env /etc/bunkerweb/ui.env
+          sudo chmod 777 /etc/bunkerweb/variables.env /etc/bunkerweb/ui.env
       - name: Run tests
         run: |
           cd ./tests/ui
