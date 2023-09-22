@@ -1,8 +1,10 @@
 from datetime import date
 from gzip import GzipFile
 from io import BytesIO
-from pathlib import Path
+from os import getenv
 from maxminddb import MODE_FD, open_database
+from os.path import join, sep
+from pathlib import Path
 from requests import get
 
 # Compute the mmdb URL
@@ -18,7 +20,13 @@ with get(mmdb_url, stream=True) as resp:
             file_content.write(chunk)
 file_content.seek(0)
 
-with open_database(GzipFile(fileobj=file_content, mode="rb"), mode=MODE_FD) as reader:
+output_path = (
+    Path(sep, "output", "ip_asn.txt")
+    if getenv("TEST_TYPE", "docker") == "docker"
+    else Path(".", "ip_asn.txt")
+)
+
+with open_database(GzipFile(fileobj=file_content, mode="rb"), mode=MODE_FD) as reader:  # type: ignore
     dbip_asn = reader.get("1.0.0.3")
 
     if not dbip_asn:
@@ -26,8 +34,8 @@ with open_database(GzipFile(fileobj=file_content, mode="rb"), mode=MODE_FD) as r
         exit(1)
 
     print(
-        f"✅ ASN for IP 1.0.0.3 is {dbip_asn['autonomous_system_number']}, saving it to /output/ip_asn.txt",
+        f"✅ ASN for IP 1.0.0.3 is {dbip_asn['autonomous_system_number']}, saving it to {output_path}",  # type: ignore
         flush=True,
     )
 
-    Path("/output/ip_asn.txt").write_text(str(dbip_asn["autonomous_system_number"]))
+    output_path.write_text(str(dbip_asn["autonomous_system_number"]))  # type: ignore

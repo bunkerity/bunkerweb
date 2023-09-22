@@ -44,3 +44,19 @@ async def get_instance_id(_: Request):
 async def get_report_num(_: Request):
     global report_num
     return JSONResponse(status_code=200, content={"result": "ok", "data": report_num})
+
+
+@app.get("/reset")
+async def reset(_: Request):
+    global instance_id, report_num
+    instance_id = None
+    report_num = 0
+    return JSONResponse(
+        status_code=200, content={"result": "ok", "data": "Reset done."}
+    )
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="127.0.0.1", port=8080)
