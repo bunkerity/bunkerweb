@@ -33,7 +33,7 @@ try:
             )
             sleep(5)
 
-    use_bad_behavior = getenv("USE_BAD_BEHAVIOR", "yes")
+    use_bad_behavior = getenv("USE_BAD_BEHAVIOR", "yes") == "yes"
     bad_behavior_status_codes = getenv(
         "BAD_BEHAVIOR_STATUS_CODES", "400 401 403 404 405 429 444"
     )
@@ -61,7 +61,7 @@ try:
     ).status_code
 
     if status_code == 403:
-        if use_bad_behavior == "no":
+        if not use_bad_behavior:
             print("❌ Bad Behavior is enabled, it shouldn't be ...", flush=True)
             exit(1)
         elif bad_behavior_status_codes != "400 401 403 404 405 429 444":
@@ -131,7 +131,7 @@ try:
                 print("❌ Bad Behavior's count time didn't changed ...", flush=True)
                 exit(1)
     elif (
-        use_bad_behavior == "yes"
+        use_bad_behavior
         and bad_behavior_status_codes == "400 401 403 404 405 429 444"
         and bad_behavior_threshold == "10"
     ):

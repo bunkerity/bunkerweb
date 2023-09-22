@@ -1,26 +1,63 @@
 #!/bin/bash
 
-echo "🏴 Building blacklist stack ..."
+integration=$1
+
+if [ -z "$integration" ] ; then
+    echo "🤖 Please provide an integration name as argument ❌"
+    exit 1
+elif [ "$integration" != "docker" ] && [ "$integration" != "linux" ] ; then
+    echo "🤖 Integration \"$integration\" is not supported ❌"
+    exit 1
+fi
+
+echo "🏴 Building blacklist stack for integration \"$integration\" ..."
 
 # Starting stack
-docker compose pull bw-docker
-if [ $? -ne 0 ] ; then
-    echo "🏴 Pull failed ❌"
-    exit 1
-fi
+if [ "$integration" = "docker" ] ; then
+    docker compose pull bw-docker
+    if [ $? -ne 0 ] ; then
+        echo "🏴 Pull failed ❌"
+        exit 1
+    fi
 
-echo "🏴 Building custom api image ..."
-docker compose build blacklist-api
-if [ $? -ne 0 ] ; then
-    echo "🏴 Build failed ❌"
-    exit 1
-fi
+    echo "🏴 Building custom api image ..."
+    docker compose build blacklist-api
+    if [ $? -ne 0 ] ; then
+        echo "🏴 Build failed ❌"
+        exit 1
+    fi
 
-echo "🏴 Building tests images ..."
-docker compose -f docker-compose.test.yml build
-if [ $? -ne 0 ] ; then
-    echo "🏴 Build failed ❌"
-    exit 1
+    echo "🏴 Building tests images ..."
+    docker compose -f docker-compose.test.yml build
+    if [ $? -ne 0 ] ; then
+        echo "🏴 Build failed ❌"
+        exit 1
+    fi
+else
+    sudo systemctl stop bunkerweb
+    sudo sed -i 's@USE_BLACKLIST=.*$@USE_BLACKLIST=yes@' /etc/bunkerweb/variables.env
+    echo "BLACKLIST_IP=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_IP_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_RDNS_GLOBAL=yes" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_RDNS=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_RDNS_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_ASN=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_ASN_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_USER_AGENT=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_USER_AGENT_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_URI=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_URI_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_IGNORE_IP=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_IGNORE_IP_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_IGNORE_RDNS=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_IGNORE_RDNS_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_IGNORE_ASN=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_IGNORE_ASN_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_IGNORE_USER_AGENT=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_IGNORE_USER_AGENT_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_IGNORE_URI=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "BLACKLIST_IGNORE_URI_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
+    sudo touch /var/www/html/index.html
 fi
 
 manual=0
@@ -29,29 +66,55 @@ as_number=0
 cleanup_stack () {
     exit_code=$?
     if [[ $end -eq 1 || $exit_code = 1 ]] || [[ $end -eq 0 && $exit_code = 0 ]] && [ $manual = 0 ] ; then
-        rm -rf init/output
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_BLACKLIST: "no"@USE_BLACKLIST: "yes"@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IP: "0.0.0.0/0"@BLACKLIST_IP: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_IP: "192.168.0.3"@BLACKLIST_IGNORE_IP: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IP_URLS: "http://blacklist-api:8080/ip"@BLACKLIST_IP_URLS: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_IP_URLS: "http://blacklist-api:8080/ip"@BLACKLIST_IGNORE_IP_URLS: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_RDNS_GLOBAL: "no"@BLACKLIST_RDNS_GLOBAL: "yes"@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_RDNS: ".bw-services"@BLACKLIST_RDNS: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_RDNS: ".bw-services"@BLACKLIST_IGNORE_RDNS: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_RDNS_URLS: "http://blacklist-api:8080/rdns"@BLACKLIST_RDNS_URLS: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_RDNS_URLS: "http://blacklist-api:8080/rdns"@BLACKLIST_IGNORE_RDNS_URLS: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_ASN: "[0-9]*"@BLACKLIST_ASN: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_ASN: "[0-9]*"@BLACKLIST_IGNORE_ASN: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_ASN_URLS: "http://blacklist-api:8080/asn"@BLACKLIST_ASN_URLS: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_ASN_URLS: "http://blacklist-api:8080/asn"@BLACKLIST_IGNORE_ASN_URLS: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_USER_AGENT: "BunkerBot"@BLACKLIST_USER_AGENT: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_USER_AGENT: "BunkerBot"@BLACKLIST_IGNORE_USER_AGENT: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_USER_AGENT_URLS: "http://blacklist-api:8080/user_agent"@BLACKLIST_USER_AGENT_URLS: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_USER_AGENT_URLS: "http://blacklist-api:8080/user_agent"@BLACKLIST_IGNORE_USER_AGENT_URLS: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_URI: "/admin"@BLACKLIST_URI: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_URI: "/admin"@BLACKLIST_IGNORE_URI: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_URI_URLS: "http://blacklist-api:8080/uri"@BLACKLIST_URI_URLS: ""@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_URI_URLS: "http://blacklist-api:8080/uri"@BLACKLIST_IGNORE_URI_URLS: ""@' {} \;
+        if [ "$integration" == "docker" ] ; then
+            rm -rf init/output
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_BLACKLIST: "no"@USE_BLACKLIST: "yes"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IP: "0.0.0.0/0"@BLACKLIST_IP: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_IP: "192.168.0.3"@BLACKLIST_IGNORE_IP: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IP_URLS: "http://blacklist-api:8080/ip"@BLACKLIST_IP_URLS: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_IP_URLS: "http://blacklist-api:8080/ip"@BLACKLIST_IGNORE_IP_URLS: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_RDNS_GLOBAL: "no"@BLACKLIST_RDNS_GLOBAL: "yes"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_RDNS: ".bw-services"@BLACKLIST_RDNS: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_RDNS: ".bw-services"@BLACKLIST_IGNORE_RDNS: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_RDNS_URLS: "http://blacklist-api:8080/rdns"@BLACKLIST_RDNS_URLS: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_RDNS_URLS: "http://blacklist-api:8080/rdns"@BLACKLIST_IGNORE_RDNS_URLS: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_ASN: "[0-9]*"@BLACKLIST_ASN: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_ASN: "[0-9]*"@BLACKLIST_IGNORE_ASN: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_ASN_URLS: "http://blacklist-api:8080/asn"@BLACKLIST_ASN_URLS: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_ASN_URLS: "http://blacklist-api:8080/asn"@BLACKLIST_IGNORE_ASN_URLS: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_USER_AGENT: "BunkerBot"@BLACKLIST_USER_AGENT: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_USER_AGENT: "BunkerBot"@BLACKLIST_IGNORE_USER_AGENT: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_USER_AGENT_URLS: "http://blacklist-api:8080/user_agent"@BLACKLIST_USER_AGENT_URLS: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_USER_AGENT_URLS: "http://blacklist-api:8080/user_agent"@BLACKLIST_IGNORE_USER_AGENT_URLS: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_URI: "/admin"@BLACKLIST_URI: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_URI: "/admin"@BLACKLIST_IGNORE_URI: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_URI_URLS: "http://blacklist-api:8080/uri"@BLACKLIST_URI_URLS: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_IGNORE_URI_URLS: "http://blacklist-api:8080/uri"@BLACKLIST_IGNORE_URI_URLS: ""@' {} \;
+        else
+            rm -f ip_asn.txt
+            sudo sed -i 's@USE_BLACKLIST=.*$@USE_BLACKLIST=yes@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_IP=.*$@BLACKLIST_IP=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_IP_URLS=.*$@BLACKLIST_IP_URLS=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_RDNS_GLOBAL=.*$@BLACKLIST_RDNS_GLOBAL=yes@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_RDNS=.*$@BLACKLIST_RDNS=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_RDNS_URLS=.*$@BLACKLIST_RDNS_URLS=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_ASN=.*$@BLACKLIST_ASN=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_ASN_URLS=.*$@BLACKLIST_ASN_URLS=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_USER_AGENT=.*$@BLACKLIST_USER_AGENT=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_USER_AGENT_URLS=.*$@BLACKLIST_USER_AGENT_URLS=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_URI=.*$@BLACKLIST_URI=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_URI_URLS=.*$@BLACKLIST_URI_URLS=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_IGNORE_IP=.*$@BLACKLIST_IGNORE_IP=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_IGNORE_IP_URLS=.*$@BLACKLIST_IGNORE_IP_URLS=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_IGNORE_RDNS=.*$@BLACKLIST_IGNORE_RDNS=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_IGNORE_RDNS_URLS=.*$@BLACKLIST_IGNORE_RDNS_URLS=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_IGNORE_ASN=.*$@BLACKLIST_IGNORE_ASN=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_IGNORE_ASN_URLS=.*$@BLACKLIST_IGNORE_ASN_URLS=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_IGNORE_USER_AGENT=.*$@BLACKLIST_IGNORE_USER_AGENT=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_IGNORE_USER_AGENT_URLS=.*$@BLACKLIST_IGNORE_USER_AGENT_URLS=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_IGNORE_URI=.*$@BLACKLIST_IGNORE_URI=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@BLACKLIST_IGNORE_URI_URLS=.*$@BLACKLIST_IGNORE_URI_URLS=@' /etc/bunkerweb/variables.env
+        fi
         if [[ $end -eq 1 && $exit_code = 0 ]] ; then
             return
         fi
@@ -59,10 +122,15 @@ cleanup_stack () {
 
     echo "🏴 Cleaning up current stack ..."
 
-    docker compose down -v --remove-orphans
+    if [ "$integration" == "docker" ] ; then
+        docker compose down -v --remove-orphans
+    else
+        sudo systemctl stop bunkerweb
+        sudo truncate -s 0 /var/log/bunkerweb/error.log
+    fi
 
     if [ $? -ne 0 ] ; then
-        echo "🏴 Down failed ❌"
+        echo "🤖 Cleanup failed ❌"
         exit 1
     fi
 

@@ -62,26 +62,20 @@ try:
     use_reverse_scan = getenv("USE_REVERSE_SCAN", "no") == "yes"
 
     if use_reverse_scan:
-        print("ℹ️ Testing Reverse Scan, starting FastAPI ...", flush=True)
-        app = FastAPI()
-        fastapi_proc = Process(
-            target=run,
-            args=(app,),
-            kwargs=dict(
-                host="0.0.0.0"
-                if getenv("TEST_TYPE", "docker") == "docker"
-                else "127.0.0.1",
-                port=8080,
-            ),
-        )
-        fastapi_proc.start()
+        if ip_to_check == "1.0.0.3":
+            print("ℹ️ Testing Reverse Scan, starting FastAPI ...", flush=True)
+            app = FastAPI()
+            fastapi_proc = Process(
+                target=run, args=(app,), kwargs=dict(host="0.0.0.0", port=8080)
+            )
+            fastapi_proc.start()
 
-        sleep(2)
+            sleep(2)
 
-        print(
-            "ℹ️ FastAPI started, sending a request to http://www.example.com ...",
-            flush=True,
-        )
+            print(
+                "ℹ️ FastAPI started, sending a request to http://www.example.com ...",
+                flush=True,
+            )
 
         response = get(
             "http://www.example.com",
@@ -98,17 +92,21 @@ try:
 
         print("ℹ️ The request was blocked, checking Redis ...", flush=True)
 
-        key_value = redis_client.get(f"plugin_reverse_scan_{ip_to_check}:8080")
+        port_to_check = "8080" if ip_to_check == "1.0.0.3" else "80"
+
+        key_value = redis_client.get(
+            f"plugin_reverse_scan_{ip_to_check}:{port_to_check}"
+        )
 
         if key_value is None:
             print(
-                f'❌ The Reverse Scan key ("plugin_reverse_scan_{ip_to_check}:8080") was not found, exiting ...\nkeys: {redis_client.keys()}',
+                f'❌ The Reverse Scan key ("plugin_reverse_scan_{ip_to_check}:{port_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
                 flush=True,
             )
             exit(1)
         elif key_value != b"open":
             print(
-                f'❌ The Reverse Scan key ("plugin_reverse_scan_{ip_to_check}:8080") was found, but the value is not "open" ({key_value.decode()}), exiting ...\nkeys: {redis_client.keys()}',
+                f'❌ The Reverse Scan key ("plugin_reverse_scan_{ip_to_check}:{port_to_check}") was found, but the value is not "open" ({key_value.decode()}), exiting ...\nkeys: {redis_client.keys()}',
                 flush=True,
             )
             exit(1)
@@ -352,24 +350,25 @@ try:
         flush=True,
     )
 
-    print(
-        "ℹ️ Checking if the dnsbl keys were created ...",
-        flush=True,
-    )
-
-    key_value = redis_client.get(f"plugin_dnsbl_www.example.com{ip_to_check}")
-
-    if key_value is None:
+    if ip_to_check == "1.0.0.3":
         print(
-            f'❌ The dnsbl key ("plugin_dnsbl_www.example.com{ip_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
+            "ℹ️ Checking if the dnsbl keys were created ...",
             flush=True,
         )
-        exit(1)
 
-    print(
-        f"✅ The dnsbl key was found, the value is {key_value.decode()}",
-        flush=True,
-    )
+        key_value = redis_client.get(f"plugin_dnsbl_www.example.com{ip_to_check}")
+
+        if key_value is None:
+            print(
+                f'❌ The dnsbl key ("plugin_dnsbl_www.example.com{ip_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
+                flush=True,
+            )
+            exit(1)
+
+        print(
+            f"✅ The dnsbl key was found, the value is {key_value.decode()}",
+            flush=True,
+        )
 except SystemExit as e:
     exit(e.code)
 except:

@@ -165,9 +165,9 @@ do
             sudo sed -i 's@REDIS_DATABASE=.*$@REDIS_DATABASE=1@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REDIS_SSL=.*$@REDIS_SSL=yes@' /etc/bunkerweb/variables.env
             unset USE_ANTIBOT
-            unset REDIS_PORT
-            unset REDIS_DATABASE
-            unset REDIS_SSL
+            export REDIS_PORT="6380"
+            export REDIS_DATABASE="1"
+            export REDIS_SSL="yes"
 
             echo "🧰 Stoping redis ..."
             redis-cli shutdown

@@ -78,6 +78,7 @@ else
     done
     if [ $i -ge 120 ] ; then
         sudo journalctl -u bunkerweb --no-pager
+        sudo journalctl -u bunkerweb-ui --no-pager
         echo "🛡️ Showing BunkerWeb error logs ..."
         sudo cat /var/log/bunkerweb/error.log
         echo "🛡️ Showing BunkerWeb access logs ..."
@@ -105,6 +106,7 @@ if [ $? -ne 0 ] ; then
         docker compose logs
     else
         sudo journalctl -u bunkerweb --no-pager
+        sudo journalctl -u bunkerweb-ui --no-pager
         echo "🛡️ Showing BunkerWeb error logs ..."
         sudo cat /var/log/bunkerweb/error.log
         echo "🛡️ Showing BunkerWeb access logs ..."
