@@ -55,6 +55,7 @@ class Config:
             servers.append(server_name)
 
         conf["SERVER_NAME"] = " ".join(servers)
+        conf["DATABASE_URI"] = self.__db.database_uri
         env_file = Path(sep, "tmp", f"{uuid4()}.env")
         env_file.write_text(
             "\n".join(f"{k}={conf[k]}" for k in sorted(conf)),
