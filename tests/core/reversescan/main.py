@@ -7,18 +7,15 @@ from traceback import format_exc
 from uvicorn import run
 
 
-app = FastAPI()
-fastapi_proc = Process(
-    target=run,
-    args=(app,),
-    kwargs=dict(
-        host="0.0.0.0" if getenv("TEST_TYPE", "docker") == "docker" else "127.0.0.1",
-        port=80,
-    ),
-)
-fastapi_proc.start()
+fastapi_proc = None
+if getenv("TEST_TYPE", "docker") == "docker":
+    app = FastAPI()
+    fastapi_proc = Process(
+        target=run, args=(app,), kwargs=dict(host="0.0.0.0", port=80)
+    )
+    fastapi_proc.start()
 
-sleep(1)
+    sleep(1)
 
 try:
     use_reverse_scan = getenv("USE_REVERSE_SCAN", "yes") == "yes"
@@ -47,4 +44,5 @@ except:
     print(f"❌ Something went wrong, exiting ...\n{format_exc()}", flush=True)
     exit(1)
 finally:
-    fastapi_proc.terminate()
+    if fastapi_proc:
+        fastapi_proc.terminate()
