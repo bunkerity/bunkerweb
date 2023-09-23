@@ -64,7 +64,7 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
 
-  # Code security
+  # Python code security
   code-security:
     runs-on: ubuntu-latest
     permissions:
@@ -88,7 +88,7 @@ jobs:
         with:
           category: "/language:${{matrix.language}}"
 
-  # Create infrastructures
+  # Create infrastructures and prepare tests
   create-infras:
     needs: [code-security, build-containers, build-packages]
     strategy:
@@ -101,8 +101,30 @@ jobs:
       CICD_SECRETS: ${{ secrets.CICD_SECRETS }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       K8S_IP: ${{ secrets.K8S_IP }}
+  prepare-tests-core:
+    needs: [code-security, build-containers, build-packages]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - id: set-matrix
+        run: |
+          tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
+          echo "::set-output name=tests::$tests"
+    outputs:
+      tests: ${{ steps.set-matrix.outputs.tests }}
 
   # Perform tests
+  tests-ui:
+    needs: [code-security, build-containers]
+    uses: ./.github/workflows/tests-ui.yml
+    with:
+      RELEASE: testing
+  tests-ui-linux:
+    needs: [code-security, build-packages]
+    uses: ./.github/workflows/tests-ui-linux.yml
+    with:
+      RELEASE: testing
   staging-tests:
     needs: [create-infras]
     strategy:
@@ -124,23 +146,6 @@ jobs:
       TYPE: ${{ matrix.type }}
       RUNS_ON: ${{ matrix.runs_on }}
     secrets: inherit
-  tests-ui:
-    needs: [create-infras]
-    uses: ./.github/workflows/tests-ui.yml
-    with:
-      RELEASE: testing
-  prepare-tests-core:
-    needs: [create-infras]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - id: set-matrix
-        run: |
-          tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-          echo "::set-output name=tests::$tests"
-    outputs:
-      tests: ${{ steps.set-matrix.outputs.tests }}
   tests-core:
     needs: prepare-tests-core
     strategy:
@@ -151,6 +156,17 @@ jobs:
     with:
       TEST: ${{ matrix.test }}
       RELEASE: testing
+  tests-core-linux:
+    needs: prepare-tests-core
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
+    uses: ./.github/workflows/test-core-linux.yml
+    with:
+      TEST: ${{ matrix.test }}
+      RELEASE: testing
+    secrets: inherit
 
   # Delete infrastructures
   delete-infras:
@@ -196,7 +212,7 @@ jobs:
 
   # Push Linux packages
   push-packages:
-    needs: [staging-tests, tests-ui, tests-core]
+    needs: [staging-tests, tests-ui-linux, tests-core-linux]
     strategy:
       matrix:
         linux: [ubuntu, debian, fedora, el]
