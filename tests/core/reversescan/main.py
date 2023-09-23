@@ -1,3 +1,4 @@
+from re import search
 from time import sleep
 from fastapi import FastAPI
 from os import getenv
@@ -19,7 +20,7 @@ if getenv("TEST_TYPE", "docker") == "docker":
 
 try:
     use_reverse_scan = getenv("USE_REVERSE_SCAN", "yes") == "yes"
-    reverse_scan_ports = getenv("REVERSE_SCAN_PORTS", "22 80 443 3128 8000 8080")
+    reverse_scan_ports = getenv("REVERSE_SCAN_PORTS", "80")
 
     print(f"ℹ️ Trying to access http://www.example.com ...", flush=True)
     status_code = get(
@@ -30,7 +31,7 @@ try:
 
     if status_code == 403:
         pass
-    elif use_reverse_scan and " 80 " in reverse_scan_ports:
+    elif use_reverse_scan and search(r"\b80\b", reverse_scan_ports):
         print(
             "❌ Request didn't return 403, but reverse scan is enabled and port 80 is in the reverse scan ports list, exiting ...",
             flush=True,

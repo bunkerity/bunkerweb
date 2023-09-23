@@ -27,7 +27,7 @@ if [ "$integration" = "docker" ] ; then
 else
     sudo systemctl stop bunkerweb
     echo "USE_REVERSE_SCAN=yes" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "REVERSE_SCAN_PORTS=22 80 443 3128 8000 8080" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "REVERSE_SCAN_PORTS=80" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REVERSE_SCAN_TIMEOUT=500" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
     export TEST_TYPE="linux"
@@ -40,10 +40,10 @@ cleanup_stack () {
     if [[ $end -eq 1 || $exit_code = 1 ]] || [[ $end -eq 0 && $exit_code = 0 ]] && [ $manual = 0 ] ; then
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_REVERSE_SCAN: "no"@USE_REVERSE_SCAN: "yes"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_SCAN_PORTS: ".*"$@REVERSE_SCAN_PORTS: "22 80 443 3128 8000 8080"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_SCAN_PORTS: ".*"$@REVERSE_SCAN_PORTS: "80"@' {} \;
         else
             sudo sed -i 's@USE_REVERSE_SCAN=.*$@USE_REVERSE_SCAN=yes@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@REVERSE_SCAN_PORTS=.*$@REVERSE_SCAN_PORTS=22 80 443 3128 8000 8080@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@REVERSE_SCAN_PORTS=.*$@REVERSE_SCAN_PORTS=80@' /etc/bunkerweb/variables.env
             unset USE_REVERSE_SCAN
             unset REVERSE_SCAN_PORTS
         fi
@@ -79,10 +79,10 @@ do
     elif [ "$test" = "tweaked_ports" ] ; then
         echo "🕵️ Running tests while removing the 80 port being scanned ..."
         if [ "$integration" == "docker" ] ; then
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_SCAN_PORTS: ".*"$@REVERSE_SCAN_PORTS: "22 443 3128 8000 8080"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_SCAN_PORTS: ".*"$@REVERSE_SCAN_PORTS: ""@' {} \;
         else
-            sudo sed -i 's@REVERSE_SCAN_PORTS=.*$@REVERSE_SCAN_PORTS=22 443 3128 8000 8080@' /etc/bunkerweb/variables.env
-            export REVERSE_SCAN_PORTS="22 443 3128 8000 8080"
+            sudo sed -i 's@REVERSE_SCAN_PORTS=.*$@REVERSE_SCAN_PORTS=@' /etc/bunkerweb/variables.env
+            export REVERSE_SCAN_PORTS=""
         fi
     elif [ "$test" = "deactivated" ] ; then
         echo "🕵️ Running tests without the reverse scan ..."
