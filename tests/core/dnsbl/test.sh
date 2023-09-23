@@ -3,10 +3,10 @@
 integration=$1
 
 if [ -z "$integration" ] ; then
-    echo "🤖 Please provide an integration name as argument ❌"
+    echo "🚫 Please provide an integration name as argument ❌"
     exit 1
 elif [ "$integration" != "docker" ] && [ "$integration" != "linux" ] ; then
-    echo "🤖 Integration \"$integration\" is not supported ❌"
+    echo "🚫 Integration \"$integration\" is not supported ❌"
     exit 1
 fi
 
@@ -68,7 +68,7 @@ cleanup_stack () {
     fi
 
     if [ $? -ne 0 ] ; then
-        echo "🤖 Cleanup failed ❌"
+        echo "🚫 Cleanup failed ❌"
         exit 1
     fi
 
@@ -149,20 +149,20 @@ do
     if [ "$integration" == "docker" ] ; then
         docker compose up -d
         if [ $? -ne 0 ] ; then
-            echo "🤖 Up failed, retrying ... ⚠️"
+            echo "🚫 Up failed, retrying ... ⚠️"
             manual=1
             cleanup_stack
             manual=0
             docker compose up -d
             if [ $? -ne 0 ] ; then
-                echo "🤖 Up failed ❌"
+                echo "🚫 Up failed ❌"
                 exit 1
             fi
         fi
     else
         sudo systemctl start bunkerweb
         if [ $? -ne 0 ] ; then
-            echo "🤖 Start failed ❌"
+            echo "🚫 Start failed ❌"
             exit 1
         fi
     fi
@@ -197,7 +197,7 @@ do
         while [ $i -lt 120 ] ; do
             check="$(sudo cat /var/log/bunkerweb/error.log | grep "BunkerWeb is ready")"
             if ! [ -z "$check" ] ; then
-                echo "🤖 Linux stack is healthy ✅"
+                echo "🚫 Linux stack is healthy ✅"
                 break
             fi
             sleep 1
@@ -209,7 +209,7 @@ do
             sudo cat /var/log/bunkerweb/error.log
             echo "🛡️ Showing BunkerWeb access logs ..."
             sudo cat /var/log/bunkerweb/access.log
-            echo "🤖 Linux stack is not healthy ❌"
+            echo "🚫 Linux stack is not healthy ❌"
             exit 1
         fi
     fi
