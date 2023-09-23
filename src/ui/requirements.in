@@ -5,5 +5,6 @@ Flask_Login==0.6.2
 Flask_WTF==1.1.1
 gevent==23.9.0
 gunicorn==21.2.0
+importlib-metadata==6.8.0
 python_dateutil==2.8.2
 regex==2023.8.8

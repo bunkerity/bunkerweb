@@ -4,7 +4,12 @@
 
 - [BUGFIX] Fix BunkerWeb not loading his own settings after a docker restart
 - [BUGFIX] Fix Custom configs not following the service name after an update on the UI
+- [BUGFIX] Fix UI clearing configs folder at startup
+- [BUGFIX] Fix Database not clearing old services when not using multisite
+- [BUGFIX] Fix UI using the wrong database when generating the new config when using an external database
 - [MISC] Updated core dependencies
+- [MISC] Updated self-signed job to regenerate the cert if the subject or the expiration date has changed
+- [MISC] Jobs that download files from urls will now remove old cached files if urls are empty
 
 ## v1.5.2 - 2023/10/10
 

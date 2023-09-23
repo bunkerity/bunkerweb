@@ -30,6 +30,7 @@ try:
             )
             sleep(5)
 
+    GLOBAL = getenv("GLOBAL", "no") == "yes"
     use_blacklist = getenv("USE_BLACKLIST", "yes") == "yes"
 
     blacklist_ip = getenv("BLACKLIST_IP", "")
@@ -61,8 +62,9 @@ try:
     )
 
     status_code = get(
-        f"http://www.example.com/admin",
-        headers={"Host": "www.example.com", "User-Agent": "BunkerBot"},
+        "http://www.example.com/admin",
+        headers={"Host": "www.example.com", "User-Agent": "BunkerBot"}
+        | ({"X-Forwarded-For": "1.0.0.3"} if GLOBAL else {}),
     ).status_code
 
     if status_code == 403:

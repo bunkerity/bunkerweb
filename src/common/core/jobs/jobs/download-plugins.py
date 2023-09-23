@@ -76,7 +76,12 @@ try:
                 content = Path(normpath(plugin_urls[7:])).read_bytes()
             else:
                 content = b""
-                resp = get(plugin_url, stream=True, timeout=10)
+                resp = get(
+                    plugin_url,
+                    headers={"User-Agent": "BunkerWeb"},
+                    stream=True,
+                    timeout=30,
+                )
 
                 if resp.status_code != 200:
                     logger.warning(f"Got status code {resp.status_code}, skipping...")

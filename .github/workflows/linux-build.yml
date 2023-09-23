@@ -39,8 +39,8 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
       - name: Replace VERSION
-        if: inputs.RELEASE == 'testing'
-        run: ./misc/update-version.sh testing
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
+        run: ./misc/update-version.sh ${{ inputs.RELEASE }}
       - name: Extract arch
         run: |
           echo "ARCH=${{ env.PLATFORMS }}" | sed 's/linux//g' | sed 's@/@@g' >> "$GITHUB_ENV"
@@ -91,7 +91,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       # Build testing package image
       - name: Build package image
-        if: inputs.RELEASE == 'testing'
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -99,11 +99,11 @@ jobs:
           file: src/linux/Dockerfile-${{ inputs.LINUX }}
           platforms: ${{ inputs.PLATFORMS }}
           tags: local/bunkerweb-${{ inputs.LINUX }}:latest
-          cache-from: type=gha,scope=${{ inputs.LINUX }}-testing
-          cache-to: type=gha,scope=${{ inputs.LINUX }}-testing,mode=min
+          cache-from: type=gha,scope=${{ inputs.LINUX }}-${{ inputs.RELEASE }}
+          cache-to: type=gha,scope=${{ inputs.LINUX }}-${{ inputs.RELEASE }},mode=min
       # Build non-testing package image
       - name: Build package image
-        if: inputs.RELEASE != 'testing'
+        if: inputs.RELEASE != 'testing' && inputs.RELEASE != 'dev'
         uses: docker/build-push-action@v5
         with:
           context: .

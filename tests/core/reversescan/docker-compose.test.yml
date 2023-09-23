@@ -6,7 +6,7 @@ services:
     environment:
       PYTHONUNBUFFERED: "1"
       USE_REVERSE_SCAN: "yes"
-      REVERSE_SCAN_PORTS: "22 80 443 3128 8000 8080"
+      REVERSE_SCAN_PORTS: "80"
       REVERSE_SCAN_TIMEOUT: "500"
     extra_hosts:
       - "www.example.com:192.168.0.2"

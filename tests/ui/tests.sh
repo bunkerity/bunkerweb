@@ -1,61 +1,146 @@
 #!/bin/bash
 
-# Go to env
-cd ./tests/ui
+integration=$1
+
+if [ -z "$integration" ] ; then
+    echo "Please provide an integration name as argument ❌"
+    exit 1
+elif [ "$integration" != "docker" ] && [ "$integration" != "linux" ] ; then
+    echo "Integration \"$integration\" is not supported ❌"
+    exit 1
+fi
 
 # Prepare environment
-sed -i "s@bunkerity/bunkerweb:.*@bunkerweb-tests@" docker-compose.yml
-sed -i "s@bunkerity/bunkerweb-scheduler:.*@scheduler-tests@" docker-compose.yml
-sed -i "s@bunkerity/bunkerweb-ui:.*@ui-tests@" docker-compose.yml
+if [ "$integration" = "docker" ] ; then
+    sed -i "s@bunkerity/bunkerweb:.*@bunkerweb-tests@" docker-compose.yml
+    sed -i "s@bunkerity/bunkerweb-scheduler:.*@scheduler-tests@" docker-compose.yml
+    sed -i "s@bunkerity/bunkerweb-ui:.*@ui-tests@" docker-compose.yml
 
-# Start stack
-docker-compose pull bw-docker-proxy app1
-if [ $? -ne 0 ] ; then
-    echo "❌ Pull failed"
-    exit 1
+    # Start stack
+    docker-compose pull bw-docker-proxy app1
+    if [ $? -ne 0 ] ; then
+        echo "❌ Pull failed"
+        exit 1
+    fi
+
+    echo "🤖 Starting stack ..."
+    docker compose up -d
+    if [ $? -ne 0 ] ; then
+        echo "🤖 Up failed, retrying ... ⚠️"
+        docker compose down -v --remove-orphans
+        docker compose up -d
+        if [ $? -ne 0 ] ; then
+            echo "🤖 Up failed ❌"
+            exit 1
+        fi
+    fi
+else
+    sudo systemctl stop bunkerweb bunkerweb-ui
+    sudo mkdir /var/www/html/app1.example.com
+    sudo touch /var/www/html/app1.example.com/index.html
+    export TEST_TYPE="linux"
 fi
-docker-compose up -d
-if [ $? -ne 0 ] ; then
-    echo "❌ Up failed"
-    exit 1
-fi
+
 i=0
-while [ $i -lt 120 ] ; do
-    containers=("ui_bw_1" "ui_bw-scheduler_1" "ui_bw-ui_1")
-    healthy="true"
-    for container in "${containers[@]}" ; do
-        check="$(docker inspect --format "{{json .State.Health }}" $container | grep "healthy")"
-        if [ "$check" = "" ] ; then
-            echo "⚠️ Container $container is not healthy yet ..."
-            healthy="false"
+if [ "$integration" == "docker" ] ; then
+    while [ $i -lt 120 ] ; do
+        containers=("ui-bw-1" "ui-bw-scheduler-1" "ui-bw-ui-1")
+        healthy="true"
+        for container in "${containers[@]}" ; do
+            check="$(docker inspect --format "{{json .State.Health }}" $container | grep "healthy")"
+            if [ "$check" = "" ] ; then
+                echo "⚠️ Container $container is not healthy yet ..."
+                healthy="false"
+                break
+            fi
+        done
+        if [ "$healthy" = "true" ] ; then
             break
         fi
+        sleep 1
+        i=$((i+1))
     done
-    if [ "$healthy" = "true" ] ; then
-        break
+    if [ $i -ge 120 ] ; then
+        docker-compose logs
+        echo "❌ Docker stack is not healthy"
+        exit 1
     fi
-    sleep 1
-    i=$((i+1))
-done
-if [ $i -ge 120 ] ; then
-    docker-compose logs
-    echo "❌ Docker stack is not healthy"
-    exit 1
+else
+    sudo systemctl start bunkerweb bunkerweb-ui
+    healthy="false"
+    retries=0
+    while [[ $healthy = "false" && $retries -lt 5 ]] ; do
+        while [ $i -lt 120 ] ; do
+            if sudo grep -q "BunkerWeb is ready" "/var/log/bunkerweb/error.log" ; then
+                echo "🔏 Linux stack is healthy ✅"
+                break
+            fi
+            sleep 1
+            i=$((i+1))
+        done
+        if [ $i -ge 120 ] ; then
+            echo "🛡️ Showing BunkerWeb journal logs ..."
+            sudo journalctl -u bunkerweb --no-pager
+            echo "🛡️ Showing BunkerWeb UI journal logs ..."
+            sudo journalctl -u bunkerweb-ui --no-pager
+            echo "🛡️ Showing BunkerWeb error logs ..."
+            sudo cat /var/log/bunkerweb/error.log
+            echo "🛡️ Showing BunkerWeb access logs ..."
+            sudo cat /var/log/bunkerweb/access.log
+            echo "🔏 Linux stack is not healthy ❌"
+            exit 1
+        fi
+
+        if ! [ -z "$(sudo journalctl -u bunkerweb --no-pager | grep "SYSTEMCTL - ❌")" ] ; then
+            echo "🔏 ⚠ Linux stack got an issue, restarting ..."
+            sudo journalctl --rotate
+            sudo journalctl --vacuum-time=1s
+            manual=1
+            cleanup_stack
+            manual=0
+            sudo systemctl start bunkerweb
+            retries=$((retries+1))
+        else
+            healthy="true"
+        fi
+    done
+    if [ $retries -ge 5 ] ; then
+        echo "🔏 Linux stack could not be healthy ❌"
+        exit 1
+    fi
 fi
 
 # Start tests
-docker-compose -f docker-compose.test.yml build
-if [ $? -ne 0 ] ; then
-    echo "❌ Build failed"
-    exit 1
+if [ "$integration" == "docker" ] ; then
+    docker-compose -f docker-compose.test.yml build
+    if [ $? -ne 0 ] ; then
+        echo "❌ Build failed"
+        exit 1
+    fi
+
+    docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from ui-tests
+else
+    python3 main.py
 fi
-docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from ui-tests
-ret=$?
-if [ $ret -ne 0 ] ; then
-    docker-compose logs
-    echo "❌ Up failed"
+
+if [ $? -ne 0 ] ; then
+    if [ "$integration" == "docker" ] ; then
+        docker compose logs
+    else
+        echo "🛡️ Showing BunkerWeb journal logs ..."
+        sudo journalctl -u bunkerweb --no-pager
+        echo "🛡️ Showing BunkerWeb UI journal logs ..."
+        sudo journalctl -u bunkerweb-ui --no-pager
+        echo "🛡️ Showing BunkerWeb error logs ..."
+        sudo cat /var/log/bunkerweb/error.log
+        echo "🛡️ Showing BunkerWeb access logs ..."
+        sudo cat /var/log/bunkerweb/access.log
+        echo "🛡️ Showing Geckodriver logs ..."
+        sudo cat geckodriver.log
+    fi
+    echo "❌ Tests failed"
     exit 1
 fi
 
 # Exit
-exit $?
+exit 0
