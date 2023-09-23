@@ -150,8 +150,7 @@ do
         retries=0
         while [[ $healthy = "false" && $retries -lt 5 ]] ; do
             while [ $i -lt 120 ] ; do
-                check="$(sudo cat /var/log/bunkerweb/error.log | grep "BunkerWeb is ready")"
-                if ! [ -z "$check" ] ; then
+                if sudo grep -q "BunkerWeb is ready" "/var/log/bunkerweb/error.log" ; then
                     echo "🧳 Linux stack is healthy ✅"
                     break
                 fi
@@ -168,10 +167,11 @@ do
                 exit 1
             fi
 
-            check="$(sudo cat /var/log/bunkerweb/error.log | grep "SYSTEMCTL - ❌")"
-            if ! [ -z "$check" ] ; then
+            if sudo grep -q "SYSTEMCTL - ❌" "/var/log/bunkerweb/error.log" ; then
                 echo "🧳 ⚠ Linux stack got an issue, restarting ..."
-                sudo systemctl stop bunkerweb
+                manual=1
+                cleanup_stack
+                manual=0
                 sudo systemctl start bunkerweb
                 retries=$((retries+1))
             else

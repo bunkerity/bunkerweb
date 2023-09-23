@@ -68,7 +68,7 @@ else
         -out tls/redis.pem \
         -days 365 \
         -subj /CN=bw-redis/
-    sudo chmod -R 640 tls
+    sudo chmod -R 777 tls
     echo "🧰 Certs generated ✅"
 
     echo "USE_REDIS=yes" | sudo tee -a /etc/bunkerweb/variables.env
@@ -103,6 +103,7 @@ cleanup_stack () {
             unset REDIS_PORT
             unset REDIS_DATABASE
             unset REDIS_SSL
+            sudo killall redis-server
         fi
         if [[ $end -eq 1 && $exit_code = 0 ]] ; then
             return
@@ -170,7 +171,7 @@ do
             export REDIS_SSL="yes"
 
             echo "🧰 Stoping redis ..."
-            redis-cli shutdown
+            sudo killall redis-server
             if [ $? -ne 0 ] ; then
                 echo "🧰 Redis stop failed ❌"
                 exit 1
@@ -239,8 +240,7 @@ do
         retries=0
         while [[ $healthy = "false" && $retries -lt 5 ]] ; do
             while [ $i -lt 120 ] ; do
-                check="$(sudo cat /var/log/bunkerweb/error.log | grep "BunkerWeb is ready")"
-                if ! [ -z "$check" ] ; then
+                if sudo grep -q "BunkerWeb is ready" "/var/log/bunkerweb/error.log" ; then
                     echo "🧰 Linux stack is healthy ✅"
                     break
                 fi
@@ -257,10 +257,11 @@ do
                 exit 1
             fi
 
-            check="$(sudo cat /var/log/bunkerweb/error.log | grep "SYSTEMCTL - ❌")"
-            if ! [ -z "$check" ] ; then
+            if sudo grep -q "SYSTEMCTL - ❌" "/var/log/bunkerweb/error.log" ; then
                 echo "🧰 ⚠ Linux stack got an issue, restarting ..."
-                sudo systemctl stop bunkerweb
+                manual=1
+                cleanup_stack
+                manual=0
                 sudo systemctl start bunkerweb
                 retries=$((retries+1))
             else
