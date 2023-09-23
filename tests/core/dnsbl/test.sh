@@ -26,11 +26,12 @@ if [ "$integration" = "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb
+    sudo pip install -r requirements.txt
     echo "USE_REAL_IP=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REAL_IP_FROM=127.0.0.0/24" | sudo tee -a /etc/bunkerweb/variables.env
 
     echo "USE_DNSBL=yes" | sudo tee -a /etc/bunkerweb/variables.env
-    echo "DNSBL_LIST=bl.blocklist.de problems.dnsbl.sorbs.net" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "DNSBL_LIST=" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
     export TEST_TYPE="linux"
 fi
@@ -43,13 +44,13 @@ cleanup_stack () {
         if [ "$integration" == "docker" ] ; then
             rm -rf init/output
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_DNSBL: "no"@USE_DNSBL: "yes"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@DNSBL_LIST: ".*"@DNSBL_LIST: "bl.blocklist.de problems.dnsbl.sorbs.net"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@DNSBL_LIST: ".*"@DNSBL_LIST: ""@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@ipv4_address: [0-9][0-9]*\.0@ipv4_address: 192.168@' {} \;
             sed -i 's@subnet: [0-9][0-9]*\.0@subnet: 192.168@' docker-compose.yml
             sed -i 's@www.example.com:[0-9][0-9]*\.0@www.example.com:192.168@' docker-compose.test.yml
         else
             sudo sed -i 's@USE_DNSBL=.*$@USE_DNSBL=yes@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@DNSBL_LIST=.*$@DNSBL_LIST=bl.blocklist.de problems.dnsbl.sorbs.net@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@DNSBL_LIST=.*$@DNSBL_LIST=@' /etc/bunkerweb/variables.env
             unset USE_DNSBL
             unset DNSBL_LIST
         fi
@@ -116,13 +117,13 @@ do
     if [ "$test" = "activated" ] ; then
         echo "🚫 Running tests with DNSBL activated and the server $server added to the list ..."
         if [ "$integration" = "docker" ] ; then
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@DNSBL_LIST: ".*"@DNSBL_LIST: "bl.blocklist.de problems.dnsbl.sorbs.net '"$server"'"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@DNSBL_LIST: ".*"@DNSBL_LIST: "'"$server"'"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@ipv4_address: 192.168@ipv4_address: '"${ip%%.*}"'.0@' {} \;
             sed -i 's@subnet: 192.168@subnet: '"${ip%%.*}"'.0@' docker-compose.yml
             sed -i 's@www.example.com:192.168@www.example.com:'"${ip%%.*}"'.0@' docker-compose.test.yml
         else
-            sudo sed -i 's@DNSBL_LIST=.*$@DNSBL_LIST=bl.blocklist.de problems.dnsbl.sorbs.net '"$server"'@' /etc/bunkerweb/variables.env
-            export DNSBL_LIST="bl.blocklist.de problems.dnsbl.sorbs.net $server"
+            sudo sed -i 's@DNSBL_LIST=.*$@DNSBL_LIST='"$server"'@' /etc/bunkerweb/variables.env
+            export DNSBL_LIST="$server"
             export IP_ADDRESS="$ip"
         fi
     elif [ "$test" = "deactivated" ] ; then
@@ -137,10 +138,10 @@ do
         echo "🚫 Running tests with DNSBL activated and without the server $server added to the list ..."
         if [ "$integration" = "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_DNSBL: "no"@USE_DNSBL: "yes"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@DNSBL_LIST: ".*"@DNSBL_LIST: "bl.blocklist.de problems.dnsbl.sorbs.net"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@DNSBL_LIST: ".*"@DNSBL_LIST: ""@' {} \;
         else
             sudo sed -i 's@USE_DNSBL=.*$@USE_DNSBL=yes@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@DNSBL_LIST=.*$@DNSBL_LIST=bl.blocklist.de problems.dnsbl.sorbs.net@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@DNSBL_LIST=.*$@DNSBL_LIST=@' /etc/bunkerweb/variables.env
             unset USE_DNSBL
             unset DNSBL_LIST
         fi
@@ -216,8 +217,10 @@ do
                 exit 1
             fi
 
-            if ! [ -z $(sudo journalctl -u bunkerweb --no-pager | grep "SYSTEMCTL - ❌") ] ; then
+            if ! [ -z "$(sudo journalctl -u bunkerweb --no-pager | grep "SYSTEMCTL - ❌")" ] ; then
                 echo "🚫 ⚠ Linux stack got an issue, restarting ..."
+                sudo journalctl --rotate
+                sudo journalctl --vacuum-time=1s
                 manual=1
                 cleanup_stack
                 manual=0
@@ -245,7 +248,7 @@ do
     if [ "$integration" == "docker" ] ; then
         docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests
     else
-        python3 main.py
+        sudo -E python3 main.py
     fi
 
     if [ $? -ne 0 ] ; then

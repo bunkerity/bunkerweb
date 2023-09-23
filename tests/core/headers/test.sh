@@ -314,8 +314,10 @@ do
                 exit 1
             fi
 
-            if ! [ -z $(sudo journalctl -u bunkerweb --no-pager | grep "SYSTEMCTL - ❌") ] ; then
+            if ! [ -z "$(sudo journalctl -u bunkerweb --no-pager | grep "SYSTEMCTL - ❌")" ] ; then
                 echo "🎛️ ⚠ Linux stack got an issue, restarting ..."
+                sudo journalctl --rotate
+                sudo journalctl --vacuum-time=1s
                 manual=1
                 cleanup_stack
                 manual=0
