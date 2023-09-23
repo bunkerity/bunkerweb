@@ -47,7 +47,13 @@ try:
 
     print("ℹ️ Sending a request to http://www.example.com ...", flush=True)
     status_code = get(
-        "http://www.example.com", headers={"Host": "www.example.com"}
+        "http://www.example.com",
+        headers={"Host": "www.example.com"}
+        | (
+            {"X-Forwarded-For": "1.0.0.3"}
+            if getenv("TEST_TYPE", "docker") == "linux" and _global
+            else {}
+        ),
     ).status_code
 
     print(f"ℹ️ Status code: {status_code}", flush=True)
