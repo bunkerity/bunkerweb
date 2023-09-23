@@ -1,21 +1,16 @@
 #!/usr/bin/python3
 
-from os import _exit, getenv, listdir, sep, urandom
-from os.path import basename, dirname, join
+from os.path import basename, dirname, join, sep
 from sys import path as sys_path, modules as sys_modules
-from pathlib import Path
-
-os_release_path = Path(sep, "etc", "os-release")
-if os_release_path.is_file() and "Alpine" not in os_release_path.read_text(
-    encoding="utf-8"
-):
-    sys_path.append(join(sep, "usr", "share", "bunkerweb", "deps", "python"))
-
-del os_release_path
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("utils",), ("api",), ("db",))
+    for paths in (
+        ("deps", "python"),
+        ("utils",),
+        ("api",),
+        ("db",),
+    )
 ]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
@@ -61,6 +56,8 @@ from jinja2 import Template
 from kubernetes import client as kube_client
 from kubernetes import config as kube_config
 from kubernetes.client.exceptions import ApiException as kube_ApiException
+from os import _exit, getenv, listdir, urandom
+from pathlib import Path
 from re import compile as re_compile
 from regex import match as regex_match
 from requests import get
