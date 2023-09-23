@@ -44,7 +44,7 @@ fi
 i=0
 if [ "$integration" == "docker" ] ; then
     while [ $i -lt 120 ] ; do
-        containers=("ui_bw_1" "ui_bw-scheduler_1" "ui_bw-ui_1")
+        containers=("ui-bw-1" "ui-bw-scheduler-1" "ui-bw-ui-1")
         healthy="true"
         for container in "${containers[@]}" ; do
             check="$(docker inspect --format "{{json .State.Health }}" $container | grep "healthy")"
