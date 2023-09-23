@@ -49,7 +49,6 @@ services:
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.5.2
     pull_policy: never
-    command: python3 -m flask --app main:app run --host=0.0.0.0 --port=7000
     depends_on:
       - bw
       - bw-docker-proxy
