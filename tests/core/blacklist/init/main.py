@@ -1,9 +1,8 @@
 from datetime import date
 from gzip import GzipFile
 from io import BytesIO
-from os import getenv
+from os import getenv, sep
 from maxminddb import MODE_FD, open_database
-from os.path import join, sep
 from pathlib import Path
 from requests import get
 
