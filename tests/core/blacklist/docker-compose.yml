@@ -71,7 +71,7 @@ services:
   blacklist-api:
     build: api
     environment:
-      - AS_NUMBER: ""
+      AS_NUMBER: ""
     networks:
       bw-docker:
       bw-services:
