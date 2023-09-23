@@ -67,23 +67,45 @@ if [ "$integration" == "docker" ] ; then
     fi
 else
     sudo systemctl start bunkerweb bunkerweb-ui
-    while [ $i -lt 120 ] ; do
-        check="$(sudo cat /var/log/bunkerweb/error.log | grep "BunkerWeb is ready")"
-        if ! [ -z "$check" ] ; then
-            echo "🤖 Linux stack is healthy ✅"
-            break
+    healthy="false"
+    retries=0
+    while [[ $healthy = "false" && $retries -lt 5 ]] ; do
+        while [ $i -lt 120 ] ; do
+            if sudo grep -q "BunkerWeb is ready" "/var/log/bunkerweb/error.log" ; then
+                echo "🔏 Linux stack is healthy ✅"
+                break
+            fi
+            sleep 1
+            i=$((i+1))
+        done
+        if [ $i -ge 120 ] ; then
+            echo "🛡️ Showing BunkerWeb journal logs ..."
+            sudo journalctl -u bunkerweb --no-pager
+            echo "🛡️ Showing BunkerWeb UI journal logs ..."
+            sudo journalctl -u bunkerweb-ui --no-pager
+            echo "🛡️ Showing BunkerWeb error logs ..."
+            sudo cat /var/log/bunkerweb/error.log
+            echo "🛡️ Showing BunkerWeb access logs ..."
+            sudo cat /var/log/bunkerweb/access.log
+            echo "🔏 Linux stack is not healthy ❌"
+            exit 1
         fi
-        sleep 1
-        i=$((i+1))
+
+        if ! [ -z "$(sudo journalctl -u bunkerweb --no-pager | grep "SYSTEMCTL - ❌")" ] ; then
+            echo "🔏 ⚠ Linux stack got an issue, restarting ..."
+            sudo journalctl --rotate
+            sudo journalctl --vacuum-time=1s
+            manual=1
+            cleanup_stack
+            manual=0
+            sudo systemctl start bunkerweb
+            retries=$((retries+1))
+        else
+            healthy="true"
+        fi
     done
-    if [ $i -ge 120 ] ; then
-        sudo journalctl -u bunkerweb --no-pager
-        sudo journalctl -u bunkerweb-ui --no-pager
-        echo "🛡️ Showing BunkerWeb error logs ..."
-        sudo cat /var/log/bunkerweb/error.log
-        echo "🛡️ Showing BunkerWeb access logs ..."
-        sudo cat /var/log/bunkerweb/access.log
-        echo "🤖 Linux stack is not healthy ❌"
+    if [ $retries -ge 5 ] ; then
+        echo "🔏 Linux stack could not be healthy ❌"
         exit 1
     fi
 fi
@@ -105,7 +127,9 @@ if [ $? -ne 0 ] ; then
     if [ "$integration" == "docker" ] ; then
         docker compose logs
     else
+        echo "🛡️ Showing BunkerWeb journal logs ..."
         sudo journalctl -u bunkerweb --no-pager
+        echo "🛡️ Showing BunkerWeb UI journal logs ..."
         sudo journalctl -u bunkerweb-ui --no-pager
         echo "🛡️ Showing BunkerWeb error logs ..."
         sudo cat /var/log/bunkerweb/error.log
