@@ -231,8 +231,9 @@ do
                 manual=1
                 cleanup_stack
                 manual=0
+                sleep 10
                 sudo systemctl start bunkerweb
-                retries=$((retries+1))
+                retries=$((retries+0.2))
             else
                 healthy="true"
             fi
