@@ -39,7 +39,13 @@ try:
     )
 
     status_code = get(
-        f"http://www.example.com", headers={"Host": "www.example.com"}
+        f"http://www.example.com",
+        headers={"Host": "www.example.com"}
+        | (
+            {"X-Forwarded-For": getenv("IP_ADDRESS", "")}
+            if getenv("TEST_TYPE", "docker") == "linux"
+            else {}
+        ),
     ).status_code
 
     if status_code == 403:
