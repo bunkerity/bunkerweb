@@ -82,7 +82,7 @@ try:
 
         sleep(5)
     else:
-        proc = run(["systemctl", "restart", "bunkerweb"], check=False)
+        proc = run(["sudo", "systemctl", "restart", "bunkerweb"], check=False)
         if proc.returncode != 0:
             print(
                 "❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True

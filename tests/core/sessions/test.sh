@@ -26,7 +26,6 @@ if [ "$integration" = "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb
-    sudo pip install -r requirements.txt
     echo "USE_ANTIBOT=cookie" | sudo tee -a /etc/bunkerweb/variables.env
     echo "SESSIONS_SECRET=random" | sudo tee -a /etc/bunkerweb/variables.env
     echo "SESSIONS_NAME=random" | sudo tee -a /etc/bunkerweb/variables.env
@@ -172,7 +171,7 @@ do
     if [ "$integration" == "docker" ] ; then
         docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from tests
     else
-        sudo -E python3 main.py
+        python3 main.py
     fi
 
     if [ $? -ne 0 ] ; then
