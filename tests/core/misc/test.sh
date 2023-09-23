@@ -232,7 +232,7 @@ do
                 exit 1
             fi
 
-            if sudo grep -q "SYSTEMCTL - ❌" "/var/log/bunkerweb/error.log" ; then
+            if ! [ -z $(sudo journalctl -u bunkerweb --no-pager | grep "SYSTEMCTL - ❌") ] ; then
                 echo "🗃️ ⚠ Linux stack got an issue, restarting ..."
                 manual=1
                 cleanup_stack
