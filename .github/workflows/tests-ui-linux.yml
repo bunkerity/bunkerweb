@@ -52,7 +52,7 @@ jobs:
       - name: Copy deb file to host
         run: |
           container_id=$(docker create "ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }}")
-          docker cp "$container_id:/opt/bunkerweb_dev-1_amd64.deb" "/tmp/bunkerweb.deb"
+          docker cp "$container_id:/opt/bunkerweb_${{ inputs.RELEASE }}-1_amd64.deb" "/tmp/bunkerweb.deb"
           docker rm "$container_id"
       - name: Install BunkerWeb
         run: |
