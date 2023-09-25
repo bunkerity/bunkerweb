@@ -83,8 +83,8 @@ RUN cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
   echo "Linux" > /usr/share/bunkerweb/INTEGRATION && \
   mkdir -p /etc/bunkerweb/plugins && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir -p "/etc/bunkerweb/${dir}" ; done && \
-  find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec chmod 0740 {} \; && \
-  find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type d -exec chmod 0750 {} \; && \
+  find /usr/share/bunkerweb -path /usr/share/bunkerweb/deps -prune -o -type f -exec chmod 0740 {} \; && \
+  find /usr/share/bunkerweb -path /usr/share/bunkerweb/deps -prune -o -type d -exec chmod 0750 {} \; && \
   chmod -R 770 /var/cache/bunkerweb/ /var/lib/bunkerweb/ /etc/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ /var/log/bunkerweb/ && \
   chmod 750 /usr/share/bunkerweb/gen/main.py /usr/share/bunkerweb/scheduler/main.py /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/ui/main.py /var/www/ && \
   find /usr/share/bunkerweb/core/*/jobs/* -type f -exec chmod 750 {} \; && \
