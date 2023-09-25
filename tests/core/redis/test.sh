@@ -39,6 +39,7 @@ else
     echo "BLACKLIST_IP_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
     echo "SESSIONS_NAME=test" | sudo tee -a /etc/bunkerweb/variables.env
     echo "USE_REVERSE_SCAN=no" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "REVERSE_SCAN_PORTS=80" | sudo tee -a /etc/bunkerweb/variables.env
     echo "USE_ANTIBOT=no" | sudo tee -a /etc/bunkerweb/variables.env
     echo "USE_GREYLIST=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "GREYLIST_IP=0.0.0.0/0" | sudo tee -a /etc/bunkerweb/variables.env
