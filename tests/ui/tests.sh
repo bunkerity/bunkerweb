@@ -38,7 +38,7 @@ else
     sudo systemctl stop bunkerweb bunkerweb-ui
     sudo sed -i "/python3 -m gunicorn/c\    python3 -m flask --app main:app run --host=127.0.0.1 --port=7000 &" /usr/share/bunkerweb/scripts/bunkerweb-ui.sh
     export MAKEFLAGS="-j$(nproc)"
-    pip install --force-reinstall --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
+    sudo pip install --force-reinstall --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
     sudo chown -R nginx:nginx /usr/share/bunkerweb/deps
     sudo chmod -R 777 /usr/share/bunkerweb/deps
     sudo mkdir /var/www/html/app1.example.com
