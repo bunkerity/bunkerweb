@@ -23,14 +23,14 @@ if [ "$integration" = "docker" ] ; then
         exit 1
     fi
 
-    echo "🤖 Starting stack ..."
+    echo "🌐 Starting stack ..."
     docker compose up -d
     if [ $? -ne 0 ] ; then
-        echo "🤖 Up failed, retrying ... ⚠️"
+        echo "🌐 Up failed, retrying ... ⚠️"
         docker compose down -v --remove-orphans
         docker compose up -d
         if [ $? -ne 0 ] ; then
-            echo "🤖 Up failed ❌"
+            echo "🌐 Up failed ❌"
             exit 1
         fi
     fi
@@ -73,7 +73,7 @@ else
     while [[ $healthy = "false" && $retries -lt 5 ]] ; do
         while [ $i -lt 120 ] ; do
             if sudo grep -q "BunkerWeb is ready" "/var/log/bunkerweb/error.log" ; then
-                echo "🔏 Linux stack is healthy ✅"
+                echo "🌐 Linux stack is healthy ✅"
                 break
             fi
             sleep 1
@@ -88,12 +88,12 @@ else
             sudo cat /var/log/bunkerweb/error.log
             echo "🛡️ Showing BunkerWeb access logs ..."
             sudo cat /var/log/bunkerweb/access.log
-            echo "🔏 Linux stack is not healthy ❌"
+            echo "🌐 Linux stack is not healthy ❌"
             exit 1
         fi
 
         if ! [ -z "$(sudo journalctl -u bunkerweb --no-pager | grep "SYSTEMCTL - ❌")" ] ; then
-            echo "🔏 ⚠ Linux stack got an issue, restarting ..."
+            echo "🌐 ⚠ Linux stack got an issue, restarting ..."
             sudo journalctl --rotate
             sudo journalctl --vacuum-time=1s
             manual=1
@@ -106,9 +106,17 @@ else
         fi
     done
     if [ $retries -ge 5 ] ; then
-        echo "🔏 Linux stack could not be healthy ❌"
+        echo "🌐 Linux stack could not be healthy ❌"
         exit 1
     fi
+
+    while [ -f "/var/run/bunkerweb/ui.pid" ] ; do
+        sleep 1
+    done
+
+    sleep 5
+
+    echo "🌐 Linux stack is healthy ✅"
 fi
 
 # Start tests
