@@ -39,8 +39,8 @@ else
     export MAKEFLAGS="-j$(nproc)"
     pip install --force-reinstall --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
     sudo chown -R nginx:nginx /usr/share/bunkerweb
-    find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec chmod 0740 {} \;
-    find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type d -exec chmod 0750 {} \;
+    find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type f -exec sudo chmod 0740 {} \;
+    find /usr/share/bunkerweb -path /usr/share/bunkerweb/ui/deps -prune -o -type d -exec sudo chmod 0750 {} \;
     sudo mkdir /var/www/html/app1.example.com
     sudo touch /var/www/html/app1.example.com/index.html
     export TEST_TYPE="linux"
