@@ -36,6 +36,8 @@ if [ "$integration" = "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb bunkerweb-ui
+    export MAKEFLAGS="-j$(nproc)"
+    pip install --force-reinstall --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
     sudo mkdir /var/www/html/app1.example.com
     sudo touch /var/www/html/app1.example.com/index.html
     export TEST_TYPE="linux"
