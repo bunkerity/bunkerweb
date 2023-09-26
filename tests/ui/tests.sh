@@ -116,7 +116,7 @@ else
 
     sleep 5
 
-    echo "🌐 Linux stack is healthy ✅"
+    echo "🌐 Web UI is healthy ✅"
 fi
 
 # Start tests

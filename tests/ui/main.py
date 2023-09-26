@@ -29,13 +29,13 @@ while not ready:
     with suppress(RequestException):
         status_code = get("http://www.example.com/admin").status_code
 
-        if status_code > 500:
+        if status_code > 500 and status_code != 502:
             print("An error occurred with the server, exiting ...", flush=True)
             exit(1)
 
         ready = status_code < 400
 
-    if retries > 10:
+    if retries > 20:
         print("UI took too long to be ready, exiting ...", flush=True)
         exit(1)
     elif not ready:
