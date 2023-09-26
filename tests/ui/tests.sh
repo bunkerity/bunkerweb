@@ -117,6 +117,7 @@ else
             break
         fi
         sleep 1
+        i=$((i+1))
     done
     if [ $i -ge 120 ] ; then
         echo "🛡️ Showing BunkerWeb journal logs ..."
