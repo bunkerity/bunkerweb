@@ -36,7 +36,7 @@ if [ "$integration" = "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb bunkerweb-ui
-    sudo sed -i "/python3 -m gunicorn/c\    export MAKEFLAGS=\"-j\$(nproc)\"\n    python3 -m pip install --no-cache-dir --require-hashes -r /usr/share/bunkerweb/deps/requirements.txt\n    python3 -m flask --app main:app run --host=127.0.0.1 --port=7000 &\n    echo  \$? > /var/run/bunkerweb/ui.pid" /usr/share/bunkerweb/scripts/bunkerweb-ui.sh
+    sudo sed -i "/python3 -m gunicorn/c\    python3 -m gunicorn --config /usr/share/bunkerweb/ui/gunicorn.conf.py --user nginx --group nginx --bind \"127.0.0.1:7000\" --log-level debug &" /usr/share/bunkerweb/scripts/bunkerweb-ui.sh
     sudo mkdir /var/www/html/app1.example.com
     sudo touch /var/www/html/app1.example.com/index.html
     export TEST_TYPE="linux"
