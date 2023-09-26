@@ -25,10 +25,10 @@ jobs:
           sudo apt update
           sudo apt install --no-install-recommends -y zip nodejs tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 libasound2 libdbus-glib-1-2 libxtst6 libxt6
           wget -O firefox-setup.tar.bz2 "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64"
-          tar -xjf firefox-setup.tar.bz2 -C /opt/
+          sudo tar -xjf firefox-setup.tar.bz2 -C /opt/
+          sudo rm -f /usr/bin/firefox
           sudo ln -s /opt/firefox/firefox /usr/bin/firefox
-          sudo chmod 755 /opt/firefox
-          sudo chmod 755 /opt/firefox/firefox
+          sudo chmod 755 /opt/firefox /opt/firefox/firefox
           rm -f firefox-setup.tar.bz2
       - name: Download geckodriver
         uses: nick-fields/retry@v2
@@ -52,7 +52,7 @@ jobs:
       - name: Copy deb file to host
         run: |
           container_id=$(docker create "ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }}")
-          docker cp "$container_id:/opt/bunkerweb_dev-1_amd64.deb" "/tmp/bunkerweb.deb"
+          docker cp "$container_id:/opt/bunkerweb_${{ inputs.RELEASE }}-1_amd64.deb" "/tmp/bunkerweb.deb"
           docker rm "$container_id"
       - name: Install BunkerWeb
         run: |

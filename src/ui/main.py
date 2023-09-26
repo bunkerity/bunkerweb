@@ -20,10 +20,6 @@ for deps_path in [
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from gevent import monkey
-
-monkey.patch_all()
-
 from bs4 import BeautifulSoup
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
@@ -82,7 +78,6 @@ from src.ReverseProxied import ReverseProxied
 from src.User import User
 
 from utils import check_settings, path_to_dict
-from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from logging import getLogger
 

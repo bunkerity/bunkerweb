@@ -13,7 +13,7 @@ fi
 echo "🔑 Building selfsigned stack for integration \"$integration\" ..."
 
 # Starting stack
-if [ "$integration" = "docker" ] ; then
+if [ "$integration" == "docker" ] ; then
     docker compose pull bw-docker
     if [ $? -ne 0 ] ; then
         echo "🔑 Pull failed ❌"
