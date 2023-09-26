@@ -13,7 +13,15 @@ fi
 start() {
     echo "Starting UI"
     export $(cat /etc/bunkerweb/ui.env)
-    python3 -m gunicorn --config /usr/share/bunkerweb/ui/gunicorn.conf.py --user nginx --group nginx --bind "127.0.0.1:7000" &
+    python3 -m gunicorn \
+        --config /usr/share/bunkerweb/ui/gunicorn.conf.py \
+        --pythonpath /usr/share/bunkerweb/deps/python/,/usr/share/bunkerweb/ui/ \
+        --user nginx \
+        --group nginx \
+        --bind "127.0.0.1:7000" &
+    while ! [ -f "/var/run/bunkerweb/ui.pid" ]; do
+        sleep 1
+    done
 }
 
 # Function to stop the UI
