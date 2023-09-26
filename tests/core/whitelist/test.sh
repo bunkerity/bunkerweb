@@ -13,7 +13,7 @@ fi
 echo "🏳️ Building whitelist stack for integration \"$integration\" ..."
 
 # Starting stack
-if [ "$integration" = "docker" ] ; then
+if [ "$integration" == "docker" ] ; then
     docker compose pull bw-docker
     if [ $? -ne 0 ] ; then
         echo "🏳️ Pull failed ❌"
@@ -63,7 +63,7 @@ AS_NUMBER=0
 cleanup_stack () {
     exit_code=$?
     if [[ $end -eq 1 || $exit_code = 1 ]] || [[ $end -eq 0 && $exit_code = 0 ]] && [ $manual = 0 ] ; then
-        if [ "$integration" = "docker" ] ; then
+        if [ "$integration" == "docker" ] ; then
             rm -rf init/output
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_WHITELIST: "yes"@USE_WHITELIST: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@WHITELIST_IP: "192.168.0.0/24"@WHITELIST_IP: ""@' {} \;

@@ -13,7 +13,7 @@ fi
 echo "🚫 Building dnsbl stack for integration \"$integration\" ..."
 
 # Starting stack
-if [ "$integration" = "docker" ] ; then
+if [ "$integration" == "docker" ] ; then
     docker compose pull bw-docker
     if [ $? -ne 0 ] ; then
         echo "🚫 Pull failed ❌"
@@ -80,7 +80,7 @@ cleanup_stack () {
 trap cleanup_stack EXIT
 
 echo "🚫 Initializing workspace ..."
-if [ "$integration" = "docker" ] ; then
+if [ "$integration" == "docker" ] ; then
     rm -rf init/output
     mkdir -p init/output
     docker compose -f docker-compose.init.yml up --build
@@ -116,7 +116,7 @@ for test in "activated" "deactivated" "list"
 do
     if [ "$test" = "activated" ] ; then
         echo "🚫 Running tests with DNSBL activated and the server $server added to the list ..."
-        if [ "$integration" = "docker" ] ; then
+        if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@DNSBL_LIST: ".*"@DNSBL_LIST: "'"$server"'"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@ipv4_address: 192.168@ipv4_address: '"${ip%%.*}"'.0@' {} \;
             sed -i 's@subnet: 192.168@subnet: '"${ip%%.*}"'.0@' docker-compose.yml
@@ -128,7 +128,7 @@ do
         fi
     elif [ "$test" = "deactivated" ] ; then
         echo "🚫 Running tests without DNSBL ..."
-        if [ "$integration" = "docker" ] ; then
+        if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_DNSBL: "yes"@USE_DNSBL: "no"@' {} \;
         else
             sudo sed -i 's@USE_DNSBL=.*$@USE_DNSBL=no@' /etc/bunkerweb/variables.env
@@ -136,7 +136,7 @@ do
         fi
     elif [ "$test" = "list" ] ; then
         echo "🚫 Running tests with DNSBL activated and without the server $server added to the list ..."
-        if [ "$integration" = "docker" ] ; then
+        if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_DNSBL: "no"@USE_DNSBL: "yes"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@DNSBL_LIST: ".*"@DNSBL_LIST: ""@' {} \;
         else

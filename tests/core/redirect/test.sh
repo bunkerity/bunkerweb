@@ -13,7 +13,7 @@ fi
 echo "↩️ Building redirect stack for integration \"$integration\" ..."
 
 # Starting stack
-if [ "$integration" = "docker" ] ; then
+if [ "$integration" == "docker" ] ; then
     docker compose pull bw-docker app1
     if [ $? -ne 0 ] ; then
         echo "↩️ Pull failed ❌"
@@ -36,7 +36,7 @@ end=0
 cleanup_stack () {
     exit_code=$?
     if [[ $end -eq 1 || $exit_code = 1 ]] || [[ $end -eq 0 && $exit_code = 0 ]] && [ $manual = 0 ] ; then
-        if [ "$integration" = "docker" ] ; then
+        if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIRECT_TO: "http://brightlushsilveryawn\.neverssl\.com/online/"@REDIRECT_TO: ""@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIRECT_TO_REQUEST_URI: "yes"@REDIRECT_TO_REQUEST_URI: "no"@' {} \;
         else

@@ -13,7 +13,7 @@ fi
 echo "🕸️ Building bunkernet stack for integration \"$integration\" ..."
 
 # Starting stack
-if [ "$integration" = "docker" ] ; then
+if [ "$integration" == "docker" ] ; then
     docker compose pull bw-docker
     if [ $? -ne 0 ] ; then
         echo "🕸️ Pull failed ❌"
@@ -50,7 +50,7 @@ end=0
 cleanup_stack () {
     exit_code=$?
     if [[ $end -eq 1 || $exit_code = 1 ]] || [[ $end -eq 0 && $exit_code = 0 ]] && [ $manual = 0 ] ; then
-        if [ "$integration" = "docker" ] ; then
+        if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_BUNKERNET: "no"@USE_BUNKERNET: "yes"@' {} \;
         else
             sudo sed -i 's@USE_BUNKERNET=.*$@USE_BUNKERNET=yes@' /etc/bunkerweb/variables.env
@@ -67,7 +67,6 @@ cleanup_stack () {
     if [ "$integration" == "docker" ] ; then
         docker compose down -v --remove-orphans
     else
-        curl http://127.0.0.1:8080/reset
         sudo systemctl stop bunkerweb
         sudo truncate -s 0 /var/log/bunkerweb/error.log
     fi
@@ -216,6 +215,10 @@ do
     manual=1
     cleanup_stack
     manual=0
+
+    if [ "$integration" == "linux" ] ; then
+        curl http://127.0.0.1:8080/reset
+    fi
 
     echo " "
 done
