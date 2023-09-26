@@ -36,7 +36,7 @@ if [ "$integration" = "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb bunkerweb-ui
-    sudo sed -i "/python3 -m gunicorn/c\    export MAKEFLAGS="-j$(nproc)"\n    python3 -m pip install --no-cache-dir --require-hashes -r /usr/share/bunkerweb/deps/requirements.txt\n    python3 -m flask --app main:app run --host=127.0.0.1 --port=7000 &" /usr/share/bunkerweb/scripts/bunkerweb-ui.sh
+    sudo sed -i "/python3 -m gunicorn/c\    export MAKEFLAGS=\"-j\$(nproc)\"\n    python3 -m pip install --no-cache-dir --require-hashes -r /usr/share/bunkerweb/deps/requirements.txt\n    python3 -m flask --app main:app run --host=127.0.0.1 --port=7000 &\n    echo  \$? > /var/run/bunkerweb/ui.pid" /usr/share/bunkerweb/scripts/bunkerweb-ui.sh
     sudo mkdir /var/www/html/app1.example.com
     sudo touch /var/www/html/app1.example.com/index.html
     export TEST_TYPE="linux"
@@ -110,13 +110,28 @@ else
         exit 1
     fi
 
-    while [ -f "/var/run/bunkerweb/ui.pid" ] ; do
+    i=0
+    while [ $i -lt 120 ] ; do
+        if [ -f "/var/run/bunkerweb/ui.pid" ] ; then
+            echo "🌐 Web UI is ready ✅"
+            break
+        fi
         sleep 1
     done
+    if [ $i -ge 120 ] ; then
+        echo "🛡️ Showing BunkerWeb journal logs ..."
+        sudo journalctl -u bunkerweb --no-pager
+        echo "🛡️ Showing BunkerWeb UI journal logs ..."
+        sudo journalctl -u bunkerweb-ui --no-pager
+        echo "🛡️ Showing BunkerWeb error logs ..."
+        sudo cat /var/log/bunkerweb/error.log
+        echo "🛡️ Showing BunkerWeb access logs ..."
+        sudo cat /var/log/bunkerweb/access.log
+        echo "🌐 Web UI is not ready ❌"
+        exit 1
+    fi
 
-    sleep 5
-
-    echo "🌐 Web UI is healthy ✅"
+    sleep 3
 fi
 
 # Start tests
