@@ -1169,6 +1169,8 @@ location /hello {
 
         assert_button_click(driver, "//button[@data-cache-modal-submit='']")
 
+        sleep(3)
+
         print("The cache file content is correct, trying logs page ...", flush=True)
 
         access_page(
