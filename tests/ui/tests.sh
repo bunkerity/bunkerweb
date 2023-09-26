@@ -109,30 +109,6 @@ else
         echo "🌐 Linux stack could not be healthy ❌"
         exit 1
     fi
-
-    i=0
-    while [ $i -lt 120 ] ; do
-        if [ -f "/var/run/bunkerweb/ui.pid" ] ; then
-            echo "🌐 Web UI is ready ✅"
-            break
-        fi
-        sleep 1
-        i=$((i+1))
-    done
-    if [ $i -ge 120 ] ; then
-        echo "🛡️ Showing BunkerWeb journal logs ..."
-        sudo journalctl -u bunkerweb --no-pager
-        echo "🛡️ Showing BunkerWeb UI journal logs ..."
-        sudo journalctl -u bunkerweb-ui --no-pager
-        echo "🛡️ Showing BunkerWeb error logs ..."
-        sudo cat /var/log/bunkerweb/error.log
-        echo "🛡️ Showing BunkerWeb access logs ..."
-        sudo cat /var/log/bunkerweb/access.log
-        echo "🌐 Web UI is not ready ❌"
-        exit 1
-    fi
-
-    sleep 3
 fi
 
 # Start tests
