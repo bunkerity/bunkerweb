@@ -10,6 +10,29 @@ elif [ "$integration" != "docker" ] && [ "$integration" != "linux" ] ; then
     exit 1
 fi
 
+echo "🌐 Building UI stack for integration \"$integration\" ..."
+
+cleanup_stack () {
+    echo "🌐 Cleaning up current stack ..."
+
+    if [ "$integration" == "docker" ] ; then
+        docker compose down -v --remove-orphans
+    else
+        sudo systemctl stop bunkerweb
+        sudo truncate -s 0 /var/log/bunkerweb/error.log
+    fi
+
+    if [ $? -ne 0 ] ; then
+        echo "🌐 Cleanup failed ❌"
+        exit 1
+    fi
+
+    echo "🌐 Cleaning up current stack done ✅"
+}
+
+# Cleanup stack on exit
+trap cleanup_stack EXIT
+
 # Prepare environment
 if [ "$integration" = "docker" ] ; then
     sed -i "s@bunkerity/bunkerweb:.*@bunkerweb-tests@" docker-compose.yml
@@ -27,7 +50,7 @@ if [ "$integration" = "docker" ] ; then
     docker compose up -d
     if [ $? -ne 0 ] ; then
         echo "🌐 Up failed, retrying ... ⚠️"
-        docker compose down -v --remove-orphans
+        cleanup_stack
         docker compose up -d
         if [ $? -ne 0 ] ; then
             echo "🌐 Up failed ❌"
@@ -42,6 +65,7 @@ else
     export TEST_TYPE="linux"
 fi
 
+echo "🌐 Waiting for stack to be healthy ..."
 i=0
 if [ "$integration" == "docker" ] ; then
     while [ $i -lt 120 ] ; do
@@ -96,9 +120,7 @@ else
             echo "🌐 ⚠ Linux stack got an issue, restarting ..."
             sudo journalctl --rotate
             sudo journalctl --vacuum-time=1s
-            manual=1
             cleanup_stack
-            manual=0
             sudo systemctl start bunkerweb
             retries=$((retries+1))
         else
@@ -142,6 +164,3 @@ if [ $? -ne 0 ] ; then
     echo "❌ Tests failed"
     exit 1
 fi
-
-# Exit
-exit 0
