@@ -333,9 +333,10 @@ class Upload {
         : (fileSize = (loaded / (1024 * 1024)).toFixed(2) + " MB");
 
       const progressHTML = this.fileLoad(name, fileSize);
+      let cleanHTML = DOMPurify.sanitize(progressHTML);
 
       this.uploadedArea.classList.add("onprogress");
-      this.progressArea.innerHTML = progressHTML;
+      this.progressArea.innerHTML = cleanHTML;
     });
 
     xhr.addEventListener("readystatechange", () => {
