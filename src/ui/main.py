@@ -245,25 +245,27 @@ LOG_RX = re_compile(
 
 def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
     # Do the operation
+    error = False
     if method == "services":
-        error = False
-        editing = False
+        editing = operation == "edit"
         service_custom_confs = glob(
             join(sep, "etc", "bunkerweb", "configs", "*", args[1])
         )
+        moved = False
 
         if operation == "new":
             operation, error = app.config["CONFIG"].new_service(args[0])
         elif operation == "edit":
-            editing = True
             if args[1] != args[2] and service_custom_confs:
                 for service_custom_conf in service_custom_confs:
-                    move(
-                        service_custom_conf,
-                        service_custom_conf.replace(
-                            f"{sep}{args[1]}", f"{sep}{args[2]}"
-                        ).replace(join(sep, "etc"), join(sep, "var", "tmp")),
-                    )
+                    if listdir(service_custom_conf):
+                        move(
+                            service_custom_conf,
+                            service_custom_conf.replace(
+                                f"{sep}{args[1]}", f"{sep}{args[2]}"
+                            ).replace(join(sep, "etc"), join(sep, "var", "tmp")),
+                        )
+                        moved = True
             operation, error = app.config["CONFIG"].edit_service(args[1], args[0])
         elif operation == "delete":
             operation, error = app.config["CONFIG"].delete_service(args[2])
@@ -273,7 +275,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
         else:
             app.config["TO_FLASH"].append({"content": operation, "type": "success"})
 
-            if editing and args[1] != args[2] and service_custom_confs:
+            if editing and moved and args[1] != args[2] and service_custom_confs:
                 for tmp_service_custom_conf in glob(
                     join(sep, "var", "tmp", "bunkerweb", "configs", "*", args[2])
                 ):
@@ -292,7 +294,6 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
                 )
     if method == "global_config":
         operation = app.config["CONFIG"].edit_global_conf(args[0])
-        app.config["TO_FLASH"].append({"content": operation, "type": "success"})
     elif method == "plugins":
         app.config["CONFIG"].reload_config()
 
@@ -304,18 +305,21 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
         operation = app.config["INSTANCES"].stop_instance(args[0])
     elif operation == "restart":
         operation = app.config["INSTANCES"].restart_instance(args[0])
-    else:
+    elif not error:
         operation = "The scheduler will be in charge of reloading the instances."
-
-    if isinstance(operation, list):
-        for op in operation:
-            app.config["TO_FLASH"].append(
-                {"content": f"Reload failed for the instance {op}", "type": "error"}
-            )
-    elif operation.startswith("Can't"):
-        app.config["TO_FLASH"].append({"content": operation, "type": "error"})
     else:
-        app.config["TO_FLASH"].append({"content": operation, "type": "success"})
+        operation = ""
+
+    if operation:
+        if isinstance(operation, list):
+            for op in operation:
+                app.config["TO_FLASH"].append(
+                    {"content": f"Reload failed for the instance {op}", "type": "error"}
+                )
+        elif operation.startswith("Can't"):
+            app.config["TO_FLASH"].append({"content": operation, "type": "error"})
+        else:
+            app.config["TO_FLASH"].append({"content": operation, "type": "success"})
 
     app.config["RELOADING"] = False
 
@@ -529,6 +533,18 @@ def services():
                     or not value.strip()
                 ):
                     del variables[variable]
+
+            if (
+                request.form["operation"] == "edit"
+                and len(variables) == 1
+                and "SERVER_NAME" in variables
+                and variables["SERVER_NAME"] == request.form.get("OLD_SERVER_NAME", "")
+            ):
+                flash(
+                    "The service was not edited because no values were changed.",
+                    "error",
+                )
+                return redirect(url_for("loading", next=url_for("services")))
 
             error = app.config["CONFIG"].check_variables(variables)
 
