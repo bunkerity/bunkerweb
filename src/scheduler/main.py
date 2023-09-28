@@ -470,6 +470,7 @@ if __name__ == "__main__":
 
         FIRST_RUN = True
         CONFIG_NEED_GENERATION = True
+        RUN_JOBS_ONCE = True
         CHANGES = []
         threads = []
 
@@ -498,15 +499,16 @@ if __name__ == "__main__":
                 )
                 stop(1)
 
-            # Update the environment variables of the scheduler
-            SCHEDULER.env = env.copy() | environ.copy()
-            SCHEDULER.setup()
+            if RUN_JOBS_ONCE:
+                # Update the environment variables of the scheduler
+                SCHEDULER.env = env.copy() | environ.copy()
+                SCHEDULER.setup()
 
-            # Only run jobs once
-            if not SCHEDULER.run_once():
-                logger.error("At least one job in run_once() failed")
-            else:
-                logger.info("All jobs in run_once() were successful")
+                # Only run jobs once
+                if not SCHEDULER.run_once():
+                    logger.error("At least one job in run_once() failed")
+                else:
+                    logger.info("All jobs in run_once() were successful")
 
             if CONFIG_NEED_GENERATION:
                 content = ""
@@ -613,6 +615,7 @@ if __name__ == "__main__":
                 )
 
             NEED_RELOAD = False
+            RUN_JOBS_ONCE = False
             CONFIG_NEED_GENERATION = False
             CONFIGS_NEED_GENERATION = False
             PLUGINS_NEED_GENERATION = False
@@ -675,6 +678,7 @@ if __name__ == "__main__":
                         )
 
                     PLUGINS_NEED_GENERATION = True
+                    CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
 
                 # check if the custom configs have changed since last time
@@ -693,6 +697,7 @@ if __name__ == "__main__":
                 if changes["instances_changed"]:
                     logger.info("Instances changed, generating ...")
                     INSTANCES_NEED_GENERATION = True
+                    CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
 
             FIRST_RUN = False
@@ -718,6 +723,7 @@ if __name__ == "__main__":
                     CHANGES.append("config")
                     env = db.get_config()
                     env["DATABASE_URI"] = db.database_uri
+                    RUN_JOBS_ONCE = True
 
                 if INSTANCES_NEED_GENERATION:
                     CHANGES.append("instances")
