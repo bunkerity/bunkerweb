@@ -13,6 +13,7 @@ SECURITY.md
 tsparticles.bundle.min.js
 flatpickr.*
 src/ui/static/js/editor/*
+src/ui/static/js/utils/purify/*
 src/ui/templates/*
 datepicker-foundation.css
 examples/*

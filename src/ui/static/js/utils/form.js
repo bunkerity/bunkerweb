@@ -52,18 +52,18 @@ class Select {
       try {
         if (!e.target.closest("button")) {
           const selectEls = document.querySelectorAll(
-            "div[data-setting-select-dropdown]",
+            "div[data-setting-select-dropdown]"
           );
           selectEls.forEach((select) => {
             select.classList.add("hidden");
             select.classList.remove("flex");
           });
           const btnEls = document.querySelectorAll(
-            "button[data-setting-select]",
+            "button[data-setting-select]"
           );
           btnEls.forEach((btn) => {
             const dropdownChevron = btn.querySelector(
-              `svg[data-setting-select]`,
+              `svg[data-setting-select]`
             );
             dropdownChevron.classList.remove("rotate-180");
           });
@@ -87,7 +87,7 @@ class Select {
             .hasAttribute(`data-setting-select-dropdown-btn`)
         ) {
           const btn = e.target.closest(
-            `button[data-setting-select-dropdown-btn]`,
+            `button[data-setting-select-dropdown-btn]`
           );
           const btnValue = btn.getAttribute("value");
 
@@ -116,7 +116,7 @@ class Select {
 
           //close dropdown
           const dropdownChevron = selectCustom.querySelector(
-            `svg[data-setting-select]`,
+            `svg[data-setting-select]`
           );
           dropdownChevron.classList.remove("rotate-180");
 
@@ -139,7 +139,7 @@ class Select {
     });
     //select new one
     const newOption = selectEl.querySelector(
-      `option[value="${selectedValue}"]`,
+      `option[value="${selectedValue}"]`
     );
     newOption.selected = true;
     newOption.setAttribute("selected", "");
@@ -255,7 +255,8 @@ class DisabledPop {
     } bg-blue-500 absolute right-2 rounded-lg px-2 py-1 z-20 dark:brightness-90">
     <p class="m-0 text-xs text-white dark:text-gray-100">disabled by ${method}</p>
     </div>`;
-    el.insertAdjacentHTML("beforebegin", popupHTML);
+    let cleanHTML = DOMPurify.sanitize(popupHTML);
+    el.insertAdjacentHTML("beforebegin", cleanHTML);
   }
 }
 
