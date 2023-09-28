@@ -10,5 +10,9 @@ CONTRIBUTING.md
 LICENSE.md
 README.md
 SECURITY.md
-src/ui/static
+tsparticles.bundle.min.js
+flatpickr.*
+src/ui/static/js/editor/*
+src/ui/templates/*
+datepicker-foundation.css
 examples/*
