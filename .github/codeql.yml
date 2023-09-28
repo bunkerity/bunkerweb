@@ -6,5 +6,7 @@ paths:
   - src/ui
   - src/common
 paths-ignore:
-  - src/ui/static
+  - src/ui/static/tsparticles.bundle.min.js
+  - src/ui/static/js/utils/flatpickr.js
+  - src/ui/static/js/editor
   - src/common/core/modsecurity/files

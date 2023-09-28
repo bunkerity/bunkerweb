@@ -39,7 +39,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
       - name: Replace VERSION
-        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
         run: ./misc/update-version.sh ${{ inputs.RELEASE }}
       - name: Extract arch
         run: |
@@ -91,7 +91,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       # Build testing package image
       - name: Build package image
-        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
         uses: docker/build-push-action@v5
         with:
           context: .

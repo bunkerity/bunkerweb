@@ -64,33 +64,16 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
 
-  # Python code security
-  code-security:
-    runs-on: ubuntu-latest
+  codeql:
+    uses: ./.github/workflows/codeql.yml
     permissions:
       actions: read
       contents: read
       security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ["python"]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: ${{ matrix.language }}
-          config-file: ./.github/codeql.yml
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
-        with:
-          category: "/language:${{matrix.language}}"
 
   # Create infrastructures and prepare tests
   create-infras:
-    needs: [code-security, build-containers, build-packages]
+    needs: [codeql, build-containers, build-packages]
     strategy:
       matrix:
         type: [docker, autoconf, swarm, k8s, linux]
@@ -102,7 +85,7 @@ jobs:
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       K8S_IP: ${{ secrets.K8S_IP }}
   prepare-tests-core:
-    needs: [code-security, build-containers, build-packages]
+    needs: [codeql, build-containers, build-packages]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -116,12 +99,12 @@ jobs:
 
   # Perform tests
   tests-ui:
-    needs: [code-security, build-containers]
+    needs: [codeql, build-containers]
     uses: ./.github/workflows/tests-ui.yml
     with:
       RELEASE: testing
   tests-ui-linux:
-    needs: [code-security, build-packages]
+    needs: [codeql, build-packages]
     uses: ./.github/workflows/tests-ui-linux.yml
     with:
       RELEASE: testing
