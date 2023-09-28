@@ -76,10 +76,9 @@ class Config:
             check=False,
         )
 
+        env_file.unlink()
         if proc.returncode != 0:
             raise Exception(f"Error from generator (return code = {proc.returncode})")
-
-        env_file.unlink()
 
     def get_plugins_settings(self) -> dict:
         return {
@@ -180,7 +179,7 @@ class Config:
             self.get_config(methods=False), self.get_services(methods=False)
         )
 
-    def new_service(self, variables: dict, edit: bool = False) -> Tuple[str, int]:
+    def new_service(self, variables: dict) -> Tuple[str, int]:
         """Creates a new service from the given variables
 
         Parameters
@@ -199,17 +198,16 @@ class Config:
             raise this if the service already exists
         """
         services = self.get_services(methods=False)
-        for i, service in enumerate(services):
-            if service["SERVER_NAME"] == variables["SERVER_NAME"] or service[
-                "SERVER_NAME"
-            ] in variables["SERVER_NAME"].split(" "):
-                if not edit:
-                    return (
-                        f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
-                        1,
-                    )
-
-                services.pop(i)
+        server_name_splitted = variables["SERVER_NAME"].split(" ")
+        for service in services:
+            if (
+                service["SERVER_NAME"] == variables["SERVER_NAME"]
+                or service["SERVER_NAME"] in server_name_splitted
+            ):
+                return (
+                    f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
+                    1,
+                )
 
         services.append(variables)
         self.__gen_conf(self.get_config(methods=False), services)
@@ -233,19 +231,39 @@ class Config:
         str
             the confirmation message
         """
-        message, error = self.delete_service(old_server_name)
+        services = self.get_services(methods=False)
+        changed_server_name = old_server_name != variables["SERVER_NAME"]
+        server_name_splitted = variables["SERVER_NAME"].split(" ")
+        old_server_name_splitted = old_server_name.split(" ")
+        for i, service in enumerate(deepcopy(services)):
+            if (
+                service["SERVER_NAME"] == variables["SERVER_NAME"]
+                or service["SERVER_NAME"] in server_name_splitted
+            ):
+                if changed_server_name:
+                    return (
+                        f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
+                        1,
+                    )
+                services.pop(i)
+            elif changed_server_name and (
+                service["SERVER_NAME"] == old_server_name
+                or service["SERVER_NAME"] in old_server_name_splitted
+            ):
+                services.pop(i)
 
-        if error:
-            return message, error
+        services.append(variables)
+        config = self.get_config(methods=False)
 
-        message, error = self.new_service(variables, edit=True)
+        if changed_server_name:
+            for k in deepcopy(config):
+                if k.startswith(old_server_name):
+                    config.pop(k)
 
-        if error:
-            return message, error
-
+        self.__gen_conf(config, services)
         return (
             f"Configuration for {old_server_name.split(' ')[0]} has been edited.",
-            error,
+            0,
         )
 
     def edit_global_conf(self, variables: dict) -> str:

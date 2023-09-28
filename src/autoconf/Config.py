@@ -58,35 +58,25 @@ class Config(ConfigCaller):
     def apply(self, instances, services, configs={}, first=False) -> bool:
         success = True
 
-        # update types
-        updates = {
-            "instances": False,
-            "services": False,
-            "configs": False,
-            "config": False,
-        }
         changes = []
         if instances != self.__instances or first:
             self.__instances = instances
-            updates["instances"] = True
             changes.append("instances")
         if services != self.__services or first:
             self.__services = services
-            updates["services"] = True
+            changes.append("services")
         if configs != self.__configs or first:
             self.__configs = configs
-            updates["configs"] = True
             changes.append("custom_configs")
-        if updates["instances"] or updates["services"]:
+        if "instances" in changes or "services" in changes:
             old_env = deepcopy(self.__config)
             new_env = self.__get_full_env()
             if old_env != new_env or first:
                 self.__config = new_env
-                updates["config"] = True
                 changes.append("config")
 
         custom_configs = []
-        if updates["configs"]:
+        if "custom_configs" in changes:
             for config_type in self.__configs:
                 for file, data in self.__configs[config_type].items():
                     site = None
@@ -126,21 +116,24 @@ class Config(ConfigCaller):
                     "Scheduler is already applying a configuration, retrying in 5 seconds ...",
                 )
             sleep(5)
+
         # update instances in database
-        if updates["instances"]:
+        if "instances" in changes:
             err = self._db.update_instances(self.__instances, changed=False)
             if err:
                 self.__logger.error(f"Failed to update instances: {err}")
+
         # save config to database
-        if updates["config"]:
+        if "config" in changes:
             err = self._db.save_config(self.__config, "autoconf", changed=False)
             if err:
                 success = False
                 self.__logger.error(
                     f"Can't save config in database: {err}, config may not work as expected",
                 )
+
         # save custom configs to database
-        if updates["configs"]:
+        if "custom_configs" in changes:
             err = self._db.save_custom_configs(
                 custom_configs, "autoconf", changed=False
             )
@@ -149,6 +142,7 @@ class Config(ConfigCaller):
                 self.__logger.error(
                     f"Can't save autoconf custom configs in database: {err}, custom configs may not work as expected",
                 )
+
         # update changes in db
         ret = self._db.checked_changes(changes, value=True)
         if ret:

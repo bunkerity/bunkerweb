@@ -352,6 +352,8 @@ class Database:
                     return "The metadata are not set yet, try again"
 
                 if "config" in changes:
+                    if not metadata.first_config_saved:
+                        metadata.first_config_saved = True
                     metadata.config_changed = value
                 if "custom_configs" in changes:
                     metadata.custom_configs_changed = value
@@ -1733,7 +1735,9 @@ class Database:
                 )
             ]
 
-    def add_instance(self, hostname: str, port: int, server_name: str) -> str:
+    def add_instance(
+        self, hostname: str, port: int, server_name: str, changed: Optional[bool] = True
+    ) -> str:
         """Add instance."""
         with self.__db_session() as session:
             db_instance = (
@@ -1749,6 +1753,12 @@ class Database:
             session.add(
                 Instances(hostname=hostname, port=port, server_name=server_name)
             )
+
+            if changed:
+                with suppress(ProgrammingError, OperationalError):
+                    metadata = session.query(Metadata).get(1)
+                    if metadata is not None:
+                        metadata.instances_changed = True
 
             try:
                 session.commit()
