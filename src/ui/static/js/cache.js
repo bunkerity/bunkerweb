@@ -16,7 +16,9 @@ class Download {
     this.listContainer.addEventListener("click", (e) => {
       try {
         if (
-          e.target.closest("button").hasAttribute(`data-${this.prefix}-download`)
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-download`)
         ) {
           const btnEl = e.target.closest("button");
           const jobName = btnEl.getAttribute("data-cache-download");
@@ -31,8 +33,8 @@ class Download {
     window.open(
       `${location.href.replace(
         "cache",
-        "jobs"
-      )}/download?job_name=${jobName}&file_name=${fileName}`
+        "jobs",
+      )}/download?job_name=${jobName}&file_name=${fileName}`,
     );
   }
 }

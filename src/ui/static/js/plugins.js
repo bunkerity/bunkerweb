@@ -286,7 +286,9 @@ class Upload {
     //close fail/success log
     this.container.addEventListener("click", (e) => {
       try {
-        if (e.target.closest("button").hasAttribute("data-upload-message-delete")) {
+        if (
+          e.target.closest("button").hasAttribute("data-upload-message-delete")
+        ) {
           const message = e.target.closest("div[data-upload-message]");
           message.remove();
         }
@@ -406,7 +408,8 @@ class Upload {
       </div>
     </div>
     </div>`;
-    return str;
+    let cleanHTML = DOMPurify.sanitize(str);
+    return cleanHTML;
   }
 
   fileFail(name, fileSize) {
@@ -433,7 +436,8 @@ class Upload {
       </div>
     </div>
     </div>`;
-    return str;
+    let cleanHTML = DOMPurify.sanitize(str);
+    return cleanHTML;
   }
 }
 
@@ -445,8 +449,12 @@ class Modal {
     this.modalNameInp = this.modal.querySelector("input#name");
     this.modalExtInp = this.modal.querySelector("input#external");
 
-    this.modalTitle = this.modal.querySelector(`[data-${this.prefix}-modal-title]`);
-    this.modalTxt = this.modal.querySelector(`[data-${this.prefix}-modal-text]`);
+    this.modalTitle = this.modal.querySelector(
+      `[data-${this.prefix}-modal-title]`
+    );
+    this.modalTxt = this.modal.querySelector(
+      `[data-${this.prefix}-modal-text]`
+    );
     this.init();
   }
 
@@ -455,8 +463,9 @@ class Modal {
       //DELETE HANDLER
       try {
         if (
-          e.target.closest("button").getAttribute(`data-${this.prefix}-action`) ===
-          "delete"
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-action`) === "delete"
         ) {
           const btnEl = e.target.closest("button");
           this.setModal(btnEl);
@@ -469,7 +478,9 @@ class Modal {
       //CLOSE MODAL HANDLER
       try {
         if (
-          e.target.closest("button").hasAttribute(`data-${this.prefix}-modal-close`)
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-modal-close`)
         ) {
           this.hideModal();
         }

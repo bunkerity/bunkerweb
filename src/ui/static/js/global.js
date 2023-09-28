@@ -74,10 +74,11 @@ class News {
         date,
         lastUpdate
       );
+      let cleanHTML = DOMPurify.sanitize(cardHTML);
       //add to DOM
       document
         .querySelector("[data-news-container]")
-        .insertAdjacentHTML("afterbegin", cardHTML);
+        .insertAdjacentHTML("afterbegin", cleanHTML);
     });
   }
 
