@@ -1,11 +1,14 @@
-FROM python:3.11.5-alpine AS builder
+FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded AS builder
 
 # Copy python requirements
-COPY src/common/gen/requirements.txt /tmp/req/requirements.txt
-COPY src/common/db/requirements.txt /tmp/req/requirements.txt.1
+COPY src/deps/requirements.txt /tmp/req/requirements.txt
+COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.1
+COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
 
-RUN mkdir -p /usr/share/bunkerweb/deps && \
-    cat /tmp/req/requirements.txt /tmp/req/requirements.txt.1 > /usr/share/bunkerweb/deps/requirements.txt && \
+WORKDIR /usr/share/bunkerweb
+
+RUN mkdir -p deps/python && \
+    cat /tmp/req/requirements.txt* > deps/requirements.txt && \
     rm -rf /tmp/req
 
 # Install python dependencies
@@ -13,10 +16,7 @@ RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev 
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-    pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
-    mkdir -p /usr/share/bunkerweb/deps/python && \
-    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
+    pip install --no-cache-dir-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Remove build dependencies
 RUN apk del .build-deps && \
@@ -24,16 +24,16 @@ RUN apk del .build-deps && \
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
-COPY src/autoconf /usr/share/bunkerweb/autoconf
-COPY src/common/api /usr/share/bunkerweb/api
-COPY src/common/cli /usr/share/bunkerweb/cli
-COPY src/common/core /usr/share/bunkerweb/core
-COPY src/common/db /usr/share/bunkerweb/db
-COPY src/common/helpers /usr/share/bunkerweb/helpers
-COPY src/common/settings.json /usr/share/bunkerweb/settings.json
-COPY src/common/utils /usr/share/bunkerweb/utils
+COPY src/autoconf autoconf
+COPY src/common/api api
+COPY src/common/cli cli
+COPY src/common/core core
+COPY src/common/db db
+COPY src/common/helpers helpers
+COPY src/common/settings.json settings.json
+COPY src/common/utils utils
 
-FROM python:3.11.5-alpine
+FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -41,11 +41,13 @@ RUN umask 027
 # Copy dependencies
 COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 
+WORKDIR /usr/share/bunkerweb
+
 # Add autoconf user, drop bwcli, install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache bash && \
     addgroup -g 101 autoconf && \
     adduser -h /var/cache/autoconf -g autoconf -s /bin/sh -G autoconf -D -H -u 101 autoconf && \
-    cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
+    cp helpers/bwcli /usr/bin/ && \
     mkdir -p /var/tmp/bunkerweb && \
     mkdir -p /var/www && \
     mkdir -p /etc/bunkerweb && \
@@ -58,7 +60,7 @@ RUN apk add --no-cache bash && \
     chmod -R 770 /data && \
     chown -R root:autoconf /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
     chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
-    chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/bin/bwcli /usr/share/bunkerweb/autoconf/main.py /usr/share/bunkerweb/deps/python/bin/*
+    chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py deps/python/bin/*
 
 # Fix CVEs
 # There are no CVE to fix for the moment
@@ -71,4 +73,4 @@ USER autoconf:autoconf
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-autoconf.sh
 
-CMD ["python3", "/usr/share/bunkerweb/autoconf/main.py"]
+CMD [ "python3", "main.py" ]

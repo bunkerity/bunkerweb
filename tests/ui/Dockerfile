@@ -1,4 +1,4 @@
-FROM python:3.11.5-alpine
+FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded
 
 # Install firefox and geckodriver
 RUN apk add --no-cache --virtual .build-deps curl grep zip wget && \
@@ -15,7 +15,7 @@ WORKDIR /opt/tests_ui
 
 COPY requirements.txt .
 
-RUN MAKEFLAGS="-j $(nproc)" pip install --no-cache -r requirements.txt
+RUN MAKEFLAGS="-j $(nproc)" pip install --no-cache-dir --require-hashes -r requirements.txt
 
 RUN touch test.txt && \
   zip test.zip test.txt && \

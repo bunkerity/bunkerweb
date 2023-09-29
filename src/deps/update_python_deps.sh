@@ -6,19 +6,11 @@ echo "Updating python dependencies"
 echo "Creating virtual environment"
 
 python3 -m venv tmp_venv && source tmp_venv/bin/activate
-pip install pip --upgrade > /dev/null && pip install wheel setuptools pip-tools pip-compile-multi pip-upgrader > /dev/null
+pip install --force-reinstall --no-cache-dir --require-hashes -r requirements-deps.txt
 
-echo "Updating requirements.in files"
+function update_python_deps() {
+    file=$1
 
-files=("../../docs/requirements.txt" "../common/db/requirements.in" "../common/gen/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in")
-
-for file in $(find ../../tests -iname "requirements.txt")
-do
-    files+=("$file")
-done
-
-for file in "${files[@]}"
-do
     echo "Updating $file"
     cd $(dirname $file)
 
@@ -26,12 +18,12 @@ do
         mv $(basename $file) $(basename ${file/%.in}.txt)
     fi
 
-    echo "all" | pip-upgrade
+    echo "all" | pip-upgrade $(basename ${file/%.in}.txt)
 
     if [[ $file == *.in ]]; then
         mv $(basename ${file/%.in}.txt) $(basename $file)
         echo "Generating hashes for $file ..."
-        pip-compile --generate-hashes --allow-unsafe --resolver=backtracking
+        pip-compile --generate-hashes --allow-unsafe --resolver=backtracking $(basename $file)
     else
         echo "No need to generate hashes for $file"
     fi
@@ -39,9 +31,27 @@ do
     echo " "
 
     cd -
+}
+
+update_python_deps requirements-deps.in
+
+pip install --no-cache-dir --require-hashes -r requirements-deps.txt
+
+echo "Updating python requirements files"
+
+files=("requirements.in" "../../docs/requirements.in" "../../misc/requirements-ansible.in" "../common/db/requirements.in" "../common/gen/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in")
+
+for file in $(find ../../tests -type f -iname "requirements.in")
+do
+    files+=("$file")
 done
 
-echo "Finished updating requirements.txt files, cleaning up ..."
+for file in "${files[@]}"
+do
+    update_python_deps "$file"
+done
+
+echo "Finished updating python requirements files, cleaning up ..."
 
 deactivate
 rm -rf tmp_venv

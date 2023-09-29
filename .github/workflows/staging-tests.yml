@@ -42,7 +42,7 @@ jobs:
         run: docker tag local/bunkerweb-tests:latest 192.168.42.100:5000/bunkerweb-tests:latest && docker push 192.168.42.100:5000/bunkerweb-tests:latest && docker tag local/scheduler-tests:latest 192.168.42.100:5000/scheduler-tests:latest && docker push 192.168.42.100:5000/scheduler-tests:latest && docker tag local/autoconf-tests:latest 192.168.42.100:5000/autoconf-tests:latest && docker push 192.168.42.100:5000/autoconf-tests:latest
         if: inputs.TYPE == 'swarm'
       - name: Install test dependencies
-        run: pip3 install -r tests/requirements.txt
+        run: pip3 install --no-cache-dir --require-hashes -r tests/requirements.txt
       - uses: actions/download-artifact@v3
         with:
           name: tf-k8s
