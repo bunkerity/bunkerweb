@@ -16,7 +16,7 @@ RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev 
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-    pip install --no-cache-dir-dir --require-hashes --target deps/python -r deps/requirements.txt
+    pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Remove build dependencies
 RUN apk del .build-deps && \
