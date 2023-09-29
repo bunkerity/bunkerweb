@@ -7,7 +7,7 @@
       <h5 class="transition duration-300 ease-in-out 0 ml-2 font-bold text-md uppercase dark:text-white/90 mb-0">CONFIGS</h5>
       <!-- search inpt-->
       <div class="flex relative col-span-12 sm:col-span-6 lg:col-span-4 3xl:col-span-3">
-  
+
         <input
           type="text"
           id="settings-filter"
@@ -24,7 +24,7 @@
       {% include "settings_tabs.html" %}
       <!-- end tabs-->
   </div>
-  
+
     <!-- form global conf -->
     <form
     data-global-config-form
@@ -33,11 +33,11 @@
       class="flex flex-col justify-between overflow-hidden overflow-y-auto max-h-135 md:max-h-160 dark:brightness-110 col-span-12 break-words bg-white shadow-xl p-4 dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
     >
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-  
+
         <!-- plugin item -->
         {% include "settings_plugins.html" %}
         <!-- end plugin item -->
-  
+
       <!-- submit -->
       <div class="flex w-full justify-center mt-8 mb-2">
         <button
@@ -50,7 +50,7 @@
       <!-- end submit -->
     </form>
     <!--end form global conf -->
-  
+
   </div>
 </div>
 

@@ -19,13 +19,13 @@
 
 <p align="center">
 	📓 <a href="https://docs.bunkerweb.io">Documentation</a>
-	 &#124; 
+	 &#124;
 	👨‍💻 <a href="https://demo.bunkerweb.io">Demo</a>
-	 &#124; 
+	 &#124;
 	🛡️ <a href="./examples">Examples</a>
-	 &#124; 
+	 &#124;
 	💬 <a href="https://discord.com/invite/fTf46FmtyD">Chat</a>
-	 &#124; 
+	 &#124;
 	📝 <a href="https://github.com/bunkerity/bunkerweb/discussions">Forum</a>
 	 &#124;
 	⚙️ <a href="https://config.bunkerweb.io">Configurator</a>
@@ -142,7 +142,7 @@ Another core component of BunkerWeb is the ModSecurity Web Application Firewall 
 State of the current configuration of BunkerWeb is stored in a backend database which contains the following data :
 
 - Settings defined for all the services
-- Custom configurations 
+- Custom configurations
 - BunkerWeb instances
 - Metadata about jobs execution
 - Cached files
@@ -355,3 +355,8 @@ If you would like to contribute to the plugins you can read the [contributing gu
 # Security policy
 
 We take security bugs as serious issues and encourage responsible disclosure, see our [security policy](./SECURITY.md) for more information.
+
+
+# Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/bunkerity/bunkerweb.svg)](https://starchart.cc/bunkerity/bunkerweb)

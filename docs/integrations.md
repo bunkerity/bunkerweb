@@ -136,15 +136,15 @@ volumes:
     ```
 
     For example, if you have a value of **100000**, the mapped UID/GID will be **100100** (100000 + 100) :
-  
+
     ```shell
     mkdir bw-data && \
     sudo chgrp 100100 bw-data && \
     chmod 770 bw-data
     ```
-	
+
 	  Or if the folder already exists :
-  
+
 	  ```shell
     sudo chgrp -R 100100 bw-data && \
     chmod -R 770 bw-data
@@ -188,7 +188,7 @@ By default, BunkerWeb container is listening (inside the container) on **8080/tc
 
 !!! warning "Privileged ports in rootless mode or when using podman"
     If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) and want to redirect privileged ports (< 1024) like 80 and 443 to BunkerWeb, please refer to the prerequisites [here](https://docs.docker.com/engine/security/rootless/#exposing-privileged-ports).
-	
+
     If you are using [podman](https://podman.io/) you can lower the minimum number for unprivileged ports :
     ```shell
     sudo sysctl net.ipv4.ip_unprivileged_port_start=1
@@ -465,7 +465,7 @@ As for the database volume, the documentation does not specify a specific approa
 
 !!! info "Database backend"
     Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.2/misc/integrations) folder of the repository for more information.
-    
+
     Clustered database backends setup are out-of-the-scope of this documentation.
 
 Here is the stack boilerplate that you can deploy using `docker stack deploy` :
@@ -638,7 +638,7 @@ Given the presence of multiple BunkerWeb instances, it is necessary to establish
 
 !!! info "Database backend"
     Please be aware that our instructions assume you are using MariaDB as the default database backend, as configured by the `DATABASE_URI` setting. However, we understand that you may prefer to utilize alternative backends for your Docker integration. If that is the case, rest assured that other database backends are still possible. See docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.2/misc/integrations) folder of the repository for more information.
-    
+
     Clustered database backends setup are out-of-the-scope of this documentation.
 
 Please ensure that both the scheduler and autoconf services have access to the Kubernetes API. It is recommended to utilize [RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) for this purpose.
@@ -985,7 +985,7 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     sudo apt update && \
     sudo apt install -y bunkerweb=1.5.2
     ```
-	
+
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
 
     ```shell
@@ -1022,7 +1022,7 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     sudo apt update && \
     sudo apt install -y bunkerweb=1.5.2
     ```
-	
+
     To prevent upgrading NGINX and/or BunkerWeb packages when executing `apt upgrade`, you can use the following command :
 
     ```shell
@@ -1188,7 +1188,7 @@ the configuration of BunkerWeb is done by using specific role variables :
 
 List of supported providers :
 
-- virtualbox 
+- virtualbox
 - libvirt
 
 !!! note "Supported Base Images"

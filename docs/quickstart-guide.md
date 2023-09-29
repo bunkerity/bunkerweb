@@ -280,7 +280,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     [mybunkers]
       192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
     ```
-    
+
     Or alternatively, in your playbook file :
 
     ```yaml
@@ -355,7 +355,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     ```shell
     curl -H "Host: app1.example.com" http://ip-or-fqdn-of-server
     ```
-    
+
     If you are using HTTPS, you will need to play with SNI :
 
     ```shell
@@ -716,7 +716,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     [mybunkers]
       192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env"
     ```
-    
+
     Or alternatively, in your playbook file :
 
     ```yaml
@@ -1226,7 +1226,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - 80:8080 # Keep it if you want to use Let's Encrypt automation
           - 10000:10000 # app1
           - 20000:20000 # app2
-      
+
     ...
     ```
 
@@ -1450,14 +1450,14 @@ Some integrations provide more convenient ways to apply configurations, such as 
 === "Docker"
 
     When using the [Docker integration](integrations.md#docker), you have two choices for the addition of custom configurations :
-    
+
     - Using specific settings `*_CUSTOM_CONF_*` as environment variables (recommended)
     - Writing .conf files to the volume mounted on /data of the scheduler
-    
+
     **Using settings**
-    
+
     The settings to use must follow the pattern `<SITE>_CUSTOM_CONF_<TYPE>_<NAME>` :
-    
+
     - `<SITE>` : optional primary server name if multisite mode is enabled and the config must be applied to a specific service
     - `<TYPE>` : the type of config, accepted values are `HTTP`, `DEFAULT_SERVER_HTTP`, `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS`, `STREAM` and `SERVER_STREAM`
     - `<NAME>` : the name of config without the .conf suffix
@@ -1529,9 +1529,9 @@ Some integrations provide more convenient ways to apply configurations, such as 
         When using labels with the Docker autoconf integration, you can only apply custom configurations for the corresponding web service. Applying **http**, **default-server-http**, **stream** or any global configurations (like **server-http** or **server-stream** for all services) is not possible : you will need to mount files for that purpose.
 
     The labels to use must follow the pattern `bunkerweb.CUSTOM_CONF_<TYPE>_<NAME>` :
-    
+
     - `<TYPE>` : the type of config, accepted values are `SERVER_HTTP`, `MODSEC`, `MODSEC_CRS` and `SERVER_STREAM`
-    - `<NAME>` : the name of config without the .conf suffix 
+    - `<NAME>` : the name of config without the .conf suffix
 
     Here is a dummy example using a docker-compose file :
 
@@ -1553,13 +1553,13 @@ Some integrations provide more convenient ways to apply configurations, such as 
     **Using files**
 
     The first thing to do is to create the folders :
-  
+
     ```shell
     mkdir -p ./bw-data/configs/server-http
     ```
 
     You can now write your configurations :
-  
+
     ```shell
     echo "location /hello {
     	default_type 'text/plain';
@@ -1568,7 +1568,7 @@ Some integrations provide more convenient ways to apply configurations, such as 
     	}
     }" > ./bw-data/configs/server-http/hello-world.conf
     ```
-  
+
     Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
 
     ```shell
@@ -1906,7 +1906,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     find ./www -type f -exec chmod 0640 {} \; && \
     find ./www -type d -exec chmod 0750 {} \;
     ```
-	
+
     When you start the BunkerWeb autoconf stack, mount the `www` folder into `/var/www/html` for the BunkerWeb container :
 
     ```yaml
@@ -2064,7 +2064,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     find /shared/www -type f -exec chmod 0640 {} \; && \
     find /shared/www -type d -exec chmod 0750 {} \;
     ```
-	
+
 	  When you start the BunkerWeb stack, mount the `/shared/www` folder into `/var/www/html` for the BunkerWeb container :
 
     ```yaml
@@ -2249,14 +2249,14 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     app3.example.com_LOCAL_PHP=/run/php/php-fpm.sock
     app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
     ```
-	
+
     The `custom_site` variable can be used to specify a directory containing your application files (e.g : `www`) that will be copied to `/var/www/html` and the `custom_www_owner` variable contains the owner that should be set for the files and folders. Here is an example using the Ansible inventory (replace `www-data` with the user running the PHP-FPM service):
 
     ```ini
     [mybunkers]
     192.168.0.42 variables_env="{{ playbook_dir }}/my_variables.env" custom_www="{{ playbook_dir }}/my_app" custom_www_owner="www-data"
     ```
-	
+
     Or alternatively, in your playbook file :
 
     ```yaml
@@ -2354,7 +2354,7 @@ By default, BunkerWeb will only listen on IPv4 adresses and won't use IPv6 for n
         image: bunkerity/bunkerweb:1.5.2
         environment:
           - USE_IPv6=yes
-    
+
     ...
 
     networks:
@@ -2399,7 +2399,7 @@ By default, BunkerWeb will only listen on IPv4 adresses and won't use IPv6 for n
         image: bunkerity/bunkerweb:1.5.2
         environment:
           - USE_IPv6=yes
-    
+
     ...
 
     networks:
@@ -2410,6 +2410,6 @@ By default, BunkerWeb will only listen on IPv4 adresses and won't use IPv6 for n
           config:
             - subnet: fd00:13:37::/48
               gateway: fd00:13:37::1
-    
+
     ...
     ```

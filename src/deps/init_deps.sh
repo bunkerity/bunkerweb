@@ -19,7 +19,7 @@ do
   sha512="$(echo $download | jq -r .sha512)"
 
   echo "ℹ️ Downloading ${name} from ${url}"
-  
+
   if [ ! -d "src/deps/src/${id}" ] ; then
     do_and_check_cmd wget -q -O "src/deps/src/${id}.tar.gz" "$url"
     check="$(sha512sum "src/deps/src/${id}.tar.gz" | cut -d ' ' -f 1)"

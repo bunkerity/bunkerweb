@@ -3,7 +3,7 @@
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python/:/usr/share/bunkerweb/ui/
 
-# Create the ui.env file if it doesn't exist 
+# Create the ui.env file if it doesn't exist
 if [ ! -f /etc/bunkerweb/ui.env ]; then
     echo "ADMIN_USERNAME=admin" > /etc/bunkerweb/ui.env
     echo "ADMIN_PASSWORD=changeme" >> /etc/bunkerweb/ui.env

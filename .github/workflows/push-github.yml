@@ -56,7 +56,7 @@ jobs:
           body: |
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
 
-            Docker tags : 
+            Docker tags :
             - BunkerWeb : `bunkerity/bunkerweb:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb:${{ inputs.VERSION }}`
             - Scheduler : `bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}`
             - Autoconf : `bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}`
@@ -64,7 +64,7 @@ jobs:
 
             Linux packages : https://packagecloud.io/app/bunkerity/bunkerweb/search?q=${{ inputs.VERSION }}&filter=all&dist=
 
-            Changelog : 
+            Changelog :
             ${{ steps.getchangelog.outputs.content }}
           draft: true
           prerelease: ${{ inputs.PRERELEASE }}
@@ -82,7 +82,7 @@ jobs:
 
             Documentation : https://docs.bunkerweb.io/${{ inputs.VERSION }}/
 
-            Docker tags : 
+            Docker tags :
             - BunkerWeb : `bunkerity/bunkerweb:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb:${{ inputs.VERSION }}`
             - Scheduler : `bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-scheduler:${{ inputs.VERSION }}`
             - Autoconf : `bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}` or `ghcr.io/bunkerity/bunkerweb-autoconf:${{ inputs.VERSION }}`

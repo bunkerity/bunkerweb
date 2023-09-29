@@ -20,7 +20,7 @@ function reload_systemd() {
     do_and_check_cmd systemctl reset-failed
 }
 
-# remove a systemd service 
+# remove a systemd service
 function remove_systemd_service {
     service=$1
     service_file="/lib/systemd/system/$service.service"
@@ -142,7 +142,7 @@ elif [ "$1" = "1" ]; then
     cp -f /var/lib/bunkerweb/db.sqlite3 /var/tmp/db.sqlite3
     exit 0
 fi
-else 
+else
     echo "Error"
     exit 0
 fi

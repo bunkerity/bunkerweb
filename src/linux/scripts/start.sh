@@ -218,13 +218,13 @@ function reload()
 
 # List of differents args
 case $1 in
-    "start") 
+    "start")
     start
     ;;
-    "stop") 
+    "stop")
     stop
     ;;
-    "reload") 
+    "reload")
     reload
     ;;
     *)

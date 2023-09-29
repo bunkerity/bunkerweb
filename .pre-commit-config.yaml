@@ -1,0 +1,18 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+exclude: (^LICENSE.md$|^src/VERSION$|^src/(deps/src/|common/core/modsecurity/files/coreruleset/|ui/static/js/(editor/|utils/purify/|tsparticles\.bundle\.min\.js))|\.(svg|drawio|patch\d?|ascii|pem|tf|tftpl)$)
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/ambv/black
+    rev: 23.9.1
+    hooks:
+      - id: black
+        language_version: python3.9

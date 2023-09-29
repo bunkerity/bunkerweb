@@ -377,7 +377,7 @@ class Upload {
         </svg>
       <span class="text-sm text-slate-700 dark:text-gray-300 mr-4">${name} </span>
         <span class="text-sm text-slate-700 dark:text-gray-300">${fileSize}</span>
-       
+
         <svg class=" fill-gray-600 dark:fill-gray-300 dark:opacity-80 h-3 w-3 " viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <circle cx="50" cy="50" r="50"/>
         </svg>
@@ -398,7 +398,7 @@ class Upload {
       <path
         d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"
       />
-    </svg>          
+    </svg>
       <span class="text-sm text-slate-700 dark:text-gray-300 mr-4">${name} </span>
         <span class="text-sm text-slate-700 dark:text-gray-300">${fileSize}</span>
         <button type="button" data-upload-message-delete>
@@ -424,7 +424,7 @@ class Upload {
       <path
         d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"
       />
-    </svg>                
+    </svg>
       <span class="text-sm text-slate-700 dark:text-gray-300 mr-4">${name} </span>
         <span class="text-sm text-slate-700 dark:text-gray-300">${fileSize}</span>
         <button type="button" data-upload-message-delete>

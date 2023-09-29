@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.5.3 - 
+## v1.5.3 -
 
 - [BUGFIX] Fix BunkerWeb not loading his own settings after a docker restart
 - [BUGFIX] Fix Custom configs not following the service name after an update on the UI

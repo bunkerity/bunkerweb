@@ -36,7 +36,7 @@ else
         exit 1
     fi
     echo "⌨️ Redis installed ✅"
-    
+
     echo "USE_REDIS=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REDIS_HOST=127.0.0.1" | sudo tee -a /etc/bunkerweb/variables.env
     export USE_REDIS="yes"
