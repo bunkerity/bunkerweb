@@ -85,14 +85,6 @@ try:
         LOGGER.info("Blacklist is not activated, skipping downloads...")
         _exit(0)
 
-    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
-
-    # Create directories if they don't exist
-    blacklist_path = Path(sep, "var", "cache", "bunkerweb", "blacklist")
-    blacklist_path.mkdir(parents=True, exist_ok=True)
-    tmp_blacklist_path = Path(sep, "var", "tmp", "bunkerweb", "blacklist")
-    tmp_blacklist_path.mkdir(parents=True, exist_ok=True)
-
     # Get URLs
     urls = {
         "IP": [],
@@ -138,7 +130,6 @@ try:
             )
 
             if not urls[kind]:
-                blacklist_path.joinpath(f"{kind}.list").unlink(missing_ok=True)
                 deleted, err = del_cache(f"{kind}.list", CORE_API, CORE_TOKEN)
                 if not deleted:
                     LOGGER.warning(f"Coudn't delete {kind}.list from cache : {err}")

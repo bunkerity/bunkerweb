@@ -85,14 +85,6 @@ try:
         LOGGER.info("Greylist is not activated, skipping downloads...")
         _exit(0)
 
-    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
-
-    # Create directories if they don't exist
-    greylist_path = Path(sep, "var", "cache", "bunkerweb", "greylist")
-    greylist_path.mkdir(parents=True, exist_ok=True)
-    tmp_greylist_path = Path(sep, "var", "tmp", "bunkerweb", "greylist")
-    tmp_greylist_path.mkdir(parents=True, exist_ok=True)
-
     # Get URLs
     urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
     for kind in urls:
@@ -122,7 +114,6 @@ try:
             )
 
             if not urls[kind]:
-                greylist_path.joinpath(f"{kind}.list").unlink(missing_ok=True)
                 deleted, err = del_cache(f"{kind}.list", CORE_API, CORE_TOKEN)
                 if not deleted:
                     LOGGER.warning(f"Coudn't delete {kind}.list from cache : {err}")

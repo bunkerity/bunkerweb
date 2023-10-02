@@ -24,7 +24,7 @@ for deps_path in [
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 
-from Database import Database  # type: ignore
+from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
 from jobs import cache_file, get_cache
 

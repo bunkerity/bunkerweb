@@ -76,21 +76,12 @@ try:
         LOGGER.info("RealIP is not activated, skipping download...")
         _exit(0)
 
-    # Create directories if they don't exist
-    realip_path = Path(sep, "var", "cache", "bunkerweb", "realip")
-    realip_path.mkdir(parents=True, exist_ok=True)
-    tmp_realip_path = Path(sep, "var", "tmp", "bunkerweb", "realip")
-    tmp_realip_path.mkdir(parents=True, exist_ok=True)
-
-    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
-
     # Get URLs
     urls = [url for url in getenv("REAL_IP_FROM_URLS", "").split(" ") if url]
 
     # Don't go further if the cache is fresh
     if is_cached_file("combined.list", "hour", CORE_API, CORE_TOKEN):
         if not urls:
-            tmp_realip_path.joinpath("combined.list").unlink(missing_ok=True)
             deleted, err = del_cache("combined.list", CORE_API, CORE_TOKEN)
             if not deleted:
                 LOGGER.warning(f"Coudn't delete combined.list from cache : {err}")
