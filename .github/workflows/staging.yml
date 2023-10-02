@@ -71,6 +71,9 @@ jobs:
       contents: read
       security-events: write
 
+  cflite:
+    uses: ./.github/workflows/cflite.yml
+
   # Create infrastructures and prepare tests
   create-infras:
     needs: [codeql, build-containers, build-packages]
