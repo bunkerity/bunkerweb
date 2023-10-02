@@ -1,15 +1,16 @@
+#!/bin/bash
 # Small code to build and run the tests on Linux with docker
 
 # Check if the package already exists in /tmp/$DISTRO/bunkerweb.deb or /tmp/$DISTRO/bunkerweb.rpm
 # Always remove the package before building it
 
 function checkPackage() {
-  if [ ! -z "$DISTRO" ]; then
+  if [ -n "$DISTRO" ]; then
     if [ -f "/tmp/$DISTRO/bunkerweb.deb" ]; then
-      sudo rm -rf /tmp/$DISTRO/bunkerweb.deb
+      sudo rm -rf /tmp/"$DISTRO"/bunkerweb.deb
     fi
     if [ -f "/tmp/$DISTRO/bunkerweb.rpm" ]; then
-      sudo rm -rf /tmp/$DISTRO/bunkerweb.rpm
+      sudo rm -rf /tmp/"$DISTRO"/bunkerweb.rpm
     fi
   fi
 }
@@ -17,7 +18,7 @@ function checkPackage() {
 # Build the package using the dockerfile
 
 function buildPackage() {
-  if [ ! -z "$DISTRO" ]; then
+  if [ -n "$DISTRO" ]; then
     if [ "$DISTRO" = "ubuntu" ]; then
       sudo docker build -t linux-ubuntu -f src/linux/Dockerfile-ubuntu .
     fi
@@ -36,7 +37,7 @@ function buildPackage() {
 # Create the container and copy the package to the host
 
 function createContainer() {
-  if [ ! -z "$DISTRO" ]; then
+  if [ -n "$DISTRO" ]; then
     if [ "$DISTRO" = "ubuntu" ]; then
       sudo docker run -v /tmp/ubuntu:/data linux-ubuntu
     fi
@@ -56,7 +57,7 @@ function createContainer() {
 
 function retrieveDistro() {
   echo "Which distro do you want to use? (ubuntu, debian, centos, fedora)"
-  read DISTRO
+  read -r DISTRO
 }
 
 # Main function

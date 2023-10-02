@@ -2,7 +2,7 @@
 
 echo "Certbot started, domains = $DOMAINS"
 
-first_domain="$(echo -n $DOMAINS | cut -d ',' -f 1 | sed 's/*\.//g')"
+first_domain="$(echo "$DOMAINS" | tr -d '\n' | cut -d ',' -f 1 | sed 's/*\.//g')"
 if [ "$EMAIL" = "" ] ; then
 	EMAIL="contact@${first_domain}"
 fi

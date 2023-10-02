@@ -15,11 +15,13 @@ echo "🕵️ Building reversescan stack for integration \"$integration\" ..."
 # Starting stack
 if [ "$integration" == "docker" ] ; then
     docker compose pull bw-docker
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "🕵️ Pull failed ❌"
         exit 1
     fi
     docker compose -f docker-compose.test.yml build
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "🕵️ Build failed ❌"
         exit 1
@@ -61,6 +63,7 @@ cleanup_stack () {
         sudo truncate -s 0 /var/log/bunkerweb/error.log
     fi
 
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "🕵️ Cleanup failed ❌"
         exit 1
@@ -97,12 +100,14 @@ do
     echo "🕵️ Starting stack ..."
     if [ "$integration" == "docker" ] ; then
         docker compose up -d
+        # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             echo "🕵️ Up failed, retrying ... ⚠️"
             manual=1
             cleanup_stack
             manual=0
             docker compose up -d
+            # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 echo "🕵️ Up failed ❌"
                 exit 1
@@ -110,6 +115,7 @@ do
         fi
     else
         sudo systemctl start bunkerweb
+        # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             echo "🕵️ Start failed ❌"
             exit 1
@@ -124,7 +130,7 @@ do
             containers=("reversescan-bw-1" "reversescan-bw-scheduler-1")
             healthy="true"
             for container in "${containers[@]}" ; do
-                check="$(docker inspect --format "{{json .State.Health }}" $container | grep "healthy")"
+                check="$(docker inspect --format "{{json .State.Health }}" "$container" | grep "healthy")"
                 if [ "$check" = "" ] ; then
                     healthy="false"
                     break
@@ -164,7 +170,7 @@ do
                 exit 1
             fi
 
-            if ! [ -z "$(sudo journalctl -u bunkerweb --no-pager | grep "SYSTEMCTL - ❌")" ] ; then
+            if sudo journalctl -u bunkerweb --no-pager | grep -q "SYSTEMCTL - ❌ " ; then
                 echo "🕵️ ⚠ Linux stack got an issue, restarting ..."
                 sudo journalctl --rotate
                 sudo journalctl --vacuum-time=1s
@@ -177,7 +183,7 @@ do
                 healthy="true"
             fi
         done
-        if [ $retries -ge 5 ] ; then
+        if [ "$retries" -ge 5 ] ; then
             echo "🕵️ Linux stack could not be healthy ❌"
             exit 1
         fi
@@ -191,6 +197,7 @@ do
         python3 main.py
     fi
 
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "🕵️ Test \"$test\" failed ❌"
         echo "🛡️ Showing BunkerWeb and BunkerWeb Scheduler logs ..."

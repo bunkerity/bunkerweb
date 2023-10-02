@@ -22,6 +22,7 @@ cleanup_stack () {
         sudo truncate -s 0 /var/log/bunkerweb/error.log
     fi
 
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "🌐 Cleanup failed ❌"
         exit 1
@@ -41,6 +42,7 @@ if [ "$integration" = "docker" ] ; then
 
     # Start stack
     docker-compose pull bw-docker-proxy app1
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "❌ Pull failed"
         exit 1
@@ -48,10 +50,12 @@ if [ "$integration" = "docker" ] ; then
 
     echo "🌐 Starting stack ..."
     docker compose up -d
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "🌐 Up failed, retrying ... ⚠️"
         cleanup_stack
         docker compose up -d
+        # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             echo "🌐 Up failed ❌"
             exit 1
@@ -72,7 +76,7 @@ if [ "$integration" == "docker" ] ; then
         containers=("ui-bw-1" "ui-bw-scheduler-1" "ui-bw-ui-1")
         healthy="true"
         for container in "${containers[@]}" ; do
-            check="$(docker inspect --format "{{json .State.Health }}" $container | grep "healthy")"
+            check="$(docker inspect --format "{{json .State.Health }}" "$container" | grep "healthy")"
             if [ "$check" = "" ] ; then
                 echo "⚠️ Container $container is not healthy yet ..."
                 healthy="false"
@@ -116,7 +120,7 @@ else
             exit 1
         fi
 
-        if ! [ -z "$(sudo journalctl -u bunkerweb --no-pager | grep "SYSTEMCTL - ❌")" ] ; then
+        if sudo journalctl -u bunkerweb --no-pager | grep -q "SYSTEMCTL - ❌ " ; then
             echo "🌐 ⚠ Linux stack got an issue, restarting ..."
             sudo journalctl --rotate
             sudo journalctl --vacuum-time=1s
@@ -136,6 +140,7 @@ fi
 # Start tests
 if [ "$integration" == "docker" ] ; then
     docker-compose -f docker-compose.test.yml build
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "❌ Build failed"
         exit 1
@@ -146,6 +151,7 @@ else
     python3 main.py
 fi
 
+# shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     if [ "$integration" == "docker" ] ; then
         docker compose logs

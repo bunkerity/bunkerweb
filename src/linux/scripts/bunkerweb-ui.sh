@@ -12,7 +12,7 @@ fi
 # Function to start the UI
 start() {
     echo "Starting UI"
-    export $(cat /etc/bunkerweb/ui.env)
+    export "$(cat /etc/bunkerweb/ui.env)"
     python3 -m gunicorn \
         --config /usr/share/bunkerweb/ui/gunicorn.conf.py \
         --pythonpath /usr/share/bunkerweb/deps/python/,/usr/share/bunkerweb/ui/ \
@@ -28,8 +28,8 @@ start() {
 stop() {
     echo "Stopping UI service..."
     if [ -f "/var/run/bunkerweb/ui.pid" ]; then
-        pid=$(cat /var/run/bunkerweb/ui.pid)
-        kill -s TERM $pid
+        pid="$(cat /var/run/bunkerweb/ui.pid)"
+        kill -s TERM "$pid"
     else
         echo "UI service is not running or the pid file doesn't exist."
     fi
