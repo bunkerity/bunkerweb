@@ -1,9 +1,12 @@
 #!/bin/bash
 
+# shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
-ascii_array=($(ls /usr/share/bunkerweb/misc/*.ascii))
-cat ${ascii_array[$(($RANDOM % ${#ascii_array[@]}))]}
+shopt -s nullglob
+ascii_array=(/usr/share/bunkerweb/misc/*.ascii)
+shopt -u nullglob
+cat "${ascii_array[$((RANDOM % ${#ascii_array[@]}))]}"
 
 log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /usr/share/bunkerweb/VERSION) ..."
 
@@ -12,18 +15,23 @@ log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /usr/share/bunkerweb/VERSIO
 
 # trap SIGTERM and SIGINT
 function trap_exit() {
-	log "ENTRYPOINT" "ℹ️" "Catched stop operation"
-	log "ENTRYPOINT" "ℹ️" "Stopping nginx ..."
+	# shellcheck disable=SC2317
+	log "ENTRYPOINT" "ℹ️" "Catched stop operation, stopping nginx ..."
+	# shellcheck disable=SC2317
 	nginx -s stop
 }
 trap "trap_exit" TERM INT QUIT
 
 # trap SIGHUP
 function trap_reload() {
+	# shellcheck disable=SC2317
 	log "ENTRYPOINT" "ℹ️" "Catched reload operation"
+	# shellcheck disable=SC2317
 	if [ -f /var/run/bunkerweb/nginx.pid ] ; then
+		# shellcheck disable=SC2317
 		log "ENTRYPOINT" "ℹ️" "Reloading nginx ..."
 		nginx -s reload
+		# shellcheck disable=SC2181,SC2317
 		if [ $? -eq 0 ] ; then
 			log "ENTRYPOINT" "ℹ️" "Reload successful"
 		else

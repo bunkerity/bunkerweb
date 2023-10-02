@@ -36,7 +36,7 @@ function spaces_to_lua() {
 function has_value() {
 	envs=$(find /etc/nginx -name "*.env")
 	for file in $envs ; do
-		if [ "$(grep "^${1}=${2}$" $file)" != "" ] ; then
+		if [ "$(grep "^${1}=${2}$" "$file")" != "" ] ; then
 			echo "$file"
 		fi
 	done

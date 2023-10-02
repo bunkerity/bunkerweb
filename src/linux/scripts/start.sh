@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Source the utils helper script
+# shellcheck disable=SC1091
 source /usr/share/bunkerweb/helpers/utils.sh
 
 # Set the PYTHONPATH
@@ -17,27 +18,31 @@ function display_help() {
 
 function stop_nginx() {
     pgrep nginx > /dev/null 2>&1
+    # shellcheck disable=SC2181
     if [ $? -eq 0 ] ; then
         log "SYSTEMCTL" "ℹ️ " "Stopping nginx..."
         nginx -s stop
+        # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "SYSTEMCTL" "❌" "Error while sending stop signal to nginx"
             log "SYSTEMCTL" "ℹ️ " "Stopping nginx (force)..."
-            kill -TERM $(cat /var/run/bunkerweb/nginx.pid)
+            kill -TERM "$(cat /var/run/bunkerweb/nginx.pid)"
+            # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 log "SYSTEMCTL" "❌" "Error while sending term signal to nginx"
             fi
         fi
     fi
     count=0
-    while [ 1 ] ; do
+    while true ; do
         pgrep nginx > /dev/null 2>&1
+        # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             break
         fi
         log "SYSTEMCTL" "ℹ️ " "Waiting for nginx to stop..."
         sleep 1
-        count=$(($count + 1))
+        count=$((count + 1))
         if [ $count -ge 20 ] ; then
             break
         fi
@@ -54,6 +59,7 @@ function stop_scheduler() {
         scheduler_pid=$(cat "/var/run/bunkerweb/scheduler.pid")
         log "SYSTEMCTL" "ℹ️ " "Stopping scheduler..."
         kill -SIGINT "$scheduler_pid"
+        # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "SYSTEMCTL" "❌" "Error while sending stop signal to scheduler"
             exit 1
@@ -65,7 +71,7 @@ function stop_scheduler() {
     count=0
     while [ -f "/var/run/bunkerweb/scheduler.pid" ] ; do
         sleep 1
-        count=$(($count + 1))
+        count=$((count + 1))
         if [ $count -ge 10 ] ; then
             break
         fi
@@ -139,6 +145,7 @@ function start() {
     fi
     sudo -E -u nginx -g nginx /bin/bash -c "echo -ne 'IS_LOADING=yes\nUSE_BUNKERNET=no\nSERVER_NAME=\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\n' > /var/tmp/bunkerweb/tmp.env"
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env --no-linux-reload"
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
         exit 1
@@ -152,6 +159,7 @@ function start() {
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting temp nginx ..."
     nginx -e /var/log/bunkerweb/error.log
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while executing temp nginx"
         exit 1
@@ -159,10 +167,11 @@ function start() {
     count=0
     while [ $count -lt 10 ] ; do
         check="$(curl -s -H "Host: healthcheck.bunkerweb.io" http://127.0.0.1:6000/healthz 2>&1)"
+        # shellcheck disable=SC2181
         if [ $? -eq 0 ] && [ "$check" = "ok" ] ; then
             break
         fi
-        count=$(($count + 1))
+        count=$((count + 1))
         sleep 1
         log "SYSTEMCTL" "ℹ️" "Waiting for nginx to start ..."
     done
@@ -175,7 +184,8 @@ function start() {
     # Execute scheduler
     log "SYSTEMCTL" "ℹ️ " "Executing scheduler ..."
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/scheduler/main.py --variables /etc/bunkerweb/variables.env"
-    if [ "$?" -ne 0 ] ; then
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Scheduler failed"
         exit 1
     fi
@@ -199,12 +209,12 @@ function reload()
     PID_FILE_PATH="/var/run/bunkerweb/scheduler.pid"
     if [ -f "$PID_FILE_PATH" ];
     then
-        var=$(cat "$PID_FILE_PATH")
+        result=$(cat "$PID_FILE_PATH")
         # Send signal to scheduler to reload
         log "SYSTEMCTL" "ℹ️" "Sending reload signal to scheduler ..."
-        kill -SIGHUP $var
-        result=$?
-        if [ $result -ne 0 ] ; then
+        kill -SIGHUP "$result"
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
             log "SYSTEMCTL" "❌" "Your command exited with non-zero status $result"
             exit 1
         fi
@@ -218,13 +228,13 @@ function reload()
 
 # List of differents args
 case $1 in
-    "start") 
+    "start")
     start
     ;;
-    "stop") 
+    "stop")
     stop
     ;;
-    "reload") 
+    "reload")
     reload
     ;;
     *)

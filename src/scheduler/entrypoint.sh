@@ -1,12 +1,17 @@
 #!/bin/bash
 
+# shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
 # trap SIGTERM and SIGINT
 function trap_exit() {
+	# shellcheck disable=SC2317
 	log "ENTRYPOINT" "ℹ️ " "Catched stop operation"
+	# shellcheck disable=SC2317
 	if [ -f "/var/run/bunkerweb/scheduler.pid" ] ; then
+		# shellcheck disable=SC2317
 		log "ENTRYPOINT" "ℹ️ " "Stopping job scheduler ..."
+		# shellcheck disable=SC2317
 		kill -s TERM "$(cat /var/run/bunkerweb/scheduler.pid)"
 	fi
 }
@@ -33,7 +38,8 @@ if ! grep -q "Docker" /usr/share/bunkerweb/INTEGRATION ; then
 	# Init database
 	get_env > "/tmp/variables.env"
 	/usr/share/bunkerweb/gen/save_config.py --variables /tmp/variables.env --init
-	if [ "$?" -ne 0 ] ; then
+	# shellcheck disable=SC2181
+	if [ $? -ne 0 ] ; then
 		log "ENTRYPOINT" "❌" "Scheduler generator failed"
 		exit 1
 	fi

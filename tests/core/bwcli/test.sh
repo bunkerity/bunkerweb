@@ -15,28 +15,31 @@ echo "⌨️ Building bwcli stack for integration \"$integration\" ..."
 # Starting stack
 if [ "$integration" == "docker" ] ; then
     docker compose pull bw-docker
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "⌨️ Pull failed ❌"
         exit 1
     fi
     docker compose -f docker-compose.test.yml build
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "⌨️ Build failed ❌"
         exit 1
     fi
 else
     sudo systemctl stop bunkerweb
-    sudo pip install -r requirements.txt
+    MAKEFLAGS="-j $(nproc)" sudo pip install --no-cache-dir --require-hashes -r requirements.txt
 
     echo "⌨️ Installing Redis ..."
     sudo apt install --no-install-recommends -y redis
     redis-server --daemonize yes
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "⌨️ Redis start failed ❌"
         exit 1
     fi
     echo "⌨️ Redis installed ✅"
-    
+
     echo "USE_REDIS=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REDIS_HOST=127.0.0.1" | sudo tee -a /etc/bunkerweb/variables.env
     export USE_REDIS="yes"
@@ -54,6 +57,7 @@ cleanup_stack () {
         sudo truncate -s 0 /var/log/bunkerweb/error.log
     fi
 
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "⌨️ Cleanup failed ❌"
         exit 1
@@ -70,12 +74,12 @@ echo "⌨️ Running bwcli tests ..."
 echo "⌨️ Starting stack ..."
 if [ "$integration" == "docker" ] ; then
     docker compose up -d
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "⌨️ Up failed, retrying ... ⚠️"
-        manual=1
         cleanup_stack
-        manual=0
         docker compose up -d
+        # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             echo "⌨️ Up failed ❌"
             exit 1
@@ -83,6 +87,7 @@ if [ "$integration" == "docker" ] ; then
     fi
 else
     sudo systemctl start bunkerweb
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         echo "⌨️ Start failed ❌"
         exit 1
@@ -97,7 +102,7 @@ if [ "$integration" == "docker" ] ; then
         containers=("bwcli-bw-1" "bwcli-bw-scheduler-1")
         healthy="true"
         for container in "${containers[@]}" ; do
-            check="$(docker inspect --format "{{json .State.Health }}" $container | grep "healthy")"
+            check="$(docker inspect --format "{{json .State.Health }}" "$container" | grep "healthy")"
             if [ "$check" = "" ] ; then
                 healthy="false"
                 break
@@ -137,20 +142,18 @@ else
             exit 1
         fi
 
-        if ! [ -z "$(sudo journalctl -u bunkerweb --no-pager | grep "SYSTEMCTL - ❌")" ] ; then
+        if sudo journalctl -u bunkerweb --no-pager | grep -q "SYSTEMCTL - ❌ " ; then
             echo "⌨️ ⚠ Linux stack got an issue, restarting ..."
             sudo journalctl --rotate
             sudo journalctl --vacuum-time=1s
-            manual=1
             cleanup_stack
-            manual=0
             sudo systemctl start bunkerweb
             retries=$((retries+1))
         else
             healthy="true"
         fi
     done
-    if [ $retries -ge 5 ] ; then
+    if [ "$retries" -ge 5 ] ; then
         echo "⌨️ Linux stack could not be healthy ❌"
         exit 1
     fi
@@ -164,6 +167,7 @@ else
     sudo python3 linux.py
 fi
 
+# shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     echo "⌨️ Test bwcli failed ❌"
     echo "🛡️ Showing BunkerWeb and BunkerWeb Scheduler logs ..."

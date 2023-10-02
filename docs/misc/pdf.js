@@ -13,7 +13,7 @@ console.log('Saving', url, 'to', pdfPath);
 // totalPages – total pages in the document
 headerHtml = `
 <div style="font-size: 10px; text-align: center; width: 100%;">
-    <span>${title}</span>  
+    <span>${title}</span>
 </div>`;
 
 footerHtml = `<div style="font-size: 10px; text-align: center; width: 100%;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>`;

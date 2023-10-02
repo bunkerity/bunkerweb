@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $(id -u) -ne 0 ] ; then
+if [ "$(id -u)" -ne 0 ] ; then
 	echo "❌ Run me as root"
 	exit 1
 fi
@@ -8,9 +8,9 @@ fi
 DNF=$(which dnf)
 APT=$(which apt)
 
-if [ ! -z $DNF ] ; then
+if [ -n "$DNF" ] ; then
 	dnf install -y haproxy
-elif [ ! -z $APT ] ; then
+elif [ -n "$APT" ] ; then
 	apt install -y haproxy
 fi
 

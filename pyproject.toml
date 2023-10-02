@@ -1,12 +1,13 @@
 [project]
 name = "BunkerWeb"
 description = "Make your web services secure by default !"
-version = "1.4.3"
+version = "1.5.2"
 authors = [
     { name = "Bunkerity", email = "contact@bunkerity.com" }
 ]
 
 [tool.black]
+py39 = true
 exclude = '''
 /(
   | \.git

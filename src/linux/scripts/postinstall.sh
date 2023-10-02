@@ -34,7 +34,7 @@ do_and_check_cmd systemctl start bunkerweb
 if [ -f /var/tmp/variables.env ]; then
     echo "Old environment file found!"
     echo "Copying old line from environment file to new one..."
-    while read line; do
+    while read -r line; do
         echo "$line" >> /etc/bunkerweb/variables.env
     done < /var/tmp/variables.env
     # Remove old environment files
@@ -51,7 +51,7 @@ fi
 if [ -f /var/tmp/ui.env ]; then
     echo "Old ui environment file found!"
     echo "Copying old line from ui environment file to new one..."
-    while read line; do
+    while read -r line; do
         echo "$line" >> /etc/bunkerweb/ui.env
     done < /var/tmp/ui.env
     # Remove old environment files

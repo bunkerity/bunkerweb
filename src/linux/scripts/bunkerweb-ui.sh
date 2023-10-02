@@ -3,7 +3,7 @@
 # Set the PYTHONPATH
 export PYTHONPATH=/usr/share/bunkerweb/deps/python/:/usr/share/bunkerweb/ui/
 
-# Create the ui.env file if it doesn't exist 
+# Create the ui.env file if it doesn't exist
 if [ ! -f /etc/bunkerweb/ui.env ]; then
     echo "ADMIN_USERNAME=admin" > /etc/bunkerweb/ui.env
     echo "ADMIN_PASSWORD=changeme" >> /etc/bunkerweb/ui.env
@@ -12,6 +12,7 @@ fi
 # Function to start the UI
 start() {
     echo "Starting UI"
+    # shellcheck disable=SC2046
     export $(cat /etc/bunkerweb/ui.env)
     python3 -m gunicorn \
         --config /usr/share/bunkerweb/ui/gunicorn.conf.py \
@@ -28,8 +29,8 @@ start() {
 stop() {
     echo "Stopping UI service..."
     if [ -f "/var/run/bunkerweb/ui.pid" ]; then
-        pid=$(cat /var/run/bunkerweb/ui.pid)
-        kill -s TERM $pid
+        pid="$(cat /var/run/bunkerweb/ui.pid)"
+        kill -s TERM "$pid"
     else
         echo "UI service is not running or the pid file doesn't exist."
     fi

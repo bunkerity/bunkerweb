@@ -36,7 +36,7 @@ jobs:
           python-version: "3.11"
           cache: "pip"
       - name: Install ansible
-        run: pip install ansible
+        run: pip install --no-cache-dir --require-hashes -r misc/requirements-ansible.txt
         if: inputs.TYPE != 'k8s'
       - name: Install ansible libs
         run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner,1.18.1 && ansible-galaxy collection install --timeout 120 community.general

@@ -42,7 +42,7 @@ jobs:
         run: docker tag local/bunkerweb-tests:latest 192.168.42.100:5000/bunkerweb-tests:latest && docker push 192.168.42.100:5000/bunkerweb-tests:latest && docker tag local/scheduler-tests:latest 192.168.42.100:5000/scheduler-tests:latest && docker push 192.168.42.100:5000/scheduler-tests:latest && docker tag local/autoconf-tests:latest 192.168.42.100:5000/autoconf-tests:latest && docker push 192.168.42.100:5000/autoconf-tests:latest
         if: inputs.TYPE == 'swarm'
       - name: Install test dependencies
-        run: pip3 install -r tests/requirements.txt
+        run: pip3 install --no-cache-dir --require-hashes -r tests/requirements.txt
       - uses: actions/download-artifact@v3
         with:
           name: tf-k8s
@@ -50,7 +50,7 @@ jobs:
         if: inputs.TYPE == 'k8s'
       - run: |
           echo "$SECRET_KEY" > /tmp/.secret_key
-          openssl enc -d -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -iter 100000 -md sha256 -pass file:/tmp/.secret_key -out /tmp/terraform.tar 
+          openssl enc -d -in /tmp/terraform.tar.enc -aes-256-cbc -pbkdf2 -iter 100000 -md sha256 -pass file:/tmp/.secret_key -out /tmp/terraform.tar
           rm -f /tmp/.secret_key
           tar xf /tmp/terraform.tar -C /
           mkdir /tmp/reg

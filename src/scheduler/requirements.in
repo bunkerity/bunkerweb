@@ -2,5 +2,5 @@ certbot==2.6.0
 cryptography==41.0.4
 maxminddb==2.4.0
 python-magic==0.4.27
-schedule==1.2.0
+schedule==1.2.1
 urllib3==1.26.16

@@ -40,6 +40,13 @@ from flask import (
     send_file,
     url_for,
 )
+
+import werkzeug
+
+# ? Temp fix to support werkzeug>=3.0.0 with flask_login
+werkzeug.urls.url_decode = werkzeug.urls._unquote_query
+werkzeug.urls.url_encode = werkzeug.urls._urlencode
+
 from flask_login import (
     current_user,
     LoginManager,

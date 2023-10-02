@@ -2,7 +2,7 @@
 
 function do_and_check_cmd() {
 	if [ "$CHANGE_DIR" != "" ] ; then
-		cd "$CHANGE_DIR"
+		cd "$CHANGE_DIR" || return 1
 	fi
 	output=$("$@" 2>&1)
 	ret="$?"
@@ -11,14 +11,12 @@ function do_and_check_cmd() {
 		echo "$output"
 		exit $ret
 	fi
-	#echo $output
-	return 0
 }
 
 function gen_package() {
     mode="$1"
     linux="$2"
-    version="$(cat VERSION | tr -d '\n')"
+    version="$(tr -d '\n' < VERSION)"
     if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] || [ "$linux" = "rhel" ] ; then
         type="rpm"
     else
@@ -48,7 +46,7 @@ fi
 do_and_check_cmd mkdir /tmp/packages
 
 # Remove old packages
-find /opt/packages/ -type f | xargs rm
+find /opt/packages/ -type f -exec rm -f {} \;
 
 # Generate packages
 # echo "Building ubuntu package ..."
