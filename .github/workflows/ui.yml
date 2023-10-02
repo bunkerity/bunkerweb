@@ -33,9 +33,43 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
 
+  # Build Linux packages
+  build-packages:
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        linux: [ubuntu]
+        include:
+          - linux: ubuntu
+            package: deb
+    uses: ./.github/workflows/linux-build.yml
+    with:
+      RELEASE: ui
+      LINUX: ${{ matrix.linux }}
+      PACKAGE: ${{ matrix.package }}
+      TEST: true
+      PLATFORMS: linux/amd64
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+
+  codeql:
+    uses: ./.github/workflows/codeql.yml
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
   # UI tests
   tests-ui:
-    needs: [build-containers]
+    needs: [codeql, build-containers]
     uses: ./.github/workflows/tests-ui.yml
+    with:
+      RELEASE: ui
+  tests-ui-linux:
+    needs: [codeql, build-packages]
+    uses: ./.github/workflows/tests-ui-linux.yml
     with:
       RELEASE: ui

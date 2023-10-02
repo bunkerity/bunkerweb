@@ -55,7 +55,7 @@ try:
 
     status_code = get(
         f"http://www.example.com/?id=/etc/passwd",
-        headers={"Host": "www.example.com"},
+        headers={"Host": "www.example.com", "X-Forwarded-For": "1.0.0.3"},
     ).status_code
 
     print(f"ℹ️ Status code: {status_code}", flush=True)

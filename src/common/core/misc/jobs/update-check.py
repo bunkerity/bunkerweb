@@ -29,8 +29,9 @@ try:
 
     response = get(
         "https://github.com/bunkerity/bunkerweb/releases/latest",
+        headers={"User-Agent": "BunkerWeb"},
         allow_redirects=True,
-        timeout=5,
+        timeout=10,
     )
     response.raise_for_status()
 

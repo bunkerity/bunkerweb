@@ -45,7 +45,6 @@ from ApiCaller import ApiCaller  # type: ignore
 
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
-GENERATE = False
 INTEGRATION = "Linux"
 CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
 SCHEDULER_TMP_ENV_PATH = Path(sep, "var", "tmp", "bunkerweb", "scheduler.env")
@@ -195,17 +194,6 @@ def api_to_instance(api):
     }
 
 
-def update_docker_instances(sc, db, force=False):
-    current_apis = set(sc.apis)
-    sc.auto_setup()
-    if force or current_apis != set(sc.apis):
-        new_instances = []
-        for api in sc.apis:
-            new_instances.append(api_to_instance(api))
-        return db.update_instances(new_instances)
-    return ""
-
-
 if __name__ == "__main__":
     try:
         # Don't execute if pid file exists
@@ -323,21 +311,25 @@ if __name__ == "__main__":
                 )
                 sleep(5)
                 env = db.get_config()
+        else:
+            env = db.get_config()
 
         env["DATABASE_URI"] = db.database_uri
 
         # Instantiate scheduler
         SCHEDULER = JobScheduler(env.copy() | environ.copy(), logger, INTEGRATION)
 
-        if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
+        if INTEGRATION in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
             # Automatically setup the scheduler apis
-            SCHEDULER.auto_setup()
-        elif INTEGRATION == "Docker":
-            err = update_docker_instances(SCHEDULER, db, force=True)
-            if err:
-                logger.error(
-                    f"Couldn't save instances to database: {err}",
-                )
+            while not SCHEDULER.apis:
+                SCHEDULER.auto_setup()
+
+                if not SCHEDULER.apis:
+                    logger.warning(
+                        "No BunkerWeb API found, retrying in 5s ...",
+                    )
+                    sleep(5)
+            db.update_instances([api_to_instance(api) for api in SCHEDULER.apis])
 
         scheduler_first_start = db.is_scheduler_first_start()
 
@@ -465,22 +457,7 @@ if __name__ == "__main__":
 
         logger.info("Executing scheduler ...")
 
-        GENERATE = (
-            env != dotenv_env
-            or not tmp_variables_path.exists()
-            or not nginx_variables_path.exists()
-            or (
-                tmp_variables_path.read_text(encoding="utf-8")
-                != nginx_variables_path.read_text(encoding="utf-8")
-            )
-        )
-
         del dotenv_env
-
-        if not GENERATE:
-            logger.warning(
-                "Looks like BunkerWeb configuration is already generated, will not generate it again ..."
-            )
 
         if scheduler_first_start:
             ret = db.set_scheduler_first_start()
@@ -492,6 +469,8 @@ if __name__ == "__main__":
                 stop(1)
 
         FIRST_RUN = True
+        CONFIG_NEED_GENERATION = True
+        RUN_JOBS_ONCE = True
         CHANGES = []
         threads = []
 
@@ -511,27 +490,27 @@ if __name__ == "__main__":
                 logger.info(f"Successfully sent {CACHE_PATH} folder")
 
         while True:
-            if not FIRST_RUN:
-                threads.clear()
-                ret = db.checked_changes(CHANGES)
+            threads.clear()
+            ret = db.checked_changes(CHANGES)
 
-                if ret:
-                    logger.error(
-                        f"An error occurred when setting the changes to checked in the database : {ret}"
-                    )
-                    stop(1)
+            if ret:
+                logger.error(
+                    f"An error occurred when setting the changes to checked in the database : {ret}"
+                )
+                stop(1)
 
-            # Update the environment variables of the scheduler
-            SCHEDULER.env = env.copy() | environ.copy()
-            SCHEDULER.setup()
+            if RUN_JOBS_ONCE:
+                # Update the environment variables of the scheduler
+                SCHEDULER.env = env.copy() | environ.copy()
+                SCHEDULER.setup()
 
-            # Only run jobs once
-            if not SCHEDULER.run_once():
-                logger.error("At least one job in run_once() failed")
-            else:
-                logger.info("All jobs in run_once() were successful")
+                # Only run jobs once
+                if not SCHEDULER.run_once():
+                    logger.error("At least one job in run_once() failed")
+                else:
+                    logger.info("All jobs in run_once() were successful")
 
-            if GENERATE:
+            if CONFIG_NEED_GENERATION:
                 content = ""
                 for k, v in env.items():
                     content += f"{k}={v}\n"
@@ -548,11 +527,7 @@ if __name__ == "__main__":
                         "--output",
                         join(sep, "etc", "nginx"),
                         "--variables",
-                        (
-                            str(tmp_variables_path)
-                            if args.variables and FIRST_RUN
-                            else str(SCHEDULER_TMP_ENV_PATH)
-                        ),
+                        str(SCHEDULER_TMP_ENV_PATH),
                     ],
                     stdin=DEVNULL,
                     stderr=STDOUT,
@@ -639,8 +614,8 @@ if __name__ == "__main__":
                     f"Exception while reloading after running jobs once scheduling : {format_exc()}",
                 )
 
-            GENERATE = True
             NEED_RELOAD = False
+            RUN_JOBS_ONCE = False
             CONFIG_NEED_GENERATION = False
             CONFIGS_NEED_GENERATION = False
             PLUGINS_NEED_GENERATION = False
@@ -703,6 +678,7 @@ if __name__ == "__main__":
                         )
 
                     PLUGINS_NEED_GENERATION = True
+                    CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
 
                 # check if the custom configs have changed since last time
@@ -721,6 +697,7 @@ if __name__ == "__main__":
                 if changes["instances_changed"]:
                     logger.info("Instances changed, generating ...")
                     INSTANCES_NEED_GENERATION = True
+                    CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
 
             FIRST_RUN = False
@@ -746,6 +723,7 @@ if __name__ == "__main__":
                     CHANGES.append("config")
                     env = db.get_config()
                     env["DATABASE_URI"] = db.database_uri
+                    RUN_JOBS_ONCE = True
 
                 if INSTANCES_NEED_GENERATION:
                     CHANGES.append("instances")

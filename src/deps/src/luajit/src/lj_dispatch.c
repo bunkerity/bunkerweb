@@ -1,6 +1,6 @@
 /*
 ** Instruction dispatch handling.
-** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_dispatch_c
@@ -307,9 +307,9 @@ int luaJIT_setmode(lua_State *L, int idx, int mode)
       } else {
 	return 0;  /* Failed. */
       }
-      g->bc_cfunc_ext = BCINS_AD(BC_FUNCCW, 0, 0);
+      setbc_op(&g->bc_cfunc_ext, BC_FUNCCW);
     } else {
-      g->bc_cfunc_ext = BCINS_AD(BC_FUNCC, 0, 0);
+      setbc_op(&g->bc_cfunc_ext, BC_FUNCC);
     }
     break;
   default:

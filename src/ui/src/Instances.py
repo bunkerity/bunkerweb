@@ -94,9 +94,17 @@ class Instance:
 
     def restart(self) -> bool:
         if self._type == "local":
+            proc = run(
+                ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
+                stdin=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                return False
             return (
                 run(
-                    ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "restart"],
+                    ["sudo", join(sep, "usr", "sbin", "nginx")],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,

@@ -10,17 +10,24 @@ try:
     ssl_generated = getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes"
     disabled_default_server = getenv("DISABLE_DEFAULT_SERVER", "no") == "yes"
     deny_http_status = getenv("DENY_HTTP_STATUS", "403")
-    listen_http = getenv("LISTEN_HTTP", "no") == "yes"
+    listen_http = getenv("LISTEN_HTTP", "yes") == "yes"
 
     error = False
 
     print(
-        "ℹ️ Sending a HEAD request to http://192.168.0.2 (default server) to test DISABLE_DEFAULT_SERVER",
+        f"ℹ️ Sending a HEAD request to http://{'192.168.0.2' if getenv('TEST_TYPE', 'docker') == 'docker' else '127.0.0.1'} (default server) to test DISABLE_DEFAULT_SERVER",
         flush=True,
     )
 
     try:
-        response = head("http://192.168.0.2")
+        response = head(
+            "http://"
+            + (
+                "192.168.0.2"
+                if getenv("TEST_TYPE", "docker") == "docker"
+                else "127.0.0.1"
+            )
+        )
 
         if response.status_code != 403 and disabled_default_server:
             print(
@@ -213,7 +220,7 @@ try:
 
     sleep(1)
 
-    serve_files = getenv("SERVE_FILES", "no") == "yes"
+    serve_files = getenv("SERVE_FILES", "yes") == "yes"
 
     print(
         f"ℹ️ Sending a HEAD request to http{'s' if ssl_generated else ''}://www.example.com/index.html to test the serve_files option",
@@ -247,7 +254,7 @@ try:
 
     sleep(1)
 
-    http2 = getenv("HTTP2", "no") == "yes"
+    http2 = getenv("HTTP2", "yes") == "yes"
 
     print(
         f"ℹ️ Sending a GET request to http{'s' if ssl_generated else ''}://www.example.com with HTTP/2 to test HTTP2",

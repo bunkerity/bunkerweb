@@ -18,7 +18,7 @@ updates:
     schedule:
       interval: "daily"
     assignees:
-      - "fl0ppy-d1sk"
+      - "TheophileDiot"
     commit-message:
       prefix: "deps/bw"
     target-branch: "dev"
@@ -29,7 +29,7 @@ updates:
     schedule:
       interval: "daily"
     assignees:
-      - "fl0ppy-d1sk"
+      - "TheophileDiot"
     commit-message:
       prefix: "deps/scheduler"
     target-branch: "dev"
@@ -38,7 +38,7 @@ updates:
     schedule:
       interval: "daily"
     assignees:
-      - "fl0ppy-d1sk"
+      - "TheophileDiot"
     commit-message:
       prefix: "deps/scheduler"
     target-branch: "dev"
@@ -49,7 +49,7 @@ updates:
     schedule:
       interval: "daily"
     assignees:
-      - "fl0ppy-d1sk"
+      - "TheophileDiot"
     commit-message:
       prefix: "deps/autoconf"
     target-branch: "dev"
@@ -58,7 +58,7 @@ updates:
     schedule:
       interval: "daily"
     assignees:
-      - "fl0ppy-d1sk"
+      - "TheophileDiot"
     commit-message:
       prefix: "deps/autoconf"
     target-branch: "dev"
@@ -69,7 +69,7 @@ updates:
     schedule:
       interval: "daily"
     assignees:
-      - "fl0ppy-d1sk"
+      - "TheophileDiot"
     commit-message:
       prefix: "deps/ui"
     target-branch: "dev"
@@ -78,7 +78,7 @@ updates:
     schedule:
       interval: "daily"
     assignees:
-      - "fl0ppy-d1sk"
+      - "TheophileDiot"
     commit-message:
       prefix: "deps/ui"
     target-branch: "dev"

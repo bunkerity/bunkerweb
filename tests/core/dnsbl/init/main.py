@@ -1,5 +1,6 @@
 from contextlib import suppress
 from ipaddress import IPv4Address
+from os import getenv, sep
 from pathlib import Path
 from traceback import format_exc
 from selenium import webdriver
@@ -40,6 +41,12 @@ try:
 
     print("ℹ️ Checking the DNSBL servers for a banned IP ...", flush=True)
 
+    output_path = (
+        Path(sep, "output", "dnsbl_ip.txt")
+        if getenv("TEST_TYPE", "docker") == "docker"
+        else Path(".", "dnsbl_ip.txt")
+    )
+
     for ip_address in [IPv4Address(f"{x}.0.0.3") for x in range(1, 256)]:
         for dnsbl_server in dnsbl_servers:
             with suppress(gaierror):
@@ -47,10 +54,10 @@ try:
                     f"{ip_address.reverse_pointer.replace('.in-addr.arpa', '')}.{dnsbl_server}"
                 )
                 print(
-                    f"✅ {ip_address} is banned on {dnsbl_server}, saving it to /output/dnsbl_ip.txt",
+                    f"✅ {ip_address} is banned on {dnsbl_server}, saving it to {output_path}",
                     flush=True,
                 )
-                Path("/output/dnsbl_ip.txt").write_text(f"{ip_address} {dnsbl_server}")
+                output_path.write_text(f"{ip_address} {dnsbl_server}")
                 exit(0)
 except SystemExit as e:
     exit(e.code)

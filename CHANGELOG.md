@@ -1,11 +1,31 @@
 # Changelog
 
-## v1.5.2 - 
+## v1.5.3 -
 
-- [BUGFIX] Fix UI fetching only default values from the database (fixes no thrash button too)
+- [BUGFIX] Fix BunkerWeb not loading his own settings after a docker restart
+- [BUGFIX] Fix Custom configs not following the service name after an update on the UI
+- [BUGFIX] Fix UI clearing configs folder at startup
+- [BUGFIX] Fix Database not clearing old services when not using multisite
+- [BUGFIX] Fix UI using the wrong database when generating the new config when using an external database
+- [MISC] Updated core dependencies
+- [MISC] Updated self-signed job to regenerate the cert if the subject or the expiration date has changed
+- [MISC] Jobs that download files from urls will now remove old cached files if urls are empty
+
+## v1.5.2 - 2023/10/10
+
+- [BUGFIX] Fix UI fetching only default values from the database (fixes no trash button too)
 - [BUGFIX] Fix infinite loop when using autoconf
+- [BUGFIX] Fix BunkerWeb fails to start after reboot on Fedora and Rhel
+- [BUGFIX] Fix logs page not working in UI on Linux integrations
+- [BUGFIX] Fix settings regex that had issues in general and with the UI
+- [BUGFIX] Fix scheduler error with external plugins when reloading
+- [BUGFIX] Fix permissions with folders in linux integrations
 - [MISC] Push Docker images to GitHub packages (ghcr.io repository)
 - [MISC] Improved CI/CD
+- [MISC] Updated python dependencies
+- [MISC] Updated Python Docker image to 3.11.5-alpine in Dockerfiles
+- [MISC] Add support for ModSecurity JSON LogFormat
+- [MISC] Updated OWASP coreruleset to 3.3.5
 
 ## v1.5.1 - 2023/08/08
 

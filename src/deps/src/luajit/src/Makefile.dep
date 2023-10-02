@@ -1,6 +1,6 @@
 lib_aux.o: lib_aux.c lua.h luaconf.h lauxlib.h lj_obj.h lj_def.h \
  lj_arch.h lj_err.h lj_errmsg.h lj_state.h lj_trace.h lj_jit.h lj_ir.h \
- lj_dispatch.h lj_bc.h lj_traceerr.h lj_lib.h
+ lj_dispatch.h lj_bc.h lj_traceerr.h lj_lib.h lj_vmevent.h
 lib_base.o: lib_base.c lua.h luaconf.h lauxlib.h lualib.h lj_obj.h \
  lj_def.h lj_arch.h lj_gc.h lj_err.h lj_errmsg.h lj_debug.h lj_buf.h \
  lj_str.h lj_tab.h lj_meta.h lj_state.h lj_frame.h lj_bc.h lj_ctype.h \
@@ -55,7 +55,7 @@ lj_asm.o: lj_asm.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h lj_gc.h \
  lj_buf.h lj_str.h lj_tab.h lj_frame.h lj_bc.h lj_ctype.h lj_ir.h \
  lj_jit.h lj_ircall.h lj_iropt.h lj_mcode.h lj_trace.h lj_dispatch.h \
  lj_traceerr.h lj_snap.h lj_asm.h lj_vm.h lj_target.h lj_target_*.h \
- lj_emit_*.h lj_asm_*.h
+ lj_prng.h lj_emit_*.h lj_asm_*.h
 lj_assert.o: lj_assert.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h
 lj_bc.o: lj_bc.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h lj_bc.h \
  lj_bcdef.h
@@ -124,7 +124,7 @@ lj_func.o: lj_func.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h lj_gc.h \
 lj_gc.o: lj_gc.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h lj_gc.h \
  lj_err.h lj_errmsg.h lj_buf.h lj_str.h lj_tab.h lj_func.h lj_udata.h \
  lj_meta.h lj_state.h lj_frame.h lj_bc.h lj_ctype.h lj_cdata.h lj_trace.h \
- lj_jit.h lj_ir.h lj_dispatch.h lj_traceerr.h lj_vm.h
+ lj_jit.h lj_ir.h lj_dispatch.h lj_traceerr.h lj_vm.h lj_vmevent.h
 lj_gdbjit.o: lj_gdbjit.c lj_obj.h lua.h luaconf.h lj_def.h lj_arch.h \
  lj_gc.h lj_err.h lj_errmsg.h lj_debug.h lj_frame.h lj_bc.h lj_buf.h \
  lj_str.h lj_strfmt.h lj_jit.h lj_ir.h lj_dispatch.h
@@ -222,25 +222,25 @@ ljamalg.o: ljamalg.c lua.h luaconf.h lauxlib.h lj_assert.c lj_obj.h \
  lj_def.h lj_arch.h lj_gc.c lj_gc.h lj_err.h lj_errmsg.h lj_buf.h \
  lj_str.h lj_tab.h lj_func.h lj_udata.h lj_meta.h lj_state.h lj_frame.h \
  lj_bc.h lj_ctype.h lj_cdata.h lj_trace.h lj_jit.h lj_ir.h lj_dispatch.h \
- lj_traceerr.h lj_vm.h lj_err.c lj_debug.h lj_ff.h lj_ffdef.h lj_strfmt.h \
- lj_char.c lj_char.h lj_bc.c lj_bcdef.h lj_obj.c lj_buf.c lj_str.c \
- lj_prng.h lj_tab.c lj_func.c lj_udata.c lj_meta.c lj_strscan.h lj_lib.h \
- lj_debug.c lj_prng.c lj_state.c lj_lex.h lj_alloc.h luajit.h \
- lj_dispatch.c lj_ccallback.h lj_profile.h lj_vmevent.c lj_vmevent.h \
- lj_vmmath.c lj_strscan.c lj_strfmt.c lj_strfmt_num.c lj_serialize.c \
- lj_serialize.h lj_api.c lj_profile.c lj_lex.c lualib.h lj_parse.h \
- lj_parse.c lj_bcread.c lj_bcdump.h lj_bcwrite.c lj_load.c lj_ctype.c \
- lj_cdata.c lj_cconv.h lj_cconv.c lj_ccall.c lj_ccall.h lj_ccallback.c \
- lj_target.h lj_target_*.h lj_mcode.h lj_carith.c lj_carith.h lj_clib.c \
- lj_clib.h lj_cparse.c lj_cparse.h lj_lib.c lj_ir.c lj_ircall.h \
- lj_iropt.h lj_opt_mem.c lj_opt_fold.c lj_folddef.h lj_opt_narrow.c \
- lj_opt_dce.c lj_opt_loop.c lj_snap.h lj_opt_split.c lj_opt_sink.c \
- lj_mcode.c lj_snap.c lj_record.c lj_record.h lj_ffrecord.h lj_crecord.c \
- lj_crecord.h lj_ffrecord.c lj_recdef.h lj_asm.c lj_asm.h lj_emit_*.h \
- lj_asm_*.h lj_trace.c lj_gdbjit.h lj_gdbjit.c lj_alloc.c lib_aux.c \
- lib_base.c lj_libdef.h lib_math.c lib_string.c lib_table.c lib_io.c \
- lib_os.c lib_package.c lib_debug.c lib_bit.c lib_jit.c lib_ffi.c \
- lib_buffer.c lib_init.c
+ lj_traceerr.h lj_vm.h lj_vmevent.h lj_err.c lj_debug.h lj_ff.h \
+ lj_ffdef.h lj_strfmt.h lj_char.c lj_char.h lj_bc.c lj_bcdef.h lj_obj.c \
+ lj_buf.c lj_str.c lj_prng.h lj_tab.c lj_func.c lj_udata.c lj_meta.c \
+ lj_strscan.h lj_lib.h lj_debug.c lj_prng.c lj_state.c lj_lex.h \
+ lj_alloc.h luajit.h lj_dispatch.c lj_ccallback.h lj_profile.h \
+ lj_vmevent.c lj_vmmath.c lj_strscan.c lj_strfmt.c lj_strfmt_num.c \
+ lj_serialize.c lj_serialize.h lj_api.c lj_profile.c lj_lex.c lualib.h \
+ lj_parse.h lj_parse.c lj_bcread.c lj_bcdump.h lj_bcwrite.c lj_load.c \
+ lj_ctype.c lj_cdata.c lj_cconv.h lj_cconv.c lj_ccall.c lj_ccall.h \
+ lj_ccallback.c lj_target.h lj_target_*.h lj_mcode.h lj_carith.c \
+ lj_carith.h lj_clib.c lj_clib.h lj_cparse.c lj_cparse.h lj_lib.c lj_ir.c \
+ lj_ircall.h lj_iropt.h lj_opt_mem.c lj_opt_fold.c lj_folddef.h \
+ lj_opt_narrow.c lj_opt_dce.c lj_opt_loop.c lj_snap.h lj_opt_split.c \
+ lj_opt_sink.c lj_mcode.c lj_snap.c lj_record.c lj_record.h lj_ffrecord.h \
+ lj_crecord.c lj_crecord.h lj_ffrecord.c lj_recdef.h lj_asm.c lj_asm.h \
+ lj_emit_*.h lj_asm_*.h lj_trace.c lj_gdbjit.h lj_gdbjit.c lj_alloc.c \
+ lib_aux.c lib_base.c lj_libdef.h lib_math.c lib_string.c lib_table.c \
+ lib_io.c lib_os.c lib_package.c lib_debug.c lib_bit.c lib_jit.c \
+ lib_ffi.c lib_buffer.c lib_init.c
 luajit.o: luajit.c lua.h luaconf.h lauxlib.h lualib.h luajit.h lj_arch.h
 host/buildvm.o: host/buildvm.c host/buildvm.h lj_def.h lua.h luaconf.h \
  lj_arch.h lj_obj.h lj_def.h lj_arch.h lj_gc.h lj_obj.h lj_bc.h lj_ir.h \

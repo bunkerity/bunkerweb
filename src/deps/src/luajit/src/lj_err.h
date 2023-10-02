@@ -1,6 +1,6 @@
 /*
 ** Error handling.
-** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #ifndef _LJ_ERR_H

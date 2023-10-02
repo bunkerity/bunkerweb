@@ -31,11 +31,11 @@ jobs:
           git config --global user.email "bunkerbot@bunkerity.com"
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
       - name: Install doc requirements
-        run: pip install -r docs/requirements.txt
+        run: pip install --no-cache-dir --require-hashes -r docs/requirements.txt
       - name: Push doc
-        run: mike deploy --update-aliases --push ${{ inputs.VERSION }} ${{ inputs.ALIAS }}
+        run: mike deploy --update-aliases --push --no-redirect ${{ inputs.VERSION }} ${{ inputs.ALIAS }}
       - name: Set default doc
         if: inputs.ALIAS == 'latest'
         run: mike set-default --push latest

@@ -18,7 +18,8 @@
 
   <script type="module" src="./js/global.js"></script>
 
-  <script src="./js/editor/ace.js"></script>
+  <script async src="./js/utils/purify/purify.min.js"></script>
+  <script async src="./js/editor/ace.js"></script>
 
   {% if current_endpoint == "global_config" %}
   <script type="module" src="./js/global_config.js"></script>
@@ -33,7 +34,7 @@
   {% elif current_endpoint == "logs" %}
   <link rel="stylesheet" type="text/css" href="./css/flatpickr.css" />
   <link rel="stylesheet" type="text/css" href="./css/flatpickr.dark.css" />
-  <script type="module" src="./js/utils/flatpickr.js"></script>
+  <script async type="module" src="./js/utils/flatpickr.js"></script>
   <script type="module" src="./js/logs.js"></script>
   <link
     rel="stylesheet"

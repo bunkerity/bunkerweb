@@ -4,15 +4,9 @@ echo "ℹ️ Cloning BunkerWeb Plugins ..."
 
 git clone https://github.com/bunkerity/bunkerweb-plugins.git
 
-echo "ℹ️ Checking out to dev branch ..."
-
-cd bunkerweb-plugins
-
 echo "ℹ️ Extracting ClamAV plugin ..."
 
-cp -r clamav /plugins/
-
-cd ..
+cp -r bunkerweb-plugins/clamav /plugins/
 
 echo "ℹ️ Extracting settings.json file, db and core directory ..."
 

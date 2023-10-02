@@ -1,8 +1,10 @@
 from contextlib import suppress
 from datetime import datetime, timedelta
-from os import listdir
+from functools import partial
+from os import getenv, listdir
 from os.path import join
 from pathlib import Path
+from subprocess import PIPE, run
 from time import sleep
 from traceback import format_exc
 from typing import List, Union
@@ -27,13 +29,13 @@ while not ready:
     with suppress(RequestException):
         status_code = get("http://www.example.com/admin").status_code
 
-        if status_code > 500:
+        if status_code > 500 and status_code != 502:
             print("An error occurred with the server, exiting ...", flush=True)
             exit(1)
 
         ready = status_code < 400
 
-    if retries > 10:
+    if retries > 20:
         print("UI took too long to be ready, exiting ...", flush=True)
         exit(1)
     elif not ready:
@@ -42,6 +44,8 @@ while not ready:
         sleep(5)
 
 print("UI is ready, starting tests ...", flush=True)
+
+TEST_TYPE = getenv("TEST_TYPE", "docker")
 
 firefox_options = Options()
 if "geckodriver" not in listdir(Path.cwd()):
@@ -161,14 +165,21 @@ def access_page(
         )
 
 
-with webdriver.Firefox(
-    service=Service(
-        executable_path="./geckodriver"
-        if "geckodriver" in listdir(Path.cwd())
-        else "/usr/local/bin/geckodriver"
-    ),
-    options=firefox_options,
-) as driver:
+driver_func = partial(webdriver.Firefox, options=firefox_options)
+if TEST_TYPE == "dev":
+    driver_func = partial(
+        webdriver.Firefox,
+        service=Service(
+            Service(
+                executable_path="./geckodriver"
+                if "geckodriver" in listdir(Path.cwd())
+                else "/usr/local/bin/geckodriver"
+            )
+        ),
+        options=firefox_options,
+    )
+
+with webdriver.Firefox(options=firefox_options) as driver:
     try:
         driver.delete_all_cookies()
         driver.maximize_window()
@@ -268,8 +279,9 @@ with webdriver.Firefox(
 
         no_errors = True
         retries = 0
+        action = "reload" if TEST_TYPE == "docker" else "restart"
         while no_errors:
-            print("Trying to reload BunkerWeb instance ...", flush=True)
+            print(f"Trying to {action} BunkerWeb instance ...", flush=True)
 
             try:
                 form = WebDriverWait(driver, 2).until(
@@ -285,17 +297,17 @@ with webdriver.Firefox(
                 access_page(
                     driver,
                     driver_wait,
-                    "//form[starts-with(@id, 'form-instance-')]//button[@value='reload']",
+                    f"//form[starts-with(@id, 'form-instance-')]//button[@value='{action}']",
                     "instances",
                     False,
                 )
 
                 print(
-                    "Instance was reloaded successfully, checking the message ...",
+                    f"Instance was {action}ed successfully, checking the message ...",
                     flush=True,
                 )
 
-                assert_alert_message(driver, "has been reloaded")
+                assert_alert_message(driver, f"has been {action}ed")
 
                 no_errors = False
             except:
@@ -306,6 +318,24 @@ with webdriver.Firefox(
                 print(
                     "WARNING: message list doesn't contain the expected message or is empty, retrying..."
                 )
+
+        if TEST_TYPE == "linux":
+            retries = 0
+            while (
+                not b"BunkerWeb is ready"
+                in run(
+                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
+                    stdout=PIPE,
+                    check=True,
+                ).stdout
+            ) and retries < 10:
+                retries += 1
+                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
+                sleep(5)
+
+            if retries >= 10:
+                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
+                exit(1)
 
         print("Trying global config page ...")
 
@@ -408,6 +438,24 @@ with webdriver.Firefox(
             "global config",
             False,
         )
+
+        if TEST_TYPE == "linux":
+            retries = 0
+            while (
+                not b"BunkerWeb is ready"
+                in run(
+                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
+                    stdout=PIPE,
+                    check=True,
+                ).stdout
+            ) and retries < 10:
+                retries += 1
+                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
+                sleep(5)
+
+            if retries >= 10:
+                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
+                exit(1)
 
         input_worker = safe_get_element(driver, By.ID, "WORKER_RLIMIT_NOFILE")
 
@@ -563,6 +611,24 @@ with webdriver.Firefox(
             False,
         )
 
+        if TEST_TYPE == "linux":
+            retries = 0
+            while (
+                not b"BunkerWeb is ready"
+                in run(
+                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
+                    stdout=PIPE,
+                    check=True,
+                ).stdout
+            ) and retries < 10:
+                retries += 1
+                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
+                sleep(5)
+
+            if retries >= 10:
+                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
+                exit(1)
+
         print(
             "The page reloaded successfully, checking if the setting has been updated ...",
             flush=True,
@@ -613,24 +679,25 @@ with webdriver.Firefox(
 
         assert_button_click(driver, "//button[@data-services-action='new']")
 
-        server_name_input: WebElement = safe_get_element(driver, By.ID, "SERVER_NAME")
+        server_name_input: WebElement = safe_get_element(driver, By.ID, "SERVER_NAME")  # type: ignore
         server_name_input.clear()
         server_name_input.send_keys("app1.example.com")
 
-        assert_button_click(driver, "//button[@data-tab-handler='reverseproxy']")
+        if TEST_TYPE == "docker":
+            assert_button_click(driver, "//button[@data-tab-handler='reverseproxy']")
 
-        assert_button_click(
-            driver, safe_get_element(driver, By.ID, "USE_REVERSE_PROXY")
-        )
+            assert_button_click(
+                driver, safe_get_element(driver, By.ID, "USE_REVERSE_PROXY")
+            )
 
-        assert_button_click(
-            driver, "//button[@data-services-multiple-add='reverse-proxy']"
-        )
+            assert_button_click(
+                driver, "//button[@data-services-multiple-add='reverse-proxy']"
+            )
 
-        safe_get_element(driver, By.ID, "REVERSE_PROXY_HOST").send_keys(
-            "http://app1:8080"
-        )
-        safe_get_element(driver, By.ID, "REVERSE_PROXY_URL").send_keys("/")
+            safe_get_element(driver, By.ID, "REVERSE_PROXY_HOST").send_keys(
+                "http://app1:8080"
+            )
+            safe_get_element(driver, By.ID, "REVERSE_PROXY_URL").send_keys("/")
 
         access_page(
             driver,
@@ -639,6 +706,24 @@ with webdriver.Firefox(
             "services",
             False,
         )
+
+        if TEST_TYPE == "linux":
+            retries = 0
+            while (
+                not b"BunkerWeb is ready"
+                in run(
+                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
+                    stdout=PIPE,
+                    check=True,
+                ).stdout
+            ) and retries < 10:
+                retries += 1
+                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
+                sleep(5)
+
+            if retries >= 10:
+                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
+                exit(1)
 
         try:
             services = safe_get_element(
@@ -741,6 +826,24 @@ with webdriver.Firefox(
             False,
         )
 
+        if TEST_TYPE == "linux":
+            retries = 0
+            while (
+                not b"BunkerWeb is ready"
+                in run(
+                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
+                    stdout=PIPE,
+                    check=True,
+                ).stdout
+            ) and retries < 10:
+                retries += 1
+                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
+                sleep(5)
+
+            if retries >= 10:
+                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
+                exit(1)
+
         assert_alert_message(driver, "has been deleted.")
 
         print(
@@ -810,6 +913,24 @@ location /hello {
             False,
         )
 
+        if TEST_TYPE == "linux":
+            retries = 0
+            while (
+                not b"BunkerWeb is ready"
+                in run(
+                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
+                    stdout=PIPE,
+                    check=True,
+                ).stdout
+            ) and retries < 10:
+                retries += 1
+                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
+                sleep(5)
+
+            if retries >= 10:
+                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
+                exit(1)
+
         assert_alert_message(driver, "was successfully created")
 
         sleep(30)
@@ -832,7 +953,7 @@ location /hello {
             exit(1)
 
         print(
-            "The config has been created and is working, trying to edit it ...",
+            "The config has been created and is working, trying to delete it ...",
             flush=True,
         )
 
@@ -856,6 +977,24 @@ location /hello {
             "configs",
             False,
         )
+
+        if TEST_TYPE == "linux":
+            retries = 0
+            while (
+                not b"BunkerWeb is ready"
+                in run(
+                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
+                    stdout=PIPE,
+                    check=True,
+                ).stdout
+            ) and retries < 10:
+                retries += 1
+                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
+                sleep(5)
+
+            if retries >= 10:
+                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
+                exit(1)
 
         assert_alert_message(driver, "was successfully deleted")
 
@@ -929,6 +1068,24 @@ location /hello {
             False,
         )
 
+        if TEST_TYPE == "linux":
+            retries = 0
+            while (
+                not b"BunkerWeb is ready"
+                in run(
+                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
+                    stdout=PIPE,
+                    check=True,
+                ).stdout
+            ) and retries < 10:
+                retries += 1
+                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
+                sleep(5)
+
+            if retries >= 10:
+                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
+                exit(1)
+
         external_plugins = safe_get_element(
             driver,
             By.XPATH,
@@ -954,6 +1111,24 @@ location /hello {
             "plugins",
             False,
         )
+
+        if TEST_TYPE == "linux":
+            retries = 0
+            while (
+                not b"BunkerWeb is ready"
+                in run(
+                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
+                    stdout=PIPE,
+                    check=True,
+                ).stdout
+            ) and retries < 10:
+                retries += 1
+                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
+                sleep(5)
+
+            if retries >= 10:
+                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
+                exit(1)
 
         with suppress(TimeoutException):
             title = WebDriverWait(driver, 2).until(
@@ -993,6 +1168,8 @@ location /hello {
             exit(1)
 
         assert_button_click(driver, "//button[@data-cache-modal-submit='']")
+
+        sleep(3)
 
         print("The cache file content is correct, trying logs page ...", flush=True)
 

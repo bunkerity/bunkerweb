@@ -1,6 +1,6 @@
 /*
 ** Common definitions for the JIT compiler.
-** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #ifndef _LJ_JIT_H
@@ -106,7 +106,7 @@
 /* -- JIT engine parameters ----------------------------------------------- */
 
 #if LJ_TARGET_WINDOWS || LJ_64
-/* See: http://blogs.msdn.com/oldnewthing/archive/2003/10/08/55239.aspx */
+/* See: https://devblogs.microsoft.com/oldnewthing/20031008-00/?p=42223 */
 #define JIT_P_sizemcode_DEFAULT		64
 #else
 /* Could go as low as 4K, but the mmap() overhead would be rather high. */
@@ -274,6 +274,9 @@ typedef struct GCtrace {
   BCIns startins;	/* Original bytecode of starting instruction. */
   MSize szmcode;	/* Size of machine code. */
   MCode *mcode;		/* Start of machine code. */
+#if LJ_ABI_PAUTH
+  ASMFunction mcauth;	/* Start of machine code, with ptr auth applied. */
+#endif
   MSize mcloop;		/* Offset of loop start in machine code. */
   uint16_t nchild;	/* Number of child traces (root trace only). */
   uint16_t spadjust;	/* Stack pointer adjustment (offset in bytes). */

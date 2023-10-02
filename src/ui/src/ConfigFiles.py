@@ -45,7 +45,7 @@ class ConfigFiles:
             if custom_configs:
                 self.__logger.info("Refreshing custom configs ...")
                 # Remove old custom configs files
-                for file in glob(join(sep, "etc", "bunkerweb", "configs", "*")):
+                for file in glob(join(sep, "etc", "bunkerweb", "configs", "*", "*")):
                     file = Path(file)
                     if file.is_symlink() or file.is_file():
                         file.unlink()

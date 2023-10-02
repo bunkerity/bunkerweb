@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.1
+    image: bunkerity/bunkerweb:1.5.2
     pull_policy: never
     labels:
       - "bunkerweb.INSTANCE"
@@ -17,14 +17,14 @@ services:
 
       # ? DNSBL settings
       USE_DNSBL: "yes"
-      DNSBL_LIST: "bl.blocklist.de problems.dnsbl.sorbs.net"
+      DNSBL_LIST: ""
     networks:
       bw-universe:
       bw-services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.1
+    image: bunkerity/bunkerweb-scheduler:1.5.2
     pull_policy: never
     depends_on:
       - bw

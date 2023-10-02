@@ -48,7 +48,7 @@ data-plugin-item="{{plugin['id']}}"
           <path
             d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z"
           />
-        </svg> 
+        </svg>
         <!-- popover -->
         <div  class="popover-settings-container  hidden"
         data-popover-content="{{ value["label"] }}"
@@ -69,7 +69,7 @@ data-plugin-item="{{plugin['id']}}"
         {% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default'  %} disabled {% endif %}     id="{{setting}}" name="{{setting}}"
         class="regular-input"
         value="{% if global_config[setting]['value'] %} {{global_config[setting]['value']}} {% else %} {{value['default']}} {% endif %}" type="{{value['type']}}"  pattern="{{value['regex']|safe}}" />
-     
+
         {% if value['type'] == "password" %}
         <div data-setting-password-container class="absolute flex right-2 h-5 w-5">
           <button type="button" data-setting-password="visible" class="h-5 w-5 flex items-center align-middle" type="button">
@@ -96,13 +96,13 @@ data-plugin-item="{{plugin['id']}}"
           {% endfor %}
       </select>
       <!-- end default hidden-->
-      
+
       <!--custom-->
       <div data-select-container class="relative">
         <button
         {% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default'  %} disabled {% endif %}    data-setting-select="{{value['id']}}"
         data-default-value="{{global_config[setting]['value']}}"
-        data-default-method="{{global_config[setting]['method']}}" 
+        data-default-method="{{global_config[setting]['method']}}"
           type="button"
           class="custom-select-btn"
           >
@@ -172,17 +172,17 @@ data-plugin-item="{{plugin['id']}}"
       <div data-checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0 z-10 ">
         <input  id="{{setting}}" name="{{setting}}"
         data-default-method="{% if setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] %}mode{% else %}{{global_config[setting]['method']}}{% endif %}"
-        data-default-value="{{global_config[setting]['value']}}" 
-        
+        data-default-value="{{global_config[setting]['value']}}"
+
         {% if
         setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
-        != 'default' %} disabled {% endif %} 
+        != 'default' %} disabled {% endif %}
 
         aria-checked="{% if global_config[setting]['value'] == "yes" %}true{% else %}false{% endif %}"
-          checked  
-        id="checkbox-{{value['id']}}" 
+          checked
+        id="checkbox-{{value['id']}}"
 
-        class="checkbox" type="checkbox" data-pattern="{{value['regex']|safe}}"        
+        class="checkbox" type="checkbox" data-pattern="{{value['regex']|safe}}"
         value="{{global_config[setting]['value']}}" />
 
         <svg
@@ -220,7 +220,7 @@ data-plugin-item="{{plugin['id']}}"
       {% set multList = multList.append(value['multiple']) %}
     {%endif%}
   {%endfor%}
-  
+
   {%for multiple in multList %}
   <!-- plugin multiple handler -->
   <div data-multiple-handler class="flex items-center mx-0 sm:mx-4 md:mx-6 md:my-3 my-2 2xl:mx-6 2xl:my-3  col-span-12 ">
@@ -264,7 +264,7 @@ data-plugin-item="{{plugin['id']}}"
           <path
             d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z"
           />
-        </svg> 
+        </svg>
         <!-- popover -->
         <div  class="popover-settings-container hidden"
         data-popover-content="{{ value["label"] }}"
@@ -283,7 +283,7 @@ data-plugin-item="{{plugin['id']}}"
         data-default-value="{{value['default']}}" data-default-method="default" id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
         class="regular-input"
         value="{{value['default']}}" type="{{value['type']}}"  pattern="{{value['regex']|safe}}" />
-     
+
         {% if value['type'] == "password" %}
         <div data-setting-password-container class="absolute flex right-2 h-5 w-5">
           <button type="button"data- setting-password="visible" class="h-5 w-5 flex items-center align-middle" type="button">
@@ -309,7 +309,7 @@ data-plugin-item="{{plugin['id']}}"
           {% endfor %}
       </select>
       <!-- end default hidden-->
-      
+
       <!--custom-->
       <div  data-select-container  class="relative">
         <button
@@ -376,7 +376,7 @@ data-plugin-item="{{plugin['id']}}"
         <input id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
         data-default-method="default"
         data-default-value="{{value['default']}}" {% if value['default'] == 'yes' %} checked {%
-        endif %} id="checkbox-{{value['id']}}" 
+        endif %} id="checkbox-{{value['id']}}"
         class="checkbox" type="checkbox" data-pattern="{{value['regex']|safe}}"
         value="{{value['default']}}" />
         <svg

@@ -1,16 +1,14 @@
 ---
-  meta:
-    author: "csanders-git, Franziska Bühler"
-    enabled: true
-    name: "941160.yaml"
-    description: "Tests to trigger, or not trigger 941160"
-  tests:
-    -
-      test_title: 941160-1
-      desc: XSS in XML Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
-      stages:
-      -
-        stage:
+meta:
+  author: "csanders-git, Franziska Bühler"
+  enabled: true
+  name: "941160.yaml"
+  description: "Tests to trigger, or not trigger 941160"
+tests:
+  - test_title: 941160-1
+    desc: XSS in XML Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -21,12 +19,10 @@
               Host: localhost
           output:
             log_contains: id "941160"
-    -
-      test_title: 941160-2
-      desc: XSS in XML Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
-      stages:
-      -
-        stage:
+  - test_title: 941160-2
+    desc: XSS in XML Test as described in http://www.client9.com/article/five-interesting-injection-attacks/
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -37,12 +33,10 @@
               Host: localhost
           output:
             log_contains: id "941160"
-    -
-      test_title: 941160-3
-      desc: "just another XSS teststring: <x onend="
-      stages:
-      -
-        stage:
+  - test_title: 941160-3
+    desc: "just another XSS teststring: <x onend="
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -53,12 +47,10 @@
               Host: localhost
           output:
             log_contains: id "941160"
-    -
-      test_title: 941160-4
-      desc: 'just another XSS teststring: "onzoom='
-      stages:
-      -
-        stage:
+  - test_title: 941160-4
+    desc: 'just another XSS teststring: "onzoom='
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -69,12 +61,10 @@
               Host: localhost
           output:
             log_contains: id "941160"
-    -
-      test_title: 941160-5
-      desc: "just another XSS teststring: 'formaction="
-      stages:
-      -
-        stage:
+  - test_title: 941160-5
+    desc: "just another XSS teststring: 'formaction="
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -85,12 +75,10 @@
               Host: localhost
           output:
             log_contains: id "941160"
-    -
-      test_title: 941160-6
-      desc: "just another XSS teststring:< x: script"
-      stages:
-      -
-        stage:
+  - test_title: 941160-6
+    desc: "just another XSS teststring:< x: script"
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -101,12 +89,10 @@
               Host: localhost
           output:
             log_contains: id "941160"
-    -
-      test_title: 941160-7
-      desc: "just another XSS teststring:<f o r m"
-      stages:
-      -
-        stage:
+  - test_title: 941160-7
+    desc: "just another XSS teststring:<f o r m"
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -117,12 +103,10 @@
               Host: localhost
           output:
             log_contains: id "941160"
-    -
-      test_title: 941160-8
-      desc: "just another XSS teststring: '<f o r m' in User-Agent header"
-      stages:
-      -
-        stage:
+  - test_title: 941160-8
+    desc: "just another XSS teststring: '<f o r m' in User-Agent header"
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -133,12 +117,10 @@
               Host: localhost
           output:
             log_contains: id "941160"
-    -
-      test_title: 941160-9
-      desc: "just another XSS teststring: '<f o r m' in Referer header"
-      stages:
-      -
-        stage:
+  - test_title: 941160-9
+    desc: "just another XSS teststring: '<f o r m' in Referer header"
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -150,12 +132,10 @@
               Referer: 'https://coreruleset.org/?%3Cf%20o%20r%20m'
           output:
             log_contains: id "941160"
-    -
-      test_title: 941160-10
-      desc: "just another XSS teststring: '<f o r m' in Cookie name"
-      stages:
-      -
-        stage:
+  - test_title: 941160-10
+    desc: "just another XSS teststring: '<f o r m' in Cookie name"
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -167,12 +147,10 @@
               Cookie: 'PHPSESSID%3Cf%20o%20r%20m=1234'
           output:
             log_contains: id "941160"
-    -
-      test_title: 941160-10
-      desc: "just another XSS teststring: '<f o r m' in Cookie value"
-      stages:
-      -
-        stage:
+  - test_title: 941160-10
+    desc: "just another XSS teststring: '<f o r m' in Cookie value"
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -184,12 +162,10 @@
               Cookie: 'PHPSESSID=1234%3Cf%20o%20r%20m'
           output:
             log_contains: id "941160"
-    -
-      test_title: 941160-11
-      desc: "just another XSS teststring: '<f o r m' in ARG NAME"
-      stages:
-      -
-        stage:
+  - test_title: 941160-11
+    desc: "just another XSS teststring: '<f o r m' in ARG NAME"
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -200,12 +176,10 @@
               Host: localhost
           output:
             log_contains: id "941160"
-    -
-      test_title: 941160-12
-      desc: "just another XSS teststring: '<f o r m' in ARG VALUE"
-      stages:
-      -
-        stage:
+  - test_title: 941160-12
+    desc: "just another XSS teststring: '<f o r m' in ARG VALUE"
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET

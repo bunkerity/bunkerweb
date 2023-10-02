@@ -23,7 +23,7 @@ from requests import get
 
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import cache_file, cache_hash, file_hash, is_cached_file
+from jobs import cache_file, cache_hash, del_file_in_db, file_hash, is_cached_file
 
 
 def check_line(line):
@@ -75,13 +75,18 @@ try:
 
     db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
 
-    # Don't go further if the cache is fresh
-    if is_cached_file(realip_path.joinpath("combined.list"), "hour", db):
-        logger.info("RealIP list is already in cache, skipping download...")
-        _exit(0)
-
     # Get URLs
     urls = [url for url in getenv("REAL_IP_FROM_URLS", "").split(" ") if url]
+
+    # Don't go further if the cache is fresh
+    if is_cached_file(realip_path.joinpath("combined.list"), "hour", db):
+        if not urls:
+            tmp_realip_path.joinpath("combined.list").unlink(missing_ok=True)
+            deleted, err = del_file_in_db("combined.list", db)
+            if not deleted:
+                logger.warning(f"Coudn't delete combined.list from cache : {err}")
+        logger.info("RealIP list is already in cache, skipping download...")
+        _exit(0)
 
     # Download and write data to temp file
     i = 0

@@ -354,7 +354,7 @@ function storage.new(configuration)
   local server_name       = configuration and configuration.server_name
 
   if pool or pool_size or backlog then
-    setmetatable({
+    return setmetatable({
       prefix = prefix,
       suffix = suffix,
       host = host,

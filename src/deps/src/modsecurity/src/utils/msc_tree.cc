@@ -258,11 +258,13 @@ int InsertNetmask(TreeNode *node, TreeNode *parent, TreeNode *new_node,
             }
 
             node->count++;
+
             node->netmasks = reinterpret_cast<unsigned char *>(malloc(node->count * sizeof(unsigned char)));
+            if(node->netmasks == NULL) {
+                return 0;
+            }
             memset(node->netmasks, 0, (node->count *  sizeof(unsigned char)));
 
-            if(node->netmasks == NULL)
-                return 0;
             if ((node->count-1) == 0) {
                 node->netmasks[0] = netmask;
                 return 1;

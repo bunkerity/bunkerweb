@@ -1,16 +1,14 @@
 ---
-  meta:
-    author: "csanders-git"
-    enabled: true
-    name: "941190.yaml"
-    description: "Tests to trigger, or not trigger 941190"
-  tests:
-    -
-      test_title: 941190-1
-      desc: Node-validator blacklist keywords, ARGS
-      stages:
-      -
-        stage:
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "941190.yaml"
+  description: "Tests to trigger, or not trigger 941190"
+tests:
+  - test_title: 941190-1
+    desc: Node-validator blacklist keywords, ARGS
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -22,12 +20,10 @@
             data: "941190-1=<STYLE>@import'http://xss.rocks/xss.css';</STYLE>"
           output:
             log_contains: id "941190"
-    -
-      test_title: 941190-2
-      desc: Node-validator blacklist keywords, ARGS_NAMES
-      stages:
-      -
-        stage:
+  - test_title: 941190-2
+    desc: Node-validator blacklist keywords, ARGS_NAMES
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET
@@ -39,12 +35,10 @@
             data: "x=<STYLE>@im\\port'\\ja\vasc\\ript:alert('XSS')';</STYLE>"
           output:
             log_contains: id "941190"
-    -
-      test_title: 941190-3
-      desc: Node-validator blacklist keywords, COOKIES_NAMES
-      stages:
-      -
-        stage:
+  - test_title: 941190-3
+    desc: Node-validator blacklist keywords, COOKIES_NAMES
+    stages:
+      - stage:
           input:
             dest_addr: 127.0.0.1
             method: GET

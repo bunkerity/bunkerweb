@@ -1,5 +1,6 @@
 from contextlib import suppress
 from os import getenv
+from subprocess import PIPE, run
 from requests import get, post
 from requests.exceptions import RequestException
 from selenium import webdriver
@@ -35,8 +36,9 @@ try:
     firefox_options = Options()
     firefox_options.add_argument("--headless")
 
-    sessions_secret = getenv("SESSIONS_SECRET", "random")
+    sessions_secret = getenv("SESSIONS_SECRET", "random")  # TODO : also test the secret
     sessions_name = getenv("SESSIONS_NAME", "random")
+    TEST_TYPE = getenv("TEST_TYPE", "docker")
     first_cookie = None
 
     print("ℹ️ Starting Firefox ...", flush=True)
@@ -58,19 +60,51 @@ try:
 
     print("ℹ️ Reloading BunkerWeb ...", flush=True)
 
-    response = post("http://192.168.0.2:5000/reload", headers={"Host": "bwapi"})
+    if TEST_TYPE == "docker":
+        response = post(
+            f"http://192.168.0.2:5000/reload",
+            headers={"Host": "bwapi"},
+        )
 
-    if response.status_code != 200:
-        print("❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True)
-        exit(1)
+        if response.status_code != 200:
+            print(
+                "❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True
+            )
+            exit(1)
 
-    data = response.json()
+        data = response.json()
 
-    if data["status"] != "success":
-        print("❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True)
-        exit(1)
+        if data["status"] != "success":
+            print(
+                "❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True
+            )
+            exit(1)
 
-    sleep(5)
+        sleep(5)
+    else:
+        proc = run(["sudo", "systemctl", "restart", "bunkerweb"], check=False)
+        if proc.returncode != 0:
+            print(
+                "❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True
+            )
+            exit(1)
+
+        retries = 0
+        while (
+            not b"BunkerWeb is ready"
+            in run(
+                ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
+                stdout=PIPE,
+                check=True,
+            ).stdout
+        ) and retries < 10:
+            retries += 1
+            print("ℹ️ Waiting for BunkerWeb to be ready, retrying in 5s ...")
+            sleep(5)
+
+        if retries >= 10:
+            print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
+            exit(1)
 
     print("ℹ️ Starting Firefox again ...", flush=True)
     with webdriver.Firefox(options=firefox_options) as driver:
@@ -82,12 +116,19 @@ try:
 
         cookie = driver.get_cookies()[0]
 
-        if sessions_name == "random" and first_cookie["name"] != cookie["name"]:
-            print(
-                "❌ The cookie name shouldn't have changed after a simple reload, exiting ...",
-                flush=True,
-            )
-            exit(1)
+        if sessions_name == "random":
+            if TEST_TYPE == "docker" and first_cookie["name"] != cookie["name"]:
+                print(
+                    "❌ The cookie name should not have changed after a simple reload, exiting ...",
+                    flush=True,
+                )
+                exit(1)
+            elif TEST_TYPE == "linux" and first_cookie["name"] == cookie["name"]:
+                print(
+                    "❌ The cookie name should have changed after a full reload, exiting ...",
+                    flush=True,
+                )
+                exit(1)
 except SystemExit as e:
     exit(e.code)
 except:

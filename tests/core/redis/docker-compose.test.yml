@@ -7,7 +7,6 @@ services:
       PYTHONUNBUFFERED: "1"
       USE_REVERSE_SCAN: "no"
       USE_ANTIBOT: "no"
-      BLACKLIST_IP: ""
 
       REDIS_HOST: "bw-redis"
       REDIS_PORT: "6379"

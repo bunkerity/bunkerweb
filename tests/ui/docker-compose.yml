@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.1
+    image: bunkerity/bunkerweb:1.5.2
     pull_policy: never
     ports:
       - 80:80
@@ -12,6 +12,7 @@ services:
       MULTISITE: "yes"
       HTTP_PORT: "80"
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
+      LOG_LEVEL: "info"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
       DISABLE_DEFAULT_SERVER: "yes"
@@ -33,7 +34,7 @@ services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.1
+    image: bunkerity/bunkerweb-scheduler:1.5.2
     pull_policy: never
     depends_on:
       - bw
@@ -46,7 +47,7 @@ services:
       - bw-docker
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.5.1
+    image: bunkerity/bunkerweb-ui:1.5.2
     pull_policy: never
     depends_on:
       - bw

@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.1
+    image: bunkerity/bunkerweb:1.5.2
     pull_policy: never
     labels:
       - "bunkerweb.INSTANCE"
@@ -17,7 +17,7 @@ services:
 
       # ? REVERSE_SCAN settings
       USE_REVERSE_SCAN: "yes"
-      REVERSE_SCAN_PORTS: "22 80 443 3128 8000 8080"
+      REVERSE_SCAN_PORTS: "80"
       REVERSE_SCAN_TIMEOUT: "500"
     networks:
       bw-universe:
@@ -25,7 +25,7 @@ services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.1
+    image: bunkerity/bunkerweb-scheduler:1.5.2
     pull_policy: never
     depends_on:
       - bw

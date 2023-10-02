@@ -2590,15 +2590,34 @@ h6 {
 }
 
 .transition {
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
     -webkit-backdrop-filter;
   transition-property: color, background-color, border-color,
     text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
     backdrop-filter;
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
-    backdrop-filter, -webkit-backdrop-filter;
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
+    backdrop-filter,
+    -webkit-backdrop-filter;
   transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   transition-duration: 150ms;
 }
@@ -3310,15 +3329,34 @@ h6 {
   font-size: 0.875rem;
   line-height: 1.5rem;
   font-weight: 700;
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
     -webkit-backdrop-filter;
   transition-property: color, background-color, border-color,
     text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
     backdrop-filter;
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
-    backdrop-filter, -webkit-backdrop-filter;
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
+    backdrop-filter,
+    -webkit-backdrop-filter;
   transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   transition-duration: 300ms;
   transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
@@ -3343,15 +3381,34 @@ h6 {
   --tw-bg-opacity: 1;
   background-color: rgb(94 114 228 / var(--tw-bg-opacity));
   padding: 0.75rem;
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
     -webkit-backdrop-filter;
   transition-property: color, background-color, border-color,
     text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
     backdrop-filter;
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
-    backdrop-filter, -webkit-backdrop-filter;
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
+    backdrop-filter,
+    -webkit-backdrop-filter;
   transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   transition-duration: 150ms;
 }
@@ -3370,15 +3427,34 @@ h6 {
   font-weight: 700;
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
     -webkit-backdrop-filter;
   transition-property: color, background-color, border-color,
     text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
     backdrop-filter;
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
-    backdrop-filter, -webkit-backdrop-filter;
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
+    backdrop-filter,
+    -webkit-backdrop-filter;
   transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   transition-duration: 300ms;
   transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
@@ -3539,15 +3615,34 @@ h6 {
   padding-right: 0.5rem;
   --tw-text-opacity: 1;
   color: rgb(8 85 119 / var(--tw-text-opacity));
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
     -webkit-backdrop-filter;
   transition-property: color, background-color, border-color,
     text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
     backdrop-filter;
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
-    backdrop-filter, -webkit-backdrop-filter;
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
+    backdrop-filter,
+    -webkit-backdrop-filter;
   transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   transition-duration: 300ms;
   transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
@@ -3569,15 +3664,34 @@ h6 {
   --tw-bg-opacity: 1;
   background-color: rgb(94 114 228 / var(--tw-bg-opacity));
   padding: 0.75rem;
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
     -webkit-backdrop-filter;
   transition-property: color, background-color, border-color,
     text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
     backdrop-filter;
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
-    backdrop-filter, -webkit-backdrop-filter;
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
+    backdrop-filter,
+    -webkit-backdrop-filter;
   transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   transition-duration: 150ms;
 }
@@ -3666,15 +3780,34 @@ h6 {
 .settings-tabs-mobile-btn-text {
   --tw-text-opacity: 1;
   color: rgb(8 85 119 / var(--tw-text-opacity));
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
     -webkit-backdrop-filter;
   transition-property: color, background-color, border-color,
     text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
     backdrop-filter;
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter,
-    backdrop-filter, -webkit-backdrop-filter;
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    box-shadow,
+    transform,
+    filter,
+    backdrop-filter,
+    -webkit-backdrop-filter;
   transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   transition-duration: 300ms;
   transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);

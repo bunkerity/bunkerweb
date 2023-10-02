@@ -20,15 +20,15 @@ function reload_systemd() {
     do_and_check_cmd systemctl reset-failed
 }
 
-# remove a systemd service 
+# remove a systemd service
 function remove_systemd_service {
     service=$1
     service_file="/lib/systemd/system/$service.service"
     echo "checking service $service with $service_file file "
     if [ -f "$service_file" ]; then
         echo "ℹ️ Remove $service service"
-        do_and_check_cmd systemctl stop $service
-        do_and_check_cmd systemctl disable $service
+        do_and_check_cmd systemctl stop "$service"
+        do_and_check_cmd systemctl disable "$service"
         do_and_check_cmd rm -f "$service_file"
         reload_systemd
     else
@@ -107,7 +107,7 @@ function purge() {
 }
 
 # Check if we are root
-if [ $(id -u) -ne 0 ] ; then
+if [ "$(id -u)" -ne 0 ] ; then
     echo "❌ Run me as root"
     exit 1
 fi
@@ -126,11 +126,11 @@ if [ "$1" = "remove" ]; then
 elif [ "$1" = "purge" ]; then
     # Call the purge function
     purge
-else 
+else
     echo "Package is being upgraded"
-    # Check the version of the package and if it's inferior to 1.5.1, we need to copy the variables.env file
+    # Check the version of the package and if it's inferior to 1.5.2, we need to copy the variables.env file
     VERSION=$(dpkg-query -W -f='${Version}' bunkerweb)
-    if [ "$VERSION" != "1.5.1" ]; then
+    if [ "$VERSION" != "1.5.2" ]; then
         echo "ℹ️ Copyenv variables to /var/tmp/bunkerweb/*.env"
         do_and_check_cmd cp -f /opt/bunkerweb/variables.env /var/tmp/variables.env
         do_and_check_cmd cp -f /opt/bunkerweb/ui.env /var/tmp/ui.env
