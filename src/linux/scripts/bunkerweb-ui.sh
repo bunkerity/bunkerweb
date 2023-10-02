@@ -12,7 +12,8 @@ fi
 # Function to start the UI
 start() {
     echo "Starting UI"
-    export "$(cat /etc/bunkerweb/ui.env)"
+    # shellcheck disable=SC2046
+    export $(cat /etc/bunkerweb/ui.env)
     python3 -m gunicorn \
         --config /usr/share/bunkerweb/ui/gunicorn.conf.py \
         --pythonpath /usr/share/bunkerweb/deps/python/,/usr/share/bunkerweb/ui/ \
