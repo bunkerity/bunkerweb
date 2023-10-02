@@ -70,9 +70,6 @@ jobs:
       contents: read
       security-events: write
 
-  cflite:
-    uses: ./.github/workflows/cflite.yml
-
   # UI tests
   tests-ui:
     needs: [codeql, build-containers]
