@@ -1,6 +1,6 @@
 /*
 ** Definitions for x86 and x64 CPUs.
-** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #ifndef _LJ_TARGET_X86_H
@@ -116,8 +116,8 @@ enum {
 
 #if LJ_64
 /* Prefer the low 8 regs of each type to reduce REX prefixes. */
-#undef rset_picktop
-#define rset_picktop(rs)	(lj_fls(lj_bswap(rs)) ^ 0x18)
+#undef rset_picktop_
+#define rset_picktop_(rs)	(lj_fls(lj_bswap(rs)) ^ 0x18)
 #endif
 
 /* -- Spill slots --------------------------------------------------------- */

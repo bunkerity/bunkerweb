@@ -1,6 +1,6 @@
 /*
 ** Error handling.
-** Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_err_c
@@ -447,10 +447,10 @@ LJ_FUNCA int lj_err_unwind_dwarf(int version, int actions,
     if ((actions & _UA_FORCE_UNWIND)) {
       return _URC_CONTINUE_UNWIND;
     } else if (cf) {
+      ASMFunction ip;
       _Unwind_SetGR(ctx, LJ_TARGET_EHRETREG, errcode);
-      _Unwind_SetIP(ctx, (uintptr_t)(cframe_unwind_ff(cf) ?
-				     lj_vm_unwind_ff_eh :
-				     lj_vm_unwind_c_eh));
+      ip = cframe_unwind_ff(cf) ? lj_vm_unwind_ff_eh : lj_vm_unwind_c_eh;
+      _Unwind_SetIP(ctx, (uintptr_t)lj_ptr_strip(ip));
       return _URC_INSTALL_CONTEXT;
     }
 #if LJ_TARGET_X86ORX64
@@ -583,9 +583,17 @@ extern void __deregister_frame(const void *);
 
 uint8_t *lj_err_register_mcode(void *base, size_t sz, uint8_t *info)
 {
-  void **handler;
+  ASMFunction handler = (ASMFunction)err_unwind_jit;
   memcpy(info, err_frame_jit_template, sizeof(err_frame_jit_template));
-  handler = (void *)err_unwind_jit;
+#if LJ_ABI_PAUTH
+#if LJ_TARGET_ARM64
+  handler = ptrauth_auth_and_resign(handler,
+    ptrauth_key_function_pointer, 0,
+    ptrauth_key_process_independent_code, info + ERR_FRAME_JIT_OFS_HANDLER);
+#else
+#error "missing pointer authentication support for this architecture"
+#endif
+#endif
   memcpy(info + ERR_FRAME_JIT_OFS_HANDLER, &handler, sizeof(handler));
   *(uint32_t *)(info + ERR_FRAME_JIT_OFS_CODE_SIZE) =
     (uint32_t)(sz - sizeof(err_frame_jit_template) - (info - (uint8_t *)base));
@@ -781,6 +789,10 @@ LJ_NOINLINE void lj_err_mem(lua_State *L)
 {
   if (L->status == LUA_ERRERR+1)  /* Don't touch the stack during lua_open. */
     lj_vm_unwind_c(L->cframe, LUA_ERRMEM);
+  if (LJ_HASJIT) {
+    TValue *base = tvref(G(L)->jit_base);
+    if (base) L->base = base;
+  }
   if (curr_funcisL(L)) L->top = curr_topL(L);
   setstrV(L, L->top++, lj_err_str(L, LJ_ERR_ERRMEM));
   lj_err_throw(L, LUA_ERRMEM);
@@ -875,6 +887,10 @@ LJ_NORET LJ_NOINLINE static void err_msgv(lua_State *L, ErrMsg em, ...)
   const char *msg;
   va_list argp;
   va_start(argp, em);
+  if (LJ_HASJIT) {
+    TValue *base = tvref(G(L)->jit_base);
+    if (base) L->base = base;
+  }
   if (curr_funcisL(L)) L->top = curr_topL(L);
   msg = lj_strfmt_pushvf(L, err2msg(em), argp);
   va_end(argp);

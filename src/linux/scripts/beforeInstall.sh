@@ -17,6 +17,7 @@ function do_and_check_cmd() {
 
 # Check the os running
 if [ -f /etc/os-release ]; then
+    # shellcheck disable=SC1091
     . /etc/os-release
     OS=$NAME
     if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" ]]; then

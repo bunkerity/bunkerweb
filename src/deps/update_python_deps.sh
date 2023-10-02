@@ -5,43 +5,60 @@ echo "Updating python dependencies"
 
 echo "Creating virtual environment"
 
+# shellcheck disable=SC1091
 python3 -m venv tmp_venv && source tmp_venv/bin/activate
-pip install pip --upgrade > /dev/null && pip install wheel setuptools pip-tools pip-compile-multi pip-upgrader > /dev/null
+pip install --force-reinstall --no-cache-dir --require-hashes -r requirements-deps.txt
 
-echo "Updating requirements.in files"
+function update_python_deps() {
+    file=$1
 
-files=("../../docs/requirements.txt" "../common/db/requirements.in" "../common/gen/requirements.in" "../autoconf/requirements.in" "../ui/requirements.in" "../core/requirements.in")
-
-for file in $(find ../../tests -iname "requirements.txt")
-do
-    files+=("$file")
-done
-
-for file in "${files[@]}"
-do
     echo "Updating $file"
-    cd $(dirname $file)
+    cd "$(dirname "$file")" || return
 
-    if [[ "$file" == *.in ]]; then
-        mv $(basename $file) $(basename ${file/%.in}.txt)
+    if [[ $file == *.in ]]; then
+        mv "$(basename "$file")" "$(basename "${file/%.in}.txt")"
     fi
 
-    echo "all" | pip-upgrade
+    echo "all" | pip-upgrade "$(basename "${file/%.in}.txt")"
 
-    if [[ "$file" == *.in ]]; then
-        mv $(basename ${file/%.in}.txt) $(basename $file)
+    if [[ $file == *.in ]]; then
+        mv "$(basename "${file/%.in}.txt")" "$(basename "$file")"
         echo "Generating hashes for $file ..."
-        pip-compile --generate-hashes --allow-unsafe --resolver=backtracking
+        pip-compile --generate-hashes --allow-unsafe --resolver=backtracking --strip-extras "$(basename "$file")"
     else
         echo "No need to generate hashes for $file"
     fi
 
     echo " "
 
-    cd -
+    cd - || return
+}
+
+update_python_deps requirements-deps.in
+
+pip install --no-cache-dir --require-hashes -r requirements-deps.txt
+
+echo "Updating python requirements files"
+
+files=("requirements.in" "../../docs/requirements.in" "../common/db/requirements.in" "../common/gen/requirements.in" "../autoconf/requirements.in" "../ui/requirements.in" "../core/requirements.in")
+
+shopt -s globstar
+for file in ../../misc/**/requirements*.in
+do
+    files+=("$file")
+done
+for file in ../../tests/**/requirements*.in
+do
+    files+=("$file")
+done
+shopt -u globstar
+
+for file in "${files[@]}"
+do
+    update_python_deps "$file"
 done
 
-echo "Finished updating requirements.txt files, cleaning up ..."
+echo "Finished updating python requirements files, cleaning up ..."
 
 deactivate
 rm -rf tmp_venv

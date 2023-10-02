@@ -68,7 +68,7 @@ SecAuditLog /var/log/bunkerweb/modsec_audit.log
 {% if USE_MODSECURITY_CRS == "yes" %}
 include /usr/share/bunkerweb/core_plugins/modsecurity/files/crs-setup.conf
 
-# custom CRS configurations before loading rules (e.g. exclusions) 
+# custom CRS configurations before loading rules (e.g. exclusions)
 {% if is_custom_conf("/etc/bunkerweb/configs/modsec-crs") %}
 include /etc/bunkerweb/configs/modsec-crs/*.conf
 {% endif %}

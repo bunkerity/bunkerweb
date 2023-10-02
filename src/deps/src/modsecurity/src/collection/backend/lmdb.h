@@ -97,7 +97,7 @@ class MDBEnvProvider {
 class LMDB :
     public Collection {
  public:
-    explicit LMDB(std::string name);
+    explicit LMDB(const std::string &name);
     void store(std::string key, std::string value) override;
 
     bool storeOrUpdateFirst(const std::string &key,
@@ -122,7 +122,7 @@ class LMDB :
  private:
     int txn_begin(unsigned int flags, MDB_txn **ret);
     void string2val(const std::string& str, MDB_val *val);
-    void inline lmdb_debug(int rc, std::string op, std::string scope);
+    void inline lmdb_debug(int rc, const std::string &op, const std::string &scope);
 
     MDB_env *m_env;
     MDB_dbi m_dbi;

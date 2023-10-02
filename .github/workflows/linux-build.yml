@@ -39,8 +39,8 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
       - name: Replace VERSION
-        if: inputs.RELEASE == 'testing'
-        run: ./misc/update-version.sh testing
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
+        run: ./misc/update-version.sh ${{ inputs.RELEASE }}
       - name: Extract arch
         run: |
           echo "ARCH=${{ env.PLATFORMS }}" | sed 's/linux//g' | sed 's@/@@g' >> "$GITHUB_ENV"
@@ -70,41 +70,41 @@ jobs:
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
       - name: Setup Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         if: startsWith(env.ARCH, 'arm') == false
       - name: Setup Buildx (ARM)
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         if: startsWith(env.ARCH, 'arm') == true
         with:
           endpoint: ssh://root@arm
           platforms: linux/arm64,linux/arm/v7,linux/arm/v6
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       # Build testing package image
       - name: Build package image
-        if: inputs.RELEASE == 'testing'
-        uses: docker/build-push-action@v4
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
+        uses: docker/build-push-action@v5
         with:
           context: .
           load: true
           file: src/linux/Dockerfile-${{ inputs.LINUX }}
           platforms: ${{ inputs.PLATFORMS }}
           tags: local/bunkerweb-${{ inputs.LINUX }}:latest
-          cache-from: type=gha,scope=${{ inputs.LINUX }}-testing
-          cache-to: type=gha,scope=${{ inputs.LINUX }}-testing,mode=min
+          cache-from: type=gha,scope=${{ inputs.LINUX }}-${{ inputs.RELEASE }}
+          cache-to: type=gha,scope=${{ inputs.LINUX }}-${{ inputs.RELEASE }},mode=min
       # Build non-testing package image
       - name: Build package image
-        if: inputs.RELEASE != 'testing'
-        uses: docker/build-push-action@v4
+        if: inputs.RELEASE != 'testing' && inputs.RELEASE != 'dev'
+        uses: docker/build-push-action@v5
         with:
           context: .
           load: true
@@ -135,12 +135,12 @@ jobs:
       - name: Extract metadata
         if: inputs.TEST == true
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/bunkerity/${{ inputs.LINUX }}-tests:${{ inputs.RELEASE }}
       - name: Build test image
         if: inputs.TEST == true
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: tests/linux/Dockerfile-${{ inputs.LINUX }}

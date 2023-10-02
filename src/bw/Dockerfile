@@ -1,33 +1,34 @@
-FROM nginx:1.24.0-alpine AS builder
+FROM nginx:1.24.0-alpine@sha256:76ca7f6bfe01c3e22e3af85fd37c30149ece3ac2a444973687cab1765abca115 AS builder
 
 # Install temporary requirements for the dependencies
-RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools
+RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip
+
+WORKDIR /tmp/bunkerweb/deps
+
+# Copy dependencies sources folder
+COPY src/deps/misc misc
+COPY src/deps/src src
+COPY src/deps/deps.json deps.json
+COPY src/deps/install.sh install.sh
+
+# Compile and install dependencies
+RUN mkdir -p /usr/share/bunkerweb/deps/python && \
+	chmod +x install.sh && \
+	bash install.sh
 
 WORKDIR /usr/share/bunkerweb
 
-# Copy dependencies sources folder
-COPY src/deps /tmp/bunkerweb/deps
-
-# Compile and install dependencies
-RUN mkdir -p deps && \
-	chmod +x /tmp/bunkerweb/deps/install.sh && \
-	bash /tmp/bunkerweb/deps/install.sh
-
-# Clean up temporary dependencies
-RUN apk del .build-deps && \
-	rm -rf /var/cache/apk/*
-
 # Copy python requirements
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/common/gen/requirements.txt deps/requirements.txt
 
 # Install python requirements
-RUN apk add --no-cache --virtual .build-deps py3-pip && \
-	mkdir -p deps/python && \
-	export MAKEFLAGS="-j$(nproc)" && \
-	pip install --no-cache-dir --upgrade pip && \
-	pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
-	pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt && \
-	apk del .build-deps && \
+RUN export MAKEFLAGS="-j$(nproc)" && \
+	pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
+	pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
+
+# Clean up temporary dependencies
+RUN apk del .build-deps && \
 	rm -rf /var/cache/apk/*
 
 # Copy files
@@ -47,7 +48,7 @@ COPY src/common/utils utils
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
-FROM nginx:1.24.0-alpine
+FROM nginx:1.24.0-alpine@sha256:76ca7f6bfe01c3e22e3af85fd37c30149ece3ac2a444973687cab1765abca115
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -59,7 +60,7 @@ WORKDIR /usr/share/bunkerweb
 
 # Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
 RUN apk add --no-cache pcre bash python3 yajl && \
-	cp /usr/share/bunkerweb/helpers/bwcli /usr/bin/ && \
+	cp helpers/bwcli /usr/bin/ && \
 	mkdir -p /var/tmp/bunkerweb && \
 	mkdir -p /var/run/bunkerweb && \
 	mkdir -p /var/log/bunkerweb && \
@@ -78,10 +79,6 @@ RUN apk add --no-cache pcre bash python3 yajl && \
 
 # Fix CVEs
 # There are no CVE to fix for the moment
-
-VOLUME /data /etc/nginx
-
-EXPOSE 8080 8443
 
 USER nginx:nginx
 

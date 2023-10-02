@@ -339,43 +339,68 @@ if __name__ == "__main__":
         if args.init:
             sys_exit(0)
 
-        err = db.save_config(config_files, args.method)
+        changes = []
+        err = db.save_config(config_files, args.method, changed=False)
 
-        if not err:
-            err1 = db.save_custom_configs(custom_confs, args.method)
-        else:
-            err = None
-            err1 = None
-
-        if err or err1:
-            logger.error(
-                f"Can't save config to database : {err or err1}",
+        if err:
+            logger.warning(
+                f"Couldn't save config to database : {err}, config may not work as expected"
             )
-            sys_exit(1)
         else:
+            changes.append("config")
             logger.info("Config successfully saved to database")
 
         if args.method != "ui":
+            err1 = db.save_custom_configs(custom_confs, args.method, changed=False)
+
+            if err1:
+                logger.warning(
+                    f"Couldn't save custom configs to database : {err1}, custom configs may not work as expected"
+                )
+            else:
+                changes.append("custom_configs")
+                logger.info("Custom configs successfully saved to database")
+
             if apis:
                 for api in apis:
                     endpoint_data = api.endpoint.replace("http://", "").split(":")
                     err = db.add_instance(
-                        endpoint_data[0], endpoint_data[1].replace("/", ""), api.host
+                        endpoint_data[0],
+                        endpoint_data[1].replace("/", ""),
+                        api.host,
+                        changed=False,
                     )
 
                     if err:
                         logger.warning(err)
+                    else:
+                        if "instances" not in changes:
+                            changes.append("instances")
+                        logger.info(
+                            f"Instance {endpoint_data[0]} successfully saved to database"
+                        )
             else:
                 err = db.add_instance(
                     "127.0.0.1",
                     config_files.get("API_HTTP_PORT", 5000),
                     config_files.get("API_SERVER_NAME", "bwapi"),
+                    changed=False,
                 )
 
                 if err:
                     logger.warning(err)
+                else:
+                    changes.append("instances")
+                    logger.info("Instance 127.0.0.1 successfully saved to database")
+
+        # update changes in db
+        ret = db.checked_changes(changes, value=True)
+        if ret:
+            logger.error(
+                f"An error occurred when setting the changes to checked in the database : {ret}"
+            )
     except SystemExit as e:
-        raise e
+        sys_exit(e.code)
     except:
         logger.exception("Exception while executing config saver")
         sys_exit(1)

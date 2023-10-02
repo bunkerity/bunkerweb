@@ -1,0 +1,95 @@
+name: Core test Linux (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      TEST:
+        required: true
+        type: string
+      RELEASE:
+        required: true
+        type: string
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install Firefox manually and dependencies
+        run: |
+          sudo apt purge -y firefox
+          sudo apt update
+          sudo apt install --no-install-recommends -y openssl git nodejs tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 libasound2 libdbus-glib-1-2 libxtst6 libxt6 php-fpm unzip
+          wget -O firefox-setup.tar.bz2 "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64"
+          sudo tar -xjf firefox-setup.tar.bz2 -C /opt/
+          sudo rm -f /usr/bin/firefox
+          sudo ln -s /opt/firefox/firefox /usr/bin/firefox
+          sudo chmod 755 /opt/firefox /opt/firefox/firefox
+          rm -f firefox-setup.tar.bz2
+      - name: Download geckodriver
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 3
+          timeout_minutes: 20
+          command: |
+            GECKODRIVER_VERSION=`curl -i https://github.com/mozilla/geckodriver/releases/latest | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+'` && \
+            wget -O geckodriver.tar.gz -w 5 https://github.com/mozilla/geckodriver/releases/download/$GECKODRIVER_VERSION/geckodriver-$GECKODRIVER_VERSION-linux64.tar.gz
+            sudo tar -xzf geckodriver.tar.gz -C /usr/local/bin
+            sudo chmod +x /usr/local/bin/geckodriver
+            rm -f geckodriver.tar.gz
+      - name: Login to ghcr
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull BW linux ubuntu test image
+        run: docker pull ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }}
+      - name: Copy deb file to host
+        run: |
+          container_id=$(docker create "ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }}")
+          docker cp "$container_id:/opt/bunkerweb_${{ inputs.RELEASE }}-1_amd64.deb" "/tmp/bunkerweb.deb"
+          docker rm "$container_id"
+      - name: Install BunkerWeb
+        run: |
+          sudo apt install -y gnupg2 ca-certificates lsb-release ubuntu-keyring
+          curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+          echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
+          sudo apt update
+          sudo apt install -y nginx=1.24.0-1~jammy
+      - name: Fix version without a starting number
+        if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
+        run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
+      - name: Install BunkerWeb
+        run: sudo apt install -fy /tmp/bunkerweb.deb
+      - name: Edit configuration files
+        run: |
+          # Misc
+          echo "127.0.0.1 www.example.com" | sudo tee -a /etc/hosts
+          echo "127.0.0.1 app1.example.com" | sudo tee -a /etc/hosts
+          echo "127.0.0.1 bwadm.example.com" | sudo tee -a /etc/hosts
+          sudo cp ./tests/www-deb.conf /etc/php/8.1/fpm/pool.d/www.conf
+          sudo systemctl stop php8.1-fpm
+          sudo systemctl start php8.1-fpm
+          # BunkerWeb
+          echo "SERVER_NAME=www.example.com" | sudo tee /etc/bunkerweb/variables.env
+          echo "HTTP_PORT=80" | sudo tee -a /etc/bunkerweb/variables.env
+          echo "HTTPS_PORT=443" | sudo tee -a /etc/bunkerweb/variables.env
+          echo 'DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4' | sudo tee -a /etc/bunkerweb/variables.env
+          echo "USE_BUNKERNET=no" | sudo tee -a /etc/bunkerweb/variables.env
+          echo "USE_BLACKLIST=no" | sudo tee -a /etc/bunkerweb/variables.env
+          echo "LOG_LEVEL=info" | sudo tee -a /etc/bunkerweb/variables.env
+          sudo chown nginx:nginx /etc/bunkerweb/variables.env
+          sudo chmod 777 /etc/bunkerweb/variables.env
+      - name: Run tests
+        run: |
+          cd ./tests/core/${{ inputs.TEST }}
+          MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install --no-cache-dir --require-hashes -r {} \;
+          ./test.sh "linux"

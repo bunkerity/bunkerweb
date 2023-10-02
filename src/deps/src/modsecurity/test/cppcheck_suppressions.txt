@@ -53,14 +53,11 @@ duplicateBranch:src/request_body_processor/multipart.cc:93
 danglingTempReference:src/modsecurity.cc:206
 knownConditionTrueFalse:src/operators/validate_url_encoding.cc:77
 knownConditionTrueFalse:src/operators/verify_svnr.cc:87
-rethrowNoCurrentException:headers/modsecurity/transaction.h:309
+rethrowNoCurrentException:headers/modsecurity/transaction.h:313
 rethrowNoCurrentException:src/rule_with_actions.cc:127
-ctunullpointer:src/rule_with_actions.cc:241
+ctunullpointer:src/rule_with_actions.cc:244
 ctunullpointer:src/rule_with_operator.cc:135
 ctunullpointer:src/rule_with_operator.cc:95
-passedByValue:src/variables/global.h:109
-passedByValue:src/variables/global.h:110
-passedByValue:src/parser/driver.cc:46
 passedByValue:test/common/modsecurity_test.cc:49
 passedByValue:test/common/modsecurity_test.cc:98
 unreadVariable:src/rule_with_operator.cc:219
@@ -68,28 +65,33 @@ unreadVariable:src/rule_with_operator.cc:219
 uninitvar:src/operators/verify_cpf.cc:77
 uninitvar:src/operators/verify_svnr.cc:67
 
+functionConst:src/collection/backend/lmdb.h:86
+unusedLabel:src/collection/backend/lmdb.cc:297
+
+variableScope:src/operators/rx.cc
+variableScope:src/operators/rx_global.cc
+
 noExplicitConstructor:seclang-parser.hh
 constParameter:seclang-parser.hh
 accessMoved:seclang-parser.hh
-returnTempReference:seclang-parser.hh
+
+unreadVariable:src/operators/rx.cc
+unreadVariable:src/operators/rx_global.cc
+
 
 unusedFunction
 missingIncludeSystem
 useStlAlgorithm
 preprocessorErrorDirective
 funcArgNamesDifferent
-unmatchedSuppression
 missingInclude
 
 purgedConfiguration
-
-constParameter
 
 nullPointerRedundantCheck
 knownConditionTrueFalse
 cstyleCast
 functionStatic
-variableScope
 shadowFunction
 
 constVariable

@@ -1,16 +1,35 @@
-FROM quay.io/centos/centos:stream8
+FROM quay.io/centos/centos:stream8@sha256:e4e81a5e6be8f8f7eb511a8df3afcd4e7123e68c56bc03efc40fbd0ab5b2e4fd
 
 ENV OS=centos
 ENV NGINX_VERSION 1.24.0
 
-# Install fpm
-RUN dnf install -y epel-release && \
-    dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build && \
+# Install Nginx, fpm and dependencies
+RUN dnf update -y && \
+    dnf install -y epel-release dnf-plugins-core && \
+    dnf config-manager --set-enabled powertools && \
+    dnf install -y --setopt=install_weak_deps=False ruby ruby-devel make gcc redhat-rpm-config rpm-build \
+    python39-pip brotli brotli-devel wget gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-libs \
+    yum-utils redhat-lsb-core && \
     dnf module -y reset ruby && dnf module -y enable ruby:2.6 && dnf module -y install ruby:2.6/common && \
-    gem install fpm
+    gem install fpm && \
+    # TODO: find a way to install nginx-1.24.0 as it's not yet available in centos 8
+    dnf install nginx-${NGINX_VERSION} -y
+
+WORKDIR /tmp/bunkerweb/deps
 
 # Copy dependencies sources folder
-COPY src/deps /tmp/bunkerweb/deps
+COPY src/deps/misc misc
+COPY src/deps/src src
+COPY src/deps/deps.json deps.json
+COPY src/deps/install.sh install.sh
+
+# Compile and install dependencies
+RUN mkdir -p /usr/share/bunkerweb/deps/python && \
+    chmod +x install.sh && \
+    bash install.sh
+
+# Copy dependencies sources folder
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/core/requirements.txt /tmp/req/requirements.txt
 COPY src/ui/requirements.txt /tmp/req/requirements.txt.1
 COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.2
@@ -18,25 +37,14 @@ COPY src/common/db/requirements.txt /tmp/req/requirements.txt.3
 
 WORKDIR /usr/share/bunkerweb
 
-RUN mkdir -p deps && \
+RUN mkdir -p deps/python && \
     cat /tmp/req/requirements.txt* > deps/requirements.txt && \
     rm -rf /tmp/req
 
-# Nginx
-COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
-RUN dnf install yum-utils redhat-lsb-core -y && \
-    dnf install nginx-${NGINX_VERSION} -y 
-
 # Compile and install dependencies
-RUN dnf install -y python39-pip brotli brotli-devel wget gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-libs && \
-    export MAKEFLAGS="-j$(nproc)" && \
-    pip3.9 install --no-cache-dir --upgrade pip && \
-    pip3.9 install --no-cache-dir --upgrade pip-tools wheel setuptools && \
-    chmod +x /tmp/bunkerweb/deps/install.sh && \
-    bash /tmp/bunkerweb/deps/install.sh && \
-    mkdir deps/python && \
-    pip3.9 install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
-
+RUN export MAKEFLAGS="-j$(nproc)" && \
+    pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
+    pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
@@ -82,7 +90,7 @@ RUN chmod +x scripts/*.sh /usr/share/fpm.sh
 COPY src/linux/fpm-centos /usr/share/.fpm
 COPY src/linux/*.service /lib/systemd/system/
 
-# Generate DEB at startup
+# Generate RPM at startup
 VOLUME /data
 WORKDIR /usr/share/
-ENTRYPOINT ["./fpm.sh", "rpm"]
+ENTRYPOINT [ "./fpm.sh", "rpm" ]

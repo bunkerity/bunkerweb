@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
--- LuaSec 1.3.1
+-- LuaSec 1.3.2
 --
 -- Copyright (C) 2009-2023 PUC-Rio
 --
@@ -19,8 +19,8 @@ local try    = socket.try
 -- Module
 --
 local _M = {
-  _VERSION   = "1.3.1",
-  _COPYRIGHT = "LuaSec 1.3.1 - Copyright (C) 2009-2023 PUC-Rio",
+  _VERSION   = "1.3.2",
+  _COPYRIGHT = "LuaSec 1.3.2 - Copyright (C) 2009-2023 PUC-Rio",
   PORT       = 443,
   TIMEOUT    = 60
 }

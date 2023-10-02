@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="$(cat /usr/share/bunkerweb/VERSION | tr -d '\n')"
+VERSION="$(tr -d '\n' < /usr/share/bunkerweb/VERSION)"
 ARCH="$(uname -m)"
 sed -i "s/%VERSION%/${VERSION}/g" .fpm
 sed -i "s/%ARCH%/${ARCH}/g" .fpm

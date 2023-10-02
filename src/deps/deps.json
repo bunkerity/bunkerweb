@@ -9,15 +9,15 @@
   "git_repository": [
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20230410",
+      "name": "LuaJIT v2.1-20230911",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "04f33ff01da97905a1641985fb5c840d234f97f1"
+      "commit": "e598aeb7426dbc069f90ba70db9bce43cd573b0e"
     },
     {
       "id": "modsecurity",
-      "name": "ModSecurity v3.0.9",
+      "name": "ModSecurity v3.0.10",
       "url": "https://github.com/SpiderLabs/ModSecurity.git",
-      "commit": "205dac0e8c675182f96b5c2fb06be7d1cf7af2b2",
+      "commit": "ccc2d9b53632fb5088673bbaafedf0d8d4b5f1d8",
       "post_install": "patch src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch && rm -rf src/deps/src/modsecurity/others/libinjection"
     },
     {
@@ -83,9 +83,9 @@
     },
     {
       "id": "lua-ffi-zlib",
-      "name": "lua-ffi-zlib v0.5",
+      "name": "lua-ffi-zlib v0.6",
       "url": "https://github.com/hamishforbes/lua-ffi-zlib.git",
-      "commit": "1fb69ca505444097c82d2b72e87904f3ed923ae9",
+      "commit": "61e95cb434e4047c8bc65a180c293a05bf754416",
       "post_install": "patch src/deps/src/lua-ffi-zlib/lib/ffi-zlib.lua src/deps/misc/lua-ffi-zlib.patch"
     },
     {
@@ -170,9 +170,9 @@
     },
     {
       "id": "lua-resty-session",
-      "name": "lua-resty-session v4.0.4",
+      "name": "lua-resty-session v4.0.5",
       "url": "https://github.com/bungle/lua-resty-session.git",
-      "commit": "8b5f8752f3046396c414c5b97850e784c07e1641"
+      "commit": "5f2aed616d16fa7ca04dc40e23d6941740cd634d"
     },
     {
       "id": "lua-resty-signal",
@@ -213,9 +213,9 @@
     },
     {
       "id": "luasec",
-      "name": "luasec v1.3.1",
+      "name": "luasec v1.3.2",
       "url": "https://github.com/brunoos/luasec.git",
-      "commit": "fddde111f7fe9ad5417d75ebbd70429d13eaad97"
+      "commit": "4c06287052d68fdbe7429b8f967cdc8ee94aa44a"
     },
     {
       "id": "luasocket",
@@ -231,9 +231,9 @@
     },
     {
       "id": "zlib",
-      "name": "zlib v1.2.13",
+      "name": "zlib v1.3",
       "url": "https://github.com/madler/zlib.git",
-      "commit": "04f42ceca40f73e2978b50e93806c2a18c1281fc"
+      "commit": "09155eaa2f9270dc4ed1fa13e2b4b2613e6e4851"
     }
   ]
 }

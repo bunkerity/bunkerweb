@@ -20,7 +20,7 @@ function reload_systemd() {
     do_and_check_cmd systemctl reset-failed
 }
 
-# remove a systemd service 
+# remove a systemd service
 function remove_systemd_service {
     service=$1
     service_file="/lib/systemd/system/$service.service"
@@ -126,7 +126,7 @@ if [ "$1" = "remove" ]; then
 elif [ "$1" = "purge" ]; then
     # Call the purge function
     purge
-else 
+else
     echo "Package is being upgraded"
     # Check the version of the package and if it's inferior to 1.5.2, we need to copy the variables.env file
     VERSION=$(dpkg-query -W -f='${Version}' bunkerweb)

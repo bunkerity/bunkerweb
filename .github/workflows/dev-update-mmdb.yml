@@ -23,7 +23,7 @@ jobs:
           cd src/bw/misc/
           CURL_RETURN_CODE=0
           CURL_OUTPUT=`curl -w httpcode=%{http_code} -s -o asn.mmdb.gz https://download.db-ip.com/free/dbip-asn-lite-$(date +%Y-%m).mmdb.gz 2> /dev/null` || CURL_RETURN_CODE=$?
-          if [ ${CURL_RETURN_CODE} -ne 0 ]; then  
+          if [ ${CURL_RETURN_CODE} -ne 0 ]; then
             echo "Curl connection failed when downloading asn-lite mmdb file with return code - ${CURL_RETURN_CODE}"
             exit 1
           else
@@ -37,7 +37,7 @@ jobs:
           fi
           CURL_RETURN_CODE=0
           CURL_OUTPUT=`curl -w httpcode=%{http_code} -s -o country.mmdb.gz https://download.db-ip.com/free/dbip-country-lite-$(date +%Y-%m).mmdb.gz 2> /dev/null` || CURL_RETURN_CODE=$?
-          if [ ${CURL_RETURN_CODE} -ne 0 ]; then  
+          if [ ${CURL_RETURN_CODE} -ne 0 ]; then
             echo "Curl connection failed when downloading country-lite mmdb file with return code - ${CURL_RETURN_CODE}"
             exit 1
           else

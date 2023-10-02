@@ -1,4 +1,16 @@
-FROM python:3.11.5-alpine AS builder
+FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded AS builder
+
+# Copy python requirements
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+COPY src/ui/requirements.txt /tmp/req/requirements.txt
+COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.1
+COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
+
+WORKDIR /usr/share/bunkerweb
+
+RUN mkdir -p deps/python && \
+  cat /tmp/req/requirements.txt* > deps/requirements.txt && \
+  rm -rf /tmp/req
 
 # Install python dependencies
 # RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev file make
@@ -10,14 +22,12 @@ COPY src/ui/requirements.txt deps/requirements.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-    pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
-    mkdir -p deps/python && \
-    pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
+  pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
+  pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Remove build dependencies
-# RUN apk del .build-deps && \
-#     rm -rf /var/cache/apk/*
+RUN apk del .build-deps && \
+  rm -rf /var/cache/apk/*
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
@@ -29,7 +39,7 @@ COPY src/VERSION VERSION
 
 COPY src/ui ui
 
-FROM python:3.11.5-alpine
+FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -41,22 +51,22 @@ WORKDIR /usr/share/bunkerweb
 
 # Add ui user, drop bwcli, install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache bash jq nodejs npm && \
-    addgroup -g 101 ui && \
-    adduser -h /usr/share/bunkerweb/ui -g ui -s /bin/sh -G ui -D -H -u 101 ui && \
-    cp helpers/bwcli /usr/bin/ && \
-    echo "Docker" > INTEGRATION && \
-    mkdir -p /etc/bunkerweb && \
-    mkdir -p /run/secrets && \
-    mkdir -p /var/tmp/bunkerweb && \
-    mkdir -p /var/run/bunkerweb && \
-    mkdir -p /var/log/bunkerweb && \
-    touch /etc/bunkerweb/ui.conf /etc/bunkerweb/config.yaml && \
-    chown -R root:ui INTEGRATION /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
-    chown -R ui:ui ui && \
-    chmod 770 /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
-    chmod 750 ui/entrypoint.sh ui/*.py /usr/bin/bwcli deps/python/bin/* helpers/*.sh && \
-    chmod 660 INTEGRATION && \
-    chown root:ui INTEGRATION
+  addgroup -g 101 ui && \
+  adduser -h /usr/share/bunkerweb/ui -g ui -s /bin/sh -G ui -D -H -u 101 ui && \
+  cp helpers/bwcli /usr/bin/ && \
+  echo "Docker" > INTEGRATION && \
+  mkdir -p /etc/bunkerweb && \
+  mkdir -p /run/secrets && \
+  mkdir -p /var/tmp/bunkerweb && \
+  mkdir -p /var/run/bunkerweb && \
+  mkdir -p /var/log/bunkerweb && \
+  touch /etc/bunkerweb/ui.conf /etc/bunkerweb/config.yaml && \
+  chown -R root:ui INTEGRATION /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
+  chown -R ui:ui ui && \
+  chmod 770 /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
+  chmod 750 ui/entrypoint.sh ui/*.py /usr/bin/bwcli deps/python/bin/* helpers/*.sh && \
+  chmod 660 INTEGRATION && \
+  chown root:ui INTEGRATION
 # ln -s /proc/1/fd/1 /var/log/bunkerweb/ui-access.log && \ # TODO find a solution
 # ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
 

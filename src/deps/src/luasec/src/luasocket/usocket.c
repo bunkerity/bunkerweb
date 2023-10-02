@@ -426,7 +426,9 @@ const char *socket_gaistrerror(int err) {
         case EAI_MEMORY: return "memory allocation failure";
         case EAI_NONAME: 
             return "host or service not provided, or not known";
+#ifdef EAI_OVERFLOW
         case EAI_OVERFLOW: return "argument buffer overflow";
+#endif
 #ifdef EAI_PROTOCOL
         case EAI_PROTOCOL: return "resolved protocol is unknown";
 #endif

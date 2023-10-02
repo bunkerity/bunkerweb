@@ -1,9 +1,0 @@
-{
-  "id": "discord",
-  "order": 999,
-  "name": "Discord",
-  "description": "Send alerts to a Discord channel (using webhooks).",
-  "version": "0.1",
-  "stream": "no",
-  "settings": {}
-}

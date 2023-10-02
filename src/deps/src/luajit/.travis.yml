@@ -58,4 +58,4 @@ script:
   - sudo make install PREFIX=$LUAJIT_PREFIX > build.log 2>&1 || (cat build.log && exit 1)
   - if [ ${TRAVIS_CPU_ARCH} == "amd64" ]; then PATH=/opt/luajit21/bin:$PATH prove -I. t; fi
   - cd ../luajit2-test-suite
-  - ./run-tests -j $JOBS $FLAGS $LUAJIT_PREFIX
+  - ./run-tests -j 1 $FLAGS $LUAJIT_PREFIX

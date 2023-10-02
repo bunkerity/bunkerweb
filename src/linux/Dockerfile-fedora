@@ -1,19 +1,31 @@
-FROM fedora:38
+FROM fedora:38@sha256:6fc00f83a1b6526b1c6562e30f552d109ba8e269259c6742a26efab1b7aef59e
 
 ENV OS=fedora
 ENV NGINX_VERSION 1.24.0
 
-# Install fpm
+# Install Nginx, fpm and dependencies
 RUN dnf update -y && \
-    dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build && \
-    gem install fpm
-
-# Nginx
-RUN dnf install -y curl gnupg2 ca-certificates redhat-lsb-core && \
+    dnf install -y curl gnupg2 ca-certificates redhat-lsb-core \
+    ruby ruby-devel make gcc redhat-rpm-config rpm-build && \
+    gem install fpm && \
+    dnf install -y --setopt=install_weak_deps=False python3 python3-devel python3-pip brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
     dnf install nginx-${NGINX_VERSION} -y
 
+WORKDIR /tmp/bunkerweb/deps
+
 # Copy dependencies sources folder
-COPY src/deps /tmp/bunkerweb/deps
+COPY src/deps/misc misc
+COPY src/deps/src src
+COPY src/deps/deps.json deps.json
+COPY src/deps/install.sh install.sh
+
+# Compile and install dependencies
+RUN mkdir -p /usr/share/bunkerweb/deps/python && \
+    chmod +x install.sh && \
+    bash install.sh
+
+# Copy dependencies sources folder
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/core/requirements.txt /tmp/req/requirements.txt
 COPY src/ui/requirements.txt /tmp/req/requirements.txt.1
 COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.2
@@ -21,21 +33,14 @@ COPY src/common/db/requirements.txt /tmp/req/requirements.txt.3
 
 WORKDIR /usr/share/bunkerweb
 
-RUN mkdir -p /usr/share/bunkerweb/deps && \
-    cat /tmp/req/requirements.txt* > /usr/share/bunkerweb/deps/requirements.txt && \
+RUN mkdir -p deps/python && \
+    cat /tmp/req/requirements.txt* > deps/requirements.txt && \
     rm -rf /tmp/req
 
 # Compile and install dependencies
-RUN dnf install -y --setopt=install_weak_deps=False python3 python3-devel brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ kernel-devel curl znc-modtcl libmpc-devel gmp-devel gawk mpfr-devel libtool pcre-devel automake autoconf readline-devel gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel lmdb-devel && \
-    curl https://bootstrap.pypa.io/get-pip.py > /tmp/get-pip.py && \
-    python3 /tmp/get-pip.py && \
-    export MAKEFLAGS="-j$(nproc)" && \
-    pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
-    chmod +x /tmp/bunkerweb/deps/install.sh && \
-    bash /tmp/bunkerweb/deps/install.sh && \
-    mkdir /usr/share/bunkerweb/deps/python && \
-    pip install --no-cache-dir --require-hashes --target /usr/share/bunkerweb/deps/python -r /usr/share/bunkerweb/deps/requirements.txt
+RUN export MAKEFLAGS="-j$(nproc)" && \
+    pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
+    pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
@@ -81,7 +86,7 @@ RUN chmod +x scripts/*.sh /usr/share/fpm.sh
 COPY src/linux/fpm-fedora /usr/share/.fpm
 COPY src/linux/*.service /lib/systemd/system/
 
-# Generate DEB at startup
+# Generate RPM at startup
 VOLUME /data
 WORKDIR /usr/share/
-ENTRYPOINT ["./fpm.sh", "rpm"]
+ENTRYPOINT [ "./fpm.sh", "rpm" ]

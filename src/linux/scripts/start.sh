@@ -76,6 +76,7 @@ function start() {
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting temp nginx ..."
     nginx -e /var/log/bunkerweb/error.log
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while executing temp nginx"
         exit 1
@@ -84,6 +85,7 @@ function start() {
 
     while [ $count -lt 10 ] ; do
         check="$(curl -s -H "Host: healthcheck.bunkerweb.io" http://127.0.0.1:6000/healthz 2>&1)"
+        # shellcheck disable=SC2181
         if [ $? -eq 0 ] && [ "$check" = "ok" ] ; then
             break
         fi

@@ -32,7 +32,10 @@ from bunkerweb.db.model import (
 try:
     database_uri = getenv("DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3")
 
-    if database_uri == "sqlite:////var/lib/bunkerweb/db.sqlite3":
+    if (
+        getenv("TEST_TYPE", "docker") == "docker"
+        and database_uri == "sqlite:////var/lib/bunkerweb/db.sqlite3"
+    ):
         database_uri = "sqlite:////data/lib/db.sqlite3"
 
     error = False
@@ -40,10 +43,7 @@ try:
     print(f"ℹ️ Connecting to database: {database_uri}", flush=True)
 
     try:
-        sql_engine = create_engine(
-            database_uri,
-            future=True,
-        )
+        sql_engine = create_engine(database_uri, future=True)
     except ArgumentError:
         print(f"❌ Invalid database URI: {database_uri}", flush=True)
         error = True
@@ -584,7 +584,9 @@ try:
             service_custom_configs[custom_conf[3]] = {
                 "value": environ[env].encode(),
                 "type": custom_conf[2].lower(),
-                "method": "scheduler",
+                "method": "manual"
+                if getenv("TEST_TYPE", "docker") == "linux"
+                else "scheduler",
                 "checked": False,
             }
             continue
@@ -592,7 +594,9 @@ try:
         global_custom_configs[custom_conf[3]] = {
             "value": environ[env].encode(),
             "type": custom_conf[2].lower(),
-            "method": "scheduler",
+            "method": "manual"
+            if getenv("TEST_TYPE", "docker") == "linux"
+            else "scheduler",
             "checked": False,
         }
 
@@ -651,6 +655,8 @@ try:
             elif (
                 custom_config.data.replace(b"# CREATED BY ENV\n", b"")
                 != current_custom_configs[custom_config.name]["value"]
+                and custom_config.data.replace(b"# CREATED BY ENV\n", b"")
+                != current_custom_configs[custom_config.name]["value"] + b"\n"
             ):
                 print(
                     f"❌ The custom config {custom_config.name} is in the database but the value differ, exiting ...\n{custom_config.data} (database) != {current_custom_configs[custom_config.name]['value']} (env)",

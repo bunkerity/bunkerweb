@@ -1,6 +1,6 @@
 |// Low-level VM code for ARM64 CPUs.
 |// Bytecode interpreter, fast functions and helper functions.
-|// Copyright (C) 2005-2022 Mike Pall. See Copyright Notice in luajit.h
+|// Copyright (C) 2005-2023 Mike Pall. See Copyright Notice in luajit.h
 |
 |.arch arm64
 |.section code_op, code_sub
@@ -77,6 +77,23 @@
 |.define CRET1,		x0
 |.define CRET1w,	w0
 |
+|//-----------------------------------------------------------------------
+|
+|// ARM64e pointer authentication codes (PAC).
+|.if PAUTH
+|.macro sp_auth; pacibsp; .endmacro
+|.macro br_auth, reg; braaz reg; .endmacro
+|.macro blr_auth, reg; blraaz reg; .endmacro
+|.macro ret_auth; retab; .endmacro
+|.else
+|.macro sp_auth; .endmacro
+|.macro br_auth, reg; br reg; .endmacro
+|.macro blr_auth, reg; blr reg; .endmacro
+|.macro ret_auth; ret; .endmacro
+|.endif
+|
+|//-----------------------------------------------------------------------
+|
 |// Stack layout while in interpreter. Must match with lj_frame.h.
 |
 |.define CFRAME_SPACE,	208
@@ -106,6 +123,7 @@
 |.endmacro
 |
 |.macro saveregs
+|  sp_auth
 |  sub sp, sp, # CFRAME_SPACE
 |  stp fp, lr, [sp, # SAVE_FP_LR_]
 |  add fp, sp, # SAVE_FP_LR_
@@ -180,7 +198,7 @@
 |   decode_RA RA, INS
 |  ldr TMP0, [TMP1, #GG_G2DISP]
 |   decode_RD RC, INS
-|  br TMP0
+|  br_auth TMP0
 |.endmacro
 |
 |// Instruction footer.
@@ -209,7 +227,7 @@
 |   decode_RA RA, INS
 |  ldr TMP0, [TMP1, #GG_G2DISP]
 |   add RA, BASE, RA, lsl #3
-|  br TMP0
+|  br_auth TMP0
 |.endmacro
 |
 |.macro ins_call
@@ -356,7 +374,7 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |->vm_leave_unw:
   |  restoreregs
-  |  ret
+  |  ret_auth
   |
   |6:
   |  bgt >7				// Less results wanted?
@@ -542,7 +560,7 @@ static void build_subroutines(BuildCtx *ctx)
   |   str RC, SAVE_CFRAME
   |  str TMP0, L->cframe		// Add our C frame to cframe chain.
   |    str L, GL->cur_L
-  |  blr CARG4			// (lua_State *L, lua_CFunction func, void *ud)
+  |  blr_auth CARG4		// (lua_State *L, lua_CFunction func, void *ud)
   |  mov BASE, CRET1
   |   mov PC, #FRAME_CP
   |  cbnz BASE, <3			// Else continue with the call.
@@ -573,7 +591,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  ldr CARG3, LFUNC:CARG3->pc
   |  ldr KBASE, [CARG3, #PC2PROTO(k)]
   |  // BASE = base, RA = resultptr, CARG4 = meta base
-  |    br CARG1
+  |    br_auth CARG1
   |
   |.if FFI
   |1:
@@ -1707,7 +1725,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  cmp TMP1, TMP2
   |   mov CARG1, L
   |  bhi >5				// Need to grow stack.
-  |   blr CARG3				// (lua_State *L)
+  |   blr_auth CARG3			// (lua_State *L)
   |  // Either throws an error, or recovers and returns -1, 0 or nresults+1.
   |   ldr BASE, L->base
   |  cmp CRET1w, #0
@@ -1743,6 +1761,7 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |->fff_gcstep:			// Call GC step function.
   |  // BASE = new base, RC = nargs*8
+  |  sp_auth
   |   add CARG2, BASE, NARGS8:RC	// Calculate L->top.
   |  mov RA, lr
   |   stp BASE, CARG2, L->base
@@ -1754,7 +1773,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  mov lr, RA				// Help return address predictor.
   |  sub NARGS8:RC, CARG2, BASE		// Calculate nargs*8.
   |   and CFUNC:CARG3, CARG3, #LJ_GCVMASK
-  |  ret
+  |  ret_auth
   |
   |//-----------------------------------------------------------------------
   |//-- Special dispatch targets -------------------------------------------
@@ -1781,7 +1800,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  tbz TMP2w, #HOOK_ACTIVE_SHIFT, >1	// Hook already active?
   |5:  // Re-dispatch to static ins.
   |  ldr TMP0, [TMP1, #GG_G2DISP+GG_DISP2STATIC]
-  |  br TMP0
+  |  br_auth TMP0
   |
   |->vm_inshook:			// Dispatch target for instr/line hooks.
   |  ldrb TMP2w, GL->hookmask
@@ -1807,7 +1826,7 @@ static void build_subroutines(BuildCtx *ctx)
   |   decode_RA RA, INS
   |  ldr TMP0, [TMP1, #GG_G2DISP+GG_DISP2STATIC]
   |   decode_RD RC, INS
-  |  br TMP0
+  |  br_auth TMP0
   |
   |->cont_hook:				// Continue from hook yield.
   |  ldr CARG1, [CARG4, #-40]
@@ -1857,7 +1876,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  sub NARGS8:RC, TMP1, BASE
   |   ldr INSw, [PC, #-4]
   |  and LFUNC:CARG3, CARG3, #LJ_GCVMASK
-  |  br CRET1
+  |  br_auth CRET1
   |
   |->cont_stitch:			// Trace stitching.
   |.if JIT
@@ -1986,8 +2005,8 @@ static void build_subroutines(BuildCtx *ctx)
   |.if JIT
   |  ldr L, SAVE_L
   |1:
-  |  cmp CARG1w, #0
-  |  blt >9				// Check for error from exit.
+  |  cmn CARG1w, #LUA_ERRERR
+  |  bhs >9				// Check for error from exit.
   |   lsl RC, CARG1, #3
   |  ldr LFUNC:CARG2, [BASE, FRAME_FUNC]
   |    movz TISNUM, #(LJ_TISNUM>>1)&0xffff, lsl #48
@@ -2004,6 +2023,8 @@ static void build_subroutines(BuildCtx *ctx)
   |  ldrb RBw, [PC, # OFS_OP]
   |   ldr INSw, [PC], #4
   |    st_vmstate CARG4w
+  |  cmn CARG1w, #17			// Static dispatch?
+  |  beq >5
   |  cmp RBw, #BC_FUNCC+2		// Fast function?
   |   add TMP1, GL, INS, uxtb #3
   |  bhs >4
@@ -2014,13 +2035,13 @@ static void build_subroutines(BuildCtx *ctx)
   |   decode_RA RA, INS
   |   lsr TMP0, INS, #16
   |   csel RC, TMP0, RC, lo
-  |   blo >5
+  |   blo >3
   |   ldr CARG3, [BASE, FRAME_FUNC]
   |   sub RC, RC, #8
   |   add RA, BASE, RA, lsl #3	// Yes: RA = BASE+framesize*8, RC = nargs*8
   |   and LFUNC:CARG3, CARG3, #LJ_GCVMASK
-  |5:
-  |  br RB
+  |3:
+  |  br_auth RB
   |
   |4:  // Check frame below fast function.
   |  ldr CARG1, [BASE, FRAME_PC]
@@ -2035,6 +2056,17 @@ static void build_subroutines(BuildCtx *ctx)
   |  ldr CARG3, LFUNC:CARG3->pc
   |  ldr KBASE, [CARG3, #PC2PROTO(k)]
   |  b <2
+  |
+  |5:  // Dispatch to static entry of original ins replaced by BC_JLOOP.
+  |  ldr RA, [GL, #GL_J(trace)]
+  |  decode_RD RC, INS
+  |  ldr TRACE:RA, [RA, RC, lsl #3]
+  |  ldr INSw, TRACE:RA->startins
+  |  add TMP0, GL, INS, uxtb #3
+  |   decode_RA RA, INS
+  |  ldr RB, [TMP0, #GG_G2DISP+GG_DISP2STATIC]
+  |   decode_RD RC, INS
+  |  br_auth RB
   |
   |9:  // Rethrow error from the right C frame.
   |  neg CARG2w, CARG1w
@@ -2182,6 +2214,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  // Caveat: needs special frame unwinding, see below.
   |.if FFI
   |  .type CCSTATE, CCallState, x19
+  |  sp_auth
   |  stp x20, CCSTATE, [sp, #-32]!
   |  stp fp, lr, [sp, #16]
   |  add fp, sp, #16
@@ -2189,14 +2222,14 @@ static void build_subroutines(BuildCtx *ctx)
   |  ldr TMP0w, CCSTATE:x0->spadj
   |   ldrb TMP1w, CCSTATE->nsp
   |    add TMP2, CCSTATE, #offsetof(CCallState, stack)
-  |   subs TMP1, TMP1, #1
+  |   subs TMP1, TMP1, #8
   |    ldr TMP3, CCSTATE->func
   |  sub sp, sp, TMP0
   |   bmi >2
   |1:  // Copy stack slots
-  |  ldr TMP0, [TMP2, TMP1, lsl #3]
-  |  str TMP0, [sp, TMP1, lsl #3]
-  |  subs TMP1, TMP1, #1
+  |  ldr TMP0, [TMP2, TMP1]
+  |  str TMP0, [sp, TMP1]
+  |  subs TMP1, TMP1, #8
   |  bpl <1
   |2:
   |  ldp x0, x1, CCSTATE->gpr[0]
@@ -2208,14 +2241,14 @@ static void build_subroutines(BuildCtx *ctx)
   |  ldp x6, x7, CCSTATE->gpr[6]
   |   ldp d6, d7, CCSTATE->fpr[6]
   |  ldr x8, CCSTATE->retp
-  |  blr TMP3
+  |  blr_auth TMP3
   |  sub sp, fp, #16
   |  stp x0, x1, CCSTATE->gpr[0]
   |   stp d0, d1, CCSTATE->fpr[0]
   |   stp d2, d3, CCSTATE->fpr[2]
   |  ldp fp, lr, [sp, #16]
   |  ldp x20, CCSTATE, [sp], #32
-  |  ret
+  |  ret_auth
   |.endif
   |// Note: vm_ffi_call must be the last function in this object file!
   |
@@ -3786,11 +3819,19 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |   mov CARG2w, #0  // Traces on ARM64 don't store the trace #, so use 0.
     |  ldr TRACE:RC, [CARG1, RC, lsl #3]
     |   st_vmstate CARG2w
+    |.if PAUTH
+    |  ldr RA, TRACE:RC->mcauth
+    |.else
     |  ldr RA, TRACE:RC->mcode
+    |.endif
     |   str BASE, GL->jit_base
     |   str L, GL->tmpbuf.L
     |  sub sp, sp, #16	// See SPS_FIXED. Avoids sp adjust in every root trace.
+    |.if PAUTH
+    |  braa RA, RC
+    |.else
     |  br RA
+    |.endif
     |.endif
     break;
 
@@ -3901,7 +3942,7 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  mov CARG1, L
     |   bhi ->vm_growstack_c		// Need to grow stack.
     |    st_vmstate TMP0w
-    |  blr CARG4			// (lua_State *L [, lua_CFunction f])
+    |  blr_auth CARG4			// (lua_State *L [, lua_CFunction f])
     |  // Returns nresults.
     |  ldp BASE, TMP1, L->base
     |    str L, GL->cur_L

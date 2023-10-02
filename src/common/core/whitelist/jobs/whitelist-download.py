@@ -24,6 +24,7 @@ from jobs import (
     bytes_hash,
     cache_file,
     cache_hash,
+    del_cache,
     is_cached_file,
     update_cache_file_info,
 )
@@ -84,6 +85,21 @@ try:
         LOGGER.info("Whitelist is not activated, skipping downloads...")
         _exit(0)
 
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
+
+    # Create directories if they don't exist
+    whitelist_path = Path(sep, "var", "cache", "bunkerweb", "whitelist")
+    whitelist_path.mkdir(parents=True, exist_ok=True)
+    tmp_whitelist_path = Path(sep, "var", "tmp", "bunkerweb", "whitelist")
+    tmp_whitelist_path.mkdir(parents=True, exist_ok=True)
+
+    # Get URLs
+    urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
+    for kind in urls:
+        for url in getenv(f"WHITELIST_{kind}_URLS", "").split(" "):
+            if url and url not in urls[kind]:
+                urls[kind].append(url)
+
     # Don't go further if the cache is fresh
     kinds_fresh = {
         "IP": True,
@@ -104,15 +120,14 @@ try:
             LOGGER.info(
                 f"Whitelist for {kind} is already in cache, skipping downloads...",
             )
+
+            if not urls[kind]:
+                whitelist_path.joinpath(f"{kind}.list").unlink(missing_ok=True)
+                deleted, err = cache_hash(f"{kind}.list", CORE_API, CORE_TOKEN)
+                if not deleted:
+                    LOGGER.warning(f"Coudn't delete {kind}.list from cache : {err}")
     if all_fresh:
         _exit(0)
-
-    # Get URLs
-    urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
-    for kind in urls:
-        for url in getenv(f"WHITELIST_{kind}_URLS", "").split():
-            if url and url not in urls[kind]:
-                urls[kind].append(url)
 
     # Loop on kinds
     for kind, urls_list in urls.items():

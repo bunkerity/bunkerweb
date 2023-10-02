@@ -1,26 +1,31 @@
 <p align="center">
-	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/misc/logo.png" />
+	<img alt="BunkerWeb logo" src="./misc/logo.png" />
 </p>
 
 <p align="center">
 	<img src="https://img.shields.io/github/v/release/bunkerity/bunkerweb?label=stable" />
 	<img src="https://img.shields.io/github/v/release/bunkerity/bunkerweb?include_prereleases&label=latest" />
+	<br />
 	<img src="https://img.shields.io/github/last-commit/bunkerity/bunkerweb" />
 	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/dev.yml?branch=dev&label=CI%2FCD%20dev" />
 	<img src="https://img.shields.io/github/actions/workflow/status/bunkerity/bunkerweb/staging.yml?branch=staging&label=CI%2FCD%20staging" />
+	<br />
 	<img src="https://img.shields.io/github/issues/bunkerity/bunkerweb">
 	<img src="https://img.shields.io/github/issues-pr/bunkerity/bunkerweb">
+	<a href="https://securityscorecards.dev/viewer/?uri=github.com/bunkerity/bunkerweb">
+		<img src="https://api.securityscorecards.dev/projects/github.com/bunkerity/bunkerweb/badge" />
+	</a>
 </p>
 
 <p align="center">
 	📓 <a href="https://docs.bunkerweb.io">Documentation</a>
-	 &#124; 
+	 &#124;
 	👨‍💻 <a href="https://demo.bunkerweb.io">Demo</a>
-	 &#124; 
-	🛡️ <a href="https://github.com/bunkerity/bunkerweb/tree/v1.5.2/examples">Examples</a>
-	 &#124; 
+	 &#124;
+	🛡️ <a href="./examples">Examples</a>
+	 &#124;
 	💬 <a href="https://discord.com/invite/fTf46FmtyD">Chat</a>
-	 &#124; 
+	 &#124;
 	📝 <a href="https://github.com/bunkerity/bunkerweb/discussions">Forum</a>
 	 &#124;
 	⚙️ <a href="https://config.bunkerweb.io">Configurator</a>
@@ -33,7 +38,7 @@
 # BunkerWeb
 
 <p align="center">
-	<img alt="overview" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/intro-overview.svg" />
+	<img alt="Overview banner" src="./docs/assets/img/intro-overview.svg" />
 </p>
 
 BunkerWeb is a next-generation and open-source Web Application Firewall (WAF).
@@ -77,7 +82,7 @@ A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](http
 # Concepts
 
 <p align="center">
-	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/concepts.svg" />
+	<img alt="Concepts banner" src="./docs/assets/img/concepts.svg" />
 </p>
 
 You will find more information about the key concepts of BunkerWeb in the [documentation](https://docs.bunkerweb.io/1.5.2/concepts).
@@ -137,7 +142,7 @@ Another core component of BunkerWeb is the ModSecurity Web Application Firewall 
 State of the current configuration of BunkerWeb is stored in a backend database which contains the following data :
 
 - Settings defined for all the services
-- Custom configurations 
+- Custom configurations
 - BunkerWeb instances
 - Metadata about jobs execution
 - Cached files
@@ -160,7 +165,7 @@ In other words, the scheduler is the brain of BunkerWeb.
 ## Docker
 
 <p align="center">
-	<img alt="Docker" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/integration-docker.svg" />
+	<img alt="Docker banner" src="./docs/assets/img/integration-docker.svg" />
 </p>
 
 We provide ready to use prebuilt images for x64, x86, armv7 and arm64 platforms on [Docker Hub](https://hub.docker.com/u/bunkerity).
@@ -176,7 +181,7 @@ You will find more information in the [Docker integration section](https://docs.
 ## Docker autoconf
 
 <p align="center">
-	<img alt="Docker autoconf" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/integration-autoconf.svg" />
+	<img alt="Docker autoconf banner" src="./docs/assets/img/integration-autoconf.svg" />
 </p>
 
 The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called **autoconf** which will listen for Docker events and automatically reconfigure BunkerWeb in real-time without recreating the container.
@@ -188,7 +193,7 @@ You will find more information in the [Docker autoconf section](https://docs.bun
 ## Swarm
 
 <p align="center">
-	<img alt="Swarm" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/integration-swarm.svg" />
+	<img alt="Swarm banner" src="./docs/assets/img/integration-swarm.svg" />
 </p>
 
 To automatically configure BunkerWeb instances, a special service, called **autoconf** will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime.
@@ -200,7 +205,7 @@ You will find more information in the [Swarm section](https://docs.bunkerweb.io/
 ## Kubernetes
 
 <p align="center">
-	<img alt="Kubernetes" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/integration-kubernetes.svg" />
+	<img alt="Kubernetes banner" src="./docs/assets/img/integration-kubernetes.svg" />
 </p>
 
 The autoconf acts as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) and will configure the BunkerWeb instances according to the [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/). It also monitors other Kubernetes objects like [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) for custom configurations.
@@ -210,7 +215,7 @@ You will find more information in the [Kubernetes section](https://docs.bunkerwe
 ## Linux
 
 <p align="center">
-	<img alt="Linux" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/integration-linux.svg" />
+	<img alt="Linux banner" src="./docs/assets/img/integration-linux.svg" />
 </p>
 
 List of supported Linux distros :
@@ -227,7 +232,7 @@ You will find more information in the [Linux section](https://docs.bunkerweb.io/
 ## Ansible
 
 <p align="center">
-	<img alt="Ansible" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/integration-ansible.svg" />
+	<img alt="Ansible banner" src="./docs/assets/img/integration-ansible.svg" />
 </p>
 
 List of supported Linux distros :
@@ -282,7 +287,7 @@ Check the [settings section](https://docs.bunkerweb.io/1.5.2/settings) of the do
 # Web UI
 
 <p align="center">
-	<a href="https://www.youtube.com/watch?v=Ao20SfvQyr4" target="_blank"><img alt="BunkerWeb UI demo" src="https://yt-embed.herokuapp.com/embed?v=Ao20SfvQyr4" /></a>
+	<iframe style="display: block;" width="560" height="315" alt="BunkerWeb UI demo" src="https://www.youtube-nocookie.com/embed/Ao20SfvQyr4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 The "Web UI" is a web application that helps you manage your BunkerWeb instance using a user-friendly interface instead of the command-line one.
@@ -303,15 +308,15 @@ BunkerWeb comes with a plugin system to make it possible to easily add new featu
 
 Here is the list of "official" plugins that we maintain (see the [bunkerweb-plugins](https://github.com/bunkerity/bunkerweb-plugins) repository for more information) :
 
-|      Name      | Version | Description                                                                                                                      |                                                 Link                                                  |
-| :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
+|      Name      | Version | Description                                                                                                                      |                                                Link                                                 |
+| :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------: |
 |   **ClamAV**   |   1.1   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
-| **Coraza** |   1.1   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).           | [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza) |
+|   **Coraza**   |   1.1   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).                                                            |     [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza)     |
 |  **CrowdSec**  |   1.1   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
-| **Discord** | 1.1 | Send security notifications to a Discord channel using a Webhook. | [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord) |
-| **Slack** | 1.1 | Send security notifications to a Slack channel using a Webhook. | [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack) |
+|  **Discord**   |   1.1   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
+|   **Slack**    |   1.1   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
 | **VirusTotal** |   1.1   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-| **WebHook** | 1.1 | Send security notifications to a custom HTTP endpoint using a	Webhook. | [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook) |
+|  **WebHook**   |   1.1   | Send security notifications to a custom HTTP endpoint using a	Webhook.                                                           |     [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 You will find more information in the [plugins section](https://docs.bunkerweb.io/1.5.2/plugins) of the documentation.
 
@@ -341,12 +346,17 @@ Please don't use [GitHub issues](https://github.com/bunkerity/bunkerweb/issues) 
 
 # License
 
-This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerweb/tree/1.5.2/LICENSE.md).
+This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](./LICENSE.md).
 
 # Contribute
 
-If you would like to contribute to the plugins you can read the [contributing guidelines](https://github.com/bunkerity/bunkerweb/tree/1.5.2/CONTRIBUTING.md) to get started.
+If you would like to contribute to the plugins you can read the [contributing guidelines](./CONTRIBUTING.md) to get started.
 
 # Security policy
 
-We take security bugs as serious issues and encourage responsible disclosure, see our [security policy](https://github.com/bunkerity/bunkerweb/tree/1.5.2/SECURITY.md) for more information.
+We take security bugs as serious issues and encourage responsible disclosure, see our [security policy](./SECURITY.md) for more information.
+
+
+# Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/bunkerity/bunkerweb.svg)](https://starchart.cc/bunkerity/bunkerweb)

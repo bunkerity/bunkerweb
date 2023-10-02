@@ -11,8 +11,6 @@ function do_and_check_cmd() {
 		echo "$output"
 		exit $ret
 	fi
-	#echo $output
-	return 0
 }
 
 # Check args
@@ -37,7 +35,7 @@ do_and_check_cmd mkdir "$package_dir"
 # Generate package
 version="$3"
 if [ -f "src/VERSION" ] ; then
-	version="$(cat src/VERSION | tr -d '\n')"
+	version="$(tr -d '\n' < src/VERSION)"
 fi
 type="deb"
 if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] || [ "$linux" = "rhel" ] ; then

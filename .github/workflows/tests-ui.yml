@@ -14,7 +14,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
       - name: Login to ghcr
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -27,6 +27,8 @@ jobs:
         run: docker pull ghcr.io/bunkerity/ui-tests:${{ inputs.RELEASE }} && docker tag ghcr.io/bunkerity/ui-tests:${{ inputs.RELEASE }} ui-tests
       # Do tests
       - name: Run tests
-        run: ./tests/ui/tests.sh
+        run: |
+          cd ./tests/ui
+          ./tests.sh "docker"
         env:
           MODE: ${{ inputs.RELEASE }}

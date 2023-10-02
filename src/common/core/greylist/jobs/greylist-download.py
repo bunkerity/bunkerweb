@@ -24,6 +24,7 @@ from jobs import (
     bytes_hash,
     cache_file,
     cache_hash,
+    del_cache,
     is_cached_file,
     update_cache_file_info,
 )
@@ -84,6 +85,21 @@ try:
         LOGGER.info("Greylist is not activated, skipping downloads...")
         _exit(0)
 
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
+
+    # Create directories if they don't exist
+    greylist_path = Path(sep, "var", "cache", "bunkerweb", "greylist")
+    greylist_path.mkdir(parents=True, exist_ok=True)
+    tmp_greylist_path = Path(sep, "var", "tmp", "bunkerweb", "greylist")
+    tmp_greylist_path.mkdir(parents=True, exist_ok=True)
+
+    # Get URLs
+    urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
+    for kind in urls:
+        for url in getenv(f"GREYLIST_{kind}_URLS", "").split(" "):
+            if url and url not in urls[kind]:
+                urls[kind].append(url)
+
     # Don't go further if the cache is fresh
     kinds_fresh = {
         "IP": True,
@@ -104,15 +120,14 @@ try:
             LOGGER.info(
                 f"Greylist for {kind} is already in cache, skipping downloads...",
             )
+
+            if not urls[kind]:
+                greylist_path.joinpath(f"{kind}.list").unlink(missing_ok=True)
+                deleted, err = del_cache(f"{kind}.list", CORE_API, CORE_TOKEN)
+                if not deleted:
+                    LOGGER.warning(f"Coudn't delete {kind}.list from cache : {err}")
     if all_fresh:
         _exit(0)
-
-    # Get URLs
-    urls = {"IP": [], "RDNS": [], "ASN": [], "USER_AGENT": [], "URI": []}
-    for kind in urls:
-        for url in getenv(f"GREYLIST_{kind}_URLS", "").split():
-            if url and url not in urls[kind]:
-                urls[kind].append(url)
 
     # Loop on kinds
     for kind, urls_list in urls.items():

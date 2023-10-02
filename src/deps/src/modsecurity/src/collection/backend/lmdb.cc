@@ -37,7 +37,7 @@ namespace backend {
 
 #ifdef WITH_LMDB
 
-LMDB::LMDB(std::string name) :
+LMDB::LMDB(const std::string &name) :
     Collection(name), m_env(NULL), isOpen(false) {}
 
 int LMDB::txn_begin(unsigned int flags, MDB_txn **ret) {
@@ -60,7 +60,7 @@ void LMDB::string2val(const std::string& str, MDB_val *val) {
 }
 
 
-void LMDB::lmdb_debug(int rc, std::string op, std::string scope) {
+void LMDB::lmdb_debug(int rc, const std::string &op, const std::string &scope) {
 #ifndef LMDB_STDOUT_COUT
     return;
 #else

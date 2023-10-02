@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -17,12 +17,7 @@
 
 #include <string.h>
 
-#include <iostream>
 #include <string>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
 
 #include "modsecurity/transaction.h"
 #include "src/actions/transformations/transformation.h"
@@ -35,19 +30,20 @@ namespace transformations {
 
 std::string RemoveNulls::evaluate(const std::string &val,
     Transaction *transaction) {
-    int64_t i;
-    std::string value(val);
+    size_t i = 0;
+    std::string transformed_value;
+    transformed_value.reserve(val.size());
 
-    i = 0;
-    while (i < value.size()) {
-        if (value.at(i) == '\0') {
-            value.erase(i, 1);
+    while (i < val.size()) {
+        if (val.at(i) == '\0') {
+            // do nothing; continue on to next char in original val
         } else {
-            i++;
+            transformed_value += val.at(i);
         }
+        i++;
     }
 
-    return value;
+    return transformed_value;
 }
 
 

@@ -61,22 +61,22 @@ jobs:
           SSH_IP: ${{ secrets.ARM_SSH_IP }}
           SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
       - name: Setup Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         if: inputs.CACHE_SUFFIX != 'arm'
       - name: Setup Buildx (ARM)
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         if: inputs.CACHE_SUFFIX == 'arm'
         with:
           endpoint: ssh://root@arm
           platforms: linux/arm64,linux/arm/v7,linux/arm/v6
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to ghcr
         if: inputs.PUSH == true
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -84,13 +84,13 @@ jobs:
       # Compute metadata
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: bunkerity/${{ inputs.IMAGE }}
       # Build cached image
       - name: Build image
         if: inputs.CACHE == true
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}
@@ -103,7 +103,7 @@ jobs:
       # Build non-cached image
       - name: Build image
         if: inputs.CACHE != true
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ${{ inputs.DOCKERFILE }}

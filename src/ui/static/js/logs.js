@@ -37,7 +37,7 @@ class Dropdown {
           const btn = e.target.closest("button");
           const btnValue = btn.getAttribute("value");
           const btnSetting = btn.getAttribute(
-            `data-${this.prefix}-setting-select-dropdown-btn`
+            `data-${this.prefix}-setting-select-dropdown-btn`,
           );
           //stop if same value to avoid new fetching
           const isSameVal = this.isSameValue(btnSetting, btnValue);
@@ -58,7 +58,7 @@ class Dropdown {
 
   closeAllDrop() {
     const drops = document.querySelectorAll(
-      `[data-${this.prefix}-setting-select-dropdown]`
+      `[data-${this.prefix}-setting-select-dropdown]`,
     );
     drops.forEach((drop) => {
       drop.classList.add("hidden");
@@ -66,8 +66,8 @@ class Dropdown {
       document
         .querySelector(
           `svg[data-${this.prefix}-setting-select="${drop.getAttribute(
-            `data-${this.prefix}-setting-select-dropdown`
-          )}"]`
+            `data-${this.prefix}-setting-select-dropdown`,
+          )}"]`,
         )
         .classList.remove("rotate-180");
     });
@@ -75,7 +75,7 @@ class Dropdown {
 
   isSameValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`,
     );
     const currVal = selectCustom.textContent;
     return currVal === value ? true : false;
@@ -83,30 +83,30 @@ class Dropdown {
 
   setSelectNewValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[data-${this.prefix}-setting-select="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select="${btnSetting}"]`,
     );
     selectCustom.querySelector(
-      `[data-${this.prefix}-setting-select-text]`
+      `[data-${this.prefix}-setting-select-text]`,
     ).textContent = value;
   }
 
   hideDropdown(btnSetting) {
     //hide dropdown
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
     );
     dropdownEl.classList.add("hidden");
     dropdownEl.classList.remove("flex");
     //svg effect
     const dropdownChevron = document.querySelector(
-      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`
+      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`,
     );
     dropdownChevron.classList.remove("rotate-180");
   }
 
   changeDropBtnStyle(btnSetting, selectedBtn) {
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
     );
     //reset dropdown btns
     const btnEls = dropdownEl.querySelectorAll("button");
@@ -116,7 +116,7 @@ class Dropdown {
         "bg-primary",
         "dark:bg-primary",
         "text-gray-300",
-        "text-gray-300"
+        "text-gray-300",
       );
       btn.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
     });
@@ -124,7 +124,7 @@ class Dropdown {
     selectedBtn.classList.remove(
       "bg-white",
       "dark:bg-slate-700",
-      "text-gray-700"
+      "text-gray-700",
     );
     selectedBtn.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
   }
@@ -135,10 +135,10 @@ class Dropdown {
       .getAttribute(`data-${this.prefix}-setting-select`);
     //toggle dropdown
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${attribut}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${attribut}"]`,
     );
     const dropdownChevron = document.querySelector(
-      `svg[data-${this.prefix}-setting-select="${attribut}"]`
+      `svg[data-${this.prefix}-setting-select="${attribut}"]`,
     );
     dropdownEl.classList.toggle("hidden");
     dropdownEl.classList.toggle("flex");
@@ -173,7 +173,7 @@ class FetchLogs {
   constructor(prefix = "logs") {
     this.prefix = prefix;
     this.instance = document.querySelector(
-      `[data-${this.prefix}-setting-select-text="instances"]`
+      `[data-${this.prefix}-setting-select-text="instances"]`,
     );
     this.instanceName = "";
     this.updateInp = document.querySelector("input#update-date");
@@ -188,7 +188,7 @@ class FetchLogs {
     this.lastUpdate = Date.now() - 86400000;
     this.container = document.querySelector(`[data-${this.prefix}-settings]`);
     this.logListContainer = document.querySelector(
-      `[data-${this.prefix}-list]`
+      `[data-${this.prefix}-list]`,
     );
     this.submitDate = document.querySelector("button[data-submit-date]");
     this.submitLive = document.querySelector("button[data-submit-live]");
@@ -218,7 +218,7 @@ class FetchLogs {
         "data-submit-live",
         this.submitLive.getAttribute("data-submit-live") === "yes"
           ? "no"
-          : "yes"
+          : "yes",
       );
 
       if (this.submitLive.getAttribute("data-submit-live") === "yes") {
@@ -314,7 +314,7 @@ class FetchLogs {
       .querySelector(`[data-${this.prefix}-list]`)
       .scrollTo(
         0,
-        document.querySelector(`[data-${this.prefix}-list]`).scrollHeight
+        document.querySelector(`[data-${this.prefix}-list]`).scrollHeight,
       );
   }
 
@@ -323,7 +323,7 @@ class FetchLogs {
     //case from date defined only
     if (this.toDate) {
       res = await fetch(
-        `${location.href}/${this.instanceName}?from_date=${this.fromDate}&to_date=${this.toDate}`
+        `${location.href}/${this.instanceName}?from_date=${this.fromDate}&to_date=${this.toDate}`,
       );
       const data = await res.json();
       return await this.showLogsDate(data);
@@ -331,7 +331,7 @@ class FetchLogs {
     //case from date and to date defined
     if (!this.toDate) {
       res = await fetch(
-        `${location.href}/${this.instanceName}?from_date=${this.fromDate}`
+        `${location.href}/${this.instanceName}?from_date=${this.fromDate}`,
       );
       const data = await res.json();
       return await this.showLogsDate(data);
@@ -341,7 +341,7 @@ class FetchLogs {
   async getLogsSinceLastUpdate() {
     const response = await fetch(
       `${location.href}/${this.instanceName}` +
-        (this.lastUpdate ? `?last_update=${this.lastUpdate}` : "")
+        (this.lastUpdate ? `?last_update=${this.lastUpdate}` : ""),
     );
     const data = await response.json();
     return await this.showLogsLive(data);
@@ -437,7 +437,7 @@ class Filter {
           const btn = e.target.closest("button");
           const btnValue = btn.getAttribute("value");
           const btnSetting = btn.getAttribute(
-            `data-${this.prefix}-setting-select-dropdown-btn`
+            `data-${this.prefix}-setting-select-dropdown-btn`,
           );
 
           this.lastType = btnValue;

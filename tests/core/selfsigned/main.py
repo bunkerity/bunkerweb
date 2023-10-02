@@ -60,9 +60,12 @@ try:
     common_name = certificate.subject.get_attributes_for_oid(
         x509.oid.NameOID.COMMON_NAME
     )[0].value
-    if common_name != self_signed_ssl_subj.replace("/", "").replace("CN=", ""):
+    check_self_signed_ssl_subj = self_signed_ssl_subj.replace("/", "").replace(
+        "CN=", ""
+    )
+    if common_name != check_self_signed_ssl_subj:
         print(
-            f"❌ The SSL generation is enabled and the Common Name (CN) is not {self_signed_ssl_subj} but {common_name}, exiting ...",
+            f"❌ The SSL generation is enabled and the Common Name (CN) is not {check_self_signed_ssl_subj} but {common_name}, exiting ...",
             flush=True,
         )
         exit(1)

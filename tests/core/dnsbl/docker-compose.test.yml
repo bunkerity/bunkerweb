@@ -6,7 +6,7 @@ services:
     environment:
       PYTHONUNBUFFERED: "1"
       USE_DNSBL: "yes"
-      DNSBL_LIST: "bl.blocklist.de problems.dnsbl.sorbs.net"
+      DNSBL_LIST: ""
     extra_hosts:
       - "www.example.com:192.168.0.2"
     networks:

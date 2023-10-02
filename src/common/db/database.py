@@ -521,6 +521,29 @@ class Database:
 
             if config:
                 config.pop("DATABASE_URI", None)
+                db_services = (
+                    session.query(Services)
+                    .with_entities(Services.id, Services.method)
+                    .all()
+                )
+                db_ids = [service.id for service in db_services]
+                services = config.get("SERVER_NAME", [])
+
+                if isinstance(services, str):
+                    services = services.split(" ")
+
+                if db_services:
+                    missing_ids = [
+                        service.id
+                        for service in db_services
+                        if (service.method == method) and service.id not in services
+                    ]
+
+                    if missing_ids:
+                        # Remove services that are no longer in the list
+                        session.query(Services).filter(
+                            Services.id.in_(missing_ids)
+                        ).with_for_update().delete()
 
                 if config.get("MULTISITE", "no") == "yes":
                     global_values = []
@@ -695,7 +718,7 @@ class Database:
                 else:
                     if (
                         "SERVER_NAME" in config
-                        and config["SERVER_NAME"] != ""
+                        and config.get("SERVER_NAME", "") != ""
                         and not (
                             session.query(Services)
                             .with_entities(Services.id)

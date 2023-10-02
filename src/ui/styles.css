@@ -45,15 +45,15 @@
 /*----------------------------------------------*/
 
 .checkbox {
-  @apply cursor-pointer disabled:cursor-default 
-    relative dark:border-slate-600 dark:bg-slate-700 z-10 aria-checked:z-0 w-5 h-5 
+  @apply cursor-pointer disabled:cursor-default
+    relative dark:border-slate-600 dark:bg-slate-700 z-10 aria-checked:z-0 w-5 h-5
     text-base rounded-1.4 aria-checked:bg-primary aria-checked:border-primary
     dark:aria-checked:bg-primary dark:aria-checked:border-primary duration-250 float-left
     mt-1 appearance-none border border-gray-300 bg-white bg-contain bg-center
     bg-no-repeat align-top transition-all disabled:bg-gray-400
     disabled:border-gray-400 dark:disabled:bg-gray-800
     dark:disabled:border-gray-800 disabled:text-gray-700
-    dark:disabled:text-gray-300    
+    dark:disabled:text-gray-300
     aria-checked:disabled:bg-gray-400
     aria-checked:disabled:border-gray-400 dark:aria-checked:disabled:bg-gray-800
     dark:aria-checked:disabled:border-gray-800 aria-checked:disabled:text-gray-700

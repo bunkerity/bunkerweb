@@ -255,7 +255,8 @@ class DisabledPop {
     } bg-blue-500 absolute right-2 rounded-lg px-2 py-1 z-20 dark:brightness-90">
     <p class="m-0 text-xs text-white dark:text-gray-100">disabled by ${method}</p>
     </div>`;
-    el.insertAdjacentHTML("beforebegin", popupHTML);
+    let cleanHTML = DOMPurify.sanitize(popupHTML);
+    el.insertAdjacentHTML("beforebegin", cleanHTML);
   }
 }
 

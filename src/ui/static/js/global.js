@@ -74,10 +74,11 @@ class News {
         date,
         lastUpdate
       );
+      let cleanHTML = DOMPurify.sanitize(cardHTML);
       //add to DOM
       document
         .querySelector("[data-news-container]")
-        .insertAdjacentHTML("afterbegin", cardHTML);
+        .insertAdjacentHTML("afterbegin", cleanHTML);
     });
   }
 
@@ -93,7 +94,7 @@ class News {
       </a>`;
     });
     //create card
-    const card = `  
+    const card = `
       <div
         class="min-h-[400px] w-full col-span-12 transition hover:-translate-y-2  bg-gray-100 dark:bg-slate-900 rounded px-6 py-4 m-2  flex flex-col justify-between"
       >
@@ -104,12 +105,12 @@ class News {
                 src="${img}"
                 alt="image"
             />
-            <h3 role="link"                     
+            <h3 role="link"
             onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
-            class="cursor-pointer mt-3 mb-1  text-3xl dark:text-white tracking-wide">{{ post['title'] }}</h3>            
+            class="cursor-pointer mt-3 mb-1  text-3xl dark:text-white tracking-wide">{{ post['title'] }}</h3>
         </div>
         <div>
-            <div  role="link"                     
+            <div  role="link"
             onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
             class="cursor-pointer min-h-[130px] mb-3 text-lg dark:text-gray-300 text-gray-600 pt-3">
                 ${excerpt}

@@ -1,4 +1,13 @@
 --------------------------------------------------------------------------------
+LuaSec 1.3.2
+---------------
+This version includes:
+
+* Fix: place EAI_OVERFLOW inside macro, unbreak build on <10.7 (Sergey Fedorov)
+* Fix: Expand workaround for zero errno to OpenSSL 3.0.x (Kim Alvefur)
+* Fix: reset block timeout at send or receive (MartinDahlberg)
+
+--------------------------------------------------------------------------------
 LuaSec 1.3.1
 ---------------
 This version includes:

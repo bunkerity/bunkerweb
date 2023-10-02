@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------------
- * LuaSec 1.3.1
+ * LuaSec 1.3.2
  *
  * Copyright (C) 2014-2023 Kim Alvefur, Paul Aurich, Tobias Markmann, Matthew Wild
  * Copyright (C) 2014-2023 Bruno Silvestre

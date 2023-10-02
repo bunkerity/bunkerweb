@@ -86,7 +86,7 @@ class Tabs {
     });
     //reset mobile style
     const tabsMobile = container.querySelectorAll(
-      "button[data-tab-handler-mobile]"
+      "button[data-tab-handler-mobile]",
     );
     tabsMobile.forEach((tab) => {
       tab.classList.remove("active");
@@ -96,13 +96,13 @@ class Tabs {
   highlightClicked(container, tabAtt) {
     //desktop case
     const tabDesktop = container.querySelector(
-      `button[data-tab-handler='${tabAtt}']`
+      `button[data-tab-handler='${tabAtt}']`,
     );
     tabDesktop.classList.add("active");
 
     //mobile case
     const tabMobile = container.querySelector(
-      `button[data-tab-handler-mobile='${tabAtt}']`
+      `button[data-tab-handler-mobile='${tabAtt}']`,
     );
     tabMobile.classList.add("active");
   }
@@ -230,7 +230,7 @@ class FilterSettings {
       .querySelector(`[data-plugin-item="${tabName}"]`)
       .querySelector(`[data-plugin-settings]`);
     const settings = settingContainer.querySelectorAll(
-      "[data-setting-container]"
+      "[data-setting-container]",
     );
     return settings;
   }
