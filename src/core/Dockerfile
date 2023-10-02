@@ -1,4 +1,4 @@
-FROM python:3.11.5-alpine AS builder
+FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache --virtual .build-deps g++ gcc build-base linux-headers
@@ -6,19 +6,20 @@ RUN apk add --no-cache --virtual .build-deps g++ gcc build-base linux-headers
 WORKDIR /usr/share/bunkerweb
 
 # Copy python requirements
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/core/requirements.txt /tmp/req/requirements.txt
 COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
 COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.3
 
-RUN mkdir -p deps && \
+WORKDIR /usr/share/bunkerweb
+
+RUN mkdir -p deps/python && \
   cat /tmp/req/requirements.txt* > deps/requirements.txt && \
   rm -rf /tmp/req
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  pip install --no-cache-dir --upgrade pip && \
-  pip install --no-cache-dir --upgrade pip-tools wheel setuptools && \
-  mkdir -p deps/python && \
+  pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Clean up temporary dependencies
@@ -40,7 +41,7 @@ COPY src/VERSION VERSION
 
 COPY src/core core
 
-FROM python:3.11.5-alpine
+FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
