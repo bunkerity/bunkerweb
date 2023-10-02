@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
         with:
           fetch-depth: 0
           token: ${{ secrets.BUNKERBOT_TOKEN }}
@@ -52,7 +52,7 @@ jobs:
           rm -f asn.mmdb country.mmdb
           gunzip asn.mmdb.gz country.mmdb.gz
       - name: Commit and push changes
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a # v4.16.0
         with:
           branch: dev
           commit_message: "Monthly mmdb update"

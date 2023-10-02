@@ -20,10 +20,10 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
       - name: Install terraform
-        uses: hashicorp/setup-terraform@v2
-      - uses: actions/download-artifact@v3
+        uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1 # v2.0.3
+      - uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: tf-${{ inputs.TYPE }}
           path: /tmp
@@ -34,7 +34,7 @@ jobs:
           tar xf /tmp/terraform.tar -C / && mkdir ~/.ssh && touch ~/.ssh/id_rsa.pub
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      - uses: azure/setup-kubectl@v3
+      - uses: azure/setup-kubectl@901a10e89ea615cf61f57ac05cecdf23e7de06d8 # v3.2
         if: inputs.TYPE == 'k8s'
       # Remove infra
       - run: kubectl delete daemonsets,replicasets,services,deployments,pods,rc,ingress,statefulsets --all --all-namespaces --timeout=60s ; kubectl delete pvc --all --timeout=60s ; kubectl delete pv --all --timeout=60s
