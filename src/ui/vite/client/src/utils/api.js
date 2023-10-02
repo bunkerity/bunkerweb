@@ -22,7 +22,6 @@ export async function fetchAPI(
   !state ? (state = { isPend: false, isErr: false, data: {} }) : false;
   // Fetch
   const baseURL = "http://localhost:8000";
-  console.log(JSON.stringify(body));
   state.isPend = true;
   return await fetch(`${baseURL}${api}`, {
     method: method.toUpperCase(),
