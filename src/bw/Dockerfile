@@ -16,18 +16,15 @@ RUN mkdir -p /usr/share/bunkerweb/deps/python && \
 	chmod +x install.sh && \
 	bash install.sh
 
-# Copy python requirements
-COPY src/deps/requirements.txt /tmp/req/requirements.txt
-COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.1
-
 WORKDIR /usr/share/bunkerweb
 
-RUN mkdir -p deps && \
-	cat /tmp/req/requirements.txt* > deps/requirements.txt && \
-	rm -rf /tmp/req
+# Copy python requirements
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+COPY src/common/gen/requirements.txt deps/requirements.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
+	pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
 	pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Clean up temporary dependencies

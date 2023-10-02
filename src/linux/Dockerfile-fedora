@@ -25,11 +25,11 @@ RUN mkdir -p /usr/share/bunkerweb/deps/python && \
     bash install.sh
 
 # Copy dependencies sources folder
-COPY src/deps/requirements.txt /tmp/req/requirements.txt
-COPY src/scheduler/requirements.txt /tmp/req/requirements.txt.1
-COPY src/ui/requirements.txt /tmp/req/requirements.txt.2
-COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.3
-COPY src/common/db/requirements.txt /tmp/req/requirements.txt.4
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+COPY src/scheduler/requirements.txt /tmp/req/requirements.txt
+COPY src/ui/requirements.txt /tmp/req/requirements.txt.1
+COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.2
+COPY src/common/db/requirements.txt /tmp/req/requirements.txt.3
 
 WORKDIR /usr/share/bunkerweb
 
@@ -39,6 +39,7 @@ RUN mkdir -p deps/python && \
 
 # Compile and install dependencies
 RUN export MAKEFLAGS="-j$(nproc)" && \
+    pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
     pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Copy files

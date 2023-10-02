@@ -1,26 +1,27 @@
 FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded AS builder
 
 # Copy python requirements
-COPY src/deps/requirements.txt /tmp/req/requirements.txt
-COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.1
-COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+COPY src/common/gen/requirements.txt /tmp/req/requirements.txt
+COPY src/common/db/requirements.txt /tmp/req/requirements.txt.1
 
 WORKDIR /usr/share/bunkerweb
 
 RUN mkdir -p deps/python && \
-    cat /tmp/req/requirements.txt* > deps/requirements.txt && \
-    rm -rf /tmp/req
+  cat /tmp/req/requirements.txt* > deps/requirements.txt && \
+  rm -rf /tmp/req
 
 # Install python dependencies
 RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-    pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
+  pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
+  pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Remove build dependencies
 RUN apk del .build-deps && \
-    rm -rf /var/cache/apk/*
+  rm -rf /var/cache/apk/*
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
@@ -45,22 +46,22 @@ WORKDIR /usr/share/bunkerweb
 
 # Add autoconf user, drop bwcli, install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache bash && \
-    addgroup -g 101 autoconf && \
-    adduser -h /var/cache/autoconf -g autoconf -s /bin/sh -G autoconf -D -H -u 101 autoconf && \
-    cp helpers/bwcli /usr/bin/ && \
-    mkdir -p /var/tmp/bunkerweb && \
-    mkdir -p /var/www && \
-    mkdir -p /etc/bunkerweb && \
-    mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
-    mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
-    mkdir -p /data/www && ln -s /data/www /var/www/html && \
-    for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
-    for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
-    chown -R root:autoconf /data && \
-    chmod -R 770 /data && \
-    chown -R root:autoconf /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
-    chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
-    chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py deps/python/bin/*
+  addgroup -g 101 autoconf && \
+  adduser -h /var/cache/autoconf -g autoconf -s /bin/sh -G autoconf -D -H -u 101 autoconf && \
+  cp helpers/bwcli /usr/bin/ && \
+  mkdir -p /var/tmp/bunkerweb && \
+  mkdir -p /var/www && \
+  mkdir -p /etc/bunkerweb && \
+  mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
+  mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
+  mkdir -p /data/www && ln -s /data/www /var/www/html && \
+  for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
+  for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
+  chown -R root:autoconf /data && \
+  chmod -R 770 /data && \
+  chown -R root:autoconf /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /usr/bin/bwcli && \
+  chmod -R 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb && \
+  chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py deps/python/bin/*
 
 # Fix CVEs
 # There are no CVE to fix for the moment

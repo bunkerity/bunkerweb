@@ -1,10 +1,10 @@
 FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded AS builder
 
 # Copy python requirements
-COPY src/deps/requirements.txt /tmp/req/requirements.txt
-COPY src/scheduler/requirements.txt /tmp/req/requirements.txt.1
-COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.2
-COPY src/common/db/requirements.txt /tmp/req/requirements.txt.3
+COPY src/deps/requirements.txt /tmp/requirements-deps.txt
+COPY src/scheduler/requirements.txt /tmp/req/requirements.txt
+COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.1
+COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
 
 WORKDIR /usr/share/bunkerweb
 
@@ -17,6 +17,7 @@ RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev 
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
+  pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Remove build dependencies
