@@ -3,7 +3,7 @@ from random import uniform
 from typing import Annotated, Dict, List, Literal, Union
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
-import requests
+import requests, json
 from config import API_URL
 from utils import set_res_from_req
 from models import Instance, ResponseModel
@@ -51,5 +51,5 @@ async def delete_instance(instance_hostname: str):
 )
 async def send_instance_action(instance_hostname: str, action: Literal["ping", "bans", "start", "stop", "restart", "reload"]):
     req = requests.post(f'{API_URL}/{instance_hostname}/{action}')
-    res = set_res_from_req(req, "POST", "Send instance action")
+    res = set_res_from_req(req, "POST", f"Send instance {instance_hostname} action {action}")
     return res

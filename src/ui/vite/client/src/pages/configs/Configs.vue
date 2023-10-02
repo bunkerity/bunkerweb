@@ -11,7 +11,6 @@ import {
 } from "@utils/custom_configs.js";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
-import SettingsSelect from "@components/Settings/Select.vue";
 import SettingsCheckbox from "@components/Settings/Checkbox.vue";
 import { useFeedbackStore } from "@store/global.js";
 import FileManagerStructure from "@components/FileManager/Structure.vue";

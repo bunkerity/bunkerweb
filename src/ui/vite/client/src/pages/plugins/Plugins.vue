@@ -48,7 +48,8 @@ async function getPlugins() {
     "GET",
     null,
     plugins.isPend,
-    plugins.isErr
+    plugins.isErr,
+    feedbackStore.addFeedback
   );
 }
 
