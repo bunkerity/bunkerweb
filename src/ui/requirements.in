@@ -1,8 +1,8 @@
 bcrypt==4.0.1
 beautifulsoup4==4.12.2
-Flask==2.3.3
+Flask==3.0.0
 Flask_Login==0.6.2
-Flask_WTF==1.1.1
+Flask_WTF==1.2.1
 gunicorn[gthread]==21.2.0
 importlib-metadata==6.8.0
 python_dateutil==2.8.2

@@ -24,7 +24,7 @@ function update_python_deps() {
     if [[ $file == *.in ]]; then
         mv "$(basename "${file/%.in}.txt")" "$(basename "$file")"
         echo "Generating hashes for $file ..."
-        pip-compile --generate-hashes --allow-unsafe --resolver=backtracking "$(basename "$file")"
+        pip-compile --generate-hashes --allow-unsafe --resolver=backtracking --strip-extras "$(basename "$file")"
     else
         echo "No need to generate hashes for $file"
     fi
@@ -40,9 +40,13 @@ pip install --no-cache-dir --require-hashes -r requirements-deps.txt
 
 echo "Updating python requirements files"
 
-files=("requirements.in" "../../docs/requirements.in" "../../misc/requirements-ansible.in" "../common/db/requirements.in" "../common/gen/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in")
+files=("requirements.in" "../../docs/requirements.in" "../common/db/requirements.in" "../common/gen/requirements.in" "../scheduler/requirements.in" "../ui/requirements.in")
 
 shopt -s globstar
+for file in ../../misc/**/requirements*.in
+do
+    files+=("$file")
+done
 for file in ../../tests/**/requirements*.in
 do
     files+=("$file")
