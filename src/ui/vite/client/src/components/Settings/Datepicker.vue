@@ -31,12 +31,26 @@ const props = defineProps({
 const date = reactive({
   isInvalid : false,
   isValid : false,
+  format : "m/d/Y H:i:S"
 });
 
 let datepicker;
 let currStamp;
 onMounted(() => {
-  datepicker = flatpickr(`#${props.settings.id}`, {locale: "en",   dateFormat: "m/d/Y", defaultDate : props.defaultDate});
+  datepicker = flatpickr(`#${props.settings.id}`, 
+  { locale: "en",   
+    dateFormat: date.format, 
+    defaultDate : props.defaultDate, 
+    enableTime: true,
+    enableSeconds: true,
+    time_24hr:true,
+    minuteIncrement: 1,
+    onChange(selectedDates, dateStr, instance) {
+      console.log(dateStr)
+      datepicker.setDate(`${dateStr}h`);
+    }
+  });
+
 })
 
 function checkToSend(date) {
@@ -79,7 +93,7 @@ const emits = defineEmits(["inp"]);
       :required="props.settings.id === 'SERVER_NAME' || props.settings.required || false ? true : false"
       :disabled="props.settings.disabled || false"
       :name="props.settings.id"
-      placeholder="mm/dd/yyyy"
+      :placeholder="date.format"
       pattern="/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{4}$/g"
     />
   </div>

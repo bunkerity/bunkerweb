@@ -3,7 +3,6 @@ import Dashboard from "@layouts/Dashboard.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
-import SettingsDatepicker from "@components/Settings/Datepicker.vue";
 import CardBase from "@components/Card/Base.vue";
 import CardItemList from "@components/Card/Item/List.vue";
 import BansTabs from "@components/Bans/Tabs.vue";
@@ -158,7 +157,7 @@ const tab = reactive({
       </SettingsLayout>
     </CardBase>
     <CardBase
-    class="col-span-12 overflow-x-auto overflow-y-hidden"
+    class="max-w-[1100px] col-span-12 overflow-y-hidden min-h-[400px]"
     label="ACTIONS"
     >
       <BansTabs @tab="(v) => tab.current = v" />

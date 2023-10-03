@@ -79,6 +79,7 @@
 .dark .flatpickr-calendar.hasTime .flatpickr-time {
   height: 40px;
   border-top: 1px solid #20222c;
+  background-color: #1e3969;
 }
 .dark .flatpickr-calendar.noCalendar.hasTime .flatpickr-time {
   height: auto;
@@ -261,6 +262,9 @@
   margin: 0;
   -webkit-appearance: none;
 }
+.dark .flatpickr-current-month .numInputWrapper span {
+  border:0
+}
 .dark .numInputWrapper span {
   position: absolute;
   right: 0;
@@ -270,6 +274,7 @@
   line-height: 50%;
   opacity: 0;
   cursor: pointer;
+  border-right: 1px solid rgba(26, 25, 25, 0.4);
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
@@ -786,7 +791,7 @@
 .dark .flatpickr-time .flatpickr-am-pm:hover,
 .dark .flatpickr-time input:focus,
 .dark .flatpickr-time .flatpickr-am-pm:focus {
-  background: #6a7395;
+  background: rgba(64, 187, 107, 0.8);
 }
 .dark .flatpickr-input[readonly] {
   cursor: pointer;
