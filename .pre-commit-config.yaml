@@ -5,17 +5,27 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
-      - id: check-case-conflict
-      - id: detect-private-key
-      - id: end-of-file-fixer
       - id: requirements-txt-fixer
       - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        exclude: ^(mkdocs.yml|examples/bigbluebutton/docker-compose.yml)$
+        args: ["--allow-multiple-documents"]
+      - id: check-case-conflict
 
   - repo: https://github.com/ambv/black
     rev: 23.9.1
     hooks:
       - id: black
+        name: Black Python Formatter
         language_version: python3.9
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        name: Flake8 Python Linter
+        args: ["--max-line-length=250", "--ignore=E266,E402,E722,W503"]
 
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.18.0
