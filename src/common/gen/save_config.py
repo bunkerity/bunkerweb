@@ -32,12 +32,12 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
     apis = []
 
     for var in instance.attrs["Config"]["Env"] if _type == "Docker" else instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
-        splitted = var.split("=", 1)
-        if custom_confs_rx.match(splitted[0]):
-            custom_conf = custom_confs_rx.search(splitted[0]).groups()
+        split = var.split("=", 1)
+        if custom_confs_rx.match(split[0]):
+            custom_conf = custom_confs_rx.search(split[0]).groups()
             custom_confs.append(
                 {
-                    "value": f"# CREATED BY ENV\n{splitted[1]}",
+                    "value": f"# CREATED BY ENV\n{split[1]}",
                     "exploded": (
                         custom_conf[0],
                         custom_conf[1],
@@ -47,14 +47,14 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
             )
             logger.info(f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}")
         else:
-            tmp_config[splitted[0]] = splitted[1]
+            tmp_config[split[0]] = split[1]
 
-            if not db and splitted[0] == "DATABASE_URI":
-                db = Database(logger, sqlalchemy_string=splitted[1], pool=False)
-            elif splitted[0] == "API_HTTP_PORT":
-                api_http_port = splitted[1]
-            elif splitted[0] == "API_SERVER_NAME":
-                api_server_name = splitted[1]
+            if not db and split[0] == "DATABASE_URI":
+                db = Database(logger, sqlalchemy_string=split[1], pool=False)
+            elif split[0] == "API_HTTP_PORT":
+                api_http_port = split[1]
+            elif split[0] == "API_SERVER_NAME":
+                api_server_name = split[1]
 
     apis.append(
         API(
@@ -222,12 +222,12 @@ if __name__ == "__main__":
 
             for instance in docker_client.containers.list(filters={"label": "bunkerweb.INSTANCE"}):
                 for var in instance.attrs["Config"]["Env"]:
-                    splitted = var.split("=", 1)
-                    if custom_confs_rx.match(splitted[0]):
-                        custom_conf = custom_confs_rx.search(splitted[0]).groups()
+                    split = var.split("=", 1)
+                    if custom_confs_rx.match(split[0]):
+                        custom_conf = custom_confs_rx.search(split[0]).groups()
                         custom_confs.append(
                             {
-                                "value": f"# CREATED BY ENV\n{splitted[1]}",
+                                "value": f"# CREATED BY ENV\n{split[1]}",
                                 "exploded": (
                                     custom_conf[0],
                                     custom_conf[1],
@@ -237,14 +237,14 @@ if __name__ == "__main__":
                         )
                         logger.info(f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}")
                     else:
-                        tmp_config[splitted[0]] = splitted[1]
+                        tmp_config[split[0]] = split[1]
 
-                        if not db and splitted[0] == "DATABASE_URI":
-                            db = Database(logger, sqlalchemy_string=splitted[1], pool=False)
-                        elif splitted[0] == "API_HTTP_PORT":
-                            api_http_port = splitted[1]
-                        elif splitted[0] == "API_SERVER_NAME":
-                            api_server_name = splitted[1]
+                        if not db and split[0] == "DATABASE_URI":
+                            db = Database(logger, sqlalchemy_string=split[1], pool=False)
+                        elif split[0] == "API_HTTP_PORT":
+                            api_http_port = split[1]
+                        elif split[0] == "API_SERVER_NAME":
+                            api_server_name = split[1]
 
                 apis.append(
                     API(

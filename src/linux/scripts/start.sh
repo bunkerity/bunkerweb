@@ -226,7 +226,7 @@ function reload()
     log "SYSTEMCTL" "ℹ️" "BunkerWeb service reloaded ..."
 }
 
-# List of differents args
+# List of different args
 case $1 in
     "start")
     start

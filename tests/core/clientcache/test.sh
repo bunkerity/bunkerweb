@@ -114,7 +114,7 @@ do
             export CLIENT_CACHE_ETAG="no"
         fi
     elif [ "$test" = "cache_control" ] ; then
-        echo "📝 Running tests whith clientcache control set to public, max-age=3600 ..."
+        echo "📝 Running tests with clientcache control set to public, max-age=3600 ..."
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CLIENT_CACHE_ETAG: "no"@CLIENT_CACHE_ETAG: "yes"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@CLIENT_CACHE_CONTROL: "public, max-age=15552000"@CLIENT_CACHE_CONTROL: "public, max-age=3600"@' {} \;

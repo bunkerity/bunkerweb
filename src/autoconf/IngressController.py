@@ -231,7 +231,7 @@ class IngressController(Controller):
                         locked = False
                         continue
                     self._logger.info(
-                        f"Catched kubernetes event ({watch_type}), deploying new configuration ...",
+                        f"Caught kubernetes event ({watch_type}), deploying new configuration ...",
                     )
                     try:
                         ret = self.apply_config()

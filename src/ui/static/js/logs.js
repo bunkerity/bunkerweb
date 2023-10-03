@@ -130,15 +130,15 @@ class Dropdown {
   }
 
   toggleSelectBtn(e) {
-    const attribut = e.target
+    const attribute = e.target
       .closest("button")
       .getAttribute(`data-${this.prefix}-setting-select`);
     //toggle dropdown
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${attribut}"]`,
+      `[data-${this.prefix}-setting-select-dropdown="${attribute}"]`,
     );
     const dropdownChevron = document.querySelector(
-      `svg[data-${this.prefix}-setting-select="${attribut}"]`,
+      `svg[data-${this.prefix}-setting-select="${attribute}"]`,
     );
     dropdownEl.classList.toggle("hidden");
     dropdownEl.classList.toggle("flex");

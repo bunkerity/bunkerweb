@@ -81,7 +81,7 @@ try:
             tmp_realip_path.joinpath("combined.list").unlink(missing_ok=True)
             deleted, err = del_file_in_db("combined.list", db)
             if not deleted:
-                logger.warning(f"Coudn't delete combined.list from cache : {err}")
+                logger.warning(f"Couldn't delete combined.list from cache : {err}")
         logger.info("RealIP list is already in cache, skipping download...")
         _exit(0)
 
