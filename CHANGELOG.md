@@ -8,6 +8,7 @@
 - [BUGFIX] Fix Database not clearing old services when not using multisite
 - [BUGFIX] Fix UI using the wrong database when generating the new config when using an external database
 - [BUGFIX] Small fixes on linux paths creating unnecessary folders
+- [BUGFIX] Fix ACME renewal fails on redirection enabled Service
 - [MISC] Updated core dependencies
 - [MISC] Updated self-signed job to regenerate the cert if the subject or the expiration date has changed
 - [MISC] Jobs that download files from urls will now remove old cached files if urls are empty
