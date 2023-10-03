@@ -1,7 +1,6 @@
 import subprocess
 import sys
 import tempfile
-import os
 import time
 import pathlib
 
@@ -74,9 +73,7 @@ if distro == "ubuntu":
     with tempfile.NamedTemporaryFile(mode="w") as f:
         f.write(bash_script)
         f.flush()
-        subprocess.run(
-            ["docker", "cp", f.name, "systemd-ubuntu:/data/install_nginx.sh"]
-        )
+        subprocess.run(["docker", "cp", f.name, "systemd-ubuntu:/data/install_nginx.sh"])
         result = subprocess.run(
             [
                 "docker",
@@ -202,9 +199,7 @@ if distro == "ubuntu":
             ],
             capture_output=True,
         )
-        print(
-            "❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode()
-        )
+        print("❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode())
 
     bunkerweb_ui_state = subprocess.run(
         [
@@ -329,12 +324,7 @@ if distro == "ubuntu":
         print("❌ /usr/bin/bwcli found.")
     # Checking Removing test
     try:
-        if (
-            pathlib.Path("/usr/share/bunkerweb").is_dir()
-            or pathlib.Path("/var/tmp/bunkerweb").is_dir()
-            or pathlib.Path("/var/cache/bunkerweb").is_dir()
-            or pathlib.Path("/usr/bin/bwcli").is_file()
-        ):
+        if pathlib.Path("/usr/share/bunkerweb").is_dir() or pathlib.Path("/var/tmp/bunkerweb").is_dir() or pathlib.Path("/var/cache/bunkerweb").is_dir() or pathlib.Path("/usr/bin/bwcli").is_file():
             test_results["Removing test"] = "KO"
         else:
             test_results["Removing test"] = "OK"
@@ -390,10 +380,7 @@ if distro == "ubuntu":
         print("❌ /etc/bunkerweb found.")
     # Checking Purging test
     try:
-        if (
-            pathlib.Path("/var/lib/bunkerweb").is_dir()
-            or pathlib.Path("/etc/bunkerweb").is_dir()
-        ):
+        if pathlib.Path("/var/lib/bunkerweb").is_dir() or pathlib.Path("/etc/bunkerweb").is_dir():
             test_results["Purging test"] = "KO"
         else:
             test_results["Purging test"] = "OK"
@@ -444,9 +431,7 @@ if distro == "ubuntu":
     with tempfile.NamedTemporaryFile(mode="w") as f:
         f.write(bash_script)
         f.flush()
-        subprocess.run(
-            ["docker", "cp", f.name, "systemd-ubuntu:/data/install_nginx.sh"]
-        )
+        subprocess.run(["docker", "cp", f.name, "systemd-ubuntu:/data/install_nginx.sh"])
         result = subprocess.run(
             [
                 "docker",
@@ -613,9 +598,7 @@ elif distro == "debian":
         f.write(bash_script)
         f.flush()
         subprocess.run(["docker", "cp", f.name, "systemd-debian:/tmp/install_nginx.sh"])
-        result = subprocess.run(
-            ["docker", "exec", "-it", "systemd-debian", "bash", "/tmp/install_nginx.sh"]
-        )
+        result = subprocess.run(["docker", "exec", "-it", "systemd-debian", "bash", "/tmp/install_nginx.sh"])
     if result.returncode != 0:
         bunkerweb_logs = subprocess.run(
             [
@@ -731,9 +714,7 @@ elif distro == "debian":
             ],
             capture_output=True,
         )
-        print(
-            "❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode()
-        )
+        print("❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode())
 
     bunkerweb_ui_state = subprocess.run(
         [
@@ -858,12 +839,7 @@ elif distro == "debian":
         print("❌ /usr/bin/bwcli found.")
     # Checking Removing test
     try:
-        if (
-            pathlib.Path("/usr/share/bunkerweb").is_dir()
-            or pathlib.Path("/var/tmp/bunkerweb").is_dir()
-            or pathlib.Path("/var/cache/bunkerweb").is_dir()
-            or pathlib.Path("/usr/bin/bwcli").is_file()
-        ):
+        if pathlib.Path("/usr/share/bunkerweb").is_dir() or pathlib.Path("/var/tmp/bunkerweb").is_dir() or pathlib.Path("/var/cache/bunkerweb").is_dir() or pathlib.Path("/usr/bin/bwcli").is_file():
             test_results["Removing test"] = "KO"
         else:
             test_results["Removing test"] = "OK"
@@ -919,10 +895,7 @@ elif distro == "debian":
         print("❌ /etc/bunkerweb found.")
     # Checking Purging test
     try:
-        if (
-            pathlib.Path("/var/lib/bunkerweb").is_dir()
-            or pathlib.Path("/etc/bunkerweb").is_dir()
-        ):
+        if pathlib.Path("/var/lib/bunkerweb").is_dir() or pathlib.Path("/etc/bunkerweb").is_dir():
             test_results["Purging test"] = "KO"
         else:
             test_results["Purging test"] = "OK"
@@ -973,9 +946,7 @@ elif distro == "debian":
     with tempfile.NamedTemporaryFile(mode="w") as f:
         f.write(bash_script)
         f.flush()
-        subprocess.run(
-            ["docker", "cp", f.name, "systemd-debian:/data/install_nginx.sh"]
-        )
+        subprocess.run(["docker", "cp", f.name, "systemd-debian:/data/install_nginx.sh"])
         result = subprocess.run(
             [
                 "docker",
@@ -1138,9 +1109,7 @@ elif distro == "fedora":
     with tempfile.NamedTemporaryFile(mode="w") as f:
         f.write(bash_script)
         f.flush()
-        subprocess.run(
-            ["docker", "cp", f.name, "systemd-fedora:/data/install_nginx.sh"]
-        )
+        subprocess.run(["docker", "cp", f.name, "systemd-fedora:/data/install_nginx.sh"])
         result = subprocess.run(
             [
                 "docker",
@@ -1265,9 +1234,7 @@ elif distro == "fedora":
             ],
             capture_output=True,
         )
-        print(
-            "❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode()
-        )
+        print("❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode())
 
     bunkerweb_ui_state = subprocess.run(
         [
@@ -1546,9 +1513,7 @@ elif distro == "fedora":
         subprocess.run(["docker", "start", "systemd-fedora"])
 
     def check_container_status():
-        result = subprocess.run(
-            ["docker", "inspect", "systemd-fedora"], stdout=subprocess.PIPE
-        )
+        result = subprocess.run(["docker", "inspect", "systemd-fedora"], stdout=subprocess.PIPE)
         return "running" in str(result.stdout)
 
     while True:
@@ -1805,9 +1770,7 @@ elif distro == "rhel":
             ],
             capture_output=True,
         )
-        print(
-            "❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode()
-        )
+        print("❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode())
 
     bunkerweb_ui_state = subprocess.run(
         [
@@ -2151,9 +2114,7 @@ elif distro == "centos":
         ]
     )
     # Building local systemd image
-    subprocess.run(
-        ["docker", "build", "-t", "centos", "-f", "tests/Dockerfile-centos", "."]
-    )
+    subprocess.run(["docker", "build", "-t", "centos", "-f", "tests/Dockerfile-centos", "."])
     subprocess.run(
         [
             "docker",
@@ -2201,9 +2162,7 @@ elif distro == "centos":
                 "systemd-centos:/etc/yum.repos.d/nginx.repo",
             ]
         )
-        subprocess.run(
-            ["docker", "cp", f.name, "systemd-centos:/data/install_nginx.sh"]
-        )
+        subprocess.run(["docker", "cp", f.name, "systemd-centos:/data/install_nginx.sh"])
         result = subprocess.run(
             [
                 "docker",
@@ -2329,9 +2288,7 @@ elif distro == "centos":
             ],
             capture_output=True,
         )
-        print(
-            "❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode()
-        )
+        print("❌ bunkerweb.service is not running. Logs:", bunkerweb_logs.stdout.decode())
 
     bunkerweb_ui_state = subprocess.run(
         [

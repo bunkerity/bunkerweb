@@ -43,9 +43,7 @@ try:
         with lock:
             response = None
             try:
-                response = get(
-                    "https://db-ip.com/db/download/ip-to-asn-lite", timeout=5
-                )
+                response = get("https://db-ip.com/db/download/ip-to-asn-lite", timeout=5)
             except RequestException:
                 logger.warning("Unable to check if asn.mmdb is the latest version")
 
@@ -59,14 +57,10 @@ try:
                     _sha1.update(data)
 
             if response.content.decode().find(_sha1.hexdigest()) != -1:
-                logger.info(
-                    "asn.mmdb is already the latest version, skipping download..."
-                )
+                logger.info("asn.mmdb is already the latest version, skipping download...")
                 dl_mmdb = False
         else:
-            logger.warning(
-                "Unable to check if asn.mmdb is the latest version, downloading it anyway..."
-            )
+            logger.warning("Unable to check if asn.mmdb is the latest version, downloading it anyway...")
 
     db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
 

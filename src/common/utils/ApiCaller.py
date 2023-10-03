@@ -7,10 +7,7 @@ from sys import path as sys_path
 from tarfile import open as tar_open
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("utils",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -46,10 +43,7 @@ class ApiCaller:
             config.load_incluster_config()
             corev1 = kube_client.CoreV1Api()
             for pod in corev1.list_pod_for_all_namespaces(watch=False).items:
-                if (
-                    pod.metadata.annotations != None
-                    and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-                ):
+                if pod.metadata.annotations is not None and "bunkerweb.io/INSTANCE" in pod.metadata.annotations:
                     api_http_port = None
                     api_server_name = None
 
@@ -66,20 +60,14 @@ class ApiCaller:
                         )
                     )
         else:
-            docker_client = DockerClient(
-                base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
-            )
+            docker_client = DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
 
             if bw_integration == "Swarm":
-                for instance in docker_client.services.list(
-                    filters={"label": "bunkerweb.INSTANCE"}
-                ):
+                for instance in docker_client.services.list(filters={"label": "bunkerweb.INSTANCE"}):
                     api_http_port = None
                     api_server_name = None
 
-                    for var in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
-                        "Env"
-                    ]:
+                    for var in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
                         if var.startswith("API_HTTP_PORT="):
                             api_http_port = var.replace("API_HTTP_PORT=", "", 1)
                         elif var.startswith("API_SERVER_NAME="):
@@ -89,15 +77,12 @@ class ApiCaller:
                         self.__apis.append(
                             API(
                                 f"http://{instance.name}.{task['NodeID']}.{task['ID']}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
-                                host=api_server_name
-                                or getenv("API_SERVER_NAME", "bwapi"),
+                                host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
                             )
                         )
                 return
 
-            for instance in docker_client.containers.list(
-                filters={"label": "bunkerweb.INSTANCE"}
-            ):
+            for instance in docker_client.containers.list(filters={"label": "bunkerweb.INSTANCE"}):
                 api_http_port = None
                 api_server_name = None
 
@@ -160,9 +145,7 @@ class ApiCaller:
     def send_files(self, path: str, url: str) -> bool:
         ret = True
         with BytesIO() as tgz:
-            with tar_open(
-                mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3
-            ) as tf:
+            with tar_open(mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3) as tf:
                 tf.add(path, arcname=".")
             tgz.seek(0, 0)
             files = {"archive.tar.gz": tgz}

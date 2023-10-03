@@ -20,7 +20,7 @@ function plugin:initialize(id, ctx)
         end
     end
     self.is_request = multisite
-    -- Store common objets
+    -- Store common objects
     self.logger = logger:new(self.id)
     local use_redis, err = utils.get_variable("USE_REDIS", false)
     if not use_redis then

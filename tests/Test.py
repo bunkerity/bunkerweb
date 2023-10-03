@@ -1,13 +1,11 @@
-from abc import ABC, abstractmethod
-from sys import stderr
+from abc import ABC
 from time import time, sleep
 from requests import get
 from traceback import format_exc
 from shutil import copytree
 from os.path import isdir, join
-from os import mkdir, makedirs, walk, chmod, rename
+from os import mkdir, walk, rename
 from re import sub, search, MULTILINE
-from datetime import datetime
 from subprocess import run
 from logger import log
 from string import ascii_lowercase, digits
@@ -22,6 +20,7 @@ class Test(ABC):
         self.__tests = tests
         self._no_copy_container = no_copy_container
         self.__delay = delay
+        self._domains = {}
         log(
             "TEST",
             "ℹ️",
@@ -30,7 +29,7 @@ class Test(ABC):
 
     # Class method
     # called once before running all the different tests for a given integration
-    def init():
+    def init(self):
         try:
             if not isdir("/tmp/bw-data"):
                 mkdir("/tmp/bw-data")
@@ -48,7 +47,7 @@ class Test(ABC):
 
     # Class method
     # called once all tests ended
-    def end():
+    def end(self):
         return True
 
     # helper to check domains
@@ -146,6 +145,7 @@ class Test(ABC):
     def _debug_fail(self):
         pass
 
+    @staticmethod
     def replace_in_file(path, old, new):
         try:
             with open(path, "r") as f:
@@ -156,11 +156,13 @@ class Test(ABC):
         except:
             log("TEST", "⚠️", f"can't replace file {path} : {format_exc()}")
 
+    @staticmethod
     def replace_in_files(path, old, new):
         for root, dirs, files in walk(path):
             for name in files:
                 Test.replace_in_file(join(root, name), old, new)
 
+    @staticmethod
     def rename(path, old, new):
         for root, dirs, files in walk(path):
             for name in dirs + files:
@@ -169,6 +171,7 @@ class Test(ABC):
                 if full_path != new_path:
                     rename(full_path, new_path)
 
+    @staticmethod
     def random_string(length):
         charset = ascii_lowercase + digits
         return "".join(choice(charset) for i in range(length))

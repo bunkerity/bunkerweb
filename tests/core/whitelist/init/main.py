@@ -19,11 +19,7 @@ with get(mmdb_url, stream=True) as resp:
             file_content.write(chunk)
 file_content.seek(0)
 
-output_path = (
-    Path(sep, "output", "ip_asn.txt")
-    if getenv("TEST_TYPE", "docker") == "docker"
-    else Path(".", "ip_asn.txt")
-)
+output_path = Path(sep, "output", "ip_asn.txt") if getenv("TEST_TYPE", "docker") == "docker" else Path(".", "ip_asn.txt")
 
 with open_database(GzipFile(fileobj=file_content, mode="rb"), mode=MODE_FD) as reader:  # type: ignore
     dbip_asn = reader.get("1.0.0.3")

@@ -32,10 +32,7 @@ from bunkerweb.db.model import (
 try:
     database_uri = getenv("DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3")
 
-    if (
-        getenv("TEST_TYPE", "docker") == "docker"
-        and database_uri == "sqlite:////var/lib/bunkerweb/db.sqlite3"
-    ):
+    if getenv("TEST_TYPE", "docker") == "docker" and database_uri == "sqlite:////var/lib/bunkerweb/db.sqlite3":
         database_uri = "sqlite:////data/lib/db.sqlite3"
 
     error = False
@@ -130,12 +127,7 @@ try:
     print("ℹ️ Checking if database is initialized ...", flush=True)
 
     with db_session() as session:
-        metadata = (
-            session.query(Metadata)
-            .with_entities(Metadata.is_initialized)
-            .filter_by(id=1)
-            .first()
-        )
+        metadata = session.query(Metadata).with_entities(Metadata.is_initialized).filter_by(id=1).first()
 
         if metadata is None or not metadata.is_initialized:
             print(
@@ -188,10 +180,7 @@ try:
 
         for global_value in global_values:
             if global_value.setting_id in global_settings:
-                if (
-                    global_value.value
-                    != global_settings[global_value.setting_id]["value"]
-                ):
+                if global_value.value != global_settings[global_value.setting_id]["value"]:
                     print(
                         f"❌ The global value {global_value.setting_id} is in the database but is not correct, exiting ...\n{global_value.value} (database) != {global_settings[global_value.setting_id]['value']} (env)",
                         flush=True,
@@ -218,9 +207,7 @@ try:
                 )
                 exit(1)
 
-    if not all(
-        [global_settings[global_value]["checked"] for global_value in global_settings]
-    ):
+    if not all([global_settings[global_value]["checked"] for global_value in global_settings]):
         print(
             f"❌ Not all global values are in the database, exiting ...\nmissing values: {', '.join([global_value for global_value in global_settings if not global_settings[global_value]['checked']])}",
             flush=True,
@@ -246,10 +233,7 @@ try:
         else:
             for service_setting in services_settings:
                 if service_setting.setting_id in service_settings:
-                    if (
-                        service_setting.value
-                        != service_settings[service_setting.setting_id]["value"]
-                    ):
+                    if service_setting.value != service_settings[service_setting.setting_id]["value"]:
                         print(
                             f"❌ The service value {service_setting.setting_id} is in the database but is not correct, exiting ...\n{service_setting.value} (database) != {service_settings[service_setting.setting_id]['value']} (env)",
                             flush=True,
@@ -276,12 +260,7 @@ try:
                     )
                     exit(1)
 
-    if not all(
-        [
-            service_settings[service_setting]["checked"]
-            for service_setting in service_settings
-        ]
-    ):
+    if not all([service_settings[service_setting]["checked"] for service_setting in service_settings]):
         print(
             f"❌ Not all service values are in the database, exiting ...\nmissing values: {', '.join([service_setting for service_setting in service_settings if not service_settings[service_setting]['checked']])}",
             flush=True,
@@ -353,14 +332,11 @@ try:
                 )
                 exit(1)
 
-            if (
-                plugin.name != current_plugin[plugin.id]["name"]
-                or plugin.description != current_plugin[plugin.id]["description"]
-                or plugin.version != current_plugin[plugin.id]["version"]
-                or plugin.stream != current_plugin[plugin.id]["stream"]
-            ):
+            if plugin.name != current_plugin[plugin.id]["name"] or plugin.description != current_plugin[plugin.id]["description"] or plugin.version != current_plugin[plugin.id]["version"] or plugin.stream != current_plugin[plugin.id]["stream"]:
                 print(
-                    f"❌ The {'external' if plugin.external else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n{dumps({'name': plugin.name, 'description': plugin.description, 'version': plugin.version, 'stream': plugin.stream})} (database) != {dumps({'name': current_plugin[plugin.id]['name'], 'description': current_plugin[plugin.id]['description'], 'version': current_plugin[plugin.id]['version'], 'stream': current_plugin[plugin.id]['stream']})} (file)",
+                    f"❌ The {'external' if plugin.external else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n"
+                    + f"{dumps({'name': plugin.name, 'description': plugin.description, 'version': plugin.version, 'stream': plugin.stream})}"
+                    + f" (database) != {dumps({'name': current_plugin[plugin.id]['name'], 'description': current_plugin[plugin.id]['description'], 'version': current_plugin[plugin.id]['version'], 'stream': current_plugin[plugin.id]['stream']})} (file)",  # noqa: E501
                     flush=True,
                 )
                 exit(1)
@@ -369,27 +345,19 @@ try:
 
                 for setting in settings:
                     if (
-                        setting.name
-                        != current_plugin[plugin.id]["settings"][setting.id]["id"]
-                        or setting.context
-                        != current_plugin[plugin.id]["settings"][setting.id]["context"]
-                        or setting.default
-                        != current_plugin[plugin.id]["settings"][setting.id]["default"]
-                        or setting.help
-                        != current_plugin[plugin.id]["settings"][setting.id]["help"]
-                        or setting.label
-                        != current_plugin[plugin.id]["settings"][setting.id]["label"]
-                        or setting.regex
-                        != current_plugin[plugin.id]["settings"][setting.id]["regex"]
-                        or setting.type
-                        != current_plugin[plugin.id]["settings"][setting.id]["type"]
-                        or setting.multiple
-                        != current_plugin[plugin.id]["settings"][setting.id].get(
-                            "multiple", None
-                        )
+                        setting.name != current_plugin[plugin.id]["settings"][setting.id]["id"]
+                        or setting.context != current_plugin[plugin.id]["settings"][setting.id]["context"]
+                        or setting.default != current_plugin[plugin.id]["settings"][setting.id]["default"]
+                        or setting.help != current_plugin[plugin.id]["settings"][setting.id]["help"]
+                        or setting.label != current_plugin[plugin.id]["settings"][setting.id]["label"]
+                        or setting.regex != current_plugin[plugin.id]["settings"][setting.id]["regex"]
+                        or setting.type != current_plugin[plugin.id]["settings"][setting.id]["type"]
+                        or setting.multiple != current_plugin[plugin.id]["settings"][setting.id].get("multiple", None)
                     ):
                         print(
-                            f"❌ The {'external' if plugin.external else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n{dumps({'default': setting.default, 'help': setting.help, 'label': setting.label, 'regex': setting.regex, 'type': setting.type})} (database) != {dumps({'default': current_plugin[plugin.id]['settings'][setting.id]['default'], 'help': current_plugin[plugin.id]['settings'][setting.id]['help'], 'label': current_plugin[plugin.id]['settings'][setting.id]['label'], 'regex': current_plugin[plugin.id]['settings'][setting.id]['regex'], 'type': current_plugin[plugin.id]['settings'][setting.id]['type']})} (file)",
+                            f"❌ The {'external' if plugin.external else 'core'} plugin {plugin.name} (id: {plugin.id}) is in the database but is not correct, exiting ...\n"
+                            + f"{dumps({'default': setting.default, 'help': setting.help, 'label': setting.label, 'regex': setting.regex, 'type': setting.type})}"
+                            + f" (database) != {dumps({'default': current_plugin[plugin.id]['settings'][setting.id]['default'], 'help': current_plugin[plugin.id]['settings'][setting.id]['help'], 'label': current_plugin[plugin.id]['settings'][setting.id]['label'], 'regex': current_plugin[plugin.id]['settings'][setting.id]['regex'], 'type': current_plugin[plugin.id]['settings'][setting.id]['type']})} (file)",  # noqa: E501
                             flush=True,
                         )
                         exit(1)
@@ -435,46 +403,26 @@ try:
                 )
                 exit(1)
 
-            index = next(
-                index
-                for (index, d) in enumerate(
-                    current_plugin[job.plugin_id].get("jobs", [])
-                )
-                if d["name"] == job.name
-            )
+            index = next(index for (index, d) in enumerate(current_plugin[job.plugin_id].get("jobs", [])) if d["name"] == job.name)
             core_job = current_plugin[job.plugin_id]["jobs"][index]
 
-            if (
-                job.name != core_job["name"]
-                or job.file_name != core_job["file"]
-                or job.every != core_job["every"]
-                or job.reload != core_job["reload"]
-            ):
+            if job.name != core_job["name"] or job.file_name != core_job["file"] or job.every != core_job["every"] or job.reload != core_job["reload"]:
                 print(
-                    f"❌ The job {job.name} (plugin_id: {job.plugin_id}) is in the database but is not correct, exiting ...\n{dumps({'name': job.name, 'file': job.file_name, 'every': job.every, 'reload': job.reload})} (database) != {dumps({'name': core_job['name'], 'file': core_job['file'], 'every': core_job['every'], 'reload': core_job['reload']})} (file)",
+                    f"❌ The job {job.name} (plugin_id: {job.plugin_id}) is in the database but is not correct, exiting ...\n"
+                    + f"{dumps({'name': job.name, 'file': job.file_name, 'every': job.every, 'reload': job.reload})} (database) != {dumps({'name': core_job['name'], 'file': core_job['file'], 'every': core_job['every'], 'reload': core_job['reload']})} (file)",  # noqa: E501
                     flush=True,
                 )
                 exit(1)
 
             current_plugin[job.plugin_id]["jobs"][index]["checked"] = True
 
-    if not all(
-        [
-            all([job["checked"] for job in core_plugins[plugin].get("jobs", [])])
-            for plugin in core_plugins
-        ]
-    ):
+    if not all([all([job["checked"] for job in core_plugins[plugin].get("jobs", [])]) for plugin in core_plugins]):
         print(
             f"❌ Not all jobs from core plugins are in the database, exiting ...\nmissing jobs: {dumps({plugin: [job['name'] for job in core_plugins[plugin]['jobs'] if not job['checked']] for plugin in core_plugins})}",
             flush=True,
         )
         exit(1)
-    elif not all(
-        [
-            all([job["checked"] for job in external_plugins[plugin].get("jobs", [])])
-            for plugin in external_plugins
-        ]
-    ):
+    elif not all([all([job["checked"] for job in external_plugins[plugin].get("jobs", [])]) for plugin in external_plugins]):
         print(
             f"❌ Not all jobs from external plugins are in the database, exiting ...\nmissing jobs: {dumps({plugin: [job['name'] for job in external_plugins[plugin]['jobs'] if not job['checked']] for plugin in external_plugins})}",
             flush=True,
@@ -519,11 +467,7 @@ try:
                 )
                 exit(1)
 
-            path_ui = (
-                Path(join("bunkerweb", "core", plugin_page.plugin_id, "ui"))
-                if Path(join("bunkerweb", "core", plugin_page.plugin_id, "ui")).exists()
-                else Path(join("external", plugin_page.plugin_id, "ui"))
-            )
+            path_ui = Path(join("bunkerweb", "core", plugin_page.plugin_id, "ui")) if Path(join("bunkerweb", "core", plugin_page.plugin_id, "ui")).exists() else Path(join("external", plugin_page.plugin_id, "ui"))
 
             if not path_ui.exists():
                 print(
@@ -556,9 +500,7 @@ try:
             flush=True,
         )
         exit(1)
-    elif not all(
-        [external_plugins[plugin]["page_checked"] for plugin in external_plugins]
-    ):
+    elif not all([external_plugins[plugin]["page_checked"] for plugin in external_plugins]):
         print(
             f"❌ Not all external plugins pages are in the database, exiting ...\nmissing plugins pages: {', '.join([plugin for plugin in external_plugins if not external_plugins[plugin]['page_checked']])}",
             flush=True,
@@ -569,9 +511,7 @@ try:
     print(" ", flush=True)
     print("ℹ️ Checking if all custom configs are in the database ...", flush=True)
 
-    custom_confs_rx = re_compile(
-        r"^([0-9a-z\.-]*)_?CUSTOM_CONF_(SERVICE_)?(HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
-    )
+    custom_confs_rx = re_compile(r"^([0-9a-z\.-]*)_?CUSTOM_CONF_(SERVICE_)?(HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$")
 
     global_custom_configs = {}
     service_custom_configs = {}
@@ -584,9 +524,7 @@ try:
             service_custom_configs[custom_conf[3]] = {
                 "value": environ[env].encode(),
                 "type": custom_conf[2].lower(),
-                "method": "manual"
-                if getenv("TEST_TYPE", "docker") == "linux"
-                else "scheduler",
+                "method": "manual" if getenv("TEST_TYPE", "docker") == "linux" else "scheduler",
                 "checked": False,
             }
             continue
@@ -594,9 +532,7 @@ try:
         global_custom_configs[custom_conf[3]] = {
             "value": environ[env].encode(),
             "type": custom_conf[2].lower(),
-            "method": "manual"
-            if getenv("TEST_TYPE", "docker") == "linux"
-            else "scheduler",
+            "method": "manual" if getenv("TEST_TYPE", "docker") == "linux" else "scheduler",
             "checked": False,
         }
 
@@ -614,21 +550,13 @@ try:
         )
 
         for custom_config in custom_configs:
-            if (
-                not multisite
-                and custom_config.name in global_custom_configs
-                and custom_config.service_id
-            ):
+            if not multisite and custom_config.name in global_custom_configs and custom_config.service_id:
                 print(
                     f"❌ The custom config {custom_config.name} is in the database but should not be owned by the service {custom_config.service_id} because multisite is not enabled, exiting ...",
                     flush=True,
                 )
                 exit(1)
-            elif (
-                multisite
-                and custom_config.name in service_custom_configs
-                and not custom_config.service_id
-            ):
+            elif multisite and custom_config.name in service_custom_configs and not custom_config.service_id:
                 print(
                     f"❌ The custom config {custom_config.name} is in the database but should be owned by the service bwadm.example.com because it's a service config, exiting ...",
                     flush=True,
@@ -652,21 +580,13 @@ try:
                     flush=True,
                 )
                 exit(1)
-            elif (
-                custom_config.data.replace(b"# CREATED BY ENV\n", b"")
-                != current_custom_configs[custom_config.name]["value"]
-                and custom_config.data.replace(b"# CREATED BY ENV\n", b"")
-                != current_custom_configs[custom_config.name]["value"] + b"\n"
-            ):
+            elif custom_config.data.replace(b"# CREATED BY ENV\n", b"") != current_custom_configs[custom_config.name]["value"] and custom_config.data.replace(b"# CREATED BY ENV\n", b"") != current_custom_configs[custom_config.name]["value"] + b"\n":
                 print(
                     f"❌ The custom config {custom_config.name} is in the database but the value differ, exiting ...\n{custom_config.data} (database) != {current_custom_configs[custom_config.name]['value']} (env)",
                     flush=True,
                 )
                 exit(1)
-            elif (
-                custom_config.method
-                != current_custom_configs[custom_config.name]["method"]
-            ):
+            elif custom_config.method != current_custom_configs[custom_config.name]["method"]:
                 print(
                     f"❌ The custom config {custom_config.name} is in the database but the method differ, exiting ...\n{custom_config.method} (database) != {current_custom_configs[custom_config.name]['method']} (env)",
                     flush=True,
@@ -675,32 +595,20 @@ try:
 
             current_custom_configs[custom_config.name]["checked"] = True
 
-    if not all(
-        [
-            global_custom_configs[custom_config]["checked"]
-            for custom_config in global_custom_configs
-        ]
-    ):
+    if not all([global_custom_configs[custom_config]["checked"] for custom_config in global_custom_configs]):
         print(
             f"❌ Not all global custom configs are in the database, exiting ...\nmissing custom configs: {', '.join([custom_config for custom_config in global_custom_configs if not global_custom_configs[custom_config]['checked']])}",
             flush=True,
         )
         exit(1)
-    elif not all(
-        [
-            service_custom_configs[custom_config]["checked"]
-            for custom_config in service_custom_configs
-        ]
-    ):
+    elif not all([service_custom_configs[custom_config]["checked"] for custom_config in service_custom_configs]):
         print(
             f"❌ Not all service custom configs are in the database, exiting ...\nmissing custom configs: {', '.join([custom_config for custom_config in service_custom_configs if not service_custom_configs[custom_config]['checked']])}",
             flush=True,
         )
         exit(1)
 
-    print(
-        "✅ All custom configs are in the database and have the right value", flush=True
-    )
+    print("✅ All custom configs are in the database and have the right value", flush=True)
 except SystemExit:
     exit(1)
 except:

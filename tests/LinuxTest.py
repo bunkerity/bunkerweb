@@ -17,7 +17,7 @@ class LinuxTest(Test):
             r"app2\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_2')}",
             r"app3\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_3')}",
         }
-        if not distro in ("ubuntu", "debian", "fedora", "centos", "rhel"):
+        if distro not in ("ubuntu", "debian", "fedora", "centos", "rhel"):
             raise Exception(f"unknown distro {distro}")
         self.__distro = distro
 
@@ -33,7 +33,7 @@ class LinuxTest(Test):
             if distro in ("ubuntu", "debian"):
                 cmd = "echo force-bad-version >> /etc/dpkg/dpkg.cfg ; apt install -y /opt/\\$(ls /opt | grep deb)"
             elif distro in ("centos", "fedora", "rhel"):
-                cmd = "dnf install -y /opt/\$(ls /opt | grep rpm)"
+                cmd = "dnf install -y /opt/\\$(ls /opt | grep rpm)"
             proc = LinuxTest.docker_exec(distro, cmd)
             if proc.returncode != 0:
                 raise Exception("docker exec apt install failed (linux stack)")
@@ -51,23 +51,17 @@ class LinuxTest(Test):
                         "./tests/www-deb.conf",
                         "/etc/php/8.1/fpm/pool.d/www.conf",
                     )
-                    LinuxTest.docker_exec(
-                        distro, "systemctl stop php8.1-fpm ; systemctl start php8.1-fpm"
-                    )
+                    LinuxTest.docker_exec(distro, "systemctl stop php8.1-fpm ; systemctl start php8.1-fpm")
                 elif distro == "debian":
                     LinuxTest.docker_cp(
                         distro,
                         "./tests/www-deb.conf",
                         "/etc/php/7.4/fpm/pool.d/www.conf",
                     )
-                    LinuxTest.docker_exec(
-                        distro, "systemctl stop php7.4-fpm ; systemctl start php7.4-fpm"
-                    )
+                    LinuxTest.docker_exec(distro, "systemctl stop php7.4-fpm ; systemctl start php7.4-fpm")
             elif distro in ("centos", "fedora", "rhel"):
                 LinuxTest.docker_exec(distro, "dnf install -y php-fpm unzip")
-                LinuxTest.docker_cp(
-                    distro, "./tests/www-rpm.conf", "/etc/php-fpm.d/www.conf"
-                )
+                LinuxTest.docker_cp(distro, "./tests/www-rpm.conf", "/etc/php-fpm.d/www.conf")
                 LinuxTest.docker_exec(
                     distro,
                     "mkdir /run/php ; chmod 777 /run/php ; systemctl stop php-fpm ; systemctl start php-fpm",
@@ -92,9 +86,7 @@ class LinuxTest(Test):
             if proc.returncode != 0:
                 ret = False
         except:
-            log(
-                "LINUX", "❌", f"exception while running LinuxTest.end()\n{format_exc()}"
-            )
+            log("LINUX", "❌", f"exception while running LinuxTest.end()\n{format_exc()}")
             return False
         return ret
 
@@ -117,9 +109,7 @@ class LinuxTest(Test):
                 )
                 if proc.returncode != 0:
                     raise Exception("docker exec setup failed (test)")
-            proc = self.docker_exec(
-                self.__distro, f"cp /opt/{self._name}/variables.env /etc/bunkerweb/"
-            )
+            proc = self.docker_exec(self.__distro, f"cp /opt/{self._name}/variables.env /etc/bunkerweb/")
             if proc.returncode != 0:
                 raise Exception("docker exec cp variables.env failed (test)")
             proc = self.docker_exec(
@@ -128,9 +118,7 @@ class LinuxTest(Test):
             )
             if proc.returncode != 0:
                 raise (Exception("docker exec append variables.env failed (test)"))
-            proc = self.docker_exec(
-                self.__distro, "systemctl stop bunkerweb ; systemctl start bunkerweb"
-            )
+            proc = self.docker_exec(self.__distro, "systemctl stop bunkerweb ; systemctl start bunkerweb")
             if proc.returncode != 0:
                 raise Exception("docker exec systemctl restart failed (linux stack)")
         except:

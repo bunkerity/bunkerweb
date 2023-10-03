@@ -17,10 +17,10 @@ Please contact us at [contact@bunkerity.com](mailto:contact@bunkerity.com) if yo
 
 ## Where to get community support ?
 
-To get free community support, you can use the following medias :
+To get free community support, you can use the following media :
 
 - The #help channel of BunkerWeb in the [Discord server](https://discord.com/invite/fTf46FmtyD)
-- The help category of [GitHub dicussions](https://github.com/bunkerity/bunkerweb/discussions)
+- The help category of [GitHub discussions](https://github.com/bunkerity/bunkerweb/discussions)
 - The [/r/BunkerWeb](https://www.reddit.com/r/BunkerWeb) subreddit
 - The [Server Fault](https://serverfault.com/) and [Super User](https://superuser.com/) forums
 

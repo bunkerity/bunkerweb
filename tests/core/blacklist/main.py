@@ -10,9 +10,7 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get(
-                "http://www.example.com", headers={"Host": "www.example.com"}
-            ).status_code
+            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
@@ -25,9 +23,7 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     GLOBAL = getenv("GLOBAL", "no") == "yes"
@@ -63,19 +59,14 @@ try:
 
     status_code = get(
         "http://www.example.com/admin",
-        headers={"Host": "www.example.com", "User-Agent": "BunkerBot"}
-        | ({"X-Forwarded-For": "1.0.0.3"} if GLOBAL else {}),
+        headers={"Host": "www.example.com", "User-Agent": "BunkerBot"} | ({"X-Forwarded-For": "1.0.0.3"} if GLOBAL else {}),
     ).status_code
 
     if status_code == 403:
         if not use_blacklist:
-            print(
-                "❌ The request was rejected, but the blacklist is disabled, exiting ..."
-            )
+            print("❌ The request was rejected, but the blacklist is disabled, exiting ...")
             exit(1)
-        elif blacklist_rdns_global and (
-            blacklist_rdns != "" or blacklist_rdns_urls != ""
-        ):
+        elif blacklist_rdns_global and (blacklist_rdns != "" or blacklist_rdns_urls != ""):
             print(
                 "❌ Blacklist's RDNS global didn't work as expected, exiting ...",
             )
@@ -128,9 +119,7 @@ try:
                 flush=True,
             )
             exit(1)
-    elif blacklist_ip != "" and not any(
-        [blacklist_ignore_ip, blacklist_ignore_ip_urls, not use_blacklist]
-    ):
+    elif blacklist_ip != "" and not any([blacklist_ignore_ip, blacklist_ignore_ip_urls, not use_blacklist]):
         print("❌ Blacklist's IP didn't work as expected, exiting ...", flush=True)
         exit(1)
     elif blacklist_ip_urls != "":
@@ -146,24 +135,16 @@ try:
         print("❌ Blacklist's RDNS didn't work as expected, exiting ...", flush=True)
         exit(1)
     elif blacklist_rdns_urls != "" and blacklist_rdns_global:
-        print(
-            "❌ Blacklist's RDNS urls didn't work as expected, exiting ...", flush=True
-        )
+        print("❌ Blacklist's RDNS urls didn't work as expected, exiting ...", flush=True)
         exit(1)
-    elif blacklist_asn != "" and not any(
-        [blacklist_ignore_asn, blacklist_ignore_asn_urls]
-    ):
+    elif blacklist_asn != "" and not any([blacklist_ignore_asn, blacklist_ignore_asn_urls]):
         print("❌ Blacklist's ASN didn't work as expected, exiting ...", flush=True)
         exit(1)
     elif blacklist_asn_urls != "":
         print("❌ Blacklist's ASN urls didn't work as expected, exiting ...", flush=True)
         exit(1)
-    elif blacklist_user_agent != "" and not any(
-        [blacklist_ignore_user_agent, blacklist_ignore_user_agent_urls]
-    ):
-        print(
-            "❌ Blacklist's User Agent didn't work as expected, exiting ...", flush=True
-        )
+    elif blacklist_user_agent != "" and not any([blacklist_ignore_user_agent, blacklist_ignore_user_agent_urls]):
+        print("❌ Blacklist's User Agent didn't work as expected, exiting ...", flush=True)
         exit(1)
     elif blacklist_user_agent_urls != "":
         print(
@@ -171,9 +152,7 @@ try:
             flush=True,
         )
         exit(1)
-    elif blacklist_uri != "" and not any(
-        [blacklist_ignore_uri, blacklist_ignore_uri_urls]
-    ):
+    elif blacklist_uri != "" and not any([blacklist_ignore_uri, blacklist_ignore_uri_urls]):
         print("❌ Blacklist's URI didn't work as expected, exiting ...", flush=True)
         exit(1)
     elif blacklist_uri_urls != "":

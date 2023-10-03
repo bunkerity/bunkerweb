@@ -6,7 +6,7 @@
 # trap SIGTERM and SIGINT
 function trap_exit() {
 	# shellcheck disable=SC2317
-	log "ENTRYPOINT" "ℹ️ " "Catched stop operation"
+	log "ENTRYPOINT" "ℹ️ " "Caught stop operation"
 	# shellcheck disable=SC2317
 	if [ -f "/var/run/bunkerweb/scheduler.pid" ] ; then
 		# shellcheck disable=SC2317

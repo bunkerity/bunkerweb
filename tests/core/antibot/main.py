@@ -14,9 +14,7 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get(
-                "http://www.example.com", headers={"Host": "www.example.com"}
-            ).status_code
+            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
@@ -29,9 +27,7 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     firefox_options = Options()
@@ -55,9 +51,7 @@ try:
                 exit(1)
             elif test_type == "captcha":
                 if not driver.current_url.endswith(antibot_uri):
-                    print(
-                        "❌ Antibot is disabled or the endpoint is wrong ...", flush=True
-                    )
+                    print("❌ Antibot is disabled or the endpoint is wrong ...", flush=True)
                     exit(1)
                 try:
                     driver.find_element(By.XPATH, "//input[@name='captcha']")

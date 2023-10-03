@@ -1,1 +1,2 @@
 requests==2.31.0
+urllib3[socks]==2.0.6

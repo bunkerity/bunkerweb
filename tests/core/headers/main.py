@@ -29,15 +29,11 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     custom_headers = getenv("CUSTOM_HEADER", "")
-    remove_headers = getenv(
-        "REMOVE_HEADERS", "Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version"
-    )
+    remove_headers = getenv("REMOVE_HEADERS", "Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version")
     strict_transport_security = getenv("STRICT_TRANSPORT_SECURITY", "max-age=31536000")
     cookie_flags = getenv("COOKIE_FLAGS", "* HttpOnly SameSite=Lax")
     cookie_flags_1 = getenv("COOKIE_FLAGS_1")
@@ -49,11 +45,17 @@ try:
     referrer_policy = getenv("REFERRER_POLICY", "strict-origin-when-cross-origin")
     permissions_policy = getenv(
         "PERMISSIONS_POLICY",
-        "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()",
+        "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(),"
+        + " execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(),"
+        + " navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()",
     )
     feature_policy = getenv(
         "FEATURE_POLICY",
-        "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';",
+        "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none';"
+        + " execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none';"
+        + " legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none';"
+        + " publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none';"
+        + " xr-spatial-tracking 'none';",
     )
     x_frame_options = getenv("X_FRAME_OPTIONS", "SAMEORIGIN")
     x_content_type_options = getenv("X_CONTENT_TYPE_OPTIONS", "nosniff")
@@ -72,11 +74,11 @@ try:
     response.raise_for_status()
 
     if custom_headers:
-        splitted = custom_headers.split(":")
+        split = custom_headers.split(":")
 
-        if response.headers.get(splitted[0].strip()) != splitted[1].strip():
+        if response.headers.get(split[0].strip()) != split[1].strip():
             print(
-                f"❌ Header {splitted[0].strip()} is not set to {splitted[1].strip()}, exiting ...\nheaders: {response.headers}",
+                f"❌ Header {split[0].strip()} is not set to {split[1].strip()}, exiting ...\nheaders: {response.headers}",
                 flush=True,
             )
             exit(1)
@@ -86,11 +88,7 @@ try:
             flush=True,
         )
         exit(1)
-    elif (
-        ssl
-        and response.headers.get("Strict-Transport-Security")
-        != strict_transport_security
-    ):
+    elif ssl and response.headers.get("Strict-Transport-Security") != strict_transport_security:
         print(
             f'❌ Header "Strict-Transport-Security" doesn\'t have the right value. {response.headers.get("Strict-Transport-Security", "missing header")} (header) != {strict_transport_security} (env), exiting ...\nheaders: {response.headers}',
             flush=True,
@@ -167,11 +165,7 @@ try:
             f"❌ Cookie {cookie.name} has the HttpOnly flag even though it's not supposed to, exiting ...\ncookie: name = {cookie.name}, secure = {cookie.secure}, HttpOnly = {cookie.has_nonstandard_attr('HttpOnly')}",
         )
         exit(1)
-    elif (
-        not cookie_flags_1
-        and "HttpOnly" in cookie_flags
-        and not cookie.has_nonstandard_attr("HttpOnly")
-    ):
+    elif not cookie_flags_1 and "HttpOnly" in cookie_flags and not cookie.has_nonstandard_attr("HttpOnly"):
         print(
             f"❌ Cookie {cookie.name} doesn't have the HttpOnly flag even though it's set in the env, exiting ...\ncookie: name = {cookie.name}, secure = {cookie.secure}, HttpOnly = {cookie.has_nonstandard_attr('HttpOnly')}",
         )

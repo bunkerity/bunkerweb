@@ -35,16 +35,9 @@ class SwarmTest(Test):
             compose = "/tmp/swarm/stack.yml"
             with open(compose, "r") as f:
                 data = safe_load(f.read())
-            if (
-                not "AUTO_LETS_ENCRYPT=yes"
-                in data["services"]["bunkerweb"]["environment"]
-            ):
-                data["services"]["bunkerweb"]["environment"].append(
-                    "AUTO_LETS_ENCRYPT=yes"
-                )
-            data["services"]["bunkerweb"]["environment"].append(
-                "USE_LETS_ENCRYPT_STAGING=yes"
-            )
+            if "AUTO_LETS_ENCRYPT=yes" not in data["services"]["bunkerweb"]["environment"]:
+                data["services"]["bunkerweb"]["environment"].append("AUTO_LETS_ENCRYPT=yes")
+            data["services"]["bunkerweb"]["environment"].append("USE_LETS_ENCRYPT_STAGING=yes")
             del data["services"]["bunkerweb"]["deploy"]["placement"]
             with open(compose, "w") as f:
                 f.write(dump(data))
@@ -87,7 +80,12 @@ class SwarmTest(Test):
                 i += 1
             if not healthy:
                 proc = run(
-                    "docker service logs bunkerweb_bunkerweb ; docker service logs bunkerweb_bw-autoconf ; docker service logs bunkerweb_bw-scheduler ; docker service logs bunkerweb_bw-db ; docker service logs bunkerweb_bw-redis ; docker stack ps --no-trunc bunkerweb",
+                    "docker service logs bunkerweb_bunkerweb ;"
+                    + " docker service logs bunkerweb_bw-autoconf ;"
+                    + " docker service logs bunkerweb_bw-scheduler ;"
+                    + " docker service logs bunkerweb_bw-db ;"
+                    + " docker service logs bunkerweb_bw-redis ;"
+                    + " docker stack ps --no-trunc bunkerweb",
                     cwd="/tmp/swarm",
                     shell=True,
                     capture_output=True,
@@ -116,9 +114,7 @@ class SwarmTest(Test):
                 ret = False
             rmtree("/tmp/swarm")
         except:
-            log(
-                "SWARM", "❌", f"exception while running SwarmTest.end()\n{format_exc()}"
-            )
+            log("SWARM", "❌", f"exception while running SwarmTest.end()\n{format_exc()}")
             return False
         return ret
 
@@ -163,7 +159,7 @@ class SwarmTest(Test):
                     )
                     if proc2.returncode != 0:
                         raise (Exception("swarm stack is not healthy (cmd2 failed)"))
-                    if not "Running" in proc2.stdout.decode():
+                    if "Running" not in proc2.stdout.decode():
                         all_healthy = False
                         break
                 if all_healthy:
@@ -188,9 +184,7 @@ class SwarmTest(Test):
             proc = run(f'docker stack rm "{self._name}"', shell=True)
             if proc.returncode != 0:
                 raise (Exception("docker stack rm failed"))
-            proc = run(
-                'docker config ls --format "{{ .ID }}"', shell=True, capture_output=True
-            )
+            proc = run('docker config ls --format "{{ .ID }}"', shell=True, capture_output=True)
             if proc.returncode != 0:
                 raise (Exception("docker config ls failed"))
             for config in proc.stdout.decode().splitlines():

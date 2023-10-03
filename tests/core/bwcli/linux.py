@@ -15,9 +15,7 @@ try:
     _, err = result.communicate()
 
     if result.returncode != 0:
-        print(
-            f'❌ Command "ban" failed, exiting ...\noutput: {err.decode()}\nexit_code: {result.returncode}'
-        )
+        print(f'❌ Command "ban" failed, exiting ...\noutput: {err.decode()}\nexit_code: {result.returncode}')
         exit(1)
 
     print(err.decode(), flush=True)
@@ -31,20 +29,14 @@ try:
     _, err = result.communicate()
 
     if result.returncode != 0:
-        print(
-            f'❌ Command "bans" failed, exiting ...\noutput: {err.decode()}\nexit_code: {result.returncode}'
-        )
+        print(f'❌ Command "bans" failed, exiting ...\noutput: {err.decode()}\nexit_code: {result.returncode}')
         exit(1)
 
     if b"- 127.0.0.1" not in err:
-        print(
-            f'❌ IP 127.0.0.1 not found in the output of "bans", exiting ...\noutput: {err.decode()}'
-        )
+        print(f'❌ IP 127.0.0.1 not found in the output of "bans", exiting ...\noutput: {err.decode()}')
         exit(1)
     elif b"List of bans for redis:" not in err:
-        print(
-            f'❌ Redis ban list not found in the output of "bans", exiting ...\noutput: {err.decode()}'
-        )
+        print(f'❌ Redis ban list not found in the output of "bans", exiting ...\noutput: {err.decode()}')
         exit(1)
     elif b"1 hour" not in err and b"59 minutes" not in err:
         print(f"❌ Ban duration isn't 1 hour, exiting ...\noutput: {err.decode()}")
@@ -59,9 +51,7 @@ try:
     _, err = result.communicate()
 
     if result.returncode != 0:
-        print(
-            f'❌ Command "unban" failed, exiting ...\noutput: {err.decode()}\nexit_code: {result.returncode}'
-        )
+        print(f'❌ Command "unban" failed, exiting ...\noutput: {err.decode()}\nexit_code: {result.returncode}')
         exit(1)
 
     print(err.decode(), flush=True)
@@ -75,9 +65,7 @@ try:
     _, err = result.communicate()
 
     if result.returncode != 0:
-        print(
-            f'❌ Command "bans" failed, exiting ...\noutput: {err.decode()}\nexit_code: {result.returncode}'
-        )
+        print(f'❌ Command "bans" failed, exiting ...\noutput: {err.decode()}\nexit_code: {result.returncode}')
         exit(1)
 
     found = 0

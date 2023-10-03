@@ -21,9 +21,7 @@ from sys import path as sys_path
 from threading import Lock, Semaphore, Thread
 from traceback import format_exc
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -94,16 +92,12 @@ class JobScheduler(ApiCaller):
 
     def __get_jobs(self):
         jobs = {}
-        for plugin_file in glob(
-            join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json")
-        ) + glob(  # core plugins
-            join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")
-        ):  # external plugins
+        for plugin_file in glob(join(sep, "usr", "share", "bunkerweb", "core", "*", "plugin.json")) + glob(join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")):  # core plugins  # external plugins
             plugin_name = basename(dirname(plugin_file))
             jobs[plugin_name] = []
             try:
                 plugin_data = loads(Path(plugin_file).read_text(encoding="utf-8"))
-                if not "jobs" in plugin_data:
+                if "jobs" not in plugin_data:
                     continue
 
                 plugin_jobs = plugin_data["jobs"]
@@ -118,34 +112,24 @@ class JobScheduler(ApiCaller):
                             "reload",
                         )
                     ):
-                        self.__logger.warning(
-                            f"missing keys for job {job['name']} in plugin {plugin_name}, must have name, file, every and reload, ignoring job"
-                        )
+                        self.__logger.warning(f"missing keys for job {job['name']} in plugin {plugin_name}, must have name, file, every and reload, ignoring job")
                         plugin_jobs.pop(x)
                         continue
 
                     if not match(r"^[\w.-]{1,128}$", job["name"]):
-                        self.__logger.warning(
-                            f"Invalid name for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128)), ignoring job"
-                        )
+                        self.__logger.warning(f"Invalid name for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128)), ignoring job")
                         plugin_jobs.pop(x)
                         continue
                     elif not match(r"^[\w./-]{1,256}$", job["file"]):
-                        self.__logger.warning(
-                            f"Invalid file for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256)), ignoring job"
-                        )
+                        self.__logger.warning(f"Invalid file for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256)), ignoring job")
                         plugin_jobs.pop(x)
                         continue
                     elif job["every"] not in ("once", "minute", "hour", "day", "week"):
-                        self.__logger.warning(
-                            f"Invalid every for job {job['name']} in plugin {plugin_name} (Must be once, minute, hour, day or week), ignoring job"
-                        )
+                        self.__logger.warning(f"Invalid every for job {job['name']} in plugin {plugin_name} (Must be once, minute, hour, day or week), ignoring job")
                         plugin_jobs.pop(x)
                         continue
                     elif job["reload"] is not True and job["reload"] is not False:
-                        self.__logger.warning(
-                            f"Invalid reload for job {job['name']} in plugin {plugin_name} (Must be true or false), ignoring job"
-                        )
+                        self.__logger.warning(f"Invalid reload for job {job['name']} in plugin {plugin_name} (Must be true or false), ignoring job")
                         plugin_jobs.pop(x)
                         continue
 
@@ -255,9 +239,7 @@ class JobScheduler(ApiCaller):
                     file = job["file"]
                     every = job["every"]
                     if every != "once":
-                        self.__str_to_schedule(every).do(
-                            self.__job_wrapper, path, plugin, name, file
-                        )
+                        self.__str_to_schedule(every).do(self.__job_wrapper, path, plugin, name, file)
                 except:
                     self.__logger.error(
                         f"Exception while scheduling jobs for plugin {plugin} : {format_exc()}",

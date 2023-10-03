@@ -214,7 +214,7 @@ do
             unset X_XSS_PROTECTION
         fi
     elif [ "$test" = "multiple_no_httponly_flag" ] ; then
-        echo "🎛️ Running tests with HttpOnly flag overriden for cookie \"bw_cookie\" and default cookies flags ..."
+        echo "🎛️ Running tests with HttpOnly flag overridden for cookie \"bw_cookie\" and default cookies flags ..."
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@COOKIE_FLAGS: ".*"$@COOKIE_FLAGS: "* HttpOnly SameSite=Lax"@' {} \;
             sed -i '27i \      COOKIE_FLAGS_1: "bw_cookie SameSite=Lax"' docker-compose.yml

@@ -10,9 +10,7 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get(
-                "http://www.example.com", headers={"Host": "www.example.com"}
-            ).status_code
+            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
@@ -25,9 +23,7 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     use_bunkernet = getenv("USE_BUNKERNET", "yes") == "yes"
@@ -49,14 +45,9 @@ try:
         print("✅ BunkerNet plugin is disabled and not registered ...", flush=True)
         exit(0)
 
-    print(
-        "ℹ️ Sending a request to http://www.example.com/?id=/etc/passwd ...", flush=True
-    )
+    print("ℹ️ Sending a request to http://www.example.com/?id=/etc/passwd ...", flush=True)
 
-    status_code = get(
-        f"http://www.example.com/?id=/etc/passwd",
-        headers={"Host": "www.example.com", "X-Forwarded-For": "1.0.0.3"},
-    ).status_code
+    status_code = get("http://www.example.com/?id=/etc/passwd", headers={"Host": "www.example.com", "X-Forwarded-For": "1.0.0.3"}).status_code
 
     print(f"ℹ️ Status code: {status_code}", flush=True)
 

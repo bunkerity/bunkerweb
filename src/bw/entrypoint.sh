@@ -16,7 +16,7 @@ log "ENTRYPOINT" "ℹ️" "Starting BunkerWeb v$(cat /usr/share/bunkerweb/VERSIO
 # trap SIGTERM and SIGINT
 function trap_exit() {
 	# shellcheck disable=SC2317
-	log "ENTRYPOINT" "ℹ️" "Catched stop operation, stopping nginx ..."
+	log "ENTRYPOINT" "ℹ️" "Caught stop operation, stopping nginx ..."
 	# shellcheck disable=SC2317
 	nginx -s stop
 }
@@ -25,7 +25,7 @@ trap "trap_exit" TERM INT QUIT
 # trap SIGHUP
 function trap_reload() {
 	# shellcheck disable=SC2317
-	log "ENTRYPOINT" "ℹ️" "Catched reload operation"
+	log "ENTRYPOINT" "ℹ️" "Caught reload operation"
 	# shellcheck disable=SC2317
 	if [ -f /var/run/bunkerweb/nginx.pid ] ; then
 		# shellcheck disable=SC2317

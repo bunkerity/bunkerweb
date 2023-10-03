@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from os import getenv
 from time import sleep
-from typing import Literal, Optional, Union
+from typing import Literal, Union
 
 from Config import Config
 
@@ -20,12 +20,8 @@ class Controller(Config):
         self._type = ctrl_type
         self._instances = []
         self._services = []
-        self._configs = {
-            config_type: {} for config_type in self._supported_config_types
-        }
-        self._logger = setup_logger(
-            f"{self._type}-controller", getenv("LOG_LEVEL", "INFO")
-        )
+        self._configs = {config_type: {} for config_type in self._supported_config_types}
+        self._logger = setup_logger(f"{self._type}-controller", getenv("LOG_LEVEL", "INFO"))
 
     def wait(self, wait_time: int) -> list:
         all_ready = False
@@ -105,7 +101,7 @@ class Controller(Config):
 
     def _is_service_present(self, server_name):
         for service in self._services:
-            if not "SERVER_NAME" in service or not service["SERVER_NAME"]:
+            if "SERVER_NAME" not in service or not service["SERVER_NAME"]:
                 continue
             if server_name == service["SERVER_NAME"].strip().split(" ")[0]:
                 return True

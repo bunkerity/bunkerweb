@@ -19,15 +19,9 @@ class DockerTest(Test):
         self._domains = {
             r"www\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
             r"auth\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-            r"app1\.example\.com": Test.random_string(6)
-            + "."
-            + getenv("TEST_DOMAIN1_1"),
-            r"app2\.example\.com": Test.random_string(6)
-            + "."
-            + getenv("TEST_DOMAIN1_2"),
-            r"app3\.example\.com": Test.random_string(6)
-            + "."
-            + getenv("TEST_DOMAIN1_3"),
+            r"app1\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
+            r"app2\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
+            r"app3\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_3"),
         }
         self._check_domains()
 
@@ -53,9 +47,7 @@ class DockerTest(Test):
             test = "/tmp/tests/" + self._name
             compose = "/tmp/tests/" + self._name + "/docker-compose.yml"
             example_data = "/tmp/tests/" + self._name + "/bw-data"
-            Test.replace_in_file(
-                compose, r"bunkerity/bunkerweb:.*$", "local/bunkerweb-tests:latest"
-            )
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "local/bunkerweb-tests:latest")
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb-scheduler:.*$",
@@ -69,9 +61,7 @@ class DockerTest(Test):
                 r"AUTO_LETS_ENCRYPT=yes",
                 "AUTO_LETS_ENCRYPT=yes\n      - USE_LETS_ENCRYPT_STAGING=yes",
             )
-            Test.replace_in_file(
-                compose, r"DISABLE_DEFAULT_SERVER=yes", "DISABLE_DEFAULT_SERVER=no"
-            )
+            Test.replace_in_file(compose, r"DISABLE_DEFAULT_SERVER=yes", "DISABLE_DEFAULT_SERVER=no")
             for ex_domain, test_domain in self._domains.items():
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)
@@ -88,9 +78,7 @@ class DockerTest(Test):
                 )
                 if proc.returncode != 0:
                     raise (Exception("cp bw-data failed"))
-            proc = run(
-                "docker-compose pull --ignore-pull-failures", shell=True, cwd=test
-            )
+            proc = run("docker-compose pull --ignore-pull-failures", shell=True, cwd=test)
             if proc.returncode != 0:
                 raise (Exception("docker-compose pull failed"))
             proc = run("docker-compose up -d", shell=True, cwd=test)
@@ -124,4 +112,4 @@ class DockerTest(Test):
 
     def _debug_fail(self):
         test = "/tmp/tests/" + self._name
-        proc = run("docker-compose logs", shell=True, cwd=test)
+        run("docker-compose logs", shell=True, cwd=test)
