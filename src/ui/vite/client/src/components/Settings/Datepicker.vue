@@ -11,12 +11,59 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  defaultDate : {
+    type: [String, Date],
+    required: false,
+    default: null
+  },
+  noPickBeforeStamp : {
+    type: [String, Number],
+    required: false,
+    default: ""
+  },
+  noPickAfterStamp : {
+    type: [String, Number],
+    required: false,
+    default: ""
+  }
 });
 
+const date = reactive({
+  isInvalid : false,
+  isValid : false,
+});
 
+let datepicker;
+let currStamp;
 onMounted(() => {
-  const el = flatpickr(`#${props.settings.id}`, {locale: "en",   dateFormat: "m/d/Y",});
+  datepicker = flatpickr(`#${props.settings.id}`, {locale: "en",   dateFormat: "m/d/Y", defaultDate : props.defaultDate});
 })
+
+function checkToSend(date) {
+  currStamp = Date.parse(date);
+  // Check pick is in interval
+  if(props.noPickBeforeStamp && currStamp < props.noPickBeforeStamp) setInvalid(props.noPickBeforeStamp);
+  if(props.noPickAfterStamp && currStamp > props.noPickAfterStamp) setInvalid(props.noPickAfterStamp);
+  // Run whatever, if invalid this will override
+  setValid();
+  return {timestamp : currStamp, date : new Date(currStamp)}
+}
+
+function setInvalid(dateToSet) {
+  currStamp = dateToSet;
+  datepicker.setDate(currStamp);
+  date.isInvalid = true;
+  setTimeout(() => {
+    date.isInvalid = false;
+  }, 1000);
+}
+
+function setValid() {
+  date.isValid = true;
+  setTimeout(() => {
+    date.isValid = false;
+  }, 1000);
+}
 
 const emits = defineEmits(["inp"]);
 </script>
@@ -24,13 +71,16 @@ const emits = defineEmits(["inp"]);
 <template>
   <div class="relative flex items-center">
     <input
-      @change="(v) => $emit('inp', {timestamp : Date.parse(v.target.value), date : new Date(Date.parse(v.target.value))})"
+      @change="(v) => $emit('inp', checkToSend(v.target.value))"
       type="text"
+      :class="[date.isInvalid ? 'invalid': '', !date.isInvalid && date.isValid ? 'valid': '']"
       class="input-regular cursor-pointer"
       :id="props.settings.id"
       :required="props.settings.id === 'SERVER_NAME' || props.settings.required || false ? true : false"
       :disabled="props.settings.disabled || false"
       :name="props.settings.id"
+      placeholder="mm/dd/yyyy"
+      pattern="/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{4}$/g"
     />
   </div>
 </template>

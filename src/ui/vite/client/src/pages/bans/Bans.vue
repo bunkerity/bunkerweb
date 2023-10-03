@@ -156,13 +156,6 @@ const tab = reactive({
           }"
         />
       </SettingsLayout>
-      <SettingsLayout class="sm:col-span-6" label="Select reason" name="date">
-        <SettingsDatepicker
-          :settings="{
-            id: 'date',
-          }"
-        />
-      </SettingsLayout>
     </CardBase>
     <CardBase
     class="col-span-12 overflow-x-auto overflow-y-hidden"

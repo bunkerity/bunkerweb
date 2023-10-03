@@ -3,7 +3,7 @@ import ListBase from "@components/List/Base.vue";
 import ListItem from "@components/List/Item.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
-import SettingsSelect from "@components/Settings/Select.vue";
+import SettingsDatepicker from "@components/Settings/Datepicker.vue";
 import ButtonBase from "@components/Button/Base.vue";
 
 import {reactive} from "vue";
@@ -13,16 +13,22 @@ const bans = reactive({
 })
 
 const addPositions = [
-  "col-span-5",
-  "col-span-5",
-  "col-span-2",
+  "col-span-3",
+  "col-span-3",
+  "col-span-3",
+  "col-span-3",
 ];
 
 const addHeader = [
   "IP number",
-  "Fin ban",
   "Reason",
+  "Ban start",
+  "Ban end",
 ];
+
+function addPrefZero(dateStr) {
+  return dateStr.length === 2 ? dateStr : `0${dateStr}`;
+}
 </script>
 
 <template>
@@ -63,18 +69,26 @@ const addHeader = [
                       }"
                     />
                   </SettingsLayout>
-                  <SettingsLayout :class="[addPositions[1], 'mx-2']" label="" :name="`add-ip-${id}`">
+                  <SettingsLayout :class="[addPositions[1], 'mx-2']" label="" :name="`add-reason-${id}`">
                     <SettingsInput
                       @inp="(v) => (filters.name = v)"
                       :settings="{
-                        id: `add-ip-${id}`,
+                        id: `add-reason-${id}`,
                         type: 'text',
                         value: '',
-                        placeholder: '127.0.0.1',
+                        placeholder: 'Manual',
                       }"
                     />
                   </SettingsLayout>
-                  <span :class="[addPositions[2], 'font-semibold']">MANUAL</span>
+                  <span :class="[addPositions[2], 'font-sm']">{{ `${addPrefZero(new Date().getMonth().toString())}/${addPrefZero(new Date().getDay().toString())}/${new Date().getFullYear().toString()}` }}</span>
+                  <SettingsLayout :class="[addPositions[3], 'mx-2']" label="" :name="`add-ban-date-${id}`">
+                    <SettingsDatepicker
+                      :settings="{
+                        id: `add-ban-date-${id}`,
+                      }"
+                      :noPickBeforeStamp="Date.parse(new Date())"
+                    />
+                  </SettingsLayout>
                 </div>
               </ListItem>
             </ListBase>
