@@ -34,7 +34,7 @@ class Config(ConfigCaller):
         if not plugins:
             self.__logger.error("No plugins in database, can't update settings...")
             return
-        self._settings = []
+        self._settings = {}
         for plugin in plugins:
             self._settings.update(plugin["settings"])
 
