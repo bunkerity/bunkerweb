@@ -6,6 +6,8 @@ services:
     pull_policy: never
     labels:
       - "bunkerweb.INSTANCE"
+    volumes:
+      - ./index.html:/var/www/html/index.html
     environment:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       HTTP_PORT: "80"
