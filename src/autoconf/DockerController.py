@@ -104,6 +104,7 @@ class DockerController(Controller):
         self._set_autoconf_load_db()
         for _ in self.__client.events(decode=True, filters={"type": "container"}):
             try:
+                self._update_settings()
                 self._instances = self.get_instances()
                 self._services = self.get_services()
                 self._configs = self.get_configs()

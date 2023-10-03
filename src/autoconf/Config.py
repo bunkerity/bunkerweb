@@ -29,6 +29,15 @@ class Config(ConfigCaller):
 
         self._db = Database(self.__logger)
 
+    def _update_settings(self):
+        plugins = self._db.get_plugins()
+        if not plugins:
+            self.__logger.error("No plugins in database, can't update settings...")
+            return
+        self._settings = []
+        for plugin in plugins:
+            self._settings.update(plugin["settings"])
+
     def __get_full_env(self) -> dict:
         env_instances = {"SERVER_NAME": ""}
         for instance in self.__instances:
