@@ -13,6 +13,16 @@ repos:
         args: ["--allow-multiple-documents"]
       - id: check-case-conflict
 
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+      - id: codespell
+        name: Codespell Spell Checker
+        exclude: modsecurity-rules.conf.*$
+        entry: codespell --ignore-regex="(tabEl|Widgits)" --skip src/common/core/antibot/files/*.html,src/common/core/misc/files/*.html,src/common/core/errors/files/*.html,src/bw/loading/*.html,src/ui/static/js/utils/flatpickr.js,CHANGELOG.md
+        language: python
+        types: [text]
+
   - repo: https://github.com/ambv/black
     rev: 23.9.1
     hooks:
