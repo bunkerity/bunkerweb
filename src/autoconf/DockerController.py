@@ -13,9 +13,7 @@ class DockerController(Controller):
     def __init__(self, docker_host):
         super().__init__("docker")
         self.__client = DockerClient(base_url=docker_host)
-        self.__custom_confs_rx = re_compile(
-            r"^bunkerweb.CUSTOM_CONF_(SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
-        )
+        self.__custom_confs_rx = re_compile(r"^bunkerweb.CUSTOM_CONF_(SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$")
 
     def _get_controller_instances(self) -> List[Container]:
         return self.__client.containers.list(filters={"label": "bunkerweb.INSTANCE"})
@@ -27,10 +25,7 @@ class DockerController(Controller):
         instance = {}
         instance["name"] = controller_instance.name
         instance["hostname"] = controller_instance.name
-        instance["health"] = (
-            controller_instance.status == "running"
-            and controller_instance.attrs["State"]["Health"]["Status"] == "healthy"
-        )
+        instance["health"] = controller_instance.status == "running" and controller_instance.attrs["State"]["Health"]["Status"] == "healthy"
         instance["env"] = {}
         for env in controller_instance.attrs["Config"]["Env"]:
             variable = env.split("=")[0]
@@ -53,9 +48,7 @@ class DockerController(Controller):
     def _get_static_services(self) -> List[dict]:
         services = []
         variables = {}
-        for instance in self.__client.containers.list(
-            filters={"label": "bunkerweb.INSTANCE"}
-        ):
+        for instance in self.__client.containers.list(filters={"label": "bunkerweb.INSTANCE"}):
             if not instance.attrs or not instance.attrs.get("Config", {}).get("Env"):
                 continue
 
@@ -70,9 +63,7 @@ class DockerController(Controller):
                 for variable, value in variables.items():
                     prefix = variable.split("_")[0]
                     real_variable = variable.replace(f"{prefix}_", "", 1)
-                    if prefix == server_name and self._is_setting_context(
-                        real_variable, "multisite"
-                    ):
+                    if prefix == server_name and self._is_setting_context(real_variable, "multisite"):
                         service[real_variable] = value
                 services.append(service)
         return services
@@ -80,9 +71,7 @@ class DockerController(Controller):
     def get_configs(self) -> Dict[str, Dict[str, Any]]:
         configs = {config_type: {} for config_type in self._supported_config_types}
         # get site configs from labels
-        for container in self.__client.containers.list(
-            filters={"label": "bunkerweb.SERVER_NAME"}
-        ):
+        for container in self.__client.containers.list(filters={"label": "bunkerweb.SERVER_NAME"}):
             labels = container.labels  # type: ignore (labels is inside a container)
             if isinstance(labels, list):
                 labels = {label: "" for label in labels}
@@ -100,9 +89,7 @@ class DockerController(Controller):
                 result = self.__custom_confs_rx.search(variable)
                 if result is None:
                     continue
-                configs[result.group(1).lower().replace("_", "-")][
-                    f"{server_name}/{result.group(2)}"
-                ] = value
+                configs[result.group(1).lower().replace("_", "-")][f"{server_name}/{result.group(2)}"] = value
         return configs
 
     def apply_config(self) -> bool:
@@ -120,13 +107,9 @@ class DockerController(Controller):
                 self._instances = self.get_instances()
                 self._services = self.get_services()
                 self._configs = self.get_configs()
-                if not self.update_needed(
-                    self._instances, self._services, configs=self._configs
-                ):
+                if not self.update_needed(self._instances, self._services, configs=self._configs):
                     continue
-                self._logger.info(
-                    "Caught Docker event, deploying new configuration ..."
-                )
+                self._logger.info("Caught Docker event, deploying new configuration ...")
                 if not self.apply_config():
                     self._logger.error("Error while deploying new configuration")
                 else:
@@ -136,6 +119,4 @@ class DockerController(Controller):
 
                     self._set_autoconf_load_db()
             except:
-                self._logger.error(
-                    f"Exception while processing events :\n{format_exc()}"
-                )
+                self._logger.error(f"Exception while processing events :\n{format_exc()}")

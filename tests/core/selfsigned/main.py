@@ -12,17 +12,11 @@ try:
     ssl_generated = getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes"
     self_signed_ssl_expiry = getenv("SELF_SIGNED_SSL_EXPIRY", "365")
 
-    self_signed_ssl_expiry = (
-        datetime.now()
-        + timedelta(days=int(self_signed_ssl_expiry))
-        - timedelta(hours=1)
-    )
+    self_signed_ssl_expiry = datetime.now() + timedelta(days=int(self_signed_ssl_expiry)) - timedelta(hours=1)
 
     self_signed_ssl_subj = getenv("SELF_SIGNED_SSL_SUBJ", "/CN=www.example.com/")
 
-    response = get(
-        f"http://www.example.com", headers={"Host": "www.example.com"}, verify=False
-    )
+    response = get("http://www.example.com", headers={"Host": "www.example.com"}, verify=False)
 
     if not ssl_generated and response.status_code == 200:
         print(
@@ -33,9 +27,7 @@ try:
 
     sleep(1)
 
-    response = get(
-        f"https://www.example.com", headers={"Host": "www.example.com"}, verify=False
-    )
+    response = get("https://www.example.com", headers={"Host": "www.example.com"}, verify=False)
 
     if ssl_generated and response.status_code != 200:
         print(
@@ -57,12 +49,8 @@ try:
     # Parse the PEM certificate
     certificate = x509.load_pem_x509_certificate(pem_data.encode(), default_backend())
 
-    common_name = certificate.subject.get_attributes_for_oid(
-        x509.oid.NameOID.COMMON_NAME
-    )[0].value
-    check_self_signed_ssl_subj = self_signed_ssl_subj.replace("/", "").replace(
-        "CN=", ""
-    )
+    common_name = certificate.subject.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)[0].value
+    check_self_signed_ssl_subj = self_signed_ssl_subj.replace("/", "").replace("CN=", "")
     if common_name != check_self_signed_ssl_subj:
         print(
             f"❌ The SSL generation is enabled and the Common Name (CN) is not {check_self_signed_ssl_subj} but {common_name}, exiting ...",

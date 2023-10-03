@@ -34,9 +34,7 @@ lock = Lock()
 status = 0
 
 
-def generate_cert(
-    first_server: str, days: str, subj: str, self_signed_path: Path
-) -> Tuple[bool, int]:
+def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Path) -> Tuple[bool, int]:
     if self_signed_path.joinpath(f"{first_server}.pem").is_file():
         if (
             run(
@@ -61,19 +59,10 @@ def generate_cert(
                 self_signed_path.joinpath(f"{first_server}.pem").read_bytes(),
                 default_backend(),
             )
-            if sorted(
-                attribute.rfc4514_string() for attribute in certificate.subject
-            ) != sorted(v for v in subj.split("/") if v):
-                logger.warning(
-                    f"Subject of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ..."
-                )
-            elif (
-                certificate.not_valid_after - certificate.not_valid_before
-                != timedelta(days=int(days))
-            ):
-                logger.warning(
-                    f"Expiration date of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ..."
-                )
+            if sorted(attribute.rfc4514_string() for attribute in certificate.subject) != sorted(v for v in subj.split("/") if v):
+                logger.warning(f"Subject of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ...")
+            elif certificate.not_valid_after - certificate.not_valid_before != timedelta(days=int(days)):
+                logger.warning(f"Expiration date of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ...")
             else:
                 return True, 0
 
@@ -154,9 +143,7 @@ try:
                 continue
 
             if not db:
-                db = Database(
-                    logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False
-                )
+                db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
 
             ret, ret_status = generate_cert(
                 first_server,
@@ -174,9 +161,7 @@ try:
 
     # Singlesite case
     elif getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes" and getenv("SERVER_NAME"):
-        db = Database(
-            logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False
-        )
+        db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
 
         first_server = getenv("SERVER_NAME", "").split(" ")[0]
         ret, ret_status = generate_cert(

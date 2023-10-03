@@ -10,10 +10,7 @@ from time import sleep
 from traceback import format_exc
 from typing import Any
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("utils",), ("api",), ("db",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -24,9 +21,7 @@ from Database import Database  # type: ignore
 from Configurator import Configurator
 from API import API  # type: ignore
 
-custom_confs_rx = re_compile(
-    r"^([0-9a-z\.-]*)_?CUSTOM_CONF_(HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$"
-)
+custom_confs_rx = re_compile(r"^([0-9a-z\.-]*)_?CUSTOM_CONF_(HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(.+)$")
 
 
 def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
@@ -36,11 +31,7 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
     custom_confs = []
     apis = []
 
-    for var in (
-        instance.attrs["Config"]["Env"]
-        if _type == "Docker"
-        else instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]
-    ):
+    for var in instance.attrs["Config"]["Env"] if _type == "Docker" else instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
         splitted = var.split("=", 1)
         if custom_confs_rx.match(splitted[0]):
             custom_conf = custom_confs_rx.search(splitted[0]).groups()
@@ -54,9 +45,7 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
                     ),
                 }
             )
-            logger.info(
-                f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
-            )
+            logger.info(f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}")
         else:
             tmp_config[splitted[0]] = splitted[1]
 
@@ -168,9 +157,7 @@ if __name__ == "__main__":
 
         # Check existences and permissions
         logger.info("Checking arguments ...")
-        files = [settings_path] + (
-            [Path(normpath(args.variables))] if args.variables else []
-        )
+        files = [settings_path] + ([Path(normpath(args.variables))] if args.variables else [])
         paths_rx = [core_path, plugins_path]
         for file in files:
             if not file.is_file():
@@ -217,19 +204,13 @@ if __name__ == "__main__":
                             ),
                         }
                     )
-                    logger.info(
-                        f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
-                    )
+                    logger.info(f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}")
 
             db = Database(logger, config_files.get("DATABASE_URI", None), pool=False)
         else:
-            docker_client = DockerClient(
-                base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
-            )
+            docker_client = DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
 
-            while not docker_client.containers.list(
-                filters={"label": "bunkerweb.INSTANCE"}
-            ):
+            while not docker_client.containers.list(filters={"label": "bunkerweb.INSTANCE"}):
                 logger.info("Waiting for BunkerWeb instance ...")
                 sleep(5)
 
@@ -239,9 +220,7 @@ if __name__ == "__main__":
             custom_confs = []
             apis = []
 
-            for instance in docker_client.containers.list(
-                filters={"label": "bunkerweb.INSTANCE"}
-            ):
+            for instance in docker_client.containers.list(filters={"label": "bunkerweb.INSTANCE"}):
                 for var in instance.attrs["Config"]["Env"]:
                     splitted = var.split("=", 1)
                     if custom_confs_rx.match(splitted[0]):
@@ -256,16 +235,12 @@ if __name__ == "__main__":
                                 ),
                             }
                         )
-                        logger.info(
-                            f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}"
-                        )
+                        logger.info(f"Found custom conf env var {'for service ' + custom_conf[0] if custom_conf[0] else 'without service'} with type {custom_conf[1]} and name {custom_conf[2]}")
                     else:
                         tmp_config[splitted[0]] = splitted[1]
 
                         if not db and splitted[0] == "DATABASE_URI":
-                            db = Database(
-                                logger, sqlalchemy_string=splitted[1], pool=False
-                            )
+                            db = Database(logger, sqlalchemy_string=splitted[1], pool=False)
                         elif splitted[0] == "API_HTTP_PORT":
                             api_http_port = splitted[1]
                         elif splitted[0] == "API_SERVER_NAME":
@@ -319,9 +294,7 @@ if __name__ == "__main__":
                 logger.info("Database tables initialized")
 
             err = db.initialize_db(
-                version=Path(sep, "usr", "share", "bunkerweb", "VERSION")
-                .read_text()
-                .strip(),
+                version=Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip(),
                 integration=integration,
             )
 
@@ -344,9 +317,7 @@ if __name__ == "__main__":
         err = db.save_config(config_files, args.method, changed=False)
 
         if err:
-            logger.warning(
-                f"Couldn't save config to database : {err}, config may not work as expected"
-            )
+            logger.warning(f"Couldn't save config to database : {err}, config may not work as expected")
         else:
             changes.append("config")
             logger.info("Config successfully saved to database")
@@ -355,9 +326,7 @@ if __name__ == "__main__":
             err1 = db.save_custom_configs(custom_confs, args.method, changed=False)
 
             if err1:
-                logger.warning(
-                    f"Couldn't save custom configs to database : {err1}, custom configs may not work as expected"
-                )
+                logger.warning(f"Couldn't save custom configs to database : {err1}, custom configs may not work as expected")
             else:
                 changes.append("custom_configs")
                 logger.info("Custom configs successfully saved to database")
@@ -377,9 +346,7 @@ if __name__ == "__main__":
                     else:
                         if "instances" not in changes:
                             changes.append("instances")
-                        logger.info(
-                            f"Instance {endpoint_data[0]} successfully saved to database"
-                        )
+                        logger.info(f"Instance {endpoint_data[0]} successfully saved to database")
             else:
                 err = db.add_instance(
                     "127.0.0.1",
@@ -397,9 +364,7 @@ if __name__ == "__main__":
         # update changes in db
         ret = db.checked_changes(changes, value=True)
         if ret:
-            logger.error(
-                f"An error occurred when setting the changes to checked in the database : {ret}"
-            )
+            logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
     except SystemExit as e:
         sys_exit(e.code)
     except:

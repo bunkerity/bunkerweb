@@ -16,9 +16,7 @@ from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.schema import UniqueConstraint
 
 CONTEXTS_ENUM = Enum("global", "multisite", name="contexts_enum")
-SETTINGS_TYPES_ENUM = Enum(
-    "password", "text", "check", "select", name="settings_types_enum"
-)
+SETTINGS_TYPES_ENUM = Enum("password", "text", "check", "select", name="settings_types_enum")
 METHODS_ENUM = Enum("ui", "scheduler", "autoconf", "manual", name="methods_enum")
 SCHEDULES_ENUM = Enum("once", "minute", "hour", "day", "week", name="schedules_enum")
 CUSTOM_CONFIGS_TYPES_ENUM = Enum(
@@ -57,9 +55,7 @@ class Plugins(Base):
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     checksum = Column(String(128), nullable=True)
 
-    settings = relationship(
-        "Settings", back_populates="plugin", cascade="all, delete-orphan"
-    )
+    settings = relationship("Settings", back_populates="plugin", cascade="all, delete-orphan")
     jobs = relationship("Jobs", back_populates="plugin", cascade="all, delete-orphan")
     pages = relationship("Plugin_pages", back_populates="plugin", cascade="all")
 
@@ -88,12 +84,8 @@ class Settings(Base):
     multiple = Column(String(128), nullable=True)
 
     selects = relationship("Selects", back_populates="setting", cascade="all")
-    services = relationship(
-        "Services_settings", back_populates="setting", cascade="all"
-    )
-    global_value = relationship(
-        "Global_values", back_populates="setting", cascade="all"
-    )
+    services = relationship("Services_settings", back_populates="setting", cascade="all")
+    global_value = relationship("Global_values", back_populates="setting", cascade="all")
     plugin = relationship("Plugins", back_populates="settings")
 
 
@@ -118,12 +110,8 @@ class Services(Base):
     id = Column(String(64), primary_key=True)
     method = Column(METHODS_ENUM, nullable=False)
 
-    settings = relationship(
-        "Services_settings", back_populates="service", cascade="all"
-    )
-    custom_configs = relationship(
-        "Custom_configs", back_populates="service", cascade="all"
-    )
+    settings = relationship("Services_settings", back_populates="service", cascade="all")
+    custom_configs = relationship("Custom_configs", back_populates="service", cascade="all")
     jobs_cache = relationship("Jobs_cache", back_populates="service", cascade="all")
 
 

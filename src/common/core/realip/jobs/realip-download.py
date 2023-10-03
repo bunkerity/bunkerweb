@@ -52,10 +52,7 @@ try:
             servers = servers.split(" ")
 
         for first_server in servers:
-            if (
-                getenv(f"{first_server}_USE_REAL_IP", getenv("USE_REAL_IP", "no"))
-                == "yes"
-            ):
+            if getenv(f"{first_server}_USE_REAL_IP", getenv("USE_REAL_IP", "no")) == "yes":
                 realip_activated = True
                 break
 
@@ -118,9 +115,7 @@ try:
                     i += 1
         except:
             status = 2
-            logger.error(
-                f"Exception while getting RealIP list from {url} :\n{format_exc()}"
-            )
+            logger.error(f"Exception while getting RealIP list from {url} :\n{format_exc()}")
 
     tmp_realip_path.joinpath("combined.list").write_bytes(content)
 

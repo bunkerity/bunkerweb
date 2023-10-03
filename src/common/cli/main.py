@@ -6,10 +6,7 @@ from os.path import join
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("utils",), ("api",), ("db",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -25,9 +22,7 @@ if __name__ == "__main__":
         subparsers = parser.add_subparsers(help="command", dest="command")
 
         # Unban subparser
-        parser_unban = subparsers.add_parser(
-            "unban", help="remove a ban from the cache"
-        )
+        parser_unban = subparsers.add_parser("unban", help="remove a ban from the cache")
         parser_unban.add_argument("ip", type=str, help="IP address to unban")
 
         # Ban subparser

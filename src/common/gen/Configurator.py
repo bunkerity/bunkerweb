@@ -57,14 +57,10 @@ class Configurator:
     def get_settings(self) -> Dict[str, Any]:
         return self.__settings
 
-    def get_plugins(
-        self, _type: Union[Literal["core"], Literal["external"]]
-    ) -> List[Dict[str, Any]]:
+    def get_plugins(self, _type: Union[Literal["core"], Literal["external"]]) -> List[Dict[str, Any]]:
         return self.__core_plugins if _type == "core" else self.__external_plugins
 
-    def get_plugins_settings(
-        self, _type: Union[Literal["core"], Literal["external"]]
-    ) -> Dict[str, Any]:
+    def get_plugins_settings(self, _type: Union[Literal["core"], Literal["external"]]) -> Dict[str, Any]:
         if _type == "core":
             plugins = self.__core_plugins
         else:
@@ -77,7 +73,7 @@ class Configurator:
         return plugins_settings
 
     def __map_servers(self) -> Dict[str, List[str]]:
-        if not self.__multisite or not "SERVER_NAME" in self.__variables:
+        if not self.__multisite or "SERVER_NAME" not in self.__variables:
             return {}
         servers = {}
         for server_name in self.__variables["SERVER_NAME"].strip().split(" "):
@@ -96,11 +92,7 @@ class Configurator:
                         f"Ignoring {server_name}_SERVER_NAME because regex is not valid",
                     )
                 else:
-                    names = (
-                        self.__variables[f"{server_name}_SERVER_NAME"]
-                        .strip()
-                        .split(" ")
-                    )
+                    names = self.__variables[f"{server_name}_SERVER_NAME"].strip().split(" ")
 
             servers[server_name] = names
         return servers
@@ -132,9 +124,7 @@ class Configurator:
 
             if _type == "external":
                 plugin_content = BytesIO()
-                with tar_open(
-                    fileobj=plugin_content, mode="w:gz", compresslevel=9
-                ) as tar:
+                with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
                     tar.add(
                         dirname(file),
                         arcname=basename(dirname(file)),
@@ -170,7 +160,7 @@ class Configurator:
             lines = f.readlines()
             for line in lines:
                 line = line.strip()
-                if not line or line.startswith("#") or not "=" in line:
+                if not line or line.startswith("#") or "=" not in line:
                     continue
                 splitted = line.split("=", 1)
                 variables[splitted[0]] = splitted[1]
@@ -268,9 +258,7 @@ class Configurator:
             if variable in target:
                 return target, variable
             for real_var, settings in target.items():
-                if "multiple" in settings and re_search(
-                    f"^{real_var}_[0-9]+$", variable
-                ):
+                if "multiple" in settings and re_search(f"^{real_var}_[0-9]+$", variable):
                     return target, real_var
         return None, variable
 

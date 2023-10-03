@@ -14,7 +14,7 @@ def print_md_table(settings) -> MarkdownTableWriter:
                 f"`{setting}`",
                 "" if data["default"] == "" else f"`{data['default']}`",
                 data["context"],
-                "no" if not "multiple" in data else "yes",
+                "no" if "multiple" not in data else "yes",
                 data["help"],
             ]
             for setting, data in settings.items()
@@ -42,15 +42,19 @@ print(
     file=doc,
 )
 print(
-    "This section contains the full list of settings supported by BunkerWeb. If you are not yet familiar with BunkerWeb, you should first read the [concepts](concepts.md) section of the documentation. Please follow the instructions for your own [integration](integrations.md) on how to apply the settings.\n",
+    "This section contains the full list of settings supported by BunkerWeb."
+    + " If you are not yet familiar with BunkerWeb, you should first read the [concepts](concepts.md) section of the documentation."
+    + " Please follow the instructions for your own [integration](integrations.md) on how to apply the settings.\n",
     file=doc,
 )
 print(
-    "As a general rule when multisite mode is enabled, if you want to apply settings with multisite context to a specific server, you will need to add the primary (first) server name as a prefix like `www.example.com_USE_ANTIBOT=captcha` or `myapp.example.com_USE_GZIP=yes` for example.\n",
+    "As a general rule when multisite mode is enabled, if you want to apply settings with multisite context to a specific server, you will need to add the primary"
+    + " (first) server name as a prefix like `www.example.com_USE_ANTIBOT=captcha` or `myapp.example.com_USE_GZIP=yes` for example.\n",
     file=doc,
 )
 print(
-    'When settings are considered as "multiple", it means that you can have multiple groups of settings for the same feature by adding numbers as suffix like `REVERSE_PROXY_URL_1=/subdir`, `REVERSE_PROXY_HOST_1=http://myhost1`, `REVERSE_PROXY_URL_2=/anotherdir`, `REVERSE_PROXY_HOST_2=http://myhost2`, ... for example.\n',
+    'When settings are considered as "multiple", it means that you can have multiple groups of settings for the same feature by adding numbers as suffix like `REVERSE_PROXY_URL_1=/subdir`,'
+    + " `REVERSE_PROXY_HOST_1=http://myhost1`, `REVERSE_PROXY_URL_2=/anotherdir`, `REVERSE_PROXY_HOST_2=http://myhost2`, ... for example.\n",
     file=doc,
 )
 

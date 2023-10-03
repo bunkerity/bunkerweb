@@ -2,7 +2,6 @@
 
 from os import getenv
 from time import sleep
-from typing import Optional
 from copy import deepcopy
 
 from ConfigCaller import ConfigCaller  # type: ignore
@@ -25,9 +24,7 @@ class Config(ConfigCaller):
             "modsec",
             "modsec-crs",
         ]
-        self.__configs = {
-            config_type: {} for config_type in self._supported_config_types
-        }
+        self.__configs = {config_type: {} for config_type in self._supported_config_types}
         self.__config = {}
 
         self._db = Database(self.__logger)
@@ -106,9 +103,7 @@ class Config(ConfigCaller):
         while True:
             curr_changes = self._db.check_changes()
             if isinstance(curr_changes, str):
-                self.__logger.error(
-                    f"An error occurred when checking for changes in the database : {curr_changes}"
-                )
+                self.__logger.error(f"An error occurred when checking for changes in the database : {curr_changes}")
             elif not any(curr_changes.values()):
                 break
             else:
@@ -134,9 +129,7 @@ class Config(ConfigCaller):
 
         # save custom configs to database
         if "custom_configs" in changes:
-            err = self._db.save_custom_configs(
-                custom_configs, "autoconf", changed=False
-            )
+            err = self._db.save_custom_configs(custom_configs, "autoconf", changed=False)
             if err:
                 success = False
                 self.__logger.error(
@@ -146,8 +139,6 @@ class Config(ConfigCaller):
         # update changes in db
         ret = self._db.checked_changes(changes, value=True)
         if ret:
-            self.__logger.error(
-                f"An error occurred when setting the changes to checked in the database : {ret}"
-            )
+            self.__logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
 
         return success

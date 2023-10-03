@@ -42,9 +42,7 @@ try:
         bw_integration = "Autoconf"
     elif integration_path.is_file():
         bw_integration = integration_path.read_text(encoding="utf-8").strip()
-    elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
-        encoding="utf-8"
-    ):
+    elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
         bw_integration = "Docker"
 
     token = getenv("CERTBOT_TOKEN", "")
@@ -64,9 +62,7 @@ try:
         tgz.seek(0, 0)
         files = {"archive.tar.gz": tgz}
 
-        db = Database(
-            logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False
-        )
+        db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
         lock = Lock()
 
         with lock:
@@ -77,19 +73,13 @@ try:
             host = instance["server_name"]
             api = API(endpoint, host=host)
 
-            sent, err, status, resp = api.request(
-                "POST", "/lets-encrypt/certificates", files=files
-            )
+            sent, err, status, resp = api.request("POST", "/lets-encrypt/certificates", files=files)
             if not sent:
                 status = 1
-                logger.error(
-                    f"Can't send API request to {api.endpoint}/lets-encrypt/certificates : {err}"
-                )
+                logger.error(f"Can't send API request to {api.endpoint}/lets-encrypt/certificates : {err}")
             elif status != 200:
                 status = 1
-                logger.error(
-                    f"Error while sending API request to {api.endpoint}/lets-encrypt/certificates : status = {resp['status']}, msg = {resp['msg']}"
-                )
+                logger.error(f"Error while sending API request to {api.endpoint}/lets-encrypt/certificates : status = {resp['status']}, msg = {resp['msg']}")
             else:
                 logger.info(
                     f"Successfully sent API request to {api.endpoint}/lets-encrypt/certificates",
@@ -97,18 +87,12 @@ try:
                 sent, err, status, resp = api.request("POST", "/reload")
                 if not sent:
                     status = 1
-                    logger.error(
-                        f"Can't send API request to {api.endpoint}/reload : {err}"
-                    )
+                    logger.error(f"Can't send API request to {api.endpoint}/reload : {err}")
                 elif status != 200:
                     status = 1
-                    logger.error(
-                        f"Error while sending API request to {api.endpoint}/reload : status = {resp['status']}, msg = {resp['msg']}"
-                    )
+                    logger.error(f"Error while sending API request to {api.endpoint}/reload : status = {resp['status']}, msg = {resp['msg']}")
                 else:
-                    logger.info(
-                        f"Successfully sent API request to {api.endpoint}/reload"
-                    )
+                    logger.info(f"Successfully sent API request to {api.endpoint}/reload")
     # Linux case
     else:
         if (

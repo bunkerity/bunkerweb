@@ -10,9 +10,7 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get(
-                "http://www.example.com/image.png", headers={"Host": "www.example.com"}
-            ).status_code
+            status_code = get("http://www.example.com/image.png", headers={"Host": "www.example.com"}).status_code
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
@@ -25,9 +23,7 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     use_client_cache = getenv("USE_CLIENT_CACHE", "no") == "yes"
@@ -46,22 +42,16 @@ try:
         flush=True,
     )
 
-    response = get(
-        "http://www.example.com/image.png", headers={"Host": "www.example.com"}
-    )
+    response = get("http://www.example.com/image.png", headers={"Host": "www.example.com"})
     response.raise_for_status()
 
     if not use_client_cache:
         if "Cache-Control" in response.headers:
-            print(
-                f"❌ Cache-Control header is present even if Client cache is deactivated, exiting ...\nheaders: {response.headers}"
-            )
+            print(f"❌ Cache-Control header is present even if Client cache is deactivated, exiting ...\nheaders: {response.headers}")
             exit(1)
     else:
         if "Cache-Control" not in response.headers and default_cache_extensions:
-            print(
-                f"❌ Cache-Control header is not present even if Client cache is activated, exiting ...\nheaders: {response.headers}"
-            )
+            print(f"❌ Cache-Control header is not present even if Client cache is activated, exiting ...\nheaders: {response.headers}")
             exit(1)
         elif not default_cache_extensions and "Cache-Control" in response.headers:
             print(
@@ -69,16 +59,10 @@ try:
                 flush=True,
             )
         elif not client_cache_etag and "ETag" in response.headers:
-            print(
-                f"❌ ETag header is present even if Client cache ETag is deactivated, exiting ...\nheaders: {response.headers}"
-            )
+            print(f"❌ ETag header is present even if Client cache ETag is deactivated, exiting ...\nheaders: {response.headers}")
             exit(1)
-        elif default_cache_extensions and client_cache_control != response.headers.get(
-            "Cache-Control"
-        ):
-            print(
-                f"❌ Cache-Control header is not equal to the expected value, exiting ...\nheaders: {response.headers}"
-            )
+        elif default_cache_extensions and client_cache_control != response.headers.get("Cache-Control"):
+            print(f"❌ Cache-Control header is not equal to the expected value, exiting ...\nheaders: {response.headers}")
             exit(1)
 
     print("✅ Client cache is working as expected ...", flush=True)

@@ -14,11 +14,7 @@ from uuid import uuid4
 
 class Config:
     def __init__(self, db) -> None:
-        self.__settings = json_loads(
-            Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(
-                encoding="utf-8"
-            )
-        )
+        self.__settings = json_loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
         self.__db = db
 
     def __gen_conf(self, global_conf: dict, services_conf: list[dict]) -> None:
@@ -42,11 +38,7 @@ class Config:
             server_name = service["SERVER_NAME"].split(" ")[0]
             for k in service:
                 key_without_server_name = k.replace(f"{server_name}_", "")
-                if (
-                    plugins_settings[key_without_server_name]["context"] != "global"
-                    if key_without_server_name in plugins_settings
-                    else True
-                ):
+                if plugins_settings[key_without_server_name]["context"] != "global" if key_without_server_name in plugins_settings else True:
                     if not k.startswith(server_name) or k in plugins_settings:
                         conf[f"{server_name}_{k}"] = service[k]
                     else:
@@ -86,9 +78,7 @@ class Config:
             **self.__settings,
         }
 
-    def get_plugins(
-        self, *, external: bool = False, with_data: bool = False
-    ) -> List[dict]:
+    def get_plugins(self, *, external: bool = False, with_data: bool = False) -> List[dict]:
         plugins = self.__db.get_plugins(external=external, with_data=with_data)
         plugins.sort(key=lambda x: x["name"])
 
@@ -153,18 +143,13 @@ class Config:
 
                 setting = k
             else:
-                setting = k[0 : k.rfind("_")]
-                if (
-                    setting not in plugins_settings
-                    or "multiple" not in plugins_settings[setting]
-                ):
+                setting = k[0 : k.rfind("_")]  # noqa: E203
+                if setting not in plugins_settings or "multiple" not in plugins_settings[setting]:
                     error = 1
                     flash(f"Variable {k} is not valid.", "error")
                     continue
 
-            if not (
-                _global ^ (plugins_settings[setting]["context"] == "global")
-            ) and re_search(plugins_settings[setting]["regex"], v):
+            if not (_global ^ (plugins_settings[setting]["context"] == "global")) and re_search(plugins_settings[setting]["regex"], v):
                 check = True
 
             if not check:
@@ -175,9 +160,7 @@ class Config:
         return error
 
     def reload_config(self) -> None:
-        self.__gen_conf(
-            self.get_config(methods=False), self.get_services(methods=False)
-        )
+        self.__gen_conf(self.get_config(methods=False), self.get_services(methods=False))
 
     def new_service(self, variables: dict) -> Tuple[str, int]:
         """Creates a new service from the given variables
@@ -200,10 +183,7 @@ class Config:
         services = self.get_services(methods=False)
         server_name_splitted = variables["SERVER_NAME"].split(" ")
         for service in services:
-            if (
-                service["SERVER_NAME"] == variables["SERVER_NAME"]
-                or service["SERVER_NAME"] in server_name_splitted
-            ):
+            if service["SERVER_NAME"] == variables["SERVER_NAME"] or service["SERVER_NAME"] in server_name_splitted:
                 return (
                     f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
                     1,
@@ -236,20 +216,14 @@ class Config:
         server_name_splitted = variables["SERVER_NAME"].split(" ")
         old_server_name_splitted = old_server_name.split(" ")
         for i, service in enumerate(deepcopy(services)):
-            if (
-                service["SERVER_NAME"] == variables["SERVER_NAME"]
-                or service["SERVER_NAME"] in server_name_splitted
-            ):
+            if service["SERVER_NAME"] == variables["SERVER_NAME"] or service["SERVER_NAME"] in server_name_splitted:
                 if changed_server_name:
                     return (
                         f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
                         1,
                     )
                 services.pop(i)
-            elif changed_server_name and (
-                service["SERVER_NAME"] == old_server_name
-                or service["SERVER_NAME"] in old_server_name_splitted
-            ):
+            elif changed_server_name and (service["SERVER_NAME"] == old_server_name or service["SERVER_NAME"] in old_server_name_splitted):
                 services.pop(i)
 
         services.append(variables)
@@ -279,9 +253,7 @@ class Config:
         str
             the confirmation message
         """
-        self.__gen_conf(
-            self.get_config(methods=False) | variables, self.get_services(methods=False)
-        )
+        self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False))
         return "The global configuration has been edited."
 
     def delete_service(self, service_name: str) -> Tuple[str, int]:
@@ -317,9 +289,7 @@ class Config:
         if not found:
             return f"Can't delete missing {service_name} configuration.", 1
 
-        full_env["SERVER_NAME"] = " ".join(
-            [s for s in full_env["SERVER_NAME"].split(" ") if s != service_name]
-        )
+        full_env["SERVER_NAME"] = " ".join([s for s in full_env["SERVER_NAME"].split(" ") if s != service_name])
 
         new_env = deepcopy(full_env)
 

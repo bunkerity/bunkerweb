@@ -19,10 +19,10 @@ for deps_path in [
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from bunkernet import register, ping, get_id
+from bunkernet import register, ping
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import get_file_in_db, set_file_in_db, del_file_in_db
+from jobs import get_file_in_db, set_file_in_db, del_file_in_db  # type: ignore
 
 logger = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
 exit_status = 0
@@ -38,10 +38,7 @@ try:
             servers = servers.split(" ")
 
         for first_server in servers:
-            if (
-                getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes"))
-                == "yes"
-            ):
+            if getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes")) == "yes":
                 bunkernet_activated = True
                 break
     # Singlesite case
@@ -73,9 +70,7 @@ try:
         logger.info("Registering instance on BunkerNet API ...")
         ok, status, data = register()
         if not ok:
-            logger.error(
-                f"Error while sending register request to BunkerNet API : {data}"
-            )
+            logger.error(f"Error while sending register request to BunkerNet API : {data}")
             _exit(2)
         elif status == 429:
             logger.warning(
@@ -102,23 +97,17 @@ try:
             )
             _exit(2)
         elif data.get("result", "ko") != "ok":
-            logger.error(
-                f"Received error from BunkerNet API while sending register request : {data.get('data', {})}"
-            )
+            logger.error(f"Received error from BunkerNet API while sending register request : {data.get('data', {})}")
             _exit(2)
         bunkernet_id = data["data"]
         instance_id_path.write_text(bunkernet_id, encoding="utf-8")
         registered = True
         exit_status = 1
-        logger.info(
-            f"Successfully registered on BunkerNet API with instance id {data['data']}"
-        )
+        logger.info(f"Successfully registered on BunkerNet API with instance id {data['data']}")
     else:
         bunkernet_id = bunkernet_id or instance_id_path.read_bytes()
         bunkernet_id = bunkernet_id.decode()
-        logger.info(
-            f"Already registered on BunkerNet API with instance id {bunkernet_id}"
-        )
+        logger.info(f"Already registered on BunkerNet API with instance id {bunkernet_id}")
 
     sleep(1)
 

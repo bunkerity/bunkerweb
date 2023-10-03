@@ -13,9 +13,7 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get(
-                "http://www.example.com", headers={"Host": "www.example.com"}
-            ).status_code
+            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
@@ -28,9 +26,7 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     firefox_options = Options()
@@ -61,38 +57,29 @@ try:
     print("ℹ️ Reloading BunkerWeb ...", flush=True)
 
     if TEST_TYPE == "docker":
-        response = post(
-            f"http://192.168.0.2:5000/reload",
-            headers={"Host": "bwapi"},
-        )
+        response = post("http://192.168.0.2:5000/reload", headers={"Host": "bwapi"})
 
         if response.status_code != 200:
-            print(
-                "❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True
-            )
+            print("❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True)
             exit(1)
 
         data = response.json()
 
         if data["status"] != "success":
-            print(
-                "❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True
-            )
+            print("❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True)
             exit(1)
 
         sleep(5)
     else:
         proc = run(["sudo", "systemctl", "restart", "bunkerweb"], check=False)
         if proc.returncode != 0:
-            print(
-                "❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True
-            )
+            print("❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True)
             exit(1)
 
         retries = 0
         while (
-            not b"BunkerWeb is ready"
-            in run(
+            b"BunkerWeb is ready"
+            not in run(
                 ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
                 stdout=PIPE,
                 check=True,

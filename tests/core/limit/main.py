@@ -42,19 +42,13 @@ try:
         if any(response.status_code >= 500 for response in responses):
             print("❌ An error occurred with the server, exiting ...", flush=True)
             exit(1)
-        elif (
-            not any(response.status_code == 429 for response in responses)
-            and limit_conn_http1 == 1
-        ):
+        elif not any(response.status_code == 429 for response in responses) and limit_conn_http1 == 1:
             print(
                 f"❌ The limit_conn for HTTP1 directive is not working correctly, the limit was set to {limit_conn_http1} and the limit was not reached with 5 simultaneous connections, exiting ...",
                 flush=True,
             )
             exit(1)
-        elif (
-            any(response.status_code == 429 for response in responses)
-            and limit_conn_http1 > 1
-        ):
+        elif any(response.status_code == 429 for response in responses) and limit_conn_http1 > 1:
             print(
                 f"❌ The limit_conn for HTTP1 directive is not working correctly, the limit was set to {limit_conn_http1} and the limit was reached with 5 simultaneous connections, exiting ...",
                 flush=True,
@@ -72,9 +66,7 @@ try:
     request_number = 0
     stopped = False
 
-    print(
-        "ℹ️ Sending requests to the service until it reaches the limit ...", flush=True
-    )
+    print("ℹ️ Sending requests to the service until it reaches the limit ...", flush=True)
 
     while status_code != 429:
         with Client() as client:

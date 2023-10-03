@@ -34,15 +34,7 @@ class Instance:
         self.name = name
         self.hostname = hostname
         self._type = _type
-        self.health = status == "up" and (
-            (
-                data.attrs["State"]["Health"]["Status"] == "healthy"
-                if "Health" in data.attrs["State"]
-                else False
-            )
-            if _type == "container" and data
-            else True
-        )
+        self.health = status == "up" and ((data.attrs["State"]["Health"]["Status"] == "healthy" if "Health" in data.attrs["State"] else False) if _type == "container" and data else True)
         self.env = data
         self.apiCaller = apiCaller or ApiCaller()
 
@@ -133,13 +125,8 @@ class Instances:
         instances = []
         # Docker instances (containers or services)
         if self.__docker_client is not None:
-            for instance in self.__docker_client.containers.list(
-                all=True, filters={"label": "bunkerweb.INSTANCE"}
-            ):
-                env_variables = {
-                    x[0]: x[1]
-                    for x in [env.split("=") for env in instance.attrs["Config"]["Env"]]
-                }
+            for instance in self.__docker_client.containers.list(all=True, filters={"label": "bunkerweb.INSTANCE"}):
+                env_variables = {x[0]: x[1] for x in [env.split("=") for env in instance.attrs["Config"]["Env"]]}
 
                 instances.append(
                     Instance(
@@ -160,9 +147,7 @@ class Instances:
                     )
                 )
         elif self.__integration == "Swarm":
-            for instance in self.__docker_client.services.list(
-                filters={"label": "bunkerweb.INSTANCE"}
-            ):
+            for instance in self.__docker_client.services.list(filters={"label": "bunkerweb.INSTANCE"}):
                 status = "down"
                 desired_tasks = instance.attrs["ServiceStatus"]["DesiredTasks"]
                 running_tasks = instance.attrs["ServiceStatus"]["RunningTasks"]
@@ -173,9 +158,7 @@ class Instances:
                 api_http_port = None
                 api_server_name = None
 
-                for var in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
-                    "Env"
-                ]:
+                for var in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
                     if var.startswith("API_HTTP_PORT="):
                         api_http_port = var.replace("API_HTTP_PORT=", "", 1)
                     elif var.startswith("API_SERVER_NAME="):
@@ -201,16 +184,9 @@ class Instances:
                     )
                 )
         elif self.__integration == "Kubernetes":
-            for pod in self.__kubernetes_client.list_pod_for_all_namespaces(
-                watch=False
-            ).items:
-                if (
-                    pod.metadata.annotations != None
-                    and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-                ):
-                    env_variables = {
-                        env.name: env.value or "" for env in pod.spec.containers[0].env
-                    }
+            for pod in self.__kubernetes_client.list_pod_for_all_namespaces(watch=False).items:
+                if pod.metadata.annotations is not None and "bunkerweb.io/INSTANCE" in pod.metadata.annotations:
+                    env_variables = {env.name: env.value or "" for env in pod.spec.containers[0].env}
 
                     status = "up"
                     if pod.status.conditions is not None:
@@ -231,9 +207,7 @@ class Instances:
                                 [
                                     API(
                                         f"http://{pod.status.pod_ip}:{env_variables.get('API_HTTP_PORT', '5000')}",
-                                        host=env_variables.get(
-                                            "API_SERVER_NAME", "bwapi"
-                                        ),
+                                        host=env_variables.get("API_SERVER_NAME", "bwapi"),
                                     )
                                 ]
                             ),
@@ -247,9 +221,7 @@ class Instances:
 
         # Local instance
         if Path(sep, "usr", "sbin", "nginx").exists():
-            env_variables = dotenv_values(
-                join(sep, "etc", "bunkerweb", "variables.env")
-            )
+            env_variables = dotenv_values(join(sep, "etc", "bunkerweb", "variables.env"))
 
             instances.insert(
                 0,
@@ -258,9 +230,7 @@ class Instances:
                     "local",
                     "127.0.0.1",
                     "local",
-                    "up"
-                    if Path(sep, "var", "run", "bunkerweb", "nginx.pid").exists()
-                    else "down",
+                    "up" if Path(sep, "var", "run", "bunkerweb", "nginx.pid").exists() else "down",
                     None,
                     ApiCaller(
                         [
@@ -287,9 +257,7 @@ class Instances:
 
         return not_reloaded or "Successfully reloaded instances"
 
-    def reload_instance(
-        self, _id: Optional[int] = None, instance: Optional[Instance] = None
-    ) -> str:
+    def reload_instance(self, _id: Optional[int] = None, instance: Optional[Instance] = None) -> str:
         if instance is None:
             instance = self.__instance_from_id(_id)
 

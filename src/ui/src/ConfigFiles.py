@@ -29,12 +29,7 @@ def generate_custom_configs(
 class ConfigFiles:
     def __init__(self, logger, db):
         self.__name_regex = re_compile(r"^[\w.-]{1,64}$")
-        self.__root_dirs = [
-            child["name"]
-            for child in path_to_dict(join(sep, "etc", "bunkerweb", "configs"))[
-                "children"
-            ]
-        ]
+        self.__root_dirs = [child["name"] for child in path_to_dict(join(sep, "etc", "bunkerweb", "configs"))["children"]]
         self.__file_creation_blacklist = ["http", "stream"]
         self.__logger = logger
         self.__db = db
@@ -68,9 +63,7 @@ class ConfigFiles:
                             {
                                 "value": f.read(),
                                 "exploded": (
-                                    f"{path_exploded.pop()}"
-                                    if path_exploded[-1] not in root_dirs
-                                    else None,
+                                    f"{path_exploded.pop()}" if path_exploded[-1] not in root_dirs else None,
                                     path_exploded[-1],
                                     file.replace(".conf", ""),
                                 ),
@@ -87,20 +80,14 @@ class ConfigFiles:
     def check_name(self, name: str) -> bool:
         return self.__name_regex.match(name) is not None
 
-    def check_path(
-        self, path: str, root_path: str = join(sep, "etc", "bunkerweb", "configs")
-    ) -> str:
+    def check_path(self, path: str, root_path: str = join(sep, "etc", "bunkerweb", "configs")) -> str:
         root_dir: str = path.split("/")[4]
         if not (
             path.startswith(root_path)
             or root_path == join(sep, "etc", "bunkerweb", "configs")
             and path.startswith(root_path)
             and root_dir in self.__root_dirs
-            and (
-                not path.endswith(".conf")
-                or root_dir not in self.__file_creation_blacklist
-                or len(path.split("/")) > 5
-            )
+            and (not path.endswith(".conf") or root_dir not in self.__file_creation_blacklist or len(path.split("/")) > 5)
         ):
             return f"{path} is not a valid path"
 
@@ -110,9 +97,7 @@ class ConfigFiles:
             dirs = "/".join(dirs)
             if len(dirs) > 1:
                 for x in range(nbr_children - 1):
-                    if not Path(
-                        root_path, root_dir, "/".join(dirs.split("/")[0:-x])
-                    ).exists():
+                    if not Path(root_path, root_dir, "/".join(dirs.split("/")[0:-x])).exists():
                         return f"{join(root_path, root_dir, '/'.join(dirs.split('/')[0:-x]))} doesn't exist"
 
         return ""
@@ -170,9 +155,7 @@ class ConfigFiles:
             0,
         )
 
-    def edit_file(
-        self, path: str, name: str, old_name: str, content: str
-    ) -> Tuple[str, int]:
+    def edit_file(self, path: str, name: str, old_name: str, content: str) -> Tuple[str, int]:
         new_path = join(dirname(path), name)
         old_path = join(dirname(path), old_name)
 

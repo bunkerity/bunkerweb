@@ -114,9 +114,7 @@ try:
                 with tar_open(fileobj=BytesIO(content), mode="r") as tar:
                     tar.extractall(path=temp_dir)
             else:
-                logger.error(
-                    f"Unknown file type for {plugin_url}, either zip or tar are supported, skipping..."
-                )
+                logger.error(f"Unknown file type for {plugin_url}, either zip or tar are supported, skipping...")
                 continue
         except:
             logger.error(

@@ -3,7 +3,7 @@
 from pathlib import Path
 from sys import path, argv, exit
 from glob import glob
-from os import getenv, _exit
+from os import _exit
 from os.path import isfile
 from traceback import format_exc
 from json import loads
@@ -23,7 +23,7 @@ if len(argv) <= 1:
     exit(1)
 
 test_type = argv[1]
-if not test_type in ("linux", "docker", "autoconf", "swarm", "kubernetes", "ansible"):
+if test_type not in ("linux", "docker", "autoconf", "swarm", "kubernetes", "ansible"):
     log("TESTS", "❌", "Wrong type argument " + test_type)
     exit(1)
 
@@ -57,7 +57,7 @@ for example in glob("./examples/*"):
         try:
             with open(f"{example}/tests.json") as f:
                 tests = loads(f.read())
-            if not test_type in tests["kinds"]:
+            if test_type not in tests["kinds"]:
                 log(
                     "TESTS",
                     "ℹ️",
@@ -88,17 +88,11 @@ for example in glob("./examples/*"):
                     delay=delay,
                 )
             elif test_type == "swarm":
-                test_obj = SwarmTest(
-                    tests["name"], tests["timeout"], tests["tests"], delay=delay
-                )
+                test_obj = SwarmTest(tests["name"], tests["timeout"], tests["tests"], delay=delay)
             elif test_type == "kubernetes":
-                test_obj = KubernetesTest(
-                    tests["name"], tests["timeout"], tests["tests"], delay=delay
-                )
+                test_obj = KubernetesTest(tests["name"], tests["timeout"], tests["tests"], delay=delay)
             elif test_type == "linux":
-                test_obj = LinuxTest(
-                    tests["name"], tests["timeout"], tests["tests"], distro
-                )
+                test_obj = LinuxTest(tests["name"], tests["timeout"], tests["tests"], distro)
             if not test_obj.run_tests():
                 log("TESTS", "❌", "Tests failed for " + tests["name"])
                 if test_type == "linux":
@@ -110,10 +104,7 @@ for example in glob("./examples/*"):
             log(
                 "TESTS",
                 "❌",
-                "Exception while executing test for example "
-                + example
-                + " : "
-                + format_exc(),
+                "Exception while executing test for example " + example + " : " + format_exc(),
             )
             if test_type == "linux":
                 ret = end_fun(distro)

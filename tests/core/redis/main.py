@@ -1,10 +1,8 @@
-from contextlib import suppress
 from fastapi import FastAPI
 from multiprocessing import Process
 from os import getenv
 from redis import Redis
 from requests import get
-from requests.exceptions import RequestException
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from time import sleep
@@ -65,9 +63,7 @@ try:
         if ip_to_check == "1.0.0.3":
             print("ℹ️ Testing Reverse Scan, starting FastAPI ...", flush=True)
             app = FastAPI()
-            fastapi_proc = Process(
-                target=run, args=(app,), kwargs=dict(host="0.0.0.0", port=8080)
-            )
+            fastapi_proc = Process(target=run, args=(app,), kwargs=dict(host="0.0.0.0", port=8080))
             fastapi_proc.start()
 
             sleep(2)
@@ -94,9 +90,7 @@ try:
 
         port_to_check = "8080" if ip_to_check == "1.0.0.3" else "80"
 
-        key_value = redis_client.get(
-            f"plugin_reverse_scan_{ip_to_check}:{port_to_check}"
-        )
+        key_value = redis_client.get(f"plugin_reverse_scan_{ip_to_check}:{port_to_check}")
 
         if key_value is None:
             print(

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from os import _exit, environ, getenv, listdir, sep
+from os import _exit, environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
@@ -23,7 +23,7 @@ for deps_path in [
 
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import get_file_in_db, set_file_in_db
+from jobs import get_file_in_db, set_file_in_db  # type: ignore
 
 
 def renew(domain: str, letsencrypt_path: Path) -> int:
@@ -53,8 +53,7 @@ def renew(domain: str, letsencrypt_path: Path) -> int:
         ],
         stdin=DEVNULL,
         stderr=STDOUT,
-        env=environ.copy()
-        | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
+        env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
         check=False,
     ).returncode
 
@@ -69,10 +68,7 @@ try:
         use_letsencrypt = True
     elif getenv("MULTISITE", "no") == "yes":
         for first_server in getenv("SERVER_NAME", "").split(" "):
-            if (
-                first_server
-                and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes"
-            ):
+            if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes":
                 use_letsencrypt = True
                 break
 
@@ -83,9 +79,7 @@ try:
     # Create directory if it doesn't exist
     letsencrypt_path = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
     letsencrypt_path.mkdir(parents=True, exist_ok=True)
-    Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(
-        parents=True, exist_ok=True
-    )
+    Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(parents=True, exist_ok=True)
 
     # Get env vars
     bw_integration = "Linux"
@@ -99,9 +93,7 @@ try:
         bw_integration = "Autoconf"
     elif integration_path.is_file():
         bw_integration = integration_path.read_text(encoding="utf-8").strip()
-    elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
-        encoding="utf-8"
-    ):
+    elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
         bw_integration = "Docker"
 
     # Extract letsencrypt folder if it exists in db
@@ -134,9 +126,7 @@ try:
                     getenv("AUTO_LETS_ENCRYPT", "no"),
                 )
                 != "yes"
-                or not letsencrypt_path.joinpath(
-                    "etc", "live", first_server, "cert.pem"
-                ).exists()
+                or not letsencrypt_path.joinpath("etc", "live", first_server, "cert.pem").exists()
             ):
                 continue
 

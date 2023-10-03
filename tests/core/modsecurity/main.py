@@ -1,5 +1,4 @@
 from contextlib import suppress
-from datetime import datetime
 from os import getenv
 from requests import get
 from requests.exceptions import RequestException
@@ -11,9 +10,7 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get(
-                "http://www.example.com", headers={"Host": "www.example.com"}
-            ).status_code
+            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
@@ -26,9 +23,7 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     use_modsecurity = getenv("USE_MODSECURITY", "yes") == "yes"
@@ -39,9 +34,7 @@ try:
         flush=True,
     )
 
-    status_code = get(
-        "http://www.example.com/?id=/etc/passwd", headers={"Host": "www.example.com"}
-    ).status_code
+    status_code = get("http://www.example.com/?id=/etc/passwd", headers={"Host": "www.example.com"}).status_code
 
     print(f"ℹ️ Status code: {status_code}", flush=True)
 
