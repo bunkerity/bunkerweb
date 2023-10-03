@@ -18,7 +18,7 @@ services:
       REVERSE_PROXY_URL: "/"
       REVERSE_PROXY_HOST: "http://mydrupal"
       CUSTOM_CONF_MODSEC_CRS_drupal: 'SecAction "id:900130,phase:1,nolog,pass,t:none,setvar:tx.crs_exclusions_drupal=1"'
-      # Onces the installation is done, you can remove these lines
+      # Once the installation is done, you can remove these lines
       LIMIT_REQ_URL_1: "/core/install.php"
       LIMIT_REQ_RATE_1: "5r/s"
     labels:
@@ -74,6 +74,7 @@ services:
 volumes:
   bw-data:
   db-data:
+
 
 networks:
   bw-universe:

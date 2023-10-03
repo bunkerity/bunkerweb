@@ -162,8 +162,8 @@ class Configurator:
                 line = line.strip()
                 if not line or line.startswith("#") or "=" not in line:
                     continue
-                splitted = line.split("=", 1)
-                variables[splitted[0]] = splitted[1]
+                split = line.split("=", 1)
+                variables[split[0]] = split[1]
         return variables
 
     def get_config(self) -> Dict[str, Any]:

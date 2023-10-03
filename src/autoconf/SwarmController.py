@@ -129,7 +129,7 @@ class SwarmController(Controller):
                             self.__internal_lock.release()
                             locked = False
                             continue
-                        self._logger.info(f"Catched Swarm event ({event_type}), deploying new configuration ...")
+                        self._logger.info(f"Caught Swarm event ({event_type}), deploying new configuration ...")
                         if not self.apply_config():
                             self._logger.error("Error while deploying new configuration")
                         else:

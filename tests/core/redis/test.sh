@@ -176,7 +176,7 @@ do
             export REDIS_DATABASE="1"
             export REDIS_SSL="yes"
 
-            echo "🧰 Stoping redis ..."
+            echo "🧰 Stopping redis ..."
             sudo killall redis-server
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then

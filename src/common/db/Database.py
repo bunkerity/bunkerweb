@@ -77,8 +77,8 @@ class Database:
                 with suppress(FileExistsError):
                     Path(dirname(sqlalchemy_string.split("///")[1])).mkdir(parents=True, exist_ok=True)
         elif "+" in sqlalchemy_string and "+pymysql" not in sqlalchemy_string:
-            splitted = sqlalchemy_string.split("+")
-            sqlalchemy_string = f"{splitted[0]}:{':'.join(splitted[1].split(':')[1:])}"
+            split = sqlalchemy_string.split("+")
+            sqlalchemy_string = f"{split[0]}:{':'.join(split[1].split(':')[1:])}"
 
         self.database_uri = sqlalchemy_string
         error = False

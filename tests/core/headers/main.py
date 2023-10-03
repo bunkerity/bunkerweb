@@ -74,11 +74,11 @@ try:
     response.raise_for_status()
 
     if custom_headers:
-        splitted = custom_headers.split(":")
+        split = custom_headers.split(":")
 
-        if response.headers.get(splitted[0].strip()) != splitted[1].strip():
+        if response.headers.get(split[0].strip()) != split[1].strip():
             print(
-                f"❌ Header {splitted[0].strip()} is not set to {splitted[1].strip()}, exiting ...\nheaders: {response.headers}",
+                f"❌ Header {split[0].strip()} is not set to {split[1].strip()}, exiting ...\nheaders: {response.headers}",
                 flush=True,
             )
             exit(1)

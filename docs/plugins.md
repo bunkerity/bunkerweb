@@ -106,7 +106,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     When using the [Swarm integration](integrations.md#swarm), plugins must be written to the volume mounted on `/data/plugins` into the scheduler container.
 
     !!! info "Swarm volume"
-        Configuring a Swarm volume that will persist when the scheduler service is running on different nodes is not covered is in this documentation. We will assume that you have a shared folder mounted on `/shared` accross all nodes.
+        Configuring a Swarm volume that will persist when the scheduler service is running on different nodes is not covered is in this documentation. We will assume that you have a shared folder mounted on `/shared` across all nodes.
 
     The first thing to do is to create the plugins folder :
 
@@ -460,7 +460,7 @@ Some helpers modules provide common helpful helpers :
 - `self.logger` : print logs
 - `bunkerweb.utils` : various useful functions
 - `bunkerweb.datastore` : access the global shared data on one instance (key/value store)
-- `bunkerweb.clusterstore` : access a Redis data store shared beetween BunkerWeb instances (key/value store)
+- `bunkerweb.clusterstore` : access a Redis data store shared between BunkerWeb instances (key/value store)
 
 To access the functions, you first need to **require** the modules :
 

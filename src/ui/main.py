@@ -93,7 +93,7 @@ def stop(status, _stop=True):
 
 
 def handle_stop(signum, frame):
-    app.logger.info("Catched stop operation")
+    app.logger.info("Caught stop operation")
     app.logger.info("Stopping web ui ...")
     stop(0, False)
 
@@ -1330,13 +1330,13 @@ def logs_container(container_id):
             )
 
     for log in tmp_logs:
-        splitted = log.split(" ")
-        timestamp = splitted[0]
+        split = log.split(" ")
+        timestamp = split[0]
 
         if to_date is not None and dateutil_parse(timestamp).timestamp() > to_date:
             break
 
-        log = " ".join(splitted[1:])
+        log = " ".join(split[1:])
         log_lower = log.lower()
 
         if "[48;2" in log or not log.strip():

@@ -127,7 +127,7 @@ try:
                 blacklist_path.joinpath(f"{kind}.list").unlink(missing_ok=True)
                 deleted, err = del_file_in_db(f"{kind}.list", db)
                 if not deleted:
-                    logger.warning(f"Coudn't delete {kind}.list from cache : {err}")
+                    logger.warning(f"Couldn't delete {kind}.list from cache : {err}")
     if all_fresh:
         _exit(0)
 
