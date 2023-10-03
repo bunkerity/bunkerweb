@@ -49,7 +49,7 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Add scheduler user, drop bwcli, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash libgcc libstdc++ openssl libmagic && \
+RUN apk add --no-cache bash libgcc libstdc++ libpq openssl libmagic && \
   ln -s /usr/local/bin/python3 /usr/bin/python3 && \
   addgroup -g 101 scheduler && \
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler && \
