@@ -3,6 +3,7 @@ import Dashboard from "@layouts/Dashboard.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
+import SettingsDatepicker from "@components/Settings/Datepicker.vue";
 import CardBase from "@components/Card/Base.vue";
 import CardItemList from "@components/Card/Item/List.vue";
 import BansTabs from "@components/Bans/Tabs.vue";
@@ -107,25 +108,6 @@ onMounted(async () => {
 const tab = reactive({
   current : 'list'
 })
-
-const listPositions = [
-  "col-span-2",
-  "col-span-3",
-  "col-span-2",
-  "col-span-2",
-  "col-span-2",
-  "col-span-1",
-];
-
-const listHeader = [
-  "Check",
-  "IP number",
-  "Reason",
-  "Date ban",
-  "Fin ban",
-  "Ratio",
-];
-
 </script>
 
 <template>
@@ -171,6 +153,13 @@ const listHeader = [
             id: 'reason',
             value: 'all',
             values: bans.reasonList,
+          }"
+        />
+      </SettingsLayout>
+      <SettingsLayout class="sm:col-span-6" label="Select reason" name="date">
+        <SettingsDatepicker
+          :settings="{
+            id: 'date',
           }"
         />
       </SettingsLayout>

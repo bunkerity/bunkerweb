@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "ace-builds": "^1.24.2",
+    "flatpickr": "^4.6.13",
     "pinia": "^2.1.6",
     "vue": "^3.3.4"
   },
