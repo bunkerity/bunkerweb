@@ -3,7 +3,7 @@
 exclude: (^LICENSE.md$|^src/VERSION$|^src/(bw/misc/root-ca.pem$|deps/src/|common/core/modsecurity/files|ui/static/js/(editor/|utils/purify/|tsparticles\.bundle\.min\.js))|\.(svg|drawio|patch\d?|ascii|tf|tftpl)$)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: f71fa2c1f9cf5cb705f73dffe4b21f7c61470ba9 # frozen: v4.4.0
     hooks:
       - id: requirements-txt-fixer
       - id: trailing-whitespace
@@ -13,36 +13,42 @@ repos:
         args: ["--allow-multiple-documents"]
       - id: check-case-conflict
 
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
-    hooks:
-      - id: codespell
-        name: Codespell Spell Checker
-        exclude: modsecurity-rules.conf.*$
-        entry: codespell --ignore-regex="(tabEl|Widgits)" --skip src/common/core/antibot/files/*.html,src/common/core/misc/files/*.html,src/common/core/errors/files/*.html,src/bw/loading/*.html,src/ui/static/js/utils/flatpickr.js,CHANGELOG.md
-        language: python
-        types: [text]
-
   - repo: https://github.com/ambv/black
-    rev: 23.9.1
+    rev: e87737140f32d3cd7c44ede75f02dcd58e55820e # frozen: 23.9.1
     hooks:
       - id: black
         name: Black Python Formatter
         language_version: python3.9
 
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: fc260393cc4ec09f8fc0a5ba4437f481c8b55dc1 # frozen: v3.0.3
+    hooks:
+      - id: prettier
+        name: Prettier Code Formatter
+
   - repo: https://github.com/pycqa/flake8
-    rev: 6.1.0
+    rev: 10f4af6dbcf93456ba7df762278ae61ba3120dc6 # frozen: 6.1.0
     hooks:
       - id: flake8
         name: Flake8 Python Linter
         args: ["--max-line-length=250", "--ignore=E266,E402,E722,W503"]
 
+  - repo: https://github.com/codespell-project/codespell
+    rev: 6e41aba91fb32e9feb741a6258eefeb9c6e4a482 # frozen: v2.2.6
+    hooks:
+      - id: codespell
+        name: Codespell Spell Checker
+        exclude: (^src/(common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*)$
+        entry: codespell --ignore-regex="(tabEl|Widgits)" --skip src/ui/static/js/utils/flatpickr.js,CHANGELOG.md
+        language: python
+        types: [text]
+
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.0
+    rev: b813e6fe08b87541cb77296359ba1b7a50a00c98 # frozen: v8.18.0
     hooks:
       - id: gitleaks
 
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.9.0
+    rev: 3f77b826548d8dc2d26675f077361c92773b50a7 # frozen: v0.9.0
     hooks:
       - id: shellcheck
