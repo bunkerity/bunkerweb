@@ -1,5 +1,8 @@
 FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded AS builder
 
+# Install python dependencies
+RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev file make
+
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
 COPY src/ui/requirements.txt /tmp/req/requirements.txt
@@ -11,9 +14,6 @@ WORKDIR /usr/share/bunkerweb
 RUN mkdir -p deps/python && \
   cat /tmp/req/requirements.txt* > deps/requirements.txt && \
   rm -rf /tmp/req
-
-# Install python dependencies
-RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev file make
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
