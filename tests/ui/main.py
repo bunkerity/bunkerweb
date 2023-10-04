@@ -165,7 +165,7 @@ with webdriver.Firefox(options=firefox_options) as driver:
     try:
         driver.delete_all_cookies()
         driver.maximize_window()
-        driver_wait = WebDriverWait(driver, 30)
+        driver_wait = WebDriverWait(driver, 60)
 
         print("Navigating to http://www.example.com/admin ...", flush=True)
 

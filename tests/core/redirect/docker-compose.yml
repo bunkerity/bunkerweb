@@ -6,14 +6,13 @@ services:
     pull_policy: never
     labels:
       - "bunkerweb.INSTANCE"
+    volumes:
+      - ./index.html:/var/www/html/index.html
     environment:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       HTTP_PORT: "80"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
-      USE_REVERSE_PROXY: "yes"
-      REVERSE_PROXY_HOST: "http://app1:8080"
-      REVERSE_PROXY_URL: "/"
       LOG_LEVEL: "info"
 
       # ? REDIRECT settings

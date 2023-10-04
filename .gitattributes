@@ -1,0 +1,15 @@
+# Folders
+src/deps/src/** linguist-vendored
+src/common/core/modsecurity/files/** linguist-vendored
+src/ui/static/js/editor/** linguist-vendored
+src/ui/static/js/utils/purify/** linguist-vendored
+src/ui/static/webfonts/** linguist-vendored
+
+# Files
+src/deps/misc/lua-pack.Makefile -linguist-vendored
+src/deps/misc/ngx_http_modsecurity_access.c -linguist-vendored
+src/ui/static/css/datepicker-foundation.css -linguist-vendored
+src/ui/static/css/flatpickr.css -linguist-vendored
+src/ui/static/css/flatpickr.dark.css -linguist-vendored
+src/ui/static/js/tsparticles.bundle.min.js -linguist-vendored
+src/ui/static/js/utils/flatpickr.js -linguist-vendored
