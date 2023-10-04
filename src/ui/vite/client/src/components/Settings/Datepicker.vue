@@ -25,6 +25,10 @@ const props = defineProps({
     type: [String, Number],
     required: false,
     default: ""
+  },
+  inpClass: {
+    type: String,
+    required: false
   }
 });
 
@@ -87,8 +91,7 @@ const emits = defineEmits(["inp"]);
     <input
       @change="(v) => $emit('inp', checkToSend(v.target.value))"
       type="text"
-      :class="[date.isInvalid ? 'invalid': '', !date.isInvalid && date.isValid ? 'valid': '']"
-      class="input-regular cursor-pointer"
+      :class="[date.isInvalid ? 'invalid': '', !date.isInvalid && date.isValid ? 'valid': '', 'input-regular cursor-pointer', props.inpClass]"
       :id="props.settings.id"
       :required="props.settings.id === 'SERVER_NAME' || props.settings.required || false ? true : false"
       :disabled="props.settings.disabled || false"

@@ -5,7 +5,7 @@ from fastapi import Body, APIRouter, BackgroundTasks, status, Path as fastapi_Pa
 from fastapi.responses import JSONResponse
 import requests
 from config import API_URL
-from utils import set_res_from_req
+from utils import set_res
 from models import  ResponseModel
 import json
 
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/config", tags=["config"])
 )
 async def get_config(methods: bool = False, new_format: bool = False):
     req = requests.get(f'{API_URL}/config?methods={methods}&new_format={new_format}')
-    res = set_res_from_req(req, "GET", "Retrieve config")
+    res = set_res(req, "GET", "Retrieve config")
     return res
 
 
@@ -30,7 +30,7 @@ async def get_config(methods: bool = False, new_format: bool = False):
 )
 async def update_config(config: Dict[str, str], method: str):
     req = requests.put(f'{API_URL}/config?method={method}', data=config)
-    res = set_res_from_req(req, "PUT", "Update config")
+    res = set_res(req, "PUT", "Update config")
     return res
 
 @router.put(
@@ -41,7 +41,7 @@ async def update_config(config: Dict[str, str], method: str):
 async def update_global_config(config: Annotated[dict, Body()], method: str):
     data = json.dumps(config,  skipkeys = True, allow_nan = True, indent = 6)
     req = requests.put(f'{API_URL}/config/global?method={method}', data=data)
-    res = set_res_from_req(req, "PUT", "Update global config")
+    res = set_res(req, "PUT", "Update global config")
     return res
 
 @router.put(
@@ -51,7 +51,7 @@ async def update_global_config(config: Annotated[dict, Body()], method: str):
 )
 async def update_service_config(config: Dict[str, str], method: str, service_name: str):
     req = requests.put(f'{API_URL}/config/service?method={method}', data=config)
-    res = set_res_from_req(req, "PUT", f'Update service config {service_name}')
+    res = set_res(req, "PUT", f'Update service config {service_name}')
     return res
 
 
@@ -62,5 +62,5 @@ async def update_service_config(config: Dict[str, str], method: str, service_nam
 )
 async def delete_service_config(method: str, service_name: str):
     req = requests.delete(f'{API_URL}/config/service/{service_name}?method={method}')
-    res = set_res_from_req(req, "DELETE", f'Delete service config {service_name}')
+    res = set_res(req, "DELETE", f'Delete service config {service_name}')
     return res

@@ -14,6 +14,10 @@ import AlertBase from "@components/Alert/Base.vue";
 import "@assets/script/editor/ace.js";
 import "@assets/script/editor/theme-dracula.js";
 import "@assets/script/editor/theme-dawn.js";
+import { fetchAPI } from "@utils/api.js";
+import { useFeedbackStore } from "@store/global.js";
+
+const feedbackStore = useFeedbackStore();
 
 // Open after a file manager item (folder / file) action is clicked
 // With the current folder / file data
@@ -40,6 +44,8 @@ const props = defineProps({
     required: true,
   },
 });
+
+const emits = defineEmits(["close", "updateFile"]);
 
 // Filter data from path
 const oldName = computed(() => {
@@ -104,6 +110,10 @@ class FileEditor {
   getValue() {
     return this.editor.getValue();
   }
+
+  setValue(content) {
+    return this.editor.setValue(content, 1);
+  }
 }
 
 let editor = null;
@@ -112,6 +122,7 @@ let editor = null;
 onMounted(() => {
   try {
     editor = new FileEditor();
+    editor.setValue(props.value);
   } catch (err) {}
 });
 
@@ -127,6 +138,67 @@ onUnmounted(() => {
   } catch (err) {}
 });
 
+const updateConf = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+})
+
+function createFile() {
+  // Case no name
+  if (!inp.name) return showAlert(
+      'error',
+      `Filename missing to create conf`
+    );
+
+  // Case no content
+  if (!editor.getValue()) {
+    inp.name = inp.name;
+    return showAlert('error', 'Missing content to create conf');
+  }
+  // Format data
+  const splitPath = props.path.replace("root/", "").trim().split("/");
+  !splitPath[splitPath.length - 1] ? splitPath.pop() : false;
+  const type = splitPath[0].replaceAll("-", "_");
+  const serviceID = splitPath[1] ? splitPath[1] : "";
+
+  const conf = [
+    {
+      service_id: serviceID,
+      type: type,
+      name: inp.name || oldName,
+      data: editor.getValue(),
+    },
+  ];
+
+  updateConfig(conf);
+  if (props.action === "delete") deleteConfig(conf);
+}
+
+async function updateConfig(conf) {
+  
+  showAlert('info', `Try to ${props.action} conf.`);
+  // We want to close modal only if communication with API worked
+  // To avoid input removing on close
+  const api = props.action === `delete` ? `/api/custom_configs/${conf.name}?method=ui` : `/api/custom_configs?method=ui`;
+  const method = props.action === `delete` ? `DELETE` : `PUT`;
+
+  await fetchAPI(
+    api,
+    method,
+    conf,
+    updateConf,
+    feedbackStore.addFeedback
+  ).then(res => {
+    if(res.type === "error") return showAlert('error', 'Failed to save conf');
+    alert.isOpen = false;
+    emits('close');
+    emits('updateFile');
+  }).catch(err => {
+    showAlert('error', 'Failed to save conf');
+  });
+}
+
 const alert = reactive({
   isOpen: false,
   message: "",
@@ -139,7 +211,6 @@ function showAlert(type, message) {
   alert.isOpen = true;
 }
 
-const emits = defineEmits(["createFile", "close"]);
 </script>
 <template>
   <ModalBase :title="`${props.action} file`">
@@ -178,27 +249,7 @@ const emits = defineEmits(["createFile", "close"]);
           Close
         </ButtonBase>
         <ButtonBase
-          @click="
-            () => {
-              if (!inp.name)
-                return showAlert(
-                  'error',
-                  `Filename missing to create element.`
-                );
-
-              if (!editor.getValue()) {
-                inp.name = inp.name;
-                return showAlert('error', 'Missing content to create file.');
-              }
-
-              $emit('createFile', {
-                action: props.action,
-                path: props.path,
-                name: inp.name,
-                data: editor.getValue(),
-              });
-            }
-          "
+          @click="createFile()"
           size="lg"
           v-if="props.action !== 'view'"
           :class="[

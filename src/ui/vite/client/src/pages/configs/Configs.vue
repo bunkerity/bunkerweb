@@ -81,9 +81,13 @@ async function getConfig() {
   );
 }
 
-onMounted(async () => {
+async function getData() {
   await getConfig();
   await getCustomConf();
+}
+
+onMounted(async () => {
+  await getData();
 });
 </script>
 
@@ -169,6 +173,7 @@ onMounted(async () => {
       :isData="customConf.data ? true : false"
     />
     <FileManagerStructure
+      @updateFile="getData()"
       v-if="customConf.setup.length > 0"
       :config="customConf.setup"
       class="col-span-12"

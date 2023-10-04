@@ -7,6 +7,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  inpClass: {
+    type: String,
+    required: false
+  }
 });
 
 const inp = reactive({
@@ -23,11 +27,11 @@ const emits = defineEmits(["inp"]);
       @input="$emit('inp', inp.value)"
       :type="props.settings.type"
       :id="props.settings.id"
-      class="input-regular"
+      :class="['input-regular', props.inpClass]"
       :required="props.settings.id === 'SERVER_NAME' || props.settings.required || false ? true : false"
       :disabled="props.settings.disabled || false"
       :placeholder="props.settings.placeholder || ''"
-      :pattern="props.settings.pattern || ''"
+      :pattern="props.settings.pattern || '(?s).*'"
       :name="props.settings.id"
       :value="inp.value"
     />

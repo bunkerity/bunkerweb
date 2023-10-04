@@ -161,8 +161,8 @@ const tab = reactive({
     label="ACTIONS"
     >
       <BansTabs @tab="(v) => tab.current = v" />
-          <BansList :class="[tab.current === 'list' ? true : 'hidden']"  />
-          <BansAdd :class="[tab.current === 'add' ? true : 'hidden']"  />
+      <BansList :class="[tab.current === 'list' ? true : 'hidden']"  />
+      <BansAdd @addBans="getInstances()" :class="[tab.current === 'add' ? true : 'hidden']"  />
     </CardBase>
   </Dashboard>
 </template>

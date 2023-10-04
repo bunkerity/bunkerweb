@@ -7,6 +7,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  inpClass: {
+    type: String,
+    required: false
+  }
 });
 
 // When mounted or when props changed, we want select to display new props values
@@ -107,7 +111,7 @@ const emits = defineEmits(["inp"]);
       :disabled="props.settings.disabled || false"
       :aria-expanded="select.isOpen ? 'true' : 'false'"
       @click="toggleSelect()"
-      class="select-btn"
+      :class="['select-btn', props.inpClass]"
     >
       <span class="select-btn-name">
         {{ select.value || props.settings.value }}
