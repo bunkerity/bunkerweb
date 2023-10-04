@@ -178,10 +178,10 @@ api.global.GET["^/bans$"] = function(self)
 	local data = {}
 	for i, k in ipairs(self.datastore:keys()) do
 		if k:find("^bans_ip_") then
-			local ret, reason = self.datastore:get(k)
-			if not ret then
+			local reason, err = self.datastore:get(k)
+			if err then
 				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
-					"can't access " .. k .. " from datastore : " + reason)
+					"can't access " .. k .. " from datastore : " .. reason)
 			end
 			local ok, ttl = self.datastore:ttl(k)
 			if not ok then
