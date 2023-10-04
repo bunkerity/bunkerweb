@@ -246,7 +246,7 @@ async def delete_instance(instance_hostname: str) -> JSONResponse:
 )
 async def send_instance_action(
     instance_hostname: str,
-    action: Literal["ping", "bans", "start", "stop", "restart", "reload"],
+    action: Literal["ping", "bans", "stop", "reload"],  # TODO: maybe add a "start" action
 ) -> JSONResponse:
     """
     Delete a BunkerWeb instance
