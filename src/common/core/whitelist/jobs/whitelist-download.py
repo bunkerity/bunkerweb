@@ -60,11 +60,11 @@ try:
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
         for first_server in getenv("SERVER_NAME", "").split(" "):
-            if getenv(f"{first_server}_USE_WHITELIST", getenv("USE_WHITELIST", "no")) == "yes":
+            if getenv(f"{first_server}_USE_WHITELIST", getenv("USE_WHITELIST", "yes")) == "yes":
                 whitelist_activated = True
                 break
     # Singlesite case
-    elif getenv("USE_WHITELIST", "no") == "yes":
+    elif getenv("USE_WHITELIST", "yes") == "yes":
         whitelist_activated = True
 
     if not whitelist_activated:
