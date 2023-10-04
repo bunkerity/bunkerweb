@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 import requests
 from config import API_URL
-from utils import set_res_from_req
+from utils import set_res
 from models import ResponseModel
 
 router = APIRouter(prefix="/api", tags=[""])
@@ -14,5 +14,5 @@ router = APIRouter(prefix="/api", tags=[""])
 )
 async def get_version():
     req = requests.get(f"{API_URL}/version")
-    res = set_res_from_req(req, "GET", "Retrieve version")
+    res = set_res(req, "GET", "Retrieve version")
     return res

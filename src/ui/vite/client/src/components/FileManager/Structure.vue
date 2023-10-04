@@ -6,9 +6,6 @@ import FileManagerContainer from "@components/FileManager/Container.vue";
 import FileManagerItemBase from "@components/FileManager/Item/Base.vue";
 import CardBase from "@components/Card/Base.vue";
 import { reactive, watch } from "vue";
-import { generateItem } from "@utils/custom_configs.js";
-import { useFeedbackStore } from "@store/global.js";
-import { fetchAPI } from "@utils/api.js";
 
 const props = defineProps({
   config: {
@@ -16,7 +13,7 @@ const props = defineProps({
   },
 });
 
-const feedbackStore = useFeedbackStore();
+const emits = defineEmits(["updateFile"]);
 
 // All forders need a path with children items inside it
 // When a breadcrumb element or folder is clicked
@@ -56,76 +53,6 @@ watch(path, () => {
     }
   });
 });
-
-const updateConfigs = reactive({
-  isPend: false,
-  isErr: false,
-  data: [],
-});
-
-async function updateConfig(data) {
-  await fetchAPI(
-    "/api/custom_configs?method=ui",
-    "PUT",
-    data,
-    updateConfigs,
-    feedbackStore.addFeedback,
-  );
-}
-
-const createConfigs = reactive({
-  isPend: false,
-  isErr: false,
-  data: [],
-});
-
-async function createConfig(data) {
-  await fetchAPI(
-    "/api/custom_configs?method=ui",
-    "POST",
-    data,
-    createConfigs,
-    feedbackStore.addFeedback,
-  );
-}
-
-const deleteConfigs = reactive({
-  isPend: false,
-  isErr: false,
-  data: [],
-});
-
-async function deleteConfig(data) {
-  await fetchAPI(
-    "/api/custom_configs?method=ui",
-    "DELETE",
-    data,
-    deleteConfigs,
-    feedbackStore.addFeedback,
-  );
-}
-
-function handleCreate(data) {
-  modal.isOpen = false;
-
-  const splitPath = data.path.replace("root/", "").trim().split("/");
-  !splitPath[splitPath.length - 1] ? splitPath.pop() : false;
-  const type = splitPath[0].replaceAll("-", "_");
-  const serviceID = splitPath[1] ? splitPath[1] : "";
-
-  const newConf = [
-    {
-      service_id: serviceID,
-      type: type,
-      name: data.name,
-      data: data.data,
-    },
-  ];
-
-  if (data.action === "create") createConfig(newConf);
-  if (data.action === "edit") updateConfig(newConf);
-  if (data.action === "delete") deleteConfig(newConf);
-}
 </script>
 
 <template>
@@ -174,7 +101,6 @@ function handleCreate(data) {
       </div>
     </CardBase>
     <FileManagerModal
-      @createFile="(v) => handleCreate(v)"
       :aria-hidden="modal.isOpen ? 'false' : 'true'"
       v-if="modal.isOpen"
       :type="modal.type"
@@ -182,6 +108,7 @@ function handleCreate(data) {
       :path="modal.path"
       :value="modal.value"
       @close="modal.isOpen = false"
+      @updateFile="emits('updateFile')"
     />
   </div>
 </template>

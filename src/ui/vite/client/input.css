@@ -139,7 +139,10 @@ body {
   @apply outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
 }
 
-.invalid.input-regular {
+.invalid.input-regular,
+.invalid.input-regular:hover,
+.invalid.input-regular:focus,
+.invalid.input-regular:active {
   @apply border-gray-50/0 ring-1 ring-red-500;
 }
 
@@ -444,7 +447,7 @@ body {
 /* CARD STAT COMPONENT */
 
 .card {
-  @apply dark:brightness-110 hover:translate-y-0.5 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between items-start w-full shadow-md break-words dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply dark:brightness-110 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between items-start w-full shadow-md break-words dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .default.card {
@@ -456,7 +459,7 @@ body {
 }
 
 .card-stat {
-  @apply dark:brightness-110 sm:max-h-28 hover:translate-y-0.5 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply dark:brightness-110 sm:max-h-28 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .card-stat-title {

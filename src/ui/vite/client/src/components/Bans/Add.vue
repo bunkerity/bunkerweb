@@ -5,8 +5,13 @@ import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsDatepicker from "@components/Settings/Datepicker.vue";
 import ButtonBase from "@components/Button/Base.vue";
-
+import BansModalAdd from "@components/Bans/Modal/Add.vue";
+import { fetchAPI } from "@utils/api.js";
+import { useFeedbackStore } from "@store/global.js";
 import { reactive } from "vue";
+
+const feedbackStore = useFeedbackStore();
+const emits = defineEmits(["addBans"]);
 
 const bans = reactive({
   count: 0,
@@ -17,9 +22,9 @@ function addItem() {
   bans.items.push({
     id: bans.count,
     ip: "",
-    reason: "",
-    dateDeb: Date.parse(new Date()),
-    dateEnd: "",
+    reason: "Manual",
+    stampDeb: Date.parse(new Date()),
+    stampEnd: "",
   });
   bans.count++;
 }
@@ -48,6 +53,57 @@ const addHeader = ["IP number", "Ban start", "Ban end", "Reason", "Delete"];
 
 function addPrefZero(dateStr) {
   return dateStr.length === 2 ? dateStr : `0${dateStr}`;
+}
+
+const addBans = reactive({
+  isErr: false,
+  isPend: false,
+  data: [],
+});
+
+const modal = reactive({
+  isOpen: false,
+});
+
+async function checkToAddBans() {
+  // Check if some invalid value
+  let isInvalid = false;
+  for (let i = 0; i < bans.items.length; i++) {
+    const item = bans.items[i];
+    if (!item.stampEnd || !item.reason || !item.ip) isInvalid = true;
+    if (isInvalid) break;
+  }
+
+  // Case invalid data find
+  if (isInvalid) return (modal.isOpen = true);
+
+  // Case all valid, try to add
+  return await sendBans();
+}
+
+function getValidBans() {
+  const validBans = [];
+  bans.items.forEach((item) => {
+    if (!item.ip || !item.reason || !item.stampDeb || !item.stampEnd) return;
+    validBans.push(item);
+  });
+  return validBans;
+}
+
+async function sendBans() {
+  await fetchAPI(
+    `/api/instances/bans`,
+    "POST",
+    getValidBans(),
+    addBans,
+    feedbackStore.addFeedback,
+  ).then((res) => {
+    if (res.type === "error") return;
+    // Case succeed, delete items from UI
+    // And emit add event to refetch ban list
+    deleteAllItems();
+    emits("add");
+  });
 }
 </script>
 
@@ -129,6 +185,7 @@ function addPrefZero(dateStr) {
                   value: '',
                   placeholder: '127.0.0.1',
                 }"
+                :inpClass="item.ip ? '' : 'invalid'"
               />
             </SettingsLayout>
             <SettingsLayout
@@ -137,6 +194,7 @@ function addPrefZero(dateStr) {
               :name="`add-ban-date-deb-${id}`"
             >
               <SettingsDatepicker
+                @inp="(v) => (item.ip = v)"
                 :settings="{
                   id: `add-ban-date-deb-${id}`,
                   disabled: true,
@@ -155,7 +213,8 @@ function addPrefZero(dateStr) {
                 :settings="{
                   id: `add-ban-date-end-${id}`,
                 }"
-                @inp="(v) => (item.dateEnd = v.timestamp)"
+                @inp="(v) => (item.stampEnd = v.timestamp)"
+                :inpClass="item.stampEnd ? '' : 'invalid'"
                 :noPickBeforeStamp="Date.parse(new Date())"
               />
             </SettingsLayout>
@@ -169,9 +228,10 @@ function addPrefZero(dateStr) {
                 :settings="{
                   id: `add-reason-${id}`,
                   type: 'text',
-                  value: '',
+                  value: item.reason,
                   placeholder: 'Manual',
                 }"
+                :inpClass="item.reason ? '' : 'invalid'"
               />
             </SettingsLayout>
             <ButtonBase
@@ -205,7 +265,7 @@ function addPrefZero(dateStr) {
       class="col-span-12 flex justify-center mt-4"
     >
       <ButtonBase
-        @click="sendBans()"
+        @click="checkToAddBans()"
         color="valid"
         size="normal"
         class="text-sm mb-2 sm:mb-0"
@@ -213,5 +273,10 @@ function addPrefZero(dateStr) {
         save bans
       </ButtonBase>
     </div>
+    <BansModalAdd
+      @close="modal.isOpen = false"
+      @sendAdd="sendBans()"
+      :isOpen="modal.isOpen"
+    />
   </div>
 </template>

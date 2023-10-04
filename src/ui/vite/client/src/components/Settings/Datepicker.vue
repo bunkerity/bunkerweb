@@ -26,6 +26,10 @@ const props = defineProps({
     required: false,
     default: "",
   },
+  inpClass: {
+    type: String,
+    required: false,
+  },
 });
 
 const date = reactive({
@@ -91,8 +95,9 @@ const emits = defineEmits(["inp"]);
       :class="[
         date.isInvalid ? 'invalid' : '',
         !date.isInvalid && date.isValid ? 'valid' : '',
+        'input-regular cursor-pointer',
+        props.inpClass,
       ]"
-      class="input-regular cursor-pointer"
       :id="props.settings.id"
       :required="
         props.settings.id === 'SERVER_NAME' || props.settings.required || false

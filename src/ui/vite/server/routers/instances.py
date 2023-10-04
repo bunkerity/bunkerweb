@@ -2,7 +2,7 @@ from typing import List, Literal, Union
 from fastapi import APIRouter
 import requests
 from config import API_URL
-from utils import set_res_from_req
+from utils import set_res
 from models import Instance, ResponseModel
 
 router = APIRouter(prefix="/api/instances", tags=["instances"])
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/api/instances", tags=["instances"])
 )
 async def get_instances():
     req = requests.get(f"{API_URL}/instances")
-    res = set_res_from_req(req, "GET", "Retrieve instances")
+    res = set_res(req, "GET", "Retrieve instances")
     return res
 
 
@@ -30,7 +30,7 @@ async def upsert_instance(
     reload: bool = True,
 ):
     req = requests.put(f"{API_URL}/instances?method={method}&reload={reload}", data=instances)
-    res = set_res_from_req(req, "PUT", "Upsert instances")
+    res = set_res(req, "PUT", "Upsert instances")
     return res
 
 
@@ -41,7 +41,7 @@ async def upsert_instance(
 )
 async def delete_instance(instance_hostname: str):
     req = requests.delete(f"{API_URL}/{instance_hostname}")
-    res = set_res_from_req(req, "DELETE", "Delete instance")
+    res = set_res(req, "DELETE", "Delete instance")
     return res
 
 
@@ -52,5 +52,5 @@ async def delete_instance(instance_hostname: str):
 )
 async def send_instance_action(instance_hostname: str, action: Literal["ping", "bans", "start", "stop", "restart", "reload"]):
     req = requests.post(f"{API_URL}/{instance_hostname}/{action}")
-    res = set_res_from_req(req, "POST", f"Send instance {instance_hostname} action {action}")
+    res = set_res(req, "POST", f"Send instance {instance_hostname} action {action}")
     return res

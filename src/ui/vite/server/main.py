@@ -1,9 +1,9 @@
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi import FastAPI
+from utils import exception_res
 from config import dev_mode, app_name, description, summary, version, contact, license_info, openapi_tags
-
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -25,14 +25,12 @@ if dev_mode:
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request, exc):
-    print(exc)
-    return PlainTextResponse(str({"type": "error", "status": exc.status_code, "message": exc.detail, "data": {}}), status_code=exc.status_code)
+    return JSONResponse(exception_res(exc.status_code, request.url.path, exc.detail))
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    print(exc)
-    return PlainTextResponse(str({"type": "error", "status": 400, "message": "Invalid data send on request", "data": {}}), status_code=400)
+    return JSONResponse(exception_res(400, request.url.path, "Invalid data send on request"))
 
 
 from routers import instances, plugins, config, misc, jobs, custom_configs

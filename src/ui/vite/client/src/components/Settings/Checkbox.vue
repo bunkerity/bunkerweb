@@ -7,6 +7,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  inpClass: {
+    type: String,
+    required: false,
+  },
 });
 
 const checkbox = reactive({
@@ -29,7 +33,11 @@ function updateValue() {
       :name="props.settings.id"
       :aria-checked="checkbox.value === 'yes' ? 'true' : 'false'"
       :checked="checkbox.value === 'yes' ? true : false"
-      :class="[checkbox.value === 'yes' ? 'check' : '', 'checkbox']"
+      :class="[
+        checkbox.value === 'yes' ? 'check' : '',
+        'checkbox',
+        props.inpClass,
+      ]"
       type="checkbox"
       :value="checkbox.value"
     />
