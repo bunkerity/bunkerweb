@@ -13,9 +13,6 @@ services:
       HTTP_PORT: "80"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
-      USE_REVERSE_PROXY: "yes"
-      REVERSE_PROXY_HOST: "http://app1:8080"
-      REVERSE_PROXY_URL: "/"
       LOG_LEVEL: "info"
 
       # ? REDIRECT settings
