@@ -4,13 +4,13 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==2.6.0 \
-    --hash=sha256:261e8655034f3afe099e68a9c5061304f5ba0c1625ec1b8288fc228315bacbdf \
-    --hash=sha256:607360db73e458150ab63825a82b220bdf04badbd81c6d3218e5d993c6be491c
+acme==2.7.0 \
+    --hash=sha256:7aeaf0886322ca5569bc532828086ff2a7fc5b66a29a0a5d3270363d448af228 \
+    --hash=sha256:fabdcb97801dfd3bc23ac7ca7175f2d98e4192b62297a6efd6e6718423653ac3
     # via certbot
-certbot==2.6.0 \
-    --hash=sha256:6513b9fb3d266f1fa3803a1713eb7e415bbc250b624c834e02cb71086b26d800 \
-    --hash=sha256:c4de6bb0d092729650ed90a5bdb513932bdc47ec5f7f98049180ab8e4a835dab
+certbot==2.7.0 \
+    --hash=sha256:274329918656db82fb314e2ecb12a9b276a1df820e28e36e8ecca8c3a0563c1c \
+    --hash=sha256:892d25d1016aa6da4f947b40f46a02efa9ba77f8811e0b22e9db046aae05e518
     # via -r requirements.in
 certifi==2023.7.22 \
     --hash=sha256:539cc1d13202e33ca466e88b2807e29f4c13049d6d87031a3c110744495cb082 \
@@ -255,14 +255,6 @@ requests==2.31.0 \
 schedule==1.2.1 \
     --hash=sha256:14cdeb083a596aa1de6dc77639a1b2ac8bf6eaafa82b1c9279d3612823063d01 \
     --hash=sha256:843bc0538b99c93f02b8b50e3e39886c06f2d003b24f48e1aa4cadfa3f341279
-    # via
-    #   -r requirements.in
-    #   requests
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==68.2.2 \
-    --hash=sha256:4ac1475276d2f1c48684874089fefcd83bd7162ddaafb81fac866ba0db282a87 \
-    --hash=sha256:b454a35605876da60632df1a60f736524eb73cc47bbc9f3f1ef1b644de74fd2a
     # via -r requirements.in
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
@@ -271,6 +263,14 @@ six==1.16.0 \
 urllib3==1.26.17 \
     --hash=sha256:24d6a242c28d29af46c3fae832c36db3bbebcc533dd1bb549172cd739c82df21 \
     --hash=sha256:94a757d178c9be92ef5539b8840d48dc9cf1b2709c9d6b588232a055c524458b
+    # via
+    #   -r requirements.in
+    #   requests
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==68.2.2 \
+    --hash=sha256:4ac1475276d2f1c48684874089fefcd83bd7162ddaafb81fac866ba0db282a87 \
+    --hash=sha256:b454a35605876da60632df1a60f736524eb73cc47bbc9f3f1ef1b644de74fd2a
     # via
     #   acme
     #   certbot
