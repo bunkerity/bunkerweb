@@ -146,7 +146,7 @@ class CLI(ApiCaller):
             return True, f"IP {ip} has been unbanned"
         return False, "error"
 
-    def ban(self, ip: str, exp: float) -> Tuple[bool, str]:
+    def ban(self, ip: str, exp: float, reason: str) -> Tuple[bool, str]:
         if self.__redis:
             ok = self.__redis.set(
                 f"bans_ip_{ip}",
@@ -156,10 +156,10 @@ class CLI(ApiCaller):
             if not ok:
                 self.__logger.error(f"Failed to ban {ip} in redis")
 
-        if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp}):
+        if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason}):
             return (
                 True,
-                f"IP {ip} has been banned for {format_remaining_time(exp)}",
+                f"IP {ip} has been banned for {format_remaining_time(exp)} with reason {reason}",
             )
         return False, "error"
 

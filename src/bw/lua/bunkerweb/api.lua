@@ -166,22 +166,35 @@ api.global.POST["^/ban$"] = function(self)
 			file:close()
 		end
 	end
+	local ban = {
+		ip = "",
+		exp = 86400,
+		reason = "manual"
+	}
 	local ok, ip = pcall(cjson.decode, data)
+	ban.ip = ip["ip"]
+	if ip["exp"] then
+		ban.exp = ip["exp"]
+	end
+	if ip["reason"] then
+		ban.reason = ip["reason"]
+	end
 	if not ok then
 		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
-	self.datastore:set("bans_ip_" .. ip["ip"], "manual", ip["exp"])
-	return self:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " banned")
+	self.datastore:set("bans_ip_" .. ban["ip"], ban["reason"], ban["exp"])
+	return self:response(ngx.HTTP_OK, "success",
+		"ip " .. ban["ip"] .. " banned for " .. ban["exp"] .. " seconds with reason " .. ban["reason"])
 end
 
 api.global.GET["^/bans$"] = function(self)
 	local data = {}
 	for i, k in ipairs(self.datastore:keys()) do
 		if k:find("^bans_ip_") then
-			local ret, reason = self.datastore:get(k)
-			if not ret then
+			local reason, err = self.datastore:get(k)
+			if err then
 				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
-					"can't access " .. k .. " from datastore : " + reason)
+					"can't access " .. k .. " from datastore : " .. reason)
 			end
 			local ok, ttl = self.datastore:ttl(k)
 			if not ok then

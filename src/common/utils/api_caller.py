@@ -55,8 +55,13 @@ class ApiCaller:
             else:
                 if status != 200:
                     ret = False
+                    msg = "No message"
+                    if resp.headers.get("Content-Type", "").startswith("application/json"):
+                        resp = resp.json()
+                        status = resp["status"]
+                        msg = resp["msg"]
                     self.__logger.error(
-                        f"Error while sending API request to {api.endpoint}{url} : status = {resp['status']}, msg = {resp['msg']}",
+                        f"Error while sending API request to {api.endpoint}{url} : status = {status}, msg = {msg}",
                     )
                 else:
                     self.__logger.info(
