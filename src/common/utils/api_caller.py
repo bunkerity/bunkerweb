@@ -38,7 +38,7 @@ class ApiCaller:
         files: Optional[Dict[str, BytesIO]] = None,
         data: Optional[Dict[str, Any]] = None,
         response: bool = False,
-    ) -> Union[bool, Tuple[bool, Optional[Dict[str, Any]]]]:
+    ) -> Tuple[bool, Optional[Dict[str, Any]]]:
         ret = True
         url = url if not url.startswith("/") else url[1:]
         responses = {}
@@ -75,9 +75,7 @@ class ApiCaller:
                         else:
                             responses[instance] = resp.json()
 
-        if response and responses:
-            return ret, responses
-        return ret
+        return ret, responses
 
     def send_files(self, path: str, url: str) -> bool:
         ret = True

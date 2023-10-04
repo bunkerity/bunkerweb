@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+from datetime import datetime
+from time import time
 from dotenv import dotenv_values
 from os import getenv, sep
 from os.path import join
@@ -148,13 +150,13 @@ class CLI(ApiCaller):
 
     def ban(self, ip: str, exp: float, reason: str) -> Tuple[bool, str]:
         if self.__redis:
-            ok = self.__redis.set(
+            ok = self.__redis.hmset(
                 f"bans_ip_{ip}",
-                "manual",
-                ex=exp,
+                {"reason": reason, "date": time()},
             )
             if not ok:
                 self.__logger.error(f"Failed to ban {ip} in redis")
+            self.__redis.expire(f"bans_ip_{ip}", int(exp))
 
         if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason}):
             return (
@@ -177,12 +179,16 @@ class CLI(ApiCaller):
             servers["redis"] = []
             for key in self.__redis.scan_iter("bans_ip_*"):
                 ip = key.decode("utf-8").replace("bans_ip_", "")
+                data = self.__redis.hgetall(key)
+                if not data:
+                    continue
                 exp = self.__redis.ttl(key)
                 servers["redis"].append(
                     {
                         "ip": ip,
+                        "reason": data[b"reason"].decode("utf-8"),
+                        "date": data[b"date"].decode("utf-8"),
                         "exp": exp,
-                        "reason": "manual",
                     }
                 )
 
@@ -193,7 +199,7 @@ class CLI(ApiCaller):
                 cli_str += "No ban found\n"
 
             for ban in bans:
-                cli_str += f"- {ban['ip']} for {format_remaining_time(ban['exp'])} : {ban.get('reason', 'no reason given')}\n"
+                cli_str += f"- {ban['ip']} ; banned at {datetime.fromtimestamp(ban['date']).strftime('%Y-%m-%d %H:%M:%S')} for {format_remaining_time(ban['exp'])} remaining with reason \"{ban.get('reason', 'no reason given')}\"\n"
             cli_str += "\n"
 
         return True, cli_str

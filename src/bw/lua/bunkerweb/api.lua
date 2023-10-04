@@ -182,7 +182,10 @@ api.global.POST["^/ban$"] = function(self)
 	if not ok then
 		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
-	self.datastore:set("bans_ip_" .. ban["ip"], ban["reason"], ban["exp"])
+	self.datastore:set("bans_ip_" .. ban["ip"], cjson.encode({
+		reason = ban["reason"],
+		date = os.time()
+	}), ban["exp"])
 	return self:response(ngx.HTTP_OK, "success",
 		"ip " .. ban["ip"] .. " banned for " .. ban["exp"] .. " seconds with reason " .. ban["reason"])
 end
@@ -191,17 +194,18 @@ api.global.GET["^/bans$"] = function(self)
 	local data = {}
 	for i, k in ipairs(self.datastore:keys()) do
 		if k:find("^bans_ip_") then
-			local reason, err = self.datastore:get(k)
+			local result, err = self.datastore:get(k)
 			if err then
 				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
-					"can't access " .. k .. " from datastore : " .. reason)
+					"can't access " .. k .. " from datastore : " .. result)
 			end
 			local ok, ttl = self.datastore:ttl(k)
 			if not ok then
 				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
 					"can't access ttl " .. k .. " from datastore : " .. ttl)
 			end
-			local ban = { ip = k:sub(9, #k), reason = reason, exp = math.floor(ttl) }
+			local ban_data = cjson.decode(result)
+			local ban = { ip = k:sub(9, #k), reason = ban_data["reason"], date = ban_data["date"], exp = math.floor(ttl) }
 			table.insert(data, ban)
 		end
 	end
