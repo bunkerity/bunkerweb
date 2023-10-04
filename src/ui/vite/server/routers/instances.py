@@ -51,6 +51,6 @@ async def delete_instance(instance_hostname: str):
     summary="Send action to a BunkerWeb instance",
 )
 async def send_instance_action(instance_hostname: str, action: Literal["ping", "bans", "start", "stop", "restart", "reload"]):
-    req = requests.post(f"{API_URL}/{instance_hostname}/{action}")
+    req = requests.post(f'{API_URL}/instances/{instance_hostname}/{action}')
     res = set_res(req, "POST", f"Send instance {instance_hostname} action {action}")
     return res

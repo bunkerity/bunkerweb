@@ -8,7 +8,7 @@ import CardItemList from "@components/Card/Item/List.vue";
 import BansTabs from "@components/Bans/Tabs.vue";
 import BansAdd from "@components/Bans/Add.vue";
 import BansList from "@components/Bans/List.vue";
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 
@@ -26,64 +26,59 @@ const instances = reactive({
   isPend: false,
   isErr: false,
   data: [],
-  total: computed(() => {
-    return instances.data.length;
-  }),
-  hostnames: computed(() => {
-    if (instances.data.length === 0) return [];
-    const hosts = [];
-    instances.data.forEach((instance) => {
-      hosts.push(instance["hostname"]);
-    });
-    return hosts;
-  }),
+  hostnames : [],
+  total : computed(() => {return instances.hostnames.length}),
+})
+
+const bans = reactive({
+  data: [],
+  total : "",
+  reasonList: ['all'], // Based on reasons find on fetch
 });
 
-async function getInstances() {
-  await fetchAPI(
+async function getData() {
+  const getInstances = await fetchAPI(
     "/api/instances",
     "GET",
     null,
     instances,
     feedbackStore.addFeedback,
   );
+  const hostnames = await getHostFromInst();
+  return await getBansFromInst(hostnames);
 }
 
-const bans = reactive({
-  isPend: false,
-  isErr: false,
-  total: "",
-  reasonList: ["all"], // Based on reasons find on fetch
-  hostnames: [], // Only hostnames with retrieve ip ban
-  setup: computed(() => {
-    if (instances.hostnames.length === 0) return [];
-    // Fetch all instances bans
+async function getHostFromInst() {
+  const hosts = [];
+    instances.data.forEach(instance => {
+      hosts.push(instance['hostname'])
+  })
+  instances.hostnames = hosts;
+  return hosts;
+}
+
+async function getBansFromInst(hostnames) {
+  if(hostnames.length === 0) return bans.data = [];
+    // Fetch all instances bans    
     const promises = [];
-    for (let i = 0; i < instances.hostnames.length; i++) {
-      const hostname = instances.hostnames[i];
+    for (let i = 0; i < hostnames.length; i++) {
+      const hostname = hostnames[i];
       promises.push(getHostBan(hostname));
     }
 
     // When all promises fulfill, setup data
-    let bansList = [];
+    const bansList = [];
     Promise.all(promises).then((instances) => {
-      let count = 0;
-      const instNum = instances.length;
-      // Loop on instances
-      instances.forEach((fetchData) => {
-        // Case didn't retrieve ip list
-        if (fetchData.type === "error") return count++;
+        instances.forEach((instance, id) => {
+          console.log(instance);
+          bansList.push({hostname : hostnames[id], data: JSON.parse(instance.data) || []})
+        })  
+        console.log(bansList)
+      })
 
-        const banIps = fetchData.data;
-      });
-      // Case no instances data
-      if (count === instNum) return [];
-
-      bansList = values;
-    });
+    
     return bansList;
-  }),
-});
+}
 
 async function getHostBan(hostname) {
   const data = {
@@ -100,8 +95,9 @@ async function getHostBan(hostname) {
   );
 }
 
-onMounted(async () => {
-  await getInstances();
+
+onMounted(() => {
+  getData();
 });
 
 const tab = reactive({
@@ -156,12 +152,9 @@ const tab = reactive({
       class="max-w-[1100px] col-span-12 overflow-y-hidden min-h-[400px]"
       label="ACTIONS"
     >
-      <BansTabs @tab="(v) => (tab.current = v)" />
-      <BansList :class="[tab.current === 'list' ? true : 'hidden']" />
-      <BansAdd
-        @addBans="getInstances()"
-        :class="[tab.current === 'add' ? true : 'hidden']"
-      />
+      <BansTabs @tab="(v) => tab.current = v" />
+      <BansList :class="[tab.current === 'list' ? true : 'hidden']"  />
+      <BansAdd @addBans="getData()" :class="[tab.current === 'add' ? true : 'hidden']"  />
     </CardBase>
   </Dashboard>
 </template>
