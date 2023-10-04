@@ -24,15 +24,13 @@ for deps_path in [
 
 from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import get_file_in_db, set_file_in_db
+from jobs import get_file_in_db, set_file_in_db  # type: ignore
 
 logger = setup_logger("LETS-ENCRYPT.new", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 
-def certbot_new(
-    domains: str, email: str, letsencrypt_path: Path, letsencrypt_job_path: Path
-) -> int:
+def certbot_new(domains: str, email: str, letsencrypt_path: Path, letsencrypt_job_path: Path) -> int:
     return run(
         [
             join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot"),
@@ -60,8 +58,7 @@ def certbot_new(
         + (["--staging"] if getenv("USE_LETS_ENCRYPT_STAGING", "no") == "yes" else []),
         stdin=DEVNULL,
         stderr=STDOUT,
-        env=environ.copy()
-        | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
+        env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
     ).returncode
 
 
@@ -81,8 +78,7 @@ def certbot_check_domains(domains: list[str], letsencrypt_path: Path) -> int:
         stdout=PIPE,
         stderr=STDOUT,
         text=True,
-        env=environ.copy()
-        | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
+        env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
     )
     if proc.returncode != 0:
         logger.error(f"Error while checking certificates :\n{proc.stdout}")
@@ -91,10 +87,7 @@ def certbot_check_domains(domains: list[str], letsencrypt_path: Path) -> int:
     needed_domains = set(domains)
     for raw_domains in findall(r"^    Domains: (.*)$", proc.stdout, MULTILINE):
         current_domains = raw_domains.split(" ")
-        if (
-            current_domains[0] == first_needed_domain
-            and set(current_domains) == needed_domains
-        ):
+        if current_domains[0] == first_needed_domain and set(current_domains) == needed_domains:
             return 1
     return 0
 
@@ -108,10 +101,7 @@ try:
         use_letsencrypt = True
     elif getenv("MULTISITE", "no") == "yes":
         for first_server in getenv("SERVER_NAME", "").split(" "):
-            if (
-                first_server
-                and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes"
-            ):
+            if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes":
                 use_letsencrypt = True
                 break
 
@@ -123,12 +113,8 @@ try:
     letsencrypt_path = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
     letsencrypt_path.mkdir(parents=True, exist_ok=True)
 
-    letsencrypt_job_path = Path(
-        sep, "usr", "share", "bunkerweb", "core", "letsencrypt", "jobs"
-    )
-    Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(
-        parents=True, exist_ok=True
-    )
+    letsencrypt_job_path = Path(sep, "usr", "share", "bunkerweb", "core", "letsencrypt", "jobs")
+    Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(parents=True, exist_ok=True)
 
     # Get env vars
     bw_integration = "Linux"
@@ -142,9 +128,7 @@ try:
         bw_integration = "Autoconf"
     elif integration_path.is_file():
         bw_integration = integration_path.read_text(encoding="utf-8").strip()
-    elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
-        encoding="utf-8"
-    ):
+    elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
         bw_integration = "Docker"
 
     # Extract letsencrypt folder if it exists in db
@@ -209,9 +193,7 @@ try:
                 continue
             else:
                 status = 1 if status == 0 else status
-                logger.info(
-                    f"Certificate generation succeeded for domain(s) : {domains}"
-                )
+                logger.info(f"Certificate generation succeeded for domain(s) : {domains}")
 
     # Singlesite case
     elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes" and getenv("SERVER_NAME"):
@@ -243,9 +225,7 @@ try:
                 logger.error(f"Certificate generation failed for domain(s) : {domains}")
             else:
                 status = 1
-                logger.info(
-                    f"Certificate generation succeeded for domain(s) : {domains}"
-                )
+                logger.info(f"Certificate generation succeeded for domain(s) : {domains}")
 
     # Put new folder in cache
     bio = BytesIO()

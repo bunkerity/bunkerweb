@@ -2,7 +2,7 @@ site_name: BunkerWeb
 site_url: https://docs.bunkerweb.io/
 repo_url: https://github.com/bunkerity/bunkerweb
 site_description: Make your web services secure by default.
-copyright: Bunkerity
+copyright: Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bunkerity
 #remote_branch: ?
 #remote_name: ?
 
@@ -49,7 +49,6 @@ markdown_extensions:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
 
-copyright: Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bunkerity
 extra:
   version:
     provider: mike

@@ -10,10 +10,7 @@ from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Tuple
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("utils",), ("db",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -63,14 +60,11 @@ try:
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
         for first_server in getenv("SERVER_NAME", "").split(" "):
-            if (
-                getenv(f"{first_server}_USE_WHITELIST", getenv("USE_WHITELIST", "no"))
-                == "yes"
-            ):
+            if getenv(f"{first_server}_USE_WHITELIST", getenv("USE_WHITELIST", "yes")) == "yes":
                 whitelist_activated = True
                 break
     # Singlesite case
-    elif getenv("USE_WHITELIST", "no") == "yes":
+    elif getenv("USE_WHITELIST", "yes") == "yes":
         whitelist_activated = True
 
     if not whitelist_activated:
@@ -117,7 +111,7 @@ try:
                 whitelist_path.joinpath(f"{kind}.list").unlink(missing_ok=True)
                 deleted, err = del_file_in_db(f"{kind}.list", db)
                 if not deleted:
-                    logger.warning(f"Coudn't delete {kind}.list from cache : {err}")
+                    logger.warning(f"Couldn't delete {kind}.list from cache : {err}")
     if all_fresh:
         _exit(0)
 
@@ -136,9 +130,7 @@ try:
                     resp = get(url, stream=True, timeout=10)
 
                     if resp.status_code != 200:
-                        logger.warning(
-                            f"Got status code {resp.status_code}, skipping..."
-                        )
+                        logger.warning(f"Got status code {resp.status_code}, skipping...")
                         continue
 
                     iterable = resp.iter_lines()
@@ -187,9 +179,7 @@ try:
                         status = 1
             except:
                 status = 2
-                logger.error(
-                    f"Exception while getting whitelist from {url} :\n{format_exc()}"
-                )
+                logger.error(f"Exception while getting whitelist from {url} :\n{format_exc()}")
 
 except:
     status = 2

@@ -10,9 +10,7 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get(
-                "http://www.example.com", headers={"Host": "www.example.com"}
-            ).status_code
+            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
@@ -25,9 +23,7 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     use_greylist = getenv("USE_GREYLIST", "yes") == "yes"
@@ -48,12 +44,7 @@ try:
     print("ℹ️ Sending a request to http://www.example.com ...", flush=True)
     status_code = get(
         "http://www.example.com",
-        headers={"Host": "www.example.com"}
-        | (
-            {"X-Forwarded-For": "1.0.0.3"}
-            if getenv("TEST_TYPE", "docker") == "linux" and _global
-            else {}
-        ),
+        headers={"Host": "www.example.com"} | ({"X-Forwarded-For": "1.0.0.3"} if getenv("TEST_TYPE", "docker") == "linux" and _global else {}),
     ).status_code
 
     print(f"ℹ️ Status code: {status_code}", flush=True)
@@ -62,28 +53,16 @@ try:
 
     if status_code == 403:
         if not use_greylist:
-            print(
-                "❌ Request was rejected, even though greylist is supposed to be disabled, exiting ..."
-            )
+            print("❌ Request was rejected, even though greylist is supposed to be disabled, exiting ...")
             exit(1)
         elif (greylist_ip or greylist_ip_urls) and not _global:
-            print(
-                "❌ Request was rejected, even though IP is supposed to be in the greylist, exiting ..."
-            )
+            print("❌ Request was rejected, even though IP is supposed to be in the greylist, exiting ...")
             exit(1)
-        elif (
-            (greylist_rdns or greylist_rdns_urls)
-            and not greylist_rdns_global
-            and not _global
-        ):
-            print(
-                "❌ Request was rejected, even though RDNS is supposed to be in the greylist, exiting ..."
-            )
+        elif (greylist_rdns or greylist_rdns_urls) and not greylist_rdns_global and not _global:
+            print("❌ Request was rejected, even though RDNS is supposed to be in the greylist, exiting ...")
             exit(1)
         elif (greylist_asn or greylist_asn_urls) and _global:
-            print(
-                "❌ Request was rejected, even though ASN is supposed to be in the greylist, exiting ..."
-            )
+            print("❌ Request was rejected, even though ASN is supposed to be in the greylist, exiting ...")
             exit(1)
         elif greylist_user_agent or greylist_user_agent_urls:
             print(
@@ -98,9 +77,7 @@ try:
             print(f"ℹ️ Status code: {status_code}", flush=True)
 
             if status_code == 403:
-                print(
-                    "❌ Request was rejected, even though User Agent is supposed to be in the greylist ..."
-                )
+                print("❌ Request was rejected, even though User Agent is supposed to be in the greylist ...")
                 exit(1)
 
             sleep(2)
@@ -126,16 +103,12 @@ try:
                 "ℹ️ Sending a request to http://www.example.com/admin ...",
                 flush=True,
             )
-            status_code = get(
-                "http://www.example.com/admin", headers={"Host": "www.example.com"}
-            ).status_code
+            status_code = get("http://www.example.com/admin", headers={"Host": "www.example.com"}).status_code
 
             print(f"ℹ️ Status code: {status_code}", flush=True)
 
             if status_code == 403:
-                print(
-                    "❌ Request was rejected, even though URI is supposed to be in the greylist ..."
-                )
+                print("❌ Request was rejected, even though URI is supposed to be in the greylist ...")
                 exit(1)
 
             sleep(2)
@@ -158,14 +131,10 @@ try:
                 exit(1)
     else:
         if (greylist_ip or greylist_ip_urls) and _global:
-            print(
-                "❌ Request was not rejected, but IP is not in the greylist, exiting ..."
-            )
+            print("❌ Request was not rejected, but IP is not in the greylist, exiting ...")
             exit(1)
         elif (greylist_rdns or greylist_rdns_urls) and _global:
-            print(
-                "❌ Request was not rejected, but RDNS is not in the greylist, exiting ..."
-            )
+            print("❌ Request was not rejected, but RDNS is not in the greylist, exiting ...")
             exit(1)
         elif (greylist_asn or greylist_asn_urls) and not _global:
             print("❌ Request was rejected, but ASN is not in the greylist, exiting ...")

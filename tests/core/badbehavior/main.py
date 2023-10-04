@@ -13,9 +13,7 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get(
-                "http://www.example.com", headers={"Host": "www.example.com"}
-            ).status_code
+            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
@@ -28,15 +26,11 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     use_bad_behavior = getenv("USE_BAD_BEHAVIOR", "yes") == "yes"
-    bad_behavior_status_codes = getenv(
-        "BAD_BEHAVIOR_STATUS_CODES", "400 401 403 404 405 429 444"
-    )
+    bad_behavior_status_codes = getenv("BAD_BEHAVIOR_STATUS_CODES", "400 401 403 404 405 429 444")
     bad_behavior_ban_time = getenv("BAD_BEHAVIOR_BAN_TIME", "86400")
     bad_behavior_threshold = getenv("BAD_BEHAVIOR_THRESHOLD", "10")
     bad_behavior_count_time = getenv("BAD_BEHAVIOR_COUNT_TIME", "60")
@@ -55,10 +49,7 @@ try:
 
     sleep(3)
 
-    status_code = get(
-        f"http://www.example.com",
-        headers={"Host": "www.example.com"},
-    ).status_code
+    status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
     if status_code == 403:
         if not use_bad_behavior:
@@ -74,10 +65,7 @@ try:
             )
             sleep(65)
 
-            status_code = get(
-                f"http://www.example.com",
-                headers={"Host": "www.example.com"},
-            ).status_code
+            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
             if status_code == 403:
                 print("❌ Bad Behavior's ban time didn't changed ...", flush=True)
@@ -103,9 +91,7 @@ try:
                 docker_host = getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
                 docker_client = DockerClient(base_url=docker_host)
 
-                bw_instances = docker_client.containers.list(
-                    filters={"label": "bunkerweb.INSTANCE"}
-                )
+                bw_instances = docker_client.containers.list(filters={"label": "bunkerweb.INSTANCE"})
 
                 if not bw_instances:
                     print("❌ BunkerWeb instance not found ...", flush=True)
@@ -130,11 +116,7 @@ try:
             if not found:
                 print("❌ Bad Behavior's count time didn't changed ...", flush=True)
                 exit(1)
-    elif (
-        use_bad_behavior
-        and bad_behavior_status_codes == "400 401 403 404 405 429 444"
-        and bad_behavior_threshold == "10"
-    ):
+    elif use_bad_behavior and bad_behavior_status_codes == "400 401 403 404 405 429 444" and bad_behavior_threshold == "10":
         print("❌ Bad Behavior is disabled, it shouldn't be ...", flush=True)
         exit(1)
 

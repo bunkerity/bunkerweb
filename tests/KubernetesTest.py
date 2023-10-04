@@ -1,7 +1,7 @@
 from Test import Test
-from os.path import isdir, join, isfile
-from os import chown, walk, getenv, listdir, mkdir
-from shutil import copytree, rmtree, copy
+from os.path import isfile
+from os import getenv, mkdir
+from shutil import rmtree, copy
 from traceback import format_exc
 from subprocess import run
 from time import sleep
@@ -42,9 +42,7 @@ class KubernetesTest(Test):
             for yaml in data:
                 if yaml["metadata"]["name"] == "bunkerweb":
                     for k, v in append_env.items():
-                        yaml["spec"]["template"]["spec"]["containers"][0]["env"].append(
-                            {"name": k, "value": v}
-                        )
+                        yaml["spec"]["template"]["spec"]["containers"][0]["env"].append({"name": k, "value": v})
                     for ele in yaml["spec"]["template"]["spec"]["containers"][0]["env"]:
                         if ele["name"] in replace_env:
                             ele["value"] = replace_env[ele["name"]]
@@ -53,9 +51,7 @@ class KubernetesTest(Test):
                     "bunkerweb-controller",
                     "bunkerweb-scheduler",
                 ]:
-                    yaml["spec"]["template"]["spec"]["imagePullSecrets"] = [
-                        {"name": "secret-registry"}
-                    ]
+                    yaml["spec"]["template"]["spec"]["imagePullSecrets"] = [{"name": "secret-registry"}]
                 yamls.append(yaml)
             with open(deploy, "w") as f:
                 f.write(dump_all(yamls))
@@ -74,9 +70,7 @@ class KubernetesTest(Test):
                 r"bunkerity/bunkerweb-scheduler:.*$",
                 f"ghcr.io/bunkerity/scheduler-tests:{getenv('IMAGE_TAG')}",
             )
-            proc = run(
-                "kubectl apply -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True
-            )
+            proc = run("kubectl apply -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True)
             if proc.returncode != 0:
                 raise (Exception("kubectl apply bunkerweb failed (k8s stack)"))
             healthy = False
@@ -154,9 +148,7 @@ class KubernetesTest(Test):
         try:
             if not Test.end():
                 return False
-            proc = run(
-                "kubectl delete -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True
-            )
+            proc = run("kubectl delete -f bunkerweb.yml", cwd="/tmp/kubernetes", shell=True)
             if proc.returncode != 0:
                 ret = False
             rmtree("/tmp/kubernetes")
@@ -173,8 +165,6 @@ class KubernetesTest(Test):
         try:
             super()._setup_test()
             test = f"/tmp/tests/{self._name}"
-            deploy = f"/tmp/tests/{self._name}/kubernetes.yml"
-            example_data = f"./examples/{self._name}/bw-data"
             for ex_domain, test_domain in self._domains.items():
                 Test.replace_in_files(test, ex_domain, test_domain)
                 Test.rename(test, ex_domain, test_domain)

@@ -30,9 +30,7 @@ class ReverseProxied(ProxyFix):
         if x_for:
             environ["REMOTE_ADDR"] = x_for
 
-        x_proto = self._get_real_value(
-            self.x_proto, environ_get("HTTP_X_FORWARDED_PROTO")
-        )
+        x_proto = self._get_real_value(self.x_proto, environ_get("HTTP_X_FORWARDED_PROTO"))
         if x_proto:
             environ["wsgi.url_scheme"] = x_proto
 
@@ -53,16 +51,12 @@ class ReverseProxied(ProxyFix):
                 environ["HTTP_HOST"] = f"{host}:{x_port}"
             environ["SERVER_PORT"] = x_port
 
-        x_prefix = self._get_real_value(
-            self.x_prefix, environ_get("HTTP_X_FORWARDED_PREFIX")
-        )
+        x_prefix = self._get_real_value(self.x_prefix, environ_get("HTTP_X_FORWARDED_PREFIX"))
         if x_prefix:
             environ["SCRIPT_NAME"] = x_prefix
 
-        environ["PATH_INFO"] = environ["PATH_INFO"][len(environ["SCRIPT_NAME"]) :]
-        environ[
-            "ABSOLUTE_URI"
-        ] = f"{environ['wsgi.url_scheme']}://{environ['HTTP_HOST']}{environ['SCRIPT_NAME']}/"
+        environ["PATH_INFO"] = environ["PATH_INFO"][len(environ["SCRIPT_NAME"]) :]  # noqa: E203
+        environ["ABSOLUTE_URI"] = f"{environ['wsgi.url_scheme']}://{environ['HTTP_HOST']}{environ['SCRIPT_NAME']}/"
         environ["SESSION_COOKIE_DOMAIN"] = environ["HTTP_HOST"]
 
         return self.app(environ, start_response)

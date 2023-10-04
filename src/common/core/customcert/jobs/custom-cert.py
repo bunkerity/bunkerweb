@@ -26,28 +26,20 @@ logger = setup_logger("CUSTOM-CERT", getenv("LOG_LEVEL", "INFO"))
 db = None
 
 
-def check_cert(
-    cert_path: str, key_path: str, first_server: Optional[str] = None
-) -> bool:
+def check_cert(cert_path: str, key_path: str, first_server: Optional[str] = None) -> bool:
     try:
         if not cert_path or not key_path:
-            logger.warning(
-                "Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates"
-            )
+            logger.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates")
             return False
 
         cert_path: Path = Path(normpath(cert_path))
         key_path: Path = Path(normpath(key_path))
 
         if not cert_path.is_file():
-            logger.warning(
-                f"Certificate file {cert_path} is not a valid file, ignoring the custom certificate"
-            )
+            logger.warning(f"Certificate file {cert_path} is not a valid file, ignoring the custom certificate")
             return False
         elif not key_path.is_file():
-            logger.warning(
-                f"Key file {key_path} is not a valid file, ignoring the custom certificate"
-            )
+            logger.warning(f"Key file {key_path} is not a valid file, ignoring the custom certificate")
             return False
 
         cert_cache_path = Path(
@@ -66,9 +58,7 @@ def check_cert(
         if old_hash == cert_hash:
             return False
 
-        cached, err = cache_file(
-            cert_path, cert_cache_path, cert_hash, db, delete_file=False
-        )
+        cached, err = cache_file(cert_path, cert_cache_path, cert_hash, db, delete_file=False)
         if not cached:
             logger.error(f"Error while caching custom-cert cert.pem file : {err}")
 
@@ -86,9 +76,7 @@ def check_cert(
         key_hash = file_hash(key_path)
         old_hash = cache_hash(key_cache_path, db)
         if old_hash != key_hash:
-            cached, err = cache_file(
-                key_path, key_cache_path, key_hash, db, delete_file=False
-            )
+            cached, err = cache_file(key_path, key_cache_path, key_hash, db, delete_file=False)
             if not cached:
                 logger.error(f"Error while caching custom-cert key.pem file : {err}")
 
@@ -103,14 +91,10 @@ def check_cert(
 status = 0
 
 try:
-    Path(sep, "var", "cache", "bunkerweb", "customcert").mkdir(
-        parents=True, exist_ok=True
-    )
+    Path(sep, "var", "cache", "bunkerweb", "customcert").mkdir(parents=True, exist_ok=True)
 
     if getenv("USE_CUSTOM_SSL", "no") == "yes" and getenv("SERVER_NAME", "") != "":
-        db = Database(
-            logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False
-        )
+        db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
 
         cert_path = getenv("CUSTOM_SSL_CERT", "")
         key_path = getenv("CUSTOM_SSL_KEY", "")
@@ -131,16 +115,11 @@ try:
             servers = servers.split(" ")
 
         for first_server in servers:
-            if not first_server or (
-                getenv(f"{first_server}_USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no"))
-                != "yes"
-            ):
+            if not first_server or (getenv(f"{first_server}_USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")) != "yes"):
                 continue
 
             if not db:
-                db = Database(
-                    logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False
-                )
+                db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
 
             cert_path = getenv(f"{first_server}_CUSTOM_SSL_CERT", "")
             key_path = getenv(f"{first_server}_CUSTOM_SSL_KEY", "")

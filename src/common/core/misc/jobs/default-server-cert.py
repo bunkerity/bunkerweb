@@ -35,10 +35,7 @@ try:
                 "AUTO_LETS_ENCRYPT",
                 "GENERATE_SELF_SIGNED_SSL",
             ):
-                if (
-                    getenv(f"{first_server}_{check_var}", getenv(check_var, "no"))
-                    == "yes"
-                ):
+                if getenv(f"{first_server}_{check_var}", getenv(check_var, "no")) == "yes":
                     need_default_cert = True
                     break
             if need_default_cert:
@@ -99,9 +96,7 @@ try:
                 "Successfully generated self-signed certificate for default server",
             )
 
-        db = Database(
-            logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False
-        )
+        db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
 
         cached, err = set_file_in_db(
             "cert.pem",
@@ -109,13 +104,9 @@ try:
             db,
         )
         if not cached:
-            logger.error(
-                f"Error while saving default-server-cert cert.pem file to db cache : {err}"
-            )
+            logger.error(f"Error while saving default-server-cert cert.pem file to db cache : {err}")
         else:
-            logger.info(
-                "Successfully saved default-server-cert cert.pem file to db cache"
-            )
+            logger.info("Successfully saved default-server-cert cert.pem file to db cache")
 
         cached, err = set_file_in_db(
             "cert.key",
@@ -123,13 +114,9 @@ try:
             db,
         )
         if not cached:
-            logger.error(
-                f"Error while saving default-server-cert cert.key file to db cache : {err}"
-            )
+            logger.error(f"Error while saving default-server-cert cert.key file to db cache : {err}")
         else:
-            logger.info(
-                "Successfully saved default-server-cert cert.key file to db cache"
-            )
+            logger.info("Successfully saved default-server-cert cert.key file to db cache")
     else:
         logger.info(
             "Skipping generation of self-signed certificate for default server (already present)",

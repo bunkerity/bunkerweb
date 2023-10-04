@@ -5,7 +5,7 @@ from copy import deepcopy
 from glob import glob
 from hashlib import sha256
 from io import BytesIO
-from json import dumps, load as json_load
+from json import load as json_load
 from os import (
     _exit,
     chmod,
@@ -29,10 +29,7 @@ from time import sleep
 from traceback import format_exc
 from typing import Any, Dict, List, Optional, Union
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("utils",), ("api",), ("db",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -41,7 +38,6 @@ from dotenv import dotenv_values
 from logger import setup_logger  # type: ignore
 from Database import Database  # type: ignore
 from JobScheduler import JobScheduler
-from ApiCaller import ApiCaller  # type: ignore
 
 RUN = True
 SCHEDULER: Optional[JobScheduler] = None
@@ -182,12 +178,7 @@ def dict_to_frozenset(d):
 
 
 def api_to_instance(api):
-    hostname_port = (
-        api.endpoint.replace("http://", "")
-        .replace("https://", "")
-        .replace("/", "")
-        .split(":")
-    )
+    hostname_port = api.endpoint.replace("http://", "").replace("https://", "").replace("/", "").split(":")
     return {
         "hostname": hostname_port[0],
         "env": {"API_HTTP_PORT": int(hostname_port[1]), "API_SERVER_NAME": api.host},
@@ -228,27 +219,19 @@ if __name__ == "__main__":
             INTEGRATION = "Autoconf"
         elif integration_path.is_file():
             INTEGRATION = integration_path.read_text(encoding="utf-8").strip()
-        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
-            encoding="utf-8"
-        ):
+        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
             INTEGRATION = "Docker"
 
         del integration_path, os_release_path
 
-        tmp_variables_path = (
-            normpath(args.variables)
-            if args.variables
-            else join(sep, "var", "tmp", "bunkerweb", "variables.env")
-        )
+        tmp_variables_path = normpath(args.variables) if args.variables else join(sep, "var", "tmp", "bunkerweb", "variables.env")
         tmp_variables_path = Path(tmp_variables_path)
         nginx_variables_path = Path(sep, "etc", "nginx", "variables.env")
         dotenv_env = dotenv_values(str(tmp_variables_path))
 
         db = Database(
             logger,
-            sqlalchemy_string=dotenv_env.get(
-                "DATABASE_URI", getenv("DATABASE_URI", None)
-            ),
+            sqlalchemy_string=dotenv_env.get("DATABASE_URI", getenv("DATABASE_URI", None)),
         )
         env = {}
 
@@ -270,16 +253,7 @@ if __name__ == "__main__":
                 sleep(5)
 
             env = db.get_config()
-        elif (
-            not tmp_variables_path.exists()
-            or not nginx_variables_path.exists()
-            or (
-                tmp_variables_path.read_text(encoding="utf-8")
-                != nginx_variables_path.read_text(encoding="utf-8")
-            )
-            or db.is_initialized()
-            and db.get_config() != dotenv_env
-        ):
+        elif not tmp_variables_path.exists() or not nginx_variables_path.exists() or (tmp_variables_path.read_text(encoding="utf-8") != nginx_variables_path.read_text(encoding="utf-8")) or db.is_initialized() and db.get_config() != dotenv_env:
             # run the config saver
             proc = subprocess_run(
                 [
@@ -349,9 +323,7 @@ if __name__ == "__main__":
                     custom_conf = {
                         "value": content,
                         "exploded": (
-                            f"{path_exploded.pop()}"
-                            if path_exploded[-1] not in root_dirs
-                            else None,
+                            f"{path_exploded.pop()}" if path_exploded[-1] not in root_dirs else None,
                             path_exploded[-1],
                             file.replace(".conf", ""),
                         ),
@@ -360,10 +332,7 @@ if __name__ == "__main__":
                     saving = True
                     in_db = False
                     for db_conf in db_configs:
-                        if (
-                            db_conf["service_id"] == custom_conf["exploded"][0]
-                            and db_conf["name"] == custom_conf["exploded"][2]
-                        ):
+                        if db_conf["service_id"] == custom_conf["exploded"][0] and db_conf["name"] == custom_conf["exploded"][2]:
                             in_db = True
                             if db_conf["method"] != "manual":
                                 saving = False
@@ -376,9 +345,7 @@ if __name__ == "__main__":
                     if saving:
                         custom_configs.append(custom_conf)
 
-        changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {
-            hash(dict_to_frozenset(d)) for d in db_configs
-        }
+        changes = changes or {hash(dict_to_frozenset(d)) for d in custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs}
 
         if changes:
             err = db.save_custom_configs(custom_configs, "manual")
@@ -404,9 +371,7 @@ if __name__ == "__main__":
             with open(filename, "r", encoding="utf-8") as f:
                 _dir = dirname(filename)
                 plugin_content = BytesIO()
-                with tar_open(
-                    fileobj=plugin_content, mode="w:gz", compresslevel=9
-                ) as tar:
+                with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
                     tar.add(_dir, arcname=basename(_dir), recursive=True)
                 plugin_content.seek(0, 0)
                 value = plugin_content.getvalue()
@@ -435,9 +400,7 @@ if __name__ == "__main__":
             db_plugin.pop("method", None)
             tmp_db_plugins.append(db_plugin)
 
-        changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {
-            hash(dict_to_frozenset(d)) for d in tmp_db_plugins
-        }
+        changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in tmp_db_plugins}
 
         if changes:
             err = db.update_external_plugins(external_plugins, delete_missing=True)
@@ -463,9 +426,7 @@ if __name__ == "__main__":
             ret = db.set_scheduler_first_start()
 
             if ret:
-                logger.error(
-                    f"An error occurred when setting the scheduler first start : {ret}"
-                )
+                logger.error(f"An error occurred when setting the scheduler first start : {ret}")
                 stop(1)
 
         FIRST_RUN = True
@@ -494,9 +455,7 @@ if __name__ == "__main__":
             ret = db.checked_changes(CHANGES)
 
             if ret:
-                logger.error(
-                    f"An error occurred when setting the changes to checked in the database : {ret}"
-                )
+                logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
                 stop(1)
 
             if RUN_JOBS_ONCE:
@@ -578,17 +537,13 @@ if __name__ == "__main__":
                         logger.info("Successfully sent stop signal to temp nginx")
                         i = 0
                         while i < 20:
-                            if not Path(
-                                sep, "var", "run", "bunkerweb", "nginx.pid"
-                            ).is_file():
+                            if not Path(sep, "var", "run", "bunkerweb", "nginx.pid").is_file():
                                 break
                             logger.warning("Waiting for temp nginx to stop ...")
                             sleep(1)
                             i += 1
                         if i >= 20:
-                            logger.error(
-                                "Timeout error while waiting for temp nginx to stop"
-                            )
+                            logger.error("Timeout error while waiting for temp nginx to stop")
                         else:
                             # Start nginx
                             logger.info("Starting nginx ...")
@@ -623,9 +578,7 @@ if __name__ == "__main__":
 
             # infinite schedule for the jobs
             logger.info("Executing job scheduler ...")
-            Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy").write_text(
-                "ok", encoding="utf-8"
-            )
+            Path(sep, "var", "tmp", "bunkerweb", "scheduler.healthy").write_text("ok", encoding="utf-8")
             while RUN and not NEED_RELOAD:
                 SCHEDULER.run_pending()
                 sleep(1)
@@ -633,9 +586,7 @@ if __name__ == "__main__":
                 changes = db.check_changes()
 
                 if isinstance(changes, str):
-                    logger.error(
-                        f"An error occurred when checking for changes in the database : {changes}"
-                    )
+                    logger.error(f"An error occurred when checking for changes in the database : {changes}")
                     stop(1)
 
                 # check if the plugins have changed since last time
@@ -644,9 +595,7 @@ if __name__ == "__main__":
 
                     if FIRST_RUN:
                         # run the config saver to save potential ignored external plugins settings
-                        logger.info(
-                            "Running config saver to save potential ignored external plugins settings ..."
-                        )
+                        logger.info("Running config saver to save potential ignored external plugins settings ...")
                         proc = subprocess_run(
                             [
                                 "python",
@@ -707,9 +656,7 @@ if __name__ == "__main__":
 
                 if CONFIGS_NEED_GENERATION:
                     CHANGES.append("custom_configs")
-                    generate_custom_configs(
-                        db.get_custom_configs(), original_path=configs_path
-                    )
+                    generate_custom_configs(db.get_custom_configs(), original_path=configs_path)
 
                 if PLUGINS_NEED_GENERATION:
                     CHANGES.append("external_plugins")

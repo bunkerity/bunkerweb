@@ -16,9 +16,9 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
         with:
           python-version: "3.11"
           cache: "pip"
@@ -34,7 +34,7 @@ jobs:
           sudo chmod 755 /opt/firefox /opt/firefox/firefox
           rm -f firefox-setup.tar.bz2
       - name: Download geckodriver
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4 # v2.9.0
         with:
           max_attempts: 3
           timeout_minutes: 20
@@ -45,7 +45,7 @@ jobs:
             sudo chmod +x /usr/local/bin/geckodriver
             rm -f geckodriver.tar.gz
       - name: Login to ghcr
-        uses: docker/login-action@v3
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

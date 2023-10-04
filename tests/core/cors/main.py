@@ -32,23 +32,14 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     use_cors = getenv("USE_CORS", "no") == "yes"
-    cors_allow_origin = (
-        getenv("CORS_ALLOW_ORIGIN", "*")
-        .replace("\\", "")
-        .replace("^", "")
-        .replace("$", "")
-    )
+    cors_allow_origin = getenv("CORS_ALLOW_ORIGIN", "*").replace("\\", "").replace("^", "").replace("$", "")
     cors_expose_headers = getenv("CORS_EXPOSE_HEADERS", "Content-Length,Content-Range")
     cors_max_age = getenv("CORS_MAX_AGE", "86400")
-    cors_allow_credentials = (
-        "true" if getenv("CORS_ALLOW_CREDENTIALS", "no") == "yes" else "false"
-    )
+    cors_allow_credentials = "true" if getenv("CORS_ALLOW_CREDENTIALS", "no") == "yes" else "false"
     cors_allow_methods = getenv("CORS_ALLOW_METHODS", "GET, POST, OPTIONS")
     cors_allow_headers = getenv(
         "CORS_ALLOW_HEADERS",
@@ -129,18 +120,12 @@ try:
         response.raise_for_status()
 
     if use_cors:
-        if (
-            cors_allow_credentials == "false"
-            and "Access-Control-Allow-Credentials" in response.headers
-        ):
+        if cors_allow_credentials == "false" and "Access-Control-Allow-Credentials" in response.headers:
             print(
                 f'❌ The Access-Control-Allow-Credentials header is present in the response headers while the setting CORS_ALLOW_CREDENTIALS is set to "no", it should not be ...\nheaders: {response.headers}',
             )
             exit(1)
-        elif (
-            cors_allow_credentials == "true"
-            and "Access-Control-Allow-Credentials" not in response.headers
-        ):
+        elif cors_allow_credentials == "true" and "Access-Control-Allow-Credentials" not in response.headers:
             print(
                 f'❌ The Access-Control-Allow-Credentials header is not present in the response headers while the setting CORS_ALLOW_CREDENTIALS is set to "yes", it should be ...\nheaders: {response.headers}',
             )
@@ -157,10 +142,7 @@ try:
         ("Access-Control-Allow-Headers", cors_allow_headers),
     ):
         if use_cors:
-            if (
-                header == "Access-Control-Allow-Credentials"
-                and cors_allow_credentials == "false"
-            ):
+            if header == "Access-Control-Allow-Credentials" and cors_allow_credentials == "false":
                 continue
 
             if value != response.headers.get(header):
@@ -190,8 +172,7 @@ try:
             cors_max_age != "86400",
             cors_allow_credentials == "true",
             cors_allow_methods != "GET, POST, OPTIONS",
-            cors_allow_headers
-            != "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range",
+            cors_allow_headers != "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range",
         ]
     ):
         exit(0)

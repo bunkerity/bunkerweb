@@ -39,9 +39,7 @@ try:
         bw_integration = "Autoconf"
     elif integration_path.is_file():
         bw_integration = integration_path.read_text(encoding="utf-8").strip()
-    elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
-        encoding="utf-8"
-    ):
+    elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
         bw_integration = "Docker"
 
     token = getenv("CERTBOT_TOKEN", "")
@@ -49,9 +47,7 @@ try:
 
     # Cluster case
     if bw_integration in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
-        db = Database(
-            logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False
-        )
+        db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
         lock = Lock()
 
         with lock:
@@ -69,9 +65,7 @@ try:
             )
             if not sent:
                 status = 1
-                logger.error(
-                    f"Can't send API request to {api.endpoint}/lets-encrypt/challenge : {err}"
-                )
+                logger.error(f"Can't send API request to {api.endpoint}/lets-encrypt/challenge : {err}")
             elif status != 200:
                 status = 1
                 logger.error(

@@ -11,9 +11,7 @@ from uvicorn import run
 fastapi_proc = None
 if getenv("TEST_TYPE", "docker") == "docker":
     app = FastAPI()
-    fastapi_proc = Process(
-        target=run, args=(app,), kwargs=dict(host="0.0.0.0", port=80)
-    )
+    fastapi_proc = Process(target=run, args=(app,), kwargs=dict(host="0.0.0.0", port=80))
     fastapi_proc.start()
 
     sleep(1)
@@ -22,10 +20,8 @@ try:
     use_reverse_scan = getenv("USE_REVERSE_SCAN", "yes") == "yes"
     reverse_scan_ports = getenv("REVERSE_SCAN_PORTS", "80")
 
-    print(f"ℹ️ Trying to access http://www.example.com ...", flush=True)
-    status_code = get(
-        "http://www.example.com", headers={"Host": "www.example.com"}
-    ).status_code
+    print("ℹ️ Trying to access http://www.example.com ...", flush=True)
+    status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
     print(f"ℹ️ Status code: {status_code}", flush=True)
 

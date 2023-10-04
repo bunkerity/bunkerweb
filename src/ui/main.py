@@ -6,17 +6,12 @@ from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
 
 os_release_path = Path(sep, "etc", "os-release")
-if os_release_path.is_file() and "Alpine" not in os_release_path.read_text(
-    encoding="utf-8"
-):
+if os_release_path.is_file() and "Alpine" not in os_release_path.read_text(encoding="utf-8"):
     sys_path.append(join(sep, "usr", "share", "bunkerweb", "deps", "python"))
 
 del os_release_path
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("utils",), ("api",), ("db",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -98,7 +93,7 @@ def stop(status, _stop=True):
 
 
 def handle_stop(signum, frame):
-    app.logger.info("Catched stop operation")
+    app.logger.info("Caught stop operation")
     app.logger.info("Stopping web ui ...")
     stop(0, False)
 
@@ -138,9 +133,7 @@ if not getenv("FLASK_DEBUG", False) and not regex_match(
     r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$",
     getenv("ADMIN_PASSWORD", "changeme"),
 ):
-    app.logger.error(
-        "The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
-    )
+    app.logger.error("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
     stop(1)
 
 login_manager = LoginManager()
@@ -173,9 +166,7 @@ docker_client = None
 kubernetes_client = None
 if INTEGRATION in ("Docker", "Swarm", "Autoconf"):
     try:
-        docker_client: DockerClient = DockerClient(
-            base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
-        )
+        docker_client: DockerClient = DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
     except (docker_APIError, DockerException):
         app.logger.warning("No docker host found")
 elif INTEGRATION == "Kubernetes":
@@ -203,11 +194,7 @@ while not db.is_initialized():
 
 app.logger.info("Database is ready")
 Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").write_text("ok", encoding="utf-8")
-bw_version = (
-    Path(sep, "usr", "share", "bunkerweb", "VERSION")
-    .read_text(encoding="utf-8")
-    .strip()
-)
+bw_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encoding="utf-8").strip()
 
 try:
     app.config.update(
@@ -238,9 +225,7 @@ app.jinja_env.globals.update(check_settings=check_settings)
 csrf = CSRFProtect()
 csrf.init_app(app)
 
-LOG_RX = re_compile(
-    r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$"
-)
+LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
 
 
 def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
@@ -248,9 +233,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
     error = False
     if method == "services":
         editing = operation == "edit"
-        service_custom_confs = glob(
-            join(sep, "etc", "bunkerweb", "configs", "*", args[1])
-        )
+        service_custom_confs = glob(join(sep, "etc", "bunkerweb", "configs", "*", args[1]))
         moved = False
 
         if operation == "new":
@@ -261,9 +244,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
                     if listdir(service_custom_conf):
                         move(
                             service_custom_conf,
-                            service_custom_conf.replace(
-                                f"{sep}{args[1]}", f"{sep}{args[2]}"
-                            ).replace(join(sep, "etc"), join(sep, "var", "tmp")),
+                            service_custom_conf.replace(f"{sep}{args[1]}", f"{sep}{args[2]}").replace(join(sep, "etc"), join(sep, "var", "tmp")),
                         )
                         moved = True
             operation, error = app.config["CONFIG"].edit_service(args[1], args[0])
@@ -276,9 +257,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
             app.config["TO_FLASH"].append({"content": operation, "type": "success"})
 
             if editing and moved and args[1] != args[2] and service_custom_confs:
-                for tmp_service_custom_conf in glob(
-                    join(sep, "var", "tmp", "bunkerweb", "configs", "*", args[2])
-                ):
+                for tmp_service_custom_conf in glob(join(sep, "var", "tmp", "bunkerweb", "configs", "*", args[2])):
                     move(
                         tmp_service_custom_conf,
                         tmp_service_custom_conf.replace(
@@ -289,9 +268,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
                 error = app.config["CONFIGFILES"].save_configs()
                 if error:
                     app.config["TO_FLASH"].append({"content": error, "type": "error"})
-                rmtree(
-                    join(sep, "var", "tmp", "bunkerweb", "configs"), ignore_errors=True
-                )
+                rmtree(join(sep, "var", "tmp", "bunkerweb", "configs"), ignore_errors=True)
     if method == "global_config":
         operation = app.config["CONFIG"].edit_global_conf(args[0])
     elif method == "plugins":
@@ -313,9 +290,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
     if operation:
         if isinstance(operation, list):
             for op in operation:
-                app.config["TO_FLASH"].append(
-                    {"content": f"Reload failed for the instance {op}", "type": "error"}
-                )
+                app.config["TO_FLASH"].append({"content": f"Reload failed for the instance {op}", "type": "error"})
         elif operation.startswith("Can't"):
             app.config["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
@@ -327,9 +302,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
 @app.after_request
 def set_csp_header(response):
     """Set the Content-Security-Policy header to prevent XSS attacks."""
-    response.headers[
-        "Content-Security-Policy"
-    ] = "object-src 'none'; frame-ancestors 'self';"
+    response.headers["Content-Security-Policy"] = "object-src 'none'; frame-ancestors 'self';"
     return response
 
 
@@ -438,7 +411,7 @@ def instances():
     # Manage instances
     if request.method == "POST":
         # Check operation
-        if not "operation" in request.form or not request.form["operation"] in (
+        if "operation" not in request.form or request.form["operation"] not in (
             "reload",
             "start",
             "stop",
@@ -448,7 +421,7 @@ def instances():
             return redirect(url_for("loading", next=url_for("instances")))
 
         # Check that all fields are present
-        if not "INSTANCE_ID" in request.form:
+        if "INSTANCE_ID" not in request.form:
             flash("Missing INSTANCE_ID parameter.", "error")
             return redirect(url_for("loading", next=url_for("instances")))
 
@@ -465,12 +438,7 @@ def instances():
             url_for(
                 "loading",
                 next=url_for("instances"),
-                message=(
-                    f"{request.form['operation'].title()}ing"
-                    if request.form["operation"] != "stop"
-                    else "Stopping"
-                )
-                + " instance",
+                message=(f"{request.form['operation'].title()}ing" if request.form["operation"] != "stop" else "Stopping") + " instance",
             )
         )
 
@@ -489,7 +457,7 @@ def instances():
 def services():
     if request.method == "POST":
         # Check operation
-        if not "operation" in request.form or not request.form["operation"] in (
+        if "operation" not in request.form or request.form["operation"] not in (
             "new",
             "edit",
             "delete",
@@ -501,10 +469,7 @@ def services():
         variables = deepcopy(request.form.to_dict())
         del variables["csrf_token"]
 
-        if (
-            not "OLD_SERVER_NAME" in request.form
-            and request.form["operation"] == "edit"
-        ):
+        if "OLD_SERVER_NAME" not in request.form and request.form["operation"] == "edit":
             flash("Missing OLD_SERVER_NAME parameter.", "error")
             return redirect(url_for("loading", next=url_for("services")))
 
@@ -527,19 +492,10 @@ def services():
                 elif value == "off":
                     value = "no"
 
-                if variable in variables and (
-                    variable != "SERVER_NAME"
-                    and value == config.get(variable, None)
-                    or not value.strip()
-                ):
+                if variable in variables and (variable != "SERVER_NAME" and value == config.get(variable, None) or not value.strip()):
                     del variables[variable]
 
-            if (
-                request.form["operation"] == "edit"
-                and len(variables) == 1
-                and "SERVER_NAME" in variables
-                and variables["SERVER_NAME"] == request.form.get("OLD_SERVER_NAME", "")
-            ):
+            if request.form["operation"] == "edit" and len(variables) == 1 and "SERVER_NAME" in variables and variables["SERVER_NAME"] == request.form.get("OLD_SERVER_NAME", ""):
                 flash(
                     "The service was not edited because no values were changed.",
                     "error",
@@ -553,13 +509,11 @@ def services():
 
         # Delete
         elif request.form["operation"] == "delete":
-            if not "SERVER_NAME" in request.form:
+            if "SERVER_NAME" not in request.form:
                 flash("Missing SERVER_NAME parameter.", "error")
                 return redirect(url_for("loading", next=url_for("services")))
 
-            error = app.config["CONFIG"].check_variables(
-                {"SERVER_NAME": request.form["SERVER_NAME"]}
-            )
+            error = app.config["CONFIG"].check_variables({"SERVER_NAME": request.form["SERVER_NAME"]})
 
             if error:
                 return redirect(url_for("loading", next=url_for("services")))
@@ -584,15 +538,11 @@ def services():
         message = ""
 
         if request.form["operation"] == "new":
-            message = (
-                f"Creating service {variables.get('SERVER_NAME', '').split(' ')[0]}"
-            )
+            message = f"Creating service {variables.get('SERVER_NAME', '').split(' ')[0]}"
         elif request.form["operation"] == "edit":
             message = f"Saving configuration for service {request.form.get('OLD_SERVER_NAME', '').split(' ')[0]}"
         elif request.form["operation"] == "delete":
-            message = (
-                f"Deleting service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
-            )
+            message = f"Deleting service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
 
         return redirect(url_for("loading", next=url_for("services"), message=message))
 
@@ -644,9 +594,7 @@ def global_config():
                 del variables[variable]
 
         if not variables:
-            flash(
-                "The global configuration was not edited because no values were changed."
-            )
+            flash("The global configuration was not edited because no values were changed.")
             return redirect(url_for("loading", next=url_for("global_config")))
 
         error = app.config["CONFIG"].check_variables(variables, True)
@@ -688,7 +636,7 @@ def configs():
         operation = ""
 
         # Check operation
-        if not "operation" in request.form or not request.form["operation"] in (
+        if "operation" not in request.form or request.form["operation"] not in (
             "new",
             "edit",
             "delete",
@@ -720,21 +668,15 @@ def configs():
                 if "old_name" in variables:
                     variables["old_name"] = f"{variables['old_name']}.conf"
 
-                variables["content"] = BeautifulSoup(
-                    variables["content"], "html.parser"
-                ).get_text()
+                variables["content"] = BeautifulSoup(variables["content"], "html.parser").get_text()
 
             error = False
 
             if request.form["operation"] == "new":
                 if variables["type"] == "folder":
-                    operation, error = app.config["CONFIGFILES"].create_folder(
-                        variables["path"], variables["name"]
-                    )
+                    operation, error = app.config["CONFIGFILES"].create_folder(variables["path"], variables["name"])
                 elif variables["type"] == "file":
-                    operation, error = app.config["CONFIGFILES"].create_file(
-                        variables["path"], variables["name"], variables["content"]
-                    )
+                    operation, error = app.config["CONFIGFILES"].create_file(variables["path"], variables["name"], variables["content"])
             elif request.form["operation"] == "edit":
                 if variables["type"] == "folder":
                     operation, error = app.config["CONFIGFILES"].edit_folder(
@@ -774,10 +716,7 @@ def configs():
             path_to_dict(
                 join(sep, "etc", "bunkerweb", "configs"),
                 db_data=db.get_custom_configs(),
-                services=app.config["CONFIG"]
-                .get_config(methods=False)
-                .get("SERVER_NAME", "")
-                .split(" "),
+                services=app.config["CONFIG"].get_config(methods=False).get("SERVER_NAME", "").split(" "),
             )
         ],
         dark_mode=app.config["DARK_MODE"],
@@ -851,9 +790,7 @@ def plugins():
                             )
                     else:
                         try:
-                            with tar_open(
-                                str(tmp_ui_path.joinpath(file)), errorlevel=2
-                            ) as tar_file:
+                            with tar_open(str(tmp_ui_path.joinpath(file)), errorlevel=2) as tar_file:
                                 try:
                                     tar_file.getmember("plugin.json")
                                 except KeyError:
@@ -882,24 +819,12 @@ def plugins():
                             )
 
                     if is_dir:
-                        dirs = [
-                            d
-                            for d in listdir(str(temp_folder_path))
-                            if temp_folder_path.joinpath(d).is_dir()
-                        ]
+                        dirs = [d for d in listdir(str(temp_folder_path)) if temp_folder_path.joinpath(d).is_dir()]
 
-                        if (
-                            not dirs
-                            or len(dirs) > 1
-                            or not temp_folder_path.joinpath(
-                                dirs[0], "plugin.json"
-                            ).is_file()
-                        ):
+                        if not dirs or len(dirs) > 1 or not temp_folder_path.joinpath(dirs[0], "plugin.json").is_file():
                             raise KeyError
 
-                        for file_name in listdir(
-                            str(temp_folder_path.joinpath(dirs[0]))
-                        ):
+                        for file_name in listdir(str(temp_folder_path.joinpath(dirs[0]))):
                             move(
                                 str(temp_folder_path.joinpath(dirs[0], file_name)),
                                 str(temp_folder_path.joinpath(file_name)),
@@ -909,11 +834,7 @@ def plugins():
                             ignore_errors=True,
                         )
 
-                    plugin_file = json_loads(
-                        temp_folder_path.joinpath("plugin.json").read_text(
-                            encoding="utf-8"
-                        )
-                    )
+                    plugin_file = json_loads(temp_folder_path.joinpath("plugin.json").read_text(encoding="utf-8"))
 
                     if not all(key in plugin_file.keys() for key in PLUGIN_KEYS):
                         raise ValueError
@@ -992,9 +913,7 @@ def plugins():
                     flash(f"{e}", "error")
                 finally:
                     if error != 1:
-                        flash(
-                            f"Successfully created plugin: <b><i>{folder_name}</i></b>"
-                        )
+                        flash(f"Successfully created plugin: <b><i>{folder_name}</i></b>")
 
                     error = 0
 
@@ -1030,9 +949,7 @@ def plugins():
         if tmp_ui_path.exists():
             rmtree(str(tmp_ui_path), ignore_errors=True)
 
-        return redirect(
-            url_for("loading", next=url_for("plugins"), message="Reloading plugins")
-        )
+        return redirect(url_for("loading", next=url_for("plugins"), message="Reloading plugins"))
 
     plugin_args = app.config["PLUGIN_ARGS"]
     app.config["PLUGIN_ARGS"] = {}
@@ -1051,11 +968,7 @@ def plugins():
                 csrf_token=generate_csrf,
                 url_for=url_for,
                 dark_mode=app.config["DARK_MODE"],
-                **(
-                    plugin_args["args"]
-                    if plugin_args.get("plugin", None) == plugin_id
-                    else {}
-                ),
+                **(plugin_args["args"] if plugin_args.get("plugin", None) == plugin_id else {}),
             )
 
     plugins = app.config["CONFIG"].get_plugins()
@@ -1109,9 +1022,7 @@ def upload_plugin():
                             plugins.append(basename(dirname(file)))
                     if len(plugins) > 1:
                         tar_file.extractall(str(tmp_ui_path) + "/")
-                folder_name = uploaded_file.filename.replace(".tar.gz", "").replace(
-                    ".tar.xz", ""
-                )
+                folder_name = uploaded_file.filename.replace(".tar.gz", "").replace(".tar.xz", "")
 
             if len(plugins) <= 1:
                 io.seek(0, 0)
@@ -1120,12 +1031,8 @@ def upload_plugin():
 
         for plugin in plugins:
             with BytesIO() as tgz:
-                with tar_open(
-                    mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3
-                ) as tf:
-                    tf.add(
-                        str(tmp_ui_path.joinpath(folder_name, plugin)), arcname=plugin
-                    )
+                with tar_open(mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3) as tf:
+                    tf.add(str(tmp_ui_path.joinpath(folder_name, plugin)), arcname=plugin)
                 tgz.seek(0, 0)
                 tmp_ui_path.joinpath(f"{plugin}.tar.gz").write_bytes(tgz.read())
 
@@ -1195,15 +1102,8 @@ def custom_plugin(plugin):
             sys_modules.pop("actions")
             del actions
 
-        if (
-            request.method != "POST"
-            or error is True
-            or res is None
-            or isinstance(res, dict) is False
-        ):
-            return redirect(
-                url_for("loading", next=url_for("plugins", plugin_id=plugin))
-            )
+        if request.method != "POST" or error is True or res is None or isinstance(res, dict) is False:
+            return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
 
     app.config["PLUGIN_ARGS"] = {"plugin": plugin, "args": res}
 
@@ -1221,10 +1121,7 @@ def cache():
                 join(sep, "var", "cache", "bunkerweb"),
                 is_cache=True,
                 db_data=db.get_jobs_cache_files(),
-                services=app.config["CONFIG"]
-                .get_config(methods=False)
-                .get("SERVER_NAME", "")
-                .split(" "),
+                services=app.config["CONFIG"].get_config(methods=False).get("SERVER_NAME", "").split(" "),
             )
         ],
         dark_mode=app.config["DARK_MODE"],
@@ -1274,9 +1171,7 @@ def logs_linux():
     nginx_error_file = Path(sep, "var", "log", "bunkerweb", "error.log")
     if nginx_error_file.is_file():
         with open(nginx_error_file, encoding="utf-8") as f:
-            for line in f.readlines()[
-                int(last_update.split(".")[0]) if last_update else 0 :
-            ]:
+            for line in f.readlines()[int(last_update.split(".")[0]) if last_update else 0 :]:  # noqa: E203
                 match = LOG_RX.search(line)
                 if not match:
                     continue
@@ -1288,15 +1183,10 @@ def logs_linux():
                         logs_error[-1] += f"\n{line}"
                         continue
                     logs_error.append(line)
-                elif (
-                    all(f"[{log_level}]" != level for log_level in NGINX_LOG_LEVELS)
-                    and temp_multiple_lines
-                ):
+                elif all(f"[{log_level}]" != level for log_level in NGINX_LOG_LEVELS) and temp_multiple_lines:
                     temp_multiple_lines.append(line)
                 else:
-                    logs_error.append(
-                        f"{datetime.strptime(date, '%Y/%m/%d %H:%M:%S').replace(tzinfo=timezone.utc).timestamp()} {line}"
-                    )
+                    logs_error.append(f"{datetime.strptime(date, '%Y/%m/%d %H:%M:%S').replace(tzinfo=timezone.utc).timestamp()} {line}")
 
     if temp_multiple_lines:
         logs_error.append("\n".join(temp_multiple_lines))
@@ -1305,12 +1195,8 @@ def logs_linux():
     nginx_access_file = Path(sep, "var", "log", "bunkerweb", "access.log")
     if nginx_access_file.is_file():
         with open(nginx_access_file, encoding="utf-8") as f:
-            for line in f.readlines()[
-                int(last_update.split(".")[1]) if last_update else 0 :
-            ]:
-                logs_access.append(
-                    f"{datetime.strptime(line[line.find('[') + 1: line.find(']')], '%d/%b/%Y:%H:%M:%S %z').replace(tzinfo=timezone.utc).timestamp()} {line}"
-                )
+            for line in f.readlines()[int(last_update.split(".")[1]) if last_update else 0 :]:  # noqa: E203
+                logs_access.append(f"{datetime.strptime(line[line.find('[') + 1: line.find(']')], '%d/%b/%Y:%H:%M:%S %z').replace(tzinfo=timezone.utc).timestamp()} {line}")
 
     raw_logs = logs_error + logs_access
 
@@ -1339,17 +1225,8 @@ def logs_linux():
         log_lower = log.lower()
         error_type = (
             "error"
-            if "[error]" in log_lower
-            or "[crit]" in log_lower
-            or "[alert]" in log_lower
-            or "❌" in log_lower
-            else (
-                "warn"
-                if "[warn]" in log_lower or "⚠️" in log_lower
-                else (
-                    "info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"
-                )
-            )
+            if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
+            else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
         )
 
         logs.append(
@@ -1370,9 +1247,7 @@ def logs_linux():
     return jsonify(
         {
             "logs": logs,
-            "last_update": f"{count_error_logs + int(last_update.split('.')[0])}.{len(logs_access) + int(last_update.split('.')[1])}"
-            if last_update
-            else f"{count_error_logs}.{len(logs_access)}",
+            "last_update": f"{count_error_logs + int(last_update.split('.')[0])}.{len(logs_access) + int(last_update.split('.')[1])}" if last_update else f"{count_error_logs}.{len(logs_access)}",
         }
     )
 
@@ -1398,10 +1273,7 @@ def logs_container(container_id):
             422,
         )
     elif not last_update:
-        last_update = int(
-            datetime.now().timestamp()
-            - timedelta(days=1).total_seconds()  # 1 day before
-        )
+        last_update = int(datetime.now().timestamp() - timedelta(days=1).total_seconds())  # 1 day before
     else:
         last_update = int(last_update) // 1000
 
@@ -1458,13 +1330,13 @@ def logs_container(container_id):
             )
 
     for log in tmp_logs:
-        splitted = log.split(" ")
-        timestamp = splitted[0]
+        split = log.split(" ")
+        timestamp = split[0]
 
         if to_date is not None and dateutil_parse(timestamp).timestamp() > to_date:
             break
 
-        log = " ".join(splitted[1:])
+        log = " ".join(split[1:])
         log_lower = log.lower()
 
         if "[48;2" in log or not log.strip():
@@ -1474,19 +1346,8 @@ def logs_container(container_id):
             {
                 "content": log,
                 "type": "error"
-                if "[error]" in log_lower
-                or "[crit]" in log_lower
-                or "[alert]" in log_lower
-                or "❌" in log_lower
-                else (
-                    "warn"
-                    if "[warn]" in log_lower or "⚠️" in log_lower
-                    else (
-                        "info"
-                        if "[info]" in log_lower or "ℹ️" in log_lower
-                        else "message"
-                    )
-                ),
+                if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
+                else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message")),
             }
         )
 
@@ -1541,14 +1402,8 @@ def jobs_download():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     fail = False
-    if (
-        request.method == "POST"
-        and "username" in request.form
-        and "password" in request.form
-    ):
-        if app.config["USER"].get_id() == request.form["username"] and app.config[
-            "USER"
-        ].check_password(request.form["password"]):
+    if request.method == "POST" and "username" in request.form and "password" in request.form:
+        if app.config["USER"].get_id() == request.form["username"] and app.config["USER"].check_password(request.form["password"]):
             # log the user in
             next_url = request.form.get("next")
             login_user(app.config["USER"])
@@ -1588,9 +1443,7 @@ def darkmode():
 def check_reloading():
     if not app.config["RELOADING"] or app.config["LAST_RELOAD"] + 60 < time():
         if app.config["RELOADING"]:
-            app.logger.warning(
-                "Reloading took too long, forcing the state to be reloaded"
-            )
+            app.logger.warning("Reloading took too long, forcing the state to be reloaded")
             flash("Forced the status to be reloaded", "error")
             app.config["RELOADING"] = False
 

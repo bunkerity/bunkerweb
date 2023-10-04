@@ -31,9 +31,7 @@ try:
     )
 
     try:
-        get(
-            "https://www.example.com", headers={"Host": "www.example.com"}, verify=False
-        )
+        get("https://www.example.com", headers={"Host": "www.example.com"}, verify=False)
     except RequestException:
         print(
             "❌ The request failed even though the Custom Cert is activated, exiting ...",

@@ -12,10 +12,7 @@ from time import sleep
 from traceback import format_exc
 from typing import Any, Dict
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("utils",), ("api",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -72,9 +69,7 @@ if __name__ == "__main__":
             type=str,
             help="path to the file containing environment variables",
         )
-        parser.add_argument(
-            "--no-linux-reload", action="store_true", help="disable linux reload"
-        )
+        parser.add_argument("--no-linux-reload", action="store_true", help="disable linux reload")
         args = parser.parse_args()
 
         settings_path = Path(normpath(args.settings))
@@ -183,10 +178,7 @@ if __name__ == "__main__":
         )
         templator.render()
 
-        if (
-            integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker")
-            and not args.no_linux_reload
-        ):
+        if integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker") and not args.no_linux_reload:
             retries = 0
             while not Path(sep, "var", "run", "bunkerweb", "nginx.pid").exists():
                 if retries == 5:

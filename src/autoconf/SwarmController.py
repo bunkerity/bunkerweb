@@ -26,9 +26,7 @@ class SwarmController(Controller):
     def _to_instances(self, controller_instance) -> List[dict]:
         instances = []
         instance_env = {}
-        for env in controller_instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"][
-            "Env"
-        ]:
+        for env in controller_instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
             variable = env.split("=")[0]
             value = env.replace(f"{variable}=", "", 1)
             if self._is_setting(variable):
@@ -61,12 +59,8 @@ class SwarmController(Controller):
     def _get_static_services(self) -> List[dict]:
         services = []
         variables = {}
-        for instance in self.__client.services.list(
-            filters={"label": "bunkerweb.INSTANCE"}
-        ):
-            if not instance.attrs or not instance.attrs.get("Spec", {}).get(
-                "TaskTemplate", {}
-            ).get("ContainerSpec", {}).get("Env"):
+        for instance in self.__client.services.list(filters={"label": "bunkerweb.INSTANCE"}):
+            if not instance.attrs or not instance.attrs.get("Spec", {}).get("TaskTemplate", {}).get("ContainerSpec", {}).get("Env"):
                 continue
 
             for env in instance.attrs["Spec"]["TaskTemplate"]["ContainerSpec"]["Env"]:
@@ -80,9 +74,7 @@ class SwarmController(Controller):
                 for variable, value in variables.items():
                     prefix = variable.split("_")[0]
                     real_variable = variable.replace(f"{prefix}_", "", 1)
-                    if prefix == server_name and self._is_setting_context(
-                        real_variable, "multisite"
-                    ):
+                    if prefix == server_name and self._is_setting_context(real_variable, "multisite"):
                         service[real_variable] = value
                 services.append(service)
         return services
@@ -91,15 +83,8 @@ class SwarmController(Controller):
         configs = {}
         for config_type in self._supported_config_types:
             configs[config_type] = {}
-        for config in self.__client.configs.list(
-            filters={"label": "bunkerweb.CONFIG_TYPE"}
-        ):
-            if (
-                not config.name
-                or not config.attrs
-                or not config.attrs.get("Spec", {}).get("Labels", {})
-                or not config.attrs.get("Spec", {}).get("Data", {})
-            ):
+        for config in self.__client.configs.list(filters={"label": "bunkerweb.CONFIG_TYPE"}):
+            if not config.name or not config.attrs or not config.attrs.get("Spec", {}).get("Labels", {}) or not config.attrs.get("Spec", {}).get("Data", {}):
                 continue
 
             config_type = config.attrs["Spec"]["Labels"]["bunkerweb.CONFIG_TYPE"]
@@ -111,19 +96,13 @@ class SwarmController(Controller):
                 continue
             config_site = ""
             if "bunkerweb.CONFIG_SITE" in config.attrs["Spec"]["Labels"]:
-                if not self._is_service_present(
-                    config.attrs["Spec"]["Labels"]["bunkerweb.CONFIG_SITE"]
-                ):
+                if not self._is_service_present(config.attrs["Spec"]["Labels"]["bunkerweb.CONFIG_SITE"]):
                     self._logger.warning(
                         f"Ignoring config {config_name} because {config.attrs['Spec']['Labels']['bunkerweb.CONFIG_SITE']} doesn't exist",
                     )
                     continue
-                config_site = (
-                    f"{config.attrs['Spec']['Labels']['bunkerweb.CONFIG_SITE']}/"
-                )
-            configs[config_type][f"{config_site}{config_name}"] = b64decode(
-                config.attrs["Spec"]["Data"]
-            )
+                config_site = f"{config.attrs['Spec']['Labels']['bunkerweb.CONFIG_SITE']}/"
+            configs[config_type][f"{config_site}{config_name}"] = b64decode(config.attrs["Spec"]["Data"])
         return configs
 
     def apply_config(self) -> bool:
@@ -139,36 +118,27 @@ class SwarmController(Controller):
             locked = False
             error = False
             try:
-                for _ in self.__client.events(
-                    decode=True, filters={"type": event_type}
-                ):
+                for _ in self.__client.events(decode=True, filters={"type": event_type}):
                     self.__internal_lock.acquire()
                     locked = True
                     try:
+                        self._update_settings()
                         self._instances = self.get_instances()
                         self._services = self.get_services()
                         self._configs = self.get_configs()
-                        if not self.update_needed(
-                            self._instances, self._services, configs=self._configs
-                        ):
+                        if not self.update_needed(self._instances, self._services, configs=self._configs):
                             self.__internal_lock.release()
                             locked = False
                             continue
-                        self._logger.info(
-                            f"Catched Swarm event ({event_type}), deploying new configuration ..."
-                        )
+                        self._logger.info(f"Caught Swarm event ({event_type}), deploying new configuration ...")
                         if not self.apply_config():
-                            self._logger.error(
-                                "Error while deploying new configuration"
-                            )
+                            self._logger.error("Error while deploying new configuration")
                         else:
                             self._logger.info(
                                 "Successfully deployed new configuration 🚀",
                             )
                     except:
-                        self._logger.error(
-                            f"Exception while processing Swarm event ({event_type}) :\n{format_exc()}"
-                        )
+                        self._logger.error(f"Exception while processing Swarm event ({event_type}) :\n{format_exc()}")
                     self.__internal_lock.release()
                     locked = False
             except:
@@ -187,10 +157,7 @@ class SwarmController(Controller):
     def process_events(self):
         self._set_autoconf_load_db()
         event_types = ("service", "config")
-        threads = [
-            Thread(target=self.__event, args=(event_type,))
-            for event_type in event_types
-        ]
+        threads = [Thread(target=self.__event, args=(event_type,)) for event_type in event_types]
         for thread in threads:
             thread.start()
         for thread in threads:

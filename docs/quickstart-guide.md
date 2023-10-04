@@ -2322,7 +2322,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 !!! warning "Feature is in beta"
 		This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
 
-By default, BunkerWeb will only listen on IPv4 adresses and won't use IPv6 for network communications. If you want to enable IPv6 support, you need to set `USE_IPV6=yes`. Please note that IPv6 configuration of your network and environment is out-of-the-scope of this documentation.
+By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for network communications. If you want to enable IPv6 support, you need to set `USE_IPV6=yes`. Please note that IPv6 configuration of your network and environment is out-of-the-scope of this documentation.
 
 === "Docker"
 

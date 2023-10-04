@@ -13,9 +13,9 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
         with:
           python-version: "3.10"
       - name: Install doc requirements
@@ -23,7 +23,7 @@ jobs:
       - name: Install chromium
         run: sudo apt install chromium-browser
       - name: Install node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
         with:
           node-version: 18
       - name: Install puppeteer
@@ -32,7 +32,7 @@ jobs:
         run: mkdocs serve & sleep 10
       - name: Run pdf script
         run: node docs/misc/pdf.js http://localhost:8000/print_page/ BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf 'BunkerWeb documentation v${{ inputs.VERSION }}'
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
           name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
           path: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf

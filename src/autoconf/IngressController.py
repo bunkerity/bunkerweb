@@ -19,21 +19,12 @@ class IngressController(Controller):
         self.__networkingv1 = client.NetworkingV1Api()
 
     def _get_controller_instances(self) -> list:
-        return [
-            pod
-            for pod in self.__corev1.list_pod_for_all_namespaces(watch=False).items
-            if (
-                pod.metadata.annotations
-                and "bunkerweb.io/INSTANCE" in pod.metadata.annotations
-            )
-        ]
+        return [pod for pod in self.__corev1.list_pod_for_all_namespaces(watch=False).items if (pod.metadata.annotations and "bunkerweb.io/INSTANCE" in pod.metadata.annotations)]
 
     def _to_instances(self, controller_instance) -> List[dict]:
         instance = {}
         instance["name"] = controller_instance.metadata.name
-        instance["hostname"] = (
-            controller_instance.status.pod_ip or controller_instance.metadata.name
-        )
+        instance["hostname"] = controller_instance.status.pod_ip or controller_instance.metadata.name
         health = False
         if controller_instance.status.conditions:
             for condition in controller_instance.status.conditions:
@@ -48,9 +39,7 @@ class IngressController(Controller):
                 pod = container
                 break
         if not pod:
-            self._logger.warning(
-                f"Missing container bunkerweb in pod {controller_instance.metadata.name}"
-            )
+            self._logger.warning(f"Missing container bunkerweb in pod {controller_instance.metadata.name}")
         else:
             for env in pod.env:
                 instance["env"][env.name] = env.value or ""
@@ -159,10 +148,7 @@ class IngressController(Controller):
         services = []
         variables = {}
         for instance in self.__corev1.list_pod_for_all_namespaces(watch=False).items:
-            if (
-                not instance.metadata.annotations
-                or not "bunkerweb.io/INSTANCE" in instance.metadata.annotations
-            ):
+            if not instance.metadata.annotations or "bunkerweb.io/INSTANCE" not in instance.metadata.annotations:
                 continue
 
             pod = None
@@ -181,22 +167,15 @@ class IngressController(Controller):
                 for variable, value in variables.items():
                     prefix = variable.split("_")[0]
                     real_variable = variable.replace(f"{prefix}_", "", 1)
-                    if prefix == server_name and self._is_setting_context(
-                        real_variable, "multisite"
-                    ):
+                    if prefix == server_name and self._is_setting_context(real_variable, "multisite"):
                         service[real_variable] = value
                 services.append(service)
         return services
 
     def get_configs(self) -> dict:
         configs = {config_type: {} for config_type in self._supported_config_types}
-        for configmap in self.__corev1.list_config_map_for_all_namespaces(
-            watch=False
-        ).items:
-            if (
-                not configmap.metadata.annotations
-                or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations
-            ):
+        for configmap in self.__corev1.list_config_map_for_all_namespaces(watch=False).items:
+            if not configmap.metadata.annotations or "bunkerweb.io/CONFIG_TYPE" not in configmap.metadata.annotations:
                 continue
 
             config_type = configmap.metadata.annotations["bunkerweb.io/CONFIG_TYPE"]
@@ -212,16 +191,12 @@ class IngressController(Controller):
                 continue
             config_site = ""
             if "bunkerweb.io/CONFIG_SITE" in configmap.metadata.annotations:
-                if not self._is_service_present(
-                    configmap.metadata.annotations["bunkerweb.io/CONFIG_SITE"]
-                ):
+                if not self._is_service_present(configmap.metadata.annotations["bunkerweb.io/CONFIG_SITE"]):
                     self._logger.warning(
                         f"Ignoring config {configmap.metadata.name} because {configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']} doesn't exist",
                     )
                     continue
-                config_site = (
-                    f"{configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']}/"
-                )
+                config_site = f"{configmap.metadata.annotations['bunkerweb.io/CONFIG_SITE']}/"
             for config_name, config_data in configmap.data.items():
                 configs[config_type][f"{config_site}{config_name}"] = config_data
         return configs
@@ -247,17 +222,16 @@ class IngressController(Controller):
                 for _ in w.stream(what):
                     self.__internal_lock.acquire()
                     locked = True
+                    self._update_settings()
                     self._instances = self.get_instances()
                     self._services = self.get_services()
                     self._configs = self.get_configs()
-                    if not self.update_needed(
-                        self._instances, self._services, configs=self._configs
-                    ):
+                    if not self.update_needed(self._instances, self._services, configs=self._configs):
                         self.__internal_lock.release()
                         locked = False
                         continue
                     self._logger.info(
-                        f"Catched kubernetes event ({watch_type}), deploying new configuration ...",
+                        f"Caught kubernetes event ({watch_type}), deploying new configuration ...",
                     )
                     try:
                         ret = self.apply_config()
@@ -308,10 +282,7 @@ class IngressController(Controller):
     def process_events(self):
         self._set_autoconf_load_db()
         watch_types = ("pod", "ingress", "configmap", "service")
-        threads = [
-            Thread(target=self.__watch, args=(watch_type,))
-            for watch_type in watch_types
-        ]
+        threads = [Thread(target=self.__watch, args=(watch_type,)) for watch_type in watch_types]
         for thread in threads:
             thread.start()
         for thread in threads:
