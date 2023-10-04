@@ -54,15 +54,9 @@ if "geckodriver" not in listdir(Path.cwd()):
 print("Starting Firefox ...", flush=True)
 
 
-def safe_get_element(
-    driver, by: By, _id: str, *, multiple: bool = False, error: bool = False
-) -> Union[WebElement, List[WebElement]]:
+def safe_get_element(driver, by: By, _id: str, *, multiple: bool = False, error: bool = False) -> Union[WebElement, List[WebElement]]:
     try:
-        return WebDriverWait(driver, 4).until(
-            EC.presence_of_element_located((by, _id))
-            if not multiple
-            else EC.presence_of_all_elements_located((by, _id))
-        )
+        return WebDriverWait(driver, 4).until(EC.presence_of_element_located((by, _id)) if not multiple else EC.presence_of_all_elements_located((by, _id)))
     except TimeoutException as e:
         if error:
             raise e
@@ -124,9 +118,7 @@ def assert_alert_message(driver, message: str):
 
     print(f'Message "{message}" found in one of the messages in the list', flush=True)
 
-    assert_button_click(
-        driver, "//aside[@data-flash-sidebar='']/*[local-name() = 'svg']"
-    )
+    assert_button_click(driver, "//aside[@data-flash-sidebar='']/*[local-name() = 'svg']")
 
 
 def access_page(
@@ -141,11 +133,7 @@ def access_page(
     assert_button_click(driver, button)
 
     try:
-        title = driver_wait.until(
-            EC.presence_of_element_located(
-                (By.XPATH, "/html/body/div/header/div/nav/h6")
-            )
-        )
+        title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div/header/div/nav/h6")))
 
         if title.text != name.replace(" ", "_").title():
             print(f"Didn't get redirected to {name} page, exiting ...", flush=True)
@@ -169,13 +157,7 @@ driver_func = partial(webdriver.Firefox, options=firefox_options)
 if TEST_TYPE == "dev":
     driver_func = partial(
         webdriver.Firefox,
-        service=Service(
-            Service(
-                executable_path="./geckodriver"
-                if "geckodriver" in listdir(Path.cwd())
-                else "/usr/local/bin/geckodriver"
-            )
-        ),
+        service=Service(Service(executable_path="./geckodriver" if "geckodriver" in listdir(Path.cwd()) else "/usr/local/bin/geckodriver")),
         options=firefox_options,
     )
 
@@ -183,7 +165,7 @@ with webdriver.Firefox(options=firefox_options) as driver:
     try:
         driver.delete_all_cookies()
         driver.maximize_window()
-        driver_wait = WebDriverWait(driver, 30)
+        driver_wait = WebDriverWait(driver, 60)
 
         print("Navigating to http://www.example.com/admin ...", flush=True)
 
@@ -234,11 +216,7 @@ with webdriver.Firefox(options=firefox_options) as driver:
         sleep(0.3)
 
         try:
-            title = driver_wait.until(
-                EC.presence_of_element_located(
-                    (By.XPATH, "/html/body/main/div[1]/div/h1")
-                )
-            )
+            title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/main/div[1]/div/h1")))
 
             if title.text != "Log in":
                 print("Didn't get redirected to login page, exiting ...", flush=True)
@@ -284,11 +262,7 @@ with webdriver.Firefox(options=firefox_options) as driver:
             print(f"Trying to {action} BunkerWeb instance ...", flush=True)
 
             try:
-                form = WebDriverWait(driver, 2).until(
-                    EC.presence_of_element_located(
-                        (By.XPATH, "//form[starts-with(@id, 'form-instance-')]")
-                    )
-                )
+                form = WebDriverWait(driver, 2).until(EC.presence_of_element_located((By.XPATH, "//form[starts-with(@id, 'form-instance-')]")))
             except TimeoutException:
                 print("No instance form found, exiting ...", flush=True)
                 exit(1)
@@ -315,15 +289,31 @@ with webdriver.Firefox(options=firefox_options) as driver:
                     exit(1)
                 retries += 1
 
-                print(
-                    "WARNING: message list doesn't contain the expected message or is empty, retrying..."
-                )
+                print("WARNING: message list doesn't contain the expected message or is empty, retrying...")
 
         if TEST_TYPE == "linux":
             retries = 0
             while (
-                not b"BunkerWeb is ready"
-                in run(
+                b"BunkerWeb is ready"
+                not in run(
+                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
+                    stdout=PIPE,
+                    check=True,
+                ).stdout
+            ) and retries < 10:
+                retries += 1
+                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
+                sleep(5)
+
+            if retries >= 10:
+                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
+                exit(1)
+
+        if TEST_TYPE == "linux":
+            retries = 0
+            while (
+                b"BunkerWeb is ready"
+                not in run(
                     ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
                     stdout=PIPE,
                     check=True,
@@ -383,9 +373,7 @@ with webdriver.Firefox(options=firefox_options) as driver:
                     exit(1)
                 retries += 1
 
-                print(
-                    "WARNING: message list doesn't contain the expected message or is empty, retrying..."
-                )
+                print("WARNING: message list doesn't contain the expected message or is empty, retrying...")
 
         print(
             'Checking if the "DATASTORE_MEMORY_SIZE" input have the overridden value ...',
@@ -414,9 +402,7 @@ with webdriver.Firefox(options=firefox_options) as driver:
         input_worker.clear()
         input_worker.send_keys("ZZZ")
 
-        assert_button_click(
-            driver, "//form[@id='form-edit-global-configs']//button[@type='submit']"
-        )
+        assert_button_click(driver, "//form[@id='form-edit-global-configs']//button[@type='submit']")
 
         assert_alert_message(
             driver,
@@ -442,8 +428,8 @@ with webdriver.Firefox(options=firefox_options) as driver:
         if TEST_TYPE == "linux":
             retries = 0
             while (
-                not b"BunkerWeb is ready"
-                in run(
+                b"BunkerWeb is ready"
+                not in run(
                     ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
                     stdout=PIPE,
                     check=True,
@@ -510,9 +496,7 @@ with webdriver.Firefox(options=firefox_options) as driver:
         print("Checking the services page ...", flush=True)
 
         try:
-            service = safe_get_element(
-                driver, By.XPATH, "//div[@data-services-service='']", error=True
-            )
+            service = safe_get_element(driver, By.XPATH, "//div[@data-services-service='']", error=True)
         except TimeoutException:
             print("Services not found, exiting ...", flush=True)
             exit(1)
@@ -559,17 +543,13 @@ with webdriver.Firefox(options=firefox_options) as driver:
         )
 
         try:
-            modal = safe_get_element(
-                driver, By.XPATH, "//div[@data-services-modal='']", error=True
-            )
+            modal = safe_get_element(driver, By.XPATH, "//div[@data-services-modal='']", error=True)
         except TimeoutException:
             print("Modal not found, exiting ...", flush=True)
             exit(1)
 
         if "hidden" in modal.get_attribute("class"):
-            print(
-                "Modal is hidden even though it shouldn't be, exiting ...", flush=True
-            )
+            print("Modal is hidden even though it shouldn't be, exiting ...", flush=True)
             exit(1)
 
         input_server_name = safe_get_element(driver, By.ID, "SERVER_NAME")
@@ -588,9 +568,7 @@ with webdriver.Firefox(options=firefox_options) as driver:
             safe_get_element(driver, By.XPATH, "//button[@data-tab-handler='gzip']"),
         )
 
-        gzip_select = safe_get_element(
-            driver, By.XPATH, "//button[@data-setting-select='gzip-comp-level']"
-        )
+        gzip_select = safe_get_element(driver, By.XPATH, "//button[@data-setting-select='gzip-comp-level']")
 
         assert_button_click(driver, gzip_select)
 
@@ -614,8 +592,8 @@ with webdriver.Firefox(options=firefox_options) as driver:
         if TEST_TYPE == "linux":
             retries = 0
             while (
-                not b"BunkerWeb is ready"
-                in run(
+                b"BunkerWeb is ready"
+                not in run(
                     ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
                     stdout=PIPE,
                     check=True,
@@ -635,9 +613,7 @@ with webdriver.Firefox(options=firefox_options) as driver:
         )
 
         try:
-            service = safe_get_element(
-                driver, By.XPATH, "//div[@data-services-service='']", error=True
-            )
+            service = safe_get_element(driver, By.XPATH, "//div[@data-services-service='']", error=True)
         except TimeoutException:
             print("Services not found, exiting ...", flush=True)
             exit(1)
@@ -650,9 +626,7 @@ with webdriver.Firefox(options=firefox_options) as driver:
         modal = safe_get_element(driver, By.XPATH, "//div[@data-services-modal='']")
 
         if "hidden" in modal.get_attribute("class"):
-            print(
-                "Modal is hidden even though it shouldn't be, exiting ...", flush=True
-            )
+            print("Modal is hidden even though it shouldn't be, exiting ...", flush=True)
             exit(1)
 
         assert_button_click(
@@ -662,18 +636,11 @@ with webdriver.Firefox(options=firefox_options) as driver:
 
         gzip_true_select = safe_get_element(driver, By.ID, "GZIP_COMP_LEVEL")
 
-        if (
-            safe_get_element(
-                driver, By.XPATH, "//select[@id='GZIP_COMP_LEVEL']/option[@selected='']"
-            ).get_attribute("value")
-            != "6"
-        ):
+        if safe_get_element(driver, By.XPATH, "//select[@id='GZIP_COMP_LEVEL']/option[@selected='']").get_attribute("value") != "6":
             print("The value is not the expected one, exiting ...", flush=True)
             exit(1)
 
-        assert_button_click(
-            driver, "//button[@data-services-modal-close='']/*[local-name() = 'svg']"
-        )
+        assert_button_click(driver, "//button[@data-services-modal-close='']/*[local-name() = 'svg']")
 
         print("Creating a new service ...", flush=True)
 
@@ -686,17 +653,11 @@ with webdriver.Firefox(options=firefox_options) as driver:
         if TEST_TYPE == "docker":
             assert_button_click(driver, "//button[@data-tab-handler='reverseproxy']")
 
-            assert_button_click(
-                driver, safe_get_element(driver, By.ID, "USE_REVERSE_PROXY")
-            )
+            assert_button_click(driver, safe_get_element(driver, By.ID, "USE_REVERSE_PROXY"))
 
-            assert_button_click(
-                driver, "//button[@data-services-multiple-add='reverse-proxy']"
-            )
+            assert_button_click(driver, "//button[@data-services-multiple-add='reverse-proxy']")
 
-            safe_get_element(driver, By.ID, "REVERSE_PROXY_HOST").send_keys(
-                "http://app1:8080"
-            )
+            safe_get_element(driver, By.ID, "REVERSE_PROXY_HOST").send_keys("http://app1:8080")
             safe_get_element(driver, By.ID, "REVERSE_PROXY_URL").send_keys("/")
 
         access_page(
@@ -710,8 +671,8 @@ with webdriver.Firefox(options=firefox_options) as driver:
         if TEST_TYPE == "linux":
             retries = 0
             while (
-                not b"BunkerWeb is ready"
-                in run(
+                b"BunkerWeb is ready"
+                not in run(
                     ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
                     stdout=PIPE,
                     check=True,
@@ -744,9 +705,7 @@ with webdriver.Firefox(options=firefox_options) as driver:
         service = services[0]
 
         if service.find_element(By.TAG_NAME, "h5").text.strip() != "app1.example.com":
-            print(
-                'The service "app1.example.com" is not present, exiting ...', flush=True
-            )
+            print('The service "app1.example.com" is not present, exiting ...', flush=True)
             exit(1)
 
         if service.find_element(By.TAG_NAME, "h6").text.strip() != "ui":
@@ -829,8 +788,8 @@ with webdriver.Firefox(options=firefox_options) as driver:
         if TEST_TYPE == "linux":
             retries = 0
             while (
-                not b"BunkerWeb is ready"
-                in run(
+                b"BunkerWeb is ready"
+                not in run(
                     ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
                     stdout=PIPE,
                     check=True,
@@ -889,12 +848,8 @@ with webdriver.Firefox(options=firefox_options) as driver:
         )
         assert_button_click(driver, "//li[@data-configs-add-file='']/button")
 
-        safe_get_element(
-            driver, By.XPATH, "//div[@data-configs-modal-path='']/input"
-        ).send_keys("hello")
-        safe_get_element(
-            driver, By.XPATH, "//div[@data-configs-modal-editor='']/textarea"
-        ).send_keys(
+        safe_get_element(driver, By.XPATH, "//div[@data-configs-modal-path='']/input").send_keys("hello")
+        safe_get_element(driver, By.XPATH, "//div[@data-configs-modal-editor='']/textarea").send_keys(
             """
 location /hello {
     default_type 'text/plain';
@@ -916,8 +871,8 @@ location /hello {
         if TEST_TYPE == "linux":
             retries = 0
             while (
-                not b"BunkerWeb is ready"
-                in run(
+                b"BunkerWeb is ready"
+                not in run(
                     ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
                     stdout=PIPE,
                     check=True,
@@ -940,13 +895,8 @@ location /hello {
         driver.switch_to.default_content()
 
         try:
-            if (
-                safe_get_element(driver, By.XPATH, "//pre", error=True).text.strip()
-                != "hello app1"
-            ):
-                print(
-                    "The config hasn't been created correctly, exiting ...", flush=True
-                )
+            if safe_get_element(driver, By.XPATH, "//pre", error=True).text.strip() != "hello app1":
+                print("The config hasn't been created correctly, exiting ...", flush=True)
                 exit(1)
         except TimeoutException:
             print("The config hasn't been created, exiting ...", flush=True)
@@ -981,8 +931,8 @@ location /hello {
         if TEST_TYPE == "linux":
             retries = 0
             while (
-                not b"BunkerWeb is ready"
-                in run(
+                b"BunkerWeb is ready"
+                not in run(
                     ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
                     stdout=PIPE,
                     check=True,
@@ -1011,9 +961,7 @@ location /hello {
 
         print("Trying to reload the plugins without adding any ...", flush=True)
 
-        reload_button = safe_get_element(
-            driver, By.XPATH, "//div[@data-plugins-upload='']//button[@type='submit']"
-        )
+        reload_button = safe_get_element(driver, By.XPATH, "//div[@data-plugins-upload='']//button[@type='submit']")
 
         if reload_button.get_attribute("disabled") is None:
             print("The reload button is not disabled, exiting ...", flush=True)
@@ -1021,13 +969,9 @@ location /hello {
 
         print("Trying to filter the plugins ...", flush=True)
 
-        safe_get_element(
-            driver, By.XPATH, "//input[@placeholder='key words']"
-        ).send_keys("Anti")
+        safe_get_element(driver, By.XPATH, "//input[@placeholder='key words']").send_keys("Anti")
 
-        plugins = safe_get_element(
-            driver, By.XPATH, "//div[@data-plugins-list='']", multiple=True
-        )
+        plugins = safe_get_element(driver, By.XPATH, "//div[@data-plugins-list='']", multiple=True)
 
         if len(plugins) != 1:
             print("The filter is not working, exiting ...", flush=True)
@@ -1035,9 +979,7 @@ location /hello {
 
         print("The filter is working, trying to add a bad plugin ...", flush=True)
 
-        safe_get_element(
-            driver, By.XPATH, "//input[@type='file' and @name='file']"
-        ).send_keys(join(Path.cwd(), "test.zip"))
+        safe_get_element(driver, By.XPATH, "//input[@type='file' and @name='file']").send_keys(join(Path.cwd(), "test.zip"))
 
         sleep(2)
 
@@ -1054,9 +996,7 @@ location /hello {
             flush=True,
         )
 
-        safe_get_element(
-            driver, By.XPATH, "//input[@type='file' and @name='file']"
-        ).send_keys(join(Path.cwd(), "discord.zip"))
+        safe_get_element(driver, By.XPATH, "//input[@type='file' and @name='file']").send_keys(join(Path.cwd(), "discord.zip"))
 
         sleep(2)
 
@@ -1071,8 +1011,8 @@ location /hello {
         if TEST_TYPE == "linux":
             retries = 0
             while (
-                not b"BunkerWeb is ready"
-                in run(
+                b"BunkerWeb is ready"
+                not in run(
                     ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
                     stdout=PIPE,
                     check=True,
@@ -1115,8 +1055,8 @@ location /hello {
         if TEST_TYPE == "linux":
             retries = 0
             while (
-                not b"BunkerWeb is ready"
-                in run(
+                b"BunkerWeb is ready"
+                not in run(
                     ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
                     stdout=PIPE,
                     check=True,
@@ -1146,9 +1086,7 @@ location /hello {
 
         print("The plugin has been deleted, trying cache page ...", flush=True)
 
-        access_page(
-            driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[7]/a", "cache"
-        )
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[7]/a", "cache")
 
         ### CACHE PAGE
 
@@ -1173,9 +1111,7 @@ location /hello {
 
         print("The cache file content is correct, trying logs page ...", flush=True)
 
-        access_page(
-            driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[8]/a", "logs"
-        )
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[8]/a", "logs")
 
         ### LOGS PAGE
 
@@ -1201,9 +1137,7 @@ location /hello {
 
         sleep(3)
 
-        logs_list = safe_get_element(
-            driver, By.XPATH, "//ul[@data-logs-list='']/li", multiple=True
-        )
+        logs_list = safe_get_element(driver, By.XPATH, "//ul[@data-logs-list='']/li", multiple=True)
 
         if len(logs_list) == 0:
             print("No logs found, exiting ...", flush=True)
@@ -1212,9 +1146,7 @@ location /hello {
         print("Logs found, trying auto refresh ...", flush=True)
 
         assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
-        assert_button_click(
-            driver, "//button[@id='submit-settings' and contains(text(), 'Go Live')]"
-        )
+        assert_button_click(driver, "//button[@id='submit-settings' and contains(text(), 'Go Live')]")
 
         sleep(3)
 
@@ -1236,9 +1168,7 @@ location /hello {
 
         sleep(3)
 
-        logs_list = safe_get_element(
-            driver, By.XPATH, "//ul[@data-logs-list='']/li", multiple=True
-        )
+        logs_list = safe_get_element(driver, By.XPATH, "//ul[@data-logs-list='']/li", multiple=True)
 
         print("Trying filters ...", flush=True)
 
@@ -1303,17 +1233,13 @@ location /hello {
 
         print("Date filter is working, trying jobs page ...", flush=True)
 
-        access_page(
-            driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[9]/a", "jobs"
-        )
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[9]/a", "jobs")
 
         ### JOBS PAGE
 
         print("Trying to filter jobs ...", flush=True)
 
-        jobs_list = safe_get_element(
-            driver, By.XPATH, "//ul[@data-jobs-list='']/li", multiple=True
-        )
+        jobs_list = safe_get_element(driver, By.XPATH, "//ul[@data-jobs-list='']/li", multiple=True)
 
         if len(jobs_list) == 0:
             print("No jobs found, exiting ...", flush=True)
@@ -1432,9 +1358,7 @@ location /hello {
 
         sleep(0.3)
 
-        resp = get(
-            "http://www.example.com/admin/jobs/download?job_name=mmdb-country&file_name=country.mmdb"
-        )
+        resp = get("http://www.example.com/admin/jobs/download?job_name=mmdb-country&file_name=country.mmdb")
 
         if resp.status_code != 200:
             print("The cache download is not working, exiting ...", flush=True)
@@ -1445,11 +1369,7 @@ location /hello {
         assert_button_click(driver, "//a[@href='logout']")
 
         try:
-            title = driver_wait.until(
-                EC.presence_of_element_located(
-                    (By.XPATH, "/html/body/main/div[1]/div/h1")
-                )
-            )
+            title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/main/div[1]/div/h1")))
 
             if title.text != "Log in":
                 print("Didn't get redirected to login page, exiting ...", flush=True)

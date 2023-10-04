@@ -13,7 +13,7 @@ const popover = reactive({
   isOpen: false,
   isHover: false,
   x: "",
-  y: ""
+  y: "",
 });
 
 // Different style for desktop and mobile

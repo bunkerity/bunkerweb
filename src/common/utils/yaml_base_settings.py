@@ -92,12 +92,7 @@ class YamlConfigSettingsSource(DotEnvSettingsSource):
         env_nested_delimiter: Optional[str] = None,
         secrets_dir: Optional[Union[str, Path]] = None,
     ) -> None:
-        self._yaml_data = (
-            yaml_config_settings_source(
-                settings_cls, yaml_file=yaml_file, secrets_dir=secrets_dir
-            )
-            or {}
-        )
+        self._yaml_data = yaml_config_settings_source(settings_cls, yaml_file=yaml_file, secrets_dir=secrets_dir) or {}
 
         for k, v in (self._yaml_data.get("global", None) or {}).items():
             self._yaml_data[k.upper()] = v
@@ -117,27 +112,19 @@ class YamlConfigSettingsSource(DotEnvSettingsSource):
     def _load_env_vars(self) -> Mapping[str, Optional[str]]:
         return self._yaml_data
 
-    def get_field_value(
-        self, field: FieldInfo, field_name: str
-    ) -> Tuple[Any, str, bool]:
+    def get_field_value(self, field: FieldInfo, field_name: str) -> Tuple[Any, str, bool]:
         field_value = self._yaml_data.get(field_name) if self._yaml_data else None
         return field_value, field_name, False
 
-    def prepare_field_value(
-        self, field_name: str, field: FieldInfo, value: Any, value_is_complex: bool
-    ) -> Any:
+    def prepare_field_value(self, field_name: str, field: FieldInfo, value: Any, value_is_complex: bool) -> Any:
         return value
 
     def __call__(self) -> Dict[str, Any]:
         d: Dict[str, Any] = super().__call__()
 
         for field_name, field in self.settings_cls.model_fields.items():
-            field_value, field_key, value_is_complex = self.get_field_value(
-                field, field_name
-            )
-            field_value = self.prepare_field_value(
-                field_name, field, field_value, value_is_complex
-            )
+            field_value, field_key, value_is_complex = self.get_field_value(field, field_name)
+            field_value = self.prepare_field_value(field_name, field, field_value, value_is_complex)
             if field_value is not None:
                 d[field_key] = field_value
 
@@ -242,36 +229,12 @@ class YamlBaseSettings(BaseSettings):
         _secrets_dir: str | Path | None = None,
     ) -> dict[str, Any]:
         # Determine settings config values
-        case_sensitive = (
-            _case_sensitive
-            if _case_sensitive is not None
-            else self.model_config.get("case_sensitive")
-        )
-        env_prefix = (
-            _env_prefix
-            if _env_prefix is not None
-            else self.model_config.get("env_prefix")
-        )
-        env_file = (
-            _env_file
-            if _env_file != ENV_FILE_SENTINEL
-            else self.model_config.get("env_file")
-        )
-        env_file_encoding = (
-            _env_file_encoding
-            if _env_file_encoding is not None
-            else self.model_config.get("env_file_encoding")
-        )
-        env_nested_delimiter = (
-            _env_nested_delimiter
-            if _env_nested_delimiter is not None
-            else self.model_config.get("env_nested_delimiter")
-        )
-        secrets_dir = (
-            _secrets_dir
-            if _secrets_dir is not None
-            else self.model_config.get("secrets_dir")
-        )
+        case_sensitive = _case_sensitive if _case_sensitive is not None else self.model_config.get("case_sensitive")
+        env_prefix = _env_prefix if _env_prefix is not None else self.model_config.get("env_prefix")
+        env_file = _env_file if _env_file != ENV_FILE_SENTINEL else self.model_config.get("env_file")
+        env_file_encoding = _env_file_encoding if _env_file_encoding is not None else self.model_config.get("env_file_encoding")
+        env_nested_delimiter = _env_nested_delimiter if _env_nested_delimiter is not None else self.model_config.get("env_nested_delimiter")
+        secrets_dir = _secrets_dir if _secrets_dir is not None else self.model_config.get("secrets_dir")
 
         # Configure built-in sources
         init_settings = InitSettingsSource(self.__class__, init_kwargs=init_kwargs)
@@ -281,9 +244,7 @@ class YamlBaseSettings(BaseSettings):
             env_prefix=env_prefix,
             env_nested_delimiter=env_nested_delimiter,
         )
-        yaml_settings = YamlConfigSettingsSource(
-            self.__class__, bw_service=_bw_service, yaml_file=_yaml_file
-        )
+        yaml_settings = YamlConfigSettingsSource(self.__class__, bw_service=_bw_service, yaml_file=_yaml_file)
         dotenv_settings = DotEnvSettingsSource(
             self.__class__,
             env_file=env_file,

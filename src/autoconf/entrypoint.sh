@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
 log "ENTRYPOINT" "ℹ️ " "Starting the autoconf v$(cat /usr/share/bunkerweb/VERSION) ..."

@@ -69,14 +69,10 @@ async def add_job_run(
 
     if "database is locked" in resp or "file is not a database" in resp:
         retry_in = str(uniform(1.0, 5.0))
-        CORE_CONFIG.logger.warning(
-            f"Can't add job {job_name} run in database : database is locked or had trouble handling the request, retry in {retry_in} seconds"
-        )
+        CORE_CONFIG.logger.warning(f"Can't add job {job_name} run in database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-            },
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
             headers={"Retry-After": retry_in},
         )
     elif resp:
@@ -86,9 +82,7 @@ async def add_job_run(
             content={"message": resp},
         )
 
-    CORE_CONFIG.logger.info(
-        f"✅ Job {job_name} run successfully added to database with run status: {'✅' if data.get('success', False) else '❌'}"
-    )
+    CORE_CONFIG.logger.info(f"✅ Job {job_name} run successfully added to database with run status: {'✅' if data.get('success', False) else '❌'}")
 
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
@@ -164,9 +158,7 @@ async def get_cache(
         {}
         | (
             {
-                "last_update": cached_file.last_update.timestamp()
-                if cached_file.last_update
-                else None,
+                "last_update": cached_file.last_update.timestamp() if cached_file.last_update else None,
                 "checksum": cached_file.checksum,
             }
             if data.with_info
@@ -213,20 +205,14 @@ async def update_cache(
 
     if "database is locked" in resp or "file is not a database" in resp:
         retry_in = str(uniform(1.0, 5.0))
-        CORE_CONFIG.logger.warning(
-            f"Can't update job {job_name} cache in database : database is locked or had trouble handling the request, retry in {retry_in} seconds"
-        )
+        CORE_CONFIG.logger.warning(f"Can't update job {job_name} cache in database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-            },
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
             headers={"Retry-After": retry_in},
         )
     elif resp not in ("created", "updated"):
-        CORE_CONFIG.logger.error(
-            f"Can't update job {job_name} cache in database : {resp}"
-        )
+        CORE_CONFIG.logger.error(f"Can't update job {job_name} cache in database : {resp}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},
@@ -235,9 +221,7 @@ async def update_cache(
     CORE_CONFIG.logger.info(f"✅ Job {job_name} cache successfully updated in database")
 
     return JSONResponse(
-        status_code=status.HTTP_200_OK
-        if resp == "updated"
-        else status.HTTP_201_CREATED,
+        status_code=status.HTTP_200_OK if resp == "updated" else status.HTTP_201_CREATED,
         content={"message": "File successfully uploaded to cache"},
     )
 
@@ -267,28 +251,20 @@ async def delete_cache(job_name: str, file_name: str, data: CacheFileModel):
 
     if "database is locked" in resp or "file is not a database" in resp:
         retry_in = str(uniform(1.0, 5.0))
-        CORE_CONFIG.logger.warning(
-            f"Can't delete job {job_name} cache in database : database is locked or had trouble handling the request, retry in {retry_in} seconds"
-        )
+        CORE_CONFIG.logger.warning(f"Can't delete job {job_name} cache in database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-            },
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        CORE_CONFIG.logger.error(
-            f"Can't delete job {job_name} cache in database : {resp}"
-        )
+        CORE_CONFIG.logger.error(f"Can't delete job {job_name} cache in database : {resp}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},
         )
 
-    CORE_CONFIG.logger.info(
-        f"✅ Job {job_name} cache successfully deleted from database"
-    )
+    CORE_CONFIG.logger.info(f"✅ Job {job_name} cache successfully deleted from database")
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,

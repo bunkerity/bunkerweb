@@ -6,7 +6,6 @@ from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
 from sys import exit as sys_exit, path as sys_path
-from threading import Lock
 from traceback import format_exc
 from typing import Tuple
 
@@ -66,19 +65,10 @@ def generate_cert(
                 self_signed_path.joinpath(f"{first_server}.pem").read_bytes(),
                 default_backend(),
             )
-            if sorted(
-                attribute.rfc4514_string() for attribute in certificate.subject
-            ) != sorted(v for v in subj.split("/") if v):
-                LOGGER.warning(
-                    f"Subject of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ..."
-                )
-            elif (
-                certificate.not_valid_after - certificate.not_valid_before
-                != timedelta(days=int(days))
-            ):
-                LOGGER.warning(
-                    f"Expiration date of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ..."
-                )
+            if sorted(attribute.rfc4514_string() for attribute in certificate.subject) != sorted(v for v in subj.split("/") if v):
+                LOGGER.warning(f"Subject of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ...")
+            elif certificate.not_valid_after - certificate.not_valid_before != timedelta(days=int(days)):
+                LOGGER.warning(f"Expiration date of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ...")
             else:
                 return True, 0
 
@@ -160,24 +150,16 @@ try:
                 continue
 
             if not self_signed_path.joinpath(f"{first_server}.pem").is_file():
-                cached_pem = get_cache(
-                    f"{first_server}.pem", CORE_API, CORE_TOKEN, service_id=first_server
-                )
+                cached_pem = get_cache(f"{first_server}.pem", CORE_API, CORE_TOKEN, service_id=first_server)
 
                 if cached_pem:
-                    self_signed_path.joinpath(f"{first_server}.pem").write_bytes(
-                        cached_pem["data"]
-                    )
+                    self_signed_path.joinpath(f"{first_server}.pem").write_bytes(cached_pem["data"])
 
             if not self_signed_path.joinpath(f"{first_server}.key").is_file():
-                cached_key = get_cache(
-                    f"{first_server}.key", CORE_API, CORE_TOKEN, service_id=first_server
-                )
+                cached_key = get_cache(f"{first_server}.key", CORE_API, CORE_TOKEN, service_id=first_server)
 
                 if cached_key:
-                    self_signed_path.joinpath(f"{first_server}.key").write_bytes(
-                        cached_key["data"]
-                    )
+                    self_signed_path.joinpath(f"{first_server}.key").write_bytes(cached_key["data"])
 
             ret, ret_status = generate_cert(
                 first_server,
@@ -202,17 +184,13 @@ try:
             cached_pem = get_cache(f"{first_server}.pem", CORE_API, CORE_TOKEN)
 
             if cached_pem:
-                self_signed_path.joinpath(f"{first_server}.pem").write_bytes(
-                    cached_pem["data"]
-                )
+                self_signed_path.joinpath(f"{first_server}.pem").write_bytes(cached_pem["data"])
 
         if not self_signed_path.joinpath(f"{first_server}.key").is_file():
             cached_key = get_cache(f"{first_server}.key", CORE_API, CORE_TOKEN)
 
             if cached_key:
-                self_signed_path.joinpath(f"{first_server}.key").write_bytes(
-                    cached_key["data"]
-                )
+                self_signed_path.joinpath(f"{first_server}.key").write_bytes(cached_key["data"])
 
         ret, ret_status = generate_cert(
             first_server,

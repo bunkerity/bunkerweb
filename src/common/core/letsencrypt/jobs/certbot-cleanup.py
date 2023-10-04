@@ -31,15 +31,11 @@ try:
         "DELETE",
         "/lets-encrypt/challenge",
         data={"token": token},
-        additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"}
-        if CORE_TOKEN
-        else {},
+        additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"} if CORE_TOKEN else {},
     )
     if not sent:
         status = 1
-        LOGGER.error(
-            f"Can't send API request to {CORE_API.endpoint}/lets-encrypt/challenge : {err}"
-        )
+        LOGGER.error(f"Can't send API request to {CORE_API.endpoint}/lets-encrypt/challenge : {err}")
     elif status != 200:
         status = 1
         LOGGER.error(

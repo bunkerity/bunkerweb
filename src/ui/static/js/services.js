@@ -449,7 +449,7 @@ class Multiple {
           );
           //clone schema to create a group with new num
           const schemaClone = schema.cloneNode(true);
-          //add special attribut for disabled logic
+          //add special attribute for disabled logic
           this.changeCloneSuffix(schemaClone, setNum);
           //set disabled / enabled state
           this.setDisabledMultNew(schemaClone);
@@ -730,7 +730,7 @@ class Multiple {
       const select = settingContainer.querySelector("select");
       select.setAttribute("data-method", method);
 
-      //click the custom select dropdown btn vavlue to update select value
+      //click the custom select dropdown btn value to update select value
       select.parentElement
         .querySelector(
           `button[data-setting-select-dropdown-btn][value='${defaultVal}']`,

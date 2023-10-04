@@ -10,8 +10,8 @@ const props = defineProps({
 });
 
 const inp = reactive({
-  value : props.settings.value,
-})
+  value: props.settings.value,
+});
 
 const emits = defineEmits(["inp"]);
 </script>
@@ -24,7 +24,11 @@ const emits = defineEmits(["inp"]);
       :type="props.settings.type"
       :id="props.settings.id"
       class="input-regular"
-      :required="props.settings.id === 'SERVER_NAME' || props.settings.required || false ? true : false"
+      :required="
+        props.settings.id === 'SERVER_NAME' || props.settings.required || false
+          ? true
+          : false
+      "
       :disabled="props.settings.disabled || false"
       :placeholder="props.settings.placeholder || ''"
       :pattern="props.settings.pattern || ''"

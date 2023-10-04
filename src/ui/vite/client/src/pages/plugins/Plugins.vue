@@ -28,10 +28,10 @@ const plugins = reactive({
   base: [],
   total: computed(() => plugins.base.length),
   internal: computed(
-    () => plugins.base.filter((item) => item["external"] === false).length
+    () => plugins.base.filter((item) => item["external"] === false).length,
   ),
   external: computed(
-    () => plugins.base.filter((item) => item["external"] === true).length
+    () => plugins.base.filter((item) => item["external"] === true).length,
   ),
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
@@ -49,7 +49,7 @@ async function getPlugins() {
     null,
     plugins.isPend,
     plugins.isErr,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 

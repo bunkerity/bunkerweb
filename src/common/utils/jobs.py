@@ -90,9 +90,7 @@ def get_cache(
             with_data=with_data,
         )
 
-    return (
-        resp.json() if resp.headers.get("Content-Type") == "application/json" else resp
-    )
+    return resp.json() if resp.headers.get("Content-Type") == "application/json" else resp
 
 
 def is_cached_file(
@@ -175,9 +173,7 @@ def cache_file(
             f"/jobs/{job_name}/cache/{name}",
             data={"service_id": service_id, "checksum": checksum},
             files={"cache_file": content},
-            additonal_headers={"Authorization": f"Bearer {api_token}"}
-            if api_token
-            else {},
+            additonal_headers={"Authorization": f"Bearer {api_token}"} if api_token else {},
         )
 
         if not sent:
@@ -225,9 +221,7 @@ def update_cache_file_info(
             "PUT",
             f"/jobs/{job_name}/cache/{name}",
             data={"service_id": service_id},
-            additonal_headers={"Authorization": f"Bearer {api_token}"}
-            if api_token
-            else {},
+            additonal_headers={"Authorization": f"Bearer {api_token}"} if api_token else {},
         )
 
         if not sent:
@@ -273,9 +267,7 @@ def del_cache(
             "DELETE",
             f"/jobs/{job_name}/cache/{name}",
             data={"service_id": service_id},
-            additonal_headers={"Authorization": f"Bearer {api_token}"}
-            if api_token
-            else {},
+            additonal_headers={"Authorization": f"Bearer {api_token}"} if api_token else {},
         )
 
         if not sent:

@@ -65,27 +65,19 @@ class Templator:
                     templates.append(template)
         return templates
 
-    def __write_config(
-        self, subpath: Optional[str] = None, config: Optional[Dict[str, Any]] = None
-    ):
+    def __write_config(self, subpath: Optional[str] = None, config: Optional[Dict[str, Any]] = None):
         real_path = Path(self.__output, subpath or "", "variables.env")
         real_path.parent.mkdir(parents=True, exist_ok=True)
-        real_path.write_text(
-            "\n".join(f"{k}={v}" for k, v in (config or self.__config).items())
-        )
+        real_path.write_text("\n".join(f"{k}={v}" for k, v in (config or self.__config).items()))
 
     def __render_global(self):
         self.__write_config()
-        templates = self.__find_templates(
-            ["global", "http", "stream", "default-server-http"]
-        )
+        templates = self.__find_templates(["global", "http", "stream", "default-server-http"])
         for template in templates:
             self.__render_template(template)
 
     def __render_server(self, server: str):
-        templates = self.__find_templates(
-            ["modsec", "modsec-crs", "server-http", "server-stream"]
-        )
+        templates = self.__find_templates(["modsec", "modsec-crs", "server-http", "server-stream"])
         if self.__config.get("MULTISITE", "no") == "yes":
             config = self.__config.copy()
             for variable, value in self.__config.items():

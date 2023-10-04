@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Source the utils script
+# shellcheck disable=SC1091
 source /usr/share/bunkerweb/helpers/utils.sh
+# shellcheck disable=SC1091
 source /usr/share/bunkerweb/scripts/utils.sh
 
 # Start the bunkerweb service
@@ -62,7 +64,7 @@ function start() {
     fi
     sudo -E -u nginx -g nginx /bin/bash -c "echo -ne 'IS_LOADING=yes\nUSE_BUNKERNET=no\nSERVER_NAME=\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\n' > /var/tmp/bunkerweb/tmp.env"
     sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env --no-linux-reload"
-
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
         exit 1
@@ -104,9 +106,11 @@ function start() {
 
 function stop() {
     pgrep nginx > /dev/null 2>&1
+    # shellcheck disable=SC2181
     if [ $? -eq 0 ] ; then
         log "SYSTEMCTL" "ℹ️ " "Stopping nginx..."
         nginx -s stop
+        # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "SYSTEMCTL" "❌" "Error while sending stop signal to nginx"
             log "SYSTEMCTL" "ℹ️ " "Stopping nginx (force)..."
@@ -118,8 +122,9 @@ function stop() {
     fi
 
     count=0
-    while [ true ] ; do
+    while true ; do
         pgrep nginx > /dev/null 2>&1
+        # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             break
         fi
@@ -139,15 +144,15 @@ function stop() {
     log "SYSTEMCTL" "ℹ️ " "nginx is stopped"
 }
 
-# List of differents args
+# List of different args
 case $1 in
-    "start") 
+    "start")
         start
         ;;
-    "stop") 
+    "stop")
         stop
         ;;
-    "reload") 
+    "reload")
         stop
         sleep 5
         start

@@ -33,9 +33,7 @@ class Config:
             "modsec",
             "modsec-crs",
         ]
-        self.__configs = {
-            config_type: {} for config_type in self._supported_config_types
-        }
+        self.__configs = {config_type: {} for config_type in self._supported_config_types}
         self.__config = {}
         self._settings = {}
 
@@ -53,9 +51,7 @@ class Config:
                 sent, err, status, plugins = self._api.request(
                     "GET",
                     "/plugins",
-                    additonal_headers={"Authorization": f"Bearer {self._api_token}"}
-                    if self._api_token
-                    else {},
+                    additonal_headers={"Authorization": f"Bearer {self._api_token}"} if self._api_token else {},
                 )
 
                 if not sent or status != 200:
@@ -105,23 +101,15 @@ class Config:
     def _is_setting(self, setting) -> bool:
         return setting in self._settings
 
-    def _is_setting_context(
-        self, setting: str, context: Literal["global", "multisite"]
-    ) -> bool:
+    def _is_setting_context(self, setting: str, context: Literal["global", "multisite"]) -> bool:
         if self._is_setting(setting):
             return self._settings[setting]["context"] == context
         elif match(r"^.+_\d+$", setting):
             multiple_setting = "_".join(setting.split("_")[:-1])
-            return (
-                self._is_setting(multiple_setting)
-                and self._settings[multiple_setting]["context"] == context
-                and "multiple" in self._settings[multiple_setting]
-            )
+            return self._is_setting(multiple_setting) and self._settings[multiple_setting]["context"] == context and "multiple" in self._settings[multiple_setting]
         return False
 
-    def _full_env(
-        self, env_instances: Dict[str, Any], env_services: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _full_env(self, env_instances: Dict[str, Any], env_services: Dict[str, Any]) -> Dict[str, Any]:
         full_env = {}
         self.__update_settings()
         # Fill with default values
@@ -130,11 +118,7 @@ class Config:
         # Replace with instances values
         for k, v in env_instances.items():
             full_env[k] = v
-            if (
-                not self._is_setting_context(k, "global")
-                and env_instances.get("MULTISITE", "no") == "yes"
-                and env_instances.get("SERVER_NAME", "") != ""
-            ):
+            if not self._is_setting_context(k, "global") and env_instances.get("MULTISITE", "no") == "yes" and env_instances.get("SERVER_NAME", "") != "":
                 for server_name in env_instances["SERVER_NAME"].strip().split():
                     full_env[f"{server_name}_{k}"] = v
         # Replace with services values
@@ -164,9 +148,7 @@ class Config:
             sent, err, status, resp = self._api.request(
                 "GET",
                 "/ping",
-                additonal_headers={"Authorization": f"Bearer {self._api_token}"}
-                if self._api_token
-                else {},
+                additonal_headers={"Authorization": f"Bearer {self._api_token}"} if self._api_token else {},
             )
 
             if not sent or status != 200:
@@ -192,16 +174,12 @@ class Config:
                             {
                                 "hostname": instance["hostname"],
                                 "port": self.__config.get("API_HTTP_PORT", "5000"),
-                                "server_name": self.__config.get(
-                                    "API_SERVER_NAME", "bwapi"
-                                ),
+                                "server_name": self.__config.get("API_SERVER_NAME", "bwapi"),
                             }
                             for instance in instances
                         ]
                     ).encode(),
-                    additonal_headers={"Authorization": f"Bearer {self._api_token}"}
-                    if self._api_token
-                    else {},
+                    additonal_headers={"Authorization": f"Bearer {self._api_token}"} if self._api_token else {},
                 )
 
                 if not sent or status not in (200, 503):
@@ -250,9 +228,7 @@ class Config:
                     "PUT",
                     f"/custom_configs?method=autoconf&reload={'false' if config_changed else 'true'}",
                     data=dumps(custom_configs).encode(),
-                    additonal_headers={"Authorization": f"Bearer {self._api_token}"}
-                    if self._api_token
-                    else {},
+                    additonal_headers={"Authorization": f"Bearer {self._api_token}"} if self._api_token else {},
                 )
 
                 if not sent or status not in (200, 503):
@@ -276,14 +252,7 @@ class Config:
             status = 503
             while status == 503:
                 # Send new config to API
-                sent, err, status, resp = self._api.request(
-                    "PUT",
-                    f"/config?method=autoconf",
-                    data=config,
-                    additonal_headers={"Authorization": f"Bearer {self._api_token}"}
-                    if self._api_token
-                    else {},
-                )
+                sent, err, status, resp = self._api.request("PUT", "/config?method=autoconf", data=config, additonal_headers={"Authorization": f"Bearer {self._api_token}"} if self._api_token else {})
 
                 if not sent or status not in (200, 503):
                     self.__logger.warning(

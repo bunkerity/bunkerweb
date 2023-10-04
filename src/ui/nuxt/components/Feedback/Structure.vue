@@ -23,7 +23,7 @@ onMounted(() => {
   }, showDelay);
 });
 
-// Everytime feedback change
+// Every time feedback change
 watch(feedback, () => {
   // Case new feedback alert
   if (alert.prevNum < feedback.data.length) {

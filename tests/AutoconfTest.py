@@ -43,9 +43,7 @@ class AutoconfTest(Test):
             mkdir("/tmp/www")
             copy("./misc/integrations/autoconf.yml", "/tmp/autoconf/docker-compose.yml")
             compose = "/tmp/autoconf/docker-compose.yml"
-            Test.replace_in_file(
-                compose, r"bunkerity/bunkerweb:.*$", "local/bunkerweb-tests:latest"
-            )
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "local/bunkerweb-tests:latest")
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb-autoconf:.*$",
@@ -60,16 +58,9 @@ class AutoconfTest(Test):
             with open(compose, "r") as f:
                 data = safe_load(f.read())
             data["services"]["bunkerweb"]["volumes"] = ["/tmp/www:/var/www/html"]
-            if (
-                not "AUTO_LETS_ENCRYPT=yes"
-                in data["services"]["bunkerweb"]["environment"]
-            ):
-                data["services"]["bunkerweb"]["environment"].append(
-                    "AUTO_LETS_ENCRYPT=yes"
-                )
-            data["services"]["bunkerweb"]["environment"].append(
-                "USE_LETS_ENCRYPT_STAGING=yes"
-            )
+            if "AUTO_LETS_ENCRYPT=yes" not in data["services"]["bunkerweb"]["environment"]:
+                data["services"]["bunkerweb"]["environment"].append("AUTO_LETS_ENCRYPT=yes")
+            data["services"]["bunkerweb"]["environment"].append("USE_LETS_ENCRYPT_STAGING=yes")
             with open(compose, "w") as f:
                 f.write(dump(data))
             proc = run(
@@ -134,9 +125,7 @@ class AutoconfTest(Test):
             compose = f"/tmp/tests/{self._name}/autoconf.yml"
             example_data = f"/tmp/tests/{self._name}/bw-data"
             example_www = f"/tmp/tests/{self._name}/www"
-            Test.replace_in_file(
-                compose, r"bunkerity/bunkerweb:.*$", "local/bunkerweb-tests:latest"
-            )
+            Test.replace_in_file(compose, r"bunkerity/bunkerweb:.*$", "local/bunkerweb-tests:latest")
             Test.replace_in_file(
                 compose,
                 r"bunkerity/bunkerweb-scheduler:.*$",
@@ -217,6 +206,6 @@ class AutoconfTest(Test):
 
     def _debug_fail(self):
         autoconf = "/tmp/autoconf"
-        proc = run("docker-compose logs", shell=True, cwd=autoconf)
+        run("docker-compose logs", shell=True, cwd=autoconf)
         test = f"/tmp/tests/{self._name}"
-        proc = run("docker-compose -f autoconf.yml logs", shell=True, cwd=test)
+        run("docker-compose -f autoconf.yml logs", shell=True, cwd=test)

@@ -274,6 +274,7 @@ You can manually unban an IP which can be useful when doing some tests but it ne
     sudo bwcli unban 1.2.3.4
     ```
 
+
 ## Whitelisting
 
 If you have bots that need to access your website, the recommended way to avoid any false positive is to whitelist them using the [whitelisting feature](security-tuning.md#blacklisting-and-whitelisting). We don't recommend using the `WHITELIST_URI*` or `WHITELIST_USER_AGENT*` settings unless they are set to secret and unpredictable values. Common use cases are :
@@ -284,4 +285,4 @@ If you have bots that need to access your website, the recommended way to avoid 
 
 ## Timezone
 
-When using container-based integrations, the timezone of the container may not match the one of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
+When using container-based integrations, the timezone of the container may not match the one of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).

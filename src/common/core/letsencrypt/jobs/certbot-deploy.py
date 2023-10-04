@@ -45,20 +45,14 @@ try:
         "POST",
         "/lets-encrypt/certificates",
         files=files,
-        additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"}
-        if CORE_TOKEN
-        else {},
+        additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"} if CORE_TOKEN else {},
     )
     if not sent:
         status = 1
-        LOGGER.error(
-            f"Can't send API request to {CORE_API.endpoint}/lets-encrypt/certificates : {err}"
-        )
+        LOGGER.error(f"Can't send API request to {CORE_API.endpoint}/lets-encrypt/certificates : {err}")
     elif status != 200:
         status = 1
-        LOGGER.error(
-            f"Error while sending API request to {CORE_API.endpoint}/lets-encrypt/certificates : status = {resp['status']}, msg = {resp['msg']}"
-        )
+        LOGGER.error(f"Error while sending API request to {CORE_API.endpoint}/lets-encrypt/certificates : status = {resp['status']}, msg = {resp['msg']}")
     else:
         LOGGER.info(
             f"Successfully sent API request to {CORE_API.endpoint}/lets-encrypt/certificates",
@@ -67,20 +61,14 @@ try:
         sent, err, status, resp = CORE_API.request(
             "POST",
             "/reload",
-            additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"}
-            if CORE_TOKEN
-            else {},
+            additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"} if CORE_TOKEN else {},
         )
         if not sent:
             status = 1
-            LOGGER.error(
-                f"Can't send API request to {CORE_API.endpoint}/reload : {err}"
-            )
+            LOGGER.error(f"Can't send API request to {CORE_API.endpoint}/reload : {err}")
         elif status != 200:
             status = 1
-            LOGGER.error(
-                f"Error while sending API request to {CORE_API.endpoint}/reload : status = {resp['status']}, msg = {resp['msg']}"
-            )
+            LOGGER.error(f"Error while sending API request to {CORE_API.endpoint}/reload : status = {resp['status']}, msg = {resp['msg']}")
         else:
             LOGGER.info(f"Successfully sent API request to {CORE_API.endpoint}/reload")
 except:

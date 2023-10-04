@@ -30,24 +30,12 @@ basicConfig(
     level=default_level,
 )
 
-getLogger("sqlalchemy.orm.mapper.Mapper").setLevel(
-    default_level if default_level != INFO else WARNING
-)
-getLogger("sqlalchemy.orm.relationships.RelationshipProperty").setLevel(
-    default_level if default_level != INFO else WARNING
-)
-getLogger("sqlalchemy.orm.strategies.LazyLoader").setLevel(
-    default_level if default_level != INFO else WARNING
-)
-getLogger("sqlalchemy.pool.impl.QueuePool").setLevel(
-    default_level if default_level != INFO else WARNING
-)
-getLogger("sqlalchemy.pool.impl.NullPool").setLevel(
-    default_level if default_level != INFO else WARNING
-)
-getLogger("sqlalchemy.engine.Engine").setLevel(
-    default_level if default_level != INFO else WARNING
-)
+getLogger("sqlalchemy.orm.mapper.Mapper").setLevel(default_level if default_level != INFO else WARNING)
+getLogger("sqlalchemy.orm.relationships.RelationshipProperty").setLevel(default_level if default_level != INFO else WARNING)
+getLogger("sqlalchemy.orm.strategies.LazyLoader").setLevel(default_level if default_level != INFO else WARNING)
+getLogger("sqlalchemy.pool.impl.QueuePool").setLevel(default_level if default_level != INFO else WARNING)
+getLogger("sqlalchemy.pool.impl.NullPool").setLevel(default_level if default_level != INFO else WARNING)
+getLogger("sqlalchemy.engine.Engine").setLevel(default_level if default_level != INFO else WARNING)
 
 # Edit the default levels of the logging module
 addLevelName(CRITICAL, "🚨")

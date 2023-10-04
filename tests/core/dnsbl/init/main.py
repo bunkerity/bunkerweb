@@ -28,11 +28,7 @@ try:
         driver.get("https://www.dnsbl.info/dnsbl-list.php")
 
         print("ℹ️ Getting the DNSBL servers ...")
-        links: List[WebElement] = driver_wait.until(
-            EC.presence_of_all_elements_located(
-                (By.XPATH, "//table[@class='body_sub_body']//td")
-            )
-        )
+        links: List[WebElement] = driver_wait.until(EC.presence_of_all_elements_located((By.XPATH, "//table[@class='body_sub_body']//td")))
 
         for link in links:
             content = link.text
@@ -41,18 +37,12 @@ try:
 
     print("ℹ️ Checking the DNSBL servers for a banned IP ...", flush=True)
 
-    output_path = (
-        Path(sep, "output", "dnsbl_ip.txt")
-        if getenv("TEST_TYPE", "docker") == "docker"
-        else Path(".", "dnsbl_ip.txt")
-    )
+    output_path = Path(sep, "output", "dnsbl_ip.txt") if getenv("TEST_TYPE", "docker") == "docker" else Path(".", "dnsbl_ip.txt")
 
     for ip_address in [IPv4Address(f"{x}.0.0.3") for x in range(1, 256)]:
         for dnsbl_server in dnsbl_servers:
             with suppress(gaierror):
-                gethostbyname(
-                    f"{ip_address.reverse_pointer.replace('.in-addr.arpa', '')}.{dnsbl_server}"
-                )
+                gethostbyname(f"{ip_address.reverse_pointer.replace('.in-addr.arpa', '')}.{dnsbl_server}")
                 print(
                     f"✅ {ip_address} is banned on {dnsbl_server}, saving it to {output_path}",
                     flush=True,

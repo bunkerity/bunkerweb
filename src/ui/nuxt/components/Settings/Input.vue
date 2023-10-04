@@ -16,10 +16,9 @@ const input = reactive({
   pattern: props.settings.pattern || "",
 });
 
-const emits = defineEmits(['inp'])
+const emits = defineEmits(["inp"]);
 
-const inp = ""
-
+const inp = "";
 </script>
 
 <template>

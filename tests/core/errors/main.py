@@ -14,9 +14,7 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get(
-                "http://www.example.com", headers={"Host": "www.example.com"}
-            ).status_code
+            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
@@ -29,18 +27,14 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     firefox_options = Options()
     firefox_options.add_argument("--headless")
 
     errors = getenv("ERRORS", "")
-    intercepted_error_codes = getenv(
-        "INTERCEPTED_ERROR_CODES", "400 401 403 404 405 413 429 500 501 502 503 504"
-    )
+    intercepted_error_codes = getenv("INTERCEPTED_ERROR_CODES", "400 401 403 404 405 413 429 500 501 502 503 504")
 
     print("ℹ️ Starting Firefox ...", flush=True)
     with webdriver.Firefox(options=firefox_options) as driver:
@@ -55,26 +49,15 @@ try:
 
         default_message = None
         with suppress(NoSuchElementException):
-            default_message = driver.find_element(
-                By.XPATH, "//p[contains(text(), 'This website is protected with')]"
-            )
+            default_message = driver.find_element(By.XPATH, "//p[contains(text(), 'This website is protected with')]")
 
-        if default_message and (
-            errors
-            or intercepted_error_codes
-            != "400 401 403 404 405 413 429 500 501 502 503 504"
-        ):
+        if default_message and (errors or intercepted_error_codes != "400 401 403 404 405 413 429 500 501 502 503 504"):
             print(
                 "❌ The default error page is being displayed, exiting ...",
                 flush=True,
             )
             exit(1)
-        elif (
-            not default_message
-            and not errors
-            and intercepted_error_codes
-            == "400 401 403 404 405 413 429 500 501 502 503 504"
-        ):
+        elif not default_message and not errors and intercepted_error_codes == "400 401 403 404 405 413 429 500 501 502 503 504":
             print(
                 "❌ The default error page is not being displayed, exiting ...",
                 flush=True,
@@ -84,9 +67,7 @@ try:
         if errors:
             custom_message = None
             with suppress(NoSuchElementException):
-                custom_message = driver.find_element(
-                    By.XPATH, "//h1[contains(text(), 'It Works!')]"
-                )
+                custom_message = driver.find_element(By.XPATH, "//h1[contains(text(), 'It Works!')]")
 
             if not custom_message:
                 print(
@@ -98,9 +79,7 @@ try:
         if intercepted_error_codes != "400 401 403 404 405 413 429 500 501 502 503 504":
             nginx_message = None
             with suppress(NoSuchElementException):
-                nginx_message = driver.find_element(
-                    By.XPATH, "//center[contains(text(), 'nginx')]"
-                )
+                nginx_message = driver.find_element(By.XPATH, "//center[contains(text(), 'nginx')]")
 
             if not nginx_message:
                 print(

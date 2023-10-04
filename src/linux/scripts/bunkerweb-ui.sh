@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # Source the utils script
+# shellcheck disable=SC1091
 source /usr/share/bunkerweb/helpers/utils.sh
+# shellcheck disable=SC1091
 source /usr/share/bunkerweb/scripts/utils.sh
 
-# Create the ui.conf file if it doesn't exist 
+# Create the ui.conf file if it doesn't exist
 if [ ! -f /etc/bunkerweb/ui.conf ]; then
     echo "API_ADDR=http://127.0.0.1:1337" > /etc/bunkerweb/ui.conf
     { echo "API_TOKEN=changeme"; echo "ADMIN_USERNAME=admin"; echo "ADMIN_PASSWORD=changeme"; } >> /etc/bunkerweb/ui.conf

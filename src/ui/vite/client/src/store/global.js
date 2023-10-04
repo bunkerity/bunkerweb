@@ -18,7 +18,7 @@ export const useFeedbackStore = defineStore("feedback", () => {
   function removeFeedback(id) {
     data.value.splice(
       data.value.findIndex((item) => item["id"] === id),
-      1
+      1,
     );
   }
 

@@ -32,11 +32,8 @@ try:
     bunkernet_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "").split():
-            if (
-                getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes"))
-                == "yes"
-            ):
+        for first_server in getenv("SERVER_NAME", "").split(" "):
+            if getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes")) == "yes":
                 bunkernet_activated = True
                 break
     # Singlesite case
@@ -117,9 +114,7 @@ try:
             _exit(0)
 
     # Put file in cache
-    cached, err = cache_file(
-        "ip.list", content, CORE_API, CORE_TOKEN, checksum=new_hash
-    )
+    cached, err = cache_file("ip.list", content, CORE_API, CORE_TOKEN, checksum=new_hash)
     if not cached:
         LOGGER.error(f"Error while caching BunkerNet data : {err}")
         _exit(2)

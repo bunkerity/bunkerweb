@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Source the utils helper script
+# shellcheck disable=SC1091
 source /usr/share/bunkerweb/helpers/utils.sh
 
 # Display usage information
@@ -34,6 +35,7 @@ function stop() {
         service_pid=$(cat "/var/run/bunkerweb/$service.pid")
         log "SYSTEMCTL" "ℹ️ " "Stopping $service..."
         kill -SIGINT "$service_pid"
+        # shellcheck disable=SC2181
         if [ $? -ne 0 ] ; then
             log "SYSTEMCTL" "❌" "Error while sending stop signal to $service"
             exit 1

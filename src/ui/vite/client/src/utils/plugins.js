@@ -1,4 +1,4 @@
-// Set additionnal data to plugins
+// Set additional data to plugins
 export function setPluginsData(plugins) {
   plugins.forEach((plugin) => {
     const settings = plugin["settings"];

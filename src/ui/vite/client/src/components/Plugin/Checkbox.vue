@@ -43,7 +43,7 @@ function updateCheckbox() {
           config.updateConf(
             props.serviceName || checkbox.context,
             checkbox.id,
-            checkbox.value
+            checkbox.value,
           );
         }
       "

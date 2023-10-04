@@ -11,56 +11,57 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  defaultDate : {
+  defaultDate: {
     type: [String, Date],
     required: false,
-    default: null
+    default: null,
   },
-  noPickBeforeStamp : {
+  noPickBeforeStamp: {
     type: [String, Number],
     required: false,
-    default: ""
+    default: "",
   },
-  noPickAfterStamp : {
+  noPickAfterStamp: {
     type: [String, Number],
     required: false,
-    default: ""
-  }
+    default: "",
+  },
 });
 
 const date = reactive({
-  isInvalid : false,
-  isValid : false,
-  format : "m/d/Y H:i:S"
+  isInvalid: false,
+  isValid: false,
+  format: "m/d/Y H:i:S",
 });
 
 let datepicker;
 let currStamp;
 onMounted(() => {
-  datepicker = flatpickr(`#${props.settings.id}`, 
-  { locale: "en",   
-    dateFormat: date.format, 
-    defaultDate : props.defaultDate, 
+  datepicker = flatpickr(`#${props.settings.id}`, {
+    locale: "en",
+    dateFormat: date.format,
+    defaultDate: props.defaultDate,
     enableTime: true,
     enableSeconds: true,
-    time_24hr:true,
+    time_24hr: true,
     minuteIncrement: 1,
     onChange(selectedDates, dateStr, instance) {
-      console.log(dateStr)
+      console.log(dateStr);
       datepicker.setDate(`${dateStr}h`);
-    }
+    },
   });
-
-})
+});
 
 function checkToSend(date) {
   currStamp = Date.parse(date);
   // Check pick is in interval
-  if(props.noPickBeforeStamp && currStamp < props.noPickBeforeStamp) setInvalid(props.noPickBeforeStamp);
-  if(props.noPickAfterStamp && currStamp > props.noPickAfterStamp) setInvalid(props.noPickAfterStamp);
+  if (props.noPickBeforeStamp && currStamp < props.noPickBeforeStamp)
+    setInvalid(props.noPickBeforeStamp);
+  if (props.noPickAfterStamp && currStamp > props.noPickAfterStamp)
+    setInvalid(props.noPickAfterStamp);
   // Run whatever, if invalid this will override
   setValid();
-  return {timestamp : currStamp, date : new Date(currStamp)}
+  return { timestamp: currStamp, date: new Date(currStamp) };
 }
 
 function setInvalid(dateToSet) {
@@ -87,10 +88,17 @@ const emits = defineEmits(["inp"]);
     <input
       @change="(v) => $emit('inp', checkToSend(v.target.value))"
       type="text"
-      :class="[date.isInvalid ? 'invalid': '', !date.isInvalid && date.isValid ? 'valid': '']"
+      :class="[
+        date.isInvalid ? 'invalid' : '',
+        !date.isInvalid && date.isValid ? 'valid' : '',
+      ]"
       class="input-regular cursor-pointer"
       :id="props.settings.id"
-      :required="props.settings.id === 'SERVER_NAME' || props.settings.required || false ? true : false"
+      :required="
+        props.settings.id === 'SERVER_NAME' || props.settings.required || false
+          ? true
+          : false
+      "
       :disabled="props.settings.disabled || false"
       :name="props.settings.id"
       :placeholder="date.format"

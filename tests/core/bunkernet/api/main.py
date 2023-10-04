@@ -24,9 +24,7 @@ async def register(_: Request):
 async def report(_: Request):
     global report_num
     report_num += 1
-    return JSONResponse(
-        status_code=200, content={"result": "ok", "data": "Report acknowledged."}
-    )
+    return JSONResponse(status_code=200, content={"result": "ok", "data": "Report acknowledged."})
 
 
 @app.get("/db")
@@ -51,9 +49,7 @@ async def reset(_: Request):
     global instance_id, report_num
     instance_id = None
     report_num = 0
-    return JSONResponse(
-        status_code=200, content={"result": "ok", "data": "Reset done."}
-    )
+    return JSONResponse(status_code=200, content={"result": "ok", "data": "Reset done."})
 
 
 if __name__ == "__main__":

@@ -101,7 +101,7 @@ const emits = defineEmits(["action", "delete"]);
                     hostname: props.hostname,
                     operation: action.name,
                   }
-                : props.hostname
+                : props.hostname,
             )
           "
           @pointerover="action.popup = true"

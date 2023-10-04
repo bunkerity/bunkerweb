@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 
 from datetime import datetime
-from typing import Dict, List, Literal, Optional, Union, Any
+from typing import Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
-
 
 
 class Instance(BaseModel):
@@ -29,8 +28,6 @@ class ResponseModel(BaseModel):
     )
 
 
-
-
 class InstanceWithMethod(Instance):
     method: str = Field(examples=["static"], description="The method used by the API")
 
@@ -44,16 +41,12 @@ class Plugin(BaseModel):
     stream: str = Field(examples=["partial"], description="The plugin stream")
     name: str = Field(examples=["Blacklist"], description="The plugin name")
     description: str = Field(
-        examples=[
-            "Deny access based on internal and external IP/network/rDNS/ASN blacklists."
-        ],
+        examples=["Deny access based on internal and external IP/network/rDNS/ASN blacklists."],
         description="The plugin description",
     )
     version: str = Field(examples=["1.0"], description="The plugin version")
     external: bool = Field(examples=[False], description="If the plugin is external")
-    method: str = Field(
-        examples=["core"], description="Which service created the plugin"
-    )
+    method: str = Field(examples=["core"], description="Which service created the plugin")
     page: bool = Field(examples=[False], description="If the plugin has a page")
     settings: Dict[
         str,
@@ -118,9 +111,7 @@ class Plugin(BaseModel):
         ],
         description="The plugin settings",
     )
-    jobs: List[
-        Dict[Literal["name", "file", "every", "reload"], Union[str, bool]]
-    ] = Field(
+    jobs: List[Dict[Literal["name", "file", "every", "reload"], Union[str, bool]]] = Field(
         None,
         examples=[
             [
@@ -140,29 +131,19 @@ class AddedPlugin(Plugin):
     data: bytes = Field(examples=[b"BunkerWeb forever"], description="The plugin data")
     checksum: str = Field(
         None,
-        examples=[
-            "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"
-        ],
+        examples=["b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"],
         description="SHA512 checksum of the plugin file",
     )
-    template_file: bytes = Field(
-        None, examples=[b"BunkerWeb forever"], description="The template file data"
-    )
-    actions_file: bytes = Field(
-        None, examples=[b"BunkerWeb forever"], description="The actions file data"
-    )
+    template_file: bytes = Field(None, examples=[b"BunkerWeb forever"], description="The template file data")
+    actions_file: bytes = Field(None, examples=[b"BunkerWeb forever"], description="The actions file data")
     template_checksum: str = Field(
         None,
-        examples=[
-            "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"
-        ],
+        examples=["b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"],
         description="SHA512 checksum of the template file",
     )
     actions_checksum: str = Field(
         None,
-        examples=[
-            "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"
-        ],
+        examples=["b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"],
         description="SHA512 checksum of the actions file",
     )
 
@@ -207,14 +188,10 @@ class Job_cache(BaseModel):
     last_update: Optional[float] = Field(None, examples=["1609459200.0"])
     checksum: Optional[str] = Field(
         None,
-        examples=[
-            "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"
-        ],
+        examples=["b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"],
         description="SHA512 checksum of the cache file",
     )
-    data: Optional[bytes] = Field(
-        None, examples=[b"BunkerWeb forever"], description="The cache file data"
-    )
+    data: Optional[bytes] = Field(None, examples=[b"BunkerWeb forever"], description="The cache file data")
 
 
 class ErrorMessage(BaseModel):
@@ -243,15 +220,9 @@ class CacheFileDataModel(CacheFileModel):
 
 
 class CacheFileInfoModel(CacheFileModel):
-    last_update: Union[datetime, float] = Field(
-        examples=["1609459200.0"], description="The last update date"
-    )
+    last_update: Union[datetime, float] = Field(examples=["1609459200.0"], description="The last update date")
     checksum: Optional[str] = Field(
         None,
-        examples=[
-            "b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"
-        ],
+        examples=["b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"],
         description="SHA512 checksum of the cache file",
     )
-
-

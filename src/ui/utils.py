@@ -78,18 +78,9 @@ def path_to_dict(
             }
 
             if conf["service_id"]:
-                d["children"][config_types.index(type_lower)]["children"][
-                    [
-                        x["name"]
-                        for x in d["children"][config_types.index(type_lower)][
-                            "children"
-                        ]
-                    ].index(conf["service_id"])
-                ]["children"].append(file_info)
+                d["children"][config_types.index(type_lower)]["children"][[x["name"] for x in d["children"][config_types.index(type_lower)]["children"]].index(conf["service_id"])]["children"].append(file_info)
             else:
-                d["children"][config_types.index(type_lower)]["children"].append(
-                    file_info
-                )
+                d["children"][config_types.index(type_lower)]["children"].append(file_info)
     else:
         d = {
             "name": "cache",
@@ -130,9 +121,7 @@ def path_to_dict(
             }
 
             if conf["service_id"]:
-                d["children"][
-                    [x["name"] for x in d["children"]].index(conf["service_id"])
-                ]["children"].append(file_info)
+                d["children"][[x["name"] for x in d["children"]].index(conf["service_id"])]["children"].append(file_info)
             else:
                 d["children"].append(file_info)
 

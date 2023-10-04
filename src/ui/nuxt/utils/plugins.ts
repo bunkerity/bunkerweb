@@ -16,7 +16,7 @@ interface multiples {
   };
 }
 
-// Set additionnal data to plugins
+// Set additional data to plugins
 export async function setPluginsData(plugins: []) {
   plugins.forEach((plugin: any) => {
     const settings = plugin["settings"];

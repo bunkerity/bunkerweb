@@ -7,10 +7,7 @@ from sys import path as sys_path
 from tarfile import open as tar_open
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("api",), ("utils",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -80,9 +77,7 @@ class ApiCaller:
     def send_files(self, path: str, url: str) -> bool:
         ret = True
         with BytesIO() as tgz:
-            with tar_open(
-                mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3
-            ) as tf:
+            with tar_open(mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3) as tf:
                 tf.add(path, arcname=".")
             tgz.seek(0, 0)
             files = {"archive.tar.gz": tgz}

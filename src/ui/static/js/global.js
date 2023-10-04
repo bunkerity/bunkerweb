@@ -72,7 +72,7 @@ class News {
         excerpt,
         tags,
         date,
-        lastUpdate
+        lastUpdate,
       );
       let cleanHTML = DOMPurify.sanitize(cardHTML);
       //add to DOM
@@ -191,7 +191,7 @@ class darkMode {
     };
     const send = await fetch(
       `${location.href.split("/").slice(0, -1).join("/")}/darkmode`,
-      data
+      data,
     );
   }
 }
@@ -231,7 +231,7 @@ class FlashMsg {
           flashEl.remove();
           //update count
           this.flashCount.textContent = document.querySelectorAll(
-            "[data-flash-message]"
+            "[data-flash-message]",
           ).length;
         }
       } catch (err) {}
@@ -300,7 +300,7 @@ const setMenu = new Menu();
 const setNewsSidebar = new Sidebar(
   "[data-sidebar-info]",
   "[data-sidebar-info-open]",
-  "[data-sidebar-info-close]"
+  "[data-sidebar-info-close]",
 );
 
 const setCheckbox = new Checkbox();
@@ -311,7 +311,7 @@ const setDisabledPop = new DisabledPop();
 const setFlashSidebar = new Sidebar(
   "[data-flash-sidebar]",
   "[data-flash-sidebar-open]",
-  "[data-flash-sidebar-close]"
+  "[data-flash-sidebar-close]",
 );
 const setNews = new News();
 const setDarkM = new darkMode();

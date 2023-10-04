@@ -183,7 +183,7 @@ const emits = defineEmits(["createFile", "close"]);
               if (!inp.name)
                 return showAlert(
                   'error',
-                  `Filename missing to create element.`
+                  `Filename missing to create element.`,
                 );
 
               if (!editor.getValue()) {

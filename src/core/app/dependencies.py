@@ -47,14 +47,7 @@ from .core import CoreConfig
 
 integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
 os_release_path = Path(sep, "etc", "os-release")
-if (
-    integration_path.is_file()
-    and integration_path.read_text(encoding="utf-8").strip().lower()
-    in ("autoconf", "kubernetes", "swarm")
-) or (
-    os_release_path.is_file()
-    and "Alpine" in os_release_path.read_text(encoding="utf-8")
-):
+if (integration_path.is_file() and integration_path.read_text(encoding="utf-8").strip().lower() in ("autoconf", "kubernetes", "swarm")) or (os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8")):
     CORE_CONFIG = CoreConfig("core", **environ)
 else:
     CORE_CONFIG = CoreConfig("core")
@@ -63,31 +56,19 @@ del integration_path, os_release_path
 
 CORE_CONFIG.logger.info(f"🚀 {CORE_CONFIG.integration} integration detected")
 
-if not isinstance(CORE_CONFIG.WAIT_RETRY_INTERVAL, int) and (
-    not CORE_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
-    or int(CORE_CONFIG.WAIT_RETRY_INTERVAL) < 1
-):
-    CORE_CONFIG.logger.error(
-        f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
-    )
+if not isinstance(CORE_CONFIG.WAIT_RETRY_INTERVAL, int) and (not CORE_CONFIG.WAIT_RETRY_INTERVAL.isdigit() or int(CORE_CONFIG.WAIT_RETRY_INTERVAL) < 1):
+    CORE_CONFIG.logger.error(f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer.")
     stop(1)
 
-if not isinstance(CORE_CONFIG.HEALTHCHECK_INTERVAL, int) and (
-    not CORE_CONFIG.HEALTHCHECK_INTERVAL.isdigit()
-    or int(CORE_CONFIG.HEALTHCHECK_INTERVAL) < 1
-):
-    CORE_CONFIG.logger.error(
-        f"Invalid HEALTHCHECK_INTERVAL provided: {CORE_CONFIG.HEALTHCHECK_INTERVAL}, It must be a positive integer."
-    )
+if not isinstance(CORE_CONFIG.HEALTHCHECK_INTERVAL, int) and (not CORE_CONFIG.HEALTHCHECK_INTERVAL.isdigit() or int(CORE_CONFIG.HEALTHCHECK_INTERVAL) < 1):
+    CORE_CONFIG.logger.error(f"Invalid HEALTHCHECK_INTERVAL provided: {CORE_CONFIG.HEALTHCHECK_INTERVAL}, It must be a positive integer.")
     stop(1)
 
 if CORE_CONFIG.check_token and not match(
     r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$",
     CORE_CONFIG.CORE_TOKEN,
 ):
-    CORE_CONFIG.logger.error(
-        f"Invalid token provided: {CORE_CONFIG.CORE_TOKEN}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
-    )
+    CORE_CONFIG.logger.error(f"Invalid token provided: {CORE_CONFIG.CORE_TOKEN}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
     stop(1)
 
 from .job_scheduler import JobScheduler
@@ -147,9 +128,7 @@ def update_app_mounts(app):
             app.routes.remove(route)
 
     # loop over every core + external plugins that have an api subfolder
-    for subapi in glob(str(CORE_PLUGINS_PATH.joinpath("*", "api"))) + glob(
-        str(EXTERNAL_PLUGINS_PATH.joinpath("*", "api"))
-    ):
+    for subapi in glob(str(CORE_PLUGINS_PATH.joinpath("*", "api"))) + glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "api"))):
         main_file_path = Path(subapi, "main.py")
 
         if not main_file_path.is_file():
@@ -172,22 +151,14 @@ def update_app_mounts(app):
                     basename(dirname(subapi)),
                 )
 
-                CORE_CONFIG.logger.info(
-                    f"✅ The subapi for the plugin {subapi_plugin} has been mounted successfully, root path: {root_path}"
-                )
+                CORE_CONFIG.logger.info(f"✅ The subapi for the plugin {subapi_plugin} has been mounted successfully, root path: {root_path}")
             else:
-                CORE_CONFIG.logger.error(
-                    f"Couldn't mount subapi {subapi_plugin}, no app found"
-                )
+                CORE_CONFIG.logger.error(f"Couldn't mount subapi {subapi_plugin}, no app found")
         except Exception as e:
-            CORE_CONFIG.logger.error(
-                f"Exception while mounting subapi {subapi_plugin} : {e}"
-            )
+            CORE_CONFIG.logger.error(f"Exception while mounting subapi {subapi_plugin} : {e}")
 
 
-def install_plugin(
-    plugin_url: str, logger: Logger, *, semaphore: Semaphore = SEMAPHORE
-):
+def install_plugin(plugin_url: str, logger: Logger, *, semaphore: Semaphore = SEMAPHORE):
     """Install a plugin from a url"""
     semaphore.acquire(timeout=30)
 
@@ -229,9 +200,7 @@ def install_plugin(
             with tar_open(fileobj=BytesIO(content), mode="r") as tar:
                 tar.extractall(path=temp_dir)
         else:
-            logger.error(
-                f"Unknown file type for {plugin_url}, either zip or tar are supported, skipping..."
-            )
+            logger.error(f"Unknown file type for {plugin_url}, either zip or tar are supported, skipping...")
             return
     except:
         logger.exception(
@@ -241,19 +210,13 @@ def install_plugin(
 
     # Install plugins
     try:
-        for plugin_dir in glob(
-            str(temp_dir.joinpath("**", "plugin.json")), recursive=True
-        ):
+        for plugin_dir in glob(str(temp_dir.joinpath("**", "plugin.json")), recursive=True):
             plugin_dir = Path(plugin_dir).parent
             try:
                 # Load plugin.json
-                metadata = loads(
-                    plugin_dir.joinpath("plugin.json").read_text(encoding="utf-8")
-                )
+                metadata = loads(plugin_dir.joinpath("plugin.json").read_text(encoding="utf-8"))
                 # Don't go further if plugin is already installed
-                if EXTERNAL_PLUGINS_PATH.joinpath(
-                    metadata["id"], "plugin.json"
-                ).is_file():
+                if EXTERNAL_PLUGINS_PATH.joinpath(metadata["id"], "plugin.json").is_file():
                     logger.warning(
                         f"Skipping installation of plugin {metadata['id']} (already installed)",
                     )
@@ -385,9 +348,7 @@ def generate_config(function: Optional[Callable] = None):
         )
 
         if proc.returncode != 0:
-            CORE_CONFIG.logger.error(
-                "Config generator failed, configuration will not work as expected..."
-            )
+            CORE_CONFIG.logger.error("Config generator failed, configuration will not work as expected...")
 
         if function:
             return function(*args, **kwargs)
@@ -414,9 +375,7 @@ def send_plugins_to_instances(api_caller: ApiCaller = None):
     generate_external_plugins(original_path=EXTERNAL_PLUGINS_PATH)
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
-    CORE_CONFIG.logger.info(
-        f"Sending {EXTERNAL_PLUGINS_PATH} folder to instances {instances_endpoints} ..."
-    )
+    CORE_CONFIG.logger.info(f"Sending {EXTERNAL_PLUGINS_PATH} folder to instances {instances_endpoints} ...")
     ret = api_caller.send_files(EXTERNAL_PLUGINS_PATH, "/plugins")
     if not ret:
         CORE_CONFIG.logger.error(
@@ -443,14 +402,10 @@ def send_config_to_instances(api_caller: ApiCaller = None):
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
     if not nginx_prefix.is_dir():
-        CORE_CONFIG.logger.error(
-            f"{nginx_prefix} is not a directory, configuration will not be sent to instances {instances_endpoints}"
-        )
+        CORE_CONFIG.logger.error(f"{nginx_prefix} is not a directory, configuration will not be sent to instances {instances_endpoints}")
         return 1
 
-    CORE_CONFIG.logger.info(
-        f"Sending {nginx_prefix} folder to instances {instances_endpoints} ..."
-    )
+    CORE_CONFIG.logger.info(f"Sending {nginx_prefix} folder to instances {instances_endpoints} ...")
     ret = api_caller.send_files(nginx_prefix, "/confs")
     if not ret:
         CORE_CONFIG.logger.error(
@@ -475,9 +430,7 @@ def send_custom_configs_to_instances(api_caller: ApiCaller = None):
     generate_custom_configs(original_path=CUSTOM_CONFIGS_PATH)
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
-    CORE_CONFIG.logger.info(
-        f"Sending {CUSTOM_CONFIGS_PATH} folder to instances {instances_endpoints} ..."
-    )
+    CORE_CONFIG.logger.info(f"Sending {CUSTOM_CONFIGS_PATH} folder to instances {instances_endpoints} ...")
     ret = api_caller.send_files(CUSTOM_CONFIGS_PATH, "/custom_configs")
     if not ret:
         CORE_CONFIG.logger.error(
@@ -501,9 +454,7 @@ def send_cache_to_instances(api_caller: ApiCaller = None):
 
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
-    CORE_CONFIG.logger.info(
-        f"Sending {CACHE_PATH} folder to instances {instances_endpoints} ..."
-    )
+    CORE_CONFIG.logger.info(f"Sending {CACHE_PATH} folder to instances {instances_endpoints} ...")
     ret = api_caller.send_files(CACHE_PATH, "/cache")
     if not ret:
         CORE_CONFIG.logger.error(
@@ -525,9 +476,7 @@ def reload_instances(api_caller: ApiCaller = None):
             ]
         )
 
-    CORE_CONFIG.logger.info(
-        f"Reloading instances {', '.join(api.endpoint for api in api_caller.apis)} ..."
-    )
+    CORE_CONFIG.logger.info(f"Reloading instances {', '.join(api.endpoint for api in api_caller.apis)} ...")
     ret = api_caller.send_to_apis("POST", "/reload")
     if not ret:
         CORE_CONFIG.logger.error(
@@ -583,9 +532,7 @@ def seen_instance(instance_hostname: str):
 
     error = DB.seen_instance(instance_hostname)
     if error:
-        CORE_CONFIG.logger.error(
-            f"Couldn't update instance {instance_hostname} last_seen to database: {error}"
-        )
+        CORE_CONFIG.logger.error(f"Couldn't update instance {instance_hostname} last_seen to database: {error}")
         return False
 
     SEMAPHORE.release()
@@ -615,9 +562,7 @@ def test_and_send_to_instances(
             ]
         )
 
-    for instance_api in (
-        instance_apis.copy() if isinstance(instance_apis, set) else instance_apis.apis
-    ):
+    for instance_api in instance_apis.copy() if isinstance(instance_apis, set) else instance_apis.apis:
         sent, err, status, resp = instance_api.request("GET", "ping")
         if not sent:
             CORE_CONFIG.logger.warning(
@@ -633,9 +578,7 @@ def test_and_send_to_instances(
                 instance_apis.remove(instance_api)
                 continue
             else:
-                CORE_CONFIG.logger.info(
-                    f"Successfully sent API request to {instance_api.endpoint}ping, sending data to it ..."
-                )
+                CORE_CONFIG.logger.info(f"Successfully sent API request to {instance_api.endpoint}ping, sending data to it ...")
 
         Thread(
             target=seen_instance,
@@ -643,11 +586,7 @@ def test_and_send_to_instances(
         ).start()
 
     if instance_apis if isinstance(instance_apis, set) else instance_apis.apis:
-        api_caller = (
-            instance_apis
-            if isinstance(instance_apis, ApiCaller)
-            else ApiCaller(instance_apis)
-        )
+        api_caller = instance_apis if isinstance(instance_apis, ApiCaller) else ApiCaller(instance_apis)
 
         return send_to_instances(types, caller=api_caller, no_reload=no_reload)
     return 0
@@ -664,9 +603,7 @@ def run_jobs():
             sent, err, status, resp = local_api.request(
                 "GET",
                 "/ping",
-                additonal_headers={"Authorization": f"Bearer {CORE_CONFIG.CORE_TOKEN}"}
-                if CORE_CONFIG.CORE_TOKEN
-                else {},
+                additonal_headers={"Authorization": f"Bearer {CORE_CONFIG.CORE_TOKEN}"} if CORE_CONFIG.CORE_TOKEN else {},
             )
             sleep(1)
 
@@ -686,9 +623,7 @@ def run_jobs():
         CORE_CONFIG.logger.info("All jobs in run_once() were successful")
 
     if test_and_send_to_instances({"cache"}) != 0:
-        CORE_CONFIG.logger.warning(
-            "Can't send data to BunkerWeb instances, configuration will not work as expected"
-        )
+        CORE_CONFIG.logger.warning("Can't send data to BunkerWeb instances, configuration will not work as expected")
 
     if not DB.is_scheduler_initialized():
         DB.set_scheduler_initialized()
@@ -709,6 +644,4 @@ def run_job(job_name: str):
 
     # TODO: remove this when the soft reload will be available
     if test_and_send_to_instances({"cache"}) != 0:
-        CORE_CONFIG.logger.warning(
-            "Can't send data to BunkerWeb instances, configuration will not work as expected"
-        )
+        CORE_CONFIG.logger.warning("Can't send data to BunkerWeb instances, configuration will not work as expected")

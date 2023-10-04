@@ -15,7 +15,7 @@ function do_and_check_cmd() {
     return 0
 }
 
-# Create the config.yaml file if it doesn't exist 
+# Create the config.yaml file if it doesn't exist
 if [ ! -f /etc/bunkerweb/config.yaml ]; then
     touch /etc/bunkerweb/config.yaml
 fi

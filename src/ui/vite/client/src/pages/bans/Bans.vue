@@ -22,21 +22,22 @@ const filters = reactive({
   dateMax: "",
 });
 
-
 const instances = reactive({
   isPend: false,
   isErr: false,
   data: [],
-  total : computed(() => {return instances.data.length}),
-  hostnames : computed(()=> {
-    if(instances.data.length === 0) return [];
+  total: computed(() => {
+    return instances.data.length;
+  }),
+  hostnames: computed(() => {
+    if (instances.data.length === 0) return [];
     const hosts = [];
-    instances.data.forEach(instance => {
-      hosts.push(instance['hostname'])
-    })
+    instances.data.forEach((instance) => {
+      hosts.push(instance["hostname"]);
+    });
     return hosts;
-  })
-})
+  }),
+});
 
 async function getInstances() {
   await fetchAPI(
@@ -44,69 +45,68 @@ async function getInstances() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
 const bans = reactive({
   isPend: false,
   isErr: false,
-  total : "",
-  reasonList: ['all'], // Based on reasons find on fetch
+  total: "",
+  reasonList: ["all"], // Based on reasons find on fetch
   hostnames: [], // Only hostnames with retrieve ip ban
-  setup: computed(()=> {
-    if(instances.hostnames.length === 0) return [];
-    // Fetch all instances bans    
+  setup: computed(() => {
+    if (instances.hostnames.length === 0) return [];
+    // Fetch all instances bans
     const promises = [];
     for (let i = 0; i < instances.hostnames.length; i++) {
       const hostname = instances.hostnames[i];
       promises.push(getHostBan(hostname));
     }
-    
+
     // When all promises fulfill, setup data
     let bansList = [];
     Promise.all(promises).then((instances) => {
       let count = 0;
       const instNum = instances.length;
       // Loop on instances
-      instances.forEach(fetchData => {
+      instances.forEach((fetchData) => {
         // Case didn't retrieve ip list
-        if(fetchData.type === 'error') return count++;;
+        if (fetchData.type === "error") return count++;
 
         const banIps = fetchData.data;
-      })
+      });
       // Case no instances data
-      if(count === instNum) return [];
+      if (count === instNum) return [];
 
       bansList = values;
-    })
+    });
     return bansList;
-  })
+  }),
 });
 
 async function getHostBan(hostname) {
   const data = {
     isPend: false,
     isErr: false,
-    data: []
-  }
+    data: [],
+  };
   return await fetchAPI(
     `/api/instances/${hostname}/bans`,
     "POST",
     null,
     data,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
-
 
 onMounted(async () => {
   await getInstances();
 });
 
 const tab = reactive({
-  current : 'list'
-})
+  current: "list",
+});
 </script>
 
 <template>
@@ -143,11 +143,7 @@ const tab = reactive({
       </SettingsLayout>
       <SettingsLayout class="sm:col-span-6" label="Select reason" name="reason">
         <SettingsSelect
-          @inp="
-            (v) =>
-              (filters.reason =
-                v === 'all' ? 'all' : v )
-          "
+          @inp="(v) => (filters.reason = v === 'all' ? 'all' : v)"
           :settings="{
             id: 'reason',
             value: 'all',
@@ -157,12 +153,12 @@ const tab = reactive({
       </SettingsLayout>
     </CardBase>
     <CardBase
-    class="max-w-[1100px] col-span-12 overflow-y-hidden min-h-[400px]"
-    label="ACTIONS"
+      class="max-w-[1100px] col-span-12 overflow-y-hidden min-h-[400px]"
+      label="ACTIONS"
     >
-      <BansTabs @tab="(v) => tab.current = v" />
-          <BansList :class="[tab.current === 'list' ? true : 'hidden']"  />
-          <BansAdd :class="[tab.current === 'add' ? true : 'hidden']"  />
+      <BansTabs @tab="(v) => (tab.current = v)" />
+      <BansList :class="[tab.current === 'list' ? true : 'hidden']" />
+      <BansAdd :class="[tab.current === 'add' ? true : 'hidden']" />
     </CardBase>
   </Dashboard>
 </template>

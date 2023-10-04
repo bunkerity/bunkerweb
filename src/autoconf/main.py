@@ -7,10 +7,7 @@ from sys import path as sys_path
 from pathlib import Path
 from time import sleep
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("api",), ("utils",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -35,13 +32,8 @@ def stop(status):
     _exit(status)
 
 
-if not isinstance(AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL, int) and (
-    not AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL.isdigit()
-    or int(AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL) < 1
-):
-    LOGGER.error(
-        f"Invalid WAIT_RETRY_INTERVAL provided: {AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
-    )
+if not isinstance(AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL, int) and (not AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL.isdigit() or int(AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL) < 1):
+    LOGGER.error(f"Invalid WAIT_RETRY_INTERVAL provided: {AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer.")
     stop(1)
 
 
@@ -74,9 +66,7 @@ try:
         sent, err, status, resp = CORE_API.request(
             "GET",
             "/ping",
-            additonal_headers={"Authorization": f"Bearer {AUTOCONF_CONFIG.CORE_TOKEN}"}
-            if AUTOCONF_CONFIG.CORE_TOKEN
-            else {},
+            additonal_headers={"Authorization": f"Bearer {AUTOCONF_CONFIG.CORE_TOKEN}"} if AUTOCONF_CONFIG.CORE_TOKEN else {},
             timeout=3,
         )
 
@@ -121,9 +111,7 @@ try:
         )
 
     # Wait for instances
-    LOGGER.info(
-        f"Waiting for BunkerWeb instances, retrying every {AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL} seconds..."
-    )
+    LOGGER.info(f"Waiting for BunkerWeb instances, retrying every {AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL} seconds...")
     instances = controller.wait(int(AUTOCONF_CONFIG.WAIT_RETRY_INTERVAL))
     LOGGER.info("BunkerWeb instances are ready 🚀")
     i = 1

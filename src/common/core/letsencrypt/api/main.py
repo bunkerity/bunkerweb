@@ -5,10 +5,7 @@ from typing import Annotated
 
 from fastapi.responses import JSONResponse
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("api",), ("utils",), ("db",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -17,7 +14,6 @@ from fastapi import FastAPI, Form, Request
 from API import API  # type: ignore
 from api_caller import ApiCaller  # type: ignore
 from database import Database  # type: ignore
-from logger import setup_logger  # type: ignore
 
 from app.core import CoreConfig  # type: ignore
 
@@ -62,9 +58,7 @@ async def middleware(request: Request, call_next):
 
 
 @app.post("/challenge")
-async def post_challenge(
-    token: Annotated[str, Form()], validation: Annotated[str, Form()]
-):
+async def post_challenge(token: Annotated[str, Form()], validation: Annotated[str, Form()]):
     _, resp = API_CALLER.send_to_apis(
         "POST",
         "/lets-encrypt/challenge",

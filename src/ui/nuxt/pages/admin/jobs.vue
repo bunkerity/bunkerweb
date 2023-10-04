@@ -69,7 +69,7 @@ async function downloadFile(data) {
     `/api/cache?job-name=${data["job-name"]}&file-name=${data["file-name"]}`,
     {
       method: "GET",
-    }
+    },
   );
 }
 

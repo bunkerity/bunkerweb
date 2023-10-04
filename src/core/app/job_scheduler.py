@@ -52,7 +52,13 @@ class JobScheduler:
         day_rx = r"(3[01]|[12][0-9]|[1-9])"
         month_rx = r"(1[0-2]|[1-9]|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
         week_day_rx = r"([0-6]|sun|mon|tue|wed|thu|fri|sat)"
-        cron_rx = r"^(?P<minute>(?!,)((^|,)(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?))+)\s(?P<hour>(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?)(,(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?))*)\s(?P<day>(\*(/\d+)?|{day_rx}(-{day_rx}|/\d+)?)(,(\*(/\d+)?|{day_rx}(-{day_rx}|/\d+)?))*)\s(?P<month>(\*(/\d+)?|{month_rx}(-{month_rx}|/\d+)?)(,(\*(/\d+)?|{month_rx}(-{month_rx}|/\d+)?))*)\s(?P<week_day>(\*(/\d+)?|{week_day_rx}(-{week_day_rx}|/\d+)?)(,(\*(/\d+)?|{week_day_rx}(-{week_day_rx}|/\d+)?))*)$".format(
+        cron_rx = (
+            r"^(?P<minute>(?!,)((^|,)(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?))+)\s"
+            + r"(?P<hour>(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?)(,(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?))*)\s"
+            + r"(?P<day>(\*(/\d+)?|{day_rx}(-{day_rx}|/\d+)?)(,(\*(/\d+)?|{day_rx}(-{day_rx}|/\d+)?))*)\s"
+            + r"(?P<month>(\*(/\d+)?|{month_rx}(-{month_rx}|/\d+)?)(,(\*(/\d+)?|{month_rx}(-{month_rx}|/\d+)?))*)\s"
+            + r"(?P<week_day>(\*(/\d+)?|{week_day_rx}(-{week_day_rx}|/\d+)?)(,(\*(/\d+)?|{week_day_rx}(-{week_day_rx}|/\d+)?))*)$"
+        ).format(
             minute_rx=minute_rx,
             day_rx=day_rx,
             month_rx=month_rx,
@@ -70,16 +76,12 @@ class JobScheduler:
 
     def __get_jobs(self):
         jobs = {}
-        for plugin_file in glob(
-            join(sep, "usr", "share", "bunkerweb", "core_plugins", "*", "plugin.json")
-        ) + glob(  # core plugins
-            join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")
-        ):  # external plugins
+        for plugin_file in glob(join(sep, "usr", "share", "bunkerweb", "core_plugins", "*", "plugin.json")) + glob(join(sep, "etc", "bunkerweb", "plugins", "*", "plugin.json")):  # core plugins  # external plugins
             plugin_name = basename(dirname(plugin_file))
             jobs[plugin_name] = []
             try:
                 plugin_data = loads(Path(plugin_file).read_text(encoding="utf-8"))
-                if not "jobs" in plugin_data:
+                if "jobs" not in plugin_data:
                     continue
 
                 plugin_jobs = plugin_data["jobs"]
@@ -94,34 +96,24 @@ class JobScheduler:
                             "reload",
                         )
                     ):
-                        self.__logger.warning(
-                            f"missing keys for job {job['name']} in plugin {plugin_name}, must have name, file, every and reload, ignoring job"
-                        )
+                        self.__logger.warning(f"missing keys for job {job['name']} in plugin {plugin_name}, must have name, file, every and reload, ignoring job")
                         plugin_jobs.pop(x)
                         continue
 
                     if not match(r"^[\w.-]{1,128}$", job["name"]):
-                        self.__logger.warning(
-                            f"Invalid name for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128)), ignoring job"
-                        )
+                        self.__logger.warning(f"Invalid name for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128)), ignoring job")
                         plugin_jobs.pop(x)
                         continue
                     elif not match(r"^[\w./-]{1,256}$", job["file"]):
-                        self.__logger.warning(
-                            f"Invalid file for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256)), ignoring job"
-                        )
+                        self.__logger.warning(f"Invalid file for job {job['name']} in plugin {plugin_name} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256)), ignoring job")
                         plugin_jobs.pop(x)
                         continue
                     elif job["every"] not in ("once", "minute", "hour", "day", "week"):
-                        self.__logger.warning(
-                            f"Invalid every for job {job['name']} in plugin {plugin_name} (Must be once, minute, hour, day or week), ignoring job"
-                        )
+                        self.__logger.warning(f"Invalid every for job {job['name']} in plugin {plugin_name} (Must be once, minute, hour, day or week), ignoring job")
                         plugin_jobs.pop(x)
                         continue
                     elif job["reload"] is not True and job["reload"] is not False:
-                        self.__logger.warning(
-                            f"Invalid reload for job {job['name']} in plugin {plugin_name} (Must be true or false), ignoring job"
-                        )
+                        self.__logger.warning(f"Invalid reload for job {job['name']} in plugin {plugin_name} (Must be true or false), ignoring job")
                         plugin_jobs.pop(x)
                         continue
 
@@ -166,9 +158,7 @@ class JobScheduler:
             ret = proc.returncode
         except BaseException:
             success = False
-            self.__logger.exception(
-                f"Exception while executing job {name} from plugin {plugin}"
-            )
+            self.__logger.exception(f"Exception while executing job {name} from plugin {plugin}")
             with self.__thread_lock:
                 self.__job_success = False
         end_date = time()
@@ -181,36 +171,24 @@ class JobScheduler:
             with self.__thread_lock:
                 self.__job_success = False
 
-        Thread(
-            target=self.__add_job_run, args=(name, success, start_date, end_date)
-        ).start()
+        Thread(target=self.__add_job_run, args=(name, success, start_date, end_date)).start()
 
         return ret
 
-    def __add_job_run(
-        self, job_name: str, success: bool, start_date: float, end_date: float
-    ):
+    def __add_job_run(self, job_name: str, success: bool, start_date: float, end_date: float):
         sent, err, status, resp = self.__api.request(
             "POST",
             f"/jobs/{job_name}/status",
             data={"success": success, "start_date": start_date, "end_date": end_date},
-            additonal_headers={
-                "Authorization": f"Bearer {self.__env.get('CORE_TOKEN')}"
-            }
-            if "CORE_TOKEN" in self.__env
-            else {},
+            additonal_headers={"Authorization": f"Bearer {self.__env.get('CORE_TOKEN')}"} if "CORE_TOKEN" in self.__env else {},
         )
 
         if not sent:
-            self.__logger.error(
-                f"Can't send API request to {self.__api.endpoint}jobs/{job_name}/run : {err}, the database will not be updated"
-            )
+            self.__logger.error(f"Can't send API request to {self.__api.endpoint}jobs/{job_name}/run : {err}, the database will not be updated")
         elif status == 503:
             retry_after = resp.headers.get("Retry-After", 1)
             retry_after = float(retry_after)
-            self.__logger.warning(
-                f"Can't send API request to {self.__api.endpoint}jobs/{job_name}/run : status = {status}, resp = {resp}, retrying in {retry_after} seconds"
-            )
+            self.__logger.warning(f"Can't send API request to {self.__api.endpoint}jobs/{job_name}/run : status = {status}, resp = {resp}, retrying in {retry_after} seconds")
             sleep(retry_after)
             Thread(
                 target=self.__add_job_run,
@@ -240,15 +218,11 @@ class JobScheduler:
                             CancelJob()  # Cancel the previous job
 
                             # Reschedule the job
-                            schedule_every(next_run - time.time()).seconds.do(
-                                job_wrapper
-                            )
+                            schedule_every(next_run - time.time()).seconds.do(job_wrapper)
 
                         schedule_every(next_run - time.time()).seconds.do(job_wrapper)
                     elif every != "once":
-                        self.__str_to_schedule(every).do(
-                            self.__job_wrapper, path, plugin, name, file
-                        )
+                        self.__str_to_schedule(every).do(self.__job_wrapper, path, plugin, name, file)
                 except:
                     self.__logger.exception(
                         f"Exception while scheduling jobs for plugin {plugin}",
@@ -269,9 +243,7 @@ class JobScheduler:
                 self.__logger.error(f"Job {job} has no job_func attribute, ignoring it")
                 continue
 
-            self.__logger.info(
-                f"Job {job.job_func.args[2]} from plugin {job.job_func.args[1]} should run, executing it ..."
-            )
+            self.__logger.info(f"Job {job.job_func.args[2]} from plugin {job.job_func.args[1]} should run, executing it ...")
             ret = job.run()
 
             if not isinstance(ret, int):
@@ -295,9 +267,7 @@ class JobScheduler:
                 file = job["file"]
 
                 # Add job to the list of jobs to run in the order they are defined
-                plugin_jobs.append(
-                    partial(self.__job_wrapper, path, plugin, name, file)
-                )
+                plugin_jobs.append(partial(self.__job_wrapper, path, plugin, name, file))
 
             # Create a thread for each plugin
             threads.append(Thread(target=self.__run_in_thread, args=(plugin_jobs,)))
@@ -328,9 +298,7 @@ class JobScheduler:
             if job.job_func.args[2] != job_name:
                 continue
 
-            self.__logger.info(
-                f"Running job {job.job_func.args[2]} from plugin {job.job_func.args[1]} ..."
-            )
+            self.__logger.info(f"Running job {job.job_func.args[2]} from plugin {job.job_func.args[1]} ...")
             ret = job.run()
 
             if not isinstance(ret, int):

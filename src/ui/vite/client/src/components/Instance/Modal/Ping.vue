@@ -40,7 +40,7 @@ const emits = defineEmits(["close"]);
               : props.isErr
               ? `Error while ${props.hostname}.`
               : !props.data
-              ? `Ping success but no additionnal data from ${props.hostname}.`
+              ? `Ping success but no additional data from ${props.hostname}.`
               : `Ping result for ${props.hostname} :`
           }}
         </p>

@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     "GET",
     false,
     resOK,
-    resErr
+    resErr,
   );
   if (conf.type === "error") return await conf;
 
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
       resOK["type"],
       resOK["status"],
       resOK["message"],
-      data
+      data,
     );
   } catch (err) {
     return resErr;

@@ -100,9 +100,9 @@ watch(
   () => path.current,
   () => {
     path.canCreateFile = config.find(
-      (item) => item.path === path.current
+      (item) => item.path === path.current,
     ).canCreateFile;
-  }
+  },
 );
 </script>
 

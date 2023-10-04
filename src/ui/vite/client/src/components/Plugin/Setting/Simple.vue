@@ -17,7 +17,7 @@ const props = defineProps({
 });
 
 const filterSettings = computed(() =>
-  getSettingsSimple(JSON.parse(JSON.stringify(props.settings)))
+  getSettingsSimple(JSON.parse(JSON.stringify(props.settings))),
 );
 </script>
 

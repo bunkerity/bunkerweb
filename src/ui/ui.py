@@ -4,10 +4,7 @@ from os.path import join, normpath
 from sys import path as sys_path
 from typing import Literal, Union
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("utils",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -21,9 +18,7 @@ class UiConfig(YamlBaseSettings):
     CORE_TOKEN: str = ""
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = "changeme"
-    LOG_LEVEL: Literal[
-        "error", "warn", "info", "debug", "ERROR", "WARN", "INFO", "DEBUG"
-    ] = "info"
+    LOG_LEVEL: Literal["error", "warn", "info", "debug", "ERROR", "WARN", "INFO", "DEBUG"] = "info"
     REVERSE_PROXY_IPS: Union[str, set] = {
         "192.168.0.0/16",
         "172.16.0.0/12",
@@ -38,26 +33,16 @@ class UiConfig(YamlBaseSettings):
     # 4. .env file
     # 5. Default values
     model_config = YamlSettingsConfigDict(
-        yaml_file=normpath(
-            getenv("SETTINGS_YAML_FILE", join(sep, "etc", "bunkerweb", "config.yaml"))
-        ),
-        env_file=normpath(
-            getenv("SETTINGS_ENV_FILE", join(sep, "etc", "bunkerweb", "ui.conf"))
-        ),
-        secrets_dir=normpath(
-            getenv("SETTINGS_SECRETS_DIR", join(sep, "run", "secrets"))
-        ),
+        yaml_file=normpath(getenv("SETTINGS_YAML_FILE", join(sep, "etc", "bunkerweb", "config.yaml"))),
+        env_file=normpath(getenv("SETTINGS_ENV_FILE", join(sep, "etc", "bunkerweb", "ui.conf"))),
+        secrets_dir=normpath(getenv("SETTINGS_SECRETS_DIR", join(sep, "run", "secrets"))),
         env_file_encoding="utf-8",
         extra="allow",
     )
 
     @cached_property
     def log_level(self) -> str:
-        return (
-            self.LOG_LEVEL.upper()
-            if self.LOG_LEVEL in ("error", "info", "debug")
-            else "WARNING"
-        )
+        return self.LOG_LEVEL.upper() if self.LOG_LEVEL in ("error", "info", "debug") else "WARNING"
 
     @cached_property
     def reverse_proxy_ips(self) -> str:
@@ -77,10 +62,7 @@ if __name__ == "__main__":
         UI_CONFIG.ADMIN_PASSWORD,
     ):
         _exit(1)
-    elif not isinstance(UI_CONFIG.LISTEN_PORT, int) and (
-        not UI_CONFIG.LISTEN_PORT.isdigit()
-        or not (1 <= int(UI_CONFIG.LISTEN_PORT) <= 65535)
-    ):
+    elif not isinstance(UI_CONFIG.LISTEN_PORT, int) and (not UI_CONFIG.LISTEN_PORT.isdigit() or not (1 <= int(UI_CONFIG.LISTEN_PORT) <= 65535)):
         _exit(2)
 
     data = {

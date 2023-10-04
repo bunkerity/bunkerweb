@@ -1,10 +1,13 @@
 #!/bin/bash
 
+# shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
 # trap SIGTERM and SIGINT
 function trap_exit() {
-	log "ENTRYPOINT" "ℹ️ " "Catched stop operation"
+	# shellcheck disable=SC2317
+	log "ENTRYPOINT" "ℹ️ " "Caught stop operation"
+	# shellcheck disable=SC2317
 	if [ -f "/var/run/bunkerweb/ui.pid" ] ; then
 		log "ENTRYPOINT" "ℹ️ " "Stopping UI ..."
 		kill -s TERM "$(cat /var/run/bunkerweb/ui.pid)"

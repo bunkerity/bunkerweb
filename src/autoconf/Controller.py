@@ -29,9 +29,7 @@ class Controller(Config):
         self._type = ctrl_type
         self._instances = []
         self._services = []
-        self._configs = {
-            config_type: {} for config_type in self._supported_config_types
-        }
+        self._configs = {config_type: {} for config_type in self._supported_config_types}
         self._logger = setup_logger(f"{self._type}-controller", log_level)
 
     def wait(self, wait_time: int) -> list:
@@ -102,7 +100,7 @@ class Controller(Config):
 
     def _is_service_present(self, server_name):
         for service in self._services:
-            if not "SERVER_NAME" in service or not service["SERVER_NAME"]:
+            if "SERVER_NAME" not in service or not service["SERVER_NAME"]:
                 continue
             if server_name == service["SERVER_NAME"].strip().split()[0]:
                 return True

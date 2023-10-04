@@ -64,17 +64,13 @@ class CLI(ApiCaller):
             if redis_host:
                 redis_port = self.__variables.get("REDIS_PORT", "6379")
                 if not redis_port.isdigit():
-                    self.__logger.error(
-                        f"REDIS_PORT is not a valid port number: {redis_port}, defaulting to 6379"
-                    )
+                    self.__logger.error(f"REDIS_PORT is not a valid port number: {redis_port}, defaulting to 6379")
                     redis_port = "6379"
                 redis_port = int(redis_port)
 
                 redis_db = self.__variables.get("REDIS_DB", "0")
                 if not redis_db.isdigit():
-                    self.__logger.error(
-                        f"REDIS_DB is not a valid database number: {redis_db}, defaulting to 0"
-                    )
+                    self.__logger.error(f"REDIS_DB is not a valid database number: {redis_db}, defaulting to 0")
                     redis_db = "0"
                 redis_db = int(redis_db)
 
@@ -83,18 +79,12 @@ class CLI(ApiCaller):
                     try:
                         redis_timeout = float(redis_timeout)
                     except ValueError:
-                        self.__logger.error(
-                            f"REDIS_TIMEOUT is not a valid timeout: {redis_timeout}, defaulting to 1000 ms"
-                        )
+                        self.__logger.error(f"REDIS_TIMEOUT is not a valid timeout: {redis_timeout}, defaulting to 1000 ms")
                         redis_timeout = 1000.0
 
-                redis_keepalive_pool = self.__variables.get(
-                    "REDIS_KEEPALIVE_POOL", "10"
-                )
+                redis_keepalive_pool = self.__variables.get("REDIS_KEEPALIVE_POOL", "10")
                 if not redis_keepalive_pool.isdigit():
-                    self.__logger.error(
-                        f"REDIS_KEEPALIVE_POOL is not a valid number of connections: {redis_keepalive_pool}, defaulting to 10"
-                    )
+                    self.__logger.error(f"REDIS_KEEPALIVE_POOL is not a valid number of connections: {redis_keepalive_pool}, defaulting to 10")
                     redis_keepalive_pool = "10"
                 redis_keepalive_pool = int(redis_keepalive_pool)
 
@@ -109,9 +99,7 @@ class CLI(ApiCaller):
                     ssl=self.__variables.get("REDIS_SSL", "no") == "yes",
                 )
             else:
-                self.__logger.error(
-                    "USE_REDIS is set to yes but REDIS_HOST is not set, disabling redis"
-                )
+                self.__logger.error("USE_REDIS is set to yes but REDIS_HOST is not set, disabling redis")
                 self.__use_redis = False
 
         if not db_path.is_dir() or self.__integration not in (
@@ -143,9 +131,7 @@ class CLI(ApiCaller):
             return "autoconf"
         elif integration_path.is_file():
             return integration_path.read_text(encoding="utf-8").strip().lower()
-        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
-            encoding="utf-8"
-        ):
+        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
             return "docker"
 
         return "linux"

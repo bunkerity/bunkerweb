@@ -17,7 +17,7 @@ const props = defineProps({
 });
 
 // Allow to access tab name from parent
-// In order to set additionnal logic
+// In order to set additional logic
 // Like displaying content matching current tabName active
 const emits = defineEmits(["tabName"]);
 </script>

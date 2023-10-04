@@ -9,10 +9,7 @@ from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Tuple
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (("deps", "python"), ("api",), ("utils",))
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -71,10 +68,7 @@ try:
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
         for first_server in getenv("SERVER_NAME", "").split():
-            if (
-                getenv(f"{first_server}_USE_BLACKLIST", getenv("USE_BLACKLIST", "yes"))
-                == "yes"
-            ):
+            if getenv(f"{first_server}_USE_BLACKLIST", getenv("USE_BLACKLIST", "yes")) == "yes":
                 blacklist_activated = True
                 break
     # Singlesite case
@@ -132,7 +126,7 @@ try:
             if not urls[kind]:
                 deleted, err = del_cache(f"{kind}.list", CORE_API, CORE_TOKEN)
                 if not deleted:
-                    LOGGER.warning(f"Coudn't delete {kind}.list from cache : {err}")
+                    LOGGER.warning(f"Couldn't delete {kind}.list from cache : {err}")
     if all_fresh:
         _exit(0)
 
@@ -151,9 +145,7 @@ try:
                     resp = get(url, stream=True, timeout=10)
 
                     if resp.status_code != 200:
-                        LOGGER.warning(
-                            f"Got status code {resp.status_code}, skipping..."
-                        )
+                        LOGGER.warning(f"Got status code {resp.status_code}, skipping...")
                         continue
 
                     iterable = resp.iter_lines()
@@ -183,9 +175,7 @@ try:
                         f"New file {kind}.list is identical to cache file, reload is not needed",
                     )
                     # Update file info in cache
-                    cached, err = update_cache_file_info(
-                        f"{kind}.list", CORE_API, CORE_TOKEN
-                    )
+                    cached, err = update_cache_file_info(f"{kind}.list", CORE_API, CORE_TOKEN)
                     if not cached:
                         LOGGER.error(f"Error while updating cache info : {err}")
                         _exit(2)
@@ -194,9 +184,7 @@ try:
                         f"New file {kind}.list is different than cache file, reload is needed",
                     )
                     # Put file in cache
-                    cached, err = cache_file(
-                        f"{kind}.list", content, CORE_API, CORE_TOKEN, checksum=new_hash
-                    )
+                    cached, err = cache_file(f"{kind}.list", content, CORE_API, CORE_TOKEN, checksum=new_hash)
 
                     if not cached:
                         LOGGER.error(f"Error while caching blacklist : {err}")
@@ -205,9 +193,7 @@ try:
                         status = 1
             except:
                 status = 2
-                LOGGER.error(
-                    f"Exception while getting blacklist from {url} :\n{format_exc()}"
-                )
+                LOGGER.error(f"Exception while getting blacklist from {url} :\n{format_exc()}")
 
 except:
     status = 2

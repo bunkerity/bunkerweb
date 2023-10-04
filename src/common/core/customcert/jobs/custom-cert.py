@@ -28,22 +28,20 @@ CORE_API = API(getenv("API_ADDR", ""), "job-custom-cert")
 CORE_TOKEN = getenv("CORE_TOKEN", None)
 
 
-def check_cert(
-    cert_path: str, key_path: str, first_server: Optional[str] = None
-) -> bool:
+def check_cert(cert_path: str, key_path: str, first_server: Optional[str] = None) -> bool:
     try:
+        if not cert_path or not key_path:
+            LOGGER.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates")
+            return False
+
         cert_path: Path = Path(cert_path)
         key_path: Path = Path(key_path)
 
         if not cert_path.is_file():
-            LOGGER.warning(
-                f"Certificate file {cert_path} is not a valid file, ignoring the custom certificate"
-            )
+            LOGGER.warning(f"Certificate file {cert_path} is not a valid file, ignoring the custom certificate")
             return False
         elif not key_path.is_file():
-            LOGGER.warning(
-                f"Key file {key_path} is not a valid file, ignoring the custom certificate"
-            )
+            LOGGER.warning(f"Key file {key_path} is not a valid file, ignoring the custom certificate")
             return False
 
         cert_hash = file_hash(cert_path)
@@ -100,9 +98,7 @@ try:
             else:
                 LOGGER.info(f"No change for certificate {cert_path}")
         else:
-            LOGGER.warning(
-                "Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates"
-            )
+            LOGGER.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates")
 
     if getenv("MULTISITE", "no") == "yes":
         servers = getenv("SERVER_NAME") or []
@@ -111,10 +107,7 @@ try:
             servers = servers.split()
 
         for first_server in servers:
-            if not first_server or (
-                getenv(f"{first_server}_USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no"))
-                != "yes"
-            ):
+            if not first_server or (getenv(f"{first_server}_USE_CUSTOM_SSL", getenv("USE_CUSTOM_SSL", "no")) != "yes"):
                 continue
 
             cert_path = getenv(f"{first_server}_CUSTOM_SSL_CERT", "")
@@ -135,9 +128,7 @@ try:
                         f"No change for certificate {cert_path}",
                     )
             else:
-                LOGGER.warning(
-                    f"Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates with service {first_server}"
-                )
+                LOGGER.warning(f"Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates with service {first_server}")
 except:
     status = 2
     LOGGER.error(f"Exception while running custom-cert.py :\n{format_exc()}")

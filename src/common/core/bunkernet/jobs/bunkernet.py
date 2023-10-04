@@ -6,9 +6,7 @@ from requests import request as requests_request, ReadTimeout
 from typing import Literal, Optional, Tuple, Union
 
 
-def request(
-    method: Union[Literal["POST"], Literal["GET"]], url: str, _id: Optional[str] = None
-) -> Tuple[bool, Optional[int], Union[str, dict]]:
+def request(method: Union[Literal["POST"], Literal["GET"]], url: str, _id: Optional[str] = None) -> Tuple[bool, Optional[int], Union[str, dict]]:
     data = {"integration": get_integration(), "version": get_version()}
     headers = {"User-Agent": f"BunkerWeb/{get_version()}"}
     if _id is not None:
@@ -51,11 +49,7 @@ def data(_id: Optional[str]) -> Tuple[bool, Optional[int], Union[str, dict]]:
 
 
 def get_version() -> str:
-    return (
-        Path(sep, "usr", "share", "bunkerweb", "VERSION")
-        .read_text(encoding="utf-8")
-        .strip()
-    )
+    return Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encoding="utf-8").strip()
 
 
 def get_integration() -> str:
@@ -70,9 +64,7 @@ def get_integration() -> str:
             return "autoconf"
         elif integration_path.is_file():
             return integration_path.read_text(encoding="utf-8").strip().lower()
-        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(
-            encoding="utf-8"
-        ):
+        elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
             return "docker"
 
         return "linux"

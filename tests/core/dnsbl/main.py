@@ -11,9 +11,7 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get(
-                "http://www.example.com", headers={"Host": "www.example.com"}, timeout=3
-            ).status_code
+            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}, timeout=3).status_code
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
@@ -26,9 +24,7 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     use_dnsbl = getenv("USE_DNSBL", "yes") == "yes"
@@ -43,24 +39,14 @@ try:
     retries = 0
 
     while not passed and retries < 10:
-        status_code = get(
-            f"http://www.example.com",
-            headers={"Host": "www.example.com"}
-            | (
-                {"X-Forwarded-For": getenv("IP_ADDRESS", "")}
-                if TEST_TYPE == "linux"
-                else {}
-            ),
-        ).status_code
+        status_code = get("http://www.example.com", headers={"Host": "www.example.com"} | ({"X-Forwarded-For": getenv("IP_ADDRESS", "")} if TEST_TYPE == "linux" else {})).status_code
 
         if status_code == 403:
             if not use_dnsbl:
                 print("❌ The request was rejected, but DNSBL is disabled, exiting ...")
                 exit(1)
             elif not dnsbl_list:
-                print(
-                    "❌ The request was rejected, but DNSBL list is empty, exiting ..."
-                )
+                print("❌ The request was rejected, but DNSBL list is empty, exiting ...")
                 exit(1)
         elif use_dnsbl and dnsbl_list:
             if retries <= 10:
@@ -80,9 +66,7 @@ try:
                     sleep(5)
                     continue
 
-            print(
-                f'❌ The request was not rejected, but DNSBL list is equal to "{dnsbl_list}", exiting ...'
-            )
+            print(f'❌ The request was not rejected, but DNSBL list is equal to "{dnsbl_list}", exiting ...')
             exit(1)
 
         passed = True

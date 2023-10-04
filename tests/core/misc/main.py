@@ -20,14 +20,7 @@ try:
     )
 
     try:
-        response = head(
-            "http://"
-            + (
-                "192.168.0.2"
-                if getenv("TEST_TYPE", "docker") == "docker"
-                else "127.0.0.1"
-            )
-        )
+        response = head("http://" + ("192.168.0.2" if getenv("TEST_TYPE", "docker") == "docker" else "127.0.0.1"))
 
         if response.status_code != 403 and disabled_default_server:
             print(
@@ -68,9 +61,7 @@ try:
             if deny_http_status == "403" or not disabled_default_server:
                 raise e
 
-            print(
-                "✅ Request got rejected with the expected deny_http_status", flush=True
-            )
+            print("✅ Request got rejected with the expected deny_http_status", flush=True)
             exit(0)
         else:
             print(
@@ -83,10 +74,7 @@ try:
 
         ssl_protocols = getenv("SSL_PROTOCOLS", "TLSv1.2 TLSv1.3")
 
-        print(
-            f"ℹ️ Creating a socket and wrapping it with SSL an SSL context to test SSL_PROTOCOLS",
-            flush=True,
-        )
+        print("ℹ️ Creating a socket and wrapping it with SSL an SSL context to test SSL_PROTOCOLS", flush=True)
 
         sock = create_connection(("www.example.com", 443))
         ssl_context = create_default_context()
@@ -106,10 +94,7 @@ try:
         if not listen_http:
             exit(0)
     else:
-        print(
-            f"ℹ️ Skipping SSL_PROTOCOLS test as SSL is disabled",
-            flush=True,
-        )
+        print("ℹ️ Skipping SSL_PROTOCOLS test as SSL is disabled", flush=True)
 
     sleep(1)
 
@@ -132,9 +117,7 @@ try:
         if response.status_code not in (404, 301):
             response.raise_for_status()
 
-        if (
-            redirect_http_to_https or (auto_redirect_http_to_https and ssl_generated)
-        ) and response.status_code != 301:
+        if (redirect_http_to_https or (auto_redirect_http_to_https and ssl_generated)) and response.status_code != 301:
             print(
                 f"❌ Request didn't get redirected, even if {'auto ' if auto_redirect_http_to_https else ''}redirect_http_to_https is enabled, exiting ...",
                 flush=True,
@@ -277,27 +260,16 @@ try:
         check=True,
     )
 
-    status_code, http_version = (
-        proc.stdout.splitlines()[-1].replace("'", "").strip().split()
-    )
+    status_code, http_version = proc.stdout.splitlines()[-1].replace("'", "").strip().split(" ")
 
     if status_code not in ("200", "404"):
-        print(
-            f"❌ Request didn't get accepted, exiting ...",
-            flush=True,
-        )
+        print("❌ Request didn't get accepted, exiting ...", flush=True)
         exit(1)
     elif ssl_generated and http2 and http_version != "2":
-        print(
-            f"❌ Request didn't get accepted with HTTP/2, exiting ...",
-            flush=True,
-        )
+        print("❌ Request didn't get accepted with HTTP/2, exiting ...", flush=True)
         exit(1)
     elif (not ssl_generated or not http2) and http_version != "1.1":
-        print(
-            f"❌ Request got accepted with HTTP/2, it shouldn't have, exiting ...",
-            flush=True,
-        )
+        print("❌ Request got accepted with HTTP/2, it shouldn't have, exiting ...", flush=True)
         exit(1)
 
     print(f"✅ Request got accepted with HTTP/{http_version}", flush=True)

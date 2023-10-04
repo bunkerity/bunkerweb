@@ -17,7 +17,7 @@ const {
     feedbackStore.addFeedback(
       response._data.type,
       response._data.status,
-      response._data.message
+      response._data.message,
     );
   },
 });

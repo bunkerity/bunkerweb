@@ -4,9 +4,9 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==2.6.0 \
-    --hash=sha256:261e8655034f3afe099e68a9c5061304f5ba0c1625ec1b8288fc228315bacbdf \
-    --hash=sha256:607360db73e458150ab63825a82b220bdf04badbd81c6d3218e5d993c6be491c
+acme==2.7.0 \
+    --hash=sha256:7aeaf0886322ca5569bc532828086ff2a7fc5b66a29a0a5d3270363d448af228 \
+    --hash=sha256:fabdcb97801dfd3bc23ac7ca7175f2d98e4192b62297a6efd6e6718423653ac3
     # via certbot
 annotated-types==0.5.0 \
     --hash=sha256:47cdc3490d9ac1506ce92c7aaa76c579dc3509ff11e098fc867e5130ab7be802 \
@@ -71,9 +71,9 @@ brotlipy==0.7.0 \
     --hash=sha256:e5c549ae5928dda952463196180445c24d6fad2d73cb13bd118293aced31b771 \
     --hash=sha256:fd1d1c64214af5d90014d82cee5d8141b13d44c92ada7a0c0ec0679c6f15a471
     # via -r requirements.in
-certbot==2.6.0 \
-    --hash=sha256:6513b9fb3d266f1fa3803a1713eb7e415bbc250b624c834e02cb71086b26d800 \
-    --hash=sha256:c4de6bb0d092729650ed90a5bdb513932bdc47ec5f7f98049180ab8e4a835dab
+certbot==2.7.0 \
+    --hash=sha256:274329918656db82fb314e2ecb12a9b276a1df820e28e36e8ecca8c3a0563c1c \
+    --hash=sha256:892d25d1016aa6da4f947b40f46a02efa9ba77f8811e0b22e9db046aae05e518
     # via -r requirements.in
 certifi==2023.7.22 \
     --hash=sha256:539cc1d13202e33ca466e88b2807e29f4c13049d6d87031a3c110744495cb082 \
@@ -335,6 +335,10 @@ idna==3.4 \
     # via
     #   anyio
     #   requests
+importlib-metadata==6.8.0 \
+    --hash=sha256:3ebb78df84a805d7698245025b975d9d67053cd94c79245ba4b3eb694abe68bb \
+    --hash=sha256:dbace7892d8c0c4ac1ad096662232f831d4e64f4c4545bd53016a3e9d4654743
+    # via certbot
 josepy==1.13.0 \
     --hash=sha256:6f64eb35186aaa1776b7a1768651b1c616cab7f9685f9660bffc6491074a5390 \
     --hash=sha256:8931daf38f8a4c85274a0e8b7cb25addfd8d1f28f9fb8fbed053dd51aec75dc9
@@ -668,6 +672,12 @@ requests==2.31.0 \
 schedule==1.2.1 \
     --hash=sha256:14cdeb083a596aa1de6dc77639a1b2ac8bf6eaafa82b1c9279d3612823063d01 \
     --hash=sha256:843bc0538b99c93f02b8b50e3e39886c06f2d003b24f48e1aa4cadfa3f341279
+    # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+setuptools==68.2.2 \
+    --hash=sha256:4ac1475276d2f1c48684874089fefcd83bd7162ddaafb81fac866ba0db282a87 \
+    --hash=sha256:b454a35605876da60632df1a60f736524eb73cc47bbc9f3f1ef1b644de74fd2a
     # via -r requirements.in
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
@@ -692,9 +702,9 @@ typing-extensions==4.8.0 \
     #   pydantic-core
     #   starlette
     #   uvicorn
-urllib3==2.0.5 \
-    --hash=sha256:13abf37382ea2ce6fb744d4dad67838eec857c9f4f57009891805e0b5e123594 \
-    --hash=sha256:ef16afa8ba34a1f989db38e1dbbe0c302e4289a47856990d0682e374563ce35e
+urllib3==2.0.6 \
+    --hash=sha256:7a7c7003b000adf9e7ca2a377c9688bbc54ed41b985789ed576570342a375cd2 \
+    --hash=sha256:b19e1a85d206b56d7df1d5e683df4a7725252a964e3993648dd0fb5a1c157564
     # via requests
 uvicorn==0.23.2 \
     --hash=sha256:1f9be6558f01239d4fdf22ef8126c39cb1ad0addf76c40e760549d2c2f43ab53 \
@@ -828,11 +838,9 @@ websockets==11.0.3 \
     --hash=sha256:fb06eea71a00a7af0ae6aefbb932fb8a7df3cb390cc217d51a9ad7343de1b8d0 \
     --hash=sha256:ffd7dcaf744f25f82190856bc26ed81721508fc5cbf2a330751e135ff1283564
     # via uvicorn
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==68.2.2 \
-    --hash=sha256:4ac1475276d2f1c48684874089fefcd83bd7162ddaafb81fac866ba0db282a87 \
-    --hash=sha256:b454a35605876da60632df1a60f736524eb73cc47bbc9f3f1ef1b644de74fd2a
+zipp==3.17.0 \
+    --hash=sha256:0e923e726174922dce09c53c59ad483ff7bbb8e572e00c7f7c46b88556409f31 \
+    --hash=sha256:84e64a1c28cf7e91ed2078bb8cc8c259cb19b76942096c8d7b84947690cabaf0
     # via
     #   acme
     #   certbot

@@ -15,7 +15,7 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  // Additionnal styles
+  // Additional styles
   first: {
     type: Boolean,
     required: false,

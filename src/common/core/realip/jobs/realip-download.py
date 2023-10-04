@@ -4,7 +4,6 @@ from contextlib import suppress
 from ipaddress import ip_address, ip_network
 from os import _exit, getenv, sep
 from os.path import join, normpath
-from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
@@ -61,10 +60,7 @@ try:
             servers = servers.split()
 
         for first_server in servers:
-            if (
-                getenv(f"{first_server}_USE_REAL_IP", getenv("USE_REAL_IP", "no"))
-                == "yes"
-            ):
+            if getenv(f"{first_server}_USE_REAL_IP", getenv("USE_REAL_IP", "no")) == "yes":
                 realip_activated = True
                 break
 
@@ -84,7 +80,7 @@ try:
         if not urls:
             deleted, err = del_cache("combined.list", CORE_API, CORE_TOKEN)
             if not deleted:
-                LOGGER.warning(f"Coudn't delete combined.list from cache : {err}")
+                LOGGER.warning(f"Couldn't delete combined.list from cache : {err}")
         LOGGER.info("RealIP list is already in cache, skipping download...")
         _exit(0)
 
@@ -121,9 +117,7 @@ try:
                     i += 1
         except:
             status = 2
-            LOGGER.error(
-                f"Exception while getting RealIP list from {url} :\n{format_exc()}"
-            )
+            LOGGER.error(f"Exception while getting RealIP list from {url} :\n{format_exc()}")
 
     # Check if file has changed
     new_hash = bytes_hash(content)

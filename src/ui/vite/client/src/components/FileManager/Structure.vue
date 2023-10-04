@@ -48,7 +48,7 @@ function updateModal(type, action, path, value) {
 
 // Fire when current path changed
 // Get item that match current path to check values using config variable
-// Allow to know if can crate folder or file whatever component changing path (bread or folder click)
+// Allow to know if can create folder or file whatever component changing path (bread or folder click)
 watch(path, () => {
   props.config.forEach((item) => {
     if (path.current === item.path) {
@@ -69,7 +69,7 @@ async function updateConfig(data) {
     "PUT",
     data,
     updateConfigs,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -85,7 +85,7 @@ async function createConfig(data) {
     "POST",
     data,
     createConfigs,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -101,7 +101,7 @@ async function deleteConfig(data) {
     "DELETE",
     data,
     deleteConfigs,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 

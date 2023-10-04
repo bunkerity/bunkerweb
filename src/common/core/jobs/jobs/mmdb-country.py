@@ -51,9 +51,7 @@ try:
         with lock:
             response = None
             try:
-                response = get(
-                    "https://db-ip.com/db/download/ip-to-country-lite", timeout=5
-                )
+                response = get("https://db-ip.com/db/download/ip-to-country-lite", timeout=5)
             except RequestException:
                 LOGGER.warning("Unable to check if country.mmdb is the latest version")
 
@@ -67,14 +65,10 @@ try:
                     _sha1.update(data)
 
             if response.content.decode().find(_sha1.hexdigest()) != -1:
-                LOGGER.info(
-                    "country.mmdb is already the latest version, skipping download..."
-                )
+                LOGGER.info("country.mmdb is already the latest version, skipping download...")
                 dl_mmdb = False
         else:
-            LOGGER.warning(
-                "Unable to check if country.mmdb is the latest version, downloading it anyway..."
-            )
+            LOGGER.warning("Unable to check if country.mmdb is the latest version, downloading it anyway...")
 
     if dl_mmdb:
         # Compute the mmdb URL
@@ -118,9 +112,7 @@ try:
 
     # Move it to cache folder
     LOGGER.info("Moving mmdb file to cache ...")
-    cached, err = cache_file(
-        "country.mmdb", tmp_path, CORE_API, CORE_TOKEN, checksum=new_hash
-    )
+    cached, err = cache_file("country.mmdb", tmp_path, CORE_API, CORE_TOKEN, checksum=new_hash)
     if not cached:
         LOGGER.error(f"Error while caching mmdb file : {err}")
         _exit(2)

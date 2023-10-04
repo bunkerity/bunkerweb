@@ -31,14 +31,7 @@ async def get_instances():
     for instance in tmp_instances:
         last_seen = instance.pop("last_seen")
         data = instance.copy()
-        data["status"] = (
-            "up"
-            if last_seen
-            and last_seen
-            >= datetime.now()
-            - timedelta(seconds=int(CORE_CONFIG.HEALTHCHECK_INTERVAL) * 2)
-            else "down"
-        )
+        data["status"] = "up" if last_seen and last_seen >= datetime.now() - timedelta(seconds=int(CORE_CONFIG.HEALTHCHECK_INTERVAL) * 2) else "down"
         instances.append(data)
     return instances
 
@@ -80,14 +73,10 @@ async def upsert_instance(
 
         if "database is locked" in resp or "file is not a database" in resp:
             retry_in = str(uniform(1.0, 5.0))
-            CORE_CONFIG.logger.warning(
-                f"Can't upsert instance to database : {resp}, retry in {retry_in} seconds"
-            )
+            CORE_CONFIG.logger.warning(f"Can't upsert instance to database : {resp}, retry in {retry_in} seconds")
             return JSONResponse(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                content={
-                    "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-                },
+                content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
                 headers={"Retry-After": retry_in},
             )
         elif resp not in ("created", "updated"):
@@ -99,20 +88,14 @@ async def upsert_instance(
 
         decisions[resp].append(instances)
     else:
-        resp = DB.refresh_instances(
-            [instance.model_dump() for instance in instances], method=method
-        )
+        resp = DB.refresh_instances([instance.model_dump() for instance in instances], method=method)
 
         if "database is locked" in resp or "file is not a database" in resp:
             retry_in = str(uniform(1.0, 5.0))
-            CORE_CONFIG.logger.warning(
-                f"Can't upsert instances to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-            )
+            CORE_CONFIG.logger.warning(f"Can't upsert instances to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
             return JSONResponse(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                content={
-                    "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-                },
+                content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
                 headers={"Retry-After": retry_in},
             )
         elif resp:
@@ -144,14 +127,12 @@ async def upsert_instance(
 
     if decisions["updated"]:
         CORE_CONFIG.logger.info(
-            f"Skipping sending data to instance{'s' if len(decisions) > 1 else ''} : {', '.join(instance.hostname for instance in decisions['updated'])}, as {'all' if len(decisions) > 1 else 'this'} instance{'s' if len(decisions) > 1 else ''} was/were already in the database"
+            f"Skipping sending data to instance{'s' if len(decisions) > 1 else ''} : {', '.join(instance.hostname for instance in decisions['updated'])}, as {'all' if len(decisions) > 1 else 'this'}"
+            + f" instance{'s' if len(decisions) > 1 else ''} was/were already in the database"
         )
 
     return JSONResponse(
-        status_code=status_code
-        or (
-            status.HTTP_201_CREATED if not decisions["updated"] else status.HTTP_200_OK
-        ),
+        status_code=status_code or (status.HTTP_201_CREATED if not decisions["updated"] else status.HTTP_200_OK),
         content={"message": message},
     )
 
@@ -171,9 +152,7 @@ async def upsert_instance(
 async def get_instance(
     instance_hostname: Annotated[
         str,
-        fastapi_Path(
-            title="The hostname of the instance", min_length=1, max_length=256
-        ),
+        fastapi_Path(title="The hostname of the instance", min_length=1, max_length=256),
     ]
 ):
     """
@@ -188,9 +167,7 @@ async def get_instance(
     if not db_instance:
         message = f"Instance {instance_hostname} not found"
         CORE_CONFIG.logger.warning(message)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
-        )
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
 
     return db_instance
 
@@ -224,19 +201,13 @@ async def delete_instance(instance_hostname: str) -> JSONResponse:
     if resp == "not_found":
         message = f"Instance {instance_hostname} not found"
         CORE_CONFIG.logger.warning(message)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
-        )
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif "database is locked" in resp or "file is not a database" in resp:
         retry_in = str(uniform(1.0, 5.0))
-        CORE_CONFIG.logger.warning(
-            f"Can't remove instance to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-        )
+        CORE_CONFIG.logger.warning(f"Can't remove instance to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-            },
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
             headers={"Retry-After": retry_in},
         )
     elif resp:
@@ -246,9 +217,7 @@ async def delete_instance(instance_hostname: str) -> JSONResponse:
             content={"message": resp},
         )
 
-    CORE_CONFIG.logger.info(
-        f"✅ Instance {instance_hostname} successfully removed from database"
-    )
+    CORE_CONFIG.logger.info(f"✅ Instance {instance_hostname} successfully removed from database")
 
     return JSONResponse(
         content={"message": "Instance successfully removed"},
@@ -287,18 +256,14 @@ async def send_instance_action(
     if not db_instance:
         message = f"Instance {instance_hostname} not found"
         CORE_CONFIG.logger.warning(message)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
-        )
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
 
     instance_api = API(
         f"http://{db_instance['hostname']}:{db_instance['port']}",
         db_instance["server_name"],
     )
 
-    sent, err, status_code, resp = instance_api.request(
-        "GET" if action in ("ping", "bans") else "POST", f"/{action}", timeout=(5, 10)
-    )
+    sent, err, status_code, resp = instance_api.request("GET" if action in ("ping", "bans") else "POST", f"/{action}", timeout=(5, 10))
 
     if not sent:
         error = f"Can't send API request to {instance_api.endpoint}{action} : {err}"
@@ -314,8 +279,6 @@ async def send_instance_action(
             CORE_CONFIG.logger.error(error)
             return JSONResponse(status_code=status_code, content={"message": error})
 
-    CORE_CONFIG.logger.info(
-        f"Successfully sent API request to {instance_api.endpoint}{action}"
-    )
+    CORE_CONFIG.logger.info(f"Successfully sent API request to {instance_api.endpoint}{action}")
 
     return JSONResponse(content={"message": resp.json()})

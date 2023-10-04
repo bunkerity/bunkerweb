@@ -49,8 +49,7 @@ class API:
                 method,
                 f"{self.__endpoint}{url if not url.startswith('/') else url[1:]}",
                 timeout=timeout,
-                headers={"User-Agent": "bwapi", "Host": self.__host}
-                | additonal_headers,
+                headers={"User-Agent": "bwapi", "Host": self.__host} | additonal_headers,
                 **kwargs,
             )
         except Exception as e:

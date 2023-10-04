@@ -54,8 +54,7 @@ def renew(domain: str, letsencrypt_path: Path) -> int:
         ],
         stdin=DEVNULL,
         stderr=STDOUT,
-        env=environ.copy()
-        | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
+        env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
         check=False,
     ).returncode
 
@@ -71,11 +70,8 @@ try:
     if getenv("AUTO_LETS_ENCRYPT", "no") == "yes":
         use_letsencrypt = True
     elif getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "").split():
-            if (
-                first_server
-                and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes"
-            ):
+        for first_server in getenv("SERVER_NAME", "").split(" "):
+            if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes":
                 use_letsencrypt = True
                 break
 
@@ -86,9 +82,7 @@ try:
     # Create directory if it doesn't exist
     letsencrypt_path = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
     letsencrypt_path.mkdir(parents=True, exist_ok=True)
-    Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(
-        parents=True, exist_ok=True
-    )
+    Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(parents=True, exist_ok=True)
 
     tgz = get_cache("folder.tgz", CORE_API, CORE_TOKEN)
     if tgz:
@@ -117,9 +111,7 @@ try:
                     getenv("AUTO_LETS_ENCRYPT", "no"),
                 )
                 != "yes"
-                or not letsencrypt_path.joinpath(
-                    "etc", "live", first_server, "cert.pem"
-                ).exists()
+                or not letsencrypt_path.joinpath("etc", "live", first_server, "cert.pem").exists()
             ):
                 continue
 

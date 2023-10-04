@@ -33,7 +33,7 @@ async function getInstances() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -49,7 +49,7 @@ async function actionInstance(data) {
       "POST",
       null,
       ping,
-      feedbackStore.addFeedback
+      feedbackStore.addFeedback,
     );
     return;
   }
@@ -59,7 +59,7 @@ async function actionInstance(data) {
     "POST",
     null,
     instances,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
   await getInstances();
 }
@@ -76,7 +76,7 @@ async function deleteInstance(data) {
     "DELETE",
     JSON.stringify(data),
     instances,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
   await getInstances();
 }

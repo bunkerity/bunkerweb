@@ -14,9 +14,7 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get(
-                "http://www.example.com", headers={"Host": "www.example.com"}
-            ).status_code
+            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
@@ -29,9 +27,7 @@ try:
             exit(1)
         elif not ready:
             retries += 1
-            print(
-                "⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True
-            )
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
 
     firefox_options = Options()
@@ -78,10 +74,8 @@ try:
                     "✅ Auth-basic is enabled and working in the expected location ...",
                 )
         else:
-            print(f"ℹ️ Trying to access http://www.example.com ...", flush=True)
-            status_code = get(
-                "http://www.example.com", headers={"Host": "www.example.com"}
-            ).status_code
+            print("ℹ️ Trying to access http://www.example.com ...", flush=True)
+            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
 
             if status_code != 401:
                 print("❌ The page is accessible without auth-basic ...", flush=True)
@@ -93,9 +87,7 @@ try:
                 f"ℹ️ Trying to access http://{auth_basic_username}:{auth_basic_password}@www.example.com ...",
                 flush=True,
             )
-            driver.get(
-                f"http://{auth_basic_username}:{auth_basic_password}@www.example.com"
-            )
+            driver.get(f"http://{auth_basic_username}:{auth_basic_password}@www.example.com")
 
             try:
                 driver.find_element(By.XPATH, "//img[@alt='NGINX Logo']")

@@ -10,7 +10,7 @@ export async function setResponse(
   type: string,
   status: string | number,
   message: string,
-  data: any
+  data: any,
 ) {
   const res: response = { type: "", status: "", message: "", data: {} };
 
@@ -27,7 +27,7 @@ export async function fetchApi(
   method: any,
   body: any,
   resSuccess: response,
-  resErr: response
+  resErr: response,
 ) {
   const defaultData: any = {};
   const config = useRuntimeConfig();
@@ -63,7 +63,7 @@ export async function fetchApi(
         resErr["type"] || "error",
         err.status || resErr["status"] || 500,
         err.data["message"] || resErr["message"] || `Internal Server Error`,
-        resErr["data"] || defaultData
+        resErr["data"] || defaultData,
       );
     });
 }

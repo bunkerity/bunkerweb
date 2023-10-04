@@ -38,10 +38,10 @@ const customConf = reactive({
   data: [],
   total: computed(() => customConf.data.length || 0),
   global: computed(
-    () => customConf.data.filter((item) => !item["service_id"]).length || 0
+    () => customConf.data.filter((item) => !item["service_id"]).length || 0,
   ),
   service: computed(
-    () => customConf.data.filter((item) => item["service_id"]).length || 0
+    () => customConf.data.filter((item) => item["service_id"]).length || 0,
   ),
   setup: computed(() => {
     if (
@@ -67,7 +67,7 @@ async function getCustomConf() {
     "GET",
     null,
     customConf,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -77,7 +77,7 @@ async function getConfig() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 

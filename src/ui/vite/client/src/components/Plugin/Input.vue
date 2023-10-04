@@ -40,7 +40,7 @@ const input = reactive({
         config.updateConf(
           props.serviceName || input.context,
           input.id,
-          input.value
+          input.value,
         )
       "
       :type="

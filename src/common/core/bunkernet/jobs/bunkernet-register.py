@@ -40,10 +40,7 @@ try:
             servers = servers.split()
 
         for first_server in servers:
-            if (
-                getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes"))
-                == "yes"
-            ):
+            if getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes")) == "yes":
                 bunkernet_activated = True
                 break
     # Singlesite case
@@ -67,9 +64,7 @@ try:
         LOGGER.info("Registering instance on BunkerNet API ...")
         ok, status, data = register()
         if not ok:
-            LOGGER.error(
-                f"Error while sending register request to BunkerNet API : {data}"
-            )
+            LOGGER.error(f"Error while sending register request to BunkerNet API : {data}")
             _exit(2)
         elif status == 429:
             LOGGER.warning(
@@ -96,29 +91,21 @@ try:
             )
             _exit(2)
         elif data.get("result", "ko") != "ok":
-            LOGGER.error(
-                f"Received error from BunkerNet API while sending register request : {data.get('data', {})}"
-            )
+            LOGGER.error(f"Received error from BunkerNet API while sending register request : {data.get('data', {})}")
             _exit(2)
         bunkernet_id: str = data["data"]
         registered = True
         exit_status = 1
-        LOGGER.info(
-            f"Successfully registered on BunkerNet API with instance id {data['data']}"
-        )
+        LOGGER.info(f"Successfully registered on BunkerNet API with instance id {data['data']}")
     else:
         bunkernet_id: str = bunkernet_id.decode()
-        LOGGER.info(
-            f"Already registered on BunkerNet API with instance id {bunkernet_id}"
-        )
+        LOGGER.info(f"Already registered on BunkerNet API with instance id {bunkernet_id}")
 
     sleep(1)
 
     # Update cache with new bunkernet ID
     if registered:
-        cached, err = cache_file(
-            "instance.id", bunkernet_id.encode(), CORE_API, CORE_TOKEN
-        )
+        cached, err = cache_file("instance.id", bunkernet_id.encode(), CORE_API, CORE_TOKEN)
         if not cached:
             LOGGER.error(f"Error while saving BunkerNet data to db cache : {err}")
         else:

@@ -53,9 +53,7 @@ async def get_plugins():
         },
     },
 )
-async def add_plugin(
-    plugin: AddedPlugin, background_tasks: BackgroundTasks
-) -> JSONResponse:
+async def add_plugin(plugin: AddedPlugin, background_tasks: BackgroundTasks) -> JSONResponse:
     """
     Add a plugin to the database.
     """
@@ -64,19 +62,13 @@ async def add_plugin(
     if resp == "exists":
         message = f"Plugin {plugin.id} already exists"
         CORE_CONFIG.logger.warning(message)
-        return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT, content={"message": message}
-        )
+        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"message": message})
     elif "database is locked" in resp or "file is not a database" in resp:
         retry_in = str(uniform(1.0, 5.0))
-        CORE_CONFIG.logger.warning(
-            f"Can't add plugin {plugin.id} to database : database is locked or had trouble handling the request, retry in {retry_in} seconds"
-        )
+        CORE_CONFIG.logger.warning(f"Can't add plugin {plugin.id} to database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-            },
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
             headers={"Retry-After": retry_in},
         )
     elif resp:
@@ -127,9 +119,7 @@ async def add_plugin(
         },
     },
 )
-async def update_plugin(
-    plugin_id: str, plugin: AddedPlugin, background_tasks: BackgroundTasks
-) -> JSONResponse:
+async def update_plugin(plugin_id: str, plugin: AddedPlugin, background_tasks: BackgroundTasks) -> JSONResponse:
     """
     Update a plugin from the database.
     """
@@ -138,25 +128,17 @@ async def update_plugin(
     if resp == "not_found":
         message = f"Plugin {plugin.id} not found"
         CORE_CONFIG.logger.warning(message)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
-        )
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "not_external":
         message = f"Can't update a core plugin ({plugin.id})"
         CORE_CONFIG.logger.warning(message)
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
-        )
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif "database is locked" in resp or "file is not a database" in resp:
         retry_in = str(uniform(1.0, 5.0))
-        CORE_CONFIG.logger.warning(
-            f"Can't update plugin {plugin.id} to database : database is locked or had trouble handling the request, retry in {retry_in} seconds"
-        )
+        CORE_CONFIG.logger.warning(f"Can't update plugin {plugin.id} to database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-            },
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
             headers={"Retry-After": retry_in},
         )
     elif resp:
@@ -204,9 +186,7 @@ async def update_plugin(
         },
     },
 )
-async def delete_plugin(
-    plugin_id: str, background_tasks: BackgroundTasks
-) -> JSONResponse:
+async def delete_plugin(plugin_id: str, background_tasks: BackgroundTasks) -> JSONResponse:
     """
     Delete a plugin from the database.
     """
@@ -215,25 +195,17 @@ async def delete_plugin(
     if resp == "not_found":
         message = f"Plugin {plugin_id} not found"
         CORE_CONFIG.logger.warning(message)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
-        )
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "not_external":
         message = f"Can't delete a core plugin ({plugin_id})"
         CORE_CONFIG.logger.warning(message)
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
-        )
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif "database is locked" in resp or "file is not a database" in resp:
         retry_in = str(uniform(1.0, 5.0))
-        CORE_CONFIG.logger.warning(
-            f"Can't delete plugin {plugin_id} to database : database is locked or had trouble handling the request, retry in {retry_in} seconds"
-        )
+        CORE_CONFIG.logger.warning(f"Can't delete plugin {plugin_id} to database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-            },
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
             headers={"Retry-After": retry_in},
         )
     elif resp:
@@ -270,9 +242,7 @@ async def get_plugins_files():
     Get all external plugins files in a tar archive.
     """
     plugins_files = BytesIO()
-    with tar_open(
-        fileobj=plugins_files, mode="w:gz", compresslevel=9, dereference=True
-    ) as tar:
+    with tar_open(fileobj=plugins_files, mode="w:gz", compresslevel=9, dereference=True) as tar:
         tar.add(
             str(EXTERNAL_PLUGINS_PATH),
             arcname=".",

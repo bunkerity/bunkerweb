@@ -7,9 +7,7 @@ try:
     docker_host = getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
     docker_client = DockerClient(base_url=docker_host)
 
-    bw_instances = docker_client.containers.list(
-        filters={"label": "bunkerweb.INSTANCE"}
-    )
+    bw_instances = docker_client.containers.list(filters={"label": "bunkerweb.INSTANCE"})
 
     if not bw_instances:
         print("❌ BunkerWeb instance not found ...", flush=True)
@@ -25,9 +23,7 @@ try:
     result = bw_instance.exec_run("bwcli ban 127.0.0.1 -exp 3600")
 
     if result.exit_code != 0:
-        print(
-            f'❌ Command "ban" failed, exiting ...\noutput: {result.output.decode()}\nexit_code: {result.exit_code}'
-        )
+        print(f'❌ Command "ban" failed, exiting ...\noutput: {result.output.decode()}\nexit_code: {result.exit_code}')
         exit(1)
 
     print(result.output.decode(), flush=True)
@@ -40,25 +36,17 @@ try:
     result = bw_instance.exec_run("bwcli bans")
 
     if result.exit_code != 0:
-        print(
-            f'❌ Command "bans" failed, exiting ...\noutput: {result.output.decode()}\nexit_code: {result.exit_code}'
-        )
+        print(f'❌ Command "bans" failed, exiting ...\noutput: {result.output.decode()}\nexit_code: {result.exit_code}')
         exit(1)
 
     if b"- 127.0.0.1" not in result.output:
-        print(
-            f'❌ IP 127.0.0.1 not found in the output of "bans", exiting ...\noutput: {result.output.decode()}'
-        )
+        print(f'❌ IP 127.0.0.1 not found in the output of "bans", exiting ...\noutput: {result.output.decode()}')
         exit(1)
     elif b"List of bans for redis:" not in result.output:
-        print(
-            f'❌ Redis ban list not found in the output of "bans", exiting ...\noutput: {result.output.decode()}'
-        )
+        print(f'❌ Redis ban list not found in the output of "bans", exiting ...\noutput: {result.output.decode()}')
         exit(1)
     elif b"1 hour" not in result.output and b"59 minutes" not in result.output:
-        print(
-            f"❌ Ban duration isn't 1 hour, exiting ...\noutput: {result.output.decode()}"
-        )
+        print(f"❌ Ban duration isn't 1 hour, exiting ...\noutput: {result.output.decode()}")
         exit(1)
 
     print(result.output.decode(), flush=True)
@@ -71,9 +59,7 @@ try:
     result = bw_instance.exec_run("bwcli unban 127.0.0.1")
 
     if result.exit_code != 0:
-        print(
-            f'❌ Command "unban" failed, exiting ...\noutput: {result.output.decode()}\nexit_code: {result.exit_code}'
-        )
+        print(f'❌ Command "unban" failed, exiting ...\noutput: {result.output.decode()}\nexit_code: {result.exit_code}')
         exit(1)
 
     print(result.output.decode(), flush=True)
@@ -86,9 +72,7 @@ try:
     result = bw_instance.exec_run("bwcli bans")
 
     if result.exit_code != 0:
-        print(
-            f'❌ Command "bans" failed, exiting ...\noutput: {result.output.decode()}\nexit_code: {result.exit_code}'
-        )
+        print(f'❌ Command "bans" failed, exiting ...\noutput: {result.output.decode()}\nexit_code: {result.exit_code}')
         exit(1)
 
     found = 0

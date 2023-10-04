@@ -62,28 +62,16 @@ async def update_custom_config(
 
         if resp == "method_conflict":
             message = (
-                f"Can't upsert custom config {custom_configs.name}"
-                + (
-                    f" from service {custom_configs.service_id}"
-                    if custom_configs.service_id
-                    else ""
-                )
-                + " because it was created by either the core or the autoconf and the method isn't one of them"
+                f"Can't upsert custom config {custom_configs.name}" + (f" from service {custom_configs.service_id}" if custom_configs.service_id else "") + " because it was created by either the core or the autoconf and the method isn't one of them"
             )
             CORE_CONFIG.logger.warning(message)
-            return JSONResponse(
-                status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
-            )
+            return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
         elif "database is locked" in resp or "file is not a database" in resp:
             retry_in = str(uniform(1.0, 5.0))
-            CORE_CONFIG.logger.warning(
-                f"Can't upsert custom config: Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-            )
+            CORE_CONFIG.logger.warning(f"Can't upsert custom config: Database is locked or had trouble handling the request, retry in {retry_in} seconds")
             return JSONResponse(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                content={
-                    "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-                },
+                content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
                 headers={"Retry-After": retry_in},
             )
         elif resp and resp not in ("created", "updated"):
@@ -99,14 +87,10 @@ async def update_custom_config(
 
         if "database is locked" in resp or "file is not a database" in resp:
             retry_in = str(uniform(1.0, 5.0))
-            CORE_CONFIG.logger.warning(
-                f"Can't upsert custom configs: Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-            )
+            CORE_CONFIG.logger.warning(f"Can't upsert custom configs: Database is locked or had trouble handling the request, retry in {retry_in} seconds")
             return JSONResponse(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                content={
-                    "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-                },
+                content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
                 headers={"Retry-After": retry_in},
             )
         if resp:
@@ -125,8 +109,7 @@ async def update_custom_config(
         background_tasks.add_task(send_to_instances, {"custom_configs"})
 
     return JSONResponse(
-        status_code=status_code
-        or (status.HTTP_200_OK if resp == "updated" else status.HTTP_201_CREATED),
+        status_code=status_code or (status.HTTP_200_OK if resp == "updated" else status.HTTP_201_CREATED),
         content={"message": message},
     )
 
@@ -162,40 +145,22 @@ async def delete_custom_config(
     background_tasks: BackgroundTasks,
 ):
     """Update a custom config"""
-    resp = DB.delete_custom_config(
-        custom_config.service_id, custom_config.type, custom_config_name, method
-    )
+    resp = DB.delete_custom_config(custom_config.service_id, custom_config.type, custom_config_name, method)
 
     if resp == "not_found":
         message = f"Custom config {custom_config_name} not found"
         CORE_CONFIG.logger.warning(message)
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND, content={"message": message}
-        )
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "method_conflict":
-        message = (
-            f"Can't delete custom config {custom_config_name}"
-            + (
-                f" from service {custom_config.service_id}"
-                if custom_config.service_id
-                else ""
-            )
-            + " because it was created by either the core or the autoconf and the method isn't one of them"
-        )
+        message = f"Can't delete custom config {custom_config_name}" + (f" from service {custom_config.service_id}" if custom_config.service_id else "") + " because it was created by either the core or the autoconf and the method isn't one of them"
         CORE_CONFIG.logger.warning(message)
-        return JSONResponse(
-            status_code=status.HTTP_403_FORBIDDEN, content={"message": message}
-        )
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif "database is locked" in resp or "file is not a database" in resp:
         retry_in = str(uniform(1.0, 5.0))
-        CORE_CONFIG.logger.warning(
-            f"Can't delete custom config: Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-        )
+        CORE_CONFIG.logger.warning(f"Can't delete custom config: Database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"
-            },
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
             headers={"Retry-After": retry_in},
         )
     elif resp:
@@ -205,12 +170,8 @@ async def delete_custom_config(
             content={"message": resp},
         )
 
-    CORE_CONFIG.logger.info(
-        f"✅ Custom config {custom_config_name} deleted from database"
-    )
+    CORE_CONFIG.logger.info(f"✅ Custom config {custom_config_name} deleted from database")
 
     background_tasks.add_task(send_to_instances, {"custom_configs"})
 
-    return JSONResponse(
-        content={"message": f"Custom config {custom_config_name} deleted"}
-    )
+    return JSONResponse(content={"message": f"Custom config {custom_config_name} deleted"})

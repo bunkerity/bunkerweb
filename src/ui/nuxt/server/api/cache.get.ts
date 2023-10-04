@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
         Headers: {
           Authorization: `Bearer ${config.apiToken}`,
         },
-      }
+      },
     );
   } catch (err) {
     data = Promise.reject(new Error("fail getting data"));

@@ -37,10 +37,7 @@ try:
                 "AUTO_LETS_ENCRYPT",
                 "GENERATE_SELF_SIGNED_SSL",
             ):
-                if (
-                    getenv(f"{first_server}_{check_var}", getenv(check_var, "no"))
-                    == "yes"
-                ):
+                if getenv(f"{first_server}_{check_var}", getenv(check_var, "no")) == "yes":
                     need_default_cert = True
                     break
             if need_default_cert:
@@ -121,13 +118,9 @@ try:
             CORE_TOKEN,
         )
         if not cached:
-            LOGGER.error(
-                f"Error while saving default-server-cert cert.pem file to db cache : {err}"
-            )
+            LOGGER.error(f"Error while saving default-server-cert cert.pem file to db cache : {err}")
         else:
-            LOGGER.info(
-                "Successfully saved default-server-cert cert.pem file to db cache"
-            )
+            LOGGER.info("Successfully saved default-server-cert cert.pem file to db cache")
 
         cached, err = cache_file(
             "cert.key",
@@ -136,13 +129,9 @@ try:
             CORE_TOKEN,
         )
         if not cached:
-            LOGGER.error(
-                f"Error while saving default-server-cert cert.key file to db cache : {err}"
-            )
+            LOGGER.error(f"Error while saving default-server-cert cert.key file to db cache : {err}")
         else:
-            LOGGER.info(
-                "Successfully saved default-server-cert cert.key file to db cache"
-            )
+            LOGGER.info("Successfully saved default-server-cert cert.key file to db cache")
     else:
         LOGGER.info(
             "Skipping generation of self-signed certificate for default server (already present)",

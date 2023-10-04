@@ -33,9 +33,7 @@ CORE_TOKEN = getenv("CORE_TOKEN", None)
 status = 0
 
 
-def certbot_new(
-    domains: str, email: str, letsencrypt_path: Path, letsencrypt_job_path: Path
-) -> int:
+def certbot_new(domains: str, email: str, letsencrypt_path: Path, letsencrypt_job_path: Path) -> int:
     return run(
         [
             join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot"),
@@ -63,8 +61,7 @@ def certbot_new(
         + (["--staging"] if getenv("USE_LETS_ENCRYPT_STAGING", "no") == "yes" else []),
         stdin=DEVNULL,
         stderr=STDOUT,
-        env=environ.copy()
-        | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
+        env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
     ).returncode
 
 
@@ -84,8 +81,7 @@ def certbot_check_domains(domains: list[str], letsencrypt_path: Path) -> int:
         stdout=PIPE,
         stderr=STDOUT,
         text=True,
-        env=environ.copy()
-        | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
+        env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
     )
 
     if proc.returncode != 0:
@@ -96,10 +92,7 @@ def certbot_check_domains(domains: list[str], letsencrypt_path: Path) -> int:
     needed_domains = set(domains)
     for raw_domains in findall(r"^    Domains: (.*)$", proc.stdout, MULTILINE):
         current_domains = raw_domains.split()
-        if (
-            current_domains[0] == first_needed_domain
-            and set(current_domains) == needed_domains
-        ):
+        if current_domains[0] == first_needed_domain and set(current_domains) == needed_domains:
             return 1
     return 0
 
@@ -112,11 +105,8 @@ try:
     if getenv("AUTO_LETS_ENCRYPT", "no") == "yes":
         use_letsencrypt = True
     elif getenv("MULTISITE", "no") == "yes":
-        for first_server in getenv("SERVER_NAME", "").split():
-            if (
-                first_server
-                and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes"
-            ):
+        for first_server in getenv("SERVER_NAME", "").split(" "):
+            if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes":
                 use_letsencrypt = True
                 break
 
@@ -128,12 +118,8 @@ try:
     letsencrypt_path = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
     letsencrypt_path.mkdir(parents=True, exist_ok=True)
 
-    letsencrypt_job_path = Path(
-        sep, "usr", "share", "bunkerweb", "core_plugins", "letsencrypt", "jobs"
-    )
-    Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(
-        parents=True, exist_ok=True
-    )
+    letsencrypt_job_path = Path(sep, "usr", "share", "bunkerweb", "core_plugins", "letsencrypt", "jobs")
+    Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(parents=True, exist_ok=True)
 
     tgz = get_cache("folder.tgz", CORE_API, CORE_TOKEN, job_name="certbot-renew")
     if tgz:
@@ -161,9 +147,7 @@ try:
             ):
                 continue
 
-            domains = getenv(f"{first_server}_SERVER_NAME", first_server).replace(
-                " ", ","
-            )
+            domains = getenv(f"{first_server}_SERVER_NAME", first_server).replace(" ", ",")
 
             if letsencrypt_path.joinpath(first_server, "cert.pem").exists():
                 LOGGER.info(
@@ -197,9 +181,7 @@ try:
                 continue
             else:
                 status = 1 if status == 0 else status
-                LOGGER.info(
-                    f"Certificate generation succeeded for domain(s) : {domains}"
-                )
+                LOGGER.info(f"Certificate generation succeeded for domain(s) : {domains}")
 
     # Singlesite case
     elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes" and getenv("SERVER_NAME"):
@@ -231,9 +213,7 @@ try:
                 LOGGER.error(f"Certificate generation failed for domain(s) : {domains}")
             else:
                 status = 1
-                LOGGER.info(
-                    f"Certificate generation succeeded for domain(s) : {domains}"
-                )
+                LOGGER.info(f"Certificate generation succeeded for domain(s) : {domains}")
 
     # Put new folder in cache
     bio = BytesIO()
@@ -242,9 +222,7 @@ try:
     bio.seek(0, 0)
 
     # Put tgz in cache
-    cached, err = cache_file(
-        "folder.tgz", bio.read(), CORE_API, CORE_TOKEN, job_name="certbot-renew"
-    )
+    cached, err = cache_file("folder.tgz", bio.read(), CORE_API, CORE_TOKEN, job_name="certbot-renew")
 
     if not cached:
         LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")
