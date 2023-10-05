@@ -31,6 +31,7 @@ function updateValue() {
       @click="$emit('inp', updateValue())"
       :id="props.settings.id"
       :name="props.settings.id"
+      :disabled="props.settings.disabled || false"
       :aria-checked="checkbox.value === 'yes' ? 'true' : 'false'"
       :checked="checkbox.value === 'yes' ? true : false"
       :class="[

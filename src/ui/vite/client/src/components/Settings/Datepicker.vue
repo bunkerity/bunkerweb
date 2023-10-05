@@ -12,7 +12,7 @@ const props = defineProps({
     required: true,
   },
   defaultDate: {
-    type: [String, Date],
+    type: [String, Number, Date],
     required: false,
     default: null,
   },

@@ -34,6 +34,7 @@ const bans = reactive({
   data: [],
   total : "",
   reasonList: ['all'], // Based on reasons find on fetch
+  bansList : [] // Format {hostname : str, data : Array}
 });
 
 async function getData() {
@@ -66,19 +67,41 @@ async function getBansFromInst(hostnames) {
       promises.push(getHostBan(hostname));
     }
 
-    // When all promises fulfill, setup data
+    // When all promises fulfill, 
     const bansList = [];
     Promise.all(promises).then((instances) => {
         instances.forEach((instance, id) => {
-          console.log(instance);
           bansList.push({hostname : hostnames[id], data: JSON.parse(instance.data) || []})
-        })  
+        });
+
         console.log(bansList)
+
+        // Create a global instance that regroup every ip
+        // And remove duplicate items
+        // And get all reasons
+        const reasons = ["all"];
+        const globalInst = {hostname : "all", data : []};
+        for (let i = 0; i < bansList.length; i++) {
+          const instData = bansList[i].data;
+          instData.forEach(item => {
+              // Format stamp and exp to ms
+              item.date = item.date.toString().length === 10 ? +`${item.date}000` : item.date;
+              item.exp = +`${item.exp}000`;
+              reasons.indexOf(item.reason) === -1 ? reasons.push(item.reason) : false;
+              const isItem = globalInst.data.find(globItem => {return item.ip === globItem.ip && item.reason === globItem.reason});
+              console.log(item.date.toString().length)
+              if(!isItem) globalInst.data.push(item)
+          })
+        }
+
+        bans.bansList = bansList;
+        bans.reasonList = reasons;
       })
 
-    
-    return bansList;
+
 }
+
+
 
 async function getHostBan(hostname) {
   const data = {
@@ -153,7 +176,7 @@ const tab = reactive({
       label="ACTIONS"
     >
       <BansTabs @tab="(v) => tab.current = v" />
-      <BansList :class="[tab.current === 'list' ? true : 'hidden']"  />
+      <BansList :items="bans.bansList" :class="[tab.current === 'list' ? true : 'hidden']"  />
       <BansAdd @addBans="getData()" :class="[tab.current === 'add' ? true : 'hidden']"  />
     </CardBase>
   </Dashboard>
