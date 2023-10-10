@@ -244,7 +244,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
                     if listdir(service_custom_conf):
                         move(
                             service_custom_conf,
-                            service_custom_conf.replace(f"{sep}{args[1]}", f"{sep}{args[2]}").replace(join(sep, "etc"), join(sep, "var", "tmp")),
+                            service_custom_conf.replace(f"{sep}{args[1].split(' ')[0]}", f"{sep}{args[2].split(' ')[0]}").replace(join(sep, "etc"), join(sep, "var", "tmp")),
                         )
                         moved = True
             operation, error = app.config["CONFIG"].edit_service(args[1], args[0])
@@ -257,7 +257,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
             app.config["TO_FLASH"].append({"content": operation, "type": "success"})
 
             if editing and moved and args[1] != args[2] and service_custom_confs:
-                for tmp_service_custom_conf in glob(join(sep, "var", "tmp", "bunkerweb", "configs", "*", args[2])):
+                for tmp_service_custom_conf in glob(join(sep, "var", "tmp", "bunkerweb", "configs", "*", args[2].split(" ")[0])):
                     move(
                         tmp_service_custom_conf,
                         tmp_service_custom_conf.replace(
@@ -526,12 +526,7 @@ def services():
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
-            args=(
-                "services",
-                variables,
-                request.form.get("OLD_SERVER_NAME", "").split(" ")[0],
-                variables.get("SERVER_NAME", "").split(" ")[0],
-            ),
+            args=("services", variables, request.form.get("OLD_SERVER_NAME", ""), variables.get("SERVER_NAME", "")),
             kwargs={"operation": request.form["operation"]},
         ).start()
 
@@ -554,6 +549,7 @@ def services():
             {
                 "SERVER_NAME": {
                     "value": service["SERVER_NAME"]["value"].split(" ")[0],
+                    "full_value": service["SERVER_NAME"]["value"],
                     "method": service["SERVER_NAME"]["method"],
                 },
                 "USE_REVERSE_PROXY": service["USE_REVERSE_PROXY"],

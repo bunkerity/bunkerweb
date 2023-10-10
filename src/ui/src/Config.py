@@ -231,12 +231,12 @@ class Config:
 
         if changed_server_name:
             for k in deepcopy(config):
-                if k.startswith(old_server_name):
+                if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
         self.__gen_conf(config, services)
         return (
-            f"Configuration for {old_server_name.split(' ')[0]} has been edited.",
+            f"Configuration for {old_server_name_splitted[0]} has been edited.",
             0,
         )
 
