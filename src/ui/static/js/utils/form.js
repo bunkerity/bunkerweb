@@ -222,7 +222,8 @@ class DisabledPop {
   init() {
     window.addEventListener("pointerover", (e) => {
       //for checkbox and regular inputs
-      if (e.target.tagName === "INPUT") {
+      if (e.target.tagName === "INPUT" &&
+      e.target.hasAttribute('data-default-method')) {
         const el = e.target;
         this.showPopup(el, "input");
       }
@@ -252,7 +253,7 @@ class DisabledPop {
     const popupHTML = `
     <div data-disabled-info class="${
       type === "select" ? "translate-y-2" : ""
-    } bg-blue-500 absolute right-2 rounded-lg px-2 py-1 z-20 dark:brightness-90">
+    } pointer-events-none bg-blue-500 absolute right-2 rounded-lg px-2 py-1 z-20 dark:brightness-90">
     <p class="m-0 text-xs text-white dark:text-gray-100">disabled by ${method}</p>
     </div>`;
     let cleanHTML = DOMPurify.sanitize(popupHTML);
