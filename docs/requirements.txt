@@ -143,9 +143,9 @@ jinja2==3.1.2 \
     #   mike
     #   mkdocs
     #   mkdocs-material
-markdown==3.4.4 \
-    --hash=sha256:225c6123522495d4119a90b3a3ba31a1e87a70369e03f14799ea9c0d7183a3d6 \
-    --hash=sha256:a4c1b65c0957b4bd9e7d86ddc7b3c9868fb9670660f6f99f6d1bca8954d5a941
+markdown==3.5 \
+    --hash=sha256:4afb124395ce5fc34e6d9886dab977fd9ae987fc6e85689f08278cf0c69d4bf3 \
+    --hash=sha256:a807eb2e4778d9156c8f07876c6e4d50b5494c5665c4834f67b06459dfd877b3
     # via
     #   mkdocs
     #   mkdocs-material
@@ -236,9 +236,9 @@ mkdocs==1.5.3 \
     #   -r requirements.in
     #   mike
     #   mkdocs-material
-mkdocs-material==9.4.3 \
-    --hash=sha256:3274a47a4e55a541b25bd8fa4937cf3f3c82a51763453511661e0052062758b9 \
-    --hash=sha256:5c9abc3f6ba8f88be1f9f13df23d695ca4dddbdd8a3538e4e6279c055c3936bc
+mkdocs-material==9.4.5 \
+    --hash=sha256:0922e3e34d95dbf3f0c84fc817a233e1cbd5874830c6fd821d525ba90e0ce077 \
+    --hash=sha256:efaa52843a8c64b99bcf5a97cf4ba57d410424828e3087b13c9b3954e8adb5ff
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
@@ -279,9 +279,9 @@ pymdown-extensions==10.3 \
     --hash=sha256:77a82c621c58a83efc49a389159181d570e370fff9f810d3a4766a75fc678b66 \
     --hash=sha256:94a0d8a03246712b64698af223848fd80aaf1ae4c4be29c8c61939b0467b5722
     # via mkdocs-material
-pytablewriter==1.1.0 \
-    --hash=sha256:3e0f05c6479f0817ca8cdfb27d509026a6894031170760cf99b31a2d1c24c21a \
-    --hash=sha256:95938cc210f7905895c1b62c465176da1ef7bb7b9e3fa7d25a6fad6bcb1903ed
+pytablewriter==1.2.0 \
+    --hash=sha256:0204a4bb684a22140d640f2599f09e137bcdc18b3dd49426f4a555016e246b46 \
+    --hash=sha256:4a30e2bb4bf5bc1069b1d2b2bc41947577c4517ab0875b23a5b194d296f543d8
     # via -r requirements.in
 python-dateutil==2.8.2 \
     --hash=sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86 \
