@@ -25,6 +25,7 @@ class DockerTest(Test):
         }
         self._check_domains()
 
+    @staticmethod
     def init():
         try:
             if not Test.init():

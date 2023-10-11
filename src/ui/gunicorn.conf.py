@@ -15,3 +15,4 @@ worker_class = "gthread"
 threads = 1
 workers = 1
 graceful_timeout = 0
+secure_scheme_headers = {}
