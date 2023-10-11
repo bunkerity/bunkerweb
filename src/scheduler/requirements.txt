@@ -4,13 +4,13 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==2.7.0 \
-    --hash=sha256:7aeaf0886322ca5569bc532828086ff2a7fc5b66a29a0a5d3270363d448af228 \
-    --hash=sha256:fabdcb97801dfd3bc23ac7ca7175f2d98e4192b62297a6efd6e6718423653ac3
+acme==2.7.1 \
+    --hash=sha256:47aea91999434cb01a3530c7c76866f387fdb818097808704d6cfa98dbe4e966 \
+    --hash=sha256:669167c5d855a9d60dbe9b98681ddb376ba1c2a17a35be3291489b8b0eaef4ff
     # via certbot
-certbot==2.7.0 \
-    --hash=sha256:274329918656db82fb314e2ecb12a9b276a1df820e28e36e8ecca8c3a0563c1c \
-    --hash=sha256:892d25d1016aa6da4f947b40f46a02efa9ba77f8811e0b22e9db046aae05e518
+certbot==2.7.1 \
+    --hash=sha256:113a4aabbe946c3677cb2af867279d19a3f07aaff0ebd4683cc9768be14cc077 \
+    --hash=sha256:22604d6ab8e5b665ea1aa201d65840298f5e4f98a100d399f52cf30c6f5c7408
     # via -r requirements.in
 certifi==2023.7.22 \
     --hash=sha256:539cc1d13202e33ca466e88b2807e29f4c13049d6d87031a3c110744495cb082 \
@@ -169,7 +169,9 @@ configargparse==1.7 \
 configobj==5.0.8 \
     --hash=sha256:6f704434a07dc4f4dc7c9a745172c1cad449feb548febd9f7fe362629c627a97 \
     --hash=sha256:a7a8c6ab7daade85c3f329931a807c8aee750a2494363934f8ea84d8a54c87ea
-    # via certbot
+    # via
+    #   -r requirements.in
+    #   certbot
 cryptography==41.0.4 \
     --hash=sha256:004b6ccc95943f6a9ad3142cfabcc769d7ee38a3f60fb0dddbfb431f818c3a67 \
     --hash=sha256:047c4603aeb4bbd8db2756e38f5b8bd7e94318c047cfe4efeb5d715e08b49311 \
