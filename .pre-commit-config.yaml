@@ -3,7 +3,7 @@
 exclude: (^LICENSE.md$|^src/VERSION$|^src/(bw/misc/root-ca.pem$|deps/src/|common/core/modsecurity/files|ui/static/js/(editor/|utils/purify/|tsparticles\.bundle\.min\.js))|\.(svg|drawio|patch\d?|ascii|tf|tftpl)$)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: f71fa2c1f9cf5cb705f73dffe4b21f7c61470ba9 # frozen: v4.4.0
+    rev: c4a0b883114b00d8d76b479c820ce7950211c99b # frozen: v4.5.0
     hooks:
       - id: requirements-txt-fixer
       - id: trailing-whitespace
