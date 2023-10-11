@@ -27,9 +27,9 @@ class Test(ABC):
             f"instiantiated with {len(tests)} tests and timeout of {timeout}s for {self._name}",
         )
 
-    # Class method
     # called once before running all the different tests for a given integration
-    def init(self):
+    @staticmethod
+    def init():
         try:
             if not isdir("/tmp/bw-data"):
                 mkdir("/tmp/bw-data")
@@ -46,8 +46,8 @@ class Test(ABC):
         return True
 
     # Class method
-    # called once all tests ended
-    def end(self):
+    @staticmethod
+    def end():
         return True
 
     # helper to check domains

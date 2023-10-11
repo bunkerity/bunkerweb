@@ -28,6 +28,7 @@ class AutoconfTest(Test):
         }
         self._check_domains()
 
+    @staticmethod
     def init():
         try:
             if not Test.init():
@@ -100,6 +101,7 @@ class AutoconfTest(Test):
             return False
         return True
 
+    @staticmethod
     def end():
         ret = True
         try:
