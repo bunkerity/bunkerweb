@@ -891,6 +891,10 @@ h6 {
   margin-left: 1rem !important;
 }
 
+.mr-1 {
+  margin-right: 0.25rem !important;
+}
+
 .mr-2 {
   margin-right: 0.5rem !important;
 }
@@ -939,10 +943,6 @@ h6 {
   margin-top: 2rem !important;
 }
 
-.mr-6 {
-  margin-right: 1.5rem !important;
-}
-
 .block {
   display: block !important;
 }
@@ -957,10 +957,6 @@ h6 {
 
 .inline-flex {
   display: inline-flex !important;
-}
-
-.table {
-  display: table !important;
 }
 
 .grid {
@@ -1109,16 +1105,12 @@ h6 {
   min-width: 1100px !important;
 }
 
-.min-w-\[1300px\] {
-  min-width: 1300px !important;
-}
-
 .min-w-\[500px\] {
   min-width: 500px !important;
 }
 
-.min-w-\[1000px\] {
-  min-width: 1000px !important;
+.min-w-\[1200px\] {
+  min-width: 1200px !important;
 }
 
 .max-w-\[1100px\] {
@@ -1673,10 +1665,6 @@ h6 {
 
 .pt-0 {
   padding-top: 0px !important;
-}
-
-.pt-28 {
-  padding-top: 7rem !important;
 }
 
 .pt-4 {
@@ -5824,10 +5812,6 @@ body {
 
   .sm\:justify-items-start {
     justify-items: start !important;
-  }
-
-  .sm\:pt-16 {
-    padding-top: 4rem !important;
   }
 
   .sm\:text-left {

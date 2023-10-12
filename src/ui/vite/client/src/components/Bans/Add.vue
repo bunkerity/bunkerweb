@@ -110,7 +110,7 @@ async function sendBans() {
 <template>
   <div class="col-span-12 grid grid-cols-12">
     <div
-      class="col-span-12 flex flex-col sm:flex-row justify-center items-center mt-2 mb-6 mx-2"
+      class="col-span-12 flex flex-col sm:flex-row justify-left items-center mt-2 mb-6 mx-2"
     >
       <ButtonBase
         @click="addItem()"
@@ -162,7 +162,7 @@ async function sendBans() {
 
       <ListBase
         v-if="bans.items.length > 0"
-        class="min-w-[1050px] h-full col-span-12 "
+        class="min-w-[1200px] h-full col-span-12 "
         :header="addHeader"
         :positions="addPositions"
       >
