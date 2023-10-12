@@ -1,9 +1,23 @@
-local class    = require "middleclass"
-local plugin   = require "bunkerweb.plugin"
-local utils    = require "bunkerweb.utils"
+local class = require "middleclass"
+local plugin = require "bunkerweb.plugin"
 local resolver = require "resty.dns.resolver"
+local utils = require "bunkerweb.utils"
 
-local dnsbl    = class("dnsbl", plugin)
+local dnsbl = class("dnsbl", plugin)
+
+local is_in_dnsbl = function(addr, server)
+	local request = resolver.arpa_str(addr):gsub("%.in%-addr%.arpa", ""):gsub("%.ip6%.arpa", "") .. "." .. server
+	local ips, err = utils.get_ips(request, false)
+	if not ips then
+		return nil, server, err
+	end
+	for _, ip in ipairs(ips) do
+		if ip:find "^127%.0%.0%." then
+			return true, server
+		end
+	end
+	return false, server
+end
 
 function dnsbl:initialize(ctx)
 	-- Call parent initialize
@@ -26,14 +40,15 @@ function dnsbl:init_worker()
 	local threads = {}
 	for server in self.variables["DNSBL_LIST"]:gmatch("%S+") do
 		-- Create thread
-		local thread = ngx.thread.spawn(self.is_in_dnsbl, self, "127.0.0.2", server)
+		local thread = ngx.thread.spawn(is_in_dnsbl, "127.0.0.2", server)
 		threads[server] = thread
 	end
 	-- Wait for threads
-	for dnsbl, thread in pairs(threads) do
+	for data, thread in pairs(threads) do
+		-- luacheck: ignore 421
 		local ok, result, server, err = ngx.thread.wait(thread)
 		if not ok then
-			self.logger:log(ngx.ERR, "error while waiting thread of " .. dnsbl .. " check : " .. result)
+			self.logger:log(ngx.ERR, "error while waiting thread of " .. data .. " check : " .. result)
 		elseif result == nil then
 			self.logger:log(ngx.ERR, "error while sending DNS request to " .. server .. " : " .. err)
 		elseif not result then
@@ -65,14 +80,17 @@ function dnsbl:access()
 		if cached == "ok" then
 			return self:ret(true, "client IP " .. self.ctx.bw.remote_addr .. " is in DNSBL cache (not blacklisted)")
 		end
-		return self:ret(true, "client IP " .. self.ctx.bw.remote_addr .. " is in DNSBL cache (server = " .. cached .. ")",
-			utils.get_deny_status(self.ctx))
+		return self:ret(
+			true,
+			"client IP " .. self.ctx.bw.remote_addr .. " is in DNSBL cache (server = " .. cached .. ")",
+			utils.get_deny_status(self.ctx)
+		)
 	end
 	-- Loop on DNSBL list
 	local threads = {}
 	for server in self.variables["DNSBL_LIST"]:gmatch("%S+") do
 		-- Create thread
-		local thread = ngx.thread.spawn(self.is_in_dnsbl, self, self.ctx.bw.remote_addr, server)
+		local thread = ngx.thread.spawn(is_in_dnsbl, self.ctx.bw.remote_addr, server)
 		threads[server] = thread
 	end
 	-- Wait for threads
@@ -82,7 +100,7 @@ function dnsbl:access()
 	while true do
 		-- Compute threads to wait
 		local wait_threads = {}
-		for dnsbl, thread in pairs(threads) do
+		for _, thread in pairs(threads) do
 			table.insert(wait_threads, thread)
 		end
 		-- No server reported IP
@@ -90,6 +108,7 @@ function dnsbl:access()
 			break
 		end
 		-- Wait for first thread
+		-- luacheck: ignore 421
 		local ok, result, server, err = ngx.thread.wait(unpack(wait_threads))
 		-- Error case
 		if not ok then
@@ -115,7 +134,7 @@ function dnsbl:access()
 		-- Kill other threads
 		if #threads > 0 then
 			local wait_threads = {}
-			for dnsbl, thread in pairs(threads) do
+			for _, thread in pairs(threads) do
 				table.insert(wait_threads, thread)
 			end
 			utils.kill_all_threads(wait_threads)
@@ -157,20 +176,6 @@ function dnsbl:add_to_cache(ip, value)
 		return false, err
 	end
 	return true
-end
-
-function dnsbl:is_in_dnsbl(ip, server)
-	local request = resolver.arpa_str(ip):gsub("%.in%-addr%.arpa", ""):gsub("%.ip6%.arpa", "") .. "." .. server
-	local ips, err = utils.get_ips(request, false)
-	if not ips then
-		return nil, server, err
-	end
-	for i, ip in ipairs(ips) do
-		if ip:find("^127%.0%.0%.") then
-			return true, server
-		end
-	end
-	return false, server
 end
 
 return dnsbl

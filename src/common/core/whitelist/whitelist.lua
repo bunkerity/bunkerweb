@@ -1,8 +1,8 @@
-local class     = require "middleclass"
-local plugin    = require "bunkerweb.plugin"
-local utils     = require "bunkerweb.utils"
+local class = require "middleclass"
+local env = require "resty.env"
 local ipmatcher = require "resty.ipmatcher"
-local env       = require "resty.env"
+local plugin = require "bunkerweb.plugin"
+local utils = require "bunkerweb.utils"
 
 local whitelist = class("whitelist", plugin)
 
@@ -23,7 +23,7 @@ function whitelist:initialize(ctx)
 			["RDNS"] = {},
 			["ASN"] = {},
 			["USER_AGENT"] = {},
-			["URI"] = {}
+			["URI"] = {},
 		}
 		for kind, _ in pairs(kinds) do
 			for data in self.variables["WHITELIST_" .. kind]:gmatch("%S+") do
@@ -64,11 +64,11 @@ function whitelist:init()
 		["RDNS"] = {},
 		["ASN"] = {},
 		["USER_AGENT"] = {},
-		["URI"] = {}
+		["URI"] = {},
 	}
 	local i = 0
 	for kind, _ in pairs(whitelists) do
-		local f, err = io.open("/var/cache/bunkerweb/whitelist/" .. kind .. ".list", "r")
+		local f, _ = io.open("/var/cache/bunkerweb/whitelist/" .. kind .. ".list", "r")
 		if f then
 			for line in f:lines() do
 				table.insert(whitelists[kind], line)
@@ -123,13 +123,14 @@ function whitelist:access()
 		return self:ret(true, err, ngx.OK)
 	end
 	-- Perform checks
-	for k, v in pairs(already_cached) do
+	local ok
+	for k, _ in pairs(already_cached) do
 		if not already_cached[k] then
-			local ok, whitelisted = self:is_whitelisted(k)
+			ok, whitelisted = self:is_whitelisted(k)
 			if ok == nil then
 				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is whitelisted : " .. whitelisted)
 			else
-				local ok, err = self:add_to_cache(self:kind_to_ele(k), whitelisted)
+				ok, err = self:add_to_cache(self:kind_to_ele(k), whitelisted)
 				if not ok then
 					self.logger:log(ngx.ERR, "error while adding element to cache : " .. err)
 				end
@@ -163,7 +164,7 @@ end
 function whitelist:check_cache()
 	-- Check the caches
 	local checks = {
-		["IP"] = "ip" .. self.ctx.bw.remote_addr
+		["IP"] = "ip" .. self.ctx.bw.remote_addr,
 	}
 	if self.ctx.bw.http_user_agent then
 		checks["UA"] = "ua" .. self.ctx.bw.http_user_agent
@@ -172,7 +173,7 @@ function whitelist:check_cache()
 		checks["URI"] = "uri" .. self.ctx.bw.uri
 	end
 	local already_cached = {}
-	for k, v in pairs(checks) do
+	for k, _ in pairs(checks) do
 		already_cached[k] = false
 	end
 	for k, v in pairs(checks) do
@@ -242,14 +243,15 @@ function whitelist:is_whitelisted_ip()
 	end
 	if check_rdns then
 		-- Get rDNS
+		-- luacheck: ignore 421
 		local rdns_list, err = utils.get_rdns(self.ctx.bw.remote_addr)
 		-- Check if rDNS is in whitelist
 		if rdns_list then
 			local forward_check = nil
 			local rdns_suffix = nil
-			for i, rdns in ipairs(rdns_list) do
-				for j, suffix in ipairs(self.lists["RDNS"]) do
-					if rdns:sub(- #suffix) == suffix then
+			for _, rdns in ipairs(rdns_list) do
+				for _, suffix in ipairs(self.lists["RDNS"]) do
+					if rdns:sub(-#suffix) == suffix then
 						forward_check = rdns
 						rdns_suffix = suffix
 						break
@@ -262,12 +264,15 @@ function whitelist:is_whitelisted_ip()
 			if forward_check then
 				local ip_list, err = utils.get_ips(forward_check)
 				if ip_list then
-					for i, ip in ipairs(ip_list) do
+					for _, ip in ipairs(ip_list) do
 						if ip == self.ctx.bw.remote_addr then
 							return true, "rDNS " .. rdns_suffix
 						end
 					end
-					self.logger:log(ngx.WARN, "IP " .. self.ctx.bw.remote_addr .. " may spoof reverse DNS " .. forward_check)
+					self.logger:log(
+						ngx.WARN,
+						"IP " .. self.ctx.bw.remote_addr .. " may spoof reverse DNS " .. forward_check
+					)
 				else
 					self.logger:log(ngx.ERR, "error while getting rdns (forward check) : " .. err)
 				end
@@ -283,7 +288,7 @@ function whitelist:is_whitelisted_ip()
 		if not asn then
 			self.logger:log(ngx.ERR, "can't get ASN of IP " .. self.ctx.bw.remote_addr .. " : " .. err)
 		else
-			for i, bl_asn in ipairs(self.lists["ASN"]) do
+			for _, bl_asn in ipairs(self.lists["ASN"]) do
 				if bl_asn == tostring(asn) then
 					return true, "ASN " .. bl_asn
 				end
@@ -297,7 +302,7 @@ end
 
 function whitelist:is_whitelisted_uri()
 	-- Check if URI is in whitelist
-	for i, uri in ipairs(self.lists["URI"]) do
+	for _, uri in ipairs(self.lists["URI"]) do
 		if utils.regex_match(self.ctx.bw.uri, uri) then
 			return true, "URI " .. uri
 		end
@@ -308,7 +313,7 @@ end
 
 function whitelist:is_whitelisted_ua()
 	-- Check if UA is in whitelist
-	for i, ua in ipairs(self.lists["USER_AGENT"]) do
+	for _, ua in ipairs(self.lists["USER_AGENT"]) do
 		if utils.regex_match(self.ctx.bw.http_user_agent, ua) then
 			return true, "UA " .. ua
 		end

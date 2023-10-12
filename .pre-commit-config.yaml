@@ -3,7 +3,7 @@
 exclude: (^LICENSE.md$|^src/VERSION$|^src/(bw/misc/root-ca.pem$|deps/src/|common/core/modsecurity/files|ui/static/js/(editor/|utils/purify/|tsparticles\.bundle\.min\.js))|\.(svg|drawio|patch\d?|ascii|tf|tftpl)$)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: f71fa2c1f9cf5cb705f73dffe4b21f7c61470ba9 # frozen: v4.4.0
+    rev: c4a0b883114b00d8d76b479c820ce7950211c99b # frozen: v4.5.0
     hooks:
       - id: requirements-txt-fixer
       - id: trailing-whitespace
@@ -25,6 +25,19 @@ repos:
     hooks:
       - id: prettier
         name: Prettier Code Formatter
+
+  - repo: https://github.com/JohnnyMorganz/StyLua
+    rev: 27e6b388796604181e810ef05c9fb15a9f7a7769 # frozen: v0.18.2
+    hooks:
+      - id: stylua-github
+        exclude: ^src/(bw/lua/middleclass.lua|common/core/antibot/captcha.lua)$
+
+  - repo: https://github.com/lunarmodules/luacheck
+    rev: ababb6d403d634eb74d2c541035e9ede966e710d # frozen: v1.1.1
+    hooks:
+      - id: luacheck
+        exclude: ^src/(bw/lua/middleclass.lua|common/core/antibot/captcha.lua)$
+        args: ["--std", "min", "--codes", "--ranges", "--no-cache"]
 
   - repo: https://github.com/pycqa/flake8
     rev: 10f4af6dbcf93456ba7df762278ae61ba3120dc6 # frozen: 6.1.0

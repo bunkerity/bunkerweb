@@ -1,7 +1,7 @@
-local class     = require "middleclass"
-local plugin    = require "bunkerweb.plugin"
-local utils     = require "bunkerweb.utils"
+local class = require "middleclass"
 local ipmatcher = require "resty.ipmatcher"
+local plugin = require "bunkerweb.plugin"
+local utils = require "bunkerweb.utils"
 
 local blacklist = class("blacklist", plugin)
 
@@ -78,7 +78,7 @@ function blacklist:init()
 	}
 	local i = 0
 	for kind, _ in pairs(blacklists) do
-		local f, err = io.open("/var/cache/bunkerweb/blacklist/" .. kind .. ".list", "r")
+		local f, _ = io.open("/var/cache/bunkerweb/blacklist/" .. kind .. ".list", "r")
 		if f then
 			for line in f:lines() do
 				table.insert(blacklists[kind], line)
@@ -102,7 +102,7 @@ function blacklist:access()
 	end
 	-- Check the caches
 	local checks = {
-		["IP"] = "ip" .. self.ctx.bw.remote_addr
+		["IP"] = "ip" .. self.ctx.bw.remote_addr,
 	}
 	if self.ctx.bw.http_user_agent then
 		checks["UA"] = "ua" .. self.ctx.bw.http_user_agent
@@ -113,14 +113,18 @@ function blacklist:access()
 	local already_cached = {
 		["IP"] = false,
 		["URI"] = false,
-		["UA"] = false
+		["UA"] = false,
 	}
 	for k, v in pairs(checks) do
 		local ok, cached = self:is_in_cache(v)
 		if not ok then
 			self.logger:log(ngx.ERR, "error while checking cache : " .. cached)
 		elseif cached and cached ~= "ok" then
-			return self:ret(true, k .. " is in cached blacklist (info : " .. cached .. ")", utils.get_deny_status(self.ctx))
+			return self:ret(
+				true,
+				k .. " is in cached blacklist (info : " .. cached .. ")",
+				utils.get_deny_status(self.ctx)
+			)
 		end
 		if ok and cached then
 			already_cached[k] = true
@@ -131,18 +135,23 @@ function blacklist:access()
 		return self:ret(false, "lists is nil")
 	end
 	-- Perform checks
-	for k, v in pairs(checks) do
+	for k, _ in pairs(checks) do
 		if not already_cached[k] then
 			local ok, blacklisted = self:is_blacklisted(k)
 			if ok == nil then
 				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is blacklisted : " .. blacklisted)
 			else
+				-- luacheck: ignore 421
 				local ok, err = self:add_to_cache(self:kind_to_ele(k), blacklisted)
 				if not ok then
 					self.logger:log(ngx.ERR, "error while adding element to cache : " .. err)
 				end
 				if blacklisted ~= "ok" then
-					return self:ret(true, k .. " is blacklisted (info : " .. blacklisted .. ")", utils.get_deny_status(self.ctx))
+					return self:ret(
+						true,
+						k .. " is blacklisted (info : " .. blacklisted .. ")",
+						utils.get_deny_status(self.ctx)
+					)
 				end
 			end
 		end
@@ -205,11 +214,11 @@ function blacklist:is_blacklisted_ip()
 	end
 	if not match then
 		-- Check if IP is in blacklist
-		local ipm, err = ipmatcher.new(self.lists["IP"])
+		ipm, err = ipmatcher.new(self.lists["IP"])
 		if not ipm then
 			return nil, err
 		end
-		local match, err = ipm:match(self.ctx.bw.remote_addr)
+		match, err = ipm:match(self.ctx.bw.remote_addr)
 		if err then
 			return nil, err
 		end
@@ -225,13 +234,14 @@ function blacklist:is_blacklisted_ip()
 	end
 	if check_rdns then
 		-- Get rDNS
+		-- luacheck: ignore 421
 		local rdns_list, err = utils.get_rdns(self.ctx.bw.remote_addr)
 		if rdns_list then
 			-- Check if rDNS is in ignore list
 			local ignore = false
-			for i, rdns in ipairs(rdns_list) do
-				for j, suffix in ipairs(self.lists["IGNORE_RDNS"]) do
-					if rdns:sub(- #suffix) == suffix then
+			for _, rdns in ipairs(rdns_list) do
+				for _, suffix in ipairs(self.lists["IGNORE_RDNS"]) do
+					if rdns:sub(-#suffix) == suffix then
 						ignore = true
 						break
 					end
@@ -239,9 +249,9 @@ function blacklist:is_blacklisted_ip()
 			end
 			-- Check if rDNS is in blacklist
 			if not ignore then
-				for i, rdns in ipairs(rdns_list) do
-					for j, suffix in ipairs(self.lists["RDNS"]) do
-						if rdns:sub(- #suffix) == suffix then
+				for _, rdns in ipairs(rdns_list) do
+					for _, suffix in ipairs(self.lists["RDNS"]) do
+						if rdns:sub(-#suffix) == suffix then
 							return true, "rDNS " .. suffix
 						end
 					end
@@ -259,7 +269,7 @@ function blacklist:is_blacklisted_ip()
 			self.logger:log(ngx.ERR, "can't get ASN of IP " .. self.ctx.bw.remote_addr .. " : " .. err)
 		else
 			local ignore = false
-			for i, ignore_asn in ipairs(self.lists["IGNORE_ASN"]) do
+			for _, ignore_asn in ipairs(self.lists["IGNORE_ASN"]) do
 				if ignore_asn == tostring(asn) then
 					ignore = true
 					break
@@ -267,7 +277,7 @@ function blacklist:is_blacklisted_ip()
 			end
 			-- Check if ASN is in blacklist
 			if not ignore then
-				for i, bl_asn in ipairs(self.lists["ASN"]) do
+				for _, bl_asn in ipairs(self.lists["ASN"]) do
 					if bl_asn == tostring(asn) then
 						return true, "ASN " .. bl_asn
 					end
@@ -283,7 +293,7 @@ end
 function blacklist:is_blacklisted_uri()
 	-- Check if URI is in ignore list
 	local ignore = false
-	for i, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
+	for _, ignore_uri in ipairs(self.lists["IGNORE_URI"]) do
 		if utils.regex_match(self.ctx.bw.uri, ignore_uri) then
 			ignore = true
 			break
@@ -291,7 +301,7 @@ function blacklist:is_blacklisted_uri()
 	end
 	-- Check if URI is in blacklist
 	if not ignore then
-		for i, uri in ipairs(self.lists["URI"]) do
+		for _, uri in ipairs(self.lists["URI"]) do
 			if utils.regex_match(self.ctx.bw.uri, uri) then
 				return true, "URI " .. uri
 			end
@@ -304,7 +314,7 @@ end
 function blacklist:is_blacklisted_ua()
 	-- Check if UA is in ignore list
 	local ignore = false
-	for i, ignore_ua in ipairs(self.lists["IGNORE_USER_AGENT"]) do
+	for _, ignore_ua in ipairs(self.lists["IGNORE_USER_AGENT"]) do
 		if utils.regex_match(self.ctx.bw.http_user_agent, ignore_ua) then
 			ignore = true
 			break
@@ -312,7 +322,7 @@ function blacklist:is_blacklisted_ua()
 	end
 	-- Check if UA is in blacklist
 	if not ignore then
-		for i, ua in ipairs(self.lists["USER_AGENT"]) do
+		for _, ua in ipairs(self.lists["USER_AGENT"]) do
 			if utils.regex_match(self.ctx.bw.http_user_agent, ua) then
 				return true, "UA " .. ua
 			end

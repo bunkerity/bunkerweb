@@ -122,7 +122,7 @@ urllib3==2.0.6 \
     # via
     #   docker
     #   requests
-websocket-client==1.6.3 \
-    --hash=sha256:3aad25d31284266bcfcfd1fd8a743f63282305a364b8d0948a43bd606acc652f \
-    --hash=sha256:6cfc30d051ebabb73a5fa246efdcc14c8fbebbd0330f8984ac3bb6d9edd2ad03
+websocket-client==1.6.4 \
+    --hash=sha256:084072e0a7f5f347ef2ac3d8698a5e0b4ffbfcab607628cadabc650fc9a83a24 \
+    --hash=sha256:b3324019b3c28572086c4a319f91d1dcd44e6e11cd340232978c684a7650d0df
     # via docker

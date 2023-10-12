@@ -1,6 +1,6 @@
-local class       = require "middleclass"
-local plugin      = require "bunkerweb.plugin"
-local cjson       = require "cjson"
+local cjson = require "cjson"
+local class = require "middleclass"
+local plugin = require "bunkerweb.plugin"
 
 local letsencrypt = class("letsencrypt", plugin)
 
@@ -17,9 +17,12 @@ function letsencrypt:access()
 	return self:ret(true, "success")
 end
 
+-- luacheck: ignore 212
 function letsencrypt:api(ctx)
-	if not string.match(ctx.bw.uri, "^/lets%-encrypt/challenge$") or
-			(ctx.bw.request_method ~= "POST" and ctx.bw.request_method ~= "DELETE") then
+	if
+		not string.match(ctx.bw.uri, "^/lets%-encrypt/challenge$")
+		or (ctx.bw.request_method ~= "POST" and ctx.bw.request_method ~= "DELETE")
+	then
 		return false, nil, nil
 	end
 	local acme_folder = "/var/tmp/bunkerweb/lets-encrypt/.well-known/acme-challenge/"
@@ -32,7 +35,9 @@ function letsencrypt:api(ctx)
 	if ctx.bw.request_method == "POST" then
 		local file, err = io.open(acme_folder .. data.token, "w+")
 		if not file then
-			return true, ngx.HTTP_INTERNAL_SERVER_ERROR, { status = "error", msg = "can't write validation token : " .. err }
+			return true,
+				ngx.HTTP_INTERNAL_SERVER_ERROR,
+				{ status = "error", msg = "can't write validation token : " .. err }
 		end
 		file:write(data.validation)
 		file:close()
@@ -40,7 +45,9 @@ function letsencrypt:api(ctx)
 	elseif ctx.bw.request_method == "DELETE" then
 		local ok, err = os.remove(acme_folder .. data.token)
 		if not ok then
-			return true, ngx.HTTP_INTERNAL_SERVER_ERROR, { status = "error", msg = "can't remove validation token : " .. err }
+			return true,
+				ngx.HTTP_INTERNAL_SERVER_ERROR,
+				{ status = "error", msg = "can't remove validation token : " .. err }
 		end
 		return true, ngx.HTTP_OK, { status = "success", msg = "validation token removed" }
 	end
