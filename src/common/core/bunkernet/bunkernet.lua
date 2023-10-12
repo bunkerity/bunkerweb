@@ -1,8 +1,8 @@
-local class     = require "middleclass"
-local plugin    = require "bunkerweb.plugin"
-local utils     = require "bunkerweb.utils"
-local cjson     = require "cjson"
-local http      = require "resty.http"
+local cjson = require "cjson"
+local class = require "middleclass"
+local http = require "resty.http"
+local plugin = require "bunkerweb.plugin"
+local utils = require "bunkerweb.utils"
 
 local bunkernet = class("bunkernet", plugin)
 
@@ -49,12 +49,15 @@ function bunkernet:init_worker()
 		return self:ret(false, "missing instance ID")
 	end
 	-- Send ping request
-	local ok, err, status, data = self:ping()
+	local ok, err, status, _ = self:ping()
 	if not ok then
 		return self:ret(false, "error while sending request to API : " .. err)
 	end
 	if status ~= 200 then
-		return self:ret(false, "received status " .. tostring(status) .. " from API using instance ID " .. self.bunkernet_id)
+		return self:ret(
+			false,
+			"received status " .. tostring(status) .. " from API using instance ID " .. self.bunkernet_id
+		)
 	end
 	self.logger:log(ngx.NOTICE, "connectivity with API using instance ID " .. self.bunkernet_id .. " is successful")
 	return self:ret(true, "connectivity with API using instance ID " .. self.bunkernet_id .. " is successful")
@@ -82,7 +85,7 @@ function bunkernet:init()
 	local ret = true
 	local i = 0
 	local db = {
-		ip = {}
+		ip = {},
 	}
 	local f, err = io.open("/var/cache/bunkerweb/bunkernet/ip.list", "r")
 	if not f then
@@ -128,6 +131,7 @@ function bunkernet:access()
 	if db then
 		-- Check if is IP is present
 		if #db.ip > 0 then
+			-- luacheck: ignore 421
 			local present, err = utils.is_ip_in_networks(self.ctx.bw.remote_addr, db.ip)
 			if present == nil then
 				return self:ret(false, "can't check if ip is in db : " .. err)
@@ -166,8 +170,9 @@ function bunkernet:log(bypass_checks)
 		return self:ret(true, "IP is not global")
 	end
 	-- TODO : check if IP has been reported recently
+	-- luacheck: ignore 212 431
 	local function report_callback(premature, obj, ip, reason, method, url, headers)
-		local ok, err, status, data = obj:report(ip, reason, method, url, headers)
+		local ok, err, status, _ = obj:report(ip, reason, method, url, headers)
 		if status == 429 then
 			obj.logger:log(ngx.WARN, "bunkernet API is rate limiting us")
 		elseif not ok then
@@ -177,8 +182,16 @@ function bunkernet:log(bypass_checks)
 		end
 	end
 
-	local hdr, err = ngx.timer.at(0, report_callback, self, self.ctx.bw.remote_addr, reason, self.ctx.bw.request_method,
-		self.ctx.bw.request_uri, ngx.req.get_headers())
+	local hdr, err = ngx.timer.at(
+		0,
+		report_callback,
+		self,
+		self.ctx.bw.remote_addr,
+		reason,
+		self.ctx.bw.request_method,
+		self.ctx.bw.request_uri,
+		ngx.req.get_headers()
+	)
 	if not hdr then
 		return self:ret(false, "can't create report timer : " .. err)
 	end
@@ -218,7 +231,7 @@ function bunkernet:request(method, url, data)
 	local all_data = {
 		id = self.bunkernet_id,
 		version = self.version,
-		integration = self.integration
+		integration = self.integration,
 	}
 	if data then
 		for k, v in pairs(data) do
@@ -230,8 +243,8 @@ function bunkernet:request(method, url, data)
 		body = cjson.encode(all_data),
 		headers = {
 			["Content-Type"] = "application/json",
-			["User-Agent"] = "BunkerWeb/" .. self.version
-		}
+			["User-Agent"] = "BunkerWeb/" .. self.version,
+		},
 	})
 	httpc:close()
 	if not res then
@@ -257,7 +270,7 @@ function bunkernet:report(ip, reason, method, url, headers)
 		reason = reason,
 		method = method,
 		url = url,
-		headers = headers
+		headers = headers,
 	}
 	return self:request("POST", "/report", data)
 end

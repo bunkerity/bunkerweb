@@ -1,8 +1,8 @@
-local class  = require "middleclass"
+local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
-local utils  = require "bunkerweb.utils"
+local utils = require "bunkerweb.utils"
 
-local cors   = class("cors", plugin)
+local cors = class("cors", plugin)
 
 function cors:initialize(ctx)
 	-- Call parent initialize
@@ -17,7 +17,7 @@ function cors:initialize(ctx)
 		["CORS_MAX_AGE"] = "Access-Control-Max-Age",
 		["CORS_ALLOW_CREDENTIALS"] = "Access-Control-Allow-Credentials",
 		["CORS_ALLOW_METHODS"] = "Access-Control-Allow-Methods",
-		["CORS_ALLOW_HEADERS"] = "Access-Control-Allow-Headers"
+		["CORS_ALLOW_HEADERS"] = "Access-Control-Allow-Headers",
 	}
 end
 
@@ -43,7 +43,12 @@ function cors:header()
 		ngx.header.Vary = "Origin"
 	end
 	-- Check if Origin is allowed
-	if self.ctx.bw.http_origin and self.variables["CORS_DENY_REQUEST"] == "yes" and self.variables["CORS_ALLOW_ORIGIN"] ~= "*" and not utils.regex_match(self.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"]) then
+	if
+		self.ctx.bw.http_origin
+		and self.variables["CORS_DENY_REQUEST"] == "yes"
+		and self.variables["CORS_ALLOW_ORIGIN"] ~= "*"
+		and not utils.regex_match(self.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"])
+	then
 		self.logger:log(ngx.WARN, "origin " .. self.ctx.bw.http_origin .. " is not allowed")
 		return self:ret(true, "origin " .. self.ctx.bw.http_origin .. " is not allowed")
 	end
@@ -81,9 +86,17 @@ function cors:access()
 		return self:ret(true, "service doesn't use CORS")
 	end
 	-- Deny as soon as possible if needed
-	if self.ctx.bw.http_origin and self.variables["CORS_DENY_REQUEST"] == "yes" and self.variables["CORS_ALLOW_ORIGIN"] ~= "*" and not utils.regex_match(self.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"]) then
-		return self:ret(true, "origin " .. self.ctx.bw.http_origin .. " is not allowed, denying access",
-			utils.get_deny_status(self.ctx))
+	if
+		self.ctx.bw.http_origin
+		and self.variables["CORS_DENY_REQUEST"] == "yes"
+		and self.variables["CORS_ALLOW_ORIGIN"] ~= "*"
+		and not utils.regex_match(self.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"])
+	then
+		return self:ret(
+			true,
+			"origin " .. self.ctx.bw.http_origin .. " is not allowed, denying access",
+			utils.get_deny_status(self.ctx)
+		)
 	end
 	-- Send CORS policy with a 204 (no content) status
 	if self.ctx.bw.request_method == "OPTIONS" and self.ctx.bw.http_origin then

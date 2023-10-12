@@ -1,5 +1,5 @@
+local class = require "middleclass"
 local errlog = require "ngx.errlog"
-local class  = require "middleclass"
 local logger = class("logger")
 
 function logger:initialize(prefix)

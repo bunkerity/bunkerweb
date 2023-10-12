@@ -1,15 +1,15 @@
-local class     = require "middleclass"
+local cjson = require "cjson"
+local class = require "middleclass"
 local datastore = require "bunkerweb.datastore"
-local utils     = require "bunkerweb.utils"
-local logger    = require "bunkerweb.logger"
-local cjson     = require "cjson"
-local upload    = require "resty.upload"
-local rsignal   = require "resty.signal"
-local process   = require "ngx.process"
+local logger = require "bunkerweb.logger"
+local process = require "ngx.process"
+local rsignal = require "resty.signal"
+local upload = require "resty.upload"
+local utils = require "bunkerweb.utils"
 
-local api       = class("api")
+local api = class("api")
 
-api.global      = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
+api.global = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
 
 function api:initialize()
 	self.datastore = datastore:new()
@@ -26,6 +26,7 @@ function api:initialize()
 	end
 end
 
+-- luacheck: ignore 212
 function api:log_cmd(cmd, status, stdout, stderr)
 	local level = ngx.NOTICE
 	local prefix = "success"
@@ -33,7 +34,7 @@ function api:log_cmd(cmd, status, stdout, stderr)
 		level = ngx.ERR
 		prefix = "error"
 	end
-	self.logger:log(level, prefix .. " while running command " .. command)
+	self.logger:log(level, prefix .. " while running command " .. cmd)
 	self.logger:log(level, "stdout = " .. stdout)
 	self.logger:log(level, "stdout = " .. stderr)
 end
@@ -41,6 +42,7 @@ end
 -- TODO : use this if we switch to OpenResty
 function api:cmd(cmd)
 	-- Non-blocking command
+	-- luacheck: ignore 113
 	local ok, stdout, stderr, reason, status = shell.run(cmd, nil, 10000)
 	self.logger:log_cmd(cmd, status, stdout, stderr)
 	-- Timeout
@@ -51,6 +53,7 @@ function api:cmd(cmd)
 	return status == 0, reason, status
 end
 
+-- luacheck: ignore 212
 function api:response(http_status, api_status, msg)
 	local resp = {}
 	resp["status"] = api_status
@@ -101,6 +104,7 @@ api.global.POST["^/confs$"] = function(self)
 	form:set_timeout(1000)
 	local file = io.open(tmp, "w+")
 	while true do
+		-- luacheck: ignore 421
 		local typ, res, err = form:read()
 		if not typ then
 			file:close()
@@ -117,9 +121,9 @@ api.global.POST["^/confs$"] = function(self)
 	file:close()
 	local cmds = {
 		"rm -rf " .. destination .. "/*",
-		"tar xzf " .. tmp .. " -C " .. destination
+		"tar xzf " .. tmp .. " -C " .. destination,
 	}
-	for i, cmd in ipairs(cmds) do
+	for _, cmd in ipairs(cmds) do
 		local status = os.execute(cmd)
 		if status ~= 0 then
 			return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
@@ -176,17 +180,23 @@ end
 
 api.global.GET["^/bans$"] = function(self)
 	local data = {}
-	for i, k in ipairs(self.datastore:keys()) do
+	for _, k in ipairs(self.datastore:keys()) do
 		if k:find("^bans_ip_") then
 			local reason, err = self.datastore:get(k)
 			if err then
-				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
-					"can't access " .. k .. " from datastore : " .. reason)
+				return self:response(
+					ngx.HTTP_INTERNAL_SERVER_ERROR,
+					"error",
+					"can't access " .. k .. " from datastore : " .. reason
+				)
 			end
 			local ok, ttl = self.datastore:ttl(k)
 			if not ok then
-				return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error",
-					"can't access ttl " .. k .. " from datastore : " .. ttl)
+				return self:response(
+					ngx.HTTP_INTERNAL_SERVER_ERROR,
+					"error",
+					"can't access ttl " .. k .. " from datastore : " .. ttl
+				)
 			end
 			local ban = { ip = k:sub(9, #k), reason = reason, exp = math.floor(ttl) }
 			table.insert(data, ban)
@@ -196,7 +206,7 @@ api.global.GET["^/bans$"] = function(self)
 end
 
 api.global.GET["^/variables$"] = function(self)
-	local variables, err = datastore:get('variables', true)
+	local variables, err = datastore:get("variables", true)
 	if not variables then
 		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't access variables from datastore : " .. err)
 	end
@@ -219,9 +229,9 @@ function api:do_api_call()
 				if status ~= ngx.HTTP_OK then
 					ret = false
 				end
-				if (#resp["msg"] == 0) then
+				if #resp["msg"] == 0 then
 					resp["msg"] = ""
-				elseif (type(resp["msg"]) == "table") then
+				elseif type(resp["msg"]) == "table" then
 					resp["data"] = resp["msg"]
 					resp["msg"] = resp["status"]
 				end
@@ -231,10 +241,10 @@ function api:do_api_call()
 	end
 	local list, err = self.datastore:get("plugins", true)
 	if not list then
-		local status, resp = self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't list loaded plugins : " .. err)
+		local _, resp = self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't list loaded plugins : " .. err)
 		return false, resp["msg"], ngx.HTTP_INTERNAL_SERVER_ERROR, cjson.encode(resp)
 	end
-	for i, plugin in ipairs(list) do
+	for _, plugin in ipairs(list) do
 		if pcall(require, plugin.id .. "/" .. plugin.id) then
 			local plugin_lua = require(plugin.id .. "/" .. plugin.id)
 			if plugin_lua.api ~= nil then
