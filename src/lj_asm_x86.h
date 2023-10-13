@@ -140,7 +140,8 @@ static IRRef asm_fuseabase(ASMState *as, IRRef ref)
     }
   } else if (irb->o == IR_ADD && irref_isk(irb->op2)) {
     /* Fuse base offset (vararg load). */
-    as->mrm.ofs = IR(irb->op2)->i;
+    IRIns *irk = IR(irb->op2);
+    as->mrm.ofs = irk->o == IR_KINT ? irk->i : (int32_t)ir_kint64(irk)->u64;
     return irb->op1;
   }
   return ref;  /* Otherwise use the given array base. */

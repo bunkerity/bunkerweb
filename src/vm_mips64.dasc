@@ -5396,6 +5396,7 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |   settp LFUNC:RB, TMP0
     |  daddu TMP0, RA, RC
     |   sd LFUNC:RB, 0(TMP1)		// Store (tagged) copy of LFUNC.
+    |  daddiu TMP2, TMP2, -8
     |   daddiu TMP3, RC, 16+FRAME_VARG
     |  sltu AT, TMP0, TMP2
     |    ld KBASE, -4+PC2PROTO(k)(PC)

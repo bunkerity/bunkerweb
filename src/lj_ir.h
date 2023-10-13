@@ -76,8 +76,8 @@
   \
   _(ABS,	N , ref, ref) \
   _(LDEXP,	N , ref, ref) \
-  _(MIN,	C , ref, ref) \
-  _(MAX,	C , ref, ref) \
+  _(MIN,	N , ref, ref) \
+  _(MAX,	N , ref, ref) \
   _(FPMATH,	N , ref, lit) \
   \
   /* Overflow-checking arithmetic ops. */ \
