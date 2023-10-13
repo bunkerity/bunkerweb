@@ -69,7 +69,7 @@ typedef unsigned int uintptr_t;
 #define LJ_MAX_UPVAL	120		/* Max. # of upvalues. */
 
 #define LJ_MAX_IDXCHAIN	100		/* __index/__newindex chain limit. */
-#define LJ_STACK_EXTRA	(5+2*LJ_FR2)	/* Extra stack space (metamethods). */
+#define LJ_STACK_EXTRA	(5+3*LJ_FR2)	/* Extra stack space (metamethods). */
 
 #if defined(__powerpc64__) && _CALL_ELF != 2
 #define LJ_NUM_CBPAGE	4		/* Number of FFI callback pages. */
@@ -154,15 +154,9 @@ typedef uintptr_t BloomFilter;
 #define LJ_UNLIKELY(x)	__builtin_expect(!!(x), 0)
 
 #define lj_ffs(x)	((uint32_t)__builtin_ctz(x))
-/* Don't ask ... */
-#if defined(__INTEL_COMPILER) && (defined(__i386__) || defined(__x86_64__))
-static LJ_AINLINE uint32_t lj_fls(uint32_t x)
-{
-  uint32_t r; __asm__("bsrl %1, %0" : "=r" (r) : "rm" (x) : "cc"); return r;
-}
-#else
 #define lj_fls(x)	((uint32_t)(__builtin_clz(x)^31))
-#endif
+#define lj_ffs64(x)	((uint32_t)__builtin_ctzll(x))
+#define lj_fls64(x)	((uint32_t)(__builtin_clzll(x)^63))
 
 #if defined(__arm__)
 static LJ_AINLINE uint32_t lj_bswap(uint32_t x)
@@ -273,8 +267,12 @@ static LJ_AINLINE uint32_t lj_fls(uint32_t x)
 #else
 unsigned char _BitScanForward(unsigned long *, unsigned long);
 unsigned char _BitScanReverse(unsigned long *, unsigned long);
+unsigned char _BitScanForward64(unsigned long *, uint64_t);
+unsigned char _BitScanReverse64(unsigned long *, uint64_t);
 #pragma intrinsic(_BitScanForward)
 #pragma intrinsic(_BitScanReverse)
+#pragma intrinsic(_BitScanForward64)
+#pragma intrinsic(_BitScanReverse64)
 
 static LJ_AINLINE uint32_t lj_ffs(uint32_t x)
 {
@@ -284,6 +282,16 @@ static LJ_AINLINE uint32_t lj_ffs(uint32_t x)
 static LJ_AINLINE uint32_t lj_fls(uint32_t x)
 {
   unsigned long r; _BitScanReverse(&r, x); return (uint32_t)r;
+}
+
+static LJ_AINLINE uint32_t lj_ffs64(uint64_t x)
+{
+  unsigned long r; _BitScanForward64(&r, x); return (uint32_t)r;
+}
+
+static LJ_AINLINE uint32_t lj_fls64(uint64_t x)
+{
+  unsigned long r; _BitScanReverse64(&r, x); return (uint32_t)r;
 }
 #endif
 

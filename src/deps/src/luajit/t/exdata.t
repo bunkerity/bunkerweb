@@ -136,7 +136,7 @@ print(tostring(saved_q))
 cdata<void *>: 0xefdeaddeadbeef
 cdata<void *>: 0xefdeaddeadbeef
 --- err
-[TRACE --- test.lua:8 -- trace too short at thread.exdata]
+[TRACE --- test.lua:8 -- trace too short at test.lua:9]
 
 
 
@@ -195,7 +195,7 @@ print("get: " .. total)
 set: 0
 get: 10
 --- err
-[TRACE --- test.lua:14 -- trace too short at thread.exdata]
+[TRACE --- test.lua:14 -- trace too short at test.lua:15]
 [TRACE   1 test.lua:21 loop]
 
 

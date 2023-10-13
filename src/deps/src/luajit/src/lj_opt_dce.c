@@ -44,12 +44,12 @@ static void dce_propagate(jit_State *J)
     IRIns *ir = IR(ins);
     if (irt_ismarked(ir->t)) {
       irt_clearmark(ir->t);
-      pchain[ir->o] = &ir->prev;
     } else if (!ir_sideeff(ir)) {
       *pchain[ir->o] = ir->prev;  /* Reroute original instruction chain. */
       lj_ir_nop(ir);
       continue;
     }
+    pchain[ir->o] = &ir->prev;
     if (ir->op1 >= REF_FIRST) irt_setmark(IR(ir->op1)->t);
     if (ir->op2 >= REF_FIRST) irt_setmark(IR(ir->op2)->t);
   }

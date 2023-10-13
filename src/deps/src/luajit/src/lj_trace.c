@@ -621,22 +621,27 @@ static int trace_abort(jit_State *J)
     J->cur.link = 0;
     J->cur.linktype = LJ_TRLINK_NONE;
     lj_vmevent_send(L, TRACE,
+      cTValue *bot = tvref(L->stack)+LJ_FR2;
       cTValue *frame;
-      int size;
-      BCIns pc;
-      GCfunc *fn;
+      const BCIns *pc;
+      BCPos pos = 0;
       setstrV(L, L->top++, lj_str_newlit(L, "abort"));
       setintV(L->top++, traceno);
-      /* Find original function call to generate a better error message. */
-      frame = lj_debug_frame(L, 0, &size);
-      lj_assertL(frame != NULL, "missing debug frame");
-      fn = frame_func(frame);
-      if (frame == L->base-1 && isluafunc(fn))
-	pc = proto_bcpos(funcproto(fn), J->pc);
-      else
-	pc = lj_debug_framepc(L, fn, frame);
-      setfuncV(L, L->top++, fn);
-      setintV(L->top++, pc);
+      /* Find original Lua function call to generate a better error message. */
+      for (frame = J->L->base-1, pc = J->pc; ; frame = frame_prev(frame)) {
+	if (isluafunc(frame_func(frame))) {
+	  pos = proto_bcpos(funcproto(frame_func(frame)), pc);
+	  break;
+	} else if (frame_prev(frame) <= bot) {
+	  break;
+	} else if (frame_iscont(frame)) {
+	  pc = frame_contpc(frame) - 1;
+	} else {
+	  pc = frame_pc(frame) - 1;
+	}
+      }
+      setfuncV(L, L->top++, frame_func(frame));
+      setintV(L->top++, pos);
       copyTV(L, L->top++, restorestack(L, errobj));
       copyTV(L, L->top++, &J->errinfo);
     );

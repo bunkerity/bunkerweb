@@ -107,24 +107,20 @@ local map_logsr = { -- Logical, shifted register.
     [0] = {
       shift = 29, mask = 3,
       [0] = {
-	shift = 21, mask = 7,
-	[0] = "andDNMSg", "bicDNMSg", "andDNMSg", "bicDNMSg",
-	"andDNMSg", "bicDNMSg", "andDNMg", "bicDNMg"
+	shift = 21, mask = 1,
+	[0] = "andDNMSg", "bicDNMSg"
       },
       {
-	shift = 21, mask = 7,
-	[0] ="orr|movDN0MSg", "orn|mvnDN0MSg", "orr|movDN0MSg", "orn|mvnDN0MSg",
-	     "orr|movDN0MSg", "orn|mvnDN0MSg", "orr|movDN0Mg", "orn|mvnDN0Mg"
+	shift = 21, mask = 1,
+	[0] = "orr|movDN0MSg", "orn|mvnDN0MSg"
       },
       {
-	shift = 21, mask = 7,
-	[0] = "eorDNMSg", "eonDNMSg", "eorDNMSg", "eonDNMSg",
-	"eorDNMSg", "eonDNMSg", "eorDNMg", "eonDNMg"
+	shift = 21, mask = 1,
+	[0] = "eorDNMSg", "eonDNMSg"
       },
       {
-	shift = 21, mask = 7,
-	[0] = "ands|tstD0NMSg", "bicsDNMSg", "ands|tstD0NMSg", "bicsDNMSg",
-	"ands|tstD0NMSg", "bicsDNMSg", "ands|tstD0NMg", "bicsDNMg"
+	shift = 21, mask = 1,
+	[0] = "ands|tstD0NMSg", "bicsDNMSg"
       }
     },
     false -- unallocated
@@ -132,24 +128,20 @@ local map_logsr = { -- Logical, shifted register.
   {
     shift = 29, mask = 3,
     [0] = {
-      shift = 21, mask = 7,
-      [0] = "andDNMSg", "bicDNMSg", "andDNMSg", "bicDNMSg",
-      "andDNMSg", "bicDNMSg", "andDNMg", "bicDNMg"
+      shift = 21, mask = 1,
+      [0] = "andDNMSg", "bicDNMSg"
     },
     {
-      shift = 21, mask = 7,
-      [0] = "orr|movDN0MSg", "orn|mvnDN0MSg", "orr|movDN0MSg", "orn|mvnDN0MSg",
-      "orr|movDN0MSg", "orn|mvnDN0MSg", "orr|movDN0Mg", "orn|mvnDN0Mg"
+      shift = 21, mask = 1,
+      [0] = "orr|movDN0MSg", "orn|mvnDN0MSg"
     },
     {
-      shift = 21, mask = 7,
-      [0] = "eorDNMSg", "eonDNMSg", "eorDNMSg", "eonDNMSg",
-      "eorDNMSg", "eonDNMSg", "eorDNMg", "eonDNMg"
+      shift = 21, mask = 1,
+      [0] = "eorDNMSg", "eonDNMSg"
     },
     {
-      shift = 21, mask = 7,
-      [0] = "ands|tstD0NMSg", "bicsDNMSg", "ands|tstD0NMSg", "bicsDNMSg",
-      "ands|tstD0NMSg", "bicsDNMSg", "ands|tstD0NMg", "bicsDNMg"
+      shift = 21, mask = 1,
+      [0] = "ands|tstD0NMSg", "bicsDNMSg"
     }
   }
 }
@@ -735,7 +727,7 @@ local map_cond = {
   "hi", "ls", "ge", "lt", "gt", "le", "al",
 }
 
-local map_shift = { [0] = "lsl", "lsr", "asr", }
+local map_shift = { [0] = "lsl", "lsr", "asr", "ror"}
 
 local map_extend = {
   [0] = "uxtb", "uxth", "uxtw", "uxtx", "sxtb", "sxth", "sxtw", "sxtx",
