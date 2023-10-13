@@ -843,6 +843,11 @@ h6 {
   margin-bottom: 1.5rem !important;
 }
 
+.my-1\.5 {
+  margin-top: 0.375rem !important;
+  margin-bottom: 0.375rem !important;
+}
+
 .-mb-px {
   margin-bottom: -1px !important;
 }
@@ -891,10 +896,6 @@ h6 {
   margin-left: 1rem !important;
 }
 
-.mr-1 {
-  margin-right: 0.25rem !important;
-}
-
 .mr-2 {
   margin-right: 0.5rem !important;
 }
@@ -941,6 +942,10 @@ h6 {
 
 .mt-8 {
   margin-top: 2rem !important;
+}
+
+.ml-1\.5 {
+  margin-left: 0.375rem !important;
 }
 
 .block {
@@ -1097,24 +1102,20 @@ h6 {
   min-width: 0px !important;
 }
 
-.min-w-\[1050px\] {
-  min-width: 1050px !important;
-}
-
 .min-w-\[1100px\] {
   min-width: 1100px !important;
+}
+
+.min-w-\[110px\] {
+  min-width: 110px !important;
 }
 
 .min-w-\[500px\] {
   min-width: 500px !important;
 }
 
-.min-w-\[1200px\] {
-  min-width: 1200px !important;
-}
-
-.max-w-\[1100px\] {
-  max-width: 1100px !important;
+.max-w-\[1200px\] {
+  max-width: 1200px !important;
 }
 
 .max-w-\[200px\] {
@@ -1156,6 +1157,11 @@ h6 {
 
 .-translate-y-2 {
   --tw-translate-y: -0.5rem !important;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important;
+}
+
+.-translate-y-\[2px\] {
+  --tw-translate-y: -2px !important;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important;
 }
 
@@ -1206,6 +1212,11 @@ h6 {
 
 .translate-y-1\.5 {
   --tw-translate-y: 0.375rem !important;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important;
+}
+
+.-translate-y-\[1px\] {
+  --tw-translate-y: -1px !important;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important;
 }
 

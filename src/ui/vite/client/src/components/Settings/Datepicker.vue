@@ -106,7 +106,7 @@ const emits = defineEmits(["inp"]);
       "
       :disabled="props.settings.disabled || false"
       :name="props.settings.id"
-      :placeholder="date.format"
+      :placeholder="'mm/dd/yyyy h:m:s'"
       pattern="/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{4}$/g"
     />
   </div>

@@ -11,30 +11,54 @@ import BansList from "@components/Bans/List.vue";
 import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
-
+import { getBansByFilter } from "@utils/bans.js";
 const feedbackStore = useFeedbackStore();
 
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
-  ipName: "",
-  reason: "",
-  dateMin: "",
-  dateMax: "",
+  search: "",
+  reason: "all",
 });
 
 const instances = reactive({
   isPend: false,
   isErr: false,
   data: [],
-  hostnames : [],
-  total : computed(() => {return instances.hostnames.length}),
-})
+  hostnames: [],
+  total: computed(() => {
+    return instances.hostnames.length;
+  }),
+});
 
 const bans = reactive({
   data: [],
-  total : "",
-  reasonList: ['all'], // Based on reasons find on fetch
-  bansList : [] // Format {hostname : str, data : Array}
+  total: "",
+  reasonList: ["all"], // Based on reasons find on fetch
+  bansList: [], // Format {hostname : str, data : Array}
+  setup: computed(() => {
+    if (bans.data.length === 0) return;
+
+    // Create a global instance that regroup every ip
+    // And remove duplicate items
+    // And get all reasons
+    const reasons = ["all"];
+    const globalInst = [];
+    for (let i = 0; i < bans.data.length; i++) {
+      const instData = bans.data[i].data;
+      instData.forEach((item) => {
+        reasons.indexOf(item.reason) === -1 ? reasons.push(item.reason) : false;
+        const isItem = globalInst.find((globItem) => {
+          return item.ip === globItem.ip && item.reason === globItem.reason;
+        });
+        if (!isItem) globalInst.push(item);
+      });
+    }
+
+    bans.reasonList = reasons;
+    //Filter
+    const filterBans = getBansByFilter(globalInst, filters);
+    return filterBans;
+  }),
 });
 
 async function getData() {
@@ -43,65 +67,39 @@ async function getData() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   const hostnames = await getHostFromInst();
-  return await getBansFromInst(hostnames);
+  return await getHostFromInst();
 }
 
 async function getHostFromInst() {
   const hosts = [];
-    instances.data.forEach(instance => {
-      hosts.push(instance['hostname'])
-  })
-  instances.hostnames = hosts;
-  return hosts;
+  instances.data.forEach((instance) => {
+    hosts.push(instance["hostname"]);
+  });
+  return await setHostBan(hosts);
 }
 
-async function getBansFromInst(hostnames) {
-  if(hostnames.length === 0) return bans.data = [];
-    // Fetch all instances bans    
-    const promises = [];
-    for (let i = 0; i < hostnames.length; i++) {
-      const hostname = hostnames[i];
-      promises.push(getHostBan(hostname));
-    }
+async function setHostBan(hostnames) {
+  // Fetch all instances bans
+  const promises = [];
+  for (let i = 0; i < hostnames.length; i++) {
+    const hostname = hostnames[i];
+    promises.push(getHostBan(hostname));
+  }
 
-    // When all promises fulfill, 
-    const bansList = [];
-    Promise.all(promises).then((instances) => {
-        instances.forEach((instance, id) => {
-          bansList.push({hostname : hostnames[id], data: JSON.parse(instance.data) || []})
-        });
-
-        console.log(bansList)
-
-        // Create a global instance that regroup every ip
-        // And remove duplicate items
-        // And get all reasons
-        const reasons = ["all"];
-        const globalInst = {hostname : "all", data : []};
-        for (let i = 0; i < bansList.length; i++) {
-          const instData = bansList[i].data;
-          instData.forEach(item => {
-              // Format stamp and exp to ms
-              item.date = item.date.toString().length === 10 ? +`${item.date}000` : item.date;
-              item.exp = +`${item.exp}000`;
-              reasons.indexOf(item.reason) === -1 ? reasons.push(item.reason) : false;
-              const isItem = globalInst.data.find(globItem => {return item.ip === globItem.ip && item.reason === globItem.reason});
-              console.log(item.date.toString().length)
-              if(!isItem) globalInst.data.push(item)
-          })
-        }
-
-        bans.bansList = bansList;
-        bans.reasonList = reasons;
-      })
-
-
+  const bansList = [];
+  Promise.all(promises).then((instances) => {
+    instances.forEach((instance, id) => {
+      bansList.push({
+        hostname: hostnames[id],
+        data: JSON.parse(instance.data) || [],
+      });
+    });
+    bans.data = bansList;
+  });
 }
-
-
 
 async function getHostBan(hostname) {
   const data = {
@@ -114,10 +112,9 @@ async function getHostBan(hostname) {
     "POST",
     null,
     data,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
-
 
 onMounted(() => {
   getData();
@@ -151,7 +148,7 @@ const tab = reactive({
         name="ipName"
       >
         <SettingsInput
-          @inp="(v) => (filters.ipName = v)"
+          @inp="(v) => (filters.search = v)"
           :settings="{
             id: 'ipName',
             type: 'text',
@@ -165,19 +162,25 @@ const tab = reactive({
           @inp="(v) => (filters.reason = v === 'all' ? 'all' : v)"
           :settings="{
             id: 'reason',
-            value: 'all',
+            value: filters.reason,
             values: bans.reasonList,
           }"
         />
       </SettingsLayout>
     </CardBase>
     <CardBase
-      class="max-w-[1100px] col-span-12 overflow-y-hidden min-h-[400px]"
+      class="max-w-[1200px] col-span-12 overflow-y-hidden min-h-[400px]"
       label="ACTIONS"
     >
-      <BansTabs @tab="(v) => tab.current = v" />
-      <BansList :items="bans.bansList" :class="[tab.current === 'list' ? true : 'hidden']"  />
-      <BansAdd @addBans="getData()" :class="[tab.current === 'add' ? true : 'hidden']"  />
+      <BansTabs @tab="(v) => (tab.current = v)" />
+      <BansList
+        :items="bans.setup"
+        :class="[tab.current === 'list' ? true : 'hidden']"
+      />
+      <BansAdd
+        @addBans="getData()"
+        :class="[tab.current === 'add' ? true : 'hidden']"
+      />
     </CardBase>
   </Dashboard>
 </template>

@@ -31,7 +31,7 @@ const emits = defineEmits(["close"]);
       props.type === 'success' ? 'bg-green-500' : '',
       props.type !== 'success' && props.type !== 'error' ? 'bg-sky-500' : '',
     ]"
-    class="my-2 border relative p-4 w-11/12 min-h-20 rounded-lg hover:scale-102 transition shadow-md break-words dark:brightness-90"
+    class="my-1.5 border relative p-4 w-11/12 rounded-lg hover:scale-102 transition shadow-md break-words dark:brightness-90"
   >
     <div class="flex justify-between align-top items-start">
       <h5 class="text-lg mb-0 text-white">

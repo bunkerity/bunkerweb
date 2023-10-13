@@ -96,7 +96,7 @@ async function sendBans() {
     "POST",
     getValidBans(),
     addBans,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "error") return;
     // Case succeed, delete items from UI
@@ -124,7 +124,7 @@ async function sendBans() {
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="w-6 h-6"
+          class="w-6 h-6 -translate-y-[1px]"
         >
           <path
             stroke-linecap="round"
@@ -147,7 +147,7 @@ async function sendBans() {
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="w-6 h-6"
+          class="w-5.5 h-5.5 -translate-y-[1px]"
         >
           <path
             stroke-linecap="round"
@@ -159,10 +159,9 @@ async function sendBans() {
       </ButtonBase>
     </div>
     <div class="overflow-x-auto col-span-12 grid grid-cols-12">
-
       <ListBase
         v-if="bans.items.length > 0"
-        class="min-w-[1200px] h-full col-span-12 "
+        class="min-w-[110px] h-full col-span-12"
         :header="addHeader"
         :positions="addPositions"
       >
