@@ -9,9 +9,9 @@
   "git_repository": [
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20230911",
+      "name": "LuaJIT v2.1-20231006",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "e598aeb7426dbc069f90ba70db9bce43cd573b0e"
+      "commit": "492cfdd0d829e21abbf8ef8761aa48a3daf5a73f"
     },
     {
       "id": "modsecurity",
