@@ -67,8 +67,6 @@ jobs:
       - name: Fix version without a starting number
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev'
         run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-      - name: Install BunkerWeb
-        run: sudo apt install -fy /tmp/bunkerweb.deb
       - name: Edit configuration files
         run: |
           # Misc
@@ -88,8 +86,11 @@ jobs:
           echo "LOG_LEVEL=info" | sudo tee -a /etc/bunkerweb/variables.env
           sudo chown nginx:nginx /etc/bunkerweb/variables.env
           sudo chmod 777 /etc/bunkerweb/variables.env
+      - name: Install BunkerWeb
+        run: sudo apt install -fy /tmp/bunkerweb.deb
       - name: Run tests
         run: |
           cd ./tests/core/${{ inputs.TEST }}
           MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install --no-cache-dir --require-hashes -r {} \;
+          sudo truncate -s 0 /var/log/bunkerweb/error.log
           ./test.sh "linux"
