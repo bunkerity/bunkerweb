@@ -3,11 +3,16 @@ import json
 
 def set_res(req, method, message = ""):
 
-    print(req.text)
+    print(req)
+    print(method)
     data = req.text
 
-    if type(json.loads(req.text)) is dict and "message" in json.loads(req.text).keys() and "data" in json.loads(req.text)["message"].keys():
-        data = json.dumps(json.loads(req.text)["message"]["data"])
+    if type(json.loads(req.text)) is dict :
+        req_JSON = json.loads(req.text)
+        if "message" in req_JSON and "data" in req_JSON.get('message') :
+            req_JSON_Nested = req_JSON["message"]["data"]
+        if "message" in req_JSON and not "data" in req_JSON.get('message') :
+            req_JSON_Nested = req_JSON["message"]
     
     return {
         "type" : "success" if req.status_code == requests.codes.ok else "error",

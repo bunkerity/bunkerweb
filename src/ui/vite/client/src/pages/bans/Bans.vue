@@ -45,6 +45,7 @@ const bans = reactive({
     const globalInst = [];
     for (let i = 0; i < bans.data.length; i++) {
       const instData = bans.data[i].data;
+      console.log(instData);
       instData.forEach((item) => {
         reasons.indexOf(item.reason) === -1 ? reasons.push(item.reason) : false;
         const isItem = globalInst.find((globItem) => {
@@ -92,11 +93,13 @@ async function setHostBan(hostnames) {
   const bansList = [];
   Promise.all(promises).then((instances) => {
     instances.forEach((instance, id) => {
+      if (!Array.isArray(JSON.parse(instance.data))) return;
       bansList.push({
         hostname: hostnames[id],
         data: JSON.parse(instance.data) || [],
       });
     });
+    console.log(bans.data);
     bans.data = bansList;
   });
 }
@@ -174,6 +177,7 @@ const tab = reactive({
     >
       <BansTabs @tab="(v) => (tab.current = v)" />
       <BansList
+        @unban="getData()"
         :items="bans.setup"
         :class="[tab.current === 'list' ? true : 'hidden']"
       />

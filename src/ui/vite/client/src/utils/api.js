@@ -16,7 +16,7 @@ export async function fetchAPI(
   method,
   body = false,
   state = null,
-  addFeedback = null,
+  addFeedback = null
 ) {
   // Block scope state object if any passed to avoid error
   !state ? (state = { isPend: false, isErr: false, data: {} }) : false;
@@ -53,7 +53,7 @@ export async function fetchAPI(
         ? addFeedback(
             err["type"] || "error",
             err["status"] || 500,
-            err["message"] || "Internal Server Error",
+            err["message"] || "Internal Server Error"
           )
         : false;
       // Set custom error data before throwing err

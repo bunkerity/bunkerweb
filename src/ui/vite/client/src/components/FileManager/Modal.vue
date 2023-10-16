@@ -167,9 +167,7 @@ function createFile() {
       data: editor.getValue(),
     },
   ];
-
   updateConfig(conf);
-  if (props.action === "delete") deleteConfig(conf);
 }
 
 async function updateConfig(conf) {

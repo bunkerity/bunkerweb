@@ -2,7 +2,6 @@
 import Dashboard from "@layouts/Dashboard.vue";
 import InstanceCard from "@components/Instance/Card.vue";
 import InstanceModalDelete from "@components/Instance/Modal/Delete.vue";
-import InstanceModalPing from "@components/Instance/Modal/Ping.vue";
 import { reactive, computed, onMounted } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
@@ -33,33 +32,17 @@ async function getInstances() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
 async function actionInstance(data) {
-  modal.hostname = data.hostname;
-  if (data.operation === "ping") {
-    ping.isPend = true;
-    ping.isErr = false;
-    ping.data = [];
-    modal.pingIsOpen = true;
-    await fetchAPI(
-      `/api/instances/${data.hostname}/${data.operation}`,
-      "POST",
-      null,
-      ping,
-      feedbackStore.addFeedback,
-    );
-    return;
-  }
-
   await fetchAPI(
-    `/api/${data.hostname}/${data.operation}`,
+    `/api/instances/${data.hostname}/${data.operation}`,
     "POST",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await getInstances();
 }
@@ -72,11 +55,11 @@ const ping = reactive({
 
 async function deleteInstance(data) {
   await fetchAPI(
-    "api/instances",
+    `/api/instances/${data.hostname}`,
     "DELETE",
-    JSON.stringify(data),
+    null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await getInstances();
 }
@@ -103,11 +86,6 @@ onMounted(async () => {
       @delete="(v) => deleteInstance(v)"
       @close="modal.delIsOpen = false"
       :isOpen="modal.delIsOpen"
-      :hostname="modal.hostname"
-    />
-    <InstanceModalPing
-      @close="modal.pingIsOpen = false"
-      :isOpen="modal.pingIsOpen"
       :hostname="modal.hostname"
     />
   </Dashboard>

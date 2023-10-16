@@ -1,6 +1,5 @@
 <script setup>
 import Dashboard from "@layouts/Dashboard.vue";
-import ApiState from "@components/Api/State.vue";
 import HomeCardStructure from "@components/Home/Card/Structure.vue";
 import HomeCardSvgVersion from "@components/Home/Card/Svg/Version.vue";
 import HomeCardSvgInstances from "@components/Home/Card/Svg/Instances.vue";
@@ -18,10 +17,10 @@ const instances = reactive({
   data: [],
   count: computed(() => instances.data.length),
   up: computed(() =>
-    instances.data.filter((item) => item.status === "up").length.toString(),
+    instances.data.filter((item) => item.status === "up").length.toString()
   ),
   down: computed(() =>
-    instances.data.filter((item) => item.status !== "up").length.toString(),
+    instances.data.filter((item) => item.status !== "up").length.toString()
   ),
 });
 
@@ -31,7 +30,7 @@ async function getInstances() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -52,7 +51,7 @@ async function getVersion() {
     "GET",
     null,
     version,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -64,10 +63,10 @@ const plugins = reactive({
   data: [],
   num: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.data.filter((item) => item["external"] === false).length,
+    () => plugins.data.filter((item) => item["external"] === false).length
   ),
   external: computed(
-    () => plugins.data.filter((item) => item["external"] === true).length,
+    () => plugins.data.filter((item) => item["external"] === true).length
   ),
   services: computed(() => {
     if (
@@ -94,6 +93,9 @@ const conf = reactive({
   isErr: false,
   // Data from fetch
   data: [],
+  services: computed(() => {
+    Object.keys(conf.data.services).length;
+  }),
 });
 
 async function getConf() {
@@ -104,14 +106,14 @@ async function getConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -125,12 +127,6 @@ onMounted(async () => {
 <template>
   <Dashboard>
     <!-- version -->
-    <ApiState
-      class="col-span-12 md:col-span-6 2xl:col-span-4"
-      :isErr="version.isErr"
-      :isPend="version.isPend"
-      :isData="version.data ? true : false"
-    />
     <HomeCardStructure
       v-if="!version.isPend && !version.isErr && version.data"
       :href="'#'"
@@ -150,12 +146,6 @@ onMounted(async () => {
     <!-- end version -->
 
     <!-- instances -->
-    <ApiState
-      class="col-span-12 md:col-span-6 2xl:col-span-4"
-      :isErr="instances.isErr"
-      :isPend="instances.isPend"
-      :isData="instances.data ? true : false"
-    />
     <HomeCardStructure
       v-if="!instances.isPend && !instances.isErr && instances.data"
       :href="'/admin/instances'"
@@ -181,12 +171,6 @@ onMounted(async () => {
     <!-- end instances -->
 
     <!-- services -->
-    <ApiState
-      class="col-span-12 md:col-span-6 2xl:col-span-4"
-      :isErr="plugins.isErr || conf.isErr"
-      :isPend="plugins.isPend || conf.isPend"
-      :isData="plugins.data ? true : false"
-    />
     <HomeCardStructure
       v-if="
         !plugins.isPend &&
@@ -210,22 +194,9 @@ onMounted(async () => {
       <HomeCardSvgServices />
     </HomeCardStructure>
     <!-- end services-->
-
     <!-- services -->
-    <ApiState
-      class="col-span-12 md:col-span-6 2xl:col-span-4"
-      :isErr="plugins.isErr || conf.isErr"
-      :isPend="plugins.isPend || conf.isPend"
-      :isData="plugins.data ? true : false"
-    />
     <HomeCardStructure
-      v-if="
-        !plugins.isPend &&
-        !conf.isPend &&
-        !plugins.isErr &&
-        !conf.isErr &&
-        plugins.data
-      "
+      v-if="!conf.isPend && !conf.isErr && conf.data"
       :href="'/admin/plugins'"
       :name="'plugins'"
       :count="plugins.num || '0'"

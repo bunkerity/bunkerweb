@@ -62,8 +62,8 @@ const services = reactive({
     const cloneMultisitePlugin = setPluginsData(
       getPluginsByContext(
         JSON.parse(JSON.stringify(services.data)),
-        "multisite",
-      ),
+        "multisite"
+      )
     );
 
     // Get only services custom conf
@@ -147,14 +147,14 @@ async function getGlobalConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     services,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -173,6 +173,31 @@ function changeServ(servName) {
   services.activeService = servName;
   // Remove previous config services changes
   config.$reset();
+}
+
+async function sendServConf() {
+  const promises = [];
+  // Send service
+  const servicesConf = conf.data.services;
+  if (Object.keys(servicesConf).length > 0) {
+    for (const [key, value] of Object.entries(servicesConf)) {
+      if (Object.keys(value).length === 0) continue;
+      const serviceName = key;
+      promises.push(
+        await fetchAPI(
+          `/api/config/service/${serviceName}?method=ui`,
+          "PUT",
+          value,
+          null,
+          feedbackStore.addFeedback
+        )
+      );
+    }
+  }
+  // When all conf responded, refetch global conf
+  Promise.all(promises).then((services) => {
+    getGlobalConf();
+  });
 }
 
 // Show service data logic
@@ -234,7 +259,7 @@ onMounted(async () => {
               value:
                 services.activeService === 'new' ? '' : services.activeService,
               values: Object.keys(services.setup).filter(
-                (item) => item !== 'new',
+                (item) => item !== 'new'
               ),
               placeholder: 'Services',
             }"
@@ -331,7 +356,7 @@ onMounted(async () => {
           />
         </div>
         <div class="col-span-12 flex w-full justify-center mt-8 mb-2">
-          <ButtonBase @click="sendConf()" color="valid" size="lg">
+          <ButtonBase @click="sendServConf()" color="valid" size="lg">
             SAVE
           </ButtonBase>
         </div>

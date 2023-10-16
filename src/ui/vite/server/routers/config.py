@@ -48,8 +48,9 @@ async def update_global_config(config: Annotated[dict, Body()], method: str):
     response_model=ResponseModel,
     summary="Update service config",
 )
-async def update_service_config(config: Dict[str, str], method: str, service_name: str):
-    req = requests.put(f"{API_URL}/config/service?method={method}", data=config)
+async def update_service_config(config: Annotated[dict, Body()], method: str, service_name: str):
+    data = json.dumps(config, skipkeys=True, allow_nan=True, indent=6)
+    req = requests.put(f"{API_URL}/config/service/{service_name}?method={method}", data=data)
     res = set_res(req, "PUT", f"Update service config {service_name}")
     return res
 

@@ -6,10 +6,14 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsCheckbox from "@components/Settings/Checkbox.vue";
 import SettingsDatepicker from "@components/Settings/Datepicker.vue";
 import ButtonBase from "@components/Button/Base.vue";
+import ButtonRefresh from "@components/Button/Refresh.vue";
 import { useSelectBanStore } from "@store/bans.js";
 import { reactive } from "vue";
+import { useFeedbackStore } from "@store/global.js";
 
+const feedbackStore = useFeedbackStore();
 const selectBanStore = useSelectBanStore();
+const emits = defineEmits(["unban"]);
 
 const props = defineProps({
   items: {
@@ -73,7 +77,21 @@ function toggleAllCheck() {
   });
 }
 
-function sendUnban() {}
+async function sendUnban() {
+  await fetchAPI(
+    `/api/instances/bans`,
+    "POST",
+    selectBanStore.data,
+    addBans,
+    feedbackStore.addFeedback
+  ).then((res) => {
+    if (res.type === "error") return;
+    // Case succeed, delete items from UI
+    // And emit add event to refetch ban list
+    list.checkAll = false;
+    emits("unban");
+  });
+}
 </script>
 
 <template>

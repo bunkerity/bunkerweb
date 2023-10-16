@@ -18,6 +18,15 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  textState: {
+    type: Object,
+    required: false,
+    default: {
+      isPend: "Pending data from API",
+      isErr: "Error accessing API",
+      isData: "No data to display",
+    },
+  },
 });
 </script>
 
@@ -28,12 +37,12 @@ const props = defineProps({
         <p class="m-0 dark:text-white">
           {{
             isPend
-              ? "Pending data from API"
+              ? props.textState.isPend
               : isErr
-              ? "Error accessing API"
+              ? props.textState.isErr
               : isData
               ? ""
-              : "No data to display"
+              : props.textState.isData
           }}
         </p>
       </div>

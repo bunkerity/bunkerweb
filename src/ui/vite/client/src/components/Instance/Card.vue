@@ -1,9 +1,7 @@
 <script setup>
 import ButtonBase from "@components/Button/Base.vue";
 import { reactive, defineProps, defineEmits, markRaw } from "vue";
-import InstanceSvgBans from "@components/Instance/Svg/Bans.vue";
 import InstanceSvgPing from "@components/Instance/Svg/Ping.vue";
-import InstanceSvgStop from "@components/Instance/Svg/Stop.vue";
 import InstanceSvgDelete from "@components/Instance/Svg/Delete.vue";
 
 const props = defineProps({
@@ -101,7 +99,7 @@ const emits = defineEmits(["action", "delete"]);
                     hostname: props.hostname,
                     operation: action.name,
                   }
-                : props.hostname,
+                : props.hostname
             )
           "
           @pointerover="action.popup = true"
