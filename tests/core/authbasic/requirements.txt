@@ -166,6 +166,7 @@ urllib3==2.0.6 \
     #   -r requirements.in
     #   requests
     #   selenium
+    #   urllib3
 wsproto==1.2.0 \
     --hash=sha256:ad565f26ecb92588a3e43bc3d96164de84cd9902482b130d0ddbaa9664a85065 \
     --hash=sha256:b9acddd652b585d75b20477888c56642fdade28bdfd3579aa24a4d2c037dd736

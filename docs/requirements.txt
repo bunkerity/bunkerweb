@@ -236,9 +236,9 @@ mkdocs==1.5.3 \
     #   -r requirements.in
     #   mike
     #   mkdocs-material
-mkdocs-material==9.4.5 \
-    --hash=sha256:0922e3e34d95dbf3f0c84fc817a233e1cbd5874830c6fd821d525ba90e0ce077 \
-    --hash=sha256:efaa52843a8c64b99bcf5a97cf4ba57d410424828e3087b13c9b3954e8adb5ff
+mkdocs-material==9.4.6 \
+    --hash=sha256:09665e60df7ee9e5ff3a54af173f6d45be718b1ee7dd962bcff3102b81fb0c14 \
+    --hash=sha256:78802035d5768a78139c84ad7dce0c6493e8f7dc4861727d36ed91d1520a54da
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
@@ -472,6 +472,7 @@ typepy==1.3.2 \
     #   dataproperty
     #   pytablewriter
     #   tabledata
+    #   typepy
 urllib3==2.0.6 \
     --hash=sha256:7a7c7003b000adf9e7ca2a377c9688bbc54ed41b985789ed576570342a375cd2 \
     --hash=sha256:b19e1a85d206b56d7df1d5e683df4a7725252a964e3993648dd0fb5a1c157564

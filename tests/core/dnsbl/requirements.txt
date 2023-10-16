@@ -119,3 +119,4 @@ urllib3==2.0.6 \
     # via
     #   -r requirements.in
     #   requests
+    #   urllib3
