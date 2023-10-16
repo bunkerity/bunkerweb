@@ -106,8 +106,10 @@ try:
             logger.info(
                 f"Whitelist for {kind} is already in cache, skipping downloads...",
             )
-
             if not urls[kind]:
+                logger.info(
+                    f"Whitelist for {kind} is already in cache, skipping downloads...",
+                )
                 whitelist_path.joinpath(f"{kind}.list").unlink(missing_ok=True)
                 deleted, err = del_file_in_db(f"{kind}.list", db)
                 if not deleted:

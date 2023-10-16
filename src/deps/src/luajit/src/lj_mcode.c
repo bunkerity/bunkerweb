@@ -29,6 +29,11 @@
 #include <valgrind/valgrind.h>
 #endif
 
+#if LJ_TARGET_WINDOWS
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
+
 #if LJ_TARGET_IOS
 void sys_icache_invalidate(void *start, size_t len);
 #endif
@@ -41,6 +46,8 @@ void lj_mcode_sync(void *start, void *end)
 #endif
 #if LJ_TARGET_X86ORX64
   UNUSED(start); UNUSED(end);
+#elif LJ_TARGET_WINDOWS
+  FlushInstructionCache(GetCurrentProcess(), start, (char *)end-(char *)start);
 #elif LJ_TARGET_IOS
   sys_icache_invalidate(start, (char *)end-(char *)start);
 #elif LJ_TARGET_PPC
@@ -57,9 +64,6 @@ void lj_mcode_sync(void *start, void *end)
 #if LJ_HASJIT
 
 #if LJ_TARGET_WINDOWS
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 
 #define MCPROT_RW	PAGE_READWRITE
 #define MCPROT_RX	PAGE_EXECUTE_READ
@@ -363,7 +367,7 @@ void lj_mcode_limiterr(jit_State *J, size_t need)
   sizemcode = (size_t)J->param[JIT_P_sizemcode] << 10;
   sizemcode = (sizemcode + LJ_PAGESIZE-1) & ~(size_t)(LJ_PAGESIZE - 1);
   maxmcode = (size_t)J->param[JIT_P_maxmcode] << 10;
-  if ((size_t)need > sizemcode)
+  if (need * sizeof(MCode) > sizemcode)
     lj_trace_err(J, LJ_TRERR_MCODEOV);  /* Too long for any area. */
   if (J->szallmcarea + sizemcode > maxmcode)
     lj_trace_err(J, LJ_TRERR_MCODEAL);

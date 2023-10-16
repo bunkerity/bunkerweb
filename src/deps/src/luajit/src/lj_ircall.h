@@ -63,7 +63,7 @@ typedef struct CCallInfo {
 /* Helpers for conditional function definitions. */
 #define IRCALLCOND_ANY(x)		x
 
-#if LJ_TARGET_X86ORX64
+#if LJ_TARGET_X86ORX64 || LJ_TARGET_ARM64
 #define IRCALLCOND_FPMATH(x)		NULL
 #else
 #define IRCALLCOND_FPMATH(x)		x

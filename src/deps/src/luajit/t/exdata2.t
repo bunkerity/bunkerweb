@@ -160,7 +160,7 @@ print(tostring(saved_q))
 cdata<void *>: 0xefdeaddeadbeef
 cdata<void *>: 0xefdeaddeadbeef
 --- err
-[TRACE --- test.lua:8 -- trace too short at thread.exdata2]
+[TRACE --- test.lua:8 -- trace too short at test.lua:9]
 
 
 
@@ -224,7 +224,7 @@ get: 10
 cdata<void *>: NULL
 cdata<void *>: 0xefdeaddeadbeef
 --- err
-[TRACE --- test.lua:15 -- trace too short at thread.exdata2]
+[TRACE --- test.lua:15 -- trace too short at test.lua:16]
 [TRACE   1 test.lua:22 loop]
 
 

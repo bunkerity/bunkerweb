@@ -426,9 +426,7 @@ the toolchain used to compile LuaJIT:
 on the C&nbsp;stack. The contents of the C++&nbsp;exception object
 pass through unmodified.</li>
 <li>Lua errors can be caught on the C++ side with <tt>catch(...)</tt>.
-The corresponding Lua error message can be retrieved from the Lua stack.<br>
-For MSVC for Windows 64 bit this requires compilation of your C++ code
-with <tt>/EHa</tt>.</li>
+The corresponding Lua error message can be retrieved from the Lua stack.</li>
 <li>Throwing Lua errors across C++ frames is safe. C++ destructors
 will be called.</li>
 </ul>

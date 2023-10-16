@@ -1990,6 +1990,7 @@ static void asm_prof(ASMState *as, IRIns *ir)
 static void asm_stack_check(ASMState *as, BCReg topslot,
 			    IRIns *irp, RegSet allow, ExitNo exitno)
 {
+  int savereg = 0;
   Reg pbase;
   uint32_t k;
   if (irp) {
@@ -2000,12 +2001,14 @@ static void asm_stack_check(ASMState *as, BCReg topslot,
       pbase = rset_pickbot(allow);
     } else {
       pbase = RID_RET;
-      emit_lso(as, ARMI_LDR, RID_RET, RID_SP, 0);  /* Restore temp. register. */
+      savereg = 1;
     }
   } else {
     pbase = RID_BASE;
   }
   emit_branch(as, ARMF_CC(ARMI_BL, CC_LS), exitstub_addr(as->J, exitno));
+  if (savereg)
+    emit_lso(as, ARMI_LDR, RID_RET, RID_SP, 0);  /* Restore temp. register. */
   k = emit_isk12(0, (int32_t)(8*topslot));
   lj_assertA(k, "slot offset %d does not fit in K12", 8*topslot);
   emit_n(as, ARMI_CMP^k, RID_TMP);
@@ -2017,7 +2020,7 @@ static void asm_stack_check(ASMState *as, BCReg topslot,
     if (ra_hasspill(irp->s))
       emit_lso(as, ARMI_LDR, pbase, RID_SP, sps_scale(irp->s));
     emit_lso(as, ARMI_LDR, RID_TMP, RID_TMP, (i & 4095));
-    if (ra_hasspill(irp->s) && !allow)
+    if (savereg)
       emit_lso(as, ARMI_STR, RID_RET, RID_SP, 0);  /* Save temp. register. */
     emit_loadi(as, RID_TMP, (i & ~4095));
   } else {

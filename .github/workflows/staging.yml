@@ -93,7 +93,7 @@ jobs:
       - id: set-matrix
         run: |
           tests=$(find ./tests/core/ -maxdepth 1 -mindepth 1 -type d -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
-          echo "::set-output name=tests::$tests"
+          echo "tests=$tests" >> $GITHUB_OUTPUT
     outputs:
       tests: ${{ steps.set-matrix.outputs.tests }}
 

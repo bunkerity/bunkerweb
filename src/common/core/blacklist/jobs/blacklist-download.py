@@ -122,8 +122,10 @@ try:
             logger.info(
                 f"Blacklist for {kind} is already in cache, skipping downloads...",
             )
-
             if not urls[kind]:
+                logger.warning(
+                    f"Blacklist for {kind} is cached but no URL is configured, removing from cache...",
+                )
                 blacklist_path.joinpath(f"{kind}.list").unlink(missing_ok=True)
                 deleted, err = del_file_in_db(f"{kind}.list", db)
                 if not deleted:

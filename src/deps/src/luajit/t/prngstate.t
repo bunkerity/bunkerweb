@@ -49,7 +49,7 @@ print('ok')
 ok
 --- jv
 --- err eval
-qr/trace too short at jit\.prngstate/
+qr/trace too short at test.lua:4/
 
 
 
