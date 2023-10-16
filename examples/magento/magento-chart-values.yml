@@ -8,3 +8,4 @@ magentoAdminUri: "admin"
 mariadb:
   auth:
     password: "changeme1337"
+elasticsearch.enabled: false
