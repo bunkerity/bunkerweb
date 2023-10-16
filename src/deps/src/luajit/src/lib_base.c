@@ -617,7 +617,10 @@ static int ffh_resume(lua_State *L, lua_State *co, int wrap)
     setstrV(L, L->base-LJ_FR2, lj_err_str(L, em));
     return FFH_RES(2);
   }
-  lj_state_growstack(co, (MSize)(L->top - L->base));
+  if (lj_state_cpgrowstack(co, (MSize)(L->top - L->base)) != LUA_OK) {
+    cTValue *msg = --co->top;
+    lj_err_callermsg(L, strVdata(msg));
+  }
   return FFH_RETRY;
 }
 

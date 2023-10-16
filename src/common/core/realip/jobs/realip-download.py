@@ -77,12 +77,13 @@ try:
 
     # Don't go further if the cache is fresh
     if is_cached_file(realip_path.joinpath("combined.list"), "hour", db):
+        logger.info("RealIP list is already in cache, skipping download...")
         if not urls:
+            logger.warning("No URL found, deleting combined.list from cache...")
             tmp_realip_path.joinpath("combined.list").unlink(missing_ok=True)
             deleted, err = del_file_in_db("combined.list", db)
             if not deleted:
                 logger.warning(f"Couldn't delete combined.list from cache : {err}")
-        logger.info("RealIP list is already in cache, skipping download...")
         _exit(0)
 
     # Download and write data to temp file

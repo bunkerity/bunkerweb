@@ -4,6 +4,7 @@
   "name": "Dummy example plugin",
   "description": "Just an example plugin.",
   "version": "0.1",
+  "stream": "no",
   "settings": {
     "DUMMY_SETTING": {
       "context": "multisite",

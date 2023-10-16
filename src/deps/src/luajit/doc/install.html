@@ -203,7 +203,7 @@ Or install Microsoft's Visual Studio (MSVC).
 </p>
 <h3>Building with MSVC</h3>
 <p>
-Open a "Visual Studio Command Prompt" (either x86 or x64), <tt>cd</tt> to the
+Open a "Visual Studio Command Prompt" (x86, x64 or ARM64), <tt>cd</tt> to the
 directory with the source code and run these commands:
 </p>
 <pre class="code">
@@ -213,6 +213,9 @@ msvcbuild
 <p>
 Check the <tt>msvcbuild.bat</tt> file for more options.
 Then follow the installation instructions below.
+</p>
+<p>
+For an x64 to ARM64 cross-build run this first: <tt>vcvarsall.bat x64_arm64</tt>
 </p>
 <h3>Building with MinGW or Cygwin</h3>
 <p>

@@ -1118,12 +1118,8 @@ static TRef crec_call_args(jit_State *J, RecordFFData *rd,
     ngpr = 1;
   else if (ctype_cconv(ct->info) == CTCC_FASTCALL)
     ngpr = 2;
-#elif LJ_TARGET_ARM64
-#if LJ_ABI_WIN
-#error "NYI: ARM64 Windows ABI calling conventions"
-#elif LJ_TARGET_OSX
+#elif LJ_TARGET_ARM64 && LJ_TARGET_OSX
   int ngpr = CCALL_NARG_GPR;
-#endif
 #endif
 
   /* Skip initial attributes. */

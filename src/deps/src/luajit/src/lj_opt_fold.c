@@ -377,10 +377,10 @@ static uint64_t kfold_int64arith(jit_State *J, uint64_t k1, uint64_t k2,
   case IR_BOR: k1 |= k2; break;
   case IR_BXOR: k1 ^= k2; break;
   case IR_BSHL: k1 <<= (k2 & 63); break;
-  case IR_BSHR: k1 = (int32_t)((uint32_t)k1 >> (k2 & 63)); break;
-  case IR_BSAR: k1 >>= (k2 & 63); break;
-  case IR_BROL: k1 = (int32_t)lj_rol((uint32_t)k1, (k2 & 63)); break;
-  case IR_BROR: k1 = (int32_t)lj_ror((uint32_t)k1, (k2 & 63)); break;
+  case IR_BSHR: k1 >>= (k2 & 63); break;
+  case IR_BSAR: k1 = (uint64_t)((int64_t)k1 >> (k2 & 63)); break;
+  case IR_BROL: k1 = lj_rol(k1, (k2 & 63)); break;
+  case IR_BROR: k1 = lj_ror(k1, (k2 & 63)); break;
   default: lj_assertJ(0, "bad IR op %d", op); break;
   }
 #else
@@ -1972,7 +1972,10 @@ LJFOLD(NE any any)
 LJFOLDF(comm_equal)
 {
   /* For non-numbers only: x == x ==> drop; x ~= x ==> fail */
-  if (fins->op1 == fins->op2 && !irt_isnum(fins->t))
+  if (fins->op1 == fins->op2 &&
+      (!irt_isnum(fins->t) ||
+       (fleft->o == IR_CONV &&  /* Converted integers cannot be NaN. */
+	(uint32_t)(fleft->op2 & IRCONV_SRCMASK) - (uint32_t)IRT_I8 <= (uint32_t)(IRT_U64 - IRT_U8))))
     return CONDFOLD(fins->o == IR_EQ);
   return fold_comm_swap(J);
 }

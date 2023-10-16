@@ -1,12 +1,12 @@
-local class    = require "middleclass"
-local plugin   = require "bunkerweb.plugin"
-local utils    = require "bunkerweb.utils"
-local cjson    = require "cjson"
-local captcha  = require "antibot.captcha"
-local base64   = require "base64"
-local sha256   = require "resty.sha256"
-local str      = require "resty.string"
-local http     = require "resty.http"
+local base64 = require "base64"
+local captcha = require "antibot.captcha"
+local cjson = require "cjson"
+local class = require "middleclass"
+local http = require "resty.http"
+local plugin = require "bunkerweb.plugin"
+local sha256 = require "resty.sha256"
+local str = require "resty.string"
+local utils = require "bunkerweb.utils"
 local template = nil
 if ngx.shared.datastore then
 	template = require "resty.template"
@@ -51,40 +51,41 @@ function antibot:header()
 		return self:ret(true, "Not antibot uri")
 	end
 
-
 	local header = "Content-Security-Policy"
 	if self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes" then
 		header = header .. "-Report-Only"
 	end
 
 	if self.session_data.type == "recaptcha" then
-		ngx.header[header] =
-				"default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-" ..
-				self.session_data.nonce_script ..
-				"' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ 'unsafe-inline' http: https:; img-src https://www.gstatic.com/recaptcha/ 'self' data:; frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/; style-src 'self' 'nonce-" ..
-				self.session_data.nonce_style ..
-				"'; font-src 'self' https://fonts.gstatic.com data:; base-uri 'self';"
+		ngx.header[header] = "default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-"
+			.. self.session_data.nonce_script
+			.. "' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ 'unsafe-inline' http: https:;"
+			.. " img-src https://www.gstatic.com/recaptcha/ 'self' data:; "
+			.. " frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/;"
+			.. " style-src 'self' 'nonce-"
+			.. self.session_data.nonce_style
+			.. "'; font-src 'self' https://fonts.gstatic.com data:; base-uri 'self';"
 	elseif self.session_data.type == "hcaptcha" then
-		ngx.header[header] =
-				"default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-" ..
-				self.session_data.nonce_script ..
-				"' https://hcaptcha.com https://*.hcaptcha.com 'unsafe-inline' http: https:; img-src 'self' data:; frame-src https://hcaptcha.com https://*.hcaptcha.com; style-src 'self' 'nonce-" ..
-				self.session_data.nonce_style ..
-				"' https://hcaptcha.com https://*.hcaptcha.com; connect-src https://hcaptcha.com https://*.hcaptcha.com; font-src 'self' data:; base-uri 'self';"
+		ngx.header[header] = "default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-"
+			.. self.session_data.nonce_script
+			.. "' https://hcaptcha.com https://*.hcaptcha.com 'unsafe-inline' http: https:; img-src 'self' data:;"
+			.. " frame-src https://hcaptcha.com https://*.hcaptcha.com; style-src 'self' 'nonce-"
+			.. self.session_data.nonce_style
+			.. "' https://hcaptcha.com https://*.hcaptcha.com; connect-src https://hcaptcha.com https://*.hcaptcha.com; "
+			.. " font-src 'self' data:; base-uri 'self';"
 	elseif self.session_data.type == "turnstile" then
-		ngx.header[header] =
-				"default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-" ..
-				self.session_data.nonce_script ..
-				"' https://challenges.cloudflare.com 'unsafe-inline' http: https:; img-src 'self' data:; frame-src https://challenges.cloudflare.com; style-src 'self' 'nonce-" ..
-				self.session_data.nonce_style ..
-				"'; font-src 'self' data:; base-uri 'self';"
+		ngx.header[header] = "default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-"
+			.. self.session_data.nonce_script
+			.. "' https://challenges.cloudflare.com 'unsafe-inline' http: https:; img-src 'self' data:;"
+			.. " frame-src https://challenges.cloudflare.com; style-src 'self' 'nonce-"
+			.. self.session_data.nonce_style
+			.. "'; font-src 'self' data:; base-uri 'self';"
 	else
-		ngx.header[header] =
-				"default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-" ..
-				self.session_data.nonce_script ..
-				"' 'unsafe-inline' http: https:; img-src 'self' data:; style-src 'self' 'nonce-" ..
-				self.session_data.nonce_style ..
-				"'; font-src 'self' data:; base-uri 'self';"
+		ngx.header[header] = "default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-"
+			.. self.session_data.nonce_script
+			.. "' 'unsafe-inline' http: https:; img-src 'self' data:; style-src 'self' 'nonce-"
+			.. self.session_data.nonce_style
+			.. "'; font-src 'self' data:; base-uri 'self';"
 	end
 	return self:ret(true, "Successfully overridden CSP header")
 end
@@ -138,6 +139,7 @@ function antibot:access()
 
 	-- Check challenge
 	if self.ctx.bw.request_method == "POST" then
+		-- luacheck: ignore 421
 		local ok, err, redirect = self:check_challenge()
 		local set_ok, set_err = self:set_session_data()
 		if not set_ok then
@@ -152,7 +154,7 @@ function antibot:access()
 			return self:ret(true, "check challenge redirect : " .. redirect, nil, redirect)
 		end
 		self:prepare_challenge()
-		local ok, err = self:set_session_data()
+		ok, err = self:set_session_data()
 		if not ok then
 			return self:ret(false, "can't save session : " .. err, ngx.HTTP_INTERNAL_SERVER_ERROR)
 		end
@@ -215,7 +217,9 @@ function antibot:check_session()
 		return
 	end
 	-- Check if new prepare is needed
-	if not resolved and (time_resolve > time or time - time_resolve > tonumber(self.variables["ANTIBOT_TIME_RESOLVE"])) then
+	if
+		not resolved and (time_resolve > time or time - time_resolve > tonumber(self.variables["ANTIBOT_TIME_RESOLVE"]))
+	then
 		self.session_data = {}
 		self.session_updated = true
 		return
@@ -312,7 +316,7 @@ function antibot:check_challenge()
 		return nil, "challenge not prepared"
 	end
 
-	local resolved = false
+	local resolved
 
 	self.session_data.prepared = false
 	self.session_updated = true
@@ -364,12 +368,15 @@ function antibot:check_challenge()
 		end
 		local res, err = httpc:request_uri("https://www.google.com/recaptcha/api/siteverify", {
 			method = "POST",
-			body = "secret=" ..
-					self.variables["ANTIBOT_RECAPTCHA_SECRET"] ..
-					"&response=" .. args["token"] .. "&remoteip=" .. self.ctx.bw.remote_addr,
+			body = "secret="
+				.. self.variables["ANTIBOT_RECAPTCHA_SECRET"]
+				.. "&response="
+				.. args["token"]
+				.. "&remoteip="
+				.. self.ctx.bw.remote_addr,
 			headers = {
-				["Content-Type"] = "application/x-www-form-urlencoded"
-			}
+				["Content-Type"] = "application/x-www-form-urlencoded",
+			},
 		})
 		httpc:close()
 		if not res then
@@ -400,12 +407,15 @@ function antibot:check_challenge()
 		end
 		local res, err = httpc:request_uri("https://hcaptcha.com/siteverify", {
 			method = "POST",
-			body = "secret=" ..
-					self.variables["ANTIBOT_HCAPTCHA_SECRET"] ..
-					"&response=" .. args["token"] .. "&remoteip=" .. self.ctx.bw.remote_addr,
+			body = "secret="
+				.. self.variables["ANTIBOT_HCAPTCHA_SECRET"]
+				.. "&response="
+				.. args["token"]
+				.. "&remoteip="
+				.. self.ctx.bw.remote_addr,
 			headers = {
-				["Content-Type"] = "application/x-www-form-urlencoded"
-			}
+				["Content-Type"] = "application/x-www-form-urlencoded",
+			},
 		})
 		httpc:close()
 		if not res then
@@ -413,7 +423,7 @@ function antibot:check_challenge()
 		end
 		local ok, hdata = pcall(cjson.decode, res.body)
 		if not ok then
-			return nil, "error while decoding JSON from hCaptcha API : " .. data, nil
+			return nil, "error while decoding JSON from hCaptcha API : " .. hdata, nil
 		end
 		if not hdata.success then
 			return false, "client failed challenge", nil
@@ -436,12 +446,15 @@ function antibot:check_challenge()
 		end
 		local res, err = httpc:request_uri("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
 			method = "POST",
-			body = "secret=" ..
-					self.variables["ANTIBOT_TURNSTILE_SECRET"] ..
-					"&response=" .. args["token"] .. "&remoteip=" .. self.ctx.bw.remote_addr,
+			body = "secret="
+				.. self.variables["ANTIBOT_TURNSTILE_SECRET"]
+				.. "&response="
+				.. args["token"]
+				.. "&remoteip="
+				.. self.ctx.bw.remote_addr,
 			headers = {
-				["Content-Type"] = "application/x-www-form-urlencoded"
-			}
+				["Content-Type"] = "application/x-www-form-urlencoded",
+			},
 		})
 		httpc:close()
 		if not res then
@@ -449,7 +462,7 @@ function antibot:check_challenge()
 		end
 		local ok, tdata = pcall(cjson.decode, res.body)
 		if not ok then
-			return nil, "error while decoding JSON from Turnstile API : " .. data, nil
+			return nil, "error while decoding JSON from Turnstile API : " .. tdata, nil
 		end
 		if not tdata.success then
 			return false, "client failed challenge", nil
