@@ -77,6 +77,7 @@ jobs:
           sudo systemctl stop php8.1-fpm
           sudo systemctl start php8.1-fpm
           # BunkerWeb
+          sudo mkdir -p /etc/bunkerweb
           echo "SERVER_NAME=www.example.com" | sudo tee /etc/bunkerweb/variables.env
           echo "HTTP_PORT=80" | sudo tee -a /etc/bunkerweb/variables.env
           echo "HTTPS_PORT=443" | sudo tee -a /etc/bunkerweb/variables.env
