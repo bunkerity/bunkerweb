@@ -1,11 +1,12 @@
-local class     = require "middleclass"
-local lrucache  = require "resty.lrucache"
+local class = require "middleclass"
+local lrucache = require "resty.lrucache"
 local datastore = class("datastore")
 
-local lru, err  = lrucache.new(100000)
+local lru, err = lrucache.new(100000)
 if not lru then
-	require "bunkerweb.logger":new("DATASTORE"):log(ngx.ERR,
-		"failed to instantiate LRU cache : " .. (err or "unknown error"))
+	require "bunkerweb.logger"
+		:new("DATASTORE")
+		:log(ngx.ERR, "failed to instantiate LRU cache : " .. (err or "unknown error"))
 end
 
 function datastore:initialize()
@@ -16,11 +17,13 @@ function datastore:initialize()
 end
 
 function datastore:get(key, worker)
+	-- luacheck: ignore 431
+	local value, err
 	if worker then
-		local value, err = lru:get(key)
+		value, err = lru:get(key)
 		return value, err or "not found"
 	end
-	local value, err = self.dict:get(key)
+	value, err = self.dict:get(key)
 	if not value and not err then
 		err = "not found"
 	end
@@ -52,10 +55,11 @@ function datastore:keys(worker)
 	return self.dict:get_keys(0)
 end
 
-function datastore:ttl(key)
+function datastore:ttl(key, worker)
 	if worker then
 		return false, "not supported by LRU"
 	end
+	-- luacheck: ignore 431
 	local ttl, err = self.dict:ttl(key)
 	if not ttl then
 		return false, err
@@ -64,13 +68,13 @@ function datastore:ttl(key)
 end
 
 function datastore:delete_all(pattern, worker)
-	local keys = {}
+	local keys
 	if worker then
 		keys = lru:keys(0)
 	else
 		keys = self.dict:get_keys(0)
 	end
-	for i, key in ipairs(keys) do
+	for _, key in ipairs(keys) do
 		if key:match(pattern) then
 			self.dict:delete(key)
 		end
@@ -78,6 +82,7 @@ function datastore:delete_all(pattern, worker)
 	return true, "success"
 end
 
+-- luacheck: ignore 212
 function datastore:flush_lru()
 	lru:flush_all()
 end

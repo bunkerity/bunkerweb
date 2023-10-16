@@ -106,8 +106,10 @@ try:
             LOGGER.info(
                 f"Greylist for {kind} is already in cache, skipping downloads...",
             )
-
             if not urls[kind]:
+                LOGGER.warning(
+                    f"Greylist for {kind} is cached but no URL is configured, removing from cache...",
+                )
                 deleted, err = del_cache(f"{kind}.list", CORE_API, CORE_TOKEN)
                 if not deleted:
                     LOGGER.warning(f"Couldn't delete {kind}.list from cache : {err}")

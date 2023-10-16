@@ -112,6 +112,11 @@ if __name__ == "__main__":
             type=str,
             help="The method that is used to save the config",
         )
+        parser.add_argument(
+            "--no-check-changes",
+            action="store_true",
+            help="Set the changes to checked in the database",
+        )
         args = parser.parse_args()
 
         settings_path = Path(normpath(args.settings))
@@ -360,10 +365,11 @@ if __name__ == "__main__":
                     changes.append("instances")
                     logger.info("Instance 127.0.0.1 successfully saved to database")
 
-        # update changes in db
-        ret = db.checked_changes(changes, value=True)
-        if ret:
-            logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
+        if not args.no_check_changes:
+            # update changes in db
+            ret = db.checked_changes(changes, value=True)
+            if ret:
+                logger.error(f"An error occurred when setting the changes to checked in the database : {ret}")
     except SystemExit as e:
         sys_exit(e.code)
     except:

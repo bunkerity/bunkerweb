@@ -1,9 +1,9 @@
-local class     = require "middleclass"
-local plugin    = require "bunkerweb.plugin"
-local utils     = require "bunkerweb.utils"
+local class = require "middleclass"
 local ipmatcher = require "resty.ipmatcher"
+local plugin = require "bunkerweb.plugin"
+local utils = require "bunkerweb.utils"
 
-local greylist  = class("greylist", plugin)
+local greylist = class("greylist", plugin)
 
 function greylist:initialize(ctx)
 	-- Call parent initialize
@@ -22,7 +22,7 @@ function greylist:initialize(ctx)
 			["RDNS"] = {},
 			["ASN"] = {},
 			["USER_AGENT"] = {},
-			["URI"] = {}
+			["URI"] = {},
 		}
 		for kind, _ in pairs(kinds) do
 			for data in self.variables["GREYLIST_" .. kind]:gmatch("%S+") do
@@ -67,7 +67,7 @@ function greylist:init()
 	}
 	local i = 0
 	for kind, _ in pairs(greylists) do
-		local f, err = io.open("/var/cache/bunkerweb/greylist/" .. kind .. ".list", "r")
+		local f, _ = io.open("/var/cache/bunkerweb/greylist/" .. kind .. ".list", "r")
 		if f then
 			for line in f:lines() do
 				table.insert(greylists[kind], line)
@@ -91,7 +91,7 @@ function greylist:access()
 	end
 	-- Check the caches
 	local checks = {
-		["IP"] = "ip" .. self.ctx.bw.remote_addr
+		["IP"] = "ip" .. self.ctx.bw.remote_addr,
 	}
 	if self.ctx.bw.http_user_agent then
 		checks["UA"] = "ua" .. self.ctx.bw.http_user_agent
@@ -102,7 +102,7 @@ function greylist:access()
 	local already_cached = {
 		["IP"] = false,
 		["URI"] = false,
-		["UA"] = false
+		["UA"] = false,
 	}
 	for k, v in pairs(checks) do
 		local ok, cached = self:is_in_cache(v)
@@ -120,12 +120,13 @@ function greylist:access()
 		return self:ret(false, "lists is nil")
 	end
 	-- Perform checks
-	for k, v in pairs(checks) do
+	for k, _ in pairs(checks) do
 		if not already_cached[k] then
 			local ok, greylisted = self:is_greylisted(k)
 			if ok == nil then
 				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is greylisted : " .. greylisted)
 			else
+				-- luacheck: ignore 421
 				local ok, err = self:add_to_cache(self:kind_to_ele(k), greylisted)
 				if not ok then
 					self.logger:log(ngx.ERR, "error while adding element to cache : " .. err)
@@ -187,12 +188,13 @@ function greylist:is_greylisted_ip()
 	end
 	if check_rdns then
 		-- Get rDNS
+		-- luacheck: ignore 421
 		local rdns_list, err = utils.get_rdns(self.ctx.bw.remote_addr)
 		-- Check if rDNS is in greylist
 		if rdns_list then
-			for i, rdns in ipairs(rdns_list) do
-				for j, suffix in ipairs(self.lists["RDNS"]) do
-					if rdns:sub(- #suffix) == suffix then
+			for _, rdns in ipairs(rdns_list) do
+				for _, suffix in ipairs(self.lists["RDNS"]) do
+					if rdns:sub(-#suffix) == suffix then
 						return true, "rDNS " .. suffix
 					end
 				end
@@ -208,7 +210,7 @@ function greylist:is_greylisted_ip()
 		if not asn then
 			self.logger:log(ngx.ERR, "can't get ASN of IP " .. self.ctx.bw.remote_addr .. " : " .. err)
 		else
-			for i, bl_asn in ipairs(self.lists["ASN"]) do
+			for _, bl_asn in ipairs(self.lists["ASN"]) do
 				if bl_asn == tostring(asn) then
 					return true, "ASN " .. bl_asn
 				end
@@ -222,7 +224,7 @@ end
 
 function greylist:is_greylisted_uri()
 	-- Check if URI is in greylist
-	for i, uri in ipairs(self.lists["URI"]) do
+	for _, uri in ipairs(self.lists["URI"]) do
 		if utils.regex_match(self.ctx.bw.uri, uri) then
 			return true, "URI " .. uri
 		end
@@ -233,7 +235,7 @@ end
 
 function greylist:is_greylisted_ua()
 	-- Check if UA is in greylist
-	for i, ua in ipairs(self.lists["USER_AGENT"]) do
+	for _, ua in ipairs(self.lists["USER_AGENT"]) do
 		if utils.regex_match(self.ctx.bw.http_user_agent, ua) then
 			return true, "UA " .. ua
 		end

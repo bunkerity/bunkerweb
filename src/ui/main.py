@@ -232,43 +232,42 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
     # Do the operation
     error = False
     if method == "services":
-        editing = operation == "edit"
-        service_custom_confs = glob(join(sep, "etc", "bunkerweb", "configs", "*", args[1]))
+        service_custom_confs = glob(join(sep, "etc", "bunkerweb", "configs", "*", args[1].split(" ")[0]))
         moved = False
+        deleted = False
 
         if operation == "new":
             operation, error = app.config["CONFIG"].new_service(args[0])
         elif operation == "edit":
-            if args[1] != args[2] and service_custom_confs:
+            if args[1].split(" ")[0] != args[2].split(" ")[0] and service_custom_confs:
                 for service_custom_conf in service_custom_confs:
                     if listdir(service_custom_conf):
-                        move(
-                            service_custom_conf,
-                            service_custom_conf.replace(f"{sep}{args[1]}", f"{sep}{args[2]}").replace(join(sep, "etc"), join(sep, "var", "tmp")),
-                        )
+                        move(service_custom_conf, service_custom_conf.replace(f"{sep}{args[1].split(' ')[0]}", f"{sep}{args[2].split(' ')[0]}"))
                         moved = True
-            operation, error = app.config["CONFIG"].edit_service(args[1], args[0])
+            operation, error = app.config["CONFIG"].edit_service(args[1], args[0], check_changes=not moved)
         elif operation == "delete":
-            operation, error = app.config["CONFIG"].delete_service(args[2])
+            for service_custom_conf in glob(join(sep, "etc", "bunkerweb", "configs", "*", args[2].split(" ")[0])):
+                if listdir(service_custom_conf):
+                    rmtree(service_custom_conf, ignore_errors=True)
+                    deleted = True
+            operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=not deleted)
 
         if error:
             app.config["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
             app.config["TO_FLASH"].append({"content": operation, "type": "success"})
 
-            if editing and moved and args[1] != args[2] and service_custom_confs:
-                for tmp_service_custom_conf in glob(join(sep, "var", "tmp", "bunkerweb", "configs", "*", args[2])):
-                    move(
-                        tmp_service_custom_conf,
-                        tmp_service_custom_conf.replace(
-                            join(sep, "var", "tmp"),
-                            join(sep, "etc"),
-                        ),
-                    )
-                error = app.config["CONFIGFILES"].save_configs()
+            if moved or deleted:
+                changes = ["config", "custom_configs"]
+                error = app.config["CONFIGFILES"].save_configs(check_changes=False)
                 if error:
                     app.config["TO_FLASH"].append({"content": error, "type": "error"})
-                rmtree(join(sep, "var", "tmp", "bunkerweb", "configs"), ignore_errors=True)
+                    changes.pop()
+
+                # update changes in db
+                ret = db.checked_changes(changes, value=True)
+                if ret:
+                    app.config["TO_FLASH"].append({"content": f"An error occurred when setting the changes to checked in the database : {ret}", "type": "error"})
     if method == "global_config":
         operation = app.config["CONFIG"].edit_global_conf(args[0])
     elif method == "plugins":
@@ -526,12 +525,7 @@ def services():
         Thread(
             target=manage_bunkerweb,
             name="Reloading instances",
-            args=(
-                "services",
-                variables,
-                request.form.get("OLD_SERVER_NAME", "").split()[0],
-                variables.get("SERVER_NAME", "").split()[0],
-            ),
+            args=("services", variables, request.form.get("OLD_SERVER_NAME", ""), variables.get("SERVER_NAME", "")),
             kwargs={"operation": request.form["operation"]},
         ).start()
 
@@ -553,7 +547,8 @@ def services():
         services=[
             {
                 "SERVER_NAME": {
-                    "value": service["SERVER_NAME"]["value"].split()[0],
+                    "value": service["SERVER_NAME"]["value"].split(" ")[0],
+                    "full_value": service["SERVER_NAME"]["value"],
                     "method": service["SERVER_NAME"]["method"],
                 },
                 "USE_REVERSE_PROXY": service["USE_REVERSE_PROXY"],

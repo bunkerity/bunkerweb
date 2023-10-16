@@ -50,7 +50,7 @@ class ConfigFiles:
                 generate_custom_configs(custom_configs)
                 self.__logger.info("Custom configs refreshed successfully")
 
-    def save_configs(self) -> str:
+    def save_configs(self, *, check_changes: bool = True) -> str:
         custom_configs = []
         configs_path = join(sep, "etc", "bunkerweb", "configs")
         root_dirs = listdir(configs_path)
@@ -70,7 +70,7 @@ class ConfigFiles:
                             }
                         )
 
-        err = self.__db.save_custom_configs(custom_configs, "ui")
+        err = self.__db.save_custom_configs(custom_configs, "ui", changed=check_changes)
         if err:
             self.__logger.error(f"Could not save custom configs: {err}")
             return "Couldn't save custom configs to database"

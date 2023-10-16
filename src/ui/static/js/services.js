@@ -64,7 +64,11 @@ class ServiceModal {
         ) {
           //set form info and right form
           const [action, serviceName] = this.getActionAndServName(e.target);
-          this.setForm(action, serviceName, this.formNewEdit);
+          const oldServName = e.target
+            .closest("[data-services-service]")
+            .querySelector("[data-old-service-name]")
+            .getAttribute("data-value");
+          this.setForm(action, serviceName, oldServName, this.formNewEdit);
           //get service data and parse it
           //multiple type logic is launch at same time on relate class
           const servicesSettings = e.target
@@ -87,7 +91,7 @@ class ServiceModal {
         ) {
           //set form info and right form
           const [action, serviceName] = this.getActionAndServName(e.target);
-          this.setForm(action, serviceName, this.formNewEdit);
+          this.setForm(action, serviceName, serviceName, this.formNewEdit);
           //set default value with method default
           this.setSettingsDefault();
           //server name is unset
@@ -110,7 +114,7 @@ class ServiceModal {
         ) {
           //set form info and right form
           const [action, serviceName] = this.getActionAndServName(e.target);
-          this.setForm(action, serviceName, this.formDelete);
+          this.setForm(action, serviceName, serviceName, this.formDelete);
           //show modal
           this.openModal();
         }
@@ -202,7 +206,7 @@ class ServiceModal {
     }
   }
 
-  setForm(action, serviceName, formEl) {
+  setForm(action, serviceName, oldServName, formEl) {
     this.modalTitle.textContent = `${action} ${serviceName}`;
     formEl.setAttribute("id", `form-${action}-${serviceName}`);
     const opeInp = formEl.querySelector(`input[name="operation"]`);
@@ -212,8 +216,8 @@ class ServiceModal {
     if (action === "edit" || action === "new") {
       this.showNewEditForm();
       const oldNameInp = formEl.querySelector(`input[name="OLD_SERVER_NAME"]`);
-      oldNameInp.setAttribute("value", serviceName);
-      oldNameInp.value = serviceName;
+      oldNameInp.setAttribute("value", oldServName);
+      oldNameInp.value = oldServName;
     }
 
     if (action === "delete") {

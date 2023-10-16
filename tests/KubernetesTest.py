@@ -20,6 +20,7 @@ class KubernetesTest(Test):
             r"app3\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN3')}",
         }
 
+    @staticmethod
     def init():
         try:
             if not Test.init():
@@ -143,6 +144,7 @@ class KubernetesTest(Test):
             return False
         return True
 
+    @staticmethod
     def end():
         ret = True
         try:

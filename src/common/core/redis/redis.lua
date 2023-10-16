@@ -1,9 +1,9 @@
-local class  = require "middleclass"
+local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
 
-local redis  = class("redis", plugin)
+local redis = class("redis", plugin)
 
-function redis:initialize()
+function redis:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "redis", ctx)
 end

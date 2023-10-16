@@ -1,9 +1,40 @@
-local class  = require "middleclass"
+local cjson = require "cjson"
+local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
-local utils  = require "bunkerweb.utils"
-local cjson  = require "cjson"
+local utils = require "bunkerweb.utils"
 
-local limit  = class("limit", plugin)
+local limit = class("limit", plugin)
+
+local limit_req_timestamps = function(rate_max, rate_time, timestamps)
+	-- Compute new timestamps
+	local updated = false
+	local new_timestamps = {}
+	local current_timestamp = os.time(os.date "!*t")
+	local delay = 0
+	if rate_time == "s" then
+		delay = 1
+	elseif rate_time == "m" then
+		delay = 60
+	elseif rate_time == "h" then
+		delay = 3600
+	elseif rate_time == "d" then
+		delay = 86400
+	end
+	-- Keep only timestamp within the delay
+	for _, timestamp in ipairs(timestamps) do
+		if current_timestamp - timestamp <= delay then
+			table.insert(new_timestamps, timestamp)
+		else
+			updated = true
+		end
+	end
+	-- Only insert the new timestamp if client is not limited already to avoid infinite insert
+	if #new_timestamps <= rate_max then
+		table.insert(new_timestamps, current_timestamp)
+		updated = true
+	end
+	return updated, new_timestamps, delay
+end
 
 function limit:initialize(ctx)
 	-- Call parent initialize
@@ -11,7 +42,6 @@ function limit:initialize(ctx)
 	-- Load rules if needed
 	if ngx.get_phase() ~= "init" and self:is_needed() then
 		-- Get all rules from datastore
-		local limited = false
 		local all_rules, err = self.datastore:get("plugin_limit_rules", true)
 		if not all_rules then
 			self.logger:log(ngx.ERR, err)
@@ -93,19 +123,16 @@ function limit:access()
 		return self:ret(true, "limit request not enabled")
 	end
 	-- Check if URI is limited
-	local rate = nil
-	local uri = nil
+	local rate
 	for k, v in pairs(self.rules) do
 		if k ~= "/" and utils.regex_match(self.ctx.bw.uri, k) then
 			rate = v
-			uri = k
 			break
 		end
 	end
 	if not rate then
 		if self.rules["/"] then
 			rate = self.rules["/"]
-			uri = "/"
 		else
 			return self:ret(true, "no rule for " .. self.ctx.bw.uri)
 		end
@@ -118,19 +145,37 @@ function limit:access()
 	end
 	-- Limit reached
 	if limited then
-		return self:ret(true,
-			"client IP " ..
-			self.ctx.bw.remote_addr ..
-			" is limited for URL " ..
-			self.ctx.bw.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")",
-			ngx.HTTP_TOO_MANY_REQUESTS)
+		return self:ret(
+			true,
+			"client IP "
+				.. self.ctx.bw.remote_addr
+				.. " is limited for URL "
+				.. self.ctx.bw.uri
+				.. " (current rate = "
+				.. current_rate
+				.. "r/"
+				.. rate_time
+				.. " and max rate = "
+				.. rate
+				.. ")",
+			ngx.HTTP_TOO_MANY_REQUESTS
+		)
 	end
 	-- Limit not reached
-	return self:ret(true,
-		"client IP " ..
-		self.ctx.bw.remote_addr ..
-		" is not limited for URL " ..
-		self.ctx.bw.uri .. " (current rate = " .. current_rate .. "r/" .. rate_time .. " and max rate = " .. rate .. ")")
+	return self:ret(
+		true,
+		"client IP "
+			.. self.ctx.bw.remote_addr
+			.. " is not limited for URL "
+			.. self.ctx.bw.uri
+			.. " (current rate = "
+			.. current_rate
+			.. "r/"
+			.. rate_time
+			.. " and max rate = "
+			.. rate
+			.. ")"
+	)
 end
 
 function limit:limit_req(rate_max, rate_time)
@@ -143,9 +188,12 @@ function limit:limit_req(rate_max, rate_time)
 		else
 			timestamps = redis_timestamps
 			-- Save the new timestamps
+			-- luacheck: ignore 421
 			local ok, err = self.datastore:set(
 				"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
-				cjson.encode(timestamps), delay)
+				cjson.encode(timestamps),
+				delay
+			)
 			if not ok then
 				return nil, "can't update timestamps : " .. err
 			end
@@ -167,8 +215,8 @@ end
 
 function limit:limit_req_local(rate_max, rate_time)
 	-- Get timestamps
-	local timestamps, err = self.datastore:get("plugin_limit_" ..
-		self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri)
+	local timestamps, err =
+		self.datastore:get("plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri)
 	if not timestamps and err ~= "not found" then
 		return nil, err
 	elseif err == "not found" then
@@ -176,12 +224,15 @@ function limit:limit_req_local(rate_max, rate_time)
 	end
 	timestamps = cjson.decode(timestamps)
 	-- Compute new timestamps
-	local updated, new_timestamps, delay = self:limit_req_timestamps(rate_max, rate_time, timestamps)
+	local updated, new_timestamps, delay = limit_req_timestamps(rate_max, rate_time, timestamps)
 	-- Save new timestamps if needed
 	if updated then
+		-- luacheck: ignore 421
 		local ok, err = self.datastore:set(
 			"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
-			cjson.encode(new_timestamps), delay)
+			cjson.encode(new_timestamps),
+			delay
+		)
 		if not ok then
 			return nil, err
 		end
@@ -245,9 +296,15 @@ function limit:limit_req_redis(rate_max, rate_time)
 		return nil, err
 	end
 	-- Execute script
-	local timestamps, err = self.clusterstore:call("eval", redis_script, 1,
-		"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri, rate_max, rate_time,
-		os.time(os.date("!*t")))
+	local timestamps, err = self.clusterstore:call(
+		"eval",
+		redis_script,
+		1,
+		"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
+		rate_max,
+		rate_time,
+		os.time(os.date("!*t"))
+	)
 	if not timestamps then
 		self.clusterstore:close()
 		return nil, err
@@ -255,37 +312,6 @@ function limit:limit_req_redis(rate_max, rate_time)
 	-- Return timestamps
 	self.clusterstore:close()
 	return timestamps, "success"
-end
-
-function limit:limit_req_timestamps(rate_max, rate_time, timestamps)
-	-- Compute new timestamps
-	local updated = false
-	local new_timestamps = {}
-	local current_timestamp = os.time(os.date("!*t"))
-	local delay = 0
-	if rate_time == "s" then
-		delay = 1
-	elseif rate_time == "m" then
-		delay = 60
-	elseif rate_time == "h" then
-		delay = 3600
-	elseif rate_time == "d" then
-		delay = 86400
-	end
-	-- Keep only timestamp within the delay
-	for i, timestamp in ipairs(timestamps) do
-		if current_timestamp - timestamp <= delay then
-			table.insert(new_timestamps, timestamp)
-		else
-			updated = true
-		end
-	end
-	-- Only insert the new timestamp if client is not limited already to avoid infinite insert
-	if #new_timestamps <= rate_max then
-		table.insert(new_timestamps, current_timestamp)
-		updated = true
-	end
-	return updated, new_timestamps, delay
 end
 
 return limit

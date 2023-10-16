@@ -105,8 +105,10 @@ try:
             LOGGER.info(
                 f"Whitelist for {kind} is already in cache, skipping downloads...",
             )
-
             if not urls[kind]:
+                LOGGER.info(
+                    f"Whitelist for {kind} is already in cache, skipping downloads...",
+                )
                 deleted, err = cache_hash(f"{kind}.list", CORE_API, CORE_TOKEN)
                 if not deleted:
                     LOGGER.warning(f"Couldn't delete {kind}.list from cache : {err}")

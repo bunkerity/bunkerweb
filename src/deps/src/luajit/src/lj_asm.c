@@ -606,7 +606,11 @@ static Reg ra_allock(ASMState *as, intptr_t k, RegSet allow)
 	IRIns *ir = IR(ref);
 	if ((ir->o == IR_KINT64 && k == (int64_t)ir_kint64(ir)->u64) ||
 #if LJ_GC64
+#if LJ_TARGET_ARM64
+	    (ir->o == IR_KINT && (uint64_t)k == (uint32_t)ir->i) ||
+#else
 	    (ir->o == IR_KINT && k == ir->i) ||
+#endif
 	    (ir->o == IR_KGC && k == (intptr_t)ir_kgc(ir)) ||
 	    ((ir->o == IR_KPTR || ir->o == IR_KKPTR) &&
 	     k == (intptr_t)ir_kptr(ir))

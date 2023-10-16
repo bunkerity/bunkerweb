@@ -17,7 +17,7 @@ class Config:
         self.__settings = json_loads(Path(sep, "usr", "share", "bunkerweb", "settings.json").read_text(encoding="utf-8"))
         self.__db = db
 
-    def __gen_conf(self, global_conf: dict, services_conf: list[dict]) -> None:
+    def __gen_conf(self, global_conf: dict, services_conf: list[dict], *, check_changes: bool = True) -> None:
         """Generates the nginx configuration file from the given configuration
 
         Parameters
@@ -61,7 +61,8 @@ class Config:
                 str(env_file),
                 "--method",
                 "ui",
-            ],
+            ]
+            + (["--no-check-changes"] if not check_changes else []),
             stdin=DEVNULL,
             stderr=STDOUT,
             check=False,
@@ -195,7 +196,7 @@ class Config:
             0,
         )
 
-    def edit_service(self, old_server_name: str, variables: dict) -> Tuple[str, int]:
+    def edit_service(self, old_server_name: str, variables: dict, *, check_changes: bool = True) -> Tuple[str, int]:
         """Edits a service
 
         Parameters
@@ -230,12 +231,12 @@ class Config:
 
         if changed_server_name:
             for k in deepcopy(config):
-                if k.startswith(old_server_name):
+                if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
 
-        self.__gen_conf(config, services)
+        self.__gen_conf(config, services, check_changes=check_changes)
         return (
-            f"Configuration for {old_server_name.split(' ')[0]} has been edited.",
+            f"Configuration for {old_server_name_splitted[0]} has been edited.",
             0,
         )
 
@@ -255,7 +256,7 @@ class Config:
         self.__gen_conf(self.get_config(methods=False) | variables, self.get_services(methods=False))
         return "The global configuration has been edited."
 
-    def delete_service(self, service_name: str) -> Tuple[str, int]:
+    def delete_service(self, service_name: str, *, check_changes: bool = True) -> Tuple[str, int]:
         """Deletes a service
 
         Parameters
@@ -300,5 +301,5 @@ class Config:
                     if k in service:
                         service.pop(k)
 
-        self.__gen_conf(new_env, new_services)
+        self.__gen_conf(new_env, new_services, check_changes=check_changes)
         return f"Configuration for {service_name} has been deleted.", 0

@@ -77,11 +77,12 @@ try:
 
     # Don't go further if the cache is fresh
     if is_cached_file("combined.list", "hour", CORE_API, CORE_TOKEN):
+        LOGGER.info("RealIP list is already in cache, skipping download...")
         if not urls:
+            LOGGER.warning("No URL found, deleting combined.list from cache...")
             deleted, err = del_cache("combined.list", CORE_API, CORE_TOKEN)
             if not deleted:
                 LOGGER.warning(f"Couldn't delete combined.list from cache : {err}")
-        LOGGER.info("RealIP list is already in cache, skipping download...")
         _exit(0)
 
     # Download and write data to temp file
