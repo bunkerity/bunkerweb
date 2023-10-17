@@ -18,6 +18,7 @@
 - [MISC] Replaced gevent with gthread in UI for security reasons
 - [MISC] Add HTML sanitization when injecting code in pages in the UI
 - [MISC] Optimize the way the UI handles services creation and edition
+- [MISC] Optimize certbot renew script to renew all domains in one command
 
 ## v1.5.2 - 2023/10/10
 
