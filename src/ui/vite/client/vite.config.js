@@ -21,9 +21,36 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: "../ui",
+    emptyOutDir: "../ui",
     rollupOptions: {
       input: {
-        main: resolve(__dirname, "/pages/index.html"),
+        home: resolve(__dirname, "./src/pages/home/index.html"),
+        bans: resolve(__dirname, "./src/pages/bans/index.html"),
+        configs: resolve(__dirname, "./src/pages/configs/index.html"),
+        "global-config": resolve(
+          __dirname,
+          "./src/pages/global-config/index.html"
+        ),
+        instances: resolve(__dirname, "./src/pages/instances/index.html"),
+        jobs: resolve(__dirname, "./src/pages/jobs/index.html"),
+        login: resolve(__dirname, "./src/pages/login/index.html"),
+        plugs: resolve(__dirname, "./src/pages/plugins/index.html"),
+        services: resolve(__dirname, "./src/pages/services/index.html"),
+      },
+      output: {
+        home: resolve(__dirname, "./src/pages/home/index.html"),
+        bans: resolve(__dirname, "./src/pages/bans/index.html"),
+        configs: resolve(__dirname, "./src/pages/configs/index.html"),
+        "global-config": resolve(
+          __dirname,
+          "./src/pages/global-config/index.html"
+        ),
+        instances: resolve(__dirname, "./src/pages/instances/index.html"),
+        jobs: resolve(__dirname, "./src/pages/jobs/index.html"),
+        login: resolve(__dirname, "./src/pages/login/index.html"),
+        plugs: resolve(__dirname, "./src/pages/plugins/index.html"),
+        services: resolve(__dirname, "./src/pages/services/index.html"),
       },
     },
   },
