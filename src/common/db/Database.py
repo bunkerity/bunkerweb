@@ -7,7 +7,7 @@ from hashlib import sha256
 from inspect import getsourcefile
 from logging import Logger
 from os import _exit, getenv, listdir, sep
-from os.path import basename, dirname, join
+from os.path import basename, normpath, join
 from pathlib import Path
 from re import compile as re_compile
 from sys import _getframe, path as sys_path
@@ -47,12 +47,14 @@ from sqlalchemy.exc import (
     SQLAlchemyError,
 )
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.pool import NullPool
+from sqlalchemy.pool import SingletonThreadPool
 
 install_as_MySQLdb()
 
 
 class Database:
+    DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql):/+(?P<path>/[^\s]+)")
+
     def __init__(
         self,
         logger: Logger,
@@ -69,27 +71,27 @@ class Database:
         if not sqlalchemy_string:
             sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3")
 
-        if sqlalchemy_string.startswith("sqlite"):
+        match = self.DB_STRING_RX.search(sqlalchemy_string)
+        if not match:
+            self.__logger.error(f"Invalid database string provided: {sqlalchemy_string}, exiting...")
+            _exit(1)
+
+        if match.group("database").startswith("sqlite"):
+            db_path = Path(normpath(match.group("path")))
             if ui:
-                while not Path(sep, "var", "lib", "bunkerweb", "db.sqlite3"):
+                while not db_path.is_file():
+                    self.__logger.warning(f"Waiting for the database file to be created: {db_path}")
                     sleep(1)
             else:
-                with suppress(FileExistsError):
-                    Path(dirname(sqlalchemy_string.split("///")[1])).mkdir(parents=True, exist_ok=True)
-        elif "+" in sqlalchemy_string and "+pymysql" not in sqlalchemy_string:
-            split = sqlalchemy_string.split("+")
-            sqlalchemy_string = f"{split[0]}:{':'.join(split[1].split(':')[1:])}"
+                db_path.parent.mkdir(parents=True, exist_ok=True)
 
         self.database_uri = sqlalchemy_string
         error = False
 
+        engine_kwargs = {"future": True, "poolclass": None if pool else SingletonThreadPool, "pool_pre_ping": True}
+
         try:
-            self.__sql_engine = create_engine(
-                sqlalchemy_string,
-                future=True,
-                poolclass=None if pool else NullPool,
-                pool_pre_ping=True,
-            )
+            self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
         except ArgumentError:
             self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
             error = True
@@ -125,12 +127,7 @@ class Database:
                 if "attempt to write a readonly database" in str(e):
                     self.__logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
                     self.__sql_engine.dispose(close=True)
-                    self.__sql_engine = create_engine(
-                        sqlalchemy_string,
-                        future=True,
-                        poolclass=None if pool else NullPool,
-                        pool_pre_ping=True,
-                    )
+                    self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
@@ -144,12 +141,10 @@ class Database:
                 self.__logger.error(f"Error when trying to connect to the database: {format_exc()}")
                 exit(1)
 
-        self.__logger.info("Database connection established")
+        self.__logger.info("✅ Database connection established")
 
-        self.__session = sessionmaker()
-        self.__sql_session = scoped_session(self.__session)
-        self.__sql_session.remove()
-        self.__sql_session.configure(bind=self.__sql_engine, autoflush=False, expire_on_commit=False)
+        session_factory = sessionmaker(bind=self.__sql_engine, autoflush=True, expire_on_commit=False)
+        self.__sql_session = scoped_session(session_factory)
         self.suffix_rx = re_compile(r"_\d+$")
 
         if sqlalchemy_string.startswith("sqlite"):

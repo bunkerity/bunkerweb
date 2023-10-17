@@ -11,6 +11,7 @@
 - [BUGFIX] Fix ACME renewal fails on redirection enabled Service
 - [BUGFIX] Fix errors when using a server name with multiple values in web UI
 - [BUGFIX] Fix error when deleting a service that have custom configs on web UI
+- [BUGFIX] Fix rare bug where database is locked
 - [MISC] Updated core dependencies
 - [MISC] Updated self-signed job to regenerate the cert if the subject or the expiration date has changed
 - [MISC] Jobs that download files from urls will now remove old cached files if urls are empty
