@@ -1,0 +1,1 @@
+.btn-spin{animation:2s spin linear infinite}@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}

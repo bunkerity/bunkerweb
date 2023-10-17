@@ -5,5 +5,7 @@ __pycache__
 env
 node_modules
 /src/ui/*.txt
-/src/ui/vite/ui
+/src/ui/v2/ui
+/src/ui/v2/static
+/src/ui/v2/templates
 .mypy_cache
