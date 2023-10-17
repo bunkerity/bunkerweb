@@ -50,7 +50,7 @@ class Plugins(Base):
     version = Column(String(32), nullable=False)
     stream = Column(String(16), nullable=False)
     external = Column(Boolean, nullable=True, default=False)
-    method = Column(String(32), nullable=True, default="manual")
+    method = Column(String(32), nullable=True, default="static")
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     checksum = Column(String(128), nullable=True)
 

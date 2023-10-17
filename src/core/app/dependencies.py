@@ -324,7 +324,17 @@ def generate_config(function: Optional[Callable] = None):
         assert DB
 
         content = ""
-        for k, v in DB.get_config().items():
+        db_config = DB.get_config()
+
+        if isinstance(db_config, str):
+            CORE_CONFIG.logger.error(
+                f"Can't get config from database : {db_config}",
+            )
+            stop(1)
+
+        assert isinstance(db_config, dict)
+
+        for k, v in db_config.items():
             content += f"{k}={v}\n"
         TMP_ENV_PATH.write_text(content)
 
@@ -608,8 +618,19 @@ def run_jobs():
             sleep(1)
 
     assert DB
+
+    db_config = DB.get_config()
+
+    if isinstance(db_config, str):
+        CORE_CONFIG.logger.error(
+            f"Can't get config from database : {db_config}",
+        )
+        stop(1)
+
+    assert isinstance(db_config, dict)
+
     SCHEDULER.reload(
-        DB.get_config()
+        db_config
         | {
             "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
             "CORE_TOKEN": CORE_CONFIG.CORE_TOKEN,
@@ -633,8 +654,19 @@ def run_jobs():
 def run_job(job_name: str):
     """Run a job"""
     assert DB
+
+    db_config = DB.get_config()
+
+    if isinstance(db_config, str):
+        CORE_CONFIG.logger.error(
+            f"Can't get config from database : {db_config}",
+        )
+        stop(1)
+
+    assert isinstance(db_config, dict)
+
     SCHEDULER.reload(
-        DB.get_config()
+        db_config
         | {
             "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
             "CORE_TOKEN": CORE_CONFIG.CORE_TOKEN,

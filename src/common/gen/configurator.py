@@ -77,7 +77,7 @@ class Configurator:
         if not self.__multisite or "SERVER_NAME" not in self.__variables:
             return {}
         servers = {}
-        for server_name in self.__variables["SERVER_NAME"].strip().split():
+        for server_name in self.__variables["SERVER_NAME"].strip().split(" "):
             if not re_search(self.__settings["SERVER_NAME"]["regex"], server_name):
                 self.__logger.warning(
                     f"Ignoring server name {server_name} because regex is not valid",
@@ -93,7 +93,7 @@ class Configurator:
                         f"Ignoring {server_name}_SERVER_NAME because regex is not valid",
                     )
                 else:
-                    names = self.__variables[f"{server_name}_SERVER_NAME"].strip().split()
+                    names = self.__variables[f"{server_name}_SERVER_NAME"].strip().split(" ")
 
             servers[server_name] = names
         return servers
@@ -138,7 +138,7 @@ class Configurator:
                     {
                         "external": True,
                         "page": "ui" in listdir(dirname(file)),
-                        "method": "manual",
+                        "method": "static",
                         "data": value,
                         "checksum": bytes_hash(value).hexdigest(),
                     }
@@ -211,7 +211,7 @@ class Configurator:
                 self.__logger.warning(f"Ignoring variable {variable} : {err}")
         # Expand variables to each sites if MULTISITE=yes and if not present
         if config.get("MULTISITE", "no") == "yes":
-            for server_name in config["SERVER_NAME"].split():
+            for server_name in config["SERVER_NAME"].split(" "):
                 server_name = server_name.strip()
                 if not server_name:
                     continue

@@ -1,3 +1,4 @@
+# TODO: update to 3.12.0 when uvloop supports it
 FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded AS builder
 
 # Install temporary requirements for the dependencies
@@ -41,6 +42,7 @@ COPY src/VERSION VERSION
 
 COPY src/core core
 
+# TODO: update to 3.12.0 when uvloop supports it
 FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded
 
 # Set default umask to prevent huge recursive chmod increasing the final image size

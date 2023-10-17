@@ -55,7 +55,7 @@ async def get_instances():
 async def upsert_instance(
     instances: Union[Instance, List[Instance]],
     background_tasks: BackgroundTasks,
-    method: str = "manual",
+    method: str = "static",
     reload: bool = True,
 ) -> JSONResponse:
     """

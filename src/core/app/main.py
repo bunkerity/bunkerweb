@@ -192,7 +192,7 @@ for filename in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "plugin.json"))):
     in_db = False
 
     for db_plugin in db_plugins:
-        if db_plugin["id"] == dir_basename and db_plugin["method"] != "manual":
+        if db_plugin["id"] == dir_basename and db_plugin["method"] != "static":
             in_db = True
 
     if in_db:
@@ -203,7 +203,7 @@ for filename in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "plugin.json"))):
     if not plugin_data:
         continue
 
-    plugin_data["method"] = "manual"
+    plugin_data["method"] = "static"
 
     manual_plugins_ids.append(plugin_data["id"])
     manual_plugins.append(plugin_data)
@@ -385,15 +385,15 @@ for root, dirs, files in walk(str(CONFIGS_PATH)):
 
             for db_conf in db_configs:
                 if db_conf["service_id"] == custom_conf["exploded"][0] and db_conf["name"] == custom_conf["exploded"][2]:
-                    if db_conf["method"] != "manual":
+                    if db_conf["method"] != "static":
                         saving = False
                     break
 
             if saving:
                 files_custom_configs.append(custom_conf)
 
-if {hash(dict_to_frozenset(d)) for d in files_custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs if d["method"] == "manual"}:
-    err = DB.save_custom_configs(files_custom_configs, "manual")
+if {hash(dict_to_frozenset(d)) for d in files_custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs if d["method"] == "static"}:
+    err = DB.save_custom_configs(files_custom_configs, "static")
     if err:
         CORE_CONFIG.logger.error(
             f"Couldn't save some manually created custom configs to database: {err}",
