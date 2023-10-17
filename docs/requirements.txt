@@ -242,9 +242,9 @@ mkdocs-material==9.4.6 \
     # via
     #   -r requirements.in
     #   mkdocs-print-site-plugin
-mkdocs-material-extensions==1.2 \
-    --hash=sha256:27e2d1ed2d031426a6e10d5ea06989d67e90bb02acd588bc5673106b5ee5eedf \
-    --hash=sha256:c767bd6d6305f6420a50f0b541b0c9966d52068839af97029be14443849fb8a1
+mkdocs-material-extensions==1.3 \
+    --hash=sha256:0297cc48ba68a9fdd1ef3780a3b41b534b0d0df1d1181a44676fda5f464eeadc \
+    --hash=sha256:f0446091503acb110a7cab9349cbc90eeac51b58d1caa92a704a81ca1e24ddbd
     # via mkdocs-material
 mkdocs-print-site-plugin==2.3.6 \
     --hash=sha256:01ccb1ceccc87f29e1612bebb77c3bf9980809fbce750fc2113f9d6acea589d4 \
