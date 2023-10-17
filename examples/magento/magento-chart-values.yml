@@ -1,3 +1,5 @@
+image:
+  tag: "2.4.6-debian-11-r69"
 magentoHost: "www.example.com"
 magentoUsername: "user"
 magentoPassword: "changeme42"
@@ -6,7 +8,19 @@ magentoFirstName: "John"
 magentoLastName: "Doe"
 magentoAdminUri: "admin"
 mariadb:
+  image:
+    tag: "10.6.15-debian-11-r2"
   auth:
     password: "changeme1337"
 elasticsearch:
-  enabled: false
+  image:
+    tag: "7.17.12-debian-11-r21"
+volumePermissions:
+  image:
+    tag: "11-debian-11-r43"
+metrics:
+  image:
+    tag: "1.0.1-debian-11-r21"
+certificates:
+  image:
+    tag: "11-debian-11-r43"
