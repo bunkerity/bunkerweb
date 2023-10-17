@@ -491,7 +491,7 @@ def services():
                 elif value == "off":
                     value = "no"
 
-                if variable in variables and (variable != "SERVER_NAME" and value == config.get(variable, None) or not value.strip()):
+                if variable in variables and variable != "SERVER_NAME" and value == config.get(variable, None):
                     del variables[variable]
 
             if request.form["operation"] == "edit" and len(variables) == 1 and "SERVER_NAME" in variables and variables["SERVER_NAME"] == request.form.get("OLD_SERVER_NAME", ""):
