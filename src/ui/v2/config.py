@@ -1,5 +1,3 @@
-dev_mode = True
-API_URL = "http://localhost:1337"
 app_name = "BunkerWeb UI API"
 description = """# BunkerWeb Internal API Documentation
 

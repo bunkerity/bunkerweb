@@ -1,10 +1,16 @@
 from typing import Annotated, Dict
 from fastapi import Body, APIRouter
 import requests
-from config import API_URL
 from utils import set_res
 from models import ResponseModel
 import json
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+CORE_PORT = os.getenv("CORE_PORT")
+CORE_IP = os.getenv("CORE_IP")
+API = f'{CORE_IP}:{CORE_PORT}'
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 
@@ -15,7 +21,7 @@ router = APIRouter(prefix="/api/config", tags=["config"])
     summary="Get complete config",
 )
 async def get_config(methods: bool = False, new_format: bool = False):
-    req = requests.get(f"{API_URL}/config?methods={methods}&new_format={new_format}")
+    req = requests.get(f"{API}/config?methods={methods}&new_format={new_format}")
     res = set_res(req, "GET", "Retrieve config")
     return res
 
@@ -26,7 +32,7 @@ async def get_config(methods: bool = False, new_format: bool = False):
     summary="Update whole config",
 )
 async def update_config(config: Dict[str, str], method: str):
-    req = requests.put(f"{API_URL}/config?method={method}", data=config)
+    req = requests.put(f"{API}/config?method={method}", data=config)
     res = set_res(req, "PUT", "Update config")
     return res
 
@@ -38,7 +44,7 @@ async def update_config(config: Dict[str, str], method: str):
 )
 async def update_global_config(config: Annotated[dict, Body()], method: str):
     data = json.dumps(config, skipkeys=True, allow_nan=True, indent=6)
-    req = requests.put(f"{API_URL}/config/global?method={method}", data=data)
+    req = requests.put(f"{API}/config/global?method={method}", data=data)
     res = set_res(req, "PUT", "Update global config")
     return res
 
@@ -50,7 +56,7 @@ async def update_global_config(config: Annotated[dict, Body()], method: str):
 )
 async def update_service_config(config: Annotated[dict, Body()], method: str, service_name: str):
     data = json.dumps(config, skipkeys=True, allow_nan=True, indent=6)
-    req = requests.put(f"{API_URL}/config/service/{service_name}?method={method}", data=data)
+    req = requests.put(f"{API}/config/service/{service_name}?method={method}", data=data)
     res = set_res(req, "PUT", f"Update service config {service_name}")
     return res
 
@@ -61,6 +67,6 @@ async def update_service_config(config: Annotated[dict, Body()], method: str, se
     summary="Delete service config",
 )
 async def delete_service_config(method: str, service_name: str):
-    req = requests.delete(f"{API_URL}/config/service/{service_name}?method={method}")
+    req = requests.delete(f"{API}/config/service/{service_name}?method={method}")
     res = set_res(req, "DELETE", f"Delete service config {service_name}")
     return res

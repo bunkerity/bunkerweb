@@ -3,15 +3,20 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi import FastAPI
 from utils import exception_res
-from config import dev_mode, app_name, description, summary, version, contact, license_info, openapi_tags
+from config import app_name, description, summary, version, contact, license_info, openapi_tags
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+DEV_MODE = os.getenv("DEV_MODE")
 
+base = os.path.dirname(os.path.abspath(__file__))
 app = FastAPI(title=app_name, description=description, summary=summary, version=version, contact=contact, license_info=license_info, openapi_tags=openapi_tags)
 
 
-if dev_mode:
+if DEV_MODE:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -46,3 +51,5 @@ app.include_router(config.router)
 app.include_router(custom_configs.router)
 app.include_router(jobs.router)
 app.include_router(admin.router)
+
+app.mount("/", StaticFiles(directory=f'{base}/static'), name="static")
