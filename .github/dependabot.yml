@@ -6,8 +6,12 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
     assignees:
-      - "fl0ppy-d1sk"
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
     commit-message:
       prefix: "deps/gha"
     target-branch: "dev"
@@ -17,7 +21,11 @@ updates:
     directory: "/src/bw"
     schedule:
       interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
     assignees:
+      - "TheophileDiot"
+    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/bw"
@@ -28,7 +36,11 @@ updates:
     directory: "/src/scheduler"
     schedule:
       interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
     assignees:
+      - "TheophileDiot"
+    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/scheduler"
@@ -37,7 +49,11 @@ updates:
     directory: "/src/scheduler"
     schedule:
       interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
     assignees:
+      - "TheophileDiot"
+    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/scheduler"
@@ -48,7 +64,11 @@ updates:
     directory: "/src/autoconf"
     schedule:
       interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
     assignees:
+      - "TheophileDiot"
+    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/autoconf"
@@ -57,7 +77,11 @@ updates:
     directory: "/src/autoconf"
     schedule:
       interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
     assignees:
+      - "TheophileDiot"
+    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/autoconf"
@@ -68,7 +92,11 @@ updates:
     directory: "/src/ui"
     schedule:
       interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
     assignees:
+      - "TheophileDiot"
+    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/ui"
@@ -77,8 +105,68 @@ updates:
     directory: "/src/ui"
     schedule:
       interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
     assignees:
+      - "TheophileDiot"
+    reviewers:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/ui"
+    target-branch: "dev"
+
+  # Misc
+  - package-ecosystem: "pip"
+    directory: "/src/deps"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/deps"
+    target-branch: "dev"
+  - package-ecosystem: "pip"
+    directory: "/src/common/gen"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/common/gen"
+    target-branch: "dev"
+  - package-ecosystem: "pip"
+    directory: "/src/common/db"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/common/db"
+    target-branch: "dev"
+
+  # Terraform
+  - package-ecosystem: "terraform"
+    directory: "/tests/terraform"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "fl0ppy-d1sk"
+    reviewers:
+      - "fl0ppy-d1sk"
+    commit-message:
+      prefix: "deps/terraform"
     target-branch: "dev"

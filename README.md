@@ -1,5 +1,5 @@
 <p align="center">
-	<img alt="BunkerWeb logo" src="./misc/logo.png" />
+	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/misc/logo.png" />
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
 	 &#124;
 	👨‍💻 <a href="https://demo.bunkerweb.io">Demo</a>
 	 &#124;
-	🛡️ <a href="./examples">Examples</a>
+	🛡️ <a href="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/examples">Examples</a>
 	 &#124;
 	💬 <a href="https://discord.com/invite/fTf46FmtyD">Chat</a>
 	 &#124;
@@ -38,7 +38,7 @@
 # BunkerWeb
 
 <p align="center">
-	<img alt="Overview banner" src="./docs/assets/img/intro-overview.svg" />
+	<img alt="Overview banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/intro-overview.svg" />
 </p>
 
 BunkerWeb is a next-generation and open-source Web Application Firewall (WAF).
@@ -82,7 +82,7 @@ A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](http
 # Concepts
 
 <p align="center">
-	<img alt="Concepts banner" src="./docs/assets/img/concepts.svg" />
+	<img alt="Concepts banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/concepts.svg" />
 </p>
 
 You will find more information about the key concepts of BunkerWeb in the [documentation](https://docs.bunkerweb.io/1.5.2/concepts).
@@ -165,7 +165,7 @@ In other words, the scheduler is the brain of BunkerWeb.
 ## Docker
 
 <p align="center">
-	<img alt="Docker banner" src="./docs/assets/img/integration-docker.svg" />
+	<img alt="Docker banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/integration-docker.svg" />
 </p>
 
 We provide ready to use prebuilt images for x64, x86, armv7 and arm64 platforms on [Docker Hub](https://hub.docker.com/u/bunkerity).
@@ -181,7 +181,7 @@ You will find more information in the [Docker integration section](https://docs.
 ## Docker autoconf
 
 <p align="center">
-	<img alt="Docker autoconf banner" src="./docs/assets/img/integration-autoconf.svg" />
+	<img alt="Docker autoconf banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/integration-autoconf.svg" />
 </p>
 
 The downside of using environment variables is that the container needs to be recreated each time there is an update which is not very convenient. To counter that issue, you can use another image called **autoconf** which will listen for Docker events and automatically reconfigure BunkerWeb in real-time without recreating the container.
@@ -193,7 +193,7 @@ You will find more information in the [Docker autoconf section](https://docs.bun
 ## Swarm
 
 <p align="center">
-	<img alt="Swarm banner" src="./docs/assets/img/integration-swarm.svg" />
+	<img alt="Swarm banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/integration-swarm.svg" />
 </p>
 
 To automatically configure BunkerWeb instances, a special service, called **autoconf** will listen for Docker Swarm events like service creation or deletion and automatically configure the **BunkerWeb instances** in real-time without downtime.
@@ -205,7 +205,7 @@ You will find more information in the [Swarm section](https://docs.bunkerweb.io/
 ## Kubernetes
 
 <p align="center">
-	<img alt="Kubernetes banner" src="./docs/assets/img/integration-kubernetes.svg" />
+	<img alt="Kubernetes banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/integration-kubernetes.svg" />
 </p>
 
 The autoconf acts as an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) and will configure the BunkerWeb instances according to the [Ingress resources](https://kubernetes.io/docs/concepts/services-networking/ingress/). It also monitors other Kubernetes objects like [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/) for custom configurations.
@@ -215,14 +215,14 @@ You will find more information in the [Kubernetes section](https://docs.bunkerwe
 ## Linux
 
 <p align="center">
-	<img alt="Linux banner" src="./docs/assets/img/integration-linux.svg" />
+	<img alt="Linux banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/integration-linux.svg" />
 </p>
 
 List of supported Linux distros :
 
 - Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
-- Fedora 37
+- Fedora 38
 - RHEL 8.7
 
 Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
@@ -232,14 +232,14 @@ You will find more information in the [Linux section](https://docs.bunkerweb.io/
 ## Ansible
 
 <p align="center">
-	<img alt="Ansible banner" src="./docs/assets/img/integration-ansible.svg" />
+	<img alt="Ansible banner" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.2/docs/assets/img/integration-ansible.svg" />
 </p>
 
 List of supported Linux distros :
 
 - Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
-- Fedora 37
+- Fedora 38
 - RHEL 8.7
 
 [Ansible](https://www.ansible.com/) is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.
@@ -346,15 +346,15 @@ Please don't use [GitHub issues](https://github.com/bunkerity/bunkerweb/issues) 
 
 # License
 
-This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](./LICENSE.md).
+This project is licensed under the terms of the [GNU Affero General Public License (AGPL) version 3](https://github.com/bunkerity/bunkerweb/raw/v1.5.2/LICENSE.md).
 
 # Contribute
 
-If you would like to contribute to the plugins you can read the [contributing guidelines](./CONTRIBUTING.md) to get started.
+If you would like to contribute to the plugins you can read the [contributing guidelines](https://github.com/bunkerity/bunkerweb/raw/v1.5.2/CONTRIBUTING.md) to get started.
 
 # Security policy
 
-We take security bugs as serious issues and encourage responsible disclosure, see our [security policy](./SECURITY.md) for more information.
+We take security bugs as serious issues and encourage responsible disclosure, see our [security policy](https://github.com/bunkerity/bunkerweb/raw/v1.5.2/SECURITY.md) for more information.
 
 
 # Stargazers over time
