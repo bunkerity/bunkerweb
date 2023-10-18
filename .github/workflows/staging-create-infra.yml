@@ -34,7 +34,6 @@ jobs:
         if: inputs.TYPE != 'k8s'
         with:
           python-version: "3.11"
-          cache: "pip"
       - name: Install ansible
         run: pip install --no-cache-dir --require-hashes -r misc/requirements-ansible.txt
         if: inputs.TYPE != 'k8s'
