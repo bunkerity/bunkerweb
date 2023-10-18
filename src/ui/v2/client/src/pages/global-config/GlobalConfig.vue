@@ -56,7 +56,7 @@ const plugins = reactive({
     // Duplicate base data
     const cloneGlobalPlugin = getPluginsByContext(
       JSON.parse(JSON.stringify(plugins.data)),
-      "global",
+      "global"
     );
     const cloneGlobalConf = JSON.parse(JSON.stringify(conf.data["global"]));
     // Format and keep only global config
@@ -112,14 +112,14 @@ async function getGlobalConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -144,7 +144,7 @@ async function sendConf() {
     "PUT",
     config.data["global"],
     null,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 </script>
@@ -152,10 +152,13 @@ async function sendConf() {
 <template>
   <Dashboard>
     <ApiState
-      class="col-span-4 col-start-5"
+      class="col-span-12 md:col-start-4 md:col-span-6"
       :isErr="plugins.isErr"
       :isPend="plugins.isPend"
-      :isData="true"
+      :textState="{
+        isPend: 'Try retrieve global config',
+        isErr: 'Error retrieving global config',
+      }"
     />
     <div
       v-if="!plugins.isErr && !plugins.isPend"

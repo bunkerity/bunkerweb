@@ -5,6 +5,7 @@ import HomeCardSvgVersion from "@components/Home/Card/Svg/Version.vue";
 import HomeCardSvgInstances from "@components/Home/Card/Svg/Instances.vue";
 import HomeCardSvgServices from "@components/Home/Card/Svg/Services.vue";
 import HomeCardSvgPlugins from "@components/Home/Card/Svg/Plugins.vue";
+import ApiState from "@components/Api/State.vue";
 import { reactive, computed, onMounted } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
@@ -127,8 +128,17 @@ onMounted(async () => {
 <template>
   <Dashboard>
     <!-- version -->
+    <ApiState
+      class="col-span-12 md:col-span-6 2xl:col-span-4"
+      :isErr="version.isErr"
+      :isPend="version.isPend"
+      :textState="{
+        isPend: 'Try retrieve version',
+        isErr: 'Error retrieving version',
+      }"
+    />
     <HomeCardStructure
-      v-if="!version.isPend && !version.isErr && version.data"
+      v-if="!version.isPend && !version.isErr"
       :href="'#'"
       :name="'version'"
       :count="version.num || ''"
@@ -146,6 +156,15 @@ onMounted(async () => {
     <!-- end version -->
 
     <!-- instances -->
+    <ApiState
+      class="col-span-12 md:col-span-6 2xl:col-span-4"
+      :isErr="instances.isErr || !instances.data || instances.data.length === 0"
+      :isPend="instances.isPend"
+      :textState="{
+        isPend: 'Try retrieve instances',
+        isErr: 'Error retrieving instances',
+      }"
+    />
     <HomeCardStructure
       v-if="!instances.isPend && !instances.isErr && instances.data"
       :href="'/admin/instances'"
@@ -171,14 +190,17 @@ onMounted(async () => {
     <!-- end instances -->
 
     <!-- services -->
+    <ApiState
+      class="col-span-12 md:col-span-6 2xl:col-span-4"
+      :isErr="plugins.isErr"
+      :isPend="plugins.isPend"
+      :textState="{
+        isPend: 'Try retrieve services',
+        isErr: 'Error retrieving services',
+      }"
+    />
     <HomeCardStructure
-      v-if="
-        !plugins.isPend &&
-        !conf.isPend &&
-        !plugins.isErr &&
-        !conf.isErr &&
-        plugins.data
-      "
+      v-if="!plugins.isPend && !plugins.isErr && plugins.data.length > 0"
       :href="'/admin/services'"
       :name="'services'"
       :count="plugins.servicesNum || '0'"
@@ -194,9 +216,18 @@ onMounted(async () => {
       <HomeCardSvgServices />
     </HomeCardStructure>
     <!-- end services-->
-    <!-- services -->
+    <!-- plugins -->
+    <ApiState
+      class="col-span-12 md:col-span-6 2xl:col-span-4"
+      :isErr="conf.isErr"
+      :isPend="conf.isPend"
+      :textState="{
+        isPend: 'Try retrieve plugins',
+        isErr: 'Error retrieving plugins',
+      }"
+    />
     <HomeCardStructure
-      v-if="!conf.isPend && !conf.isErr && conf.data"
+      v-if="!conf.isPend && !conf.isErr"
       :href="'/admin/plugins'"
       :name="'plugins'"
       :count="plugins.num || '0'"
@@ -217,6 +248,6 @@ onMounted(async () => {
     >
       <HomeCardSvgPlugins />
     </HomeCardStructure>
-    <!-- end services-->
+    <!-- end plugins-->
   </Dashboard>
 </template>

@@ -23,6 +23,7 @@ export async function fetchAPI(
   // Fetch
   const baseURL = "http://localhost:8000";
   state.isPend = true;
+
   return await fetch(`${baseURL}${api}`, {
     method: method.toUpperCase(),
     headers: {
@@ -36,9 +37,11 @@ export async function fetchAPI(
     .then((res) => {
       state.isPend = false;
       state.isErr = false;
+      console.log(res);
       return res.json();
     })
     .then((data) => {
+      state.isErr = data["type"] === "error" ? true : false;
       state.data = JSON.parse(data["data"]);
       addFeedback
         ? addFeedback(data["type"], data["status"], data["message"])

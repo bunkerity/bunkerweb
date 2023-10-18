@@ -11,6 +11,7 @@ import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import SettingsUploadSvgWarning from "@components/Settings/Upload/Svg/Warning.vue";
+
 import { reactive, computed, onMounted } from "vue";
 import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
 import {
@@ -209,10 +210,13 @@ onMounted(async () => {
 <template>
   <Dashboard>
     <ApiState
-      class="col-span-4 col-start-5"
-      :isErr="services.isErr"
+      class="col-span-12 md:col-start-4 md:col-span-6"
+      :isErr="services.isErr || !services.data || services.data.length === 0"
       :isPend="services.isPend"
-      :isData="true"
+      :textState="{
+        isPend: 'Try retrieve services',
+        isErr: 'Error retrieving services',
+      }"
     />
     <div
       v-if="!services.isErr && !services.isPend"

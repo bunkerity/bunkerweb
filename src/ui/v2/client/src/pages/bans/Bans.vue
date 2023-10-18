@@ -8,6 +8,8 @@ import CardItemList from "@components/Card/Item/List.vue";
 import BansTabs from "@components/Bans/Tabs.vue";
 import BansAdd from "@components/Bans/Add.vue";
 import BansList from "@components/Bans/List.vue";
+import ApiState from "@components/Api/State.vue";
+
 import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
@@ -32,6 +34,8 @@ const instances = reactive({
 
 const bans = reactive({
   data: [],
+  isPend: false,
+  isErr: false,
   total: "",
   reasonList: ["all"], // Based on reasons find on fetch
   bansList: [], // Format {hostname : str, data : Array}
@@ -84,6 +88,8 @@ async function getHostFromInst() {
 
 async function setHostBan(hostnames) {
   // Fetch all instances bans
+  bans.isPend = true;
+  bans.isErr = false;
   const promises = [];
   for (let i = 0; i < hostnames.length; i++) {
     const hostname = hostnames[i];
@@ -92,14 +98,15 @@ async function setHostBan(hostnames) {
 
   const bansList = [];
   Promise.all(promises).then((instances) => {
+    bans.isPend = false;
     instances.forEach((instance, id) => {
+      if (instance.type === "error") bans.isErr = true;
       if (!Array.isArray(JSON.parse(instance.data))) return;
       bansList.push({
         hostname: hostnames[id],
         data: JSON.parse(instance.data) || [],
       });
     });
-    console.log(bans.data);
     bans.data = bansList;
   });
 }
@@ -130,7 +137,19 @@ const tab = reactive({
 
 <template>
   <Dashboard>
+    <ApiState
+      class="col-span-12 md:col-start-4 md:col-span-6"
+      :isErr="instances.isErr || bans.isErr"
+      :isPend="instances.isPend || bans.isPend"
+      :textState="{
+        isPend: 'Try retrieve bans list',
+        isErr: 'Error retrieving bans list',
+      }"
+    />
     <CardBase
+      v-if="
+        !instances.isErr && !instances.isPend && !bans.isPend && !bans.isErr
+      "
       class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
       label="info"
     >
@@ -142,6 +161,9 @@ const tab = reactive({
       />
     </CardBase>
     <CardBase
+      v-if="
+        !instances.isErr && !instances.isPend && !bans.isPend && !bans.isErr
+      "
       label="ban list filter"
       class="z-[100] col-span-12 md:col-span-8 lg:col-span-6 2xl:col-span-5 3xl:col-span-4 grid grid-cols-12 relative"
     >

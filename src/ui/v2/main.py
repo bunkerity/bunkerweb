@@ -40,6 +40,7 @@ async def get_ui_req(request: Request, call_next):
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request, exc):
+    print(f'------------------- {request, exc.status_code}')
     return JSONResponse(exception_res(exc.status_code, request.url.path, exc.detail))
 
 

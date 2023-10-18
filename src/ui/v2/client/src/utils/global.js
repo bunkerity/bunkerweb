@@ -1,9 +1,7 @@
 export function getDarkMode() {
   let darkMode = false;
-  console.log(sessionStorage.getItem("mode"));
   // Case on storage
   if (sessionStorage.getItem("mode")) {
-    console.log("local");
     darkMode = sessionStorage.getItem("mode") === "dark" ? true : false;
   } else if (
     window.matchMedia &&

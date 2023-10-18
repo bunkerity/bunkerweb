@@ -5,6 +5,7 @@ import InstanceModalDelete from "@components/Instance/Modal/Delete.vue";
 import { reactive, computed, onMounted } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
+import ApiState from "@components/Api/State.vue";
 
 const feedbackStore = useFeedbackStore();
 
@@ -71,6 +72,15 @@ onMounted(async () => {
 
 <template>
   <Dashboard>
+    <ApiState
+      class="col-span-12 md:col-start-4 md:col-span-6"
+      :isErr="instances.isErr || !instances.data || instances.data.length === 0"
+      :isPend="instances.isPend"
+      :textState="{
+        isPend: 'Try retrieve instances',
+        isErr: 'Error retrieving instances',
+      }"
+    />
     <InstanceCard
       v-for="instance in instances.data"
       :id="instance.server_name"

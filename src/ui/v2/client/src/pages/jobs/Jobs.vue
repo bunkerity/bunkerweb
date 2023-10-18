@@ -8,6 +8,7 @@ import SettingsSelect from "@components/Settings/Select.vue";
 import JobsModalHistory from "@components/Jobs/Modal/History.vue";
 import ListBase from "@components/List/Base.vue";
 import JobsItems from "@components/Jobs/Items.vue";
+import ApiState from "@components/Api/State.vue";
 
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
@@ -59,7 +60,7 @@ const jobs = reactive({
   }),
   success: computed(() => {
     return Object.values(jobs.data).filter(
-      (item) => item["history"][0]["success"] !== false,
+      (item) => item["history"][0]["success"] !== false
     ).length;
   }),
   setup: computed(() => {
@@ -92,7 +93,7 @@ async function runJob(data) {
     "POST",
     null,
     run,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -108,7 +109,7 @@ async function downloadFile(data) {
     "GET",
     null,
     download,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -131,7 +132,17 @@ onMounted(async () => {
 
 <template>
   <Dashboard>
+    <ApiState
+      class="col-span-12 md:col-start-4 md:col-span-6"
+      :isErr="jobs.isErr || !jobs.data || jobs.data.length === 0"
+      :isPend="jobs.isPend"
+      :textState="{
+        isPend: 'Try retrieve jobs',
+        isErr: 'Error retrieving jobs',
+      }"
+    />
     <CardBase
+      v-if="!jobs.isErr && !jobs.isPend"
       class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
       label="info"
     >
@@ -144,6 +155,7 @@ onMounted(async () => {
       />
     </CardBase>
     <CardBase
+      v-if="!jobs.isErr && !jobs.isPend"
       class="z-10 h-fit col-span-12 md:col-span-8 xl:col-span-8 2xl:col-span-5 3xl:col-span-4"
       label="filter"
     >
@@ -206,6 +218,7 @@ onMounted(async () => {
       </SettingsLayout>
     </CardBase>
     <CardBase
+      v-if="!jobs.isErr && !jobs.isPend"
       class="col-span-12 overflow-x-auto overflow-y-hidden"
       label="jobs"
     >

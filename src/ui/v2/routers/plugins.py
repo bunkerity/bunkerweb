@@ -4,6 +4,8 @@ from utils import set_res
 from models import AddedPlugin, ResponseModel
 import os
 from dotenv import load_dotenv
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
 
 load_dotenv()
 API = os.getenv("CORE_ADDR") 
@@ -17,9 +19,13 @@ router = APIRouter(prefix="/api/plugins", tags=["plugins"])
     summary="Get all plugins",
 )
 async def get_plugins():
-    req = requests.get(f"{API}/plugins")
-    res = set_res(req, "GET", "Retrieve plugins")
-    return res
+    print(f'get plugins')
+    try:
+        req = requests.get(f"{API}/plugins")
+        res = set_res(req, "GET", "Retrieve plugins")
+        return res
+    except:
+        raise  StarletteHTTPException(status_code=500, detail="Impossible to connect to CORE API")
 
 
 @router.post(

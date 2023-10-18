@@ -38,10 +38,10 @@ const customConf = reactive({
   data: [],
   total: computed(() => customConf.data.length || 0),
   global: computed(
-    () => customConf.data.filter((item) => !item["service_id"]).length || 0,
+    () => customConf.data.filter((item) => !item["service_id"]).length || 0
   ),
   service: computed(
-    () => customConf.data.filter((item) => item["service_id"]).length || 0,
+    () => customConf.data.filter((item) => item["service_id"]).length || 0
   ),
   setup: computed(() => {
     if (
@@ -67,7 +67,7 @@ async function getCustomConf() {
     "GET",
     null,
     customConf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -77,7 +77,7 @@ async function getConfig() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -93,7 +93,20 @@ onMounted(async () => {
 
 <template>
   <Dashboard>
+    {{}}
+    <ApiState
+      class="col-span-12 md:col-start-4 md:col-span-6"
+      :isErr="customConf.isErr || conf.isErr"
+      :isPend="customConf.isPend"
+      :textState="{
+        isPend: 'Try retrieve custom conf',
+        isErr: 'Error retrieving custom conf',
+      }"
+    />
     <CardBase
+      v-if="
+        !customConf.isPend && !customConf.isErr && !conf.isPend && !conf.isErr
+      "
       class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
       label="info"
     >
@@ -106,6 +119,9 @@ onMounted(async () => {
       />
     </CardBase>
     <CardBase
+      v-if="
+        !customConf.isPend && !customConf.isErr && !conf.isPend && !conf.isErr
+      "
       label="configs"
       class="z-[100] col-span-12 md:col-span-8 lg:col-span-6 2xl:col-span-5 3xl:col-span-4 grid grid-cols-12 relative"
     >
@@ -166,15 +182,11 @@ onMounted(async () => {
         />
       </SettingsLayout>
     </CardBase>
-    <ApiState
-      class="col-span-12 md:col-start-4 md:col-span-6 2xl:col-span-4 2xl:col-start-5"
-      :isErr="customConf.isErr"
-      :isPend="customConf.isPend"
-      :isData="customConf.data ? true : false"
-    />
     <FileManagerStructure
       @updateFile="getData()"
-      v-if="customConf.setup.length > 0"
+      v-if="
+        !customConf.isPend && !customConf.isErr && !conf.isPend && !conf.isErr
+      "
       :config="customConf.setup"
       class="col-span-12"
     />

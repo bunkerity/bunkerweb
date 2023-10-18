@@ -13,37 +13,23 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
-  // Case communication with API worked but no data to display
-  isData: {
-    type: Boolean,
-    required: true,
-  },
   textState: {
     type: Object,
     required: false,
     default: {
       isPend: "Pending data from API",
       isErr: "Error accessing API",
-      isData: "No data to display",
     },
   },
 });
 </script>
 
 <template>
-  <div v-if="isErr || isPend || !isData">
-    <CardBase :color="props.isErr ? 'error' : 'default'">
+  <div v-if="isErr || isPend">
+    <CardBase :color="props.isErr ? 'error' : 'pending'">
       <div class="col-span-12 flex items-center justify-center">
         <p class="m-0 dark:text-white">
-          {{
-            isPend
-              ? props.textState.isPend
-              : isErr
-              ? props.textState.isErr
-              : isData
-              ? ""
-              : props.textState.isData
-          }}
+          {{ isErr ? props.textState.isErr : props.textState.isPend }}
         </p>
       </div>
     </CardBase>

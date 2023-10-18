@@ -460,8 +460,12 @@ body {
   @apply bg-white dark:bg-slate-850;
 }
 
+.pending.card {
+  @apply text-white bg-blue-500 dark:brightness-95;
+}
+
 .error.card {
-  @apply bg-red-500;
+  @apply text-white bg-red-500 dark:brightness-95;
 }
 
 .card-stat {

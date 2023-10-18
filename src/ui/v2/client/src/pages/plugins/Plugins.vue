@@ -11,6 +11,7 @@ import { reactive, computed, onMounted } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { getPluginsByFilter } from "@utils/plugins.js";
+import ApiState from "@components/Api/State.vue";
 
 const feedbackStore = useFeedbackStore();
 
@@ -25,18 +26,20 @@ const plugins = reactive({
   isPend: false,
   isErr: false,
   // Never modify this unless refetch
-  base: [],
-  total: computed(() => plugins.base.length),
+  data: [],
+  total: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.base.filter((item) => item["external"] === false).length
+    () => plugins.data.filter((item) => item["external"] === false).length
   ),
   external: computed(
-    () => plugins.base.filter((item) => item["external"] === true).length
+    () => plugins.data.filter((item) => item["external"] === true).length
   ),
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
+    if (plugins.isPend || plugins.isErr || plugins.data.length === 0) return [];
+
     // Filter data to display
-    const cloneBase = JSON.parse(JSON.stringify(plugins.base));
+    const cloneBase = JSON.parse(JSON.stringify(plugins.data));
     const filter = getPluginsByFilter(cloneBase, filters);
     return filter;
   }),
@@ -44,11 +47,10 @@ const plugins = reactive({
 
 async function getPlugins() {
   await fetchAPI(
-    "/api/global-config",
+    "/api/plugins",
     "GET",
     null,
-    plugins.isPend,
-    plugins.isErr,
+    plugins,
     feedbackStore.addFeedback
   );
 }
@@ -60,7 +62,17 @@ onMounted(async () => {
 
 <template>
   <Dashboard>
+    <ApiState
+      class="col-span-12 md:col-start-4 md:col-span-6"
+      :isErr="plugins.isErr"
+      :isPend="plugins.isPend"
+      :textState="{
+        isPend: 'Try retrieve plugins',
+        isErr: 'Error retrieving plugins',
+      }"
+    />
     <CardBase
+      v-if="!plugins.isErr && !plugins.isPend && plugins.setup.length > 0"
       class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
       label="info"
     >
@@ -73,12 +85,14 @@ onMounted(async () => {
       />
     </CardBase>
     <CardBase
+      v-if="!plugins.isErr && !plugins.isPend"
       label="upload"
       class="h-fit col-span-12 md:col-span-8 2xl:col-span-4 3xl:col-span-3"
     >
       <SettingsUploadStructure />
     </CardBase>
     <CardBase
+      v-if="!plugins.isErr && !plugins.isPend"
       class="z-10 h-fit col-start-1 col-end-13 md:col-start-5 md:col-end-13 2xl:col-span-5 3xl:col-span-4"
       label="filter"
     >
