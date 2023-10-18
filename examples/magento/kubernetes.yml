@@ -15,7 +15,7 @@ spec:
               service:
                 name: magento
                 port:
-                  number: 8080
+                  number: 80
 ---
 apiVersion: v1
 kind: ConfigMap
