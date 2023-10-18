@@ -8,37 +8,40 @@ import MenuSvgJobs from "@components/Menu/Svg/Jobs.vue";
 import MenuSvgTwitter from "@components/Menu/Svg/Twitter.vue";
 import MenuSvgLinkedin from "@components/Menu/Svg/Linkedin.vue";
 import MenuSvgDiscord from "@components/Menu/Svg/Discord.vue";
+import MenuSvgServices from "@components/Menu/Svg/Services.vue";
 import MenuSvgGithub from "@components/Menu/Svg/Github.vue";
-import { reactive, onMounted } from "vue";
+import MenuSvgBans from "@components/Menu/Svg/Bans.vue";
+import { reactive, onMounted, computed } from "vue";
 import { getDarkMode } from "@utils/global.js";
-
-const currPath = "";
 
 // Navigation with components
 // resolveComponent allow to replace a tag by a real Vue component
 const navList = [
-  { title: "Home", svg: MenuSvgHome, path: "/admin/home" },
+  { title: "Home", svg: MenuSvgHome, path: "/home" },
   {
     title: "Instances",
     svg: MenuSvgInstances,
-    path: "/admin/instances",
+    path: "/instances",
   },
+
   {
     title: "Global config",
     svg: MenuSvgGlobalConf,
-    path: "/admin/global-config",
+    path: "/global-config",
   },
+  { title: "Services", svg: MenuSvgServices, path: "/services" },
   {
     title: "Configs",
     svg: MenuSvgConfigs,
-    path: "/admin/configs",
+    path: "/configs",
   },
   {
     title: "Plugins",
     svg: MenuSvgPlugins,
-    path: "/admin/plugins",
+    path: "/plugins",
   },
-  { title: "Jobs", svg: MenuSvgJobs, path: "/admin/jobs" },
+  { title: "Jobs", svg: MenuSvgJobs, path: "/jobs" },
+  { title: "Bans", svg: MenuSvgBans, path: "/bans" },
 ];
 
 // Social links
@@ -67,13 +70,36 @@ const socialList = [
 
 const menu = reactive({
   pagePlugins: [], // Render custom page plugins links
-  darkMode: getDarkMode(), // Apply dark mode state
+  darkMode: false, // Apply dark mode state
   isActive: false, // Handle menu display/expand
   isDesktop: true, // Expand logic exclude with desktop
+  currPath: false,
 });
+
+function switchMode() {
+  menu.darkMode = menu.darkMode ? false : true;
+  sessionStorage.setItem("mode", menu.darkMode ? "dark" : "light");
+  updateMode();
+}
+
+function updateMode() {
+  try {
+    menu.darkMode
+      ? document.querySelector("html").classList.add("dark")
+      : document.querySelector("html").classList.remove("dark");
+  } catch (err) {}
+}
 
 // Check device desktop using breakpoint
 onMounted(() => {
+  menu.darkMode = getDarkMode();
+  updateMode();
+  const pathName = window.location.pathname.toLowerCase();
+  navList.forEach((item) => {
+    const title = item.title.replaceAll(" ", "-").toLowerCase();
+    if (pathName.includes(title)) menu.currPath = title;
+  });
+
   menu.isDesktop = window.innerWidth < 1200 ? false : true;
   window.addEventListener("resize", () => {
     menu.isDesktop = window.innerWidth < 1200 ? false : true;
@@ -81,14 +107,6 @@ onMounted(() => {
 });
 
 // EVENTS
-
-// Toggle dark mode
-function switchMode() {
-  menu.darkMode = menu.darkMode ? false : true;
-  menu.darkMode
-    ? document.querySelector("html").classList.add("dark")
-    : document.querySelector("html").classList.remove("dark");
-}
 
 // Close the menu, desktop exclude
 function closeMenu() {
@@ -151,7 +169,7 @@ function toggleMenu() {
       <div class="h-19">
         <a
           class="menu-logo-container"
-          :href="currPath === '/home' ? '#' : '/home'"
+          :href="menu.currPath === '/home' ? '#' : '/home'"
         >
           <img
             src="/images/logo-menu-2.png"
@@ -176,10 +194,14 @@ function toggleMenu() {
           <li v-for="item in navList" class="mt-0.5 w-full">
             <a
               :class="[
-                item.path === currPath ? 'active' : '',
+                item.path.toLowerCase().includes(menu.currPath) ? 'active' : '',
                 'menu-nav-item-anchor',
               ]"
-              :href="item.path === currPath ? '#' : item.path"
+              :href="
+                item.path.toLowerCase().includes(menu.currPath)
+                  ? '#'
+                  : item.path
+              "
             >
               <div class="menu-nav-item-container">
                 <component :is="item.svg"></component>
@@ -204,8 +226,8 @@ function toggleMenu() {
                   class="menu-page-plugin-empty-anchor"
                   target="_blank"
                   href="https://docs.bunkerweb.io/1.4/plugins/#writing-a-plugin"
-                  >check doc</a
-                >
+                  >check doc
+                </a>
               </h6>
             </li>
 
@@ -243,12 +265,6 @@ function toggleMenu() {
 
       <!-- dark/light mode -->
       <div class="menu-mode-container">
-        <input
-          type="hidden"
-          id="csrf_token"
-          name="csrf_token"
-          :value="menu.csrfToken"
-        />
         <input
           :checked="menu.darkMode"
           @click="switchMode()"

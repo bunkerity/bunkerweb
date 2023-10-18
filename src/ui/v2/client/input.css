@@ -293,10 +293,11 @@ body {
 }
 
 .menu-nav-item-anchor {
-  @apply dark:text-white dark:opacity-80 py-1  my-0 mx-2 flex items-center whitespace-nowrap rounded-lg px-4 transition text-sm;
+  @apply hover:bg-slate-100/50 dark:hover:bg-gray-700 dark:text-white dark:opacity-80 py-1 my-0 mx-2 flex items-center whitespace-nowrap rounded-lg px-4 transition text-sm;
 }
-.menu-nav-item-anchor .active {
-  @apply font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30;
+
+.active.menu-nav-item-anchor {
+  @apply font-semibold text-slate-700 dark:text-white dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/10 hover:bg-primary/20;
 }
 
 .menu-nav-item-container {
