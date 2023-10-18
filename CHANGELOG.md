@@ -20,7 +20,7 @@
 - [MISC] Optimize the way the UI handles services creation and edition
 - [MISC] Optimize certbot renew script to renew all domains in one command
 
-## v1.5.2 - 2023/10/10
+## v1.5.2 - 2023/09/10
 
 - [BUGFIX] Fix UI fetching only default values from the database (fixes no trash button too)
 - [BUGFIX] Fix infinite loop when using autoconf
