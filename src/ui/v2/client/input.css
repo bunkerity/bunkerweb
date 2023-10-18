@@ -347,6 +347,11 @@ body {
   @apply flex justify-center align-middle w-full mb-4;
 }
 
+/* LOGS */
+.logs-float-btn {
+  @apply scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-16 sm:top-3 right-5 sm:right-40 xl:right-40 z-990 rounded-circle text-slate-700;
+}
+
 /* NEWS */
 
 .news-float-btn {
@@ -635,11 +640,11 @@ body {
 }
 
 .modal-wrap {
-  @apply w-full flex justify-center items-center h-3/4;
+  @apply z-10 w-full flex justify-center items-center h-3/4;
 }
 
 .modal-card {
-  @apply overflow-hidden px-4 py-3 w-full max-w-180 max-h-[70vh] flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply z-10 overflow-hidden px-4 py-3 w-full max-w-180 max-h-[70vh] flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .modal-card-title {

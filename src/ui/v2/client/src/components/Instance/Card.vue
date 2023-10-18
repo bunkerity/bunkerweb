@@ -1,6 +1,6 @@
 <script setup>
 import ButtonBase from "@components/Button/Base.vue";
-import { reactive, defineProps, defineEmits, markRaw } from "vue";
+import { reactive, defineProps, defineEmits, markRaw, computed } from "vue";
 import InstanceSvgPing from "@components/Instance/Svg/Ping.vue";
 import InstanceSvgDelete from "@components/Instance/Svg/Delete.vue";
 
@@ -31,6 +31,29 @@ const props = defineProps({
   },
 });
 
+const actions = reactive({
+  stop: { name: "stop", color: "delete" },
+  reload: { name: "reload", color: "edit" },
+  restart: { name: "restart", color: "valid" },
+});
+
+const topActions = reactive({
+  delete: {
+    name: "delete",
+    class: "bg-red-500",
+    svg: markRaw(InstanceSvgDelete),
+    popup: false,
+    emit: "delete",
+  },
+  ping: {
+    name: "ping",
+    class: "bg-sky-500",
+    svg: markRaw(InstanceSvgPing),
+    popup: false,
+    emit: "action",
+  },
+});
+
 const instance = reactive({
   // Info list to render
   info: [
@@ -38,33 +61,17 @@ const instance = reactive({
     { label: "method", text: props.method },
     { label: "port", text: props.port },
   ],
-  actions:
+
+  actions: computed(() =>
     props.status === "up"
-      ? [
-          { name: "stop", color: "delete" },
-          { name: "reload", color: "edit" },
-          { name: "restart", color: "valid" },
-        ]
-      : [
-          { name: "reload", color: "edit" },
-          { name: "restart", color: "valid" },
-        ],
-  checks: [
-    {
-      name: "delete",
-      class: "bg-red-500",
-      svg: markRaw(InstanceSvgDelete),
-      popup: false,
-      emit: "delete",
-    },
-    {
-      name: "ping",
-      class: "bg-sky-500",
-      svg: markRaw(InstanceSvgPing),
-      popup: false,
-      emit: "action",
-    },
-  ],
+      ? [actions.stop, actions.reload, actions.restart]
+      : [actions.reload, actions.restart]
+  ),
+  checks: computed(() =>
+    props.method === "static"
+      ? [topActions.delete, topActions.ping]
+      : [topActions.ping]
+  ),
 });
 
 // action => return action to execute with instance name

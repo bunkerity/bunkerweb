@@ -6,6 +6,7 @@ import Menu from "@components/Menu.vue";
 import FeedbackStructure from "@components/Feedback/Structure.vue";
 import News from "@components/News.vue";
 import Header from "@components/Header.vue";
+import Logs from "@components/Logs.vue";
 </script>
 
 <template>
@@ -19,6 +20,7 @@ import Header from "@components/Header.vue";
     <Menu />
     <FeedbackStructure />
     <News />
+    <Logs />
     <div class="content-wrap">
       <Header />
       <slot></slot>

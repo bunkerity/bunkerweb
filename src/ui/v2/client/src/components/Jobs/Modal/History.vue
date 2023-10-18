@@ -30,7 +30,11 @@ const header = ["success", "start date", "end date"];
 const emits = defineEmits(["close"]);
 </script>
 <template>
-  <ModalBase :title="`history ${props.jobName}`" v-if="props.isOpen">
+  <ModalBase
+    @backdrop="$emit('close')"
+    :title="`history ${props.jobName}`"
+    v-if="props.isOpen"
+  >
     <div class="col-span-12 overflow-x-auto overflow-y-hidden">
       <ListBase class="min-w-[500px]" :header="header" :positions="positions">
         <ListItem v-for="item in props.history">

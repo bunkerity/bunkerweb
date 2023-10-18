@@ -206,7 +206,7 @@ function showAlert(type, message) {
 }
 </script>
 <template>
-  <ModalBase :title="`${props.action} file`">
+  <ModalBase @backdrop="$emit('close')" :title="`${props.action} file`">
     <div class="w-full">
       <div class="modal-path">
         <p class="modal-path-text">
@@ -227,7 +227,7 @@ function showAlert(type, message) {
       </div>
 
       <!-- editor-->
-      <div id="editor" class="modal-editor">
+      <div v-if="props.type === 'file'" id="editor" class="modal-editor">
         {{ props.value }}
       </div>
       <!-- editor-->

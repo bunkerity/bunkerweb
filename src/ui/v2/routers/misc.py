@@ -6,9 +6,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-CORE_PORT = os.getenv("CORE_PORT")
-CORE_IP = os.getenv("CORE_IP")
-API = f'{CORE_IP}:{CORE_PORT}'
+API = os.getenv("CORE_ADDR") 
 
 router = APIRouter(prefix="/api", tags=[""])
 

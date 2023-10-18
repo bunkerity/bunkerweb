@@ -43,12 +43,7 @@ function updateClientDir() {
     // Change templates/page/index.html by templates/{page_name}.html
     // And move from static to templates
     const templateDir = resolve(__dirname + `/${buildDir}/templates`);
-    // Create template folder
-    if (
-      !fs.existsSync(resolve(__dirname.replace("static", "") + `/templates`))
-    ) {
-      fs.mkdirSync(resolve(__dirname.replace("static", "") + `/templates`));
-    }
+
     fs.readdir(templateDir, (err, subdirs) => {
       subdirs.forEach((subdir) => {
         // Get absolute path of current subdir
@@ -60,7 +55,7 @@ function updateClientDir() {
         // Copy file to move it from /template/page to /template
         fs.copyFileSync(
           `${currPath.replace("/static/templates", "")}/${subdir}.html`,
-          resolve(__dirname.replace("static", "") + `/templates/${subdir}.html`)
+          resolve(__dirname + `/static/${subdir}.html`)
         );
       });
       fs.rmSync(templateDir, { recursive: true, force: true });

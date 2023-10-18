@@ -1,7 +1,7 @@
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from utils import exception_res
 from config import app_name, description, summary, version, contact, license_info, openapi_tags
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,6 +30,12 @@ if DEV_MODE:
         return {"test": "test"}
 
 
+# For futur log UI
+@app.middleware("http")
+async def get_ui_req(request: Request, call_next):
+    response = await call_next(request)
+    return response
+    
 
 
 @app.exception_handler(StarletteHTTPException)

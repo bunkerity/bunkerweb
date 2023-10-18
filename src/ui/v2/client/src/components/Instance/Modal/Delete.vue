@@ -18,7 +18,11 @@ const props = defineProps({
 const emits = defineEmits(["close", "delete"]);
 </script>
 <template>
-  <ModalBase title="delete instance" v-if="props.isOpen">
+  <ModalBase
+    @backdrop="$emit('close')"
+    title="delete instance"
+    v-if="props.isOpen"
+  >
     <div class="w-full">
       <div class="flex justify-center">
         <div class="modal-path">

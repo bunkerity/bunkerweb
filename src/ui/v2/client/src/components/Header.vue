@@ -12,7 +12,7 @@ const pathSplit = "";
             {{ pathSplit[pathSplit.length - 1] }}
           </h2>
           <ul class="header-breadcrumb-container">
-            <li class="header-breadcrumb-item first">Bunkerweb</li>
+            <li class="header-breadcrumb-item first">BunkerWeb</li>
             <li
               v-for="(item, id) in pathSplit"
               :class="[id === pathSplit.length - 1 ? 'active' : 'prev']"
