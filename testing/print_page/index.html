@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.2.8">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.046329b4.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.35e1ed30.min.css">
       
       
 
@@ -784,7 +784,7 @@
 <h2 id="migrating-default-values-and-new-settings">Default values and new settings</h2>
 <p>The default value of some settings have changed and we have added many other settings, we recommend you read the <a href="#security-tuning">security tuning</a> and <a href="#settings">settings</a> sections of the documentation.</p></section><section class="print-page" id="concepts"><h1 id="concepts-concepts">Concepts</h1>
 <figure>
-<p><img align="center," alt="Overwiew" src="../assets/img/concepts.svg" width="600" /></p>
+<p><img align="center," alt="Overview" src="../assets/img/concepts.svg" width="600" /></p>
 </figure>
 <h2 id="concepts-integrations">Integrations</h2>
 <p>The first concept is the integration of BunkerWeb into the target environment. We prefer to use the word "integration" instead of "installation" because one of the goals of BunkerWeb is to integrate seamlessly into existing environments.</p>
@@ -2030,7 +2030,7 @@ MY_SETTING_2=value2
 
 <p>List of supported providers :</p>
 <ul>
-<li>virtualbox </li>
+<li>virtualbox</li>
 <li>libvirt</li>
 </ul>
 <div class="admonition note">
@@ -2091,8 +2091,9 @@ end
 <p>We assume that you're already familiar with the <a href="#concepts">core concepts</a> and you have followed the <a href="#integrations">integrations instructions</a> for your environment.</p>
 </div>
 <div class="admonition tip">
-<p class="admonition-title">Going further<p>To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the <a href="https://github.com/bunkerity/bunkerweb/tree/vtesting/examples">examples folder</a> of the repository to get real-world examples.</p>
-</p>
+<p class="admonition-title">Going further</p>
+<pre><code>To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/vtesting/examples) of the repository to get real-world examples.
+</code></pre>
 </div>
 <h2 id="quickstart-guide-protect-http-applications">Protect HTTP applications</h2>
 <p>Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb : it will act as a classical <a href="https://en.wikipedia.org/wiki/Reverse_proxy">reverse proxy</a> with extra security features.</p>
@@ -2993,8 +2994,9 @@ REAL_IP_HEADER=proxy_protocol
 </div>
 <h2 id="quickstart-guide-protect-udptcp-applications">Protect UDP/TCP applications</h2>
 <div class="admonition warning">
-<p class="admonition-title">Feature is in beta<p>This feature is not production-ready. Feel free to test it and report us any bug using <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> in the GitHub repository.</p>
-</p>
+<p class="admonition-title">Feature is in beta</p>
+<pre><code>This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
+</code></pre>
 </div>
 <p>BunkerWeb offers the capability to function as a <strong>generic UDP/TCP reverse proxy</strong>, allowing you to protect any network-based applications operating at least on layer 4 of the OSI model. Instead of utilizing the "classical" HTTP module, BunkerWeb leverages the <a href="https://nginx.org/en/docs/stream/ngx_stream_core_module.html">stream module</a> of NGINX.</p>
 <p>It's important to note that not all settings and security features are available when using the stream module. Additional information on this can be found in the <a href="#security-tuning">security tuning</a> and <a href="#settings">settings</a> sections of the documentation.</p>
@@ -3356,7 +3358,7 @@ chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">770</span
 <p>The labels to use must follow the pattern <code>bunkerweb.CUSTOM_CONF_&lt;TYPE&gt;_&lt;NAME&gt;</code> :</p>
 <ul>
 <li><code>&lt;TYPE&gt;</code> : the type of config, accepted values are <code>SERVER_HTTP</code>, <code>MODSEC</code>, <code>MODSEC_CRS</code> and <code>SERVER_STREAM</code></li>
-<li><code>&lt;NAME&gt;</code> : the name of config without the .conf suffix </li>
+<li><code>&lt;NAME&gt;</code> : the name of config without the .conf suffix</li>
 </ul>
 <p>Here is a dummy example using a docker-compose file :</p>
 <div class="highlight"><pre><span></span><code><span class="nt">myapp</span><span class="p">:</span>
@@ -4012,10 +4014,11 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 </div>
 <h2 id="quickstart-guide-ipv6">IPv6</h2>
 <div class="admonition warning">
-<p class="admonition-title">Feature is in beta<p>This feature is not production-ready. Feel free to test it and report us any bug using <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> in the GitHub repository.</p>
-</p>
+<p class="admonition-title">Feature is in beta</p>
+<pre><code>This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
+</code></pre>
 </div>
-<p>By default, BunkerWeb will only listen on IPv4 adresses and won't use IPv6 for network communications. If you want to enable IPv6 support, you need to set <code>USE_IPV6=yes</code>. Please note that IPv6 configuration of your network and environment is out-of-the-scope of this documentation.</p>
+<p>By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for network communications. If you want to enable IPv6 support, you need to set <code>USE_IPV6=yes</code>. Please note that IPv6 configuration of your network and environment is out-of-the-scope of this documentation.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="quickstart-guide-__tabbed_8_1" name="quickstart-guide-__tabbed_8" type="radio" /><input id="quickstart-guide-__tabbed_8_2" name="quickstart-guide-__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_8_1">Docker</label><label for="quickstart-guide-__tabbed_8_2">Docker autoconf</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -8553,7 +8556,7 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <li>Social media crawler</li>
 </ul>
 <h2 id="troubleshooting-timezone">Timezone</h2>
-<p>When using container-based integrations, the timezone of the container may not match the one of the host machine. To resolve that, you can set the <code>TZ</code> environment variable to the timezone of your choice on your containers (e.g. <code>TZ=Europe/Paris</code>). You will find the list of timezone identifers <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">here</a>.</p></section><section class="print-page" id="plugins"><h1 id="plugins-plugins">Plugins</h1>
+<p>When using container-based integrations, the timezone of the container may not match the one of the host machine. To resolve that, you can set the <code>TZ</code> environment variable to the timezone of your choice on your containers (e.g. <code>TZ=Europe/Paris</code>). You will find the list of timezone identifiers <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">here</a>.</p></section><section class="print-page" id="plugins"><h1 id="plugins-plugins">Plugins</h1>
 <p>BunkerWeb comes with a plugin system making it possible to easily add new features. Once a plugin is installed, you can manage it using additional settings defined by the plugin.</p>
 <h2 id="plugins-official-plugins">Official plugins</h2>
 <p>Here is the list of "official" plugins that we maintain (see the <a href="https://github.com/bunkerity/bunkerweb-plugins">bunkerweb-plugins</a> repository for more information) :</p>
@@ -8669,7 +8672,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <p>When using the <a href="#integrations-swarm">Swarm integration</a>, plugins must be written to the volume mounted on <code>/data/plugins</code> into the scheduler container.</p>
 <div class="admonition info">
 <p class="admonition-title">Swarm volume</p>
-<p>Configuring a Swarm volume that will persist when the scheduler service is running on different nodes is not covered is in this documentation. We will assume that you have a shared folder mounted on <code>/shared</code> accross all nodes.</p>
+<p>Configuring a Swarm volume that will persist when the scheduler service is running on different nodes is not covered is in this documentation. We will assume that you have a shared folder mounted on <code>/shared</code> across all nodes.</p>
 </div>
 <p>The first thing to do is to create the plugins folder :</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/shared/bw-plugins
@@ -9122,7 +9125,7 @@ cp<span class="w"> </span>-rp<span class="w"> </span>./bunkerweb-plugins/*<span 
 <li><code>self.logger</code> : print logs</li>
 <li><code>bunkerweb.utils</code> : various useful functions</li>
 <li><code>bunkerweb.datastore</code> : access the global shared data on one instance (key/value store)</li>
-<li><code>bunkerweb.clusterstore</code> : access a Redis data store shared beetween BunkerWeb instances (key/value store)</li>
+<li><code>bunkerweb.clusterstore</code> : access a Redis data store shared between BunkerWeb instances (key/value store)</li>
 </ul>
 <p>To access the functions, you first need to <strong>require</strong> the modules :</p>
 <div class="highlight"><pre><span></span><code><span class="kd">local</span> <span class="n">utils</span>       <span class="o">=</span> <span class="nb">require</span> <span class="s2">&quot;bunkerweb.utils&quot;</span>
@@ -9204,10 +9207,10 @@ Content of foo is : {{ foo }}.
 </ul>
 <p>Please contact us at <a href="mailto:contact@bunkerity.com">contact@bunkerity.com</a> if you are interested.</p>
 <h2 id="about-where-to-get-community-support">Where to get community support ?</h2>
-<p>To get free community support, you can use the following medias :</p>
+<p>To get free community support, you can use the following media :</p>
 <ul>
 <li>The #help channel of BunkerWeb in the <a href="https://discord.com/invite/fTf46FmtyD">Discord server</a></li>
-<li>The help category of <a href="https://github.com/bunkerity/bunkerweb/discussions">GitHub dicussions</a></li>
+<li>The help category of <a href="https://github.com/bunkerity/bunkerweb/discussions">GitHub discussions</a></li>
 <li>The <a href="https://www.reddit.com/r/BunkerWeb">/r/BunkerWeb</a> subreddit</li>
 <li>The <a href="https://serverfault.com/">Server Fault</a> and <a href="https://superuser.com/">Super User</a> forums</li>
 </ul>
@@ -9361,10 +9364,11 @@ JvbFAfI3qteepvnjBQ==
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "/latest", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
+    
+    <script id="__config" type="application/json">{"base": "/latest", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.dff1b7c8.min.js"></script>
+      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       
