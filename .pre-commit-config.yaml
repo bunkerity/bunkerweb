@@ -6,6 +6,9 @@ repos:
     rev: c4a0b883114b00d8d76b479c820ce7950211c99b # frozen: v4.5.0
     hooks:
       - id: requirements-txt-fixer
+        name: Fix requirements.txt and requirements.in files
+        description: Sorts entries in requirements.txt and requirements.in files.
+        files: (requirements|constraints).*\.(txt|in)$
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
@@ -14,7 +17,7 @@ repos:
       - id: check-case-conflict
 
   - repo: https://github.com/ambv/black
-    rev: e87737140f32d3cd7c44ede75f02dcd58e55820e # frozen: 23.9.1
+    rev: 9edba85f71d50d12996ef7bda576426362016171 # frozen: 23.10.0
     hooks:
       - id: black
         name: Black Python Formatter
