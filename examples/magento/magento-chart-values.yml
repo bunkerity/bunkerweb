@@ -1,5 +1,3 @@
-image:
-  tag: "2.4.5"
 magentoHost: "www.example.com"
 magentoUsername: "user"
 magentoPassword: "changeme42"
@@ -8,10 +6,5 @@ magentoFirstName: "John"
 magentoLastName: "Doe"
 magentoAdminUri: "admin"
 mariadb:
-  image:
-    tag: "10.2"
   auth:
     password: "changeme1337"
-elasticsearch:
-  image:
-    tag: "7"

@@ -6,9 +6,9 @@
   "delay": 300,
   "tests": [
     {
-      "type": "string",
+      "type": "status",
       "url": "https://www.example.com",
-      "string": "magento"
+      "string": 200
     }
   ]
 }
