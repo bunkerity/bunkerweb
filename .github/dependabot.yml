@@ -7,7 +7,7 @@ updates:
     schedule:
       interval: "daily"
     assignees:
-      - "fl0ppy-d1sk"
+      - "TheophileDiot"
     commit-message:
       prefix: "deps/gha"
     target-branch: "dev"
@@ -81,4 +81,35 @@ updates:
       - "TheophileDiot"
     commit-message:
       prefix: "deps/ui"
+    target-branch: "dev"
+
+  # Misc
+  - package-ecosystem: "pip"
+    directory: "/src/common/gen"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/common/gen"
+    target-branch: "dev"
+  - package-ecosystem: "pip"
+    directory: "/src/common/db"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/common/db"
+    target-branch: "dev"
+
+  # Terraform
+  - package-ecosystem: "terraform"
+    directory: "/tests/terraform"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "fl0ppy-d1sk"
+    commit-message:
+      prefix: "deps/terraform"
     target-branch: "dev"
