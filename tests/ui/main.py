@@ -130,7 +130,8 @@ def access_page(
     *,
     retries: int = 0,
 ):
-    assert_button_click(driver, button)
+    if retries == 0:
+        assert_button_click(driver, button)
 
     try:
         title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div/header/div/nav/h6")))
@@ -139,7 +140,7 @@ def access_page(
             print(f"Didn't get redirected to {name} page, exiting ...", flush=True)
             exit(1)
     except TimeoutException:
-        if retries < 3 and driver.current_url.split("/")[-1].startswith("/loading"):
+        if retries < 3 and "/loading" in driver.current_url:
             sleep(2)
             access_page(driver, driver_wait, button, name, message, retries=retries + 1)
 
