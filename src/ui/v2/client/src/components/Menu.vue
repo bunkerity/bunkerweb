@@ -92,14 +92,18 @@ function updateMode() {
 
 // Check device desktop using breakpoint
 onMounted(() => {
+  // Get current mode from sessionStorage and update
   menu.darkMode = getDarkMode();
   updateMode();
+
+  // Get current route and try to match with a menu item to highlight
   const pathName = window.location.pathname.toLowerCase();
   navList.forEach((item) => {
     const title = item.title.replaceAll(" ", "-").toLowerCase();
     if (pathName.includes(title)) menu.currPath = title;
   });
 
+  // Determine menu behavior (static or float)
   menu.isDesktop = window.innerWidth < 1200 ? false : true;
   window.addEventListener("resize", () => {
     menu.isDesktop = window.innerWidth < 1200 ? false : true;
@@ -219,7 +223,7 @@ function toggleMenu() {
             <li class="w-full mt-4">
               <h6 class="menu-page-plugin-title">PLUGIN PAGES</h6>
             </li>
-            <li v-if="menu.pagePlugins.length === 0" class="w-full mt-8">
+            <li v-if="menu.pagePlugins.length === 0" class="w-full mt-6">
               <h6 class="menu-page-plugin-empty-title">
                 Want your own plugins ? <br />
                 <a
@@ -260,7 +264,7 @@ function toggleMenu() {
     <!-- end top sidebar -->
 
     <!-- bottom sidebar  -->
-    <div class="w-full flex flex-col justify-end m-4">
+    <div class="w-full flex flex-col justify-end mt-2 m-4">
       <hr class="line-separator" />
 
       <!-- dark/light mode -->

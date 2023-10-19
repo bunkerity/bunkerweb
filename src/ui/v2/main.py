@@ -43,7 +43,6 @@ async def http_exception_handler(request, exc):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    print("grdg")
     return JSONResponse(exception_res(400, request.url.path, "Invalid data send on request"))
 
 app.include_router(misc.router)

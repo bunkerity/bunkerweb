@@ -1436,6 +1436,18 @@ h6 {
   border-color: transparent !important;
 }
 
+.border-slate-700\/30 {
+  border-color: rgb(52 71 103 / 0.3) !important;
+}
+
+.border-slate-700\/40 {
+  border-color: rgb(52 71 103 / 0.4) !important;
+}
+
+.border-slate-700\/60 {
+  border-color: rgb(52 71 103 / 0.6) !important;
+}
+
 .bg-gray-100 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(235 239 244 / var(--tw-bg-opacity)) !important;
@@ -3179,7 +3191,6 @@ body {
 
 @media (min-width: 1200px) {
   .menu-container {
-    position: absolute;
     left: 0px;
     margin-left: 1.5rem;
   }
@@ -3300,10 +3311,9 @@ body {
   align-items: center;
   white-space: nowrap;
   border-radius: 0.5rem;
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
   padding-left: 1rem;
   padding-right: 1rem;
+  padding-bottom: 0.125rem;
   font-size: 0.875rem;
   line-height: 1.5rem;
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter;

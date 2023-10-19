@@ -27,19 +27,18 @@ const instances = reactive({
   isErr: false,
   data: [],
   hostnames: [],
-  total: computed(() => {
-    return instances.hostnames.length;
-  }),
+  total: "null",
 });
 
 const bans = reactive({
   data: [],
   isPend: false,
   isErr: false,
-  total: "",
+  total: "null",
   reasonList: ["all"], // Based on reasons find on fetch
   bansList: [], // Format {hostname : str, data : Array}
   setup: computed(() => {
+    instances.total = bans.data.length;
     if (bans.data.length === 0) return;
 
     // Create a global instance that regroup every ip
@@ -48,8 +47,7 @@ const bans = reactive({
     const reasons = ["all"];
     const globalInst = [];
     for (let i = 0; i < bans.data.length; i++) {
-      const instData = bans.data[i].data;
-      console.log(instData);
+      const instData = bans.data[i].data.message.data;
       instData.forEach((item) => {
         reasons.indexOf(item.reason) === -1 ? reasons.push(item.reason) : false;
         const isItem = globalInst.find((globItem) => {
@@ -58,7 +56,7 @@ const bans = reactive({
         if (!isItem) globalInst.push(item);
       });
     }
-
+    bans.total = globalInst.length;
     bans.reasonList = reasons;
     //Filter
     const filterBans = getBansByFilter(globalInst, filters);
@@ -75,12 +73,12 @@ async function getData() {
     feedbackStore.addFeedback
   );
   const hostnames = await getHostFromInst();
+
   return await getHostFromInst();
 }
 
 async function getHostFromInst() {
   const hosts = [];
-
   if (!Array.isArray(instances.data)) return;
 
   instances.data.forEach((instance) => {
@@ -104,7 +102,6 @@ async function setHostBan(hostnames) {
     bans.isPend = false;
     instances.forEach((instance, id) => {
       if (instance.type === "error") bans.isErr = true;
-      if (!Array.isArray(JSON.parse(instance.data))) return;
       bansList.push({
         hostname: hostnames[id],
         data: JSON.parse(instance.data) || [],

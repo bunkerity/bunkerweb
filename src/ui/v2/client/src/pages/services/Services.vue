@@ -344,7 +344,7 @@ onMounted(async () => {
         class="z-10 col-span-12 grid grid-cols-12 relative"
       >
         <CardLabel
-          class="text-xl border-b pb-2 mb-4"
+          class="text-xl border-b border-slate-700/60 pb-2 mb-4"
           :label="
             services.activeService === 'new'
               ? 'CREATE NEW SERVICE'

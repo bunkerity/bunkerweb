@@ -37,7 +37,6 @@ export async function fetchAPI(
     .then((res) => {
       state.isPend = false;
       state.isErr = false;
-      console.log(res);
       return res.json();
     })
     .then((data) => {

@@ -1,5 +1,34 @@
 <script setup>
-const pathSplit = "";
+import { reactive, onMounted, computed } from "vue";
+
+const header = reactive({
+  splitPath: [],
+  currPath: computed(() => {
+    if (header.splitPath.length === 0) return "page";
+    return header.splitPath[header.splitPath.length - 1];
+  }),
+});
+
+onMounted(() => {
+  // Get current route and try to match with a menu item to highlight
+  const pathName = window.location.pathname.toLowerCase();
+  // Remove queries
+  let splitPath = pathName.split("?")[0].split("/");
+  if (splitPath.length === 0) return (header.splitPath = []);
+  // Remove .html and index
+  for (let i = 0; i < splitPath.length; i++) {
+    const el = splitPath[i];
+    splitPath[i] = el.replace(".html", "");
+  }
+  if (splitPath[splitPath.length - 1].includes("index")) splitPath.pop();
+  splitPath = splitPath.filter((item) => item !== "");
+  // We want to keep only last 2 params to avoid wide path
+  for (let i = 0; splitPath.length > 2; i++) {
+    splitPath.shift();
+  }
+
+  header.splitPath = splitPath;
+});
 </script>
 
 <template>
@@ -8,16 +37,16 @@ const pathSplit = "";
       <div class="header-wrap">
         <nav>
           <!-- breadcrumb -->
-          <h2 class="header-title">
-            {{ pathSplit[pathSplit.length - 1] }}
-          </h2>
+          <h2 class="header-title">{{ header.currPath }}</h2>
           <ul class="header-breadcrumb-container">
             <li class="header-breadcrumb-item first">BunkerWeb</li>
             <li
-              v-for="(item, id) in pathSplit"
-              :class="[id === pathSplit.length - 1 ? 'active' : 'prev']"
+              v-for="(item, id) in header.splitPath"
+              :class="[id === header.splitPath.length - 1 ? 'active' : 'prev']"
               class="header-breadcrumb-item slash"
-              :aria-current="id === pathSplit.length - 1 ? 'page' : false"
+              :aria-current="
+                id === header.splitPath.length - 1 ? 'page' : false
+              "
             >
               {{ item }}
             </li>
