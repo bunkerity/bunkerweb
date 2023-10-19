@@ -322,14 +322,15 @@ class JobScheduler:
     def clear(self):
         schedule_clear()
 
-    def reload(self, env: Dict[str, Any], api: Optional[API] = None) -> bool:
+    def reload(self, env: Dict[str, Any], api: Optional[API] = None, *, run: bool = True) -> bool:
         ret = True
         try:
             self.__env.update(env)
             self.__api = api or self.__api
             self.clear()
             self.__jobs = self.__get_jobs()
-            ret = self.run_once()
+            if run:
+                ret = self.run_once()
             self.setup()
         except:
             self.__logger.exception("Exception while reloading scheduler")

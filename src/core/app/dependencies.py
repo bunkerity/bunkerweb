@@ -629,16 +629,14 @@ def run_jobs():
 
     assert isinstance(db_config, dict)
 
-    SCHEDULER.reload(
+    # Only run jobs once
+    if not SCHEDULER.reload(
         db_config
         | {
             "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
             "CORE_TOKEN": CORE_CONFIG.CORE_TOKEN,
         }
-    )
-
-    # Only run jobs once
-    if not SCHEDULER.run_once():
+    ):
         CORE_CONFIG.logger.error("At least one job in run_once() failed")
     else:
         CORE_CONFIG.logger.info("All jobs in run_once() were successful")
@@ -670,7 +668,8 @@ def run_job(job_name: str):
         | {
             "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
             "CORE_TOKEN": CORE_CONFIG.CORE_TOKEN,
-        }
+        },
+        run=False,
     )
     SCHEDULER.run_single(job_name)
 

@@ -1937,10 +1937,11 @@ class Database:
                 "reload": job.reload,
                 "history": [
                     {
-                        "date": job_run.id.strftime("%Y/%m/%d, %I:%M:%S %p"),
+                        "start_date": job_run.start_date.strftime("%Y/%m/%d, %I:%M:%S %p"),
+                        "end_date": job_run.end_date.strftime("%Y/%m/%d, %I:%M:%S %p"),
                         "success": job_run.success,
                     }
-                    for job_run in session.query(Jobs_runs).with_entities(Jobs_runs.end_date, Jobs_runs.success).filter_by(job_name=job.name).order_by(Jobs_runs.end_date.desc()).limit(10).with_for_update(read=True).all()
+                    for job_run in session.query(Jobs_runs).with_entities(Jobs_runs.success, Jobs_runs.start_date, Jobs_runs.end_date).filter_by(job_name=job.name).order_by(Jobs_runs.end_date.desc()).limit(10).with_for_update(read=True).all()
                 ],
                 "cache": [
                     {
