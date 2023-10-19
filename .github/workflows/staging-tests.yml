@@ -68,6 +68,8 @@ jobs:
         if: inputs.TYPE == 'k8s'
       - uses: azure/setup-kubectl@901a10e89ea615cf61f57ac05cecdf23e7de06d8 # v3.2
         if: inputs.TYPE == 'k8s'
+        with:
+          version: 'v1.28.2'
       - uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
         if: inputs.TYPE == 'k8s'
       - name: Pull BW linux ubuntu test image
