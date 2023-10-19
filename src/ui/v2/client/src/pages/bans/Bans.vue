@@ -80,6 +80,9 @@ async function getData() {
 
 async function getHostFromInst() {
   const hosts = [];
+
+  if (!Array.isArray(instances.data)) return;
+
   instances.data.forEach((instance) => {
     hosts.push(instance["hostname"]);
   });

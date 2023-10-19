@@ -211,8 +211,8 @@ onMounted(async () => {
   <Dashboard>
     <ApiState
       class="col-span-12 md:col-start-4 md:col-span-6"
-      :isErr="services.isErr || !services.data || services.data.length === 0"
-      :isPend="services.isPend"
+      :isErr="conf.isErr || services.isErr"
+      :isPend="conf.isPend || services.isPend"
       :textState="{
         isPend: 'Try retrieve services',
         isErr: 'Error retrieving services',

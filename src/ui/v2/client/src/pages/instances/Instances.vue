@@ -74,7 +74,7 @@ onMounted(async () => {
   <Dashboard>
     <ApiState
       class="col-span-12 md:col-start-4 md:col-span-6"
-      :isErr="instances.isErr || !instances.data || instances.data.length === 0"
+      :isErr="instances.isErr"
       :isPend="instances.isPend"
       :textState="{
         isPend: 'Try retrieve instances',

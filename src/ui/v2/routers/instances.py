@@ -1,7 +1,7 @@
 from typing import List, Literal, Union
 from fastapi import APIRouter
 import requests
-from utils import set_res
+from utils import get_core_format_res
 from models import Instance, ResponseModel
 import os
 from dotenv import load_dotenv
@@ -19,10 +19,7 @@ router = APIRouter(prefix="/api/instances", tags=["instances"])
     summary="Get BunkerWeb instances",
 )
 async def get_instances():
-    req = requests.get(f"{API}/instances")
-    res = set_res(req, "GET", "Retrieve instances")
-    return res
-
+    return get_core_format_res(f"{API}/instances", "GET", "", "Retrieve instances")
 
 @router.put(
     "",
@@ -34,9 +31,8 @@ async def upsert_instance(
     method: str = "manual",
     reload: bool = True,
 ):
-    req = requests.put(f"{API}/instances?method={method}&reload={reload}", data=instances)
-    res = set_res(req, "PUT", "Upsert instances")
-    return res
+    return get_core_format_res(f"{API}/instances?method={method}&reload={reload}", "PUT", instances, "Upsert instances")
+
 
 
 @router.delete(
@@ -45,10 +41,7 @@ async def upsert_instance(
     summary="Delete BunkerWeb instance",
 )
 async def delete_instance(instance_hostname: str):
-    req = requests.delete(f"{API}/instances/{instance_hostname}")
-    res = set_res(req, "DELETE", "Delete instance")
-    return res
-
+    return get_core_format_res(f"{API}/instances/{instance_hostname}", "DELETE", "", "Delete instance")
 
 @router.post(
     "/{instance_hostname}/{action}",
@@ -56,6 +49,5 @@ async def delete_instance(instance_hostname: str):
     summary="Send action to a BunkerWeb instance",
 )
 async def send_instance_action(instance_hostname: str, action: str):
-    req = requests.post(f'{API}/instances/{instance_hostname}/{action}')
-    res = set_res(req, "POST", f"Send instance {instance_hostname} action {action}")
-    return res
+    return get_core_format_res(f'{API}/instances/{instance_hostname}/{action}', "POST", "", f"Send instance {instance_hostname} action : {action}")
+

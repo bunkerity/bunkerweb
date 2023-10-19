@@ -153,7 +153,7 @@ async function sendConf() {
   <Dashboard>
     <ApiState
       class="col-span-12 md:col-start-4 md:col-span-6"
-      :isErr="plugins.isErr"
+      :isErr="conf.isErr || plugins.isErr"
       :isPend="plugins.isPend"
       :textState="{
         isPend: 'Try retrieve global config',

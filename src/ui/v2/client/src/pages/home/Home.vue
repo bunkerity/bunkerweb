@@ -119,9 +119,9 @@ async function getConf() {
 }
 
 onMounted(async () => {
-  await getInstances();
-  await getVersion();
-  await getConf();
+  getVersion();
+  getInstances();
+  getConf();
 });
 </script>
 
@@ -158,7 +158,7 @@ onMounted(async () => {
     <!-- instances -->
     <ApiState
       class="col-span-12 md:col-span-6 2xl:col-span-4"
-      :isErr="instances.isErr || !instances.data || instances.data.length === 0"
+      :isErr="instances.isErr"
       :isPend="instances.isPend"
       :textState="{
         isPend: 'Try retrieve instances',

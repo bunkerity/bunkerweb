@@ -96,8 +96,8 @@ onMounted(async () => {
     {{}}
     <ApiState
       class="col-span-12 md:col-start-4 md:col-span-6"
-      :isErr="customConf.isErr || conf.isErr"
-      :isPend="customConf.isPend"
+      :isErr="customConf.isErr"
+      :isPend="conf.isPend || customConf.isPend"
       :textState="{
         isPend: 'Try retrieve custom conf',
         isErr: 'Error retrieving custom conf',
@@ -185,7 +185,11 @@ onMounted(async () => {
     <FileManagerStructure
       @updateFile="getData()"
       v-if="
-        !customConf.isPend && !customConf.isErr && !conf.isPend && !conf.isErr
+        !customConf.isPend &&
+        !customConf.isErr &&
+        !conf.isPend &&
+        !conf.isErr &&
+        customConf.setup.length > 0
       "
       :config="customConf.setup"
       class="col-span-12"

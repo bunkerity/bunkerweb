@@ -1,7 +1,7 @@
 from typing import Annotated, Optional
 from fastapi import APIRouter, File, Form
 import requests
-from utils import set_res
+from utils import get_core_format_res
 from models import CacheFileModel, ResponseModel
 import os
 from dotenv import load_dotenv
@@ -18,9 +18,7 @@ router = APIRouter(prefix="/api/logs", tags=["jobs"])
     summary="Get ui logs",
 )
 async def get_logs_ui():
-    req = requests.get(f"{API}/logs/ui")
-    res = set_res(req, "GET", "Retrieve ui logs")
-    return res
+    return get_core_format_res(f"{API}/logs/ui", "GET", "", "Retrieve ui logs")
 
 @router.get(
     "/core",
@@ -28,6 +26,4 @@ async def get_logs_ui():
     summary="Get core logs",
 )
 async def get_logs_ui():
-    req = requests.get(f"{API}/logs/core")
-    res = set_res(req, "GET", "Retrieve core logs")
-    return res
+    return get_core_format_res(f"{API}/logs/core", "GET", "", "Retrieve core logs")

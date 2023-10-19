@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
 from dotenv import load_dotenv
+from routers import instances, plugins, config, misc, jobs, custom_configs, admin
 
 load_dotenv()
 DEV_MODE = os.getenv("DEV_MODE")
@@ -25,9 +26,6 @@ if DEV_MODE:
         allow_headers=["*"],
     )
 
-    @app.get("/test")
-    async def test():
-        return {"test": "test"}
 
 
 # For futur log UI
@@ -40,16 +38,13 @@ async def get_ui_req(request: Request, call_next):
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request, exc):
-    print(f'------------------- {request, exc.status_code}')
     return JSONResponse(exception_res(exc.status_code, request.url.path, exc.detail))
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
+    print("grdg")
     return JSONResponse(exception_res(400, request.url.path, "Invalid data send on request"))
-
-
-from routers import instances, plugins, config, misc, jobs, custom_configs, admin
 
 app.include_router(misc.router)
 app.include_router(instances.router)
