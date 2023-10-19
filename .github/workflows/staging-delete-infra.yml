@@ -36,6 +36,8 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
       - uses: azure/setup-kubectl@901a10e89ea615cf61f57ac05cecdf23e7de06d8 # v3.2
         if: inputs.TYPE == 'k8s'
+        with:
+          version: 'v1.28.2'
       # Remove infra
       - run: kubectl delete daemonsets,replicasets,services,deployments,pods,rc,ingress,statefulsets --all --all-namespaces --timeout=60s ; kubectl delete pvc --all --timeout=60s ; kubectl delete pv --all --timeout=60s
         if: inputs.TYPE == 'k8s'
