@@ -1,1 +1,0 @@
-import{o,c as n,e as r,n as a}from"./_plugin-vue_export-helper-8cf34f94.js";const p={__name:"Base",props:{color:{type:String},size:{type:String}},setup(t){const e=t;return(s,c)=>(o(),n("button",{class:a([`btn btn-${e.color} btn-${e.size}`])},[r(s.$slots,"default")],2))}};export{p as _};

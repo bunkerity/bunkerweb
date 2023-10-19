@@ -757,20 +757,12 @@ h6 {
   grid-column: span 3 / span 3 !important;
 }
 
-.col-span-4 {
-  grid-column: span 4 / span 4 !important;
-}
-
 .col-span-5 {
   grid-column: span 5 / span 5 !important;
 }
 
 .col-start-1 {
   grid-column-start: 1 !important;
-}
-
-.col-start-5 {
-  grid-column-start: 5 !important;
 }
 
 .col-end-13 {
@@ -5936,10 +5928,6 @@ body {
 }
 
 @media (min-width: 768px) {
-  .md\:col-span-12 {
-    grid-column: span 12 / span 12 !important;
-  }
-
   .md\:col-span-4 {
     grid-column: span 4 / span 4 !important;
   }
@@ -6000,6 +5988,10 @@ body {
 }
 
 @media (min-width: 992px) {
+  .lg\:col-span-12 {
+    grid-column: span 12 / span 12 !important;
+  }
+
   .lg\:col-span-3 {
     grid-column: span 3 / span 3 !important;
   }
@@ -6051,14 +6043,6 @@ body {
 
   .\32xl\:col-span-5 {
     grid-column: span 5 / span 5 !important;
-  }
-
-  .\32xl\:col-span-6 {
-    grid-column: span 6 / span 6 !important;
-  }
-
-  .\32xl\:col-start-5 {
-    grid-column-start: 5 !important;
   }
 }
 

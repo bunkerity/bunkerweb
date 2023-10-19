@@ -222,6 +222,15 @@ onMounted(async () => {
       v-if="!services.isErr && !services.isPend"
       class="col-span-12 content-wrap"
     >
+      <div class="col-span-12 flex justify-center mt-2">
+        <ButtonBase
+          @click="services.activeService = 'new'"
+          color="valid"
+          size="normal"
+          class="text-sm"
+          >Create new service
+        </ButtonBase>
+      </div>
       <CardBase
         class="z-[102] h-fit col-span-12 md:col-span-4 lg:col-span-3 3xl:col-span-2"
         label="info"
@@ -244,7 +253,7 @@ onMounted(async () => {
         />
       </CardBase>
       <CardBase
-        class="z-[101] h-fit col-span-12 md:col-span-8 lg:col-span-4 3xl:col-span-3"
+        class="z-[101] h-fit col-span-12 md:col-span-8 lg:col-span-5 3xl:col-span-3"
       >
         <div class="col-span-12 flex">
           <CardLabel label="services" />
@@ -269,15 +278,6 @@ onMounted(async () => {
             }"
           />
         </SettingsLayout>
-        <div class="col-span-12 flex justify-center mt-2">
-          <ButtonBase
-            @click="services.activeService = 'new'"
-            color="valid"
-            size="normal"
-            class="text-sm"
-            >Create new service</ButtonBase
-          >
-        </div>
         <div class="col-span-12 flex flex-col justify-center items-center mt-2">
           <hr class="line-separator z-10 w-full" />
           <p class="dark:text-gray-500 text-xs text-center mt-1 mb-2">
@@ -289,11 +289,11 @@ onMounted(async () => {
         </div>
       </CardBase>
       <CardBase
-        label="plugins"
-        class="z-[100] col-span-12 md:col-span-12 lg:col-span-5 3xl:col-span-4 grid grid-cols-12 relative"
+        label="plugins & filters"
+        class="z-[100] h-fit col-span-12 lg:col-span-4 grid grid-cols-12 relative"
       >
         <SettingsLayout
-          class="flex w-full col-span-12 2xl:col-span-6"
+          class="flex w-full col-span-12 md:col-span-4 lg:col-span-12"
           label="Select plugin"
           name="plugins"
         >
@@ -308,7 +308,7 @@ onMounted(async () => {
           />
         </SettingsLayout>
         <SettingsLayout
-          class="flex w-full col-span-12 2xl:col-span-6"
+          class="flex w-full col-span-12 md:col-span-4 lg:col-span-12"
           label="Setting search"
           name="keyword"
         >
@@ -323,7 +323,7 @@ onMounted(async () => {
           />
         </SettingsLayout>
         <SettingsLayout
-          class="flex w-full col-span-12 2xl:col-span-6"
+          class="flex w-full col-span-12 md:col-span-4 lg:col-span-12"
           label="Setting method"
           name="keyword"
         >
