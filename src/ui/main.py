@@ -481,6 +481,7 @@ def services():
 
             # Edit check fields and remove already existing ones
             config = app.config["CONFIG"].get_config(methods=False)
+            server_name = variables["SERVER_NAME"].split(" ")[0]
             for variable, value in deepcopy(variables).items():
                 if variable.endswith("SCHEMA"):
                     del variables[variable]
@@ -491,7 +492,7 @@ def services():
                 elif value == "off":
                     value = "no"
 
-                if variable in variables and variable != "SERVER_NAME" and value == config.get(variable, None):
+                if variable in variables and variable != "SERVER_NAME" and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, None):
                     del variables[variable]
 
             if request.form["operation"] == "edit" and len(variables) == 1 and "SERVER_NAME" in variables and variables["SERVER_NAME"] == request.form.get("OLD_SERVER_NAME", ""):
@@ -499,6 +500,9 @@ def services():
                     "The service was not edited because no values were changed.",
                     "error",
                 )
+                return redirect(url_for("loading", next=url_for("services")))
+            elif request.form["operation"] == "new" and not variables:
+                flash("The service was not created because all values had the default value.", "error")
                 return redirect(url_for("loading", next=url_for("services")))
 
             error = app.config["CONFIG"].check_variables(variables)
