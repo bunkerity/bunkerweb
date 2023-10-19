@@ -218,7 +218,7 @@ class Config:
         old_server_name_splitted = old_server_name.split(" ")
         for i, service in enumerate(deepcopy(services)):
             if service["SERVER_NAME"] == variables["SERVER_NAME"] or service["SERVER_NAME"] in server_name_splitted:
-                if changed_server_name:
+                if changed_server_name and service["SERVER_NAME"].split(" ")[0] != old_server_name_splitted[0]:
                     return (
                         f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
                         1,
