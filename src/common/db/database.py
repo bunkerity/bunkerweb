@@ -893,14 +893,12 @@ class Database:
 
     def get_config(self, methods: bool = False, *, new_format: bool = False) -> Dict[str, dict]:
         """Get the config from the database"""
-        config: dict = (
-            {
-                "global": {},
-                "services": {},
-            }
-            if new_format
-            else {}
-        )
+        config = {}
+        global_config = config
+        if new_format:
+            del global_config
+            config = {"global": {}, "services": {}}
+            global_config = config["global"]
         with suppress(BaseException), self.__db_session() as session:
             multisite = []
             for setting in (
@@ -915,63 +913,32 @@ class Database:
                 .all()
             ):
                 default = setting.default or ""
+                global_config[setting.id] = {"value": default, "method": "default"} | ({"global": True} if not new_format else {}) if methods else default
 
-                if new_format:
-                    config["global"][setting.id] = {"value": default, "method": "default"} if methods else default
-                else:
-                    config[setting.id] = {"value": default, "global": True, "method": "default"} if methods else default
-
-                global_values = session.query(Global_values).with_entities(Global_values.value, Global_values.suffix, Global_values.method).filter_by(setting_id=setting.id).with_for_update(read=True).all()
-
-                for global_value in global_values:
+                for global_value in session.query(Global_values).with_entities(Global_values.value, Global_values.suffix, Global_values.method).filter_by(setting_id=setting.id).with_for_update(read=True).all():
                     setting_key = setting.id + (f"_{global_value.suffix}" if setting.multiple and global_value.suffix > 0 else "")
-                    if new_format:
-                        config["global"][setting_key] = (
-                            {
-                                "value": global_value.value,
-                                "method": global_value.method,
-                            }
-                            if methods
-                            else global_value.value
-                        )
-                    else:
-                        config[setting_key] = (
-                            {
-                                "value": global_value.value,
-                                "global": True,
-                                "method": global_value.method,
-                            }
-                            if methods
-                            else global_value.value
-                        )
+                    global_config[setting_key] = {"value": global_value.value, "method": global_value.method} | ({"global": True} if not new_format else {}) if methods else global_value.value
 
                 if setting.context == "multisite":
                     multisite.append(setting.id)
 
-            is_multisite = config.get("global", config).get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else config.get("global", config).get("MULTISITE", "no") == "yes"
+            is_multisite = global_config.get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else global_config.get("MULTISITE", "no") == "yes"
 
             if is_multisite:
                 for service in session.query(Services).with_entities(Services.id).with_for_update(read=True).all():
                     if new_format and service not in config["services"]:
                         config["services"][service.id] = {}
-                    checked_settings = []
-                    for key, value in deepcopy(config).items():
+                    for key, value in deepcopy(global_config).items():
                         original_key = key
                         if self.suffix_rx.search(key):
                             key = key[: -len(str(key.split("_")[-1])) - 1]
 
                         if key not in multisite:
                             continue
+                        elif new_format and original_key not in config["services"][service.id]:
+                            config["services"][service.id][original_key] = value
                         elif f"{service.id}_{original_key}" not in config:
-                            if new_format:
-                                config["services"][service.id][original_key] = value
-                            else:
-                                config[f"{service.id}_{original_key}"] = value
-
-                        if original_key not in checked_settings:
-                            checked_settings.append(original_key)
-                        else:
-                            continue
+                            config[f"{service.id}_{original_key}"] = value
 
                         service_settings = (
                             session.query(Services_settings)

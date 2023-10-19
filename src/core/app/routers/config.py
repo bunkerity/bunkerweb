@@ -20,7 +20,7 @@ router = APIRouter(prefix="/config", tags=["config"])
             Literal["global", "services"],
             Dict[
                 str,
-                Union[str, Dict[Literal["value", "method"], str]],
+                Dict[str, Union[str, Dict[Literal["value", "method"], str]]],
             ],
         ],
     ],
