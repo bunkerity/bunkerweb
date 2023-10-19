@@ -27,13 +27,11 @@ if DEV_MODE:
     )
 
 
-
 # For futur log UI
 @app.middleware("http")
 async def get_ui_req(request: Request, call_next):
     response = await call_next(request)
     return response
-    
 
 
 @app.exception_handler(StarletteHTTPException)
@@ -45,6 +43,7 @@ async def http_exception_handler(request, exc):
 async def validation_exception_handler(request, exc):
     return JSONResponse(exception_res(400, request.url.path, "Invalid data send on request"))
 
+
 app.include_router(misc.router)
 app.include_router(instances.router)
 app.include_router(plugins.router)
@@ -53,4 +52,4 @@ app.include_router(custom_configs.router)
 app.include_router(jobs.router)
 app.include_router(admin.router)
 
-app.mount("/", StaticFiles(directory=f'{base}/static'), name="static")
+app.mount("/", StaticFiles(directory=f"{base}/static"), name="static")

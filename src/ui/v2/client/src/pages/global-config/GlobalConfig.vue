@@ -56,7 +56,7 @@ const plugins = reactive({
     // Duplicate base data
     const cloneGlobalPlugin = getPluginsByContext(
       JSON.parse(JSON.stringify(plugins.data)),
-      "global"
+      "global",
     );
     const cloneGlobalConf = JSON.parse(JSON.stringify(conf.data["global"]));
     // Format and keep only global config
@@ -112,14 +112,14 @@ async function getGlobalConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -144,7 +144,7 @@ async function sendConf() {
     "PUT",
     config.data["global"],
     null,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 </script>

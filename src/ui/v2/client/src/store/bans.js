@@ -6,15 +6,15 @@ export const useSelectBanStore = defineStore("selectBan", () => {
 
   function addBanItem(ip) {
     // Look if item already exists
-    data.value.forEach(ipValue => {
-      if(ipValue === ip)  return;
-    })
+    data.value.forEach((ipValue) => {
+      if (ipValue === ip) return;
+    });
 
     data.value.push(ip);
   }
 
   function deleteBanItem(ip) {
-    data.value = data.value.filter(ipValue => ip !== ipValue);
+    data.value = data.value.filter((ipValue) => ip !== ipValue);
   }
 
   function $reset() {
@@ -23,5 +23,3 @@ export const useSelectBanStore = defineStore("selectBan", () => {
 
   return { data, $reset, addBanItem, deleteBanItem };
 });
-
-

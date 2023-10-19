@@ -1,6 +1,5 @@
 from typing import List
 from fastapi import APIRouter
-import requests
 from utils import get_core_format_res
 from models import ResponseModel
 import json
@@ -8,7 +7,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-API = os.getenv("CORE_ADDR") 
+API = os.getenv("CORE_ADDR")
 
 
 router = APIRouter(prefix="/api/custom_configs", tags=["custom_configs"])
@@ -40,4 +39,3 @@ async def update_custom_configs(custom_config: List[dict], method: str):
 )
 async def delete_custom_configs(method: str, custom_config_name: str):
     return get_core_format_res(f"{API}/custom_configs/{custom_config_name}?method={method}", "DELETE", "", f"Delete custom config {custom_config_name}")
-

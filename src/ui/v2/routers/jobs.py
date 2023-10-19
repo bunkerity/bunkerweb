@@ -1,13 +1,12 @@
 from typing import Annotated, Optional
 from fastapi import APIRouter, File, Form
-import requests
 from utils import get_core_format_res
 from models import CacheFileModel, ResponseModel
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-API = os.getenv("CORE_ADDR") 
+API = os.getenv("CORE_ADDR")
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
@@ -20,6 +19,7 @@ router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 async def get_jobs():
     return get_core_format_res(f"{API}/jobs", "GET", "", "Retrieve jobs")
 
+
 @router.post(
     "/{job_name}/run",
     response_model=ResponseModel,
@@ -28,6 +28,7 @@ async def get_jobs():
 async def run_job(job_name: str):
     return get_core_format_res(f"{API}/jobs/{job_name}/run", "POST", "", f"Run job {job_name}")
 
+
 @router.get(
     "/{job_name}/cache/{file_name}",
     response_model=ResponseModel,
@@ -35,6 +36,7 @@ async def run_job(job_name: str):
 )
 async def get_job_cache_file(job_name: str, file_name: str):
     return get_core_format_res(f"{API}/jobs/{job_name}/cache/{file_name}", "GET", "", f"Get file {file_name} from cache for job {job_name}")
+
 
 @router.delete(
     "/{job_name}/cache/{file_name}",
@@ -58,4 +60,3 @@ async def upload_job_file(
     checksum: Optional[Annotated[str, Form()]] = None,
 ):
     return get_core_format_res(f"{API}/jobs/{job_name}/cache/{file_name}?cache_file={cache_file}&service_id={service_id}&checksum={checksum}", "PUT", "", f"Upload file {file_name} to cache {cache_file}")
-

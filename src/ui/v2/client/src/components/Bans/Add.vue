@@ -96,7 +96,7 @@ async function sendBans() {
     "POST",
     getValidBans(),
     addBans,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "error") return;
     // Case succeed, delete items from UI

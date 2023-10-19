@@ -637,10 +637,11 @@ async def validate_request(request: Request, call_next):
     except AssertionError:
         return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={"result": "ko"})
 
-    if CORE_CONFIG.check_whitelist and request.client.host != "127.0.0.1":
+    os_release_path = Path(sep, "etc", "os-release")
+    if CORE_CONFIG.check_whitelist and (request.client.host != "127.0.0.1" if os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8") else True):
         if not CORE_CONFIG.whitelist:
             CORE_CONFIG.logger.warning(f'Unauthorized access attempt from {request.client.host} (whitelist check is set to "yes" but the whitelist is empty), aborting...')
-            return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={"result": "ko"})
+            return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"result": "ko"})
 
         remote_ip = ip_address(request.client.host)
         for whitelist in CORE_CONFIG.whitelist:
@@ -652,12 +653,15 @@ async def validate_request(request: Request, call_next):
                     break
         else:
             CORE_CONFIG.logger.warning(f"Unauthorized access attempt from {remote_ip} (not in whitelist), aborting...")
-            return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={"result": "ko"})
+            return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"result": "ko"})
 
     if CORE_CONFIG.check_token:
-        if request.headers.get("Authorization") != f"Bearer {CORE_CONFIG.CORE_TOKEN}":
-            CORE_CONFIG.logger.warning(f"Unauthorized access attempt from {request.client.host} (invalid token), aborting...")
+        if "Authorization" not in request.headers:
+            CORE_CONFIG.logger.warning(f"Unauthorized access attempt from {request.client.host} (missing token), aborting...")
             return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={"result": "ko"})
+        elif request.headers["Authorization"] != f"Bearer {CORE_CONFIG.CORE_TOKEN}":
+            CORE_CONFIG.logger.warning(f"Unauthorized access attempt from {request.client.host} (invalid token), aborting...")
+            return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"result": "ko"})
 
     return await call_next(request)
 

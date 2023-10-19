@@ -33,7 +33,7 @@ async function getInstances() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -43,7 +43,7 @@ async function actionInstance(data) {
     "POST",
     null,
     instances,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
   await getInstances();
 }
@@ -60,7 +60,7 @@ async function deleteInstance(data) {
     "DELETE",
     null,
     instances,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
   await getInstances();
 }

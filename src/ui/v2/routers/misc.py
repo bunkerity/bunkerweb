@@ -1,12 +1,11 @@
 from fastapi import APIRouter
-import requests
 from utils import get_core_format_res
 from models import ResponseModel
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-API = os.getenv("CORE_ADDR") 
+API = os.getenv("CORE_ADDR")
 
 router = APIRouter(prefix="/api", tags=[""])
 

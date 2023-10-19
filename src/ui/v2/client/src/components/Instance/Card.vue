@@ -65,12 +65,12 @@ const instance = reactive({
   actions: computed(() =>
     props.status === "up"
       ? [actions.stop, actions.reload, actions.restart]
-      : [actions.reload, actions.restart]
+      : [actions.reload, actions.restart],
   ),
   checks: computed(() =>
     props.method === "static"
       ? [topActions.delete, topActions.ping]
-      : [topActions.ping]
+      : [topActions.ping],
   ),
 });
 
@@ -106,7 +106,7 @@ const emits = defineEmits(["action", "delete"]);
                     hostname: props.hostname,
                     operation: action.name,
                   }
-                : props.hostname
+                : props.hostname,
             )
           "
           @pointerover="action.popup = true"

@@ -1,14 +1,12 @@
 from fastapi import APIRouter
-import requests
 from utils import get_core_format_res
 from models import AddedPlugin, ResponseModel
 import os
 from dotenv import load_dotenv
-from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
 load_dotenv()
-API = os.getenv("CORE_ADDR") 
+API = os.getenv("CORE_ADDR")
 
 router = APIRouter(prefix="/api/plugins", tags=["plugins"])
 
@@ -31,14 +29,13 @@ async def add_plugin(plugin: AddedPlugin):
     return get_core_format_res(f"{API}/plugins", "POST", plugin, "Adding plugin")
 
 
-
 @router.patch(
     "/{plugin_id}",
     response_model=ResponseModel,
     summary="Update a plugin",
 )
 async def update_plugin(plugin: AddedPlugin, plugin_id: str):
-    return get_core_format_res(f"{API}/plugins/{plugin_id}", "PATCH", plugin,  f"Update plugin {plugin_id}")
+    return get_core_format_res(f"{API}/plugins/{plugin_id}", "PATCH", plugin, f"Update plugin {plugin_id}")
 
 
 @router.delete(
@@ -47,8 +44,7 @@ async def update_plugin(plugin: AddedPlugin, plugin_id: str):
     summary="Delete BunkerWeb instance",
 )
 async def delete_instance(plugin_id: str):
-    return get_core_format_res(f"{API}/plugins/{plugin_id}", "DELETE", plugin,  f"Delete plugin {plugin_id}")
-
+    return get_core_format_res(f"{API}/plugins/{plugin_id}", "DELETE", plugin_id, f"Delete plugin {plugin_id}")
 
 
 @router.get(
@@ -57,4 +53,4 @@ async def delete_instance(plugin_id: str):
     summary="Get external files with plugins",
 )
 async def send_instance_action():
-    return get_core_format_res(f"{API}/plugins/external/files", "GET", "",  "Plugin external files")
+    return get_core_format_res(f"{API}/plugins/external/files", "GET", "", "Plugin external files")

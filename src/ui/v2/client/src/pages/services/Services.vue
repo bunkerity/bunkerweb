@@ -63,8 +63,8 @@ const services = reactive({
     const cloneMultisitePlugin = setPluginsData(
       getPluginsByContext(
         JSON.parse(JSON.stringify(services.data)),
-        "multisite"
-      )
+        "multisite",
+      ),
     );
 
     // Get only services custom conf
@@ -148,14 +148,14 @@ async function getGlobalConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     services,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -190,8 +190,8 @@ async function sendServConf() {
           "PUT",
           value,
           null,
-          feedbackStore.addFeedback
-        )
+          feedbackStore.addFeedback,
+        ),
       );
     }
   }
@@ -272,7 +272,7 @@ onMounted(async () => {
               value:
                 services.activeService === 'new' ? '' : services.activeService,
               values: Object.keys(services.setup).filter(
-                (item) => item !== 'new'
+                (item) => item !== 'new',
               ),
               placeholder: 'Services',
             }"
