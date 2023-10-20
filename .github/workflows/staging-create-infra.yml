@@ -30,7 +30,7 @@ jobs:
         uses: azure/setup-kubectl@901a10e89ea615cf61f57ac05cecdf23e7de06d8 # v3.2
         if: inputs.TYPE == 'k8s'
         with:
-          version: 'v1.28.2'
+          version: "v1.28.2"
       - name: Set up Python 3.11
         uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
         if: inputs.TYPE != 'k8s'
