@@ -15,8 +15,9 @@ sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" misc/integrations/*.yml
 # examples
 shopt -s globstar
 for example in examples/* ; do
-    if [ -d "$test" ] ; then
-        sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" "$example/*.yml"
+    if [ -d "$example" ] ; then
+        # shellcheck disable=SC2086
+        sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" ${example}/*.yml
     fi
 done
 shopt -u globstar
@@ -37,3 +38,7 @@ shopt -u globstar
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/linux/scripts/*.sh
 # db
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/db/model.py
+# github
+sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" .github/ISSUE_TEMPLATE/bug_report.yml
+# pyproject
+sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" pyproject.toml
