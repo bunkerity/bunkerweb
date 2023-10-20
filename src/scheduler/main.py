@@ -628,18 +628,21 @@ if __name__ == "__main__":
 
                     PLUGINS_NEED_GENERATION = True
                     CONFIG_NEED_GENERATION = True
+                    RUN_JOBS_ONCE = True
                     NEED_RELOAD = True
 
                 # check if the custom configs have changed since last time
                 if changes["custom_configs_changed"]:
                     logger.info("Custom configs changed, generating ...")
                     CONFIGS_NEED_GENERATION = True
+                    CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
 
                 # check if the config have changed since last time
                 if changes["config_changed"]:
                     logger.info("Config changed, generating ...")
                     CONFIG_NEED_GENERATION = True
+                    RUN_JOBS_ONCE = True
                     NEED_RELOAD = True
 
                 # check if the instances have changed since last time
@@ -647,6 +650,7 @@ if __name__ == "__main__":
                     logger.info("Instances changed, generating ...")
                     INSTANCES_NEED_GENERATION = True
                     CONFIG_NEED_GENERATION = True
+                    RUN_JOBS_ONCE = True
                     NEED_RELOAD = True
 
             FIRST_RUN = False
@@ -670,7 +674,6 @@ if __name__ == "__main__":
                     CHANGES.append("config")
                     env = db.get_config()
                     env["DATABASE_URI"] = db.database_uri
-                    RUN_JOBS_ONCE = True
 
                 if INSTANCES_NEED_GENERATION:
                     CHANGES.append("instances")
