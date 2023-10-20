@@ -230,7 +230,7 @@ class Config:
         services.append(variables)
         config = self.get_config(methods=False)
 
-        if changed_server_name:
+        if changed_server_name and server_name_splitted[0] != old_server_name_splitted[0]:
             for k in deepcopy(config):
                 if k.startswith(old_server_name_splitted[0]):
                     config.pop(k)
