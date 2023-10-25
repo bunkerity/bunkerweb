@@ -3,7 +3,7 @@
 from datetime import datetime
 from hashlib import sha512
 from inspect import getsourcefile
-from io import BufferedReader, BytesIO
+from io import BytesIO
 from os.path import basename, normpath
 from pathlib import Path
 from sys import _getframe
@@ -35,11 +35,11 @@ def file_hash(file: Union[str, Path]) -> str:
     return _sha512.hexdigest()
 
 
-def bytes_hash(bio: Union[bytes, BufferedReader]) -> str:
+def bytes_hash(bio: Union[bytes, BytesIO]) -> str:
     if isinstance(bio, bytes):
         bio = BytesIO(bio)  # type: ignore (bio will always be a bytes object in this case)
 
-    assert isinstance(bio, BufferedReader)
+    assert isinstance(bio, BytesIO)
 
     _sha512 = sha512()
     while True:

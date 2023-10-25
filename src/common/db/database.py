@@ -399,9 +399,9 @@ class Database:
                                 Plugin_pages(
                                     plugin_id=plugin["id"],
                                     template_file=template,
-                                    template_checksum=bytes_hash(template).hexdigest(),
+                                    template_checksum=bytes_hash(template),
                                     actions_file=actions,
-                                    actions_checksum=bytes_hash(actions).hexdigest(),
+                                    actions_checksum=bytes_hash(actions),
                                 )
                             )
 
@@ -823,7 +823,7 @@ class Database:
                     "data": custom_config["value"].encode("utf-8") if isinstance(custom_config["value"], str) else custom_config["value"],
                     "method": method,
                 }
-                config["checksum"] = bytes_hash(config["data"]).hexdigest()
+                config["checksum"] = bytes_hash(config["data"])
 
                 if custom_config["exploded"][0]:
                     if not session.query(Services).with_entities(Services.id).filter_by(id=custom_config["exploded"][0]).with_for_update(read=True).first():
@@ -1017,7 +1017,7 @@ class Database:
             config = {
                 "data": data,
                 "method": method,
-                "checksum": checksum or bytes_hash(data).hexdigest(),
+                "checksum": checksum or bytes_hash(data),
                 "service_id": service_id,
                 "type": config_type.replace("-", "_").lower(),
                 "name": name,
@@ -1335,9 +1335,9 @@ class Database:
                                     Plugin_pages(
                                         plugin_id=plugin["id"],
                                         template_file=template,
-                                        template_checksum=bytes_hash(template).hexdigest(),
+                                        template_checksum=bytes_hash(template),
                                         actions_file=actions,
-                                        actions_checksum=bytes_hash(actions).hexdigest(),
+                                        actions_checksum=bytes_hash(actions),
                                     )
                                 )
                             else:
@@ -1442,9 +1442,9 @@ class Database:
                                     Plugin_pages(
                                         plugin_id=plugin["id"],
                                         template_file=template,
-                                        template_checksum=bytes_hash(template).hexdigest(),
+                                        template_checksum=bytes_hash(template),
                                         actions_file=actions,
-                                        actions_checksum=bytes_hash(actions).hexdigest(),
+                                        actions_checksum=bytes_hash(actions),
                                     )
                                 )
                             else:
@@ -1635,9 +1635,9 @@ class Database:
                         Plugin_pages(
                             plugin_id=plugin["id"],
                             template_file=template_file,
-                            template_checksum=template_checksum or bytes_hash(template_file).hexdigest(),
+                            template_checksum=template_checksum or bytes_hash(template_file),
                             actions_file=template_file,
-                            actions_checksum=actions_checksum or bytes_hash(actions_file).hexdigest(),
+                            actions_checksum=actions_checksum or bytes_hash(actions_file),
                         )
                     )
                 else:
@@ -1847,15 +1847,15 @@ class Database:
                             Plugin_pages(
                                 plugin_id=plugin_data["id"],
                                 template_file=template_file,
-                                template_checksum=template_checksum or bytes_hash(template_file).hexdigest(),
+                                template_checksum=template_checksum or bytes_hash(template_file),
                                 actions_file=template_file,
-                                actions_checksum=actions_checksum or bytes_hash(actions_file).hexdigest(),
+                                actions_checksum=actions_checksum or bytes_hash(actions_file),
                             )
                         )
                     else:
                         updates = {}
-                        template_checksum = template_checksum or bytes_hash(template_file).hexdigest()
-                        actions_checksum = actions_checksum or bytes_hash(actions_file).hexdigest()
+                        template_checksum = template_checksum or bytes_hash(template_file)
+                        actions_checksum = actions_checksum or bytes_hash(actions_file)
 
                         if plugin_data["id"] != db_plugin.id:
                             updates[Plugin_pages.plugin_id] = plugin_data["id"]

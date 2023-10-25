@@ -3,12 +3,7 @@ from typing import Dict, List, Literal, Union
 from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
-from ..models import (
-    CustomConfigModel,
-    CustomConfigDataModel,
-    CustomConfigNameModel,
-    ErrorMessage,
-)
+from ..models import CustomConfigModel, CustomConfigDataModel, ErrorMessage
 from ..dependencies import CORE_CONFIG, DB, send_to_instances
 
 router = APIRouter(prefix="/custom_configs", tags=["custom_configs"])
@@ -48,7 +43,7 @@ async def get_custom_configs():
     },
 )
 async def update_custom_config(
-    custom_configs: Union[CustomConfigNameModel, List[CustomConfigNameModel]],
+    custom_configs: Union[CustomConfigDataModel, List[CustomConfigDataModel]],
     method: str,
     background_tasks: BackgroundTasks,
     reload: bool = True,
@@ -57,8 +52,10 @@ async def update_custom_config(
     resp = "created"
     status_code = None
 
-    if isinstance(custom_configs, CustomConfigNameModel):
-        resp = DB.upsert_custom_config(custom_configs.model_dump() | {"method": method})
+    if isinstance(custom_configs, CustomConfigDataModel):
+        custom_config_data = custom_configs.model_dump() | {"method": method}
+        custom_config_data["config_type"] = custom_config_data.pop("type")
+        resp = DB.upsert_custom_config(**custom_config_data)
 
         if resp == "method_conflict":
             message = (
