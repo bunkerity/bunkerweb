@@ -47,7 +47,7 @@ const bans = reactive({
     const reasons = ["all"];
     const globalInst = [];
     for (let i = 0; i < bans.data.length; i++) {
-      const instData = bans.data[i].data.message.data;
+      const instData = bans.data[i].data;
       instData.forEach((item) => {
         reasons.indexOf(item.reason) === -1 ? reasons.push(item.reason) : false;
         const isItem = globalInst.find((globItem) => {
@@ -70,7 +70,7 @@ async function getData() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   const hostnames = await getHostFromInst();
 
@@ -122,7 +122,7 @@ async function getHostBan(hostname) {
     "POST",
     null,
     data,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 

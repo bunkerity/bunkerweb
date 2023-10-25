@@ -1,4 +1,4 @@
-import requests
+import requests, traceback, json
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
@@ -26,18 +26,21 @@ def get_core_format_res(path, method, data, message):
 
     # Case response from core, format response for client
     try:
-        data = req.text
+        data =  req.text
 
-        # if type(json.loads(req.text)) is dict: # TODO
-        #     req_JSON = json.loads(req.text)
-        #     if "message" in req_JSON and "data" in req_JSON.get("message"):
-        #         req_JSON_Nested = req_JSON["message"]["data"]
-        #     if "message" in req_JSON and not "data" in req_JSON.get("message"):
-        #         req_JSON_Nested = req_JSON["message"]
+        obj = json.loads(req.text)
+        if isinstance(obj, dict):
+            data = obj.get("message", obj)
+            if isinstance(data, dict):
+                data = data.get("data", data)
+
+            data = json.dumps(data, skipkeys=True, allow_nan=True, indent=6)
+            
 
         return {"type": "success" if req.status_code == requests.codes.ok else "error", "status": str(req.status_code), "message": message, "data": data}
     # Case impossible to format
     except:
+        print(traceback.format_exc())
         raise StarletteHTTPException(status_code=500, detail="Impossible to proceed CORE API response")
 
 
