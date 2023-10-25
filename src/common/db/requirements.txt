@@ -226,14 +226,6 @@ pymysql==1.1.0 \
     --hash=sha256:4f13a7df8bf36a51e81dd9f3605fede45a4878fe02f9236349fd82a3f0612f96 \
     --hash=sha256:8969ec6d763c856f7073c4c64662882675702efcb114b4bcbb955aea3a069fa7
     # via -r requirements.in
-retrying==1.3.4 \
-    --hash=sha256:345da8c5765bd982b1d1915deb9102fd3d1f7ad16bd84a9700b85f64d24e8f3e \
-    --hash=sha256:8cc4d43cb8e1125e0ff3344e9de678fefd85db3b750b81b2240dc0183af37b35
-    # via -r requirements.in
-six==1.16.0 \
-    --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
-    --hash=sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254
-    # via retrying
 sqlalchemy==2.0.22 \
     --hash=sha256:0b0b3f2686c3f162123adba3cb8b626ed7e9b8433ab528e36ed270b4f70d1cdb \
     --hash=sha256:0c1fea8c0abcb070ffe15311853abfda4e55bf7dc1d4889497b3403629f3bf00 \
