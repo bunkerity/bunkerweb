@@ -88,7 +88,7 @@ class Database:
         self.database_uri = sqlalchemy_string
         error = False
 
-        engine_kwargs = {"future": True, "poolclass": None if pool else SingletonThreadPool, "pool_pre_ping": True}
+        engine_kwargs = {"future": True, "poolclass": None if pool else SingletonThreadPool, "pool_pre_ping": True, "pool_recycle": 1800}
 
         try:
             self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
@@ -169,7 +169,6 @@ class Database:
             _exit(1)
 
         session = self.__sql_session()
-        session.expire_on_commit = False
 
         try:
             yield session
