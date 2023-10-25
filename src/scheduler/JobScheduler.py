@@ -160,7 +160,7 @@ class JobScheduler(ApiCaller):
         if self.__integration not in ("Autoconf", "Swarm", "Kubernetes", "Docker"):
             self.__logger.info("Reloading nginx ...")
             proc = run(
-                ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
+                [join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
                 stdin=DEVNULL,
                 stderr=PIPE,
                 env=self.__env,

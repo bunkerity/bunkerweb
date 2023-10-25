@@ -46,7 +46,7 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
+                    [join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -60,7 +60,7 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", join(sep, "usr", "sbin", "nginx")],
+                    [join(sep, "usr", "sbin", "nginx")],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -74,7 +74,7 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
+                    [join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -87,7 +87,7 @@ class Instance:
     def restart(self) -> bool:
         if self._type == "local":
             proc = run(
-                ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
+                [join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 check=False,
@@ -96,7 +96,7 @@ class Instance:
                 return False
             return (
                 run(
-                    ["sudo", join(sep, "usr", "sbin", "nginx")],
+                    [join(sep, "usr", "sbin", "nginx")],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,

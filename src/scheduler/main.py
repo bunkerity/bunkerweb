@@ -527,7 +527,7 @@ if __name__ == "__main__":
                     # Stop temp nginx
                     logger.info("Stopping temp nginx ...")
                     proc = subprocess_run(
-                        ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
+                        [join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
                         stdin=DEVNULL,
                         stderr=STDOUT,
                         env=env.copy(),
@@ -548,7 +548,7 @@ if __name__ == "__main__":
                             # Start nginx
                             logger.info("Starting nginx ...")
                             proc = subprocess_run(
-                                ["sudo", join(sep, "usr", "sbin", "nginx")],
+                                [join(sep, "usr", "sbin", "nginx")],
                                 stdin=DEVNULL,
                                 stderr=STDOUT,
                                 env=env.copy(),
