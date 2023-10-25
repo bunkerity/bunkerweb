@@ -1,4 +1,4 @@
-FROM python:3.12.0-alpine3.18@sha256:dc2e8896e2bc0a52effa1249de614eee1b770a46cb1df25a72baf60a34ce5b1a AS builder
+FROM python:3.12.0-alpine3.18@sha256:a5d1738d6abbdff3e81c10b7f86923ebcb340ca536e21e8c5ee7d938d263dba1 AS builder
 
 # Install python dependencies
 RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev file make
@@ -36,7 +36,7 @@ COPY src/common/helpers helpers
 COPY src/ui ui
 COPY src/VERSION VERSION
 
-FROM python:3.12.0-alpine3.18@sha256:dc2e8896e2bc0a52effa1249de614eee1b770a46cb1df25a72baf60a34ce5b1a
+FROM python:3.12.0-alpine3.18@sha256:a5d1738d6abbdff3e81c10b7f86923ebcb340ca536e21e8c5ee7d938d263dba1
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
