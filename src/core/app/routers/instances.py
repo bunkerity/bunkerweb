@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from random import uniform
 from typing import Annotated, Dict, List, Literal, Union
-from fastapi import APIRouter, BackgroundTasks, Query, status, Path as fastapi_Path
+from fastapi import APIRouter, BackgroundTasks, status, Path as fastapi_Path
 from fastapi.responses import JSONResponse
 
 from ..models import ErrorMessage, Instance, InstanceWithInfo, InstanceWithMethod
@@ -59,7 +59,7 @@ async def get_instances():
 async def upsert_instance(
     instances: Union[Instance, List[Instance]],
     background_tasks: BackgroundTasks,
-    method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")],
+    method: str,
     reload: bool = True,
 ) -> JSONResponse:
     """
@@ -69,6 +69,12 @@ async def upsert_instance(
     - **port**: The port of the instance
     - **server_name**: The server name of the instance
     """
+
+    if method == "static":
+        message = "Can't upsert instance(s) : method can't be static"
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+
     decisions = {"created": [], "updated": []}
     status_code = None
 
@@ -76,7 +82,7 @@ async def upsert_instance(
         resp = DB.upsert_instance(**instances.model_dump(), method=method)
 
         if resp == "method_conflict":
-            message = f"Can't delete instance {instances.hostname} because it is either static or was created by the core or the autoconf and the method isn't one of them"
+            message = f"Can't upsert instance {instances.hostname} because it is either static or was created by the core or the autoconf and the method isn't one of them"
             CORE_CONFIG.logger.warning(message)
             return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
         elif "database is locked" in resp or "file is not a database" in resp:
@@ -200,10 +206,16 @@ async def get_instance(
         },
     },
 )
-async def delete_instance(instance_hostname: str, method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")]) -> JSONResponse:
+async def delete_instance(instance_hostname: str, method: str) -> JSONResponse:
     """
     Delete a BunkerWeb instance
     """
+
+    if method == "static":
+        message = f"Can't delete instance {instance_hostname} : method can't be static"
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+
     resp = DB.remove_instance(instance_hostname, method=method)
 
     if resp == "not_found":

@@ -1,6 +1,6 @@
 from random import uniform
-from typing import Annotated, Dict, List, Literal, Union
-from fastapi import APIRouter, BackgroundTasks, Query, status
+from typing import Dict, List, Literal, Union
+from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
 from ..models import CustomConfigModel, CustomConfigDataModel, ErrorMessage
@@ -44,11 +44,17 @@ async def get_custom_configs():
 )
 async def update_custom_config(
     custom_configs: Union[CustomConfigDataModel, List[CustomConfigDataModel]],
-    method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")],
+    method: str,
     background_tasks: BackgroundTasks,
     reload: bool = True,
 ):
     """Update one or more custom configs"""
+
+    if method == "static":
+        message = "Can't delete custom config(s) : method can't be static"
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+
     resp = "created"
     status_code = None
 
@@ -140,10 +146,16 @@ async def update_custom_config(
 async def delete_custom_config(
     custom_config_name: str,
     custom_config: CustomConfigModel,
-    method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")],
+    method: str,
     background_tasks: BackgroundTasks,
 ):
     """Update a custom config"""
+
+    if method == "static":
+        message = f"Can't delete custom config {custom_config_name} : method can't be static"
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+
     resp = DB.delete_custom_config(custom_config.service_id, custom_config.type, custom_config_name, method)
 
     if resp == "not_found":

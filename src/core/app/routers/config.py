@@ -1,6 +1,6 @@
 from random import uniform
-from typing import Annotated, Dict, Literal, Union
-from fastapi import APIRouter, BackgroundTasks, Query, status
+from typing import Dict, Literal, Union
+from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
 from ..models import ErrorMessage
@@ -48,8 +48,14 @@ async def get_config(methods: bool = False, new_format: bool = False):
         },
     },
 )
-async def update_config(config: Dict[str, str], method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")], background_tasks: BackgroundTasks) -> JSONResponse:
+async def update_config(config: Dict[str, str], method: str, background_tasks: BackgroundTasks) -> JSONResponse:
     """Update whole config in Database"""
+
+    if method == "static":
+        message = "Can't update config : method can't be static"
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+
     resp = DB.save_config(config, method)
 
     if "database is locked" in resp or "file is not a database" in resp:
@@ -88,8 +94,14 @@ async def update_config(config: Dict[str, str], method: Annotated[str, Query(pat
         },
     },
 )
-async def update_global_config(config: Dict[str, str], method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")], background_tasks: BackgroundTasks) -> JSONResponse:
+async def update_global_config(config: Dict[str, str], method: str, background_tasks: BackgroundTasks) -> JSONResponse:
     """Update global config in Database"""
+
+    if method == "static":
+        message = "Can't update global config : method can't be static"
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+
     resp = DB.save_global_config(config, method)
 
     if "database is locked" in resp or "file is not a database" in resp:
@@ -139,10 +151,16 @@ async def update_global_config(config: Dict[str, str], method: Annotated[str, Qu
 async def update_service_config(
     service_name: str,
     config: Dict[str, str],
-    method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")],
+    method: str,
     background_tasks: BackgroundTasks,
 ) -> JSONResponse:
     """Update service config in Database"""
+
+    if method == "static":
+        message = f"Can't update {service_name} config : method can't be static"
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+
     resp = DB.save_service_config(service_name, config, method)
 
     if resp == "not_found":
@@ -197,8 +215,14 @@ async def update_service_config(
         },
     },
 )
-async def delete_service_config(service_name: str, method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")], background_tasks: BackgroundTasks) -> JSONResponse:
+async def delete_service_config(service_name: str, method: str, background_tasks: BackgroundTasks) -> JSONResponse:
     """Delete a service from the config in the Database"""
+
+    if method == "static":
+        message = f"Can't delete {service_name} config : method can't be static"
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+
     resp = DB.remove_service(service_name, method)
 
     if resp == "not_found":
