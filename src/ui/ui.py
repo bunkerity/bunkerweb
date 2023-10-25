@@ -18,7 +18,7 @@ class UiConfig(YamlBaseSettings):
     CORE_TOKEN: str = ""
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = "changeme"
-    LOG_LEVEL: Literal["error", "warn", "info", "debug", "ERROR", "WARN", "INFO", "DEBUG"] = "info"
+    LOG_LEVEL: Literal["debug", "info", "warning", "error", "critical", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "info"
     REVERSE_PROXY_IPS: Union[str, set] = {
         "192.168.0.0/16",
         "172.16.0.0/12",
@@ -42,7 +42,7 @@ class UiConfig(YamlBaseSettings):
 
     @cached_property
     def log_level(self) -> str:
-        return self.LOG_LEVEL.upper() if self.LOG_LEVEL in ("error", "info", "debug") else "WARNING"
+        return self.LOG_LEVEL.lower()
 
     @cached_property
     def reverse_proxy_ips(self) -> str:
@@ -61,24 +61,24 @@ if __name__ == "__main__":
         r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$",
         UI_CONFIG.ADMIN_PASSWORD,
     ):
-        _exit(1)
-    elif not isinstance(UI_CONFIG.LISTEN_PORT, int) and (not UI_CONFIG.LISTEN_PORT.isdigit() or not (1 <= int(UI_CONFIG.LISTEN_PORT) <= 65535)):
         _exit(2)
+    elif not isinstance(UI_CONFIG.LISTEN_PORT, int) and (not UI_CONFIG.LISTEN_PORT.isdigit() or not (1 <= int(UI_CONFIG.LISTEN_PORT) <= 65535)):
+        _exit(3)
 
     data = {
-        "HOST": UI_CONFIG.LISTEN_ADDR,
-        "PORT": UI_CONFIG.LISTEN_PORT,
-        "NUXT_CORE_ADDR": UI_CONFIG.CORE_ADDR,
-        "NUXT_CORE_TOKEN": UI_CONFIG.CORE_TOKEN,
-        "NUXT_ADMIN_USERNAME": UI_CONFIG.ADMIN_USERNAME,
-        "NUXT_ADMIN_PASSWORD": UI_CONFIG.ADMIN_PASSWORD,
-        "NUXT_LOG_LEVEL": UI_CONFIG.log_level,
-        "NUXT_REVERSE_PROXY_IPS": UI_CONFIG.reverse_proxy_ips,
+        "LISTEN_ADDR": UI_CONFIG.LISTEN_ADDR,
+        "LISTEN_PORT": UI_CONFIG.LISTEN_PORT,
+        "CORE_ADDR": UI_CONFIG.CORE_ADDR,
+        "CORE_TOKEN": UI_CONFIG.CORE_TOKEN,
+        "ADMIN_USERNAME": UI_CONFIG.ADMIN_USERNAME,
+        "ADMIN_PASSWORD": UI_CONFIG.ADMIN_PASSWORD,
+        "LOG_LEVEL": UI_CONFIG.log_level,
+        "REVERSE_PROXY_IPS": UI_CONFIG.reverse_proxy_ips,
     }
 
     content = ""
     for k, v in data.items():
         content += f"{k}={v!r}\n"
 
-    with open("/tmp/ui.tmp.env", "w", encoding="utf-8") as f:
+    with open(join(sep, "etc", "bunkerweb", "ui.env"), "w", encoding="utf-8") as f:
         f.write(content)

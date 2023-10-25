@@ -1,3 +1,7 @@
+fastapi==0.104.0
+gunicorn==21.2.0
 pydantic_settings==2.0.3
 PyYAML==6.0.1
-regex==2023.8.8
+regex==2023.10.3
+requests==2.31.0
+uvicorn[standard]==0.23.2

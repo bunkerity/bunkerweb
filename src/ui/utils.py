@@ -1,132 +1,47 @@
-#!/usr/bin/python3
-
-from os.path import join
-from typing import List, Optional
+import requests, traceback, json  # noqa: E401
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
-def path_to_dict(
-    path: str,
-    *,
-    is_cache: bool = False,
-    db_data: Optional[List[dict]] = None,
-    services: Optional[List[dict]] = None,
-) -> dict:
-    db_data = db_data or []
-    services = services or []
+def get_core_format_res(path, method, data, message):
+    req = None
+    # Request core api and store response
+    try:
+        if method.upper() == "GET":
+            req = requests.get(path)
 
-    if not is_cache:
-        config_types = [
-            "http",
-            "stream",
-            "server-http",
-            "server-stream",
-            "default-server-http",
-            "modsec",
-            "modsec-crs",
-        ]
+        if method.upper() == "POST":
+            req = requests.post(path, data=data)
 
-        d = {
-            "name": "configs",
-            "type": "folder",
-            "path": path,
-            "can_create_files": False,
-            "can_create_folders": False,
-            "can_edit": False,
-            "can_delete": False,
-            "children": [
-                {
-                    "name": config,
-                    "type": "folder",
-                    "path": join(path, config),
-                    "can_create_files": True,
-                    "can_create_folders": False,
-                    "can_edit": False,
-                    "can_delete": False,
-                    "children": [
-                        {
-                            "name": service,
-                            "type": "folder",
-                            "path": join(path, config, service),
-                            "can_create_files": True,
-                            "can_create_folders": False,
-                            "can_edit": False,
-                            "can_delete": False,
-                            "children": [],
-                        }
-                        for service in services
-                    ],
-                }
-                for config in config_types
-            ],
-        }
+        if method.upper() == "DELETE":
+            req = requests.delete(path, data=data)
 
-        for conf in db_data:
-            type_lower = conf["type"].replace("_", "-")
-            file_info = {
-                "name": f"{conf['name']}.conf",
-                "type": "file",
-                "path": join(
-                    path,
-                    type_lower,
-                    conf["service_id"] if conf["service_id"] else "",
-                    f"{conf['name']}.conf",
-                ),
-                "can_edit": conf["method"] == "ui",
-                "can_delete": True,
-                "can_download": True,
-                "content": conf["data"].decode("utf-8"),
-            }
+        if method.upper() == "PATCH":
+            req = requests.patch(path, data=data)
 
-            if conf["service_id"]:
-                d["children"][config_types.index(type_lower)]["children"][[x["name"] for x in d["children"][config_types.index(type_lower)]["children"]].index(conf["service_id"])]["children"].append(file_info)
-            else:
-                d["children"][config_types.index(type_lower)]["children"].append(file_info)
-    else:
-        d = {
-            "name": "cache",
-            "type": "folder",
-            "path": path,
-            "can_create_files": False,
-            "can_create_folders": False,
-            "can_edit": False,
-            "can_delete": False,
-            "children": [
-                {
-                    "name": service,
-                    "type": "folder",
-                    "path": join(path, service),
-                    "can_create_files": False,
-                    "can_create_folders": False,
-                    "can_edit": False,
-                    "can_delete": False,
-                    "children": [],
-                }
-                for service in services
-            ],
-        }
+        if method.upper() == "PUT":
+            req = requests.put(path, data=data)
+    # Case no response from core
+    except:
+        raise StarletteHTTPException(status_code=500, detail="Impossible to connect to CORE API")
 
-        for conf in db_data:
-            file_info = {
-                "name": join(conf["job_name"], conf["file_name"]),
-                "type": "file",
-                "path": join(
-                    path,
-                    conf["service_id"] if conf["service_id"] else "",
-                    conf["file_name"],
-                ),
-                "can_edit": False,
-                "can_delete": False,
-                "can_download": True,
-                "content": conf["data"],
-            }
+    # Case response from core, format response for client
+    try:
+        data = req.text
 
-            if conf["service_id"]:
-                d["children"][[x["name"] for x in d["children"]].index(conf["service_id"])]["children"].append(file_info)
-            else:
-                d["children"].append(file_info)
+        obj = json.loads(req.text)
+        if isinstance(obj, dict):
+            data = obj.get("message", obj)
+            if isinstance(data, dict):
+                data = data.get("data", data)
 
-    return d
+            data = json.dumps(data, skipkeys=True, allow_nan=True, indent=6)
+
+        return {"type": "success" if req.status_code == requests.codes.ok else "error", "status": str(req.status_code), "message": message, "data": data}
+    # Case impossible to format
+    except:
+        print(traceback.format_exc())
+        raise StarletteHTTPException(status_code=500, detail="Impossible to proceed CORE API response")
 
 
-def check_settings(settings: dict, check: str) -> bool:
-    return any(setting["context"] == check for setting in settings.values())
+def exception_res(status_code, path, detail):
+    return {"type": "error", "status": status_code, "message": f"{path} {detail}", "data": "{}"}

@@ -26,8 +26,7 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Remove build dependencies
-RUN apk del .build-deps && \
-  rm -rf /var/cache/apk/*
+RUN rm -rf /var/cache/apk/*
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
@@ -50,9 +49,9 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Add ui user, drop bwcli, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash && \
+RUN apk add --no-cache bash nodejs npm && \
   addgroup -g 101 ui && \
-  adduser -h /var/cache/nginx -g ui -s /bin/sh -G ui -D -H -u 101 ui && \
+  adduser -h /usr/share/bunkerweb/ui -g ui -s /bin/sh -G ui -D -H -u 101 ui && \
   echo "Docker" > /usr/share/bunkerweb/INTEGRATION && \
   mkdir -p /var/tmp/bunkerweb && \
   mkdir -p /var/run/bunkerweb && \
@@ -60,15 +59,18 @@ RUN apk add --no-cache bash && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
   mkdir -p /var/log/bunkerweb/ && \
+  touch /etc/bunkerweb/ui.conf /etc/bunkerweb/config.yaml && \
   for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:ui /data && \
   chmod -R 770 /data && \
   chown -R root:ui /usr/share/bunkerweb/INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
-  chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
-  chmod 750 /usr/share/bunkerweb/gen/*.py /usr/share/bunkerweb/ui/*.py /usr/share/bunkerweb/ui/src/*.py /usr/share/bunkerweb/deps/python/bin/* /usr/share/bunkerweb/helpers/*.sh && \
+  chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
+  chmod 750 /usr/share/bunkerweb/ui/*.js /usr/share/bunkerweb/ui/*.sh /usr/share/bunkerweb/ui/*.py /usr/share/bunkerweb/ui/routers/*.py /usr/share/bunkerweb/deps/python/bin/* /usr/share/bunkerweb/helpers/*.sh && \
   chmod 660 /usr/share/bunkerweb/INTEGRATION && \
   chown root:ui /usr/share/bunkerweb/INTEGRATION && \
+  mkdir -p /usr/share/bunkerweb/ui/.npm /usr/share/bunkerweb/ui/static && \
+  chown -R ui:ui /usr/share/bunkerweb/ui/.npm /usr/share/bunkerweb/ui/static && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/ui-access.log && \
   ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
 
@@ -78,19 +80,20 @@ RUN apk add --no-cache "libcrypto3>=3.1.4-r0" "libssl3>=3.1.4-r0"
 USER ui:ui
 
 # Change working directory
-WORKDIR /usr/share/bunkerweb/ui/nuxt
+WORKDIR /usr/share/bunkerweb/ui
 
 # Initialize project
-RUN npm install
+RUN cd client && \
+  npm install
 
-# Build project
-RUN npm run build
+RUN node build.js
+
+USER root
 
 # Remove no longer needed files
-RUN rm -rf .nuxtignore assets components composables layouts node_modules nuxt.config.ts pages public server tsconfig.json utils
+RUN rm -rf client build.js
 
-# Change working directory
-WORKDIR /usr/share/bunkerweb/ui
+USER ui:ui
 
 EXPOSE 7000
 
