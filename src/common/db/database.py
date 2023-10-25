@@ -706,15 +706,15 @@ class Database:
             first_server_name: str = config.get("SERVER_NAME", service_name).split()[0]
 
             if first_server_name != service_name:
-                if db_service.method != method and method not in ("core", "autoconf"):
+                if method not in (db_service.method, "core", "autoconf"):
                     return "method_conflict"
 
                 service_settings = session.query(Services_settings).with_entities(Services_settings.method).filter_by(service_id=service_name).with_for_update(read=True).all()
 
-                if not all(setting.method == method or setting.method not in ("core", "autoconf") for setting in service_settings):
+                if method not in ("core", "autoconf") and not all(setting.method == method for setting in service_settings):
                     return "method_conflict"
 
-                session.query(Services).filter(Services.id == service_name).with_for_update().update(Services.id == first_server_name)  # type: ignore
+                session.query(Services).filter(Services.id == service_name).with_for_update().update({Services.id: first_server_name, Services.method: method})
 
             service_name = first_server_name
 
@@ -730,14 +730,7 @@ class Database:
                         suffix = int(key.split("_")[-1])
                         key = key[: -len(str(suffix)) - 1]
 
-                    setting = session.query(Settings).with_entities(Settings.default).filter_by(id=key).with_for_update(read=True).first()
-
-                    if not setting:
-                        continue
-
-                    if key.startswith(f"{service_name}_"):
-                        key = key.replace(f"{service_name}_", "", 1)
-
+                    key = key.replace(f"{service_name}_", "", 1)
                     setting = session.query(Settings).with_entities(Settings.default).filter_by(id=key).with_for_update(read=True).first()
 
                     if not setting:
@@ -801,7 +794,7 @@ class Database:
 
             if not db_service:
                 return "not_found"
-            elif db_service.method != method:
+            elif method not in (db_service.method, "autoconf"):
                 return "method_conflict"
 
             session.query(Services).filter(Services.id == service_name).with_for_update().delete()
@@ -858,10 +851,7 @@ class Database:
 
                 if not custom_conf:
                     to_put.append(Custom_configs(**config))
-                elif config["checksum"] != custom_conf.checksum and method in (
-                    custom_conf.method,
-                    "autoconf",
-                ):
+                elif method in (custom_conf.method, "core", "autoconf"):
                     session.query(Custom_configs).filter(
                         Custom_configs.service_id == config.get("service_id", None),
                         Custom_configs.type == config["type"],
@@ -870,8 +860,8 @@ class Database:
                         {
                             Custom_configs.data: config["data"],
                             Custom_configs.checksum: config["checksum"],
+                            Custom_configs.method: method,
                         }
-                        | ({Custom_configs.method: "autoconf"} if method == "autoconf" else {})
                     )
 
             try:
@@ -883,7 +873,7 @@ class Database:
 
         return (self.__exceptions.get(getpid()) or [message]).pop()
 
-    def get_config(self, methods: bool = False, *, new_format: bool = False) -> Dict[str, dict]:
+    def get_config(self, methods: bool = False, *, new_format: bool = False) -> Dict[str, Dict[str, Union[str, bool]]]:
         """Get the config from the database"""
         config = {}
         global_config = config
@@ -967,11 +957,8 @@ class Database:
                                 )
 
             if is_multisite:
-                servers = " ".join(service.id for service in session.query(Services).with_for_update(read=True).all())  # type: ignore
-                if new_format:
-                    config["global"]["SERVER_NAME"] = {"value": servers, "method": "default"} if methods else servers
-                else:
-                    config["SERVER_NAME"] = {"value": servers, "global": True, "method": "default"} if methods else servers
+                servers = " ".join(str(service.id) for service in session.query(Services).with_for_update(read=True).all())
+                global_config["SERVER_NAME"] = {"value": servers, "method": "default"} | ({"global": True} if not new_format else {}) if methods else servers
 
         return (self.__exceptions.get(getpid()) or [config]).pop()
 
@@ -1038,10 +1025,9 @@ class Database:
             if not custom_conf:
                 session.add(Custom_configs(**config))
                 ret = "created"
-            elif config["checksum"] != custom_conf.checksum and method in (
-                custom_conf.method,
-                "autoconf",
-            ):
+            elif method not in (custom_conf.method, "core", "autoconf"):
+                ret = "method_conflict"
+            else:
                 session.query(Custom_configs).filter(
                     Custom_configs.service_id == config["service_id"],
                     Custom_configs.type == config["type"],
@@ -1050,8 +1036,8 @@ class Database:
                     {
                         Custom_configs.data: config["data"],
                         Custom_configs.checksum: config["checksum"],
+                        Custom_configs.method: method,
                     }
-                    | ({"method": "autoconf"} if method == "autoconf" else {})
                 )
                 ret = "updated"
             session.commit()
@@ -1075,7 +1061,7 @@ class Database:
 
             if not custom_conf:
                 return "not_found"
-            elif custom_conf.method != method and method not in ("core", "autoconf"):
+            elif method not in (custom_conf.method, "core", "autoconf"):
                 return "method_conflict"
 
             session.query(Custom_configs).filter(
@@ -2195,6 +2181,8 @@ class Database:
                     )
                 )
                 ret = "created"
+            elif method not in (db_instance.method, "core", "autoconf"):
+                ret = "method_conflict"
             else:
                 session.query(Instances).filter_by(hostname=hostname).with_for_update().update(
                     {
@@ -2256,13 +2244,15 @@ class Database:
             self.__logger.error(self.__exceptions[getpid()].pop())
         return {}
 
-    def remove_instance(self, instance_hostname: str) -> str:
+    def remove_instance(self, instance_hostname: str, *, method: str = "core") -> str:
         """Remove an instance."""
         with suppress(BaseException), self.__db_session() as session:
             db_instance = session.query(Instances).with_entities(Instances.hostname).filter_by(hostname=instance_hostname).with_for_update(read=True).first()
 
             if db_instance is None:
                 return "not_found"
+            elif method not in (db_instance.method, "core", "autoconf"):
+                return "method_conflict"
 
             session.query(Instances).filter(Instances.hostname == instance_hostname).with_for_update().delete()
             session.commit()

@@ -24,7 +24,7 @@ class Instance(BaseModel):
 
 
 class InstanceWithMethod(Instance):
-    method: str = Field(examples=["static"], description="The method used by the API")
+    method: str = Field(examples=["core"], description="The method used by the API")
 
 
 class InstanceWithInfo(InstanceWithMethod):

@@ -1,6 +1,6 @@
 from random import uniform
-from typing import Dict, Literal, Union
-from fastapi import APIRouter, BackgroundTasks, status
+from typing import Annotated, Dict, Literal, Union
+from fastapi import APIRouter, BackgroundTasks, Query, status
 from fastapi.responses import JSONResponse
 
 from ..models import ErrorMessage
@@ -48,7 +48,7 @@ async def get_config(methods: bool = False, new_format: bool = False):
         },
     },
 )
-async def update_config(config: Dict[str, str], method: str, background_tasks: BackgroundTasks) -> JSONResponse:
+async def update_config(config: Dict[str, str], method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")], background_tasks: BackgroundTasks) -> JSONResponse:
     """Update whole config in Database"""
     resp = DB.save_config(config, method)
 
@@ -88,7 +88,7 @@ async def update_config(config: Dict[str, str], method: str, background_tasks: B
         },
     },
 )
-async def update_global_config(config: Dict[str, str], method: str, background_tasks: BackgroundTasks) -> JSONResponse:
+async def update_global_config(config: Dict[str, str], method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")], background_tasks: BackgroundTasks) -> JSONResponse:
     """Update global config in Database"""
     resp = DB.save_global_config(config, method)
 
@@ -139,7 +139,7 @@ async def update_global_config(config: Dict[str, str], method: str, background_t
 async def update_service_config(
     service_name: str,
     config: Dict[str, str],
-    method: str,
+    method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")],
     background_tasks: BackgroundTasks,
 ) -> JSONResponse:
     """Update service config in Database"""
@@ -197,7 +197,7 @@ async def update_service_config(
         },
     },
 )
-async def delete_service_config(service_name: str, method: str, background_tasks: BackgroundTasks) -> JSONResponse:
+async def delete_service_config(service_name: str, method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")], background_tasks: BackgroundTasks) -> JSONResponse:
     """Delete a service from the config in the Database"""
     resp = DB.remove_service(service_name, method)
 
@@ -206,7 +206,7 @@ async def delete_service_config(service_name: str, method: str, background_tasks
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "method_conflict":
-        message = f"Can't delete service {service_name} because it was created by either the core or the autoconf and the method isn't one of them"
+        message = f"Can't delete service {service_name} because it is either static or was created by the core or the autoconf and the method isn't one of them"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif "database is locked" in resp or "file is not a database" in resp:

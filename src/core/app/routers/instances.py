@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from random import uniform
 from typing import Annotated, Dict, List, Literal, Union
-from fastapi import APIRouter, BackgroundTasks, status, Path as fastapi_Path
+from fastapi import APIRouter, BackgroundTasks, Query, status, Path as fastapi_Path
 from fastapi.responses import JSONResponse
 
 from ..models import ErrorMessage, Instance, InstanceWithInfo, InstanceWithMethod
@@ -42,6 +42,10 @@ async def get_instances():
     summary="Upsert one or more BunkerWeb instances",
     response_description="Message",
     responses={
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Not authorized to update the instance",
+            "model": ErrorMessage,
+        },
         status.HTTP_503_SERVICE_UNAVAILABLE: {
             "description": "Database is locked or had trouble handling the request",
             "model": ErrorMessage,
@@ -55,7 +59,7 @@ async def get_instances():
 async def upsert_instance(
     instances: Union[Instance, List[Instance]],
     background_tasks: BackgroundTasks,
-    method: str = "static",
+    method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")],
     reload: bool = True,
 ) -> JSONResponse:
     """
@@ -71,7 +75,11 @@ async def upsert_instance(
     if isinstance(instances, Instance):
         resp = DB.upsert_instance(**instances.model_dump(), method=method)
 
-        if "database is locked" in resp or "file is not a database" in resp:
+        if resp == "method_conflict":
+            message = f"Can't delete instance {instances.hostname} because it is either static or was created by the core or the autoconf and the method isn't one of them"
+            CORE_CONFIG.logger.warning(message)
+            return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+        elif "database is locked" in resp or "file is not a database" in resp:
             retry_in = str(uniform(1.0, 5.0))
             CORE_CONFIG.logger.warning(f"Can't upsert instance to database : {resp}, retry in {retry_in} seconds")
             return JSONResponse(
@@ -192,16 +200,20 @@ async def get_instance(
         },
     },
 )
-async def delete_instance(instance_hostname: str) -> JSONResponse:
+async def delete_instance(instance_hostname: str, method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")]) -> JSONResponse:
     """
     Delete a BunkerWeb instance
     """
-    resp = DB.remove_instance(instance_hostname)
+    resp = DB.remove_instance(instance_hostname, method=method)
 
     if resp == "not_found":
         message = f"Instance {instance_hostname} not found"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
+    elif resp == "method_conflict":
+        message = f"Can't delete instance {instance_hostname} because it is either static or was created by the core or the autoconf and the method isn't one of them"
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif "database is locked" in resp or "file is not a database" in resp:
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't remove instance to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds")

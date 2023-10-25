@@ -1,6 +1,6 @@
 from random import uniform
-from typing import Dict, List, Literal, Union
-from fastapi import APIRouter, BackgroundTasks, status
+from typing import Annotated, Dict, List, Literal, Union
+from fastapi import APIRouter, BackgroundTasks, Query, status
 from fastapi.responses import JSONResponse
 
 from ..models import CustomConfigModel, CustomConfigDataModel, ErrorMessage
@@ -29,7 +29,7 @@ async def get_custom_configs():
     response_description="Message",
     responses={
         status.HTTP_403_FORBIDDEN: {
-            "description": "Can't update a custom config created by the core or the autoconf if the method isn't one of them",
+            "description": "Not authorized to update the custom config",
             "model": ErrorMessage,
         },
         status.HTTP_503_SERVICE_UNAVAILABLE: {
@@ -44,7 +44,7 @@ async def get_custom_configs():
 )
 async def update_custom_config(
     custom_configs: Union[CustomConfigDataModel, List[CustomConfigDataModel]],
-    method: str,
+    method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")],
     background_tasks: BackgroundTasks,
     reload: bool = True,
 ):
@@ -59,7 +59,9 @@ async def update_custom_config(
 
         if resp == "method_conflict":
             message = (
-                f"Can't upsert custom config {custom_configs.name}" + (f" from service {custom_configs.service_id}" if custom_configs.service_id else "") + " because it was created by either the core or the autoconf and the method isn't one of them"
+                f"Can't upsert custom config {custom_configs.name}"
+                + (f" from service {custom_configs.service_id}" if custom_configs.service_id else "")
+                + " because it is either static or was created by the core or the autoconf and the method isn't one of them"
             )
             CORE_CONFIG.logger.warning(message)
             return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
@@ -122,7 +124,7 @@ async def update_custom_config(
             "model": ErrorMessage,
         },
         status.HTTP_403_FORBIDDEN: {
-            "description": "Can't delete a custom config created by the core or the autoconf if the method isn't one of them",
+            "description": "Not authorized to delete the custom config",
             "model": ErrorMessage,
         },
         status.HTTP_503_SERVICE_UNAVAILABLE: {
@@ -138,7 +140,7 @@ async def update_custom_config(
 async def delete_custom_config(
     custom_config_name: str,
     custom_config: CustomConfigModel,
-    method: str,
+    method: Annotated[str, Query(pattern=r"^(?!static$)\w+$")],
     background_tasks: BackgroundTasks,
 ):
     """Update a custom config"""
@@ -149,7 +151,11 @@ async def delete_custom_config(
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "method_conflict":
-        message = f"Can't delete custom config {custom_config_name}" + (f" from service {custom_config.service_id}" if custom_config.service_id else "") + " because it was created by either the core or the autoconf and the method isn't one of them"
+        message = (
+            f"Can't delete custom config {custom_config_name}"
+            + (f" from service {custom_config.service_id}" if custom_config.service_id else "")
+            + " because it is either static or was created by the core or the autoconf and the method isn't one of them"
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif "database is locked" in resp or "file is not a database" in resp:
