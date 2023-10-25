@@ -64,7 +64,7 @@ RUN apk add --no-cache bash && \
   chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py deps/python/bin/*
 
 # Fix CVEs
-# There are no CVE to fix for the moment
+RUN apk add --no-cache "libcrypto3>=3.1.4-r0" "libssl3>=3.1.4-r0"
 
 VOLUME /data /etc/nginx
 
