@@ -1,5 +1,5 @@
 # TODO: update to 3.12.0 when uvloop supports it
-FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded AS builder
+FROM python:3.11.6-alpine3.18@sha256:527e0b0d92686a3ab1af3e65fdef12a47a9359f298dfd9b8d36617808d4029e9 AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache --virtual .build-deps g++ gcc build-base linux-headers
@@ -43,7 +43,7 @@ COPY src/VERSION VERSION
 COPY src/core core
 
 # TODO: update to 3.12.0 when uvloop supports it
-FROM python:3.11.5-alpine@sha256:cd311c6a0164f34a7edbf364e05258b07d66d3f7bc155139dcb9bef88a186ded
+FROM python:3.11.6-alpine3.18@sha256:527e0b0d92686a3ab1af3e65fdef12a47a9359f298dfd9b8d36617808d4029e9
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027

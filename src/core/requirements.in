@@ -1,5 +1,5 @@
 brotlipy==0.7.0
-certbot==2.7.1
+certbot==2.7.2
 croniter==2.0.1
 fastapi==0.104.0
 gunicorn==21.2.0

@@ -1,4 +1,4 @@
-FROM python:3.12.0-alpine@sha256:a4029bd4a6ccfc9d23099f7c7fd808b7fe82ed8a625814ac524fc00017c9af6c AS builder
+FROM python:3.12.0-alpine3.18@sha256:a5d1738d6abbdff3e81c10b7f86923ebcb340ca536e21e8c5ee7d938d263dba1 AS builder
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
@@ -32,7 +32,7 @@ COPY src/common/helpers helpers
 COPY src/common/utils utils
 COPY src/VERSION VERSION
 
-FROM python:3.12.0-alpine@sha256:a4029bd4a6ccfc9d23099f7c7fd808b7fe82ed8a625814ac524fc00017c9af6c
+FROM python:3.12.0-alpine3.18@sha256:a5d1738d6abbdff3e81c10b7f86923ebcb340ca536e21e8c5ee7d938d263dba1
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -62,7 +62,7 @@ RUN apk add --no-cache bash && \
   chmod 750 /usr/share/bunkerweb/cli/main.py /usr/share/bunkerweb/helpers/*.sh /usr/bin/bwcli /usr/share/bunkerweb/autoconf/main.py /usr/share/bunkerweb/deps/python/bin/*
 
 # Fix CVEs
-# There are no CVE to fix for the moment
+RUN apk add --no-cache "libcrypto3>=3.1.4-r0" "libssl3>=3.1.4-r0"
 
 WORKDIR /usr/share/bunkerweb/autoconf
 

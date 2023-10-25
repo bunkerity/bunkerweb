@@ -57,11 +57,7 @@ class Database:
     ALEMBIC_FILE_PATH = Path(sep, "var", "lib", "bunkerweb", "alembic.ini")
     ALEMBIC_DIR = Path(sep, "var", "lib", "bunkerweb", "alembic")
 
-    def __init__(
-        self,
-        logger: Logger,
-        sqlalchemy_string: Optional[str] = None,
-    ) -> None:
+    def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None) -> None:
         """Initialize the database"""
         self.__logger = logger
         self.__sql_session = None
@@ -115,11 +111,7 @@ class Database:
         self.database_uri = sqlalchemy_string
         error = False
 
-        engine_kwargs = {
-            "future": True,
-            "poolclass": SingletonThreadPool,
-            "pool_pre_ping": True,
-        }
+        engine_kwargs = {"future": True, "poolclass": SingletonThreadPool, "pool_pre_ping": True, "pool_recycle": 1800}
 
         try:
             self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)

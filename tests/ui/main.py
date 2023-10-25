@@ -18,10 +18,7 @@ from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import (
-    ElementClickInterceptedException,
-    TimeoutException,
-)
+from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException, WebDriverException
 
 ready = False
 retries = 0
@@ -146,6 +143,13 @@ def access_page(
 
         print(f"{name.title()} page didn't load in time, exiting ...", flush=True)
         exit(1)
+    except WebDriverException as we:
+        if "connectionFailure" in str(we):
+            print("Connection failure, retrying in 5s ...", flush=True)
+            driver.refresh()
+            sleep(5)
+            return access_page(driver, driver_wait, button, name, message, retries=1)
+        raise we
 
     if message:
         print(
