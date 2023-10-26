@@ -274,6 +274,7 @@ async def delete_instance(instance_hostname: str, method: str, background_tasks:
 async def send_instance_action(
     instance_hostname: str,
     action: Literal["ping", "bans", "stop", "reload"],  # TODO: maybe add a "start" action
+    method: str,
     background_tasks: BackgroundTasks,
 ) -> JSONResponse:
     """
@@ -307,7 +308,7 @@ async def send_instance_action(
             CORE_CONFIG.logger.error(error)
             return JSONResponse(status_code=status_code, content={"message": error})
 
-    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": "core", "tags": ["instance"], "title": "Send instance action", "description": f"Send action {action} to instance {instance_hostname}"})
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["instance"], "title": "Send instance action", "description": f"Send action {action} to instance {instance_hostname}"})
     CORE_CONFIG.logger.info(f"Successfully sent API request to {instance_api.endpoint}{action}")
 
     return JSONResponse(content={"message": resp.json()})
