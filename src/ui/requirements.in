@@ -7,3 +7,4 @@ gunicorn[gthread]==21.2.0
 importlib-metadata==6.8.0
 python_dateutil==2.8.2
 regex==2023.10.3
+werkzeug==3.0.1
