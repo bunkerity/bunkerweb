@@ -5,7 +5,7 @@ services:
     image: bunkerity/bunkerweb:1.5.3
     pull_policy: never
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     environment:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       HTTP_PORT: "80"

@@ -47,7 +47,7 @@ services:
         	}
         }
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     networks:
       - bw-universe
       - bw-services

@@ -23,7 +23,7 @@ services:
         proxy_buffers 4 512k;
         proxy_buffer_size 256k;
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services

@@ -26,7 +26,7 @@ services:
           rewrite ^(.*)$$ $$1/ permanent;
         }
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services

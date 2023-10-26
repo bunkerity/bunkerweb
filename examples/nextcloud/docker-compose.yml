@@ -48,7 +48,7 @@ services:
         CUSTOM_CONF_MODSEC_nextcloud=
         SecRule REQUEST_FILENAME "@rx ^/remote.php/dav/files/" "id:2000,ctl:ruleRemoveByTag=attack-protocol,ctl:ruleRemoveByTag=attack-generic,nolog"
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services

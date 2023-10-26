@@ -29,7 +29,7 @@ services:
         constraints:
           - "node.role == worker"
       labels:
-        - "bunkerweb.INSTANCE"
+        - "bunkerweb.INSTANCE=yes"
 
   bw-autoconf:
     image: bunkerity/bunkerweb-autoconf:1.5.3

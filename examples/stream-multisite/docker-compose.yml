@@ -27,7 +27,7 @@ services:
       - app2.example.com_LISTEN_STREAM_PORT=20000
       - app2.example.com_LISTEN_STREAM_PORT_SSL=20001
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services

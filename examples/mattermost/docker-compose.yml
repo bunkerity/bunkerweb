@@ -38,7 +38,7 @@ services:
       - LIMIT_REQ_URL_3=^/static/
       - LIMIT_REQ_RATE_3=10r/s
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services

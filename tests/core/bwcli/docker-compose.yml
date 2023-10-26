@@ -7,7 +7,7 @@ services:
     depends_on:
       - bw-redis
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     environment:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       USE_BUNKERNET: "no"

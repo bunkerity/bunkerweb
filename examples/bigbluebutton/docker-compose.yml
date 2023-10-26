@@ -42,7 +42,7 @@ services:
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://10.7.7.253:8080
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     # You have to put this IP address in your docker-compose.yml file
     networks:
       bbb-net:

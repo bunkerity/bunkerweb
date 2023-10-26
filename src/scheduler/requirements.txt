@@ -4,13 +4,13 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==2.7.2 \
-    --hash=sha256:52bbc5f51f9887f6ee384e1ea7a3802792e31773d661cf5f5904e3d2be5df72d \
-    --hash=sha256:be4f11846e101bfc36663620ae81be8a60d31c7e743568bc8b9d974884043ad7
+acme==2.7.3 \
+    --hash=sha256:801c1d8eb8451793a88623abfd707ff3bcf31328c9a885f8fbe48721ea7f8565 \
+    --hash=sha256:93ec4f6ebe8dec9a063e3523f8f31fb60f540757b3cd4fb1b4c144e69b83d7b9
     # via certbot
-certbot==2.7.2 \
-    --hash=sha256:1425de7e41c29fe1734f53fea5b64c3713df0cfc1df1a23a78d7513001457e6e \
-    --hash=sha256:8cf818b81eee3cf12102ad39b79953b9fd0b5f59fd20f5cf2d0cf5ea5d8a9172
+certbot==2.7.3 \
+    --hash=sha256:6e6f5dbdbd36672925572f44feccef77501a36d4eb68d63ecd5e372f09606eb0 \
+    --hash=sha256:e198bcf1bddff9836d408cc9928223804044e755524c42aa4481c1a626c8c80a
     # via -r requirements.in
 certifi==2023.7.22 \
     --hash=sha256:539cc1d13202e33ca466e88b2807e29f4c13049d6d87031a3c110744495cb082 \
@@ -231,9 +231,9 @@ pycparser==2.21 \
     --hash=sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9 \
     --hash=sha256:e644fdec12f7872f86c58ff790da456218b10f863970249516d60a5eaca77206
     # via cffi
-pyopenssl==23.2.0 \
-    --hash=sha256:24f0dc5227396b3e831f4c7f602b950a5e9833d292c8e4a2e06b709292806ae2 \
-    --hash=sha256:276f931f55a452e7dea69c7173e984eb2a4407ce413c918aa34b55f82f9b8bac
+pyopenssl==23.3.0 \
+    --hash=sha256:6756834481d9ed5470f4a9393455154bc92fe7a64b7bc6ee2c804e78c52099b2 \
+    --hash=sha256:6b2cba5cc46e822750ec3e5a81ee12819850b11303630d575e98108a079c2b12
     # via
     #   acme
     #   josepy

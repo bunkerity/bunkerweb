@@ -20,7 +20,7 @@ services:
       - REAL_IP_FROM=10.10.10.0/24
       - REAL_IP_HEADER=proxy_protocol
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - net-proxy
       - bw-universe
