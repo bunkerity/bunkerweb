@@ -12,7 +12,7 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import SettingsUploadSvgWarning from "@components/Settings/Upload/Svg/Warning.vue";
 
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed, onMounted, watch } from "vue";
 import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
 import {
   setPluginsData,
@@ -24,6 +24,7 @@ import { useFeedbackStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
 
 const config = useConfigStore();
+
 const feedbackStore = useFeedbackStore();
 
 // Hide / Show settings and plugin base on that filters
@@ -63,8 +64,8 @@ const services = reactive({
     const cloneMultisitePlugin = setPluginsData(
       getPluginsByContext(
         JSON.parse(JSON.stringify(services.data)),
-        "multisite",
-      ),
+        "multisite"
+      )
     );
 
     // Get only services custom conf
@@ -90,6 +91,7 @@ const services = reactive({
 
     // Add new service with all default values
     // Will not be add to config store until a default value is change
+    // services.setup is at least length 1
     cloneServConf["new"] = JSON.parse(JSON.stringify(cloneMultisitePlugin));
 
     // Filter data to display for each service
@@ -99,12 +101,11 @@ const services = reactive({
 
     // Set first service as active if none
     if (!services.activeService)
-      services.activeService = services.servicesName[0];
-
+      services.activeService = services.servicesName[0] || "";
     // Get remain plugin after filter
-    // Use active service but is impersonal (no specific service logic)
+    // Use new service because always here
     const remainPlugins = [];
-    cloneServConf[services.activeService].forEach((item) => {
+    cloneServConf["new"].forEach((item) => {
       item["isMatchFilter"] ? remainPlugins.push(item.name) : false;
     });
     services.activePlugins = remainPlugins;
@@ -140,7 +141,7 @@ const conf = reactive({
   data: [],
 });
 
-async function getGlobalConf() {
+async function getGlobalConf(isFeedback = true) {
   conf.isPend = true;
   services.isPend = true;
   await fetchAPI(
@@ -148,14 +149,14 @@ async function getGlobalConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    isFeedback ? feedbackStore.addFeedback : null
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     services,
-    feedbackStore.addFeedback,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 
@@ -177,33 +178,39 @@ function changeServ(servName) {
 }
 
 async function sendServConf() {
+  // Case nothing to send
+  if (Object.keys(config.data.services).length === 0) return;
+
   const promises = [];
-  // Send service
-  const servicesConf = conf.data.services;
-  if (Object.keys(servicesConf).length > 0) {
-    for (const [key, value] of Object.entries(servicesConf)) {
+  // Send services
+  const services = config.data.services;
+  if (Object.keys(services).length > 0) {
+    for (const [key, value] of Object.entries(services)) {
       if (Object.keys(value).length === 0) continue;
-      const serviceName = key;
+      // Case new, replace by SERVER_NAME
+      const serviceName = key === "new" ? services[key]["SERVER_NAME"] : key;
+
       promises.push(
         await fetchAPI(
           `/api/config/service/${serviceName}?method=ui`,
           "PUT",
           value,
           null,
-          feedbackStore.addFeedback,
-        ),
+          feedbackStore.addFeedback
+        )
       );
     }
+
+    // When all conf responded, refetch global conf
+    Promise.all(promises).then((services) => {
+      getGlobalConf(false);
+    });
   }
-  // When all conf responded, refetch global conf
-  Promise.all(promises).then((services) => {
-    getGlobalConf();
-  });
 }
 
 // Show service data logic
-onMounted(async () => {
-  await getGlobalConf();
+onMounted(() => {
+  getGlobalConf();
 });
 </script>
 
@@ -256,25 +263,40 @@ onMounted(async () => {
         class="z-[101] h-fit col-span-12 md:col-span-8 lg:col-span-5 3xl:col-span-3"
       >
         <div class="col-span-12 flex">
-          <CardLabel label="services" />
+          <CardLabel label="services / plugins" />
           <PluginRefresh @refresh="refresh()" />
         </div>
         <SettingsLayout
+          v-if="Object.keys(services.setup).length > 1"
           class="flex w-full col-span-12"
           label="Select service"
           name="services-list"
         >
           <SettingsSelect
             @inp="(v) => changeServ(v)"
-            v-if="services.activeService"
             :settings="{
               id: 'services-list',
               value:
                 services.activeService === 'new' ? '' : services.activeService,
               values: Object.keys(services.setup).filter(
-                (item) => item !== 'new',
+                (item) => item !== 'new'
               ),
               placeholder: 'Services',
+            }"
+          />
+        </SettingsLayout>
+        <SettingsLayout
+          class="flex w-full col-span-12"
+          label="Select plugin"
+          name="plugins"
+        >
+          <SettingsSelect
+            @inp="(v) => (services.activePlugin = v)"
+            :settings="{
+              id: 'plugins',
+              value: services.activePlugin,
+              values: services.activePlugins,
+              placeholder: 'Search',
             }"
           />
         </SettingsLayout>
@@ -289,26 +311,11 @@ onMounted(async () => {
         </div>
       </CardBase>
       <CardBase
-        label="plugins & filters"
+        label="filters"
         class="z-[100] h-fit col-span-12 lg:col-span-4 grid grid-cols-12 relative"
       >
         <SettingsLayout
-          class="flex w-full col-span-12 md:col-span-4 lg:col-span-12"
-          label="Select plugin"
-          name="plugins"
-        >
-          <SettingsSelect
-            @inp="(v) => (services.activePlugin = v)"
-            :settings="{
-              id: 'plugins',
-              value: services.activePlugin,
-              values: services.activePlugins,
-              placeholder: 'Search',
-            }"
-          />
-        </SettingsLayout>
-        <SettingsLayout
-          class="flex w-full col-span-12 md:col-span-4 lg:col-span-12"
+          class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
           label="Setting search"
           name="keyword"
         >
@@ -323,7 +330,7 @@ onMounted(async () => {
           />
         </SettingsLayout>
         <SettingsLayout
-          class="flex w-full col-span-12 md:col-span-4 lg:col-span-12"
+          class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
           label="Setting method"
           name="keyword"
         >
@@ -331,7 +338,7 @@ onMounted(async () => {
             @inp="(v) => (filters.method = v)"
             :settings="{
               id: 'keyword',
-              value: 'all',
+              value: filters.method,
               values: getMethodList(),
               placeholder: 'Search',
             }"

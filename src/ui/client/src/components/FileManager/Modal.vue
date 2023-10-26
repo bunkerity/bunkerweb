@@ -159,14 +159,12 @@ function createFile() {
   const type = splitPath[0].replaceAll("-", "_");
   const serviceID = splitPath[1] ? splitPath[1] : "";
 
-  const conf = [
-    {
-      service_id: serviceID,
-      type: type,
-      name: inp.name || oldName,
-      data: editor.getValue(),
-    },
-  ];
+  const conf = {
+    service_id: serviceID,
+    type: type,
+    name: inp.name || oldName,
+    data: editor.getValue(),
+  };
   updateConfig(conf);
 }
 
@@ -179,11 +177,12 @@ async function updateConfig(conf) {
       ? `/api/custom_configs/${conf.name}?method=ui`
       : `/api/custom_configs?method=ui`;
   const method = props.action === `delete` ? `DELETE` : `PUT`;
-
   await fetchAPI(api, method, conf, updateConf, feedbackStore.addFeedback)
     .then((res) => {
+      // Case not save
       if (res.type === "error")
         return showAlert("error", "Failed to save conf");
+      // Case saved
       alert.isOpen = false;
       emits("close");
       emits("updateFile");

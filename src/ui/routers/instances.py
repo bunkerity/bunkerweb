@@ -40,7 +40,7 @@ async def upsert_instance(
     summary="Delete BunkerWeb instance",
 )
 async def delete_instance(instance_hostname: str):
-    return get_core_format_res(f"{API}/instances/{instance_hostname}", "DELETE", "", "Delete instance")
+    return get_core_format_res(f"{API}/instances/{instance_hostname}", "DELETE", "", f"Delete instance {instance_hostname}")
 
 
 @router.post(

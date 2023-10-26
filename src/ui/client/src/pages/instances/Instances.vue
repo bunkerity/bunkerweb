@@ -9,9 +9,59 @@ import ApiState from "@components/Api/State.vue";
 
 const feedbackStore = useFeedbackStore();
 
+const instances = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+  count: computed(() => instances.data.length),
+});
+
+async function getInstances(isFeedback = true) {
+  await fetchAPI(
+    "/api/instances",
+    "GET",
+    null,
+    instances,
+    isFeedback ? feedbackStore.addFeedback : null
+  );
+}
+
+const instActions = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+});
+
+async function actionInstance(data) {
+  //Try action and refetch instances only if succeed
+  await fetchAPI(
+    `/api/instances/${data.hostname}/${data.operation}`,
+    "POST",
+    null,
+    instActions,
+    feedbackStore.addFeedback
+  ).then((res) => {
+    if (res.type === "error") return;
+    getInstances(false);
+  });
+}
+
+async function deleteInstance(data) {
+  //Try action and refetch instances only if succeed
+  await fetchAPI(
+    `/api/instances/${data.hostname}`,
+    "DELETE",
+    null,
+    instances,
+    feedbackStore.addFeedback
+  ).then((res) => {
+    if (res.type === "error") return;
+    getInstances(false);
+  });
+}
+
 const modal = reactive({
   delIsOpen: false,
-  pingIsOpen: false,
   hostname: "",
 });
 
@@ -20,53 +70,8 @@ function openDelModal(hostname) {
   modal.delIsOpen = true;
 }
 
-const instances = reactive({
-  isPend: false,
-  isErr: false,
-  data: [],
-  count: computed(() => instances.data.length),
-});
-
-async function getInstances() {
-  await fetchAPI(
-    "/api/instances",
-    "GET",
-    null,
-    instances,
-    feedbackStore.addFeedback,
-  );
-}
-
-async function actionInstance(data) {
-  await fetchAPI(
-    `/api/instances/${data.hostname}/${data.operation}`,
-    "POST",
-    null,
-    instances,
-    feedbackStore.addFeedback,
-  );
-  await getInstances();
-}
-
-const ping = reactive({
-  isPend: false,
-  isErr: false,
-  data: [],
-});
-
-async function deleteInstance(data) {
-  await fetchAPI(
-    `/api/instances/${data.hostname}`,
-    "DELETE",
-    null,
-    instances,
-    feedbackStore.addFeedback,
-  );
-  await getInstances();
-}
-
-onMounted(async () => {
-  await getInstances();
+onMounted(() => {
+  getInstances();
 });
 </script>
 

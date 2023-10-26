@@ -18,10 +18,10 @@ const instances = reactive({
   data: [],
   count: computed(() => instances.data.length),
   up: computed(() =>
-    instances.data.filter((item) => item.status === "up").length.toString(),
+    instances.data.filter((item) => item.status === "up").length.toString()
   ),
   down: computed(() =>
-    instances.data.filter((item) => item.status !== "up").length.toString(),
+    instances.data.filter((item) => item.status !== "up").length.toString()
   ),
 });
 
@@ -31,18 +31,18 @@ async function getInstances() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
 const version = reactive({
   isPend: false,
   isErr: false,
-  data: [],
-  num: computed(() => version.data["message"]),
-  latest: computed(() => version.data["message"]),
+  data: "",
+  num: computed(() => version.data),
+  latest: "0",
   isLatest: computed(() => {
-    return version.num === version.latest ? true : false;
+    return version.latest.includes(version.num) ? true : false;
   }),
 });
 
@@ -52,8 +52,18 @@ async function getVersion() {
     "GET",
     null,
     version,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
+  // Get latest version from github
+  await fetch("https://api.github.com/repos/bunkerity/bunkerweb/tags")
+    .then((res) => {
+      return res.json();
+    })
+    .then((res) => {
+      if (res.length <= 0) return;
+
+      version.latest = res[0]["name"] || null;
+    });
 }
 
 // Plugins data to render components
@@ -64,10 +74,10 @@ const plugins = reactive({
   data: [],
   num: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.data.filter((item) => item["external"] === false).length,
+    () => plugins.data.filter((item) => item["external"] === false).length
   ),
   external: computed(
-    () => plugins.data.filter((item) => item["external"] === true).length,
+    () => plugins.data.filter((item) => item["external"] === true).length
   ),
   services: computed(() => {
     if (
@@ -107,14 +117,14 @@ async function getConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -127,6 +137,7 @@ onMounted(async () => {
 
 <template>
   <Dashboard>
+    {{}}
     <!-- version -->
     <ApiState
       class="col-span-12 md:col-span-6 2xl:col-span-4"
@@ -141,10 +152,10 @@ onMounted(async () => {
       v-if="!version.isPend && !version.isErr"
       :href="'#'"
       :name="'version'"
-      :count="version.num || ''"
+      :count="version.num"
       :detailArr="[
         {
-          text: version.isLatest ? 'Latest version' : 'newer version exists',
+          text: version.isLatest ? 'Latest version' : 'is latest version',
           num: version.isLatest ? '' : version.latest,
           textClass: version.isLatest ? 'text-green-500' : 'text-yellow-500',
           numClass: version.isLatest ? 'text-green-500' : 'text-yellow-500',
@@ -206,10 +217,16 @@ onMounted(async () => {
       :count="plugins.servicesNum || '0'"
       :detailArr="[
         {
-          text: '',
+          text: 'ui,',
           num: '',
-          textClass: 'text-green-500',
-          numClass: 'text-green-500',
+          textClass: 'text-sky-500',
+          numClass: 'text-sky-500',
+        },
+        {
+          text: 'autoconf',
+          num: '',
+          textClass: 'text-sky-500',
+          numClass: 'text-sky-500',
         },
       ]"
     >

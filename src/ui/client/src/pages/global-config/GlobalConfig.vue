@@ -21,6 +21,7 @@ import { useFeedbackStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
 
 const config = useConfigStore();
+
 const feedbackStore = useFeedbackStore();
 
 // Hide / Show settings and plugin base on that filters
@@ -56,7 +57,7 @@ const plugins = reactive({
     // Duplicate base data
     const cloneGlobalPlugin = getPluginsByContext(
       JSON.parse(JSON.stringify(plugins.data)),
-      "global",
+      "global"
     );
     const cloneGlobalConf = JSON.parse(JSON.stringify(conf.data["global"]));
     // Format and keep only global config
@@ -92,7 +93,6 @@ const plugins = reactive({
           plugins.activePlugins.length > 0 ? plugins.activePlugins[0] : "";
       }
     }
-
     return filter;
   }),
 });
@@ -112,14 +112,14 @@ async function getGlobalConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -128,24 +128,27 @@ onMounted(async () => {
 });
 
 // Refetch and reset all states
-function resetValues() {
+async function resetValues() {
   filters.label = "";
   config.$reset();
 }
 
-function refresh() {
-  getGlobalConf();
-  resetValues();
+async function refresh() {
+  await getGlobalConf();
+  await resetValues();
 }
 
 async function sendConf() {
+  // Case no data to send
+  if (Object.keys(config.data["global"]).length === 0) return;
   await fetchAPI(
     "/api/config/global?method=ui",
     "PUT",
     config.data["global"],
     null,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
+  await refresh();
 }
 </script>
 
@@ -228,7 +231,14 @@ async function sendConf() {
           :active="plugins.activePlugin"
         />
         <div class="col-span-12 flex w-full justify-center mt-8 mb-2">
-          <ButtonBase @click="sendConf()" color="valid" size="lg">
+          <ButtonBase
+            :disabled="
+              Object.keys(config.data['global']).length === 0 ? true : false
+            "
+            @click="sendConf()"
+            color="valid"
+            size="lg"
+          >
             SAVE
           </ButtonBase>
         </div>

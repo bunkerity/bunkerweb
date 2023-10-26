@@ -41,6 +41,8 @@ const input = reactive({
           props.serviceName || input.context,
           input.id,
           input.value,
+          props.setting.value,
+          props.setting.regex
         )
       "
       :type="

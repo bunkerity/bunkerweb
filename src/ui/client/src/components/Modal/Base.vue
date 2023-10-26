@@ -12,12 +12,14 @@ const props = defineProps({
 const emits = defineEmits(["backdrop"]);
 
 function closeBackdrop(e) {
-  if (
-    e.target.className.includes("modal-container") ||
-    e.target.className.includes("modal-wrap")
-  ) {
-    emits("backdrop");
-  }
+  try {
+    if (
+      e.target.className.includes("modal-container") ||
+      e.target.className.includes("modal-wrap")
+    ) {
+      emits("backdrop");
+    }
+  } catch (e) {}
 }
 
 onMounted(() => {

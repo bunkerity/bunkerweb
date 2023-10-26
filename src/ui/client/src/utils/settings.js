@@ -22,6 +22,7 @@ export function getSettingsByFilter(plugins, filters) {
       // Check if setting match
       let isMatch = true;
       // Look for every filter
+
       for (const [key, value] of Object.entries(filters)) {
         // Case one filter already fail
         if (!isMatch) continue;
@@ -155,7 +156,7 @@ export function getSettingsMultipleList(settings) {
             if (settingName.startsWith(baseSettingName)) return;
             // Case not, create
             settings[`${baseSettingName}${suffix}`] = baseSettingData;
-          },
+          }
         );
       });
     });

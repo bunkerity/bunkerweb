@@ -38,10 +38,10 @@ const customConf = reactive({
   data: [],
   total: computed(() => customConf.data.length || 0),
   global: computed(
-    () => customConf.data.filter((item) => !item["service_id"]).length || 0,
+    () => customConf.data.filter((item) => !item["service_id"]).length || 0
   ),
   service: computed(
-    () => customConf.data.filter((item) => item["service_id"]).length || 0,
+    () => customConf.data.filter((item) => item["service_id"]).length || 0
   ),
   setup: computed(() => {
     if (
@@ -61,23 +61,23 @@ const customConf = reactive({
   }),
 });
 
-async function getCustomConf() {
+async function getCustomConf(isFeedback = true) {
   await fetchAPI(
     "/api/custom_configs",
     "GET",
     null,
     customConf,
-    feedbackStore.addFeedback,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 
-async function getConfig() {
+async function getConfig(isFeedback = true) {
   await fetchAPI(
     "/api/config?methods=1&new_format=1",
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 
@@ -86,14 +86,13 @@ async function getData() {
   await getCustomConf();
 }
 
-onMounted(async () => {
-  await getData();
+onMounted(() => {
+  getData();
 });
 </script>
 
 <template>
   <Dashboard>
-    {{}}
     <ApiState
       class="col-span-12 md:col-start-4 md:col-span-6"
       :isErr="customConf.isErr"
