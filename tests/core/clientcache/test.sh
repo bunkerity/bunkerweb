@@ -34,6 +34,7 @@ else
     echo "CLIENT_CACHE_CONTROL=public, max-age=15552000" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
     sudo cp image.png /var/www/html/image.png
+    sudo cp ready.conf /etc/bunkerweb/server-http
 fi
 
 manual=0

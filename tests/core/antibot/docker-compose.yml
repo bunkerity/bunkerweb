@@ -23,8 +23,9 @@ services:
         location /ready {
           default_type 'text/plain';
           rewrite_by_lua_block {
-            ngx.say('ready')
-            ngx.exit(ngx.OK)
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
           }
         }
     networks:

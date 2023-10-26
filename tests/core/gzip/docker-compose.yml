@@ -4,6 +4,8 @@ services:
   bw:
     image: bunkerity/bunkerweb:1.5.3
     pull_policy: never
+    ports:
+      - 80:8080
     labels:
       - "bunkerweb.INSTANCE=yes"
     environment:
@@ -22,7 +24,8 @@ services:
         location /ready {
           default_type 'text/plain';
           rewrite_by_lua_block {
-            ngx.say('ready')
+            ngx.print('ready')
+            ngx.flush(true)
             ngx.exit(ngx.HTTP_OK)
           }
         }

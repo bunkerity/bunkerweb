@@ -33,6 +33,7 @@ else
     echo "REVERSE_SCAN_TIMEOUT=500" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
     export TEST_TYPE="linux"
+    sudo cp ready.conf /etc/bunkerweb/server-http
 fi
 
 manual=0

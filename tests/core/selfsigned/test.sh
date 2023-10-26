@@ -32,6 +32,7 @@ else
     echo "SELF_SIGNED_SSL_EXPIRY=365" | sudo tee -a /etc/bunkerweb/variables.env
     echo "SELF_SIGNED_SSL_SUBJ=/CN=www.example.com/" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
+    sudo cp ready.conf /etc/bunkerweb/server-http
 fi
 
 manual=0

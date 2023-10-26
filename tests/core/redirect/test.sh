@@ -31,6 +31,7 @@ else
     echo "REDIRECT_TO=" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REDIRECT_TO_REQUEST_URI=no" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
+    sudo cp ready.conf /etc/bunkerweb/server-http
 fi
 
 manual=0

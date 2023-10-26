@@ -43,6 +43,7 @@ else
     echo "CORS_ALLOW_CREDENTIALS=no" | sudo tee -a /etc/bunkerweb/variables.env
     echo "CORS_ALLOW_METHODS=GET, POST, OPTIONS" | sudo tee -a /etc/bunkerweb/variables.env
     echo "CORS_ALLOW_HEADERS=DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range" | sudo tee -a /etc/bunkerweb/variables.env
+    sudo cp ready.conf /etc/bunkerweb/server-http
 fi
 
 manual=0

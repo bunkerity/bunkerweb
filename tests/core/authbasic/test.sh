@@ -33,6 +33,7 @@ else
     echo "AUTH_BASIC_USER=bunkerity" | sudo tee -a /etc/bunkerweb/variables.env
     echo "AUTH_BASIC_PASSWORD=Secr3tP@ssw0rd" | sudo tee -a /etc/bunkerweb/variables.env
     sudo wget -O /var/www/html/index.html https://github.com/nginxinc/NGINX-Demos/raw/master/nginx-hello-nonroot/html-version/index.html
+    sudo cp ready.conf /etc/bunkerweb/server-http
 fi
 
 manual=0

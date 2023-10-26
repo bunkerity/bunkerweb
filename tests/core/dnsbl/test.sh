@@ -36,6 +36,7 @@ else
     echo "DNSBL_LIST=" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
     export TEST_TYPE="linux"
+    sudo cp ready.conf /etc/bunkerweb/server-http
 fi
 
 manual=0

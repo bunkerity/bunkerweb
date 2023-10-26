@@ -30,6 +30,7 @@ else
     sudo systemctl stop bunkerweb
     echo "USE_BROTLI=no" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
+    sudo cp ready.conf /etc/bunkerweb/server-http
 fi
 
 manual=0
