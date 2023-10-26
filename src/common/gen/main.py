@@ -194,7 +194,7 @@ if __name__ == "__main__":
                 sleep(5)
 
             proc = run(
-                ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
+                [join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
                 stdin=DEVNULL,
                 stderr=STDOUT,
             )

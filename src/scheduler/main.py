@@ -548,7 +548,7 @@ if __name__ == "__main__":
                             # Start nginx
                             logger.info("Starting nginx ...")
                             proc = subprocess_run(
-                                [join(sep, "usr", "sbin", "nginx")],
+                                [join(sep, "usr", "sbin", "nginx"), "-e", "/var/log/bunkerweb/error.log"],
                                 stdin=DEVNULL,
                                 stderr=STDOUT,
                                 env=env.copy(),
