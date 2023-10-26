@@ -66,8 +66,8 @@ const instance = reactive({
   ),
   checks: computed(() =>
     props.method === "static"
-      ? [topActions.delete, topActions.ping]
-      : [topActions.ping]
+      ? [topActions.ping]
+      : [topActions.delete, topActions.ping]
   ),
 });
 

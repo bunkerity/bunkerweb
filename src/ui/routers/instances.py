@@ -28,7 +28,7 @@ async def get_instances():
 )
 async def upsert_instance(
     instances: Union[Instance, List[Instance]],
-    method: str = "manual",
+    method: str = "ui",
     reload: bool = True,
 ):
     return get_core_format_res(f"{API}/instances?method={method}&reload={reload}", "PUT", instances, "Upsert instances")
@@ -39,8 +39,8 @@ async def upsert_instance(
     response_model=ResponseModel,
     summary="Delete BunkerWeb instance",
 )
-async def delete_instance(instance_hostname: str):
-    return get_core_format_res(f"{API}/instances/{instance_hostname}", "DELETE", "", f"Delete instance {instance_hostname}")
+async def delete_instance(instance_hostname: str, method: str = "ui"):
+    return get_core_format_res(f"{API}/instances/{instance_hostname}?method={method}", "DELETE", "", f"Delete instance {instance_hostname}")
 
 
 @router.post(

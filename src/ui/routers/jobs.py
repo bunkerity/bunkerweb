@@ -25,8 +25,8 @@ async def get_jobs():
     response_model=ResponseModel,
     summary="Send to scheduler task to run a job async",
 )
-async def run_job(job_name: str):
-    return get_core_format_res(f"{API}/jobs/{job_name}/run", "POST", "", f"Run job {job_name}")
+async def run_job(job_name: str, method: str = "ui"):
+    return get_core_format_res(f"{API}/jobs/{job_name}/run?method={method}", "POST", "", f"Run job {job_name}")
 
 
 @router.get(

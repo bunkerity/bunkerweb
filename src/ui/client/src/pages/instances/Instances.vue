@@ -35,7 +35,7 @@ const instActions = reactive({
 async function actionInstance(data) {
   //Try action and refetch instances only if succeed
   await fetchAPI(
-    `/api/instances/${data.hostname}/${data.operation}`,
+    `/api/instances/${data.hostname}/${data.operation}?method=ui`,
     "POST",
     null,
     instActions,
@@ -49,7 +49,7 @@ async function actionInstance(data) {
 async function deleteInstance(data) {
   //Try action and refetch instances only if succeed
   await fetchAPI(
-    `/api/instances/${data.hostname}`,
+    `/api/instances/${data.hostname}?method=ui`,
     "DELETE",
     null,
     instances,
