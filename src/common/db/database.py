@@ -2254,7 +2254,7 @@ class Database:
     def remove_instance(self, instance_hostname: str, *, method: str = "core") -> str:
         """Remove an instance."""
         with suppress(BaseException), self.__db_session() as session:
-            db_instance = session.query(Instances).with_entities(Instances.hostname).filter_by(hostname=instance_hostname).with_for_update(read=True).first()
+            db_instance = session.query(Instances).with_entities(Instances.hostname, Instances.method).filter_by(hostname=instance_hostname).with_for_update(read=True).first()
 
             if db_instance is None:
                 return "not_found"

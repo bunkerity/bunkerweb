@@ -10,8 +10,9 @@ from API import API  # type: ignore
 
 class Instance(BaseModel):
     hostname: str = Field(examples=["bunkerweb-1"], description="The server hostname")
-    port: int = Field(examples=[5000], description="The server port")
+    port: int = Field(5000, examples=[5000], description="The server port")
     server_name: str = Field(
+        "bwapi",
         examples=["bwapi"],
         description="The instance's server name to be used in the API",
     )
