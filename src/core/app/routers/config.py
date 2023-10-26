@@ -99,6 +99,10 @@ async def get_config(methods: bool = False, new_format: bool = False):
     summary="Update whole config in Database",
     response_description="Message",
     responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Can't save config to database",
+            "model": ErrorMessage,
+        },
         status.HTTP_503_SERVICE_UNAVAILABLE: {
             "description": "Database is locked or had trouble handling the request",
             "model": ErrorMessage,
@@ -118,6 +122,11 @@ async def update_config(config: Dict[str, str], method: str, background_tasks: B
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
     conflicts, config = parse_config(config)
+
+    if conflicts and not config:
+        CORE_CONFIG.logger.warning(f"Can't save config to database : {dumps(conflicts)}")
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": {"data": {"settings": conflicts, "message": "Can't save config to database"}}})
+
     resp = DB.save_config(config, method)
 
     if "database is locked" in resp or "file is not a database" in resp:
@@ -152,6 +161,10 @@ async def update_config(config: Dict[str, str], method: str, background_tasks: B
     summary="Update global config in Database",
     response_description="Message",
     responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Can't save global config to database",
+            "model": ErrorMessage,
+        },
         status.HTTP_503_SERVICE_UNAVAILABLE: {
             "description": "Database is locked or had trouble handling the request",
             "model": ErrorMessage,
@@ -171,6 +184,11 @@ async def update_global_config(config: Dict[str, str], method: str, background_t
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
     conflicts, config = parse_config(config)
+
+    if conflicts and not config:
+        CORE_CONFIG.logger.warning(f"Can't save global config to database : {dumps(conflicts)}")
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": {"data": {"settings": conflicts, "message": "Can't save global config to database"}}})
+
     resp = DB.save_global_config(config, method)
 
     if "database is locked" in resp or "file is not a database" in resp:
@@ -206,6 +224,10 @@ async def update_global_config(config: Dict[str, str], method: str, background_t
     summary="Update a service config in Database",
     response_description="Message",
     responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Can't save service config to database",
+            "model": ErrorMessage,
+        },
         status.HTTP_404_NOT_FOUND: {
             "description": "Service not found",
             "model": ErrorMessage,
@@ -238,6 +260,11 @@ async def update_service_config(
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
     conflicts, config = parse_config(config)
+
+    if conflicts and not config:
+        CORE_CONFIG.logger.warning(f"Can't save {service_name} service config to database : {dumps(conflicts)}")
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": {"data": {"settings": conflicts, "message": f"Can't save {service_name} service config to database"}}})
+
     resp = DB.save_service_config(service_name, config, method)
 
     if resp == "not_found":
