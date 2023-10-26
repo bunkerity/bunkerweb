@@ -58,7 +58,7 @@ else
     echo "WHITELIST_URI_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
     export TEST_TYPE="linux"
-    sudo cp ready.conf /etc/bunkerweb/server-http
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 manual=0

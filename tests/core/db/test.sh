@@ -64,7 +64,7 @@ else
     export GLOBAL_REVERSE_PROXY_HOST="http://app1:8080"
     export GLOBAL_REVERSE_PROXY_URL="/"
     export CUSTOM_CONF_MODSEC_test_custom_conf='SecRule REQUEST_FILENAME "@rx ^/db" "id:10000,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"'
-    sudo cp ready.conf /etc/bunkerweb/server-http
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 manual=0

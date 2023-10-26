@@ -30,7 +30,7 @@ else
     sudo systemctl stop bunkerweb
     echo "USE_GZIP=no" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
-    sudo cp ready.conf /etc/bunkerweb/server-http
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 manual=0

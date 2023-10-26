@@ -550,6 +550,8 @@ try:
         )
 
         for custom_config in custom_configs:
+            if custom_config.name == "ready":
+                continue
             if not multisite and custom_config.name in global_custom_configs and custom_config.service_id:
                 print(
                     f"❌ The custom config {custom_config.name} is in the database but should not be owned by the service {custom_config.service_id} because multisite is not enabled, exiting ...",
