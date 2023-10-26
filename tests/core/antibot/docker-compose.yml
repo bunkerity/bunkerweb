@@ -19,6 +19,14 @@ services:
       # ? ANTIBOT settings
       USE_ANTIBOT: "no"
       ANTIBOT_URI: "/challenge"
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.say('ready')
+            ngx.exit(ngx.OK)
+          }
+        }
     networks:
       bw-universe:
       bw-services:

@@ -19,6 +19,14 @@ services:
       # ? ERRORS settings
       ERRORS: ""
       INTERCEPTED_ERROR_CODES: "400 401 403 404 405 413 429 500 501 502 503 504"
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.say('ready')
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       bw-universe:
       bw-services:

@@ -18,6 +18,14 @@ services:
       # ? REDIRECT settings
       REDIRECT_TO: ""
       REDIRECT_TO_REQUEST_URI: "no"
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.say('ready')
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       bw-universe:
       bw-services:
