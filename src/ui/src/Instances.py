@@ -96,7 +96,7 @@ class Instance:
                 return False
             return (
                 run(
-                    [join(sep, "usr", "sbin", "nginx")],
+                    [join(sep, "usr", "sbin", "nginx"), "-e", "/var/log/bunkerweb/error.log"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
