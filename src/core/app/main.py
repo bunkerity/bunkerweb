@@ -680,8 +680,9 @@ async def get_version() -> JSONResponse:
 
 # Include the routers to the main app
 
-from .routers import config, custom_configs, instances, jobs, plugins
+from .routers import actions, config, custom_configs, instances, jobs, plugins
 
+app.include_router(actions.router)
 app.include_router(config.router)
 app.include_router(custom_configs.router)
 app.include_router(instances.router)

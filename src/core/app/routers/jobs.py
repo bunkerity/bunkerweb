@@ -4,7 +4,7 @@ from typing import Annotated, Dict, Literal, Optional, Union
 from fastapi import APIRouter, BackgroundTasks, File, Form, status
 from fastapi.responses import JSONResponse
 
-from ..models import CacheFileDataModel, CacheFileModel, ErrorMessage, Job, Job_cache
+from ..models import CacheFileDataModel, CacheFileModel, ErrorMessage, Job, JobCache
 from ..dependencies import CORE_CONFIG, DB, run_job as deps_run_job
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
@@ -46,6 +46,8 @@ async def get_jobs():
 async def add_job_run(
     job_name: str,
     data: Dict[Literal["success", "start_date", "end_date"], Union[bool, float]],
+    method: str,
+    background_tasks: BackgroundTasks,
 ) -> JSONResponse:
     """
     Update a job run status in the database.
@@ -82,6 +84,9 @@ async def add_job_run(
             content={"message": resp},
         )
 
+    background_tasks.add_task(
+        DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["job"], "title": f"Job {job_name} run", "description": f"Job {job_name} run {'succeeded' if data.get('success', False) else 'failed'}"}
+    )
     CORE_CONFIG.logger.info(f"✅ Job {job_name} run successfully added to database with run status: {'✅' if data.get('success', False) else '❌'}")
 
     return JSONResponse(
@@ -102,7 +107,7 @@ async def add_job_run(
         }
     },
 )
-async def run_job(job_name: str, background_tasks: BackgroundTasks):
+async def run_job(job_name: str, method: str, background_tasks: BackgroundTasks):
     """
     Run a job.
     """
@@ -115,6 +120,7 @@ async def run_job(job_name: str, background_tasks: BackgroundTasks):
             content={"message": f"Job {job_name} not found"},
         )
 
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["job"], "title": f"Job {job_name} run", "description": f"Job {job_name} run scheduled"})
     background_tasks.add_task(deps_run_job, job_name)
 
     return JSONResponse(content={"message": "Successfully sent task to scheduler"})
@@ -122,7 +128,7 @@ async def run_job(job_name: str, background_tasks: BackgroundTasks):
 
 @router.get(
     "/{job_name}/cache/{file_name}",
-    response_model=Job_cache,
+    response_model=JobCache,
     summary="Get a file from the cache",
     response_description="Job cache data",
     responses={
@@ -187,6 +193,8 @@ async def get_cache(
 async def update_cache(
     job_name: str,
     file_name: str,
+    method: str,
+    background_tasks: BackgroundTasks,
     cache_file: Optional[Annotated[bytes, File()]] = None,
     service_id: Optional[Annotated[str, Form()]] = None,
     checksum: Optional[Annotated[str, Form()]] = None,
@@ -218,6 +226,20 @@ async def update_cache(
             content={"message": resp},
         )
 
+    background_tasks.add_task(
+        DB.add_action,
+        {
+            "date": datetime.now(),
+            "api_method": "PUT",
+            "method": method,
+            "tags": ["job"],
+            "title": f"Job {job_name} cache file {file_name} {resp}",
+            "description": f"Job {job_name} cache file {file_name} {resp}"
+            + (f" for service {service_id}" if service_id else "")
+            + (f" with checksum {checksum}" if checksum else "")
+            + (f" with a file data length of {len(cache_file)} bytes" if cache_file else ""),
+        },
+    )
     CORE_CONFIG.logger.info(f"✅ Job {job_name} cache successfully updated in database")
 
     return JSONResponse(
@@ -242,7 +264,7 @@ async def update_cache(
         },
     },
 )
-async def delete_cache(job_name: str, file_name: str, data: CacheFileModel):
+async def delete_cache(job_name: str, file_name: str, method: str, data: CacheFileModel, background_tasks: BackgroundTasks):
     """
     Delete a file from the cache.
     """
@@ -264,9 +286,58 @@ async def delete_cache(job_name: str, file_name: str, data: CacheFileModel):
             content={"message": resp},
         )
 
+    background_tasks.add_task(
+        DB.add_action,
+        {
+            "date": datetime.now(),
+            "api_method": "DELETE",
+            "method": method,
+            "tags": ["job"],
+            "title": f"Job {job_name} cache file {file_name} deleted",
+            "description": f"Job {job_name} cache file {file_name} deleted" + (f" for service {data.service_id}" if data.service_id else ""),
+        },
+    )
     CORE_CONFIG.logger.info(f"✅ Job {job_name} cache successfully deleted from database")
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"message": "File successfully deleted from cache"},
     )
+
+
+@router.post(
+    "/cleanup",
+    response_model=Dict[Literal["message"], str],
+    summary="Cleanup the oldest jobs runs that are over the limit",
+    response_description="Cleanup result",
+    responses={
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
+    },
+)
+async def cleanup_jobs(method: str, background_tasks: BackgroundTasks, limit: Annotated[int, Form()] = 1000):
+    """
+    Cleanup the oldest jobs runs that are older than the limit.
+    """
+    actions_cleaned = DB.cleanup_jobs_runs_excess(limit)
+
+    if "database is locked" in actions_cleaned or "file is not a database" in actions_cleaned:
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(f"Can't cleanup jobs runs : database is locked or had trouble handling the request, retry in {retry_in} seconds")
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
+            headers={"Retry-After": retry_in},
+        )
+    elif not actions_cleaned.isdigit():
+        return JSONResponse(content={"message": actions_cleaned}, status_code=500)
+
+    message = f"Cleaned {actions_cleaned} jobs runs from the database."
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["job"], "title": "Cleanup jobs runs", "description": message})
+    return JSONResponse(content={"message": message})

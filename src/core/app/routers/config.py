@@ -1,3 +1,5 @@
+from datetime import datetime
+from json import dumps
 from random import uniform
 from typing import Dict, Literal, Union
 from fastapi import APIRouter, BackgroundTasks, status
@@ -70,6 +72,7 @@ async def update_config(config: Dict[str, str], method: str, background_tasks: B
         CORE_CONFIG.logger.error(f"Can't save config to database : {resp}")
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": resp})
 
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": "Config updated", "description": "Whole Config updated"})
     CORE_CONFIG.logger.info("✅ Config successfully saved to database")
 
     background_tasks.add_task(run_jobs)
@@ -116,6 +119,7 @@ async def update_global_config(config: Dict[str, str], method: str, background_t
         CORE_CONFIG.logger.error(f"Can't save global config to database : {resp}")
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": resp})
 
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": "Global config updated", "description": f"Global Config updated with these data : {dumps(config)}"})
     CORE_CONFIG.logger.info("✅ Global config successfully saved to database")
 
     background_tasks.add_task(run_jobs)
@@ -183,6 +187,9 @@ async def update_service_config(
         CORE_CONFIG.logger.error(f"Can't save service {service_name} config to database : {resp}")
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": resp})
 
+    background_tasks.add_task(
+        DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": "Update service config", "description": f"Service {service_name} Config updated with these data : {dumps(config)}"}
+    )
     CORE_CONFIG.logger.info(f"✅ Service {service_name} config successfully saved to database")
 
     background_tasks.add_task(run_jobs)
@@ -245,6 +252,7 @@ async def delete_service_config(service_name: str, method: str, background_tasks
         CORE_CONFIG.logger.error(f"Can't delete service {service_name} from the database : {resp}")
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": resp})
 
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["config"], "title": "Delete service", "description": f"Delete service {service_name}"})
     CORE_CONFIG.logger.info(f"✅ Service {service_name} successfully deleted from the database")
 
     background_tasks.add_task(run_jobs)

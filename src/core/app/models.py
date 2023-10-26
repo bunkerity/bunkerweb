@@ -179,7 +179,7 @@ class Job(BaseModel):
     )
 
 
-class Job_cache(BaseModel):
+class JobCache(BaseModel):
     last_update: Optional[float] = Field(None, examples=["1609459200.0"])
     checksum: Optional[str] = Field(
         None,
@@ -241,3 +241,12 @@ class CustomConfigDataModel(CustomConfigNameModel):
         examples=["b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"],
         description="SHA512 checksum of the custom config file",
     )
+
+
+class Action(BaseModel):
+    date: datetime = Field(examples=["2021-01-01T00:00:00.000Z"], description="The action date")
+    api_method: str = Field(examples=["POST"], description="The action API method")
+    method: str = Field(examples=["core"], description="The action method")
+    title: str = Field(examples=["Reloaded BunkerWeb"], description="The action title")
+    description: str = Field(examples=["BunkerWeb was reloaded"], description="The action description")
+    tags: List[str] = Field(examples=[["config"]], description="The action tags")

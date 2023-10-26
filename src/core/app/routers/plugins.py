@@ -1,4 +1,6 @@
+from datetime import datetime
 from io import BytesIO
+from json import dumps
 from random import uniform
 from tarfile import open as tar_open
 from typing import Dict, List, Literal
@@ -57,7 +59,8 @@ async def add_plugin(plugin: AddedPlugin, background_tasks: BackgroundTasks) -> 
     """
     Add a plugin to the database.
     """
-    resp = DB.add_external_plugin(plugin.model_dump())
+    plugin_dict = plugin.model_dump()
+    resp = DB.add_external_plugin(plugin_dict)
 
     if resp == "exists":
         message = f"Plugin {plugin.id} already exists"
@@ -78,6 +81,7 @@ async def add_plugin(plugin: AddedPlugin, background_tasks: BackgroundTasks) -> 
             content={"message": resp},
         )
 
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": plugin.method, "tags": ["plugin"], "title": f"Add plugin {plugin.id}", "description": f"Add plugin {plugin.id} with data {dumps(plugin_dict)}"})
     background_tasks.add_task(
         generate_external_plugins,
         None,
@@ -123,7 +127,8 @@ async def update_plugin(plugin_id: str, plugin: AddedPlugin, background_tasks: B
     """
     Update a plugin from the database.
     """
-    resp = DB.update_external_plugin(plugin_id, plugin.model_dump())
+    plugin_dict = plugin.model_dump()
+    resp = DB.update_external_plugin(plugin_id, plugin_dict)
 
     if resp == "not_found":
         message = f"Plugin {plugin.id} not found"
@@ -149,6 +154,9 @@ async def update_plugin(plugin_id: str, plugin: AddedPlugin, background_tasks: B
         )
 
     background_tasks.add_task(
+        DB.add_action, {"date": datetime.now(), "api_method": "PATCH", "method": plugin.method, "tags": ["plugin"], "title": f"Update plugin {plugin.id}", "description": f"Update plugin {plugin.id} with data {dumps(plugin_dict)}"}
+    )
+    background_tasks.add_task(
         generate_external_plugins,
         None,
         original_path=EXTERNAL_PLUGINS_PATH,
@@ -173,7 +181,7 @@ async def update_plugin(plugin_id: str, plugin: AddedPlugin, background_tasks: B
             "model": ErrorMessage,
         },
         status.HTTP_403_FORBIDDEN: {
-            "description": "Can't delete a core plugin",
+            "description": "Can't delete the plugin because it is either static or was created by the core or the autoconf and the method isn't one of them",
             "model": ErrorMessage,
         },
         status.HTTP_503_SERVICE_UNAVAILABLE: {
@@ -186,11 +194,17 @@ async def update_plugin(plugin_id: str, plugin: AddedPlugin, background_tasks: B
         },
     },
 )
-async def delete_plugin(plugin_id: str, background_tasks: BackgroundTasks) -> JSONResponse:
+async def delete_plugin(plugin_id: str, method: str, background_tasks: BackgroundTasks) -> JSONResponse:
     """
     Delete a plugin from the database.
     """
-    resp = DB.remove_external_plugin(plugin_id)
+
+    if method == "static":
+        message = f"Can't delete plugin {plugin_id} : method can't be static"
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+
+    resp = DB.remove_external_plugin(plugin_id, method=method)
 
     if resp == "not_found":
         message = f"Plugin {plugin_id} not found"
@@ -198,6 +212,10 @@ async def delete_plugin(plugin_id: str, background_tasks: BackgroundTasks) -> JS
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "not_external":
         message = f"Can't delete a core plugin ({plugin_id})"
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+    elif resp == "method_conflict":
+        message = f"Can't delete plugin {plugin_id} because it is either static or was created by the core or the autoconf and the method isn't one of them"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif "database is locked" in resp or "file is not a database" in resp:
@@ -215,6 +233,7 @@ async def delete_plugin(plugin_id: str, background_tasks: BackgroundTasks) -> JS
             content={"message": resp},
         )
 
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["plugin"], "title": f"Delete plugin {plugin_id}", "description": f"Delete plugin {plugin_id}"})
     background_tasks.add_task(
         generate_external_plugins,
         None,

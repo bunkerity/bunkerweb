@@ -15,20 +15,23 @@ from time import sleep
 from traceback import format_exc
 
 from models import (
+    Actions,
+    Actions_tags,
     Base,
-    Instances,
-    Plugins,
-    Settings,
+    Custom_configs,
     Global_values,
-    Services,
-    Services_settings,
+    Instances,
     Jobs,
-    Plugin_pages,
     Jobs_cache,
     Jobs_runs,
-    Custom_configs,
-    Selects,
     Metadata,
+    Plugins,
+    Plugin_pages,
+    Selects,
+    Services,
+    Services_settings,
+    Settings,
+    Tags,
 )
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
@@ -42,6 +45,7 @@ from sqlalchemy import create_engine, text, inspect
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
+    IntegrityError,
     OperationalError,
     ProgrammingError,
     SQLAlchemyError,
@@ -197,6 +201,7 @@ class Database:
             yield session
         except BaseException:
             session.rollback()
+            self.__logger.exception("Error when trying to execute a database query")
             self.__exceptions[getpid()] = [format_exc()]
             raise
         finally:
@@ -1877,7 +1882,7 @@ class Database:
 
         return (self.__exceptions.get(getpid()) or [""]).pop()
 
-    def remove_external_plugin(self, plugin_id: str) -> str:
+    def remove_external_plugin(self, plugin_id: str, *, method: str = "core") -> str:
         """Delete an external plugin from the database."""
         with suppress(BaseException), self.__db_session() as session:
             db_plugin = session.query(Plugins).with_entities(Plugins.external).filter_by(id=plugin_id).with_for_update(read=True).first()
@@ -1886,6 +1891,8 @@ class Database:
                 return "not_found"
             elif db_plugin.external is False:
                 return "not_external"
+            elif method not in (db_plugin.method, "core", "autoconf"):
+                return "method_conflict"
 
             session.query(Plugins).filter(Plugins.id == plugin_id).with_for_update().delete()
             session.commit()
@@ -2297,3 +2304,87 @@ class Database:
 
         if self.__exceptions.get(getpid()):
             self.__logger.error(self.__exceptions[getpid()].pop())
+
+    def add_action(self, action: Dict[str, Any]) -> str:
+        """Add an action to the database."""
+        with suppress(BaseException), self.__db_session() as session:
+            db_action = Actions(
+                date=action["date"],
+                api_method=action["api_method"],
+                method=action["method"],
+                title=action["title"],
+                description=action["description"],
+            )
+            session.add(db_action)
+            session.commit()
+
+            tags = action.get("tags", [])
+            if tags:
+                session.refresh(db_action)
+                db_tags = [tag.id for tag in session.query(Tags).with_entities(Tags.id).with_for_update(read=True).all()]
+                for tag in tags:
+                    if tag not in db_tags:
+                        session.add(Tags(id=tag))
+                    session.add(Actions_tags(action_id=db_action.id, tag_id=tag))
+                try:
+                    session.commit()
+                except IntegrityError:
+                    session.rollback()
+                    for tag in tags:
+                        session.add(Actions_tags(action_id=db_action.id, tag_id=tag))
+                    session.commit()
+
+        return (self.__exceptions.get(getpid()) or [""]).pop()
+
+    def get_actions(self) -> List[Dict[str, Any]]:
+        """Get actions."""
+        with suppress(BaseException), self.__db_session() as session:
+            return [
+                {
+                    "date": action.date,
+                    "api_method": action.api_method,
+                    "method": action.method,
+                    "title": action.title,
+                    "description": action.description,
+                    "tags": [action_tag.tag_id for action_tag in session.query(Actions_tags).with_entities(Actions_tags.tag_id).filter_by(action_id=action.id).with_for_update(read=True).all()],
+                }
+                for action in (
+                    session.query(Actions)
+                    .with_entities(
+                        Actions.id,
+                        Actions.date,
+                        Actions.api_method,
+                        Actions.method,
+                        Actions.title,
+                        Actions.description,
+                    )
+                    .with_for_update(read=True)
+                    .all()
+                )
+            ]
+
+        if self.__exceptions.get(getpid()):
+            self.__logger.error(self.__exceptions[getpid()].pop())
+        return []
+
+    def cleanup_actions_excess(self, max_actions: int) -> str:
+        """Remove excess actions."""
+        result = 0
+        with suppress(BaseException), self.__db_session() as session:
+            rows_count = session.query(Actions).count()
+            if rows_count > max_actions:
+                result = session.query(Actions).order_by(Actions.date.asc()).limit(rows_count - max_actions).with_for_update().delete(synchronize_session=False)
+                session.commit()
+
+        return (self.__exceptions.get(getpid()) or [str(result)]).pop()
+
+    def cleanup_jobs_runs_excess(self, max_runs: int) -> str:
+        """Remove excess actions."""
+        result = 0
+        with suppress(BaseException), self.__db_session() as session:
+            rows_count = session.query(Jobs_runs).count()
+            if rows_count > max_runs:
+                result = session.query(Jobs_runs).order_by(Jobs_runs.end_date.asc()).limit(rows_count - max_runs).with_for_update().delete(synchronize_session=False)
+                session.commit()
+
+        return (self.__exceptions.get(getpid()) or [str(result)]).pop()

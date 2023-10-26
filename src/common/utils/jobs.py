@@ -69,7 +69,7 @@ def get_cache(
 
     sent, _, status, resp = api.request(
         "GET",
-        f"/jobs/{job_name}/cache/{name}",
+        f"/jobs/{job_name}/cache/{name}?method=core",
         data={"service_id": service_id, "with_info": with_info, "with_data": with_data},
         additonal_headers={"Authorization": f"Bearer {api_token}"} if api_token else {},
     )
@@ -170,7 +170,7 @@ def cache_file(
     try:
         sent, err, status, resp = api.request(
             "PUT",
-            f"/jobs/{job_name}/cache/{name}",
+            f"/jobs/{job_name}/cache/{name}?method=core",
             data={"service_id": service_id, "checksum": checksum},
             files={"cache_file": content},
             additonal_headers={"Authorization": f"Bearer {api_token}"} if api_token else {},
@@ -219,7 +219,7 @@ def update_cache_file_info(
     try:
         sent, err, status, resp = api.request(
             "PUT",
-            f"/jobs/{job_name}/cache/{name}",
+            f"/jobs/{job_name}/cache/{name}?method=core",
             data={"service_id": service_id},
             additonal_headers={"Authorization": f"Bearer {api_token}"} if api_token else {},
         )
@@ -265,7 +265,7 @@ def del_cache(
     try:
         sent, err, status, resp = api.request(
             "DELETE",
-            f"/jobs/{job_name}/cache/{name}",
+            f"/jobs/{job_name}/cache/{name}?method=core",
             data={"service_id": service_id},
             additonal_headers={"Authorization": f"Bearer {api_token}"} if api_token else {},
         )

@@ -265,3 +265,35 @@ class Metadata(Base):
     scheduler_initialized = Column(Boolean, nullable=True, default=False)
     integration = Column(INTEGRATIONS_ENUM, nullable=True, default="Unknown")
     version = Column(String(32), nullable=True, default="1.5.1")
+
+
+class Actions(Base):
+    __tablename__ = "bw_actions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(DateTime(timezone=True), nullable=False)
+    api_method = Column(String(32), nullable=False)
+    method = Column(String(32), nullable=False)
+    title = Column(String(256), nullable=False)
+    description = Column(String(2 ^ 24), nullable=False)
+
+    tags = relationship("Actions_tags", back_populates="action")
+
+
+class Tags(Base):
+    __tablename__ = "bw_tags"
+
+    id = Column(String(64), primary_key=True)
+
+    actions = relationship("Actions_tags", back_populates="tag")
+
+
+class Actions_tags(Base):
+    __tablename__ = "bw_actions_tags"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    action_id = Column(Integer, ForeignKey("bw_actions.id"), nullable=False)
+    tag_id = Column(String(64), ForeignKey("bw_tags.id"), nullable=False)
+
+    action = relationship("Actions", back_populates="tags")
+    tag = relationship("Tags", back_populates="actions")

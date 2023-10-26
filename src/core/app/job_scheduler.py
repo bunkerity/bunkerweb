@@ -178,7 +178,7 @@ class JobScheduler:
     def __add_job_run(self, job_name: str, success: bool, start_date: float, end_date: float):
         sent, err, status, resp = self.__api.request(
             "POST",
-            f"/jobs/{job_name}/status",
+            f"/jobs/{job_name}/status?method=core",
             data={"success": success, "start_date": start_date, "end_date": end_date},
             additonal_headers={"Authorization": f"Bearer {self.__env.get('CORE_TOKEN')}"} if "CORE_TOKEN" in self.__env else {},
         )

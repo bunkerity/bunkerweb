@@ -338,4 +338,8 @@ tags_metadata = [  # TODO: Add more tags and better descriptions: https://fastap
         "name": "jobs",
         "description": "Operations related to job management",
     },
+    {
+        "name": "actions",
+        "description": "Operations related to action management",
+    },
 ]

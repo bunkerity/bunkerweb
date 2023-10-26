@@ -1,3 +1,4 @@
+from datetime import datetime
 from random import uniform
 from typing import Dict, List, Literal, Union
 from fastapi import APIRouter, BackgroundTasks, status
@@ -108,6 +109,7 @@ async def update_custom_config(
         message = f"Custom configs {', '.join(c.name for c in custom_configs)} {resp}"
         status_code = status.HTTP_200_OK
 
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["custom_config"], "title": "Updated custom configs", "description": message})
     CORE_CONFIG.logger.info(f"✅ {message} to database")
 
     if reload:
@@ -185,6 +187,9 @@ async def delete_custom_config(
             content={"message": resp},
         )
 
+    background_tasks.add_task(
+        DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Delete custom config {custom_config_name}", "description": f"Delete custom config {custom_config_name}"}
+    )
     CORE_CONFIG.logger.info(f"✅ Custom config {custom_config_name} deleted from database")
 
     background_tasks.add_task(send_to_instances, {"custom_configs"})

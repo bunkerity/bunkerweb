@@ -184,7 +184,7 @@ class Job(BaseModel):
     )
 
 
-class Job_cache(BaseModel):
+class JobCache(BaseModel):
     last_update: Optional[float] = Field(None, examples=["1609459200.0"])
     checksum: Optional[str] = Field(
         None,

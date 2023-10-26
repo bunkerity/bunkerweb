@@ -13,6 +13,32 @@
       "label": "The database URI",
       "regex": "^(postgresql|mysql|mariadb|sqlite|oracle)(\\+[\\w\\-]+)?:.+$",
       "type": "text"
+    },
+    "DATABASE_MAX_JOBS_RUNS": {
+      "context": "global",
+      "default": "1000",
+      "help": "The maximum number of jobs runs to keep in the database.",
+      "id": "database-max-jobs-runs",
+      "label": "The maximum number of jobs runs to keep in the database",
+      "regex": "^\\d+$",
+      "type": "text"
+    },
+    "DATABASE_MAX_ACTIONS": {
+      "context": "global",
+      "default": "10000",
+      "help": "The maximum number of actions to keep in the database.",
+      "id": "database-max-actions",
+      "label": "The maximum number of actions to keep in the database",
+      "regex": "^\\d+$",
+      "type": "text"
     }
-  }
+  },
+  "jobs": [
+    {
+      "name": "cleanup-excess",
+      "file": "cleanup-excess.py",
+      "every": "hour",
+      "reload": false
+    }
+  ]
 }

@@ -130,6 +130,8 @@ async def upsert_instance(
         if decisions["created"]:
             message += "and "
         message += f"{', '.join(instance.hostname for instance in decisions['updated'])} successfully updated"
+
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["instance"], "title": "Upsert instance(s)", "description": message})
     CORE_CONFIG.logger.info(f"{message} in the database")
 
     if decisions["created"] and reload:
@@ -206,7 +208,7 @@ async def get_instance(
         },
     },
 )
-async def delete_instance(instance_hostname: str, method: str) -> JSONResponse:
+async def delete_instance(instance_hostname: str, method: str, background_tasks: BackgroundTasks) -> JSONResponse:
     """
     Delete a BunkerWeb instance
     """
@@ -241,6 +243,7 @@ async def delete_instance(instance_hostname: str, method: str) -> JSONResponse:
             content={"message": resp},
         )
 
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["instance"], "title": "Delete instance", "description": f"Delete instance {instance_hostname}"})
     CORE_CONFIG.logger.info(f"✅ Instance {instance_hostname} successfully removed from database")
 
     return JSONResponse(
@@ -271,6 +274,7 @@ async def delete_instance(instance_hostname: str, method: str) -> JSONResponse:
 async def send_instance_action(
     instance_hostname: str,
     action: Literal["ping", "bans", "stop", "reload"],  # TODO: maybe add a "start" action
+    background_tasks: BackgroundTasks,
 ) -> JSONResponse:
     """
     Delete a BunkerWeb instance
@@ -303,6 +307,7 @@ async def send_instance_action(
             CORE_CONFIG.logger.error(error)
             return JSONResponse(status_code=status_code, content={"message": error})
 
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": "core", "tags": ["instance"], "title": "Send instance action", "description": f"Send action {action} to instance {instance_hostname}"})
     CORE_CONFIG.logger.info(f"Successfully sent API request to {instance_api.endpoint}{action}")
 
     return JSONResponse(content={"message": resp.json()})
