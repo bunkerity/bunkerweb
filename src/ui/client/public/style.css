@@ -1550,6 +1550,10 @@ h6 {
   fill: #fbb140 !important;
 }
 
+.stroke-amber-500 {
+  stroke: #f59e0b !important;
+}
+
 .stroke-blue-400 {
   stroke: #60a5fa !important;
 }
@@ -1600,6 +1604,26 @@ h6 {
 
 .stroke-yellow-600 {
   stroke: #ca8a04 !important;
+}
+
+.stroke-slate-500 {
+  stroke: #67748e !important;
+}
+
+.stroke-slate-300 {
+  stroke: #a8b8d8 !important;
+}
+
+.stroke-slate-400 {
+  stroke: #8392ab !important;
+}
+
+.stroke-slate-600 {
+  stroke: #627594 !important;
+}
+
+.stroke-violet-500 {
+  stroke: #825ee4 !important;
 }
 
 .p-0 {
@@ -5786,6 +5810,10 @@ body {
 
 :is(.dark .dark\:fill-gray-600) {
   fill: #6c757d !important;
+}
+
+:is(.dark .dark\:stroke-slate-400) {
+  stroke: #8392ab !important;
 }
 
 :is(.dark .dark\:text-gray-200) {

@@ -48,5 +48,5 @@ async def delete_instance(instance_hostname: str, method: str = "ui"):
     response_model=ResponseModel,
     summary="Send action to a BunkerWeb instance",
 )
-async def send_instance_action(instance_hostname: str, action: str):
-    return get_core_format_res(f"{API}/instances/{instance_hostname}/{action}", "POST", "", f"Send instance {instance_hostname} action : {action}")
+async def send_instance_action(instance_hostname: str, action: str, method: str = "ui"):
+    return get_core_format_res(f"{API}/instances/{instance_hostname}/{action}?method={method}", "POST", "", f"Send instance {instance_hostname} action : {action}")

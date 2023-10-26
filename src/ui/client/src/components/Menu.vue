@@ -11,6 +11,7 @@ import MenuSvgDiscord from "@components/Menu/Svg/Discord.vue";
 import MenuSvgServices from "@components/Menu/Svg/Services.vue";
 import MenuSvgGithub from "@components/Menu/Svg/Github.vue";
 import MenuSvgBans from "@components/Menu/Svg/Bans.vue";
+import MenuSvgActions from "@components/Menu/Svg/Actions.vue";
 import { reactive, onMounted, computed } from "vue";
 import { getDarkMode } from "@utils/global.js";
 
@@ -42,6 +43,7 @@ const navList = [
   },
   { title: "Jobs", svg: MenuSvgJobs, path: "/jobs" },
   { title: "Bans", svg: MenuSvgBans, path: "/bans" },
+  { title: "Actions", svg: MenuSvgActions, path: "/actions" },
 ];
 
 // Social links

@@ -47,9 +47,9 @@ const bans = reactive({
     const reasons = ["all"];
     const globalInst = [];
     for (let i = 0; i < bans.data.length; i++) {
-      const instData = bans.data;
-      console.log(instData);
-      instData.forEach((item) => {
+      if (!Array.isArray(bans.data[i].data)) continue;
+      const instBans = bans.data[i].data;
+      instBans.forEach((item) => {
         reasons.indexOf(item.reason) === -1 ? reasons.push(item.reason) : false;
         const isItem = globalInst.find((globItem) => {
           return item.ip === globItem.ip && item.reason === globItem.reason;
@@ -61,7 +61,6 @@ const bans = reactive({
     bans.reasonList = reasons;
     //Filter
     const filterBans = getBansByFilter(globalInst, filters);
-    print(filterBans);
     return filterBans;
   }),
 });

@@ -120,6 +120,7 @@ let editor = null;
 
 // Use ace editor
 onMounted(() => {
+  inp.name = oldName;
   try {
     editor = new FileEditor();
     editor.setValue(props.value);
@@ -163,13 +164,13 @@ function createFile() {
     service_id: serviceID,
     type: type,
     name: inp.name || oldName,
+    old_name: oldName,
     data: editor.getValue(),
   };
   updateConfig(conf);
 }
 
 async function updateConfig(conf) {
-  showAlert("info", `Try to ${props.action} conf.`);
   // We want to close modal only if communication with API worked
   // To avoid input removing on close
   const api =
@@ -224,7 +225,6 @@ function showAlert(type, message) {
         />
         <p class="ml-1 modal-path-text">.conf</p>
       </div>
-
       <!-- editor-->
       <div v-if="props.type === 'file'" id="editor" class="modal-editor">
         {{ props.value }}

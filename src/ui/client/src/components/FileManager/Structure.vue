@@ -87,7 +87,7 @@ watch(path, () => {
               :canDownload="child.canDownload || false"
               @updatePath="(v) => (path.current = v)"
               @action="
-                (v) => updateModal(child.type, v, child.path, child.value || '')
+                (v) => updateModal(child.type, v, child.path, child.data || '')
               "
             />
           </div>
