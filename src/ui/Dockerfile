@@ -77,8 +77,6 @@ RUN apk add --no-cache bash nodejs npm && \
 # Fix CVEs
 RUN apk add --no-cache "libcrypto3>=3.1.4-r0" "libssl3>=3.1.4-r0"
 
-USER ui:ui
-
 # Change working directory
 WORKDIR /usr/share/bunkerweb/ui
 
@@ -87,8 +85,6 @@ RUN cd client && \
   npm install
 
 RUN node build.js
-
-USER root
 
 # Remove no longer needed files
 RUN rm -rf client build.js

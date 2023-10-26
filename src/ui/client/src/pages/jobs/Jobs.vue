@@ -60,7 +60,7 @@ const jobs = reactive({
   }),
   success: computed(() => {
     return Object.values(jobs.data).filter(
-      (item) => item["history"][0]["success"] !== false
+      (item) => item["history"][0]["success"] !== false,
     ).length;
   }),
   setup: computed(() => {
@@ -93,7 +93,7 @@ async function runJob(data) {
     "POST",
     null,
     run,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -109,7 +109,7 @@ async function downloadFile(data) {
     "GET",
     null,
     download,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
