@@ -70,7 +70,7 @@ async function getData() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   const hostnames = await getHostFromInst();
 
@@ -122,7 +122,7 @@ async function getHostBan(hostname) {
     "POST",
     null,
     data,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -184,7 +184,7 @@ const tab = reactive({
       </SettingsLayout>
       <SettingsLayout class="sm:col-span-6" label="Select reason" name="reason">
         <SettingsSelect
-          @inp="(v) => (filters.reason = v === 'all' ? 'all' : v)"
+          @inp="(v) => (filters.reason = v)"
           :settings="{
             id: 'reason',
             value: filters.reason,

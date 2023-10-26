@@ -10,6 +10,5 @@ export function getBansByFilter(bans, filters) {
     ban["isMatchFilter"] = isMatch;
   });
 
-  // Update bans removing empty index (deleted bans)
   return bans;
 }

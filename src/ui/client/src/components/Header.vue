@@ -18,7 +18,7 @@ onMounted(() => {
   // Remove .html and index
   for (let i = 0; i < splitPath.length; i++) {
     const el = splitPath[i];
-    splitPath[i] = el.replace(".html", "");
+    splitPath[i] = el.replace(".html", "").replace("-", " ");
   }
   if (splitPath[splitPath.length - 1].includes("index")) splitPath.pop();
   splitPath = splitPath.filter((item) => item !== "");
