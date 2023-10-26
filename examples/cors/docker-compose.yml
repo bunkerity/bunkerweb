@@ -32,7 +32,7 @@ services:
       - app3.example.com_REMOTE_PHP=myapp3
       - app3.example.com_REMOTE_PHP_PATH=/app
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services

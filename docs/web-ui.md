@@ -74,7 +74,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - 80:8080
           - 443:8443
         labels:
-          - "bunkerweb.INSTANCE"
+          - "bunkerweb.INSTANCE=yes"
         environment:
           - SERVER_NAME=www.example.com
           - MULTISITE=yes
@@ -194,7 +194,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - 80:8080
           - 443:8443
         labels:
-          - "bunkerweb.INSTANCE"
+          - "bunkerweb.INSTANCE=yes"
         environment:
           - SERVER_NAME=
           - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
@@ -351,7 +351,7 @@ Because the web UI is a web application, the recommended installation procedure 
             constraints:
               - "node.role == worker"
           labels:
-            - "bunkerweb.INSTANCE"
+            - "bunkerweb.INSTANCE=yes"
 
       bw-autoconf:
         image: bunkerity/bunkerweb-autoconf:1.5.3

@@ -40,7 +40,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - 80:8080
           - 443:8443
         labels:
-          - "bunkerweb.INSTANCE"
+          - "bunkerweb.INSTANCE=yes"
         environment:
           - SERVER_NAME=www.example.com
           - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
@@ -391,7 +391,7 @@ You will find more settings about reverse proxy in the [settings section](settin
           - 80:8080
           - 443:8443
         labels:
-          - "bunkerweb.INSTANCE"
+          - "bunkerweb.INSTANCE=yes"
         environment:
           - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
           - MULTISITE=yes
@@ -1156,7 +1156,7 @@ For complete list of settings regarding `stream` mode, please refer to the [sett
           - 10000:10000 # app1
           - 20000:20000 # app2
         labels:
-          - "bunkerweb.INSTANCE"
+          - "bunkerweb.INSTANCE=yes"
         environment:
           - SERVER_NAME=app1.example.com app2.example.com
           - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
@@ -1820,7 +1820,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
           - 80:8080
           - 443:8443
         labels:
-          - "bunkerweb.INSTANCE"
+          - "bunkerweb.INSTANCE=yes"
         environment:
           - SERVER_NAME=app1.example.com app2.example.com
           - MULTISITE=yes
@@ -1918,7 +1918,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
         volumes:
           - ./www:/var/www/html
         labels:
-          - "bunkerweb.INSTANCE"
+          - "bunkerweb.INSTANCE=yes"
         environment:
           - MULTISITE=yes
           - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database

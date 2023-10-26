@@ -18,7 +18,7 @@ services:
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://myghost:2368
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services

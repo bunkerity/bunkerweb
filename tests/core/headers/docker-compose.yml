@@ -5,7 +5,7 @@ services:
     image: bunkerity/bunkerweb:1.5.3
     pull_policy: never
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     volumes:
       - ./www:/var/www/html
     environment:

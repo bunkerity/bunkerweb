@@ -19,7 +19,7 @@ services:
       REVERSE_PROXY_HOST: "http://mywp"
       CUSTOM_CONF_MODSEC_CRS_wordpress: 'SecAction "id:900130,phase:1,nolog,pass,t:none,setvar:tx.crs_exclusions_wordpress=1"'
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services

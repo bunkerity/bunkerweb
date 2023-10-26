@@ -7,7 +7,7 @@ services:
       - 80:8080
       - 443:8443
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     networks:
       - bw-universe
       - bw-services
