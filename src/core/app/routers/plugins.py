@@ -251,11 +251,7 @@ async def delete_plugin(plugin_id: str, method: str, background_tasks: Backgroun
     )
 
 
-@router.get(
-    "/external/files",
-    summary="Get all external plugins files in a tar archive",
-    response_description="Tar archive containing all external plugins files",
-)
+@router.get("/external/files", summary="Get all external plugins files in a tar archive", response_description="Tar archive containing all external plugins files")
 async def get_plugins_files():
     """
     Get all external plugins files in a tar archive.

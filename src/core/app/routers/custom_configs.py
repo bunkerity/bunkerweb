@@ -10,12 +10,7 @@ from ..dependencies import CORE_CONFIG, DB, send_to_instances
 router = APIRouter(prefix="/custom_configs", tags=["custom_configs"])
 
 
-@router.get(
-    "",
-    response_model=List[CustomConfigDataModel],
-    summary="Get all custom configs",
-    response_description="List of custom configs",
-)
+@router.get("", response_model=List[CustomConfigDataModel], summary="Get all custom configs", response_description="List of custom configs")
 async def get_custom_configs():
     """
     Get all custom configs
@@ -43,12 +38,7 @@ async def get_custom_configs():
         },
     },
 )
-async def upsert_custom_config(
-    custom_config: CustomConfigDataModel,
-    method: str,
-    background_tasks: BackgroundTasks,
-    reload: bool = True,
-):
+async def upsert_custom_config(custom_config: CustomConfigDataModel, method: str, background_tasks: BackgroundTasks, reload: bool = True):
     """Update one or more custom configs"""
 
     if method == "static":
@@ -118,12 +108,7 @@ async def upsert_custom_config(
         },
     },
 )
-async def delete_custom_config(
-    custom_config_name: str,
-    custom_config: CustomConfigModel,
-    method: str,
-    background_tasks: BackgroundTasks,
-):
+async def delete_custom_config(custom_config_name: str, custom_config: CustomConfigModel, method: str, background_tasks: BackgroundTasks):
     """Update a custom config"""
 
     if method == "static":

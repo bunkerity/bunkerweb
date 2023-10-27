@@ -10,12 +10,7 @@ from ..dependencies import CORE_CONFIG, DB, run_job as deps_run_job
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
 
-@router.get(
-    "",
-    response_model=Dict[str, Job],
-    summary="Get all jobs",
-    response_description="Jobs",
-)
+@router.get("", response_model=Dict[str, Job], summary="Get all jobs", response_description="Jobs")
 async def get_jobs():
     """
     Get all jobs from the database.
@@ -43,12 +38,7 @@ async def get_jobs():
         },
     },
 )
-async def add_job_run(
-    job_name: str,
-    data: Dict[Literal["success", "start_date", "end_date"], Union[bool, float]],
-    method: str,
-    background_tasks: BackgroundTasks,
-) -> JSONResponse:
+async def add_job_run(job_name: str, data: Dict[Literal["success", "start_date", "end_date"], Union[bool, float]], method: str, background_tasks: BackgroundTasks) -> JSONResponse:
     """
     Update a job run status in the database.
     """
@@ -138,11 +128,7 @@ async def run_job(job_name: str, method: str, background_tasks: BackgroundTasks)
         }
     },
 )
-async def get_cache(
-    job_name: str,
-    file_name: str,
-    data: CacheFileDataModel,
-):
+async def get_cache(job_name: str, file_name: str, data: CacheFileDataModel):
     """
     Get a file from the cache.
     """

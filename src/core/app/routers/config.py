@@ -246,12 +246,7 @@ async def update_global_config(config: Dict[str, str], method: str, background_t
         },
     },
 )
-async def update_service_config(
-    service_name: str,
-    config: Dict[str, str],
-    method: str,
-    background_tasks: BackgroundTasks,
-) -> JSONResponse:
+async def update_service_config(service_name: str, config: Dict[str, str], method: str, background_tasks: BackgroundTasks) -> JSONResponse:
     """Update service config in Database"""
 
     if method == "static":

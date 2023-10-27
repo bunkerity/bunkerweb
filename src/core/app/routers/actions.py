@@ -10,12 +10,7 @@ from ..dependencies import CORE_CONFIG, DB
 router = APIRouter(prefix="/actions", tags=["actions"])
 
 
-@router.get(
-    "",
-    response_model=List[Action],
-    summary="Get all actions",
-    response_description="Actions",
-)
+@router.get("", response_model=List[Action], summary="Get all actions", response_description="Actions")
 async def get_actions():
     """
     Get all jobs from the database.
