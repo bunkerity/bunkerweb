@@ -28,7 +28,7 @@ async def post_action(action: Action):
     """
     Creates a new action.
     """
-    resp = DB.add_action(**action.model_dump() | {"date": action.date or datetime.now()})
+    resp = DB.add_action(action.model_dump() | {"date": action.date or datetime.now()})
 
     if resp:
         CORE_CONFIG.logger.error(f"Can't add action : {resp}")
