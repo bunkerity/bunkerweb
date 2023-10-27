@@ -1,0 +1,4 @@
+CORE_ADDR=http://127.0.0.1:1337
+CORE_TOKEN=
+WAIT_RETRY_INTERVAL=5
+DOCKER_HOST=unix:///var/run/docker.sock
