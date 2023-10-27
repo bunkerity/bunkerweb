@@ -4,6 +4,34 @@ from requests.exceptions import RequestException
 from traceback import format_exc
 
 try:
+
+    ready = False
+    retries = 0
+    while not ready:
+        with suppress(RequestException):      
+            resp = get(
+                f"http://www.example.com/ready",
+                headers={"Host": "www.example.com"},
+                verify=False,
+                allow_redirects=True
+            )
+            status_code = resp.status_code
+            text = resp.text
+
+            if status_code >= 500:
+                print("❌ An error occurred with the server, exiting ...", flush=True)
+                exit(1)
+
+            ready = status_code < 400 and text == "ready"
+
+        if retries > 10:
+            print("❌ The service took too long to be ready, exiting ...", flush=True)
+            exit(1)
+        elif not ready:
+            retries += 1
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
+            sleep(5)
+
     use_custom_ssl = getenv("USE_CUSTOM_SSL", "no") == "yes"
 
     print(
