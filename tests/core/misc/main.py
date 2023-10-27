@@ -1,12 +1,36 @@
 from os import getenv
+from contextlib import suppress
 from subprocess import run
-from requests import ConnectionError, get, head, post
+from requests import RequestException, ConnectionError, get, head, post
 from socket import create_connection
 from ssl import CERT_NONE, create_default_context
 from time import sleep
 from traceback import format_exc
 
 try:
+
+    ready = False
+    retries = 0
+    while not ready:
+        with suppress(RequestException):
+            resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"})
+            status_code = resp.status_code
+            text = resp.text
+
+            if resp.status_code >= 500:
+                print("❌ An error occurred with the server, exiting ...", flush=True)
+                exit(1)
+
+            ready = status_code < 400 and text == "ready"
+
+        if retries > 10:
+            print("❌ The service took too long to be ready, exiting ...", flush=True)
+            exit(1)
+        elif not ready:
+            retries += 1
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
+            sleep(5)
+
     ssl_generated = getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes"
     disabled_default_server = getenv("DISABLE_DEFAULT_SERVER", "no") == "yes"
     deny_http_status = getenv("DENY_HTTP_STATUS", "403")

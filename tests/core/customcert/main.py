@@ -1,7 +1,8 @@
+from contextlib import suppress
 from os import getenv
-from requests import get
-from requests.exceptions import RequestException
+from requests import RequestException, get
 from traceback import format_exc
+from time import sleep
 
 try:
 
