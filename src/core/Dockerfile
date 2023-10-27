@@ -77,7 +77,9 @@ RUN apk add --no-cache bash grep libmagic && \
   find core_plugins/*/jobs/* -type f -exec chmod 750 {} \; && \
   chmod 750 cli/main.py core/app/*.py core/app/routers/*.py core/entrypoint.sh helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
   chmod 660 INTEGRATION && \
-  chown root:core INTEGRATION
+  chown root:core INTEGRATION && \
+  ln -s /proc/1/fd/1 /var/log/bunkerweb/core-access.log && \
+  ln -s /proc/1/fd/2 /var/log/bunkerweb/core.log
 
 COPY --chown=root:core src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chown=root:core src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
