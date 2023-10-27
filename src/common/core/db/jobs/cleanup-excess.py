@@ -20,8 +20,8 @@ for deps_path in [
 from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
 
-LOGGER = setup_logger("UPDATE-CHECK", getenv("LOG_LEVEL", "INFO"))
-CORE_API = API(getenv("API_ADDR", ""), "job-default-server-cert")
+LOGGER = setup_logger("CLEANUP-EXCESS", getenv("LOG_LEVEL", "INFO"))
+CORE_API = API(getenv("API_ADDR", ""), "job-cleanup-excess")
 CORE_TOKEN = getenv("CORE_TOKEN", None)
 status = 0
 
@@ -53,11 +53,11 @@ def send_request(url: str, data: dict, retries: int = 0) -> int:
 
 
 try:
-    status = send_request("/jobs/cleanup?method=core", {"limit": getenv("DATABASE_MAX_JOBS_RUNS", "1000")})
-    other_status = send_request("/actions/cleanup?method=core", {"limit": getenv("DATABASE_MAX_ACTIONS", "10000")})
+    status = send_request("/db/jobs/cleanup?method=core", {"limit": getenv("DATABASE_MAX_JOBS_RUNS", "1000")})
+    other_status = send_request("/db/actions/cleanup?method=core", {"limit": getenv("DATABASE_MAX_ACTIONS", "10000")})
     status = status or other_status
 except:
     status = 2
-    LOGGER.error(f"Exception while running cleanup-actions.py :\n{format_exc()}")
+    LOGGER.error(f"Exception while running cleanup-excess.py :\n{format_exc()}")
 
 sys_exit(status)

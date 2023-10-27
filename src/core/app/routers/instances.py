@@ -1,10 +1,11 @@
+from contextlib import suppress
 from datetime import datetime, timedelta
 from random import uniform
 from typing import Annotated, Dict, List, Literal, Union
 from fastapi import APIRouter, BackgroundTasks, status, Path as fastapi_Path
 from fastapi.responses import JSONResponse
 
-from ..models import ErrorMessage, Instance, InstanceWithInfo, InstanceWithMethod
+from ..models import ErrorMessage, InstanceWithInfo, InstanceWithMethod, UpsertInstance
 from ..dependencies import CORE_CONFIG, DB, test_and_send_to_instances
 from API import API  # type: ignore
 
@@ -24,9 +25,15 @@ async def get_instances():
     tmp_instances = DB.get_instances()
     instances = []
     for instance in tmp_instances:
-        last_seen = instance.pop("last_seen")
         data = instance.copy()
-        data["status"] = "up" if last_seen and last_seen >= datetime.now() - timedelta(seconds=int(CORE_CONFIG.HEALTHCHECK_INTERVAL) * 2) else "down"
+        data["status"] = "down"
+        with suppress(BaseException):
+            sent, err, status, resp = API(
+                f"http://{instance['hostname']}:{instance['port']}",
+                instance["server_name"],
+            ).request("GET", "ping", timeout=1)
+            if sent and status == 200:
+                data["status"] = "up" if instance["last_seen"] and instance["last_seen"] >= datetime.now() - timedelta(seconds=int(CORE_CONFIG.HEALTHCHECK_INTERVAL) * 2) else "down"
         instances.append(data)
     return instances
 
@@ -51,7 +58,7 @@ async def get_instances():
         },
     },
 )
-async def upsert_instance(instance: Instance, background_tasks: BackgroundTasks, method: str, reload: bool = True) -> JSONResponse:
+async def upsert_instance(instance: UpsertInstance, background_tasks: BackgroundTasks, method: str, reload: bool = True) -> JSONResponse:
     """
     Upsert one or more BunkerWeb instances with the following information:
 

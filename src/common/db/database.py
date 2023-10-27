@@ -63,17 +63,17 @@ class Database:
 
     def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None) -> None:
         """Initialize the database"""
-        self.__logger = logger
-        self.__sql_session = None
-        self.__sql_engine = None
-        self.__exceptions = {}
+        self._logger = logger
+        self._sql_session = None
+        self._sql_engine = None
+        self._exceptions = {}
 
         if not sqlalchemy_string:
             sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3")
 
         match = self.DB_STRING_RX.search(sqlalchemy_string)
         if not match:
-            self.__logger.error(f"Invalid database string provided: {sqlalchemy_string}, exiting...")
+            self._logger.error(f"Invalid database string provided: {sqlalchemy_string}, exiting...")
             _exit(1)
 
         if match.group("database").startswith("sqlite"):
@@ -91,7 +91,7 @@ class Database:
                 check=False,
             )
             if proc.returncode != 0:
-                self.__logger.error(f"Error when trying to initialize alembic: {proc.stdout.decode()}")
+                self._logger.error(f"Error when trying to initialize alembic: {proc.stdout.decode()}")
                 _exit(1)
 
             # Update the alembic.ini file to use the correct database URI
@@ -118,21 +118,21 @@ class Database:
         engine_kwargs = {"future": True, "poolclass": SingletonThreadPool, "pool_pre_ping": True, "pool_recycle": 1800}
 
         try:
-            self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
+            self._sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
         except ArgumentError:
-            self.__logger.error(f"Invalid database URI: {sqlalchemy_string}")
+            self._logger.error(f"Invalid database URI: {sqlalchemy_string}")
             error = True
         except SQLAlchemyError:
-            self.__logger.error(f"Error when trying to create the engine: {format_exc()}")
+            self._logger.error(f"Error when trying to create the engine: {format_exc()}")
             error = True
         finally:
             if error:
                 _exit(1)
 
         try:
-            assert self.__sql_engine is not None
+            assert self._sql_engine is not None
         except AssertionError:
-            self.__logger.error("The database engine is not initialized")
+            self._logger.error("The database engine is not initialized")
             _exit(1)
 
         not_connected = True
@@ -140,76 +140,76 @@ class Database:
 
         while not_connected:
             try:
-                with self.__sql_engine.connect() as conn:
+                with self._sql_engine.connect() as conn:
                     conn.execute(text("CREATE TABLE IF NOT EXISTS test (id INT)"))
                     conn.execute(text("DROP TABLE test"))
                 not_connected = False
             except (OperationalError, DatabaseError) as e:
                 if retries <= 0:
-                    self.__logger.error(
+                    self._logger.error(
                         f"Can't connect to database : {format_exc()}",
                     )
                     _exit(1)
 
                 if "attempt to write a readonly database" in str(e):
-                    self.__logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
-                    self.__sql_engine.dispose(close=True)
-                    self.__sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
+                    self._logger.warning("The database is read-only, waiting for it to become writable. Retrying in 5 seconds ...")
+                    self._sql_engine.dispose(close=True)
+                    self._sql_engine = create_engine(sqlalchemy_string, **engine_kwargs)
                 if "Unknown table" in str(e):
                     not_connected = False
                     continue
                 else:
-                    self.__logger.warning(
+                    self._logger.warning(
                         "Can't connect to database, retrying in 5 seconds ...",
                     )
                 retries -= 1
                 sleep(5)
             except BaseException:
-                self.__logger.error(f"Error when trying to connect to the database: {format_exc()}")
+                self._logger.error(f"Error when trying to connect to the database: {format_exc()}")
                 exit(1)
 
-        self.__logger.info("✅ Database connection established")
+        self._logger.info("✅ Database connection established")
 
-        session_factory = sessionmaker(bind=self.__sql_engine, autoflush=True, expire_on_commit=False)
-        self.__sql_session = scoped_session(session_factory)
+        session_factory = sessionmaker(bind=self._sql_engine, autoflush=True, expire_on_commit=False)
+        self._sql_session = scoped_session(session_factory)
         self.suffix_rx = re_compile(r"_\d+$")
 
         if match.group("database").startswith("sqlite"):
-            with self.__db_session() as session:
+            with self._db_session() as session:
                 session.execute(text("PRAGMA journal_mode=WAL"))
                 session.commit()
 
     def __del__(self) -> None:
         """Close the database"""
-        if self.__sql_session:
-            self.__sql_session.close_all()
+        if self._sql_session:
+            self._sql_session.close_all()
 
-        if self.__sql_engine:
-            self.__sql_engine.dispose()
+        if self._sql_engine:
+            self._sql_engine.dispose()
 
     @contextmanager
-    def __db_session(self):
+    def _db_session(self):
         try:
-            assert self.__sql_session is not None
+            assert self._sql_session is not None
         except AssertionError:
-            self.__logger.error("The database session is not initialized")
+            self._logger.error("The database session is not initialized")
             _exit(1)
 
-        session = self.__sql_session()
+        session = self._sql_session()
 
         try:
             yield session
         except BaseException:
             session.rollback()
-            self.__logger.exception("Error when trying to execute a database query")
-            self.__exceptions[getpid()] = [format_exc()]
+            self._logger.exception("Error when trying to execute a database query")
+            self._exceptions[getpid()] = [format_exc()]
             raise
         finally:
             session.close()
 
     def set_scheduler_initialized(self, value: bool = True) -> str:
         """Set the scheduler_initialized value"""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             metadata = session.query(Metadata).with_for_update().get(1)
 
             if not metadata:
@@ -218,11 +218,11 @@ class Database:
             metadata.scheduler_initialized = value
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def is_scheduler_initialized(self) -> bool:
         """Check if it's the scheduler is initialized"""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             try:
                 metadata = session.query(Metadata).with_entities(Metadata.scheduler_initialized).filter_by(id=1).with_for_update(read=True).first()
                 return metadata is not None and metadata.scheduler_initialized
@@ -232,7 +232,7 @@ class Database:
 
     def is_first_config_saved(self) -> bool:
         """Check if the first configuration has been saved"""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             try:
                 metadata = session.query(Metadata).with_entities(Metadata.first_config_saved).filter_by(id=1).with_for_update(read=True).first()
                 return metadata is not None and metadata.first_config_saved
@@ -242,7 +242,7 @@ class Database:
 
     def is_initialized(self) -> bool:
         """Check if the database is initialized"""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             try:
                 metadata = session.query(Metadata).with_entities(Metadata.is_initialized).filter_by(id=1).with_for_update(read=True).first()
                 return metadata is not None and metadata.is_initialized
@@ -252,7 +252,7 @@ class Database:
 
     def initialize_db(self, version: str, integration: str = "Unknown") -> str:
         """Initialize the database"""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             session.add(
                 Metadata(
                     is_initialized=True,
@@ -262,10 +262,10 @@ class Database:
             )
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def update_db_schema(self, version: str) -> str:
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             metadata = session.query(Metadata).with_for_update().get(1)
 
             if not metadata:
@@ -312,14 +312,14 @@ class Database:
             metadata.version = version
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def init_tables(self, default_plugins: List[dict]) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
-        inspector = inspect(self.__sql_engine)
+        inspector = inspect(self._sql_engine)
 
         if inspector is None:
-            self.__logger.error("The database inspector is not initialized")
+            self._logger.error("The database inspector is not initialized")
             _exit(1)
 
         if len(Base.metadata.tables.keys()) <= len(inspector.get_table_names()):
@@ -333,7 +333,7 @@ class Database:
             if has_all_tables:
                 return False, ""
 
-        Base.metadata.create_all(self.__sql_engine, checkfirst=True)
+        Base.metadata.create_all(self._sql_engine, checkfirst=True)
 
         to_put = []
         for plugins in default_plugins:
@@ -410,12 +410,12 @@ class Database:
                                 )
                             )
 
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             session.add_all(to_put)
             session.commit()
 
-        if self.__exceptions.get(getpid()):
-            return False, self.__exceptions[getpid()]
+        if self._exceptions.get(getpid()):
+            return False, self._exceptions[getpid()]
 
         proc = subprocess_run(
             ["python3", "-m", "alembic", "revision", "--autogenerate", "-m", '"init"'],
@@ -448,7 +448,7 @@ class Database:
     def save_config(self, config: Dict[str, Any], method: str) -> str:
         """Save the config in the database"""
         to_put = []
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             # Delete all the old config
             session.query(Global_values).filter(Global_values.method == method).with_for_update().delete()
             session.query(Services_settings).filter(Services_settings.method == method).with_for_update().delete()
@@ -641,12 +641,12 @@ class Database:
             session.add_all(to_put)
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def save_global_config(self, config: Dict[str, Any], method: str) -> str:
         """Save the global config in the database"""
         to_put = []
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             # Delete all the old global config
             session.query(Global_values).filter(Global_values.method == method).with_for_update().delete()
 
@@ -696,12 +696,12 @@ class Database:
             session.add_all(to_put)
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def save_service_config(self, service_name: str, config: Dict[str, Any], method: str) -> str:
         """Save the service config in the database"""
         to_put = []
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             # Delete all the old service config
             db_service = session.query(Services).with_entities(Services.id, Services.method).filter_by(id=service_name).with_for_update(read=True).first()
 
@@ -789,11 +789,11 @@ class Database:
             session.add_all(to_put)
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def remove_service(self, service_name: str, method: str) -> str:
         """Remove a service from the database"""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             # Delete all the old service config
             db_service = session.query(Services).with_entities(Services.id, Services.method).filter_by(id=service_name).with_for_update(read=True).first()
 
@@ -805,12 +805,12 @@ class Database:
             session.query(Services).filter(Services.id == service_name).with_for_update().delete()
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def save_custom_configs(self, custom_configs: List[Dict[str, Tuple[str, List[str]]]], method: str) -> str:
         """Save the custom configs in the database"""
         message = ""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             # Delete all the old config
             session.query(Custom_configs).filter(Custom_configs.method == method).with_for_update().delete()
 
@@ -876,7 +876,7 @@ class Database:
                 session.rollback()
                 return f"{f'{message}{endl}' if message else ''}{format_exc()}"
 
-        return (self.__exceptions.get(getpid()) or [message]).pop()
+        return (self._exceptions.get(getpid()) or [message]).pop()
 
     def get_config(self, methods: bool = False, *, new_format: bool = False) -> Dict[str, Dict[str, Union[str, bool]]]:
         """Get the config from the database"""
@@ -886,7 +886,7 @@ class Database:
             del global_config
             config = {"global": {}, "services": {}}
             global_config = config["global"]
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             multisite = []
             for setting in (
                 session.query(Settings)
@@ -965,11 +965,11 @@ class Database:
                 servers = " ".join(str(service.id) for service in session.query(Services).with_for_update(read=True).all())
                 global_config["SERVER_NAME"] = {"value": servers, "method": "default"} | ({"global": True} if not new_format else {}) if methods else servers
 
-        return (self.__exceptions.get(getpid()) or [config]).pop()
+        return (self._exceptions.get(getpid()) or [config]).pop()
 
     def get_custom_configs(self) -> Union[str, List[Dict[str, Any]]]:
         """Get the custom configs from the database"""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             return [
                 {
                     "service_id": custom_config.service_id,
@@ -991,7 +991,7 @@ class Database:
                     .all()
                 )
             ]
-        return (self.__exceptions.get(getpid()) or ["An error occurred, couldn't fetch the traceback"]).pop()
+        return (self._exceptions.get(getpid()) or ["An error occurred, couldn't fetch the traceback"]).pop()
 
     def upsert_custom_config(
         self,
@@ -1007,7 +1007,7 @@ class Database:
         """Add or update a custom config in the database"""
         old_name = old_name or name
         ret = ""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             config = {
                 "data": data,
                 "method": method,
@@ -1050,11 +1050,11 @@ class Database:
                 ret = "updated"
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [ret]).pop()
+        return (self._exceptions.get(getpid()) or [ret]).pop()
 
     def delete_custom_config(self, service_id: str, config_type: str, name: str, method: str) -> str:
         """Delete a custom config from the database"""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             custom_conf = (
                 session.query(Custom_configs)
                 .with_entities(Custom_configs.method)
@@ -1079,13 +1079,13 @@ class Database:
             ).with_for_update().delete()
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def get_services_settings(self, methods: bool = False) -> List[Dict[str, Any]]:
         """Get the services' configs from the database"""
         services = []
         config = self.get_config(methods=methods)
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             service_names = [service.id for service in session.query(Services).with_entities(Services.id).with_for_update(read=True).all()]
             for service in service_names:
                 tmp_config = deepcopy(config)
@@ -1113,7 +1113,7 @@ class Database:
     def update_external_plugins(self, plugins: List[Dict[str, Any]], *, delete_missing: bool = True) -> str:
         """Update external plugins from the database"""
         to_put = []
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             db_plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(external=True).with_for_update(read=True).all()
 
             db_ids = []
@@ -1150,7 +1150,7 @@ class Database:
 
                 if db_plugin is not None:
                     if db_plugin.external is False:
-                        self.__logger.warning(
+                        self._logger.warning(
                             f"Plugin \"{plugin['id']}\" is not external, skipping update (updating a non-external plugin is forbidden for security reasons)",
                         )
                         continue
@@ -1380,7 +1380,7 @@ class Database:
                     db_setting = session.query(Settings).filter_by(id=setting).with_for_update(read=True).first()
 
                     if db_setting is not None:
-                        self.__logger.warning(f"A setting with id {setting} already exists, therefore it will not be added.")
+                        self._logger.warning(f"A setting with id {setting} already exists, therefore it will not be added.")
                         continue
 
                     value.update(
@@ -1404,7 +1404,7 @@ class Database:
                     db_job = session.query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin["id"]).with_for_update(read=True).first()
 
                     if db_job is not None:
-                        self.__logger.warning(f"A job with the name {job['name']} already exists in the database, therefore it will not be added.")
+                        self._logger.warning(f"A job with the name {job['name']} already exists in the database, therefore it will not be added.")
                         continue
 
                     job["file_name"] = job.pop("file")
@@ -1470,12 +1470,12 @@ class Database:
             session.add_all(to_put)
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def get_plugins(self, *, external: bool = False, with_data: bool = False) -> List[Dict[str, Any]]:
         """Get all plugins from the database."""
         plugins = []
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             for plugin in (
                 session.query(Plugins)
                 .with_entities(
@@ -1558,7 +1558,7 @@ class Database:
     def add_external_plugin(self, plugin: Dict[str, Any]) -> str:
         """Add an external plugin to the database."""
         to_put = []
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             db_plugin = session.query(Plugins).with_entities(Plugins.id).filter_by(id=plugin["id"]).with_for_update(read=True).first()
 
             if db_plugin is not None:
@@ -1589,7 +1589,7 @@ class Database:
                 db_setting = session.query(Settings).filter_by(id=setting).with_for_update(read=True).first()
 
                 if db_setting is not None:
-                    self.__logger.warning(f"A setting with id {setting} already exists, therefore it will not be added.")
+                    self._logger.warning(f"A setting with id {setting} already exists, therefore it will not be added.")
                     continue
 
                 value.update(
@@ -1613,7 +1613,7 @@ class Database:
                 db_job = session.query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin["id"]).with_for_update(read=True).first()
 
                 if db_job is not None:
-                    self.__logger.warning(f"A job with the name {job['name']} already exists in the database, therefore it will not be added.")
+                    self._logger.warning(f"A job with the name {job['name']} already exists in the database, therefore it will not be added.")
                     continue
 
                 job["file_name"] = job.pop("file")
@@ -1635,18 +1635,18 @@ class Database:
                         )
                     )
                 else:
-                    self.__logger.warning(
+                    self._logger.warning(
                         f"Plugin \"{plugin['id']}\" has a page but no template or actions file, skipping page addition.",
                     )
 
             session.add_all(to_put)
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def update_external_plugin(self, plugin_id: str, plugin_data: Dict[str, Any]) -> str:
         """Update an external plugin from the database."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             db_plugin = (
                 session.query(Plugins)
                 .with_entities(
@@ -1876,18 +1876,18 @@ class Database:
                 else:
                     session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin_id).with_for_update().delete()
 
-                    self.__logger.warning(
+                    self._logger.warning(
                         f'Plugin "{plugin_id}" has a page but no template or actions file, skipping page addition and removing existing page.',
                     )
 
             session.add_all(to_put)
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def remove_external_plugin(self, plugin_id: str, *, method: str = "core") -> str:
         """Delete an external plugin from the database."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             db_plugin = session.query(Plugins).with_entities(Plugins.external).filter_by(id=plugin_id).with_for_update(read=True).first()
 
             if db_plugin is None:
@@ -1900,21 +1900,21 @@ class Database:
             session.query(Plugins).filter(Plugins.id == plugin_id).with_for_update().delete()
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def get_plugins_errors(self) -> int:
         """Get plugins errors."""
         # TODO edit this function to return the number of errors from the new history
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             return session.query(Jobs).filter(Jobs.success == False).with_for_update(read=True).count()  # noqa: E712
 
-        if self.__exceptions.get(getpid()):
-            self.__logger.error(self.__exceptions[getpid()].pop())
+        if self._exceptions.get(getpid()):
+            self._logger.error(self._exceptions[getpid()].pop())
         return 0
 
     def get_job(self, job_name: str) -> Dict[str, Any]:
         """Get job."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             job = session.query(Jobs).with_entities(Jobs.name, Jobs.every, Jobs.reload).filter_by(name=job_name).with_for_update(read=True).first()
 
             if job is None:
@@ -1951,13 +1951,13 @@ class Database:
                 ],
             }
 
-        if self.__exceptions.get(getpid()):
-            self.__logger.error(self.__exceptions[getpid()].pop())
+        if self._exceptions.get(getpid()):
+            self._logger.error(self._exceptions[getpid()].pop())
         return {}
 
     def get_jobs(self) -> Dict[str, Dict[str, Any]]:
         """Get jobs."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             return {
                 job.name: {
                     "every": job.every,
@@ -2001,8 +2001,8 @@ class Database:
                 )
             }
 
-        if self.__exceptions.get(getpid()):
-            self.__logger.error(self.__exceptions[getpid()].pop())
+        if self._exceptions.get(getpid()):
+            self._logger.error(self._exceptions[getpid()].pop())
         return {}
 
     def add_job_run(
@@ -2013,7 +2013,7 @@ class Database:
         end_date: Optional[datetime] = None,
     ) -> str:
         """Add a job run."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             session.add(
                 Jobs_runs(
                     job_name=job_name,
@@ -2024,7 +2024,7 @@ class Database:
             )
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def delete_job_cache(
         self,
@@ -2033,7 +2033,7 @@ class Database:
         *,
         service_id: Optional[str] = None,
     ) -> str:
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             session.query(Jobs_cache).filter(
                 Jobs_cache.job_name == job_name,
                 Jobs_cache.service_id == service_id,
@@ -2041,7 +2041,7 @@ class Database:
             ).with_for_update().delete()
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def upsert_job_cache(
         self,
@@ -2054,7 +2054,7 @@ class Database:
     ) -> str:
         """Update the plugin cache in the database"""
         resp = ""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             cache = (
                 session.query(Jobs_cache)
                 .filter_by(
@@ -2089,7 +2089,7 @@ class Database:
                 resp = "updated"
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [resp]).pop()
+        return (self._exceptions.get(getpid()) or [resp]).pop()
 
     def get_job_cache(
         self,
@@ -2107,13 +2107,13 @@ class Database:
         if with_data:
             entities.append(Jobs_cache.data)
 
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             return session.query(Jobs_cache).with_entities(*entities).filter_by(job_name=job_name, service_id=service_id, file_name=file_name).with_for_update(read=True).first()
-        return (self.__exceptions.get(getpid()) or [None]).pop()
+        return (self._exceptions.get(getpid()) or [None]).pop()
 
     def get_jobs_cache_files(self) -> List[Dict[str, Any]]:
         """Get jobs cache files."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             return [
                 {
                     "job_name": cache.job_name,
@@ -2133,13 +2133,13 @@ class Database:
                 )
             ]
 
-        if self.__exceptions.get(getpid()):
-            self.__logger.error(self.__exceptions[getpid()].pop())
+        if self._exceptions.get(getpid()):
+            self._logger.error(self._exceptions[getpid()].pop())
         return []
 
     def add_instance(self, hostname: str, port: int, server_name: str, method: str) -> str:
         """Add instance."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             db_instance = session.query(Instances).with_entities(Instances.hostname).filter_by(hostname=hostname).with_for_update(read=True).first()
 
             if db_instance is not None:
@@ -2159,12 +2159,12 @@ class Database:
                 session.rollback()
                 return f"An error occurred while adding the instance {hostname} (port: {port}, server name: {server_name}).\n{format_exc()}"
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def refresh_instances(self, instances: List[Dict[str, Any]], method: str) -> str:
         """Update instances."""
         to_put = []
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             session.query(Instances).filter(Instances.method == method).with_for_update().delete()
 
             for instance in instances:
@@ -2173,13 +2173,13 @@ class Database:
             session.add_all(to_put)
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def upsert_instance(self, hostname: str, port: int, server_name: str, method: str, *, old_hostname: Optional[str] = None) -> str:
         """Update instance."""
         old_hostname = old_hostname or hostname
         ret = ""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             db_instance = session.query(Instances).with_entities(Instances.hostname, Instances.method).filter_by(hostname=old_hostname).with_for_update(read=True).first()
 
             if db_instance is None:
@@ -2206,11 +2206,11 @@ class Database:
                 ret = "updated"
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [ret]).pop()
+        return (self._exceptions.get(getpid()) or [ret]).pop()
 
     def get_instances(self) -> List[Dict[str, Any]]:
         """Get instances."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             return [
                 {
                     "hostname": instance.hostname,
@@ -2233,13 +2233,13 @@ class Database:
                 )
             ]
 
-        if self.__exceptions.get(getpid()):
-            self.__logger.error(self.__exceptions[getpid()].pop())
+        if self._exceptions.get(getpid()):
+            self._logger.error(self._exceptions[getpid()].pop())
         return []
 
     def get_instance(self, instance_hostname: str) -> Dict[str, Any]:
         """Get an instance."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             instance = session.query(Instances).filter_by(hostname=instance_hostname).with_for_update(read=True).first()
 
             if not instance:
@@ -2252,13 +2252,13 @@ class Database:
                 "method": instance.method,
             }
 
-        if self.__exceptions.get(getpid()):
-            self.__logger.error(self.__exceptions[getpid()].pop())
+        if self._exceptions.get(getpid()):
+            self._logger.error(self._exceptions[getpid()].pop())
         return {}
 
     def remove_instance(self, instance_hostname: str, *, method: str = "core") -> str:
         """Remove an instance."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             db_instance = session.query(Instances).with_entities(Instances.hostname, Instances.method).filter_by(hostname=instance_hostname).with_for_update(read=True).first()
 
             if db_instance is None:
@@ -2269,11 +2269,11 @@ class Database:
             session.query(Instances).filter(Instances.hostname == instance_hostname).with_for_update().delete()
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def seen_instance(self, instance_hostname: str) -> str:
         """Update last_seen for an instance."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             db_instance = session.query(Instances).with_entities(Instances.hostname).filter_by(hostname=instance_hostname).with_for_update(read=True).first()
 
             if db_instance is None:
@@ -2282,11 +2282,11 @@ class Database:
             session.query(Instances).filter(Instances.hostname == instance_hostname).with_for_update().update({Instances.last_seen: datetime.now()})
             session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def get_plugin_actions(self, plugin: str) -> Optional[Any]:
         """get actions file for the plugin"""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             page = session.query(Plugin_pages).with_entities(Plugin_pages.actions_file).filter_by(plugin_id=plugin).with_for_update(read=True).first()
 
             if not page:
@@ -2294,12 +2294,12 @@ class Database:
 
             return page.actions_file
 
-        if self.__exceptions.get(getpid()):
-            self.__logger.error(self.__exceptions[getpid()].pop())
+        if self._exceptions.get(getpid()):
+            self._logger.error(self._exceptions[getpid()].pop())
 
     def get_plugin_template(self, plugin: str) -> Optional[Any]:
         """get template file for the plugin"""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             page = session.query(Plugin_pages).with_entities(Plugin_pages.template_file).filter_by(plugin_id=plugin).with_for_update(read=True).first()
 
             if not page:
@@ -2307,12 +2307,12 @@ class Database:
 
             return page.template_file
 
-        if self.__exceptions.get(getpid()):
-            self.__logger.error(self.__exceptions[getpid()].pop())
+        if self._exceptions.get(getpid()):
+            self._logger.error(self._exceptions[getpid()].pop())
 
     def add_action(self, action: Dict[str, Any]) -> str:
         """Add an action to the database."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             db_action = Actions(
                 date=action["date"],
                 api_method=action["api_method"],
@@ -2339,11 +2339,11 @@ class Database:
                         session.add(Actions_tags(action_id=db_action.id, tag_id=tag))
                     session.commit()
 
-        return (self.__exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [""]).pop()
 
     def get_actions(self) -> List[Dict[str, Any]]:
         """Get actions."""
-        with suppress(BaseException), self.__db_session() as session:
+        with suppress(BaseException), self._db_session() as session:
             return [
                 {
                     "date": action.date,
@@ -2368,28 +2368,6 @@ class Database:
                 )
             ]
 
-        if self.__exceptions.get(getpid()):
-            self.__logger.error(self.__exceptions[getpid()].pop())
+        if self._exceptions.get(getpid()):
+            self._logger.error(self._exceptions[getpid()].pop())
         return []
-
-    def cleanup_actions_excess(self, max_actions: int) -> str:
-        """Remove excess actions."""
-        result = 0
-        with suppress(BaseException), self.__db_session() as session:
-            rows_count = session.query(Actions).count()
-            if rows_count > max_actions:
-                result = session.query(Actions).order_by(Actions.date.asc()).limit(rows_count - max_actions).with_for_update().delete(synchronize_session=False)
-                session.commit()
-
-        return (self.__exceptions.get(getpid()) or [str(result)]).pop()
-
-    def cleanup_jobs_runs_excess(self, max_runs: int) -> str:
-        """Remove excess actions."""
-        result = 0
-        with suppress(BaseException), self.__db_session() as session:
-            rows_count = session.query(Jobs_runs).count()
-            if rows_count > max_runs:
-                result = session.query(Jobs_runs).order_by(Jobs_runs.end_date.asc()).limit(rows_count - max_runs).with_for_update().delete(synchronize_session=False)
-                session.commit()
-
-        return (self.__exceptions.get(getpid()) or [str(result)]).pop()

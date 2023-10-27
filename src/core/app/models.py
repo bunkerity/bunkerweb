@@ -10,7 +10,7 @@ from API import API  # type: ignore
 
 class Instance(BaseModel):
     hostname: str = Field(examples=["bunkerweb-1"], description="The server hostname")
-    old_hostname: Optional[str] = Field(None, examples=["bunkerweb-2"], description="The old server hostname")
+    last_seen: Optional[datetime] = Field(None, examples=["2021-01-01T00:00:00.000Z"], description="The last seen date")
     port: int = Field(5000, examples=[5000], description="The server port")
     server_name: str = Field(
         "bwapi",
@@ -23,6 +23,10 @@ class Instance(BaseModel):
             f"http://{self.hostname}:{self.port}",
             self.server_name,
         )
+
+
+class UpsertInstance(Instance):
+    old_hostname: Optional[str] = Field(None, examples=["bunkerweb-2"], description="The old server hostname")
 
 
 class InstanceWithMethod(Instance):
@@ -231,7 +235,6 @@ class CustomConfigModel(CacheFileModel):
 
 class CustomConfigNameModel(CustomConfigModel):
     name: str = Field(examples=["my_custom_config"], description="The config name")
-    old_name: Optional[str] = Field(None, examples=["my_old_custom_config"], description="The old config name")
 
 
 class CustomConfigDataModel(CustomConfigNameModel):
@@ -246,8 +249,12 @@ class CustomConfigDataModel(CustomConfigNameModel):
     )
 
 
+class UpsertCustomConfigDataModel(CustomConfigDataModel):
+    old_name: Optional[str] = Field(None, examples=["my_old_custom_config"], description="The old config name")
+
+
 class Action(BaseModel):
-    date: datetime = Field(examples=["2021-01-01T00:00:00.000Z"], description="The action date")
+    date: Optional[datetime] = Field(None, examples=["2021-01-01T00:00:00.000Z"], description="The action date")
     api_method: str = Field(examples=["POST"], description="The action API method")
     method: str = Field(examples=["core"], description="The action method")
     title: str = Field(examples=["Reloaded BunkerWeb"], description="The action title")

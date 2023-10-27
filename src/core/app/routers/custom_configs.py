@@ -4,7 +4,7 @@ from typing import Dict, List, Literal
 from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
-from ..models import CustomConfigModel, CustomConfigDataModel, ErrorMessage
+from ..models import CustomConfigModel, CustomConfigDataModel, ErrorMessage, UpsertCustomConfigDataModel
 from ..dependencies import CORE_CONFIG, DB, send_to_instances
 
 router = APIRouter(prefix="/custom_configs", tags=["custom_configs"])
@@ -38,7 +38,7 @@ async def get_custom_configs():
         },
     },
 )
-async def upsert_custom_config(custom_config: CustomConfigDataModel, method: str, background_tasks: BackgroundTasks, reload: bool = True):
+async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, method: str, background_tasks: BackgroundTasks, reload: bool = True):
     """Update one or more custom configs"""
 
     if method == "static":
