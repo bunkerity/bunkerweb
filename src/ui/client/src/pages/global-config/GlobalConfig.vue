@@ -4,12 +4,11 @@ import ApiState from "@components/Api/State.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import CardBase from "@components/Card/Base.vue";
 import CardLabel from "@components/Card/Label.vue";
-import PluginRefresh from "@components/Plugin/Refresh.vue";
 import PluginStructure from "@components/Plugin/Structure.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
-import { reactive, computed, onMounted, onUpdated, watch } from "vue";
+import { reactive, computed, onMounted, watch } from "vue";
 import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
 import {
   setPluginsData,
@@ -20,6 +19,14 @@ import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
+import { useRefreshStore } from "@store/global.js";
+
+// Refresh when related btn is clicked
+const refreshStore = useRefreshStore();
+
+watch(refreshStore, () => {
+  refresh();
+});
 
 const logsStore = useLogsStore();
 logsStore.setTags(["config", "plugin"]);
@@ -61,7 +68,7 @@ const plugins = reactive({
     // Duplicate base data
     const cloneGlobalPlugin = getPluginsByContext(
       JSON.parse(JSON.stringify(plugins.data)),
-      "global",
+      "global"
     );
     const cloneGlobalConf = JSON.parse(JSON.stringify(conf.data["global"]));
     // Format and keep only global config
@@ -116,14 +123,14 @@ async function getGlobalConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -150,7 +157,7 @@ async function sendConf() {
     "PUT",
     config.data["global"],
     null,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await refresh();
 }
@@ -174,10 +181,7 @@ async function sendConf() {
       <CardBase
         class="z-100 h-fit col-span-12 md:col-span-5 lg:col-span-4 3xl:col-span-3 grid grid-cols-12 relative"
       >
-        <div class="col-span-12 flex">
-          <CardLabel label="global config" />
-          <PluginRefresh @refresh="refresh()" />
-        </div>
+        <CardLabel label="global config" />
         <SettingsLayout
           class="flex w-full col-span-12"
           label="Select plugin"

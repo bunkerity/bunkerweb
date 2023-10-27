@@ -3,7 +3,7 @@ import Dashboard from "@layouts/Dashboard.vue";
 import ApiState from "@components/Api/State.vue";
 import CardBase from "@components/Card/Base.vue";
 import CardItemList from "@components/Card/Item/List.vue";
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import {
   generateConfTree,
@@ -15,6 +15,14 @@ import SettingsCheckbox from "@components/Settings/Checkbox.vue";
 import { useFeedbackStore } from "@store/global.js";
 import FileManagerStructure from "@components/FileManager/Structure.vue";
 import { useLogsStore } from "@store/logs.js";
+import { useRefreshStore } from "@store/global.js";
+
+// Refresh when related btn is clicked
+const refreshStore = useRefreshStore();
+
+watch(refreshStore, () => {
+  getData();
+});
 
 const logsStore = useLogsStore();
 logsStore.setTags(["custom_config"]);
@@ -42,10 +50,10 @@ const customConf = reactive({
   data: [],
   total: computed(() => customConf.data.length || 0),
   global: computed(
-    () => customConf.data.filter((item) => !item["service_id"]).length || 0,
+    () => customConf.data.filter((item) => !item["service_id"]).length || 0
   ),
   service: computed(
-    () => customConf.data.filter((item) => item["service_id"]).length || 0,
+    () => customConf.data.filter((item) => item["service_id"]).length || 0
   ),
   setup: computed(() => {
     if (
@@ -71,7 +79,7 @@ async function getCustomConf(isFeedback = true) {
     "GET",
     null,
     customConf,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 
@@ -81,7 +89,7 @@ async function getConfig(isFeedback = true) {
     "GET",
     null,
     conf,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 

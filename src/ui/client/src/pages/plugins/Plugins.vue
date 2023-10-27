@@ -7,12 +7,20 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import SettingsUploadStructure from "@components/Settings/Upload/Structure.vue";
 import PluginList from "@components/Plugin/List.vue";
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { getPluginsByFilter } from "@utils/plugins.js";
 import ApiState from "@components/Api/State.vue";
 import { useLogsStore } from "@store/logs.js";
+import { useRefreshStore } from "@store/global.js";
+
+// Refresh when related btn is clicked
+const refreshStore = useRefreshStore();
+
+watch(refreshStore, () => {
+  getPlugins();
+});
 
 const logsStore = useLogsStore();
 logsStore.setTags(["plugin"]);
@@ -59,8 +67,8 @@ async function getPlugins() {
   );
 }
 
-onMounted(async () => {
-  await getPlugins();
+onMounted(() => {
+  getPlugins();
 });
 </script>
 

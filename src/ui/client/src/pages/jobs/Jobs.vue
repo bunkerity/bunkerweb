@@ -9,12 +9,19 @@ import JobsModalHistory from "@components/Jobs/Modal/History.vue";
 import ListBase from "@components/List/Base.vue";
 import JobsItems from "@components/Jobs/Items.vue";
 import ApiState from "@components/Api/State.vue";
-
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed, onMounted, watch } from "vue";
 import { getJobsByFilter, getJobsIntervalList } from "@utils/jobs.js";
 import { useLogsStore } from "@store/logs.js";
+import { useRefreshStore } from "@store/global.js";
+
+// Refresh when related btn is clicked
+const refreshStore = useRefreshStore();
+
+watch(refreshStore, () => {
+  getJobs();
+});
 
 const logsStore = useLogsStore();
 logsStore.setTags(["job"]);
@@ -64,7 +71,7 @@ const jobs = reactive({
   }),
   success: computed(() => {
     return Object.values(jobs.data).filter(
-      (item) => item["history"][0]["success"] !== false,
+      (item) => item["history"][0]["success"] !== false
     ).length;
   }),
   setup: computed(() => {
@@ -97,7 +104,7 @@ async function runJob(data) {
     "POST",
     null,
     run,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -113,7 +120,7 @@ async function downloadFile(data) {
     "GET",
     null,
     download,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 

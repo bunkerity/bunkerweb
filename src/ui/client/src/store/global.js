@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+
 export const useFeedbackStore = defineStore("feedback", () => {
   const data = ref([]);
   let feedID = 0;
@@ -18,11 +19,19 @@ export const useFeedbackStore = defineStore("feedback", () => {
   function removeFeedback(id) {
     data.value.splice(
       data.value.findIndex((item) => item["id"] === id),
-      1,
+      1
     );
   }
 
   return { data, addFeedback, removeFeedback };
 });
 
-export default useFeedbackStore;
+export const useRefreshStore = defineStore("refresh", () => {
+  const count = ref(0);
+
+  async function refresh() {
+    count.value++;
+  }
+
+  return { count, refresh };
+});

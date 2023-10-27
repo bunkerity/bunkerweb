@@ -2,11 +2,19 @@
 import Dashboard from "@layouts/Dashboard.vue";
 import InstanceCard from "@components/Instance/Card.vue";
 import InstanceModalDelete from "@components/Instance/Modal/Delete.vue";
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import ApiState from "@components/Api/State.vue";
 import { useLogsStore } from "@store/logs.js";
+import { useRefreshStore } from "@store/global.js";
+
+// Refresh when related btn is clicked
+const refreshStore = useRefreshStore();
+
+watch(refreshStore, () => {
+  getInstances();
+});
 
 const logsStore = useLogsStore();
 logsStore.setTags(["instance"]);
@@ -26,7 +34,7 @@ async function getInstances(isFeedback = true) {
     "GET",
     null,
     instances,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 
@@ -43,7 +51,7 @@ async function actionInstance(data) {
     "POST",
     null,
     instActions,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "error") return;
     getInstances(false);
@@ -57,7 +65,7 @@ async function deleteInstance(data) {
     "DELETE",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "error") return;
     getInstances(false);

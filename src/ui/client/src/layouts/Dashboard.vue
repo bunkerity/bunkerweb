@@ -7,6 +7,7 @@ import FeedbackStructure from "@components/Feedback/Structure.vue";
 import News from "@components/News.vue";
 import Header from "@components/Header.vue";
 import Logs from "@components/Logs.vue";
+import Refresh from "@components/Refresh.vue";
 </script>
 
 <template>
@@ -21,6 +22,7 @@ import Logs from "@components/Logs.vue";
     <FeedbackStructure />
     <News />
     <Logs />
+    <Refresh />
     <div class="content-wrap">
       <Header />
       <slot></slot>

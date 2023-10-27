@@ -9,12 +9,19 @@ import BansTabs from "@components/Bans/Tabs.vue";
 import BansAdd from "@components/Bans/Add.vue";
 import BansList from "@components/Bans/List.vue";
 import ApiState from "@components/Api/State.vue";
-
 import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { getBansByFilter } from "@utils/bans.js";
 import { useLogsStore } from "@store/logs.js";
+import { useRefreshStore } from "@store/global.js";
+
+// Refresh when related btn is clicked
+const refreshStore = useRefreshStore();
+
+watch(refreshStore, () => {
+  getData();
+});
 
 const logsStore = useLogsStore();
 logsStore.setTags(["instance"]);
@@ -76,7 +83,7 @@ async function getData() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   const hostnames = await getHostFromInst();
 
@@ -128,7 +135,7 @@ async function getHostBan(hostname) {
     "POST",
     null,
     data,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 

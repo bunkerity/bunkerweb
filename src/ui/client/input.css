@@ -253,7 +253,7 @@ body {
 /* MENU */
 
 .menu-float-btn {
-  @apply scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 xl:hidden fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-2 sm:top-3 right-5 sm:right-6 z-990 rounded-circle text-slate-700;
+  @apply w-13 h-13 scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 xl:hidden fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-2 sm:top-3 right-5 sm:right-6 z-990 rounded-circle text-slate-700;
 }
 
 .menu-close-btn {
@@ -350,13 +350,19 @@ body {
 
 /* LOGS */
 .logs-float-btn {
-  @apply scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-16 sm:top-3 right-5 sm:right-40 xl:right-40 z-990 rounded-circle text-slate-700;
+  @apply w-13 h-13 scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-16 sm:top-3 right-5 sm:right-40 z-990 rounded-circle text-slate-700;
+}
+
+/* REFRESH */
+
+.refresh-float-btn {
+  @apply w-13 h-13 scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-16 sm:top-3 right-20 sm:right-[14.125rem] z-990 rounded-circle text-slate-700;
 }
 
 /* NEWS */
 
 .news-float-btn {
-  @apply scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-16 sm:top-3 right-5 sm:right-40 xl:right-6 z-990 rounded-circle text-slate-700;
+  @apply w-13 h-13 scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-16 sm:top-3 right-5 sm:right-6 z-990 rounded-circle text-slate-700;
 }
 
 .news-close-btn {

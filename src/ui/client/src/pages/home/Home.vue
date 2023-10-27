@@ -6,10 +6,20 @@ import HomeCardSvgInstances from "@components/Home/Card/Svg/Instances.vue";
 import HomeCardSvgServices from "@components/Home/Card/Svg/Services.vue";
 import HomeCardSvgPlugins from "@components/Home/Card/Svg/Plugins.vue";
 import ApiState from "@components/Api/State.vue";
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { useLogsStore } from "@store/logs.js";
+import { useRefreshStore } from "@store/global.js";
+
+// Refresh when related btn is clicked
+const refreshStore = useRefreshStore();
+
+watch(refreshStore, () => {
+  getVersion();
+  getInstances();
+  getConf();
+});
 
 const logsStore = useLogsStore();
 logsStore.setTags(["all"]);
@@ -22,10 +32,10 @@ const instances = reactive({
   data: [],
   count: computed(() => instances.data.length),
   up: computed(() =>
-    instances.data.filter((item) => item.status === "up").length.toString(),
+    instances.data.filter((item) => item.status === "up").length.toString()
   ),
   down: computed(() =>
-    instances.data.filter((item) => item.status !== "up").length.toString(),
+    instances.data.filter((item) => item.status !== "up").length.toString()
   ),
 });
 
@@ -35,7 +45,7 @@ async function getInstances() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -56,7 +66,7 @@ async function getVersion() {
     "GET",
     null,
     version,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   // Get latest version from github
   await fetch("https://api.github.com/repos/bunkerity/bunkerweb/tags")
@@ -78,10 +88,10 @@ const plugins = reactive({
   data: [],
   num: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.data.filter((item) => item["external"] === false).length,
+    () => plugins.data.filter((item) => item["external"] === false).length
   ),
   external: computed(
-    () => plugins.data.filter((item) => item["external"] === true).length,
+    () => plugins.data.filter((item) => item["external"] === true).length
   ),
   services: computed(() => {
     if (
@@ -121,18 +131,18 @@ async function getConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
-onMounted(async () => {
+onMounted(() => {
   getVersion();
   getInstances();
   getConf();
@@ -141,7 +151,6 @@ onMounted(async () => {
 
 <template>
   <Dashboard>
-    {{}}
     <!-- version -->
     <ApiState
       class="col-span-12 md:col-span-6 2xl:col-span-4"

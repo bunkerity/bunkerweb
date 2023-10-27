@@ -1,6 +1,6 @@
 <script setup>
 import FeedbackAlert from "@components/Feedback/Alert.vue";
-import useFeedbackStore from "@store/global.js";
+import { useFeedbackStore } from "@store/global.js";
 import { reactive, watch, onMounted } from "vue";
 
 // Handle feedback history panel

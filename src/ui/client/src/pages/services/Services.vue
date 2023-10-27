@@ -5,13 +5,11 @@ import ButtonBase from "@components/Button/Base.vue";
 import CardBase from "@components/Card/Base.vue";
 import CardItemList from "@components/Card/Item/List.vue";
 import CardLabel from "@components/Card/Label.vue";
-import PluginRefresh from "@components/Plugin/Refresh.vue";
 import PluginStructure from "@components/Plugin/Structure.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import SettingsUploadSvgWarning from "@components/Settings/Upload/Svg/Warning.vue";
-
 import { reactive, computed, onMounted, watch } from "vue";
 import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
 import {
@@ -23,6 +21,14 @@ import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
+import { useRefreshStore } from "@store/global.js";
+
+// Refresh when related btn is clicked
+const refreshStore = useRefreshStore();
+
+watch(refreshStore, () => {
+  refresh();
+});
 
 const logsStore = useLogsStore();
 logsStore.setTags(["plugin", "config"]);
@@ -34,7 +40,7 @@ const feedbackStore = useFeedbackStore();
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
   keyword: "",
-  method: "",
+  method: "all",
 });
 
 // Plugins data to render components
@@ -68,8 +74,8 @@ const services = reactive({
     const cloneMultisitePlugin = setPluginsData(
       getPluginsByContext(
         JSON.parse(JSON.stringify(services.data)),
-        "multisite",
-      ),
+        "multisite"
+      )
     );
 
     // Get only services custom conf
@@ -153,14 +159,14 @@ async function getGlobalConf(isFeedback = true) {
     "GET",
     null,
     conf,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     services,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 
@@ -200,8 +206,8 @@ async function sendServConf() {
           "PUT",
           value,
           null,
-          feedbackStore.addFeedback,
-        ),
+          feedbackStore.addFeedback
+        )
       );
     }
 
@@ -266,10 +272,7 @@ onMounted(() => {
       <CardBase
         class="z-[101] h-fit col-span-12 md:col-span-8 lg:col-span-5 3xl:col-span-3"
       >
-        <div class="col-span-12 flex">
-          <CardLabel label="services / plugins" />
-          <PluginRefresh @refresh="refresh()" />
-        </div>
+        <CardLabel label="services / plugins" />
         <SettingsLayout
           v-if="Object.keys(services.setup).length > 1"
           class="flex w-full col-span-12"
@@ -283,7 +286,7 @@ onMounted(() => {
               value:
                 services.activeService === 'new' ? '' : services.activeService,
               values: Object.keys(services.setup).filter(
-                (item) => item !== 'new',
+                (item) => item !== 'new'
               ),
               placeholder: 'Services',
             }"

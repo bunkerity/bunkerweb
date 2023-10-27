@@ -8,12 +8,19 @@ import SettingsSelect from "@components/Settings/Select.vue";
 import ListBase from "@components/List/Base.vue";
 import ActionsItems from "@components/Actions/Items.vue";
 import ApiState from "@components/Api/State.vue";
-
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed, onMounted, watch } from "vue";
 import { getActionsByFilter, getSelectList } from "@utils/actions.js";
 import { useLogsStore } from "@store/logs.js";
+import { useRefreshStore } from "@store/global.js";
+
+// Refresh when related btn is clicked
+const refreshStore = useRefreshStore();
+
+watch(refreshStore, () => {
+  getActions();
+});
 
 const logsStore = useLogsStore();
 logsStore.setTags(["action"]);
