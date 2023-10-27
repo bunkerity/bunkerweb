@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Based on:
 # https://pypi.org/project/pydantic-settings-yaml/
 

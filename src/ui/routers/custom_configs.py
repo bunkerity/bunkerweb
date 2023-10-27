@@ -1,4 +1,5 @@
-from typing import List, Annotated
+# -*- coding: utf-8 -*-
+from typing import Annotated
 from fastapi import APIRouter, Body
 from utils import get_core_format_res
 from models import ResponseModel
@@ -27,7 +28,7 @@ async def get_custom_configs():
     response_model=ResponseModel,
     summary="Update one or more custom configs",
 )
-async def update_custom_configs(custom_config:  Annotated[dict, Body()], method: str):
+async def update_custom_configs(custom_config: Annotated[dict, Body()], method: str):
     data = json.dumps(custom_config, skipkeys=True, allow_nan=True, indent=6)
     return get_core_format_res(f"{API}/custom_configs?method={method}", "PUT", data, "Update custom configs")
 

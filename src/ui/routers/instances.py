@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from typing import List, Union
 from fastapi import APIRouter
 from utils import get_core_format_res

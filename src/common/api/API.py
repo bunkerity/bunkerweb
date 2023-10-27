@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 from typing import Literal, Optional, Union
 from requests import Response, request

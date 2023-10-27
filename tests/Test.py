@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from abc import ABC
 from time import time, sleep
 from requests import get

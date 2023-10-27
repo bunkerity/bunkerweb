@@ -156,7 +156,7 @@ export function getSettingsMultipleList(settings) {
             if (settingName.startsWith(baseSettingName)) return;
             // Case not, create
             settings[`${baseSettingName}${suffix}`] = baseSettingData;
-          }
+          },
         );
       });
     });

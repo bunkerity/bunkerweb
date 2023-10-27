@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contextlib import contextmanager
 from glob import iglob
 from hashlib import sha256

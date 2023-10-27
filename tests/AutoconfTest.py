@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Test import Test
 from os.path import isdir, isfile
 from os import getenv, mkdir

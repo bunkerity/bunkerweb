@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 from functools import cached_property
 from ipaddress import (
@@ -32,7 +33,7 @@ EXTERNAL_PLUGIN_URLS_RX = re_compile(r"^( *((https?://|file:///)[-\w@:%.+~#=]+[-
 class CoreConfig(YamlBaseSettings):
     LISTEN_ADDR: str = "0.0.0.0"
     LISTEN_PORT: Union[str, int] = 1337
-    MAX_WORKERS: Union[str, int] = CPU_COUNT - 1 if CPU_COUNT > 1 else 1
+    MAX_WORKERS: Union[str, int] = CPU_COUNT
     MAX_THREADS: Union[str, int] = int(MAX_WORKERS) * 2 if isinstance(MAX_WORKERS, int) or MAX_WORKERS.isdigit() else 2
     WAIT_RETRY_INTERVAL: Union[str, int] = 5
     HEALTHCHECK_INTERVAL: Union[str, int] = 30
@@ -73,7 +74,7 @@ class CoreConfig(YamlBaseSettings):
     # 4. .env file
     # 5. Default values
     model_config = YamlSettingsConfigDict(
-        yaml_file=normpath(getenv("SETTINGS_YAML_FILE", join(sep, "etc", "bunkerweb", "config.yaml"))),
+        yaml_file=normpath(getenv("SETTINGS_YAML_FILE", join(sep, "etc", "bunkerweb", "config.yml") if Path(sep, "etc", "bunkerweb", "config.yml").is_file() else join(sep, "etc", "bunkerweb", "config.yaml"))),
         env_file=normpath(getenv("SETTINGS_ENV_FILE", join(sep, "etc", "bunkerweb", "core.conf"))),
         secrets_dir=normpath(getenv("SETTINGS_SECRETS_DIR", join(sep, "run", "secrets"))),
         env_file_encoding="utf-8",

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime
 from typing import List
 from fastapi import APIRouter, status

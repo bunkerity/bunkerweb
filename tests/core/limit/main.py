@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from asyncio import Semaphore, gather, run
 from httpx import AsyncClient, Client
 from os import getenv

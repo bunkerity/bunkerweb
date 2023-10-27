@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime
 from random import uniform
 from typing import Dict, List, Literal

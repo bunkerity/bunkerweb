@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from os import getenv
 from subprocess import run
 from requests import ConnectionError, get, head, post

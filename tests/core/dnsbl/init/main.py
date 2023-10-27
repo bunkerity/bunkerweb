@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contextlib import suppress
 from ipaddress import IPv4Address
 from os import getenv, sep

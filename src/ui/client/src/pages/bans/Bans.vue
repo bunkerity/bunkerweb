@@ -71,7 +71,7 @@ async function getData() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
   const hostnames = await getHostFromInst();
 
@@ -123,7 +123,7 @@ async function getHostBan(hostname) {
     "POST",
     null,
     data,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 

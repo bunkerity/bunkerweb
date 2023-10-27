@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contextlib import suppress
 from os import getenv
 from subprocess import PIPE, run

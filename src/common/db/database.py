@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 from contextlib import contextmanager, suppress
 from copy import deepcopy

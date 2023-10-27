@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 from contextlib import suppress
 from ipaddress import ip_address, ip_network

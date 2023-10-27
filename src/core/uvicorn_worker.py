@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from os import sep
 from os.path import join
 from sys import path as sys_path

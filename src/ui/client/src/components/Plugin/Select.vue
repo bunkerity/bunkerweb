@@ -67,7 +67,7 @@ function updateTop() {
   selectTop.value = `${
     Math.abs(
       selectBtn.value.closest(".plugin-structure").scrollTop -
-        selectBtn.value.offsetTop
+        selectBtn.value.offsetTop,
     ) + selectBtn.value.clientHeight
   }px`;
 }
@@ -156,7 +156,7 @@ onMounted(() => {
             select.id,
             select.value,
             props.setting.value,
-            props.setting.regex
+            props.setting.regex,
           );
         }
       "

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from typing import Annotated, Optional
 from fastapi import APIRouter, File, Form
 from utils import get_core_format_res

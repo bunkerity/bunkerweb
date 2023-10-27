@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from subprocess import PIPE, Popen
 from traceback import format_exc
 

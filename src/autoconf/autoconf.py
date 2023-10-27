@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 from functools import cached_property
 from os import getenv, sep
 from os.path import join, normpath
+from pathlib import Path
 from sys import path as sys_path
 from typing import Literal, Union
 
@@ -12,7 +14,7 @@ from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type:
 
 
 class AutoconfConfig(YamlBaseSettings):
-    CORE_ADDR: str = ""
+    CORE_ADDR: str = "http://127.0.0.1:1337"
     CORE_TOKEN: str = ""
     WAIT_RETRY_INTERVAL: Union[str, int] = 5
     DOCKER_HOST: str = "unix:///var/run/docker.sock"
@@ -28,7 +30,7 @@ class AutoconfConfig(YamlBaseSettings):
     # 4. .env file
     # 5. Default values
     model_config = YamlSettingsConfigDict(
-        yaml_file=normpath(getenv("SETTINGS_YAML_FILE", join(sep, "etc", "bunkerweb", "config.yaml"))),
+        yaml_file=normpath(getenv("SETTINGS_YAML_FILE", join(sep, "etc", "bunkerweb", "config.yml") if Path(sep, "etc", "bunkerweb", "config.yml").is_file() else join(sep, "etc", "bunkerweb", "config.yaml"))),
         env_file=normpath(getenv("SETTINGS_ENV_FILE", join(sep, "etc", "bunkerweb", "ui.conf"))),
         secrets_dir=normpath(getenv("SETTINGS_SECRETS_DIR", join(sep, "run", "secrets"))),
         env_file_encoding="utf-8",

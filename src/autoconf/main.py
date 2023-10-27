@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 from os import _exit, environ, getpid, sep
 from os.path import join

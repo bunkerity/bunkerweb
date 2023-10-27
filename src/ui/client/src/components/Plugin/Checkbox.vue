@@ -44,7 +44,7 @@ function updateCheckbox() {
             props.serviceName || checkbox.context,
             checkbox.id,
             checkbox.value,
-            props.setting.value
+            props.setting.value,
           );
         }
       "

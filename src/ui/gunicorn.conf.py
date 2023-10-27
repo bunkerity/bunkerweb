@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from os import cpu_count, getenv, sep
 from os.path import join
 
@@ -20,5 +21,6 @@ worker_class = "uvicorn_worker.BwUiUvicornWorker"
 workers = MAX_WORKERS
 threads = MAX_WORKERS * 2
 graceful_timeout = 0
+max_requests_jitter = min(8, MAX_WORKERS)
 secure_scheme_headers = {}
 strip_header_spaces = True

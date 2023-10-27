@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 app_name = "BunkerWeb UI API"
 description = """# BunkerWeb Internal API Documentation
 

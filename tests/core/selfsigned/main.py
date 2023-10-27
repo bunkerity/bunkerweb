@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from datetime import datetime, timedelta

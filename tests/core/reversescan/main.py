@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from re import search
 from time import sleep
 from fastapi import FastAPI

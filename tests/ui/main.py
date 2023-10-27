@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contextlib import suppress
 from datetime import datetime, timedelta
 from functools import partial

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from typing import Annotated, Dict
 from fastapi import Body, APIRouter
 from utils import get_core_format_res

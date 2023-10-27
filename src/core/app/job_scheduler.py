@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 from copy import deepcopy
 from functools import partial
@@ -41,7 +42,7 @@ class JobScheduler:
     ):
         self.__logger = logger or setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
         self.__api = api
-        self.__env = env or {}
+        self.__env = {k: v for k, v in env.items() if isinstance(v, str)} if env else {}
         self.__jobs = self.__get_jobs()
         self.__lock = lock
         self.__thread_lock = Lock()
@@ -72,7 +73,7 @@ class JobScheduler:
 
     @env.setter
     def env(self, env: Dict[str, Any]):
-        self.__env = env
+        self.__env = {k: v for k, v in env.items() if isinstance(v, str)}
 
     def __get_jobs(self):
         jobs = {}
@@ -325,7 +326,7 @@ class JobScheduler:
     def reload(self, env: Dict[str, Any], api: Optional[API] = None, *, run: bool = True) -> bool:
         ret = True
         try:
-            self.__env.update(env)
+            self.__env.update({k: v for k, v in env.items() if isinstance(v, str)})
             self.__api = api or self.__api
             self.clear()
             self.__jobs = self.__get_jobs()

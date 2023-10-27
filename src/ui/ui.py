@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 from functools import cached_property
 from os import getenv, sep
 from os.path import join, normpath
+from pathlib import Path
 from sys import path as sys_path
 from typing import Literal, Union
 
@@ -14,7 +16,7 @@ from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type:
 class UiConfig(YamlBaseSettings):
     LISTEN_ADDR: str = "0.0.0.0"
     LISTEN_PORT: Union[str, int] = 7000
-    CORE_ADDR: str = ""
+    CORE_ADDR: str = "http://127.0.0.1:1337"
     CORE_TOKEN: str = ""
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = "changeme"
@@ -33,7 +35,7 @@ class UiConfig(YamlBaseSettings):
     # 4. .env file
     # 5. Default values
     model_config = YamlSettingsConfigDict(
-        yaml_file=normpath(getenv("SETTINGS_YAML_FILE", join(sep, "etc", "bunkerweb", "config.yaml"))),
+        yaml_file=normpath(getenv("SETTINGS_YAML_FILE", join(sep, "etc", "bunkerweb", "config.yml") if Path(sep, "etc", "bunkerweb", "config.yml").is_file() else join(sep, "etc", "bunkerweb", "config.yaml"))),
         env_file=normpath(getenv("SETTINGS_ENV_FILE", join(sep, "etc", "bunkerweb", "ui.conf"))),
         secrets_dir=normpath(getenv("SETTINGS_SECRETS_DIR", join(sep, "run", "secrets"))),
         env_file_encoding="utf-8",

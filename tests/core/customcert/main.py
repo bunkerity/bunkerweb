@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from os import getenv
 from requests import get
 from requests.exceptions import RequestException

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from fastapi import FastAPI
 from multiprocessing import Process
 from os import getenv

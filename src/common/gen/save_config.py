@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 from argparse import ArgumentParser
 from os import R_OK, X_OK, access, environ, getenv, sep

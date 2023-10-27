@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 from functools import wraps
 from glob import glob
@@ -34,7 +35,7 @@ def stop(status):
 
     for thread in all_threads():
         if thread.name != "MainThread":
-            thread.join()
+            thread.join(timeout=3)
 
     HEALTHY_PATH.unlink(missing_ok=True)
     if DB:

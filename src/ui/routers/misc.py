@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from fastapi import APIRouter
 from utils import get_core_format_res
 from models import ResponseModel

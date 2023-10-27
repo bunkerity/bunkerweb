@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from os import getenv
 from traceback import format_exc
 from docker import DockerClient
