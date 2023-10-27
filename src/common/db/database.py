@@ -2298,6 +2298,13 @@ class Database:
                     session.add(Actions_tags(action_id=db_action.id, tag_id=tag))
                 try:
                     session.commit()
+                except OperationalError:
+                    session.rollback()
+                    with self._db_session() as other_session:
+                        other_session.refresh(db_action)
+                        for tag in tags:
+                            other_session.add(Actions_tags(action_id=db_action.id, tag_id=tag))
+                        other_session.commit()
                 except IntegrityError:
                     session.rollback()
                     for tag in tags:

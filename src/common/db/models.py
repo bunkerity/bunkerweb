@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import (
+    TEXT,
     Boolean,
     Column,
     DateTime,
@@ -276,7 +277,7 @@ class Actions(Base):
     api_method = Column(String(32), nullable=False)
     method = Column(String(32), nullable=False)
     title = Column(String(256), nullable=False)
-    description = Column(String(2 ^ 24), nullable=False)
+    description = Column(TEXT, nullable=False)
 
     tags = relationship("Actions_tags", back_populates="action")
 
