@@ -2175,11 +2175,12 @@ class Database:
 
         return (self.__exceptions.get(getpid()) or [""]).pop()
 
-    def upsert_instance(self, hostname: str, port: int, server_name: str, method: str) -> str:
+    def upsert_instance(self, hostname: str, port: int, server_name: str, method: str, *, old_hostname: Optional[str] = None) -> str:
         """Update instance."""
+        old_hostname = old_hostname or hostname
         ret = ""
         with suppress(BaseException), self.__db_session() as session:
-            db_instance = session.query(Instances).with_entities(Instances.hostname, Instances.method).filter_by(hostname=hostname).with_for_update(read=True).first()
+            db_instance = session.query(Instances).with_entities(Instances.hostname, Instances.method).filter_by(hostname=old_hostname).with_for_update(read=True).first()
 
             if db_instance is None:
                 session.add(
@@ -2194,8 +2195,9 @@ class Database:
             elif method not in (db_instance.method, "core", "autoconf"):
                 ret = "method_conflict"
             else:
-                session.query(Instances).filter_by(hostname=hostname).with_for_update().update(
+                session.query(Instances).filter_by(hostname=old_hostname).with_for_update().update(
                     {
+                        Instances.hostname: hostname,
                         Instances.port: port,
                         Instances.server_name: server_name,
                         Instances.method: method,
