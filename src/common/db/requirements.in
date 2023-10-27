@@ -1,4 +1,4 @@
-alembic==1.12.0
+alembic==1.12.1
 cryptography==41.0.5
 psycopg2-binary==2.9.9
 PyMySQL==1.1.0

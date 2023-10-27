@@ -4,9 +4,9 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==2.7.2 \
-    --hash=sha256:52bbc5f51f9887f6ee384e1ea7a3802792e31773d661cf5f5904e3d2be5df72d \
-    --hash=sha256:be4f11846e101bfc36663620ae81be8a60d31c7e743568bc8b9d974884043ad7
+acme==2.7.3 \
+    --hash=sha256:801c1d8eb8451793a88623abfd707ff3bcf31328c9a885f8fbe48721ea7f8565 \
+    --hash=sha256:93ec4f6ebe8dec9a063e3523f8f31fb60f540757b3cd4fb1b4c144e69b83d7b9
     # via certbot
 annotated-types==0.6.0 \
     --hash=sha256:0641064de18ba7a25dee8f96403ebc39113d0cb953a01429249d5c7564666a43 \
@@ -71,9 +71,9 @@ brotlipy==0.7.0 \
     --hash=sha256:e5c549ae5928dda952463196180445c24d6fad2d73cb13bd118293aced31b771 \
     --hash=sha256:fd1d1c64214af5d90014d82cee5d8141b13d44c92ada7a0c0ec0679c6f15a471
     # via -r requirements.in
-certbot==2.7.2 \
-    --hash=sha256:1425de7e41c29fe1734f53fea5b64c3713df0cfc1df1a23a78d7513001457e6e \
-    --hash=sha256:8cf818b81eee3cf12102ad39b79953b9fd0b5f59fd20f5cf2d0cf5ea5d8a9172
+certbot==2.7.3 \
+    --hash=sha256:6e6f5dbdbd36672925572f44feccef77501a36d4eb68d63ecd5e372f09606eb0 \
+    --hash=sha256:e198bcf1bddff9836d408cc9928223804044e755524c42aa4481c1a626c8c80a
     # via -r requirements.in
 certifi==2023.7.22 \
     --hash=sha256:539cc1d13202e33ca466e88b2807e29f4c13049d6d87031a3c110744495cb082 \
@@ -479,9 +479,9 @@ pydantic-settings==2.0.3 \
     --hash=sha256:962dc3672495aad6ae96a4390fac7e593591e144625e5112d359f8f67fb75945 \
     --hash=sha256:ddd907b066622bd67603b75e2ff791875540dc485b7307c4fffc015719da8625
     # via -r requirements.in
-pyopenssl==23.2.0 \
-    --hash=sha256:24f0dc5227396b3e831f4c7f602b950a5e9833d292c8e4a2e06b709292806ae2 \
-    --hash=sha256:276f931f55a452e7dea69c7173e984eb2a4407ce413c918aa34b55f82f9b8bac
+pyopenssl==23.3.0 \
+    --hash=sha256:6756834481d9ed5470f4a9393455154bc92fe7a64b7bc6ee2c804e78c52099b2 \
+    --hash=sha256:6b2cba5cc46e822750ec3e5a81ee12819850b11303630d575e98108a079c2b12
     # via
     #   acme
     #   josepy
@@ -704,10 +704,12 @@ typing-extensions==4.8.0 \
     #   pydantic-core
     #   starlette
     #   uvicorn
-urllib3==2.0.7 \
-    --hash=sha256:c97dfde1f7bd43a71c8d2a58e369e9b2bf692d1334ea9f9cae55add7d0dd0f84 \
-    --hash=sha256:fdb6d215c776278489906c2f8916e6e7d4f5a9b602ccbcfdf7f016fc8da0596e
-    # via requests
+urllib3==1.26.18 \
+    --hash=sha256:34b97092d7e0a3a8cf7cd10e386f401b3737364026c45e622aa02903dffe0f07 \
+    --hash=sha256:f8ecc1bba5667413457c529ab955bf8c67b45db799d159066261719e328580a0
+    # via
+    #   -r requirements.in
+    #   requests
 uvicorn==0.23.2 \
     --hash=sha256:1f9be6558f01239d4fdf22ef8126c39cb1ad0addf76c40e760549d2c2f43ab53 \
     --hash=sha256:4d3cc12d7727ba72b64d12d3cc7743124074c0a69f7b201512fc50c3e3f1569a
