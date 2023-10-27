@@ -117,13 +117,11 @@ class DockerController(Controller):
             self._instances,
             self._services,
             configs=self._configs,
-            first=not self._loaded,
         )
 
     def process_events(self):
         for _ in self.__client.events(decode=True, filters={"type": "container"}):
             try:
-                self._update_settings()
                 self._instances = self.get_instances()
                 self._services = self.get_services()
                 self._configs = self.get_configs()

@@ -38,9 +38,9 @@ class Config:
         self.__config = {}
         self._settings = {}
 
-        self.__update_settings()
+        self._update_settings()
 
-    def __update_settings(self) -> None:
+    def _update_settings(self) -> None:
         old_settings = self._settings
         try:
             self._settings = {}
@@ -65,7 +65,7 @@ class Config:
                         f"Successfully sent API request to {self._api.endpoint}plugins",
                     )
 
-            for plugin in plugins:
+            for plugin in plugins.json():  # type: ignore
                 self._settings.update(plugin["settings"])
         except:
             self.__logger.exception("Could not update settings")
@@ -112,7 +112,7 @@ class Config:
 
     def _full_env(self, env_instances: Dict[str, Any], env_services: Dict[str, Any]) -> Dict[str, Any]:
         full_env = {}
-        self.__update_settings()
+        self._update_settings()
         # Fill with default values
         for k, v in self._settings.items():
             full_env[k] = v["default"]
@@ -183,7 +183,7 @@ class Config:
                     additonal_headers={"Authorization": f"Bearer {self._api_token}"} if self._api_token else {},
                 )
 
-                if not sent or status not in (200, 503):
+                if not sent or status not in (200, 201, 503):
                     self.__logger.warning(resp)
                     self.__logger.warning(
                         f"Could not contact core API. Instances may not be updated: {err}",
@@ -257,7 +257,7 @@ class Config:
 
                 if not sent or status not in (200, 503):
                     self.__logger.warning(
-                        f"Could not contact core API. Config may not be updated: {err}, config will not work as expected",
+                        f"Could not contact core API. Config may not be updated:\n{err}",
                     )
                     success = False
                 elif status == 503:

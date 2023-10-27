@@ -145,7 +145,6 @@ class SwarmController(Controller):
                     self.__internal_lock.acquire()
                     locked = True
                     try:
-                        self._update_settings()
                         self._instances = self.get_instances()
                         self._services = self.get_services()
                         self._configs = self.get_configs()

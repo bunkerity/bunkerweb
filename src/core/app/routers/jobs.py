@@ -136,7 +136,11 @@ async def run_jobs(method: str, background_tasks: BackgroundTasks, job_name: Opt
         status.HTTP_404_NOT_FOUND: {
             "description": "File not found",
             "model": ErrorMessage,
-        }
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
     },
 )
 async def get_cache(job_name: str, file_name: str, data: CacheFileDataModel):
@@ -155,6 +159,12 @@ async def get_cache(job_name: str, file_name: str, data: CacheFileDataModel):
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "File not found"},
+        )
+    elif isinstance(cached_file, str):
+        CORE_CONFIG.logger.error(f"Can't get job {job_name} cache from database : {cached_file}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": cached_file},
         )
 
     return (

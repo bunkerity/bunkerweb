@@ -239,7 +239,6 @@ class IngressController(Controller):
                 for _ in w.stream(what):
                     self.__internal_lock.acquire()
                     locked = True
-                    self._update_settings()
                     self._instances = self.get_instances()
                     self._services = self.get_services()
                     self._configs = self.get_configs()

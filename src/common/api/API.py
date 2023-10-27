@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from typing import Literal, Optional, Union
+from typing import Literal, Optional, Tuple, Union
 from requests import Response, request
 
 
@@ -31,7 +31,7 @@ class API:
         *,
         additonal_headers: Optional[dict] = None,
         timeout=(10, 30),
-    ) -> tuple[bool, str, Optional[int], Optional[Response]]:
+    ) -> Tuple[bool, str, Optional[int], Optional[Response]]:
         additonal_headers = additonal_headers or {}
         try:
             kwargs = {}

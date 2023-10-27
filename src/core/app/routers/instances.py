@@ -59,7 +59,7 @@ async def get_instances():
         },
     },
 )
-async def upsert_instance(instance: UpsertInstance, background_tasks: BackgroundTasks, method: str, reload: bool = True) -> JSONResponse:
+async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]], background_tasks: BackgroundTasks, method: str, reload: bool = True) -> JSONResponse:
     """
     Upsert one or more BunkerWeb instances with the following information:
 
@@ -69,43 +69,85 @@ async def upsert_instance(instance: UpsertInstance, background_tasks: Background
     """
 
     if method == "static":
-        message = f"Can't upsert instance {instance.hostname} : method can't be static"
+        message = "Can't upsert instance(s) : method can't be static"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
-    resp = DB.upsert_instance(**instance.model_dump(), method=method)
+    decisions = {"created": [], "updated": []}
+    status_code = None
 
-    if resp == "method_conflict":
-        message = f"Can't upsert instance {instance.hostname} because it is either static or was created by the core or the autoconf and the method isn't one of them"
-        CORE_CONFIG.logger.warning(message)
-        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
-    elif "database is locked" in resp or "file is not a database" in resp:
-        retry_in = str(uniform(1.0, 5.0))
-        CORE_CONFIG.logger.warning(f"Can't upsert instance to database : {resp}, retry in {retry_in} seconds")
-        return JSONResponse(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
-            headers={"Retry-After": retry_in},
-        )
-    elif resp not in ("created", "updated"):
-        CORE_CONFIG.logger.error(f"Can't upsert instance to database : {resp}")
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"message": resp},
-        )
+    if not isinstance(instances, list):
+        resp = DB.upsert_instance(**instances.model_dump(exclude=("last_seen",)), method=method)  # type: ignore
 
-    message = f"Instance {instance.hostname} successfully {resp}"
+        if resp == "method_conflict":
+            message = f"Can't upsert instance {instances.hostname} because it is either static or was created by the core or the autoconf and the method isn't one of them"
+            CORE_CONFIG.logger.warning(message)
+            return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+        elif "database is locked" in resp or "file is not a database" in resp:
+            retry_in = str(uniform(1.0, 5.0))
+            CORE_CONFIG.logger.warning(f"Can't upsert instance to database : {resp}, retry in {retry_in} seconds")
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
+                headers={"Retry-After": retry_in},
+            )
+        elif resp not in ("created", "updated"):
+            CORE_CONFIG.logger.error(f"Can't upsert instance to database : {resp}")
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"message": resp},
+            )
 
-    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["instance"], "title": "Upsert instance", "description": message})
+        decisions[resp].append(instances)
+    else:
+        for instance in instances:
+            resp = DB.upsert_instance(**instance.model_dump(exclude=("last_seen",)), method=method)  # type: ignore
+
+            if "database is locked" in resp or "file is not a database" in resp:
+                retry_in = str(uniform(1.0, 5.0))
+                CORE_CONFIG.logger.warning(f"Can't upsert instance {instance.hostname} to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
+                return JSONResponse(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
+                    headers={"Retry-After": retry_in},
+                )
+            elif resp not in ("created", "updated"):
+                CORE_CONFIG.logger.error(f"Can't upsert instance {instance.hostname} to database : {resp}")
+                return JSONResponse(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    content={"message": resp},
+                )
+
+            decisions[resp].append(instance)
+
+        status_code = status.HTTP_200_OK
+
+    message = "Instance(s) "
+
+    if decisions["created"]:
+        message += f"{', '.join(instance.hostname for instance in decisions['created'])} successfully created"
+    if decisions["updated"]:
+        if decisions["created"]:
+            message += "and "
+        message += f"{', '.join(instance.hostname for instance in decisions['updated'])} successfully updated"
+
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["instance"], "title": "Upsert instance(s)", "description": message})
     CORE_CONFIG.logger.info(f"✅ {message} in the database")
 
-    if resp == "created" and reload:
-        background_tasks.add_task(test_and_send_to_instances, "all", {instance.to_api()})
+    if reload:
+        if decisions["created"]:
+            background_tasks.add_task(
+                test_and_send_to_instances,
+                "all",
+                {instance.to_api() for instance in decisions["created"]},
+            )
+        if decisions["updated"]:
+            CORE_CONFIG.logger.info(
+                f"Skipping sending data to instance{'s' if len(decisions) > 1 else ''} : {', '.join(instance.hostname for instance in decisions['updated'])}, as {'all' if len(decisions) > 1 else 'this'}"
+                + f" instance{'s' if len(decisions) > 1 else ''} {'were' if len(decisions) > 1 else 'was'} already in the database"
+            )
 
-    if resp == "updated":
-        CORE_CONFIG.logger.info(f"Skipping sending data to instance {instance.hostname}, as this instance was already in the database")
-
-    return JSONResponse(status_code=status.HTTP_201_CREATED if resp == "created" else status.HTTP_200_OK, content={"message": message})
+    return JSONResponse(status_code=status_code or (status.HTTP_201_CREATED if not decisions["updated"] else status.HTTP_200_OK), content={"message": message})
 
 
 @router.get(

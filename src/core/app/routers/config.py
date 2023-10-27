@@ -39,31 +39,44 @@ def update_plugins(function: Optional[Callable] = None):
     wrap()
 
 
-def parse_config(config: Dict[str, str]) -> Tuple[List[Dict[Literal["setting", "error"], str]], Dict[str, str]]:
+def parse_config(config: Dict[str, str], *, whole: bool = False) -> Tuple[List[Dict[Literal["setting", "error"], str]], Dict[str, str]]:
     conflicts = []
-    for setting, value in deepcopy(config.items()):
+    servers = []
+    if whole:
+        for server_name in config["SERVER_NAME"].strip().split(" "):
+            if not match(r"^(?! )( ?((?=[^ ]{1,255}( |$))[^ ]+)(?!.* \2))*$", server_name):
+                continue
+            servers.append(server_name)
+
+    for setting, value in deepcopy(config).items():
         found = False
         error = ""
         multiple = False
         raw_setting = setting
+        for server_name in servers:
+            if setting.startswith(server_name + "_"):
+                setting = setting.replace(f"{server_name}_", "", 1)
+                break
         if match("_[0-9]+$", setting):
-            raw_setting = setting.rsplit("_", 1)[0]
+            setting = setting.rsplit("_", 1)[0]
             multiple = True
         for plugin in PLUGINS:
-            for plugin_setting, data in PLUGINS[plugin]["settings"].items():
-                if setting != plugin_setting:
+            for plugin_setting, data in plugin["settings"].items():
+                if plugin_setting == raw_setting:
+                    multiple = False
+                elif plugin_setting != setting:
                     continue
                 found = True
                 if multiple and "multiple" not in data:
-                    error = f"Setting {setting} is not multiple"
+                    error = f"Setting {raw_setting} is not multiple"
                     break
                 if not match(data["regex"], value):
-                    error = f"Value {value} for setting {setting} doesn't match regex {data['regex']}"
+                    error = f"Value {value} for setting {raw_setting} doesn't match regex {data['regex']}"
                     break
             if error or found:
                 break
         if not found:
-            error = f"Setting {setting} not found"
+            error = f"Setting {raw_setting} not found"
         if error:
             config.pop(raw_setting, None)
             conflicts.append({"setting": setting, "error": error})
@@ -122,7 +135,7 @@ async def update_config(config: Dict[str, str], method: str, background_tasks: B
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
-    conflicts, config = parse_config(config)
+    conflicts, config = parse_config(config, whole=True)
 
     if conflicts and not config:
         CORE_CONFIG.logger.warning(f"Can't save config to database : {dumps(conflicts)}")
