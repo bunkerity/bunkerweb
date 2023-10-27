@@ -22,6 +22,10 @@ import {
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
+import { useLogsStore } from "@store/logs.js";
+
+const logsStore = useLogsStore();
+logsStore.setTags(["plugin", "config"]);
 
 const config = useConfigStore();
 

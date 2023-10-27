@@ -96,7 +96,7 @@ async function sendBans() {
     "POST",
     getValidBans(),
     addBans,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "error") return;
     // Case succeed, delete items from UI
@@ -168,7 +168,7 @@ async function sendBans() {
         <ListItem
           v-for="(item, id) in bans.items"
           :key="id"
-          :class="[id === bans.items.length - 1 ? '' : 'border-b', 'pt-0']"
+          :class="[id === bans.items.length - 1 ? '' : 'border-b', 'py-1.5']"
         >
           <div class="list-content-item-wrap">
             <SettingsLayout
@@ -237,7 +237,7 @@ async function sendBans() {
               @click="deleteItem(item.id)"
               color="delete"
               size="normal"
-              class="text-sm mx-4 mt-2"
+              class="text-sm mx-4 py-1.5"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

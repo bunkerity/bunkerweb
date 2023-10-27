@@ -717,6 +717,10 @@ body {
   @apply border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5;
 }
 
+.list-content {
+  @apply border-b hover:bg-gray-100 dark:hover:bg-slate-700 border-gray-300 py-2.5 dark:text-gray-400;
+}
+
 .list-content-item-wrap {
   @apply break-words items-center col-span-12 grid grid-cols-12 text-sm dark:text-gray-400;
 }

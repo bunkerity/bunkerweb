@@ -37,6 +37,9 @@ def get_core_format_res(path, method, data, message):
 
             data = json.dumps(data, skipkeys=True, allow_nan=True, indent=6)
 
+        print(req.status_code)
+        print(req.status_code == requests.codes.ok)
+
         return {"type": "success" if req.status_code == requests.codes.ok else "error", "status": str(req.status_code), "message": message, "data": data}
     # Case impossible to format
     except:

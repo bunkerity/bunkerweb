@@ -12,18 +12,29 @@ import ApiState from "@components/Api/State.vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { reactive, computed, onMounted } from "vue";
-import { getActionsByFilter } from "@utils/actions.js";
+import { getActionsByFilter, getSelectList } from "@utils/actions.js";
+import { useLogsStore } from "@store/logs.js";
+
+const logsStore = useLogsStore();
+logsStore.setTags(["action"]);
 
 const feedbackStore = useFeedbackStore();
 
-const positions = ["col-span-2", "col-span-3", "col-span-4", "col-span-3"];
+const positions = [
+  "col-span-2",
+  "col-span-3",
+  "col-span-3",
+  "col-span-3",
+  "col-span-1",
+];
 
-const header = ["Method", "Title", "Description", "Date"];
+const header = ["Method", "Title", "Description", "Date", "Action"];
 
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
-  name: "",
+  search: "",
   method: "all",
+  actionApi: "all",
 });
 
 // Plugins data to render components
@@ -33,25 +44,56 @@ const actions = reactive({
   // Never modify this unless refetch
   data: [],
   total: computed(() => Object.keys(actions.data).length),
+  core: 0,
   ui: 0,
-  autoconf: 0,
   methodList: ["all"],
+  actionApiList: ["all"],
   setup: computed(() => {
+    if (!actions.data || actions.data.length <= 0) return [];
     // Change to array and keep name
     const cloneData = JSON.parse(JSON.stringify(actions.data));
-    const dataArr = [];
-    for (const [key, value] of Object.entries(cloneData)) {
-      dataArr.push({ [key]: cloneData[key] });
-    }
 
     // Filter data to display
-    const filter = getActionsByFilter(dataArr, filters);
+    const filter = getActionsByFilter(cloneData, filters);
+
+    // Get method select list
+    const methodList = getSelectList(["all"], filter, "method");
+
+    filters.method =
+      methodList.indexOf(filters.method) === -1 ? "all" : filters.method;
+    actions.methodList = methodList;
+
+    // Get action api select list
+    const actionApiList = getSelectList(["all"], filter, "api_method");
+
+    filters.actionApi =
+      actionApiList.indexOf(filters.actionApi) === -1
+        ? "all"
+        : filters.actionApi;
+    actions.actionApiList = actionApiList;
+
+    // Update info
+    let countUI = 0;
+    let countCore = 0;
+    filter.forEach((action) => {
+      if (action.method.toLowerCase() === "core") countCore++;
+      if (action.method.toLowerCase() === "ui") countUI++;
+    });
+    actions.core = countCore;
+    actions.ui = countUI;
+
     return filter;
   }),
 });
 
 async function getActions() {
-  await fetchAPI("/api/jobs", "GET", null, jobs, feedbackStore.addFeedback);
+  await fetchAPI(
+    "/api/actions",
+    "GET",
+    null,
+    actions,
+    feedbackStore.addFeedback
+  );
 }
 
 onMounted(() => {
@@ -79,7 +121,7 @@ onMounted(() => {
         :items="[
           { label: 'actions total', value: actions.total },
           { label: 'actions ui', value: actions.ui },
-          { label: 'actions autoconf', value: actions.autoconf },
+          { label: 'actions core', value: actions.core },
         ]"
       />
     </CardBase>
@@ -90,7 +132,7 @@ onMounted(() => {
     >
       <SettingsLayout class="sm:col-span-6" label="Search" name="keyword">
         <SettingsInput
-          @inp="(v) => (filters.name = v)"
+          @inp="(v) => (filters.search = v)"
           :settings="{
             id: 'keyword',
             type: 'text',
@@ -114,18 +156,32 @@ onMounted(() => {
           }"
         />
       </SettingsLayout>
+      <SettingsLayout
+        class="sm:col-span-6"
+        label="API Method"
+        name="actions-action-api"
+      >
+        <SettingsSelect
+          @inp="(v) => (filters.actionApi = v)"
+          :settings="{
+            id: 'actions-action-api',
+            value: filters.actionApi,
+            values: actions.actionApiList,
+          }"
+        />
+      </SettingsLayout>
     </CardBase>
     <CardBase
       v-if="!actions.isErr && !actions.isPend"
       class="col-span-12 overflow-x-auto overflow-y-hidden"
-      label="jobs"
+      label="ACTIONS"
     >
       <ListBase
         class="min-w-[1100px] col-span-12"
         :header="header"
         :positions="positions"
       >
-        <ActionsItems :positions="positions" :items="jobs.setup">
+        <ActionsItems :positions="positions" :items="actions.setup">
         </ActionsItems>
       </ListBase>
     </CardBase>

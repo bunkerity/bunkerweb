@@ -14,6 +14,10 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsCheckbox from "@components/Settings/Checkbox.vue";
 import { useFeedbackStore } from "@store/global.js";
 import FileManagerStructure from "@components/FileManager/Structure.vue";
+import { useLogsStore } from "@store/logs.js";
+
+const logsStore = useLogsStore();
+logsStore.setTags(["custom_config"]);
 
 const feedbackStore = useFeedbackStore();
 

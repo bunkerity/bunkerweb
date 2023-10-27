@@ -14,6 +14,10 @@ import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { reactive, computed, onMounted } from "vue";
 import { getJobsByFilter, getJobsIntervalList } from "@utils/jobs.js";
+import { useLogsStore } from "@store/logs.js";
+
+const logsStore = useLogsStore();
+logsStore.setTags(["job"]);
 
 const feedbackStore = useFeedbackStore();
 

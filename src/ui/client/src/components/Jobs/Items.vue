@@ -25,7 +25,7 @@ const emits = defineEmits(["cache", "run", "history"]);
 <template>
   <ListItem
     v-for="(item, id) in props.items"
-    :class="[id === props.items.length - 1 ? '' : 'border-b']"
+    :class="[id === props.items.length - 1 ? '' : 'border-b', 'py-2']"
   >
     <div class="list-content-item-wrap" v-for="(data, key) in item">
       <span class="pl-4" :class="[props.positions[0]]">{{ key }}</span>
@@ -57,6 +57,7 @@ const emits = defineEmits(["cache", "run", "history"]);
       </div>
       <div :class="[props.positions[7], 'flex justify-center']">
         <ButtonBase
+          class="py-1.5"
           color="valid"
           size="lg"
           @click="$emit('run', { jobName: key })"

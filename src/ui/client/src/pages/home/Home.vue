@@ -9,6 +9,10 @@ import ApiState from "@components/Api/State.vue";
 import { reactive, computed, onMounted } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
+import { useLogsStore } from "@store/logs.js";
+
+const logsStore = useLogsStore();
+logsStore.setTags(["all"]);
 
 const feedbackStore = useFeedbackStore();
 

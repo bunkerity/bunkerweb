@@ -14,6 +14,11 @@ import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { getBansByFilter } from "@utils/bans.js";
+import { useLogsStore } from "@store/logs.js";
+
+const logsStore = useLogsStore();
+logsStore.setTags(["instance"]);
+
 const feedbackStore = useFeedbackStore();
 
 // Hide / Show settings and plugin base on that filters

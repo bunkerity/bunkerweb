@@ -6,7 +6,6 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsCheckbox from "@components/Settings/Checkbox.vue";
 import SettingsDatepicker from "@components/Settings/Datepicker.vue";
 import ButtonBase from "@components/Button/Base.vue";
-import ButtonRefresh from "@components/Button/Refresh.vue";
 import { useSelectBanStore } from "@store/bans.js";
 import { reactive } from "vue";
 import { useFeedbackStore } from "@store/global.js";
@@ -68,7 +67,7 @@ const list = reactive({
 function toggleAllCheck() {
   list.checkAll = list.checkAll ? false : true;
   const banItemsChekbox = document.querySelectorAll(
-    '#banlist-container input[type="checkbox"]',
+    '#banlist-container input[type="checkbox"]'
   );
   banItemsChekbox.forEach((item) => {
     // Check current state to update
@@ -83,7 +82,7 @@ async function sendUnban() {
     "POST",
     selectBanStore.data,
     addBans,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "error") return;
     // Case succeed, delete items from UI
@@ -161,6 +160,7 @@ async function sendUnban() {
               :class="[
                 id === props.items.length - 1 ? '' : 'border-b',
                 item.isMatchFilter ? '' : 'hidden',
+                'py-1.5',
               ]"
             >
               <div class="list-content-item-wrap">
@@ -219,7 +219,7 @@ async function sendUnban() {
                         id: `ban-end-${id}`,
                         disabled: true,
                       }"
-                      :defaultDate="Date.now() + +`${item.exp}000`"
+                      :defaultDate="Date.now() + `${item.exp}000`"
                     />
                   </SettingsLayout>
                 </div>

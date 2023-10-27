@@ -1,13 +1,59 @@
 <script setup>
-import { onMounted, reactive } from "vue";
+import { onMounted, reactive, computed } from "vue";
 import TablistBase from "@components/Tablist/Base.vue";
+import ListItem from "@components/List/Item.vue";
+import { getLogsByFilter } from "@utils/logs.js";
+import { fetchAPI } from "@utils/api.js";
+import { useLogsStore } from "@store/logs.js";
+
+// On each page, we are selecting tags we want to show
+// Using logsStore.setTags()
+const logsStore = useLogsStore();
+
+const filters = reactive({
+  tags: logsStore.tags,
+});
 
 // DATA
 const logs = reactive({
-  isActive: false,
+  isPend: false,
+  isErr: false,
+  // Never modify this unless refetch
+  data: [],
   current: "ui",
-  ui: [],
-  core: [],
+  maxHeight: "max-h-[90vh]",
+  setup: computed(() => {
+    if (!logs.data || logs.data.length <= 0) return [];
+    // Change to array and keep name
+    const cloneData = JSON.parse(JSON.stringify(logs.data));
+    const filter = getLogsByFilter(cloneData, filters);
+    console.log(filter);
+
+    const logUI = [];
+    const logCore = [];
+    filter.forEach((log) => {
+      if (!log.isMatchFilter) return;
+      if (log.method.toLowerCase() === "core") logCore.push(log);
+      if (log.method.toLowerCase() === "ui") logUI.push(log);
+    });
+
+    return { ui: logUI, core: logCore };
+  }),
+});
+
+async function getLogs() {
+  await fetchAPI("/api/actions", "GET", null, logs, null);
+}
+
+onMounted(() => {
+  getLogs();
+  // Change logs height to fit screen
+  if (window.innerHeight >= 780) logs.maxHeight = "max-h-[90vh]";
+  if (window.innerHeight < 780 && window.innerHeight >= 567)
+    logs.maxHeight = "max-h-[70vh]";
+  if (window.innerHeight < 567 && window.innerHeight >= 490)
+    logs.maxHeight = "max-h-[65vh]";
+  if (window.innerHeight < 490) logs.maxHeight = "max-h-[60vh]";
 });
 </script>
 
@@ -59,8 +105,9 @@ const logs = reactive({
 
     <!-- header -->
     <div class="news-sidebar-header">
-      <div class="float-left w-full">
-        <h5 class="news-sidebar-title mb-4">LOGS</h5>
+      <div class="w-full">
+        <h5 class="news-sidebar-title">ACTIONS</h5>
+        <p class="news-sidebar-subtitle mb-4">Related to page tags</p>
         <TablistBase
           @tab="(v) => (logs.current = v)"
           :current="logs.current"
@@ -70,8 +117,58 @@ const logs = reactive({
           ]"
         />
       </div>
-      <div v-if="logs.current === 'ui'"></div>
-      <div v-if="logs.current === 'core'"></div>
+      <ul
+        :class="[logs.maxHeight]"
+        class="overflow-auto"
+        v-if="logs.current === 'ui'"
+      >
+        <ListItem v-for="item in logs.setup.ui">
+          <div class="list-content-item-wrap px-2">
+            <div class="col-span-12">
+              <div class="flex justify-between">
+                <strong class="mb-0.5 font-bold">{{ item.title }}</strong>
+                <div class="flex mb-0.5">
+                  <p class="mb-0.5">{{ item.method.toUpperCase() }}</p>
+                  <span class="mb-0.5">|</span>
+                  <p class="mb-0.5">{{ item.api_method }}</p>
+                </div>
+              </div>
+              <p class="mb-1.5">{{ item.description }}</p>
+              <div class="flex items-center justify-end">
+                <p class="text-right text-xs italic mb-0">
+                  {{ item.date }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </ListItem>
+      </ul>
+      <ul
+        :class="[logs.maxHeight]"
+        class="overflow-auto"
+        v-if="logs.current === 'core'"
+      >
+        <ListItem v-for="item in logs.setup.core">
+          <div class="list-content-item-wrap px-2">
+            <div class="col-span-12">
+              <div class="flex justify-between">
+                <strong class="mb-0.5 font-bold">{{ item.title }}</strong>
+                <div class="flex mb-0.5">
+                  <p class="mb-0.5">{{ item.method.toUpperCase() }}</p>
+                  <span class="mb-0.5">|</span>
+                  <p class="mb-0.5">{{ item.api_method }}</p>
+                </div>
+              </div>
+              <p class="mb-1.5">{{ item.description }}</p>
+              <div class="flex items-center justify-end">
+                <p class="text-right text-xs italic mb-0">
+                  {{ item.date }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </ListItem>
+      </ul>
     </div>
     <!-- end header -->
   </aside>

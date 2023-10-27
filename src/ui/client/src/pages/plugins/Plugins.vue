@@ -12,6 +12,10 @@ import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { getPluginsByFilter } from "@utils/plugins.js";
 import ApiState from "@components/Api/State.vue";
+import { useLogsStore } from "@store/logs.js";
+
+const logsStore = useLogsStore();
+logsStore.setTags(["plugin"]);
 
 const feedbackStore = useFeedbackStore();
 
@@ -29,10 +33,10 @@ const plugins = reactive({
   data: [],
   total: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.data.filter((item) => item["external"] === false).length,
+    () => plugins.data.filter((item) => item["external"] === false).length
   ),
   external: computed(
-    () => plugins.data.filter((item) => item["external"] === true).length,
+    () => plugins.data.filter((item) => item["external"] === true).length
   ),
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
@@ -51,7 +55,7 @@ async function getPlugins() {
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
