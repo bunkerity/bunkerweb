@@ -5,7 +5,7 @@ from fastapi import APIRouter, BackgroundTasks, File, Form, status
 from fastapi.responses import JSONResponse
 
 from ..models import CacheFileDataModel, CacheFileModel, ErrorMessage, Job, JobCache
-from ..dependencies import CORE_CONFIG, DB, run_job as deps_run_job
+from ..dependencies import CORE_CONFIG, DB, run_job, run_jobs as deps_run_jobs
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -86,9 +86,9 @@ async def add_job_run(job_name: str, data: Dict[Literal["success", "start_date",
 
 
 @router.post(
-    "/{job_name}/run",
+    "/run",
     response_model=Dict[Literal["message"], str],
-    summary="Send a task to the scheduler to run a job asynchronously",
+    summary="Send a task to the scheduler to run a single job or all jobs asynchronously",
     response_description="Job",
     responses={
         status.HTTP_404_NOT_FOUND: {
@@ -97,21 +97,31 @@ async def add_job_run(job_name: str, data: Dict[Literal["success", "start_date",
         }
     },
 )
-async def run_job(job_name: str, method: str, background_tasks: BackgroundTasks):
+async def run_jobs(method: str, background_tasks: BackgroundTasks, job_name: Optional[str] = None):
     """
-    Run a job.
+    Run a job(s).
     """
-    job = DB.get_job(job_name)
+    title = ""
+    description = ""
+    if job_name:
+        job = DB.get_job(job_name)
 
-    if not job:
-        CORE_CONFIG.logger.warning(f"Job {job_name} not found")
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": f"Job {job_name} not found"},
-        )
+        if not job:
+            CORE_CONFIG.logger.warning(f"Job {job_name} not found")
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"message": f"Job {job_name} not found"},
+            )
 
-    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["job"], "title": f"Job {job_name} run", "description": f"Job {job_name} run scheduled"})
-    background_tasks.add_task(deps_run_job, job_name)
+        title = f"Job {job_name} run"
+        description = f"Job {job_name} run scheduled"
+        background_tasks.add_task(run_job, job_name)
+    else:
+        title = "Jobs run"
+        description = "Jobs run scheduled"
+        background_tasks.add_task(deps_run_jobs)
+
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["job"], "title": title, "description": description})
 
     return JSONResponse(content={"message": "Successfully sent task to scheduler"})
 

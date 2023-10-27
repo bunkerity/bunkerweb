@@ -230,16 +230,6 @@ class Database:
                 return False
         return False
 
-    def is_first_config_saved(self) -> bool:
-        """Check if the first configuration has been saved"""
-        with suppress(BaseException), self._db_session() as session:
-            try:
-                metadata = session.query(Metadata).with_entities(Metadata.first_config_saved).filter_by(id=1).with_for_update(read=True).first()
-                return metadata is not None and metadata.first_config_saved
-            except (ProgrammingError, OperationalError):
-                return False
-        return False
-
     def is_initialized(self) -> bool:
         """Check if the database is initialized"""
         with suppress(BaseException), self._db_session() as session:
@@ -274,15 +264,7 @@ class Database:
                 return "The database is already up to date"
 
             proc = subprocess_run(
-                [
-                    "python3",
-                    "-m",
-                    "alembic",
-                    "revision",
-                    "--autogenerate",
-                    "-m",
-                    f'"Update to version v{version}"',
-                ],
+                ["python3", "-m", "alembic", "revision", "--autogenerate", "-m", f'"Update to version v{version}"'],
                 cwd=str(self.ALEMBIC_FILE_PATH.parent),
                 stdout=DEVNULL,
                 stderr=STDOUT,
@@ -1974,31 +1956,13 @@ class Database:
                         {
                             "service_id": cache.service_id,
                             "file_name": cache.file_name,
-                            "last_update": cache.last_update.strftime("%Y/%m/%d, %I:%M:%S %p") if cache.last_update is not None else "Never",
+                            "last_update": cache.last_update.strftime("%Y/%m/%d, %I:%M:%S %p") if cache.last_update else "Never",
                             "checksum": cache.checksum,
                         }
-                        for cache in session.query(Jobs_cache)
-                        .with_entities(
-                            Jobs_cache.service_id,
-                            Jobs_cache.file_name,
-                            Jobs_cache.last_update,
-                            Jobs_cache.checksum,
-                        )
-                        .filter_by(job_name=job.name)
-                        .with_for_update(read=True)
-                        .all()
+                        for cache in session.query(Jobs_cache).with_entities(Jobs_cache.service_id, Jobs_cache.file_name, Jobs_cache.last_update, Jobs_cache.checksum).filter_by(job_name=job.name).with_for_update(read=True).all()
                     ],
                 }
-                for job in (
-                    session.query(Jobs)
-                    .with_entities(
-                        Jobs.name,
-                        Jobs.every,
-                        Jobs.reload,
-                    )
-                    .with_for_update(read=True)
-                    .all()
-                )
+                for job in session.query(Jobs).with_entities(Jobs.name, Jobs.every, Jobs.reload).with_for_update(read=True).all()
             }
 
         if self._exceptions.get(getpid()):
