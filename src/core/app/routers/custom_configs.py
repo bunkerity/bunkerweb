@@ -1,6 +1,6 @@
 from datetime import datetime
 from random import uniform
-from typing import Dict, List, Literal, Union
+from typing import Dict, List, Literal
 from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
@@ -26,7 +26,7 @@ async def get_custom_configs():
 @router.put(
     "",
     response_model=Dict[Literal["message"], str],
-    summary="Update one or more custom configs",
+    summary="Update one custom config",
     response_description="Message",
     responses={
         status.HTTP_403_FORBIDDEN: {
@@ -43,8 +43,8 @@ async def get_custom_configs():
         },
     },
 )
-async def update_custom_config(
-    custom_configs: Union[CustomConfigDataModel, List[CustomConfigDataModel]],
+async def upsert_custom_config(
+    custom_config: CustomConfigDataModel,
     method: str,
     background_tasks: BackgroundTasks,
     reload: bool = True,
@@ -52,73 +52,46 @@ async def update_custom_config(
     """Update one or more custom configs"""
 
     if method == "static":
-        message = "Can't delete custom config(s) : method can't be static"
+        message = f"Can't upsert custom config {custom_config.name} : method can't be static"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
-    resp = "created"
-    status_code = None
+    custom_config_data = custom_config.model_dump() | {"method": method}
+    custom_config_data["config_type"] = custom_config_data.pop("type")
+    resp = DB.upsert_custom_config(**custom_config_data)
 
-    if isinstance(custom_configs, CustomConfigDataModel):
-        custom_config_data = custom_configs.model_dump() | {"method": method}
-        custom_config_data["config_type"] = custom_config_data.pop("type")
-        resp = DB.upsert_custom_config(**custom_config_data)
+    if resp == "method_conflict":
+        message = (
+            f"Can't upsert custom config {custom_config.name}"
+            + (f" from service {custom_config.service_id}" if custom_config.service_id else "")
+            + " because it is either static or was created by the core or the autoconf and the method isn't one of them"
+        )
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+    elif "database is locked" in resp or "file is not a database" in resp:
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(f"Can't upsert custom config: Database is locked or had trouble handling the request, retry in {retry_in} seconds")
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
+            headers={"Retry-After": retry_in},
+        )
+    elif resp and resp not in ("created", "updated"):
+        CORE_CONFIG.logger.error(f"Can't upsert custom config: {resp}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": resp},
+        )
 
-        if resp == "method_conflict":
-            message = (
-                f"Can't upsert custom config {custom_configs.name}"
-                + (f" from service {custom_configs.service_id}" if custom_configs.service_id else "")
-                + " because it is either static or was created by the core or the autoconf and the method isn't one of them"
-            )
-            CORE_CONFIG.logger.warning(message)
-            return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
-        elif "database is locked" in resp or "file is not a database" in resp:
-            retry_in = str(uniform(1.0, 5.0))
-            CORE_CONFIG.logger.warning(f"Can't upsert custom config: Database is locked or had trouble handling the request, retry in {retry_in} seconds")
-            return JSONResponse(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
-                headers={"Retry-After": retry_in},
-            )
-        elif resp and resp not in ("created", "updated"):
-            CORE_CONFIG.logger.error(f"Can't upsert custom config: {resp}")
-            return JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"message": resp},
-            )
-
-        message = f"Custom config {custom_configs.name} {resp}"
-    else:
-        resp = DB.save_custom_configs([c.model_dump() for c in custom_configs], method)
-
-        if "database is locked" in resp or "file is not a database" in resp:
-            retry_in = str(uniform(1.0, 5.0))
-            CORE_CONFIG.logger.warning(f"Can't upsert custom configs: Database is locked or had trouble handling the request, retry in {retry_in} seconds")
-            return JSONResponse(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
-                headers={"Retry-After": retry_in},
-            )
-        if resp:
-            CORE_CONFIG.logger.error(f"Can't upsert custom configs: {resp}")
-            return JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"message": resp},
-            )
-
-        message = f"Custom configs {', '.join(c.name for c in custom_configs)} {resp}"
-        status_code = status.HTTP_200_OK
+    message = f"Custom config {custom_config.name} {resp}"
 
     background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["custom_config"], "title": "Updated custom configs", "description": message})
-    CORE_CONFIG.logger.info(f"✅ {message} to database")
+    CORE_CONFIG.logger.info(f"✅ {message} in the database")
 
     if reload:
         background_tasks.add_task(send_to_instances, {"custom_configs"})
 
-    return JSONResponse(
-        status_code=status_code or (status.HTTP_200_OK if resp == "updated" else status.HTTP_201_CREATED),
-        content={"message": message},
-    )
+    return JSONResponse(status_code=status.HTTP_200_OK if resp == "updated" else status.HTTP_201_CREATED, content={"message": message})
 
 
 @router.delete(

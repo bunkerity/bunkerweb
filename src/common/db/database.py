@@ -1002,8 +1002,10 @@ class Database:
         method: str,
         *,
         checksum: Optional[str] = None,
+        old_name: Optional[str] = None,
     ) -> str:
         """Add or update a custom config in the database"""
+        old_name = old_name or name
         ret = ""
         with suppress(BaseException), self.__db_session() as session:
             config = {
@@ -1021,7 +1023,7 @@ class Database:
                 .filter_by(
                     service_id=config["service_id"],
                     type=config["type"],
-                    name=config["name"],
+                    name=old_name,
                 )
                 .with_for_update(read=True)
                 .first()
@@ -1036,9 +1038,10 @@ class Database:
                 session.query(Custom_configs).filter(
                     Custom_configs.service_id == config["service_id"],
                     Custom_configs.type == config["type"],
-                    Custom_configs.name == config["name"],
+                    Custom_configs.name == old_name,
                 ).with_for_update().update(
                     {
+                        Custom_configs.name: config["name"],
                         Custom_configs.data: config["data"],
                         Custom_configs.checksum: config["checksum"],
                         Custom_configs.method: method,

@@ -230,6 +230,7 @@ class CustomConfigModel(CacheFileModel):
 
 class CustomConfigNameModel(CustomConfigModel):
     name: str = Field(examples=["my_custom_config"], description="The config name")
+    old_name: Optional[str] = Field(None, examples=["my_old_custom_config"], description="The old config name")
 
 
 class CustomConfigDataModel(CustomConfigNameModel):
@@ -237,7 +238,7 @@ class CustomConfigDataModel(CustomConfigNameModel):
         examples=[b"BunkerWeb forever"],
         description="The custom config content in bytes",
     )
-    checksum: str = Field(
+    checksum: Optional[str] = Field(
         None,
         examples=["b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"],
         description="SHA512 checksum of the custom config file",
