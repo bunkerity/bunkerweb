@@ -30,10 +30,11 @@ RUN mkdir -p /usr/share/bunkerweb/deps/python && \
 
 # Copy dependencies sources folder
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
-COPY src/scheduler/requirements.txt /tmp/req/requirements.txt
-COPY src/ui/requirements.txt /tmp/req/requirements.txt.1
-COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.2
-COPY src/common/db/requirements.txt /tmp/req/requirements.txt.3
+COPY src/core/requirements.txt /tmp/req/requirements.txt
+COPY src/autoconf/requirements.txt /tmp/req/requirements.txt.1
+COPY src/ui/requirements.txt /tmp/req/requirements.txt.2
+COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.3
+COPY src/common/db/requirements.txt /tmp/req/requirements.txt.4
 
 WORKDIR /usr/share/bunkerweb
 
@@ -62,7 +63,9 @@ COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 COPY src/core core
 COPY src/ui ui
+COPY src/autoconf autoconf
 COPY src/VERSION VERSION
+COPY misc/config.yaml.example config.yaml.example
 
 
 # Setup BW
@@ -76,11 +79,12 @@ RUN cp helpers/bwcli /usr/bin/ && \
     mkdir -p /var/log/bunkerweb/ && \
     mkdir -p /var/www/html && \
     mkdir -p /var/lib/bunkerweb && \
+    mv config.yaml.example /etc/bunkerweb/ && \
     echo "Linux" > INTEGRATION && \
     find /usr/share/bunkerweb -path ui/deps -prune -o -type f -exec chmod 0740 {} \; && \
     find /usr/share/bunkerweb -path ui/deps -prune -o -type d -exec chmod 0750 {} \; && \
     chmod 770 /var/cache/bunkerweb/ /var/tmp/bunkerweb/ /var/run/bunkerweb/ /var/log/bunkerweb/ && \
-    chmod 750 gen/main.py core/app/*.py core/app/routers/*.py cli/main.py helpers/*.sh /var/www/ && \
+    chmod 750 gen/main.py core/app/*.py core/app/routers/*.py autoconf/*.py ui/*.py ui/routers/*.py cli/main.py helpers/*.sh /var/www/ && \
     find core_plugins/*/jobs/* -type f -exec chmod 750 {} \; && \
     chmod 755 /usr/share/bunkerweb
 

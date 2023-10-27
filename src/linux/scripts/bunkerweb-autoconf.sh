@@ -7,14 +7,15 @@ source /usr/share/bunkerweb/helpers/utils.sh
 source /usr/share/bunkerweb/scripts/utils.sh
 
 # Create the ui.conf file if it doesn't exist
-if [ ! -f /etc/bunkerweb/ui.conf ]; then
-    cp /usr/share/bunkerweb/ui/ui.conf.example /etc/bunkerweb/ui.conf
+if [ ! -f /etc/bunkerweb/autoconf.conf ]; then
+    cp /usr/share/bunkerweb/autoconf/autoconf.conf.example /etc/bunkerweb/autoconf.conf
 fi
 
 # Function to start the UI
 function start() {
-    log "SYSTEMCTL" "ℹ️" "Starting UI"
-    # python3 -m gunicorn --config /usr/share/bunkerweb/ui/gunicorn.conf.py --user nginx --group nginx --bind 127.0.0.1:7000 & # TODO change this
+    log "SYSTEMCTL" "ℹ️" "Starting Autoconf"
+    python /usr/share/bunkerweb/autoconf/main.py &
+    echo $! > /var/run/bunkerweb/autoconf.pid
 }
 
 # Check the command line argument
@@ -23,7 +24,7 @@ case $1 in
         start
         ;;
     "stop")
-        stop "ui"
+        stop "autoconf"
         ;;
     "reload")
         stop
@@ -33,6 +34,6 @@ case $1 in
     *)
         echo "Invalid option!"
         echo "List of options availables:"
-        display_help "ui"
+        display_help "autoconf"
         exit 1
 esac
