@@ -12,7 +12,20 @@ from fastapi.responses import JSONResponse
 from ..models import ErrorMessage
 from ..dependencies import CORE_CONFIG, DB, run_jobs, send_to_instances
 
-router = APIRouter(prefix="/config", tags=["config"])
+router = APIRouter(
+    prefix="/config",
+    tags=["config"],
+    responses={
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
+    },
+)
 PLUGINS = DB.get_plugins()
 
 
@@ -103,7 +116,21 @@ def parse_config(config: Dict[str, str], *, whole: bool = False) -> Tuple[List[D
 )
 async def get_config(methods: bool = False, new_format: bool = False):
     """Get config from Database"""
-    return DB.get_config(methods=methods, new_format=new_format)
+    config = DB.get_config(methods=methods, new_format=new_format)
+
+    if config == "retry":
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(f"Can't get config : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
+            headers={"Retry-After": retry_in},
+        )
+    elif isinstance(config, str):
+        CORE_CONFIG.logger.error(f"Can't get config : {config}")
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": config})
+
+    return config
 
 
 @update_plugins
@@ -143,7 +170,7 @@ async def update_config(config: Dict[str, str], method: str, background_tasks: B
 
     resp = DB.save_config(config, method)
 
-    if "database is locked" in resp or "file is not a database" in resp:
+    if resp == "retry":
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't save config to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
@@ -205,7 +232,7 @@ async def update_global_config(config: Dict[str, str], method: str, background_t
 
     resp = DB.save_global_config(config, method)
 
-    if "database is locked" in resp or "file is not a database" in resp:
+    if resp == "retry":
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't save global config to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
@@ -284,7 +311,7 @@ async def update_service_config(service_name: str, config: Dict[str, str], metho
         message = f"Can't rename service {service_name} because its method or one of its setting's method belongs to the core or the autoconf and the method isn't one of them"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
-    elif "database is locked" in resp or "file is not a database" in resp:
+    elif resp == "retry":
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't save config for service {service_name} to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
@@ -359,7 +386,7 @@ async def delete_service_config(service_name: str, method: str, background_tasks
         message = f"Can't delete service {service_name} because it is either static or was created by the core or the autoconf and the method isn't one of them"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
-    elif "database is locked" in resp or "file is not a database" in resp:
+    elif resp == "retry":
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't delete service {service_name} from the database : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(

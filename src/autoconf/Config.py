@@ -78,7 +78,7 @@ class Config:
                 env_instances[variable] = value
         env_services = {}
         for service in self.__services:
-            server_name = service.get("SERVER_NAME", "").strip().split()[0]
+            server_name = service.get("SERVER_NAME", "").strip().split(" ")[0]
             for variable, value in service.items():
                 env_services[f"{server_name}_{variable}"] = value
             env_instances["SERVER_NAME"] += f" {server_name}"

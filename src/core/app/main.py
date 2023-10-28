@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from contextlib import suppress
+from contextlib import asynccontextmanager, suppress
 from copy import deepcopy
 from glob import glob
 from io import BytesIO
@@ -25,6 +25,7 @@ from tarfile import open as tar_open
 from time import sleep
 from typing import Optional
 
+
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("db",), ("gen",), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
@@ -39,6 +40,7 @@ from regex import compile as re_compile
 from API import API  # type: ignore
 from api_caller import ApiCaller  # type: ignore
 from configurator import Configurator  # type: ignore
+from database import Database  # type: ignore
 from jobs import bytes_hash  # type: ignore
 from .core import BUNKERWEB_VERSION, description, tags_metadata
 from .dependencies import (
@@ -90,6 +92,16 @@ signal(SIGINT, exit_handler)
 signal(SIGTERM, exit_handler)
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global DB
+    del DB
+    DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI)
+    yield
+    del DB
+    stop_app(0)
+
+
 # ? APP
 app = FastAPI(
     title="BunkerWeb API",
@@ -107,6 +119,7 @@ app = FastAPI(
         "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md",
     },
     openapi_tags=tags_metadata,
+    lifespan=lifespan,
 )
 
 

@@ -19,7 +19,20 @@ from ..dependencies import (
     update_app_mounts,
 )
 
-router = APIRouter(prefix="/plugins", tags=["plugins"])
+router = APIRouter(
+    prefix="/plugins",
+    tags=["plugins"],
+    responses={
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
+    },
+)
 
 
 @router.get(
@@ -32,7 +45,24 @@ async def get_plugins():
     """
     Get core and external plugins from the database.
     """
-    return DB.get_plugins()
+    plugins = DB.get_plugins()
+
+    if plugins == "retry":
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(f"Can't get plugins from database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
+            headers={"Retry-After": retry_in},
+        )
+    elif isinstance(plugins, str):
+        CORE_CONFIG.logger.error(f"Can't get plugins from database : {plugins}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": plugins},
+        )
+
+    return plugins
 
 
 @router.post(
@@ -67,7 +97,7 @@ async def add_plugin(plugin: AddedPlugin, background_tasks: BackgroundTasks) -> 
         message = f"Plugin {plugin.id} already exists"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"message": message})
-    elif "database is locked" in resp or "file is not a database" in resp:
+    elif resp == "retry":
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't add plugin {plugin.id} to database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
@@ -139,7 +169,7 @@ async def update_plugin(plugin_id: str, plugin: AddedPlugin, background_tasks: B
         message = f"Can't update a core plugin ({plugin.id})"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
-    elif "database is locked" in resp or "file is not a database" in resp:
+    elif resp == "retry":
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't update plugin {plugin.id} to database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
@@ -182,7 +212,7 @@ async def update_plugin(plugin_id: str, plugin: AddedPlugin, background_tasks: B
             "model": ErrorMessage,
         },
         status.HTTP_403_FORBIDDEN: {
-            "description": "Can't delete the plugin because it is either static or was created by the core or the autoconf and the method isn't one of them",
+            "description": "Can't delete the plugin because it is either not external, static or was created by the core or the autoconf and the method isn't one of them",
             "model": ErrorMessage,
         },
         status.HTTP_503_SERVICE_UNAVAILABLE: {
@@ -219,7 +249,7 @@ async def delete_plugin(plugin_id: str, method: str, background_tasks: Backgroun
         message = f"Can't delete plugin {plugin_id} because it is either static or was created by the core or the autoconf and the method isn't one of them"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
-    elif "database is locked" in resp or "file is not a database" in resp:
+    elif resp == "retry":
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't delete plugin {plugin_id} to database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
@@ -252,7 +282,7 @@ async def delete_plugin(plugin_id: str, method: str, background_tasks: Backgroun
     )
 
 
-@router.get("/external/files", summary="Get all external plugins files in a tar archive", response_description="Tar archive containing all external plugins files")
+@router.get("/external/files", summary="Get all external plugins files in a tar archive", response_description="Tar archive containing all external plugins files", responses={})
 async def get_plugins_files():
     """
     Get all external plugins files in a tar archive.

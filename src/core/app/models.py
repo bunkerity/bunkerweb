@@ -261,3 +261,9 @@ class Action(BaseModel):
     title: str = Field(examples=["Reloaded BunkerWeb"], description="The action title")
     description: str = Field(examples=["BunkerWeb was reloaded"], description="The action description")
     tags: List[str] = Field(examples=[["config"]], description="The action tags")
+
+
+class JobRun(BaseModel):
+    success: bool = Field(examples=[True], description="If the job run was successful")
+    start_date: datetime = Field(examples=["2021-01-01T00:00:00.000Z"], description="The job run start date")
+    end_date: Optional[datetime] = Field(None, examples=["2021-01-01T00:00:00.000Z"], description="The job run end date")

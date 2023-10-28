@@ -166,6 +166,7 @@ def cache_file(
     else:
         if isinstance(file_cache, str):
             file_cache = Path(file_cache)
+        assert isinstance(file_cache, Path)
         content = file_cache.read_bytes()
 
     try:

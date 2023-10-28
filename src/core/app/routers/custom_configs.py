@@ -8,7 +8,20 @@ from fastapi.responses import JSONResponse
 from ..models import CustomConfigModel, CustomConfigDataModel, ErrorMessage, UpsertCustomConfigDataModel
 from ..dependencies import CORE_CONFIG, DB, send_to_instances
 
-router = APIRouter(prefix="/custom_configs", tags=["custom_configs"])
+router = APIRouter(
+    prefix="/custom_configs",
+    tags=["custom_configs"],
+    responses={
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
+    },
+)
 
 
 @router.get("", response_model=List[CustomConfigDataModel], summary="Get all custom configs", response_description="List of custom configs")
@@ -16,7 +29,24 @@ async def get_custom_configs():
     """
     Get all custom configs
     """
-    return DB.get_custom_configs()
+    custom_configs = DB.get_custom_configs()
+
+    if custom_configs == "retry":
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(f"Can't get custom config : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
+            headers={"Retry-After": retry_in},
+        )
+    elif isinstance(custom_configs, str):
+        CORE_CONFIG.logger.error(f"Can't get custom configs in database : {custom_configs}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": custom_configs},
+        )
+
+    return custom_configs
 
 
 @router.put(
@@ -59,7 +89,7 @@ async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, metho
         )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
-    elif "database is locked" in resp or "file is not a database" in resp:
+    elif resp == "retry":
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't upsert custom config: Database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
@@ -131,7 +161,7 @@ async def delete_custom_config(custom_config_name: str, custom_config: CustomCon
         )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
-    elif "database is locked" in resp or "file is not a database" in resp:
+    elif resp == "retry":
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't delete custom config: Database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(

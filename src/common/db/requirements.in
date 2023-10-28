@@ -1,5 +1,6 @@
 alembic==1.12.1
 cryptography==41.0.5
-psycopg2-binary==2.9.9
+oracledb==1.4.2
+psycopg[binary,pool]==3.1.12
 PyMySQL==1.1.0
 sqlalchemy==2.0.22

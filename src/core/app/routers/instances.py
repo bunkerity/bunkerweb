@@ -10,7 +10,20 @@ from ..models import ErrorMessage, InstanceWithInfo, InstanceWithMethod, UpsertI
 from ..dependencies import CORE_CONFIG, DB, test_and_send_to_instances
 from API import API  # type: ignore
 
-router = APIRouter(prefix="/instances", tags=["instances"])
+router = APIRouter(
+    prefix="/instances",
+    tags=["instances"],
+    responses={
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
+    },
+)
 
 
 @router.get("", response_model=List[InstanceWithInfo], summary="Get BunkerWeb instances", response_description="BunkerWeb instances")
@@ -23,17 +36,33 @@ async def get_instances():
     - **server_name**: The server name of the instance
     - **method**: The method of the instance
     """
-    tmp_instances = DB.get_instances()
+    db_instances = DB.get_instances()
+
+    if db_instances == "retry":
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(f"Can't get instances : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
+            headers={"Retry-After": retry_in},
+        )
+    elif isinstance(db_instances, str):
+        CORE_CONFIG.logger.error(f"Can't get instances in database : {db_instances}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": db_instances},
+        )
+
     instances = []
-    for instance in tmp_instances:
+    for instance in db_instances:
         data = instance.copy()
         data["status"] = "down"
         with suppress(BaseException):
-            sent, err, status, resp = API(
+            sent, err, status_code, resp = API(
                 f"http://{instance['hostname']}:{instance['port']}",
                 instance["server_name"],
             ).request("GET", "ping", timeout=1)
-            if sent and status == 200:
+            if sent and status_code == 200:
                 data["status"] = "up" if instance["last_seen"] and instance["last_seen"] >= datetime.now() - timedelta(seconds=int(CORE_CONFIG.HEALTHCHECK_INTERVAL) * 2) else "down"
         instances.append(data)
     return instances
@@ -83,7 +112,7 @@ async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]]
             message = f"Can't upsert instance {instances.hostname} because it is either static or was created by the core or the autoconf and the method isn't one of them"
             CORE_CONFIG.logger.warning(message)
             return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
-        elif "database is locked" in resp or "file is not a database" in resp:
+        elif resp == "retry":
             retry_in = str(uniform(1.0, 5.0))
             CORE_CONFIG.logger.warning(f"Can't upsert instance to database : {resp}, retry in {retry_in} seconds")
             return JSONResponse(
@@ -103,7 +132,7 @@ async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]]
         for instance in instances:
             resp = DB.upsert_instance(**instance.model_dump(exclude=("last_seen",)), method=method)  # type: ignore
 
-            if "database is locked" in resp or "file is not a database" in resp:
+            if resp == "retry":
                 retry_in = str(uniform(1.0, 5.0))
                 CORE_CONFIG.logger.warning(f"Can't upsert instance {instance.hostname} to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
                 return JSONResponse(
@@ -160,6 +189,14 @@ async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]]
             "description": "Instance not found",
             "model": ErrorMessage,
         },
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
     },
 )
 async def get_instance(instance_hostname: Annotated[str, fastapi_Path(title="The hostname of the instance", min_length=1, max_length=256)]):
@@ -176,6 +213,20 @@ async def get_instance(instance_hostname: Annotated[str, fastapi_Path(title="The
         message = f"Instance {instance_hostname} not found"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
+    elif db_instance == "retry":
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(f"Can't get instance {instance_hostname} : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
+            headers={"Retry-After": retry_in},
+        )
+    elif isinstance(db_instance, str):
+        CORE_CONFIG.logger.error(f"Can't get instance {instance_hostname} in database : {db_instance}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": db_instance},
+        )
 
     return db_instance
 
@@ -220,7 +271,7 @@ async def delete_instance(instance_hostname: str, method: str, background_tasks:
         message = f"Can't delete instance {instance_hostname} because it is either static or was created by the core or the autoconf and the method isn't one of them"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
-    elif "database is locked" in resp or "file is not a database" in resp:
+    elif resp == "retry":
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't remove instance to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
@@ -253,6 +304,10 @@ async def delete_instance(instance_hostname: str, method: str, background_tasks:
             "description": "Instance not found",
             "model": ErrorMessage,
         },
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Internal server error",
             "model": ErrorMessage,
@@ -273,6 +328,20 @@ async def send_instance_action(instance_hostname: str, action: Literal["ping", "
         message = f"Instance {instance_hostname} not found"
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
+    elif db_instance == "retry":
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(f"Can't get instance {instance_hostname} : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
+            headers={"Retry-After": retry_in},
+        )
+    elif isinstance(db_instance, str):
+        CORE_CONFIG.logger.error(f"Can't get instance {instance_hostname} in database : {db_instance}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": db_instance},
+        )
 
     instance_api = API(
         f"http://{db_instance['hostname']}:{db_instance['port']}",
