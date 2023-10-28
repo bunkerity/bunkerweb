@@ -28,7 +28,7 @@ async def get_custom_configs():
     response_model=ResponseModel,
     summary="Update one or more custom configs",
 )
-async def update_custom_configs(custom_config: Annotated[dict, Body()], method: str):
+async def update_custom_configs(custom_config: Annotated[dict, Body()], method: str = "ui"):
     data = json.dumps(custom_config, skipkeys=True, allow_nan=True, indent=6)
     return get_core_format_res(f"{API}/custom_configs?method={method}", "PUT", data, "Update custom configs")
 
@@ -38,5 +38,5 @@ async def update_custom_configs(custom_config: Annotated[dict, Body()], method: 
     response_model=ResponseModel,
     summary="Delete a custom config by name",
 )
-async def delete_custom_configs(method: str, custom_config_name: str):
+async def delete_custom_configs(custom_config_name: str, method: str = "ui"):
     return get_core_format_res(f"{API}/custom_configs/{custom_config_name}?method={method}", "DELETE", "", f"Delete custom config {custom_config_name}")

@@ -6,11 +6,9 @@ import {
   reactive,
   onMounted,
   onUnmounted,
-  onUpdated,
 } from "vue";
 import ModalBase from "@components/Modal/Base.vue";
 import ButtonBase from "@components/Button/Base.vue";
-import AlertBase from "@components/Alert/Base.vue";
 import "@assets/script/editor/ace.js";
 import "@assets/script/editor/theme-dracula.js";
 import "@assets/script/editor/theme-dawn.js";
@@ -42,24 +40,32 @@ const props = defineProps({
   value: {
     type: String,
     required: true,
+    default: "",
   },
 });
 
 const emits = defineEmits(["close", "updateFile"]);
 
 // Filter data from path
-const oldName = computed(() => {
-  return props.path.split("/")[props.path.split("/").length - 1];
-});
 
-const prefix = computed(() => {
-  const arr = props.path.split("/");
-  arr.pop();
-  return `${arr.join("/")}/`;
-});
-
-const inp = reactive({
+const data = reactive({
   name: "",
+  oldName: props.path.split("/")[props.path.split("/").length - 1],
+  value: props.value,
+  prefix: computed(() => {
+    const arr = props.path.split("/");
+    arr.pop();
+    return `${arr.join("/")}/`;
+  }),
+  isReadOnly: computed(() => {
+    if (props.type !== "file") return true;
+    if (
+      props.action.toLowerCase() === "view" ||
+      props.action.toLowerCase() === "delete"
+    )
+      return true;
+    return false;
+  }),
 });
 
 // Ace editor vanilla logic
@@ -120,17 +126,16 @@ let editor = null;
 
 // Use ace editor
 onMounted(() => {
-  inp.name = oldName;
-  try {
-    editor = new FileEditor();
-    editor.setValue(props.value);
-  } catch (err) {}
-});
-
-onUpdated(() => {
-  try {
-    editor = new FileEditor();
-  } catch (err) {}
+  // default value
+  data.name = data.oldName;
+  if (props.type !== "file") return;
+  editor = new FileEditor();
+  editor.setValue(props.value);
+  editor.readOnlyBool(data.isReadOnly);
+  editor.editor.on("change", () => {
+    data.value = editor.getValue();
+    console.log(data.value);
+  });
 });
 
 onUnmounted(() => {
@@ -145,15 +150,36 @@ const updateConf = reactive({
   data: [],
 });
 
-function createFile() {
-  // Case no name
-  if (!inp.name) return showAlert("error", `Filename missing to create conf`);
+async function sendData() {
+  // Send only if filename and content
+  if (!data.name && !data.value) return;
 
-  // Case no content
-  if (!editor.getValue()) {
-    inp.name = inp.name;
-    return showAlert("error", "Missing content to create conf");
-  }
+  // Case all needed data
+  const conf = formatData();
+
+  const method = props.action.toLowerCase() === "delete" ? "DELETE" : "PUT";
+  let api;
+  // Case delete
+  if (method.toLowerCase() === "delete")
+    api = `/api/custom_configs/${conf.name}?method=ui`;
+
+  // Case update
+  if (method.toLowerCase() === "put") api = `/api/custom_configs?method=ui`;
+
+  // Fetch
+  await fetchAPI(api, method, conf, updateConf, feedbackStore.addFeedback)
+    .then((res) => {
+      // Case not save
+      if (res.type === "error") return;
+      // Case saved
+      alert.isOpen = false;
+      emits("close");
+      emits("updateFile");
+    })
+    .catch((err) => {});
+}
+
+function formatData() {
   // Format data
   const splitPath = props.path.replace("root/", "").trim().split("/");
   !splitPath[splitPath.length - 1] ? splitPath.pop() : false;
@@ -163,85 +189,54 @@ function createFile() {
   const conf = {
     service_id: serviceID,
     type: type,
-    name: inp.name || oldName,
-    old_name: oldName,
+    name: data.name || data.oldName,
+    old_name: data.oldName,
     data: editor.getValue(),
   };
-  updateConfig(conf);
-}
 
-async function updateConfig(conf) {
-  // We want to close modal only if communication with API worked
-  // To avoid input removing on close
-  const api =
-    props.action === `delete`
-      ? `/api/custom_configs/${conf.name}?method=ui`
-      : `/api/custom_configs?method=ui`;
-  const method = props.action === `delete` ? `DELETE` : `PUT`;
-  await fetchAPI(api, method, conf, updateConf, feedbackStore.addFeedback)
-    .then((res) => {
-      // Case not save
-      if (res.type === "error")
-        return showAlert("error", "Failed to save conf");
-      // Case saved
-      alert.isOpen = false;
-      emits("close");
-      emits("updateFile");
-    })
-    .catch((err) => {
-      showAlert("error", "Failed to save conf");
-    });
-}
-
-const alert = reactive({
-  isOpen: false,
-  message: "",
-  type: "",
-});
-
-function showAlert(type, message) {
-  alert.message = message;
-  alert.type = type;
-  alert.isOpen = true;
+  return conf;
 }
 </script>
 <template>
   <ModalBase @backdrop="$emit('close')" :title="`${props.action} file`">
     <div class="w-full">
       <div class="modal-path">
-        <p class="modal-path-text">
-          {{ prefix }}
+        <p class="modal-path-text mr-1">
+          {{ data.prefix.replaceAll("/", " / ") }}
         </p>
         <input
-          @input="inp.name = $event.target.value"
+          @input="data.name = $event.target.value"
           type="text"
           name="name"
           id="name"
-          :value="inp.name || oldName"
-          class="modal-input"
+          :value="data.name"
+          class="modal-path-input"
+          :class="[data.name ? '' : 'invalid']"
           :placeholder="'filename'"
-          :disabled="props.action === 'view'"
+          :disabled="data.isReadOnly"
+          pattern="^(?=.*[a-zA-Z0-9]).{1,}$"
           required
         />
         <p class="ml-1 modal-path-text">.conf</p>
       </div>
+
       <!-- editor-->
-      <div v-if="props.type === 'file'" id="editor" class="modal-editor">
-        {{ props.value }}
+      <div v-if="props.type === 'file'" class="relative">
+        <div
+          v-if="!data.value"
+          class="absolute w-full h-full border-2 border-red-500 z-100 pointer-events-none outline-red-500"
+        ></div>
+        <div id="editor" class="modal-editor z-10"></div>
       </div>
+
       <!-- editor-->
-      <AlertBase
-        :message="alert.message"
-        :type="alert.type"
-        v-if="alert.isOpen"
-        @close="alert.isOpen = false"
-      />
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase size="lg" @click="$emit('close')" class="btn-close text-xs">
           Close
         </ButtonBase>
         <ButtonBase
-          @click="createFile()"
+          :disabled="!data.name || !data.value ? true : false"
+          @click="sendData()"
           size="lg"
           v-if="props.action !== 'view'"
           :class="[

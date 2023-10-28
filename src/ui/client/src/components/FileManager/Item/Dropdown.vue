@@ -3,7 +3,7 @@ import FileManagerButtonView from "@components/FileManager/Button/View.vue";
 import FileManagerButtonEdit from "@components/FileManager/Button/Edit.vue";
 import FileManagerButtonDownload from "@components/FileManager/Button/Download.vue";
 import FileManagerButtonDelete from "@components/FileManager/Button/Delete.vue";
-import { reactive, watch, defineEmits, ref } from "vue";
+import { reactive, watch, defineEmits, ref, computed } from "vue";
 // Dropdown toggle logic and buttons list with @action emit value on click
 // The value of the clicked button will be emit itself to be retrieved by FileManagerBase
 const props = defineProps({
@@ -75,18 +75,27 @@ const emits = defineEmits(["action"]);
   </button>
   <!-- dropdown -->
   <div v-if="dropdown.isOpen" role="tablist" class="file-manager-item-dropdown">
-    <FileManagerButtonView @click="$emit('action', 'view')" />
+    <FileManagerButtonView
+      class="first"
+      :class="[
+        props.canDelete || props.canDownload || props.canEdit ? '' : 'last',
+      ]"
+      @click="$emit('action', 'view')"
+    />
     <FileManagerButtonEdit
       @click="$emit('action', 'edit')"
       v-if="props.canEdit"
+      :class="[props.canDelete || props.canDownload ? '' : 'last']"
     />
     <FileManagerButtonDownload
       @click="$emit('action', 'download')"
       v-if="props.canDownload"
+      :class="[props.canDelete ? '' : 'last']"
     />
     <FileManagerButtonDelete
       @click="$emit('action', 'delete')"
       v-if="props.canDelete"
+      class="last"
     />
   </div>
   <!-- end dropdown -->

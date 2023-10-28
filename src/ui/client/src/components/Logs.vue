@@ -27,7 +27,6 @@ const logs = reactive({
     // Change to array and keep name
     const cloneData = JSON.parse(JSON.stringify(logs.data));
     const filter = getLogsByFilter(cloneData, filters);
-    console.log(filter);
 
     const logUI = [];
     const logCore = [];

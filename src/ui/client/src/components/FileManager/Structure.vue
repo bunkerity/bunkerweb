@@ -19,7 +19,7 @@ const emits = defineEmits(["updateFile"]);
 // When a breadcrumb element or folder is clicked
 // We update currPath and display the folder.path that match currPath
 const path = reactive({
-  current: props.config[0]["path"],
+  current: "root", // when mount or render, always be on root
   canCreateFile: props.config[0]["canCreateFile"],
 });
 
@@ -108,7 +108,12 @@ watch(path, () => {
       :path="modal.path"
       :value="modal.value"
       @close="modal.isOpen = false"
-      @updateFile="emits('updateFile')"
+      @updateFile="
+        () => {
+          emits('updateFile');
+          path.current = 'root';
+        }
+      "
     />
   </div>
 </template>

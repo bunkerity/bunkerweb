@@ -27,7 +27,7 @@ async def get_config(methods: bool = False, new_format: bool = False):
     response_model=ResponseModel,
     summary="Update whole config",
 )
-async def update_config(config: Dict[str, str], method: str):
+async def update_config(config: Dict[str, str], method: str = "ui"):
     return get_core_format_res(f"{API}/config?method={method}", "PUT", config, "Update config")
 
 
@@ -36,7 +36,7 @@ async def update_config(config: Dict[str, str], method: str):
     response_model=ResponseModel,
     summary="Update global config",
 )
-async def update_global_config(config: Annotated[dict, Body()], method: str):
+async def update_global_config(config: Annotated[dict, Body()], method: str = "ui"):
     data = json.dumps(config, skipkeys=True, allow_nan=True, indent=6)
     return get_core_format_res(f"{API}/config/global?method={method}", "PUT", data, "Update global config")
 
@@ -46,7 +46,7 @@ async def update_global_config(config: Annotated[dict, Body()], method: str):
     response_model=ResponseModel,
     summary="Update service config",
 )
-async def update_service_config(config: Annotated[dict, Body()], method: str, service_name: str):
+async def update_service_config(service_name: str, config: Annotated[dict, Body()], method: str = "ui"):
     data = json.dumps(config, skipkeys=True, allow_nan=True, indent=6)
     return get_core_format_res(f"{API}/config/service/{service_name}?method={method}", "PUT", data, f"Update service config {service_name}")
 
@@ -56,5 +56,5 @@ async def update_service_config(config: Annotated[dict, Body()], method: str, se
     response_model=ResponseModel,
     summary="Delete service config",
 )
-async def delete_service_config(method: str, service_name: str):
+async def delete_service_config(service_name: str, method: str = "ui"):
     return get_core_format_res(f"{API}/config/service/{service_name}?method={method}", "DELETE", "", f"Delete service config {service_name}")
