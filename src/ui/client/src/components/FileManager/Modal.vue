@@ -134,7 +134,6 @@ onMounted(() => {
   editor.readOnlyBool(data.isReadOnly);
   editor.editor.on("change", () => {
     data.value = editor.getValue();
-    console.log(data.value);
   });
 });
 
@@ -155,16 +154,13 @@ async function sendData() {
   if (!data.name && !data.value) return;
 
   // Case all needed data
-  const conf = formatData();
 
   const method = props.action.toLowerCase() === "delete" ? "DELETE" : "PUT";
-  let api;
-  // Case delete
-  if (method.toLowerCase() === "delete")
-    api = `/api/custom_configs/${conf.name}?method=ui`;
-
-  // Case update
-  if (method.toLowerCase() === "put") api = `/api/custom_configs?method=ui`;
+  const conf = formatData();
+  const api =
+    method.toLowerCase() === "delete"
+      ? `/api/custom_configs/${data.name}?method=ui`
+      : `/api/custom_configs?method=ui`;
 
   // Fetch
   await fetchAPI(api, method, conf, updateConf, feedbackStore.addFeedback)
@@ -180,20 +176,24 @@ async function sendData() {
 }
 
 function formatData() {
-  // Format data
-  const splitPath = props.path.replace("root/", "").trim().split("/");
-  !splitPath[splitPath.length - 1] ? splitPath.pop() : false;
-  const type = splitPath[0].replaceAll("-", "_");
-  const serviceID = splitPath[1] ? splitPath[1] : "";
+  // Format data, we need to remove root that is only functional
+  // And the current file name to keep only type/service?
+  const splitPath = props.path
+    .replaceAll("-", "_")
+    .replace("root/", "")
+    .replace(`${data.oldName}`, "")
+    .trim()
+    .split("/")
+    .filter((item) => item !== "");
 
   const conf = {
-    service_id: serviceID,
-    type: type,
-    name: data.name || data.oldName,
+    service_id: splitPath[1] ? splitPath[1] : "",
+    type: splitPath[0],
+    name: data.name,
     old_name: data.oldName,
-    data: editor.getValue(),
+    data: data.value,
   };
-
+  console.log(conf);
   return conf;
 }
 </script>
