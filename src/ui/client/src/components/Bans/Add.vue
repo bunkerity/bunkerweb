@@ -5,10 +5,9 @@ import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsDatepicker from "@components/Settings/Datepicker.vue";
 import ButtonBase from "@components/Button/Base.vue";
-import BansModalAdd from "@components/Bans/Modal/Add.vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
-import { reactive } from "vue";
+import { computed, reactive } from "vue";
 
 const feedbackStore = useFeedbackStore();
 const emits = defineEmits(["addBans"]);
@@ -16,6 +15,16 @@ const emits = defineEmits(["addBans"]);
 const bans = reactive({
   count: 0,
   items: [],
+  isInvalidAdd: computed(() => {
+    // Check if some invalid value
+    let isInvalid = false;
+    for (let i = 0; i < bans.items.length; i++) {
+      const item = bans.items[i];
+      if (!item.stampEnd || !item.reason || !item.ip) isInvalid = true;
+      if (isInvalid) break;
+    }
+    return isInvalid;
+  }),
 });
 
 function addItem() {
@@ -64,22 +73,6 @@ const addBans = reactive({
 const modal = reactive({
   isOpen: false,
 });
-
-async function checkToAddBans() {
-  // Check if some invalid value
-  let isInvalid = false;
-  for (let i = 0; i < bans.items.length; i++) {
-    const item = bans.items[i];
-    if (!item.stampEnd || !item.reason || !item.ip) isInvalid = true;
-    if (isInvalid) break;
-  }
-
-  // Case invalid data find
-  if (isInvalid) return (modal.isOpen = true);
-
-  // Case all valid, try to add
-  return await sendBans();
-}
 
 function getValidBans() {
   const validBans = [];
@@ -264,7 +257,8 @@ async function sendBans() {
       class="col-span-12 flex justify-center mt-4"
     >
       <ButtonBase
-        @click="checkToAddBans()"
+        @click="sendBans()"
+        :disabled="bans.isInvalidAdd"
         color="valid"
         size="normal"
         class="text-sm mb-2 sm:mb-0"
@@ -272,10 +266,5 @@ async function sendBans() {
         save bans
       </ButtonBase>
     </div>
-    <BansModalAdd
-      @close="modal.isOpen = false"
-      @sendAdd="sendBans()"
-      :isOpen="modal.isOpen"
-    />
   </div>
 </template>
