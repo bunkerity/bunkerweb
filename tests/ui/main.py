@@ -73,7 +73,7 @@ def assert_button_click(driver, button: Union[str, WebElement]):
 
             button.click()
             clicked = True
-
+    return clicked
 
 def assert_alert_message(driver, message: str):
     safe_get_element(driver, By.XPATH, "//button[@data-flash-sidebar-open='']")
@@ -126,20 +126,25 @@ def access_page(
     message: bool = True,
     *,
     retries: int = 0,
+    clicked: bool = False,
 ):
-    if retries == 0:
-        assert_button_click(driver, button)
+    if retries > 5:
+        print("Too many retries...", flush=True)
+        exit(1)
 
     try:
+        if not clicked:
+            clicked = assert_button_click(driver, button)
+
         title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div/header/div/nav/h6")))
 
         if title.text != name.replace(" ", "_").title():
             print(f"Didn't get redirected to {name} page, exiting ...", flush=True)
             exit(1)
     except TimeoutException:
-        if retries < 3 and "/loading" in driver.current_url:
+        if "/loading" in driver.current_url:
             sleep(2)
-            access_page(driver, driver_wait, button, name, message, retries=retries + 1)
+            return access_page(driver, driver_wait, button, name, message, retries=retries + 1, clicked=clicked)
 
         print(f"{name.title()} page didn't load in time, exiting ...", flush=True)
         exit(1)
@@ -148,7 +153,7 @@ def access_page(
             print("Connection failure, retrying in 5s ...", flush=True)
             driver.refresh()
             sleep(5)
-            return access_page(driver, driver_wait, button, name, message, retries=1)
+            return access_page(driver, driver_wait, button, name, message, retries=retries + 1, clicked=clicked)
         raise we
 
     if message:
