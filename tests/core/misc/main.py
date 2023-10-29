@@ -8,12 +8,16 @@ from time import sleep
 from traceback import format_exc
 
 try:
+    ssl_generated = getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes"
+    disabled_default_server = getenv("DISABLE_DEFAULT_SERVER", "no") == "yes"
+    deny_http_status = getenv("DENY_HTTP_STATUS", "403")
+    listen_http = getenv("LISTEN_HTTP", "yes") == "yes"
 
     ready = False
     retries = 0
     while not ready:
         with suppress(RequestException):
-            resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"})
+            resp = get(f"http{'s' if ssl_generated else ''}://www.example.com/ready", headers={"Host": "www.example.com"}, verify=False)
             status_code = resp.status_code
             text = resp.text
 
@@ -30,11 +34,6 @@ try:
             retries += 1
             print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
             sleep(5)
-
-    ssl_generated = getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes"
-    disabled_default_server = getenv("DISABLE_DEFAULT_SERVER", "no") == "yes"
-    deny_http_status = getenv("DENY_HTTP_STATUS", "403")
-    listen_http = getenv("LISTEN_HTTP", "yes") == "yes"
 
     error = False
 

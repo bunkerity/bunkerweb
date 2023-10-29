@@ -66,6 +66,8 @@ else
     sudo sed -i "/--bind \"127.0.0.1:7000\" &/c\        --bind \"127.0.0.1:7000\" --log-level debug &" /usr/share/bunkerweb/scripts/bunkerweb-ui.sh
     sudo mkdir /var/www/html/app1.example.com
     sudo touch /var/www/html/app1.example.com/index.html
+    sudo find /etc/bunkerweb/configs/ -type f -exec rm -f {} \;
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
     export TEST_TYPE="linux"
 fi
 
