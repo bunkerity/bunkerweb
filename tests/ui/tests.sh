@@ -162,6 +162,10 @@ if [ $? -ne 0 ] ; then
         sudo journalctl -u bunkerweb --no-pager
         echo "🛡️ Showing BunkerWeb UI journal logs ..."
         sudo journalctl -u bunkerweb-ui --no-pager
+        echo "🛡️ Showing BunkerWeb UI logs ..."
+        sudo cat /var/log/bunkerweb/ui.log
+        echo "🛡️ Showing BunkerWeb UI access logs ..."
+        sudo cat /var/log/bunkerweb/ui-access.log
         echo "🛡️ Showing BunkerWeb error logs ..."
         sudo cat /var/log/bunkerweb/error.log
         echo "🛡️ Showing BunkerWeb access logs ..."
