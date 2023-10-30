@@ -266,6 +266,7 @@ class Actions(Base):
     method = Column(String(32), nullable=False)
     title = Column(String(256), nullable=False)
     description = Column(LargeBinary(length=2**14), nullable=False)
+    status = Column(String(32), default="success", nullable=True)
 
     tags = relationship("Actions_tags", back_populates="action")
 

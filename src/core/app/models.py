@@ -260,6 +260,7 @@ class Action(BaseModel):
     method: str = Field(examples=["core"], description="The action method")
     title: str = Field(examples=["Reloaded BunkerWeb"], description="The action title")
     description: str = Field(examples=["BunkerWeb was reloaded"], description="The action description")
+    status: str = Field("success", examples=["success"], description="The action status")
     tags: List[str] = Field(examples=[["config"]], description="The action tags")
 
 

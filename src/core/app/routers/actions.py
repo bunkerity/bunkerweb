@@ -2,7 +2,7 @@
 from datetime import datetime
 from random import uniform
 from typing import List
-from fastapi import APIRouter, status
+from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
 from ..models import Action, ErrorMessage
@@ -25,7 +25,7 @@ router = APIRouter(
 
 
 @router.get("", response_model=List[Action], summary="Get all actions", response_description="Actions")
-async def get_actions():
+async def get_actions(background_tasks: BackgroundTasks):
     """
     Get all jobs from the database.
     """
@@ -40,6 +40,7 @@ async def get_actions():
             headers={"Retry-After": retry_in},
         )
     elif isinstance(actions, str):
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["action"], "title": "Get actions failed", "description": f"Can't get actions in database : {actions}", "status": "error"})
         CORE_CONFIG.logger.error(f"Can't get actions in database : {actions}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -50,7 +51,7 @@ async def get_actions():
 
 
 @router.post("", response_model=ErrorMessage, summary="Creates a new action", response_description="Message")
-async def post_action(action: Action):
+async def post_action(action: Action, background_tasks: BackgroundTasks):
     """
     Creates a new action.
     """
@@ -65,6 +66,7 @@ async def post_action(action: Action):
             headers={"Retry-After": retry_in},
         )
     elif resp:
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": action.method, "tags": ["action"], "title": "Add action failed", "description": f"Can't add action : {resp}", "status": "error"})
         CORE_CONFIG.logger.error(f"Can't add action : {resp}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -25,7 +25,7 @@ router = APIRouter(
 
 
 @router.get("", response_model=Dict[str, Job], summary="Get all jobs", response_description="Jobs")
-async def get_jobs():
+async def get_jobs(background_tasks: BackgroundTasks):
     """
     Get all jobs from the database.
     """
@@ -40,7 +40,9 @@ async def get_jobs():
             headers={"Retry-After": retry_in},
         )
     elif isinstance(jobs, str):
-        CORE_CONFIG.logger.error(f"Can't get jobs from database : {jobs}")
+        message = f"Can't get jobs from database : {jobs}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["job"], "title": "Get jobs failed", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": jobs},
@@ -65,7 +67,9 @@ async def add_job_run(job_name: str, job_run: JobRun, method: str, background_ta
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        CORE_CONFIG.logger.error(f"Can't add job {job_name} run in database : {resp}")
+        message = f"Can't add job {job_name} run in database : {resp}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["job"], "title": f"Tried to add job {job_name} run", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},
@@ -110,11 +114,10 @@ async def run_jobs(method: str, background_tasks: BackgroundTasks, job_name: Opt
         job = DB.get_job(job_name)
 
         if not job:
-            CORE_CONFIG.logger.warning(f"Job {job_name} not found")
-            return JSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content={"message": f"Job {job_name} not found"},
-            )
+            message = f"Job {job_name} not found"
+            background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["job"], "title": f"Tried to run job {job_name}", "description": message, "status": "error"})
+            CORE_CONFIG.logger.warning(message)
+            return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
         elif job == "retry":
             retry_in = str(uniform(1.0, 5.0))
             CORE_CONFIG.logger.warning(f"Can't get job {job_name} in database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
@@ -124,7 +127,9 @@ async def run_jobs(method: str, background_tasks: BackgroundTasks, job_name: Opt
                 headers={"Retry-After": retry_in},
             )
         elif isinstance(job, str):
-            CORE_CONFIG.logger.error(f"Can't get job {job_name} from database : {job}")
+            message = f"Can't get job {job_name} from database : {job}"
+            background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["job"], "title": f"Tried to run job {job_name}", "description": message, "status": "error"})
+            CORE_CONFIG.logger.error(message)
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={"message": job},
@@ -163,7 +168,7 @@ async def run_jobs(method: str, background_tasks: BackgroundTasks, job_name: Opt
         },
     },
 )
-async def get_cache(job_name: str, file_name: str, data: CacheFileDataModel):
+async def get_cache(job_name: str, file_name: str, data: CacheFileDataModel, background_tasks: BackgroundTasks):
     """
     Get a file from the cache.
     """
@@ -176,11 +181,10 @@ async def get_cache(job_name: str, file_name: str, data: CacheFileDataModel):
     )
 
     if not cached_file:
-        CORE_CONFIG.logger.warning(f"Job {job_name} cache file {file_name} not found")
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "File not found"},
-        )
+        message = f"Job {job_name} cache file {file_name} not found"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["job"], "title": f"Tried to get job {job_name} cache file {file_name}", "description": message, "status": "error"})
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif cached_file == "retry":
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't get job {job_name} cache file {file_name} in database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
@@ -190,7 +194,9 @@ async def get_cache(job_name: str, file_name: str, data: CacheFileDataModel):
             headers={"Retry-After": retry_in},
         )
     elif isinstance(cached_file, str):
-        CORE_CONFIG.logger.error(f"Can't get job {job_name} cache file {file_name} from database : {cached_file}")
+        message = f"Can't get job {job_name} cache file {file_name} from database : {cached_file}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["job"], "title": f"Tried to get job {job_name} cache file {file_name}", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": cached_file},
@@ -241,7 +247,9 @@ async def update_cache(
             headers={"Retry-After": retry_in},
         )
     elif resp not in ("created", "updated"):
-        CORE_CONFIG.logger.error(f"Can't upsert job {job_name} cache file {file_name} in database : {resp}")
+        message = f"Can't upsert job {job_name} cache file {file_name} in database : {resp}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["job"], "title": f"Tried to upsert job {job_name} cache file {file_name}", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},
@@ -297,11 +305,10 @@ async def delete_cache(job_name: str, file_name: str, method: str, data: CacheFi
     resp = DB.delete_job_cache(job_name, file_name, service_id=data.service_id)
 
     if not resp:
-        CORE_CONFIG.logger.warning(f"Job {job_name} cache file {file_name} not found")
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"message": "File not found"},
-        )
+        message = f"Job {job_name} cache file {file_name} not found"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["job"], "title": f"Tried to delete job {job_name} cache file {file_name}", "description": message, "status": "error"})
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "retry":
         retry_in = str(uniform(1.0, 5.0))
         CORE_CONFIG.logger.warning(f"Can't delete job {job_name} cache file {file_name} in database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
@@ -311,7 +318,9 @@ async def delete_cache(job_name: str, file_name: str, method: str, data: CacheFi
             headers={"Retry-After": retry_in},
         )
     elif not isinstance(resp, str):
-        CORE_CONFIG.logger.error(f"Can't delete job {job_name} cache file {file_name} in database : {resp}")
+        message = f"Can't delete job {job_name} cache file {file_name} from database : {resp}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["job"], "title": f"Tried to delete job {job_name} cache file {file_name}", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},

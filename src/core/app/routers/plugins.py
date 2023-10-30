@@ -41,7 +41,7 @@ router = APIRouter(
     summary="Get all plugins",
     response_description="Plugins",
 )
-async def get_plugins():
+async def get_plugins(background_tasks: BackgroundTasks):
     """
     Get core and external plugins from the database.
     """
@@ -56,7 +56,9 @@ async def get_plugins():
             headers={"Retry-After": retry_in},
         )
     elif isinstance(plugins, str):
-        CORE_CONFIG.logger.error(f"Can't get plugins from database : {plugins}")
+        message = f"Can't get plugins from database : {plugins}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["plugin"], "title": "Get plugins failed", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": plugins},
@@ -95,6 +97,18 @@ async def add_plugin(plugin: AddedPlugin, background_tasks: BackgroundTasks) -> 
 
     if resp == "exists":
         message = f"Plugin {plugin.id} already exists"
+        background_tasks.add_task(
+            DB.add_action,
+            {
+                "date": datetime.now(),
+                "api_method": "POST",
+                "method": plugin.method,
+                "tags": ["plugin"],
+                "title": f"Tried to add plugin {plugin.id}",
+                "description": f"Tried to add plugin {plugin.id} with data {dumps(plugin_dict)} but it already exists",
+                "status": "error",
+            },
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"message": message})
     elif resp == "retry":
@@ -106,7 +120,9 @@ async def add_plugin(plugin: AddedPlugin, background_tasks: BackgroundTasks) -> 
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        CORE_CONFIG.logger.error(f"Can't add plugin to database : {resp}")
+        message = f"Can't add plugin to database : {resp}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": plugin.method, "tags": ["plugin"], "title": f"Tried to add plugin {plugin.id}", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},
@@ -163,10 +179,34 @@ async def update_plugin(plugin_id: str, plugin: AddedPlugin, background_tasks: B
 
     if resp == "not_found":
         message = f"Plugin {plugin.id} not found"
+        background_tasks.add_task(
+            DB.add_action,
+            {
+                "date": datetime.now(),
+                "api_method": "PATCH",
+                "method": plugin.method,
+                "tags": ["plugin"],
+                "title": f"Tried to update plugin {plugin.id}",
+                "description": f"Tried to update plugin {plugin.id} with data {dumps(plugin_dict)} but it doesn't exist",
+                "status": "error",
+            },
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "not_external":
         message = f"Can't update a core plugin ({plugin.id})"
+        background_tasks.add_task(
+            DB.add_action,
+            {
+                "date": datetime.now(),
+                "api_method": "PATCH",
+                "method": plugin.method,
+                "tags": ["plugin"],
+                "title": f"Tried to update plugin {plugin.id}",
+                "description": f"Tried to update plugin {plugin.id} with data {dumps(plugin_dict)} but it is a core plugin",
+                "status": "error",
+            },
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif resp == "retry":
@@ -178,7 +218,9 @@ async def update_plugin(plugin_id: str, plugin: AddedPlugin, background_tasks: B
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        CORE_CONFIG.logger.error(f"Can't update plugin to database : {resp}")
+        message = f"Can't update plugin to database : {resp}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PATCH", "method": plugin.method, "tags": ["plugin"], "title": f"Tried to update plugin {plugin.id}", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},
@@ -232,6 +274,7 @@ async def delete_plugin(plugin_id: str, method: str, background_tasks: Backgroun
 
     if method == "static":
         message = f"Can't delete plugin {plugin_id} : method can't be static"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["plugin"], "title": f"Tried to delete plugin {plugin_id}", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
@@ -239,14 +282,31 @@ async def delete_plugin(plugin_id: str, method: str, background_tasks: Backgroun
 
     if resp == "not_found":
         message = f"Plugin {plugin_id} not found"
+        background_tasks.add_task(
+            DB.add_action,
+            {
+                "date": datetime.now(),
+                "api_method": "DELETE",
+                "method": method,
+                "tags": ["plugin"],
+                "title": f"Tried to delete plugin {plugin_id}",
+                "description": f"Tried to delete plugin {plugin_id} but it doesn't exist",
+                "status": "error",
+            },
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "not_external":
         message = f"Can't delete a core plugin ({plugin_id})"
+        background_tasks.add_task(
+            DB.add_action,
+            {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["plugin"], "title": f"Tried to delete plugin {plugin_id}", "description": f"Tried to delete plugin {plugin_id} but it is a core plugin", "status": "error"},
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif resp == "method_conflict":
         message = f"Can't delete plugin {plugin_id} because it is either static or was created by the core or the autoconf and the method isn't one of them"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["plugin"], "title": f"Tried to delete plugin {plugin_id}", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif resp == "retry":
@@ -258,7 +318,9 @@ async def delete_plugin(plugin_id: str, method: str, background_tasks: Backgroun
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        CORE_CONFIG.logger.error(f"Can't delete plugin to database : {resp}")
+        message = f"Can't delete plugin {plugin_id} to database : {resp}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["plugin"], "title": f"Tried to delete plugin {plugin_id}", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},

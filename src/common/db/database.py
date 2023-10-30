@@ -202,6 +202,7 @@ class Database:
             yield session
         except BaseException as e:
             session.rollback()
+            self._logger.debug(f"Error when trying to execute a database query: {format_exc()}")
             error = str(e)
             if any(
                 msg in error
@@ -214,10 +215,10 @@ class Database:
                     "can't change 'autocommit' now",
                     "It has been closed automatically.",
                     "server closed the connection unexpectedly",
-                    "oracledb.exceptions.InternalError",  # ? OracleDB potential errors
-                    "cursor number is invalid or does not exist",
+                    "cursor number is invalid or does not exist",  # ? OracleDB potential errors
                     "User requested cancel of current operation.",
                     "the database or network closed the connection",
+                    "InternalError",  # ? Misc errors
                 )
             ):
                 self._exceptions[getpid()] = ["retry"]
@@ -2279,6 +2280,7 @@ class Database:
                 method=action["method"],
                 title=action["title"],
                 description=action["description"].encode(),
+                status=action.get("status", "success"),
             )
             session.add(db_action)
             session.commit()

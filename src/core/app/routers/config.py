@@ -114,7 +114,7 @@ def parse_config(config: Dict[str, str], *, whole: bool = False) -> Tuple[List[D
     summary="Get config from Database",
     response_description="BunkerWeb config",
 )
-async def get_config(methods: bool = False, new_format: bool = False):
+async def get_config(background_tasks: BackgroundTasks, methods: bool = False, new_format: bool = False):
     """Get config from Database"""
     config = DB.get_config(methods=methods, new_format=new_format)
 
@@ -127,7 +127,9 @@ async def get_config(methods: bool = False, new_format: bool = False):
             headers={"Retry-After": retry_in},
         )
     elif isinstance(config, str):
-        CORE_CONFIG.logger.error(f"Can't get config : {config}")
+        message = f"Can't get config : {config}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["config"], "title": "Get config failed", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": config})
 
     return config
@@ -158,14 +160,17 @@ async def update_config(config: Dict[str, str], method: str, background_tasks: B
     """Update whole config in Database"""
 
     if method == "static":
-        message = "Can't update config : method can't be static"
+        message = "Can't save config : method can't be static"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": "Trired to save config", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
     conflicts, config = parse_config(config, whole=True)
 
     if conflicts and not config:
-        CORE_CONFIG.logger.warning(f"Can't save config to database : {dumps(conflicts)}")
+        message = f"Can't save config to database : {dumps(conflicts)}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": "Tried to save config", "description": message, "status": "error"})
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": {"data": {"settings": conflicts, "message": "Can't save config to database"}}})
 
     resp = DB.save_config(config, method)
@@ -179,7 +184,9 @@ async def update_config(config: Dict[str, str], method: str, background_tasks: B
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        CORE_CONFIG.logger.error(f"Can't save config to database : {resp}")
+        message = f"Can't save config to database : {resp}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": "Tried to save config", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": resp})
 
     background_tasks.add_task(
@@ -221,13 +228,16 @@ async def update_global_config(config: Dict[str, str], method: str, background_t
 
     if method == "static":
         message = "Can't update global config : method can't be static"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": "Tried to update global config", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
     conflicts, config = parse_config(config)
 
     if conflicts and not config:
-        CORE_CONFIG.logger.warning(f"Can't save global config to database : {dumps(conflicts)}")
+        message = f"Can't save global config to database : {dumps(conflicts)}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": "Tried to update global config", "description": message, "status": "error"})
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": {"data": {"settings": conflicts, "message": "Can't save global config to database"}}})
 
     resp = DB.save_global_config(config, method)
@@ -241,7 +251,9 @@ async def update_global_config(config: Dict[str, str], method: str, background_t
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        CORE_CONFIG.logger.error(f"Can't save global config to database : {resp}")
+        message = f"Can't save global config to database : {resp}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": "Tried to update global config", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": resp})
 
     background_tasks.add_task(
@@ -292,23 +304,42 @@ async def update_service_config(service_name: str, config: Dict[str, str], metho
 
     if method == "static":
         message = f"Can't update {service_name} config : method can't be static"
+        background_tasks.add_task(
+            DB.add_action,
+            {
+                "date": datetime.now(),
+                "api_method": "PUT",
+                "method": method,
+                "tags": ["config"],
+                "title": f"Tried to update {service_name} service config",
+                "description": f"Can't update {service_name} service config : method can't be static",
+                "status": "error",
+            },
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
     conflicts, config = parse_config(config)
 
     if conflicts and not config:
-        CORE_CONFIG.logger.warning(f"Can't save {service_name} service config to database : {dumps(conflicts)}")
+        message = f"Can't save {service_name} service config to database : {dumps(conflicts)}"
+        background_tasks.add_task(
+            DB.add_action,
+            {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": f"Tried to update {service_name} config", "description": message, "status": "error"},
+        )
+        CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": {"data": {"settings": conflicts, "message": f"Can't save {service_name} service config to database"}}})
 
     resp = DB.save_service_config(service_name, config, method)
 
     if resp == "not_found":
-        message = f"Service {service_name} not found"
+        message = f"Can't update {service_name} config : Service {service_name} not found"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": f"Tried to update {service_name} config", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "method_conflict":
         message = f"Can't rename service {service_name} because its method or one of its setting's method belongs to the core or the autoconf and the method isn't one of them"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": f"Tried to update {service_name} config", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif resp == "retry":
@@ -320,7 +351,9 @@ async def update_service_config(service_name: str, config: Dict[str, str], metho
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        CORE_CONFIG.logger.error(f"Can't save service {service_name} config to database : {resp}")
+        message = f"Can't save service {service_name} config to database : {resp}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": f"Tried to update {service_name} config", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": resp})
 
     background_tasks.add_task(
@@ -373,17 +406,20 @@ async def delete_service_config(service_name: str, method: str, background_tasks
 
     if method == "static":
         message = f"Can't delete {service_name} config : method can't be static"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["config"], "title": f"Tried to delete {service_name} config", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
     resp = DB.remove_service(service_name, method)
 
     if resp == "not_found":
-        message = f"Service {service_name} not found"
+        message = f"Can't delete {service_name} config : Service {service_name} not found"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["config"], "title": f"Tried to delete {service_name} config", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "method_conflict":
         message = f"Can't delete service {service_name} because it is either static or was created by the core or the autoconf and the method isn't one of them"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["config"], "title": f"Tried to delete {service_name} config", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif resp == "retry":
@@ -395,7 +431,9 @@ async def delete_service_config(service_name: str, method: str, background_tasks
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        CORE_CONFIG.logger.error(f"Can't delete service {service_name} from the database : {resp}")
+        message = f"Can't delete service {service_name} from the database : {resp}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["config"], "title": f"Tried to delete {service_name} config", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"message": resp})
 
     background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["config"], "title": "Delete service", "description": f"Delete service {service_name}"})

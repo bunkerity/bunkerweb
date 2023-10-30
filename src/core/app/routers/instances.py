@@ -27,7 +27,7 @@ router = APIRouter(
 
 
 @router.get("", response_model=List[InstanceWithInfo], summary="Get BunkerWeb instances", response_description="BunkerWeb instances")
-async def get_instances():
+async def get_instances(background_tasks: BackgroundTasks):
     """
     Get BunkerWeb instances with the following information:
 
@@ -47,6 +47,9 @@ async def get_instances():
             headers={"Retry-After": retry_in},
         )
     elif isinstance(db_instances, str):
+        background_tasks.add_task(
+            DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["instance"], "title": "Get instances failed", "description": f"Can't get instances in database : {db_instances}", "status": "error"}
+        )
         CORE_CONFIG.logger.error(f"Can't get instances in database : {db_instances}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -74,6 +77,14 @@ async def get_instances():
     summary="Upsert one BunkerWeb instance",
     response_description="Message",
     responses={
+        status.HTTP_201_CREATED: {
+            "description": "Instance(s) successfully created",
+            "model": ErrorMessage,
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "All instances failed to be upserted",
+            "model": ErrorMessage,
+        },
         status.HTTP_403_FORBIDDEN: {
             "description": "Not authorized to update the instance",
             "model": ErrorMessage,
@@ -99,10 +110,11 @@ async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]]
 
     if method == "static":
         message = "Can't upsert instance(s) : method can't be static"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["instance"], "title": "Upsert instance(s) failed", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
-    decisions = {"created": [], "updated": []}
+    decisions = {"created": [], "updated": [], "failed": {}}
     status_code = None
 
     if not isinstance(instances, list):
@@ -111,7 +123,7 @@ async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]]
         if resp == "method_conflict":
             message = f"Can't upsert instance {instances.hostname} because it is either static or was created by the core or the autoconf and the method isn't one of them"
             CORE_CONFIG.logger.warning(message)
-            return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
+            decisions["failed"][instances.hostname] = message
         elif resp == "retry":
             retry_in = str(uniform(1.0, 5.0))
             CORE_CONFIG.logger.warning(f"Can't upsert instance to database : {resp}, retry in {retry_in} seconds")
@@ -122,17 +134,18 @@ async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]]
             )
         elif resp not in ("created", "updated"):
             CORE_CONFIG.logger.error(f"Can't upsert instance to database : {resp}")
-            return JSONResponse(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"message": resp},
-            )
-
-        decisions[resp].append(instances)
+            decisions["failed"][instances.hostname] = resp
+        else:
+            decisions[resp].append(instances)
     else:
         for instance in instances:
             resp = DB.upsert_instance(**instance.model_dump(exclude=("last_seen",)), method=method)  # type: ignore
 
-            if resp == "retry":
+            if resp == "method_conflict":
+                message = f"Can't upsert instance {instance.hostname} because it is either static or was created by the core or the autoconf and the method isn't one of them"
+                CORE_CONFIG.logger.warning(message)
+                decisions["failed"][instance.hostname] = message
+            elif resp == "retry":
                 retry_in = str(uniform(1.0, 5.0))
                 CORE_CONFIG.logger.warning(f"Can't upsert instance {instance.hostname} to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
                 return JSONResponse(
@@ -142,14 +155,9 @@ async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]]
                 )
             elif resp not in ("created", "updated"):
                 CORE_CONFIG.logger.error(f"Can't upsert instance {instance.hostname} to database : {resp}")
-                return JSONResponse(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    content={"message": resp},
-                )
-
-            decisions[resp].append(instance)
-
-        status_code = status.HTTP_200_OK
+                decisions["failed"][instance.hostname] = resp
+            else:
+                decisions[resp].append(instance)
 
     message = "Instance(s) "
 
@@ -159,9 +167,26 @@ async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]]
         if decisions["created"]:
             message += "and "
         message += f"{', '.join(instance.hostname for instance in decisions['updated'])} successfully updated"
+    if decisions["failed"]:
+        if decisions["created"] or decisions["updated"]:
+            message += " but "
+        if not decisions["created"] and not decisions["updated"]:
+            status_code = status.HTTP_400_BAD_REQUEST
+        message += f"{', '.join(f'{hostname} ({reason})' for hostname, reason in decisions['failed'].items())} failed to be upserted"
 
-    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["instance"], "title": "Upsert instance(s)", "description": message})
-    CORE_CONFIG.logger.info(f"✅ {message} in the database")
+    background_tasks.add_task(
+        DB.add_action,
+        {
+            "date": datetime.now(),
+            "api_method": "PUT",
+            "method": method,
+            "tags": ["instance"],
+            "title": "Upsert instance(s)",
+            "description": message,
+            "status": "error" if decisions["failed"] and not decisions["created"] and not decisions["updated"] else "success",
+        },
+    )
+    CORE_CONFIG.logger.info(f"{'✅' if not decisions['failed'] else '⚠️'} {message} in the database")
 
     if reload:
         if decisions["created"]:
@@ -199,7 +224,7 @@ async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]]
         },
     },
 )
-async def get_instance(instance_hostname: Annotated[str, fastapi_Path(title="The hostname of the instance", min_length=1, max_length=256)]):
+async def get_instance(instance_hostname: Annotated[str, fastapi_Path(title="The hostname of the instance", min_length=1, max_length=256)], background_tasks: BackgroundTasks):
     """
     Get a BunkerWeb instance with the following information:
 
@@ -211,6 +236,7 @@ async def get_instance(instance_hostname: Annotated[str, fastapi_Path(title="The
 
     if not db_instance:
         message = f"Instance {instance_hostname} not found"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["instance"], "title": f"Tried to get instance {instance_hostname}", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif db_instance == "retry":
@@ -222,7 +248,12 @@ async def get_instance(instance_hostname: Annotated[str, fastapi_Path(title="The
             headers={"Retry-After": retry_in},
         )
     elif isinstance(db_instance, str):
-        CORE_CONFIG.logger.error(f"Can't get instance {instance_hostname} in database : {db_instance}")
+        message = f"Can't get instance {instance_hostname} in database : {db_instance}"
+        background_tasks.add_task(
+            DB.add_action,
+            {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["instance"], "title": f"Tried to get instance {instance_hostname}", "description": message, "status": "error"},
+        )
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": db_instance},
@@ -258,6 +289,10 @@ async def delete_instance(instance_hostname: str, method: str, background_tasks:
 
     if method == "static":
         message = f"Can't delete instance {instance_hostname} : method can't be static"
+        background_tasks.add_task(
+            DB.add_action,
+            {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["instance"], "title": f"Tried to delete instance {instance_hostname}", "description": message, "status": "error"},
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
@@ -265,10 +300,12 @@ async def delete_instance(instance_hostname: str, method: str, background_tasks:
 
     if resp == "not_found":
         message = f"Instance {instance_hostname} not found"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["instance"], "title": f"Tried to delete instance {instance_hostname}", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "method_conflict":
         message = f"Can't delete instance {instance_hostname} because it is either static or was created by the core or the autoconf and the method isn't one of them"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["instance"], "title": f"Tried to delete instance {instance_hostname}", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif resp == "retry":
@@ -280,7 +317,12 @@ async def delete_instance(instance_hostname: str, method: str, background_tasks:
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        CORE_CONFIG.logger.error(f"Can't remove instance to database : {resp}")
+        message = f"Can't remove instance to database : {resp}"
+        background_tasks.add_task(
+            DB.add_action,
+            {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["instance"], "title": "Delete instance failed", "description": message, "status": "error"},
+        )
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},
@@ -326,6 +368,9 @@ async def send_instance_action(instance_hostname: str, action: Literal["ping", "
 
     if not db_instance:
         message = f"Instance {instance_hostname} not found"
+        background_tasks.add_task(
+            DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["instance"], "title": f"Tried to send action {action} to instance {instance_hostname}", "description": message, "status": "error"}
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif db_instance == "retry":
@@ -337,7 +382,12 @@ async def send_instance_action(instance_hostname: str, action: Literal["ping", "
             headers={"Retry-After": retry_in},
         )
     elif isinstance(db_instance, str):
-        CORE_CONFIG.logger.error(f"Can't get instance {instance_hostname} in database : {db_instance}")
+        message = f"Can't get instance {instance_hostname} in database : {db_instance}"
+        background_tasks.add_task(
+            DB.add_action,
+            {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["instance"], "title": f"Tried to send action {action} to instance {instance_hostname}", "description": message, "status": "error"},
+        )
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": db_instance},
@@ -352,6 +402,10 @@ async def send_instance_action(instance_hostname: str, action: Literal["ping", "
 
     if not sent:
         error = f"Can't send API request to {instance_api.endpoint}{action} : {err}"
+        background_tasks.add_task(
+            DB.add_action,
+            {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["instance"], "title": f"Send instance action {action} failed to instance {instance_hostname}", "description": error, "status": "error"},
+        )
         CORE_CONFIG.logger.error(error)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -361,10 +415,24 @@ async def send_instance_action(instance_hostname: str, action: Literal["ping", "
         if status_code != 200:
             resp = resp.json()
             error = f"Error while sending API request to {instance_api.endpoint}{action} : status = {resp['status']}, msg = {resp['msg']}"
+            background_tasks.add_task(
+                DB.add_action,
+                {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["instance"], "title": f"Send instance action {action} failed to instance {instance_hostname}", "description": error, "status": "error"},
+            )
             CORE_CONFIG.logger.error(error)
             return JSONResponse(status_code=status_code, content={"message": error})
 
-    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["instance"], "title": "Send instance action", "description": f"Send action {action} to instance {instance_hostname}"})
+    background_tasks.add_task(
+        DB.add_action,
+        {
+            "date": datetime.now(),
+            "api_method": "POST",
+            "method": method,
+            "tags": ["instance"],
+            "title": f"Send instance action {action} to instance {instance_hostname}",
+            "description": f"Successfully sent API request to {instance_api.endpoint}{action}",
+        },
+    )
     CORE_CONFIG.logger.info(f"Successfully sent API request to {instance_api.endpoint}{action}")
 
     return JSONResponse(content={"message": resp.json()})

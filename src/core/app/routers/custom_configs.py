@@ -25,7 +25,7 @@ router = APIRouter(
 
 
 @router.get("", response_model=List[CustomConfigDataModel], summary="Get all custom configs", response_description="List of custom configs")
-async def get_custom_configs():
+async def get_custom_configs(background_tasks: BackgroundTasks):
     """
     Get all custom configs
     """
@@ -40,7 +40,12 @@ async def get_custom_configs():
             headers={"Retry-After": retry_in},
         )
     elif isinstance(custom_configs, str):
-        CORE_CONFIG.logger.error(f"Can't get custom configs in database : {custom_configs}")
+        message = f"Can't get custom configs in database : {custom_configs}"
+        background_tasks.add_task(
+            DB.add_action,
+            {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["custom_config"], "title": "Get custom configs failed", "description": message, "status": "error"},
+        )
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": custom_configs},
@@ -74,6 +79,10 @@ async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, metho
 
     if method == "static":
         message = f"Can't upsert custom config {custom_config.name} : method can't be static"
+        background_tasks.add_task(
+            DB.add_action,
+            {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["custom_config"], "title": f"Tried to update custom config {custom_config.name}", "description": message, "status": "error"},
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
@@ -87,6 +96,7 @@ async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, metho
             + (f" from service {custom_config.service_id}" if custom_config.service_id else "")
             + " because it is either static or was created by the core or the autoconf and the method isn't one of them"
         )
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["custom_config"], "title": f"Tried to update custom config {custom_config.name}", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif resp == "retry":
@@ -98,7 +108,12 @@ async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, metho
             headers={"Retry-After": retry_in},
         )
     elif resp and resp not in ("created", "updated"):
-        CORE_CONFIG.logger.error(f"Can't upsert custom config: {resp}")
+        message = f"Can't upsert custom config: {resp}"
+        background_tasks.add_task(
+            DB.add_action,
+            {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["custom_config"], "title": f"Tried to update custom config {custom_config.name}", "description": message, "status": "error"},
+        )
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},
@@ -144,6 +159,10 @@ async def delete_custom_config(custom_config_name: str, custom_config: CustomCon
 
     if method == "static":
         message = f"Can't delete custom config {custom_config_name} : method can't be static"
+        background_tasks.add_task(
+            DB.add_action,
+            {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Tried to delete custom config {custom_config_name}", "description": message, "status": "error"},
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
@@ -151,6 +170,7 @@ async def delete_custom_config(custom_config_name: str, custom_config: CustomCon
 
     if resp == "not_found":
         message = f"Custom config {custom_config_name} not found"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Tried to delete custom config {custom_config_name}", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "method_conflict":
@@ -158,6 +178,9 @@ async def delete_custom_config(custom_config_name: str, custom_config: CustomCon
             f"Can't delete custom config {custom_config_name}"
             + (f" from service {custom_config.service_id}" if custom_config.service_id else "")
             + " because it is either static or was created by the core or the autoconf and the method isn't one of them"
+        )
+        background_tasks.add_task(
+            DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Trired to delete custom config {custom_config_name}", "description": message, "status": "error"}
         )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
@@ -170,7 +193,12 @@ async def delete_custom_config(custom_config_name: str, custom_config: CustomCon
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        CORE_CONFIG.logger.error(f"Can't delete custom config: {resp}")
+        message = f"Can't delete custom config {custom_config_name}: {resp}"
+        background_tasks.add_task(
+            DB.add_action,
+            {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Trired to delete custom config {custom_config_name}", "description": message, "status": "error"},
+        )
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},
