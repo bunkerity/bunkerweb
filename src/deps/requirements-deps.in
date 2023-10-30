@@ -4,4 +4,4 @@ pip-tools==7.3.0
 pip-upgrader==1.4.15
 setuptools==68.2.2
 tomli==2.0.1
-wheel==0.41.2
+wheel==0.41.3
