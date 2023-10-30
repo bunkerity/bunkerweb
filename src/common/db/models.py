@@ -82,7 +82,7 @@ class Global_values(Base):
     __tablename__ = "bw_global_values"
     __table_args__ = (UniqueConstraint("setting_id", "suffix"),)
 
-    id = Column(Integer, Sequence("global_value_id_seq"), primary_key=True, autoincrement=True)
+    id = Column(Integer, Sequence("global_value_id_seq", start=1, increment=1, optional=True), primary_key=True, autoincrement=True)
     setting_id = Column(
         String(256),
         ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"),
@@ -110,7 +110,7 @@ class Services_settings(Base):
     __tablename__ = "bw_services_settings"
     __table_args__ = (UniqueConstraint("service_id", "setting_id", "suffix"),)
 
-    id = Column(Integer, Sequence("service_setting_id_seq"), primary_key=True, autoincrement=True)
+    id = Column(Integer, Sequence("service_setting_id_seq", start=1, increment=1, optional=True), primary_key=True, autoincrement=True)
     service_id = Column(
         String(64),
         ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"),
@@ -150,7 +150,7 @@ class Jobs(Base):
 class Plugin_pages(Base):
     __tablename__ = "bw_plugin_pages"
 
-    id = Column(Integer, Sequence("plugin_page_id_seq"), primary_key=True, autoincrement=True)
+    id = Column(Integer, Sequence("plugin_page_id_seq", start=1, increment=1, optional=True), primary_key=True, autoincrement=True)
     plugin_id = Column(
         String(64),
         ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"),
@@ -168,7 +168,7 @@ class Jobs_cache(Base):
     __tablename__ = "bw_jobs_cache"
     __table_args__ = (UniqueConstraint("job_name", "service_id", "file_name"),)
 
-    id = Column(Integer, Sequence("job_cache_id_seq"), primary_key=True, autoincrement=True)
+    id = Column(Integer, Sequence("job_cache_id_seq", start=1, increment=1, optional=True), primary_key=True, autoincrement=True)
     job_name = Column(
         String(128),
         ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"),
@@ -194,7 +194,7 @@ class Jobs_cache(Base):
 class Jobs_runs(Base):
     __tablename__ = "bw_jobs_runs"
 
-    id = Column(Integer, Sequence("job_run_id_seq"), primary_key=True, autoincrement=True)
+    id = Column(Integer, Sequence("job_run_id_seq", start=1, increment=1, optional=True), primary_key=True, autoincrement=True)
     job_name = Column(
         String(128),
         ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"),
@@ -211,7 +211,7 @@ class Custom_configs(Base):
     __tablename__ = "bw_custom_configs"
     __table_args__ = (UniqueConstraint("service_id", "type", "name"),)
 
-    id = Column(Integer, Sequence("custom_config_id_seq"), primary_key=True, autoincrement=True)
+    id = Column(Integer, Sequence("custom_config_id_seq", start=1, increment=1, optional=True), primary_key=True, autoincrement=True)
     service_id = Column(
         String(64),
         ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"),
@@ -230,7 +230,7 @@ class Selects(Base):
     __tablename__ = "bw_selects"
     __table_args__ = (UniqueConstraint("setting_id", "value"),)
 
-    id = Column(Integer, Sequence("select_id_seq"), primary_key=True, autoincrement=True)
+    id = Column(Integer, Sequence("select_id_seq", start=1, increment=1, optional=True), primary_key=True, autoincrement=True)
     setting_id = Column(String(256), ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"), nullable=False)
     value = Column(String(256), nullable=True)
 
@@ -260,7 +260,7 @@ class Metadata(Base):
 class Actions(Base):
     __tablename__ = "bw_actions"
 
-    id = Column(Integer, Sequence("action_id_seq"), primary_key=True, autoincrement=True)
+    id = Column(Integer, Sequence("action_id_seq", start=1, increment=1, optional=True), primary_key=True, autoincrement=True)
     date = Column(DateTime(timezone=True), nullable=False)
     api_method = Column(String(32), nullable=False)
     method = Column(String(32), nullable=False)
@@ -282,7 +282,7 @@ class Tags(Base):
 class Actions_tags(Base):
     __tablename__ = "bw_actions_tags"
 
-    id = Column(Integer, Sequence("action_tag_id_seq"), primary_key=True, autoincrement=True)
+    id = Column(Integer, Sequence("action_tag_id_seq", start=1, increment=1, optional=True), primary_key=True, autoincrement=True)
     action_id = Column(Integer, ForeignKey("bw_actions.id"), nullable=False)
     tag_id = Column(String(64), ForeignKey("bw_tags.id"), nullable=False)
 
