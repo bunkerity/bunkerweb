@@ -3,9 +3,35 @@ from httpx import AsyncClient, Client
 from os import getenv
 from time import time
 from traceback import format_exc
-
+from contextlib import suppress
+from requests.exceptions import RequestException
+from time import sleep
+from requests import get
 
 try:
+
+    ready = False
+    retries = 0
+    while not ready:
+        with suppress(RequestException):
+            resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"})
+            status_code = resp.status_code
+            text = resp.text
+
+            if status_code >= 500:
+                print("❌ An error occurred with the server, exiting ...", flush=True)
+                exit(1)
+
+            ready = status_code < 400 or status_code == 403 and text == "ready"
+
+        if retries > 10:
+            print("❌ The service took too long to be ready, exiting ...", flush=True)
+            exit(1)
+        elif not ready:
+            retries += 1
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
+            sleep(5)
+
     use_limit_request = getenv("USE_LIMIT_REQ", "yes") == "yes"
     limit_req_url = getenv("LIMIT_REQ_URL", "/")
     limit_req_rate = getenv("LIMIT_REQ_RATE", "2r/s")
