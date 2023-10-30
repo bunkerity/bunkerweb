@@ -163,15 +163,19 @@ def access_page(
         )
 
 
-driver_func = partial(webdriver.Firefox, options=firefox_options)
+driver_func = partial(
+        webdriver.Firefox,
+        service=Service(log_output="./geckodriver.log"),
+        options=firefox_options
+    )
 if TEST_TYPE == "dev":
     driver_func = partial(
         webdriver.Firefox,
-        service=Service(Service(executable_path="./geckodriver" if "geckodriver" in listdir(Path.cwd()) else "/usr/local/bin/geckodriver", log_output="./geckodriver.log")),
+        service=Service(executable_path="./geckodriver" if "geckodriver" in listdir(Path.cwd()) else "/usr/local/bin/geckodriver", log_output="./geckodriver.log"),
         options=firefox_options,
     )
 
-with webdriver.Firefox(options=firefox_options) as driver:
+with driver_func() as driver:
     try:
         driver.delete_all_cookies()
         driver.maximize_window()
