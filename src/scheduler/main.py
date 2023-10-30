@@ -21,7 +21,7 @@ from pathlib import Path
 from shutil import copy, rmtree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from stat import S_IEXEC
-from subprocess import run as subprocess_run, DEVNULL, STDOUT
+from subprocess import run as subprocess_run, DEVNULL, STDOUT, PIPE
 from sys import path as sys_path
 from tarfile import open as tar_open
 from threading import Thread
@@ -524,46 +524,62 @@ if __name__ == "__main__":
                     else:
                         logger.error("Error while reloading nginx")
                 else:
-                    # Stop temp nginx
-                    logger.info("Stopping temp nginx ...")
+                    # Reload nginx
+                    logger.info("Reloading nginx ...")
                     proc = subprocess_run(
-                        [join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
+                        [join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
                         stdin=DEVNULL,
                         stderr=STDOUT,
                         env=env.copy(),
                         check=False,
+                        stdout=PIPE
                     )
                     if proc.returncode == 0:
-                        logger.info("Successfully sent stop signal to temp nginx")
-                        i = 0
-                        while i < 20:
-                            if not Path(sep, "var", "run", "bunkerweb", "nginx.pid").is_file():
-                                break
-                            logger.warning("Waiting for temp nginx to stop ...")
-                            sleep(1)
-                            i += 1
-                        if i >= 20:
-                            logger.error("Timeout error while waiting for temp nginx to stop")
-                        else:
-                            # Start nginx
-                            logger.info("Starting nginx ...")
-                            proc = subprocess_run(
-                                [join(sep, "usr", "sbin", "nginx")],
-                                stdin=DEVNULL,
-                                stderr=STDOUT,
-                                env=env.copy(),
-                                check=False,
-                            )
-                            if proc.returncode == 0:
-                                logger.info("Successfully started nginx")
-                            else:
-                                logger.error(
-                                    f"Error while starting nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
-                                )
+                        logger.info("Successfully sent reload signal to nginx")
                     else:
                         logger.error(
-                            f"Error while sending stop signal to temp nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
+                                f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stdout.decode('utf-8') if proc.stdout else 'no output'}",
                         )
+                    # # Stop temp nginx
+                    # logger.info("Stopping temp nginx ...")
+                    # proc = subprocess_run(
+                    #     [join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
+                    #     stdin=DEVNULL,
+                    #     stderr=STDOUT,
+                    #     env=env.copy(),
+                    #     check=False,
+                    # )
+                    # if proc.returncode == 0:
+                    #     logger.info("Successfully sent stop signal to temp nginx")
+                    #     i = 0
+                    #     while i < 20:
+                    #         if not Path(sep, "var", "run", "bunkerweb", "nginx.pid").is_file():
+                    #             break
+                    #         logger.warning("Waiting for temp nginx to stop ...")
+                    #         sleep(1)
+                    #         i += 1
+                    #     if i >= 20:
+                    #         logger.error("Timeout error while waiting for temp nginx to stop")
+                    #     else:
+                    #         # Start nginx
+                    #         logger.info("Starting nginx ...")
+                    #         proc = subprocess_run(
+                    #             [join(sep, "usr", "sbin", "nginx"), "-e", "/var/log/bunkerweb/error.log"],
+                    #             stdin=DEVNULL,
+                    #             stderr=STDOUT,
+                    #             env=env.copy(),
+                    #             check=False,
+                    #         )
+                    #         if proc.returncode == 0:
+                    #             logger.info("Successfully started nginx")
+                    #         else:
+                    #             logger.error(
+                    #                 f"Error while starting nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
+                    #             )
+                    # else:
+                    #     logger.error(
+                    #         f"Error while sending stop signal to temp nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
+                    #     )
             except:
                 logger.error(
                     f"Exception while reloading after running jobs once scheduling : {format_exc()}",

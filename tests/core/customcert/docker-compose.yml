@@ -20,6 +20,15 @@ services:
       USE_CUSTOM_SSL: "no"
       CUSTOM_SSL_CERT: "/certs/certificate.pem"
       CUSTOM_SSL_KEY: "/certs/privatekey.key"
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       bw-universe:
       bw-services:

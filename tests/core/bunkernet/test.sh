@@ -46,6 +46,7 @@ else
     export BUNKERNET_SERVER="http://127.0.0.1:8080"
     sudo touch /var/www/html/index.html
     python3 api/main.py &
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 manual=0

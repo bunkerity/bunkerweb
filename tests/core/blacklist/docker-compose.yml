@@ -37,6 +37,15 @@ services:
       BLACKLIST_IGNORE_USER_AGENT_URLS: ""
       BLACKLIST_IGNORE_URI: ""
       BLACKLIST_IGNORE_URI_URLS: ""
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       bw-universe:
       bw-services:

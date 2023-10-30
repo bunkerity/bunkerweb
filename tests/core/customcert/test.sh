@@ -32,6 +32,7 @@ else
     echo "CUSTOM_SSL_CERT=/tmp/certificate.pem" | sudo tee -a /etc/bunkerweb/variables.env
     echo "CUSTOM_SSL_KEY=/tmp/privatekey.key" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 manual=0

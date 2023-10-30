@@ -15,7 +15,7 @@ resource "scaleway_k8s_cluster" "cluster" {
   version = "1.24.7"
   cni = "cilium"
   private_network_id = scaleway_vpc_private_network.pn.id
-  delete_additional_resources = false
+  delete_additional_resources = true
 }
 # Create k8s pool
 resource "scaleway_k8s_pool" "pool" {

@@ -47,6 +47,7 @@ TEST_TYPE = getenv("TEST_TYPE", "docker")
 firefox_options = Options()
 if "geckodriver" not in listdir(Path.cwd()):
     firefox_options.add_argument("--headless")
+firefox_options.log.level = "trace"
 
 print("Starting Firefox ...", flush=True)
 
@@ -73,7 +74,7 @@ def assert_button_click(driver, button: Union[str, WebElement]):
 
             button.click()
             clicked = True
-
+    return clicked
 
 def assert_alert_message(driver, message: str):
     safe_get_element(driver, By.XPATH, "//button[@data-flash-sidebar-open='']")
@@ -126,20 +127,25 @@ def access_page(
     message: bool = True,
     *,
     retries: int = 0,
+    clicked: bool = False,
 ):
-    if retries == 0:
-        assert_button_click(driver, button)
+    if retries > 5:
+        print("Too many retries...", flush=True)
+        exit(1)
 
     try:
+        if not clicked:
+            clicked = assert_button_click(driver, button)
+
         title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div/header/div/nav/h6")))
 
         if title.text != name.replace(" ", "_").title():
             print(f"Didn't get redirected to {name} page, exiting ...", flush=True)
             exit(1)
     except TimeoutException:
-        if retries < 3 and "/loading" in driver.current_url:
+        if "/loading" in driver.current_url:
             sleep(2)
-            access_page(driver, driver_wait, button, name, message, retries=retries + 1)
+            return access_page(driver, driver_wait, button, name, message, retries=retries + 1, clicked=clicked)
 
         print(f"{name.title()} page didn't load in time, exiting ...", flush=True)
         exit(1)
@@ -148,7 +154,7 @@ def access_page(
             print("Connection failure, retrying in 5s ...", flush=True)
             driver.refresh()
             sleep(5)
-            return access_page(driver, driver_wait, button, name, message, retries=1)
+            return access_page(driver, driver_wait, button, name, message, retries=retries + 1, clicked=clicked)
         raise we
 
     if message:
@@ -158,15 +164,19 @@ def access_page(
         )
 
 
-driver_func = partial(webdriver.Firefox, options=firefox_options)
+driver_func = partial(
+        webdriver.Firefox,
+        service=Service(log_output="./geckodriver.log"),
+        options=firefox_options
+    )
 if TEST_TYPE == "dev":
     driver_func = partial(
         webdriver.Firefox,
-        service=Service(Service(executable_path="./geckodriver" if "geckodriver" in listdir(Path.cwd()) else "/usr/local/bin/geckodriver")),
+        service=Service(executable_path="./geckodriver" if "geckodriver" in listdir(Path.cwd()) else "/usr/local/bin/geckodriver", log_output="./geckodriver.log"),
         options=firefox_options,
     )
 
-with webdriver.Firefox(options=firefox_options) as driver:
+with driver_func() as driver:
     try:
         driver.delete_all_cookies()
         driver.maximize_window()
@@ -297,22 +307,27 @@ with webdriver.Firefox(options=firefox_options) as driver:
                 print("WARNING: message list doesn't contain the expected message or is empty, retrying...")
 
         if TEST_TYPE == "linux":
+            ready = False
             retries = 0
-            while (
-                b"BunkerWeb is ready"
-                not in run(
-                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
-                    stdout=PIPE,
-                    check=True,
-                ).stdout
-            ) and retries < 10:
-                retries += 1
-                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
-                sleep(5)
+            while not ready:
+                with suppress(RequestException):
+                    resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"}, verify=False)
+                    status_code = resp.status_code
+                    text = resp.text
 
-            if retries >= 10:
-                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
-                exit(1)
+                    if resp.status_code >= 500:
+                        print("❌ An error occurred with the server, exiting ...", flush=True)
+                        exit(1)
+
+                    ready = status_code < 400 and text == "ready"
+
+                if retries > 10:
+                    print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
+                    exit(1)
+                elif not ready:
+                    retries += 1
+                    print("⚠️ Waiting for BunkerWeb to be ready, retrying in 5s ...", flush=True)
+                    sleep(5)
 
         print("Trying global config page ...")
 
@@ -413,22 +428,27 @@ with webdriver.Firefox(options=firefox_options) as driver:
         )
 
         if TEST_TYPE == "linux":
+            ready = False
             retries = 0
-            while (
-                b"BunkerWeb is ready"
-                not in run(
-                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
-                    stdout=PIPE,
-                    check=True,
-                ).stdout
-            ) and retries < 10:
-                retries += 1
-                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
-                sleep(5)
+            while not ready:
+                with suppress(RequestException):
+                    resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"}, verify=False)
+                    status_code = resp.status_code
+                    text = resp.text
 
-            if retries >= 10:
-                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
-                exit(1)
+                    if resp.status_code >= 500:
+                        print("❌ An error occurred with the server, exiting ...", flush=True)
+                        exit(1)
+
+                    ready = status_code < 400 and text == "ready"
+
+                if retries > 10:
+                    print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
+                    exit(1)
+                elif not ready:
+                    retries += 1
+                    print("⚠️ Waiting for BunkerWeb to be ready, retrying in 5s ...", flush=True)
+                    sleep(5)
 
         input_worker = safe_get_element(driver, By.ID, "WORKER_RLIMIT_NOFILE")
 
@@ -577,22 +597,27 @@ with webdriver.Firefox(options=firefox_options) as driver:
         )
 
         if TEST_TYPE == "linux":
+            ready = False
             retries = 0
-            while (
-                b"BunkerWeb is ready"
-                not in run(
-                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
-                    stdout=PIPE,
-                    check=True,
-                ).stdout
-            ) and retries < 10:
-                retries += 1
-                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
-                sleep(5)
+            while not ready:
+                with suppress(RequestException):
+                    resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"}, verify=False)
+                    status_code = resp.status_code
+                    text = resp.text
 
-            if retries >= 10:
-                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
-                exit(1)
+                    if resp.status_code >= 500:
+                        print("❌ An error occurred with the server, exiting ...", flush=True)
+                        exit(1)
+
+                    ready = status_code < 400 and text == "ready"
+
+                if retries > 10:
+                    print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
+                    exit(1)
+                elif not ready:
+                    retries += 1
+                    print("⚠️ Waiting for BunkerWeb to be ready, retrying in 5s ...", flush=True)
+                    sleep(5)
 
         print(
             "The page reloaded successfully, checking if the setting has been updated ...",
@@ -656,22 +681,27 @@ with webdriver.Firefox(options=firefox_options) as driver:
         )
 
         if TEST_TYPE == "linux":
+            ready = False
             retries = 0
-            while (
-                b"BunkerWeb is ready"
-                not in run(
-                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
-                    stdout=PIPE,
-                    check=True,
-                ).stdout
-            ) and retries < 10:
-                retries += 1
-                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
-                sleep(5)
+            while not ready:
+                with suppress(RequestException):
+                    resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"}, verify=False)
+                    status_code = resp.status_code
+                    text = resp.text
 
-            if retries >= 10:
-                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
-                exit(1)
+                    if resp.status_code >= 500:
+                        print("❌ An error occurred with the server, exiting ...", flush=True)
+                        exit(1)
+
+                    ready = status_code < 400 and text == "ready"
+
+                if retries > 10:
+                    print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
+                    exit(1)
+                elif not ready:
+                    retries += 1
+                    print("⚠️ Waiting for BunkerWeb to be ready, retrying in 5s ...", flush=True)
+                    sleep(5)
 
         try:
             services = safe_get_element(
@@ -773,22 +803,27 @@ with webdriver.Firefox(options=firefox_options) as driver:
         )
 
         if TEST_TYPE == "linux":
+            ready = False
             retries = 0
-            while (
-                b"BunkerWeb is ready"
-                not in run(
-                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
-                    stdout=PIPE,
-                    check=True,
-                ).stdout
-            ) and retries < 10:
-                retries += 1
-                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
-                sleep(5)
+            while not ready:
+                with suppress(RequestException):
+                    resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"}, verify=False)
+                    status_code = resp.status_code
+                    text = resp.text
 
-            if retries >= 10:
-                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
-                exit(1)
+                    if resp.status_code >= 500:
+                        print("❌ An error occurred with the server, exiting ...", flush=True)
+                        exit(1)
+
+                    ready = status_code < 400 and text == "ready"
+
+                if retries > 10:
+                    print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
+                    exit(1)
+                elif not ready:
+                    retries += 1
+                    print("⚠️ Waiting for BunkerWeb to be ready, retrying in 5s ...", flush=True)
+                    sleep(5)
 
         assert_alert_message(driver, "has been deleted.")
 
@@ -856,22 +891,27 @@ location /hello {
         )
 
         if TEST_TYPE == "linux":
+            ready = False
             retries = 0
-            while (
-                b"BunkerWeb is ready"
-                not in run(
-                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
-                    stdout=PIPE,
-                    check=True,
-                ).stdout
-            ) and retries < 10:
-                retries += 1
-                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
-                sleep(5)
+            while not ready:
+                with suppress(RequestException):
+                    resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"}, verify=False)
+                    status_code = resp.status_code
+                    text = resp.text
 
-            if retries >= 10:
-                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
-                exit(1)
+                    if resp.status_code >= 500:
+                        print("❌ An error occurred with the server, exiting ...", flush=True)
+                        exit(1)
+
+                    ready = status_code < 400 and text == "ready"
+
+                if retries > 10:
+                    print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
+                    exit(1)
+                elif not ready:
+                    retries += 1
+                    print("⚠️ Waiting for BunkerWeb to be ready, retrying in 5s ...", flush=True)
+                    sleep(5)
 
         assert_alert_message(driver, "was successfully created")
 
@@ -916,22 +956,27 @@ location /hello {
         )
 
         if TEST_TYPE == "linux":
+            ready = False
             retries = 0
-            while (
-                b"BunkerWeb is ready"
-                not in run(
-                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
-                    stdout=PIPE,
-                    check=True,
-                ).stdout
-            ) and retries < 10:
-                retries += 1
-                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
-                sleep(5)
+            while not ready:
+                with suppress(RequestException):
+                    resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"}, verify=False)
+                    status_code = resp.status_code
+                    text = resp.text
 
-            if retries >= 10:
-                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
-                exit(1)
+                    if resp.status_code >= 500:
+                        print("❌ An error occurred with the server, exiting ...", flush=True)
+                        exit(1)
+
+                    ready = status_code < 400 and text == "ready"
+
+                if retries > 10:
+                    print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
+                    exit(1)
+                elif not ready:
+                    retries += 1
+                    print("⚠️ Waiting for BunkerWeb to be ready, retrying in 5s ...", flush=True)
+                    sleep(5)
 
         assert_alert_message(driver, "was successfully deleted")
 
@@ -996,22 +1041,27 @@ location /hello {
         )
 
         if TEST_TYPE == "linux":
+            ready = False
             retries = 0
-            while (
-                b"BunkerWeb is ready"
-                not in run(
-                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
-                    stdout=PIPE,
-                    check=True,
-                ).stdout
-            ) and retries < 10:
-                retries += 1
-                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
-                sleep(5)
+            while not ready:
+                with suppress(RequestException):
+                    resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"}, verify=False)
+                    status_code = resp.status_code
+                    text = resp.text
 
-            if retries >= 10:
-                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
-                exit(1)
+                    if resp.status_code >= 500:
+                        print("❌ An error occurred with the server, exiting ...", flush=True)
+                        exit(1)
+
+                    ready = status_code < 400 and text == "ready"
+
+                if retries > 10:
+                    print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
+                    exit(1)
+                elif not ready:
+                    retries += 1
+                    print("⚠️ Waiting for BunkerWeb to be ready, retrying in 5s ...", flush=True)
+                    sleep(5)
 
         external_plugins = safe_get_element(
             driver,
@@ -1040,22 +1090,27 @@ location /hello {
         )
 
         if TEST_TYPE == "linux":
+            ready = False
             retries = 0
-            while (
-                b"BunkerWeb is ready"
-                not in run(
-                    ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
-                    stdout=PIPE,
-                    check=True,
-                ).stdout
-            ) and retries < 10:
-                retries += 1
-                print("Waiting for BunkerWeb to be ready, retrying in 5s ...")
-                sleep(5)
+            while not ready:
+                with suppress(RequestException):
+                    resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"}, verify=False)
+                    status_code = resp.status_code
+                    text = resp.text
 
-            if retries >= 10:
-                print("BunkerWeb took too long to be ready, exiting ...", flush=True)
-                exit(1)
+                    if resp.status_code >= 500:
+                        print("❌ An error occurred with the server, exiting ...", flush=True)
+                        exit(1)
+
+                    ready = status_code < 400 and text == "ready"
+
+                if retries > 10:
+                    print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
+                    exit(1)
+                elif not ready:
+                    retries += 1
+                    print("⚠️ Waiting for BunkerWeb to be ready, retrying in 5s ...", flush=True)
+                    sleep(5)
 
         with suppress(TimeoutException):
             title = WebDriverWait(driver, 2).until(

@@ -36,6 +36,7 @@ else
     sudo touch /var/www/html/index.html
     export COUNTRY=""
     export TEST_TYPE="linux"
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 manual=0

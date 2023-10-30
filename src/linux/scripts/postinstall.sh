@@ -21,8 +21,8 @@ do_and_check_cmd chown -R nginx:nginx /usr/share/bunkerweb /var/cache/bunkerweb 
 
 # Stop and disable nginx on boot
 echo "Stop and disable nginx on boot..."
-do_and_check_cmd systemctl stop bunkerweb
-do_and_check_cmd systemctl disable bunkerweb
+do_and_check_cmd systemctl stop nginx
+do_and_check_cmd systemctl disable nginx
 
 # Auto start BW service on boot and start it now
 echo "Enabling and starting bunkerweb service..."

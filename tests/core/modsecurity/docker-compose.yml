@@ -21,6 +21,15 @@ services:
       MODSECURITY_SEC_AUDIT_ENGINE: "RelevantOnly"
       MODSECURITY_SEC_RULE_ENGINE: "On"
       MODSECURITY_SEC_AUDIT_LOG_PARTS: "ABCFHZ"
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       bw-universe:
       bw-services:

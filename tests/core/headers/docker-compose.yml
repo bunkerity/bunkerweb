@@ -32,6 +32,15 @@ services:
       X_FRAME_OPTIONS: "SAMEORIGIN"
       X_CONTENT_TYPE_OPTIONS: "nosniff"
       X_XSS_PROTECTION: "1; mode=block"
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       bw-universe:
       bw-services:
