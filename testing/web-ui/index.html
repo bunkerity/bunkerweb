@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.35e1ed30.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
       
       
 
@@ -808,7 +808,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span>
 <span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE=yes&quot;</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME=www.example.com</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MULTISITE=yes</span>
@@ -918,7 +918,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80:8080</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443:8443</span>
 <span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE=yes&quot;</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SERVER_NAME=</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db</span>
@@ -1065,7 +1065,7 @@ docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </
 <span class="w">        </span><span class="nt">constraints</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;node.role</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">worker&quot;</span>
 <span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bunkerweb.INSTANCE=yes&quot;</span>
 
 <span class="w">  </span><span class="nt">bw-autoconf</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bunkerity/bunkerweb-autoconf:testing</span>
@@ -1518,10 +1518,10 @@ ADMIN_PASSWORD=changeme
 </code></pre></div>
 <p>Accessing the web UI through BunkerWeb is a classical <a href="../quickstart-guide/#protect-http-applications">reverse proxy setup</a>. Please note that the web UI is listening on the <code>7000</code> port and only on the loopback interface.</p>
 <p>Here is the <code>/etc/bunkerweb/variables.env</code> boilerplate you can use :</p>
-<div class="highlight"><pre><span></span><code>API_LISTEN_IP=127.0.0.1
-HTTP_PORT=80
+<div class="highlight"><pre><span></span><code>HTTP_PORT=80
 HTTPS_PORT=443
 DNS_RESOLVERS=8.8.8.8 8.8.4.4
+API_LISTEN_IP=127.0.0.1
 SERVER_NAME=www.example.com
 MULTISITE=yes
 www.example.com_USE_UI=yes
@@ -1544,6 +1544,7 @@ ADMIN_PASSWORD=changeme
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
 HTTPS_PORT=443
 DNS_RESOLVERS=8.8.8.8 8.8.4.4
+API_LISTEN_IP=127.0.0.1
 SERVER_NAME=www.example.com
 MULTISITE=yes
 www.example.com_USE_UI=yes
@@ -1590,6 +1591,7 @@ ADMIN_PASSWORD=changeme
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
 HTTPS_PORT=443
 DNS_RESOLVERS=8.8.8.8 8.8.4.4
+API_LISTEN_IP=127.0.0.1
 SERVER_NAME=www.example.com
 MULTISITE=yes
 www.example.com_USE_UI=yes
