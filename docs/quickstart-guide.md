@@ -228,6 +228,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
     SERVER_NAME=www.example.com
     USE_REVERSE_PROXY=yes
     REVERSE_PROXY_URL=/
@@ -268,6 +269,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
     SERVER_NAME=www.example.com
     USE_REVERSE_PROXY=yes
     REVERSE_PROXY_URL=/
@@ -323,6 +325,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
     USE_REVERSE_PROXY=yes
     REVERSE_PROXY_URL=/
     REVERSE_PROXY_HOST=http://127.0.0.1:8000
@@ -658,6 +661,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
     MULTISITE=yes
     SERVER_NAME=app1.example.com app2.example.com app3.example.com
     USE_REVERSE_PROXY=yes
@@ -701,6 +705,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
     MULTISITE=yes
     SERVER_NAME=app1.example.com app2.example.com app3.example.com
     USE_REVERSE_PROXY=yes
@@ -756,6 +761,7 @@ You will find more settings about reverse proxy in the [settings section](settin
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
     MULTISITE=yes
     SERVER_NAME=app1.example.com app2.example.com app3.example.com
     USE_REVERSE_PROXY=yes
@@ -2199,6 +2205,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
     MULTISITE=yes
     SERVER_NAME=app1.example.com app2.example.com app3.example.com
     app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
@@ -2240,6 +2247,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
     MULTISITE=yes
     SERVER_NAME=app1.example.com app2.example.com app3.example.com
     app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
@@ -2289,6 +2297,7 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
     MULTISITE=yes
     SERVER_NAME=app1.example.com app2.example.com app3.example.com
     app1.example.com_LOCAL_PHP=/run/php/php-fpm.sock
