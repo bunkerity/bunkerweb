@@ -1,0 +1,19 @@
+:root {
+  --md-primary-fg-color: #125678;
+  --md-text-font: "Roboto";
+}
+
+.md-footer {
+  background-color: #125678;
+}
+
+/*
+@font-face {
+	font-family: Consolas, monaco, monospace;
+}
+
+@font-face {
+	font-family: "TitleFont";
+	src: "assets/font-title.woff";
+}
+*/
