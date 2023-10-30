@@ -126,7 +126,7 @@ class Instances:
         # Docker instances (containers or services)
         if self.__docker_client is not None:
             for instance in self.__docker_client.containers.list(all=True, filters={"label": "bunkerweb.INSTANCE"}):
-                env_variables = {x[0]: x[1] for x in [env.split("=") for env in instance.attrs["Config"]["Env"]]}
+                env_variables = {x[0]: (x[1] if len(x) > 1 else "") for x in [env.split("=") for env in instance.attrs["Config"]["Env"]]}
 
                 instances.append(
                     Instance(
