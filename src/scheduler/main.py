@@ -21,7 +21,7 @@ from pathlib import Path
 from shutil import copy, rmtree
 from signal import SIGINT, SIGTERM, signal, SIGHUP
 from stat import S_IEXEC
-from subprocess import run as subprocess_run, DEVNULL, STDOUT
+from subprocess import run as subprocess_run, DEVNULL, STDOUT, PIPE
 from sys import path as sys_path
 from tarfile import open as tar_open
 from threading import Thread
@@ -532,12 +532,13 @@ if __name__ == "__main__":
                         stderr=STDOUT,
                         env=env.copy(),
                         check=False,
+                        stdout=PIPE
                     )
                     if proc.returncode == 0:
                         logger.info("Successfully sent reload signal to nginx")
                     else:
                         logger.error(
-                                f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
+                                f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stdout.decode('utf-8') if proc.stdout else 'no output'}",
                         )
                     # # Stop temp nginx
                     # logger.info("Stopping temp nginx ...")
