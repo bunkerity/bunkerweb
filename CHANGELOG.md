@@ -19,6 +19,8 @@
 - [MISC] Add HTML sanitization when injecting code in pages in the UI
 - [MISC] Optimize the way the UI handles services creation and edition
 - [MISC] Optimize certbot renew script to renew all domains in one command
+- [MISC] Use capability instead of sudo in Linux
+- [SECURITY] Init work on OpenSSF best practices
 
 ## v1.5.2 - 2023/09/10
 

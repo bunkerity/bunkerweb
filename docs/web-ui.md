@@ -74,7 +74,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - 80:8080
           - 443:8443
         labels:
-          - "bunkerweb.INSTANCE"
+          - "bunkerweb.INSTANCE=yes"
         environment:
           - SERVER_NAME=www.example.com
           - MULTISITE=yes
@@ -194,7 +194,7 @@ Because the web UI is a web application, the recommended installation procedure 
           - 80:8080
           - 443:8443
         labels:
-          - "bunkerweb.INSTANCE"
+          - "bunkerweb.INSTANCE=yes"
         environment:
           - SERVER_NAME=
           - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
@@ -351,7 +351,7 @@ Because the web UI is a web application, the recommended installation procedure 
             constraints:
               - "node.role == worker"
           labels:
-            - "bunkerweb.INSTANCE"
+            - "bunkerweb.INSTANCE=yes"
 
       bw-autoconf:
         image: bunkerity/bunkerweb-autoconf:1.5.3
@@ -823,10 +823,10 @@ Because the web UI is a web application, the recommended installation procedure 
     Here is the `/etc/bunkerweb/variables.env` boilerplate you can use :
 
     ```conf
-    API_LISTEN_IP=127.0.0.1
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
     SERVER_NAME=www.example.com
     MULTISITE=yes
     www.example.com_USE_UI=yes
@@ -859,6 +859,7 @@ Because the web UI is a web application, the recommended installation procedure 
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
     SERVER_NAME=www.example.com
     MULTISITE=yes
     www.example.com_USE_UI=yes
@@ -932,6 +933,7 @@ Because the web UI is a web application, the recommended installation procedure 
     HTTP_PORT=80
     HTTPS_PORT=443
     DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    API_LISTEN_IP=127.0.0.1
     SERVER_NAME=www.example.com
     MULTISITE=yes
     www.example.com_USE_UI=yes

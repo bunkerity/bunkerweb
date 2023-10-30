@@ -12,8 +12,8 @@
 	<br />
 	<img src="https://img.shields.io/github/issues/bunkerity/bunkerweb">
 	<img src="https://img.shields.io/github/issues-pr/bunkerity/bunkerweb">
-	<a href="https://securityscorecards.dev/viewer/?uri=github.com/bunkerity/bunkerweb">
-		<img src="https://api.securityscorecards.dev/projects/github.com/bunkerity/bunkerweb/badge" />
+	<a href="https://www.bestpractices.dev/projects/8001">
+		<img src="https://www.bestpractices.dev/projects/8001/badge">
 	</a>
 </p>
 

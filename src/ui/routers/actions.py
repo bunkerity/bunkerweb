@@ -1,7 +1,8 @@
-from typing import Annotated, Optional, List
-from fastapi import APIRouter, File, Form, Body
+# -*- coding: utf-8 -*-
+from typing import Annotated
+from fastapi import APIRouter, Body
 from utils import get_core_format_res
-from models import CacheFileModel, ResponseModel
+from models import ResponseModel
 import os
 import json
 from dotenv import load_dotenv
@@ -30,4 +31,3 @@ async def get_actions():
 async def create_action(action: Annotated[dict, Body()]):
     data = json.dumps(action, skipkeys=True, allow_nan=True, indent=6)
     return get_core_format_res(f"{API}/actions", "POST", data, "Create action")
-

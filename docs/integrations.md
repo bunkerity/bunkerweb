@@ -69,7 +69,7 @@ services:
   mybunker:
     image: bunkerity/bunkerweb:1.5.3
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     environment:
       - MY_SETTING=value
       - ANOTHER_SETTING=another value
@@ -257,7 +257,7 @@ services:
       - 80:8080
       - 443:8443
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     environment:
       - SERVER_NAME=www.example.com
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
@@ -340,7 +340,7 @@ services:
       - 80:8080
       - 443:8443
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     environment:
       - SERVER_NAME=
       - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
@@ -502,7 +502,7 @@ services:
         constraints:
           - "node.role == worker"
       labels:
-        - "bunkerweb.INSTANCE"
+        - "bunkerweb.INSTANCE=yes"
 
   bw-autoconf:
     image: bunkerity/bunkerweb-autoconf:1.5.3

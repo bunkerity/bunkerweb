@@ -22,7 +22,7 @@ services:
       LIMIT_REQ_URL_1: "/core/install.php"
       LIMIT_REQ_RATE_1: "5r/s"
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services

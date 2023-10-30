@@ -7,7 +7,7 @@ services:
       - 80:8080
       - 443:8443
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     environment:
       - SERVER_NAME=
       - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db

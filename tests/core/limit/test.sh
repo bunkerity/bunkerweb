@@ -35,6 +35,7 @@ else
     echo "USE_LIMIT_CONN=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "LIMIT_CONN_MAX_HTTP1=1" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 manual=0

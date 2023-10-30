@@ -25,7 +25,7 @@ services:
       - REMOTE_PHP=myphp
       - REMOTE_PHP_PATH=/app
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services

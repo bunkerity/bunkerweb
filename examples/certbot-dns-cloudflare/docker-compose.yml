@@ -27,7 +27,7 @@ services:
       - app3.example.com_REVERSE_PROXY_URL=/
       - app3.example.com_REVERSE_PROXY_HOST=http://app3
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services

@@ -5,7 +5,7 @@ services:
     image: bunkerity/bunkerweb:1.5.3
     pull_policy: never
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     volumes:
       - ./index.html:/var/www/html/index.html
     environment:
@@ -27,6 +27,15 @@ services:
       GREYLIST_USER_AGENT_URLS: ""
       GREYLIST_URI: ""
       GREYLIST_URI_URLS: ""
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       bw-universe:
       bw-services:

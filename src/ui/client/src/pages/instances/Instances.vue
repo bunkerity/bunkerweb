@@ -34,7 +34,7 @@ async function getInstances(isFeedback = true) {
     "GET",
     null,
     instances,
-    isFeedback ? feedbackStore.addFeedback : null
+    isFeedback ? feedbackStore.addFeedback : null,
   );
 }
 
@@ -51,7 +51,7 @@ async function actionInstance(data) {
     "POST",
     null,
     instActions,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "error") return;
     getInstances(false);
@@ -65,7 +65,7 @@ async function deleteInstance(data) {
     "DELETE",
     null,
     instances,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "error") return;
     getInstances(false);

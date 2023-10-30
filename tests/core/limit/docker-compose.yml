@@ -5,7 +5,7 @@ services:
     image: bunkerity/bunkerweb:1.5.3
     pull_policy: never
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     volumes:
       - ./index.html:/var/www/html/index.html
     environment:
@@ -22,6 +22,15 @@ services:
       LIMIT_REQ_RATE: "2r/s"
       USE_LIMIT_CONN: "yes"
       LIMIT_CONN_MAX_HTTP1: "1"
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       bw-universe:
       bw-services:

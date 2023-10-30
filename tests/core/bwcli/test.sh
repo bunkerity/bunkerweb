@@ -45,6 +45,7 @@ else
     export USE_REDIS="yes"
     export REDIS_HOST="127.0.0.1"
     sudo touch /var/www/html/index.html
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 cleanup_stack () {
