@@ -46,8 +46,9 @@ flask==3.0.0 \
     #   -r requirements.in
     #   flask-login
     #   flask-wtf
-flask-login @ https://github.com/maxcountryman/flask-login/archive/7d98a49bc38d0849367b348bfe37a2b689323419.zip#sha256=62db8eeeae5170f0d9b54d401d63b1a19d0df8944db9ae5332b350bc284f108b \
-    --hash=sha256:62db8eeeae5170f0d9b54d401d63b1a19d0df8944db9ae5332b350bc284f108b
+flask-login==0.6.3 \
+    --hash=sha256:5e23d14a607ef12806c699590b89d0f0e0d67baeec599d75947bf9c147330333 \
+    --hash=sha256:849b25b82a436bf830a054e74214074af59097171562ab10bfa999e6b78aae5d
     # via -r requirements.in
 flask-wtf==1.2.1 \
     --hash=sha256:8bb269eb9bb46b87e7c8233d7e7debdf1f8b74bf90cc1789988c29b37a97b695 \
