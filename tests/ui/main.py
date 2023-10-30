@@ -47,6 +47,7 @@ TEST_TYPE = getenv("TEST_TYPE", "docker")
 firefox_options = Options()
 if "geckodriver" not in listdir(Path.cwd()):
     firefox_options.add_argument("--headless")
+firefox_options.log.level = "trace"
 
 print("Starting Firefox ...", flush=True)
 
