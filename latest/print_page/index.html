@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.2.8">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.046329b4.min.css">
       
       
 
@@ -2091,9 +2091,8 @@ end
 <p>We assume that you're already familiar with the <a href="#concepts">core concepts</a> and you have followed the <a href="#integrations">integrations instructions</a> for your environment.</p>
 </div>
 <div class="admonition tip">
-<p class="admonition-title">Going further</p>
-<pre><code>To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.3/examples) of the repository to get real-world examples.
-</code></pre>
+<p class="admonition-title">Going further<p>To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the <a href="https://github.com/bunkerity/bunkerweb/tree/v1.5.3/examples">examples folder</a> of the repository to get real-world examples.</p>
+</p>
 </div>
 <h2 id="quickstart-guide-protect-http-applications">Protect HTTP applications</h2>
 <p>Protecting existing web applications already accessible with the HTTP(S) protocol is the main goal of BunkerWeb : it will act as a classical <a href="https://en.wikipedia.org/wiki/Reverse_proxy">reverse proxy</a> with extra security features.</p>
@@ -3000,9 +2999,8 @@ REAL_IP_HEADER=proxy_protocol
 </div>
 <h2 id="quickstart-guide-protect-udptcp-applications">Protect UDP/TCP applications</h2>
 <div class="admonition warning">
-<p class="admonition-title">Feature is in beta</p>
-<pre><code>This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
-</code></pre>
+<p class="admonition-title">Feature is in beta<p>This feature is not production-ready. Feel free to test it and report us any bug using <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> in the GitHub repository.</p>
+</p>
 </div>
 <p>BunkerWeb offers the capability to function as a <strong>generic UDP/TCP reverse proxy</strong>, allowing you to protect any network-based applications operating at least on layer 4 of the OSI model. Instead of utilizing the "classical" HTTP module, BunkerWeb leverages the <a href="https://nginx.org/en/docs/stream/ngx_stream_core_module.html">stream module</a> of NGINX.</p>
 <p>It's important to note that not all settings and security features are available when using the stream module. Additional information on this can be found in the <a href="#security-tuning">security tuning</a> and <a href="#settings">settings</a> sections of the documentation.</p>
@@ -4023,9 +4021,8 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 </div>
 <h2 id="quickstart-guide-ipv6">IPv6</h2>
 <div class="admonition warning">
-<p class="admonition-title">Feature is in beta</p>
-<pre><code>This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
-</code></pre>
+<p class="admonition-title">Feature is in beta<p>This feature is not production-ready. Feel free to test it and report us any bug using <a href="https://github.com/bunkerity/bunkerweb/issues">issues</a> in the GitHub repository.</p>
+</p>
 </div>
 <p>By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for network communications. If you want to enable IPv6 support, you need to set <code>USE_IPV6=yes</code>. Please note that IPv6 configuration of your network and environment is out-of-the-scope of this documentation.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="quickstart-guide-__tabbed_8_1" name="quickstart-guide-__tabbed_8" type="radio" /><input id="quickstart-guide-__tabbed_8_2" name="quickstart-guide-__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="quickstart-guide-__tabbed_8_1">Docker</label><label for="quickstart-guide-__tabbed_8_2">Docker autoconf</label></div>
@@ -8583,43 +8580,43 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <tbody>
 <tr>
 <td style="text-align: center;"><strong>ClamAV</strong></td>
-<td style="text-align: center;">1.1</td>
+<td style="text-align: center;">1.2</td>
 <td style="text-align: left;">Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav">bunkerweb-plugins/clamav</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Coraza</strong></td>
-<td style="text-align: center;">1.1</td>
+<td style="text-align: center;">1.2</td>
 <td style="text-align: left;">Inspect requests using a the Coraza WAF (alternative of ModSecurity).</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza">bunkerweb-plugins/coraza</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>CrowdSec</strong></td>
-<td style="text-align: center;">1.1</td>
+<td style="text-align: center;">1.2</td>
 <td style="text-align: left;">CrowdSec bouncer for BunkerWeb.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec">bunkerweb-plugins/crowdsec</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Discord</strong></td>
-<td style="text-align: center;">1.1</td>
+<td style="text-align: center;">1.2</td>
 <td style="text-align: left;">Send security notifications to a Discord channel using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord">bunkerweb-plugins/discord</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Slack</strong></td>
-<td style="text-align: center;">1.1</td>
+<td style="text-align: center;">1.2</td>
 <td style="text-align: left;">Send security notifications to a Slack channel using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack">bunkerweb-plugins/slack</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>VirusTotal</strong></td>
-<td style="text-align: center;">1.1</td>
+<td style="text-align: center;">1.2</td>
 <td style="text-align: left;">Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal">bunkerweb-plugins/virustotal</a></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>WebHook</strong></td>
-<td style="text-align: center;">1.1</td>
+<td style="text-align: center;">1.2</td>
 <td style="text-align: left;">Send security notifications to a custom HTTP endpoint using a Webhook.</td>
 <td style="text-align: center;"><a href="https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook">bunkerweb-plugins/webhook</a></td>
 </tr>
@@ -8628,7 +8625,7 @@ cat<span class="w"> </span>/var/log/bunkerweb/access.log
 <h2 id="plugins-how-to-use-a-plugin">How to use a plugin</h2>
 <h3 id="plugins-automatic">Automatic</h3>
 <p>If you want to quickly install external plugins, you can use the <code>EXTERNAL_PLUGIN_URLS</code> setting. It takes a list of URLs, separated with space, pointing to compressed (zip format) archive containing one or more plugin(s).</p>
-<p>You can use the following value if you want to automatically install the official plugins : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.1.zip</code></p>
+<p>You can use the following value if you want to automatically install the official plugins : <code>EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.2.zip</code></p>
 <h3 id="plugins-manual">Manual</h3>
 <p>The first step is to install the plugin by putting the plugin files inside the corresponding <code>plugins</code> data folder, the procedure depends on your integration :</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:7"><input checked="checked" id="plugins-__tabbed_1_1" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_2" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_3" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_4" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_5" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_6" name="plugins-__tabbed_1" type="radio" /><input id="plugins-__tabbed_1_7" name="plugins-__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="plugins-__tabbed_1_1">Docker</label><label for="plugins-__tabbed_1_2">Docker autoconf</label><label for="plugins-__tabbed_1_3">Swarm</label><label for="plugins-__tabbed_1_4">Kubernetes</label><label for="plugins-__tabbed_1_5">Linux</label><label for="plugins-__tabbed_1_6">Ansible</label><label for="plugins-__tabbed_1_7">Vagrant</label></div>
@@ -9375,11 +9372,10 @@ JvbFAfI3qteepvnjBQ==
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
+    <script id="__config" type="application/json">{"base": "/latest", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
-    <script id="__config" type="application/json">{"base": "/latest", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
-    
-      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
+      <script src="../assets/javascripts/bundle.dff1b7c8.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       
