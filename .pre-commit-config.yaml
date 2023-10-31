@@ -51,6 +51,11 @@ repos:
         name: Flake8 Python Linter
         args: ["--max-line-length=250", "--ignore=E266,E402,E722,W503"]
 
+  - repo: https://github.com/dosisod/refurb
+    rev: 229e7ea1c2ef7b4b0c0910f94bb46f44e2fd4dd1 # frozen: v1.22.1
+    hooks:
+      - id: refurb
+
   - repo: https://github.com/codespell-project/codespell
     rev: 6e41aba91fb32e9feb741a6258eefeb9c6e4a482 # frozen: v2.2.6
     hooks:
