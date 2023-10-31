@@ -103,12 +103,13 @@ return setmetatable({
     info = function(t)
       return ffi_str(info_func(t))
     end,
-    OPENSSL_3X = version_num >= 0x30000000 and version_num < 0x30200000,
+    -- the following has implict upper bound of 4.x
+    OPENSSL_3X = version_num >= 0x30000000 and version_num < 0x40000000,
     OPENSSL_30 = version_num >= 0x30000000 and version_num < 0x30100000, -- for backward compat, deprecated
     OPENSSL_11 = version_num >= 0x10100000 and version_num < 0x10200000,
     OPENSSL_111 = version_num >= 0x10101000 and version_num < 0x10200000,
-    OPENSSL_11_OR_LATER = version_num >= 0x10100000 and version_num < 0x30200000,
-    OPENSSL_111_OR_LATER = version_num >= 0x10101000 and version_num < 0x30200000,
+    OPENSSL_11_OR_LATER = version_num >= 0x10100000 and version_num < 0x40000000,
+    OPENSSL_111_OR_LATER = version_num >= 0x10101000 and version_num < 0x40000000,
     OPENSSL_10 = version_num < 0x10100000 and version_num > 0x10000000,
     BORINGSSL = BORINGSSL,
     BORINGSSL_110 = BORINGSSL and version_num >= 0x10100000 and version_num < 0x10101000

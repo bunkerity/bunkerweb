@@ -245,11 +245,6 @@ local function modify_extension(replace, ctx, nid, toset, crit)
     return false, format_error("X509V3_add1_i2d", code)
   end
 
-  code = C.X509_REQ_add_extensions(ctx, extensions_ptr[0])
-  if code ~= 1 then
-    return false, format_error("X509_REQ_add_extensions", code)
-  end
-
   if need_cleanup then
     -- cleanup old attributes
     -- delete the first only, why?
@@ -257,6 +252,11 @@ local function modify_extension(replace, ctx, nid, toset, crit)
     if attr ~= nil then
       C.X509_ATTRIBUTE_free(attr)
     end
+  end
+
+  code = C.X509_REQ_add_extensions(ctx, extensions_ptr[0])
+  if code ~= 1 then
+    return false, format_error("X509_REQ_add_extensions", code)
   end
 
   -- mark encoded form as invalid so next time it will be re-encoded

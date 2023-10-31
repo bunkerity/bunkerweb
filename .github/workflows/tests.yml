@@ -20,7 +20,7 @@ concurrency:
 jobs:
   tests:
     name: Tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
@@ -34,64 +34,65 @@ jobs:
           lua_nginx_module: "v0.10.20"
           lua_resty_core: "v0.1.22"
         - nginx: "1.19.9"
-          openssl: "1.1.1t"
+          openssl: "1.1.1w"
           extras: "valgrind"
           lua_nginx_module: "v0.10.20"
           lua_resty_core: "v0.1.22"
         - nginx: "1.19.9"
-          openssl: "3.0.8"
+          openssl: "3.1.4"
+          openssl_fips: "3.0.8"
           extras: "valgrind"
-          openssl_opts: "enable-fips"
           lua_nginx_module: "v0.10.20"
           lua_resty_core: "v0.1.22"
           nginx_cc_opts: "-Wno-error"
         - nginx: "1.21.4"
           openssl: "1.0.2u"
           extras: "valgrind"
-          lua_nginx_module: "v0.10.21"
-          lua_resty_core: "v0.1.23"
+          lua_nginx_module: "v0.10.25"
+          lua_resty_core: "v0.1.27"
         - nginx: "1.21.4"
-          openssl: "1.1.1t"
+          openssl: "1.1.1w"
           extras: "valgrind perf"
-          lua_nginx_module: "v0.10.21"
-          lua_resty_core: "v0.1.23"
+          lua_nginx_module: "v0.10.25"
+          lua_resty_core: "v0.1.27"
         - nginx: "1.21.4"
-          openssl: "3.0.8"
+          openssl: "3.0.12"
+          openssl_fips: "3.0.8"
           extras: "valgrind perf"
-          openssl_opts: "enable-fips"
-          lua_nginx_module: "v0.10.21"
-          lua_resty_core: "v0.1.23"
+          lua_nginx_module: "v0.10.25"
+          lua_resty_core: "v0.1.27"
           nginx_cc_opts: "-Wno-error"
         - nginx: "1.21.4"
-          openssl: "3.1.0"
+          openssl: "3.1.4"
+          openssl_fips: "3.0.8"
           extras: "valgrind perf"
-          openssl_opts: "enable-fips"
-          lua_nginx_module: "v0.10.21"
-          lua_resty_core: "v0.1.23"
+          lua_nginx_module: "v0.10.25"
+          lua_resty_core: "v0.1.27"
           nginx_cc_opts: "-Wno-error"
+        - nginx: "1.21.4"
+          openssl: "3.2.0-alpha1"
+          openssl_fips: "3.0.8"
+          extras: "valgrind perf"
+          lua_nginx_module: "v0.10.25"
+          lua_resty_core: "v0.1.27"
+          nginx_cc_opts: "-Wno-error"
+        #
         # latest version with EOL 1.1.0
         - nginx: "1.21.4"
           openssl: "1.1.0l"
-          lua_nginx_module: "v0.10.21"
-          lua_resty_core: "v0.1.23"
+          lua_nginx_module: "v0.10.25"
+          lua_resty_core: "v0.1.27"
         # version that kong uses, for fips
-        - nginx: "1.21.4"
-          openssl: "1.0.2u"
-          fips2: "2.0.16"
-          openssl_opts: "fips --with-fipsdir=/home/runner/work/cache/ssl/fips"
-          extras: "valgrind"
-          lua_nginx_module: "v0.10.21"
-          lua_resty_core: "v0.1.23"
         - nginx: "1.21.4"
           boringssl: "ae223d6138807a13006342edfeef32e813246b39" # fips-20190808
           extras: "valgrind perf"
-          lua_nginx_module: "v0.10.21"
-          lua_resty_core: "v0.1.23"
+          lua_nginx_module: "v0.10.25"
+          lua_resty_core: "v0.1.27"
         - nginx: "1.21.4"
           boringssl: "853ca1ea1168dff08011e5d42d94609cc0ca2e27" # fips-20210429, not active yet
           extras: "valgrind perf"
-          lua_nginx_module: "v0.10.21"
-          lua_resty_core: "v0.1.23"
+          lua_nginx_module: "v0.10.25"
+          lua_resty_core: "v0.1.27"
 
     env:
       JOBS: 3
@@ -149,17 +150,34 @@ jobs:
     - name: Build OpenSSL
       if: matrix.boringssl == ''
       run: |
-        mkdir -p $OPENSSL_PREFIX
+        T=$OPENSSL_PREFIX
+        mkdir -p $T
         # fips doesn't seem to support to build parallelly 
-        if [ "X${{ matrix.fips2 }}" != "X" ]; then wget https://www.openssl.org/source/old/fips/openssl-fips-${{ matrix.fips2 }}.tar.gz -qO - | tar zxf - ; pushd openssl-fips-${{ matrix.fips2 }}/; FIPSDIR=$OPENSSL_PREFIX/fips ./config; make; make install; popd; fi
+        if [ "X${{ matrix.fips2 }}" != "X" ]; then wget https://www.openssl.org/source/old/fips/openssl-fips-${{ matrix.fips2 }}.tar.gz -qO - | tar zxf - ; pushd openssl-fips-${{ matrix.fips2 }}/; FIPSDIR=$T/fips ./config; make; make install; popd; fi
         if [ "X$OPENSSL_HASH" != "X" ]; then wget https://github.com/openssl/openssl/archive/$OPENSSL_HASH.tar.gz -qO - | tar zxf ; pushd openssl-$OPENSSL_HASH/; fi
         if [ "X$OPENSSL_HASH" = "X" ] ; then wget https://www.openssl.org/source/openssl-${{ matrix.openssl }}.tar.gz -qO - | tar zxf -; pushd openssl-${{ matrix.openssl }}/; fi
-        if [ ! -e $OPENSSL_PREFIX/include ]; then ./config shared -d --prefix=$OPENSSL_PREFIX -DPURIFY ${{ matrix.openssl_opts }} > build.log 2>&1 || (cat build.log && exit 1); fi
-        if [ ! -e $OPENSSL_PREFIX/include ]; then make -j$JOBS > build.log 2>&1 || (cat build.log && exit 1); fi
-        if [ ! -e $OPENSSL_PREFIX/include ]; then sudo make PATH=$PATH install_sw > build.log 2>&1 || (cat build.log && exit 1); fi
-        if [ -e $OPENSSL_LIB/libcrypto.so.3 ] && [ ! -e $OPENSSL_LIB/ossl-modules/fips.so ]; then mkdir -p $OPENSSL_PREFIX/ssl; sudo make PATH=$PATH install_fips > build.log 2>&1 || (cat build.log && exit 1); fi
-        if [ ! -e $OPENSSL_PREFIX/lib64 ]; then sudo cp -r $OPENSSL_PREFIX/lib $OPENSSL_PREFIX/lib64; fi
-        mkdir -p $OPENSSL_PREFIX/certs/ && sudo cp -r /etc/ssl/certs/* $OPENSSL_PREFIX/certs/
+        if [ ! -e $T/include ]; then ./config shared -d --prefix=$T -DPURIFY > build.log 2>&1 || (cat build.log && exit 1); fi
+        if [ ! -e $T/include ]; then make -j$JOBS > build.log 2>&1 || (cat build.log && exit 1); fi
+        if [ ! -e $T/include ]; then make PATH=$PATH install_sw > build.log 2>&1 || (cat build.log && exit 1); fi
+        if [ ! -e $T/lib64 ]; then sudo cp -r $T/lib $T/lib64; fi
+        mkdir -p $T/certs/ && sudo cp -r /etc/ssl/certs/* $T/certs/
+
+    - name: Build OpenSSL FIPS module
+      if: matrix.openssl_fips != ''
+      run: |
+        T=${OPENSSL_PREFIX}.fips
+        mkdir -p $T
+        wget https://www.openssl.org/source/openssl-${{ matrix.openssl_fips }}.tar.gz -qO - | tar zxf -; pushd openssl-${{ matrix.openssl_fips }}/
+        if [ -e $OPENSSL_PREFIX/lib64/ossl-modules/fips.so ]; then exit 0; fi 
+        ./config shared -d --prefix=$T -DPURIFY enable-fips > build.log 2>&1 || (cat build.log && exit 1)
+        make -j$JOBS > build.log 2>&1 || (cat build.log && exit 1)
+        make PATH=$PATH install_sw > build.log 2>&1 || (cat build.log && exit 1)
+        make PATH=$PATH install_fips > build.log 2>&1 || (cat build.log && exit 1)
+        cp $T/lib64/ossl-modules/fips.so $OPENSSL_PREFIX/lib64/ossl-modules/fips.so
+        mkdir -p $OPENSSL_PREFIX/ssl && cp $T/ssl/fipsmodule.cnf $OPENSSL_PREFIX/ssl/fipsmodule.cnf
+        # don't activate by default
+        sed -i "/activate = 1/d" $OPENSSL_PREFIX/ssl/fipsmodule.cnf
+
 
     - name: Build BoringSSL
       if: matrix.boringssl != ''
@@ -274,14 +292,12 @@ jobs:
     - name: Run FIPS Test
       run: |
         # openssl 3.0
-        if [ -e $OPENSSL_LIB/libcrypto.so.3 ]; then
+        if [ -e $OPENSSL_LIB/ossl-modules/fips.so ]; then
           echo "FIPS for OpenSSL 3.0"
           cp t/fixtures/openssl_fips.cnf $OPENSSL_PREFIX/openssl-fips.cnf
 
           pushd openssl-${{ matrix.openssl }}/;
           # LD_LIBRARY_PATH=$OPENSSL_LIB $OPENSSL_PREFIX/bin/openssl fipsinstall -out $OPENSSL_PREFIX/fipsmodule.cnf -module $OPENSSL_LIB/ossl-modules/fips.so
-          # don't activate by default
-          sed -i "/activate = 1/d" $OPENSSL_PREFIX/ssl/fipsmodule.cnf
           cat $OPENSSL_PREFIX/ssl/fipsmodule.cnf >> $OPENSSL_PREFIX/openssl-fips.cnf
           export OPENSSL_CONF=$OPENSSL_PREFIX/openssl-fips.cnf
           popd

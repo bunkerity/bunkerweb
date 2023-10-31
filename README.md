@@ -1860,6 +1860,8 @@ Reset the internal state of `digest` instance as it's just created by [digest.ne
 It calls [EVP_DigestInit_ex](https://www.openssl.org/docs/manmaster/man3/EVP_DigestInit_ex.html) under
 the hood.
 
+User must call this before reusing the same `digest` instance.
+
 [Back to TOC](#table-of-contents)
 
 ## resty.openssl.hmac
@@ -1928,6 +1930,8 @@ ngx.say(ngx.encode_base64(hmac))
 Reset the internal state of `hmac` instance as it's just created by [hmac.new](#hmacnew).
 It calls [HMAC_Init_ex](https://www.openssl.org/docs/manmaster/man3/HMAC_Init_ex.html) under
 the hood.
+
+User must call this before reusing the same `hmac` instance.
 
 [Back to TOC](#table-of-contents)
 
@@ -2181,6 +2185,8 @@ This function is available since OpenSSL 3.0.
 **syntax**: *ok, err = kdf:reset()*
 
 Reset the internal state of `kdf` instance as it's just created by [kdf.new](#kdfnew).
+
+User must call this before reusing the same `kdf` instance.
 
 [Back to TOC](#table-of-contents)
 

@@ -868,7 +868,7 @@ function _M:verify(signature, digest, md_alg, padding, opts)
   end
 
   if code == 0 then
-    return false, nil
+    return false, format_error("pkey:verify")
   elseif code == 1 then
     return true, nil
   end
