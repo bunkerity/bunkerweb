@@ -207,18 +207,19 @@ class Database:
             if any(
                 msg in error
                 for msg in (
-                    "database is locked",  # ? Sqlite potential errors
+                    "disk I/O error",  # ? Sqlite potential errors
+                    "database is locked",
                     "file is not a database",
                     "Lost connection",  # ? Mysql and MariaDB potential errors
                     "Command Out of Sync",
-                    "psycopg.InterfaceError",  # ? Postgresql potential errors
-                    "can't change 'autocommit' now",
+                    "can't change 'autocommit' now",  # ? Postgresql potential errors
                     "It has been closed automatically.",
                     "server closed the connection unexpectedly",
                     "cursor number is invalid or does not exist",  # ? OracleDB potential errors
                     "User requested cancel of current operation.",
                     "the database or network closed the connection",
                     "InternalError",  # ? Misc errors
+                    "InterfaceError",
                 )
             ):
                 self._exceptions[getpid()] = ["retry"]
