@@ -25,7 +25,6 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from logger import setup_logger  # type: ignore
 from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore (present in /usr/share/bunkerweb/utils/)
 
-CPU_COUNT = cpu_count() or 1
 BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(?P<hostname>(?<![:@])\b[^:@ ]+\b)(:(?P<port>\d+))?(@(?P<server_name>(?=[^ ]{1,255})[^ ]+))?")
 EXTERNAL_PLUGIN_URLS_RX = re_compile(r"^( *((https?://|file:///)[-\w@:%.+~#=]+[-\w()!@:%+.~?&/=$#]*)(?!.*\2(?!.)) *)*$")
 
@@ -33,7 +32,7 @@ EXTERNAL_PLUGIN_URLS_RX = re_compile(r"^( *((https?://|file:///)[-\w@:%.+~#=]+[-
 class CoreConfig(YamlBaseSettings):
     LISTEN_ADDR: str = "0.0.0.0"
     LISTEN_PORT: Union[str, int] = 1337
-    MAX_WORKERS: Union[str, int] = CPU_COUNT
+    MAX_WORKERS: Union[str, int] = max((cpu_count() or 1) - 1, 1)
     MAX_THREADS: Union[str, int] = int(MAX_WORKERS) * 2 if isinstance(MAX_WORKERS, int) or MAX_WORKERS.isdigit() else 2
     WAIT_RETRY_INTERVAL: Union[str, int] = 5
     HEALTHCHECK_INTERVAL: Union[str, int] = 30

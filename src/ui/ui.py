@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from functools import cached_property
-from os import getenv, sep
+from os import cpu_count, getenv, sep
 from os.path import join, normpath
 from pathlib import Path
 from sys import path as sys_path
@@ -18,8 +18,12 @@ class UiConfig(YamlBaseSettings):
     LISTEN_PORT: Union[str, int] = 7000
     CORE_ADDR: str = "http://127.0.0.1:1337"
     CORE_TOKEN: str = ""
+    MAX_WORKERS: Union[str, int] = max((cpu_count() or 1) - 1, 1)
+    MAX_THREADS: Union[str, int] = int(MAX_WORKERS) * 2 if isinstance(MAX_WORKERS, int) or MAX_WORKERS.isdigit() else 2
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = "changeme"
+    WAIT_RETRY_INTERVAL: Union[str, int] = 5
+    MAX_WAIT_RETRIES: Union[str, int] = 10
     LOG_LEVEL: Literal["debug", "info", "warning", "error", "critical", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "info"
     REVERSE_PROXY_IPS: Union[str, set] = {
         "192.168.0.0/16",
@@ -39,7 +43,7 @@ class UiConfig(YamlBaseSettings):
         env_file=normpath(getenv("SETTINGS_ENV_FILE", join(sep, "etc", "bunkerweb", "ui.conf"))),
         secrets_dir=normpath(getenv("SETTINGS_SECRETS_DIR", join(sep, "run", "secrets"))),
         env_file_encoding="utf-8",
-        extra="allow",
+        extra="ignore",
     )
 
     @cached_property

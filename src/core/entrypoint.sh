@@ -30,8 +30,10 @@ function start() {
 		exit 1
 	fi
 
+	set -a # turn on automatic exporting
 	# shellcheck disable=SC1091
 	source /tmp/core.tmp.env
+	set +a # turn off automatic exporting
 	rm -f /tmp/core.tmp.env
 
 	if [ "$AUTOCONF_MODE" == "yes" ] ; then

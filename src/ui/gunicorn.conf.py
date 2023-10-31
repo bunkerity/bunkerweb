@@ -2,9 +2,7 @@
 from os import cpu_count, getenv, sep
 from os.path import join
 
-MAX_WORKERS = cpu_count() or 1
-MAX_WORKERS = MAX_WORKERS - 1 if MAX_WORKERS > 1 else 1
-
+MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
 MODE = getenv("MODE")
 
 reload = True if MODE == "dev" else False
@@ -19,7 +17,7 @@ worker_tmp_dir = join(sep, "dev", "shm")
 tmp_upload_dir = join(sep, "var", "tmp", "bunkerweb", "ui")
 worker_class = "uvicorn_worker.BwUiUvicornWorker"
 workers = MAX_WORKERS
-threads = MAX_WORKERS * 2
+threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
 graceful_timeout = 0
 max_requests_jitter = min(8, MAX_WORKERS)
 secure_scheme_headers = {}

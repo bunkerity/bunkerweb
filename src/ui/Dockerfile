@@ -31,7 +31,6 @@ RUN rm -rf /var/cache/apk/*
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
 COPY src/common/api api
-COPY src/common/cli cli
 COPY src/common/helpers helpers
 COPY src/common/utils utils
 COPY src/VERSION VERSION
@@ -48,7 +47,7 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
-# Add ui user, drop bwcli, install runtime dependencies, create data folders and set permissions
+# Add ui user, install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache bash nodejs npm && \
   addgroup -g 101 ui && \
   adduser -h /usr/share/bunkerweb/ui -g ui -s /bin/sh -G ui -D -H -u 101 ui && \

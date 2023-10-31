@@ -2,7 +2,7 @@
 from os import cpu_count, getenv, sep
 from os.path import join
 
-MAX_WORKERS = int(getenv("MAX_WORKERS", cpu_count() or 1))
+MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
 LOG_LEVEL = getenv("LOG_LEVEL", "info")
 
 wsgi_app = "app.main:app"

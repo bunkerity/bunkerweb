@@ -34,8 +34,10 @@ function start() {
 		exit 1
 	fi
 
-    # shellcheck disable=SC1091
+    set -a # turn on automatic exporting
+	# shellcheck disable=SC1091
 	source /tmp/core.tmp.env
+	set +a # turn off automatic exporting
 	rm -f /tmp/core.tmp.env
 
     python3 -m gunicorn --chdir /usr/share/bunkerweb/core \
