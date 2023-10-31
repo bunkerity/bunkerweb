@@ -162,6 +162,18 @@
   },
   "jobs": [
     {
+      "name": "mmdb-country",
+      "file": "mmdb-country.py",
+      "every": "week",
+      "reload": true
+    },
+    {
+      "name": "mmdb-asn",
+      "file": "mmdb-asn.py",
+      "every": "week",
+      "reload": true
+    },
+    {
       "name": "default-server-cert",
       "file": "default-server-cert.py",
       "every": "once",
