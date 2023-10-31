@@ -39,17 +39,20 @@ API_CALLER = ApiCaller()
 def update_apis():
     global API_CALLER
 
-    apis = []
+    db_instances = DB.get_instances()
 
-    for instance in DB.get_instances():
-        apis.append(
+    if db_instances == "retry":
+        CORE_CONFIG.logger.warning("Can't get instances : Database is locked or had trouble handling the request, keep using old API's")
+    elif isinstance(db_instances, str):
+        CORE_CONFIG.logger.error(f"Can't get instances in database : {db_instances}, keep using old API's")
+    else:
+        API_CALLER.apis = [
             API(
                 f"http://{instance['hostname']}:{instance['port']}",
                 instance["server_name"],
             )
-        )
-
-    API_CALLER.apis = apis
+            for instance in db_instances
+        ]
 
 
 @app.middleware("http")

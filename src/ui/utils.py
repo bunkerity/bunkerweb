@@ -40,7 +40,7 @@ def get_core_format_res(path, method, data, message):
         print(req.status_code)
         print(req.status_code == requests.codes.ok)
 
-        return {"type": "success" if req.status_code == requests.codes.ok or req.status_code == 201 else "error", "status": str(req.status_code), "message": message, "data": data}
+        return {"type": "success" if req.status_code in (requests.codes.ok, 201) else "error", "status": str(req.status_code), "message": message, "data": data}
     # Case impossible to format
     except:
         print(traceback.format_exc())

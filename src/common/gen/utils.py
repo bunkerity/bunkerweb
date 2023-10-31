@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from os import getegid, geteuid, stat
+from os import getegid, geteuid
+from pathlib import Path
 from stat import (
     S_IRGRP,
     S_IROTH,
@@ -19,7 +20,7 @@ from typing import List
 def has_permissions(path: str, need_permissions: List[str]) -> bool:
     uid = geteuid()
     gid = getegid()
-    statinfo = stat(path)
+    statinfo = Path(path).stat()
     permissions = {"R": False, "W": False, "X": False}
     if statinfo.st_uid == uid:
         if statinfo.st_mode & S_IRUSR:

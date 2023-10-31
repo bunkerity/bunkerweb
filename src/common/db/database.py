@@ -1090,15 +1090,7 @@ class Database:
                     elif any(key.startswith(f"{s}_") for s in service_names):
                         tmp_config.pop(key)
                     else:
-                        tmp_config[key] = (
-                            {
-                                "value": value["value"],
-                                "global": True,
-                                "method": "default",
-                            }
-                            if methods is True
-                            else value
-                        )
+                        tmp_config[key] = {"value": value["value"], "global": True, "method": "default"} if methods else value
 
                 services.append(tmp_config)
 

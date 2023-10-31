@@ -272,10 +272,10 @@ class YamlBaseSettings(BaseSettings):
         )
         if sources:
             return deep_update(*reversed([source() for source in sources]))
-        else:
-            # no one should mean to do this, but I think returning an empty dict is marginally preferable
-            # to an informative error and much better than a confusing error
-            return {}
+
+        # no one should mean to do this, but I think returning an empty dict is marginally preferable
+        # to an informative error and much better than a confusing error
+        return {}
 
     model_config = SettingsConfigDict(
         secrets_dir=getenv("SETTINGS_SECRETS_DIR", "/etc/secrets"),

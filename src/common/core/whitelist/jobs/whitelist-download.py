@@ -141,7 +141,7 @@ try:
                 for line in iterable:
                     line = line.strip()
 
-                    if not line or line.startswith(b"#") or line.startswith(b";"):
+                    if not line or line.startswith((b"#", b";")):
                         continue
                     elif kind != "USER_AGENT":
                         line = line.split(b" ")[0]

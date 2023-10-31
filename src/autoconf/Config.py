@@ -238,8 +238,7 @@ class Config:
                     )
                     success = False
                 elif status == 503:
-                    retry_after = resp.headers.get("Retry-After", 1)
-                    retry_after = float(retry_after)
+                    retry_after = float(resp.headers.get("Retry-After", 1))
                     self.__logger.warning(
                         f"Core API is busy, waiting {retry_after} seconds before retrying ...",
                     )
@@ -261,8 +260,7 @@ class Config:
                     )
                     success = False
                 elif status == 503:
-                    retry_after = resp.headers.get("Retry-After", 1)
-                    retry_after = float(retry_after)
+                    retry_after = float(resp.headers.get("Retry-After", 1))
                     self.__logger.warning(
                         f"Core API is busy, waiting {retry_after} seconds before retrying ...",
                     )
