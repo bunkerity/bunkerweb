@@ -80,16 +80,7 @@ if __name__ == "__main__":
     elif not isinstance(UI_CONFIG.LISTEN_PORT, int) and (not UI_CONFIG.LISTEN_PORT.isdigit() or not (1 <= int(UI_CONFIG.LISTEN_PORT) <= 65535)):
         _exit(3)
 
-    data = {
-        "LISTEN_ADDR": UI_CONFIG.LISTEN_ADDR,
-        "LISTEN_PORT": UI_CONFIG.LISTEN_PORT,
-        "CORE_ADDR": UI_CONFIG.CORE_ADDR,
-        "CORE_TOKEN": UI_CONFIG.core_token,
-        "ADMIN_USERNAME": UI_CONFIG.ADMIN_USERNAME,
-        "ADMIN_PASSWORD": UI_CONFIG.ADMIN_PASSWORD,
-        "LOG_LEVEL": UI_CONFIG.log_level,
-        "REVERSE_PROXY_IPS": UI_CONFIG.reverse_proxy_ips,
-    }
+    data = {"LISTEN_ADDR": UI_CONFIG.LISTEN_ADDR, "LISTEN_PORT": UI_CONFIG.LISTEN_PORT, "LOG_LEVEL": UI_CONFIG.log_level, "REVERSE_PROXY_IPS": UI_CONFIG.reverse_proxy_ips}
 
     content = ""
     for k, v in data.items():
