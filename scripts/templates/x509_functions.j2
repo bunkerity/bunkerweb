@@ -1,0 +1,287 @@
+{%- if module.has_sign_verify %}
+-- AUTO GENERATED
+function _M:sign(pkey, digest)
+  if not pkey_lib.istype(pkey) then
+    return false, "{{modname}}:sign: expect a pkey instance at #1"
+  end
+
+  local digest_algo
+  if digest then
+    if not digest_lib.istype(digest) then
+      return false, "{{modname}}:sign: expect a digest instance at #2"
+    elseif not digest.algo then
+      return false, "{{modname}}:sign: expect a digest instance to have algo member"
+    end
+    digest_algo = digest.algo
+  elseif BORINGSSL then
+    digest_algo = C.EVP_get_digestbyname('sha256')
+  end
+
+  -- returns size of signature if success
+  if C.{{ module.type }}_sign(self.ctx, pkey.ctx, digest_algo) == 0 then
+    return false, format_error("{{ modname }}:sign")
+  end
+
+  return true
+end
+
+-- AUTO GENERATED
+function _M:verify(pkey)
+  if not pkey_lib.istype(pkey) then
+    return false, "{{ modname }}:verify: expect a pkey instance at #1"
+  end
+
+  local code = C.{{ module.type }}_verify(self.ctx, pkey.ctx)
+  if code == 1 then
+    return true
+  elseif code == 0 then
+    return false
+  else -- typically -1
+    return false, format_error("{{ modname }}:verify", code)
+  end
+end
+{% endif %}
+
+{%- if module.has_extension_accessor_by_nid %}
+-- AUTO GENERATED
+local function get_extension(ctx, nid_txt, last_pos)
+  last_pos = (last_pos or 0) - 1
+  local nid, err = txtnid2nid(nid_txt)
+  if err then
+    return nil, nil, err
+  end
+  local pos = C.{{ module.type }}_get_ext_by_NID(ctx, nid, last_pos)
+  if pos == -1 then
+    return nil
+  end
+  local ctx = C.{{ module.type }}_get_ext(ctx, pos)
+  if ctx == nil then
+    return nil, nil, format_error()
+  end
+  return ctx, pos
+end
+
+-- AUTO GENERATED
+function _M:add_extension(extension)
+  if not extension_lib.istype(extension) then
+    return false, "{{ modname }}:add_extension: expect a x509.extension instance at #1"
+  end
+
+  -- {{ module.type }}_add_ext returnes the stack on success, and NULL on error
+  -- the X509_EXTENSION ctx is dupped internally
+  if C.{{ module.type }}_add_ext(self.ctx, extension.ctx, -1) == nil then
+    return false, format_error("{{ modname }}:add_extension")
+  end
+
+  return true
+end
+
+-- AUTO GENERATED
+function _M:get_extension(nid_txt, last_pos)
+  local ctx, pos, err = get_extension(self.ctx, nid_txt, last_pos)
+  if err then
+    return nil, nil, "{{ modname }}:get_extension: " .. err
+  end
+  local ext, err = extension_lib.dup(ctx)
+  if err then
+    return nil, nil, "{{ modname }}:get_extension: " .. err
+  end
+  return ext, pos+1
+end
+
+local {{ module.type }}_delete_ext
+if OPENSSL_11_OR_LATER then
+  {{ module.type }}_delete_ext = C.{{ module.type }}_delete_ext
+elseif OPENSSL_10 then
+  {{ module.type }}_delete_ext = function(ctx, pos)
+    return C.X509v3_delete_ext(ctx.{{ module.extensions_in_struct }}, pos)
+  end
+else
+  {{ module.type }}_delete_ext = function(...)
+    error("{{ module.type }}_delete_ext undefined")
+  end
+end
+
+-- AUTO GENERATED
+function _M:set_extension(extension, last_pos)
+  if not extension_lib.istype(extension) then
+    return false, "{{ modname }}:set_extension: expect a x509.extension instance at #1"
+  end
+
+  last_pos = (last_pos or 0) - 1
+
+  local nid = extension:get_object().nid
+  local pos = C.{{ module.type }}_get_ext_by_NID(self.ctx, nid, last_pos)
+  -- pos may be -1, which means not found, it's fine, we will add new one instead of replace
+
+  local removed = {{ module.type }}_delete_ext(self.ctx, pos)
+  C.X509_EXTENSION_free(removed)
+
+  if C.{{ module.type }}_add_ext(self.ctx, extension.ctx, pos) == nil then
+    return false, format_error("{{ modname }}:set_extension")
+  end
+
+  return true
+end
+
+-- AUTO GENERATED
+function _M:set_extension_critical(nid_txt, crit, last_pos)
+  local ctx, _, err = get_extension(self.ctx, nid_txt, last_pos)
+  if err then
+    return nil, "{{ modname }}:set_extension_critical: " .. err
+  end
+
+  if C.X509_EXTENSION_set_critical(ctx, crit and 1 or 0) ~= 1 then
+    return false, format_error("{{ modname }}:set_extension_critical")
+  end
+
+  return true
+end
+
+-- AUTO GENERATED
+function _M:get_extension_critical(nid_txt, last_pos)
+  local ctx, _, err = get_extension(self.ctx, nid_txt, last_pos)
+  if err then
+    return nil, "{{ modname }}:get_extension_critical: " .. err
+  end
+
+  return C.X509_EXTENSION_get_critical(ctx) == 1
+end
+
+{% endif -%}
+
+{%- for f in module.fields -%}
+{%- if f.extension_nid -%}
+local NID_{{ f.field }} = C.OBJ_sn2nid("{{ f.extension_nid }}")
+assert(NID_{{ f.field }} ~= 0)
+
+{% endif -%}
+-- AUTO GENERATED{%- if f.extension_nid -%}: EXTENSIONS {%- endif %}
+function _M:get_{{ f.field }}({%- if f.extension_nid and f.type == "table" -%}name{%- endif -%})
+  {%- if not f.extension_nid %}
+  local got = accessors.get_{{ f.field }}(self.ctx)
+  if got == nil then
+    return nil
+  end
+  {%- else %}
+  local crit = ctypes.ptr_of_int()
+  {%- if modname == "x509.csr" %}
+  local extensions = C.X509_REQ_get_extensions(self.ctx)
+  -- GC handler is sk_X509_EXTENSION_pop_free
+  ffi_gc(extensions, x509_extensions_gc)
+  local got = C.X509V3_get_d2i(extensions, NID_{{ f.field }}, crit, nil)
+  {%- else %}
+  -- X509_get_ext_d2i returns internal pointer, always dup
+  -- for now this function always returns the first found extension
+  local got = C.X509_get_ext_d2i(self.ctx, NID_{{ f.field }}, crit, nil)
+  {%- endif %}
+  crit = tonumber(crit[0])
+  if crit == -1 then -- not found
+    return nil
+  elseif crit == -2 then
+    return nil, "{{modname}}:get_{{ f.field }}: extension of {{ f.field }} occurs more than one times, " ..
+                "this is not yet implemented. Please use get_extension instead."
+  elseif got == nil then
+    return nil, format_error("{{ modname }}:get_{{ f.field }}")
+  end
+  {%- endif %}
+
+  {%- if f.get_converter %}
+{{ f.get_converter }}
+  {%- endif %}
+
+  {%- if f.type not in LUA_TYPES %}
+    {%- if f.dup %}
+  local lib = require("resty.openssl.{{ f.type }}")
+  -- the internal ptr is returned, ie we need to copy it
+  return lib.dup(got)
+    {%- else %}
+  local lib = require("resty.openssl.{{ f.type }}")
+  -- returned a copied instance directly
+  return lib.new(got)
+    {%- endif %}
+  {%- else %}
+  return got
+  {%- endif %}
+end
+
+-- AUTO GENERATED{%- if f.extension_nid -%}: EXTENSIONS {%- endif %}
+function _M:set_{{ f.field }}(toset)
+  {%- if f.type in LUA_TYPES %}
+  if type(toset) ~= "{{ f.type }}" then
+    return false, "{{modname}}:set_{{ f.field }}: expect a {{ f.type }} at #1"
+  end
+  {%- else %}
+  local lib = require("resty.openssl.{{ f.type }}")
+  if lib.istype and not lib.istype(toset) then
+    return false, "{{modname}}:set_{{ f.field }}: expect a {{ f.type }} instance at #1"
+  end
+  toset = toset.ctx
+  {%- endif %}
+
+  {%- if f.set_converter %}
+{{ f.set_converter }}
+  {%- endif %}
+
+  {%- if not f.extension_nid %}
+  if accessors.set_{{ f.field }}(self.ctx, toset) == 0 then
+    return false, format_error("{{ modname }}:set_{{ f.field }}")
+  end
+  return true
+  {%- else %}
+  {%- if modname == "x509.csr" %}
+  return replace_extension(self.ctx, NID_{{ f.field }}, toset)
+  {%- else %}
+  -- x509v3.h: # define X509V3_ADD_REPLACE              2L
+  if C.X509_add1_ext_i2d(self.ctx, NID_{{ f.field }}, toset, 0, 0x2) ~= 1 then
+    return false, format_error("{{ modname }}:set_{{ f.field }}")
+  end
+  return true
+  {%- endif %}
+  {%- endif %}
+end
+  {%- if f.extension_nid %}
+
+-- AUTO GENERATED: EXTENSIONS
+function _M:set_{{ f.field }}_critical(crit)
+  return _M.set_extension_critical(self, NID_{{ f.field }}, crit)
+end
+
+-- AUTO GENERATED: EXTENSIONS
+function _M:get_{{ f.field }}_critical()
+  return _M.get_extension_critical(self, NID_{{ f.field }})
+end
+  {%- endif %}
+
+{% endfor %}
+-- AUTO GENERATED
+function _M:get_signature_nid()
+  local nid = accessors.get_signature_nid(self.ctx)
+  if nid <= 0 then
+    return nil, format_error("{{ modname }}:get_signature_nid")
+  end
+
+  return nid
+end
+
+-- AUTO GENERATED
+function _M:get_signature_name()
+  local nid = accessors.get_signature_nid(self.ctx)
+  if nid <= 0 then
+    return nil, format_error("{{ modname }}:get_signature_name")
+  end
+
+  return ffi.string(C.OBJ_nid2sn(nid))
+end
+
+-- AUTO GENERATED
+function _M:get_signature_digest_name()
+  local nid = accessors.get_signature_nid(self.ctx)
+  if nid <= 0 then
+    return nil, format_error("{{ modname }}:get_signature_digest_name")
+  end
+
+  local nid = find_sigid_algs(nid)
+
+  return ffi.string(C.OBJ_nid2sn(nid))
+end
