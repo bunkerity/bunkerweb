@@ -40,8 +40,9 @@ async def get_actions(background_tasks: BackgroundTasks):
             headers={"Retry-After": retry_in},
         )
     elif isinstance(actions, str):
-        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["action"], "title": "Get actions failed", "description": f"Can't get actions in database : {actions}", "status": "error"})
-        CORE_CONFIG.logger.error(f"Can't get actions in database : {actions}")
+        message = f"Can't get actions in database : {actions}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["action"], "title": "Get actions failed", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": actions},
@@ -66,8 +67,9 @@ async def post_action(action: Action, background_tasks: BackgroundTasks):
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": action.method, "tags": ["action"], "title": "Add action failed", "description": f"Can't add action : {resp}", "status": "error"})
-        CORE_CONFIG.logger.error(f"Can't add action : {resp}")
+        message = f"Can't add action : {resp}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": action.method, "tags": ["action"], "title": "Add action failed", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": resp},

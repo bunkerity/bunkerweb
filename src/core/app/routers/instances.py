@@ -47,10 +47,9 @@ async def get_instances(background_tasks: BackgroundTasks):
             headers={"Retry-After": retry_in},
         )
     elif isinstance(db_instances, str):
-        background_tasks.add_task(
-            DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["instance"], "title": "Get instances failed", "description": f"Can't get instances in database : {db_instances}", "status": "error"}
-        )
-        CORE_CONFIG.logger.error(f"Can't get instances in database : {db_instances}")
+        message = f"Can't get instances in database : {db_instances}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["instance"], "title": "Get instances failed", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": db_instances},
@@ -91,10 +90,6 @@ async def get_instances(background_tasks: BackgroundTasks):
         },
         status.HTTP_503_SERVICE_UNAVAILABLE: {
             "description": "Database is locked or had trouble handling the request",
-            "model": ErrorMessage,
-        },
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Internal server error",
             "model": ErrorMessage,
         },
     },
@@ -145,6 +140,7 @@ async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]]
                 message = f"Can't upsert instance {instance.hostname} because it is either static or was created by the core or the autoconf and the method isn't one of them"
                 CORE_CONFIG.logger.warning(message)
                 decisions["failed"][instance.hostname] = message
+                continue
             elif resp == "retry":
                 retry_in = str(uniform(1.0, 5.0))
                 CORE_CONFIG.logger.warning(f"Can't upsert instance {instance.hostname} to database : Database is locked or had trouble handling the request, retry in {retry_in} seconds")
@@ -156,8 +152,8 @@ async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]]
             elif resp not in ("created", "updated"):
                 CORE_CONFIG.logger.error(f"Can't upsert instance {instance.hostname} to database : {resp}")
                 decisions["failed"][instance.hostname] = resp
-            else:
-                decisions[resp].append(instance)
+                continue
+            decisions[resp].append(instance)
 
     message = "Instance(s) "
 

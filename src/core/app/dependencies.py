@@ -67,9 +67,9 @@ if not isinstance(CORE_CONFIG.HEALTHCHECK_INTERVAL, int) and (not CORE_CONFIG.HE
 
 if CORE_CONFIG.check_token and not match(
     r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$",
-    CORE_CONFIG.CORE_TOKEN,
+    CORE_CONFIG.core_token,
 ):
-    CORE_CONFIG.logger.error(f"Invalid token provided: {CORE_CONFIG.CORE_TOKEN}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
+    CORE_CONFIG.logger.error(f"Invalid token provided: {CORE_CONFIG.core_token}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
     stop(1)
 
 from .job_scheduler import JobScheduler
@@ -104,7 +104,7 @@ SCHEDULER = JobScheduler(
     env=CORE_CONFIG.settings
     | {
         "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
-        "CORE_TOKEN": CORE_CONFIG.CORE_TOKEN,
+        "CORE_TOKEN": CORE_CONFIG.core_token,
     },
     logger=CORE_CONFIG.logger,
 )
@@ -614,7 +614,7 @@ def run_jobs():
             sent, err, status, resp = local_api.request(
                 "GET",
                 "/ping",
-                additonal_headers={"Authorization": f"Bearer {CORE_CONFIG.CORE_TOKEN}"} if CORE_CONFIG.CORE_TOKEN else {},
+                additonal_headers={"Authorization": f"Bearer {CORE_CONFIG.core_token}"} if CORE_CONFIG.core_token else {},
             )
             sleep(1)
 
@@ -635,7 +635,7 @@ def run_jobs():
         db_config
         | {
             "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
-            "CORE_TOKEN": CORE_CONFIG.CORE_TOKEN,
+            "core_token": CORE_CONFIG.core_token,
         }
     ):
         CORE_CONFIG.logger.error("At least one job in run_once() failed")
@@ -668,7 +668,7 @@ def run_job(job_name: str):
         db_config
         | {
             "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
-            "CORE_TOKEN": CORE_CONFIG.CORE_TOKEN,
+            "core_token": CORE_CONFIG.core_token,
         },
         run=False,
     )

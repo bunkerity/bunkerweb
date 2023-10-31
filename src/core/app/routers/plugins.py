@@ -19,9 +19,14 @@ from ..dependencies import (
     update_app_mounts,
 )
 
-router = APIRouter(
-    prefix="/plugins",
-    tags=["plugins"],
+router = APIRouter(prefix="/plugins", tags=["plugins"])
+
+
+@router.get(
+    "",
+    response_model=List[Plugin],
+    summary="Get all plugins",
+    response_description="Plugins",
     responses={
         status.HTTP_503_SERVICE_UNAVAILABLE: {
             "description": "Database is locked or had trouble handling the request",
@@ -32,14 +37,6 @@ router = APIRouter(
             "model": ErrorMessage,
         },
     },
-)
-
-
-@router.get(
-    "",
-    response_model=List[Plugin],
-    summary="Get all plugins",
-    response_description="Plugins",
 )
 async def get_plugins(background_tasks: BackgroundTasks):
     """

@@ -56,6 +56,15 @@ class UiConfig(YamlBaseSettings):
             return " ".join(self.REVERSE_PROXY_IPS)
         return self.REVERSE_PROXY_IPS
 
+    @property
+    def core_token(self) -> str:
+        if not self.CORE_TOKEN:
+            core_token_path = Path(sep, "var", "cache", "bunkerweb", "core_token")
+            if core_token_path.is_file():
+                self.CORE_TOKEN = core_token_path.read_text(encoding="utf-8").strip()
+
+        return self.CORE_TOKEN
+
 
 if __name__ == "__main__":
     from os import _exit, environ
@@ -75,7 +84,7 @@ if __name__ == "__main__":
         "LISTEN_ADDR": UI_CONFIG.LISTEN_ADDR,
         "LISTEN_PORT": UI_CONFIG.LISTEN_PORT,
         "CORE_ADDR": UI_CONFIG.CORE_ADDR,
-        "CORE_TOKEN": UI_CONFIG.CORE_TOKEN,
+        "CORE_TOKEN": UI_CONFIG.core_token,
         "ADMIN_USERNAME": UI_CONFIG.ADMIN_USERNAME,
         "ADMIN_PASSWORD": UI_CONFIG.ADMIN_PASSWORD,
         "LOG_LEVEL": UI_CONFIG.log_level,

@@ -113,11 +113,7 @@ app = FastAPI(
         "url": "https://bunkerweb.io",
         "email": "contact@bunkerity.com",
     },
-    license_info={
-        "name": "GNU Affero General Public License v3.0",
-        "identifier": "AGPL-3.0",
-        "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md",
-    },
+    license_info={"name": "GNU Affero General Public License v3.0", "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md"},
     openapi_tags=tags_metadata,
     lifespan=lifespan,
 )
@@ -673,7 +669,7 @@ async def validate_request(request: Request, call_next):
         if "Authorization" not in request.headers:
             CORE_CONFIG.logger.warning(f"Unauthorized access attempt from {request.client.host} (missing token), aborting...")
             return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={"result": "ko"})
-        elif request.headers["Authorization"] != f"Bearer {CORE_CONFIG.CORE_TOKEN}":
+        elif request.headers["Authorization"] != f"Bearer {CORE_CONFIG.core_token}":
             CORE_CONFIG.logger.warning(f"Unauthorized access attempt from {request.client.host} (invalid token), aborting...")
             return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"result": "ko"})
 

@@ -15,6 +15,8 @@ from os import cpu_count, getenv, sep
 from os.path import join, normpath
 from pathlib import Path
 from re import compile as re_compile
+from secrets import choice as secrets_choice
+from string import ascii_letters, digits, punctuation
 from sys import path as sys_path
 from typing import Dict, List, Literal, Union
 
@@ -39,7 +41,7 @@ class CoreConfig(YamlBaseSettings):
     CHECK_WHITELIST: Union[str, bool] = "yes"
     WHITELIST: Union[str, set] = "127.0.0.1"
     CHECK_TOKEN: Union[str, bool] = "yes"
-    CORE_TOKEN: str = "changeme"
+    CORE_TOKEN: str = ""
     BUNKERWEB_INSTANCES: Union[str, List[str]] = []
 
     LOG_LEVEL: Literal[
@@ -196,6 +198,28 @@ class CoreConfig(YamlBaseSettings):
         return " ".join(self.external_plugin_urls)
 
     @cached_property
+    def core_token(self) -> str:
+        if not self.CORE_TOKEN:
+            core_token_path = Path(sep, "var", "cache", "bunkerweb", "core_token")
+            if core_token_path.is_file():
+                self.CORE_TOKEN = core_token_path.read_text(encoding="utf-8").strip()
+            else:
+                self.logger.warning(
+                    """
+##############################################################################################################
+#                                                                                                            #
+# WARNING: No authentication token provided, generating a random one. Please save it for future use. #
+#                                                                                                            #
+##############################################################################################################"""
+                )
+                self.CORE_TOKEN = self.generate_token()
+                self.logger.warning(f"Generated authentication token: {self.CORE_TOKEN}")
+                core_token_path.write_text(self.CORE_TOKEN, encoding="utf-8")
+                self.logger.warning(f"Authentication token saved to {core_token_path}")
+
+        return self.CORE_TOKEN
+
+    @cached_property
     def settings(self) -> Dict[str, str]:
         instances_config = self.model_dump(
             exclude=(
@@ -255,6 +279,15 @@ class CoreConfig(YamlBaseSettings):
 
         return "Linux"
 
+    @staticmethod
+    def generate_token() -> str:
+        """Generate a random 16 characters token with at least one uppercase letter, one lowercase letter, one digit, and one punctuation character."""
+        token = ""
+        while not all((any(c in token for c in ascii_letters), any(c in token for c in digits), any(c in token for c in punctuation))):
+            token = "".join(secrets_choice(ascii_letters + digits + punctuation) for _ in range(16))
+
+        return token
+
 
 if __name__ == "__main__":
     from os import _exit, environ
@@ -293,21 +326,53 @@ BUNKERWEB_VERSION = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(
 
 description = """# BunkerWeb Internal API Documentation
 
-The BunkerWeb Internal API is designed to manage BunkerWeb's instances, communicate with a Database, and interact with various BunkerWeb services, including the scheduler, autoconf, and Web UI. This API provides the necessary endpoints for performing operations related to instance management, database communication, and service interaction."""  # noqa: E501
+The BunkerWeb Internal API is designed to manage BunkerWeb's instances, communicate with a Database, and interact with various BunkerWeb services, including the scheduler, autoconf, and Web UI. This API provides the necessary endpoints for performing operations related to instance management, database communication, and service interaction.
 
-description += """
+## Configuration
+
+The API can be configured using environment variables or a configuration file (YAML and a dotenv file). The configuration files are located at `/etc/bunkerweb/config.yml` and `/etc/bunkerweb/core.conf` by default. The environment variables has precedence over the configuration file. You can also use Docker secrets to configure the API (see the [Docker Secrets](https://docs.docker.com/engine/swarm/secrets/) documentation for more information).
+
+### API configuration
+
+The API can be configured using the following settings:
+
+| Name | Description | Default value |
+| --- | --- | --- |
+| `LISTEN_ADDR` | The address to listen on | `0.0.0.0` |
+| `LISTEN_PORT` | The port to listen on | `1337` |
+| `MAX_WORKERS` | The maximum number of workers | `cpu_count() - 1` |
+| `MAX_THREADS` | The maximum number of threads | `MAX_WORKERS * 2` |
+| `WAIT_RETRY_INTERVAL` | The interval between retries when waiting for a service to be up | `5` |
+| `HEALTHCHECK_INTERVAL` | The interval between healthchecks | `30` |
+| `CHECK_WHITELIST` | Activate the whitelist | `yes` |
+| `WHITELIST` | The whitelist | `127.0.0.1` |
+| `CHECK_TOKEN` | Activate the authentication token | `yes` |
+| `CORE_TOKEN` | The accepted authentication token | `<random>` |
+| `BUNKERWEB_INSTANCES` | The static BunkerWeb instances | `[]` |
+| `LOG_LEVEL` | The log level | `notice` |
+| `DATABASE_URI` | The database URI | `sqlite:////var/lib/bunkerweb/db.sqlite3` |
+| `EXTERNAL_PLUGIN_URLS` | The external plugin URLs to download | `""` |
+| `AUTOCONF_MODE` | Activate the autoconf mode | `no` |
+| `KUBERNETES_MODE` | Activate the Kubernetes mode | `no` |
+| `SWARM_MODE` | Activate the Swarm mode | `no` |
+
+### Instance configuration
+
+The instance can be configured using BunkerWeb's settings (see the [BunkerWeb settings documentation](https://docs.bunkerweb.io/latest/settings/) for more information).
+
+**These settings can be added to the configuration file or as environment variables.**
 
 ## Authentication
 
-If the API is configured to check the authentication token, the token must be provided in the request header. Each request should include an authentication token in the request header. The token can be set in the configuration file or as an environment variable (`CORE_TOKEN`)."""  # noqa: E501
-
-description += """
+If the API is configured to check the authentication token, the token must be provided in the request header. Each request should include an authentication token in the request header. The token can be set in the configuration file or as an environment variable (`CORE_TOKEN`).
 
 Example:
 
 ```
 Authorization: Bearer YOUR_AUTH_TOKEN
 ```
+
+**If no token is provided, the API will generate a token, print it to the logs, and save it to `/var/cache/bunkerweb/core_token`.**
 
 ## Whitelist
 

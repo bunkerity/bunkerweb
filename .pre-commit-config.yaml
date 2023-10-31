@@ -55,6 +55,7 @@ repos:
     rev: 229e7ea1c2ef7b4b0c0910f94bb46f44e2fd4dd1 # frozen: v1.22.1
     hooks:
       - id: refurb
+        name: Refurb Python Refactoring Tool
 
   - repo: https://github.com/codespell-project/codespell
     rev: 6e41aba91fb32e9feb741a6258eefeb9c6e4a482 # frozen: v2.2.6
