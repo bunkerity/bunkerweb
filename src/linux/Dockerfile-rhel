@@ -99,6 +99,10 @@ RUN cp helpers/bwcli /usr/bin/ && \
   find core_plugins/*/jobs/* -type f -exec chmod 750 {} \; && \
   chmod 755 /usr/share/bunkerweb
 
+COPY src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
+COPY src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
+
+RUN chmod 770 /var/tmp/bunkerweb/asn.mmdb /var/tmp/bunkerweb/country.mmdb
 # Copy Linux files
 COPY src/linux/scripts scripts
 COPY src/linux/fpm.sh /usr/share/fpm.sh
