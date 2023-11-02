@@ -8,6 +8,8 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from time import sleep
 from traceback import format_exc
+from contextlib import suppress
+from requests.exceptions import RequestException
 
 from uvicorn import run
 
@@ -16,6 +18,28 @@ fastapi_proc = None
 ip_to_check = "1.0.0.3" if getenv("TEST_TYPE", "docker") == "docker" else "127.0.0.1"
 
 try:
+    ready = False
+    retries = 0
+    while not ready:
+        with suppress(RequestException):
+            resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"})
+            status_code = resp.status_code
+            text = resp.text
+
+            if status_code >= 500:
+                print("❌ An error occurred with the server, exiting ...", flush=True)
+                exit(1)
+
+            ready = status_code < 400 or status_code == 403 and text == "ready"
+
+        if retries > 10:
+            print("❌ The service took too long to be ready, exiting ...", flush=True)
+            exit(1)
+        elif not ready:
+            retries += 1
+            print("⚠️ Waiting for the service to be ready, retrying in 5s ...", flush=True)
+            sleep(5)
+
     redis_host = getenv("REDIS_HOST", "127.0.0.1")
 
     if not redis_host:

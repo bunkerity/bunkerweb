@@ -37,10 +37,10 @@ class KubernetesTest(Test):
                 "USE_LETS_ENCRYPT_STAGING": "yes",
                 "USE_REAL_IP": "yes",
                 "USE_PROXY_PROTOCOL": "yes",
-                "REAL_IP_FROM": "100.64.0.0/16",
+                "REAL_IP_FROM": "100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
                 "REAL_IP_HEADER": "proxy_protocol",
             }
-            replace_env = {"API_WHITELIST_IP": "127.0.0.1/8 100.64.0.0/10"}
+            replace_env = {"API_WHITELIST_IP": "127.0.0.1/8 100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"}
             for yaml in data:
                 if yaml["metadata"]["name"] == "bunkerweb":
                     for k, v in append_env.items():
@@ -131,6 +131,11 @@ class KubernetesTest(Test):
                 )
                 run(
                     "kubectl logs deployment/bunkerweb-redis",
+                    cwd="/tmp/kubernetes",
+                    shell=True,
+                )
+                run(
+                    "kubectl describe pods",
                     cwd="/tmp/kubernetes",
                     shell=True,
                 )
