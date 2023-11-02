@@ -485,33 +485,12 @@ BUNKERWEB_INSTANCES="bw1.example.com bw2.example.com:5000 bw3.example.com:5000@b
 
 The dynamic instances are automatically discovered using Redis. **Remember to activate Redis in the configuration file or as environment variables (`USE_REDIS`)**."""  # noqa: E501
 
-tags_metadata = [  # TODO: Add more tags and better descriptions: https://fastapi.tiangolo.com/tutorial/metadata/?h=swagger#metadata-for-tags
-    {
-        "name": "misc",
-        "description": "Miscellaneous operations",
-    },
-    {
-        "name": "instances",
-        "description": "Operations related to instance management",
-    },
-    {
-        "name": "plugins",
-        "description": "Operations related to plugin management",
-    },
-    {
-        "name": "config",
-        "description": "Operations related to configuration management",
-    },
-    {
-        "name": "custom_configs",
-        "description": "Operations related to custom configuration management",
-    },
-    {
-        "name": "jobs",
-        "description": "Operations related to job management",
-    },
-    {
-        "name": "actions",
-        "description": "Operations related to action management",
-    },
+tags_metadata = [
+    {"name": "misc", "description": "Miscellaneous operations"},
+    {"name": "instances", "description": "Operations related to instance management"},
+    {"name": "plugins", "description": "Operations related to plugin management"},
+    {"name": "config", "description": "Operations related to configuration management"},
+    {"name": "custom_configs", "description": "Operations related to custom configuration management"},
+    {"name": "jobs", "description": "Operations related to job management"},
+    {"name": "actions", "description": "Operations related to action management"},
 ]
