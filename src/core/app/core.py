@@ -39,9 +39,9 @@ class CoreConfig(YamlBaseSettings):
     MAX_THREADS: Union[str, int] = int(MAX_WORKERS) * 2 if isinstance(MAX_WORKERS, int) or MAX_WORKERS.isdigit() else 2
     WAIT_RETRY_INTERVAL: Union[str, int] = 5
     HEALTHCHECK_INTERVAL: Union[str, int] = 30
-    CHECK_WHITELIST: Union[str, bool] = "yes"
+    CHECK_WHITELIST: Union[Literal["yes", "no"], bool] = "yes"
     WHITELIST: Union[str, set] = "127.0.0.1"
-    CHECK_TOKEN: Union[str, bool] = "yes"
+    CHECK_TOKEN: Union[Literal["yes", "no"], bool] = "yes"
     CORE_TOKEN: str = ""
     BUNKERWEB_INSTANCES: Union[str, List[str]] = []
 
@@ -84,12 +84,12 @@ class CoreConfig(YamlBaseSettings):
     )
 
     @cached_property
-    def logger(self) -> Logger:
-        return setup_logger("core", self.log_level)
-
-    @cached_property
     def log_level(self) -> str:
         return self.LOG_LEVEL.upper() if self.LOG_LEVEL in ("error", "info", "debug") else ("WARNING" if self.LOG_LEVEL == "warn" else "INFO")
+
+    @cached_property
+    def logger(self) -> Logger:
+        return setup_logger("core", self.log_level)
 
     @cached_property
     def log_level_setting(self) -> str:
@@ -97,11 +97,11 @@ class CoreConfig(YamlBaseSettings):
 
     @cached_property
     def check_whitelist(self) -> bool:
-        return self.CHECK_WHITELIST.lower().startswith("y") if isinstance(self.CHECK_WHITELIST, str) else self.CHECK_WHITELIST
+        return self.CHECK_WHITELIST == "yes" if isinstance(self.CHECK_WHITELIST, str) else self.CHECK_WHITELIST
 
     @cached_property
     def check_token(self) -> bool:
-        return self.CHECK_TOKEN.lower().startswith("y") if isinstance(self.CHECK_TOKEN, str) else self.CHECK_TOKEN
+        return self.CHECK_TOKEN == "yes" if isinstance(self.CHECK_TOKEN, str) else self.CHECK_TOKEN
 
     @cached_property
     def autoconf_mode(self) -> bool:
