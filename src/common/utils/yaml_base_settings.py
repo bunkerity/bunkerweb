@@ -46,12 +46,7 @@ def replace_secrets(secrets_dir: Path, data: str) -> str:
     return data
 
 
-def yaml_config_settings_source(
-    settings: "YamlBaseSettings",
-    *,
-    yaml_file: Optional[Union[str, Path]] = None,
-    secrets_dir: Optional[Union[str, Path]] = None,
-) -> Dict[str, Any]:
+def yaml_config_settings_source(settings: "YamlBaseSettings", *, yaml_file: Optional[Union[str, Path]] = None, secrets_dir: Optional[Union[str, Path]] = None) -> Dict[str, Any]:
     """Loads settings from a YAML file at `Config.yaml_file`
 
     "<file:xxxx>" patterns are replaced with the contents of file xxxx. The root path
@@ -93,22 +88,15 @@ class YamlConfigSettingsSource(DotEnvSettingsSource):
         env_nested_delimiter: Optional[str] = None,
         secrets_dir: Optional[Union[str, Path]] = None,
     ) -> None:
-        self._yaml_data = yaml_config_settings_source(settings_cls, yaml_file=yaml_file, secrets_dir=secrets_dir) or {}
+        self._yaml_data: dict = yaml_config_settings_source(settings_cls, yaml_file=yaml_file, secrets_dir=secrets_dir) or {}  # type: ignore
 
-        for k, v in (self._yaml_data.get("global", None) or {}).items():
+        for k, v in self._yaml_data.get("global", {}).items():
             self._yaml_data[k.upper()] = v
 
-        for k, v in (self._yaml_data.get(bw_service, None) or {}).items():
+        for k, v in self._yaml_data.get(bw_service, {}).items():
             self._yaml_data[k.upper()] = v
 
-        super().__init__(
-            settings_cls,
-            env_file,
-            env_file_encoding,
-            case_sensitive,
-            env_prefix,
-            env_nested_delimiter,
-        )
+        super().__init__(settings_cls, env_file, env_file_encoding, case_sensitive, env_prefix, env_nested_delimiter)  # type: ignore
 
     def _load_env_vars(self) -> Mapping[str, Optional[str]]:
         return self._yaml_data
@@ -179,15 +167,7 @@ class YamlBaseSettings(BaseSettings):
         )
 
     @classmethod
-    def settings_customise_sources(
-        cls,
-        settings_cls: Type[BaseSettings],
-        init_settings,
-        env_settings,
-        yaml_settings,
-        dotenv_settings,
-        file_secret_settings,
-    ):
+    def settings_customise_sources(cls, settings_cls: Type[BaseSettings], init_settings, env_settings, yaml_settings, dotenv_settings, file_secret_settings):
         """
         Define the sources and their order for loading the settings values.
 
@@ -202,13 +182,7 @@ class YamlBaseSettings(BaseSettings):
             A tuple containing the sources and their order for
             loading the settings values.
         """
-        return (
-            init_settings,
-            env_settings,
-            yaml_settings,
-            dotenv_settings,
-            file_secret_settings,
-        )
+        return (init_settings, env_settings, yaml_settings, dotenv_settings, file_secret_settings)
 
     def _settings_build_values(
         self,
@@ -245,7 +219,7 @@ class YamlBaseSettings(BaseSettings):
             env_prefix=env_prefix,
             env_nested_delimiter=env_nested_delimiter,
         )
-        yaml_settings = YamlConfigSettingsSource(self.__class__, bw_service=_bw_service, yaml_file=_yaml_file)
+        yaml_settings = YamlConfigSettingsSource(self.__class__, bw_service=_bw_service, yaml_file=_yaml_file)  # type: ignore
         dotenv_settings = DotEnvSettingsSource(
             self.__class__,
             env_file=env_file,
@@ -277,10 +251,7 @@ class YamlBaseSettings(BaseSettings):
         # to an informative error and much better than a confusing error
         return {}
 
-    model_config = SettingsConfigDict(
-        secrets_dir=getenv("SETTINGS_SECRETS_DIR", "/etc/secrets"),
-        yaml_file=getenv("SETTINGS_YAML_FILE", "/etc/config/config.yaml"),
-    )
+    model_config = SettingsConfigDict(secrets_dir=getenv("SETTINGS_SECRETS_DIR", "/etc/secrets"), yaml_file=getenv("SETTINGS_YAML_FILE", "/etc/config/config.yaml"))  # type: ignore
 
 
 __ALL__ = (YamlBaseSettings, YamlSettingsConfigDict)

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from copy import deepcopy
 from functools import cached_property
 from ipaddress import (
     IPv4Address,
@@ -64,9 +65,9 @@ class CoreConfig(YamlBaseSettings):
     ] = "notice"
     DATABASE_URI: str = "sqlite:////var/lib/bunkerweb/db.sqlite3"
     EXTERNAL_PLUGIN_URLS: Union[str, set] = ""
-    AUTOCONF_MODE: Union[Literal["y", "yes", "n", "no"], bool] = "no"
-    KUBERNETES_MODE: Union[Literal["y", "yes", "n", "no"], bool] = "no"
-    SWARM_MODE: Union[Literal["y", "yes", "n", "no"], bool] = "no"
+    AUTOCONF_MODE: Union[Literal["yes", "no"], bool] = "no"
+    KUBERNETES_MODE: Union[Literal["yes", "no"], bool] = "no"
+    SWARM_MODE: Union[Literal["yes", "no"], bool] = "no"
 
     # The reading order is:
     # 1. Environment variables
@@ -91,7 +92,7 @@ class CoreConfig(YamlBaseSettings):
         return self.LOG_LEVEL.upper() if self.LOG_LEVEL in ("error", "info", "debug") else ("WARNING" if self.LOG_LEVEL == "warn" else "INFO")
 
     @cached_property
-    def log_level_settings(self) -> str:
+    def log_level_setting(self) -> str:
         return self.LOG_LEVEL.lower()
 
     @cached_property
@@ -104,15 +105,15 @@ class CoreConfig(YamlBaseSettings):
 
     @cached_property
     def autoconf_mode(self) -> bool:
-        return self.AUTOCONF_MODE.lower().startswith("y") if isinstance(self.AUTOCONF_MODE, str) else self.AUTOCONF_MODE
+        return self.AUTOCONF_MODE == "yes" if isinstance(self.AUTOCONF_MODE, str) else self.AUTOCONF_MODE
 
     @cached_property
     def kubernetes_mode(self) -> bool:
-        return self.KUBERNETES_MODE.lower().startswith("y") if isinstance(self.KUBERNETES_MODE, str) else self.KUBERNETES_MODE
+        return self.KUBERNETES_MODE == "yes" if isinstance(self.KUBERNETES_MODE, str) else self.KUBERNETES_MODE
 
     @cached_property
     def swarm_mode(self) -> bool:
-        return self.SWARM_MODE.lower().startswith("y") if isinstance(self.SWARM_MODE, str) else self.SWARM_MODE
+        return self.SWARM_MODE == "yes" if isinstance(self.SWARM_MODE, str) else self.SWARM_MODE
 
     @cached_property
     def whitelist(
@@ -224,7 +225,13 @@ class CoreConfig(YamlBaseSettings):
         instances_config = self.model_dump(
             exclude=(
                 "CORE",
+                "core",
                 "GLOBAL",
+                "global",
+                "UI",
+                "ui",
+                "AUTOCONF",
+                "autoconf",
                 "LISTEN_ADDR",
                 "LISTEN_PORT",
                 "MAX_WORKERS",
@@ -232,10 +239,13 @@ class CoreConfig(YamlBaseSettings):
                 "WAIT_RETRY_INTERVAL",
                 "HEALTHCHECK_INTERVAL",
                 "CORE_TOKEN",
+                "core_token",
                 "BUNKERWEB_INSTANCES",
                 "bunkerweb_instances",
                 "external_plugin_urls",
+                "external_plugin_urls_str",
                 "log_level",
+                "log_level_setting",
                 "check_whitelist",
                 "CHECK_WHITELIST",
                 "check_token",
@@ -249,10 +259,18 @@ class CoreConfig(YamlBaseSettings):
             )
         )
 
+        for config, value in deepcopy(instances_config).items():
+            if isinstance(value, list):
+                for i, setting in enumerate(value, start=1):
+                    instances_config[f"{config}_{i}"] = setting
+                del instances_config[config]
+            elif not isinstance(value, str):
+                del instances_config[config]
+
         instances_config.update(
             {
-                "MULTISITE": "yes" if self.kubernetes_mode or self.swarm_mode or self.autoconf_mode else instances_config.get("MULTISITE", "no"),
-                "LOG_LEVEL": self.log_level_settings,
+                "MULTISITE": "yes" if any((self.kubernetes_mode, self.swarm_mode, self.autoconf_mode)) else instances_config.get("MULTISITE", "no"),
+                "LOG_LEVEL": self.log_level_setting,
                 "EXTERNAL_PLUGIN_URLS": self.external_plugin_urls_str,
                 "AUTOCONF_MODE": "yes" if self.autoconf_mode else "no",
                 "KUBERNETES_MODE": "yes" if self.kubernetes_mode else "no",
