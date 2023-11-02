@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
 from functools import wraps
 from glob import glob
 from importlib.machinery import SourceFileLoader
@@ -45,14 +46,7 @@ def stop(status):
 from .core import CoreConfig
 
 
-integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
-os_release_path = Path(sep, "etc", "os-release")
-if (integration_path.is_file() and integration_path.read_text(encoding="utf-8").strip().lower() in ("autoconf", "kubernetes", "swarm")) or (os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8")):
-    CORE_CONFIG = CoreConfig("core", **environ)
-else:
-    CORE_CONFIG = CoreConfig("core")
-
-del integration_path, os_release_path
+CORE_CONFIG = CoreConfig("core", **(environ if CoreConfig.get_instance() != "Linux" else {}))
 
 CORE_CONFIG.logger.info(f"🚀 {CORE_CONFIG.integration} integration detected")
 
@@ -80,18 +74,9 @@ TMP_ENV_PATH = TMP_FOLDER.joinpath("core.env")
 
 # Instantiate database and api caller
 DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI)
-INSTANCES_API_CALLER = ApiCaller()
 
 # Instantiate scheduler
-SCHEDULER = JobScheduler(
-    API(f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "bw-scheduler"),
-    env=CORE_CONFIG.settings
-    | {
-        "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
-        "CORE_TOKEN": CORE_CONFIG.core_token,
-    },
-    logger=CORE_CONFIG.logger,
-)
+SCHEDULER = JobScheduler(API(f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "bw-scheduler"), env=CORE_CONFIG.settings | {"API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "CORE_TOKEN": CORE_CONFIG.core_token}, logger=CORE_CONFIG.logger)
 
 
 def dict_to_frozenset(d):
@@ -130,11 +115,7 @@ def update_app_mounts(app):
 
             # If the subapi has an app attribute, mount it
             if hasattr(subapi_module, "app"):
-                app.mount(
-                    root_path,
-                    getattr(subapi_module, "app"),
-                    basename(dirname(subapi)),
-                )
+                app.mount(root_path, getattr(subapi_module, "app"), basename(dirname(subapi)))
 
                 CORE_CONFIG.logger.info(f"✅ The subapi for the plugin {subapi_plugin} has been mounted successfully, root path: {root_path}")
             else:
@@ -164,9 +145,7 @@ def install_plugin(plugin_url: str, logger: Logger, *, semaphore: Semaphore = SE
                 if chunk:
                     content += chunk
     except:
-        logger.exception(
-            f"Exception while downloading plugin(s) from {plugin_url}",
-        )
+        logger.exception(f"Exception while downloading plugin(s) from {plugin_url}")
         return
 
     # Extract it to tmp folder
@@ -188,9 +167,7 @@ def install_plugin(plugin_url: str, logger: Logger, *, semaphore: Semaphore = SE
             logger.error(f"Unknown file type for {plugin_url}, either zip or tar are supported, skipping...")
             return
     except:
-        logger.exception(
-            f"Exception while decompressing plugin(s) from {plugin_url}",
-        )
+        logger.exception(f"Exception while decompressing plugin(s) from {plugin_url}")
         return
 
     # Install plugins
@@ -202,9 +179,7 @@ def install_plugin(plugin_url: str, logger: Logger, *, semaphore: Semaphore = SE
                 metadata = loads(plugin_dir.joinpath("plugin.json").read_text(encoding="utf-8"))
                 # Don't go further if plugin is already installed
                 if EXTERNAL_PLUGINS_PATH.joinpath(metadata["id"], "plugin.json").is_file():
-                    logger.warning(
-                        f"Skipping installation of plugin {metadata['id']} (already installed)",
-                    )
+                    logger.warning(f"Skipping installation of plugin {metadata['id']} (already installed)")
                     return
                 # Copy the plugin
                 copytree(plugin_dir, EXTERNAL_PLUGINS_PATH.joinpath(metadata["id"]))
@@ -214,13 +189,9 @@ def install_plugin(plugin_url: str, logger: Logger, *, semaphore: Semaphore = SE
                     chmod(job_file, st.st_mode | S_IEXEC)
                 logger.info(f"Plugin {metadata['id']} installed")
             except FileExistsError:
-                logger.warning(
-                    f"Skipping installation of plugin {plugin_dir.parent.name} (already installed)",
-                )
+                logger.warning(f"Skipping installation of plugin {plugin_dir.parent.name} (already installed)")
     except:
-        logger.exception(
-            f"Exception while installing plugin(s) from {plugin_url}",
-        )
+        logger.exception(f"Exception while installing plugin(s) from {plugin_url}")
 
     semaphore.release()
 
@@ -292,11 +263,7 @@ def generate_custom_configs(
         original_path.mkdir(parents=True, exist_ok=True)
         for custom_config in configs:
             # Extract custom config data
-            tmp_path = original_path.joinpath(
-                custom_config["type"].replace("_", "-"),
-                custom_config["service_id"] or "",
-                f"{custom_config['name']}.conf",
-            )
+            tmp_path = original_path.joinpath(custom_config["type"].replace("_", "-"), custom_config["service_id"] or "", f"{custom_config['name']}.conf")
             tmp_path.parent.mkdir(parents=True, exist_ok=True)
             tmp_path.write_bytes(custom_config["data"])
 
@@ -312,9 +279,7 @@ def generate_config(function: Optional[Callable] = None):
         db_config = DB.get_config()
 
         if isinstance(db_config, str):
-            CORE_CONFIG.logger.error(
-                f"Can't get config from database : {db_config}",
-            )
+            CORE_CONFIG.logger.error(f"Can't get config from database : {db_config}")
             stop(1)
 
         assert isinstance(db_config, dict)
@@ -350,49 +315,45 @@ def generate_config(function: Optional[Callable] = None):
 
     if function:
         return wrap
-    wrap()
+    return wrap()
 
 
-def send_plugins_to_instances(api_caller: ApiCaller = None):
-    """Send the plugins to the instances"""
-    if not api_caller:
+def assert_api_caller(function: Callable):
+    """A decorator to assert that the api_caller is set right before running the function. The function must have api_caller as the first argument"""
+
+    @wraps(function)
+    def wrap(api_caller: Optional[ApiCaller] = None, *args, **kwargs):
         assert DB
-        api_caller = ApiCaller(
-            [
-                API(
-                    f"http://{instance['hostname']}:{instance['port']}",
-                    instance["server_name"],
-                )
-                for instance in DB.get_instances()
-            ]
-        )
+        if not api_caller:
+            db_instances = DB.get_instances()
+            if isinstance(db_instances, str):
+                message = f"Can't get instances in database : {db_instances}"
+                Thread(target=DB.add_action, args=({"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["instance"], "title": "Get instances failed while asserting api_caller", "message": message, "status": "error"},)).start()
+                CORE_CONFIG.logger.error(f"{message} while asserting api_caller, api_caller will be None")
+            else:
+                api_caller = ApiCaller([API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"]) for instance in db_instances])
 
+        return function(api_caller, *args, **kwargs)
+
+    return wrap()
+
+
+@assert_api_caller
+def send_plugins_to_instances(api_caller: ApiCaller):
+    """Send the plugins to the instances"""
     generate_external_plugins(original_path=EXTERNAL_PLUGINS_PATH)
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
     CORE_CONFIG.logger.info(f"Sending {EXTERNAL_PLUGINS_PATH} folder to instances {instances_endpoints} ...")
     ret = api_caller.send_files(EXTERNAL_PLUGINS_PATH, "/plugins")
     if not ret:
-        CORE_CONFIG.logger.error(
-            "Not all instances have received the plugins, configuration will not work as expected...",
-        )
+        CORE_CONFIG.logger.error("Not all instances have received the plugins, configuration will not work as expected...")
 
 
 @generate_config
-def send_config_to_instances(api_caller: ApiCaller = None):
+@assert_api_caller
+def send_config_to_instances(api_caller: ApiCaller):
     """Send the config to the instances"""
-    if not api_caller:
-        assert DB
-        api_caller = ApiCaller(
-            [
-                API(
-                    f"http://{instance['hostname']}:{instance['port']}",
-                    instance["server_name"],
-                )
-                for instance in DB.get_instances()
-            ]
-        )
-
     nginx_prefix = Path(sep, "etc", "nginx")
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
@@ -403,24 +364,15 @@ def send_config_to_instances(api_caller: ApiCaller = None):
     CORE_CONFIG.logger.info(f"Sending {nginx_prefix} folder to instances {instances_endpoints} ...")
     ret = api_caller.send_files(nginx_prefix, "/confs")
     if not ret:
-        CORE_CONFIG.logger.error(
-            "Not all instances have received the configuration, configuration will not work as expected...",
-        )
+        CORE_CONFIG.logger.error("Not all instances have received the configuration, configuration will not work as expected...")
 
 
-def send_custom_configs_to_instances(api_caller: ApiCaller = None):
+@assert_api_caller
+def send_custom_configs_to_instances(api_caller: ApiCaller):
     """Send the custom configs to the instances"""
     if not api_caller:
         assert DB
-        api_caller = ApiCaller(
-            [
-                API(
-                    f"http://{instance['hostname']}:{instance['port']}",
-                    instance["server_name"],
-                )
-                for instance in DB.get_instances()
-            ]
-        )
+        api_caller = ApiCaller([API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"]) for instance in DB.get_instances()])
 
     generate_custom_configs(original_path=CUSTOM_CONFIGS_PATH)
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
@@ -428,49 +380,27 @@ def send_custom_configs_to_instances(api_caller: ApiCaller = None):
     CORE_CONFIG.logger.info(f"Sending {CUSTOM_CONFIGS_PATH} folder to instances {instances_endpoints} ...")
     ret = api_caller.send_files(CUSTOM_CONFIGS_PATH, "/custom_configs")
     if not ret:
-        CORE_CONFIG.logger.error(
-            "Not all instances have received the custom configs, configuration will not work as expected...",
-        )
+        CORE_CONFIG.logger.error("Not all instances have received the custom configs, configuration will not work as expected...")
 
 
-def send_cache_to_instances(api_caller: ApiCaller = None):
+@assert_api_caller
+def send_cache_to_instances(api_caller: ApiCaller):
     """Send the cache to the instances"""
     if not api_caller:
         assert DB
-        api_caller = ApiCaller(
-            [
-                API(
-                    f"http://{instance['hostname']}:{instance['port']}",
-                    instance["server_name"],
-                )
-                for instance in DB.get_instances()
-            ]
-        )
+        api_caller = ApiCaller([API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"]) for instance in DB.get_instances()])
 
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
     CORE_CONFIG.logger.info(f"Sending {CACHE_PATH} folder to instances {instances_endpoints} ...")
     ret = api_caller.send_files(CACHE_PATH, "/cache")
     if not ret:
-        CORE_CONFIG.logger.error(
-            "Not all instances have received the cache, configuration will not work as expected...",
-        )
+        CORE_CONFIG.logger.error("Not all instances have received the cache, configuration will not work as expected...")
 
 
-def reload_instances(api_caller: ApiCaller = None):
+@assert_api_caller
+def reload_instances(api_caller: ApiCaller):
     """Reload the instances"""
-    if not api_caller:
-        assert DB
-        api_caller = ApiCaller(
-            [
-                API(
-                    f"http://{instance['hostname']}:{instance['port']}",
-                    instance["server_name"],
-                )
-                for instance in DB.get_instances()
-            ]
-        )
-
     CORE_CONFIG.logger.info(f"Reloading instances {', '.join(api.endpoint for api in api_caller.apis)} ...")
     ret = api_caller.send_to_apis("POST", "/reload")
     if not ret:
@@ -479,30 +409,13 @@ def reload_instances(api_caller: ApiCaller = None):
         )
 
 
-def send_to_instances(
-    types: Union[
-        Literal["all"],
-        set[Literal["plugins", "custom_configs", "config", "cache", "reload"]],
-    ],
-    *,
-    instance_api: Optional[API] = None,
-    caller: Optional[ApiCaller] = None,
-    no_reload: bool = False,
-) -> int:
+def send_to_instances(types: Union[Literal["all"], set[Literal["plugins", "custom_configs", "config", "cache", "reload"]]], *, instance_api: Optional[API] = None, caller: Optional[ApiCaller] = None, no_reload: bool = False) -> int:
     """Send the data to the instances"""
     api_caller = caller or (ApiCaller([instance_api]) if instance_api else None)
 
     if api_caller is None:
         assert DB
-        api_caller = ApiCaller(
-            [
-                API(
-                    f"http://{instance['hostname']}:{instance['port']}",
-                    instance["server_name"],
-                )
-                for instance in DB.get_instances()
-            ]
-        )
+        api_caller = ApiCaller([API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"]) for instance in DB.get_instances()])
 
     if types != "all" and not types:
         CORE_CONFIG.logger.error("No type provided, nothing to do...")
@@ -513,7 +426,7 @@ def send_to_instances(
     if types == "all" or "custom_configs" in types:
         send_custom_configs_to_instances(api_caller)
     if types == "all" or "config" in types:
-        send_config_to_instances(api_caller)  # type: ignore
+        send_config_to_instances(api_caller)
     if types == "all" or "cache" in types:
         send_cache_to_instances(api_caller)
     if not no_reload and (types == "all" or types):
@@ -535,50 +448,27 @@ def seen_instance(instance_hostname: str):
     return True
 
 
-def test_and_send_to_instances(
-    types: Union[
-        Literal["all"],
-        set[Literal["plugins", "custom_configs", "config", "cache", "reload"]],
-    ],
-    instance_apis: Union[set[API], ApiCaller] = None,
-    *,
-    no_reload: bool = False,
-) -> int:
+def test_and_send_to_instances(types: Union[Literal["all"], set[Literal["plugins", "custom_configs", "config", "cache", "reload"]]], instance_apis: Union[set[API], ApiCaller] = None, *, no_reload: bool = False) -> int:
     """Test and send the data to the instances"""
     if instance_apis is None:
         assert DB
-        instance_apis = ApiCaller(
-            [
-                API(
-                    f"http://{instance['hostname']}:{instance['port']}",
-                    instance["server_name"],
-                )
-                for instance in DB.get_instances()
-            ]
-        )
+        instance_apis = ApiCaller([API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"]) for instance in DB.get_instances()])
 
     for instance_api in instance_apis.copy() if isinstance(instance_apis, set) else instance_apis.apis:
         sent, err, status, resp = instance_api.request("GET", "ping")
         if not sent:
-            CORE_CONFIG.logger.warning(
-                f"Can't send API request to {instance_api.endpoint}ping : {err}, data will not be sent to it ...",
-            )
+            CORE_CONFIG.logger.warning(f"Can't send API request to {instance_api.endpoint}ping : {err}, data will not be sent to it ...")
             instance_apis.remove(instance_api)
             continue
         else:
             if status != 200:
-                CORE_CONFIG.logger.warning(
-                    f"Error while sending API request to {instance_api.endpoint}ping : status = {resp['status']}, msg = {resp['msg']}, data will not be sent to it ...",
-                )
+                CORE_CONFIG.logger.warning(f"Error while sending API request to {instance_api.endpoint}ping : status = {resp['status']}, msg = {resp['msg']}, data will not be sent to it ...")
                 instance_apis.remove(instance_api)
                 continue
             else:
                 CORE_CONFIG.logger.info(f"Successfully sent API request to {instance_api.endpoint}ping, sending data to it ...")
 
-        Thread(
-            target=seen_instance,
-            args=(instance_api.endpoint.replace("http://", "").split(":")[0],),
-        ).start()
+        Thread(target=seen_instance, args=(instance_api.endpoint.replace("http://", "").split(":")[0],)).start()
 
     if instance_apis if isinstance(instance_apis, set) else instance_apis.apis:
         api_caller = instance_apis if isinstance(instance_apis, ApiCaller) else ApiCaller(instance_apis)
@@ -595,11 +485,7 @@ def run_jobs():
         status = 0
 
         while not sent or status != 200:
-            sent, err, status, resp = local_api.request(
-                "GET",
-                "/ping",
-                additonal_headers={"Authorization": f"Bearer {CORE_CONFIG.core_token}"} if CORE_CONFIG.core_token else {},
-            )
+            sent, err, status, resp = local_api.request("GET", "ping", additonal_headers={"Authorization": f"Bearer {CORE_CONFIG.core_token}"} if CORE_CONFIG.core_token else {})
             sleep(1)
 
     assert DB
@@ -607,21 +493,13 @@ def run_jobs():
     db_config = DB.get_config()
 
     if isinstance(db_config, str):
-        CORE_CONFIG.logger.error(
-            f"Can't get config from database : {db_config}",
-        )
+        CORE_CONFIG.logger.error(f"Can't get config from database : {db_config}")
         stop(1)
 
     assert isinstance(db_config, dict)
 
     # Only run jobs once
-    if not SCHEDULER.reload(
-        db_config
-        | {
-            "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
-            "core_token": CORE_CONFIG.core_token,
-        }
-    ):
+    if not SCHEDULER.reload(db_config | {"API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "core_token": CORE_CONFIG.core_token}):
         CORE_CONFIG.logger.error("At least one job in run_once() failed")
     else:
         CORE_CONFIG.logger.info("All jobs in run_once() were successful")
@@ -641,21 +519,12 @@ def run_job(job_name: str):
     db_config = DB.get_config()
 
     if isinstance(db_config, str):
-        CORE_CONFIG.logger.error(
-            f"Can't get config from database : {db_config}",
-        )
+        CORE_CONFIG.logger.error(f"Can't get config from database : {db_config}")
         stop(1)
 
     assert isinstance(db_config, dict)
 
-    SCHEDULER.reload(
-        db_config
-        | {
-            "API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}",
-            "core_token": CORE_CONFIG.core_token,
-        },
-        run=False,
-    )
+    SCHEDULER.reload(db_config | {"API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "core_token": CORE_CONFIG.core_token}, run=False)
     SCHEDULER.run_single(job_name)
 
     # TODO: remove this when the soft reload will be available

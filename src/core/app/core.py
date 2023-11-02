@@ -38,11 +38,11 @@ TOKEN_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(
 
 
 class CoreConfig(YamlBaseSettings):
-    LISTEN_ADDR: str = "0.0.0.0"  # TODO: check with regex for IPv4 and IPv6
+    LISTEN_ADDR: str = "0.0.0.0"
     LISTEN_PORT: Union[str, int] = 1337
     MAX_WORKERS: Union[str, int] = max((cpu_count() or 1) - 1, 1)
     MAX_THREADS: Union[str, int] = int(MAX_WORKERS) * 2 if isinstance(MAX_WORKERS, int) or MAX_WORKERS.isdigit() else 2
-    WAIT_RETRY_INTERVAL: Union[str, int] = 5
+    WAIT_RETRY_INTERVAL: Union[str, float] = 5.0
     HEALTHCHECK_INTERVAL: Union[str, int] = 30
     CHECK_WHITELIST: Union[Literal["yes", "no"], bool] = "yes"
     WHITELIST: Union[str, set[str]] = {"127.0.0.1"}
@@ -52,6 +52,13 @@ class CoreConfig(YamlBaseSettings):
 
     LOG_LEVEL: Literal["emerg", "alert", "crit", "error", "warn", "warning", "notice", "info", "debug", "EMERG", "ALERT", "CRIT", "ERROR", "WARN", "WARNING", "NOTICE", "INFO", "DEBUG"] = "notice"
     DATABASE_URI: str = "sqlite:////var/lib/bunkerweb/db.sqlite3"
+    USE_REDIS: Union[Literal["yes", "no"], bool] = "no"
+    REDIS_HOST: str = ""
+    REDIS_PORT: Union[str, int] = 6379
+    REDIS_DATABASE: Union[str, int] = 0
+    REDIS_SSL: Union[str, bool] = False
+    REDIS_TIMEOUT: Union[str, float] = 1000.0
+
     EXTERNAL_PLUGIN_URLS: Union[str, set] = ""
     AUTOCONF_MODE: Union[Literal["yes", "no"], bool] = "no"
     KUBERNETES_MODE: Union[Literal["yes", "no"], bool] = "no"
@@ -90,6 +97,14 @@ class CoreConfig(YamlBaseSettings):
     @cached_property
     def check_token(self) -> bool:
         return self.CHECK_TOKEN == "yes" if isinstance(self.CHECK_TOKEN, str) else self.CHECK_TOKEN
+
+    @cached_property
+    def use_redis(self) -> bool:
+        return self.USE_REDIS == "yes" if isinstance(self.USE_REDIS, str) else self.USE_REDIS
+
+    @cached_property
+    def redis_ssl(self) -> bool:
+        return self.REDIS_SSL == "yes" if isinstance(self.REDIS_SSL, str) else self.REDIS_SSL
 
     @cached_property
     def autoconf_mode(self) -> bool:
@@ -276,6 +291,10 @@ class CoreConfig(YamlBaseSettings):
         elif self.autoconf_mode:
             return "Autoconf"
 
+        return self.get_instance()
+
+    @staticmethod
+    def get_instance() -> str:
         integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
         os_release_path = Path(sep, "etc", "os-release")
         if integration_path.is_file():
@@ -301,7 +320,7 @@ def check_config(config: CoreConfig, *, exit_prog: bool = True) -> int:
     if not IP_RX.match(config.LISTEN_ADDR):
         message = f"Invalid LISTEN_ADDR provided: {CORE_CONFIG.LISTEN_ADDR}, It must be a valid IPv4 or IPv6 address."
         status = 2
-    if not isinstance(config.LISTEN_PORT, int) and (not config.LISTEN_PORT.isdigit() or not (1 <= int(config.LISTEN_PORT) <= 65535)):
+    elif not isinstance(config.LISTEN_PORT, int) and (not config.LISTEN_PORT.isdigit() or not (1 <= int(config.LISTEN_PORT) <= 65535)):
         message = f"Invalid LISTEN_PORT provided: {CORE_CONFIG.LISTEN_PORT}, It must be a positive integer between 1 and 65535."
         status = 3
     elif not isinstance(config.MAX_WORKERS, int) and (not config.MAX_WORKERS.isdigit() or int(config.MAX_WORKERS) < 1):
@@ -310,15 +329,33 @@ def check_config(config: CoreConfig, *, exit_prog: bool = True) -> int:
     elif not isinstance(config.MAX_THREADS, int) and (not config.MAX_THREADS.isdigit() or int(config.MAX_THREADS) < 1):
         message = f"Invalid MAX_THREADS provided: {CORE_CONFIG.MAX_THREADS}, It must be a positive integer."
         status = 5
-    elif not isinstance(config.WAIT_RETRY_INTERVAL, int) and (not config.WAIT_RETRY_INTERVAL.isdigit() or int(config.WAIT_RETRY_INTERVAL) < 1):
-        message = f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
+
+    try:
+        if not float(config.WAIT_RETRY_INTERVAL) > 0:
+            raise ValueError
+    except ValueError:
+        message = f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive float."
         status = 6
-    elif not isinstance(config.HEALTHCHECK_INTERVAL, int) and (not config.HEALTHCHECK_INTERVAL.isdigit() or int(config.HEALTHCHECK_INTERVAL) < 1):
+
+    if not isinstance(config.HEALTHCHECK_INTERVAL, int) and (not config.HEALTHCHECK_INTERVAL.isdigit() or int(config.HEALTHCHECK_INTERVAL) < 1):
         message = f"Invalid HEALTHCHECK_INTERVAL provided: {CORE_CONFIG.HEALTHCHECK_INTERVAL}, It must be a positive integer."
         status = 7
     elif config.check_token and not TOKEN_RX.match(config.core_token):
         message = f"Invalid token provided: {CORE_CONFIG.core_token}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
         status = 8
+    elif not isinstance(config.REDIS_PORT, int) and (not config.REDIS_PORT.isdigit() or not (1 <= int(config.REDIS_PORT) <= 65535)):
+        message = f"Invalid REDIS_PORT provided: {CORE_CONFIG.REDIS_PORT}, It must be a positive integer between 1 and 65535."
+        status = 9
+    elif not isinstance(config.REDIS_DATABASE, int) and (not config.REDIS_DATABASE.isdigit() or not (0 <= int(config.REDIS_DATABASE) <= 15)):
+        message = f"Invalid REDIS_DATABASE provided: {CORE_CONFIG.REDIS_DATABASE}, It must be a positive integer between 0 and 15."
+        status = 10
+
+    try:
+        if not float(config.REDIS_TIMEOUT) > 0:
+            raise ValueError
+    except ValueError:
+        message = f"Invalid REDIS_TIMEOUT provided: {CORE_CONFIG.REDIS_TIMEOUT}, It must be a positive float."
+        status = 11
 
     if message:
         config.logger.error(message)

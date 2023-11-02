@@ -3,6 +3,7 @@
 
 from contextlib import asynccontextmanager, suppress
 from copy import deepcopy
+from gc import collect as gc_collect
 from glob import glob
 from io import BytesIO
 from ipaddress import (
@@ -23,14 +24,12 @@ from signal import SIGINT, SIGTERM, signal
 from sys import path as sys_path
 from tarfile import open as tar_open
 from time import sleep
-from typing import Optional
 
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("db",), ("gen",), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from dotenv import dotenv_values
 from fastapi import FastAPI, Request, status
 from fastapi.datastructures import Address
 from fastapi.responses import JSONResponse
@@ -38,7 +37,6 @@ from redis.client import Redis
 from regex import compile as re_compile
 
 from API import API  # type: ignore
-from api_caller import ApiCaller  # type: ignore
 from configurator import Configurator  # type: ignore
 from database import Database  # type: ignore
 from jobs import bytes_hash  # type: ignore
@@ -63,15 +61,7 @@ from .dependencies import (
     update_app_mounts,
 )
 
-PLUGIN_KEYS = [
-    "id",
-    "name",
-    "description",
-    "version",
-    "stream",
-    "settings",
-]
-
+PLUGIN_KEYS = ("id", "name", "description", "version", "stream", "settings")
 PLUGIN_ID_REGEX = re_compile(r"^[\w.-]{1,64}$")
 CUSTOM_CONFIGS_RX = re_compile(r"^((?P<service_id>[^ ]{,255})_)?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(?P<name>.+)$")
 
@@ -93,7 +83,7 @@ signal(SIGTERM, exit_handler)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_: FastAPI):
     global DB
     del DB
     DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI)
@@ -108,30 +98,11 @@ app = FastAPI(
     description=description,
     summary="The API used by BunkerWeb to communicate with the database and the instances",
     version=BUNKERWEB_VERSION,
-    contact={
-        "name": "BunkerWeb Team",
-        "url": "https://bunkerweb.io",
-        "email": "contact@bunkerity.com",
-    },
+    contact={"name": "BunkerWeb Team", "url": "https://www.bunkerweb.io", "email": "contact@bunkerity.com"},
     license_info={"name": "GNU Affero General Public License v3.0", "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md"},
     openapi_tags=tags_metadata,
     lifespan=lifespan,
 )
-
-
-TMP_ENV_PATH = Path(
-    sep,
-    "etc",
-    "bunkerweb",
-    "variables.env" if CORE_CONFIG.integration == "Linux" else sep,
-    "var",
-    "tmp",
-    "bunkerweb",
-    "variables.env",
-)
-TMP_ENV = dotenv_values(str(TMP_ENV_PATH))
-
-INSTANCES_API_CALLER = ApiCaller()
 
 db_is_initialized = DB.is_initialized()
 
@@ -142,9 +113,7 @@ if db_is_initialized:
     resp = DB.set_scheduler_initialized(False)
 
     if resp:
-        CORE_CONFIG.logger.error(
-            f"Can't set scheduler as not initialized : {resp}",
-        )
+        CORE_CONFIG.logger.warning(f"Can't set scheduler as not initialized : {resp}")
 
     db_config = DB.get_config()
 
@@ -153,6 +122,8 @@ if db_is_initialized:
             f"Can't get config from database : {db_config}",
         )
         stop_app(1)
+
+    assert isinstance(db_config, dict)
 
     db_plugins = DB.get_plugins(external=True)
 
@@ -163,15 +134,15 @@ if db_is_initialized:
         db_plugins = []
 
 
-def extract_plugin_data(filename: str) -> Optional[dict]:
+def extract_plugin_data(filename: str) -> dict:
     plugin_data = json_loads(Path(filename).read_text(encoding="utf-8"))
 
     if not all(key in plugin_data.keys() for key in PLUGIN_KEYS):
         CORE_CONFIG.logger.warning(f"The plugin {dir_basename} doesn't have a valid plugin.json file, it's missing one or more of the following keys: {', '.join(PLUGIN_KEYS)}, ignoring it...")
-        return
+        return {}
     elif not PLUGIN_ID_REGEX.match(plugin_data["id"]):
         CORE_CONFIG.logger.warning(f"The plugin {dir_basename} doesn't have a valid id, the id must match the following regex: {PLUGIN_ID_REGEX.pattern}, ignoring it...")
-        return
+        return {}
 
     plugin_content = BytesIO()
     with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
@@ -180,14 +151,7 @@ def extract_plugin_data(filename: str) -> Optional[dict]:
     checksum = bytes_hash(plugin_content)
     plugin_content.seek(0, 0)
 
-    plugin_data.update(
-        {
-            "external": True,
-            "page": Path(_dir, "ui").exists(),
-            "data": plugin_content.getvalue(),
-            "checksum": checksum,
-        }
-    )
+    plugin_data.update({"external": True, "page": Path(_dir, "ui").exists(), "data": plugin_content.getvalue(), "checksum": checksum})
 
     return plugin_data
 
@@ -221,23 +185,16 @@ for filename in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "plugin.json"))):
 if CORE_CONFIG.external_plugin_urls_str != db_config.get("EXTERNAL_PLUGIN_URLS", ""):
     if db_is_initialized:
         CORE_CONFIG.logger.info("External plugins urls changed, refreshing external plugins...")
-        for db_plugin in db_plugins:
-            rmtree(
-                str(EXTERNAL_PLUGINS_PATH.joinpath(db_plugin["id"])),
-                ignore_errors=True,
-            )
+        for db_plugin in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*"))):
+            rmtree(db_plugin, ignore_errors=True)
     else:
         CORE_CONFIG.logger.info("Found external plugins to download, starting download...")
 
     plugin_changes = True
     threads = []
     for plugin_url in CORE_CONFIG.external_plugin_urls:
-        thread = Thread(
-            target=install_plugin,
-            args=(plugin_url, CORE_CONFIG.logger),
-        )
-        thread.start()
-        threads.append(thread)
+        threads.append(Thread(target=install_plugin, args=(plugin_url, CORE_CONFIG.logger)))
+        threads[-1].start()
 
     for thread in threads:
         thread.join()
@@ -285,54 +242,32 @@ if db_is_initialized:
 
         err = DB.update_external_plugins(external_plugins, delete_missing=True)
         if err:
-            CORE_CONFIG.logger.error(
-                f"Couldn't save some manually added plugins to database: {err}",
-            )
+            CORE_CONFIG.logger.error(f"Couldn't save some manually added plugins to database: {err}")
 
         generate_external_plugins(external_plugins, original_path=EXTERNAL_PLUGINS_PATH)
 
 CORE_CONFIG.logger.info("Computing config ...")
 
-config = Configurator(
-    str(SETTINGS_PATH),
-    str(CORE_PLUGINS_PATH),
-    external_plugins,
-    CORE_CONFIG.settings,
-    CORE_CONFIG.logger,
-)
+config = Configurator(str(SETTINGS_PATH), str(CORE_PLUGINS_PATH), external_plugins, CORE_CONFIG.settings, CORE_CONFIG.logger)
 config_files = config.get_config()
 
 if not db_is_initialized:
-    CORE_CONFIG.logger.info(
-        "Database not initialized, initializing ...",
-    )
-    ret, err = DB.init_tables(
-        [
-            config.get_settings(),
-            config.get_plugins("core"),
-            config.get_plugins("external"),
-        ]
-    )
+    CORE_CONFIG.logger.info("Database not initialized, initializing ...")
+    ret, err = DB.init_tables([config.get_settings(), config.get_plugins("core"), config.get_plugins("external")])
 
     # Initialize database tables
     if err:
-        CORE_CONFIG.logger.error(
-            f"Exception while initializing database : {err}",
-        )
+        CORE_CONFIG.logger.error(f"Exception while initializing database : {err}")
         stop_app(1)
     elif not ret:
-        CORE_CONFIG.logger.info(
-            "Database tables are already initialized, skipping creation ...",
-        )
+        CORE_CONFIG.logger.info("Database tables are already initialized, skipping creation ...")
     else:
         CORE_CONFIG.logger.info("Database tables initialized")
 
     err = DB.initialize_db(version=BUNKERWEB_VERSION, integration=CORE_CONFIG.integration)
 
     if err:
-        CORE_CONFIG.logger.error(
-            f"Can't Initialize database : {err}",
-        )
+        CORE_CONFIG.logger.error(f"Can't Initialize database : {err}")
         stop_app(1)
     else:
         CORE_CONFIG.logger.info("✅ Database initialized")
@@ -353,24 +288,13 @@ for k, v in CORE_CONFIG.settings.copy().items():
     match = CUSTOM_CONFIGS_RX.search(k)
     if match:
         name = match.group("name").replace(".conf", "")
-        env_custom_configs.append(
-            {
-                "value": v,
-                "exploded": (
-                    match.group("service_id"),
-                    match.group("type"),
-                    name,
-                ),
-            }
-        )
+        env_custom_configs.append({"value": v, "exploded": (match.group("service_id"), match.group("type"), name)})
         CORE_CONFIG.logger.info(f"🛠️ Found custom conf env var \"{name}\"{' for service ' + match.group('service_id') if match.group('service_id') else ''} with type {match.group('type')}")
 
-if {hash(dict_to_frozenset(d)) for d in env_custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs if d["method"] == "core"}:
-    err = DB.save_custom_configs(env_custom_configs, "core")
+if {hash(dict_to_frozenset(d)) for d in env_custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs if d["method"] == "env"}:
+    err = DB.save_custom_configs(env_custom_configs, "env")
     if err:
-        CORE_CONFIG.logger.error(
-            f"Couldn't save some custom configs from env to database: {err}",
-        )
+        CORE_CONFIG.logger.error(f"Couldn't save some custom configs from env to database: {err}")
 
     CORE_CONFIG.logger.info("✅ Custom configs from env saved to database")
 
@@ -383,14 +307,7 @@ for root, dirs, files in walk(str(CONFIGS_PATH)):
         path_exploded = root.split("/")
         for file in files:
             content = Path(join(root, file)).read_text(encoding="utf-8")
-            custom_conf = {
-                "value": content,
-                "exploded": (
-                    f"{path_exploded.pop()}" if path_exploded[-1] not in root_dirs else None,
-                    path_exploded[-1],
-                    file.replace(".conf", ""),
-                ),
-            }
+            custom_conf = {"value": content, "exploded": (f"{path_exploded.pop()}" if path_exploded[-1] not in root_dirs else None, path_exploded[-1], file.replace(".conf", ""))}
             saving = True
 
             for db_conf in db_configs:
@@ -405,9 +322,7 @@ for root, dirs, files in walk(str(CONFIGS_PATH)):
 if {hash(dict_to_frozenset(d)) for d in files_custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs if d["method"] == "static"}:
     err = DB.save_custom_configs(files_custom_configs, "static")
     if err:
-        CORE_CONFIG.logger.error(
-            f"Couldn't save some manually created custom configs to database: {err}",
-        )
+        CORE_CONFIG.logger.error(f"Couldn't save some manually created custom configs to database: {err}")
 
     CORE_CONFIG.logger.info("✅ Custom configs from files saved to database")
 
@@ -429,9 +344,7 @@ if config_files != db_config:
     err = DB.save_config(config_files, "core")
 
     if err:
-        CORE_CONFIG.logger.error(
-            f"Can't save config to database : {err}",
-        )
+        CORE_CONFIG.logger.error(f"Can't save config to database : {err}")
         stop_app(1)
 
     CORE_CONFIG.logger.info("✅ Config successfully saved to database")
@@ -439,45 +352,19 @@ if config_files != db_config:
 if CORE_CONFIG.integration in ("Linux", "Docker"):
     CORE_CONFIG.logger.info("Executing scheduler ...")
     DB.set_scheduler_initialized()
-    threads = [
-        Thread(
-            target=test_and_send_to_instances,
-            args=({"plugins", "custom_configs", "config"},),
-            kwargs={"no_reload": True},
-        ),
-        Thread(target=run_jobs),
-    ]
-
-    for thread in threads:
+    for thread in (Thread(target=test_and_send_to_instances, args=({"plugins", "custom_configs", "config"},), kwargs={"no_reload": True}), Thread(target=run_jobs)):
         thread.start()
-
-REDIS_HOST: Optional[str] = config_files.get("REDIS_HOST", None)
-REDIS_PORT: Optional[int] = None
-REDIS_DATABASE: Optional[int] = None
-REDIS_SSL: bool = False
-REDIS_TIMEOUT: Optional[float] = None
 
 
 def listen_dynamic_instances():
     SEMAPHORE.acquire()
 
-    if not any((REDIS_HOST, REDIS_PORT, REDIS_DATABASE, REDIS_TIMEOUT)):
-        CORE_CONFIG.logger.warning("listen_dynamic_instances - USE_REDIS is set to yes but one or more of the following variables are not defined: REDIS_HOST, REDIS_PORT, REDIS_DATABASE, REDIS_TIMEOUT, app will not listen for dynamic instances")
+    if not CORE_CONFIG.REDIS_HOST:
+        CORE_CONFIG.logger.warning("listen_dynamic_instances - USE_REDIS is set to yes but REDIS_HOST is not defined, app will not listen for dynamic instances")
         SEMAPHORE.release()
         return
 
-    assert REDIS_HOST is not None
-    assert REDIS_PORT is not None
-    assert REDIS_DATABASE is not None
-    assert REDIS_TIMEOUT is not None
-
-    redis_client = Redis(
-        host=REDIS_HOST,
-        port=REDIS_PORT,
-        db=REDIS_DATABASE,
-        ssl=REDIS_SSL,
-        socket_timeout=REDIS_TIMEOUT,
-    )
+    redis_client = Redis(host=CORE_CONFIG.REDIS_HOST, port=int(CORE_CONFIG.REDIS_PORT), db=int(CORE_CONFIG.REDIS_DATABASE), ssl=CORE_CONFIG.redis_ssl, socket_timeout=float(CORE_CONFIG.REDIS_TIMEOUT) / 1000)
 
     CORE_CONFIG.logger.info("listen_dynamic_instances - USE_REDIS is set to yes, trying to connect to Redis ...")
 
@@ -494,7 +381,7 @@ def listen_dynamic_instances():
                 SEMAPHORE.release()
                 return
             CORE_CONFIG.logger.warning(f"listen_dynamic_instances - Can't connect to Redis, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ...")
-            sleep(int(CORE_CONFIG.WAIT_RETRY_INTERVAL))
+            sleep(float(CORE_CONFIG.WAIT_RETRY_INTERVAL))
 
     CORE_CONFIG.logger.info("listen_dynamic_instances - ✅ Connected to Redis")
 
@@ -508,7 +395,7 @@ def listen_dynamic_instances():
             break
         except ConnectionError:
             CORE_CONFIG.logger.warning(f"listen_dynamic_instances - Can't subscribe to Redis channel, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ...")
-            sleep(int(CORE_CONFIG.WAIT_RETRY_INTERVAL))
+            sleep(float(CORE_CONFIG.WAIT_RETRY_INTERVAL))
 
     CORE_CONFIG.logger.info('listen_dynamic_instances - ✅ Subscribed to Redis channel "bw-instances", starting to listen for dynamic instances ...')
 
@@ -523,7 +410,7 @@ def listen_dynamic_instances():
                         pubsub.close()
                         pubsub.subscribe("bw-instances")
                         break
-                    sleep(int(CORE_CONFIG.WAIT_RETRY_INTERVAL))
+                    sleep(float(CORE_CONFIG.WAIT_RETRY_INTERVAL))
 
             try:
                 if isinstance(pubsub_message, dict) and pubsub_message.get("type") == "message":
@@ -569,10 +456,7 @@ def listen_dynamic_instances():
 
                     CORE_CONFIG.logger.info(f"listen_dynamic_instances - ✅ Instance {data['hostname']}:{data['listening_port']}:{data['server_name']} successfully {error} to database")
                     if error != "updated":
-                        instance_api = API(
-                            f"http://{data['hostname']}:{data['listening_port']}",
-                            data["server_name"],
-                        )
+                        instance_api = API(f"http://{data['hostname']}:{data['listening_port']}", data["server_name"])
 
                         if not test_and_send_to_instances("all", {instance_api}):
                             continue
@@ -592,7 +476,7 @@ def listen_dynamic_instances():
 def run_pending_jobs() -> None:
     while not DB.is_scheduler_initialized():
         CORE_CONFIG.logger.warning(f"run_pending_jobs - Scheduler is not initialized yet, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ...")
-        sleep(int(CORE_CONFIG.WAIT_RETRY_INTERVAL) - 1 if int(CORE_CONFIG.WAIT_RETRY_INTERVAL) > 0 else 0)
+        sleep(float(CORE_CONFIG.WAIT_RETRY_INTERVAL))
 
     SCHEDULER.run_pending()
 
@@ -601,13 +485,7 @@ def instances_healthcheck() -> None:
     if not DB:
         return
 
-    instance_apis = {
-        instance["hostname"]: API(
-            f"http://{instance['hostname']}:{instance['port']}",
-            instance["server_name"],
-        )
-        for instance in DB.get_instances()
-    }
+    instance_apis = {instance["hostname"]: API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"]) for instance in DB.get_instances()}
 
     if not instance_apis:
         CORE_CONFIG.logger.warning("instances_healthcheck - No instances found in database, skipping healthcheck ...")
@@ -647,8 +525,7 @@ async def validate_request(request: Request, call_next):
     except AssertionError:
         return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={"result": "ko"})
 
-    os_release_path = Path(sep, "etc", "os-release")
-    if CORE_CONFIG.check_whitelist and (request.client.host != "127.0.0.1" if os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8") else True):
+    if CORE_CONFIG.check_whitelist and (request.client.host != "127.0.0.1" if CORE_CONFIG.integration != "Linux" else True):
         if not CORE_CONFIG.whitelist:
             CORE_CONFIG.logger.warning(f'Unauthorized access attempt from {request.client.host} (whitelist check is set to "yes" but the whitelist is empty), aborting...')
             return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"result": "ko"})
@@ -701,32 +578,8 @@ app.include_router(plugins.router)
 
 update_app_mounts(app)
 
-if config_files.get("USE_REDIS", "no") == "yes":
-    if REDIS_HOST:
-        redis_port = config_files.get("REDIS_PORT", "6379")
-        if not redis_port.isdigit() or not (1 <= int(redis_port) <= 65535):
-            CORE_CONFIG.logger.warning(f"Invalid REDIS_PORT provided: {redis_port}, It must be an integer between 1 and 65535, port will default to 6379")
-            redis_port = 6379
-        REDIS_PORT = int(redis_port)
-        del redis_port
-
-        redis_database = config_files.get("REDIS_DATABASE", "0")
-        if not redis_database.isdigit() or not (0 <= int(redis_database) <= 15):
-            CORE_CONFIG.logger.warning(f"Invalid REDIS_DATABASE provided: {redis_database}, It must be an integer between 0 and 15, database will default to 0")
-            redis_database = 0
-        REDIS_DATABASE = int(redis_database)
-        del redis_database
-
-        if config_files.get("REDIS_SSL", "no") == "yes":
-            REDIS_SSL = True
-
-        redis_timeout = config_files.get("REDIS_TIMEOUT", "1000")  # ms
-        if not redis_timeout.isdigit() or int(redis_timeout) < 1:
-            CORE_CONFIG.logger.warning(f"Invalid REDIS_TIMEOUT provided: {redis_timeout}, It must be a positive integer, timeout will default to 1000 ms")
-            redis_timeout = 1000
-        REDIS_TIMEOUT = float(int(redis_timeout) / 1000)
-        del redis_timeout
-
+if CORE_CONFIG.use_redis:
+    if CORE_CONFIG.REDIS_HOST:
         Thread(target=listen_dynamic_instances, name="redis_listener").start()
     else:
         CORE_CONFIG.logger.warning("USE_REDIS is set to yes but REDIS_HOST is not defined, app will not listen for dynamic instances")
@@ -742,6 +595,7 @@ Thread(target=run_repeatedly, args=(1, run_pending_jobs), name="run_pending_jobs
 if not HEALTHY_PATH.exists():
     HEALTHY_PATH.write_text("ok", encoding="utf-8")
 
+gc_collect()
 
 if __name__ == "__main__":
     from uvicorn import run
