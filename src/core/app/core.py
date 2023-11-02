@@ -45,24 +45,7 @@ class CoreConfig(YamlBaseSettings):
     CORE_TOKEN: str = ""
     BUNKERWEB_INSTANCES: Union[str, List[str]] = []
 
-    LOG_LEVEL: Literal[
-        "emerg",
-        "alert",
-        "crit",
-        "error",
-        "warn",
-        "notice",
-        "info",
-        "debug",
-        "EMERG",
-        "ALERT",
-        "CRIT",
-        "ERROR",
-        "WARN",
-        "NOTICE",
-        "INFO",
-        "DEBUG",
-    ] = "notice"
+    LOG_LEVEL: Literal["emerg", "alert", "crit", "error", "warn", "warning", "notice", "info", "debug", "EMERG", "ALERT", "CRIT", "ERROR", "WARN", "WARNING", "NOTICE", "INFO", "DEBUG"] = "notice"
     DATABASE_URI: str = "sqlite:////var/lib/bunkerweb/db.sqlite3"
     EXTERNAL_PLUGIN_URLS: Union[str, set] = ""
     AUTOCONF_MODE: Union[Literal["yes", "no"], bool] = "no"
@@ -85,7 +68,7 @@ class CoreConfig(YamlBaseSettings):
 
     @cached_property
     def log_level(self) -> str:
-        return self.LOG_LEVEL.upper() if self.LOG_LEVEL in ("error", "info", "debug") else ("WARNING" if self.LOG_LEVEL == "warn" else "INFO")
+        return self.LOG_LEVEL.upper() if self.LOG_LEVEL in ("error", "ERROR", "info", "INFO", "debug", "DEBUG") else ("WARNING" if self.LOG_LEVEL in ("warn", "WARN", "warning", "WARNING") else "INFO")
 
     @cached_property
     def logger(self) -> Logger:
