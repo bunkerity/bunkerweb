@@ -14,12 +14,17 @@ from pathlib import Path
 from shutil import copytree, rmtree
 from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
+from sys import path as sys_path
 from tarfile import open as tar_open
 from threading import enumerate as all_threads, Event, Semaphore, Thread
 from time import sleep
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
 from uuid import uuid4
 from zipfile import ZipFile
+
+deps_path = join(sep, "usr", "share", "bunkerweb", "deps", "python")
+if deps_path not in sys_path:
+    sys_path.append(deps_path)
 
 from fastapi.routing import Mount
 from magic import Magic

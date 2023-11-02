@@ -9,23 +9,23 @@ from logging import Logger
 from os import cpu_count, getenv, sep
 from os.path import basename, dirname, join
 from pathlib import Path
-from re import IGNORECASE, compile as re_compile, match
+from re import match
 from time import sleep, time
 from typing import Any, Dict, Optional
 from subprocess import DEVNULL, STDOUT, run
+from sys import path as sys_path
 from threading import Lock, Semaphore, Thread
 
 
 from croniter import croniter
-from schedule import (
-    CancelJob,
-    Job,
-    clear as schedule_clear,
-    every as schedule_every,
-    jobs as schedule_jobs,
-)
+from schedule import CancelJob, Job, clear as schedule_clear, every as schedule_every, jobs as schedule_jobs
+
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
 from API import API  # type: ignore
+from jobs import CRON_RX  # type: ignore
 from logger import setup_logger  # type: ignore
 
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
@@ -48,24 +48,6 @@ class JobScheduler:
         self.__thread_lock = Lock()
         self.__job_success = True
         self.__semaphore = Semaphore(cpu_count() or 1)
-
-        minute_rx = r"[1-5]?\d"
-        day_rx = r"(3[01]|[12][0-9]|[1-9])"
-        month_rx = r"(1[0-2]|[1-9]|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
-        week_day_rx = r"([0-6]|sun|mon|tue|wed|thu|fri|sat)"
-        cron_rx = (
-            r"^(?P<minute>(?!,)((^|,)(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?))+)\s"
-            + r"(?P<hour>(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?)(,(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?))*)\s"
-            + r"(?P<day>(\*(/\d+)?|{day_rx}(-{day_rx}|/\d+)?)(,(\*(/\d+)?|{day_rx}(-{day_rx}|/\d+)?))*)\s"
-            + r"(?P<month>(\*(/\d+)?|{month_rx}(-{month_rx}|/\d+)?)(,(\*(/\d+)?|{month_rx}(-{month_rx}|/\d+)?))*)\s"
-            + r"(?P<week_day>(\*(/\d+)?|{week_day_rx}(-{week_day_rx}|/\d+)?)(,(\*(/\d+)?|{week_day_rx}(-{week_day_rx}|/\d+)?))*)$"
-        ).format(
-            minute_rx=minute_rx,
-            day_rx=day_rx,
-            month_rx=month_rx,
-            week_day_rx=week_day_rx,
-        )
-        self.__cron_rx = re_compile(cron_rx, IGNORECASE)
 
     @property
     def env(self) -> Dict[str, Any]:
@@ -208,7 +190,7 @@ class JobScheduler:
                     name = job["name"]
                     file = job["file"]
                     every = job["every"]
-                    if self.__cron_rx.match(every):
+                    if CRON_RX.match(every):
                         cron = croniter(every, time())
                         next_run = cron.get_next()
 

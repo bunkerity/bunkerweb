@@ -8,7 +8,7 @@ from logging import Logger
 from os import cpu_count, listdir, sep
 from os.path import basename, dirname, join
 from pathlib import Path
-from re import IGNORECASE, compile as re_compile, search as re_search
+from re import compile as re_compile, search as re_search
 from sys import path as sys_path
 from tarfile import open as tar_open
 from threading import Lock, Semaphore, Thread
@@ -18,7 +18,7 @@ deps_path = join(sep, "usr", "share", "bunkerweb", "utils")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
 
-from jobs import bytes_hash  # type: ignore
+from jobs import bytes_hash, CRON_RX  # type: ignore
 
 
 class Configurator:
@@ -55,24 +55,6 @@ class Configurator:
 
         self.__multisite = self.__variables.get("MULTISITE", "no") == "yes"
         self.__servers = self.__map_servers()
-
-        minute_rx = r"[1-5]?\d"
-        day_rx = r"(3[01]|[12][0-9]|[1-9])"
-        month_rx = r"(1[0-2]|[1-9]|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
-        week_day_rx = r"([0-6]|sun|mon|tue|wed|thu|fri|sat)"
-        cron_rx = (
-            r"^(?P<minute>(?!,)((^|,)(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?))+)\s"
-            + r"(?P<hour>(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?)(,(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?))*)\s"
-            + r"(?P<day>(\*(/\d+)?|{day_rx}(-{day_rx}|/\d+)?)(,(\*(/\d+)?|{day_rx}(-{day_rx}|/\d+)?))*)\s"
-            + r"(?P<month>(\*(/\d+)?|{month_rx}(-{month_rx}|/\d+)?)(,(\*(/\d+)?|{month_rx}(-{month_rx}|/\d+)?))*)\s"
-            + r"(?P<week_day>(\*(/\d+)?|{week_day_rx}(-{week_day_rx}|/\d+)?)(,(\*(/\d+)?|{week_day_rx}(-{week_day_rx}|/\d+)?))*)$"
-        ).format(
-            minute_rx=minute_rx,
-            day_rx=day_rx,
-            month_rx=month_rx,
-            week_day_rx=week_day_rx,
-        )
-        self.__cron_rx = re_compile(cron_rx, IGNORECASE)
 
     def get_settings(self) -> Dict[str, Any]:
         return self.__settings
@@ -330,7 +312,7 @@ class Configurator:
                 return (False, f"Invalid name for job {job['name']} in plugin {plugin['id']}")
             elif not self.__job_file_rx.match(job["file"]):
                 return (False, f"Invalid file for job {job['name']} in plugin {plugin['id']} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256))")
-            elif job["every"] not in ("once", "minute", "hour", "day", "week") and not self.__cron_rx.match(job["every"]):
+            elif job["every"] not in ("once", "minute", "hour", "day", "week") and not CRON_RX.match(job["every"]):
                 return (False, f"Invalid every for job {job['name']} in plugin {plugin['id']} (Must be once, minute, hour, day, week or a valid cron expression)")
             elif job["reload"] is not True and job["reload"] is not False:
                 return (False, f"Invalid reload for job {job['name']} in plugin {plugin['id']} (Must be true or false)")

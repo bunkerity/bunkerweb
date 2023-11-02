@@ -7,6 +7,7 @@ from inspect import getsourcefile
 from io import BytesIO
 from os.path import basename, normpath
 from pathlib import Path
+from re import IGNORECASE, compile as re_compile
 from sys import _getframe
 from threading import Lock
 from time import sleep
@@ -23,6 +24,24 @@ lock = Lock()
     "checksum": sha512
 }
 """
+
+minute_rx = r"[1-5]?\d"
+day_rx = r"(3[01]|[12][0-9]|[1-9])"
+month_rx = r"(1[0-2]|[1-9]|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
+week_day_rx = r"([0-6]|sun|mon|tue|wed|thu|fri|sat)"
+cron_rx = (
+    r"^(?P<minute>(?!,)((^|,)(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?))+)\s"
+    + r"(?P<hour>(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?)(,(\*(/\d+)?|{minute_rx}(-{minute_rx}|/\d+)?))*)\s"
+    + r"(?P<day>(\*(/\d+)?|{day_rx}(-{day_rx}|/\d+)?)(,(\*(/\d+)?|{day_rx}(-{day_rx}|/\d+)?))*)\s"
+    + r"(?P<month>(\*(/\d+)?|{month_rx}(-{month_rx}|/\d+)?)(,(\*(/\d+)?|{month_rx}(-{month_rx}|/\d+)?))*)\s"
+    + r"(?P<week_day>(\*(/\d+)?|{week_day_rx}(-{week_day_rx}|/\d+)?)(,(\*(/\d+)?|{week_day_rx}(-{week_day_rx}|/\d+)?))*)$"
+).format(
+    minute_rx=minute_rx,
+    day_rx=day_rx,
+    month_rx=month_rx,
+    week_day_rx=week_day_rx,
+)
+CRON_RX = re_compile(cron_rx, IGNORECASE)
 
 
 def file_hash(file: Union[str, Path]) -> str:
