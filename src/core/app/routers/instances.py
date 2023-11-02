@@ -186,11 +186,7 @@ async def upsert_instance(instances: Union[UpsertInstance, List[UpsertInstance]]
 
     if reload:
         if decisions["created"]:
-            background_tasks.add_task(
-                test_and_send_to_instances,
-                "all",
-                {instance.to_api() for instance in decisions["created"]},
-            )
+            background_tasks.add_task(test_and_send_to_instances, {instance.to_api() for instance in decisions["created"]}, "all")
         if decisions["updated"]:
             CORE_CONFIG.logger.info(
                 f"Skipping sending data to instance{'s' if len(decisions) > 1 else ''} : {', '.join(instance.hostname for instance in decisions['updated'])}, as {'all' if len(decisions) > 1 else 'this'}"

@@ -313,9 +313,7 @@ def generate_config(function: Optional[Callable] = None):
         if function:
             return function(*args, **kwargs)
 
-    if function:
-        return wrap
-    return wrap()
+    return wrap
 
 
 def assert_api_caller(function: Callable):
@@ -335,7 +333,7 @@ def assert_api_caller(function: Callable):
 
         return function(api_caller, *args, **kwargs)
 
-    return wrap()
+    return wrap
 
 
 @assert_api_caller
@@ -370,10 +368,6 @@ def send_config_to_instances(api_caller: ApiCaller):
 @assert_api_caller
 def send_custom_configs_to_instances(api_caller: ApiCaller):
     """Send the custom configs to the instances"""
-    if not api_caller:
-        assert DB
-        api_caller = ApiCaller([API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"]) for instance in DB.get_instances()])
-
     generate_custom_configs(original_path=CUSTOM_CONFIGS_PATH)
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
@@ -386,10 +380,6 @@ def send_custom_configs_to_instances(api_caller: ApiCaller):
 @assert_api_caller
 def send_cache_to_instances(api_caller: ApiCaller):
     """Send the cache to the instances"""
-    if not api_caller:
-        assert DB
-        api_caller = ApiCaller([API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"]) for instance in DB.get_instances()])
-
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
     CORE_CONFIG.logger.info(f"Sending {CACHE_PATH} folder to instances {instances_endpoints} ...")
@@ -448,12 +438,9 @@ def seen_instance(instance_hostname: str):
     return True
 
 
-def test_and_send_to_instances(types: Union[Literal["all"], set[Literal["plugins", "custom_configs", "config", "cache", "reload"]]], instance_apis: Union[set[API], ApiCaller] = None, *, no_reload: bool = False) -> int:
+@assert_api_caller
+def test_and_send_to_instances(instance_apis: Union[set[API], ApiCaller], types: Union[Literal["all"], set[Literal["plugins", "custom_configs", "config", "cache", "reload"]]], *, no_reload: bool = False) -> int:
     """Test and send the data to the instances"""
-    if instance_apis is None:
-        assert DB
-        instance_apis = ApiCaller([API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"]) for instance in DB.get_instances()])
-
     for instance_api in instance_apis.copy() if isinstance(instance_apis, set) else instance_apis.apis:
         sent, err, status, resp = instance_api.request("GET", "ping")
         if not sent:
@@ -504,7 +491,7 @@ def run_jobs():
     else:
         CORE_CONFIG.logger.info("All jobs in run_once() were successful")
 
-    if test_and_send_to_instances({"cache"}) != 0:
+    if test_and_send_to_instances(None, {"cache"}) != 0:
         CORE_CONFIG.logger.warning("Can't send data to BunkerWeb instances, configuration will not work as expected")
 
     if not DB.is_scheduler_initialized():
@@ -528,5 +515,5 @@ def run_job(job_name: str):
     SCHEDULER.run_single(job_name)
 
     # TODO: remove this when the soft reload will be available
-    if test_and_send_to_instances({"cache"}) != 0:
+    if test_and_send_to_instances(None, {"cache"}) != 0:
         CORE_CONFIG.logger.warning("Can't send data to BunkerWeb instances, configuration will not work as expected")

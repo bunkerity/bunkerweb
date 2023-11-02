@@ -420,6 +420,12 @@ The API can be configured using the following settings:
 | `BUNKERWEB_INSTANCES` | The static BunkerWeb instances | `[]` |
 | `LOG_LEVEL` | The log level | `notice` |
 | `DATABASE_URI` | The database URI | `sqlite:////var/lib/bunkerweb/db.sqlite3` |
+| `USE_REDIS` | Activate Redis | `no` |
+| `REDIS_HOST` | The Redis host | `""` |
+| `REDIS_PORT` | The Redis port | `6379` |
+| `REDIS_DATABASE` | The Redis database | `0` |
+| `REDIS_SSL` | Activate SSL for Redis | `no` |
+| `REDIS_TIMEOUT` | The Redis timeout in milliseconds | `1000.0` |
 | `EXTERNAL_PLUGIN_URLS` | The external plugin URLs to download | `""` |
 | `AUTOCONF_MODE` | Activate the autoconf mode | `no` |
 | `KUBERNETES_MODE` | Activate the Kubernetes mode | `no` |
@@ -445,7 +451,39 @@ Authorization: Bearer YOUR_AUTH_TOKEN
 
 ## Whitelist
 
-If the API is configured to check the whitelist, the IP address of the client must be in the whitelist. The whitelist can be set in the configuration file or as an environment variable (`API_WHITELIST`). The whitelist can contain IP addresses and/or IP networks."""  # noqa: E501
+If the API is configured to check the whitelist, the IP address of the client must be in the whitelist. The whitelist can be set in the configuration file or as an environment variable (`API_WHITELIST`). The whitelist can contain IP addresses and/or IP networks.
+
+## Instance management
+
+The BunkerWeb instances have to be declared in the configuration file or as environment variables (`BUNKERWEB_INSTANCES`). The instances can be static or dynamic. The static instances are declared in the configuration file or as environment variables (`BUNKERWEB_INSTANCES`). The dynamic instances are automatically discovered using Redis.
+
+### Static instances
+
+The static instances are declared in the configuration file or as environment variables (`BUNKERWEB_INSTANCES`). The static instances are defined as follows:
+
+    <hostname>[:<port>][@<server_name>]
+
+- `hostname`: The hostname of the instance
+
+- `port`: The port of the instance (default: `5000`)
+
+- `server_name`: The server name of the instance (default: `bwapi`)
+
+Example:
+
+```yaml
+# Configuration file
+BUNKERWEB_INSTANCES: "bw1.example.com bw2.example.com:5000 bw3.example.com:5000@bwapi"
+```
+
+```bash
+# Environment variables
+BUNKERWEB_INSTANCES="bw1.example.com bw2.example.com:5000 bw3.example.com:5000@bwapi"
+```
+
+### Dynamic instances
+
+The dynamic instances are automatically discovered using Redis. **Remember to activate Redis in the configuration file or as environment variables (`USE_REDIS`)**."""  # noqa: E501
 
 tags_metadata = [  # TODO: Add more tags and better descriptions: https://fastapi.tiangolo.com/tutorial/metadata/?h=swagger#metadata-for-tags
     {

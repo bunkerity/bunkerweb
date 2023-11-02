@@ -9,15 +9,7 @@ from fastapi import APIRouter, BackgroundTasks, Response, status
 from fastapi.responses import JSONResponse
 
 from ..models import AddedPlugin, ErrorMessage, Plugin
-from ..dependencies import (
-    CORE_CONFIG,
-    DB,
-    EXTERNAL_PLUGINS_PATH,
-    generate_external_plugins,
-    run_jobs,
-    send_to_instances,
-    update_app_mounts,
-)
+from ..dependencies import CORE_CONFIG, DB, EXTERNAL_PLUGINS_PATH, generate_external_plugins, run_jobs, send_to_instances, update_app_mounts
 
 router = APIRouter(prefix="/plugins", tags=["plugins"])
 

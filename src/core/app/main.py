@@ -104,6 +104,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+CORE_CONFIG.logger.info("Checking if database is initialized ...")
+
 db_is_initialized = DB.is_initialized()
 
 db_config = {}
@@ -352,7 +354,7 @@ if config_files != db_config:
 if CORE_CONFIG.integration in ("Linux", "Docker"):
     CORE_CONFIG.logger.info("Executing scheduler ...")
     DB.set_scheduler_initialized()
-    for thread in (Thread(target=test_and_send_to_instances, args=({"plugins", "custom_configs", "config"},), kwargs={"no_reload": True}), Thread(target=run_jobs)):
+    for thread in (Thread(target=test_and_send_to_instances, args=(None, {"plugins", "custom_configs", "config"}), kwargs={"no_reload": True}), Thread(target=run_jobs)):
         thread.start()
 
 
@@ -458,7 +460,7 @@ def listen_dynamic_instances():
                     if error != "updated":
                         instance_api = API(f"http://{data['hostname']}:{data['listening_port']}", data["server_name"])
 
-                        if not test_and_send_to_instances("all", {instance_api}):
+                        if not test_and_send_to_instances({instance_api}, "all"):
                             continue
 
                         CORE_CONFIG.logger.info(f"listen_dynamic_instances - Successfully sent data to instance {instance_api.endpoint}")
@@ -482,7 +484,7 @@ def run_pending_jobs() -> None:
 
 
 def instances_healthcheck() -> None:
-    if not DB:
+    if not DB or not DB.is_initialized():
         return
 
     instance_apis = {instance["hostname"]: API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"]) for instance in DB.get_instances()}
@@ -584,12 +586,7 @@ if CORE_CONFIG.use_redis:
     else:
         CORE_CONFIG.logger.warning("USE_REDIS is set to yes but REDIS_HOST is not defined, app will not listen for dynamic instances")
 
-Thread(
-    target=run_repeatedly,
-    args=(int(CORE_CONFIG.HEALTHCHECK_INTERVAL), instances_healthcheck),
-    kwargs={"wait_first": True},
-    name="instances_healthcheck",
-).start()
+Thread(target=run_repeatedly, args=(int(CORE_CONFIG.HEALTHCHECK_INTERVAL), instances_healthcheck), kwargs={"wait_first": True}, name="instances_healthcheck").start()
 Thread(target=run_repeatedly, args=(1, run_pending_jobs), name="run_pending_jobs").start()
 
 if not HEALTHY_PATH.exists():
