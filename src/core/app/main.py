@@ -282,6 +282,17 @@ else:
     elif not err:
         CORE_CONFIG.logger.info("✅ Database schema updated to latest version successfully")
 
+if config_files != db_config:
+    err = DB.save_config(config_files, "core")
+
+    if err:
+        CORE_CONFIG.logger.error(f"Can't save config to database : {err}")
+        stop_app(1)
+
+    db_config = DB.get_config()
+
+    CORE_CONFIG.logger.info("✅ Config successfully saved to database")
+
 CORE_CONFIG.logger.info("Checking if any custom config have been added or removed...")
 
 db_configs = DB.get_custom_configs()
@@ -290,15 +301,23 @@ for k, v in CORE_CONFIG.settings.copy().items():
     match = CUSTOM_CONFIGS_RX.search(k)
     if match:
         name = match.group("name").replace(".conf", "")
-        env_custom_configs.append({"value": v, "exploded": (match.group("service_id"), match.group("type"), name)})
-        CORE_CONFIG.logger.info(f"🛠️ Found custom conf env var \"{name}\"{' for service ' + match.group('service_id') if match.group('service_id') else ''} with type {match.group('type')}")
+        service = match.group("service_id")
+        CORE_CONFIG.logger.info(f"🛠️ Found custom conf env var \"{name}\"{' for service ' + service if service else ''} with type {match.group('type')}")
+        if db_config.get("MULTISITE", "no") == "no" and service:
+            CORE_CONFIG.logger.warning(f'🛠️ Because MULTISITE is set to "no", the service id will be ignored for custom conf env var "{name}" with type {match.group("type")}, the custom config will then be applied globally')
+            service = None
+        env_custom_configs.append({"value": v, "exploded": (service, match.group("type"), name)})
 
 if {hash(dict_to_frozenset(d)) for d in env_custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs if d["method"] == "env"}:
     err = DB.save_custom_configs(env_custom_configs, "env")
     if err:
-        CORE_CONFIG.logger.error(f"Couldn't save some custom configs from env to database: {err}")
-
-    CORE_CONFIG.logger.info("✅ Custom configs from env saved to database")
+        for e in err:
+            if e.startswith("Couldn't"):
+                CORE_CONFIG.logger.warning(e)
+            else:
+                CORE_CONFIG.logger.error(f"Couldn't save some custom configs from env to database: {err}")
+    else:
+        CORE_CONFIG.logger.info("✅ Custom configs from env saved to database")
 
 files_custom_configs = []
 custom_configs_changes = False
@@ -324,9 +343,13 @@ for root, dirs, files in walk(str(CONFIGS_PATH)):
 if {hash(dict_to_frozenset(d)) for d in files_custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs if d["method"] == "static"}:
     err = DB.save_custom_configs(files_custom_configs, "static")
     if err:
-        CORE_CONFIG.logger.error(f"Couldn't save some manually created custom configs to database: {err}")
-
-    CORE_CONFIG.logger.info("✅ Custom configs from files saved to database")
+        for e in err:
+            if e.startswith("Couldn't"):
+                CORE_CONFIG.logger.warning(e)
+            else:
+                CORE_CONFIG.logger.error(f"Couldn't save some manually created custom configs to database: {err}")
+    else:
+        CORE_CONFIG.logger.info("✅ Custom configs from files saved to database")
 
 err = DB.refresh_instances([], "dynamic")
 
@@ -341,15 +364,6 @@ if err:
     stop_app(1)
 
 CORE_CONFIG.logger.info("✅ BunkerWeb static instances updated to database")
-
-if config_files != db_config:
-    err = DB.save_config(config_files, "core")
-
-    if err:
-        CORE_CONFIG.logger.error(f"Can't save config to database : {err}")
-        stop_app(1)
-
-    CORE_CONFIG.logger.info("✅ Config successfully saved to database")
 
 if CORE_CONFIG.integration in ("Linux", "Docker"):
     CORE_CONFIG.logger.info("Executing scheduler ...")

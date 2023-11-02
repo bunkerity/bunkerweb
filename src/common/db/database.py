@@ -808,15 +808,14 @@ class Database:
 
         return (self._exceptions.get(getpid()) or [""]).pop()
 
-    def save_custom_configs(self, custom_configs: List[Dict[str, Tuple[str, List[str]]]], method: str) -> str:
+    def save_custom_configs(self, custom_configs: List[Dict[str, Tuple[str, List[str]]]], method: str) -> List[str]:
         """Save the custom configs in the database"""
-        message = ""
+        messages = []
         with suppress(BaseException), self._db_session() as session:
             # Delete all the old config
             session.query(Custom_configs).filter(Custom_configs.method == method).delete()
 
             to_put = []
-            endl = "\n"
             for custom_config in custom_configs:
                 config = {
                     "data": custom_config["value"].encode("utf-8") if isinstance(custom_config["value"], str) else custom_config["value"],
@@ -826,47 +825,20 @@ class Database:
 
                 if custom_config["exploded"][0]:
                     if not session.query(Services).with_entities(Services.id).filter_by(id=custom_config["exploded"][0]).first():
-                        message += f"{endl if message else ''}Service {custom_config['exploded'][0]} not found, please check your config"
+                        messages.append(f"Couldn't find service {custom_config['exploded'][0]}, custom config \"{custom_config['exploded'][0]}_{custom_config['exploded'][1]}_{custom_config['exploded'][2]}\" will not be saved")  # type: ignore
+                        continue
 
-                    config.update(
-                        {
-                            "service_id": custom_config["exploded"][0],
-                            "type": custom_config["exploded"][1].replace("-", "_").lower(),
-                            "name": custom_config["exploded"][2],
-                        }
-                    )
+                    config.update({"service_id": custom_config["exploded"][0], "type": custom_config["exploded"][1].replace("-", "_").lower(), "name": custom_config["exploded"][2]})  # type: ignore
                 else:
-                    config.update(
-                        {
-                            "type": custom_config["exploded"][1].replace("-", "_").lower(),
-                            "name": custom_config["exploded"][2],
-                        }
-                    )
+                    config.update({"type": custom_config["exploded"][1].replace("-", "_").lower(), "name": custom_config["exploded"][2]})  # type: ignore
 
-                custom_conf = (
-                    session.query(Custom_configs)
-                    .with_entities(Custom_configs.checksum, Custom_configs.method)
-                    .filter_by(
-                        service_id=config.get("service_id", None),
-                        type=config["type"],
-                        name=config["name"],
-                    )
-                    .first()
-                )
+                custom_conf = session.query(Custom_configs).with_entities(Custom_configs.checksum, Custom_configs.method).filter_by(service_id=config.get("service_id", None), type=config["type"], name=config["name"]).first()
 
                 if not custom_conf:
                     to_put.append(Custom_configs(**config))
                 elif method in (custom_conf.method, "core", "autoconf"):
-                    session.query(Custom_configs).filter(
-                        Custom_configs.service_id == config.get("service_id", None),
-                        Custom_configs.type == config["type"],
-                        Custom_configs.name == config["name"],
-                    ).update(
-                        {
-                            Custom_configs.data: config["data"],
-                            Custom_configs.checksum: config["checksum"],
-                            Custom_configs.method: method,
-                        }
+                    session.query(Custom_configs).filter(Custom_configs.service_id == config.get("service_id", None), Custom_configs.type == config["type"], Custom_configs.name == config["name"]).update(
+                        {Custom_configs.data: config["data"], Custom_configs.checksum: config["checksum"], Custom_configs.method: method}
                     )
 
             try:
@@ -874,9 +846,9 @@ class Database:
                 session.commit()
             except BaseException:
                 session.rollback()
-                return f"{f'{message}{endl}' if message else ''}{format_exc()}"
+                return [format_exc()]
 
-        return (self._exceptions.get(getpid()) or [message]).pop()
+        return (self._exceptions.get(getpid()) or [messages]).pop()
 
     def get_config(self, methods: bool = False, *, new_format: bool = False) -> Dict[str, Dict[str, Union[str, bool]]]:
         """Get the config from the database"""

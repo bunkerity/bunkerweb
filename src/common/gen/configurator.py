@@ -145,23 +145,11 @@ class Configurator:
             if _type == "external":
                 plugin_content = BytesIO()
                 with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                    tar.add(
-                        dirname(file),
-                        arcname=basename(dirname(file)),
-                        recursive=True,
-                    )
+                    tar.add(dirname(file), arcname=basename(dirname(file)), recursive=True)
                 plugin_content.seek(0, 0)
                 value = plugin_content.getvalue()
 
-                data.update(
-                    {
-                        "external": True,
-                        "page": "ui" in listdir(dirname(file)),
-                        "method": "static",
-                        "data": value,
-                        "checksum": bytes_hash(value).hexdigest(),
-                    }
-                )
+                data.update({"external": True, "page": "ui" in listdir(dirname(file)), "method": "static", "data": value, "checksum": bytes_hash(value)})
 
                 with self.__thread_lock:
                     self.__external_plugins.append(data)
