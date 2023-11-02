@@ -15,7 +15,7 @@ from logging import Logger
 from os import cpu_count, getenv, sep
 from os.path import join, normpath
 from pathlib import Path
-from re import compile as re_compile
+from regex import IGNORECASE, compile as re_compile
 from secrets import choice as secrets_choice
 from string import ascii_letters, digits, punctuation
 from sys import path as sys_path
@@ -30,17 +30,22 @@ from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type:
 
 BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(?P<hostname>(?<![:@])\b[^:@\s]+\b)(:(?P<port>\d+))?(@(?P<server_name>(?=[^\s]{1,255})[^\s]+))?")
 EXTERNAL_PLUGIN_URLS_RX = re_compile(r"^( *((https?://|file:///)[-\w@:%.+~#=]+[-\w()!@:%+.~?&/=$#]*)(?!.*\2(?!.)) *)*$")
+IP_RX = re_compile(
+    r"^((\b25[0-5]|\b2[0-4]\d|\b[01]?\d\d?)(\.(25[0-5]|2[0-4]\d|[01]?\d\d?)){3}|(([0-9a-f]{1,4}:){7,7}[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,7}:|([0-9a-f]{1,4}:){1,6}:[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,5}(:[0-9a-f]{1,4}){1,2}|([0-9a-f]{1,4}:){1,4}(:[0-9a-f]{1,4}){1,3}|([0-9a-f]{1,4}:){1,3}(:[0-9a-f]{1,4}){1,4}|([0-9a-f]{1,4}:){1,2}(:[0-9a-f]{1,4}){1,5}|[0-9a-f]{1,4}:((:[0-9a-f]{1,4}){1,6})|:((:[0-9a-f]{1,4}){1,7}|:)|fe80:(:[0-9a-f]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}\d){0,1}\d)\.){3,3}(25[0-5]|(2[0-4]|1{0,1}\d){0,1}\d)|([0-9a-f]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}\d){0,1}\d)\.){3,3}(25[0-5]|(2[0-4]|1{0,1}\d){0,1}\d)))$",  # noqa: E501
+    IGNORECASE,
+)
+TOKEN_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$")
 
 
 class CoreConfig(YamlBaseSettings):
-    LISTEN_ADDR: str = "0.0.0.0"
+    LISTEN_ADDR: str = "0.0.0.0"  # TODO: check with regex for IPv4 and IPv6
     LISTEN_PORT: Union[str, int] = 1337
     MAX_WORKERS: Union[str, int] = max((cpu_count() or 1) - 1, 1)
     MAX_THREADS: Union[str, int] = int(MAX_WORKERS) * 2 if isinstance(MAX_WORKERS, int) or MAX_WORKERS.isdigit() else 2
     WAIT_RETRY_INTERVAL: Union[str, int] = 5
     HEALTHCHECK_INTERVAL: Union[str, int] = 30
     CHECK_WHITELIST: Union[Literal["yes", "no"], bool] = "yes"
-    WHITELIST: Union[str, set] = "127.0.0.1"
+    WHITELIST: Union[str, set[str]] = {"127.0.0.1"}
     CHECK_TOKEN: Union[Literal["yes", "no"], bool] = "yes"
     CORE_TOKEN: str = ""
     BUNKERWEB_INSTANCES: Union[str, set[str]] = set()
@@ -290,24 +295,51 @@ class CoreConfig(YamlBaseSettings):
         return token
 
 
+def check_config(config: CoreConfig, *, exit_prog: bool = True) -> int:
+    message = ""
+    status = 0
+    if not IP_RX.match(config.LISTEN_ADDR):
+        message = f"Invalid LISTEN_ADDR provided: {CORE_CONFIG.LISTEN_ADDR}, It must be a valid IPv4 or IPv6 address."
+        status = 2
+    if not isinstance(config.LISTEN_PORT, int) and (not config.LISTEN_PORT.isdigit() or not (1 <= int(config.LISTEN_PORT) <= 65535)):
+        message = f"Invalid LISTEN_PORT provided: {CORE_CONFIG.LISTEN_PORT}, It must be a positive integer between 1 and 65535."
+        status = 3
+    elif not isinstance(config.MAX_WORKERS, int) and (not config.MAX_WORKERS.isdigit() or int(config.MAX_WORKERS) < 1):
+        message = f"Invalid MAX_WORKERS provided: {CORE_CONFIG.MAX_WORKERS}, It must be a positive integer."
+        status = 4
+    elif not isinstance(config.MAX_THREADS, int) and (not config.MAX_THREADS.isdigit() or int(config.MAX_THREADS) < 1):
+        message = f"Invalid MAX_THREADS provided: {CORE_CONFIG.MAX_THREADS}, It must be a positive integer."
+        status = 5
+    elif not isinstance(config.WAIT_RETRY_INTERVAL, int) and (not config.WAIT_RETRY_INTERVAL.isdigit() or int(config.WAIT_RETRY_INTERVAL) < 1):
+        message = f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer."
+        status = 6
+    elif not isinstance(config.HEALTHCHECK_INTERVAL, int) and (not config.HEALTHCHECK_INTERVAL.isdigit() or int(config.HEALTHCHECK_INTERVAL) < 1):
+        message = f"Invalid HEALTHCHECK_INTERVAL provided: {CORE_CONFIG.HEALTHCHECK_INTERVAL}, It must be a positive integer."
+        status = 7
+    elif config.check_token and not TOKEN_RX.match(config.core_token):
+        message = f"Invalid token provided: {CORE_CONFIG.core_token}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
+        status = 8
+
+    if message:
+        config.logger.error(message)
+    if exit_prog and status:
+        _exit(status)
+    return status
+
+
 if __name__ == "__main__":
     from os import _exit, environ
 
     CORE_CONFIG = CoreConfig("core", **environ)
 
-    if not isinstance(CORE_CONFIG.LISTEN_PORT, int) and (not CORE_CONFIG.LISTEN_PORT.isdigit() or not (1 <= int(CORE_CONFIG.LISTEN_PORT) <= 65535)):
-        _exit(2)
-    elif not isinstance(CORE_CONFIG.MAX_WORKERS, int) and (not CORE_CONFIG.MAX_WORKERS.isdigit() or int(CORE_CONFIG.MAX_WORKERS) < 1):
-        _exit(3)
-    elif not isinstance(CORE_CONFIG.MAX_THREADS, int) and (not CORE_CONFIG.MAX_THREADS.isdigit() or int(CORE_CONFIG.MAX_THREADS) < 1):
-        _exit(4)
+    check_config(CORE_CONFIG)
 
     data = {
         "LISTEN_ADDR": CORE_CONFIG.LISTEN_ADDR,
         "LISTEN_PORT": CORE_CONFIG.LISTEN_PORT,
         "MAX_WORKERS": CORE_CONFIG.MAX_WORKERS,
         "MAX_THREADS": CORE_CONFIG.MAX_THREADS,
-        "LOG_LEVEL": CORE_CONFIG.LOG_LEVEL,
+        "LOG_LEVEL": CORE_CONFIG.log_level,
         "AUTOCONF_MODE": "yes" if CORE_CONFIG.autoconf_mode else "no",
         "KUBERNETES_MODE": "yes" if CORE_CONFIG.kubernetes_mode else "no",
         "SWARM_MODE": "yes" if CORE_CONFIG.swarm_mode else "no",
@@ -317,8 +349,7 @@ if __name__ == "__main__":
     for k, v in data.items():
         content += f"{k}={v!r}\n"
 
-    with open("/tmp/core.tmp.env", "w", encoding="utf-8") as f:
-        f.write(content)
+    Path(sep, "tmp", "core.tmp.env").write_text(content, encoding="utf-8")
 
     _exit(0)
 

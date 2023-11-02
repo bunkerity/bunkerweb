@@ -22,7 +22,6 @@ from zipfile import ZipFile
 
 from fastapi.routing import Mount
 from magic import Magic
-from regex import match
 from requests import get
 
 TMP_FOLDER = Path(sep, "var", "tmp", "bunkerweb")
@@ -56,21 +55,6 @@ else:
 del integration_path, os_release_path
 
 CORE_CONFIG.logger.info(f"🚀 {CORE_CONFIG.integration} integration detected")
-
-if not isinstance(CORE_CONFIG.WAIT_RETRY_INTERVAL, int) and (not CORE_CONFIG.WAIT_RETRY_INTERVAL.isdigit() or int(CORE_CONFIG.WAIT_RETRY_INTERVAL) < 1):
-    CORE_CONFIG.logger.error(f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer.")
-    stop(1)
-
-if not isinstance(CORE_CONFIG.HEALTHCHECK_INTERVAL, int) and (not CORE_CONFIG.HEALTHCHECK_INTERVAL.isdigit() or int(CORE_CONFIG.HEALTHCHECK_INTERVAL) < 1):
-    CORE_CONFIG.logger.error(f"Invalid HEALTHCHECK_INTERVAL provided: {CORE_CONFIG.HEALTHCHECK_INTERVAL}, It must be a positive integer.")
-    stop(1)
-
-if CORE_CONFIG.check_token and not match(
-    r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$",
-    CORE_CONFIG.core_token,
-):
-    CORE_CONFIG.logger.error(f"Invalid token provided: {CORE_CONFIG.core_token}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
-    stop(1)
 
 from .job_scheduler import JobScheduler
 

@@ -13,20 +13,11 @@ function stop() {
 
 function start() {
 	output="$(python3 /usr/share/bunkerweb/core/app/core.py 2>&1)"
-	ret=$?
 
-	if [ $ret == 1 ] ; then
+	# shellcheck disable=SC2181
+	if ! [ $? -eq 0 ] ; then
 		# Show the output of the core
-		log "ENTRYPOINT" "❌ " "$output"
-		exit 1
-	elif [ $ret == 2 ] ; then
-		log "ENTRYPOINT" "❌ " "Invalid LISTEN_PORT, It must be an integer between 1 and 65535."
-		exit 1
-	elif [ $ret == 3 ] ; then
-		log "ENTRYPOINT" "❌ " "Invalid MAX_WORKERS, It must be a positive integer."
-		exit 1
-	elif [ $ret == 4 ] ; then
-		log "ENTRYPOINT" "❌ " "Invalid MAX_THREADS, It must be a positive integer."
+		echo "$output"
 		exit 1
 	fi
 

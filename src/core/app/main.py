@@ -42,7 +42,7 @@ from api_caller import ApiCaller  # type: ignore
 from configurator import Configurator  # type: ignore
 from database import Database  # type: ignore
 from jobs import bytes_hash  # type: ignore
-from .core import BUNKERWEB_VERSION, description, tags_metadata
+from .core import BUNKERWEB_VERSION, check_config, description, tags_metadata
 from .dependencies import (
     CORE_CONFIG,
     CONFIGS_PATH,
@@ -746,16 +746,7 @@ if not HEALTHY_PATH.exists():
 if __name__ == "__main__":
     from uvicorn import run
 
-    if not isinstance(CORE_CONFIG.LISTEN_PORT, int) and (not CORE_CONFIG.LISTEN_PORT.isdigit() or not (1 <= int(CORE_CONFIG.LISTEN_PORT) <= 65535)):
-        CORE_CONFIG.logger.error(f"Invalid LISTEN_PORT provided: {CORE_CONFIG.LISTEN_PORT}, It must be an integer between 1 and 65535.")
-        stop_app(1)
+    if check_config(CORE_CONFIG, exit_prog=False):
+        stop(1)
 
-    run(
-        app,
-        host=CORE_CONFIG.LISTEN_ADDR,
-        port=int(CORE_CONFIG.LISTEN_PORT),
-        reload=True,
-        proxy_headers=False,
-        server_header=False,
-        date_header=False,
-    )
+    run(app, host=CORE_CONFIG.LISTEN_ADDR, port=int(CORE_CONFIG.LISTEN_PORT), reload=True, log_level=CORE_CONFIG.log_level, proxy_headers=False, server_header=False, date_header=False)
