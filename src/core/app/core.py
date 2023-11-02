@@ -43,7 +43,7 @@ class CoreConfig(YamlBaseSettings):
     WHITELIST: Union[str, set] = "127.0.0.1"
     CHECK_TOKEN: Union[Literal["yes", "no"], bool] = "yes"
     CORE_TOKEN: str = ""
-    BUNKERWEB_INSTANCES: Union[str, List[str]] = []
+    BUNKERWEB_INSTANCES: Union[str, set[str]] = set()
 
     LOG_LEVEL: Literal["emerg", "alert", "crit", "error", "warn", "warning", "notice", "info", "debug", "EMERG", "ALERT", "CRIT", "ERROR", "WARN", "WARNING", "NOTICE", "INFO", "DEBUG"] = "notice"
     DATABASE_URI: str = "sqlite:////var/lib/bunkerweb/db.sqlite3"
@@ -128,7 +128,7 @@ class CoreConfig(YamlBaseSettings):
         self,
     ) -> List[str]:
         if isinstance(self.BUNKERWEB_INSTANCES, str):
-            tmp_bunkerweb_instances = self.BUNKERWEB_INSTANCES.split()
+            tmp_bunkerweb_instances = self.BUNKERWEB_INSTANCES.split(" ")
         else:
             tmp_bunkerweb_instances = self.BUNKERWEB_INSTANCES
 
