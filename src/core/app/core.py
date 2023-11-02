@@ -28,7 +28,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from logger import setup_logger  # type: ignore
 from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore (present in /usr/share/bunkerweb/utils/)
 
-BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(?P<hostname>(?<![:@])\b[^:@ ]+\b)(:(?P<port>\d+))?(@(?P<server_name>(?=[^ ]{1,255})[^ ]+))?")
+BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(?P<hostname>(?<![:@])\b[^:@\s]+\b)(:(?P<port>\d+))?(@(?P<server_name>(?=[^\s]{1,255})[^\s]+))?")
 EXTERNAL_PLUGIN_URLS_RX = re_compile(r"^( *((https?://|file:///)[-\w@:%.+~#=]+[-\w()!@:%+.~?&/=$#]*)(?!.*\2(?!.)) *)*$")
 
 
