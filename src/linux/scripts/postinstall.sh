@@ -15,9 +15,9 @@ function do_and_check_cmd() {
     return 0
 }
 
-# Create the config.yaml file if it doesn't exist
-if [ ! -f /etc/bunkerweb/config.yaml ]; then
-    cp /etc/bunkerweb/config.yaml.example /etc/bunkerweb/config.yaml
+# Create the config.yml file if it doesn't exist
+if [ ! -f /etc/bunkerweb/config.yml ]; then
+    cp /etc/bunkerweb/config.yml.example /etc/bunkerweb/config.yml
 fi
 
 # Give all the permissions to the nginx user

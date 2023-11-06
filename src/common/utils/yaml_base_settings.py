@@ -132,7 +132,7 @@ class YamlBaseSettings(BaseSettings):
 
     Default paths:
 
-    - yaml_file: "/etc/config/config.yaml" or env.SETTINGS_YAML_FILE
+    - yaml_file: "/etc/bunkerweb/config.yml" or env.SETTINGS_YAML_FILE
 
     See also:
 
@@ -251,7 +251,7 @@ class YamlBaseSettings(BaseSettings):
         # to an informative error and much better than a confusing error
         return {}
 
-    model_config = SettingsConfigDict(secrets_dir=getenv("SETTINGS_SECRETS_DIR", "/etc/secrets"), yaml_file=getenv("SETTINGS_YAML_FILE", "/etc/config/config.yaml"))  # type: ignore
+    model_config = SettingsConfigDict(secrets_dir=getenv("SETTINGS_SECRETS_DIR", "/etc/secrets"), yaml_file=getenv("SETTINGS_YAML_FILE", "/etc/bunkerweb/config.yml"))  # type: ignore
 
 
 __ALL__ = (YamlBaseSettings, YamlSettingsConfigDict)

@@ -51,7 +51,7 @@ RUN apk add --no-cache bash && \
   mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
   mkdir -p /data/lib && ln -s /data/lib /var/lib/bunkerweb && \
   mkdir -p /data/www && ln -s /data/www /var/www/html && \
-  touch /etc/bunkerweb/autoconf.conf /etc/bunkerweb/config.yaml && \
+  touch /etc/bunkerweb/autoconf.conf /etc/bunkerweb/config.yml && \
   for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
   chown -R root:autoconf /data && \
