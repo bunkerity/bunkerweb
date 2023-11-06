@@ -40,7 +40,7 @@ from API import API  # type: ignore
 from configurator import Configurator  # type: ignore
 from database import Database  # type: ignore
 from jobs import bytes_hash  # type: ignore
-from .core import BUNKERWEB_VERSION, check_config, description, tags_metadata
+from .core import BUNKERWEB_VERSION, description, tags_metadata
 from .dependencies import (
     CORE_CONFIG,
     CONFIGS_PATH,
@@ -610,8 +610,5 @@ gc_collect()
 
 if __name__ == "__main__":
     from uvicorn import run
-
-    if check_config(CORE_CONFIG, exit_prog=False):
-        stop(1)
 
     run(app, host=CORE_CONFIG.LISTEN_ADDR, port=int(CORE_CONFIG.LISTEN_PORT), reload=True, log_level=CORE_CONFIG.log_level, proxy_headers=False, server_header=False, date_header=False)

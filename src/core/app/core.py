@@ -15,6 +15,7 @@ from logging import Logger
 from os import cpu_count, getenv, sep
 from os.path import join, normpath
 from pathlib import Path
+from pydantic import field_validator
 from regex import IGNORECASE, compile as re_compile
 from secrets import choice as secrets_choice
 from string import ascii_letters, digits, punctuation
@@ -77,6 +78,86 @@ class CoreConfig(YamlBaseSettings):
         env_file_encoding="utf-8",
         extra="allow",
     )
+
+    # ? VALIDATION
+
+    @field_validator("LISTEN_ADDR")
+    @classmethod
+    def check_listen_addr(cls, v: str) -> str:
+        if not IP_RX.match(v):
+            raise ValueError("Invalid LISTEN_ADDR provided, it must be a valid IPv4 or IPv6 address.")
+        return v
+
+    @field_validator("LISTEN_PORT")
+    @classmethod
+    def check_listen_port(cls, v: Union[str, int]) -> Union[str, int]:
+        if not isinstance(v, int) and (not v.isdigit() or not (1 <= int(v) <= 65535)):
+            raise ValueError("Invalid LISTEN_PORT provided, it must be a positive integer between 1 and 65535.")
+        return v
+
+    @field_validator("MAX_WORKERS")
+    @classmethod
+    def check_max_workers(cls, v: Union[str, int]) -> Union[str, int]:
+        if not isinstance(v, int) and (not v.isdigit() or int(v) < 1):
+            raise ValueError("Invalid MAX_WORKERS provided, it must be a positive integer.")
+        return v
+
+    @field_validator("MAX_THREADS")
+    @classmethod
+    def check_max_threads(cls, v: Union[str, int]) -> Union[str, int]:
+        if not isinstance(v, int) and (not v.isdigit() or int(v) < 1):
+            raise ValueError("Invalid MAX_THREADS provided, it must be a positive integer.")
+        return v
+
+    @field_validator("WAIT_RETRY_INTERVAL")
+    @classmethod
+    def check_wait_retry_interval(cls, v: Union[str, float]) -> Union[str, float]:
+        try:
+            if not float(v) > 0:
+                raise ValueError
+        except ValueError:
+            raise ValueError("Invalid WAIT_RETRY_INTERVAL provided, it must be a positive float.")
+        return v
+
+    @field_validator("HEALTHCHECK_INTERVAL")
+    @classmethod
+    def check_healthcheck_interval(cls, v: Union[str, int]) -> Union[str, int]:
+        if not isinstance(v, int) and (not v.isdigit() or int(v) < 1):
+            raise ValueError("Invalid HEALTHCHECK_INTERVAL provided, it must be a positive integer.")
+        return v
+
+    @field_validator("CORE_TOKEN")
+    @classmethod
+    def check_core_token(cls, v: str) -> str:
+        if cls.check_token and v and not TOKEN_RX.match(v):
+            raise ValueError("Invalid token provided, it must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
+        return v
+
+    @field_validator("REDIS_PORT")
+    @classmethod
+    def check_redis_port(cls, v: Union[str, int]) -> Union[str, int]:
+        if not isinstance(v, int) and (not v.isdigit() or not (1 <= int(v) <= 65535)):
+            raise ValueError("Invalid REDIS_PORT provided, it must be a positive integer between 1 and 65535.")
+        return v
+
+    @field_validator("REDIS_DATABASE")
+    @classmethod
+    def check_redis_database(cls, v: Union[str, int]) -> Union[str, int]:
+        if not isinstance(v, int) and (not v.isdigit() or not (0 <= int(v) <= 15)):
+            raise ValueError("Invalid REDIS_DATABASE provided, it must be a positive integer between 0 and 15.")
+        return v
+
+    @field_validator("REDIS_TIMEOUT")
+    @classmethod
+    def check_redis_timeout(cls, v: Union[str, float]) -> Union[str, float]:
+        try:
+            if not float(v) > 0:
+                raise ValueError
+        except ValueError:
+            raise ValueError("Invalid REDIS_TIMEOUT provided, it must be a positive float.")
+        return v
+
+    # ? PROPERTIES
 
     @cached_property
     def log_level(self) -> str:
@@ -295,6 +376,8 @@ class CoreConfig(YamlBaseSettings):
 
         return self.get_instance()
 
+    # ? METHODS
+
     @staticmethod
     def get_instance() -> str:
         integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
@@ -316,62 +399,10 @@ class CoreConfig(YamlBaseSettings):
         return token
 
 
-def check_config(config: CoreConfig, *, exit_prog: bool = True) -> int:
-    message = ""
-    status = 0
-    if not IP_RX.match(config.LISTEN_ADDR):
-        message = f"Invalid LISTEN_ADDR provided: {CORE_CONFIG.LISTEN_ADDR}, It must be a valid IPv4 or IPv6 address."
-        status = 2
-    elif not isinstance(config.LISTEN_PORT, int) and (not config.LISTEN_PORT.isdigit() or not (1 <= int(config.LISTEN_PORT) <= 65535)):
-        message = f"Invalid LISTEN_PORT provided: {CORE_CONFIG.LISTEN_PORT}, It must be a positive integer between 1 and 65535."
-        status = 3
-    elif not isinstance(config.MAX_WORKERS, int) and (not config.MAX_WORKERS.isdigit() or int(config.MAX_WORKERS) < 1):
-        message = f"Invalid MAX_WORKERS provided: {CORE_CONFIG.MAX_WORKERS}, It must be a positive integer."
-        status = 4
-    elif not isinstance(config.MAX_THREADS, int) and (not config.MAX_THREADS.isdigit() or int(config.MAX_THREADS) < 1):
-        message = f"Invalid MAX_THREADS provided: {CORE_CONFIG.MAX_THREADS}, It must be a positive integer."
-        status = 5
-
-    try:
-        if not float(config.WAIT_RETRY_INTERVAL) > 0:
-            raise ValueError
-    except ValueError:
-        message = f"Invalid WAIT_RETRY_INTERVAL provided: {CORE_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive float."
-        status = 6
-
-    if not isinstance(config.HEALTHCHECK_INTERVAL, int) and (not config.HEALTHCHECK_INTERVAL.isdigit() or int(config.HEALTHCHECK_INTERVAL) < 1):
-        message = f"Invalid HEALTHCHECK_INTERVAL provided: {CORE_CONFIG.HEALTHCHECK_INTERVAL}, It must be a positive integer."
-        status = 7
-    elif config.check_token and not TOKEN_RX.match(config.core_token):
-        message = f"Invalid token provided: {CORE_CONFIG.core_token}, It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-)."
-        status = 8
-    elif not isinstance(config.REDIS_PORT, int) and (not config.REDIS_PORT.isdigit() or not (1 <= int(config.REDIS_PORT) <= 65535)):
-        message = f"Invalid REDIS_PORT provided: {CORE_CONFIG.REDIS_PORT}, It must be a positive integer between 1 and 65535."
-        status = 9
-    elif not isinstance(config.REDIS_DATABASE, int) and (not config.REDIS_DATABASE.isdigit() or not (0 <= int(config.REDIS_DATABASE) <= 15)):
-        message = f"Invalid REDIS_DATABASE provided: {CORE_CONFIG.REDIS_DATABASE}, It must be a positive integer between 0 and 15."
-        status = 10
-
-    try:
-        if not float(config.REDIS_TIMEOUT) > 0:
-            raise ValueError
-    except ValueError:
-        message = f"Invalid REDIS_TIMEOUT provided: {CORE_CONFIG.REDIS_TIMEOUT}, It must be a positive float."
-        status = 11
-
-    if message:
-        config.logger.error(message)
-    if exit_prog and status:
-        _exit(status)
-    return status
-
-
 if __name__ == "__main__":
     from os import _exit, environ
 
     CORE_CONFIG = CoreConfig("core", **environ)
-
-    check_config(CORE_CONFIG)
 
     data = {
         "LISTEN_ADDR": CORE_CONFIG.LISTEN_ADDR,
