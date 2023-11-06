@@ -8,16 +8,12 @@ from config import app_name, description, summary, version, contact, license_inf
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
-from dotenv import load_dotenv
 from routers import instances, plugins, config, misc, jobs, custom_configs, actions
 from pathlib import Path
 from logging import Logger
 from os.path import join, sep
 from sys import path as sys_path
 import time
-
-load_dotenv()
-MODE = os.getenv("MODE")
 
 HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "ui.healthy")
 
@@ -30,7 +26,7 @@ from logger import setup_logger  # type: ignore
 LOGGER: Logger = setup_logger("UI")
 
 from os import environ
-from .ui import UiConfig
+from ui import UiConfig
 
 UI_CONFIG = UiConfig("ui", **environ)
 
@@ -64,7 +60,7 @@ base = os.path.dirname(os.path.abspath(__file__))
 app = FastAPI(title=app_name, description=description, summary=summary, version=version, contact=contact, license_info=license_info, openapi_tags=openapi_tags)
 LOGGER.info("Starting UI")
 
-if MODE == "dev":
+if UI_CONFIG.DEV :
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],

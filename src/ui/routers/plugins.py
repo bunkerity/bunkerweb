@@ -2,12 +2,12 @@
 from fastapi import APIRouter
 from utils import get_core_format_res
 from models import AddedPlugin, ResponseModel
-import os
-from dotenv import load_dotenv
+from os import environ
+from ui import UiConfig
 
+UI_CONFIG = UiConfig("ui", **environ)
 
-load_dotenv()
-API = os.getenv("CORE_ADDR")
+API = UiConfig.CORE_ADDR
 
 router = APIRouter(prefix="/api/plugins", tags=["plugins"])
 

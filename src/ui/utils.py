@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import requests, traceback, json  # noqa: E401
 from starlette.exceptions import HTTPException as StarletteHTTPException
-import os
-from dotenv import load_dotenv
+from os import environ
+from ui import UiConfig
 
-load_dotenv()
-API = os.getenv("CORE_ADDR")
+UI_CONFIG = UiConfig("ui", **environ)
+
+API = UiConfig.CORE_ADDR
 
 def get_core_format_res(path, method, data, message, retry = 1):
     # Retry limit
@@ -75,9 +76,12 @@ def exception_res(status_code, path, detail):
 
 
 def check_core():
-    req = requests.get(f"{API}/ping")
+    try :
+        req = requests.get(f"{API}/ping")
 
-    if req.status_code.startswith("2"):
-        return True
+        if req.status_code.startswith("2"):
+            return True
 
-    return False
+        return False
+    except:
+        return False

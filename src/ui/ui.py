@@ -14,6 +14,7 @@ from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type:
 
 
 class UiConfig(YamlBaseSettings):
+    DEV: True
     LISTEN_ADDR: str = "0.0.0.0"
     LISTEN_PORT: Union[str, int] = 7000
     CORE_ADDR: str = "http://127.0.0.1:1337"
