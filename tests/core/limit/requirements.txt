@@ -7,7 +7,7 @@
 anyio==4.0.0 \
     --hash=sha256:cfdb2b588b9fc25ede96d8db56ed50848b0b649dca3dd1df0b11f683bb9e0b5f \
     --hash=sha256:f7ed51751b2c2add651e5747c891b47e26d2a21be5d32d9311dfe9692f3e5d7a
-    # via httpcore
+    # via httpx
 certifi==2023.7.22 \
     --hash=sha256:539cc1d13202e33ca466e88b2807e29f4c13049d6d87031a3c110744495cb082 \
     --hash=sha256:92d6037539857d8206b8f6ae472e8b77db8058fec5937a1ef3f54304089edbb9
@@ -115,13 +115,13 @@ h11==0.14.0 \
     --hash=sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d \
     --hash=sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761
     # via httpcore
-httpcore==0.18.0 \
-    --hash=sha256:13b5e5cd1dca1a6636a6aaea212b19f4f85cd88c366a2b82304181b769aab3c9 \
-    --hash=sha256:adc5398ee0a476567bf87467063ee63584a8bce86078bf748e48754f60202ced
+httpcore==1.0.1 \
+    --hash=sha256:c5e97ef177dca2023d0b9aad98e49507ef5423e9f1d94ffe2cfe250aa28e63b0 \
+    --hash=sha256:fce1ddf9b606cfb98132ab58865c3728c52c8e4c3c46e2aabb3674464a186e92
     # via httpx
-httpx==0.25.0 \
-    --hash=sha256:181ea7f8ba3a82578be86ef4171554dd45fec26a02556a744db029a0a27b7100 \
-    --hash=sha256:47ecda285389cb32bb2691cc6e069e3ab0205956f681c5b2ad2325719751d875
+httpx==0.25.1 \
+    --hash=sha256:fec7d6cc5c27c578a391f7e87b9aa7d3d8fbcd034f6399f9f79b45bcc12a866a \
+    --hash=sha256:ffd96d5cf901e63863d9f1b4b6807861dbea4d301613415d9e6e57ead15fc5d0
     # via -r requirements.in
 idna==3.4 \
     --hash=sha256:814f528e8dead7d329833b91c5faa87d60bf71824cd12a7530b5526063d02cb4 \
@@ -139,7 +139,6 @@ sniffio==1.3.0 \
     --hash=sha256:eecefdce1e5bbfb7ad2eeaabf7c1eeb404d7757c379bd1f7e5cce9d8bf425384
     # via
     #   anyio
-    #   httpcore
     #   httpx
 urllib3==2.0.7 \
     --hash=sha256:c97dfde1f7bd43a71c8d2a58e369e9b2bf692d1334ea9f9cae55add7d0dd0f84 \
