@@ -7,7 +7,7 @@ from ui import UiConfig
 
 UI_CONFIG = UiConfig("ui", **environ)
 
-API = UiConfig.CORE_ADDR
+CORE_API = UI_CONFIG.CORE_ADDR
 
 router = APIRouter(prefix="/api", tags=[""])
 
@@ -18,4 +18,4 @@ router = APIRouter(prefix="/api", tags=[""])
     summary="Get BunkerWeb version used",
 )
 async def get_version():
-    return get_core_format_res(f"{API}/version", "GET", "", "Retrieve version")
+    return get_core_format_res(f"{CORE_API}/version", "GET", "", "Retrieve version")

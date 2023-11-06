@@ -7,7 +7,7 @@ from ui import UiConfig
 
 UI_CONFIG = UiConfig("ui", **environ)
 
-API = UiConfig.CORE_ADDR
+CORE_API = UI_CONFIG.CORE_ADDR
 
 router = APIRouter(prefix="/api/plugins", tags=["plugins"])
 
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api/plugins", tags=["plugins"])
     summary="Get all plugins",
 )
 async def get_plugins():
-    return get_core_format_res(f"{API}/plugins", "GET", "", "Retrieve plugins")
+    return get_core_format_res(f"{CORE_API}/plugins", "GET", "", "Retrieve plugins")
 
 
 @router.post(
@@ -27,7 +27,7 @@ async def get_plugins():
     summary="Get all plugins",
 )
 async def add_plugin(plugin: AddedPlugin):
-    return get_core_format_res(f"{API}/plugins", "POST", plugin, "Adding plugin")
+    return get_core_format_res(f"{CORE_API}/plugins", "POST", plugin, "Adding plugin")
 
 
 @router.patch(
@@ -36,7 +36,7 @@ async def add_plugin(plugin: AddedPlugin):
     summary="Update a plugin",
 )
 async def update_plugin(plugin: AddedPlugin, plugin_id: str):
-    return get_core_format_res(f"{API}/plugins/{plugin_id}", "PATCH", plugin, f"Update plugin {plugin_id}")
+    return get_core_format_res(f"{CORE_API}/plugins/{plugin_id}", "PATCH", plugin, f"Update plugin {plugin_id}")
 
 
 @router.delete(
@@ -45,7 +45,7 @@ async def update_plugin(plugin: AddedPlugin, plugin_id: str):
     summary="Delete BunkerWeb instance",
 )
 async def delete_instance(plugin_id: str):
-    return get_core_format_res(f"{API}/plugins/{plugin_id}", "DELETE", plugin_id, f"Delete plugin {plugin_id}")
+    return get_core_format_res(f"{CORE_API}/plugins/{plugin_id}", "DELETE", plugin_id, f"Delete plugin {plugin_id}")
 
 
 @router.get(
@@ -54,4 +54,4 @@ async def delete_instance(plugin_id: str):
     summary="Get external files with plugins",
 )
 async def send_instance_action():
-    return get_core_format_res(f"{API}/plugins/external/files", "GET", "", "Plugin external files")
+    return get_core_format_res(f"{CORE_API}/plugins/external/files", "GET", "", "Plugin external files")

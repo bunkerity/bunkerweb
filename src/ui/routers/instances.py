@@ -7,8 +7,7 @@ from os import environ
 from ui import UiConfig
 
 UI_CONFIG = UiConfig("ui", **environ)
-
-API = UiConfig.CORE_ADDR
+CORE_API = UI_CONFIG.CORE_ADDR
 
 router = APIRouter(prefix="/api/instances", tags=["instances"])
 
@@ -19,7 +18,7 @@ router = APIRouter(prefix="/api/instances", tags=["instances"])
     summary="Get BunkerWeb instances",
 )
 async def get_instances():
-    return get_core_format_res(f"{API}/instances", "GET", "", "Retrieve instances")
+    return get_core_format_res(f"{CORE_API}/instances", "GET", "", "Retrieve instances")
 
 
 @router.put(
@@ -32,7 +31,7 @@ async def upsert_instance(
     method: str = "ui",
     reload: bool = True,
 ):
-    return get_core_format_res(f"{API}/instances?method={method}&reload={reload}", "PUT", instances, "Upsert instances")
+    return get_core_format_res(f"{CORE_API}/instances?method={method}&reload={reload}", "PUT", instances, "Upsert instances")
 
 
 @router.delete(
@@ -41,7 +40,7 @@ async def upsert_instance(
     summary="Delete BunkerWeb instance",
 )
 async def delete_instance(instance_hostname: str, method: str = "ui"):
-    return get_core_format_res(f"{API}/instances/{instance_hostname}?method={method}", "DELETE", "", f"Delete instance {instance_hostname}")
+    return get_core_format_res(f"{CORE_API}/instances/{instance_hostname}?method={method}", "DELETE", "", f"Delete instance {instance_hostname}")
 
 
 @router.post(
@@ -50,4 +49,4 @@ async def delete_instance(instance_hostname: str, method: str = "ui"):
     summary="Send action to a BunkerWeb instance",
 )
 async def send_instance_action(instance_hostname: str, action: str, method: str = "ui"):
-    return get_core_format_res(f"{API}/instances/{instance_hostname}/{action}?method={method}", "POST", "", f"Send instance {instance_hostname} action : {action}")
+    return get_core_format_res(f"{CORE_API}/instances/{instance_hostname}/{action}?method={method}", "POST", "", f"Send instance {instance_hostname} action : {action}")

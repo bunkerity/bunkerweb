@@ -9,8 +9,7 @@ from ui import UiConfig
 
 UI_CONFIG = UiConfig("ui", **environ)
 
-API = UiConfig.CORE_ADDR
-
+CORE_API = UI_CONFIG.CORE_ADDR
 
 router = APIRouter(prefix="/api/custom_configs", tags=["custom_configs"])
 
@@ -21,7 +20,7 @@ router = APIRouter(prefix="/api/custom_configs", tags=["custom_configs"])
     summary="Get complete custom configs",
 )
 async def get_custom_configs():
-    return get_core_format_res(f"{API}/custom_configs", "GET", "", "Retrieve custom configs")
+    return get_core_format_res(f"{CORE_API}/custom_configs", "GET", "", "Retrieve custom configs")
 
 
 @router.put(
@@ -31,7 +30,7 @@ async def get_custom_configs():
 )
 async def update_custom_configs(custom_config: Annotated[dict, Body()], method: str = "ui"):
     data = json.dumps(custom_config, skipkeys=True, allow_nan=True, indent=6)
-    return get_core_format_res(f"{API}/custom_configs?method={method}", "PUT", data, "Update custom configs")
+    return get_core_format_res(f"{CORE_API}/custom_configs?method={method}", "PUT", data, "Update custom configs")
 
 
 @router.delete(
@@ -40,4 +39,4 @@ async def update_custom_configs(custom_config: Annotated[dict, Body()], method: 
     summary="Delete a custom config by name",
 )
 async def delete_custom_configs(custom_config_name: str, method: str = "ui"):
-    return get_core_format_res(f"{API}/custom_configs/{custom_config_name}?method={method}", "DELETE", "", f"Delete custom config {custom_config_name}")
+    return get_core_format_res(f"{CORE_API}/custom_configs/{custom_config_name}?method={method}", "DELETE", "", f"Delete custom config {custom_config_name}")

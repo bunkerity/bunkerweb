@@ -9,7 +9,7 @@ from ui import UiConfig
 
 UI_CONFIG = UiConfig("ui", **environ)
 
-API = UiConfig.CORE_ADDR
+CORE_API = UI_CONFIG.CORE_ADDR
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/config", tags=["config"])
     summary="Get complete config",
 )
 async def get_config(methods: bool = False, new_format: bool = False):
-    return get_core_format_res(f"{API}/config?methods={methods}&new_format={new_format}", "GET", "", "Retrieve config")
+    return get_core_format_res(f"{CORE_API}/config?methods={methods}&new_format={new_format}", "GET", "", "Retrieve config")
 
 
 @router.put(
@@ -29,7 +29,7 @@ async def get_config(methods: bool = False, new_format: bool = False):
     summary="Update whole config",
 )
 async def update_config(config: Dict[str, str], method: str = "ui"):
-    return get_core_format_res(f"{API}/config?method={method}", "PUT", config, "Update config")
+    return get_core_format_res(f"{CORE_API}/config?method={method}", "PUT", config, "Update config")
 
 
 @router.put(
@@ -39,7 +39,7 @@ async def update_config(config: Dict[str, str], method: str = "ui"):
 )
 async def update_global_config(config: Annotated[dict, Body()], method: str = "ui"):
     data = json.dumps(config, skipkeys=True, allow_nan=True, indent=6)
-    return get_core_format_res(f"{API}/config/global?method={method}", "PUT", data, "Update global config")
+    return get_core_format_res(f"{CORE_API}/config/global?method={method}", "PUT", data, "Update global config")
 
 
 @router.put(
@@ -49,7 +49,7 @@ async def update_global_config(config: Annotated[dict, Body()], method: str = "u
 )
 async def update_service_config(service_name: str, config: Annotated[dict, Body()], method: str = "ui"):
     data = json.dumps(config, skipkeys=True, allow_nan=True, indent=6)
-    return get_core_format_res(f"{API}/config/service/{service_name}?method={method}", "PUT", data, f"Update service config {service_name}")
+    return get_core_format_res(f"{CORE_API}/config/service/{service_name}?method={method}", "PUT", data, f"Update service config {service_name}")
 
 
 @router.delete(
@@ -58,4 +58,4 @@ async def update_service_config(service_name: str, config: Annotated[dict, Body(
     summary="Delete service config",
 )
 async def delete_service_config(service_name: str, method: str = "ui"):
-    return get_core_format_res(f"{API}/config/service/{service_name}?method={method}", "DELETE", "", f"Delete service config {service_name}")
+    return get_core_format_res(f"{CORE_API}/config/service/{service_name}?method={method}", "DELETE", "", f"Delete service config {service_name}")

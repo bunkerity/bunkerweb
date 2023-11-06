@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
 import requests, traceback, json  # noqa: E401
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from os import environ
-from ui import UiConfig
-
-UI_CONFIG = UiConfig("ui", **environ)
-
-API = UiConfig.CORE_ADDR
 
 def get_core_format_res(path, method, data, message, retry = 1):
     # Retry limit
@@ -41,7 +35,7 @@ def get_core_format_res(path, method, data, message, retry = 1):
         print(req.status_code)
         print(req.status_code == requests.codes.ok)
 
-        return {"type": "success" if req.status_code.startswith('2') else "error", "status": str(req.status_code), "message": message, "data": data}
+        return {"type": "success" if str(req.status_code).startswith('2') else "error", "status": str(req.status_code), "message": message, "data": data}
     # Case impossible to format
     except:
         print(traceback.format_exc())
@@ -74,14 +68,3 @@ def req_core(path, method):
 def exception_res(status_code, path, detail):
     return {"type": "error", "status": status_code, "message": f"{path} {detail}", "data": "{}"}
 
-
-def check_core():
-    try :
-        req = requests.get(f"{API}/ping")
-
-        if req.status_code.startswith("2"):
-            return True
-
-        return False
-    except:
-        return False

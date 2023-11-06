@@ -7,7 +7,8 @@ from ui import UiConfig
 
 UI_CONFIG = UiConfig("ui", **environ)
 
-API = UiConfig.CORE_ADDR
+CORE_API = UI_CONFIG.CORE_ADDR
+
 router = APIRouter(prefix="/api/logs", tags=["jobs"])
 
 
@@ -17,7 +18,7 @@ router = APIRouter(prefix="/api/logs", tags=["jobs"])
     summary="Get ui logs",
 )
 async def get_logs_ui():
-    return get_core_format_res(f"{API}/logs/ui", "GET", "", "Retrieve ui logs")
+    return get_core_format_res(f"{CORE_API}/logs/ui", "GET", "", "Retrieve ui logs")
 
 
 @router.get(
@@ -26,4 +27,4 @@ async def get_logs_ui():
     summary="Get core logs",
 )
 async def get_logs_core():
-    return get_core_format_res(f"{API}/logs/core", "GET", "", "Retrieve core logs")
+    return get_core_format_res(f"{CORE_API}/logs/core", "GET", "", "Retrieve core logs")

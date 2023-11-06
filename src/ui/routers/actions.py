@@ -9,7 +9,7 @@ from ui import UiConfig
 
 UI_CONFIG = UiConfig("ui", **environ)
 
-API = UiConfig.CORE_ADDR
+CORE_API = UI_CONFIG.CORE_ADDR
 
 router = APIRouter(prefix="/api/actions", tags=["actions"])
 
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/actions", tags=["actions"])
     summary="Get all actions",
 )
 async def get_actions():
-    return get_core_format_res(f"{API}/actions", "GET", "", "Retrieve actions")
+    return get_core_format_res(f"{CORE_API}/actions", "GET", "", "Retrieve actions")
 
 
 @router.post(
@@ -30,4 +30,4 @@ async def get_actions():
 )
 async def create_action(action: Annotated[dict, Body()]):
     data = json.dumps(action, skipkeys=True, allow_nan=True, indent=6)
-    return get_core_format_res(f"{API}/actions", "POST", data, "Create action")
+    return get_core_format_res(f"{CORE_API}/actions", "POST", data, "Create action")

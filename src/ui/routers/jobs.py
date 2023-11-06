@@ -8,7 +8,7 @@ from ui import UiConfig
 
 UI_CONFIG = UiConfig("ui", **environ)
 
-API = UiConfig.CORE_ADDR
+CORE_API = UI_CONFIG.CORE_ADDR
 
 router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/jobs", tags=["jobs"])
     summary="Get all jobs",
 )
 async def get_jobs():
-    return get_core_format_res(f"{API}/jobs", "GET", "", "Retrieve jobs")
+    return get_core_format_res(f"{CORE_API}/jobs", "GET", "", "Retrieve jobs")
 
 
 @router.post(
@@ -28,7 +28,7 @@ async def get_jobs():
     summary="Send to scheduler task to run a job async",
 )
 async def run_job(job_name: str, method: str = "ui"):
-    return get_core_format_res(f"{API}/jobs/{job_name}/run?method={method}", "POST", "", f"Run job {job_name}")
+    return get_core_format_res(f"{CORE_API}/jobs/{job_name}/run?method={method}", "POST", "", f"Run job {job_name}")
 
 
 @router.get(
@@ -37,7 +37,7 @@ async def run_job(job_name: str, method: str = "ui"):
     summary="Get a file from cache related to a job",
 )
 async def get_job_cache_file(job_name: str, file_name: str):
-    return get_core_format_res(f"{API}/jobs/{job_name}/cache/{file_name}", "GET", "", f"Get file {file_name} from cache for job {job_name}")
+    return get_core_format_res(f"{CORE_API}/jobs/{job_name}/cache/{file_name}", "GET", "", f"Get file {file_name} from cache for job {job_name}")
 
 
 @router.delete(
@@ -46,7 +46,7 @@ async def get_job_cache_file(job_name: str, file_name: str):
     summary="Delete a file from cache related to a job",
 )
 async def delete_jobs(job_name: str, file_name: str, data: CacheFileModel):
-    return get_core_format_res(f"{API}/jobs/{job_name}/cache/{file_name}", "DELETE", "", f"Delete file {file_name} from cache for job {job_name}")
+    return get_core_format_res(f"{CORE_API}/jobs/{job_name}/cache/{file_name}", "DELETE", "", f"Delete file {file_name} from cache for job {job_name}")
 
 
 @router.put(
@@ -61,4 +61,4 @@ async def upload_job_file(
     service_id: Optional[Annotated[str, Form()]] = None,
     checksum: Optional[Annotated[str, Form()]] = None,
 ):
-    return get_core_format_res(f"{API}/jobs/{job_name}/cache/{file_name}?cache_file={cache_file}&service_id={service_id}&checksum={checksum}", "PUT", "", f"Upload file {file_name} to cache {cache_file}")
+    return get_core_format_res(f"{CORE_API}/jobs/{job_name}/cache/{file_name}?cache_file={cache_file}&service_id={service_id}&checksum={checksum}", "PUT", "", f"Upload file {file_name} to cache {cache_file}")
