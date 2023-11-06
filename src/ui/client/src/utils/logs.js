@@ -1,5 +1,7 @@
 // Filter actions
 export function getLogsByFilter(actions, filters) {
+  if (!Array.isArray(actions)) return [];
+
   actions.forEach((action, id) => {
     let isMatch = true;
     // Tags filter

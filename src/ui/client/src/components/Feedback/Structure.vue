@@ -1,7 +1,12 @@
 <script setup>
 import FeedbackAlert from "@components/Feedback/Alert.vue";
+import FeedbackLogs from "@components/Feedback/Logs.vue";
 import { useFeedbackStore } from "@store/global.js";
-import { reactive, watch, onMounted } from "vue";
+import { reactive, watch, onMounted, computed } from "vue";
+import TablistBase from "@components/Tablist/Base.vue";
+import { getLogsByFilter } from "@utils/logs.js";
+import { fetchAPI } from "@utils/api.js";
+import { useLogsStore } from "@store/logs.js";
 
 // Handle feedback history panel
 const dropdown = reactive({
@@ -20,8 +25,8 @@ const alert = reactive({
   prevNum: 0, // Number of alerts before watcher
 });
 
-// First alert should be hidden after amount of time
 onMounted(() => {
+  // First alert should be hidden after amount of time
   setTimeout(() => {
     alert.show = false;
   }, showDelay);
@@ -50,9 +55,75 @@ watch(feedback, () => {
   if (alert.prevNum > feedback.data.length)
     alert.prevNum = feedback.data.length;
 });
+
+// On each page, we are selecting tags we want to show
+// Using logsStore.setTags()
+const logsStore = useLogsStore();
+
+const filters = reactive({
+  tags: logsStore.tags,
+});
+
+// DATA
+const logs = reactive({
+  isPend: false,
+  isErr: false,
+  // Never modify this unless refetch
+  data: [],
+  current: "ui",
+  maxHeight: "max-h-[90vh]",
+  setup: computed(() => {
+    const logsCore = [];
+    const logsGlobal = [];
+    if (!logs.data || logs.data.length <= 0)
+      return { core: logsCore, global: logsGlobal };
+    // Change to array and keep name
+    const cloneData = JSON.parse(JSON.stringify(logs.data));
+    const filter = getLogsByFilter(cloneData, filters);
+
+    filter.forEach((log) => {
+      if (!log.isMatchFilter) return;
+      logsGlobal.push(log);
+      if (log.method.toLowerCase() === "core") logsCore.push(log);
+    });
+
+    return { core: logsCore, global: logsGlobal };
+  }),
+});
+
+async function getLogs() {
+  await fetchAPI("/api/actions", "GET", null, logs, null);
+}
+
+onMounted(() => {
+  getLogs();
+  setInterval(() => {
+    getLogs();
+  }, 10000);
+  // Change logs height to fit screen
+  if (window.innerHeight >= 780) logs.maxHeight = "max-h-[90vh]";
+  if (window.innerHeight < 780 && window.innerHeight >= 567)
+    logs.maxHeight = "max-h-[70vh]";
+  if (window.innerHeight < 567 && window.innerHeight >= 490)
+    logs.maxHeight = "max-h-[65vh]";
+  if (window.innerHeight < 490) logs.maxHeight = "max-h-[60vh]";
+});
 </script>
 
 <template>
+  <div
+    class="flex justify-center fixed right-0 bottom-0 w-full sm:max-w-[300px] z-[1000]"
+  >
+    <FeedbackAlert
+      v-if="alert.show && feedback.data.length > 0"
+      :type="feedback.data[feedback.data.length - 1].type"
+      :id="feedback.data[feedback.data.length - 1].id"
+      :status="feedback.data[feedback.data.length - 1].status"
+      :message="feedback.data[feedback.data.length - 1].message"
+      @close="alert.show = false"
+    />
+  </div>
+
   <!-- float button-->
   <div
     class="group group-hover hover:brightness-75 dark:hover:brightness-105 fixed top-2 sm:top-3 right-20 sm:right-24 xl:right-24 z-990"
@@ -81,19 +152,6 @@ watch(feedback, () => {
   </div>
   <!-- end float button-->
 
-  <div
-    class="flex justify-center fixed right-0 bottom-0 w-full sm:max-w-[300px] z-[1000]"
-  >
-    <FeedbackAlert
-      v-if="alert.show && feedback.data.length > 0"
-      :type="feedback.data[feedback.data.length - 1].type"
-      :id="feedback.data[feedback.data.length - 1].id"
-      :status="feedback.data[feedback.data.length - 1].status"
-      :message="feedback.data[feedback.data.length - 1].message"
-      @close="alert.show = false"
-    />
-  </div>
-
   <!-- right sidebar -->
   <aside
     :class="[dropdown.isOpen ? '' : 'translate-x-90']"
@@ -114,14 +172,22 @@ watch(feedback, () => {
         />
       </svg>
     </button>
-
     <!-- close btn-->
 
     <!-- header -->
     <div class="px-6 pt-4 pb-0 mb-0 border-b-0 rounded-t-2xl">
       <div class="float-left">
-        <h5 class="mt-4 mb-1 dark:text-white font-bold">MESSAGES</h5>
-        <p class="dark:text-white dark:opacity-80 mb-0">Feedback actions</p>
+        <h5 class="mt-4 mb-1 dark:text-white font-bold">ACTIONS</h5>
+        <p class="dark:text-white dark:opacity-80 mb-0">Get all feedbacks.</p>
+        <TablistBase
+          @tab="(v) => (logs.current = v)"
+          :current="logs.current"
+          :items="[
+            { text: 'UI', tag: 'ui' },
+            { text: 'core', tag: 'core' },
+            { text: 'global', tag: 'global' },
+          ]"
+        />
       </div>
       <!-- close button -->
       <div class="float-right mt-6">
@@ -136,13 +202,11 @@ watch(feedback, () => {
     </div>
     <!-- end header -->
 
-    <hr class="line-separator w-full" />
-
-    <!-- messages-->
+    <!-- own feedback -->
     <div
+      v-if="logs.current === 'ui'"
       class="flex flex-col justify-start items-center h-full m-2 overflow-y-auto"
     >
-      <!-- flash message-->
       <FeedbackAlert
         v-for="(item, id) in feedback.data"
         :type="item.type"
@@ -151,10 +215,39 @@ watch(feedback, () => {
         :message="item.message"
         @close="feedback.removeFeedback(item.id)"
       />
-
-      <!-- end flash message-->
     </div>
-    <!-- end messages -->
+    <!-- end own feedback  -->
+    <div
+      v-if="logs.current === 'core'"
+      class="flex flex-col justify-start items-center h-full m-2 overflow-y-auto"
+    >
+      <FeedbackLogs
+        v-for="(item, id) in logs.setup.core"
+        :type="item.type"
+        :id="id"
+        :title="item.title"
+        :method="item.method"
+        :apiMethod="item.api_method"
+        :status="item.status"
+        :message="item.description"
+        :date="item.date"
+      />
+    </div>
+    <div
+      v-if="logs.current === 'global'"
+      class="flex flex-col justify-start items-center h-full m-2 overflow-y-auto"
+    >
+      <FeedbackLogs
+        v-for="(item, id) in logs.setup.global"
+        :type="item.type"
+        :id="id"
+        :title="item.title"
+        :method="item.method"
+        :apiMethod="item.api_method"
+        :message="item.description"
+        :date="item.date"
+      />
+    </div>
   </aside>
   <!-- end right sidebar -->
 </template>

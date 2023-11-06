@@ -348,15 +348,10 @@ body {
   @apply flex justify-center align-middle w-full mb-4;
 }
 
-/* LOGS */
-.logs-float-btn {
-  @apply w-13 h-13 scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-16 sm:top-3 right-5 sm:right-40 z-990 rounded-circle text-slate-700;
-}
-
 /* REFRESH */
 
 .refresh-float-btn {
-  @apply w-13 h-13 scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-16 sm:top-3 right-20 sm:right-[14.125rem] z-990 rounded-circle text-slate-700;
+  @apply w-13 h-13 scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed pt-2.5 pb-3 text-xl bg-white shadow-sm cursor-pointer top-16 sm:top-3 right-5 sm:right-40 z-990 rounded-circle text-slate-700;
 }
 
 /* NEWS */
