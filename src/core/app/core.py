@@ -267,6 +267,8 @@ class CoreConfig(YamlBaseSettings):
                 for i, setting in enumerate(value, start=1):
                     instances_config[f"{config}_{i}"] = setting
                 del instances_config[config]
+            elif isinstance(value, bool):
+                instances_config[config] = "yes" if value else "no"
             elif not isinstance(value, str):
                 del instances_config[config]
 
