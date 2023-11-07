@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from copy import deepcopy
+from datetime import date
 from functools import cached_property
 from ipaddress import (
     IPv4Address,
@@ -350,6 +351,8 @@ class CoreConfig(YamlBaseSettings):
                 del instances_config[config]
             elif isinstance(value, bool):
                 instances_config[config] = "yes" if value else "no"
+            elif isinstance(value, (float, int, date)):
+                instances_config[config] = str(value)
             elif not isinstance(value, str):
                 del instances_config[config]
 
