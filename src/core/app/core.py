@@ -59,7 +59,7 @@ class CoreConfig(YamlBaseSettings):
     REDIS_PORT: Union[str, int] = 6379
     REDIS_DATABASE: Union[str, int] = 0
     REDIS_SSL: Union[str, bool] = False
-    REDIS_TIMEOUT: Union[str, float] = 1000.0
+    REDIS_TIMEOUT: Union[str, int] = 1000
 
     EXTERNAL_PLUGIN_URLS: Union[str, set] = ""
     AUTOCONF_MODE: Union[Literal["yes", "no"], bool] = "no"
@@ -150,12 +150,9 @@ class CoreConfig(YamlBaseSettings):
 
     @field_validator("REDIS_TIMEOUT")
     @classmethod
-    def check_redis_timeout(cls, v: Union[str, float]) -> Union[str, float]:
-        try:
-            if not float(v) > 0:
-                raise ValueError
-        except ValueError:
-            raise ValueError("Invalid REDIS_TIMEOUT provided, it must be a positive float.")
+    def check_redis_timeout(cls, v: Union[str, int]) -> Union[str, int]:
+        if not isinstance(v, int) and (not v.isdigit() or int(v) < 0):
+            raise ValueError("Invalid REDIS_TIMEOUT provided, it must be a positive integer.")
         return v
 
     # ? PROPERTIES
@@ -462,7 +459,7 @@ The API can be configured using the following settings:
 | `REDIS_PORT` | The Redis port | `6379` |
 | `REDIS_DATABASE` | The Redis database | `0` |
 | `REDIS_SSL` | Activate SSL for Redis | `no` |
-| `REDIS_TIMEOUT` | The Redis timeout in milliseconds | `1000.0` |
+| `REDIS_TIMEOUT` | The Redis timeout in milliseconds | `1000` |
 | `EXTERNAL_PLUGIN_URLS` | The external plugin URLs to download | `""` |
 | `AUTOCONF_MODE` | Activate the autoconf mode | `no` |
 | `KUBERNETES_MODE` | Activate the Kubernetes mode | `no` |
