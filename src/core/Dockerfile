@@ -97,7 +97,7 @@ EXPOSE 1337
 
 USER core:core
 
-HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-core.sh
+HEALTHCHECK --interval=10s --timeout=30s --start-period=30s --retries=6 CMD /usr/share/bunkerweb/helpers/healthcheck-core.sh
 
 ENV PYTHONPATH /usr/share/bunkerweb/deps/python
 
