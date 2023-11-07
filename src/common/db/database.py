@@ -210,6 +210,7 @@ class Database:
                     "disk I/O error",  # ? Sqlite potential errors
                     "database is locked",
                     "file is not a database",
+                    "Cannot operate on a closed database",
                     "Lost connection",  # ? Mysql and MariaDB potential errors
                     "Command Out of Sync",
                     "can't change 'autocommit' now",  # ? Postgresql potential errors
