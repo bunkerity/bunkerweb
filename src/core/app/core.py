@@ -354,6 +354,7 @@ class CoreConfig(YamlBaseSettings):
             elif isinstance(value, (float, int, date)):
                 instances_config[config] = str(value)
             elif not isinstance(value, str):
+                self.logger.warning(f"Invalid setting {config} ({value}), skipping it")
                 del instances_config[config]
 
         instances_config.update(
