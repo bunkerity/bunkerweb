@@ -17,7 +17,6 @@ fastapi_proc = None
 ip_to_check = "1.0.0.3" if getenv("TEST_TYPE", "docker") == "docker" else "127.0.0.1"
 
 try:
-
     ready = False
     retries = 0
     while not ready:

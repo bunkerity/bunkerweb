@@ -108,13 +108,13 @@ class ConfigFiles:
             if path.is_file():
                 path.unlink()
             elif path.is_dir():
-                rmtree(str(path), ignore_errors=False)
+                rmtree(path, ignore_errors=False)
             else:
                 path = Path(f"{path}.conf")
                 if path.is_file():
                     path.unlink()
                 else:
-                    rmtree(str(path), ignore_errors=False)
+                    rmtree(path, ignore_errors=False)
         except OSError:
             return f"Could not delete {path}", 1
 

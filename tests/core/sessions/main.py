@@ -1,6 +1,6 @@
 from contextlib import suppress
 from os import getenv
-from subprocess import PIPE, run
+from subprocess import run
 from requests import get, post
 from requests.exceptions import RequestException
 from selenium import webdriver

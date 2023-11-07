@@ -712,14 +712,14 @@ class Database:
                 .all()
             ):
                 default = setting.default or ""
-                config[setting.id] = default if methods is False else {"value": default, "global": True, "method": "default"}
+                config[setting.id] = default if not methods else {"value": default, "global": True, "method": "default"}
 
                 global_values = session.query(Global_values).with_entities(Global_values.value, Global_values.suffix, Global_values.method).filter_by(setting_id=setting.id).all()
 
                 for global_value in global_values:
                     config[setting.id + (f"_{global_value.suffix}" if setting.multiple and global_value.suffix > 0 else "")] = (
                         global_value.value
-                        if methods is False
+                        if not methods
                         else {
                             "value": global_value.value,
                             "global": True,
@@ -764,7 +764,7 @@ class Database:
                         for service_setting in service_settings:
                             config[f"{service.id}_{key}" + (f"_{service_setting.suffix}" if service_setting.suffix > 0 else "")] = (
                                 service_setting.value
-                                if methods is False
+                                if not methods
                                 else {
                                     "value": service_setting.value,
                                     "global": False,
@@ -774,7 +774,7 @@ class Database:
 
             if is_multisite:
                 servers = " ".join(service.id for service in session.query(Services).all())
-                config["SERVER_NAME"] = servers if methods is False else {"value": servers, "global": True, "method": "default"}
+                config["SERVER_NAME"] = servers if not methods else {"value": servers, "global": True, "method": "default"}
 
             return config
 
@@ -826,7 +826,7 @@ class Database:
                                 "global": value["global"],
                                 "method": value["method"],
                             }
-                            if methods is True
+                            if methods
                             else value
                         )
 

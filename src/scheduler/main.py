@@ -103,7 +103,7 @@ def generate_custom_configs(
         if file.is_symlink() or file.is_file():
             file.unlink()
         elif file.is_dir():
-            rmtree(str(file), ignore_errors=True)
+            rmtree(file, ignore_errors=True)
 
     if configs:
         logger.info("Generating new custom configs ...")
@@ -142,7 +142,7 @@ def generate_external_plugins(
         if file.is_symlink() or file.is_file():
             file.unlink()
         elif file.is_dir():
-            rmtree(str(file), ignore_errors=True)
+            rmtree(file, ignore_errors=True)
 
     if plugins:
         logger.info("Generating new external plugins ...")
@@ -526,19 +526,12 @@ if __name__ == "__main__":
                 else:
                     # Reload nginx
                     logger.info("Reloading nginx ...")
-                    proc = subprocess_run(
-                        [join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
-                        stdin=DEVNULL,
-                        stderr=STDOUT,
-                        env=env.copy(),
-                        check=False,
-                        stdout=PIPE
-                    )
+                    proc = subprocess_run([join(sep, "usr", "sbin", "nginx"), "-s", "reload"], stdin=DEVNULL, stderr=STDOUT, env=env.copy(), check=False, stdout=PIPE)
                     if proc.returncode == 0:
                         logger.info("Successfully sent reload signal to nginx")
                     else:
                         logger.error(
-                                f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stdout.decode('utf-8') if proc.stdout else 'no output'}",
+                            f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stdout.decode('utf-8') if proc.stdout else 'no output'}",
                         )
                     # # Stop temp nginx
                     # logger.info("Stopping temp nginx ...")

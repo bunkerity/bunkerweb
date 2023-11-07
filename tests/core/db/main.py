@@ -180,7 +180,7 @@ try:
 
         for global_value in global_values:
             if global_value.setting_id == "API_LISTEN_IP":
-                    continue
+                continue
             if global_value.setting_id in global_settings:
                 if global_value.value != global_settings[global_value.setting_id]["value"]:
                     print(
