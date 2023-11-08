@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
-from fastapi import APIRouter
+from flask import Blueprint
+from flask import request
+
 from utils import get_core_format_res
-from models import ResponseModel
+import json
 from os import environ
 from ui import UiConfig
 
 UI_CONFIG = UiConfig("ui", **environ)
 
 CORE_API = UI_CONFIG.CORE_ADDR
+PREFIX = "/api/misc"
 
-router = APIRouter(prefix="/api", tags=[""])
+misc = Blueprint('misc', __name__)
 
-
-@router.get(
-    "/version",
-    response_model=ResponseModel,
-    summary="Get BunkerWeb version used",
-)
-async def get_version():
+@misc.route(f"{PREFIX}/version", methods=['GET'])
+def get_version():
+    """ Get BunkerWeb version used """
     return get_core_format_res(f"{CORE_API}/version", "GET", "", "Retrieve version")
