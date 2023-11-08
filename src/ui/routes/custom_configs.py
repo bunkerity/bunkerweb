@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
 from flask import request
+from flask_jwt_extended import jwt_required
 
 from utils import get_core_format_res
 import json
@@ -16,12 +17,14 @@ custom_configs = Blueprint("custom_configs", __name__)
 
 
 @custom_configs.route(f"{PREFIX}", methods=["GET"])
+@jwt_required()
 def get_custom_configs():
     """Get complete custom configs"""
     return get_core_format_res(f"{CORE_API}/custom_configs", "GET", "", "Retrieve custom configs")
 
 
 @custom_configs.route(f"{PREFIX}", methods=["PUT"])
+@jwt_required()
 def update_custom_configs():
     """Update one or more custom configs"""
     args = request.args.to_dict()
@@ -33,7 +36,8 @@ def update_custom_configs():
     return get_core_format_res(f"{CORE_API}/custom_configs?method={method}", "PUT", data, "Update custom configs")
 
 
-@custom_configs.route(f"{PREFIX}/<str:custom_config_name>", methods=["DELETE"])
+@custom_configs.route(f"{PREFIX}/<string:custom_config_name>", methods=["DELETE"])
+@jwt_required()
 def delete_custom_configs(custom_config_name):
     """Delete a custom config by name"""
     # is_valid_model(custom_config_name, Model) True | False

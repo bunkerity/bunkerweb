@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
 from flask import request
+from flask_jwt_extended import jwt_required
 
 from utils import get_core_format_res
 from os import environ
@@ -15,12 +16,14 @@ jobs = Blueprint("jobs", __name__)
 
 
 @jobs.route(f"{PREFIX}", methods=["GET"])
+@jwt_required()
 def get_jobs():
     """Get all jobs"""
     return get_core_format_res(f"{CORE_API}/jobs", "GET", "", "Retrieve jobs")
 
 
-@jobs.route(f"{PREFIX}/<str:job_name>/run", methods=["POST"])
+@jobs.route(f"{PREFIX}/<string:job_name>/run", methods=["POST"])
+@jwt_required()
 def run_job(job_name):
     """Send to scheduler task to run a job async"""
     # is_valid_model(job_name, Model) True | False
@@ -30,7 +33,8 @@ def run_job(job_name):
     return get_core_format_res(f"{CORE_API}/jobs/{job_name}/run?method={method}", "POST", "", f"Run job {job_name}")
 
 
-@jobs.route(f"{PREFIX}/<str:job_name>/cache/<str:file_name>", methods=["GET"])
+@jobs.route(f"{PREFIX}/<string:job_name>/cache/<string:file_name>", methods=["GET"])
+@jwt_required()
 def get_job_cache_file(job_name, file_name):
     """Get a file from cache related to a job"""
     # is_valid_model(job_name, Model) True | False
@@ -38,7 +42,8 @@ def get_job_cache_file(job_name, file_name):
     return get_core_format_res(f"{CORE_API}/jobs/{job_name}/cache/{file_name}", "GET", "", f"Get file {file_name} from cache for job {job_name}")
 
 
-@jobs.route(f"{PREFIX}/<str:job_name>/cache/<str:file_name>", methods=["DELETE"])
+@jobs.route(f"{PREFIX}/<string:job_name>/cache/<string:file_name>", methods=["DELETE"])
+@jwt_required()
 def delete_job_file_cache(job_name, file_name):
     """Delete a file from cache related to a job"""
     # is_valid_model(job_name, Model) True | False
@@ -46,7 +51,8 @@ def delete_job_file_cache(job_name, file_name):
     return get_core_format_res(f"{CORE_API}/jobs/{job_name}/cache/{file_name}", "DELETE", "", f"Delete file {file_name} from cache for job {job_name}")
 
 
-@jobs.route(f"{PREFIX}/<str:job_name>/cache/<str:file_name>", methods=["PUT"])
+@jobs.route(f"{PREFIX}/<string:job_name>/cache/<string:file_name>", methods=["PUT"])
+@jwt_required()
 def upload_job_file_cache(job_name, file_name):
     """Upload a file to cache for a job"""
     # is_valid_model(job_name, Model) True | False

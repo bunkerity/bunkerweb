@@ -1,21 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Flask
-from flask import request
-from flask import make_response
-from flask import redirect
 from flask import Blueprint
-
-from flask_jwt_extended import create_access_token
-from flask_jwt_extended import set_access_cookies
-from flask_jwt_extended import get_jwt_identity
-from flask_jwt_extended import jwt_required
-from flask_jwt_extended import get_jwt
-from flask_jwt_extended import unset_jwt_cookies
-from flask_jwt_extended import JWTManager
-
-from datetime import datetime
-from datetime import timedelta
-from datetime import timezone
 
 import requests
 
@@ -27,6 +12,10 @@ from routes.jobs import jobs
 from routes.logs import logs
 from routes.misc import misc
 from routes.plugins import plugins
+from routes.dashboard import dashboard
+
+from middleware.jwt import setup_jwt
+
 
 from werkzeug.exceptions import HTTPException
 import os
@@ -74,7 +63,6 @@ for x in range(UI_CONFIG.MAX_WAIT_RETRIES):
         if req.status_code == 200:
             core_running = True
     except:
-        LOGGER.exception(f"Impossible to connect to CORE API | TRY {x}")
         core_running = False
 
     time.sleep(UI_CONFIG.WAIT_RETRY_INTERVAL)
@@ -88,7 +76,14 @@ if not core_running:
 
 # Start UI app
 app = Flask(__name__)
-LOGGER.info("START RUNNING UI")
+LOGGER.info("START UI SETUP")
+
+try:
+    setup_jwt(app)
+    LOGGER.info("ADDING MIDDLEWARE")
+except:
+    LOGGER.exception("ADDING API ROUTES")
+    exit(1)
 
 # Add API routes
 try:
@@ -102,26 +97,24 @@ try:
     app.register_blueprint(plugins)
     LOGGER.info("ADDING API ROUTES")
 except:
-    LOGGER.error("ADDING API ROUTES")
+    LOGGER.exception("ADDING API ROUTES")
     exit(1)
 
-# Handle static files
+# Add dashboard routes and related templates / files
 try:
-    dashboard = Blueprint("", __name__, static_folder="static")
-    LOGGER.info("ADDING STATIC FILES")
+    app.register_blueprint(dashboard)
+    templates = Blueprint("static", __name__, template_folder="static")
+    assets = Blueprint("assets", __name__, static_folder="static/assets")
+    images = Blueprint("images", __name__, static_folder="static/images")
+    style = Blueprint("style", __name__, static_folder="static/css")
+    app.register_blueprint(templates)
+    app.register_blueprint(assets)
+    app.register_blueprint(images)
+    app.register_blueprint(style)
+    LOGGER.info("ADDING TEMPLATES AND STATIC FILES")
 except:
-    LOGGER.error("ADDING STATIC FILES")
+    LOGGER.exception("ADDING API ROUTES")
     exit(1)
-
-### JWT TOKEN LOGIC
-
-# Setup the Flask-JWT-Extended extension
-app.config["JWT_TOKEN_LOCATION"] = ["cookies"]  # How JWT is handle
-app.config["JWT_COOKIE_SECURE"] = False  # ONLY HTTPS
-app.config["JWT_SECRET_KEY"] = "super-secret"  # Change for prod
-app.config["JWT_COOKIE_CSRF_PROTECT"] = True  # Add CSRF TOKEN check
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
-jwt = JWTManager(app)
 
 
 @app.errorhandler(HTTPException)
@@ -141,83 +134,8 @@ def handle_exception(e):
     return response
 
 
-@app.after_request
-def refresh_expiring_jwts(response):
-    # Add request that aren't concern by refresh (like get periodic logs)
-    try:
-        exp_timestamp = get_jwt()["exp"]
-        now = datetime.now(timezone.utc)
-        target_timestamp = datetime.timestamp(now + timedelta(minutes=5))
-        if target_timestamp > exp_timestamp:
-            access_token = create_access_token(identity=get_jwt_identity())
-            set_access_cookies(response, access_token)
-        return response
-    except (RuntimeError, KeyError):
-        # Case where there is not a valid JWT. Just return the original response
-        return response
-
-
-# Create a route to authenticate your users and return JWTs. The
-# create_access_token() function is used to actually generate the JWT.
-#
-# logs = {username : "test", password: "test"}
-# fetch(window.location.origin + '/login', {method : "POST", body : JSON.stringify(logs), headers: { "Content-Type": "application/json"}})
-#
-@app.route("/login", methods=["POST"])
-def login():
-    username = request.form.get("username", None)
-    password = request.form.get("password", None)
-    if username != "test" or password != "test":
-        return make_response(redirect("/", 302))
-
-    access_token = create_access_token(identity=username)
-    resp = make_response(redirect("/home", 302))
-    set_access_cookies(resp, access_token)
-    return resp
-
-
-# Remove cookies
-@app.route("/logout", methods=["POST"])
-def logout():
-    resp = make_response("/", 302)
-    unset_jwt_cookies(resp)
-    return resp
-
-
-# Protect a route with jwt_required, which will kick out requests
-# without a valid JWT present.
-#
-@app.route("/protected", methods=["GET"])
-@jwt_required()
-def protected():
-    # Access the identity of the current user with get_jwt_identity
-    # current_user = get_jwt_identity() # TODO
-    return "<p>Protected access</p>"
-
-
-# Get data from fetch retrieving document.cookie
-#
-# fetch(window.location.origin + '/test', {method : "GET", headers: { "Content-Type": "application/json", 'X-CSRF-TOKEN': getCookie('csrf_access_token'),}})
-#
-@app.route("/test", methods=["GET"])
-@jwt_required()
-def test():
-    return json.dumps({"test": "test"})
-
-
-@app.route("/")
-def hello_world():
-    return "<form action='/login' method='post'><input name='username' type='text'/><input name='password' type='text'><button type='submit'>submit</button></form>"
-
-
-@app.route("/home")
-@jwt_required()
-def homepage():
-    return "<p>Connected</p><form action='/logout' method='post'><button type='submit'>logout</button></form>"
-
-
 # Everything worked
 if not HEALTHY_PATH.exists():
     HEALTHY_PATH.write_text("ok", encoding="utf-8")
 
-LOGGER.info("UI STARTED PROPERLY")
+LOGGER.info("UI RUNNING")

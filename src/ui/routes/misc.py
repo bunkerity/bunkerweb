@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
+from flask_jwt_extended import jwt_required
 
 from utils import get_core_format_res
 from os import environ
@@ -14,6 +15,7 @@ misc = Blueprint("misc", __name__)
 
 
 @misc.route(f"{PREFIX}/version", methods=["GET"])
+@jwt_required()
 def get_version():
     """Get BunkerWeb version used"""
     return get_core_format_res(f"{CORE_API}/version", "GET", "", "Retrieve version")

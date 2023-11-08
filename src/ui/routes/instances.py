@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
 from flask import request
+from flask_jwt_extended import jwt_required
 
 from utils import get_core_format_res
 import json
@@ -16,12 +17,14 @@ instances = Blueprint("instances", __name__)
 
 
 @instances.route(f"{PREFIX}", methods=["GET"])
+@jwt_required()
 def get_instances():
     """Get BunkerWeb instances"""
     return get_core_format_res(f"{CORE_API}/instances", "GET", "", "Retrieve instances")
 
 
 @instances.route(f"{PREFIX}", methods=["PUT"])
+@jwt_required()
 def upsert_instance():
     """Upsert one or more BunkerWeb instances"""
     args = request.args.to_dict()
@@ -35,7 +38,8 @@ def upsert_instance():
     return get_core_format_res(f"{CORE_API}/instances?method={method}&reload={reload_instance}", "PUT", data, "Upsert instances")
 
 
-@instances.route(f"{PREFIX}/<str:instance_hostname>", methods=["DELETE"])
+@instances.route(f"{PREFIX}/<string:instance_hostname>", methods=["DELETE"])
+@jwt_required()
 def delete_instance(instance_hostname):
     """Delete BunkerWeb instance"""
     # is_valid_model(instance_hostname, Model) True | False
@@ -45,7 +49,8 @@ def delete_instance(instance_hostname):
     return get_core_format_res(f"{CORE_API}/instances/{instance_hostname}?method={method}", "DELETE", "", f"Delete instance {instance_hostname}")
 
 
-@instances.route(f"{PREFIX}/<str:instance_hostname>/<str:action>", methods=["POST"])
+@instances.route(f"{PREFIX}/<string:instance_hostname>/<string:action>", methods=["POST"])
+@jwt_required()
 def action_instance(instance_hostname, action):
     """Send action to a BunkerWeb instance"""
     # is_valid_model(instance_hostname, Model) True | False

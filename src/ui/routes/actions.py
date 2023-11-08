@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
 from flask import request
+from flask_jwt_extended import jwt_required
 
 from utils import get_core_format_res
 import json
@@ -16,12 +17,14 @@ actions = Blueprint("actions", __name__)
 
 
 @actions.route(f"{PREFIX}", methods=["GET"])
+@jwt_required()
 def get_actions():
     """Get all actions"""
     return get_core_format_res(f"{CORE_API}/actions", "GET", "", "Retrieve actions")
 
 
 @actions.route(f"{PREFIX}", methods=["POST"])
+@jwt_required()
 def create_action():
     """Create new action"""
     action_data = request.get_json()

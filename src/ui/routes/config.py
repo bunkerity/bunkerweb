@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
 from flask import request
+from flask_jwt_extended import jwt_required
 
 from utils import get_core_format_res
 import json
@@ -16,6 +17,7 @@ config = Blueprint("config", __name__)
 
 
 @config.route(f"{PREFIX}", methods=["GET"])
+@jwt_required()
 def get_config():
     """Get complete config"""
     args = request.args.to_dict()
@@ -27,6 +29,7 @@ def get_config():
 
 
 @config.route(f"{PREFIX}", methods=["PUT"])
+@jwt_required()
 def update_config():
     """Update whole config"""
     args = request.args.to_dict()
@@ -39,6 +42,7 @@ def update_config():
 
 
 @config.route(f"{PREFIX}/global", methods=["PUT"])
+@jwt_required()
 def update_global_config():
     """Update global config"""
     args = request.args.to_dict()
@@ -50,7 +54,8 @@ def update_global_config():
     return get_core_format_res(f"{CORE_API}/config/global?method={method}", "PUT", data, "Update global config")
 
 
-@config.route(f"{PREFIX}/service/<str:service_name>", methods=["PUT"])
+@config.route(f"{PREFIX}/service/<string:service_name>", methods=["PUT"])
+@jwt_required()
 def update_service_config(service_name):
     """Update service config"""
     # is_valid_model(service_name, Model) True | False
@@ -63,7 +68,8 @@ def update_service_config(service_name):
     return get_core_format_res(f"{CORE_API}/config/service/{service_name}?method={method}", "PUT", data, f"Update service config {service_name}")
 
 
-@config.route(f"{PREFIX}/service/<str:service_name>", methods=["DELETE"])
+@config.route(f"{PREFIX}/service/<string:service_name>", methods=["DELETE"])
+@jwt_required()
 def delete_service_config(service_name):
     """Delete service config"""
     # is_valid_model(service_name, Model) True | False
