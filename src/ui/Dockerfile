@@ -65,7 +65,7 @@ RUN apk add --no-cache bash nodejs npm && \
   chmod -R 770 /data && \
   chown -R root:ui /usr/share/bunkerweb/INTEGRATION /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   chmod 770 /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
-  chmod 750 /usr/share/bunkerweb/ui/*.js /usr/share/bunkerweb/ui/*.sh /usr/share/bunkerweb/ui/*.py /usr/share/bunkerweb/ui/routers/*.py /usr/share/bunkerweb/deps/python/bin/* /usr/share/bunkerweb/helpers/*.sh && \
+  chmod 750 /usr/share/bunkerweb/ui/*.js /usr/share/bunkerweb/ui/*.sh /usr/share/bunkerweb/ui/*.py /usr/share/bunkerweb/ui/routes/*.py /usr/share/bunkerweb/deps/python/bin/* /usr/share/bunkerweb/helpers/*.sh && \
   chmod 660 /usr/share/bunkerweb/INTEGRATION && \
   chown root:ui /usr/share/bunkerweb/INTEGRATION && \
   mkdir -p /usr/share/bunkerweb/ui/.npm /usr/share/bunkerweb/ui/static && \

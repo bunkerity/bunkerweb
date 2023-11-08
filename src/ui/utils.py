@@ -1,24 +1,26 @@
 # -*- coding: utf-8 -*-
 import requests, traceback, json  # noqa: E401
-from starlette.exceptions import HTTPException as StarletteHTTPException
+from werkzeug.exceptions import HTTPException
+from werkzeug.sansio.response import Response
 
-def get_core_format_res(path, method, data, message, retry = 1):
+
+def get_core_format_res(path, method, data, message, retry=1):
     # Retry limit
-    if retry == 5 :
-            raise StarletteHTTPException(status_code=500, detail="Max retry to core for same request exceeded")
+    if retry == 5:
+        raise HTTPException(response=Response(status=500), description="Max retry to core for same request exceeded")
 
     req = None
     # Try request core
-    try :       
+    try:
         req = req_core(path, method)
-        # Case 503, retry request 
-        if req.status_code == 503 :
+        # Case 503, retry request
+        if req.status_code == 503:
             return get_core_format_res(path, method, data, message, retry + 1)
         # Case error
-        if req == "error" :
-            raise StarletteHTTPException(status_code=500, detail="Impossible to connect to CORE API")
+        if req == "error":
+            raise HTTPException(response=Response(status=500), description="Impossible to connect to CORE API")
     except:
-        raise StarletteHTTPException(status_code=500, detail="Impossible to connect to CORE API")
+        raise HTTPException(response=Response(status=500), description="Impossible to connect to CORE API")
 
     # Case response from core, format response for client
     try:
@@ -35,13 +37,13 @@ def get_core_format_res(path, method, data, message, retry = 1):
         print(req.status_code)
         print(req.status_code == requests.codes.ok)
 
-        return {"type": "success" if str(req.status_code).startswith('2') else "error", "status": str(req.status_code), "message": message, "data": data}
+        return {"type": "success" if str(req.status_code).startswith("2") else "error", "status": str(req.status_code), "message": message, "data": data}
     # Case impossible to format
     except:
         print(traceback.format_exc())
 
 
-def req_core(path, method):
+def req_core(path, method, data=None):
     # Request core api and store response
     req = None
     try:
@@ -59,12 +61,12 @@ def req_core(path, method):
 
         if method.upper() == "PUT":
             req = requests.put(path, data=data)
-        
+
         return req
     # Case no response from core
     except:
-        return 'error'
+        return "error"
+
 
 def exception_res(status_code, path, detail):
     return {"type": "error", "status": status_code, "message": f"{path} {detail}", "data": "{}"}
-

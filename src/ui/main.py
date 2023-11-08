@@ -1,14 +1,11 @@
+# -*- coding: utf-8 -*-
 from flask import Flask
-from flask import jsonify
 from flask import request
 from flask import make_response
 from flask import redirect
-from flask import url_for
 from flask import Blueprint
-from flask import render_template
 
 from flask_jwt_extended import create_access_token
-from flask_jwt_extended import create_refresh_token
 from flask_jwt_extended import set_access_cookies
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
@@ -20,6 +17,8 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 
+import requests
+
 from routes.actions import actions
 from routes.config import config
 from routes.custom_configs import custom_configs
@@ -29,6 +28,7 @@ from routes.logs import logs
 from routes.misc import misc
 from routes.plugins import plugins
 
+from werkzeug.exceptions import HTTPException
 import os
 import json
 from pathlib import Path
@@ -39,13 +39,13 @@ import time
 from ui import UiConfig
 
 # Setup data and logger
-UI_CONFIG = UiConfig("ui", **environ)
+UI_CONFIG = UiConfig("ui", **os.environ)
 CORE_API = UI_CONFIG.CORE_ADDR
 HEALTHY_PATH = Path(sep, "var", "tmp", "bunkerweb", "ui.healthy")
 
 deps_path = join(sep, "usr", "share", "bunkerweb", "utils")
 if deps_path not in sys_path:
-  sys_path.append(deps_path)
+    sys_path.append(deps_path)
 
 from logger import setup_logger  # type: ignore
 
@@ -59,26 +59,30 @@ if not isinstance(UI_CONFIG.MAX_WAIT_RETRIES, int) and (not UI_CONFIG.MAX_WAIT_R
     LOGGER.error(f"Invalid MAX_WAIT_RETRIES provided: {UI_CONFIG.MAX_WAIT_RETRIES}, It must be a positive integer.")
     exit(1)
 
+LOGGER.warning(os.environ)
 
 # Check CORE to run UI
 core_running = False
 
 for x in range(UI_CONFIG.MAX_WAIT_RETRIES):
-    if core_running == True :
+    if core_running:
         break
-    
-    try :
+
+    try:
         req = requests.get(f"{CORE_API}/ping")
         LOGGER.info(f"PING {req} | TRY {x}")
+        if req.status_code == 200:
+            core_running = True
     except:
+        LOGGER.exception(f"Impossible to connect to CORE API | TRY {x}")
         core_running = False
-        
+
     time.sleep(UI_CONFIG.WAIT_RETRY_INTERVAL)
 
-if(core_running == True):
+if core_running:
     LOGGER.info("PING CORE SUCCEED")
 
-if(core_running == False):
+if not core_running:
     LOGGER.error("PING CORE FAILED, STOP STARTING UI")
     exit(1)
 
@@ -87,37 +91,55 @@ app = Flask(__name__)
 LOGGER.info("START RUNNING UI")
 
 # Add API routes
-try :
-app.register_blueprint(actions)
-app.register_blueprint(config)
-app.register_blueprint(custom_configs)
-app.register_blueprint(instances)
-app.register_blueprint(jobs)
-app.register_blueprint(logs)
-app.register_blueprint(misc)
-app.register_blueprint(plugins)
+try:
+    app.register_blueprint(actions)
+    app.register_blueprint(config)
+    app.register_blueprint(custom_configs)
+    app.register_blueprint(instances)
+    app.register_blueprint(jobs)
+    app.register_blueprint(logs)
+    app.register_blueprint(misc)
+    app.register_blueprint(plugins)
     LOGGER.info("ADDING API ROUTES")
 except:
     LOGGER.error("ADDING API ROUTES")
     exit(1)
 
 # Handle static files
-try :
-    dashboard = Blueprint('', __name__, static_folder='static')
+try:
+    dashboard = Blueprint("", __name__, static_folder="static")
     LOGGER.info("ADDING STATIC FILES")
-except :
+except:
     LOGGER.error("ADDING STATIC FILES")
     exit(1)
 
 ### JWT TOKEN LOGIC
 
 # Setup the Flask-JWT-Extended extension
-app.config["JWT_TOKEN_LOCATION"] = ["cookies"] # How JWT is handle
-app.config["JWT_COOKIE_SECURE"] = False # ONLY HTTPS
+app.config["JWT_TOKEN_LOCATION"] = ["cookies"]  # How JWT is handle
+app.config["JWT_COOKIE_SECURE"] = False  # ONLY HTTPS
 app.config["JWT_SECRET_KEY"] = "super-secret"  # Change for prod
-app.config['JWT_COOKIE_CSRF_PROTECT'] = True # Add CSRF TOKEN check
+app.config["JWT_COOKIE_CSRF_PROTECT"] = True  # Add CSRF TOKEN check
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
 jwt = JWTManager(app)
+
+
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+    """Return JSON instead of HTML for HTTP errors."""
+    # start with the correct headers and status code from the error
+    response = e.get_response()
+    # replace the body with JSON
+    response.data = json.dumps(
+        {
+            "code": e.code,
+            "name": e.name,
+            "description": e.description,
+        }
+    )
+    response.content_type = "application/json"
+    return response
+
 
 @app.after_request
 def refresh_expiring_jwts(response):
@@ -146,19 +168,21 @@ def login():
     username = request.form.get("username", None)
     password = request.form.get("password", None)
     if username != "test" or password != "test":
-        return make_response(redirect('/', 302))
+        return make_response(redirect("/", 302))
 
     access_token = create_access_token(identity=username)
-    resp = make_response(redirect('/home', 302))
+    resp = make_response(redirect("/home", 302))
     set_access_cookies(resp, access_token)
     return resp
+
 
 # Remove cookies
 @app.route("/logout", methods=["POST"])
 def logout():
-    resp = make_response('/', 302)
+    resp = make_response("/", 302)
     unset_jwt_cookies(resp)
     return resp
+
 
 # Protect a route with jwt_required, which will kick out requests
 # without a valid JWT present.
@@ -167,8 +191,9 @@ def logout():
 @jwt_required()
 def protected():
     # Access the identity of the current user with get_jwt_identity
-    current_user = get_jwt_identity()
+    # current_user = get_jwt_identity() # TODO
     return "<p>Protected access</p>"
+
 
 # Get data from fetch retrieving document.cookie
 #
@@ -176,17 +201,20 @@ def protected():
 #
 @app.route("/test", methods=["GET"])
 @jwt_required()
-def  test():
+def test():
     return json.dumps({"test": "test"})
+
 
 @app.route("/")
 def hello_world():
     return "<form action='/login' method='post'><input name='username' type='text'/><input name='password' type='text'><button type='submit'>submit</button></form>"
 
+
 @app.route("/home")
 @jwt_required()
 def homepage():
     return "<p>Connected</p><form action='/logout' method='post'><button type='submit'>logout</button></form>"
+
 
 # Everything worked
 if not HEALTHY_PATH.exists():
