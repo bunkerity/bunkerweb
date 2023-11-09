@@ -3,7 +3,7 @@ certbot==2.7.4
 croniter==2.0.1
 fastapi==0.104.1
 gunicorn==21.2.0
-maxminddb==2.4.0
+maxminddb==2.5.0
 pydantic_settings==2.0.3
 python-magic==0.4.27
 python_multipart==0.0.6
