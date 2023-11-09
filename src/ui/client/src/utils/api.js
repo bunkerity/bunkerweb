@@ -16,7 +16,7 @@ export async function fetchAPI(
   method,
   body = false,
   state = null,
-  addFeedback = null,
+  addFeedback = null
 ) {
   // Block scope state object if any passed to avoid error
   !state ? (state = { isPend: false, isErr: false, data: {} }) : false;
@@ -28,8 +28,8 @@ export async function fetchAPI(
   return await fetch(`${baseURL}${api}`, {
     method: method.toUpperCase(),
     headers: {
-      Authorization: `Bearer ${""}`,
       "Content-Type": "application/json",
+      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
     },
     // Only when exist and possible
     ...(body &&
@@ -56,10 +56,16 @@ export async function fetchAPI(
         ? addFeedback(
             err["type"] || "error",
             err["status"] || 500,
-            err["message"] || "Internal Server Error",
+            err["message"] || "Internal Server Error"
           )
         : false;
       // Set custom error data before throwing err
       return err;
     });
+}
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
 }

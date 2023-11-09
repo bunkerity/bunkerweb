@@ -44,21 +44,21 @@ def setup_jwt(app):
             return response
 
     # Create a route to authenticate your users and return JWTs
-    @app.route("/add-jwt", methods=["POST"])
+    @app.route("/login", methods=["POST"])
     def add_jwt():
         username = request.form.get("username", None)
         password = request.form.get("password", None)
         if username != UI_CONFIG.ADMIN_USERNAME or password != UI_CONFIG.ADMIN_PASSWORD:
-            return make_response(redirect("/", 302))
+            return make_response(redirect("/admin/login?error=True", 302))
 
         access_token = create_access_token(identity=username)
-        resp = make_response(redirect("/home", 302))
+        resp = make_response(redirect("/admin/home", 302))
         set_access_cookies(resp, access_token)
         return resp
 
     # Remove cookies
-    @app.route("/delete-jwt", methods=["POST"])
+    @app.route("/logout", methods=["POST"])
     def delete_jwt():
-        resp = make_response("/", 302)
+        resp = make_response(redirect("/admin/login", 302))
         unset_jwt_cookies(resp)
         return resp

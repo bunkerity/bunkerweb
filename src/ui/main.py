@@ -59,12 +59,12 @@ for x in range(UI_CONFIG.MAX_WAIT_RETRIES):
 
     try:
         req = requests.get(f"{CORE_API}/ping")
-        LOGGER.info(f"PING {req} | TRY {x}")
         if req.status_code == 200:
             core_running = True
     except:
         core_running = False
 
+    LOGGER.info(f"PING {CORE_API}/ping | TRY {x}")
     time.sleep(UI_CONFIG.WAIT_RETRY_INTERVAL)
 
 if core_running:
@@ -107,10 +107,16 @@ try:
     assets = Blueprint("assets", __name__, static_folder="static/assets")
     images = Blueprint("images", __name__, static_folder="static/images")
     style = Blueprint("style", __name__, static_folder="static/css")
+    js = Blueprint("js", __name__, static_folder="static/js")
+    json_ = Blueprint("json", __name__, static_folder="static/json")
+    fonts = Blueprint("webfonts", __name__, static_folder="static/webfonts")
     app.register_blueprint(templates)
     app.register_blueprint(assets)
     app.register_blueprint(images)
     app.register_blueprint(style)
+    app.register_blueprint(js)
+    app.register_blueprint(json_)
+    app.register_blueprint(fonts)
     LOGGER.info("ADDING TEMPLATES AND STATIC FILES")
 except:
     LOGGER.exception("ADDING API ROUTES")

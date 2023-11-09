@@ -3,7 +3,7 @@ import { defineProps, defineEmits } from "vue";
 
 const props = defineProps({
   id: {
-    type: Number,
+    type: [Number, String],
     required: true,
   },
   type: {
