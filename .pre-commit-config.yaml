@@ -64,7 +64,7 @@ repos:
       - id: codespell
         name: Codespell Spell Checker
         exclude: (^src/(common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*)$
-        entry: codespell --ignore-regex="(tabEl|Widgits)" --skip src/ui/static/js/utils/flatpickr.js,CHANGELOG.md
+        entry: codespell --ignore-regex="(tabEl|Widgits)" --skip src/ui/static/js/utils/flatpickr.js,src/ui/client/public/js/tsparticles.bundle.min.js,CHANGELOG.md
         language: python
         types: [text]
 
