@@ -1,6 +1,6 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
-exclude: (^LICENSE.md$|^src/VERSION$|^src/(bw/misc/root-ca.pem$|deps/src/|common/core/modsecurity/files|ui/(client/src/assets/script/editor/|static/js/(editor/|utils/purify/|tsparticles\.bundle\.min\.js)))|\.(svg|drawio|patch\d?|ascii|tf|tftpl)$)
+exclude: (^LICENSE.md$|^src/VERSION$|^src/(bw/misc/root-ca.pem$|deps/src/|common/core/modsecurity/files|ui/client/(public/(css/style.css|js/tsparticles.bundle.min.js|webfonts/)|src/assets/script/editor/))|\.(svg|drawio|patch\d?|ascii|tf|tftpl)$)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: c4a0b883114b00d8d76b479c820ce7950211c99b # frozen: v4.5.0
@@ -19,7 +19,7 @@ repos:
       - id: check-case-conflict
 
   - repo: https://github.com/ambv/black
-    rev: 744d23b34800c06e10272149b70752396e90eeb8 # frozen: 23.10.1
+    rev: 2a1c67e0b2f81df602ec1f6e7aeb030b9709dc7c # frozen: 23.11.0
     hooks:
       - id: black
         name: Black Python Formatter
@@ -64,7 +64,7 @@ repos:
       - id: codespell
         name: Codespell Spell Checker
         exclude: (^src/(common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*)$
-        entry: codespell --ignore-regex="(tabEl|Widgits)" --skip src/ui/static/js/utils/flatpickr.js,src/ui/client/public/js/tsparticles.bundle.min.js,CHANGELOG.md
+        entry: codespell --ignore-regex="(Widgits)" --skip CHANGELOG.md
         language: python
         types: [text]
 

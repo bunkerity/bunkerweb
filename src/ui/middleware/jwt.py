@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask import request
 from flask import make_response
 from flask import redirect
@@ -26,7 +27,7 @@ def setup_jwt(app):
     app.config["JWT_SECRET_KEY"] = "super-secret"  # Change for prod
     app.config["JWT_COOKIE_CSRF_PROTECT"] = True  # Add CSRF TOKEN check
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
-    jwt = JWTManager(app)
+    JWTManager(app)
 
     @app.after_request
     def refresh_expiring_jwts(response):
