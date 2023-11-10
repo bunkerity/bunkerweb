@@ -1,9 +1,6 @@
-site/
 .idea/
 .vscode/
 __pycache__
 env
 node_modules
-/src/ui/v2/ui
-/src/ui/static
 .mypy_cache
