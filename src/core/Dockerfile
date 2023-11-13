@@ -1,5 +1,4 @@
-# TODO: update to 3.12.0 when uvloop supports it
-FROM python:3.11.6-alpine3.18@sha256:527e0b0d92686a3ab1af3e65fdef12a47a9359f298dfd9b8d36617808d4029e9 AS builder
+FROM python:3.12.0-alpine3.18@sha256:a5d1738d6abbdff3e81c10b7f86923ebcb340ca536e21e8c5ee7d938d263dba1 AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache --virtual .build-deps g++ gcc build-base linux-headers
@@ -42,8 +41,7 @@ COPY src/VERSION VERSION
 
 COPY src/core core
 
-# TODO: update to 3.12.0 when uvloop supports it
-FROM python:3.11.6-alpine3.18@sha256:527e0b0d92686a3ab1af3e65fdef12a47a9359f298dfd9b8d36617808d4029e9
+FROM python:3.12.0-alpine3.18@sha256:a5d1738d6abbdff3e81c10b7f86923ebcb340ca536e21e8c5ee7d938d263dba1
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -87,7 +85,7 @@ COPY --chown=root:core src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb
 RUN chmod 770 /var/tmp/bunkerweb/asn.mmdb /var/tmp/bunkerweb/country.mmdb
 
 # Fix CVEs
-# There are no CVE to fix for the moment
+RUN apk add --no-cache "libcrypto3>=3.1.4-r1" "libssl3>=3.1.4-r1"
 
 VOLUME /data
 
