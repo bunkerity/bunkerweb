@@ -16,6 +16,7 @@ from routes.dashboard import dashboard
 
 from middleware.jwt import setup_jwt
 
+from utils import setupUIException, validate_env_data
 
 from werkzeug.exceptions import HTTPException
 import os
@@ -40,13 +41,8 @@ from logger import setup_logger  # type: ignore
 
 LOGGER: Logger = setup_logger("UI")
 
-# Validate some data
-if not isinstance(UI_CONFIG.WAIT_RETRY_INTERVAL, int) and (not UI_CONFIG.WAIT_RETRY_INTERVAL.isdigit() or int(UI_CONFIG.WAIT_RETRY_INTERVAL) < 1):
-    LOGGER.error(f"Invalid WAIT_RETRY_INTERVAL provided: {UI_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer.")
-    exit(1)
-if not isinstance(UI_CONFIG.MAX_WAIT_RETRIES, int) and (not UI_CONFIG.MAX_WAIT_RETRIES.isdigit() or int(UI_CONFIG.MAX_WAIT_RETRIES) < 1):
-    LOGGER.error(f"Invalid MAX_WAIT_RETRIES provided: {UI_CONFIG.MAX_WAIT_RETRIES}, It must be a positive integer.")
-    exit(1)
+# Validate some env data
+validate_env_data()
 
 LOGGER.warning(os.environ)
 
@@ -55,6 +51,7 @@ core_running = False
 
 for x in range(UI_CONFIG.MAX_WAIT_RETRIES):
     if core_running:
+        LOGGER.info("PING CORE SUCCEED")
         break
 
     try:
@@ -67,12 +64,8 @@ for x in range(UI_CONFIG.MAX_WAIT_RETRIES):
     LOGGER.info(f"PING {CORE_API}/ping | TRY {x}")
     time.sleep(UI_CONFIG.WAIT_RETRY_INTERVAL)
 
-if core_running:
-    LOGGER.info("PING CORE SUCCEED")
-
 if not core_running:
-    LOGGER.error("PING CORE FAILED, STOP STARTING UI")
-    exit(1)
+    raise setupUIException("exception", "PING CORE FAILED, STOP STARTING UI")
 
 # Start UI app
 app = Flask(__name__)
@@ -82,8 +75,8 @@ try:
     setup_jwt(app)
     LOGGER.info("ADDING MIDDLEWARE")
 except:
-    LOGGER.exception("ADDING API ROUTES")
-    exit(1)
+    raise setupUIException("exception", "ADDING MIDDLEWARE")
+
 
 # Add API routes
 try:
@@ -97,8 +90,8 @@ try:
     app.register_blueprint(plugins)
     LOGGER.info("ADDING API ROUTES")
 except:
-    LOGGER.exception("ADDING API ROUTES")
-    exit(1)
+    raise setupUIException("exception", "ADDING API ROUTES")
+
 
 # Add dashboard routes and related templates / files
 try:
@@ -119,8 +112,7 @@ try:
     app.register_blueprint(fonts)
     LOGGER.info("ADDING TEMPLATES AND STATIC FILES")
 except:
-    LOGGER.exception("ADDING API ROUTES")
-    exit(1)
+    raise setupUIException("exception", "ADDING TEMPLATES AND STATIC FILES")
 
 
 @app.errorhandler(HTTPException)

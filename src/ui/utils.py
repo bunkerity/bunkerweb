@@ -2,6 +2,23 @@
 import requests, traceback, json  # noqa: E401
 from werkzeug.exceptions import HTTPException
 from werkzeug.sansio.response import Response
+from werkzeug.exceptions import HTTPException
+import json
+from logging import Logger
+from os.path import join, sep
+from sys import path as sys_path
+import os
+from ui import UiConfig
+
+deps_path = join(sep, "usr", "share", "bunkerweb", "utils")
+if deps_path not in sys_path:
+    sys_path.append(deps_path)
+
+from logger import setup_logger  # type: ignore
+
+LOGGER: Logger = setup_logger("UI")
+
+UI_CONFIG = UiConfig("ui", **os.environ)
 
 
 def get_core_format_res(path, method, data, message, retry=1):
@@ -68,5 +85,25 @@ def req_core(path, method, data=None):
         return "error"
 
 
-def exception_res(status_code, path, detail):
-    return {"type": "error", "status": status_code, "message": f"{path} {detail}", "data": "{}"}
+def default_res(type="error", status_code="500", path="", detail="Internal Server Error", data={}):
+    return {"type": type, "status": status_code, "message": f"{path} {detail}", "data": data}
+
+
+def validate_env_data():
+    if not isinstance(UI_CONFIG.WAIT_RETRY_INTERVAL, int) and (not UI_CONFIG.WAIT_RETRY_INTERVAL.isdigit() or int(UI_CONFIG.WAIT_RETRY_INTERVAL) < 1):
+        raise setupUIException("error", f"Invalid WAIT_RETRY_INTERVAL provided: {UI_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer.")
+
+    if not isinstance(UI_CONFIG.MAX_WAIT_RETRIES, int) and (not UI_CONFIG.MAX_WAIT_RETRIES.isdigit() or int(UI_CONFIG.MAX_WAIT_RETRIES) < 1):
+        raise setupUIException("error", f"Invalid MAX_WAIT_RETRIES provided: {UI_CONFIG.MAX_WAIT_RETRIES}, It must be a positive integer.")
+
+
+class setupUIException(Exception):
+    def __init__(self, log_type, msg):
+        if log_type == "error":
+            LOGGER.error(msg)
+
+        if log_type == "exception":
+            LOGGER.exception(msg)
+
+        if not UI_CONFIG.EXIT_ON_FAILURE or UI_CONFIG.EXIT_ON_FAILURE == "yes":
+            exit(1)

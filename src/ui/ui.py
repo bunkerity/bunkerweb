@@ -20,6 +20,7 @@ class UiConfig(YamlBaseSettings):
     CORE_TOKEN: str = ""
     MAX_WORKERS: Union[str, int] = max((cpu_count() or 1) - 1, 1)
     MAX_THREADS: Union[str, int] = int(MAX_WORKERS) * 2 if isinstance(MAX_WORKERS, int) or MAX_WORKERS.isdigit() else 2
+    EXIT_ON_FAILURE: str = "yes"
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = "changeme"
     WAIT_RETRY_INTERVAL: Union[str, int] = 5
