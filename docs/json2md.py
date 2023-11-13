@@ -87,4 +87,4 @@ content = doc.read()
 doc = StringIO(content.replace("\\|", "|"))
 doc.seek(0)
 
-Path("docs", "settings.md").write_text(doc.read())
+Path("docs", "settings.md").write_text(doc.read(), encoding="utf-8")

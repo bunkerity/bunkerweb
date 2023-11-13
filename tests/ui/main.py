@@ -5,7 +5,6 @@ from functools import partial
 from os import getenv, listdir
 from os.path import join
 from pathlib import Path
-from subprocess import PIPE, run
 from time import sleep
 from traceback import format_exc
 from typing import List, Union
@@ -20,6 +19,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException, WebDriverException
+from subprocess import run, PIPE
 
 ready = False
 retries = 0
