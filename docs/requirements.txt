@@ -272,17 +272,17 @@ pathvalidate==3.2.0 \
     --hash=sha256:5e8378cf6712bff67fbe7a8307d99fa8c1a0cb28aa477056f8fc374f0dff24ad \
     --hash=sha256:cc593caa6299b22b37f228148257997e2fa850eea2daf7e4cc9205cef6908dee
     # via pytablewriter
-platformdirs==3.11.0 \
-    --hash=sha256:cf8ee52a3afdb965072dcc652433e0c7e3e40cf5ea1477cd4b3b1d2eb75495b3 \
-    --hash=sha256:e9d171d00af68be50e9202731309c4e658fd8bc76f55c11c7dd760d023bda68e
+platformdirs==4.0.0 \
+    --hash=sha256:118c954d7e949b35437270383a3f2531e99dd93cf7ce4dc8340d3356d30f173b \
+    --hash=sha256:cb633b2bcf10c51af60beb0ab06d2f1d69064b43abf4c185ca6b28865f3f9731
     # via mkdocs
 pygments==2.16.1 \
     --hash=sha256:13fc09fa63bc8d8671a6d247e1eb303c4b343eaee81d861f3404db2935653692 \
     --hash=sha256:1daff0494820c69bc8941e407aa20f577374ee88364ee10a98fdbe0aece96e29
     # via mkdocs-material
-pymdown-extensions==10.3.1 \
-    --hash=sha256:8cba67beb2a1318cdaf742d09dff7c0fc4cafcc290147ade0f8fb7b71522711a \
-    --hash=sha256:f6c79941498a458852853872e379e7bab63888361ba20992fc8b4f8a9b61735e
+pymdown-extensions==10.4 \
+    --hash=sha256:bc46f11749ecd4d6b71cf62396104b4a200bad3498cb0f5dad1b8502fe461a35 \
+    --hash=sha256:cfc28d6a09d19448bcbf8eee3ce098c7d17ff99f7bd3069db4819af181212037
     # via mkdocs-material
 pyparsing==3.1.1 \
     --hash=sha256:32c7c0b711493c72ff18a981d24f28aaf9c1fb7ed5e9667c9e84e3db623bdbfb \
