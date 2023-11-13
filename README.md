@@ -288,7 +288,7 @@ Check the [settings section](https://docs.bunkerweb.io/1.5.3/settings) of the do
 
 <p align="center">
 	<a href="https://www.youtube.com/watch?v=Ao20SfvQyr4">
-		<img src="https://img.youtube.com/vi/Ao20SfvQyr4/hqdefault.jpg" />
+		<img src="https://github.com/bunkerity/bunkerweb/raw/v1.5.3/docs/assets/img/user_interface_demo.png" height="300" />
 	</a>
 </p>
 
