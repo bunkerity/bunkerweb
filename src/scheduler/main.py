@@ -291,7 +291,7 @@ if __name__ == "__main__":
         env["DATABASE_URI"] = db.database_uri
 
         # Instantiate scheduler
-        SCHEDULER = JobScheduler(env.copy() | environ.copy(), logger, INTEGRATION)
+        SCHEDULER = JobScheduler(env.copy() | environ.copy(), logger, INTEGRATION, db=db)
 
         if INTEGRATION in ("Docker", "Swarm", "Kubernetes", "Autoconf"):
             # Automatically setup the scheduler apis

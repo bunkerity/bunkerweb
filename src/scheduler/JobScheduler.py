@@ -38,13 +38,14 @@ class JobScheduler(ApiCaller):
         logger: Optional[Logger] = None,
         integration: str = "Linux",
         *,
+        db: Optional[Database] = None,
         lock: Optional[Lock] = None,
         apis: Optional[list] = None,
     ):
         super().__init__(apis or [])
         self.__logger = logger or setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
         self.__integration = integration
-        self.__db = Database(self.__logger)
+        self.__db = db or Database(self.__logger)
         self.__env = env or {}
         self.__env.update(environ)
         self.__jobs = self.__get_jobs()
