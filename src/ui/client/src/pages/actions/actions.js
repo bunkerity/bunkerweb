@@ -1,6 +1,8 @@
 import { createApp } from "vue";
 import Actions from "./Actions.vue";
 import { createPinia } from "pinia";
+import { getI18n } from "@utils/lang.js";
+
 const pinia = createPinia();
 
-createApp(Actions).use(pinia).mount("#app");
+createApp(Actions).use(pinia).use(getI18n("actions")).mount("#app");

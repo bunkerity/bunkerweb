@@ -2,11 +2,13 @@
 // Components
 import Footer from "@components/Footer.vue";
 import Loader from "@components/Loader.vue";
+import LangSwitch from "@components/LangSwitch.vue";
 import Menu from "@components/Menu.vue";
 import FeedbackStructure from "@components/Feedback/Structure.vue";
 import News from "@components/News.vue";
 import Header from "@components/Header.vue";
 import Refresh from "@components/Refresh.vue";
+import LangSwitch from "../components/LangSwitch.vue";
 </script>
 
 <template>
@@ -14,7 +16,7 @@ import Refresh from "@components/Refresh.vue";
     >Your browser does not support JavaScript!</noscript
   >
   <Loader />
-
+  <LangSwitch />
   <!-- info -->
   <main class="content-container">
     <Menu />

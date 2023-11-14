@@ -18,6 +18,7 @@ export default defineConfig({
       "@pages": resolve(__dirname, "./src/pages"),
       "@components": resolve(__dirname, "./src/components"),
       "@assets": resolve(__dirname, "./src/assets"),
+      "@lang": resolve(__dirname, "./src/lang"),
     },
   },
   build: {
@@ -30,7 +31,7 @@ export default defineConfig({
         configs: resolve(__dirname, "./src/pages/configs/index.html"),
         "global-config": resolve(
           __dirname,
-          "./src/pages/global-config/index.html",
+          "./src/pages/global-config/index.html"
         ),
         instances: resolve(__dirname, "./src/pages/instances/index.html"),
         jobs: resolve(__dirname, "./src/pages/jobs/index.html"),

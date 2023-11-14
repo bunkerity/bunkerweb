@@ -1,0 +1,10 @@
+{
+  "login": {
+    "title": "Connexion",
+    "username": "utilisateur",
+    "username_placeholder": "entrer nom utilisateur",
+    "password": "mot de passe",
+    "password_placeholder": "enter mot de passe",
+    "log_button": "Se connecter"
+  }
+}

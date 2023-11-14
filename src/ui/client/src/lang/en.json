@@ -1,0 +1,10 @@
+{
+  "login": {
+    "title": "Log in",
+    "username": "username",
+    "username_placeholder": "entrer username",
+    "password": "password",
+    "password_placeholder": "enter password",
+    "log_button": "Log in"
+  }
+}

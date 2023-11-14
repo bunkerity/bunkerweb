@@ -1,5 +1,6 @@
 <script setup>
 import Loader from "@components/Loader.vue";
+import LangSwitch from "@components/LangSwitch.vue";
 import FeedbackAlert from "@components/Feedback/Alert.vue";
 import { onMounted, reactive } from "vue";
 const data = reactive({
@@ -22,6 +23,7 @@ onMounted(() => {
 
 <template>
   <Loader />
+  <LangSwitch />
   <div class="fixed bottom-4 right-0 min-w-[340px]">
     <FeedbackAlert
       @close="data.isErr = false"
@@ -46,7 +48,7 @@ onMounted(() => {
           />
         </div>
         <h1 class="hidden lg:block text-center font-bold dark:text-white mb-8">
-          Log in
+          {{ $t("title") }}
         </h1>
         <form action="/login" method="POST" autocomplete="off">
           <!-- username inpt-->
@@ -54,14 +56,14 @@ onMounted(() => {
             <h5
               class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300"
             >
-              Username
+              {{ $t("username") }}
             </h5>
             <input
               type="username"
               id="username"
               name="username"
               class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-              placeholder="enter username"
+              :placeholder="$t('username_placeholder')"
               pattern="(.*?)"
               required
             />
@@ -72,14 +74,14 @@ onMounted(() => {
             <h5
               class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300"
             >
-              Password
+              {{ $t("password") }}
             </h5>
             <input
               type="password"
               id="password"
               name="password"
               class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-              placeholder="enter password"
+              :placeholder="$t('password_placeholder')"
               pattern="(.*?)"
               required
             />
@@ -93,7 +95,7 @@ onMounted(() => {
               value="login"
               class="my-4 dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
             >
-              Log in
+              {{ $t("log_button") }}
             </button>
           </div>
         </form>
