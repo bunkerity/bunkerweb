@@ -7,6 +7,62 @@
     "password_placeholder": "enter password",
     "log_button": "Log in"
   },
+  "dashboard": {
+    "menu": {
+      "nav": {
+        "home": "home",
+        "instances": "instances",
+        "global_config": "global config",
+        "services": "services",
+        "configs": "configs",
+        "plugins": "plugins",
+        "jobs": "jobs",
+        "bans": "bans",
+        "actions": "actions"
+      },
+      "socials": {
+        "alt_link_twitter": "link to Twitter",
+        "alt_link_linkedin": "link to Linkedin",
+        "alt_link_discord": "link to Discord",
+        "alt_link_github": "link to Github"
+      },
+      "plugins": {
+        "title": "plugin pages",
+        "none": {
+          "description": "want your own plugins ?",
+          "check_doc": "check doc"
+        }
+      },
+      "mode": {
+        "light": "light mode",
+        "dark": "dark mode"
+      },
+      "log_out": "log out"
+    },
+    "actions": {
+      "title": "actions",
+      "subtitle": "Get all feedbacks",
+      "tabs": {
+        "ui": "ui",
+        "core": "core",
+        "global": "global"
+      }
+    },
+    "news": {
+      "title": "news",
+      "subtitle": "stay up to date.",
+      "fetch_error": "Impossible to connect to blog news.",
+      "newsletter": {
+        "title": "Join the newsletter",
+        "placeholder": "john.doe@example.com",
+        "privacy": {
+          "text": "I've read and agree to the",
+          "text_link": "privacy policy"
+        },
+        "subscribe_button": "subscribe"
+      }
+    }
+  },
   "home": {
     "version": {
       "api": {
@@ -27,7 +83,7 @@
       "card": {
         "name": "instances",
         "up": "up",
-        "stop": "stop"
+        "down": "down"
       }
     },
     "services": {

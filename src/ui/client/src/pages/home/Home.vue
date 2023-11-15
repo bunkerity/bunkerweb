@@ -157,20 +157,20 @@ onMounted(() => {
       :isErr="version.isErr"
       :isPend="version.isPend"
       :textState="{
-        isPend: $t('version.api.pending'),
-        isErr: $t('version.api.error'),
+        isPend: $t('home.version.api.pending'),
+        isErr: $t('home.version.api.error'),
       }"
     />
     <HomeCardStructure
       v-if="!version.isPend && !version.isErr"
       :href="'#'"
-      :name="$t('version.card.name')"
+      :name="$t('home.version.card.name')"
       :count="version.num"
       :detailArr="[
         {
           text: version.isLatest
-            ? $t('version.card.latest')
-            : $t('version.card.is_latest'),
+            ? $t('home.version.card.latest')
+            : $t('home.version.card.is_latest'),
           num: version.isLatest ? '' : version.latest,
           textClass: version.isLatest ? 'text-green-500' : 'text-yellow-500',
           numClass: version.isLatest ? 'text-green-500' : 'text-yellow-500',
@@ -187,24 +187,24 @@ onMounted(() => {
       :isErr="instances.isErr"
       :isPend="instances.isPend"
       :textState="{
-        isPend: $t('instances.api.pending'),
-        isErr: $t('instances.api.error'),
+        isPend: $t('home.instances.api.pending'),
+        isErr: $t('home.instances.api.error'),
       }"
     />
     <HomeCardStructure
       v-if="!instances.isPend && !instances.isErr && instances.data"
       :href="'/admin/instances'"
-      :name="$t('instances.card.name')"
+      :name="$t('home.instances.card.name')"
       :count="instances.count || '0'"
       :detailArr="[
         {
-          text: $t('instances.card.up'),
+          text: $t('home.instances.card.up'),
           num: instances.up,
           textClass: 'text-green-500',
           numClass: 'text-green-500',
         },
         {
-          text: $t('instances.card.down'),
+          text: $t('home.instances.card.down'),
           num: instances.down,
           textClass: 'text-red-500',
           numClass: 'text-red-500',
@@ -221,24 +221,24 @@ onMounted(() => {
       :isErr="plugins.isErr"
       :isPend="plugins.isPend"
       :textState="{
-        isPend: $t('services.api.pending'),
-        isErr: $t('services.api.error'),
+        isPend: $t('home.services.api.pending'),
+        isErr: $t('home.services.api.error'),
       }"
     />
     <HomeCardStructure
       v-if="!plugins.isPend && !plugins.isErr && plugins.data.length > 0"
       :href="'/admin/services'"
-      :name="$t('services.card.name')"
+      :name="$t('home.services.card.name')"
       :count="plugins.servicesNum || '0'"
       :detailArr="[
         {
-          text: $t('services.card.ui'),
+          text: $t('home.services.card.ui'),
           num: '',
           textClass: 'text-sky-500',
           numClass: 'text-sky-500',
         },
         {
-          text: $t('services.card.autoconf'),
+          text: $t('home.services.card.autoconf'),
           num: '',
           textClass: 'text-sky-500',
           numClass: 'text-sky-500',
@@ -254,24 +254,24 @@ onMounted(() => {
       :isErr="conf.isErr"
       :isPend="conf.isPend"
       :textState="{
-        isPend: $t('plugins.api.pending'),
-        isErr: $t('plugins.api.error'),
+        isPend: $t('home.plugins.api.pending'),
+        isErr: $t('home.plugins.api.error'),
       }"
     />
     <HomeCardStructure
       v-if="!conf.isPend && !conf.isErr"
       :href="'/admin/plugins'"
-      :name="$t('plugins.card.name')"
+      :name="$t('home.plugins.card.name')"
       :count="plugins.num || '0'"
       :detailArr="[
         {
-          text: $t('plugins.card.internal'),
+          text: $t('home.plugins.card.internal'),
           num: plugins.internal || '0',
           textClass: 'text-sky-500',
           numClass: 'text-sky-500',
         },
         {
-          text: $t('plugins.card.external'),
+          text: $t('home.plugins.card.external'),
           num: plugins.external || '0',
           textClass: 'text-sky-500',
           numClass: 'text-sky-500',

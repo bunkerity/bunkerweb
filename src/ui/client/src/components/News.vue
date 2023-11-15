@@ -51,8 +51,8 @@ const news = reactive({
     <!-- header -->
     <div class="news-sidebar-header">
       <div class="float-left">
-        <h5 class="news-sidebar-title">NEWS</h5>
-        <p class="news-sidebar-subtitle">Stay up to date.</p>
+        <h5 class="news-sidebar-title">{{ $t("dashboard.news.title") }}</h5>
+        <p class="news-sidebar-subtitle">{{ $t("dashboard.news.subtitle") }}</p>
       </div>
     </div>
     <hr class="line-separator" />
@@ -60,7 +60,7 @@ const news = reactive({
     <!-- news-->
     <div v-if="news.posts.length === 0" class="flex-auto overflow-auto">
       <p class="news-sidebar-no-posts-content">
-        Impossible to connect to blog news.
+        {{ $t("dashboard.news.fetch_error") }}
       </p>
     </div>
     <!-- end news-->
@@ -74,14 +74,16 @@ const news = reactive({
       class="news-newsletter-form"
       id="subscribe-newsletter"
     >
-      <h5 class="news-newsletter-title">JOIN THE NEWSLETTER</h5>
+      <h5 class="news-newsletter-title">
+        {{ $t("dashboard.news.newsletter.title") }}
+      </h5>
       <div class="flex">
         <input
           type="text"
           id="newsletter-email"
           name="EMAIL"
           class="news-newsletter-input"
-          placeholder="John.doe@example.com"
+          :placeholder="$t('dashboard.news.newsletter.placeholder')"
           pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}$"
           required
         />
@@ -113,13 +115,14 @@ const news = reactive({
           </div>
         </div>
         <label class="news-newsletter-checkbox-content" for="newsletter-check">
-          I've read and agree to the
+          {{ $t("dashboard.news.newsletter.privacy.text") }}
           <a
             class="italic"
             href="https://www.bunkerity.com/privacy-policy/"
             target="_blank"
-            >privacy policy</a
           >
+            {{ $t("dashboard.news.newsletter.privacy.text_link") }}
+          </a>
         </label>
       </div>
       <button
@@ -127,7 +130,7 @@ const news = reactive({
         formtarget="_blank"
         class="news-newsletter-confirm-btn"
       >
-        Subscribe
+        {{ $t("dashboard.news.newsletter.subscrive_button") }}
       </button>
     </form>
     <!-- end newsletter -->

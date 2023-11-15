@@ -7,16 +7,25 @@ function getAllLang() {
   return { fr: fr, en: en };
 }
 
-function getAllLangCurrPage(page) {
+function getAllLangCurrPage(pagesArr) {
   const langs = getAllLang();
+  // for each lang
   for (const [key, value] of Object.entries(langs)) {
-    langs[key] = value[page];
+    console.log(key);
+    const lang = langs[key];
+    const data = {};
+    pagesArr.forEach((page) => {
+      data[page] = value[page];
+    });
+    langs[key] = data;
   }
+  console.log(langs);
   return langs;
 }
 
-export function getI18n(page = false) {
-  const messages = page ? getAllLangCurrPage(page) : getAllLang();
+export function getI18n(pagesArr = []) {
+  const messages =
+    pagesArr.length > 0 ? getAllLangCurrPage(pagesArr) : getAllLang();
 
   const i18n = createI18n({
     legacy: false,

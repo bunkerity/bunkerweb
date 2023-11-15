@@ -177,15 +177,19 @@ onMounted(() => {
     <!-- header -->
     <div class="px-6 pt-4 pb-0 mb-0 border-b-0 rounded-t-2xl">
       <div class="float-left">
-        <h5 class="mt-4 mb-1 dark:text-white font-bold">ACTIONS</h5>
-        <p class="dark:text-white dark:opacity-80 mb-0">Get all feedbacks.</p>
+        <h5 class="mt-4 mb-1 dark:text-white font-bold">
+          {{ $t("dashboard.actions.title") }}
+        </h5>
+        <p class="dark:text-white dark:opacity-80 mb-0">
+          {{ $t("dashboard.actions.subtitle") }}
+        </p>
         <TablistBase
           @tab="(v) => (logs.current = v)"
           :current="logs.current"
           :items="[
-            { text: 'UI', tag: 'ui' },
-            { text: 'core', tag: 'core' },
-            { text: 'global', tag: 'global' },
+            { text: $t('dashboard.actions.tabs.ui'), tag: 'ui' },
+            { text: $t('dashboard.actions.tabs.core'), tag: 'core' },
+            { text: $t('dashboard.actions.tabs.global'), tag: 'global' },
           ]"
         />
       </div>

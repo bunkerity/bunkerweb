@@ -18,53 +18,61 @@ import { getDarkMode } from "@utils/global.js";
 // Navigation with components
 // resolveComponent allow to replace a tag by a real Vue component
 const navList = [
-  { title: "Home", svg: MenuSvgHome, path: "/home" },
+  { title: $t("dashboard.menu.nav.home"), svg: MenuSvgHome, path: "/home" },
   {
-    title: "Instances",
+    title: $t("dashboard.menu.nav.instances"),
     svg: MenuSvgInstances,
     path: "/instances",
   },
 
   {
-    title: "Global config",
+    title: $t("dashboard.menu.nav.global_config"),
     svg: MenuSvgGlobalConf,
     path: "/global-config",
   },
-  { title: "Services", svg: MenuSvgServices, path: "/services" },
   {
-    title: "Configs",
+    title: $t("dashboard.menu.nav.services"),
+    svg: MenuSvgServices,
+    path: "/services",
+  },
+  {
+    title: $t("dashboard.menu.nav.configs"),
     svg: MenuSvgConfigs,
     path: "/configs",
   },
   {
-    title: "Plugins",
+    title: $t("dashboard.menu.nav.plugins"),
     svg: MenuSvgPlugins,
     path: "/plugins",
   },
-  { title: "Jobs", svg: MenuSvgJobs, path: "/jobs" },
-  { title: "Bans", svg: MenuSvgBans, path: "/bans" },
-  { title: "Actions", svg: MenuSvgActions, path: "/actions" },
+  { title: $t("dashboard.menu.nav.jobs"), svg: MenuSvgJobs, path: "/jobs" },
+  { title: $t("dashboard.menu.nav.bans"), svg: MenuSvgBans, path: "/bans" },
+  {
+    title: $t("dashboard.menu.nav.actions"),
+    svg: MenuSvgActions,
+    path: "/actions",
+  },
 ];
 
 // Social links
 const socialList = [
   {
-    title: "link to Twitter",
+    title: $t("dashboard.menu.socials.alt_link_twitter"),
     href: "https://twitter.com/bunkerity",
     svg: MenuSvgTwitter,
   },
   {
-    title: "link to Linkedin",
+    title: $t("dashboard.menu.socials.alt_link_linkedin"),
     href: "https://www.linkedin.com/company/bunkerity/",
     svg: MenuSvgLinkedin,
   },
   {
-    title: "link to Discord",
+    title: $t("dashboard.menu.socials.alt_link_discord"),
     href: "https://discord.gg/fTf46FmtyD",
     svg: MenuSvgDiscord,
   },
   {
-    title: "link to Github",
+    title: $t("dashboard.menu.socials.alt_link_github"),
     href: "https://github.com/bunkerity",
     svg: MenuSvgGithub,
   },
@@ -223,16 +231,19 @@ function toggleMenu() {
           <!-- plugins -->
           <ul>
             <li class="w-full mt-4">
-              <h6 class="menu-page-plugin-title">PLUGIN PAGES</h6>
+              <h6 class="menu-page-plugin-title">
+                {{ $t("dashboard.menu.plugins.title") }}
+              </h6>
             </li>
             <li v-if="menu.pagePlugins.length === 0" class="w-full mt-6">
               <h6 class="menu-page-plugin-empty-title">
-                Want your own plugins ? <br />
+                {{ $t("dashboard.menu.plugins.none.description") }} <br />
                 <a
                   class="menu-page-plugin-empty-anchor"
                   target="_blank"
                   href="https://docs.bunkerweb.io/1.4/plugins/#writing-a-plugin"
-                  >check doc
+                >
+                  {{ $t("dashboard.menu.plugins.none.check_doc") }}
                 </a>
               </h6>
             </li>
@@ -280,7 +291,11 @@ function toggleMenu() {
           type="checkbox"
         />
         <label for="darkMode" data-dark-toggle-label class="menu-mode-label">
-          {{ menu.darkMode ? "dark mode" : "light mode" }}
+          {{
+            menu.darkMode
+              ? $t("dashboard.menu.mode.dark")
+              : $t("dashboard.menu.mode.light")
+          }}
         </label>
       </div>
       <!-- end dark/light mode -->
@@ -299,7 +314,9 @@ function toggleMenu() {
       <!-- logout-->
       <div class="w-full">
         <form action="/logout" method="POST" autocomplete="off">
-          <button type="submit" class="menu-logout">Logout</button>
+          <button type="submit" class="menu-logout">
+            {{ $t("dashboard.logout") }}
+          </button>
         </form>
       </div>
       <!-- end logout-->

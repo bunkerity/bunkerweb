@@ -5,4 +5,7 @@ import { getI18n } from "@utils/lang.js";
 
 const pinia = createPinia();
 
-createApp(Jobs).use(pinia).use(getI18n("jobs")).mount("#app");
+createApp(Jobs)
+  .use(pinia)
+  .use(getI18n(["jobs", "dashboard"]))
+  .mount("#app");

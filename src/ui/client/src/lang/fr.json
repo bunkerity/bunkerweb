@@ -7,6 +7,62 @@
     "password_placeholder": "entrer mot de passe",
     "log_button": "Se connecter"
   },
+  "dashboard": {
+    "menu": {
+      "nav": {
+        "home": "accueil",
+        "instances": "instances",
+        "global_config": "config globale",
+        "services": "services",
+        "configs": "configs",
+        "plugins": "plugins",
+        "jobs": "jobs",
+        "bans": "bans",
+        "actions": "actions"
+      },
+      "socials": {
+        "alt_link_twitter": "lien vers Twitter",
+        "alt_link_linkedin": "lien vers Linkedin",
+        "alt_link_discord": "lien vers Discord",
+        "alt_link_github": "lien vers Github"
+      },
+      "plugins": {
+        "title": "pages plugins",
+        "none": {
+          "description": "Besoin d'un plugin custom ?",
+          "check_doc": "voir doc"
+        }
+      },
+      "mode": {
+        "light": "mode clair",
+        "dark": "mode sombre"
+      },
+      "log_out": "se déconnecter"
+    },
+    "actions": {
+      "title": "actions",
+      "subtitle": "Historique des modifications",
+      "tabs": {
+        "ui": "ui",
+        "core": "core",
+        "global": "global"
+      }
+    },
+    "news": {
+      "title": "news",
+      "subtitle": "Les dernières nouveautés !",
+      "fetch_error": "Impossible de récupérer les articles de blog.",
+      "newsletter": {
+        "title": "joindre la newsletter",
+        "placeholder": "dupont.martin@example.com",
+        "privacy": {
+          "text": "J'ai lu et accepte la",
+          "text_link": "politique de confidentialité"
+        },
+        "subscribe_button": "souscrire"
+      }
+    }
+  },
   "home": {
     "version": {
       "api": {
@@ -27,7 +83,7 @@
       "card": {
         "name": "instances",
         "up": "up",
-        "stop": "stop"
+        "down": "down"
       }
     },
     "services": {

@@ -5,4 +5,7 @@ import { getI18n } from "@utils/lang.js";
 
 const pinia = createPinia();
 
-createApp(GlobalConfig).use(pinia).use(getI18n("global_config")).mount("#app");
+createApp(GlobalConfig)
+  .use(pinia)
+  .use(getI18n(["global_config", "dashboard"]))
+  .mount("#app");

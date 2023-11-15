@@ -101,20 +101,20 @@ onMounted(() => {
           />
         </div>
         <h1 class="login-title-desktop">
-          {{ $t("title") }}
+          {{ $t("login.title") }}
         </h1>
         <form action="/login" method="POST" autocomplete="off">
           <!-- username inpt-->
           <div class="login-input-group">
             <label for="username" class="login-label">
-              {{ $t("username") }}
+              {{ $t("login.username") }}
             </label>
             <input
               type="username"
               id="username"
               name="username"
               class="login-input"
-              :placeholder="$t('username_placeholder')"
+              :placeholder="$t('login.username_placeholder')"
               pattern="(.*?)"
               required
             />
@@ -123,14 +123,14 @@ onMounted(() => {
           <!-- password inpt-->
           <div class="login-input-group">
             <label for="password" class="login-label">
-              {{ $t("password") }}
+              {{ $t("login.password") }}
             </label>
             <input
               type="password"
               id="password"
               name="password"
               class="login-input"
-              :placeholder="$t('password_placeholder')"
+              :placeholder="$t('login.password_placeholder')"
               pattern="(.*?)"
               required
             />
@@ -144,7 +144,7 @@ onMounted(() => {
               value="login"
               class="login-submit-btn"
             >
-              {{ $t("log_button") }}
+              {{ $t("login.log_button") }}
             </button>
           </div>
         </form>

@@ -11,7 +11,7 @@ function updateLangStorage(lang) {
 </script>
 
 <template>
-  <div class="fixed bottom-0 left-1">
+  <div class="fixed bottom-0 left-1 z-[800]">
     <ul v-if="lang.isOpen" class="max-h-[300px] overflow-auto">
       <li :key="`locale-${locale}`" v-for="locale in $i18n.availableLocales">
         <button
