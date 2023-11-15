@@ -130,7 +130,7 @@ const news = reactive({
         formtarget="_blank"
         class="news-newsletter-confirm-btn"
       >
-        {{ $t("dashboard.news.newsletter.subscrive_button") }}
+        {{ $t("dashboard.news.newsletter.subscribe_button") }}
       </button>
     </form>
     <!-- end newsletter -->

@@ -315,7 +315,7 @@ function toggleMenu() {
       <div class="w-full">
         <form action="/logout" method="POST" autocomplete="off">
           <button type="submit" class="menu-logout">
-            {{ $t("dashboard.logout") }}
+            {{ $t("dashboard.menu.logout") }}
           </button>
         </form>
       </div>
