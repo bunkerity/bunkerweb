@@ -6,5 +6,51 @@
     "password": "password",
     "password_placeholder": "enter password",
     "log_button": "Log in"
+  },
+  "home": {
+    "version": {
+      "api": {
+        "pending": "Try retrieve version",
+        "error": "Error retrieving version"
+      },
+      "card": {
+        "name": "version",
+        "is_latest": "is latest version",
+        "latest": "latest version"
+      }
+    },
+    "instances": {
+      "api": {
+        "pending": "Try retrieve instances",
+        "error": "Error retrieving instances"
+      },
+      "card": {
+        "name": "instances",
+        "up": "up",
+        "stop": "stop"
+      }
+    },
+    "services": {
+      "api": {
+        "pending": "Try retrieve services",
+        "error": "Error retrieving services"
+      },
+      "card": {
+        "name": "services",
+        "ui": "ui",
+        "autoconf": "autoconf"
+      }
+    },
+    "plugins": {
+      "api": {
+        "pending": "Try retrieve plugins",
+        "error": "Error retrieving plugins"
+      },
+      "card": {
+        "name": "plugins",
+        "internal": "internal",
+        "external": "external"
+      }
+    }
   }
 }

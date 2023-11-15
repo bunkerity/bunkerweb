@@ -4,7 +4,53 @@
     "username": "utilisateur",
     "username_placeholder": "entrer nom utilisateur",
     "password": "mot de passe",
-    "password_placeholder": "enter mot de passe",
+    "password_placeholder": "entrer mot de passe",
     "log_button": "Se connecter"
+  },
+  "home": {
+    "version": {
+      "api": {
+        "pending": "Récupération de version en cours",
+        "error": "Erreur récupération de version"
+      },
+      "card": {
+        "name": "version",
+        "is_latest": "est la dernière version",
+        "latest": "dernière version"
+      }
+    },
+    "instances": {
+      "api": {
+        "pending": "Récupération de instances en cours ",
+        "error": "Erreur récupération de instances"
+      },
+      "card": {
+        "name": "instances",
+        "up": "up",
+        "stop": "stop"
+      }
+    },
+    "services": {
+      "api": {
+        "pending": "Récupération de services en cours ",
+        "error": "Erreur récupération de services"
+      },
+      "card": {
+        "name": "services",
+        "ui": "ui",
+        "autoconf": "autoconf"
+      }
+    },
+    "plugins": {
+      "api": {
+        "pending": "Récupération de plugins en cours ",
+        "error": "Erreur récupération de plugins"
+      },
+      "card": {
+        "name": "plugins",
+        "internal": "interne",
+        "external": "externe"
+      }
+    }
   }
 }

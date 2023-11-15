@@ -11,13 +11,13 @@ function updateLangStorage(lang) {
 </script>
 
 <template>
-  <div class="fixed bottom-0 left-0">
-    <ul v-if="lang.isOpen">
+  <div class="fixed bottom-0 left-1">
+    <ul v-if="lang.isOpen" class="max-h-[300px] overflow-auto">
       <li :key="`locale-${locale}`" v-for="locale in $i18n.availableLocales">
         <button
           @click="
             () => {
-              $i18n.locale = localse;
+              $i18n.locale = locale;
               lang.isOpen = false;
               updateLangStorage(locale);
             }

@@ -299,12 +299,7 @@ function toggleMenu() {
       <!-- logout-->
       <div class="w-full">
         <form action="/logout" method="POST" autocomplete="off">
-          <button
-            type="submit"
-            class="tracking-wide dark:brightness-125 hover:brightness-75 w-full inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
-          >
-            Logout
-          </button>
+          <button type="submit" class="menu-logout">Logout</button>
         </form>
       </div>
       <!-- end logout-->

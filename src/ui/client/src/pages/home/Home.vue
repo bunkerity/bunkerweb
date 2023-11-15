@@ -32,10 +32,10 @@ const instances = reactive({
   data: [],
   count: computed(() => instances.data.length),
   up: computed(() =>
-    instances.data.filter((item) => item.status === "up").length.toString(),
+    instances.data.filter((item) => item.status === "up").length.toString()
   ),
   down: computed(() =>
-    instances.data.filter((item) => item.status !== "up").length.toString(),
+    instances.data.filter((item) => item.status !== "up").length.toString()
   ),
 });
 
@@ -45,7 +45,7 @@ async function getInstances() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -66,7 +66,7 @@ async function getVersion() {
     "GET",
     null,
     version,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   // Get latest version from github
   await fetch("https://api.github.com/repos/bunkerity/bunkerweb/tags")
@@ -88,10 +88,10 @@ const plugins = reactive({
   data: [],
   num: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.data.filter((item) => item["external"] === false).length,
+    () => plugins.data.filter((item) => item["external"] === false).length
   ),
   external: computed(
-    () => plugins.data.filter((item) => item["external"] === true).length,
+    () => plugins.data.filter((item) => item["external"] === true).length
   ),
   services: computed(() => {
     if (
@@ -131,14 +131,14 @@ async function getConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -157,18 +157,20 @@ onMounted(() => {
       :isErr="version.isErr"
       :isPend="version.isPend"
       :textState="{
-        isPend: 'Try retrieve version',
-        isErr: 'Error retrieving version',
+        isPend: $t('version.api.pending'),
+        isErr: $t('version.api.error'),
       }"
     />
     <HomeCardStructure
       v-if="!version.isPend && !version.isErr"
       :href="'#'"
-      :name="'version'"
+      :name="$t('version.card.name')"
       :count="version.num"
       :detailArr="[
         {
-          text: version.isLatest ? 'Latest version' : 'is latest version',
+          text: version.isLatest
+            ? $t('version.card.latest')
+            : $t('version.card.is_latest'),
           num: version.isLatest ? '' : version.latest,
           textClass: version.isLatest ? 'text-green-500' : 'text-yellow-500',
           numClass: version.isLatest ? 'text-green-500' : 'text-yellow-500',
@@ -185,24 +187,24 @@ onMounted(() => {
       :isErr="instances.isErr"
       :isPend="instances.isPend"
       :textState="{
-        isPend: 'Try retrieve instances',
-        isErr: 'Error retrieving instances',
+        isPend: $t('instances.api.pending'),
+        isErr: $t('instances.api.error'),
       }"
     />
     <HomeCardStructure
       v-if="!instances.isPend && !instances.isErr && instances.data"
       :href="'/admin/instances'"
-      :name="'instances'"
+      :name="$t('instances.card.name')"
       :count="instances.count || '0'"
       :detailArr="[
         {
-          text: 'up',
+          text: $t('instances.card.up'),
           num: instances.up,
           textClass: 'text-green-500',
           numClass: 'text-green-500',
         },
         {
-          text: 'stop',
+          text: $t('instances.card.down'),
           num: instances.down,
           textClass: 'text-red-500',
           numClass: 'text-red-500',
@@ -219,24 +221,24 @@ onMounted(() => {
       :isErr="plugins.isErr"
       :isPend="plugins.isPend"
       :textState="{
-        isPend: 'Try retrieve services',
-        isErr: 'Error retrieving services',
+        isPend: $t('services.api.pending'),
+        isErr: $t('services.api.error'),
       }"
     />
     <HomeCardStructure
       v-if="!plugins.isPend && !plugins.isErr && plugins.data.length > 0"
       :href="'/admin/services'"
-      :name="'services'"
+      :name="$t('services.card.name')"
       :count="plugins.servicesNum || '0'"
       :detailArr="[
         {
-          text: 'ui,',
+          text: $t('services.card.ui'),
           num: '',
           textClass: 'text-sky-500',
           numClass: 'text-sky-500',
         },
         {
-          text: 'autoconf',
+          text: $t('services.card.autoconf'),
           num: '',
           textClass: 'text-sky-500',
           numClass: 'text-sky-500',
@@ -252,24 +254,24 @@ onMounted(() => {
       :isErr="conf.isErr"
       :isPend="conf.isPend"
       :textState="{
-        isPend: 'Try retrieve plugins',
-        isErr: 'Error retrieving plugins',
+        isPend: $t('plugins.api.pending'),
+        isErr: $t('plugins.api.error'),
       }"
     />
     <HomeCardStructure
       v-if="!conf.isPend && !conf.isErr"
       :href="'/admin/plugins'"
-      :name="'plugins'"
+      :name="$t('plugins.card.name')"
       :count="plugins.num || '0'"
       :detailArr="[
         {
-          text: 'internal,',
+          text: $t('plugins.card.internal'),
           num: plugins.internal || '0',
           textClass: 'text-sky-500',
           numClass: 'text-sky-500',
         },
         {
-          text: 'external',
+          text: $t('plugins.card.external'),
           num: plugins.external || '0',
           textClass: 'text-sky-500',
           numClass: 'text-sky-500',
