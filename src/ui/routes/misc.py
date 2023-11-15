@@ -2,7 +2,7 @@
 from flask import Blueprint
 from flask_jwt_extended import jwt_required
 
-from utils import get_core_format_res, default_res
+from utils import get_core_format_res, log_format
 from os import environ
 from ui import UiConfig
 
@@ -24,4 +24,4 @@ def get_version():
 @misc.route(f"{PREFIX}/health", methods=["GET"])
 def get_health():
     """Get BunkerWeb UI api health"""
-    return default_res("success", "200", "/api/misc/health", {})
+    return log_format("success", "200", "/api/misc/health", {})

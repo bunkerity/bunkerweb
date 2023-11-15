@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Flask
+from flask import request
 from flask import Blueprint
 
 import requests
@@ -16,7 +17,7 @@ from routes.dashboard import dashboard
 
 from middleware.jwt import setup_jwt
 
-from utils import setupUIException, validate_env_data
+from utils import setupUIException, validate_env_data, default_error_handler
 
 from werkzeug.exceptions import HTTPException
 import os
@@ -49,9 +50,11 @@ LOGGER.warning(os.environ)
 # Check CORE to run UI
 core_running = False
 
+LOGGER.info(f"Check if CORE API is setup.")
+
 for x in range(UI_CONFIG.MAX_WAIT_RETRIES):
     if core_running:
-        LOGGER.info("PING CORE SUCCEED")
+        LOGGER.info("CORE API ping succeed.")
         break
 
     try:
@@ -61,7 +64,7 @@ for x in range(UI_CONFIG.MAX_WAIT_RETRIES):
     except:
         core_running = False
 
-    LOGGER.info(f"PING {CORE_API}/ping | TRY {x}")
+    LOGGER.warn(f"Ping CORE API, try={x}")
     time.sleep(UI_CONFIG.WAIT_RETRY_INTERVAL)
 
 if not core_running:
@@ -69,6 +72,7 @@ if not core_running:
 
 # Start UI app
 app = Flask(__name__)
+
 LOGGER.info("START UI SETUP")
 
 try:
@@ -118,18 +122,7 @@ except:
 @app.errorhandler(HTTPException)
 def handle_exception(e):
     """Return JSON instead of HTML for HTTP errors."""
-    # start with the correct headers and status code from the error
-    response = e.get_response()
-    # replace the body with JSON
-    response.data = json.dumps(
-        {
-            "code": e.code,
-            "name": e.name,
-            "description": e.description,
-        }
-    )
-    response.content_type = "application/json"
-    return response
+    return default_error_handler(e.code, "", e.description)
 
 
 # Everything worked

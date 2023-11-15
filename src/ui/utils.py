@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import requests, traceback, json  # noqa: E401
+import requests, json  # noqa: E401
 from werkzeug.exceptions import HTTPException
 from werkzeug.sansio.response import Response
-from werkzeug.exceptions import HTTPException
 import json
 from logging import Logger
 from os.path import join, sep
@@ -24,7 +23,7 @@ UI_CONFIG = UiConfig("ui", **os.environ)
 def get_core_format_res(path, method, data, message, retry=1):
     # Retry limit
     if retry == 5:
-        raise HTTPException(response=Response(status=500), description="Max retry to core for same request exceeded")
+        raise HTTPException(response=Response(status=500), description="Max retry to CORE  API for same request exceeded")
 
     req = None
     # Try request core
@@ -32,6 +31,7 @@ def get_core_format_res(path, method, data, message, retry=1):
         req = req_core(path, method)
         # Case 503, retry request
         if req.status_code == 503:
+            LOGGER.warn(f"Communicate with {path} {method} retry={retry}. Maybe CORE is setting something up on background.")
             return get_core_format_res(path, method, data, message, retry + 1)
         # Case error
         if req == "error":
@@ -51,13 +51,10 @@ def get_core_format_res(path, method, data, message, retry=1):
 
             data = json.dumps(data, skipkeys=True, allow_nan=True, indent=6)
 
-        print(req.status_code)
-        print(req.status_code == requests.codes.ok)
-
         return {"type": "success" if str(req.status_code).startswith("2") else "error", "status": str(req.status_code), "message": message, "data": data}
     # Case impossible to format
     except:
-        print(traceback.format_exc())
+        raise HTTPException(response=Response(status=500), description="Impossible for UI API to proceed data send by CORE API")
 
 
 def req_core(path, method, data=None):
@@ -85,8 +82,22 @@ def req_core(path, method, data=None):
         return "error"
 
 
-def default_res(type="error", status_code="500", path="", detail="Internal Server Error", data={}):
+def res_format(type="error", status_code="500", path="", detail="Internal Server Error", data={}):
     return {"type": type, "status": status_code, "message": f"{path} {detail}", "data": data}
+
+
+def log_format(type="error", status_code="500", path="", detail="Internal Server Error", data=False):
+    return f"{type} {status_code} {path} || {detail} {data}"
+
+
+def default_error_handler(code="500", path="", desc="Internal server error."):
+    try:
+        # replace the body with JSON
+        LOGGER.error(log_format("error", code, path, desc))
+        return res_format("error", code, path, desc, {})
+    except:
+        LOGGER.error(log_format("error", "500", "", "Internal server error."))
+        return res_format("error", "500", "", "Internal server error.", {})
 
 
 def validate_env_data():
@@ -106,4 +117,7 @@ class setupUIException(Exception):
             LOGGER.exception(msg)
 
         if not UI_CONFIG.EXIT_ON_FAILURE or UI_CONFIG.EXIT_ON_FAILURE == "yes":
+            LOGGER.warn("Error while UI setupn exit on failure. Impossible to access UI.")
             exit(1)
+        else:
+            LOGGER.warn("Error while UI setup but keep running on failure. UI could not run correctly.")
