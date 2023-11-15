@@ -54,7 +54,7 @@
       "fetch_error": "Impossible de récupérer les articles de blog.",
       "newsletter": {
         "title": "joindre la newsletter",
-        "placeholder": "dupont.martin@example.com",
+        "placeholder": "dupont.martin{'@'}example.com",
         "privacy": {
           "text": "J'ai lu et accepte la",
           "text_link": "politique de confidentialité"

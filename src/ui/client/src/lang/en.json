@@ -54,7 +54,7 @@
       "fetch_error": "Impossible to connect to blog news.",
       "newsletter": {
         "title": "Join the newsletter",
-        "placeholder": "john.doe@example.com",
+        "placeholder": "john.doe{'@'}example.com",
         "privacy": {
           "text": "I've read and agree to the",
           "text_link": "privacy policy"

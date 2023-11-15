@@ -177,10 +177,10 @@ onMounted(() => {
     <!-- header -->
     <div class="px-6 pt-4 pb-0 mb-0 border-b-0 rounded-t-2xl">
       <div class="float-left">
-        <h5 class="mt-4 mb-1 dark:text-white font-bold">
+        <h5 class="uppercase mt-4 mb-1 dark:text-white font-bold">
           {{ $t("dashboard.actions.title") }}
         </h5>
-        <p class="dark:text-white dark:opacity-80 mb-0">
+        <p class="capitalize-first dark:text-white dark:opacity-80 mb-0">
           {{ $t("dashboard.actions.subtitle") }}
         </p>
         <TablistBase

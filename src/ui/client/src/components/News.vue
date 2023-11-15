@@ -88,7 +88,7 @@ const news = reactive({
           required
         />
       </div>
-      <div class="block mt-2 mb-4">
+      <div class="flex mt-2 mb-4">
         <div class="relative">
           <div
             data-checkbox-handler="newsletter-check"

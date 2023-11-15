@@ -18,37 +18,37 @@ import { getDarkMode } from "@utils/global.js";
 // Navigation with components
 // resolveComponent allow to replace a tag by a real Vue component
 const navList = [
-  { title: $t("dashboard.menu.nav.home"), svg: MenuSvgHome, path: "/home" },
+  { tag: "home", svg: MenuSvgHome, path: "/home" },
   {
-    title: $t("dashboard.menu.nav.instances"),
+    tag: "instances",
     svg: MenuSvgInstances,
     path: "/instances",
   },
 
   {
-    title: $t("dashboard.menu.nav.global_config"),
+    tag: "global_config",
     svg: MenuSvgGlobalConf,
     path: "/global-config",
   },
   {
-    title: $t("dashboard.menu.nav.services"),
+    tag: "services",
     svg: MenuSvgServices,
     path: "/services",
   },
   {
-    title: $t("dashboard.menu.nav.configs"),
+    tag: "configs",
     svg: MenuSvgConfigs,
     path: "/configs",
   },
   {
-    title: $t("dashboard.menu.nav.plugins"),
+    tag: "plugins",
     svg: MenuSvgPlugins,
     path: "/plugins",
   },
-  { title: $t("dashboard.menu.nav.jobs"), svg: MenuSvgJobs, path: "/jobs" },
-  { title: $t("dashboard.menu.nav.bans"), svg: MenuSvgBans, path: "/bans" },
+  { tag: "jobs", svg: MenuSvgJobs, path: "/jobs" },
+  { tag: "bans", svg: MenuSvgBans, path: "/bans" },
   {
-    title: $t("dashboard.menu.nav.actions"),
+    tag: "actions",
     svg: MenuSvgActions,
     path: "/actions",
   },
@@ -57,22 +57,22 @@ const navList = [
 // Social links
 const socialList = [
   {
-    title: $t("dashboard.menu.socials.alt_link_twitter"),
+    tag: "alt_link_twitter",
     href: "https://twitter.com/bunkerity",
     svg: MenuSvgTwitter,
   },
   {
-    title: $t("dashboard.menu.socials.alt_link_linkedin"),
+    tag: "alt_link_linkedin",
     href: "https://www.linkedin.com/company/bunkerity/",
     svg: MenuSvgLinkedin,
   },
   {
-    title: $t("dashboard.menu.socials.alt_link_discord"),
+    tag: "alt_link_discord",
     href: "https://discord.gg/fTf46FmtyD",
     svg: MenuSvgDiscord,
   },
   {
-    title: $t("dashboard.menu.socials.alt_link_github"),
+    tag: "alt_link_github",
     href: "https://github.com/bunkerity",
     svg: MenuSvgGithub,
   },
@@ -109,7 +109,7 @@ onMounted(() => {
   // Get current route and try to match with a menu item to highlight
   const pathName = window.location.pathname.toLowerCase();
   navList.forEach((item) => {
-    const title = item.title.replaceAll(" ", "-").toLowerCase();
+    const title = item.tag.replaceAll(" ", "-").toLowerCase();
     if (pathName.includes(title)) menu.currPath = title;
   });
 
@@ -205,7 +205,7 @@ function toggleMenu() {
       <div class="menu-nav-list-container h-full">
         <ul class="menu-nav-list">
           <!-- item -->
-          <li v-for="item in navList" class="mt-0.5 w-full">
+          <li v-for="(item, id) in navList" :key="id" class="mt-0.5 w-full">
             <a
               :class="[
                 item.path.toLowerCase().includes(menu.currPath) ? 'active' : '',
@@ -220,7 +220,9 @@ function toggleMenu() {
               <div class="menu-nav-item-container">
                 <component :is="item.svg"></component>
               </div>
-              <span class="menu-nav-item-title">{{ item.title }}</span>
+              <span class="menu-nav-item-title">{{
+                $t(`dashboard.menu.nav.${item.tag}`)
+              }}</span>
             </a>
           </li>
           <!-- end item -->
@@ -304,7 +306,9 @@ function toggleMenu() {
       <ul class="menu-social-list">
         <li v-for="item in socialList" class="mx-2 w-6">
           <a :href="item.href" target="_blank">
-            <span class="sr-only">{{ item.title }}</span>
+            <span class="sr-only">
+              {{ $t(`dashboard.menu.socials.${item.tag}`) }}
+            </span>
             <component :is="item.svg"></component>
           </a>
         </li>
@@ -315,7 +319,7 @@ function toggleMenu() {
       <div class="w-full">
         <form action="/logout" method="POST" autocomplete="off">
           <button type="submit" class="menu-logout">
-            {{ $t("dashboard.menu.logout") }}
+            {{ $t("dashboard.menu.log_out") }}
           </button>
         </form>
       </div>

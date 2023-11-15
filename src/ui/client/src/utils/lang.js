@@ -11,8 +11,6 @@ function getAllLangCurrPage(pagesArr) {
   const langs = getAllLang();
   // for each lang
   for (const [key, value] of Object.entries(langs)) {
-    console.log(key);
-    const lang = langs[key];
     const data = {};
     pagesArr.forEach((page) => {
       data[page] = value[page];

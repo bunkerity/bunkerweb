@@ -351,7 +351,7 @@ body {
 }
 
 .menu-nav-item-title {
-  @apply ml-1 duration-300 opacity-100 pointer-events-none;
+  @apply ml-1 duration-300 opacity-100 pointer-events-none capitalize-first;
 }
 
 .menu-page-plugin-title {
@@ -423,23 +423,23 @@ body {
 }
 
 .news-sidebar-title {
-  @apply mt-4 mb-0 dark:text-white font-bold;
+  @apply mt-4 mb-0 dark:text-white font-bold uppercase;
 }
 
 .news-sidebar-subtitle {
-  @apply dark:text-white dark:opacity-80 mb-0;
+  @apply dark:text-white dark:opacity-80 mb-0 capitalize-first;
 }
 
 .news-sidebar-no-posts-content {
-  @apply text-center col-span-12 relative w-full p-4 text-blue-500 rounded-lg;
+  @apply text-center col-span-12 relative w-full p-4 text-blue-500 rounded-lg capitalize-first;
 }
 
 .news-newsletter-form {
-  @apply px-6 pt-4 pb-0 mb-0 border-b-0 min-h-52;
+  @apply px-6 pt-4 pb-0 mb-0 border-b-0 min-h-[14rem];
 }
 
 .news-newsletter-title {
-  @apply mb-4 dark:text-white font-bold;
+  @apply mb-4 dark:text-white font-bold uppercase;
 }
 
 .news-newsletter-input {
