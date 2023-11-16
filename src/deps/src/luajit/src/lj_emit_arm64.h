@@ -193,6 +193,32 @@ static int emit_kdelta(ASMState *as, Reg rd, uint64_t k, int is64)
   return 0;  /* Failed. */
 }
 
+#define glofs(as, k) \
+  ((intptr_t)((uintptr_t)(k) - (uintptr_t)&J2GG(as->J)->g))
+#define mcpofs(as, k) \
+  ((intptr_t)((uintptr_t)(k) - (uintptr_t)(as->mcp - 1)))
+#define checkmcpofs(as, k) \
+  (A64F_S_OK(mcpofs(as, k)>>2, 19))
+
+/* Try to form a const as ADR or ADRP or ADRP + ADD. */
+static int emit_kadrp(ASMState *as, Reg rd, uint64_t k)
+{
+  A64Ins ai = A64I_ADR;
+  int64_t ofs = mcpofs(as, k);
+  if (!A64F_S_OK((uint64_t)ofs, 21)) {
+    uint64_t kpage = k & ~0xfffull;
+    MCode *adrp = as->mcp - 1 - (k != kpage);
+    ofs = (int64_t)(kpage - ((uint64_t)adrp & ~0xfffull)) >> 12;
+    if (!A64F_S_OK(ofs, 21))
+      return 0;  /* Failed. */
+    if (k != kpage)
+      emit_dn(as, (A64I_ADDx^A64I_K12)|A64F_U12(k - kpage), rd, rd);
+    ai = A64I_ADRP;
+  }
+  emit_d(as, ai|(((uint32_t)ofs&3)<<29)|A64F_S19(ofs>>2), rd);
+  return 1;
+}
+
 static void emit_loadk(ASMState *as, Reg rd, uint64_t u64)
 {
   int zeros = 0, ones = 0, neg, lshift = 0;
@@ -211,6 +237,9 @@ static void emit_loadk(ASMState *as, Reg rd, uint64_t u64)
       return;
     }
     if (emit_kdelta(as, rd, u64, is64)) {
+      return;
+    }
+    if (emit_kadrp(as, rd, u64)) {  /* Either 1 or 2 ins. */
       return;
     }
   }
@@ -239,13 +268,6 @@ static void emit_loadk(ASMState *as, Reg rd, uint64_t u64)
 
 /* Load a 64 bit constant into a GPR. */
 #define emit_loadu64(as, rd, i)	emit_loadk(as, rd, i)
-
-#define glofs(as, k) \
-  ((intptr_t)((uintptr_t)(k) - (uintptr_t)&J2GG(as->J)->g))
-#define mcpofs(as, k) \
-  ((intptr_t)((uintptr_t)(k) - (uintptr_t)(as->mcp - 1)))
-#define checkmcpofs(as, k) \
-  (A64F_S_OK(mcpofs(as, k)>>2, 19))
 
 static Reg ra_allock(ASMState *as, intptr_t k, RegSet allow);
 

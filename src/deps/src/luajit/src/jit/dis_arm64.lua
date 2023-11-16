@@ -948,7 +948,7 @@ local function disass_ins(ctx)
     elseif p == "U" then
       local rn = map_regs.x[band(rshift(op, 5), 31)]
       local sz = band(rshift(op, 30), 3)
-      local imm12 = lshift(arshift(lshift(op, 10), 20), sz)
+      local imm12 = lshift(rshift(lshift(op, 10), 20), sz)
       if imm12 ~= 0 then
 	x = "["..rn..", #"..imm12.."]"
       else
