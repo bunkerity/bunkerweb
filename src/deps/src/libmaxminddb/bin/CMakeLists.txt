@@ -11,6 +11,8 @@ if(NOT MSVC)
     target_link_options(mmdblookup PRIVATE "-municode")
   endif()
 
+  target_compile_definitions(mmdblookup PRIVATE PACKAGE_VERSION="${PROJECT_VERSION}")
+
   target_link_libraries(mmdblookup maxminddb pthread)
 
   install(

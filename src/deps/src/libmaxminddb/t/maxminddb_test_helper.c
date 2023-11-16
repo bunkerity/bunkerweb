@@ -1,14 +1,14 @@
+#include "maxminddb_test_helper.h"
+
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#define _POSIX_C_SOURCE 200112L
 #include <assert.h>
 #include <stdarg.h>
 #include <sys/types.h>
 
 #include "maxminddb.h"
-#include "maxminddb_test_helper.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -26,11 +26,15 @@ void for_all_record_sizes(const char *filename_fmt,
         int size = sizes[i];
 
         char filename[500];
+#if defined(__clang__)
 // This warning seems ok to ignore here in the tests.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
         snprintf(filename, 500, filename_fmt, size);
+#if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
 
         char description[14];
         snprintf(description, 14, "%i bit record", size);
@@ -76,7 +80,12 @@ char *dup_entry_string_or_bail(MMDB_entry_data_s entry_data) {
 }
 
 MMDB_s *open_ok(const char *db_file, int mode, const char *mode_desc) {
-    if (0 != access(db_file, R_OK)) {
+#ifdef _WIN32
+    int access_rv = _access(db_file, 04);
+#else
+    int access_rv = access(db_file, R_OK);
+#endif
+    if (access_rv != 0) {
         BAIL_OUT("could not read the specified file - %s\nIf you are in a git "
                  "checkout try running 'git submodule update --init'",
                  db_file);

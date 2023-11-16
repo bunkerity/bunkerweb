@@ -1,3 +1,17 @@
+## 1.8.0 - 2023-11-07
+
+* `PACKAGE_VERSION` is now a private compile definition when building
+  with CMake. Pull request by bsergean. GitHub #308.
+* `PACKAGE_VERSION` is no longer defined in `maxminddb.h` on
+  Windows.
+* The feature test macro `_POSIX_C_SOURCE` is no longer set by
+  `maxminddb.h`. As discussed in GitHub #318, this should be set by
+  applications rather than by libraries.
+* `assert()` is no longer used outside test code.
+* The deprecated Visual Studio 12 project files in the `projects/`
+  directory have been removed. CMake should be used when building on
+  Windows.
+
 ## 1.7.1 - 2022-09-30
 
 * The external symbols test now only runs on Linux. It assumes a Linux
