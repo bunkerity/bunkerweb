@@ -1,8 +1,8 @@
 # lua-resty-openssl
 
-FFI-based OpenSSL binding for LuaJIT, supporting OpenSSL 3.1, 3.0, 1.1 and 1.0.2 series.
+FFI-based OpenSSL binding for LuaJIT, supporting OpenSSL 3.x, 1.1 series.
 
-BoringSSL is also supported.
+OpenSSL 1.1.0, 1.0.2 and BoringSSL support has been dropped, but are still available at the [0.x branch](https://github.com/fffonion/lua-resty-openssl/tree/0.x).
 
 ![Build Status](https://github.com/fffonion/lua-resty-openssl/workflows/Tests/badge.svg) ![luarocks](https://img.shields.io/luarocks/v/fffonion/lua-resty-openssl?color=%232c3e67) ![opm](https://img.shields.io/opm/v/fffonion/lua-resty-openssl?color=%23599059)
 
@@ -20,6 +20,7 @@ Table of Contents
     + [openssl.resty_hmac_compat](#opensslresty_hmac_compat)
     + [openssl.get_fips_mode](#opensslget_fips_mode)
     + [openssl.set_fips_mode](#opensslset_fips_mode)
+    + [openssl.get_fips_version_text](#opensslget_fips_version_text)
     + [openssl.set_default_properties](#opensslset_default_properties)
     + [openssl.list_cipher_algorithms](#openssllist_cipher_algorithms)
     + [openssl.list_digest_algorithms](#openssllist_digest_algorithms)
@@ -35,8 +36,7 @@ Table of Contents
     + [version.version](#versionversion)
     + [version.info](#versioninfo)
     + [version.OPENSSL_3X](#versionOPENSSL_3X)
-    + [version.OPENSSL_11](#versionopenssl_11)
-    + [version.OPENSSL_10](#versionopenssl_10)
+    + [version.OPENSSL_111](#versionopenssl_111)
   * [resty.openssl.provider](#restyopensslprovider)
     + [provider.load](#providerload)
     + [provider.istype](#provideristype)
@@ -295,10 +295,7 @@ Description
 ===========
 
 `lua-resty-openssl` is a FFI-based OpenSSL binding library, currently
-supports OpenSSL `3.1.x`, `3.0.x`, `1.1.1`, `1.1.0` and `1.0.2` series.
-
-**Note: when using with OpenSSL 1.0.2, it's recommanded to not use this library with other FFI-based OpenSSL binding libraries to avoid potential mismatch of `cdef`.**
-
+supports OpenSSL `3.x` and `1.1.1` series.
 
 [Back to TOC](#table-of-contents)
 
@@ -320,9 +317,6 @@ using `error()` but instead return as last parameter.
 
 Each Lua table returned by `new()` contains a cdata object `ctx`. User are not supposed to manully setting
 `ffi.gc` or calling corresponding destructor of the `ctx` struct (like `*_free` functions).
-
-BoringSSL removes some algorithms and not all functionalities below is supported by BoringSSL. Please
-consul its manual for differences between OpenSSL API.
 
 [Back to TOC](#table-of-contents)
 
@@ -443,7 +437,14 @@ print(c:get_provider_name()) -- prints "fips"
 Compile the module per [security policy](https://csrc.nist.gov/CSRC/media/projects/cryptographic-module-validation-program/documents/security-policies/140sp3678.pdf)
 
 Check if FIPS is acticated by running `assert(openssl.set_fips_mode(true))`.
-BoringSSL doesn't support "turn FIPS mode off" once it's compiled.
+
+[Back to TOC](#table-of-contents)
+
+### openssl.get_fips_version_text
+
+**syntax**: *text, err = openssl.get_fips_version_text()*
+
+Returns the version text of the FIPS module, only available on OpenSSL 3.x.
 
 [Back to TOC](#table-of-contents)
 
@@ -596,11 +597,6 @@ Returns various OpenSSL version information. Available values for `types` are:
     MODULES_DIR
     CPU_INFO
 
-For OpenSSL prior to 1.1.x, only `VERSION`, `CFLAGS`, `BUILT_ON`, `PLATFORM`
-and `DIR` are supported. Please refer to
-[OPENSSL_VERSION_NUMBER(3)](https://www.openssl.org/docs/manmaster/man3/OPENSSL_VERSION_NUMBER.html)
-for explanation of each type.
-
 ```lua
 local version = require("resty.openssl.version")
 ngx.say(string.format("%x", version.version_num))
@@ -647,23 +643,9 @@ A boolean indicates whether the linked OpenSSL is 3.x series.
 
 [Back to TOC](#table-of-contents)
 
-### version.OPENSSL_30
+### version.OPENSSL_111
 
-Deprecated: use `version.OPENSSL_3X` is encouraged.
-
-A boolean indicates whether the linked OpenSSL is 3.0 series.
-
-[Back to TOC](#table-of-contents)
-
-### version.OPENSSL_11
-
-A boolean indicates whether the linked OpenSSL is 1.1 series.
-
-[Back to TOC](#table-of-contents)
-
-### version.OPENSSL_10
-
-A boolean indicates whether the linked OpenSSL is 1.0 series.
+A boolean indicates whether the linked OpenSSL is 1.1.1 series.
 
 [Back to TOC](#table-of-contents)
 
@@ -766,10 +748,6 @@ Ed25519 | Y | Y | | Y (PureEdDSA) | |
 X25519 | Y | Y | | | Y (ECDH) |
 Ed448 | Y | Y | | Y (PureEdDSA) | |
 X448 | Y | Y | | | Y (ECDH) |
-
-`Ed25519`, `X25519`, `Ed448` and `X448` keys are only supported since OpenSSL 1.1.0.
-
-Note BoringSSL doesn't support `Ed448` and `X448` keys.
 
 Direct support of encryption and decryption for EC and ECX does not exist, but
 processes like ECIES is possible with [pkey:derive](#pkeyderive),
@@ -1067,8 +1045,7 @@ This mode only supports RSA and EC keys.
 When passing a string as first parameter, `md_alg` parameter will specify the name
 to use when signing. When `md_alg` is undefined, for RSA and EC keys, this function does SHA256
 by default. For Ed25519 or Ed448 keys, this function does a PureEdDSA signing,
-no message digest should be specified and will not be used. BoringSSL doesn't have default
-digest thus `md_alg` must be specified.
+no message digest should be specified and will not be used.
 
 `opts` is a table that accepts additional parameters.
 
@@ -1083,8 +1060,7 @@ obsolete MD5 hash algorithm and will return error on this combination. See
 for a list of algorithms and associated public key algorithms. Normally, the ECDSA signature
 is encoded in ASN.1 DER format. If the `opts` table contains a `ecdsa_use_raw` field with
 a true value, a binary with just the concatenation of binary representation `pr` and `ps` is returned.
-This is useful for example to send the signature as JWS. This feature
-is only supported on OpenSSL 1.1.0 or later.
+This is useful for example to send the signature as JWS.
 
 [Back to TOC](#table-of-contents)
 
@@ -1106,8 +1082,7 @@ This mode only supports RSA and EC keys.
 When passing a string as second parameter, `md_alg` parameter will specify the name
 to use when verifying. When `md_alg` is undefined, for RSA and EC keys, this function does SHA256
 by default. For Ed25519 or Ed448 keys, this function does a PureEdDSA verification,
-no message digest should be specified and will not be used. BoringSSL doesn't have default
-digest thus `md_alg` must be specified.
+no message digest should be specified and will not be used.
 
 `opts` is a table that accepts additional parameters.
 
@@ -1118,8 +1093,7 @@ possible to specify PSS salt length by setting `opts.pss_saltlen`.
 For EC key, this function does a ECDSA verification. Normally, the ECDSA signature
 should be encoded in ASN.1 DER format. If the `opts` table contains a `ecdsa_use_raw` field with
 a true value, this library treat `signature` as concatenation of binary representation `pr` and `ps`.
-This is useful for example to verify the signature as JWS. This feature
-is only supported on OpenSSL 1.1.0 or later.
+This is useful for example to verify the signature as JWS.
 
 ```lua
 -- RSA and EC keys
@@ -1313,8 +1287,7 @@ Creates a `bn` instance from binary string.
 Exports the BIGNUM value in binary string.
 
 `bn:to_binary` accepts an optional number argument `padto` that can be
-used to pad leading zeros to the output to a specific length. This feature
-is only supported on OpenSSL 1.1.0 or later.
+used to pad leading zeros to the output to a specific length.
 
 ```lua
 local b, err = require("resty.openssl.bn").from_binary(ngx.decode_base64("WyU="))
@@ -1860,6 +1833,8 @@ Reset the internal state of `digest` instance as it's just created by [digest.ne
 It calls [EVP_DigestInit_ex](https://www.openssl.org/docs/manmaster/man3/EVP_DigestInit_ex.html) under
 the hood.
 
+User must call this before reusing the same `digest` instance.
+
 [Back to TOC](#table-of-contents)
 
 ## resty.openssl.hmac
@@ -1928,6 +1903,8 @@ ngx.say(ngx.encode_base64(hmac))
 Reset the internal state of `hmac` instance as it's just created by [hmac.new](#hmacnew).
 It calls [HMAC_Init_ex](https://www.openssl.org/docs/manmaster/man3/HMAC_Init_ex.html) under
 the hood.
+
+User must call this before reusing the same `hmac` instance.
 
 [Back to TOC](#table-of-contents)
 
@@ -2026,8 +2003,7 @@ instead.
 
 Derive a key from given material. Various KDFs are supported based on OpenSSL version:
 
-- On OpenSSL 1.0.2 and later, `PBKDF2`([RFC 2898], [NIST SP 800-132]) is available.
-- On OpenSSL 1.1.0 and later, `HKDF`([RFC 5869]), `TLS1-PRF`([RFC 2246], [RFC 5246] and [NIST SP 800-135 r1]) and `scrypt`([RFC 7914]) is available.
+`PBKDF2`([RFC 2898], [NIST SP 800-132]), `HKDF`([RFC 5869]), `TLS1-PRF`([RFC 2246], [RFC 5246] and [NIST SP 800-135 r1]) and `scrypt`([RFC 7914]) is available.
 
 
 `options` is a table that contains:
@@ -2043,7 +2019,7 @@ Derive a key from given material. Various KDFs are supported based on OpenSSL ve
 to explictly select provider to fetch algorithms. | |
 | pbkdf2_iter     | number | PBKDF2 iteration count. RFC 2898 suggests an iteration count of at least 1000. Any value less than 1 is treated as a single iteration.  | `1` |
 | hkdf_key     | string | HKDF key  | **required** |
-| hkdf_mode     | number | HKDF mode to use, one of `kdf.HKDEF_MODE_EXTRACT_AND_EXPAND`, `kdf.HKDEF_MODE_EXTRACT_ONLY` or `kdf.HKDEF_MODE_EXPAND_ONLY`. This is only effective with OpenSSL >= 1.1.1. To learn about mode, please refer to [EVP_PKEY_CTX_set1_hkdf_key(3)](https://www.openssl.org/docs/manmaster/man3/EVP_PKEY_CTX_set1_hkdf_key.html). Note with `kdf.HKDEF_MODE_EXTRACT_ONLY`, `outlen` is ignored and the output will be fixed size of `HMAC-<md>`.  | `kdf.HKDEF_MODE_EXTRACT_AND_EXPAND`|
+| hkdf_mode     | number | HKDF mode to use, one of `kdf.HKDEF_MODE_EXTRACT_AND_EXPAND`, `kdf.HKDEF_MODE_EXTRACT_ONLY` or `kdf.HKDEF_MODE_EXPAND_ONLY`. To learn about mode, please refer to [EVP_PKEY_CTX_set1_hkdf_key(3)](https://www.openssl.org/docs/manmaster/man3/EVP_PKEY_CTX_set1_hkdf_key.html). Note with `kdf.HKDEF_MODE_EXTRACT_ONLY`, `outlen` is ignored and the output will be fixed size of `HMAC-<md>`.  | `kdf.HKDEF_MODE_EXTRACT_AND_EXPAND`|
 | hkdf_info     | string | HKDF info value  | (empty string) |
 | tls1_prf_secret     | string | TLS1-PRF secret  | **required** |
 | tls1_prf_seed     | string | TLS1-PRF seed  | **required** |
@@ -2181,6 +2157,8 @@ This function is available since OpenSSL 3.0.
 **syntax**: *ok, err = kdf:reset()*
 
 Reset the internal state of `kdf` instance as it's just created by [kdf.new](#kdfnew).
+
+User must call this before reusing the same `kdf` instance.
 
 [Back to TOC](#table-of-contents)
 
@@ -2586,8 +2564,6 @@ Sign the certificate using the private key specified by `pkey`, which must be a
 parameter to set digest method, whichmust be a [resty.openssl.digest](#restyopenssldigest) instance.
 Returns a boolean indicating if signing is successful and error if any.
 
-In BoringSSL when `digest` is not set it's fallback to `SHA256`.
-
 [Back to TOC](#table-of-contents)
 
 ### x509:verify
@@ -2797,8 +2773,6 @@ Sign the certificate request using the private key specified by `pkey`, which mu
 [resty.openssl.pkey](#restyopensslpkey) that stores private key. Optionally accept `digest`
 parameter to set digest method, whichmust be a [resty.openssl.digest](#restyopenssldigest) instance.
 Returns a boolean indicating if signing is successful and error if any.
-
-In BoringSSL when `digest` is not set it's fallback to `SHA256`.
 
 [Back to TOC](#table-of-contents)
 
@@ -3013,8 +2987,6 @@ Sign the CRL using the private key specified by `pkey`, which must be a
 [resty.openssl.pkey](#restyopensslpkey) that stores private key. Optionally accept `digest`
 parameter to set digest method, whichmust be a [resty.openssl.digest](#restyopenssldigest) instance.
 Returns a boolean indicating if signing is successful and error if any.
-
-In BoringSSL when `digest` is not set it's fallback to `SHA256`.
 
 [Back to TOC](#table-of-contents)
 
@@ -3967,8 +3939,6 @@ to explictly select provider to fetch algorithms.
 Returns `true` when the certificate isn't revoked,
 otherwise returns `nil` and error explaining the reason.
 
-Note this function is supported from OpenSSL 1.1.0 and not supported in BoringSSL.
-
 [Back to TOC](#table-of-contents)
 
 ## resty.openssl.x509.revoked
@@ -4533,7 +4503,7 @@ Copyright and License
 
 This module is licensed under the BSD license.
 
-Copyright (C) 2019-2020, by fffonion <fffonion@gmail.com>.
+Copyright (C) 2019-2023, by fffonion <fffonion@gmail.com>.
 
 All rights reserved.
 
@@ -4551,7 +4521,7 @@ See Also
 ========
 * [luaossl](https://github.com/wahern/luaossl)
 * [API/ABI changes review for OpenSSL](https://abi-laboratory.pro/index.php?view=timeline&l=openssl)
-* [OpenSSL API manual](https://www.openssl.org/docs/man1.1.1/man3/)
+* [OpenSSL API manual](https://www.openssl.org/docs/man3.1/man3/)
 
 [Back to TOC](#table-of-contents)
 

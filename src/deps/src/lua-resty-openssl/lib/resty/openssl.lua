@@ -5,7 +5,7 @@ local ffi_str = ffi.string
 
 local format_error = require("resty.openssl.err").format_error
 
-local OPENSSL_3X, BORINGSSL
+local OPENSSL_3X
 
 local function try_require_modules()
   package.loaded["resty.openssl.version"] = nil
@@ -13,7 +13,6 @@ local function try_require_modules()
   local pok, lib = pcall(require, "resty.openssl.version")
   if pok then
     OPENSSL_3X = lib.OPENSSL_3X
-    BORINGSSL = lib.BORINGSSL
 
     require "resty.openssl.include.crypto"
     require "resty.openssl.include.objects"
@@ -25,7 +24,7 @@ try_require_modules()
 
 
 local _M = {
-  _VERSION = '0.8.23',
+  _VERSION = '1.0.1',
 }
 
 local libcrypto_name
@@ -286,6 +285,14 @@ if OPENSSL_3X then
     return C.EVP_default_properties_is_fips_enabled(ctx_lib.get_libctx()) == 1
   end
 
+  function _M.get_fips_version_text()
+    if not fips_provider_ctx then
+      return false, "FIPS mode is not enabled"
+    end
+
+    return fips_provider_ctx:get_params("version")
+  end
+
 else
   function _M.set_fips_mode(enable)
     if (not not enable) == _M.get_fips_mode() then
@@ -301,6 +308,10 @@ else
 
   function _M.get_fips_mode()
     return C.FIPS_mode() == 1
+  end
+
+  function _M.get_fips_version_text()
+    return nil, "openssl.get_fips_version_text not supported on OpenSSL 1.1.1"
   end
 end
 
@@ -362,10 +373,6 @@ local function list_provided(typ)
 end
 
 function _M.list_cipher_algorithms()
-  if BORINGSSL then
-    return nil, "openssl.list_cipher_algorithms is not supported on BoringSSL"
-  end
-
   require "resty.openssl.include.evp.cipher"
   local ret = list_legacy("EVP_CIPHER",
               OPENSSL_3X and C.EVP_CIPHER_get_nid or C.EVP_CIPHER_nid)
@@ -381,10 +388,6 @@ function _M.list_cipher_algorithms()
 end
 
 function _M.list_digest_algorithms()
-  if BORINGSSL then
-    return nil, "openssl.list_digest_algorithms is not supported on BoringSSL"
-  end
-
   require "resty.openssl.include.evp.md"
   local ret = list_legacy("EVP_MD",
               OPENSSL_3X and C.EVP_MD_get_type or C.EVP_MD_type)

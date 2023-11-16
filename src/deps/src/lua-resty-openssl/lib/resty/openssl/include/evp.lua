@@ -6,33 +6,18 @@ require "resty.openssl.include.ossl_typ"
 require "resty.openssl.include.err"
 require "resty.openssl.include.objects"
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
-local BORINGSSL = require("resty.openssl.version").BORINGSSL
 
-if BORINGSSL then
-  ffi.cdef [[
-    int PKCS5_PBKDF2_HMAC(const char *password, size_t password_len,
-        const uint8_t *salt, size_t salt_len,
-        unsigned iterations, const EVP_MD *digest,
-        size_t key_len, uint8_t *out_key);
-    int EVP_PBE_scrypt(const char *password, size_t password_len,
-        const uint8_t *salt, size_t salt_len,
-        uint64_t N, uint64_t r, uint64_t p,
-        size_t max_mem, uint8_t *out_key,
-        size_t key_len);
-  ]]
-else
-  ffi.cdef [[
-    /* KDF */
-    int PKCS5_PBKDF2_HMAC(const char *pass, int passlen,
-      const unsigned char *salt, int saltlen, int iter,
-      const EVP_MD *digest, int keylen, unsigned char *out);
+ffi.cdef [[
+  /* KDF */
+  int PKCS5_PBKDF2_HMAC(const char *pass, int passlen,
+    const unsigned char *salt, int saltlen, int iter,
+    const EVP_MD *digest, int keylen, unsigned char *out);
 
-    int EVP_PBE_scrypt(const char *pass, size_t passlen,
-      const unsigned char *salt, size_t saltlen,
-      uint64_t N, uint64_t r, uint64_t p, uint64_t maxmem,
-      unsigned char *key, size_t keylen);
-  ]]
-end
+  int EVP_PBE_scrypt(const char *pass, size_t passlen,
+    const unsigned char *salt, size_t saltlen,
+    uint64_t N, uint64_t r, uint64_t p, uint64_t maxmem,
+    unsigned char *key, size_t keylen);
+]]
 
 if OPENSSL_3X then
   require "resty.openssl.include.provider"

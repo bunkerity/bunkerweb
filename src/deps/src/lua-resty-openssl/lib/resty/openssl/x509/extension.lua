@@ -16,7 +16,6 @@ local stack_lib = require("resty.openssl.stack")
 local bio_util = require "resty.openssl.auxiliary.bio"
 local format_error = require("resty.openssl.err").format_error
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
-local BORINGSSL = require("resty.openssl.version").BORINGSSL
 
 local _M = {}
 local mt = { __index = _M }
@@ -34,22 +33,15 @@ if OPENSSL_3X then
   extension_types["issuer_pkey"] = "resty.openssl.pkey"
 end
 
-local nconf_load
-if BORINGSSL then
-  nconf_load = function()
-    return nil, "NCONF_load_bio not exported in BoringSSL"
+local nconf_load = function(conf, str)
+  local bio = C.BIO_new_mem_buf(str, #str)
+  if bio == nil then
+    return format_error("BIO_new_mem_buf")
   end
-else
-  nconf_load = function(conf, str)
-    local bio = C.BIO_new_mem_buf(str, #str)
-    if bio == nil then
-      return format_error("BIO_new_mem_buf")
-    end
-    ffi_gc(bio, C.BIO_free)
+  ffi_gc(bio, C.BIO_free)
 
-    if C.NCONF_load_bio(conf, bio, nil) ~= 1 then
-      return format_error("NCONF_load_bio")
-    end
+  if C.NCONF_load_bio(conf, bio, nil) ~= 1 then
+    return format_error("NCONF_load_bio")
   end
 end
 

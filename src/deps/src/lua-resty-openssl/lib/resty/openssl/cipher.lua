@@ -9,8 +9,6 @@ local evp_macro = require "resty.openssl.include.evp"
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 local ctx_lib = require "resty.openssl.ctx"
 local format_error = require("resty.openssl.err").format_error
-local OPENSSL_10 = require("resty.openssl.version").OPENSSL_10
-local OPENSSL_11_OR_LATER = require("resty.openssl.version").OPENSSL_11_OR_LATER
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
 
 local uchar_array = ctypes.uchar_array
@@ -32,18 +30,11 @@ function _M.new(typ, properties)
     return nil, "cipher.new: expect type to be defined"
   end
 
-  local ctx
-  if OPENSSL_11_OR_LATER then
-    ctx = C.EVP_CIPHER_CTX_new()
-    ffi_gc(ctx, C.EVP_CIPHER_CTX_free)
-  elseif OPENSSL_10 then
-    ctx = ffi.new('EVP_CIPHER_CTX')
-    C.EVP_CIPHER_CTX_init(ctx)
-    ffi_gc(ctx, C.EVP_CIPHER_CTX_cleanup)
-  end
+  local ctx = C.EVP_CIPHER_CTX_new()
   if ctx == nil then
     return nil, "cipher.new: failed to create EVP_CIPHER_CTX"
   end
+  ffi_gc(ctx, C.EVP_CIPHER_CTX_free)
 
   local ctyp
   if OPENSSL_3X then

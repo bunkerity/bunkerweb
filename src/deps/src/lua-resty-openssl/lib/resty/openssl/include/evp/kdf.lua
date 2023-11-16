@@ -7,7 +7,6 @@ require "resty.openssl.include.evp.md"
 local evp = require("resty.openssl.include.evp")
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
-local BORINGSSL = require("resty.openssl.version").BORINGSSL
 
 local void_ptr = ctypes.void_ptr
 
@@ -27,7 +26,7 @@ if OPENSSL_3X then
     void EVP_KDF_do_all_provided(OSSL_LIB_CTX *libctx,
                                 fake_openssl_kdf_provided_list_fn*,
                                 void *arg);
-    int EVP_KDF_up_ref(EVP_KDF *kdf);
+    // int EVP_KDF_up_ref(EVP_KDF *kdf);
     void EVP_KDF_free(EVP_KDF *kdf);
 
     const char *EVP_KDF_get0_name(const EVP_KDF *kdf);
@@ -46,11 +45,7 @@ if OPENSSL_3X then
     int EVP_KDF_CTX_set_params(EVP_KDF_CTX *ctx, const OSSL_PARAM params[]);
     const OSSL_PARAM *EVP_KDF_CTX_gettable_params(const EVP_KDF_CTX *ctx);
     const OSSL_PARAM *EVP_KDF_CTX_settable_params(const EVP_KDF_CTX *ctx);
-  ]]
-end
 
-if OPENSSL_3X or BORINGSSL then
-  ffi.cdef [[
     int EVP_PKEY_CTX_set_tls1_prf_md(EVP_PKEY_CTX *ctx, const EVP_MD *md);
     int EVP_PKEY_CTX_set1_tls1_prf_secret(EVP_PKEY_CTX *pctx,
                                           const unsigned char *sec, int seclen);
