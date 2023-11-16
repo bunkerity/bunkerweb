@@ -1,0 +1,10 @@
+--TEST--
+union distinct
+--INPUT--
+1 UNION DISTINCT 1;
+--EXPECTED--
+1 1
+U UNION DISTINCT
+1 1
+; ;
+

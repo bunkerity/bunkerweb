@@ -1,0 +1,12 @@
+{
+  "name": "passbolt",
+  "kinds": ["docker", "autoconf", "swarm"],
+  "timeout": 120,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "passbolt"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+redmineUsername: "user"
+redminePassword: "changeme42"
+redmineEmail: "user@example.com"
+redmineLanguage: "en"
+service:
+  type: ClusterIP
+mariadb:
+  auth:
+    password: "changeme1337"

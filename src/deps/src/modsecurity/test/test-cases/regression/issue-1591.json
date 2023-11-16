@@ -1,0 +1,119 @@
+[
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "Regular expressions in rule targets not respected (1/3)",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1591",
+  "gihub_issue": 394,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+    "headers":{
+      "Host":"localhost",
+      "User-Agent":"curl/7.38.0",
+      "Accept":"*/*",
+      "Content-Length": "1539",
+      "Cookie": "__utma=1.32168570.12572608.1259628772.2&__utmb=1.4.10.1259628772&"
+    },
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+  "expected": {
+    "debug_log": "Rule returned 0."
+  },
+  "rules": [
+    "SecRuleEngine On",
+    "SecRule REQUEST_COOKIES|!REQUEST_COOKIES:/__utm/|!REQUEST_COOKIES:/_pk_ref/|!REQUEST_COOKIES:/__utm/|!REQUEST_COOKIES:/_pk_ref/ \"321\" \"id:1,log\""
+  ]
+},
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "Regular expressions in rule targets not respected (2/3)",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1591",
+  "gihub_issue": 394,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+    "headers":{
+      "Host":"localhost",
+      "User-Agent":"curl/7.38.0",
+      "Accept":"*/*",
+      "Content-Length": "1539",
+      "Cookie": "__utma=1.32168570.12572608.1259628772.2&__utmb=1.4.10.1259628772&"
+    },
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+  "expected": {
+    "debug_log": "Rule returned 1."
+  },
+  "rules": [
+    "SecRuleEngine On",
+    "SecRule REQUEST_COOKIES \"321\" \"id:1,log\""
+  ]
+},
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "Regular expressions in rule targets not respected (3/3)",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1591",
+  "gihub_issue": 394,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+    "headers":{
+      "Host":"localhost",
+      "User-Agent":"curl/7.38.0",
+      "Accept":"*/*",
+      "Content-Length": "1539",
+      "Cookie": "__utma=1.32168570.12572608.1259628772.2&__utmb=1.4.10.1259628772&"
+    },
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+  "expected": {
+    "debug_log": "Variable: REQUEST_HEADERS:Content-Length"
+  },
+  "rules": [
+    "SecRuleEngine On",
+    "SecRule REQUEST_HEADERS:'/(Content-Length|Transfer-Encoding)/' \"321\" \"id:1,log\""
+  ]
+}
+]

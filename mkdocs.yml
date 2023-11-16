@@ -1,0 +1,72 @@
+site_name: BunkerWeb
+site_url: https://docs.bunkerweb.io/
+repo_url: https://github.com/bunkerity/bunkerweb
+site_description: Make your web services secure by default.
+copyright: Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bunkerity
+#remote_branch: ?
+#remote_name: ?
+
+nav:
+  - Introduction: 'index.md'
+  - Migrating from 1.4.X: 'migrating.md'
+  - Concepts: 'concepts.md'
+  - Integrations: 'integrations.md'
+  - Quickstart guide: 'quickstart-guide.md'
+  - Security tuning: 'security-tuning.md'
+  - Settings: 'settings.md'
+  - Web UI: 'web-ui.md'
+  - Troubleshooting: 'troubleshooting.md'
+  - Plugins: 'plugins.md'
+  - About: 'about.md'
+
+theme:
+  name: material
+  locale: en
+  logo: assets/logo.png
+  favicon: assets/favicon.png
+  font: false
+  features:
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - toc.integrate
+    - content.code.copy
+  custom_dir: docs/overrides
+
+extra_css:
+  - assets/extra.css
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - admonition
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+extra:
+  version:
+    provider: mike
+    version: latest
+
+  generator: false
+  social:
+    - icon: fontawesome/brands/discord
+      link: https://discord.com/invite/fTf46FmtyD
+    - icon: fontawesome/brands/github
+      link: https://github.com/bunkerity
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/bunkerity/
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/bunkerity
+
+plugins:
+  - search
+  - print-site
+  - mike:
+      canonical_version: latest

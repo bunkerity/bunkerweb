@@ -1,0 +1,3832 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_mvsnprintf
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   fun:_IO_vfscanf
+   fun:__isoc99_vsscanf
+   fun:__isoc99_sscanf
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:_IO_vfscanf
+   fun:__isoc99_vsscanf
+   fun:__isoc99_sscanf
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:bn_mul4x_mont
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:bn_mul4x_mont
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:bn_mul4x_mont
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:bn_mul4x_mont
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:bn_mul4x_mont
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:BN_from_montgomery_word
+   fun:BN_from_montgomery
+   fun:BN_mod_exp_mont
+   fun:RSA_eay_public_encrypt
+   fun:ssl3_send_client_key_exchange
+   fun:ssl3_connect
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:BN_from_montgomery_word
+   fun:BN_from_montgomery
+   fun:BN_mod_exp_mont
+   fun:RSA_eay_public_encrypt
+   fun:ssl3_send_client_key_exchange
+   fun:ssl3_connect
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:BN_from_montgomery_word
+   fun:BN_from_montgomery
+   fun:BN_mod_exp_mont
+   fun:RSA_eay_public_encrypt
+   fun:ssl3_send_client_key_exchange
+   fun:ssl3_connect
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:BN_num_bits_word
+   fun:BN_num_bits
+   fun:RSA_eay_public_encrypt
+   fun:ssl3_send_client_key_exchange
+   fun:ssl3_connect
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:BN_num_bits_word
+   fun:BN_num_bits
+   fun:BN_bn2bin
+   fun:RSA_eay_public_encrypt
+   fun:ssl3_send_client_key_exchange
+   fun:ssl3_connect
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   write(buf)
+   obj:/usr/lib/libc-2.24.so
+   fun:sock_write
+   fun:BIO_write
+   fun:buffer_ctrl
+   fun:ssl3_connect
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:aesni_cbc_hmac_sha1_cipher
+   fun:tls1_enc
+   fun:ssl3_read_bytes
+   fun:ssl3_get_message
+   fun:ssl3_get_finished
+   fun:ssl3_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:aesni_cbc_hmac_sha1_cipher
+   fun:tls1_enc
+   fun:ssl3_read_bytes
+   fun:ssl3_get_message
+   fun:ssl3_get_finished
+   fun:ssl3_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memset
+   fun:BUF_MEM_grow_clean
+   fun:ssl3_get_message
+   fun:ssl3_get_finished
+   fun:ssl3_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memset
+   fun:BUF_MEM_grow_clean
+   fun:ssl3_get_message
+   fun:ssl3_get_finished
+   fun:ssl3_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:ssl3_read_bytes
+   fun:ssl3_get_message
+   fun:ssl3_get_finished
+   fun:ssl3_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   write(buf)
+   obj:/usr/lib/libc-2.24.so
+   fun:sock_write
+   fun:BIO_write
+   fun:ssl3_write_pending
+   fun:ssl3_write_bytes
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:aesni_cbc_hmac_sha1_cipher
+   fun:tls1_enc
+   fun:ssl3_read_bytes
+   fun:ssl3_read
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:aesni_cbc_hmac_sha1_cipher
+   fun:tls1_enc
+   fun:ssl3_read_bytes
+   fun:ssl3_read
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:BN_from_montgomery_word
+   fun:BN_from_montgomery
+   fun:BN_mod_exp_mont
+   fun:RSA_eay_public_encrypt
+   fun:ssl3_send_client_key_exchange
+   fun:ssl3_connect
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:BN_from_montgomery_word
+   fun:BN_from_montgomery
+   fun:BN_mod_exp_mont
+   fun:RSA_eay_public_encrypt
+   fun:ssl3_send_client_key_exchange
+   fun:ssl3_connect
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:BN_from_montgomery_word
+   fun:BN_from_montgomery
+   fun:BN_mod_exp_mont
+   fun:RSA_eay_public_encrypt
+   fun:ssl3_send_client_key_exchange
+   fun:ssl3_connect
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:BN_num_bits_word
+   fun:BN_num_bits
+   fun:RSA_eay_public_encrypt
+   fun:ssl3_send_client_key_exchange
+   fun:ssl3_connect
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:BN_num_bits_word
+   fun:BN_num_bits
+   fun:BN_bn2bin
+   fun:RSA_eay_public_encrypt
+   fun:ssl3_send_client_key_exchange
+   fun:ssl3_connect
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   write(buf)
+   obj:/usr/lib/libc-2.24.so
+   fun:sock_write
+   fun:BIO_write
+   fun:buffer_ctrl
+   fun:ssl3_connect
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:aesni_cbc_hmac_sha1_cipher
+   fun:tls1_enc
+   fun:ssl3_read_bytes
+   fun:ssl3_get_message
+   fun:ssl3_get_finished
+   fun:ssl3_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:aesni_cbc_hmac_sha1_cipher
+   fun:tls1_enc
+   fun:ssl3_read_bytes
+   fun:ssl3_get_message
+   fun:ssl3_get_finished
+   fun:ssl3_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memset
+   fun:BUF_MEM_grow_clean
+   fun:ssl3_get_message
+   fun:ssl3_get_finished
+   fun:ssl3_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memset
+   fun:BUF_MEM_grow_clean
+   fun:ssl3_get_message
+   fun:ssl3_get_finished
+   fun:ssl3_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:ssl3_read_bytes
+   fun:ssl3_get_message
+   fun:ssl3_get_finished
+   fun:ssl3_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   write(buf)
+   obj:/usr/lib/libc-2.24.so
+   fun:sock_write
+   fun:BIO_write
+   fun:ssl3_write_pending
+   fun:ssl3_write_bytes
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:aesni_cbc_hmac_sha1_cipher
+   fun:tls1_enc
+   fun:ssl3_read_bytes
+   fun:ssl3_read
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:aesni_cbc_hmac_sha1_cipher
+   fun:tls1_enc
+   fun:ssl3_read_bytes
+   fun:ssl3_read
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:ssl3_read_bytes
+   fun:ssl3_read
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:ssl3_read_bytes
+   fun:ssl3_read
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:_IO_vfscanf
+   fun:__isoc99_vsscanf
+   fun:__isoc99_sscanf
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:_IO_vfscanf
+   fun:__isoc99_vsscanf
+   fun:__isoc99_sscanf
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   fun:_IO_vfscanf
+   fun:__isoc99_vsscanf
+   fun:__isoc99_sscanf
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   fun:_IO_vfscanf
+   fun:__isoc99_vsscanf
+   fun:__isoc99_sscanf
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   fun:_IO_vfscanf
+   fun:__isoc99_vsscanf
+   fun:__isoc99_sscanf
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__GI_strchr
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__GI_strchr
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__GI_strchr
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__GI_strchr
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:copy
+   fun:_S_copy
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_mutateEmmPKcm
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_appendEPKcm
+   fun:append
+   fun:_ZN11modsecurity5Utils11HttpsClient11handle_implEPcmm
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:copy
+   fun:_S_copy
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_mutateEmmPKcm
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_appendEPKcm
+   fun:append
+   fun:_ZN11modsecurity5Utils11HttpsClient11handle_implEPcmm
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:assign
+   fun:_M_set_length
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_appendEPKcm
+   fun:append
+   fun:_ZN11modsecurity5Utils11HttpsClient11handle_implEPcmm
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:copy
+   fun:_ZNSt15basic_streambufIcSt11char_traitsIcEE6xsputnEPKcl
+   fun:sputn
+   fun:__ostream_write<char, std::char_traits<char> >
+   fun:_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+   fun:operator<< <char, std::char_traits<char>, std::allocator<char> >
+   fun:_ZN11modsecurity5Utils6IpTree13addFromBufferERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:copy
+   fun:_ZNSt15basic_streambufIcSt11char_traitsIcEE6xsputnEPKcl
+   fun:sputn
+   fun:__ostream_write<char, std::char_traits<char> >
+   fun:_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+   fun:operator<< <char, std::char_traits<char>, std::allocator<char> >
+   fun:_ZN11modsecurity5Utils6IpTree13addFromBufferERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:strtok_r
+   fun:add_ip_from_param
+   fun:_ZN11modsecurity5Utils6IpTree13addFromBufferEPSiPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree13addFromBufferERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:strtok_r
+   fun:add_ip_from_param
+   fun:_ZN11modsecurity5Utils6IpTree13addFromBufferEPSiPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree13addFromBufferERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:strtok_r
+   fun:add_ip_from_param
+   fun:_ZN11modsecurity5Utils6IpTree13addFromBufferEPSiPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree13addFromBufferERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:strtok_r
+   fun:add_ip_from_param
+   fun:_ZN11modsecurity5Utils6IpTree13addFromBufferEPSiPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree13addFromBufferERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:strtok_r
+   fun:add_ip_from_param
+   fun:_ZN11modsecurity5Utils6IpTree13addFromBufferEPSiPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity5Utils6IpTree13addFromBufferERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity5Utils6IpTree10addFromUrlERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity9operators15IpMatchFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:ssl3_read_bytes
+   fun:ssl3_read
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:ssl3_read_bytes
+   fun:ssl3_read
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:ssl3_read_bytes
+   fun:ssl3_read
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:ssl3_read_bytes
+   fun:ssl3_read
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__GI_strchr
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__GI_strchr
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__GI_strchr
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__GI_strchr
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:assign
+   fun:_M_set_length
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_appendEPKcm
+   fun:append
+   fun:_ZN11modsecurity5Utils11HttpsClient11handle_implEPcmm
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:_IO_vfscanf
+   fun:__isoc99_vsscanf
+   fun:__isoc99_sscanf
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:_IO_vfscanf
+   fun:__isoc99_vsscanf
+   fun:__isoc99_sscanf
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:_IO_vfscanf
+   fun:__isoc99_vsscanf
+   fun:__isoc99_sscanf
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:_IO_vfscanf
+   fun:__isoc99_vsscanf
+   fun:__isoc99_sscanf
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:inet_pton
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:inet_pton
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:inet_pton
+   fun:gaih_inet.constprop.5
+   fun:getaddrinfo
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:start_thread
+   fun:clone
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:tolower
+   fun:strcasecmp
+   fun:_nss_files_gethostbyname4_r
+   fun:gaih_inet.constprop.5
+   fun:getaddrinfo
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:start_thread
+   fun:clone
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:tolower
+   fun:strcasecmp
+   fun:_nss_files_gethostbyname4_r
+   fun:gaih_inet.constprop.5
+   fun:getaddrinfo
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:start_thread
+   fun:clone
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   open(filename)
+   obj:/usr/lib/libc-2.24.so
+   fun:_IO_file_open
+   fun:_IO_file_fopen@@GLIBC_2.2.5
+   fun:__fopen_internal
+   obj:/usr/lib/libnss_mymachines.so.2
+   obj:/usr/lib/libnss_mymachines.so.2
+   obj:/usr/lib/libnss_mymachines.so.2
+   fun:_nss_mymachines_gethostbyname4_r
+   fun:gaih_inet.constprop.5
+   fun:getaddrinfo
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:start_thread
+   fun:clone
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   sendmsg(msg.msg_iov[1])
+   fun:sendmsg
+   obj:/usr/lib/libnss_resolve.so.2
+   obj:/usr/lib/libnss_resolve.so.2
+   obj:/usr/lib/libnss_resolve.so.2
+   obj:/usr/lib/libnss_resolve.so.2
+   fun:_nss_resolve_gethostbyname4_r
+   fun:gaih_inet.constprop.5
+   fun:getaddrinfo
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:start_thread
+   fun:clone
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   sendmsg(mmsg[0].msg_hdr.msg_iov[0])
+   fun:sendmmsg
+   obj:/usr/lib/libresolv-2.24.so
+   fun:__libc_res_nquery
+   obj:/usr/lib/libresolv-2.24.so
+   fun:__libc_res_nsearch
+   fun:_nss_dns_gethostbyname4_r
+   fun:_nss_resolve_gethostbyname4_r
+   fun:gaih_inet.constprop.5
+   fun:getaddrinfo
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:start_thread
+   fun:clone
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   sendmsg(mmsg[1].msg_hdr.msg_iov[0])
+   fun:sendmmsg
+   obj:/usr/lib/libresolv-2.24.so
+   fun:__libc_res_nquery
+   obj:/usr/lib/libresolv-2.24.so
+   fun:__libc_res_nsearch
+   fun:_nss_dns_gethostbyname4_r
+   fun:_nss_resolve_gethostbyname4_r
+   fun:gaih_inet.constprop.5
+   fun:getaddrinfo
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:start_thread
+   fun:clone
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:tolower
+   fun:strcasecmp
+   fun:ns_samename
+   fun:__res_nameinquery
+   fun:__res_queriesmatch
+   obj:/usr/lib/libresolv-2.24.so
+   fun:__libc_res_nquery
+   obj:/usr/lib/libresolv-2.24.so
+   fun:__libc_res_nsearch
+   fun:_nss_dns_gethostbyname4_r
+   fun:_nss_resolve_gethostbyname4_r
+   fun:gaih_inet.constprop.5
+   fun:getaddrinfo
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:start_thread
+   fun:clone
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:inet_pton
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   write(buf)
+   obj:/usr/lib/libc-2.24.so
+   fun:sock_write
+   fun:BIO_write
+   fun:ssl23_write_bytes
+   fun:ssl23_connect
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:copy
+   fun:_S_copy
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_mutateEmmPKcm
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_appendEPKcm
+   fun:append
+   fun:_ZN11modsecurity5Utils11HttpsClient11handle_implEPcmm
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:copy
+   fun:_S_copy
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_mutateEmmPKcm
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_appendEPKcm
+   fun:append
+   fun:_ZN11modsecurity5Utils11HttpsClient11handle_implEPcmm
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   obj:/usr/lib/libcurl.so.4.4.0
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:_ZN11modsecurity5Utils11HttpsClient8downloadERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:copy
+   fun:_S_copy
+   fun:_S_copy_chars
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE12_M_constructIPKcEEvT_S8_St20forward_iterator_tag.isra.24
+   fun:_M_construct_aux<char const*>
+   fun:_M_construct<char const*>
+   fun:basic_string
+   fun:basic_stringbuf
+   fun:basic_stringstream
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memmove
+   fun:copy
+   fun:_S_copy
+   fun:_S_copy_chars
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE12_M_constructIPKcEEvT_S8_St20forward_iterator_tag.isra.24
+   fun:_M_construct_aux<char const*>
+   fun:_M_construct<char const*>
+   fun:basic_string
+   fun:basic_stringbuf
+   fun:basic_stringstream
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:assign
+   fun:_M_set_length
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE12_M_constructIPKcEEvT_S8_St20forward_iterator_tag.isra.24
+   fun:_M_construct_aux<char const*>
+   fun:_M_construct<char const*>
+   fun:basic_string
+   fun:basic_stringbuf
+   fun:basic_stringstream
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:tolower
+   fun:acmp_add_pattern
+   fun:_ZN11modsecurity9operators10PmFromFile4initERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtod_l_internal
+   fun:__stoa<double>
+   fun:stod
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_lshift
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_lshift
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memcpy@GLIBC_2.2.5
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_cmp
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_cmp
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memcpy@GLIBC_2.2.5
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:memcpy@GLIBC_2.2.5
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_mul_1
+   fun:__mpn_mul
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_mul_1
+   fun:__mpn_mul
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_mul_1
+   fun:__mpn_mul
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_mul
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_rshift
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_rshift
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_rshift
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_rshift
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_divrem
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_divrem
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_divrem
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_mul_1
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_mul_1
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_divrem
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__mpn_divrem
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:hack_digit
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__printf_fp_l
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZSt16__convert_from_vRKP15__locale_structPciPKcz
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE15_M_insert_floatIdEES3_S3_RSt8ios_baseccT_
+   fun:_ZNKSt7num_putIcSt19ostreambuf_iteratorIcSt11char_traitsIcEEE6do_putES3_RSt8ios_basecd
+   fun:put
+   fun:_ZNSo9_M_insertIdEERSoT_
+   fun:operator<<
+   fun:_ZN11modsecurity7actions6RuleId4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:tolower
+   fun:transform<__gnu_cxx::__normal_iterator<char*, std::__cxx11::basic_string<char> >, __gnu_cxx::__normal_iterator<char*, std::__cxx11::basic_string<char> >, int (*)(int) throw ()>
+   fun:_ZN11modsecurity5utils6string7tolowerENSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN11modsecurity7actions5Phase4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   fun:__stoa<long int, int, char, int>
+   fun:stoi
+   fun:_ZN11modsecurity7actions5Phase4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   fun:__stoa<long int, int, char, int>
+   fun:stoi
+   fun:_ZN11modsecurity7actions5Phase4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:____strtol_l_internal
+   fun:__stoa<long int, int, char, int>
+   fun:stoi
+   fun:_ZN11modsecurity7actions5Phase4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:_ZL21yy_get_previous_statev
+   fun:_Z5yylexRN11modsecurity6Parser6DriverE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:_itoa_word
+   fun:vfprintf
+   fun:vsnprintf
+   fun:_ZN9__gnu_cxx12__to_xstringINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEcEET_PFiPT0_mPKS8_P13__va_list_tagEmSB_z
+   fun:to_string
+   fun:_ZN11modsecurity4Rule8evaluateEPNS_11TransactionE
+   fun:_ZN11modsecurity5Rules8evaluateEiPNS_11TransactionE
+   fun:_ZN11modsecurity11Transaction18processRequestBodyEv
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:_Z14yy_scan_bufferPcm
+   fun:_Z13yy_scan_bytesPKci
+   fun:_ZN11modsecurity6Parser6Driver10scan_beginEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:_Znwm
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:realloc
+   fun:write
+   fun:_ZN11modsecurity6engine3Lua11blob_keeperEP9lua_StatePKvmPv
+   obj:/usr/lib/liblua.so.5.3.4
+   obj:/usr/lib/liblua.so.5.3.4
+   obj:/usr/lib/liblua.so.5.3.4
+   obj:/usr/lib/liblua.so.5.3.4
+   fun:_ZN11modsecurity6engine3Lua4loadENSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity10RuleScript4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:_Znwm
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_assignERKS4_
+   fun:assign
+   fun:operator=
+   fun:_ZN11modsecurity6engine3Lua4loadENSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS7_
+   fun:_ZN11modsecurity10RuleScript4initEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:_Znwm
+   fun:_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE12_M_constructIPcEEvT_S7_St20forward_iterator_tag.isra.137
+   fun:_M_construct_aux<char*>
+   fun:_M_construct<char*>
+   fun:basic_string
+   fun:RuleScript
+   fun:_ZN2yy14seclang_parser5parseEv
+   fun:_ZN11modsecurity6Parser6Driver5parseERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+   fun:_ZN11modsecurity5Rules4loadEPKcRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+   fun:_Z17perform_unit_testPN16modsecurity_test15ModSecurityTestINS_14RegressionTestEEEPSt6vectorIPS1_SaIS5_EEPNS_22ModSecurityTestResultsINS_20RegressionTestResultEEEPi
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:strdup
+   fun:main
+}

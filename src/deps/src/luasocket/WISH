@@ -1,0 +1,22 @@
+... as an l-value to get all results of a function call?
+at least ...[i] and #...
+extend to full tuples?
+
+__and __or __not metamethods
+
+lua_tostring, lua_tonumber, lua_touseradta etc push values in stack
+__tostring,__tonumber, __touserdata metamethods are checked
+and expected to push an object of correct type on stack
+
+lua_rawtostring, lua_rawtonumber, lua_rawtouserdata don't
+push anything on stack, return data of appropriate type, 
+skip metamethods and throw error if object not of exact type
+
+package.findfile exported
+module not polluting the global namespace
+
+coxpcall with a coroutine pool for efficiency (reusing coroutines)
+
+exception mechanism formalized? just like the package system was.
+
+a nice bitlib in the core

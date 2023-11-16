@@ -1,0 +1,4 @@
+ssdeep,1.1--blocksize:hash:hash,filename
+96:MbQ1L0LDX8GPI8ov3D2D9zd6/gz2wZhFvV0O598La8Kqvfi0znNa8Xi5SM7XRWCK:KvL8Gg8rWIz2ZKqvfjzQ55RpRHjftQ++,"modsecurity.conf-recommended"
+192:b8B5UQvywcMIJuavpde/Yyz/U/vF+vGCoCvrQr/dw:afcnrvp8zqUvGrzr6,"README_WINDOWS.TXT"
+96:+qK8Z4gA165/hquKNMi68zuEyMM9qNB26x:+RG4z6c1LyZOB26x,"README.TXT"

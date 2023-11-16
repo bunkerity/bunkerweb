@@ -1,0 +1,63 @@
+
+    GENERAL NOTES
+    -------------
+
+    These functions and macros have been provided as a tool for Nginx module developers.  They have
+    been created with four main purposes:
+
+        - to speed up code-writing
+        - to reduce the code you have to read on file
+        - to add additional generic functionality similar to exising Nginx functions 
+        - to reduce code errors
+
+    Most of the utility macros are just wrappers around commonly used code, especially checking for
+    NULL and returning a value, zeroing data etc.  The functions add things like extra conf_set_X_slot
+    functions that don't exist in the standard Nginx distribution, but which might be useful in more
+    than one module.
+
+    A consistent approach has been taken to creating the macros, so that in theory you should be able
+    to 'know' the macro name from using the few rules below and your knowledge of the existing Nginx
+    functions.  As much as possible, the ordering of variables used within the underlying functions
+    remain the same, to reduce the learning time.  Also, a constent naming pattern has been used to
+    make it easier to read the macros above.
+
+    Obviously not all programmers will want to use all or any of these macros, but they are provided
+    as a tool for those who wish to use them.
+
+    If you have any comments about them, including any additions or errors please let me know at 
+    'eugaia at gmail dot com'.  I don't promise to include all additions people send, but if they seem
+    like they could be of use to multiple developers, I will.
+
+
+    UTILITY MACRO PARAMS
+    --------------------
+    p       pointer                 - used to set the result of a function to a pointer
+    a       array
+    pl      pool
+    n       multiplication factor   - for allocating multiple pointers & pushing 'n' elts in arrays etc
+    sz      size
+    l       log
+    rv      return value
+
+
+
+    UTILITY MACRO FUNCTION SUFFIXES
+    -------------------------------
+
+ - general
+
+    p       p = [FUNCTION] ()
+    _r      [ if result of function is NULL | NGX_ERROR (as appropriate) ] return rv
+    _rce    rv = NGX_CONF_ERROR
+    _re     rv = NGX_ERROR
+    _rn     rv = NULL
+
+ - (p)(c)alloc functions
+
+    p       p = [function] (pool, sizeof (*p))
+    pn      p = [function] (pool, sizeof (*p) * n)
+
+
+    UTILITY MACRO PARAMS ORDER
+    --------------------------
+    p, pl|a, sz|n, l, rv 

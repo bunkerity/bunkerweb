@@ -1,0 +1,37 @@
+{
+  "id": "redirect",
+  "name": "Redirect",
+  "description": "Manage HTTP redirects.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "REDIRECT_TO": {
+      "context": "multisite",
+      "default": "",
+      "help": "Redirect a whole site to another one.",
+      "id": "redirect-to",
+      "label": "Redirect to",
+      "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
+      "type": "text"
+    },
+    "REDIRECT_TO_REQUEST_URI": {
+      "context": "multisite",
+      "default": "no",
+      "help": "Append the requested URI to the redirect address.",
+      "id": "redirect-to-request-uri",
+      "label": "Append request URI",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "REDIRECT_TO_STATUS_CODE": {
+      "context": "multisite",
+      "default": "301",
+      "help": "Status code to send to client when redirecting.",
+      "id": "redirect-to-status-code",
+      "label": "Append request URI",
+      "regex": "^(301|302)$",
+      "type": "select",
+      "select": ["301", "302"]
+    }
+  }
+}

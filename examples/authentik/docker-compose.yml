@@ -1,0 +1,194 @@
+version: "3.4"
+
+services:
+  mybunker:
+    image: bunkerity/bunkerweb:1.5.3
+    ports:
+      - 80:8080
+      - 443:8443
+    labels:
+      - "bunkerweb.INSTANCE=yes"
+    networks:
+      - bw-universe
+      - bw-services
+    environment:
+      - MULTISITE=yes
+      - SERVER_NAME=auth.example.com app1.example.com app2.example.com # replace with your domains
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+      - SERVE_FILES=no
+      - DISABLE_DEFAULT_SERVER=yes
+      - AUTO_LETS_ENCRYPT=yes
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_REVERSE_PROXY=yes
+      # Proxy to outpost
+      - REVERSE_PROXY_URL_999=/outpost.goauthentik.io
+      - REVERSE_PROXY_HOST_999=http://server:9000
+      - REVERSE_PROXY_HEADERS_999=X-Original-URL $$scheme://$$http_host$$request_uri;Content-Length ""
+      - REVERSE_PROXY_HEADERS_CLIENT_999=Set-Cookie $$auth_cookie
+      - REVERSE_PROXY_AUTH_REQUEST_SET_999=$$auth_cookie $$upstream_http_set_cookie
+      # Authentik
+      - auth.example.com_REVERSE_PROXY_URL=/
+      - auth.example.com_REVERSE_PROXY_HOST=http://server:9000
+      - auth.example.com_REVERSE_PROXY_WS=yes
+      - auth.example.com_LIMIT_REQ_URL_1=^/api/
+      - auth.example.com_LIMIT_REQ_RATE_1=5r/s
+      - auth.example.com_REVERSE_PROXY_INTERCEPT_ERRORS=no
+      - auth.example.com_ALLOWED_METHODS=GET|POST|HEAD|PUT|DELETE|PATCH
+      - auth.example.com_COOKIE_FLAGS=* SameSite=Lax
+      # Applications
+      - app1.example.com_REVERSE_PROXY_URL=/
+      - app1.example.com_REVERSE_PROXY_HOST=http://app1
+      - app1.example.com_REVERSE_PROXY_AUTH_REQUEST=/outpost.goauthentik.io/auth/nginx
+      - app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://auth.example.com/outpost.goauthentik.io/start?rd=$$scheme%3A%2F%2F$$host$$request_uri
+      - app1.example.com_REVERSE_PROXY_AUTH_REQUEST_SET=$$auth_cookie $$upstream_http_set_cookie;$$authentik_username $$upstream_http_x_authentik_username;$$authentik_groups $$upstream_http_x_authentik_groups;$$authentik_email $$upstream_http_x_authentik_email;$$authentik_name $$upstream_http_x_authentik_name;$$authentik_uid $$upstream_http_x_authentik_uid
+      - app1.example.com_REVERSE_PROXY_HEADERS_CLIENT=Set-Cookie $$auth_cookie
+      - app1.example.com_REVERSE_PROXY_HEADERS=X-authentik-username $$authentik_username;X-authentik-groups $$authentik_groups;X-authentik-email $$authentik_email;X-authentik-name $$authentik_name;X-authentik-uid $$authentik_uid
+      - app2.example.com_REVERSE_PROXY_URL=/
+      - app2.example.com_REVERSE_PROXY_HOST=http://app2
+      - app2.example.com_REVERSE_PROXY_AUTH_REQUEST=/outpost.goauthentik.io/auth/nginx
+      - app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=https://auth.example.com/outpost.goauthentik.io/start?rd=$$scheme%3A%2F%2F$$host$$request_uri
+      - app2.example.com_REVERSE_PROXY_AUTH_REQUEST_SET=$$auth_cookie $$upstream_http_set_cookie;$$authentik_username $$upstream_http_x_authentik_username;$$authentik_groups $$upstream_http_x_authentik_groups;$$authentik_email $$upstream_http_x_authentik_email;$$authentik_name $$upstream_http_x_authentik_name;$$authentik_uid $$upstream_http_x_authentik_uid
+      - app2.example.com_REVERSE_PROXY_HEADERS_CLIENT=Set-Cookie $$auth_cookie
+      - app2.example.com_REVERSE_PROXY_HEADERS=X-authentik-username $$authentik_username;X-authentik-groups $$authentik_groups;X-authentik-email $$authentik_email;X-authentik-name $$authentik_name;X-authentik-uid $$authentik_uid
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.3
+    depends_on:
+      - mybunker
+    environment:
+      - DOCKER_HOST=tcp://bw-docker-proxy:2375
+    networks:
+      - bw-universe
+      - bw-docker
+    volumes:
+      - bw-data:/data
+
+  bw-docker-proxy:
+    image: tecnativa/docker-socket-proxy:nightly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+      - LOG_LEVEL=warning
+    networks:
+      - bw-docker
+
+  # APPLICATIONS
+  app1:
+    image: tutum/hello-world
+    networks:
+      - bw-services
+  app2:
+    image: tutum/hello-world
+    networks:
+      - bw-services
+
+  # AUTHENTIK SERVICES
+  postgresql:
+    image: docker.io/library/postgres:12-alpine
+    restart: unless-stopped
+    networks:
+      - bw-services
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - database:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${PG_PASS:?database password required}
+      - POSTGRES_USER=${PG_USER:-authentik}
+      - POSTGRES_DB=${PG_DB:-authentik}
+    env_file:
+      - .env
+  redis:
+    image: docker.io/library/redis:alpine
+    command: --save 60 1 --loglevel warning
+    restart: unless-stopped
+    networks:
+      - bw-services
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    volumes:
+      - redis:/data
+  server:
+    image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2022.11.2}
+    restart: unless-stopped
+    networks:
+      - bw-services
+    command: server
+    environment:
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: ${PG_USER:-authentik}
+      AUTHENTIK_POSTGRESQL__NAME: ${PG_DB:-authentik}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS}
+      # AUTHENTIK_ERROR_REPORTING__ENABLED: "true"
+    volumes:
+      - ./media:/media
+      - ./custom-templates:/templates
+      - geoip:/geoip
+    env_file:
+      - .env
+    # ports:
+    # - "0.0.0.0:${AUTHENTIK_PORT_HTTP:-9000}:9000"
+    # - "0.0.0.0:${AUTHENTIK_PORT_HTTPS:-9443}:9443"
+  worker:
+    image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2022.11.2}
+    restart: unless-stopped
+    networks:
+      - bw-services
+    command: worker
+    environment:
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__USER: ${PG_USER:-authentik}
+      AUTHENTIK_POSTGRESQL__NAME: ${PG_DB:-authentik}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS}
+      # AUTHENTIK_ERROR_REPORTING__ENABLED: "true"
+      # This is optional, and can be removed. If you remove this, the following will happen
+      # - The permissions for the /media folders aren't fixed, so make sure they are 1000:1000
+      # - The docker socket can't be accessed anymore
+    user: root
+    volumes:
+      - ./media:/media
+      - ./certs:/certs
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./custom-templates:/templates
+      - geoip:/geoip
+    env_file:
+      - .env
+  geoipupdate:
+    image: "maxmindinc/geoipupdate:latest"
+    networks:
+      - bw-services
+    volumes:
+      - "geoip:/usr/share/GeoIP"
+    environment:
+      GEOIPUPDATE_EDITION_IDS: "GeoLite2-City"
+      GEOIPUPDATE_FREQUENCY: "8"
+    env_file:
+      - .env
+
+volumes:
+  bw-data:
+  database:
+  redis:
+  geoip:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+  bw-docker:

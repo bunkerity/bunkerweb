@@ -1,0 +1,132 @@
+# Copyright (C) 2015-2016 Google Inc.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+
+if [ "$ngx_addon_name" = "ngx_brotli" ]; then
+  BROTLI_MODULE_SRC_DIR="$ngx_addon_dir/filter"
+else
+  BROTLI_MODULE_SRC_DIR="$ngx_addon_dir"
+fi
+
+ngx_addon_name=ngx_brotli_filter
+
+if [ -z "$ngx_module_link" ]; then
+cat << END
+
+$0: error: Brotli module requires recent version of NGINX (1.9.11+).
+
+END
+    exit 1
+fi
+
+ngx_module_type=HTTP_FILTER
+ngx_module_name=ngx_http_brotli_filter_module
+
+brotli="$ngx_addon_dir/deps/brotli/c"
+if [ ! -f "$brotli/include/brotli/encode.h" ]; then
+  brotli="/usr/local"
+fi
+if [ ! -f "$brotli/include/brotli/encode.h" ]; then
+  brotli="/usr"
+fi
+if [ ! -f "$brotli/include/brotli/encode.h" ]; then
+cat << END
+
+$0: error: \
+Brotli library is missing from the $brotli directory.
+
+Please make sure that the git submodule has been checked out:
+
+    cd $ngx_addon_dir && git submodule update --init && cd $PWD
+
+END
+    exit 1
+fi
+
+BROTLI_LISTS_FILE="$brotli/../scripts/sources.lst"
+
+if [ -f "$BROTLI_LISTS_FILE" ]; then
+
+BROTLI_LISTS=`cat "$BROTLI_LISTS_FILE" | grep -v "#" | tr '\n' '#' | \
+              sed 's/\\\\#//g' | tr -s ' ' '+' | tr -s '#' ' ' | \
+              sed 's/+c/+$brotli/g' | sed 's/+=+/=/g'`
+for ITEM in ${BROTLI_LISTS}; do
+  VAR=`echo $ITEM | sed 's/=.*//'`
+  VAL=`echo $ITEM | sed 's/.*=//' | tr '+' ' '`
+  eval ${VAR}=\"$VAL\"
+done
+
+else  # BROTLI_LISTS_FILE
+
+BROTLI_ENC_H="$brotli/include/brotli/encode.h \
+              $brotli/include/brotli/port.h \
+              $brotli/include/brotli/types.h"
+BROTLI_ENC_LIB="-lbrotlienc"
+
+fi
+
+ngx_module_incs="$brotli/include"
+ngx_module_deps="$BROTLI_COMMON_H $BROTLI_ENC_H"
+ngx_module_srcs="$BROTLI_COMMON_C $BROTLI_ENC_C \
+                 $BROTLI_MODULE_SRC_DIR/ngx_http_brotli_filter_module.c"
+ngx_module_libs="$BROTLI_ENC_LIB -lm"
+ngx_module_order="$ngx_module_name \
+                  ngx_pagespeed \
+                  ngx_http_postpone_filter_module \
+                  ngx_http_ssi_filter_module \
+                  ngx_http_charset_filter_module \
+                  ngx_http_xslt_filter_module \
+                  ngx_http_image_filter_module \
+                  ngx_http_sub_filter_module \
+                  ngx_http_addition_filter_module \
+                  ngx_http_gunzip_filter_module \
+                  ngx_http_userid_filter_module \
+                  ngx_http_headers_filter_module \
+                  ngx_http_copy_filter_module \
+                  ngx_http_range_body_filter_module \
+                  ngx_http_not_modified_filter_module \
+                  ngx_http_slice_filter_module"
+
+. auto/module
+
+if [ "$ngx_module_link" != DYNAMIC ]; then
+    # ngx_module_order doesn't work with static modules,
+    # so we must re-order filters here.
+
+    if [ "$HTTP_GZIP" = YES ]; then
+        next=ngx_http_gzip_filter_module
+    elif echo $HTTP_FILTER_MODULES | grep pagespeed_etag_filter >/dev/null; then
+        next=ngx_pagespeed_etag_filter
+    else
+        next=ngx_http_range_header_filter_module
+    fi
+
+    HTTP_FILTER_MODULES=`echo $HTTP_FILTER_MODULES \
+                         | sed "s/$ngx_module_name//" \
+                         | sed "s/$next/$next $ngx_module_name/"`
+fi
+
+CFLAGS="$CFLAGS -Wno-deprecated-declarations"
+
+have=NGX_HTTP_BROTLI_FILTER . auto/have
+have=NGX_HTTP_BROTLI_FILTER_MODULE . auto/have  # deprecated

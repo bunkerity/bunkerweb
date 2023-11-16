@@ -1,0 +1,7 @@
+moodleSiteName: "My Moodle"
+moodleUsername: "admin"
+moodlePassword: "changeme42"
+moodleEmail: "admin@example.com"
+mariadb:
+  auth:
+    password: "changeme1337"

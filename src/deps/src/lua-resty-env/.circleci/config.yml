@@ -1,0 +1,12 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: quay.io/3scale/s2i-openresty-centos7:luarocks-build
+    working_directory: /opt/app-root/lua-resty-env
+    steps:
+      - checkout
+      - run: luarocks make rockspecs/*.rockspec
+      - run: luarocks build rockspecs/*.rockspec
+      - run: luarocks install busted
+      - run: bin/busted

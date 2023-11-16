@@ -1,0 +1,11 @@
+--TEST--
+bizarre TSQL \ is sometimes converted to a 0
+--INPUT--
+SELECT \ % 1;
+--EXPECTED--
+E SELECT
+\ \
+o %
+1 1
+; ;
+

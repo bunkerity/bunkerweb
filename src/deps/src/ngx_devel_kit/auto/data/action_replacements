@@ -1,0 +1,5 @@
+
+OK      NGX_OK
+E       NGX_ERROR
+CE      NGX_CONF_ERROR
+COK     NGX_CONF_OK

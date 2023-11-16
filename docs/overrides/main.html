@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block outdated %}
+  You're not viewing the documentation of the latest version.
+  <a href="{{ '../' ~ base_url }}">
+    <strong>Click here to view latest.</strong>
+  </a>
+{% endblock %}
+
+{% block announce %}
+  📢 Looking for tailored support, consulting or development for BunkerWeb ?
+  Contact us at <a href="mailto:contact@bunkerity.com" style="color: #3f6ec6; text-decoration: underline">contact@bunkerity.com</a> for enterprise offers !
+{% endblock %}
+
+{% block libs %}
+<script
+  async
+  defer
+  data-domain="docs.bunkerweb.io"
+  src="https://data.bunkerity.com/js/script.js"
+></script>
+{% endblock %}

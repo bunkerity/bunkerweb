@@ -1,0 +1,192 @@
+[
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "ctl:ruleRemoveById doesn't handle all ranges equally 1",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1956",
+  "gihub_issue": 1956,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+      "headers": {
+        "Host": "www.google.com"
+      },
+    "uri": "\/test.pl?param1=   test   &param2=<a href=\"javascript:alert(1)\">)",
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+    "expected": {
+      "audit_log": "",
+      "debug_log": "Rule id: 913104 was skipped due to a ruleRemoveById",
+      "error_log": ""
+    },
+  "rules": [
+      "SecRule REQUEST_URI \"@beginsWith /test\" \"id:1001,phase:request,pass,nolog,t:none,ctl:ruleRemoveById=913103-913105\"",
+      "SecRule REQUEST_URI \"@beginsWith /test\" \"id:913104,phase:request,pass,nolog,t:none,msg:'whee'\""
+    ]
+  },
+  {
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "ctl:ruleRemoveById doesn't handle all ranges equally 2",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1956",
+  "gihub_issue": 1956,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+      "headers": {
+        "Host": "www.google.com"
+      },
+    "uri": "\/test.pl?param1=   test   &param2=<a href=\"javascript:alert(1)\">)",
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+    "expected": {
+      "audit_log": "",
+      "debug_log": "Rule id: 913104 was skipped due to a ruleRemoveById",
+      "error_log": ""
+    },
+  "rules": [
+      "SecRule REQUEST_URI \"@beginsWith /test\" \"id:1001,phase:request,pass,nolog,t:none,ctl:ruleRemoveById=913104\"",
+      "SecRule REQUEST_URI \"@beginsWith /test\" \"id:913104,phase:request,pass,nolog,t:none,msg:'whee'\""
+    ]
+  },
+  {
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "ctl:ruleRemoveById doesn't handle all ranges equally 3",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1956",
+  "gihub_issue": 1956,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+      "headers": {
+        "Host": "www.google.com"
+      },
+    "uri": "\/test.pl?param1=   test   &param2=<a href=\"javascript:alert(1)\">)",
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+    "expected": {
+      "audit_log": "",
+      "debug_log": "Rule id: 913103 was skipped due to a ruleRemoveById",
+      "error_log": ""
+    },
+  "rules": [
+      "SecRule REQUEST_URI \"@beginsWith /test\" \"id:1001,phase:request,pass,nolog,t:none,ctl:ruleRemoveById=913103-913105\"",
+      "SecRule REQUEST_URI \"@beginsWith /test\" \"id:913103,phase:request,pass,nolog,t:none,msg:'whee'\""
+    ]
+  },
+  {
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "ctl:ruleRemoveById doesn't handle all ranges equally 4",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1956",
+  "gihub_issue": 1956,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+      "headers": {
+        "Host": "www.google.com"
+      },
+    "uri": "\/test.pl?param1=   test   &param2=<a href=\"javascript:alert(1)\">)",
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+    "expected": {
+      "audit_log": "",
+      "debug_log": "Rule id: 913105 was skipped due to a ruleRemoveById",
+      "error_log": ""
+    },
+  "rules": [
+      "SecRule REQUEST_URI \"@beginsWith /test\" \"id:1001,phase:request,pass,nolog,t:none,ctl:ruleRemoveById=913103-913105\"",
+      "SecRule REQUEST_URI \"@beginsWith /test\" \"id:913105,phase:request,pass,nolog,t:none,msg:'whee'\""
+    ]
+  },
+  {
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "ctl:ruleRemoveById doesn't handle all ranges equally 5",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1956",
+  "gihub_issue": 1956,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+      "headers": {
+        "Host": "www.google.com"
+      },
+    "uri": "\/test.pl?param1=   test   &param2=<a href=\"javascript:alert(1)\">)",
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+    "expected": {
+      "audit_log": "",
+      "debug_log": "Rule: 913102. Executing operator",
+      "error_log": ""
+    },
+  "rules": [
+      "SecRule REQUEST_URI \"@beginsWith /test\" \"id:1001,phase:request,pass,nolog,t:none,ctl:ruleRemoveById=913103-913105\"",
+      "SecRule REQUEST_URI \"@beginsWith /test\" \"id:913102,phase:request,pass,nolog,t:none,msg:'whee'\""
+    ]
+  }
+]

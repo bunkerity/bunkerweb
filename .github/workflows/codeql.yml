@@ -1,0 +1,31 @@
+name: CodeQL Analysis
+
+on:
+  schedule:
+    # Weekly on Saturdays.
+    - cron: "30 1 * * 6"
+  workflow_call:
+
+jobs:
+  code-security:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["python", "javascript"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@74483a38d39275f33fcff5f35b679b5ca4a26a99 # v2.22.5
+        with:
+          languages: ${{ matrix.language }}
+          config-file: ./.github/codeql.yml
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@74483a38d39275f33fcff5f35b679b5ca4a26a99 # v2.22.5
+        with:
+          category: "/language:${{matrix.language}}"

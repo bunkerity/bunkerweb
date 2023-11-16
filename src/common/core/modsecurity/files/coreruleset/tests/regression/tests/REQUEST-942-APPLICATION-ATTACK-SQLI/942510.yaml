@@ -1,0 +1,37 @@
+---
+meta:
+  author: "Franziska Buehler"
+  description: None
+  enabled: true
+  name: 942510.yaml
+tests:
+  - test_title: 942510-1
+    desc: "SQLi bypass detected: backticks"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: localhost
+            method: GET
+            port: 80
+            uri: "/?`bla`"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942510"
+  - test_title: 942510-2
+    desc: "SQLi bypass detected: backticks"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: localhost
+            method: GET
+            port: 80
+            uri: "/?'bla'"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942510"
