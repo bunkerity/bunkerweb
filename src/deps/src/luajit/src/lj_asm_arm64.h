@@ -2040,7 +2040,7 @@ static Reg asm_setup_call_slots(ASMState *as, IRIns *ir, const CCallInfo *ci)
       as->evenspill = nslots;
   }
 #endif
-  return REGSP_HINT(RID_RET);
+  return REGSP_HINT(irt_isfp(ir->t) ? RID_FPRET : RID_RET);
 }
 
 static void asm_setup_target(ASMState *as)

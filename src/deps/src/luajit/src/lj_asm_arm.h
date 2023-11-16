@@ -2255,7 +2255,7 @@ static Reg asm_setup_call_slots(ASMState *as, IRIns *ir, const CCallInfo *ci)
   }
   if (nslots > as->evenspill)  /* Leave room for args in stack slots. */
     as->evenspill = nslots;
-  return REGSP_HINT(RID_RET);
+  return REGSP_HINT(irt_isfp(ir->t) ? RID_FPRET : RID_RET);
 }
 
 static void asm_setup_target(ASMState *as)

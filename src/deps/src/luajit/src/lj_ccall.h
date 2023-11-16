@@ -181,6 +181,7 @@ typedef union FPRArg {
   (CCALL_NARG_GPR > CCALL_NRET_GPR ? CCALL_NARG_GPR : CCALL_NRET_GPR)
 #define CCALL_NUM_FPR \
   (CCALL_NARG_FPR > CCALL_NRET_FPR ? CCALL_NARG_FPR : CCALL_NRET_FPR)
+#define CCALL_MAXSTACK          32
 
 /* Check against constants in lj_ctype.h. */
 LJ_STATIC_ASSERT(CCALL_NUM_GPR <= CCALL_MAX_GPR);

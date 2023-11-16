@@ -538,15 +538,6 @@
 #error "No support for ILP32 model on ARM64"
 #undef LJ_TARGET_ARM64
 #endif
-#elif LJ_TARGET_PPC
-#if defined(_LITTLE_ENDIAN) && (!defined(_BYTE_ORDER) || (_BYTE_ORDER == _LITTLE_ENDIAN))
-#error "No support for little-endian PPC32"
-#undef LJ_TARGET_PPC
-#endif
-#if defined(__NO_FPRS__) && !defined(_SOFT_FLOAT)
-#error "No support for PPC/e500, use LuaJIT 2.0"
-#undef LJ_TARGET_PPC
-#endif
 #elif LJ_TARGET_MIPS32
 #if !((defined(_MIPS_SIM_ABI32) && _MIPS_SIM == _MIPS_SIM_ABI32) || (defined(_ABIO32) && _MIPS_SIM == _ABIO32))
 #error "Only o32 ABI supported for MIPS32"
@@ -706,6 +697,10 @@ extern void *LJ_WIN_LOADLIBA(const char *path);
 #endif
 #endif
 
+#if LUAJIT_TARGET == LUAJIT_ARCH_PPC && LJ_ARCH_ENDIAN == LUAJIT_LE
+#define LJ_NO_UNWIND            0
+#define LJ_UNWIND_EXT           0
+#else
 #if defined(LUAJIT_NO_UNWIND) || __GNU_COMPACT_EH__ || defined(__symbian__) || LJ_TARGET_IOS || LJ_TARGET_PS3 || LJ_TARGET_PS4 || LJ_TARGET_PS5
 #define LJ_NO_UNWIND		1
 #endif
@@ -715,6 +710,7 @@ extern void *LJ_WIN_LOADLIBA(const char *path);
 #else
 #define LJ_UNWIND_EXT		0
 #endif
+#endif  //#if LUAJIT_TARGET == LUAJIT_ARCH_PPC && LJ_ARCH_ENDIAN == LUAJIT_LE
 
 #if LJ_UNWIND_EXT && LJ_HASJIT && !LJ_TARGET_ARM && !(LJ_ABI_WIN && LJ_TARGET_X86)
 #define LJ_UNWIND_JIT		1
