@@ -44,9 +44,13 @@ static int carith_checkarg(lua_State *L, CTState *cts, CDArith *ca)
 	p = (uint8_t *)cdata_getptr(p, ct->size);
 	if (ctype_isref(ct->info)) ct = ctype_rawchild(cts, ct);
       } else if (ctype_isfunc(ct->info)) {
+	CTypeID id0 = i ? ctype_typeid(cts, ca->ct[0]) : 0;
 	p = (uint8_t *)*(void **)p;
 	ct = ctype_get(cts,
 	  lj_ctype_intern(cts, CTINFO(CT_PTR, CTALIGN_PTR|id), CTSIZE_PTR));
+	if (i) {  /* cts->tab may have been reallocated. */
+	  ca->ct[0] = ctype_get(cts, id0);
+	}
       }
       if (ctype_isenum(ct->info)) ct = ctype_child(cts, ct);
       ca->ct[i] = ct;
