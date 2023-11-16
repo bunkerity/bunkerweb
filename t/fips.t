@@ -35,14 +35,6 @@ __DATA__
                 ngx.exit(200)
             end
             local openssl = require("resty.openssl")
-            if require("resty.openssl.version").BORINGSSL then
-                if openssl.get_fips_mode() then
-                    ngx.say("false\ntrue\nfalse")
-                else
-                    ngx.say("BORINGSSL should have fips turned on but actually not")
-                end
-                ngx.exit(200)
-            end
             ngx.say(openssl.get_fips_mode())
             myassert(openssl.set_fips_mode(true))
             ngx.say(openssl.get_fips_mode())
@@ -90,8 +82,7 @@ fips
 --- config
     location =/t {
         content_by_lua_block {
-            -- BORINGSSL doesn't seem to remove non-fips compliant algorithms?
-            if not _G.fips or require("resty.openssl.version").BORINGSSL then
+            if not _G.fips then
                 ngx.say("true\ntrue")
                 ngx.say("invalid cipher type \"chacha20\": unsupported")
                 ngx.say("invalid digest type \"md5\": unsupported")
@@ -128,5 +119,27 @@ true
 true
 .*invalid cipher type.+(?:unsupported|disabled for fips).*
 .*invalid digest type "md5".+(?:unsupported|disabled for fips).*
+--- no_error_log
+[error]
+
+=== TEST 4: Get FIPS version text
+--- http_config eval: $::HttpConfig
+--- config
+    location =/t {
+        content_by_lua_block {
+            if not _G.fips then
+                ngx.say("3.0.8")
+                ngx.exit(200)
+            end
+
+            local openssl = require("resty.openssl")
+            myassert(openssl.set_fips_mode(true))
+            ngx.say(myassert(openssl.get_fips_version_text()))
+        }
+    }
+--- request
+    GET /t
+--- response_body_like
+3\.\d+\.\d+
 --- no_error_log
 [error]

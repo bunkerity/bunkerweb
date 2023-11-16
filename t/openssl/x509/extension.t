@@ -293,22 +293,6 @@ DNS:test.com, DNS:test2.com
 --- config
     location =/t {
         content_by_lua_block {
-            if require("resty.openssl.version").BORINGSSL then
-                ngx.say([[
-{"id":"2.5.29.32","ln":"X509v3 Certificate Policies","nid":89,"sn":"certificatePolicies"}
-Policy: 1.2.3.4
-Policy: 1.5.6.7.8
-Policy: 1.3.5.8
-  CPS: http://my.host.name/
-  CPS: http://my.your.name/
-  User Notice:
-    Organization: Organisation Name
-    Numbers: 1, 2, 3, 4
-    Explicit Text: Explicit Text Here
-            ]])
-                ngx.exit(0)
-            end
-
             local extension = require("resty.openssl.x509.extension")
             local c = myassert(extension.new("certificatePolicies", "ia5org,1.2.3.4,1.5.6.7.8,@polsect",
                 [[

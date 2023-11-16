@@ -4,7 +4,6 @@ local name = require "resty.openssl.x509.name"
 local extension = require "resty.openssl.x509.extension"
 local bn = require "resty.openssl.bn"
 local digest = require "resty.openssl.digest"
-local BORINGSSL = require "resty.openssl.version".BORINGSSL
 local OPENSSL_3X = require "resty.openssl.version".OPENSSL_3X
 
 local function create_self_signed(key_opts, names, is_ca, signing_key, issuing_name)
@@ -41,10 +40,7 @@ local function create_self_signed(key_opts, names, is_ca, signing_key, issuing_n
     }))))
   end
 
-  local dgst
-  if BORINGSSL then
-    dgst = digest.new("SHA256")
-  end
+  local dgst = digest.new("SHA256")
   assert(cert:sign(signing_key or key, dgst))
 
   return cert, key

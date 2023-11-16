@@ -200,11 +200,6 @@ __DATA__
 --- config
     location =/t {
         content_by_lua_block {
-            if require("resty.openssl.version").OPENSSL_10 then
-                ngx.say("09159859CAC0C90203BB34C5A012C2A3, 1577753344\n09159859CAC0C90203BB34C5A012C2A3, 1577753344\n2, 2")
-                ngx.say("09159859CAC0C90203BB34C5A012C2A3, 1577753344\n04D2, 1511122233")
-                ngx.exit(0)
-            end
             local f = io.open("t/fixtures/TrustAsiaEVTLSProCAG2.crl"):read("*a")
             local c = myassert(require("resty.openssl.x509.crl").new(f))
             local s = myassert(c:index(1))
@@ -239,11 +234,6 @@ __DATA__
 --- config
     location =/t {
         content_by_lua_block {
-            if require("resty.openssl.version").OPENSSL_10 then
-                ngx.say("09159859CAC0C90203BB34C5A012C2A3, 1577753344\n09159859CAC0C90203BB34C5A012C2A3, 1577753344\ntruetrue")
-                ngx.exit(0)
-            end
-
             local f = io.open("t/fixtures/TrustAsiaEVTLSProCAG2.crl"):read("*a")
             local c = myassert(require("resty.openssl.x509.crl").new(f))
             local s = myassert(c:get_by_serial("09159859CAC0C90203BB34C5A012C2A3"))

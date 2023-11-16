@@ -9,5 +9,5 @@ ffi.cdef [[
   BIO *BIO_new(const BIO_METHOD *type);
   int BIO_free(BIO *a);
   const BIO_METHOD *BIO_s_mem(void);
-  int BIO_read(BIO *b, void *data, int dlen);
+  // int BIO_read(BIO *b, void *data, int dlen);
 ]]

@@ -61,8 +61,8 @@ ffi.cdef [[
 
   X509_EXTENSION *X509V3_EXT_nconf_nid(CONF *conf, X509V3_CTX *ctx, int ext_nid,
                                      const char *value);
-  X509_EXTENSION *X509V3_EXT_nconf(CONF *conf, X509V3_CTX *ctx, const char *name,
-                                 const char *value);
+  // X509_EXTENSION *X509V3_EXT_nconf(CONF *conf, X509V3_CTX *ctx, const char *name,
+  //                                const char *value);
   int X509V3_EXT_print(BIO *out, X509_EXTENSION *ext, unsigned long flag,
     int indent);
 

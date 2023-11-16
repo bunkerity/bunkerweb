@@ -227,11 +227,6 @@ pkcs12.decode.+(mac verify failure|INCORRECT_PASSWORD)
 --- config
     location =/t {
         content_by_lua_block {
-            if require("resty.openssl.version").BORINGSSL then
-                ngx.say("2333")
-                ngx.exit(0)
-            end
-
             -- don't load the legacy provider for this test
             -- by default nid_key is RC2 and is moved to legacy provider in 3.0
 

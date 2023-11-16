@@ -69,14 +69,9 @@ false
 --- config
     location =/t {
         content_by_lua_block {
-            local version = require("resty.openssl.version")
-            if version.BORINGSSL then
-                ngx.say("[\"AES\"]")
-                ngx.say("[\"AES-256-GCM @ default\"]")
-                ngx.exit(0)
-            end
             local openssl = require("resty.openssl")
             ngx.say(require("cjson").encode(openssl.list_cipher_algorithms()))
+            local version = require("resty.openssl.version")
             if not version.OPENSSL_3X then
                 ngx.say("[\"AES-256-GCM @ default\"]")
                 ngx.exit(0)
@@ -97,14 +92,9 @@ false
 --- config
     location =/t {
         content_by_lua_block {
-            local version = require("resty.openssl.version")
-            if version.BORINGSSL then
-                ngx.say("[\"SHA\"]")
-                ngx.say("[\"SHA2-256 @ default\"]")
-                ngx.exit(0)
-            end
             local openssl = require("resty.openssl")
             ngx.say(require("cjson").encode(openssl.list_digest_algorithms()))
+            local version = require("resty.openssl.version")
             if not version.OPENSSL_3X then
                 ngx.say("[\"SHA2-256 @ default\"]")
                 ngx.exit(0)
@@ -167,15 +157,6 @@ false
 --- config
     location =/t {
         content_by_lua_block {
-            local version = require("resty.openssl.version")
-            if version.OPENSSL_10 or (version.OPENSSL_11 and not version.OPENSSL_111) then
-                ngx.say("ECDHE-ECDSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA")
-                ngx.say("ECDHE-ECDSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA")
-                ngx.say("ECDHE-ECDSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA")
-                ngx.say("ECDHE-ECDSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA")
-                ngx.exit(0)
-            end
-            local version = require("resty.openssl.version")
             local openssl = require("resty.openssl")
             ngx.say(openssl.list_ssl_ciphers())
             ngx.say(openssl.list_ssl_ciphers("ECDHE-ECDSA-AES128-SHA"))
