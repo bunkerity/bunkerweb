@@ -71,9 +71,9 @@
     },
     {
       "id": "libmaxminddb",
-      "name": "libmaxminddb v1.7.1",
+      "name": "libmaxminddb v1.8.0",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "ac4d0d2480032a8664e251588e57d7b306ca630c"
+      "commit": "93a7e0e5627686deb82aa636376f53b1c7af3d9a"
     },
     {
       "id": "lua-cjson",
