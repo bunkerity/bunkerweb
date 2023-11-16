@@ -10,5 +10,5 @@
 
 #define     ngx_null_enum   { ngx_null_string, 0 }
 
-#define     ndk_memcpyp(d,s)                ngx_memcpy(d,s,sizeof(s))
+#define     ndk_memcpyp(d,s)                ngx_memcpy(d,s,sizeof(*s))
 
