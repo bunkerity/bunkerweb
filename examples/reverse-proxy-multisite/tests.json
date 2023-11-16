@@ -1,0 +1,18 @@
+{
+  "name": "reverse-proxy-multisite",
+  "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
+  "timeout": 60,
+  "delay": 90,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://app1.example.com",
+      "string": "hello"
+    },
+    {
+      "type": "string",
+      "url": "https://app2.example.com",
+      "string": "hello"
+    }
+  ]
+}

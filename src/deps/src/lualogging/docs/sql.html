@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>LuaLogging: A simple API to use logging features in Lua</title>
+    <link rel="stylesheet" href="doc.css" type="text/css"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+  <div id="product_logo">
+    <img alt="LuaLogging logo" src="images/lualogging-128.png"/>
+  </div>
+  <div id="product_name"><big><strong>LuaLogging</strong></big></div>
+  <div id="product_description">A simple API to use logging features in Lua.</div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+<h1>LuaLogging</h1>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="manual.html">Manual</a>
+      <ul>
+        <li><a href="manual.html#installation">Installation</a></li>
+        <li><a href="manual.html#logger">Logger objects</a></li>
+        <li><a href="manual.html#examples">Examples</a></li>
+      </ul>
+    </li>
+    <li><a href="manual.html#appenders">Appenders</a>
+      <ul>
+        <li><a href="console.html">Console</a></li>
+        <li><a href="file.html">File</a></li>
+        <li><a href="rolling_file.html">Rolling File</a></li>
+        <li><strong>SQL</strong></li>
+        <li><a href="socket.html">Socket</a></li>
+        <li><a href="rsyslog.html">Rsyslog</a></li>
+        <li><a href="email.html">Email</a></li>
+        <li><a href="nginx.html">Nginx</a></li>
+      </ul>
+    </li>
+    <li><a href="https://github.com/lunarmodules/lualogging">Project</a></li>
+    <li><a href="license.html">License</a></li>
+  </ul>
+</div> <!-- id="navigation" -->
+
+<div id="content">
+
+<h2>SQL appender</h2>
+
+<p>The SQL appender can be used to write log messages to a SQL
+database table. It uses <a href="https://keplerproject.github.io/luasql/">LuaSQL</a>,
+therefore any database supported by LuaSQL can be used.</p>
+
+<pre class="example">
+function logging.sql{
+    connectionfactory = <i>function</i>,
+    [tablename = <i>string</i>,]
+    [logdatefield = <i>string</i>,]
+    [loglevelfield = <i>string</i>,]
+    [logmessagefield = <i>string</i>,]
+    [keepalive = <i>boolean</i>,]
+
+    [logLevel = <i>log-level-constant</i>,]
+}
+</pre>
+
+<ul>
+    <li><code>connectionfactory</code>:<br />
+    This must be a function that creates a LuaSQL connection object.
+    This function will be called everytime a connection needs to be
+    created.</li>
+
+    <li><code>tablename</code>:<br />
+    The name of the table to write the log requests. Default value is
+    <code>"LogTable"</code>.</li>
+
+    <li><code>logdatefield</code>:<br />
+    The name of the field to write the date of each log request.
+    Default value is <code>"LogDate"</code>.</li>
+
+    <li><code>loglevelfield</code>:<br />
+    The name of the field to write the level of each log request.
+    Default value is <code>"LogLevel"</code>.</li>
+
+    <li><code>logmessagefield</code>:<br />
+    The name of the field to write the message of each log request.
+    Default value is <code>"LogMessage"</code>.</li>
+
+    <li><code>keepalive</code>:<br />
+    In every log request a connection to the database is opened, the
+    message is written, and the connection is closed.<br />
+    If the user wants to keep the connection opened he can specify
+    <code>keepalive = true</code>.</li>
+
+    <li><code>logLevel</code>:<br />
+    The initial log-level to set for the created logger.</li>
+  </ul>
+
+<h2>Example</h2>
+
+<pre class="example">
+require"logging.sql"
+require"luasql.jdbc"
+
+local env, err = luasql.jdbc('com.mysql.jdbc.Driver')
+
+local logger = logging.sql {
+  connectionfactory = function()
+    local con, err = env:connect('jdbc:mysql://localhost/test',
+                                 'tcp', '123')
+    assert(con, err)
+    return con
+  end,
+  keepalive = true,
+}
+
+logger:info("logging.sql test")
+logger:debug("debugging...")
+logger:error("error!")
+</pre>
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+  <p><a href="https://validator.w3.org/check?uri=referer">
+    <img src="https://www.w3.org/Icons/valid-xhtml10" alt="XHTML 1.0 v&aacute;lido!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+
+</body>
+</html>

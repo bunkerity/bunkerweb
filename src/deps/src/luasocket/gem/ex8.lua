@@ -1,0 +1,5 @@
+local input = source.file(io.stdin)
+local output, t = sink.table()
+output = sink.chain(normalize(CRLF), output)
+pump.all(input, output)
+io.write(table.concat(t))

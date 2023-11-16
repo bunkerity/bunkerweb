@@ -1,0 +1,10 @@
+--TEST--
+weird TSQL bug
+--INPUT--
+SELECT \ % 0 ;
+--EXPECTED--
+E SELECT
+1 \
+; ;
+
+

@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>LuaLogging: A simple API to use logging features in Lua</title>
+    <link rel="stylesheet" href="doc.css" type="text/css"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+  <div id="product_logo">
+    <img alt="LuaLogging logo" src="images/lualogging-128.png"/>
+  </div>
+  <div id="product_name"><big><strong>LuaLogging</strong></big></div>
+  <div id="product_description">A simple API to use logging features in Lua.</div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+<h1>LuaLogging</h1>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="manual.html">Manual</a>
+      <ul>
+        <li><a href="manual.html#installation">Installation</a></li>
+        <li><a href="manual.html#logger">Logger objects</a></li>
+        <li><a href="manual.html#examples">Examples</a></li>
+      </ul>
+    </li>
+    <li><a href="manual.html#appenders">Appenders</a>
+      <ul>
+        <li><a href="console.html">Console</a></li>
+        <li><a href="file.html">File</a></li>
+        <li><a href="rolling_file.html">Rolling File</a></li>
+        <li><a href="sql.html">SQL</a></li>
+        <li><a href="socket.html">Socket</a></li>
+        <li><strong>Rsyslog</strong></li>
+        <li><a href="email.html">Email</a></li>
+        <li><a href="nginx.html">Nginx</a></li>
+      </ul>
+    </li>
+    <li><a href="https://github.com/lunarmodules/lualogging">Project</a></li>
+    <li><a href="license.html">License</a></li>
+  </ul>
+</div> <!-- id="navigation" -->
+
+<div id="content">
+
+<h2>Remote syslog appender</h2>
+
+<p>This appender can be used to send syslog formatted log requests to a remote syslog server.
+This appender relies on <a href="https://github.com/lunarmodules/luasocket">LuaSocket</a>
+to do its job. Optionally <a href="https://github.com/lunarmodules/copas">Copas</a> can be
+used for async sending of log messages over TCP.<br /></p>
+
+<p>If you want to log to the local syslog daemon, then please use
+<a href="https://github.com/lunarmodules/luasyslog">luasyslog</a>.</p>
+
+<p>The LuaLogging log-levels will be mapped to the syslog levels by their name, where
+<code>logging.FATAL</code> maps to syslog <code>ALERT</code>. Since LuaLogging only has 5
+levels, the syslog levels <code>EMERG</code>, <code>CRIT</code>, and <code>NOTICE</code>
+remain unused.</p>
+
+<pre class="example">
+function logging.rsyslog {
+    hostname = <i>string</i>,
+    [port = <i>number</i>,]
+    [protocol = <i>"udp"</i> | <i>"tcp"</i>,]
+    [rfc = <i>"rfc5424"</i> | <i>"rfc3164"</i>,]
+    [maxsize = <i>number</i>,]
+    [facility = <i>facility-constant</i>,]
+    [ident = <i>string</i>,]
+    [procid = <i>string</i>,]
+    [msgid = <i>string</i>,]
+
+    [logPattern = <i>string</i>,]
+    [logPatterns = {
+      [logging.DEBUG = <i>string</i>,]
+      [logging.INFO  = <i>string</i>,]
+      [logging.WARN  = <i>string</i>,]
+      [logging.ERROR = <i>string</i>,]
+      [logging.FATAL = <i>string</i>,]
+    },]
+    [logLevel = <i>log-level-constant</i>,]
+}
+</pre>
+
+<ul>
+    <li><code>hostname</code>:<br />
+      Hostname can be an IP address or a host name of the server where the log
+      message will be sent.
+    </li>
+
+    <li><code>port</code>:<br />
+      The port must be an integer number in the range [1..64K). The default is
+      <code>514</code>.
+    </li>
+
+    <li><code>protocol</code>:<br />
+      The network protocol to use, either <code>"udp"</code> or <code>"tcp"</code>.
+      The default is <code>"tcp"</code>.
+      <br/><br/>
+      Note: TCP sending is a blocking operation. For non-blocking use
+      <a href="https://github.com/lunarmodules/copas">Copas</a>
+      is supported, see the example below.
+    </li>
+
+    <li><code>rfc</code>:<br />
+      The message format. 2 options:
+      <ul>
+        <li>for the old BSD style use <code>"rfc3164"</code> (the default)</li>
+        <li>for the IETF standard use <code>"rfc5424"</code>.</li>
+      </ul>
+    </li>
+
+    <li><code>maxsize</code>:<br />
+      The maximum message size. Longer messages will be truncated. The minimum value is 480.
+      The defaults are 1024 for <code>"rfc3164"</code>, and 2048 for <code>"rfc5424"</code>.
+    </li>
+
+    <li><code>facility</code>:<br />
+      The syslog facility to use, use one of the constants. The default value
+      is the "user" facility.
+      <pre class="example">
+  rsyslog.FACILITY_KERN
+  rsyslog.FACILITY_USER
+  rsyslog.FACILITY_MAIL
+  rsyslog.FACILITY_DAEMON
+  rsyslog.FACILITY_AUTH
+  rsyslog.FACILITY_SYSLOG
+  rsyslog.FACILITY_LPR
+  rsyslog.FACILITY_NEWS
+  rsyslog.FACILITY_UUCP
+  rsyslog.FACILITY_CRON
+  rsyslog.FACILITY_AUTHPRIV
+  rsyslog.FACILITY_FTP
+  rsyslog.FACILITY_NTP
+  rsyslog.FACILITY_SECURITY
+  rsyslog.FACILITY_CONSOLE
+  rsyslog.FACILITY_NETINFO
+  rsyslog.FACILITY_REMOTEAUTH
+  rsyslog.FACILITY_INSTALL
+  rsyslog.FACILITY_RAS
+  rsyslog.FACILITY_LOCAL0
+  rsyslog.FACILITY_LOCAL1
+  rsyslog.FACILITY_LOCAL2
+  rsyslog.FACILITY_LOCAL3
+  rsyslog.FACILITY_LOCAL4
+  rsyslog.FACILITY_LOCAL5
+  rsyslog.FACILITY_LOCAL6
+  rsyslog.FACILITY_LOCAL7
+      </pre>
+    </li>
+
+    <li><code>ident</code>:<br />
+      The value for the APP-NAME field (rfc5424, called TAG field in rfc3164).
+      Default value is <code>"lua"</code>.
+    </li>
+
+    <li><code>procid</code>:<br />
+      The process id value (only applicable for rfc5424 format).
+      Default value is <code>"-"</code> (absent).
+    </li>
+
+    <li><code>msgid</code>:<br />
+      The message id value (only applicable for rfc5424 format).
+      Default value is <code>"-"</code> (absent).
+    </li>
+
+    <li><code>logPattern</code>:<br />
+      This value will be used as the default value for each log-level that was
+      omitted in <code>logPatterns</code>, this defaults to <code>"%message"</code>.
+      The default pattern deviates from standard LuaLogging defaults since those
+      do not make sense for syslog.
+    </li>
+
+    <li><code>logPatterns</code>:<br />
+      A table with logPattern strings indexed by the log-levels.
+      A logPattern specifies how the message is written.<br />
+      If this parameter is omitted, a patterns table will be created with the
+      parameter <code>logPattern</code> as the default value for each log-level.
+    </li>
+
+    <li><code>logLevel</code>:<br />
+      The initial log-level to set for the created logger.
+    </li>
+  </ul>
+
+<h2>Example</h2>
+
+<pre class="example">
+local rsyslog = require "logging.rsyslog"
+
+rsyslog.copas() -- switch to using non-blocking Copas sockets
+
+local logger = rsyslog {
+  hostname = "syslog.mycompany.com",
+  port = 514,
+  protocol = "tcp",
+  rfc = "rfc5424",
+  maxsize = 8000,
+  facility = rsyslog.FACILITY_LOCAL2,
+  ident = "my_lua_app",
+  procid = "socket_mod",
+  logPattern = "%message %source",
+}
+
+copas.loop(function()
+  logger:info("logging.rsyslog test")
+  logger:debug("debugging...")
+  logger:error("error!")
+
+  -- destroy to ensure threads are shutdown (only for Copas)
+  logger:destroy()
+end)
+</pre>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+  <p><a href="https://validator.w3.org/check?uri=referer">
+    <img src="https://www.w3.org/Icons/valid-xhtml10" alt="XHTML 1.0 v&aacute;lido!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+
+</body>
+</html>

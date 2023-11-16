@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - 'rockspec/**'
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Lua
+        uses: leafo/gh-actions-lua@v8
+
+      - name: Install Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+
+      - name: Extract release name
+        id: release_env
+        shell: bash
+        run: |
+          title="${{ github.event.head_commit.message }}"
+          re="^feat: release v*(\S+)"
+          if [[ $title =~ $re ]]; then
+              v=v${BASH_REMATCH[1]}
+              echo "##[set-output name=version;]${v}"
+              echo "##[set-output name=version_withou_v;]${BASH_REMATCH[1]}"
+          else
+              echo "commit format is not correct"
+              exit 1
+          fi
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.release_env.outputs.version }}
+          release_name: ${{ steps.release_env.outputs.version }}
+          draft: false
+          prerelease: false
+
+      - name: Upload to luarocks
+        env:
+          LUAROCKS_TOKEN: ${{ secrets.LUAROCKS_TOKEN }}
+        run: |
+          luarocks install dkjson
+          luarocks upload rockspec/lua-resty-ipmatcher-${{ steps.release_env.outputs.version_withou_v }}-0.rockspec --api-key=${LUAROCKS_TOKEN}

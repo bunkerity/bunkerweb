@@ -1,0 +1,440 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+<meta name="description" content="LuaSocket: LTN12 support">
+<meta name="keywords" content="Lua, LuaSocket, Filters, Source, Sink,
+Pump, Support, Library">
+<title>LuaSocket: LTN12 module</title>
+<link rel="stylesheet" href="reference.css" type="text/css">
+</head>
+
+<body>
+
+<!-- header +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<div class="header">
+<hr>
+<center>
+<table summary="LuaSocket logo">
+<tr><td align="center"><a href="http://www.lua.org">
+<img width="128" height="128" border="0" alt="LuaSocket" src="luasocket.png">
+</a></td></tr>
+<tr><td align="center" valign="top">Network support for the Lua language
+</td></tr>
+</table>
+<p class="bar">
+<a href="index.html">home</a> &middot;
+<a href="index.html#download">download</a> &middot;
+<a href="installation.html">installation</a> &middot;
+<a href="introduction.html">introduction</a> &middot;
+<a href="reference.html">reference</a>
+</p>
+</center>
+<hr>
+</div>
+
+<!-- ltn12 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h2 id="ltn12">LTN12</h2>
+
+<p> The <tt>ltn12</tt> namespace implements the ideas described in
+<a href="http://lua-users.org/wiki/FiltersSourcesAndSinks">
+LTN012, Filters sources and sinks</a>. This manual simply describes the
+functions. Please refer to the LTN for a deeper explanation of the
+functionality provided by this module.
+</p>
+
+<p>
+To obtain the <tt>ltn12</tt> namespace, run:
+</p>
+
+<pre class="example">
+-- loads the LTN21 module
+local ltn12 = require("ltn12")
+</pre>
+
+<!-- filters ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h3 id="filter">Filters</h3>
+
+<!-- chain ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="filter.chain">
+ltn12.filter.<b>chain(</b>filter<sub>1</sub>, filter<sub>2</sub>
+[, ... filter<sub>N</sub>]<b>)</b>
+</p>
+
+<p class="description">
+Returns a filter that passes all data it receives through each of a
+series of given filters.
+</p>
+
+<p class="parameters">
+<tt>Filter<sub>1</sub></tt> to <tt>filter<sub>N</sub></tt> are simple
+filters.
+</p>
+
+<p class="return">
+The function returns the chained filter.
+</p>
+
+<p class="note">
+The nesting of filters can be arbitrary. For instance, the useless filter
+below doesn't do anything but return the data that was passed to it,
+unaltered.
+</p>
+
+<pre class="example">
+-- load required modules
+local ltn12 = require("ltn12")
+local mime = require("mime")
+
+-- create a silly identity filter
+id = ltn12.filter.chain(
+  mime.encode("quoted-printable"),
+  mime.encode("base64"),
+  mime.decode("base64"),
+  mime.decode("quoted-printable")
+)
+</pre>
+
+<!-- cycle ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="filter.cycle">
+ltn12.filter.<b>cycle(</b>low [, ctx, extra]<b>)</b>
+</p>
+
+<p class="description">
+Returns a high-level filter that cycles though a low-level filter by
+passing it each chunk and updating a context between calls.
+</p>
+
+<p class="parameters">
+<tt>Low</tt> is the low-level filter to be cycled,
+<tt>ctx</tt> is the initial context and <tt>extra</tt> is any extra
+argument the low-level filter might take.
+</p>
+
+<p class="return">
+The function returns the high-level filter.
+</p>
+
+<pre class="example">
+-- load the ltn12 module
+local ltn12 = require("ltn12")
+
+-- the base64 mime filter factory
+encodet['base64'] = function()
+    return ltn12.filter.cycle(b64, "")
+end
+</pre>
+
+<!-- pumps ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h3 id="pump">Pumps</h3>
+
+<!-- all ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="pump.all">
+ltn12.pump.<b>all(</b>source, sink<b>)</b>
+</p>
+
+<p class="description">
+Pumps <em>all</em> data from a <tt>source</tt> to a <tt>sink</tt>.
+</p>
+
+<p class="return">
+If successful, the function returns a value that evaluates to
+<b><tt>true</tt></b>. In case
+of error, the function returns a <b><tt>false</tt></b> value, followed by an error message.
+</p>
+
+<!-- step +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="pump.step">
+ltn12.pump.<b>step(</b>source, sink<b>)</b>
+</p>
+
+<p class="description">
+Pumps <em>one</em> chunk of data from a <tt>source</tt> to a <tt>sink</tt>.
+</p>
+
+<p class="return">
+If successful, the function returns a value that evaluates to
+<b><tt>true</tt></b>. In case
+of error, the function returns a <b><tt>false</tt></b> value, followed by an error message.
+</p>
+
+<!-- sinks ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h3 id="sink">Sinks</h3>
+
+<!-- chain ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="sink.chain">
+ltn12.sink.<b>chain(</b>filter, sink<b>)</b>
+</p>
+
+<p class="description">
+Creates and returns a new sink that passes data through a <tt>filter</tt> before sending it to a given <tt>sink</tt>.
+</p>
+
+<!-- error ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="sink.error">
+ltn12.sink.<b>error(</b>message<b>)</b>
+</p>
+
+<p class="description">
+Creates and returns a sink that aborts transmission with the error
+<tt>message</tt>.
+</p>
+
+<!-- file +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="sink.file">
+ltn12.sink.<b>file(</b>handle, message<b>)</b>
+</p>
+
+<p class="description">
+Creates a sink that sends data to a file.
+</p>
+
+<p class="parameters">
+<tt>Handle</tt> is a file handle. If <tt>handle</tt> is <tt><b>nil</b></tt>,
+<tt>message</tt> should give the reason for failure.
+</p>
+
+<p class="return">
+The function returns a sink that sends all data to the given <tt>handle</tt>
+and closes the file when done, or a sink that aborts the transmission with
+the error <tt>message</tt>
+</p>
+
+<p class="note">
+In the following example, notice how the prototype is designed to
+fit nicely with the <tt>io.open</tt> function.
+</p>
+
+<pre class="example">
+-- load the ltn12 module
+local ltn12 = require("ltn12")
+
+-- copy a file
+ltn12.pump.all(
+  ltn12.source.file(io.open("original.png", "rb")),
+  ltn12.sink.file(io.open("copy.png", "wb"))
+)
+</pre>
+
+<!-- null +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="sink.null">
+ltn12.sink.<b>null()</b>
+</p>
+
+<p class="description">
+Returns a sink that ignores all data it receives.
+</p>
+
+<!-- simplify +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="sink.simplify">
+ltn12.sink.<b>simplify(</b>sink<b>)</b>
+</p>
+
+<p class="description">
+Creates and returns a simple sink given a fancy <tt>sink</tt>.
+</p>
+
+<!-- table ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="sink.table">
+ltn12.sink.<b>table(</b>[table]<b>)</b>
+</p>
+
+<p class="description">
+Creates a sink that stores all chunks in a table. The chunks can later be
+efficiently concatenated into a single string.
+</p>
+
+<p class="parameters">
+<tt>Table</tt> is used to hold the chunks. If
+<tt><b>nil</b></tt>, the function creates its own table.
+</p>
+
+<p class="return">
+The function returns the sink and the table used to store the chunks.
+</p>
+
+<pre class="example">
+-- load needed modules
+local http = require("socket.http")
+local ltn12 = require("ltn12")
+
+-- a simplified http.get function
+function http.get(u)
+  local t = {}
+  local respt = request{
+    url = u,
+    sink = ltn12.sink.table(t)
+  }
+  return table.concat(t), respt.headers, respt.code
+end
+</pre>
+
+<!-- sinks ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<h3 id="source">Sources</h3>
+
+<!-- cat ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="source.cat">
+ltn12.source.<b>cat(</b>source<sub>1</sub> [, source<sub>2</sub>, ...,
+source<sub>N</sub>]<b>)</b>
+</p>
+
+<p class="description">
+Creates a new source that produces the concatenation of the data produced
+by a number of sources.
+</p>
+
+<p class="parameters">
+<tt>Source<sub>1</sub></tt> to <tt>source<sub>N</sub></tt> are the original
+sources.
+</p>
+
+<p class="return">
+The function returns the new source.
+</p>
+
+<!-- chain ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="source.chain">
+ltn12.source.<b>chain(</b>source, filter<b>)</b>
+</p>
+
+<p class="description">
+Creates a new <tt>source</tt> that passes data through a <tt>filter</tt>
+before returning it.
+</p>
+
+<p class="return">
+The function returns the new source.
+</p>
+
+<!-- empty ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="source.empty">
+ltn12.source.<b>empty()</b>
+</p>
+
+<p class="description">
+Creates and returns an empty source.
+</p>
+
+<!-- error ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="source.error">
+ltn12.source.<b>error(</b>message<b>)</b>
+</p>
+
+<p class="description">
+Creates and returns a source that aborts transmission with the error
+<tt>message</tt>.
+</p>
+
+<!-- file +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="source.file">
+ltn12.source.<b>file(</b>handle, message<b>)</b>
+</p>
+
+<p class="description">
+Creates a source that produces the contents of a file.
+</p>
+
+<p class="parameters">
+<tt>Handle</tt> is a file handle. If <tt>handle</tt> is <tt><b>nil</b></tt>,
+<tt>message</tt> should give the reason for failure.
+</p>
+
+<p class="return">
+The function returns a source that reads chunks of data from
+given <tt>handle</tt> and returns it to the user,
+closing the file when done, or a source that aborts the transmission with
+the error <tt>message</tt>
+</p>
+
+<p class="note">
+In the following example, notice how the prototype is designed to
+fit nicely with the <tt>io.open</tt> function.
+</p>
+
+<pre class="example">
+-- load the ltn12 module
+local ltn12 = require("ltn12")
+
+-- copy a file
+ltn12.pump.all(
+  ltn12.source.file(io.open("original.png", "rb")),
+  ltn12.sink.file(io.open("copy.png", "wb"))
+)
+</pre>
+
+<!-- simplify +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="source.simplify">
+ltn12.source.<b>simplify(</b>source<b>)</b>
+</p>
+
+<p class="description">
+Creates and returns a simple source given a fancy <tt>source</tt>.
+</p>
+
+<!-- string +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="source.string">
+ltn12.source.<b>string(</b>string<b>)</b>
+</p>
+
+<p class="description">
+Creates and returns a source that produces the contents of a
+<tt>string</tt>, chunk by chunk.
+</p>
+
+<!-- table +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class="name" id="source.table">
+ltn12.source.<b>table(</b>table<b>)</b>
+</p>
+
+<p class="description">
+Creates and returns a source that produces the numerically-indexed values of a <tt>table</tt> successively beginning at 1.  The source returns nil (end-of-stream) whenever a nil value is produced by the current index, which proceeds forward regardless.
+</p>
+
+<!-- footer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<div class="footer">
+<hr>
+<center>
+<p class="bar">
+<a href="index.html">home</a> &middot;
+<a href="index.html#down">download</a> &middot;
+<a href="installation.html">installation</a> &middot;
+<a href="introduction.html">introduction</a> &middot;
+<a href="reference.html">reference</a>
+</p>
+<p>
+<small>
+Last modified by Diego Nehab on <br>
+Thu Apr 20 00:25:41 EDT 2006
+</small>
+</p>
+</center>
+</div>
+
+</body>
+</html>

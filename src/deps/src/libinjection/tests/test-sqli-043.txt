@@ -1,0 +1,10 @@
+--TEST--
+not sqli
+--INPUT--
+1 UNION
+--EXPECTED--
+
+
+
+
+

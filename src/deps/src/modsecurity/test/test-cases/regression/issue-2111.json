@@ -1,0 +1,33 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing ctl:ruleRemoveById with range - issue 1444",
+    "expected":{
+      "http_code":200
+    },
+    "client":{
+      "ip":"127.0.0.1",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"index.php?foo=bar&z=xxx",
+      "method":"GET",
+      "body": ""
+    },
+    "server":{
+      "ip":"127.0.0.1",
+      "port":80
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule ARGS:foo \"@rx ^bar$\" \"id:100,phase:1,ctl:ruleRemoveById=200-1999\"",
+        "SecRule ARGS:z \"@rx ^xxx$\" \"id:1010,phase:1,deny,status:403\""
+    ]
+  }
+]

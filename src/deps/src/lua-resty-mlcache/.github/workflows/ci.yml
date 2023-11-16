@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: '*'
+  workflow_dispatch:
+    inputs:
+      openresty:
+        description: 'OpenResty version (e.g. 1.21.4.1rc2)'
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        openresty:
+          - 1.21.4.1
+          - 1.19.9.1
+          - 1.19.3.2
+          - 1.17.8.2
+          - 1.15.8.3
+          - 1.13.6.2
+          - 1.11.2.5
+    steps:
+      - if:  ${{ github.event_name == 'workflow_dispatch' }}
+        run: echo "OPENRESTY_VER=${{ github.event.inputs.openresty }}" >> $GITHUB_ENV
+      - if:  ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+        run: echo "OPENRESTY_VER=${{ matrix.openresty }}" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+      - name: Setup OpenResty
+        uses: thibaultcha/setup-openresty@main
+        with:
+          version: ${{ env.OPENRESTY_VER }}
+      - run: prove -r t/
+
+  lint:
+    name: Lint
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        openresty: [1.19.9.1]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup OpenResty
+        uses: thibaultcha/setup-openresty@main
+        with:
+          version: ${{ matrix.openresty }}
+      - run: |
+          echo "luarocks check"

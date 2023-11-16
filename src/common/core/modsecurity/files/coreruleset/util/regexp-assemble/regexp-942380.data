@@ -1,0 +1,19 @@
+\b(?i:having)\b\s+\d{1,10}\s*?[=<>]
+\b(?i:having)\b\s+'[^=]{1,10}'\s*?[=<>]
+(?i:\bexecute\()
+(?i:\bexecute\s{1,5}[\w\.$]{1,5}\s{0,3})
+\bhaving\b ?\d{1,10} ?[=<>]+
+\bhaving\b ?[\'\"][^=]{1,10}[\'\" ?[=<>]+
+(?i:\bcreate\s+?table.{0,20}?\()
+(?i:\blike\W*?char\W*?\()
+(?i:select.*?case)
+(?i:from.*?limit)
+(?i:order\sby)
+exists\s\sselect
+exists\sselect\Sif\s\(
+exists\sselect\Sifnull\s\(
+exists\sselect\Stop
+exists\sselect\Sconcat
+exists\ssystem\s\(
+exists\s\b(?i:having)\b\s+\d{1,10}
+exists\s'[^=]{1,10}'

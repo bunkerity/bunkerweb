@@ -1,0 +1,95 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing setsid action (1/3)",
+    "expected":{
+      "debug_log": "Setting environment variable: variable to PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120"
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "User-Agent":"My sweet little browser",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS:Cookie \"^(.*)$\" \"id:'900018',phase:2,setenv:'variable=%{matched_var}',pass\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing setenv action (2/3)",
+    "expected":{
+      "debug_log": "Setting environment variable: variable to PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120"
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "User-Agent":"My sweet little browser",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS:Cookie \"^(.*)$\" \"id:'900018',phase:2,setenv:variable=%{matched_var},pass\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing setenv action (3/3)",
+    "expected":{
+      "debug_log": "Setting environment variable: variable to PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120==test=test"
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "User-Agent":"My sweet little browser",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS:Cookie \"^(.*)$\" \"id:'900018',phase:2,setenv:variable=%{matched_var}==test=test,pass\""
+    ]
+  }
+]

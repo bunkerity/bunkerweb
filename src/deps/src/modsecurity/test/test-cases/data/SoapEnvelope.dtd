@@ -1,0 +1,8 @@
+<!-- A stupid Soap DTD example -->
+<!ELEMENT Envelope (Header?,Body)>
+<!ELEMENT Header (#PCDATA)>
+<!ELEMENT Body (getInput)>
+
+<!ELEMENT getInput (id)>
+<!ELEMENT id (#PCDATA)>
+<!ATTLIST id type CDATA #REQUIRED>

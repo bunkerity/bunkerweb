@@ -1,0 +1,87 @@
+version: '3.6'
+
+# clone the repository https://github.com/bigbluebutton/docker into the root directory and run the following command: ./scripts/setup
+# when executing the file ./scripts/setup do this:
+
+# Should greenlight be included? (y/n): y
+# Should an automatic HTTPS Proxy be included? (y/n): n
+# ...
+# Please enter the domain name: www.example.com (your domain name)
+
+# after generating your bigbluebutton docker-compose.yml file, you can modify the following to add bunkerweb to it
+
+services:
+
+  ...
+
+  nginx:
+    ...
+    # comment this line
+    # network_mode: host
+    # then add the following lines
+    networks:
+      bbb-net:
+        ipv4_address: 10.7.7.253
+    ...
+
+  ...
+
+  mybunker:
+    image: bunkerity/bunkerweb:1.5.3
+    ports:
+      - 80:8080
+      - 443:8443
+    environment:
+      - SERVER_NAME=${DOMAIN}
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+      - AUTO_LETS_ENCRYPT=yes
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_WS=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=http://10.7.7.253:8080
+    labels:
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
+    # You have to put this IP address in your docker-compose.yml file
+    networks:
+      bbb-net:
+        ipv4_address: 10.7.7.254
+      bw-universe:
+
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.3
+    depends_on:
+      - mybunker
+    environment:
+      - DOCKER_HOST=tcp://bw-docker-proxy:2375
+    volumes:
+      - bw-data:/data
+    networks:
+      bw-universe:
+      bw-docker:
+
+  bw-docker-proxy:
+    image: tecnativa/docker-socket-proxy:nightly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+      - LOG_LEVEL=warning
+    networks:
+      - bw-docker
+
+  ...
+
+volumes:
+  ...
+  bw-data:
+
+networks:
+  ...
+  bw-universe:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-docker:

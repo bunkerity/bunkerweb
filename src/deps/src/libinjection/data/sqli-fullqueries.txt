@@ -1,0 +1,131 @@
+#
+# Frequently not SQLi but
+#
+select 1 from foo where
+select @version from foo where
+select 'foo' from bar where
+# select 1,1,1,1,1,1,1
+# select @version,@version,@version
+# select 'foo','bar',1,2,3,4
+
+select sin(1),2 from bar where
+select sin(id),2 from bar where
+select sin('1'),2 from bar where
+select sin(@version),2 from bar where
+select sin((1)),2 from bar where
+select sin((id)),2 from bar where
+select sin(('1')),2 from bar where
+select sin((@version)),2 from bar where
+select sin(((1)),2 from bar where
+select sin(((id)),2 from bar where
+select sin((('1')),2 from bar where
+select sin(((@version)),2 from bar where
+
+select -sin(1),2 from bar where
+select -sin(id),2 from bar where
+select -sin('1'),2 from bar where
+select -sin(@version),2 from bar where
+select -sin((1)),2 from bar where
+select -sin((id)),2 from bar where
+select -sin(('1')),2 from bar where
+select -sin((@version)),2 from bar where
+select -sin(((1)),2 from bar where
+select -sin(((id)),2 from bar where
+select -sin((('1')),2 from bar where
+select -sin(((@version)),2 from bar where
+
+select 1,sin(1),2 from bar where
+select 1,sin(id),2 from bar where
+select 1,sin('1'),2 from bar where
+select 1,sin(@version),2 from bar where
+select 1,sin((1)),2 from bar where
+select 1,sin((id)),2 from bar where
+select 1,sin(('1')),2 from bar where
+select 1,sin((@version)),2 from bar where
+select 1,sin(((1)),2 from bar where
+select 1,sin(((id)),2 from bar where
+select 1,sin((('1')),2 from bar where
+select 1,sin(((@version)),2 from bar where
+
+select -1,sin(1),2 from bar where
+select -1,sin(id),2 from bar where
+select -1,sin('1'),2 from bar where
+select -1,sin(@version),2 from bar where
+select -1,sin((1)),2 from bar where
+select -1,sin((id)),2 from bar where
+select -1,sin(('1')),2 from bar where
+select -1,sin((@version)),2 from bar where
+select -1,sin(((1)),2 from bar where
+select -1,sin(((id)),2 from bar where
+select -1,sin((('1')),2 from bar where
+select -1,sin(((@version)),2 from bar where
+
+select id,sin(1),2 from bar where
+select id,sin(id),2 from bar where
+select id,sin('1'),2 from bar where
+select id,sin(@version),2 from bar where
+select id,sin((1)),2 from bar where
+select id,sin((id)),2 from bar where
+select id,sin(('1')),2 from bar where
+select id,sin((@version)),2 from bar where
+select id,sin(((1)),2 from bar where
+select id,sin(((id)),2 from bar where
+select id,sin((('1')),2 from bar where
+select id,sin(((@version)),2 from bar where
+
+select @version,sin(1),2 from bar where
+select @version,sin(id),2 from bar where
+select @version,sin('1'),2 from bar where
+select @version,sin(@version),2 from bar where
+select @version,sin((1)),2 from bar where
+select @version,sin((id)),2 from bar where
+select @version,sin(('1')),2 from bar where
+select @version,sin((@version)),2 from bar where
+select @version,sin(((1)),2 from bar where
+select @version,sin(((id)),2 from bar where
+select @version,sin((('1')),2 from bar where
+select @version,sin(((@version)),2 from bar where
+
+select '1',sin(1),2 from bar where
+select '1',sin(id),2 from bar where
+select '1',sin('1'),2 from bar where
+select '1',sin(@version),2 from bar where
+select '1',sin((1)),2 from bar where
+select '1',sin((id)),2 from bar where
+select '1',sin(('1')),2 from bar where
+select '1',sin((@version)),2 from bar where
+select '1',sin(((1)),2 from bar where
+select '1',sin(((id)),2 from bar where
+select '1',sin((('1')),2 from bar where
+select '1',sin(((@version)),2 from bar where
+
+select -'1',sin(1),2 from bar where
+select -'1',sin(id),2 from bar where
+select -'1',sin('1'),2 from bar where
+select -'1',sin(@version),2 from bar where
+select -'1',sin((1)),2 from bar where
+select -'1',sin((id)),2 from bar where
+select -'1',sin(('1')),2 from bar where
+select -'1',sin((@version)),2 from bar where
+select -'1',sin(((1)),2 from bar where
+select -'1',sin(((id)),2 from bar where
+select -'1',sin((('1')),2 from bar where
+select -'1',sin(((@version)),2 from bar where
+
+select 1,(2),3 from bar where
+select (1),(2),3 from bar where
+select ((1)),(2),3 from bar where
+select (((1))),(2),3 from bar where
+select ('1'),(2),3 from bar where
+select (('1')),(2),3 from bar where
+select ((('1'))),(2),3 from bar where
+select (@version),(2),3 from bar where
+select ((@version)),(2),3 from bar where
+select (((@version))),(2),3 from bar where
+select (id),(2),3 from bar where
+select ((id)),(2),3 from bar where
+select (((id))),(2),3 from bar where
+
+select (@version),(2),3 from bar where
+select (((((1,2,3,4)))) from bar
+

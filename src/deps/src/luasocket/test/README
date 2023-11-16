@@ -1,0 +1,14 @@
+This provides the  automated test scripts used to make  sure the library
+is working properly.
+
+The files provided are:
+
+    testsrvr.lua            -- test server
+    testclnt.lua            -- test client
+
+To run these tests, just run lua on the server and then on the client. 
+
+    hello.lua               -- run to verify if installation worked
+
+Good luck,
+Diego.

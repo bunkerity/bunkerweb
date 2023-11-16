@@ -1,0 +1,134 @@
+name: Build container (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      RELEASE:
+        required: true
+        type: string
+      ARCH:
+        required: true
+        type: string
+      IMAGE:
+        required: true
+        type: string
+      DOCKERFILE:
+        required: true
+        type: string
+      CACHE:
+        required: false
+        type: boolean
+        default: true
+      PUSH:
+        required: false
+        type: boolean
+        default: true
+      CACHE_SUFFIX:
+        required: false
+        type: string
+        default: ""
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_TOKEN:
+        required: true
+      ARM_SSH_KEY:
+        required: false
+      ARM_SSH_IP:
+        required: false
+      ARM_SSH_CONFIG:
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Checkout source code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Replace VERSION
+        if: inputs.RELEASE == 'testing'
+        run: ./misc/update-version.sh testing
+      - name: Setup SSH for ARM node
+        if: inputs.CACHE_SUFFIX == 'arm'
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa_arm
+          chmod 600 ~/.ssh/id_rsa_arm
+          echo "$SSH_CONFIG" | sed "s/SSH_IP/$SSH_IP/g" > ~/.ssh/config
+        env:
+          SSH_KEY: ${{ secrets.ARM_SSH_KEY }}
+          SSH_IP: ${{ secrets.ARM_SSH_IP }}
+          SSH_CONFIG: ${{ secrets.ARM_SSH_CONFIG }}
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+        if: inputs.CACHE_SUFFIX != 'arm'
+      - name: Setup Buildx (ARM)
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+        if: inputs.CACHE_SUFFIX == 'arm'
+        with:
+          endpoint: ssh://root@arm
+          platforms: linux/arm64,linux/arm/v7,linux/arm/v6
+      - name: Login to Docker Hub
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to ghcr
+        if: inputs.PUSH == true
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Compute metadata
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
+        with:
+          images: bunkerity/${{ inputs.IMAGE }}
+      # Build cached image
+      - name: Build image
+        if: inputs.CACHE == true
+        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+        with:
+          context: .
+          file: ${{ inputs.DOCKERFILE }}
+          platforms: ${{ inputs.ARCH }}
+          load: true
+          tags: local/${{ inputs.IMAGE }}
+          cache-from: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }}
+          cache-to: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }},mode=min
+          labels: ${{ steps.meta.outputs.labels }}
+      # Build non-cached image
+      - name: Build image
+        if: inputs.CACHE != true
+        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+        with:
+          context: .
+          file: ${{ inputs.DOCKERFILE }}
+          platforms: ${{ inputs.ARCH }}
+          load: ${{ inputs.CACHE_SUFFIX != 'arm' }}
+          tags: local/${{ inputs.IMAGE }}
+          cache-to: type=gha,scope=${{ inputs.IMAGE }}-${{ inputs.RELEASE }}-${{ inputs.CACHE_SUFFIX }},mode=min
+          labels: ${{ steps.meta.outputs.labels }}
+      # Check OS vulnerabilities
+      - name: Check OS vulnerabilities
+        if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
+        uses: aquasecurity/trivy-action@69cbbc0cbbf6a2b0bab8dcf0e9f2d7ead08e87e4 # master
+        with:
+          vuln-type: os
+          skip-dirs: /root/.cargo
+          image-ref: local/${{ inputs.IMAGE }}
+          format: table
+          exit-code: 1
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          trivyignores: .trivyignore
+      # Push image
+      - name: Push image
+        if: inputs.PUSH == true
+        run: docker tag local/$IMAGE ghcr.io/bunkerity/$IMAGE-tests:$TAG && docker push ghcr.io/bunkerity/$IMAGE-tests:$TAG
+        env:
+          IMAGE: "${{ inputs.IMAGE }}"
+          TAG: "${{ inputs.RELEASE }}"

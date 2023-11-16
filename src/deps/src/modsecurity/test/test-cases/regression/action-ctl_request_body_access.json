@@ -1,0 +1,185 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRequestBodyAccess (1)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/test",
+      "method":"POST",
+      "body":[
+        "--------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "--------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "--------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "--------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Request body processing is enabled, but disabled to this transaction due to ctl:requestBodyAccess action"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_URI \"@contains test\" \"id:1,phase:1,pass,t:trim,ctl:RequestBodyAccess=Off\"",
+      "SecRule REQUEST_BODY \"@contains very small test file\" \"id:2,log,phase:3\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRequestBodyAccess (2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/test",
+      "method":"POST",
+      "body":[
+        "--------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "--------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "--------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "--------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"--------------------------756b6d74fa1a8ee2"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_URI \"@contains test\" \"id:1,phase:1,pass,t:trim\"",
+      "SecRule REQUEST_BODY \"@contains very small test file\" \"id:2,log,phase:3\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRequestBodyAccess (3)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=--------------------------756b6d74fa1a8ee2",
+        "Expect":"100-continue"
+      },
+      "uri":"/test",
+      "method":"POST",
+      "body":[
+        "--------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"name\"",
+        "",
+        "test",
+        "--------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is a very small test file..",
+        "--------------------------756b6d74fa1a8ee2",
+        "Content-Disposition: form-data; name=\"filedata\"; filename=\"small_text_file.txt\"",
+        "Content-Type: text/plain",
+        "",
+        "This is another very small test file..",
+        "--------------------------756b6d74fa1a8ee2--"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"--------------------------756b6d74fa1a8ee2"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRequestBodyAccess Off",
+      "SecRule REQUEST_URI \"@contains test\" \"id:1,phase:1,pass,t:trim,ctl:RequestBodyAccess=On\"",
+      "SecRule REQUEST_BODY \"@contains very small test file\" \"id:2,log,phase:3\""
+    ]
+  }
+]

@@ -1,0 +1,79 @@
+[
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "Problem with OWASP CRS rule 920160 when msc_process_request_headers called (1/2)",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1565",
+  "gihub_issue": 394,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+    "headers":{
+      "Host":"localhost",
+      "User-Agent":"curl/7.38.0",
+      "Accept":"*/*",
+      "Content-Length": "1539"
+    },
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+  "expected": {
+    "debug_log": "Rule returned 0."
+  },
+  "rules": [
+    "SecRuleEngine On",
+    "SecRule REQUEST_HEADERS:Content-Length \"!^\\d+$\" \"id:1,log\""
+  ]
+},
+{
+  "enabled": 1,
+  "version_min": 209000,
+  "version_max": -1,
+  "title": "Problem with OWASP CRS rule 920160 when msc_process_request_headers called (2/2)",
+  "url": "https:\/\/github.com\/SpiderLabs\/ModSecurity\/issues\/1565",
+  "gihub_issue": 394,
+  "client": {
+    "ip": "200.249.12.31",
+    "port": 2313
+  },
+  "server": {
+    "ip": "200.249.12.31",
+    "port": 80
+  },
+  "request": {
+    "headers":{
+      "Host":"localhost",
+      "User-Agent":"curl/7.38.0",
+      "Accept":"*/*",
+      "Content-Length": "1539"
+    },
+    "body": "",
+    "method": "GET",
+    "http_version": 1.1
+  },
+  "response": {
+    "headers": "",
+    "body": ""
+  },
+  "expected": {
+    "debug_log": "Rule returned 1"
+  },
+  "rules": [
+    "SecRuleEngine On",
+    "SecRule REQUEST_HEADERS:Content-Length \"^\\d+$\" \"id:1,log\""
+  ]
+}
+
+]

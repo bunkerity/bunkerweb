@@ -1,0 +1,9 @@
+version: "3.5"
+
+services:
+  init:
+    build:
+      context: .
+      dockerfile: Dockerfile.init
+    volumes:
+      - ./www:/www

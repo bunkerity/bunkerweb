@@ -1,0 +1,10 @@
+--TEST--
+Comments, C-style. Nested
+--INPUT--
+SELECT /* FOO /* BAR */ JUNK */
+--EXPECTED--
+E SELECT
+X /* FOO /* BAR */
+n JUNK
+o *
+o /

