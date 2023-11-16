@@ -228,12 +228,12 @@ onMounted(() => {
       <FeedbackLogs
         v-for="(item, id) in logs.setup.core"
         :type="item.type"
-        :id="id"
+        :id="`core-${id}`"
         :title="item.title"
         :method="item.method"
         :apiMethod="item.api_method"
         :status="item.status"
-        :message="item.description"
+        :description="item.description"
         :date="item.date"
       />
     </div>
@@ -244,11 +244,12 @@ onMounted(() => {
       <FeedbackLogs
         v-for="(item, id) in logs.setup.global"
         :type="item.type"
-        :id="id"
+        :id="`global-${id}`"
         :title="item.title"
         :method="item.method"
         :apiMethod="item.api_method"
-        :message="item.description"
+        :status="item.status"
+        :description="item.description"
         :date="item.date"
       />
     </div>

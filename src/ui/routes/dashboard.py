@@ -59,3 +59,9 @@ def plugins():
 @jwt_required()
 def services():
     return render_template("services.html")
+
+
+@dashboard.route(f"{PREFIX}/actions")
+@jwt_required()
+def actions():
+    return render_template("actions.html")

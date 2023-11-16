@@ -22,15 +22,17 @@ def get_jobs():
     return get_core_format_res(f"{CORE_API}/jobs", "GET", "", "Retrieve jobs")
 
 
-@jobs.route(f"{PREFIX}/<string:job_name>/run", methods=["POST"])
+@jobs.route(f"{PREFIX}/run", methods=["POST"])
 @jwt_required()
-def run_job(job_name):
+def run_job():
     """Send to scheduler task to run a job async"""
     # is_valid_model(job_name, Model) True | False
     args = request.args.to_dict()
     method = args.get("method") or "ui"
     # is_valid_model(method, Model) True | False
-    return get_core_format_res(f"{CORE_API}/jobs/{job_name}/run?method={method}", "POST", "", f"Run job {job_name}")
+    job_name = args.get("job_name") or ""
+    # is_valid_model(job_name, Model) True | False
+    return get_core_format_res(f"{CORE_API}/jobs/run?method={method}&job_name={job_name}", "POST", "", f"Run job {job_name}")
 
 
 @jobs.route(f"{PREFIX}/<string:job_name>/cache/<string:file_name>", methods=["GET"])

@@ -44,4 +44,7 @@ def delete_custom_configs(custom_config_name):
     args = request.args.to_dict()
     method = args.get("method") or "ui"
     # is_valid_model(method, Model) True | False
-    return get_core_format_res(f"{CORE_API}/custom_configs/{custom_config_name}?method={method}", "DELETE", "", f"Delete custom config {custom_config_name}")
+    custom_config = request.get_json()
+    # is_valid_model(custom_config, Model) True | False
+    data = json.dumps(custom_config, skipkeys=True, allow_nan=True, indent=6)
+    return get_core_format_res(f"{CORE_API}/custom_configs/{custom_config_name}?method={method}", "DELETE", data, f"Delete custom config {custom_config_name}")

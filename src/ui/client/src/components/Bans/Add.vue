@@ -60,18 +60,10 @@ const addPositions = [
 
 const addHeader = ["IP number", "Ban start", "Ban end", "Reason", "Delete"];
 
-function addPrefZero(dateStr) {
-  return dateStr.length === 2 ? dateStr : `0${dateStr}`;
-}
-
 const addBans = reactive({
   isErr: false,
   isPend: false,
   data: [],
-});
-
-const modal = reactive({
-  isOpen: false,
 });
 
 function getValidBans() {
@@ -83,13 +75,34 @@ function getValidBans() {
   return validBans;
 }
 
-async function sendBans() {
+const instances = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+});
+
+async function getInstances() {
+  await fetchAPI("/api/instances", "GET", null, instances, null);
+}
+
+async function isAvailableInst() {
+  if (instances.data.length <= 0) return false;
+  if (instances.data.length >= 1 && !instances.data[0].hostname) return false;
+  return true;
+}
+
+async function addBansFromList() {
+  // We need to send bans to an instance using hostname
+  // Any instance is fine because bans are global on DB
+  const getInsta = await getInstances();
+  const isInst = isAvailableInst();
+  if (!isInst) return;
   await fetchAPI(
-    `/api/instances/bans`,
+    `/api/instances/${instances.data[0].hostname}/bans?method=ui&action=bans`,
     "POST",
     getValidBans(),
     addBans,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "error") return;
     // Case succeed, delete items from UI
@@ -257,7 +270,7 @@ async function sendBans() {
       class="col-span-12 flex justify-center mt-4"
     >
       <ButtonBase
-        @click="sendBans()"
+        @click="addBansFromList()"
         :disabled="bans.isInvalidAdd"
         color="valid"
         size="normal"

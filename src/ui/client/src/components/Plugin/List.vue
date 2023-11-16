@@ -7,6 +7,8 @@ const props = defineProps({
     required: true,
   },
 });
+
+const emits = defineEmits(["delete"]);
 </script>
 
 <template>
@@ -36,6 +38,14 @@ const props = defineProps({
           </svg>
         </a>
         <button
+          v-if="plugin.method.toLowerCase() !== 'static'"
+          @click="
+            $emit('delete', {
+              id: plugin.id,
+              name: plugin.name,
+              description: plugin.description,
+            })
+          "
           type="button"
           class="z-20 mx-2 inline-block font-bold text-left text-white uppercase align-middle transition-all cursor-pointer text-xs ease-in tracking-tight-rem hover:-translate-y-px"
         >

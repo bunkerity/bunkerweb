@@ -20,7 +20,8 @@ LOGGER: Logger = setup_logger("UI")
 UI_CONFIG = UiConfig("ui", **os.environ)
 
 
-def get_core_format_res(path, method, data, message, retry=1):
+def get_core_format_res(path, method, data=None, message=None, retry=1):
+    # LOGGER.info(f"path : {path}, method : {method}, data send to CORE : {data}")
     # Retry limit
     if retry == 5:
         raise HTTPException(response=Response(status=500), description="Max retry to CORE  API for same request exceeded")
@@ -28,7 +29,7 @@ def get_core_format_res(path, method, data, message, retry=1):
     req = None
     # Try request core
     try:
-        req = req_core(path, method)
+        req = req_core(path, method, data)
         # Case 503, retry request
         if req.status_code == 503:
             LOGGER.warn(f"Communicate with {path} {method} retry={retry}. Maybe CORE is setting something up on background.")
@@ -51,7 +52,13 @@ def get_core_format_res(path, method, data, message, retry=1):
 
             data = json.dumps(data, skipkeys=True, allow_nan=True, indent=6)
 
-        return {"type": "success" if str(req.status_code).startswith("2") else "error", "status": str(req.status_code), "message": message, "data": data}
+        res_type = "success" if str(req.status_code).startswith("2") else "error"
+        res_status = str(req.status_code)
+
+        if res_type == "error":
+            LOGGER.error(log_format(res_type, res_status, path, message, data))
+
+        return res_format(res_type, res_status, "", message, data)
     # Case impossible to format
     except:
         raise HTTPException(response=Response(status=500), description="Impossible for UI API to proceed data send by CORE API")

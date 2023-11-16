@@ -68,7 +68,7 @@ const plugins = reactive({
     // Duplicate base data
     const cloneGlobalPlugin = getPluginsByContext(
       JSON.parse(JSON.stringify(plugins.data)),
-      "global",
+      "global"
     );
     const cloneGlobalConf = JSON.parse(JSON.stringify(conf.data["global"]));
     // Format and keep only global config
@@ -115,7 +115,7 @@ const conf = reactive({
   data: [],
 });
 
-async function getGlobalConf() {
+async function getGlobalConf(isFeedback = true) {
   conf.isPend = true;
   plugins.isPend = true;
   await fetchAPI(
@@ -123,20 +123,16 @@ async function getGlobalConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    isFeedback ? feedbackStore.addFeedback : null
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
-
-onMounted(async () => {
-  await getGlobalConf();
-});
 
 // Refetch and reset all states
 async function resetValues() {
@@ -144,8 +140,8 @@ async function resetValues() {
   config.$reset();
 }
 
-async function refresh() {
-  await getGlobalConf();
+async function refresh(isFeedback = true) {
+  await getGlobalConf(isFeedback);
   await resetValues();
 }
 
@@ -157,10 +153,14 @@ async function sendConf() {
     "PUT",
     config.data["global"],
     null,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
-  await refresh();
+  await refresh(false);
 }
+
+onMounted(() => {
+  getGlobalConf();
+});
 </script>
 
 <template>

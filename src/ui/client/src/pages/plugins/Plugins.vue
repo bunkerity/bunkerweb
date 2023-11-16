@@ -7,6 +7,7 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import SettingsUploadStructure from "@components/Settings/Upload/Structure.vue";
 import PluginList from "@components/Plugin/List.vue";
+import PluginModalDelete from "@components/Plugin/Modal/Delete.vue";
 import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
@@ -41,10 +42,10 @@ const plugins = reactive({
   data: [],
   total: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.data.filter((item) => item["external"] === false).length,
+    () => plugins.data.filter((item) => item["external"] === false).length
   ),
   external: computed(
-    () => plugins.data.filter((item) => item["external"] === true).length,
+    () => plugins.data.filter((item) => item["external"] === true).length
   ),
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
@@ -63,8 +64,22 @@ async function getPlugins() {
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
+}
+
+const modalDel = reactive({
+  isOpen: false,
+  pluginId: "",
+  pluginName: "",
+  pluginDesc: "",
+});
+
+function openDelModal(v) {
+  modalDel.pluginId = v.id;
+  modalDel.pluginName = v.name;
+  modalDel.pluginDesc = v.description;
+  modalDel.isOpen = true;
 }
 
 onMounted(() => {
@@ -139,7 +154,15 @@ onMounted(() => {
       class="h-fit col-span-12"
       label="plugin list"
     >
-      <PluginList :items="plugins.setup" />
+      <PluginList @delete="(v) => openDelModal(v)" :items="plugins.setup" />
     </CardBase>
+    <PluginModalDelete
+      @close="modalDel.isOpen = false"
+      @pluginDelete="useRefreshStore.refresh()"
+      :isOpen="modalDel.isOpen"
+      :pluginId="modalDel.pluginId"
+      :pluginName="modalDel.pluginName"
+      :pluginDesc="modalDel.pluginDesc"
+    />
   </Dashboard>
 </template>
