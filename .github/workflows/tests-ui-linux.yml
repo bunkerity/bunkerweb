@@ -99,7 +99,7 @@ jobs:
       - name: Run tests
         run: |
           cd ./tests/ui
-          MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install --no-cache-dir --require-hashes -r {} \;
+          MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install --no-cache-dir --require-hashes --no-deps -r {} \;
           touch test.txt
           zip test.zip test.txt
           rm test.txt
