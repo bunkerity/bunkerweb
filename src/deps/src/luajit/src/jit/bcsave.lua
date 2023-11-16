@@ -39,7 +39,7 @@ Save LuaJIT bytecode: luajit -b[options] input output
   --        Stop handling options.
   -         Use stdin as input and/or stdout as output.
 
-File types: c cc h obj o raw (default)
+File types: c h obj o raw (default)
 ]]
   os.exit(1)
 end
@@ -82,7 +82,7 @@ end
 ------------------------------------------------------------------------------
 
 local map_type = {
-  raw = "raw", c = "c", cc = "c", h = "h", o = "obj", obj = "obj",
+  raw = "raw", c = "c", h = "h", o = "obj", obj = "obj",
 }
 
 local map_arch = {
