@@ -1752,7 +1752,8 @@ static void expr_table(LexState *ls, ExpDesc *e)
     expr(ls, &val);
     if (expr_isk(&key) && key.k != VKNIL &&
 	(key.k == VKSTR || expr_isk_nojump(&val))) {
-      TValue k, *v;
+      TValue k = {0};
+      TValue *v;
       if (!t) {  /* Create template table on demand. */
 	BCReg kidx;
 	t = lj_tab_new(fs->L, needarr ? narr : 0, hsize2hbits(nhash));

@@ -851,6 +851,11 @@ int main(int argc, char **argv)
 }
 ```
 
+# REQUIREMENTS
+
+libmaxminddb requires a minimum of POSIX.1-2001 support. If not specified
+at compilation time, it defaults to requesting POSIX.1-2008 support.
+
 # THREAD SAFETY
 
 This library is thread safe when compiled and linked with a thread-safe
@@ -878,7 +883,7 @@ Rolsky (drolsky@maxmind.com).
 
 # COPYRIGHT AND LICENSE
 
-Copyright 2013-2022 MaxMind, Inc.
+Copyright 2013-2023 MaxMind, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

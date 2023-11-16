@@ -14,7 +14,7 @@ try:
     ready = False
     retries = 0
     while not ready:
-        with suppress(RequestException):      
+        with suppress(RequestException):
             resp = get(
                 f"http{'s' if ssl else ''}://www.example.com/ready",
                 headers={"Host": "www.example.com"},

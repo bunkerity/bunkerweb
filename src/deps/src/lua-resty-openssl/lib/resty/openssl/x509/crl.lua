@@ -18,65 +18,21 @@ local txtnid2nid = require("resty.openssl.objects").txtnid2nid
 local find_sigid_algs = require("resty.openssl.objects").find_sigid_algs
 local format_error = require("resty.openssl.err").format_error
 local version = require("resty.openssl.version")
-local OPENSSL_10 = version.OPENSSL_10
-local OPENSSL_11_OR_LATER = version.OPENSSL_11_OR_LATER
 local OPENSSL_3X = version.OPENSSL_3X
-local BORINGSSL = version.BORINGSSL
-local BORINGSSL_110 = version.BORINGSSL_110 -- used in boringssl-fips-20190808
 
 local accessors = {}
 
 accessors.set_issuer_name = C.X509_CRL_set_issuer_name
 accessors.set_version = C.X509_CRL_set_version
 
-
-if OPENSSL_11_OR_LATER and not BORINGSSL_110 then
-  accessors.get_last_update = C.X509_CRL_get0_lastUpdate
-  accessors.set_last_update = C.X509_CRL_set1_lastUpdate
-  accessors.get_next_update = C.X509_CRL_get0_nextUpdate
-  accessors.set_next_update = C.X509_CRL_set1_nextUpdate
-  accessors.get_version = C.X509_CRL_get_version
-  accessors.get_issuer_name = C.X509_CRL_get_issuer -- returns internal ptr
-  accessors.get_signature_nid = C.X509_CRL_get_signature_nid
-  -- BORINGSSL_110 exports X509_CRL_get_signature_nid, but just ignored for simplicity
-  accessors.get_revoked = C.X509_CRL_get_REVOKED
-elseif OPENSSL_10 or BORINGSSL_110 then
-  accessors.get_last_update = function(crl)
-    if crl == nil or crl.crl == nil then
-      return nil
-    end
-    return crl.crl.lastUpdate
-  end
-  accessors.set_last_update = C.X509_CRL_set_lastUpdate
-  accessors.get_next_update = function(crl)
-    if crl == nil or crl.crl == nil then
-      return nil
-    end
-    return crl.crl.nextUpdate
-  end
-  accessors.set_next_update = C.X509_CRL_set_nextUpdate
-  accessors.get_version = function(crl)
-    if crl == nil or crl.crl == nil then
-      return nil
-    end
-    return C.ASN1_INTEGER_get(crl.crl.version)
-  end
-  accessors.get_issuer_name = function(crl)
-    if crl == nil or crl.crl == nil then
-      return nil
-    end
-    return crl.crl.issuer
-  end
-  accessors.get_signature_nid = function(crl)
-    if crl == nil or crl.crl == nil or crl.crl.sig_alg == nil then
-      return nil
-    end
-    return C.OBJ_obj2nid(crl.crl.sig_alg.algorithm)
-  end
-  accessors.get_revoked = function(crl)
-    return crl.crl.revoked
-  end
-end
+accessors.get_last_update = C.X509_CRL_get0_lastUpdate
+accessors.set_last_update = C.X509_CRL_set1_lastUpdate
+accessors.get_next_update = C.X509_CRL_get0_nextUpdate
+accessors.set_next_update = C.X509_CRL_set1_nextUpdate
+accessors.get_version = C.X509_CRL_get_version
+accessors.get_issuer_name = C.X509_CRL_get_issuer -- returns internal ptr
+accessors.get_signature_nid = C.X509_CRL_get_signature_nid
+accessors.get_revoked = C.X509_CRL_get_REVOKED
 
 local function __tostring(self, fmt)
   if not fmt or fmt == 'PEM' then
@@ -183,10 +139,6 @@ function _M:text()
 end
 
 local function revoked_decode(ctx)
-  if OPENSSL_10 then
-    error("x509.crl:revoked_decode: not supported on OpenSSL 1.0")
-  end
-
   local ret = {}
   local serial = C.X509_REVOKED_get0_serialNumber(ctx)
   if serial ~= nil then
@@ -330,8 +282,6 @@ function _M:sign(pkey, digest)
       return false, "x509.crl:sign: expect a digest instance to have algo member"
     end
     digest_algo = digest.algo
-  elseif BORINGSSL then
-    digest_algo = C.EVP_get_digestbyname('sha256')
   end
 
   -- returns size of signature if success
@@ -404,19 +354,6 @@ function _M:get_extension(nid_txt, last_pos)
   return ext, pos+1
 end
 
-local X509_CRL_delete_ext
-if OPENSSL_11_OR_LATER then
-  X509_CRL_delete_ext = C.X509_CRL_delete_ext
-elseif OPENSSL_10 then
-  X509_CRL_delete_ext = function(ctx, pos)
-    return C.X509v3_delete_ext(ctx.crl.extensions, pos)
-  end
-else
-  X509_CRL_delete_ext = function(...)
-    error("X509_CRL_delete_ext undefined")
-  end
-end
-
 -- AUTO GENERATED
 function _M:set_extension(extension, last_pos)
   if not extension_lib.istype(extension) then
@@ -429,7 +366,7 @@ function _M:set_extension(extension, last_pos)
   local pos = C.X509_CRL_get_ext_by_NID(self.ctx, nid, last_pos)
   -- pos may be -1, which means not found, it's fine, we will add new one instead of replace
 
-  local removed = X509_CRL_delete_ext(self.ctx, pos)
+  local removed = C.X509_CRL_delete_ext(self.ctx, pos)
   C.X509_EXTENSION_free(removed)
 
   if C.X509_CRL_add_ext(self.ctx, extension.ctx, pos) == nil then

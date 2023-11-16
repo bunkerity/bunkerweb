@@ -168,6 +168,7 @@ else
     return ssl.session_ctx
   end
 
+  -- https://github.com/openresty/stream-lua-nginx-module/blob/master/src/ngx_stream_lua_socket_tcp.h
   ffi.cdef[[
     typedef struct ngx_http_lua_socket_tcp_upstream_s
                   ngx_http_lua_socket_tcp_upstream_t;
@@ -213,7 +214,7 @@ else
         ngx.config.ngx_lua_version and
         ngx.config.ngx_lua_version
 
-  if ngx_lua_version >= 10019 and ngx_lua_version <= 10021 then
+  if ngx_lua_version >= 10019 and ngx_lua_version <= 10025 then
     -- https://github.com/openresty/lua-nginx-module/blob/master/src/ngx_http_lua_socket_tcp.h
     ffi.cdef[[
       typedef struct {

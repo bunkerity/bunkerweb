@@ -373,11 +373,12 @@ void emit_peobj(BuildCtx *ctx)
 
     /* Unwind codes for .text section with handler. */
     p = uwc;
+    CADD_FP(192);		/* +2 */
     CSAVE_REGS(19, 28, 176);	/* +5*2 */
     CSAVE_FREGS(8, 15, 96);	/* +4*2 */
     CSAVE_FPLR(192);		/* +1 */
     CALLOC_S(208);		/* +1 */
-    CEND_ALIGN;			/* +1 +3 -> 24 */
+    CEND_ALIGN;			/* +1 +1 -> 24 */
 
     u32 = ((24u >> 2) << 27) | (1u << 20) | (fcofs >> 2);
     owrite(ctx, &u32, 4);

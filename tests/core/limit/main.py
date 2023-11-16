@@ -9,7 +9,6 @@ from time import sleep
 from requests import get
 
 try:
-
     ready = False
     retries = 0
     while not ready:

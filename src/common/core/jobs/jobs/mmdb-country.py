@@ -49,7 +49,7 @@ try:
 
         if response and response.status_code == 200:
             _sha1 = sha1()
-            with open(str(tmp_path), "rb") as f:
+            with tmp_path.open("rb") as f:
                 while True:
                     data = f.read(1024)
                     if not data:

@@ -107,7 +107,7 @@ try:
             for line in iterable:
                 line = line.strip().split(b" ")[0]
 
-                if not line or line.startswith(b"#") or line.startswith(b";"):
+                if not line or line.startswith((b"#", b";")):
                     continue
 
                 ok, data = check_line(line)

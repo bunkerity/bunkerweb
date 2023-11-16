@@ -3,20 +3,16 @@ local C = ffi.C
 
 require "resty.openssl.include.ossl_typ"
 require "resty.openssl.include.stack"
-local OPENSSL_10 = require("resty.openssl.version").OPENSSL_10
-local OPENSSL_11_OR_LATER = require("resty.openssl.version").OPENSSL_11_OR_LATER
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
-local BORINGSSL = require("resty.openssl.version").BORINGSSL
-local BORINGSSL_110 = require("resty.openssl.version").BORINGSSL_110
 
 ffi.cdef [[
   X509_STORE *X509_STORE_new(void);
   void X509_STORE_free(X509_STORE *v);
- /* int X509_STORE_lock(X509_STORE *ctx);
-  int X509_STORE_unlock(X509_STORE *ctx);
-  int X509_STORE_up_ref(X509_STORE *v);
+  // int X509_STORE_lock(X509_STORE *ctx);
+  // int X509_STORE_unlock(X509_STORE *ctx);
+  // int X509_STORE_up_ref(X509_STORE *v);
   // STACK_OF(X509_OBJECT)
-  OPENSSL_STACK *X509_STORE_get0_objects(X509_STORE *v);*/
+  // OPENSSL_STACK *X509_STORE_get0_objects(X509_STORE *v);
 
   int X509_STORE_add_cert(X509_STORE *ctx, X509 *x);
   int X509_STORE_add_crl(X509_STORE *ctx, X509_CRL *x);
@@ -39,14 +35,25 @@ ffi.cdef [[
 
   void X509_STORE_CTX_set_flags(X509_STORE_CTX *ctx, unsigned long flags);
 
-  int X509_STORE_CTX_set_purpose(X509_STORE_CTX *ctx, int purpose);
+  // int X509_STORE_CTX_set_purpose(X509_STORE_CTX *ctx, int purpose);
 
   // STACK_OF(X509_CRL)
-  void X509_STORE_CTX_set0_crls(X509_STORE_CTX *c, OPENSSL_STACK *sk);
+  // void X509_STORE_CTX_set0_crls(X509_STORE_CTX *c, OPENSSL_STACK *sk);
 
   int X509_PURPOSE_get_by_sname(char *sname);
   X509_PURPOSE *X509_PURPOSE_get0(int idx);
   int X509_PURPOSE_get_id(const X509_PURPOSE *xp);
+
+  // STACK_OF(X509)
+  OPENSSL_STACK *X509_STORE_CTX_get0_chain(X509_STORE_CTX *ctx);
+  typedef int (*X509_STORE_CTX_check_revocation_fn)(X509_STORE_CTX *ctx);
+  // STACK_OF(X509)
+  void X509_STORE_CTX_set0_verified_chain(X509_STORE_CTX *ctx, OPENSSL_STACK *sk);
+
+  typedef int (*X509_STORE_CTX_check_revocation_fn)(X509_STORE_CTX *ctx);
+  X509_STORE_CTX_check_revocation_fn X509_STORE_CTX_get_check_revocation(const X509_STORE_CTX *ctx);
+  // STACK_OF(X509)
+  void X509_STORE_CTX_set0_verified_chain(X509_STORE_CTX *ctx, OPENSSL_STACK *sk);
 ]]
 
 local _M = {
@@ -76,45 +83,16 @@ local _M = {
   },
 }
 
-if OPENSSL_10 or BORINGSSL_110 then
-  ffi.cdef [[
-    // STACK_OF(X509)
-    OPENSSL_STACK *X509_STORE_CTX_get_chain(X509_STORE_CTX *ctx);
-  ]];
-  _M.X509_STORE_CTX_get0_chain = C.X509_STORE_CTX_get_chain
-elseif OPENSSL_11_OR_LATER then
-  ffi.cdef [[
-    // STACK_OF(X509)
-    OPENSSL_STACK *X509_STORE_CTX_get0_chain(X509_STORE_CTX *ctx);
-    typedef int (*X509_STORE_CTX_check_revocation_fn)(X509_STORE_CTX *ctx);
-    // STACK_OF(X509)
-    void X509_STORE_CTX_set0_verified_chain(X509_STORE_CTX *ctx, OPENSSL_STACK *sk);
-  ]];
-  _M.X509_STORE_CTX_get0_chain = C.X509_STORE_CTX_get0_chain
-end
-
--- these two apis are supported from 1.1.0 but not supported by boringssl
-if not BORINGSSL then
-  if OPENSSL_11_OR_LATER then
-    ffi.cdef [[
-      typedef int (*X509_STORE_CTX_check_revocation_fn)(X509_STORE_CTX *ctx);
-      X509_STORE_CTX_check_revocation_fn X509_STORE_CTX_get_check_revocation(const X509_STORE_CTX *ctx);
-      // STACK_OF(X509)
-      void X509_STORE_CTX_set0_verified_chain(X509_STORE_CTX *ctx, OPENSSL_STACK *sk);
-    ]];
-  end
-end
-
 if OPENSSL_3X then
   ffi.cdef [[
     X509_STORE_CTX *X509_STORE_CTX_new_ex(OSSL_LIB_CTX *libctx, const char *propq);
 
     int X509_STORE_set_default_paths_ex(X509_STORE *ctx, OSSL_LIB_CTX *libctx,
                                         const char *propq);
-    /* int X509_STORE_load_file_ex(X509_STORE *ctx, const char *file,
-                                OSSL_LIB_CTX *libctx, const char *propq);
-    int X509_STORE_load_store_ex(X509_STORE *ctx, const char *uri,
-                                OSSL_LIB_CTX *libctx, const char *propq); */
+    // int X509_STORE_load_file_ex(X509_STORE *ctx, const char *file,
+    //                             OSSL_LIB_CTX *libctx, const char *propq);
+    // int X509_STORE_load_store_ex(X509_STORE *ctx, const char *uri,
+    //                             OSSL_LIB_CTX *libctx, const char *propq);
     int X509_STORE_load_locations_ex(X509_STORE *ctx, const char *file,
                                     const char *dir, OSSL_LIB_CTX *libctx,
                                     const char *propq);

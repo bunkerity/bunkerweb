@@ -16,7 +16,7 @@ ffi.cdef(
   void BN_free(BIGNUM *a);
 
   BN_CTX *BN_CTX_new(void);
-  void BN_CTX_init(BN_CTX *c);
+  // void BN_CTX_init(BN_CTX *c);
   void BN_CTX_free(BN_CTX *c);
 
   BIGNUM *BN_dup(const BIGNUM *a);

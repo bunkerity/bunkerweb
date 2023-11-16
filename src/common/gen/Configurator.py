@@ -185,10 +185,7 @@ class Configurator:
                 config[variable] = value
             elif (
                 "CUSTOM_CONF" not in variable
-                and not variable.startswith("PYTHON")
-                and not variable.startswith("KUBERNETES_SERVICE_")
-                and not variable.startswith("KUBERNETES_PORT_")
-                and not variable.startswith("SVC_")
+                and not variable.startswith(("PYTHON", "KUBERNETES_SERVICE_", "KUBERNETES_PORT_", "SVC_"))
                 and variable
                 not in (
                     "GPG_KEY",
@@ -269,17 +266,7 @@ class Configurator:
         return False, variable
 
     def __validate_plugin(self, plugin: dict) -> Tuple[bool, str]:
-        if not all(
-            key in plugin.keys()
-            for key in [
-                "id",
-                "name",
-                "description",
-                "version",
-                "stream",
-                "settings",
-            ]
-        ):
+        if not all(key in plugin for key in ("id", "name", "description", "version", "stream", "settings")):
             return (
                 False,
                 f"Missing mandatory keys for plugin {plugin.get('id', 'unknown')} (id, name, description, version, stream, settings)",
@@ -305,25 +292,14 @@ class Configurator:
                 False,
                 f"Invalid version for plugin {plugin['id']} (Must be in format \\d+\\.\\d+(\\.\\d+)?)",
             )
-        elif plugin["stream"] not in ["yes", "no", "partial"]:
+        elif plugin["stream"] not in ("yes", "no", "partial"):
             return (
                 False,
                 f"Invalid stream for plugin {plugin['id']} (Must be yes, no or partial)",
             )
 
         for setting, data in plugin["settings"].items():
-            if not all(
-                key in data.keys()
-                for key in [
-                    "context",
-                    "default",
-                    "help",
-                    "id",
-                    "label",
-                    "regex",
-                    "type",
-                ]
-            ):
+            if not all(key in data.keys() for key in ("context", "default", "help", "id", "label", "regex", "type")):
                 return (
                     False,
                     f"missing keys for setting {setting} in plugin {plugin['id']}, must have context, default, help, id, label, regex and type",
@@ -334,7 +310,7 @@ class Configurator:
                     False,
                     f"Invalid setting name for setting {setting} in plugin {plugin['id']} (Can only contain capital letters and underscores (min 1 characters and max 256))",
                 )
-            elif data["context"] not in ["global", "multisite"]:
+            elif data["context"] not in ("global", "multisite"):
                 return (
                     False,
                     f"Invalid context for setting {setting} in plugin {plugin['id']} (Must be global or multisite)",
@@ -359,7 +335,7 @@ class Configurator:
                     False,
                     f"Invalid regex for setting {setting} in plugin {plugin['id']} (Max 1024 characters)",
                 )
-            elif data["type"] not in ["password", "text", "check", "select"]:
+            elif data["type"] not in ("password", "text", "check", "select"):
                 return (
                     False,
                     f"Invalid type for setting {setting} in plugin {plugin['id']} (Must be password, text, check or select)",
@@ -380,15 +356,7 @@ class Configurator:
                     )
 
         for job in plugin.get("jobs", []):
-            if not all(
-                key in job.keys()
-                for key in [
-                    "name",
-                    "file",
-                    "every",
-                    "reload",
-                ]
-            ):
+            if not all(key in job.keys() for key in ("name", "file", "every", "reload")):
                 return (
                     False,
                     f"missing keys for job {job['name']} in plugin {plugin['id']}, must have name, file, every and reload",
@@ -404,7 +372,7 @@ class Configurator:
                     False,
                     f"Invalid file for job {job['name']} in plugin {plugin['id']} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256))",
                 )
-            elif job["every"] not in ["once", "minute", "hour", "day", "week"]:
+            elif job["every"] not in ("once", "minute", "hour", "day", "week"):
                 return (
                     False,
                     f"Invalid every for job {job['name']} in plugin {plugin['id']} (Must be once, minute, hour, day or week)",

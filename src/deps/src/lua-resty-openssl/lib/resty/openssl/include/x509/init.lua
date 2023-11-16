@@ -6,10 +6,6 @@ require "resty.openssl.include.pem"
 require "resty.openssl.include.stack"
 local asn1_macro = require "resty.openssl.include.asn1"
 
-local OPENSSL_10 = require("resty.openssl.version").OPENSSL_10
-local OPENSSL_11_OR_LATER = require("resty.openssl.version").OPENSSL_11_OR_LATER
-local BORINGSSL_110 = require("resty.openssl.version").BORINGSSL_110
-
 asn1_macro.declare_asn1_functions("X509", asn1_macro.has_new_ex)
 
 ffi.cdef [[
@@ -65,74 +61,17 @@ ffi.cdef [[
   int X509_get_signature_nid(const X509 *x);
 
   unsigned char *X509_alias_get0(X509 *x, int *len);
-  unsigned char *X509_keyid_get0(X509 *x, int *len);
+  // unsigned char *X509_keyid_get0(X509 *x, int *len);
   int X509_check_private_key(X509 *x, EVP_PKEY *k);
+
+  int X509_up_ref(X509 *a);
+
+  int X509_set1_notBefore(X509 *x, const ASN1_TIME *tm);
+  int X509_set1_notAfter(X509 *x, const ASN1_TIME *tm);
+  /*const*/ ASN1_TIME *X509_get0_notBefore(const X509 *x);
+  /*const*/ ASN1_TIME *X509_get0_notAfter(const X509 *x);
+  long X509_get_version(const X509 *x);
+  const ASN1_INTEGER *X509_get0_serialNumber(X509 *x);
+
+  X509_EXTENSION *X509_delete_ext(X509 *x, int loc);
 ]]
-
-if OPENSSL_11_OR_LATER then
-  ffi.cdef [[
-    int X509_up_ref(X509 *a);
-
-    int X509_set1_notBefore(X509 *x, const ASN1_TIME *tm);
-    int X509_set1_notAfter(X509 *x, const ASN1_TIME *tm);
-    /*const*/ ASN1_TIME *X509_get0_notBefore(const X509 *x);
-    /*const*/ ASN1_TIME *X509_get0_notAfter(const X509 *x);
-    long X509_get_version(const X509 *x);
-    const ASN1_INTEGER *X509_get0_serialNumber(X509 *x);
-
-    X509_EXTENSION *X509_delete_ext(X509 *x, int loc);
-  ]]
-elseif OPENSSL_10 then
-  ffi.cdef [[
-    // STACK_OF(X509_EXTENSION)
-    X509_EXTENSION *X509v3_delete_ext(OPENSSL_STACK *x, int loc);
-  ]]
-end
-
-if OPENSSL_10 or BORINGSSL_110 then
-  -- in openssl 1.0.x some getters are direct accessor to struct members (defiend by macros)
-  ffi.cdef [[
-    // crypto/x509/x509.h
-    typedef struct X509_val_st {
-      ASN1_TIME *notBefore;
-      ASN1_TIME *notAfter;
-    } X509_VAL;
-
-    typedef struct X509_algor_st {
-      ASN1_OBJECT *algorithm;
-      ASN1_TYPE *parameter;
-    } X509_ALGOR;
-
-    // Note: this struct is trimmed
-    typedef struct x509_cinf_st {
-      /*ASN1_INTEGER*/ void *version;
-      /*ASN1_INTEGER*/ void *serialNumber;
-      X509_ALGOR *signature;
-      X509_NAME *issuer;
-      X509_VAL *validity;
-      X509_NAME *subject;
-      /*X509_PUBKEY*/ void *key;
-      /*ASN1_BIT_STRING*/ void *issuerUID; /* [ 1 ] optional in v2 */
-      /*ASN1_BIT_STRING*/ void *subjectUID; /* [ 2 ] optional in v2 */
-      /*STACK_OF(X509_EXTENSION)*/ OPENSSL_STACK *extensions; /* [ 3 ] optional in v3 */
-      // trimmed
-      // ASN1_ENCODING enc;
-    } X509_CINF;
-    // Note: this struct is trimmed
-    struct x509_st {
-      X509_CINF *cert_info;
-      // trimmed
-    } X509;
-
-    int X509_set_notBefore(X509 *x, const ASN1_TIME *tm);
-    int X509_set_notAfter(X509 *x, const ASN1_TIME *tm);
-    ASN1_INTEGER *X509_get_serialNumber(X509 *x);
-  ]]
-end
-
-if BORINGSSL_110 then
-  ffi.cdef [[
-    ASN1_TIME *X509_get_notBefore(const X509 *x);
-    ASN1_TIME *X509_get_notAfter(const X509 *x);
-  ]]
-end

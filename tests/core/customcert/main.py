@@ -5,17 +5,11 @@ from traceback import format_exc
 from time import sleep
 
 try:
-
     ready = False
     retries = 0
     while not ready:
-        with suppress(RequestException):      
-            resp = get(
-                f"http://www.example.com/ready",
-                headers={"Host": "www.example.com"},
-                verify=False,
-                allow_redirects=True
-            )
+        with suppress(RequestException):
+            resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"}, verify=False, allow_redirects=True)
             status_code = resp.status_code
             text = resp.text
 

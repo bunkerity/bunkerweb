@@ -4,7 +4,6 @@ from functools import partial
 from os import getenv, listdir
 from os.path import join
 from pathlib import Path
-from subprocess import PIPE, run
 from time import sleep
 from traceback import format_exc
 from typing import List, Union
@@ -75,6 +74,7 @@ def assert_button_click(driver, button: Union[str, WebElement]):
             button.click()
             clicked = True
     return clicked
+
 
 def assert_alert_message(driver, message: str):
     safe_get_element(driver, By.XPATH, "//button[@data-flash-sidebar-open='']")
@@ -164,11 +164,7 @@ def access_page(
         )
 
 
-driver_func = partial(
-        webdriver.Firefox,
-        service=Service(log_output="./geckodriver.log"),
-        options=firefox_options
-    )
+driver_func = partial(webdriver.Firefox, service=Service(log_output="./geckodriver.log"), options=firefox_options)
 if TEST_TYPE == "dev":
     driver_func = partial(
         webdriver.Firefox,

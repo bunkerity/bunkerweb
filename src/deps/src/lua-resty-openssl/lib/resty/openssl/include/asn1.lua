@@ -54,38 +54,10 @@ declare_asn1_functions("ASN1_OBJECT")
 declare_asn1_functions("ASN1_STRING")
 declare_asn1_functions("ASN1_ENUMERATED")
 
-local OPENSSL_10 = require("resty.openssl.version").OPENSSL_10
-local OPENSSL_11_OR_LATER = require("resty.openssl.version").OPENSSL_11_OR_LATER
-local BORINGSSL_110 = require("resty.openssl.version").BORINGSSL_110
-
-local ASN1_STRING_get0_data
-if OPENSSL_11_OR_LATER then
-  ffi.cdef[[
-    const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *x);
-  ]]
-  ASN1_STRING_get0_data = C.ASN1_STRING_get0_data
-elseif OPENSSL_10 then
-  ffi.cdef[[
-    unsigned char *ASN1_STRING_data(ASN1_STRING *x);
-    typedef struct ASN1_ENCODING_st {
-      unsigned char *enc;         /* DER encoding */
-      long len;                   /* Length of encoding */
-      int modified;               /* set to 1 if 'enc' is invalid */
-    } ASN1_ENCODING;
-  ]]
-  ASN1_STRING_get0_data = C.ASN1_STRING_data
-end
-
-if BORINGSSL_110 then
-  ffi.cdef [[
-    // required by resty/openssl/include/x509/crl.lua
-    typedef struct ASN1_ENCODING_st {
-      unsigned char *enc;         /* DER encoding */
-      long len;                   /* Length of encoding */
-      int modified;               /* set to 1 if 'enc' is invalid */
-    } ASN1_ENCODING;
-  ]]
-end
+ffi.cdef[[
+  const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *x);
+]]
+local ASN1_STRING_get0_data = C.ASN1_STRING_get0_data
 
 return {
   ASN1_STRING_get0_data = ASN1_STRING_get0_data,
