@@ -21,7 +21,7 @@ const props = defineProps({
   <label
     :class="[props.label ? '' : 'sr-only']"
     :for="props.name"
-    class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-300"
+    class="lowercase capitalize-first my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-300"
   >
     {{ props.label }} <span v-if="props.version">{{ props.version }}</span>
   </label>

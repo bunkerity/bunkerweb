@@ -83,7 +83,7 @@ async function getData() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   const hostnames = await getHostFromInst();
 
@@ -135,7 +135,7 @@ async function getHostBan(hostname) {
     "POST",
     null,
     data,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -155,8 +155,8 @@ const tab = reactive({
       :isErr="instances.isErr || bans.isErr"
       :isPend="instances.isPend || bans.isPend"
       :textState="{
-        isPend: 'Try retrieve bans list',
-        isErr: 'Error retrieving bans list',
+        isPend: $t('bans.api.pending'),
+        isErr: $t('bans.api.error'),
       }"
     />
     <CardBase
@@ -164,12 +164,18 @@ const tab = reactive({
         !instances.isErr && !instances.isPend && !bans.isPend && !bans.isErr
       "
       class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
-      label="info"
+      :label="$t('bans.card.info.title')"
     >
       <CardItemList
         :items="[
-          { label: 'instances total', value: instances.total },
-          { label: 'ip bans total', value: bans.total },
+          {
+            label: $t('bans.card.info.items.instances_total'),
+            value: instances.total,
+          },
+          {
+            label: $t('bans.card.info.items.ip_bans_total'),
+            value: bans.total,
+          },
         ]"
       />
     </CardBase>
@@ -177,12 +183,12 @@ const tab = reactive({
       v-if="
         !instances.isErr && !instances.isPend && !bans.isPend && !bans.isErr
       "
-      label="ban list filter"
+      :label="$t('bans.card.filter.title')"
       class="z-[100] col-span-12 md:col-span-8 lg:col-span-6 2xl:col-span-5 3xl:col-span-4 grid grid-cols-12 relative"
     >
       <SettingsLayout
         class="flex w-full col-span-12 md:col-span-6"
-        label="Search ip"
+        :label="$t('bans.card.filter.search_ip.label')"
         name="ipName"
       >
         <SettingsInput
@@ -195,7 +201,11 @@ const tab = reactive({
           }"
         />
       </SettingsLayout>
-      <SettingsLayout class="sm:col-span-6" label="Select reason" name="reason">
+      <SettingsLayout
+        class="sm:col-span-6"
+        :label="$t('bans.card.filter.reason.label')"
+        name="reason"
+      >
         <SettingsSelect
           @inp="(v) => (filters.reason = v)"
           :settings="{
@@ -208,7 +218,7 @@ const tab = reactive({
     </CardBase>
     <CardBase
       class="max-w-[1200px] col-span-12 overflow-y-hidden min-h-[400px]"
-      label="ACTIONS"
+      :label="$t('bans.card.actions.title')"
     >
       <BansTabs @tab="(v) => (tab.current = v)" />
       <BansList

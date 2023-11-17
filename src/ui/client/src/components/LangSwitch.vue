@@ -7,6 +7,7 @@ const lang = reactive({
 
 function updateLangStorage(lang) {
   sessionStorage.setItem("lang", lang);
+  window.location.href = window.location.href;
 }
 </script>
 

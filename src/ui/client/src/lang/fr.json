@@ -66,8 +66,8 @@
   "home": {
     "version": {
       "api": {
-        "pending": "Récupération de version en cours",
-        "error": "Erreur récupération de version"
+        "pending": "Récupération de la version en cours",
+        "error": "Erreur récupération la de version"
       },
       "card": {
         "name": "version",
@@ -77,8 +77,8 @@
     },
     "instances": {
       "api": {
-        "pending": "Récupération de instances en cours ",
-        "error": "Erreur récupération de instances"
+        "pending": "Récupération des instances en cours ",
+        "error": "Erreur récupération des instances"
       },
       "card": {
         "name": "instances",
@@ -88,8 +88,8 @@
     },
     "services": {
       "api": {
-        "pending": "Récupération de services en cours ",
-        "error": "Erreur récupération de services"
+        "pending": "Récupération des services en cours ",
+        "error": "Erreur récupération des services"
       },
       "card": {
         "name": "services",
@@ -99,13 +99,138 @@
     },
     "plugins": {
       "api": {
-        "pending": "Récupération de plugins en cours ",
-        "error": "Erreur récupération de plugins"
+        "pending": "Récupération des plugins en cours ",
+        "error": "Erreur récupération des plugins"
       },
       "card": {
         "name": "plugins",
         "internal": "interne",
         "external": "externe"
+      }
+    }
+  },
+  "actions": {
+    "api": {
+      "pending": "Récupération des actions en cours",
+      "error": "Erreur récupération des actions"
+    },
+    "card": {
+      "info": {
+        "title": "info",
+        "items": {
+          "total": "total actions",
+          "ui": "ui actions",
+          "core": "core actions"
+        }
+      },
+      "filter": {
+        "title": "filtres",
+        "search": {
+          "label": "recherche"
+        },
+        "method": {
+          "label": "methodes"
+        },
+        "api_method": {
+          "label": "methodes api"
+        }
+      },
+      "actions": {
+        "title": "actions",
+        "header": {
+          "method": "methode",
+          "title": "titre",
+          "description": "description",
+          "date": "date",
+          "action": "action"
+        }
+      }
+    }
+  },
+  "bans": {
+    "api": {
+      "pending": "Récupération liste de bans",
+      "error": "Erreur récupération liste de bans"
+    },
+    "card": {
+      "info": {
+        "title": "info",
+        "items": {
+          "instances_total": "total instances",
+          "ip_bans_total": "total ip bans"
+        }
+      },
+      "filter": {
+        "title": "filtres liste de bans",
+        "search_ip": {
+          "label": "recherche ip"
+        },
+        "reason": {
+          "label": "recherche motif"
+        }
+      },
+      "actions": {
+        "title": "actions"
+      },
+      "list": {
+        "no_bans": "Aucun ban à montrer",
+        "select_all": "sélectionner tout",
+        "unselect_all": "désélectionner tout"
+      },
+      "add": {
+        "actions": {
+          "add_field": "Ajouter ban",
+          "remove_all": "Supprimer tout",
+          "save_bans": "Sauvegarder"
+        },
+        "header": {
+          "ip_number": "IP",
+          "ban_start": "début ban",
+          "ban_end": "fin ban",
+          "reason": "motif",
+          "delete": "supprimer"
+        }
+      }
+    }
+  },
+  "custom_conf": {
+    "api": {
+      "pending": "Récupération des configs customs",
+      "error": "Erreur récupération des configs customs"
+    },
+    "card": {
+      "info": {
+        "title": "info",
+        "items": {
+          "conf_total": "total configs",
+          "conf_global": "configs globales",
+          "conf_services": "configs services"
+        }
+      },
+      "filter": {
+        "title": "filtres",
+        "search_path": {
+          "label": "recherche par chemin"
+        },
+        "search_name": {
+          "label": "recherche par nom"
+        },
+        "show_services_folders": {
+          "label": "voir les dossiers services"
+        },
+        "show_path_with_conf": {
+          "label": "voir seulement si fichier"
+        }
+      }
+    },
+    "file_manager": {
+      "add_file": "ajouter fichier",
+      "actions": {
+        "edit": "editer",
+        "download": "télécharger",
+        "delete": "supprimer",
+        "create": "creer",
+        "view": "voir"
       }
     }
   }

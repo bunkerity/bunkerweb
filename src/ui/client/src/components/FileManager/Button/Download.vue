@@ -1,3 +1,5 @@
+<script setup></script>
+
 <template>
   <button role="tab" type="button" class="file-manager-item-btn">
     <span class="flex justify-start items-center">
@@ -16,7 +18,9 @@
         />
       </svg>
 
-      <span class="file-manager-item-btn-text">download</span>
+      <span class="file-manager-item-btn-text">
+        {{ $t("custom_config.file_manager.actions.download") }}
+      </span>
     </span>
   </button>
 </template>

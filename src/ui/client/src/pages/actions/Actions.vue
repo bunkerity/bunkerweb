@@ -35,8 +35,6 @@ const positions = [
   "col-span-1",
 ];
 
-const header = ["Method", "Title", "Description", "Date", "Action"];
-
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
   search: "",
@@ -99,7 +97,7 @@ async function getActions() {
     "GET",
     null,
     actions,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -115,29 +113,33 @@ onMounted(() => {
       :isErr="actions.isErr"
       :isPend="actions.isPend"
       :textState="{
-        isPend: 'Try retrieve actions',
-        isErr: 'Error retrieving actions',
+        isPend: $t('actions.api.pending'),
+        isErr: $t('actions.api.error'),
       }"
     />
     <CardBase
       v-if="!actions.isErr && !actions.isPend"
       class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
-      label="info"
+      :label="$t('actions.card.info.title')"
     >
       <CardItemList
         :items="[
-          { label: 'actions total', value: actions.total },
-          { label: 'actions ui', value: actions.ui },
-          { label: 'actions core', value: actions.core },
+          { label: $t('actions.card.info.items.total'), value: actions.total },
+          { label: $t('actions.card.info.items.ui'), value: actions.ui },
+          { label: $t('actions.card.info.items.core'), value: actions.core },
         ]"
       />
     </CardBase>
     <CardBase
       v-if="!actions.isErr && !actions.isPend"
       class="z-10 h-fit col-span-12 md:col-span-8 xl:col-span-8 2xl:col-span-5 3xl:col-span-4"
-      label="filter"
+      :label="$t('actions.card.filter.title')"
     >
-      <SettingsLayout class="sm:col-span-6" label="Search" name="keyword">
+      <SettingsLayout
+        class="sm:col-span-6"
+        :label="$t('actions.card.filter.search.label')"
+        name="keyword"
+      >
         <SettingsInput
           @inp="(v) => (filters.search = v)"
           :settings="{
@@ -151,7 +153,7 @@ onMounted(() => {
 
       <SettingsLayout
         class="sm:col-span-6"
-        label="Method"
+        :label="$t('actions.card.filter.method.label')"
         name="actions-method"
       >
         <SettingsSelect
@@ -165,7 +167,7 @@ onMounted(() => {
       </SettingsLayout>
       <SettingsLayout
         class="sm:col-span-6"
-        label="API Method"
+        :label="$t('actions.card.filter.api_method.label')"
         name="actions-action-api"
       >
         <SettingsSelect
@@ -181,11 +183,17 @@ onMounted(() => {
     <CardBase
       v-if="!actions.isErr && !actions.isPend"
       class="col-span-12 overflow-x-auto overflow-y-hidden"
-      label="ACTIONS"
+      :label="$t('actions.card.actions.title')"
     >
       <ListBase
         class="min-w-[1100px] col-span-12"
-        :header="header"
+        :header="[
+          $t('actions.card.actions.header.method'),
+          $t('actions.card.actions.header.title'),
+          $t('actions.card.actions.header.description'),
+          $t('actions.card.actions.header.date'),
+          $t('actions.card.actions.header.action'),
+        ]"
         :positions="positions"
       >
         <ActionsItems :positions="positions" :items="actions.setup">

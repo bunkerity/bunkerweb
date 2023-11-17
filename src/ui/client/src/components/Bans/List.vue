@@ -67,7 +67,7 @@ const list = reactive({
 function toggleAllCheck() {
   list.checkAll = list.checkAll ? false : true;
   const banItemsChekbox = document.querySelectorAll(
-    '#banlist-container input[type="checkbox"]',
+    '#banlist-container input[type="checkbox"]'
   );
   banItemsChekbox.forEach((item) => {
     // Check current state to update
@@ -82,7 +82,7 @@ async function sendUnban() {
     "POST",
     selectBanStore.data,
     addBans,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "error") return;
     // Case succeed, delete items from UI
@@ -99,7 +99,9 @@ async function sendUnban() {
       v-if="props.items.length === 0"
       class="col-span-12 flex flex-col justify-center items-center mt-2 mb-6 mx-2"
     >
-      <p class="ml-1 mb-0 text-red-500 font-semibold">No ban to display</p>
+      <p class="ml-1 mb-0 text-red-500 font-semibold">
+        {{ $t("bans.card.list.no_bans") }}
+      </p>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -140,7 +142,9 @@ async function sendUnban() {
           />
         </svg>
         <span class="ml-1.5">{{
-          list.checkAll ? "unselect All" : "select All"
+          list.checkAll
+            ? $t("bans.card.list.unselect_all")
+            : $t("bans.card.list.select_all")
         }}</span>
       </ButtonBase>
     </div>

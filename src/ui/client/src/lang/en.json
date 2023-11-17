@@ -108,5 +108,130 @@
         "external": "external"
       }
     }
+  },
+  "actions": {
+    "api": {
+      "pending": "Try retrieve actions",
+      "error": "Error retrieving actions"
+    },
+    "card": {
+      "info": {
+        "title": "info",
+        "items": {
+          "total": "actions total",
+          "ui": "actions ui",
+          "core": "actions core"
+        }
+      },
+      "filter": {
+        "title": "filter",
+        "search": {
+          "label": "search"
+        },
+        "method": {
+          "label": "method"
+        },
+        "api_method": {
+          "label": "api method"
+        }
+      },
+      "actions": {
+        "title": "actions",
+        "header": {
+          "method": "method",
+          "title": "title",
+          "description": "description",
+          "date": "date",
+          "action": "action"
+        }
+      }
+    }
+  },
+  "bans": {
+    "api": {
+      "pending": "Try retrieve bans list",
+      "error": "Error retrieving bans list"
+    },
+    "card": {
+      "info": {
+        "title": "info",
+        "items": {
+          "instances_total": "instances total",
+          "ip_bans_total": "ip bans total"
+        }
+      },
+      "filter": {
+        "title": "ban list filter",
+        "search_ip": {
+          "label": "search ip"
+        },
+        "reason": {
+          "label": "select reason"
+        }
+      },
+      "actions": {
+        "title": "actions"
+      },
+      "list": {
+        "no_bans": "no bans to display",
+        "select_all": "select all",
+        "unselect_all": "unselect all"
+      },
+      "add": {
+        "actions": {
+          "add_field": "add field",
+          "remove_all": "remove all",
+          "save_bans": "save bans"
+        },
+        "header": {
+          "ip_number": "ip number",
+          "ban_start": "ban start",
+          "ban_end": "ban end",
+          "reason": "reason",
+          "delete": "delete"
+        }
+      }
+    }
+  },
+  "custom_conf": {
+    "api": {
+      "pending": "Try retrieve custom conf",
+      "error": "Error retrieving custom conf"
+    },
+    "card": {
+      "info": {
+        "title": "info",
+        "items": {
+          "conf_total": "configs total",
+          "conf_global": "configs global",
+          "conf_services": "configs services"
+        }
+      },
+      "filter": {
+        "title": "filter",
+        "search_path": {
+          "label": "search path"
+        },
+        "search_name": {
+          "label": "search name"
+        },
+        "show_services_folders": {
+          "label": "show services folders"
+        },
+        "show_path_with_conf": {
+          "label": "Only path with .conf"
+        }
+      }
+    },
+    "file_manager": {
+      "add_file": "add file",
+      "actions": {
+        "edit": "edit",
+        "download": "download",
+        "delete": "delete",
+        "create": "create",
+        "view": "view"
+      }
+    }
   }
 }

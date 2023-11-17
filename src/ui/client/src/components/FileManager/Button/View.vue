@@ -1,3 +1,5 @@
+<script setup></script>
+
 <template>
   <button role="tab" type="button" class="file-manager-item-btn">
     <span class="flex justify-start items-center">
@@ -20,7 +22,9 @@
           d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
         />
       </svg>
-      <span class="file-manager-item-btn-text">view</span>
+      <span class="file-manager-item-btn-text">
+        {{ $t("custom_config.file_manager.actions.view") }}
+      </span>
     </span>
   </button>
 </template>

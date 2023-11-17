@@ -247,7 +247,7 @@ function formatData() {
           ]"
           class="text-xs ml-2"
         >
-          {{ props.action }}
+          {{ $t(`custom_config.file_manager.actions.${props.action}`) }}
         </ButtonBase>
       </div>
     </div>
