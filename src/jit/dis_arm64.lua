@@ -985,8 +985,7 @@ local function disass_ins(ctx)
 	x = x.."]"
       end
     elseif p == "P" then
-      local opcv, sh = rshift(op, 26), 2
-      if opcv >= 0x2a then sh = 4 elseif opcv >= 0x1b then sh = 3 end
+      local sh = 2 + rshift(op, 31 - band(rshift(op, 26), 1))
       local imm7 = lshift(arshift(lshift(op, 10), 25), sh)
       local rn = map_regs.x[band(rshift(op, 5), 31)]
       local ind = band(rshift(op, 23), 3)

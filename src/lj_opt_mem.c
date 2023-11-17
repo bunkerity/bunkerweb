@@ -466,18 +466,23 @@ doemit:
 */
 static AliasRet aa_uref(IRIns *refa, IRIns *refb)
 {
-  if (refa->o != refb->o)
-    return ALIAS_NO;  /* Different UREFx type. */
   if (refa->op1 == refb->op1) {  /* Same function. */
     if (refa->op2 == refb->op2)
       return ALIAS_MUST;  /* Same function, same upvalue idx. */
     else
       return ALIAS_NO;  /* Same function, different upvalue idx. */
   } else {  /* Different functions, check disambiguation hash values. */
-    if (((refa->op2 ^ refb->op2) & 0xff))
+    if (((refa->op2 ^ refb->op2) & 0xff)) {
       return ALIAS_NO;  /* Upvalues with different hash values cannot alias. */
-    else
-      return ALIAS_MAY;  /* No conclusion can be drawn for same hash value. */
+    } else if (refa->o != refb->o) {
+      /* Different UREFx type, but need to confirm the UREFO really is open. */
+      if (irt_type(refa->t) == IRT_IGC) refa->t.irt += IRT_PGC-IRT_IGC;
+      else if (irt_type(refb->t) == IRT_IGC) refb->t.irt += IRT_PGC-IRT_IGC;
+      return ALIAS_NO;
+    } else {
+      /* No conclusion can be drawn for same hash value and same UREFx type. */
+      return ALIAS_MAY;
+    }
   }
 }
 
