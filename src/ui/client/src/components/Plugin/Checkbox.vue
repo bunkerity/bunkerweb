@@ -36,6 +36,7 @@ function updateCheckbox() {
 
 <template>
   <div class="relative mb-7 md:mb-0 z-10">
+    <label class="sr-only" :for="checkbox.id">{{ checkbox.id }}</label>
     <input
       @click="
         () => {
@@ -44,7 +45,7 @@ function updateCheckbox() {
             props.serviceName || checkbox.context,
             checkbox.id,
             checkbox.value,
-            props.setting.value,
+            props.setting.value
           );
         }
       "
@@ -68,6 +69,10 @@ function updateCheckbox() {
     />
 
     <svg
+      :aria-description="
+        $t('A11y.plugin.setting.checkbox.svg.aria-description')
+      "
+      :aria-hidden="checkbox.value === 'yes' ? 'false' : 'true'"
       v-show="checkbox.value === 'yes'"
       class="checkbox-svg"
       xmlns="http://www.w3.org/2000/svg"

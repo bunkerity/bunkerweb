@@ -14,7 +14,7 @@ const props = defineProps({
 });
 </script>
 <template>
-  <div class="flex items-center my-1 relative">
+  <div role="group" class="flex items-center my-1 relative">
     <h5 class="input-title">
       {{ props.label }}
     </h5>

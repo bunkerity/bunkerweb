@@ -42,6 +42,8 @@
     "actions": {
       "title": "actions",
       "subtitle": "Historique des modifications",
+      "close_button": "fermer la sidebar feedback",
+      "open_button": "ouvrir la sidebar feedback",
       "tabs": {
         "ui": "ui",
         "core": "core",
@@ -175,7 +177,8 @@
       "list": {
         "no_bans": "Aucun ban à montrer",
         "select_all": "sélectionner tout",
-        "unselect_all": "désélectionner tout"
+        "unselect_all": "désélectionner tout",
+        "unban_select": "Déban les sélections"
       },
       "add": {
         "actions": {
@@ -231,6 +234,108 @@
         "delete": "supprimer",
         "create": "creer",
         "view": "voir"
+      }
+    }
+  },
+  "global_conf": {
+    "api": {
+      "pending": "Récupération de la config globale",
+      "error": "Erreur récupération de la config globale"
+    },
+    "card": {
+      "plugin": {
+        "title": "Config globale",
+        "select_plugin": {
+          "label": "Sélection de plugin",
+          "placeholder": "recherche"
+        }
+      },
+      "filter": {
+        "title": "filtres",
+        "search": {
+          "label": "recherche",
+          "placeholder": "nom de setting"
+        },
+        "method": {
+          "label": "methode"
+        }
+      },
+      "structure": {
+        "save": "sauvegarder"
+      }
+    }
+  },
+  "A11y": {
+    "api": {
+      "state": {
+        "aria_description": "Montre l'état de la récupération de donnée."
+      }
+    },
+    "alert": {
+      "base": {
+        "close_button": {
+          "aria_description": "Ferme l'alerte concernée."
+        }
+      }
+    },
+    "feedback": {
+      "alert": {
+        "aria_description": "Retour sur tes propres actions."
+      },
+      "logs": {
+        "aria_description": "Retour sur les actions effectuées sur BunkerWeb."
+      }
+    },
+    "plugin": {
+      "setting": {
+        "select": {
+          "default": {
+            "aria_description": "Communique avec un select custom visible."
+          },
+          "dropdown_button": {
+            "aria_description": "Bouton pour ouvrir un dropdown custom."
+          },
+          "dropdown": {
+            "aria_description": " Custom select dropdown."
+          },
+          "option": {
+            "aria_description": "Custom select option."
+          }
+        },
+        "input": {
+          "password": {
+            "aria_description": "Cache ou montre la valeur de l'input de type mot de passe."
+          }
+        },
+        "checkbox": {
+          "svg": {
+            "aria_description": "Montre si la checkbox est activée ou non."
+          }
+        }
+      }
+    },
+    "bans": {
+      "list": {
+        "unban": {
+          "aria_description": "Déban les éléments de la liste sélectionnés."
+        },
+        "select": {
+          "aria_description": "Selectionne un élément pour effectuer des actions."
+        }
+      },
+      "add": {
+        "add_ban_field": {
+          "aria_description": "Ajoute un champ à remplir pour ban."
+        },
+        "delete_bans": {
+          "aria_description": "Supprime tous les champs ajoutés."
+        },
+        "delete_ban": {
+          "aria_description": "Supprime l'élément relié."
+        },
+        "save_ban": {
+          "aria_description": "Sauvegarde les éléments ajoutés"
+        }
       }
     }
   }

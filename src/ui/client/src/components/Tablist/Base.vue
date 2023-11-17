@@ -32,9 +32,16 @@ const emits = defineEmits(["tab"]);
     class="my-2 col-span-12 border-b border-gray-200 dark:border-gray-700 w-full"
   >
     <ul
+      role="tablist"
       class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400"
     >
-      <li v-for="item in tabs.items" class="mr-2 uppercase font-bold">
+      <li
+        v-for="(item, id) in tabs.items"
+        role="tab"
+        :tabindex="id"
+        :aria-selected="tabs.current === item.tag ? 'true' : 'false'"
+        class="mr-2 uppercase font-bold"
+      >
         <a
           class="min-w-[60px]"
           @click="

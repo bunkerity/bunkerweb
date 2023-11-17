@@ -34,6 +34,7 @@ const input = reactive({
 
 <template>
   <div class="relative flex items-center">
+    <label class="sr-only" :for="input.id">{{ input.id }}</label>
     <input
       v-model="input.value"
       @input="
@@ -42,7 +43,7 @@ const input = reactive({
           input.id,
           input.value,
           props.setting.value,
-          props.setting.regex,
+          props.setting.regex
         )
       "
       :type="
@@ -70,7 +71,10 @@ const input = reactive({
     />
     <div v-if="input.type === 'password'" class="input-pw-container">
       <button
-        type="button"
+        :aria-description="
+          $t('A11y.plugin.setting.input.password.aria_description')
+        "
+        :aria-controls="input.id"
         @click="input.showInp = input.showInp ? false : true"
         class="input-pw-svg-visible"
       >

@@ -8,6 +8,11 @@
     "log_button": "Log in"
   },
   "dashboard": {
+    "header": {
+      "buttons": {
+        "refresh": "Refetch all data."
+      }
+    },
     "menu": {
       "nav": {
         "home": "home",
@@ -42,6 +47,8 @@
     "actions": {
       "title": "actions",
       "subtitle": "Get all feedbacks",
+      "close_button": "close feedback sidebar",
+      "open_button": "open feedback sidebar",
       "tabs": {
         "ui": "ui",
         "core": "core",
@@ -175,7 +182,8 @@
       "list": {
         "no_bans": "no bans to display",
         "select_all": "select all",
-        "unselect_all": "unselect all"
+        "unselect_all": "unselect all",
+        "unban_select": "unban select"
       },
       "add": {
         "actions": {
@@ -231,6 +239,108 @@
         "delete": "delete",
         "create": "create",
         "view": "view"
+      }
+    }
+  },
+  "global_conf": {
+    "api": {
+      "pending": "Try retrieve global config",
+      "error": "Error retrieving global config"
+    },
+    "card": {
+      "plugin": {
+        "title": "global config",
+        "select_plugin": {
+          "label": "select plugin",
+          "placeholder": "search"
+        }
+      },
+      "filter": {
+        "title": "filter",
+        "search": {
+          "label": "search",
+          "placeholder": "label"
+        },
+        "method": {
+          "label": "method"
+        }
+      },
+      "structure": {
+        "save": "save"
+      }
+    }
+  },
+  "A11y": {
+    "api": {
+      "state": {
+        "aria_description": "Show detail while fetching data."
+      }
+    },
+    "alert": {
+      "base": {
+        "close_button": {
+          "aria_description": "Close the related alert."
+        }
+      }
+    },
+    "feedback": {
+      "alert": {
+        "aria_description": "Feedback of your own actions."
+      },
+      "logs": {
+        "aria_description": "Feedback of actions on BunkerWeb"
+      }
+    },
+    "plugin": {
+      "setting": {
+        "select": {
+          "default": {
+            "aria_description": "Communicate with a custom visible select."
+          },
+          "dropdown_button": {
+            "aria_description": "Custom select dropdown button."
+          },
+          "dropdown": {
+            "aria_description": "Custom select dropdown."
+          },
+          "option": {
+            "aria_description": "Custom select option."
+          }
+        },
+        "input": {
+          "password": {
+            "aria_description": "Toggle related input type to show/hide password."
+          }
+        },
+        "checkbox": {
+          "svg": {
+            "aria_description": "Show a check related to current checkbox state."
+          }
+        }
+      }
+    },
+    "bans": {
+      "list": {
+        "unban": {
+          "aria_description": "Unban selected ban items from list"
+        },
+        "select": {
+          "aria_description": "Select ban item to make action"
+        }
+      },
+      "add": {
+        "add_ban_field": {
+          "aria_description": "Add a ban field to fill."
+        },
+        "delete_bans": {
+          "aria_description": "Delete all current added bans fields."
+        },
+        "delete_ban": {
+          "aria_description": "Delete current ban item."
+        },
+        "save_ban": {
+          "aria_description": "Save added ban items"
+        }
       }
     }
   }

@@ -7,7 +7,7 @@ const lang = reactive({
 
 function updateLangStorage(lang) {
   sessionStorage.setItem("lang", lang);
-  window.location.href = window.location.href;
+  document.location.reload();
 }
 </script>
 
@@ -18,7 +18,6 @@ function updateLangStorage(lang) {
         <button
           @click="
             () => {
-              $i18n.locale = locale;
               lang.isOpen = false;
               updateLangStorage(locale);
             }

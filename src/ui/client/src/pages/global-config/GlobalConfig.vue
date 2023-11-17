@@ -170,8 +170,8 @@ onMounted(() => {
       :isErr="conf.isErr || plugins.isErr"
       :isPend="plugins.isPend"
       :textState="{
-        isPend: 'Try retrieve global config',
-        isErr: 'Error retrieving global config',
+        isPend: $t('global_conf.api.pending'),
+        isErr: $t('global_conf.api.error'),
       }"
     />
     <div
@@ -181,10 +181,10 @@ onMounted(() => {
       <CardBase
         class="z-100 h-fit col-span-12 md:col-span-5 lg:col-span-4 3xl:col-span-3 grid grid-cols-12 relative"
       >
-        <CardLabel label="global config" />
+        <CardLabel :label="$t('global_conf.card.plugin.title')" />
         <SettingsLayout
           class="flex w-full col-span-12"
-          label="Select plugin"
+          :label="$t('global_conf.card.plugin.select_plugin.label')"
           name="plugins"
         >
           <SettingsSelect
@@ -193,18 +193,20 @@ onMounted(() => {
               id: 'plugins',
               value: plugins.activePlugin,
               values: plugins.activePlugins,
-              placeholder: 'Search',
+              placeholder: $t(
+                'global_conf.card.plugin.select_plugin.placeholder'
+              ),
             }"
           />
         </SettingsLayout>
       </CardBase>
       <CardBase
-        label="filter"
+        :label="$t('global_conf.card.filter.title')"
         class="z-10 h-fit col-span-12 md:col-span-7 lg:col-span-5 3xl:col-span-3 grid grid-cols-12 relative"
       >
         <SettingsLayout
           class="flex w-full col-span-12 md:col-span-6"
-          label="Search"
+          :label="$t('global_conf.card.filter.search.label')"
           name="keyword"
         >
           <SettingsInput
@@ -213,22 +215,21 @@ onMounted(() => {
               id: 'keyword',
               type: 'text',
               value: '',
-              placeholder: 'label',
+              placeholder: $t('global_conf.card.filter.search.placeholder'),
             }"
           />
         </SettingsLayout>
         <SettingsLayout
           class="flex w-full col-span-12 md:col-span-6"
-          label="Method"
-          name="keyword"
+          :label="$t('global_conf.card.filter.method.label')"
+          name="method"
         >
           <SettingsSelect
             @inp="(v) => (filters.method = v)"
             :settings="{
-              id: 'keyword',
+              id: 'method',
               value: 'all',
               values: getMethodList(),
-              placeholder: 'Search',
             }"
           />
         </SettingsLayout>
@@ -247,7 +248,7 @@ onMounted(() => {
             color="valid"
             size="lg"
           >
-            SAVE
+            {{ $t("global_conf.card.structure.save") }}
           </ButtonBase>
         </div>
       </CardBase>

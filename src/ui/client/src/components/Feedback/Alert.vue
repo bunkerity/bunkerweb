@@ -25,7 +25,8 @@ const emits = defineEmits(["close"]);
 
 <template>
   <div
-    data-flash-message
+    role="alert"
+    :aria_description="$t('A11y.feedback.alert.aria_description')"
     :class="[
       props.type === 'error' ? 'bg-red-500' : '',
       props.type === 'success' ? 'bg-green-500' : '',

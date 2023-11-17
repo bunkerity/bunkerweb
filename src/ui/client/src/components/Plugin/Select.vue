@@ -67,7 +67,7 @@ function updateTop() {
   selectTop.value = `${
     Math.abs(
       selectBtn.value.closest(".plugin-structure").scrollTop -
-        selectBtn.value.offsetTop,
+        selectBtn.value.offsetTop
     ) + selectBtn.value.clientHeight
   }px`;
 }
@@ -97,19 +97,23 @@ onMounted(() => {
 </script>
 
 <template>
+  <label class="sr-only" :for="select.id">{{ select.id }}</label>
   <!-- default hidden-->
   <select
     :data-default-method="select.defaultMethod"
     :data-default-value="select.defaultValue"
     :id="select.id"
     :name="select.id"
-    aria-description="Communicate with a custom visible select."
+    :aria-description="
+      $t('A11y.plugin.setting.select.default.aria_description')
+    "
     class="hidden"
   >
     <option
       v-for="value in select.values"
       :value="value"
       :selected="value === select.value ? true : false"
+      :id="`${select.id}-option`"
     >
       {{ value }}
     </option>
@@ -117,8 +121,11 @@ onMounted(() => {
   <!-- end default hidden-->
 
   <button
+    :aria-controls="`${select.id}-dropdown`"
     ref="selectBtn"
-    aria-description="custom select dropdown button"
+    :aria-description="
+      $t('A11y.plugin.setting.select.dropdown_button.aria_description')
+    "
     :data-select-dropdown="props.setting.id"
     :disabled="
       select.method !== 'ui' && select.method !== 'default' ? true : false
@@ -140,13 +147,19 @@ onMounted(() => {
     </svg>
   </button>
   <div
+    :id="`${select.id}-dropdown`"
+    role="listbox"
     :style="{ width: selectWidth, top: selectTop }"
     :aria-hidden="select.isOpen ? 'false' : 'true'"
     :class="[select.isOpen ? 'flex' : 'hidden']"
     class="select-dropdown-container"
-    aria-description="custom select dropdown"
+    :aria-description="
+      $t('A11y.plugin.setting.select.dropdown.aria_description')
+    "
   >
     <button
+      role="option"
+      :aria-controls="`${select.id}-option`"
       v-for="(value, id) in select.values"
       @click="
         () => {
@@ -156,7 +169,7 @@ onMounted(() => {
             select.id,
             select.value,
             props.setting.value,
-            props.setting.regex,
+            props.setting.regex
           );
         }
       "
@@ -166,7 +179,9 @@ onMounted(() => {
         value === select.value ? 'active' : '',
         'select-dropdown-btn',
       ]"
-      aria-description="custom select option"
+      :aria-description="
+        $t('A11y.plugin.setting.select.option.aria_description')
+      "
       :aria-current="value === select.value ? 'true' : 'false'"
     >
       {{ value }}

@@ -21,9 +21,16 @@ const emits = defineEmits(["tab"]);
 <template>
   <div class="my-2 col-span-12 border-b border-gray-200 dark:border-gray-700">
     <ul
+      role="tablist"
       class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400"
     >
-      <li v-for="item in tabs.els" class="mr-2 uppercase font-bold">
+      <li
+        v-for="(item, id) in tabs.els"
+        role="tab"
+        :tabindex="id"
+        :aria-selected="tabs.current === item.tag ? 'true' : 'false'"
+        class="mr-2 uppercase font-bold"
+      >
         <a
           @click="
             () => {
@@ -37,7 +44,7 @@ const emits = defineEmits(["tab"]);
               ? tabs.activeTabClass
               : tabs.inactiveTabClass,
           ]"
-          :aria-current="tabs.current === 'add' ? 'page' : false"
+          :aria-current="tabs.current === item.tag ? 'page' : false"
         >
           <svg
             v-if="item.tag === 'list'"

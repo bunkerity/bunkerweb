@@ -222,13 +222,17 @@ const tab = reactive({
     >
       <BansTabs @tab="(v) => (tab.current = v)" />
       <BansList
+        role="tabpanel"
         @unban="getData()"
         :items="bans.setup"
         :class="[tab.current === 'list' ? true : 'hidden']"
+        :aria-hidden="tab.current === 'list' ? 'false' : 'true'"
       />
       <BansAdd
+        role="tabpanel"
         @addBans="getData()"
         :class="[tab.current === 'add' ? true : 'hidden']"
+        :aria-hidden="tab.current === 'add' ? 'false' : 'true'"
       />
     </CardBase>
   </Dashboard>

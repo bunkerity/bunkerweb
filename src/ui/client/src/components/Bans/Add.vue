@@ -118,6 +118,7 @@ async function addBansFromList() {
     >
       <ButtonBase
         @click="addItem()"
+        :aria-description="$t('A11y.bans.add.add_ban_field.aria_description')"
         color="valid"
         size="normal"
         class="text-sm mb-2 sm:mb-0"
@@ -143,6 +144,7 @@ async function addBansFromList() {
       <ButtonBase
         :disabled="bans.items.length <= 0 ? true : false"
         @click="deleteAllItems()"
+        :aria-description="$t('A11y.bans.add.delete_bans.aria_description')"
         color="delete"
         size="normal"
         class="text-sm ml-4"
@@ -248,6 +250,9 @@ async function addBansFromList() {
               />
             </SettingsLayout>
             <ButtonBase
+              :aria-description="
+                $t('A11y.bans.add.delete_ban.aria_description')
+              "
               @click="deleteItem(item.id)"
               color="delete"
               size="normal"
@@ -278,6 +283,7 @@ async function addBansFromList() {
       class="col-span-12 flex justify-center mt-4"
     >
       <ButtonBase
+        :aria-description="$t('A11y.bans.add.save_ban.aria_description')"
         @click="addBansFromList()"
         :disabled="bans.isInvalidAdd"
         color="valid"

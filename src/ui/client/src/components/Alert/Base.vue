@@ -18,6 +18,7 @@ const emits = defineEmits(["close"]);
 
 <template>
   <div
+    role="alert"
     :class="[
       props.type === 'error' ? 'bg-red-500' : '',
       props.type === 'success' ? 'bg-green-500' : '',
@@ -27,13 +28,13 @@ const emits = defineEmits(["close"]);
     class="my-2 relative px-4 py-2.5 w-full rounded-lg transition shadow-md break-words dark:brightness-90"
   >
     <div class="flex justify-start align-top items-start">
-      <p class="text-white mb-0 mr-8 text-sm">{{ props.message }}</p>
-
-      <button
-        @click="$emit('close')"
-        type="button"
-        class="absolute right-8 top-3"
-      >
+      <p role="alertdialog" class="text-white mb-0 mr-8 text-sm">
+        {{ props.message }}
+      </p>
+      <button @click="$emit('close')" class="absolute right-8 top-3">
+        <span class="sr-only">{{
+          $t("A11y.alert.base.close_button.aria_description")
+        }}</span>
         <svg
           class="cursor-pointer fill-white dark:opacity-80 absolute h-5 w-5"
           xmlns="http://www.w3.org/2000/svg"

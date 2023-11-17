@@ -25,10 +25,14 @@ const props = defineProps({
 </script>
 
 <template>
-  <div v-if="isErr || isPend">
+  <div
+    role="alert"
+    :aria-description="$t('A11y.api.state.aria_description')"
+    v-if="isErr || isPend"
+  >
     <CardBase :color="props.isErr ? 'error' : 'pending'">
       <div class="col-span-12 flex items-center justify-center">
-        <p class="m-0 dark:text-white">
+        <p role="alertdialog" class="m-0 dark:text-white">
           {{ isErr ? props.textState.isErr : props.textState.isPend }}
         </p>
       </div>
