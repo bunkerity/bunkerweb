@@ -1369,7 +1369,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  mov LFUNC:RB, [RA-8]
   |  add NARGS:RD, 1
   |  // This is fragile. L->base must not move, KBASE must always be defined.
-  |.if x64
+  |.if X64
   |  cmp KBASEa, rdx			// Continue with CALLT if flag set.
   |.else
   |  cmp KBASE, BASE			// Continue with CALLT if flag set.
@@ -1793,6 +1793,9 @@ static void build_subroutines(BuildCtx *ctx)
   |//-- Base library: catch errors ----------------------------------------
   |
   |.ffunc_1 pcall
+  |  mov L:RB, SAVE_L
+  |  lea RA, [BASE+NARGS:RD*8]
+  |  cmp RA, L:RB->maxstack; ja ->fff_fallback
   |  lea RA, [BASE+8]
   |  sub NARGS:RD, 1
   |  mov PC, 8+FRAME_PCALL
@@ -1804,6 +1807,9 @@ static void build_subroutines(BuildCtx *ctx)
   |  jmp ->vm_call_dispatch
   |
   |.ffunc_2 xpcall
+  |  mov L:RB, SAVE_L
+  |  lea RA, [BASE+NARGS:RD*8]
+  |  cmp RA, L:RB->maxstack; ja ->fff_fallback
   |  cmp dword [BASE+12], LJ_TFUNC;  jne ->fff_fallback
   |  mov RB, [BASE+4]			// Swap function and traceback.
   |  mov [BASE+12], RB

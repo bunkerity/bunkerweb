@@ -1905,8 +1905,12 @@ static void build_subroutines(BuildCtx *ctx)
   |//-- Base library: catch errors ----------------------------------------
   |
   |.ffunc pcall
+  |    lwz TMP1, L->maxstack
+  |    add TMP2, BASE, NARGS8:RC
   |  cmplwi NARGS8:RC, 8
   |   lbz TMP3, DISPATCH_GL(hookmask)(DISPATCH)
+  |    cmplw cr1, TMP1, TMP2
+  |  cror 4*cr0+lt, 4*cr0+lt, 4*cr1+lt
   |  blt ->fff_fallback
   |   mr TMP2, BASE
   |   la BASE, 8(BASE)
@@ -1917,14 +1921,19 @@ static void build_subroutines(BuildCtx *ctx)
   |  b ->vm_call_dispatch
   |
   |.ffunc xpcall
+  |     lwz TMP1, L->maxstack
+  |     add TMP2, BASE, NARGS8:RC
   |  cmplwi NARGS8:RC, 16
   |   lwz CARG3, 8+WORD_HI(BASE)
+  |     cmplw cr1, TMP1, TMP2
   |.if FPU
   |    lfd FARG2, 8(BASE)
+  |  cror 4*cr0+lt, 4*cr0+lt, 4*cr1+lt
   |    lfd FARG1, 0(BASE)
   |.else
   |    lwz CARG1, 0(BASE)
   |    lwz CARG2, 4(BASE)
+  |  cror 4*cr0+lt, 4*cr0+lt, 4*cr1+lt
   |    lwz CARG4, 12(BASE)
   |.endif
   |  blt ->fff_fallback

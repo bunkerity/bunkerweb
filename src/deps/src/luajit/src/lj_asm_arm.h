@@ -969,24 +969,32 @@ static void asm_hrefk(ASMState *as, IRIns *ir)
 static void asm_uref(ASMState *as, IRIns *ir)
 {
   Reg dest = ra_dest(as, ir, RSET_GPR);
-  if (irref_isk(ir->op1)) {
+  int guarded = (irt_t(ir->t) & (IRT_GUARD|IRT_TYPE)) == (IRT_GUARD|IRT_PGC);
+  if (irref_isk(ir->op1) && !guarded) {
     GCfunc *fn = ir_kfunc(IR(ir->op1));
     MRef *v = &gcref(fn->l.uvptr[(ir->op2 >> 8)])->uv.v;
     emit_lsptr(as, ARMI_LDR, dest, v);
   } else {
-    Reg uv = ra_scratch(as, RSET_GPR);
-    Reg func = ra_alloc1(as, ir->op1, RSET_GPR);
-    if (ir->o == IR_UREFC) {
-      asm_guardcc(as, CC_NE);
+    if (guarded) {
+      asm_guardcc(as, ir->o == IR_UREFC ? CC_NE : CC_EQ);
       emit_n(as, ARMI_CMP|ARMI_K12|1, RID_TMP);
-      emit_opk(as, ARMI_ADD, dest, uv,
-	       (int32_t)offsetof(GCupval, tv), RSET_GPR);
-      emit_lso(as, ARMI_LDRB, RID_TMP, uv, (int32_t)offsetof(GCupval, closed));
-    } else {
-      emit_lso(as, ARMI_LDR, dest, uv, (int32_t)offsetof(GCupval, v));
     }
-    emit_lso(as, ARMI_LDR, uv, func,
-	     (int32_t)offsetof(GCfuncL, uvptr) + 4*(int32_t)(ir->op2 >> 8));
+    if (ir->o == IR_UREFC)
+      emit_opk(as, ARMI_ADD, dest, dest,
+	       (int32_t)offsetof(GCupval, tv), RSET_GPR);
+    else
+      emit_lso(as, ARMI_LDR, dest, dest, (int32_t)offsetof(GCupval, v));
+    if (guarded)
+      emit_lso(as, ARMI_LDRB, RID_TMP, dest,
+	       (int32_t)offsetof(GCupval, closed));
+    if (irref_isk(ir->op1)) {
+      GCfunc *fn = ir_kfunc(IR(ir->op1));
+      int32_t k = (int32_t)gcrefu(fn->l.uvptr[(ir->op2 >> 8)]);
+      emit_loadi(as, dest, k);
+    } else {
+      emit_lso(as, ARMI_LDR, dest, ra_alloc1(as, ir->op1, RSET_GPR),
+	       (int32_t)offsetof(GCfuncL, uvptr) + 4*(int32_t)(ir->op2 >> 8));
+    }
   }
 }
 
