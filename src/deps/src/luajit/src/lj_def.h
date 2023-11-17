@@ -267,12 +267,8 @@ static LJ_AINLINE uint32_t lj_fls(uint32_t x)
 #else
 unsigned char _BitScanForward(unsigned long *, unsigned long);
 unsigned char _BitScanReverse(unsigned long *, unsigned long);
-unsigned char _BitScanForward64(unsigned long *, uint64_t);
-unsigned char _BitScanReverse64(unsigned long *, uint64_t);
 #pragma intrinsic(_BitScanForward)
 #pragma intrinsic(_BitScanReverse)
-#pragma intrinsic(_BitScanForward64)
-#pragma intrinsic(_BitScanReverse64)
 
 static LJ_AINLINE uint32_t lj_ffs(uint32_t x)
 {
@@ -284,6 +280,12 @@ static LJ_AINLINE uint32_t lj_fls(uint32_t x)
   unsigned long r; _BitScanReverse(&r, x); return (uint32_t)r;
 }
 
+#if defined(_M_X64) || defined(_M_ARM64)
+unsigned char _BitScanForward64(unsigned long *, uint64_t);
+unsigned char _BitScanReverse64(unsigned long *, uint64_t);
+#pragma intrinsic(_BitScanForward64)
+#pragma intrinsic(_BitScanReverse64)
+
 static LJ_AINLINE uint32_t lj_ffs64(uint64_t x)
 {
   unsigned long r; _BitScanForward64(&r, x); return (uint32_t)r;
@@ -293,6 +295,7 @@ static LJ_AINLINE uint32_t lj_fls64(uint64_t x)
 {
   unsigned long r; _BitScanReverse64(&r, x); return (uint32_t)r;
 }
+#endif
 #endif
 
 unsigned long _byteswap_ulong(unsigned long);

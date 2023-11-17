@@ -1211,6 +1211,10 @@ static void build_subroutines(BuildCtx *ctx)
   |//-- Base library: catch errors ----------------------------------------
   |
   |.ffunc pcall
+  |  ldr TMP1, L->maxstack
+  |  add TMP2, BASE, NARGS8:RC
+  |  cmp TMP1, TMP2
+  |  blo ->fff_fallback
   |   cmp NARGS8:RC, #8
   |  ldrb TMP0w, GL->hookmask
   |   blo ->fff_fallback
@@ -1230,6 +1234,10 @@ static void build_subroutines(BuildCtx *ctx)
   |  b ->vm_call_dispatch
   |
   |.ffunc xpcall
+  |  ldr TMP1, L->maxstack
+  |  add TMP2, BASE, NARGS8:RC
+  |  cmp TMP1, TMP2
+  |  blo ->fff_fallback
   |     ldp CARG1, CARG2, [BASE]
   |  ldrb TMP0w, GL->hookmask
   |   subs NARGS8:TMP1, NARGS8:RC, #16

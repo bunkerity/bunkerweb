@@ -1766,9 +1766,11 @@ static void cp_pragma(CPState *cp, BCLine pragmaline)
     cp_check(cp, '(');
     if (cp->tok == CTOK_IDENT) {
       if (cp_str_is(cp->str, "push")) {
-	if (cp->curpack < CPARSE_MAX_PACKSTACK) {
+	if (cp->curpack < CPARSE_MAX_PACKSTACK-1) {
 	  cp->packstack[cp->curpack+1] = cp->packstack[cp->curpack];
 	  cp->curpack++;
+	} else {
+	  cp_errmsg(cp, cp->tok, LJ_ERR_XLEVELS);
 	}
       } else if (cp_str_is(cp->str, "pop")) {
 	if (cp->curpack > 0) cp->curpack--;

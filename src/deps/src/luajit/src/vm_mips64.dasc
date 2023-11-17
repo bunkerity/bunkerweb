@@ -1415,8 +1415,12 @@ static void build_subroutines(BuildCtx *ctx)
   |//-- Base library: catch errors ----------------------------------------
   |
   |.ffunc pcall
+  |  ld TMP1, L->maxstack
+  |  daddu TMP2, BASE, NARGS8:RC
+  |  sltu AT, TMP1, TMP2
+  |  bnez AT, ->fff_fallback
+  |.  lbu TMP3, DISPATCH_GL(hookmask)(DISPATCH)
   |  daddiu NARGS8:RC, NARGS8:RC, -8
-  |  lbu TMP3, DISPATCH_GL(hookmask)(DISPATCH)
   |  bltz NARGS8:RC, ->fff_fallback
   |.   move TMP2, BASE
   |   daddiu BASE, BASE, 16
@@ -1437,8 +1441,12 @@ static void build_subroutines(BuildCtx *ctx)
   |.  nop
   |
   |.ffunc xpcall
+  |  ld TMP1, L->maxstack
+  |  daddu TMP2, BASE, NARGS8:RC
+  |  sltu AT, TMP1, TMP2
+  |  bnez AT, ->fff_fallback
+  |.  ld CARG1, 0(BASE)
   |  daddiu NARGS8:TMP0, NARGS8:RC, -16
-  |  ld CARG1, 0(BASE)
   |   ld CARG2, 8(BASE)
   |    bltz NARGS8:TMP0, ->fff_fallback
   |.    lbu TMP1, DISPATCH_GL(hookmask)(DISPATCH)

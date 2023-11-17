@@ -2134,8 +2134,26 @@ LJFOLDX(lj_opt_fwd_uload)
 LJFOLD(ALEN any any)
 LJFOLDX(lj_opt_fwd_alen)
 
+/* Try to merge UREFO/UREFC into referenced instruction. */
+static TRef merge_uref(jit_State *J, IRRef ref, IRIns* ir)
+{
+  if (ir->o == IR_UREFO && irt_isguard(ir->t)) {
+    /* Might be pointing to some other coroutine's stack.
+    ** And GC might shrink said stack, thereby repointing the upvalue.
+    ** GC might even collect said coroutine, thereby closing the upvalue.
+    */
+    if (gcstep_barrier(J, ref))
+      return EMITFOLD;  /* So cannot merge. */
+    /* Current fins wants a check, but ir doesn't have one. */
+    if ((irt_t(fins->t) & (IRT_GUARD|IRT_TYPE)) == (IRT_GUARD|IRT_PGC) &&
+	irt_type(ir->t) == IRT_IGC)
+      ir->t.irt += IRT_PGC-IRT_IGC;  /* So install a check. */
+  }
+  return ref;  /* Not a TRef, but the caller doesn't care. */
+}
+
 /* Upvalue refs are really loads, but there are no corresponding stores.
-** So CSE is ok for them, except for UREFO across a GC step (see below).
+** So CSE is ok for them, except for guarded UREFO across a GC step.
 ** If the referenced function is const, its upvalue addresses are const, too.
 ** This can be used to improve CSE by looking for the same address,
 ** even if the upvalues originate from a different function.
@@ -2153,11 +2171,27 @@ LJFOLDF(cse_uref)
       if (irref_isk(ir->op1)) {
 	GCfunc *fn2 = ir_kfunc(IR(ir->op1));
 	if (gco2uv(gcref(fn2->l.uvptr[(ir->op2 >> 8)])) == uv) {
-	  if (fins->o == IR_UREFO && gcstep_barrier(J, ref))
-	    break;
-	  return ref;
+	  return merge_uref(J, ref, ir);
 	}
       }
+      ref = ir->prev;
+    }
+  }
+  return EMITFOLD;
+}
+
+/* Custom CSE for UREFO. */
+LJFOLD(UREFO any any)
+LJFOLDF(cse_urefo)
+{
+  if (LJ_LIKELY(J->flags & JIT_F_OPT_CSE)) {
+    IRRef ref = J->chain[IR_UREFO];
+    IRRef lim = fins->op1;
+    IRRef2 op12 = (IRRef2)fins->op1 + ((IRRef2)fins->op2 << 16);
+    while (ref > lim) {
+      IRIns *ir = IR(ref);
+      if (ir->op12 == op12)
+	return merge_uref(J, ref, ir);
       ref = ir->prev;
     }
   }
@@ -2384,14 +2418,9 @@ LJFOLDF(fold_base)
 
 /* Write barriers are amenable to CSE, but not across any incremental
 ** GC steps.
-**
-** The same logic applies to open upvalue references, because a stack
-** may be resized during a GC step (not the current stack, but maybe that
-** of a coroutine).
 */
 LJFOLD(TBAR any)
 LJFOLD(OBAR any any)
-LJFOLD(UREFO any any)
 LJFOLDF(barrier_tab)
 {
   TRef tr = lj_opt_cse(J);
