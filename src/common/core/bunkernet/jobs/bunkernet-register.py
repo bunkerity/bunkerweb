@@ -8,15 +8,7 @@ from time import sleep
 from traceback import format_exc
 from typing import Optional
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (
-        ("deps", "python"),
-        ("api",),
-        ("utils",),
-        ("core_plugins", "bunkernet", "jobs"),
-    )
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",), ("core_plugins", "bunkernet", "jobs"))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -68,28 +60,20 @@ try:
             LOGGER.error(f"Error while sending register request to BunkerNet API : {data}")
             _exit(2)
         elif status == 429:
-            LOGGER.warning(
-                "BunkerNet API is rate limiting us, trying again later...",
-            )
+            LOGGER.warning("BunkerNet API is rate limiting us, trying again later...")
             _exit(0)
         elif status == 403:
-            LOGGER.warning(
-                "BunkerNet has banned this instance, retrying a register later...",
-            )
+            LOGGER.warning("BunkerNet has banned this instance, retrying a register later...")
             _exit(0)
 
         try:
             assert isinstance(data, dict)
         except AssertionError:
-            LOGGER.error(
-                f"Received invalid data from BunkerNet API while sending db request : {data}, retrying later...",
-            )
+            LOGGER.error(f"Received invalid data from BunkerNet API while sending db request : {data}, retrying later...")
             _exit(2)
 
         if status != 200:
-            LOGGER.error(
-                f"Error {status} from BunkerNet API : {data['data']}",
-            )
+            LOGGER.error(f"Error {status} from BunkerNet API : {data['data']}")
             _exit(2)
         elif data.get("result", "ko") != "ok":
             LOGGER.error(f"Received error from BunkerNet API while sending register request : {data.get('data', {})}")
@@ -122,34 +106,24 @@ try:
             LOGGER.error(f"Error while sending ping request to BunkerNet API : {data}")
             retry = True
         elif status == 429:
-            LOGGER.warning(
-                "BunkerNet API is rate limiting us, trying again later...",
-            )
+            LOGGER.warning("BunkerNet API is rate limiting us, trying again later...")
             retry = True
         elif status == 403:
-            LOGGER.warning(
-                "BunkerNet has banned this instance, retrying a register later...",
-            )
+            LOGGER.warning("BunkerNet has banned this instance, retrying a register later...")
             _exit(2)
         elif status == 401:
-            LOGGER.warning(
-                "Instance ID is not registered, removing it and retrying a register later...",
-            )
+            LOGGER.warning("Instance ID is not registered, removing it and retrying a register later...")
             JOB.del_cache("instance.id")
             _exit(2)
 
         try:
             assert isinstance(data, dict)
         except AssertionError:
-            LOGGER.error(
-                f"Received invalid data from BunkerNet API while sending db request : {data}, retrying later...",
-            )
+            LOGGER.error(f"Received invalid data from BunkerNet API while sending db request : {data}, retrying later...")
             _exit(2)
 
         if data.get("result", "ko") != "ok":
-            LOGGER.error(
-                f"Received error from BunkerNet API while sending ping request : {data.get('data', {})}",
-            )
+            LOGGER.error(f"Received error from BunkerNet API while sending ping request : {data.get('data', {})}")
             retry = True
         if not retry:
             bunkernet_ping = True

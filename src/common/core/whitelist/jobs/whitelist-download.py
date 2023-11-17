@@ -80,29 +80,17 @@ try:
                 urls[kind].append(url)
 
     # Don't go further if the cache is fresh
-    kinds_fresh = {
-        "IP": True,
-        "RDNS": True,
-        "ASN": True,
-        "USER_AGENT": True,
-        "URI": True,
-    }
+    kinds_fresh = {"IP": True, "RDNS": True, "ASN": True, "USER_AGENT": True, "URI": True}
     all_fresh = True
     for kind in kinds_fresh:
         if not JOB.is_cached_file(f"{kind}.list", "hour")[1]:
             kinds_fresh[kind] = False
             all_fresh = False
-            LOGGER.info(
-                f"Whitelist for {kind} is not cached, processing downloads..",
-            )
+            LOGGER.info(f"Whitelist for {kind} is not cached, processing downloads..")
         else:
-            LOGGER.info(
-                f"Whitelist for {kind} is already in cache, skipping downloads...",
-            )
+            LOGGER.info(f"Whitelist for {kind} is already in cache, skipping downloads...")
             if not urls[kind]:
-                LOGGER.warning(
-                    f"Whitelist for {kind} is cached but no URL is configured, removing from cache...",
-                )
+                LOGGER.warning(f"Whitelist for {kind} is cached but no URL is configured, removing from cache...")
                 deleted, err = JOB.del_cache(f"{kind}.list")
                 if not deleted:
                     LOGGER.warning(f"Couldn't delete {kind}.list from cache : {err}")
@@ -150,18 +138,14 @@ try:
                 new_hash = bytes_hash(content)
                 old_hash = JOB.cache_hash(f"{kind}.list")
                 if new_hash == old_hash:
-                    LOGGER.info(
-                        f"New file {kind}.list is identical to cache file, reload is not needed",
-                    )
+                    LOGGER.info(f"New file {kind}.list is identical to cache file, reload is not needed")
                     # Update file info in cache
                     cached, err = JOB.update_cache_file_info(f"{kind}.list")
                     if not cached:
                         LOGGER.error(f"Error while updating cache info : {err}")
                         _exit(2)
                 else:
-                    LOGGER.info(
-                        f"New file {kind}.list is different than cache file, reload is needed",
-                    )
+                    LOGGER.info(f"New file {kind}.list is different than cache file, reload is needed")
                     # Put file in cache
                     cached, err = JOB.cache_file(f"{kind}.list", content, checksum=new_hash)
 

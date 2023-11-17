@@ -12,14 +12,7 @@ from io import BytesIO
 from shutil import rmtree
 from re import findall, MULTILINE
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (
-        ("deps", "python"),
-        ("api",),
-        ("utils",),
-    )
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -137,47 +130,23 @@ try:
     # Multisite case
     if getenv("MULTISITE", "no") == "yes" and getenv("SERVER_NAME"):
         for first_server in getenv("SERVER_NAME", "").split():
-            if (
-                not first_server
-                or getenv(
-                    f"{first_server}_AUTO_LETS_ENCRYPT",
-                    getenv("AUTO_LETS_ENCRYPT", "no"),
-                )
-                != "yes"
-            ):
+            if not first_server or getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
                 continue
 
             domains = getenv(f"{first_server}_SERVER_NAME", first_server).replace(" ", ",")
 
             if letsencrypt_path.joinpath(first_server, "cert.pem").exists():
-                LOGGER.info(
-                    f"Certificates already exists for domain(s) {domains}",
-                )
+                LOGGER.info(f"Certificates already exists for domain(s) {domains}")
                 continue
 
-            real_email = getenv(
-                f"{first_server}_EMAIL_LETS_ENCRYPT",
-                getenv("EMAIL_LETS_ENCRYPT", f"contact@{first_server}"),
-            )
+            real_email = getenv(f"{first_server}_EMAIL_LETS_ENCRYPT", getenv("EMAIL_LETS_ENCRYPT", f"contact@{first_server}"))
             if not real_email:
                 real_email = f"contact@{first_server}"
 
-            LOGGER.info(
-                f"Asking certificates for domains : {domains} (email = {real_email}) ...",
-            )
-            if (
-                certbot_new(
-                    domains.replace(" ", ","),
-                    real_email,
-                    letsencrypt_path,
-                    letsencrypt_job_path,
-                )
-                != 0
-            ):
+            LOGGER.info(f"Asking certificates for domains : {domains} (email = {real_email}) ...")
+            if certbot_new(domains.replace(" ", ","), real_email, letsencrypt_path, letsencrypt_job_path) != 0:
                 status = 2
-                LOGGER.error(
-                    f"Certificate generation failed for domain(s) {domains} ...",
-                )
+                LOGGER.error(f"Certificate generation failed for domain(s) {domains} ...")
                 continue
             else:
                 status = 1 if status == 0 else status
@@ -189,26 +158,14 @@ try:
         domains = getenv("SERVER_NAME", "")
 
         if certbot_check_domains(domains.split(), letsencrypt_path) == 1:
-            LOGGER.info(
-                f"Certificates already exists for domain(s) {domains}",
-            )
+            LOGGER.info(f"Certificates already exists for domain(s) {domains}")
         else:
             real_email = getenv("EMAIL_LETS_ENCRYPT", f"contact@{first_server}")
             if not real_email:
                 real_email = f"contact@{first_server}"
 
-            LOGGER.info(
-                f"Asking certificates for domain(s) : {domains} (email = {real_email}) ...",
-            )
-            if (
-                certbot_new(
-                    domains.replace(" ", ","),
-                    real_email,
-                    letsencrypt_path,
-                    letsencrypt_job_path,
-                )
-                != 0
-            ):
+            LOGGER.info(f"Asking certificates for domain(s) : {domains} (email = {real_email}) ...")
+            if certbot_new(domains.replace(" ", ","), real_email, letsencrypt_path, letsencrypt_job_path) != 0:
                 status = 2
                 LOGGER.error(f"Certificate generation failed for domain(s) : {domains}")
             else:

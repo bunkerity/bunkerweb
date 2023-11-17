@@ -11,14 +11,7 @@ from tarfile import open as tar_open
 from io import BytesIO
 from shutil import rmtree
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (
-        ("deps", "python"),
-        ("api",),
-        ("utils",),
-    )
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -75,16 +68,7 @@ try:
                 "--logs-dir",
                 join(sep, "var", "log", "bunkerweb"),
                 "--deploy-hook",
-                join(
-                    sep,
-                    "usr",
-                    "share",
-                    "bunkerweb",
-                    "core_plugins",
-                    "letsencrypt",
-                    "jobs",
-                    "certbot-deploy.py",
-                ),
+                join(sep, "usr", "share", "bunkerweb", "core_plugins", "letsencrypt", "jobs", "certbot-deploy.py"),
             ],
             stdin=DEVNULL,
             stderr=STDOUT,

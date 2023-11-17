@@ -8,14 +8,7 @@ from subprocess import DEVNULL, run
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (
-        ("deps", "python"),
-        ("api",),
-        ("utils",),
-    )
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -32,31 +25,18 @@ try:
     need_default_cert = False
     if getenv("MULTISITE", "no") == "yes":
         for first_server in getenv("SERVER_NAME", "").split():
-            for check_var in (
-                "USE_CUSTOM_SSL",
-                "AUTO_LETS_ENCRYPT",
-                "GENERATE_SELF_SIGNED_SSL",
-            ):
+            for check_var in ("USE_CUSTOM_SSL", "AUTO_LETS_ENCRYPT", "GENERATE_SELF_SIGNED_SSL"):
                 if getenv(f"{first_server}_{check_var}", getenv(check_var, "no")) == "yes":
                     need_default_cert = True
                     break
             if need_default_cert:
                 break
-    elif getenv("DISABLE_DEFAULT_SERVER", "no") == "yes" and (
-        "yes"
-        in (
-            getenv("USE_CUSTOM_SSL", "no"),
-            getenv("AUTO_LETS_ENCRYPT", "no"),
-            getenv("GENERATE_SELF_SIGNED_SSL", "no"),
-        )
-    ):
+    elif getenv("DISABLE_DEFAULT_SERVER", "no") == "yes" and ("yes" in (getenv("USE_CUSTOM_SSL", "no"), getenv("AUTO_LETS_ENCRYPT", "no"), getenv("GENERATE_SELF_SIGNED_SSL", "no"))):
         need_default_cert = True
 
     # Generate the self-signed certificate
     if not need_default_cert:
-        LOGGER.info(
-            "Skipping generation of self-signed certificate for default server (not needed)",
-        )
+        LOGGER.info("Skipping generation of self-signed certificate for default server (not needed)")
         _exit(0)
 
     job_path = Path(sep, "var", "cache", "bunkerweb", "default-server-cert")
@@ -106,9 +86,7 @@ try:
         else:
             LOGGER.info("Successfully saved default-server-cert cert.key file to db cache")
     else:
-        LOGGER.info(
-            "Skipping generation of self-signed certificate for default server (already present)",
-        )
+        LOGGER.info("Skipping generation of self-signed certificate for default server (already present)")
 except:
     status = 2
     LOGGER.error(f"Exception while running default-server-cert.py :\n{format_exc()}")

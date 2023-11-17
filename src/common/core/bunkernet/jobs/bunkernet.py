@@ -13,13 +13,7 @@ def request(method: Union[Literal["POST"], Literal["GET"]], url: str, _id: Optio
     if _id is not None:
         data["id"] = _id
     try:
-        resp = requests_request(
-            method,
-            f"{getenv('BUNKERNET_SERVER', 'https://api.bunkerweb.io')}{url}",
-            json=data,
-            headers=headers,
-            timeout=5,
-        )
+        resp = requests_request(method, f"{getenv('BUNKERNET_SERVER', 'https://api.bunkerweb.io')}{url}", json=data, headers=headers, timeout=5)
         status = resp.status_code
         if status == 429:
             return True, 429, "rate limited"

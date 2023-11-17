@@ -6,15 +6,7 @@ from os.path import join
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (
-        ("deps", "python"),
-        ("api",),
-        ("utils",),
-        ("core_plugins", "bunkernet", "jobs"),
-    )
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",), ("core_plugins", "bunkernet", "jobs"))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -49,17 +41,13 @@ try:
     if bunkernet_id:
         LOGGER.info("Successfully retrieved BunkerNet ID from db cache")
     else:
-        LOGGER.error(
-            "Not downloading BunkerNet data because instance is not registered",
-        )
+        LOGGER.error("Not downloading BunkerNet data because instance is not registered")
         _exit(2)
 
     # Don't go further if the cache is fresh
     in_cache, is_cached = JOB.is_cached_file("ip.list", "day")
     if is_cached:
-        LOGGER.info(
-            "BunkerNet list is already in cache, skipping download...",
-        )
+        LOGGER.info("BunkerNet list is already in cache, skipping download...")
         _exit(0)
 
     exit_status = 1
@@ -68,33 +56,23 @@ try:
     LOGGER.info("Downloading BunkerNet data ...")
     ok, status, data = data(bunkernet_id.decode("utf-8"))
     if not ok:
-        LOGGER.error(
-            f"Error while sending data request to BunkerNet API : {data}",
-        )
+        LOGGER.error(f"Error while sending data request to BunkerNet API : {data}")
         _exit(2)
     elif status == 429:
-        LOGGER.warning(
-            "BunkerNet API is rate limiting us, trying again later...",
-        )
+        LOGGER.warning("BunkerNet API is rate limiting us, trying again later...")
         _exit(0)
     elif status == 403:
-        LOGGER.warning(
-            "BunkerNet has banned this instance, retrying a register later...",
-        )
+        LOGGER.warning("BunkerNet has banned this instance, retrying a register later...")
         _exit(0)
 
     try:
         assert isinstance(data, dict)
     except AssertionError:
-        LOGGER.error(
-            f"Received invalid data from BunkerNet API while sending db request : {data}",
-        )
+        LOGGER.error(f"Received invalid data from BunkerNet API while sending db request : {data}")
         _exit(2)
 
     if data["result"] != "ok":
-        LOGGER.error(
-            f"Received error from BunkerNet API while sending db request : {data['data']}, removing instance ID",
-        )
+        LOGGER.error(f"Received error from BunkerNet API while sending db request : {data['data']}, removing instance ID")
         _exit(2)
 
     LOGGER.info("Successfully downloaded data from BunkerNet API")
@@ -109,9 +87,7 @@ try:
         new_hash = bytes_hash(content)
         old_hash = JOB.cache_hash("ip.list")
         if new_hash == old_hash:
-            LOGGER.info(
-                "New file is identical to cache file, reload is not needed",
-            )
+            LOGGER.info("New file is identical to cache file, reload is not needed")
             _exit(0)
 
     # Put file in cache

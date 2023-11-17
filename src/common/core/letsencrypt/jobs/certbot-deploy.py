@@ -8,14 +8,7 @@ from sys import exit as sys_exit, path as sys_path
 from tarfile import open as tar_open
 from traceback import format_exc
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (
-        ("deps", "python"),
-        ("api",),
-        ("utils",),
-    )
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -35,19 +28,11 @@ try:
     tgz = BytesIO()
 
     with tar_open(mode="w:gz", fileobj=tgz, compresslevel=3) as tf:
-        tf.add(
-            join(sep, "var", "cache", "bunkerweb", "letsencrypt", "etc"),
-            arcname="etc",
-        )
+        tf.add(join(sep, "var", "cache", "bunkerweb", "letsencrypt", "etc"), arcname="etc")
     tgz.seek(0, 0)
     files = {"certificates": tgz}
 
-    sent, err, status, resp = CORE_API.request(
-        "POST",
-        "/lets-encrypt/certificates",
-        files=files,
-        additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"} if CORE_TOKEN else {},
-    )
+    sent, err, status, resp = CORE_API.request("POST", "/lets-encrypt/certificates", files=files, additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"} if CORE_TOKEN else {})
     if not sent:
         status = 1
         LOGGER.error(f"Can't send API request to {CORE_API.endpoint}/lets-encrypt/certificates : {err}")
@@ -55,15 +40,9 @@ try:
         status = 1
         LOGGER.error(f"Error while sending API request to {CORE_API.endpoint}/lets-encrypt/certificates : status = {resp['status']}, msg = {resp['msg']}")
     else:
-        LOGGER.info(
-            f"Successfully sent API request to {CORE_API.endpoint}/lets-encrypt/certificates",
-        )
+        LOGGER.info(f"Successfully sent API request to {CORE_API.endpoint}/lets-encrypt/certificates")
 
-        sent, err, status, resp = CORE_API.request(
-            "POST",
-            "/reload",
-            additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"} if CORE_TOKEN else {},
-        )
+        sent, err, status, resp = CORE_API.request("POST", "/reload", additonal_headers={"Authorization": f"Bearer {CORE_TOKEN}"} if CORE_TOKEN else {})
         if not sent:
             status = 1
             LOGGER.error(f"Can't send API request to {CORE_API.endpoint}/reload : {err}")

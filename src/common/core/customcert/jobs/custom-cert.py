@@ -8,14 +8,7 @@ from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Optional
 
-for deps_path in [
-    join(sep, "usr", "share", "bunkerweb", *paths)
-    for paths in (
-        ("deps", "python"),
-        ("api",),
-        ("utils",),
-    )
-]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -105,14 +98,10 @@ try:
                 )
                 need_reload = check_cert(cert_path, key_path, first_server)
                 if need_reload:
-                    LOGGER.info(
-                        f"Detected change for certificate {cert_path}",
-                    )
+                    LOGGER.info(f"Detected change for certificate {cert_path}")
                     status = 1
                 else:
-                    LOGGER.info(
-                        f"No change for certificate {cert_path}",
-                    )
+                    LOGGER.info(f"No change for certificate {cert_path}")
             else:
                 LOGGER.warning(f"Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates with service {first_server}")
 except:
