@@ -350,8 +350,11 @@ void LJ_FASTCALL lj_state_free(global_State *g, lua_State *L)
   lj_assertG(L != mainthread(g), "free of main thread");
   if (obj2gco(L) == gcref(g->cur_L))
     setgcrefnull(g->cur_L);
-  lj_func_closeuv(L, tvref(L->stack));
-  lj_assertG(gcref(L->openupval) == NULL, "stale open upvalues");
+  if (gcref(L->openupval) != NULL) {
+    lj_func_closeuv(L, tvref(L->stack));
+    lj_trace_abort(g);  /* For aa_uref soundness. */
+    lj_assertG(gcref(L->openupval) == NULL, "stale open upvalues");
+  }
   lj_mem_freevec(g, tvref(L->stack), L->stacksize, TValue);
   lj_mem_freet(g, L);
 }
