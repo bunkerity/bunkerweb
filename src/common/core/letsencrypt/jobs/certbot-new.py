@@ -25,12 +25,11 @@ for deps_path in [
 
 from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
+from jobs import Job  # type: ignore
 
-from jobs import get_cache, cache_file
 
 LOGGER = setup_logger("LETS-ENCRYPT.new", getenv("LOG_LEVEL", "INFO"))
-CORE_API = API(getenv("API_ADDR", ""), "job-certbot-new")
-CORE_TOKEN = getenv("CORE_TOKEN", None)
+JOB = Job(API(getenv("API_ADDR", ""), "job-certbot-new"), getenv("CORE_TOKEN", None))
 status = 0
 
 
@@ -122,7 +121,7 @@ try:
     letsencrypt_job_path = Path(sep, "usr", "share", "bunkerweb", "core_plugins", "letsencrypt", "jobs")
     Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(parents=True, exist_ok=True)
 
-    tgz = get_cache("folder.tgz", CORE_API, CORE_TOKEN, job_name="certbot-renew")
+    tgz = JOB.get_cache("folder.tgz", job_name="certbot-renew")
     if tgz:
         # Delete folder if needed
         if letsencrypt_path.exists():
@@ -223,7 +222,7 @@ try:
     bio.seek(0, 0)
 
     # Put tgz in cache
-    cached, err = cache_file("folder.tgz", bio.read(), CORE_API, CORE_TOKEN, job_name="certbot-renew")
+    cached, err = JOB.cache_file("folder.tgz", bio.read(), job_name="certbot-renew")
 
     if not cached:
         LOGGER.error(f"Error while saving Let's Encrypt data to db cache : {err}")

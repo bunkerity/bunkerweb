@@ -27,23 +27,22 @@ from requests import RequestException, get
 
 from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-
-from jobs import cache_file, cache_hash, file_hash, is_cached_file
+from jobs import file_hash, Job  # type: ignore
 
 LOGGER = setup_logger("JOBS.mmdb-asn", getenv("LOG_LEVEL", "INFO"))
-CORE_API = API(getenv("API_ADDR", ""), "job-mmdb-asn")
-CORE_TOKEN = getenv("CORE_TOKEN", None)
+JOB = Job(API(getenv("API_ADDR", ""), "job-mmdb-asn"), getenv("CORE_TOKEN", None))
 status = 0
 lock = Lock()
 
 try:
     # Don't go further if the cache is fresh
-    in_cache, is_cached = is_cached_file("asn.mmdb", "month", CORE_API, CORE_TOKEN)
+    in_cache, is_cached = JOB.is_cached_file("asn.mmdb", "month")
     if is_cached:
         LOGGER.info("asn.mmdb is already in cache, skipping cache update...")
         _exit(0)
 
     dl_mmdb = True
+    mmdb_url = None
     tmp_path = Path(sep, "var", "tmp", "bunkerweb", "asn.mmdb")
     new_hash = None
 
@@ -101,7 +100,7 @@ try:
     if in_cache:
         # Check if file has changed
         new_hash = file_hash(tmp_path)
-        old_hash = cache_hash("asn.mmdb", CORE_API, CORE_TOKEN)
+        old_hash = JOB.cache_hash("asn.mmdb")
         if new_hash == old_hash:
             LOGGER.info("New file is identical to cache file, reload is not needed")
             _exit(0)
@@ -113,13 +112,13 @@ try:
 
     # Move it to cache folder
     LOGGER.info("Moving mmdb file to cache ...")
-    cached, err = cache_file("asn.mmdb", tmp_path, CORE_API, CORE_TOKEN, checksum=new_hash)
+    cached, err = JOB.cache_file("asn.mmdb", tmp_path, checksum=new_hash)
     if not cached:
         LOGGER.error(f"Error while caching mmdb file : {err}")
         _exit(2)
 
     # Success
-    if dl_mmdb:
+    if dl_mmdb and mmdb_url:
         LOGGER.info(f"Downloaded new mmdb from {mmdb_url}")
 
     status = 1

@@ -21,11 +21,10 @@ for deps_path in [
 from bunkernet import data
 from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import bytes_hash, cache_file, cache_hash, get_cache, is_cached_file
+from jobs import bytes_hash, Job  # type: ignore
 
 LOGGER = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
-CORE_API = API(getenv("API_ADDR", ""), "job-bunkernet-data")
-CORE_TOKEN = getenv("CORE_TOKEN", None)
+JOB = Job(API(getenv("API_ADDR", ""), "job-bunkernet-data"), getenv("CORE_TOKEN", None))
 exit_status = 0
 
 try:
@@ -46,7 +45,7 @@ try:
         _exit(0)
 
     # Get ID from cache
-    bunkernet_id = get_cache("instance.id", CORE_API, CORE_TOKEN)
+    bunkernet_id = JOB.get_cache("instance.id")
     if bunkernet_id:
         LOGGER.info("Successfully retrieved BunkerNet ID from db cache")
     else:
@@ -56,7 +55,7 @@ try:
         _exit(2)
 
     # Don't go further if the cache is fresh
-    in_cache, is_cached = is_cached_file("ip.list", "day", CORE_API, CORE_TOKEN)
+    in_cache, is_cached = JOB.is_cached_file("ip.list", "day")
     if is_cached:
         LOGGER.info(
             "BunkerNet list is already in cache, skipping download...",
@@ -104,10 +103,11 @@ try:
     LOGGER.info("Saving BunkerNet data ...")
     content = "\n".join(data["data"]).encode("utf-8")
 
+    new_hash = None
     if in_cache:
         # Check if file has changed
         new_hash = bytes_hash(content)
-        old_hash = cache_hash("ip.list", CORE_API, CORE_TOKEN)
+        old_hash = JOB.cache_hash("ip.list")
         if new_hash == old_hash:
             LOGGER.info(
                 "New file is identical to cache file, reload is not needed",
@@ -115,7 +115,7 @@ try:
             _exit(0)
 
     # Put file in cache
-    cached, err = cache_file("ip.list", content, CORE_API, CORE_TOKEN, checksum=new_hash)
+    cached, err = JOB.cache_file("ip.list", content, checksum=new_hash)
     if not cached:
         LOGGER.error(f"Error while caching BunkerNet data : {err}")
         _exit(2)

@@ -23,11 +23,10 @@ for deps_path in [
 from bunkernet import register, ping
 from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import cache_file, del_cache, get_cache
+from jobs import Job  # type: ignore
 
 LOGGER = setup_logger("BUNKERNET", getenv("LOG_LEVEL", "INFO"))
-CORE_API = API(getenv("API_ADDR", ""), "job-bunkernet-register")
-CORE_TOKEN = getenv("CORE_TOKEN", None)
+JOB = Job(API(getenv("API_ADDR", ""), "job-bunkernet-register"), getenv("CORE_TOKEN", None))
 exit_status = 0
 
 try:
@@ -53,9 +52,10 @@ try:
         _exit(0)
 
     # Get ID from cache
-    bunkernet_id: Optional[bytes] = get_cache("instance.id", CORE_API, CORE_TOKEN)
+    bunkernet_id: Optional[bytes] = JOB.get_cache("instance.id")  # type: ignore
     if bunkernet_id:
         LOGGER.info("Successfully retrieved BunkerNet ID from db cache")
+        assert isinstance(bunkernet_id, bytes)
     else:
         LOGGER.info("No BunkerNet ID found in db cache")
 
@@ -106,7 +106,7 @@ try:
 
     # Update cache with new bunkernet ID
     if registered:
-        cached, err = cache_file("instance.id", bunkernet_id.encode(), CORE_API, CORE_TOKEN)
+        cached, err = JOB.cache_file("instance.id", bunkernet_id.encode())
         if not cached:
             LOGGER.error(f"Error while saving BunkerNet data to db cache : {err}")
         else:
@@ -135,7 +135,7 @@ try:
             LOGGER.warning(
                 "Instance ID is not registered, removing it and retrying a register later...",
             )
-            del_cache("instance.id", CORE_API, CORE_TOKEN)
+            JOB.del_cache("instance.id")
             _exit(2)
 
         try:

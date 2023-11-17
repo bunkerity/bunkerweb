@@ -18,13 +18,7 @@ from requests import get
 
 from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import (
-    bytes_hash,
-    cache_file,
-    cache_hash,
-    is_cached_file,
-    update_cache_file_info,
-)
+from jobs import bytes_hash, Job  # type: ignore
 
 rdns_rx = re_compile(rb"^[^ ]+$", IGNORECASE)
 asn_rx = re_compile(rb"^\d+$")
@@ -58,8 +52,7 @@ def check_line(kind: str, line: bytes) -> Tuple[bool, bytes]:
 
 
 LOGGER = setup_logger("WHITELIST", getenv("LOG_LEVEL", "INFO"))
-CORE_API = API(getenv("API_ADDR", ""), "job-whitelist-download")
-CORE_TOKEN = getenv("CORE_TOKEN", None)
+JOB = Job(API(getenv("API_ADDR", ""), "job-whitelist-download"), getenv("CORE_TOKEN", None))
 status = 0
 
 try:
@@ -96,7 +89,7 @@ try:
     }
     all_fresh = True
     for kind in kinds_fresh:
-        if not is_cached_file(f"{kind}.list", "hour", CORE_API, CORE_TOKEN)[1]:
+        if not JOB.is_cached_file(f"{kind}.list", "hour")[1]:
             kinds_fresh[kind] = False
             all_fresh = False
             LOGGER.info(
@@ -107,10 +100,10 @@ try:
                 f"Whitelist for {kind} is already in cache, skipping downloads...",
             )
             if not urls[kind]:
-                LOGGER.info(
-                    f"Whitelist for {kind} is already in cache, skipping downloads...",
+                LOGGER.warning(
+                    f"Whitelist for {kind} is cached but no URL is configured, removing from cache...",
                 )
-                deleted, err = cache_hash(f"{kind}.list", CORE_API, CORE_TOKEN)
+                deleted, err = JOB.del_cache(f"{kind}.list")
                 if not deleted:
                     LOGGER.warning(f"Couldn't delete {kind}.list from cache : {err}")
     if all_fresh:
@@ -155,13 +148,13 @@ try:
 
                 # Check if file has changed
                 new_hash = bytes_hash(content)
-                old_hash = cache_hash(f"{kind}.list", CORE_API, CORE_TOKEN)
+                old_hash = JOB.cache_hash(f"{kind}.list")
                 if new_hash == old_hash:
                     LOGGER.info(
                         f"New file {kind}.list is identical to cache file, reload is not needed",
                     )
                     # Update file info in cache
-                    cached, err = update_cache_file_info(f"{kind}.list", CORE_API, CORE_TOKEN)
+                    cached, err = JOB.update_cache_file_info(f"{kind}.list")
                     if not cached:
                         LOGGER.error(f"Error while updating cache info : {err}")
                         _exit(2)
@@ -170,7 +163,7 @@ try:
                         f"New file {kind}.list is different than cache file, reload is needed",
                     )
                     # Put file in cache
-                    cached, err = cache_file(f"{kind}.list", content, CORE_API, CORE_TOKEN, checksum=new_hash)
+                    cached, err = JOB.cache_file(f"{kind}.list", content, checksum=new_hash)
 
                     if not cached:
                         LOGGER.error(f"Error while caching whitelist : {err}")

@@ -21,11 +21,10 @@ for deps_path in [
 
 from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import cache_file, get_cache
+from jobs import Job  # type: ignore
 
 LOGGER = setup_logger("DEFAULT-SERVER-CERT", getenv("LOG_LEVEL", "INFO"))
-CORE_API = API(getenv("API_ADDR", ""), "job-default-server-cert")
-CORE_TOKEN = getenv("CORE_TOKEN", None)
+JOB = Job(API(getenv("API_ADDR", ""), "job-default-server-cert"), getenv("CORE_TOKEN", None))
 status = 0
 
 try:
@@ -64,13 +63,13 @@ try:
     cert_path.mkdir(parents=True, exist_ok=True)
 
     if not cert_path.joinpath("cert.pem").is_file():
-        cached_pem = get_cache("cert.pem", CORE_API, CORE_TOKEN)
+        cached_pem = JOB.get_cache("cert.pem")
 
         if cached_pem:
             cert_path.joinpath("cert.pem").write_bytes(cached_pem["data"])
 
     if not cert_path.joinpath("cert.key").is_file():
-        cached_key = get_cache("cert.key", CORE_API, CORE_TOKEN)
+        cached_key = JOB.get_cache("cert.key")
 
         if cached_key:
             cert_path.joinpath("cert.key").write_bytes(cached_key["data"])
@@ -112,23 +111,13 @@ try:
                 "Successfully generated self-signed certificate for default server",
             )
 
-        cached, err = cache_file(
-            "cert.pem",
-            cert_path.joinpath("cert.pem").read_bytes(),
-            CORE_API,
-            CORE_TOKEN,
-        )
+        cached, err = JOB.cache_file("cert.pem", cert_path.joinpath("cert.pem").read_bytes())
         if not cached:
             LOGGER.error(f"Error while saving default-server-cert cert.pem file to db cache : {err}")
         else:
             LOGGER.info("Successfully saved default-server-cert cert.pem file to db cache")
 
-        cached, err = cache_file(
-            "cert.key",
-            cert_path.joinpath("cert.key").read_bytes(),
-            CORE_API,
-            CORE_TOKEN,
-        )
+        cached, err = JOB.cache_file("cert.key", cert_path.joinpath("cert.key").read_bytes())
         if not cached:
             LOGGER.error(f"Error while saving default-server-cert cert.key file to db cache : {err}")
         else:

@@ -23,14 +23,7 @@ from requests import get
 
 from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import (
-    bytes_hash,
-    cache_file,
-    cache_hash,
-    del_cache,
-    is_cached_file,
-    update_cache_file_info,
-)
+from jobs import bytes_hash, Job  # type: ignore
 
 
 def check_line(line):
@@ -46,8 +39,7 @@ def check_line(line):
 
 
 LOGGER = setup_logger("REALIP", getenv("LOG_LEVEL", "INFO"))
-CORE_API = API(getenv("API_ADDR", ""), "job-realip-download")
-CORE_TOKEN = getenv("CORE_TOKEN", None)
+JOB = Job(API(getenv("API_ADDR", ""), "job-realip-download"), getenv("CORE_TOKEN", None))
 status = 0
 
 try:
@@ -77,11 +69,11 @@ try:
     urls = [url for url in getenv("REAL_IP_FROM_URLS", "").split(" ") if url]
 
     # Don't go further if the cache is fresh
-    if is_cached_file("combined.list", "hour", CORE_API, CORE_TOKEN):
+    if JOB.is_cached_file("combined.list", "hour"):
         LOGGER.info("RealIP list is already in cache, skipping download...")
         if not urls:
             LOGGER.warning("No URL found, deleting combined.list from cache...")
-            deleted, err = del_cache("combined.list", CORE_API, CORE_TOKEN)
+            deleted, err = JOB.del_cache("combined.list")
             if not deleted:
                 LOGGER.warning(f"Couldn't delete combined.list from cache : {err}")
         _exit(0)
@@ -123,24 +115,18 @@ try:
 
     # Check if file has changed
     new_hash = bytes_hash(content)
-    old_hash = cache_hash("combined.list", CORE_API, CORE_TOKEN)
+    old_hash = JOB.cache_hash("combined.list")
     if new_hash == old_hash:
         LOGGER.info("New file is identical to cache file, reload is not needed")
         # Update file info in cache
-        cached, err = update_cache_file_info("combined.list", CORE_API, CORE_TOKEN)
+        cached, err = JOB.update_cache_file_info("combined.list")
         if not cached:
             LOGGER.error(f"Error while updating cache info : {err}")
             _exit(2)
         _exit(0)
 
     # Put file in cache
-    cached, err = cache_file(
-        "combined.list",
-        content,
-        CORE_API,
-        CORE_TOKEN,
-        checksum=new_hash,
-    )
+    cached, err = JOB.cache_file("combined.list", content, checksum=new_hash)
     if not cached:
         LOGGER.error(f"Error while caching list : {err}")
         _exit(2)

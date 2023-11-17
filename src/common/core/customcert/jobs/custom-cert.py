@@ -21,15 +21,14 @@ for deps_path in [
 
 from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
+from jobs import Job, file_hash  # type: ignore
 
-from jobs import cache_file, cache_hash, file_hash
 
 LOGGER = setup_logger("CUSTOM-CERT", getenv("LOG_LEVEL", "INFO"))
-CORE_API = API(getenv("API_ADDR", ""), "job-custom-cert")
-CORE_TOKEN = getenv("CORE_TOKEN", None)
+JOB = Job(API(getenv("API_ADDR", ""), "job-custom-cert"), getenv("CORE_TOKEN", None))
 
 
-def check_cert(cert_path: str, key_path: str, first_server: Optional[str] = None) -> bool:
+def check_cert(cert_path: str, key_path: str, first_server: Optional[str] = None) -> bool:  # type: ignore
     try:
         if not cert_path or not key_path:
             LOGGER.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates")
@@ -46,32 +45,18 @@ def check_cert(cert_path: str, key_path: str, first_server: Optional[str] = None
             return False
 
         cert_hash = file_hash(cert_path)
-        old_hash = cache_hash("cert.pem", CORE_API, CORE_TOKEN, service_id=first_server)
+        old_hash = JOB.cache_hash("cert.pem", service_id=first_server)
         if old_hash == cert_hash:
             return False
 
-        cached, err = cache_file(
-            "cert.pem",
-            cert_path,
-            CORE_API,
-            CORE_TOKEN,
-            service_id=first_server,
-            checksum=cert_hash,
-        )
+        cached, err = JOB.cache_file("cert.pem", cert_path, service_id=first_server, checksum=cert_hash)
         if not cached:
             LOGGER.error(f"Error while caching custom-cert cert.pem file : {err}")
 
         key_hash = file_hash(key_path)
-        old_hash = cache_hash("key.pem", CORE_API, CORE_TOKEN, service_id=first_server)
+        old_hash = JOB.cache_hash("key.pem", service_id=first_server)
         if old_hash != key_hash:
-            cached, err = cache_file(
-                "key.pem",
-                key_path,
-                CORE_API,
-                CORE_TOKEN,
-                service_id=first_server,
-                checksum=key_hash,
-            )
+            cached, err = JOB.cache_file("key.pem", key_path, service_id=first_server, checksum=key_hash)
             if not cached:
                 LOGGER.error(f"Error while caching custom-cert key.pem file : {err}")
 

@@ -26,11 +26,10 @@ from cryptography.hazmat.backends import default_backend
 
 from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
-from jobs import cache_file, get_cache
+from jobs import Job  # type: ignore
 
 LOGGER = setup_logger("self-signed", getenv("LOG_LEVEL", "INFO"))
-CORE_API = API(getenv("API_ADDR", ""), "job-self-signed")
-CORE_TOKEN = getenv("CORE_TOKEN", None)
+JOB = Job(API(getenv("API_ADDR", ""), "job-self-signed"), getenv("CORE_TOKEN", None))
 status = 0
 
 
@@ -102,23 +101,11 @@ def generate_cert(
         return False, 2
 
     # Update db
-    cached, err = cache_file(
-        f"{first_server}.pem",
-        self_signed_path.joinpath(f"{first_server}.pem").read_bytes(),
-        CORE_API,
-        CORE_TOKEN,
-        service_id=first_server if multisite else None,
-    )
+    cached, err = JOB.cache_file(f"{first_server}.pem", self_signed_path.joinpath(f"{first_server}.pem").read_bytes(), service_id=first_server if multisite else None)
     if not cached:
         LOGGER.error(f"Error while caching self-signed {first_server}.pem file : {err}")
 
-    cached, err = cache_file(
-        f"{first_server}.key",
-        self_signed_path.joinpath(f"{first_server}.key").read_bytes(),
-        CORE_API,
-        CORE_TOKEN,
-        service_id=first_server if multisite else None,
-    )
+    cached, err = JOB.cache_file(f"{first_server}.key", self_signed_path.joinpath(f"{first_server}.key").read_bytes(), service_id=first_server if multisite else None)
     if not cached:
         LOGGER.error(f"Error while caching self-signed {first_server}.key file : {err}")
 
@@ -152,13 +139,13 @@ try:
             self_signed_path.mkdir(parents=True, exist_ok=True)
 
             if not self_signed_path.joinpath(f"{first_server}.pem").is_file():
-                cached_pem = get_cache(f"{first_server}.pem", CORE_API, CORE_TOKEN, service_id=first_server)
+                cached_pem = JOB.get_cache(f"{first_server}.pem", service_id=first_server)
 
                 if cached_pem:
                     self_signed_path.joinpath(f"{first_server}.pem").write_bytes(cached_pem["data"])
 
             if not self_signed_path.joinpath(f"{first_server}.key").is_file():
-                cached_key = get_cache(f"{first_server}.key", CORE_API, CORE_TOKEN, service_id=first_server)
+                cached_key = JOB.get_cache(f"{first_server}.key", service_id=first_server)
 
                 if cached_key:
                     self_signed_path.joinpath(f"{first_server}.key").write_bytes(cached_key["data"])
@@ -185,13 +172,13 @@ try:
         self_signed_path.mkdir(parents=True, exist_ok=True)
 
         if not self_signed_path.joinpath(f"{first_server}.pem").is_file():
-            cached_pem = get_cache(f"{first_server}.pem", CORE_API, CORE_TOKEN)
+            cached_pem = JOB.get_cache(f"{first_server}.pem")
 
             if cached_pem:
                 self_signed_path.joinpath(f"{first_server}.pem").write_bytes(cached_pem["data"])
 
         if not self_signed_path.joinpath(f"{first_server}.key").is_file():
-            cached_key = get_cache(f"{first_server}.key", CORE_API, CORE_TOKEN)
+            cached_key = JOB.get_cache(f"{first_server}.key")
 
             if cached_key:
                 self_signed_path.joinpath(f"{first_server}.key").write_bytes(cached_key["data"])
