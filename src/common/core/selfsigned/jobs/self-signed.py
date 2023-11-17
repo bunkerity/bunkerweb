@@ -33,15 +33,24 @@ JOB = Job(API(getenv("API_ADDR", ""), "job-self-signed"), getenv("CORE_TOKEN", N
 status = 0
 
 
-def generate_cert(
-    first_server: str,
-    days: str,
-    subj: str,
-    self_signed_path: Path,
-    *,
-    multisite: bool = False,
-) -> Tuple[bool, int]:
-    if self_signed_path.joinpath(f"{first_server}.pem").is_file():
+def generate_cert(first_server: str, days: str, subj: str, self_signed_path: Path, *, multisite: bool = False) -> Tuple[bool, int]:
+    cert_path = self_signed_path.joinpath(first_server if multisite else "", "cert.pem")
+    if not cert_path.is_file():
+        cached_pem = JOB.get_cache("cert.pem", service_id=first_server)
+
+        if cached_pem:
+            cert_path.parent.mkdir(parents=True, exist_ok=True)
+            cert_path.write_bytes(cached_pem["data"])
+
+    key_path = self_signed_path.joinpath(first_server if multisite else "", "key.pem")
+    if not key_path.is_file():
+        cached_key = JOB.get_cache("key.pem", service_id=first_server)
+
+        if cached_key:
+            key_path.parent.mkdir(parents=True, exist_ok=True)
+            key_path.write_bytes(cached_key["data"])
+
+    if cert_path.is_file():
         if (
             run(
                 [
@@ -51,7 +60,7 @@ def generate_cert(
                     "86400",
                     "-noout",
                     "-in",
-                    str(self_signed_path.joinpath(f"{first_server}.pem")),
+                    str(cert_path),
                 ],
                 stdin=DEVNULL,
                 stderr=STDOUT,
@@ -61,10 +70,7 @@ def generate_cert(
         ):
             LOGGER.info(f"Self-signed certificate already present for {first_server}")
 
-            certificate = x509.load_pem_x509_certificate(
-                self_signed_path.joinpath(f"{first_server}.pem").read_bytes(),
-                default_backend(),
-            )
+            certificate = x509.load_pem_x509_certificate(cert_path.read_bytes(), default_backend())
             if sorted(attribute.rfc4514_string() for attribute in certificate.subject) != sorted(v for v in subj.split("/") if v):
                 LOGGER.warning(f"Subject of self-signed certificate for {first_server} is different from the one in the configuration, regenerating ...")
             elif certificate.not_valid_after - certificate.not_valid_before != timedelta(days=int(days)):
@@ -72,25 +78,11 @@ def generate_cert(
             else:
                 return True, 0
 
+    cert_path.parent.mkdir(parents=True, exist_ok=True)
     LOGGER.info(f"Generating self-signed certificate for {first_server}")
     if (
         run(
-            [
-                "openssl",
-                "req",
-                "-nodes",
-                "-x509",
-                "-newkey",
-                "rsa:4096",
-                "-keyout",
-                str(self_signed_path.joinpath(f"{first_server}.key")),
-                "-out",
-                str(self_signed_path.joinpath(f"{first_server}.pem")),
-                "-days",
-                days,
-                "-subj",
-                subj,
-            ],
+            ["openssl", "req", "-nodes", "-x509", "-newkey", "rsa:4096", "-keyout", str(key_path), "-out", str(cert_path), "-days", days, "-subj", subj],
             stdin=DEVNULL,
             stderr=DEVNULL,
             check=False,
@@ -101,11 +93,11 @@ def generate_cert(
         return False, 2
 
     # Update db
-    cached, err = JOB.cache_file(f"{first_server}.pem", self_signed_path.joinpath(f"{first_server}.pem").read_bytes(), service_id=first_server if multisite else None)
+    cached, err = JOB.cache_file("cert.pem", cert_path.read_bytes(), service_id=first_server if multisite else None, file_exists=True)
     if not cached:
         LOGGER.error(f"Error while caching self-signed {first_server}.pem file : {err}")
 
-    cached, err = JOB.cache_file(f"{first_server}.key", self_signed_path.joinpath(f"{first_server}.key").read_bytes(), service_id=first_server if multisite else None)
+    cached, err = JOB.cache_file("key.pem", key_path.read_bytes(), service_id=first_server if multisite else None, file_exists=True)
     if not cached:
         LOGGER.error(f"Error while caching self-signed {first_server}.key file : {err}")
 
@@ -136,20 +128,6 @@ try:
             ):
                 continue
 
-            self_signed_path.mkdir(parents=True, exist_ok=True)
-
-            if not self_signed_path.joinpath(f"{first_server}.pem").is_file():
-                cached_pem = JOB.get_cache(f"{first_server}.pem", service_id=first_server)
-
-                if cached_pem:
-                    self_signed_path.joinpath(f"{first_server}.pem").write_bytes(cached_pem["data"])
-
-            if not self_signed_path.joinpath(f"{first_server}.key").is_file():
-                cached_key = JOB.get_cache(f"{first_server}.key", service_id=first_server)
-
-                if cached_key:
-                    self_signed_path.joinpath(f"{first_server}.key").write_bytes(cached_key["data"])
-
             ret, ret_status = generate_cert(
                 first_server,
                 getenv(
@@ -168,20 +146,6 @@ try:
     # Singlesite case
     elif getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes" and getenv("SERVER_NAME"):
         first_server = getenv("SERVER_NAME", "").split()[0]
-
-        self_signed_path.mkdir(parents=True, exist_ok=True)
-
-        if not self_signed_path.joinpath(f"{first_server}.pem").is_file():
-            cached_pem = JOB.get_cache(f"{first_server}.pem")
-
-            if cached_pem:
-                self_signed_path.joinpath(f"{first_server}.pem").write_bytes(cached_pem["data"])
-
-        if not self_signed_path.joinpath(f"{first_server}.key").is_file():
-            cached_key = JOB.get_cache(f"{first_server}.key")
-
-            if cached_key:
-                self_signed_path.joinpath(f"{first_server}.key").write_bytes(cached_key["data"])
 
         ret, ret_status = generate_cert(
             first_server,

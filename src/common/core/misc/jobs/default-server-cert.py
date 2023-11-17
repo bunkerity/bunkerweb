@@ -59,65 +59,48 @@ try:
         )
         _exit(0)
 
-    cert_path = Path(sep, "var", "cache", "bunkerweb", "default-server-cert")
-    cert_path.mkdir(parents=True, exist_ok=True)
+    job_path = Path(sep, "var", "cache", "bunkerweb", "default-server-cert")
+    job_path.mkdir(parents=True, exist_ok=True)
 
-    if not cert_path.joinpath("cert.pem").is_file():
+    cert_path = job_path.joinpath("cert.pem")
+    if not cert_path.is_file():
         cached_pem = JOB.get_cache("cert.pem")
 
         if cached_pem:
-            cert_path.joinpath("cert.pem").write_bytes(cached_pem["data"])
+            cert_path.write_bytes(cached_pem["data"])
 
-    if not cert_path.joinpath("cert.key").is_file():
+    key_path = job_path.joinpath("cert.key")
+    if not key_path.is_file():
         cached_key = JOB.get_cache("cert.key")
 
         if cached_key:
-            cert_path.joinpath("cert.key").write_bytes(cached_key["data"])
+            key_path.write_bytes(cached_key["data"])
 
-    if not cert_path.joinpath("cert.pem").is_file():
+    if not cert_path.is_file():
         LOGGER.info("Generating self-signed certificate for default server")
 
         if (
             run(
-                [
-                    "openssl",
-                    "req",
-                    "-nodes",
-                    "-x509",
-                    "-newkey",
-                    "rsa:4096",
-                    "-keyout",
-                    str(cert_path.joinpath("cert.key")),
-                    "-out",
-                    str(cert_path.joinpath("cert.pem")),
-                    "-days",
-                    "3650",
-                    "-subj",
-                    "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/",
-                ],
+                ["openssl", "req", "-nodes", "-x509", "-newkey", "rsa:4096", "-keyout", str(key_path), "-out", str(cert_path), "-days", "3650", "-subj", "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/"],
                 stdin=DEVNULL,
                 stderr=DEVNULL,
                 check=False,
             ).returncode
             != 0
         ):
-            LOGGER.error(
-                "Self-signed certificate generation failed for default server",
-            )
+            LOGGER.error("Self-signed certificate generation failed for default server")
             status = 2
         else:
             status = 1
-            LOGGER.info(
-                "Successfully generated self-signed certificate for default server",
-            )
+            LOGGER.info("Successfully generated self-signed certificate for default server")
 
-        cached, err = JOB.cache_file("cert.pem", cert_path.joinpath("cert.pem").read_bytes())
+        cached, err = JOB.cache_file("cert.pem", cert_path.read_bytes(), file_exists=True)
         if not cached:
             LOGGER.error(f"Error while saving default-server-cert cert.pem file to db cache : {err}")
         else:
             LOGGER.info("Successfully saved default-server-cert cert.pem file to db cache")
 
-        cached, err = JOB.cache_file("cert.key", cert_path.joinpath("cert.key").read_bytes())
+        cached, err = JOB.cache_file("cert.key", key_path.read_bytes(), file_exists=True)
         if not cached:
             LOGGER.error(f"Error while saving default-server-cert cert.key file to db cache : {err}")
         else:

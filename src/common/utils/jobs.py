@@ -72,14 +72,13 @@ class Job:
             return None
         self.source_path = Path(source_file)
         self.job_path = Path(sep, "var", "cache", "bunkerweb", self.source_path.parent.parent.name)
-        self.job_path.mkdir(parents=True, exist_ok=True)
 
         self.job_name = job_name or self.source_path.name.replace(".py", "")
         self.api = api
         self.api_token_header = {"Authorization": f"Bearer {api_token}"} if api_token else {}
 
     def get_cache(self, name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None, with_info: bool = False, with_data: bool = True) -> Optional[Union[dict, Response]]:
-        cache_path = self.job_path.joinpath(name)
+        cache_path = self.job_path.joinpath(service_id or "", name)
         if cache_path.is_file():
             return (
                 {}
@@ -115,7 +114,7 @@ class Job:
         cache_info = None
         is_cached = False
 
-        cache_path = self.job_path.joinpath(name)
+        cache_path = self.job_path.joinpath(service_id or "", name)
         if cache_path.is_file():
             cache_info = {"last_update": cache_path.stat().st_mtime}
 
@@ -142,7 +141,7 @@ class Job:
 
         return cache_info is not None, is_cached
 
-    def cache_file(self, name: str, file_cache: Union[bytes, str, Path], *, job_name: Optional[str] = None, service_id: Optional[str] = None, checksum: Optional[str] = None) -> Tuple[bool, str]:
+    def cache_file(self, name: str, file_cache: Union[bytes, str, Path], *, job_name: Optional[str] = None, service_id: Optional[str] = None, checksum: Optional[str] = None, file_exists: bool = False) -> Tuple[bool, str]:
         ret, err = True, "success"
         job_name = job_name or self.job_name
 
@@ -154,7 +153,10 @@ class Job:
             assert isinstance(file_cache, Path)
             content = file_cache.read_bytes()
 
-        self.job_path.joinpath(name).write_bytes(content)
+        if not file_exists:
+            cache_path = self.job_path.joinpath(service_id or "", name)
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            cache_path.write_bytes(content)
 
         if not checksum:
             checksum = bytes_hash(content)
@@ -175,7 +177,7 @@ class Job:
                 retry_after = resp.headers.get("Retry-After", 1)
                 retry_after = float(retry_after)
                 sleep(retry_after)
-                return self.cache_file(name, file_cache, job_name=job_name, service_id=service_id, checksum=checksum)
+                return self.cache_file(name, file_cache, job_name=job_name, service_id=service_id, checksum=checksum, file_exists=file_exists)
             elif status not in (200, 201):
                 ret = False
                 err = f"Error while sending API request to {self.api.endpoint}jobs/cache/{job_name}/{name}/ : status = {status}, resp = {resp}"
@@ -187,8 +189,9 @@ class Job:
         ret, err = True, "success"
         job_name = job_name or self.job_name
 
-        cache_path = self.job_path.joinpath(name)
-        cache_path.write_bytes(cache_path.read_bytes())
+        cache_path = self.job_path.joinpath(service_id or "", name)
+        if cache_path.is_file():
+            cache_path.write_bytes(cache_path.read_bytes())
 
         try:
             sent, err, status, resp = self.api.request(
@@ -217,7 +220,7 @@ class Job:
         ret, err = True, "success"
         job_name = job_name or self.job_name
 
-        self.job_path.joinpath(name).unlink(missing_ok=True)
+        self.job_path.joinpath(service_id or "", name).unlink(missing_ok=True)
 
         try:
             sent, err, status, resp = self.api.request(
@@ -243,7 +246,7 @@ class Job:
         return ret, err
 
     def cache_hash(self, name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None) -> Optional[str]:
-        cache_path = self.job_path.joinpath(name)
+        cache_path = self.job_path.joinpath(service_id or "", name)
         if cache_path.is_file():
             return file_hash(cache_path)
 
