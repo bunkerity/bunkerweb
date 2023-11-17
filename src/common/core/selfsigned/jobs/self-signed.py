@@ -130,7 +130,6 @@ status = 0
 
 try:
     self_signed_path = Path(sep, "var", "cache", "bunkerweb", "selfsigned")
-    self_signed_path.mkdir(parents=True, exist_ok=True)
 
     # Multisite case
     if getenv("MULTISITE") == "yes":
@@ -149,6 +148,8 @@ try:
                 != "yes"
             ):
                 continue
+
+            self_signed_path.mkdir(parents=True, exist_ok=True)
 
             if not self_signed_path.joinpath(f"{first_server}.pem").is_file():
                 cached_pem = get_cache(f"{first_server}.pem", CORE_API, CORE_TOKEN, service_id=first_server)
@@ -180,6 +181,8 @@ try:
     # Singlesite case
     elif getenv("GENERATE_SELF_SIGNED_SSL", "no") == "yes" and getenv("SERVER_NAME"):
         first_server = getenv("SERVER_NAME", "").split()[0]
+
+        self_signed_path.mkdir(parents=True, exist_ok=True)
 
         if not self_signed_path.joinpath(f"{first_server}.pem").is_file():
             cached_pem = get_cache(f"{first_server}.pem", CORE_API, CORE_TOKEN)

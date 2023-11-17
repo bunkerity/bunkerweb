@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from hashlib import sha512
 from inspect import getsourcefile
 from io import BytesIO
-from os.path import basename, normpath
+from os.path import normpath, sep
 from pathlib import Path
 from re import IGNORECASE, compile as re_compile
 from sys import _getframe
@@ -18,12 +18,6 @@ from requests import Response
 
 lock = Lock()
 
-"""
-{
-    "date": timestamp,
-    "checksum": sha512
-}
-"""
 
 minute_rx = r"[1-5]?\d"
 day_rx = r"(3[01]|[12][0-9]|[1-9])"
@@ -71,6 +65,9 @@ def bytes_hash(bio: Union[bytes, BytesIO]) -> str:
     return _sha512.hexdigest()
 
 
+# TODO make a class instead of the following functions
+
+
 def get_cache(
     name: str,
     api,
@@ -81,11 +78,28 @@ def get_cache(
     with_info: bool = False,
     with_data: bool = True,
 ) -> Optional[Union[dict, Response]]:
+    source_file = getsourcefile(_getframe(1))
+    if source_file is None:
+        return None
+    source_path = Path(source_file)
+
+    cache_path = Path(sep, "var", "cache", "bunkerweb", source_path.parent.parent.name, name)
+    if cache_path.is_file():
+        return (
+            {}
+            | (
+                {
+                    "last_update": cache_path.stat().st_mtime,
+                    "checksum": file_hash(cache_path),
+                }
+                if with_info
+                else {}
+            )
+            | ({"data": cache_path.read_bytes()} if with_data else {})
+        )
+
     if not job_name:
-        source_file = getsourcefile(_getframe(1))
-        if source_file is None:
-            return None
-        job_name = basename(source_file).replace(".py", "")
+        job_name = source_path.name.replace(".py", "")
 
     sent, _, status, resp = api.request(
         "GET",
@@ -125,37 +139,44 @@ def is_cached_file(
     cache_info = None
     is_cached = False
 
-    if not job_name:
-        source_file = getsourcefile(_getframe(1))
-        if source_file is None:
-            return False, False
-        job_name = basename(source_file).replace(".py", "")
+    source_file = getsourcefile(_getframe(1))
+    if source_file is None:
+        return False, False
+    source_path = Path(source_file)
+
+    cache_path = Path(sep, "var", "cache", "bunkerweb", source_path.parent.parent.name, name)
+    if cache_path.is_file():
+        cache_info = {"last_update": cache_path.stat().st_mtime}
 
     try:
-        cache_info = get_cache(
-            name,
-            api,
-            api_token,
-            with_info=True,
-            with_data=False,
-            job_name=job_name,
-            service_id=service_id,
-        )
+        if not cache_info:
+            if not job_name:
+                job_name = source_path.name.replace(".py", "")
+
+            cache_info = get_cache(
+                name,
+                api,
+                api_token,
+                with_info=True,
+                with_data=False,
+                job_name=job_name,
+                service_id=service_id,
+            )
 
         if cache_info and isinstance(cache_info, dict):
             current_time = datetime.now().timestamp()
-            if current_time < float(cache_info["date"]):
+            if current_time < float(cache_info["last_update"]):
                 is_cached = False
             else:
-                diff_time = current_time - float(cache_info["date"])
+                diff_time = current_time - float(cache_info["last_update"])
                 if expire == "hour":
-                    is_cached = diff_time < 3600
+                    is_cached = diff_time < timedelta(hours=1).total_seconds()
                 elif expire == "day":
-                    is_cached = diff_time < 86400
+                    is_cached = diff_time < timedelta(days=1).total_seconds()
                 elif expire == "week":
-                    is_cached = diff_time < 604800
+                    is_cached = diff_time < timedelta(weeks=1).total_seconds()
                 elif expire == "month":
-                    is_cached = diff_time < 2592000
+                    is_cached = diff_time < timedelta(days=30).total_seconds()
     except:
         is_cached = False
 
@@ -174,11 +195,13 @@ def cache_file(
 ) -> Tuple[bool, str]:
     ret, err = True, "success"
 
+    source_file = getsourcefile(_getframe(1))
+    if source_file is None:
+        return False, "Can't get source file"
+    source_path = Path(source_file)
+
     if not job_name:
-        source_file = getsourcefile(_getframe(1))
-        if source_file is None:
-            return False, "Can't get source file"
-        job_name = basename(source_file).replace(".py", "")
+        job_name = source_path.name.replace(".py", "")
 
     if isinstance(file_cache, bytes):
         content = file_cache
@@ -187,6 +210,13 @@ def cache_file(
             file_cache = Path(file_cache)
         assert isinstance(file_cache, Path)
         content = file_cache.read_bytes()
+
+    cache_path = Path(sep, "var", "cache", "bunkerweb", source_path.parent.parent.name, name)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.write_bytes(content)
+
+    if not checksum:
+        checksum = bytes_hash(content)
 
     try:
         sent, err, status, resp = api.request(
@@ -231,11 +261,17 @@ def update_cache_file_info(
 ) -> Tuple[bool, str]:
     ret, err = True, "success"
 
+    source_file = getsourcefile(_getframe(1))
+    if source_file is None:
+        return False, "Can't get source file"
+    source_path = Path(source_file)
+
+    cache_path = Path(sep, "var", "cache", "bunkerweb", source_path.parent.parent.name, name)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.write_bytes(cache_path.read_bytes())
+
     if not job_name:
-        source_file = getsourcefile(_getframe(1))
-        if source_file is None:
-            return False, "Can't get source file"
-        job_name = basename(source_file).replace(".py", "")
+        job_name = source_path.name.replace(".py", "")
 
     try:
         sent, err, status, resp = api.request(
@@ -277,11 +313,15 @@ def del_cache(
 ) -> Tuple[bool, str]:
     ret, err = True, "success"
 
+    source_file = getsourcefile(_getframe(1))
+    if source_file is None:
+        return False, "Can't get source file"
+    source_path = Path(source_file)
+
+    Path(sep, "var", "cache", "bunkerweb", source_path.parent.parent.name, name).unlink(missing_ok=True)
+
     if not job_name:
-        source_file = getsourcefile(_getframe(1))
-        if source_file is None:
-            return False, "Can't get source file"
-        job_name = basename(source_file).replace(".py", "")
+        job_name = source_path.name.replace(".py", "")
 
     try:
         sent, err, status, resp = api.request(
@@ -321,11 +361,17 @@ def cache_hash(
     job_name: Optional[str] = None,
     service_id: Optional[str] = None,
 ) -> Optional[str]:
+    source_file = getsourcefile(_getframe(1))
+    if source_file is None:
+        return None
+    source_path = Path(source_file)
+
+    cache_path = Path(sep, "var", "cache", "bunkerweb", source_path.parent.parent.name, name)
+    if cache_path.is_file():
+        return file_hash(cache_path)
+
     if not job_name:
-        source_file = getsourcefile(_getframe(1))
-        if source_file is None:
-            return None
-        job_name = basename(source_file).replace(".py", "")
+        job_name = source_path.name.replace(".py", "")
 
     cache_info = get_cache(
         name,

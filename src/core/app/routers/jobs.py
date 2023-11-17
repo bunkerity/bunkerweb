@@ -217,7 +217,7 @@ async def get_cache(job_name: str, file_name: str, data: CacheFileDataModel, bac
 
 
 @router.put("/{job_name}/cache/{file_name}", response_model=Dict[Literal["message"], str], summary="Upload a file to the cache", response_description="Message")
-async def update_cache(
+async def upsert_cache(
     job_name: str,
     file_name: str,
     method: str,
