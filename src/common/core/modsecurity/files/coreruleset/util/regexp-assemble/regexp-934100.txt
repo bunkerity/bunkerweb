@@ -1,8 +1,0 @@
-_\$\$ND_FUNC\$\$_
-__js_function
-\beval\s*\(
-String\s*\.\s*fromCharCode
-function\s*\(\s*\)\s*{
-new\s+Function\s*\(
-this\.constructor
-module\.exports\s*=
