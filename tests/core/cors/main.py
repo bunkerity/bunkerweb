@@ -15,17 +15,19 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get(
-                f"http{'s' if ssl else ''}://www.example.com",
+            resp = get(
+                f"http{'s' if ssl else ''}://www.example.com/ready",
                 headers={"Host": "www.example.com"},
                 verify=False,
-            ).status_code
+            )
+            status_code = resp.status_code
+            text = resp.text
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
                 exit(1)
 
-            ready = status_code < 400
+            ready = status_code < 400 and text == "ready"
 
         if retries > 10:
             print("❌ The service took too long to be ready, exiting ...", flush=True)

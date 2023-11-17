@@ -2,10 +2,10 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.2
+    image: bunkerity/bunkerweb:1.5.3
     pull_policy: never
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     volumes:
       - ./index.html:/var/www/html/index.html
     environment:
@@ -18,6 +18,15 @@ services:
       # ? COUNTRY settings
       BLACKLIST_COUNTRY: ""
       WHITELIST_COUNTRY: ""
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       bw-universe:
       bw-us-network:
@@ -26,7 +35,7 @@ services:
         ipv4_address: 2.0.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.2
+    image: bunkerity/bunkerweb-scheduler:1.5.3
     pull_policy: never
     depends_on:
       - bw

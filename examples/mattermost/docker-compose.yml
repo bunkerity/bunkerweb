@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.2
+    image: bunkerity/bunkerweb:1.5.3
     ports:
       - 80:8080
       - 443:8443
@@ -38,13 +38,13 @@ services:
       - LIMIT_REQ_URL_3=^/static/
       - LIMIT_REQ_RATE_3=10r/s
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.2
+    image: bunkerity/bunkerweb-scheduler:1.5.3
     depends_on:
       - mybunker
     environment:

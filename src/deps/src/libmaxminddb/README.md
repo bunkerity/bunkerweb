@@ -110,6 +110,11 @@ Or with [MacPorts](https://ports.macports.org/port/libmaxminddb):
 
     $ sudo port install libmaxminddb
 
+# Requirements
+
+libmaxminddb requires a minimum of POSIX.1-2001 support. If not specified
+at compilation time, it defaults to requesting POSIX.1-2008 support.
+
 # Bug Reports
 
 Please report bugs by filing an issue with our GitHub issue tracker at
@@ -121,7 +126,7 @@ Use `make safedist` to check the resulting tarball.
 
 # Copyright and License
 
-Copyright 2013-2022 MaxMind, Inc.
+Copyright 2013-2023 MaxMind, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

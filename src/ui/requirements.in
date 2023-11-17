@@ -1,9 +1,10 @@
 bcrypt==4.0.1
 beautifulsoup4==4.12.2
 Flask==3.0.0
-Flask-Login @ https://github.com/maxcountryman/flask-login/archive/7d98a49bc38d0849367b348bfe37a2b689323419.zip#sha256=62db8eeeae5170f0d9b54d401d63b1a19d0df8944db9ae5332b350bc284f108b
+Flask-Login==0.6.3
 Flask_WTF==1.2.1
 gunicorn[gthread]==21.2.0
 importlib-metadata==6.8.0
 python_dateutil==2.8.2
 regex==2023.10.3
+werkzeug==3.0.1

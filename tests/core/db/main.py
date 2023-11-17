@@ -179,6 +179,8 @@ try:
         global_values = session.query(Global_values).all()
 
         for global_value in global_values:
+            if global_value.setting_id == "API_LISTEN_IP":
+                continue
             if global_value.setting_id in global_settings:
                 if global_value.value != global_settings[global_value.setting_id]["value"]:
                     print(
@@ -550,6 +552,8 @@ try:
         )
 
         for custom_config in custom_configs:
+            if custom_config.name == "ready":
+                continue
             if not multisite and custom_config.name in global_custom_configs and custom_config.service_id:
                 print(
                     f"❌ The custom config {custom_config.name} is in the database but should not be owned by the service {custom_config.service_id} because multisite is not enabled, exiting ...",

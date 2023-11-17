@@ -28,7 +28,7 @@ def generate_custom_configs(
 
 class ConfigFiles:
     def __init__(self, logger, db):
-        self.__name_regex = re_compile(r"^[\w.-]{1,64}$")
+        self.__name_regex = re_compile(r"^[\w.-]{4,64}$")
         self.__root_dirs = [child["name"] for child in path_to_dict(join(sep, "etc", "bunkerweb", "configs"))["children"]]
         self.__file_creation_blacklist = ["http", "stream"]
         self.__logger = logger
@@ -108,13 +108,13 @@ class ConfigFiles:
             if path.is_file():
                 path.unlink()
             elif path.is_dir():
-                rmtree(str(path), ignore_errors=False)
+                rmtree(path, ignore_errors=False)
             else:
                 path = Path(f"{path}.conf")
                 if path.is_file():
                     path.unlink()
                 else:
-                    rmtree(str(path), ignore_errors=False)
+                    rmtree(path, ignore_errors=False)
         except OSError:
             return f"Could not delete {path}", 1
 

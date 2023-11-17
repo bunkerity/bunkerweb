@@ -31,6 +31,7 @@ else
     echo "USE_ANTIBOT=no" | sudo tee -a /etc/bunkerweb/variables.env
     echo "ANTIBOT_URI=/challenge" | sudo tee -a /etc/bunkerweb/variables.env
     sudo touch /var/www/html/index.html
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 manual=0

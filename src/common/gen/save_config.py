@@ -156,9 +156,7 @@ if __name__ == "__main__":
         external_plugins = args.plugins
         if not Path(sep, "usr", "sbin", "nginx").exists() and args.method == "ui":
             db = Database(logger, pool=False)
-            external_plugins = []
-            for plugin in db.get_plugins():
-                external_plugins.append(plugin)
+            external_plugins = db.get_plugins()
 
         # Check existences and permissions
         logger.info("Checking arguments ...")

@@ -4,15 +4,19 @@ variable "k8s_ip" {
   nullable = false
   sensitive = true
 }
-
+# Create cicd_bw_k8s private network
+resource "scaleway_vpc_private_network" "pn" {
+    name = "cicd_bw_k8s"
+}
 # Create k8s cluster
 resource "scaleway_k8s_cluster" "cluster" {
   type = "kapsule"
   name = "bw_k8s"
   version = "1.24.7"
   cni = "cilium"
+  private_network_id = scaleway_vpc_private_network.pn.id
+  delete_additional_resources = true
 }
-
 # Create k8s pool
 resource "scaleway_k8s_pool" "pool" {
   cluster_id = scaleway_k8s_cluster.cluster.id
@@ -21,7 +25,6 @@ resource "scaleway_k8s_pool" "pool" {
   size = 3
   wait_for_pool_ready = true
 }
-
 # Get kubeconfig file
 resource "local_sensitive_file" "kubeconfig" {
   depends_on = [scaleway_k8s_pool.pool]
@@ -31,7 +34,6 @@ resource "local_sensitive_file" "kubeconfig" {
 provider "kubectl" {
   config_path = "${local_sensitive_file.kubeconfig.filename}"
 }
-
 # Setup LB
 resource "local_sensitive_file" "lb_yml" {
   depends_on = [local_sensitive_file.kubeconfig]

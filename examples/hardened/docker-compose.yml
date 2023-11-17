@@ -2,7 +2,7 @@ version: "3"
 
 services:
   mybunker:
-    image: bunkerity/bunkerweb:1.5.2
+    image: bunkerity/bunkerweb:1.5.3
     # dropping all capabilities
     cap_drop:
       - ALL
@@ -33,13 +33,13 @@ services:
       - REVERSE_PROXY_HOST=http://myapp
       - REMOTE_PHP_PATH=/app
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     networks:
       - bw-universe
       - bw-services
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.2
+    image: bunkerity/bunkerweb-scheduler:1.5.3
     depends_on:
       - mybunker
     environment:

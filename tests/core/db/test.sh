@@ -40,7 +40,7 @@ if [ "$integration" == "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb
-    MAKEFLAGS="-j $(nproc)" sudo pip install --no-cache-dir --require-hashes -r requirements.txt
+    MAKEFLAGS="-j $(nproc)" sudo pip install --no-cache-dir --require-hashes --no-deps -r requirements.txt
     sudo sed -i 's@SERVER_NAME=.*$@SERVER_NAME=bwadm.example.com@' /etc/bunkerweb/variables.env
     echo "MULTISITE=no" | sudo tee -a /etc/bunkerweb/variables.env
     echo "USE_REVERSE_PROXY=yes" | sudo tee -a /etc/bunkerweb/variables.env
@@ -64,6 +64,7 @@ else
     export GLOBAL_REVERSE_PROXY_HOST="http://app1:8080"
     export GLOBAL_REVERSE_PROXY_URL="/"
     export CUSTOM_CONF_MODSEC_test_custom_conf='SecRule REQUEST_FILENAME "@rx ^/db" "id:10000,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"'
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 manual=0

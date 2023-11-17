@@ -46,7 +46,7 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
+                    [join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -60,7 +60,7 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", join(sep, "usr", "sbin", "nginx")],
+                    [join(sep, "usr", "sbin", "nginx"), "-e", "/var/log/bunkerweb/error.log"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -74,7 +74,7 @@ class Instance:
         if self._type == "local":
             return (
                 run(
-                    ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
+                    [join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -87,7 +87,7 @@ class Instance:
     def restart(self) -> bool:
         if self._type == "local":
             proc = run(
-                ["sudo", join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
+                [join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
                 stdin=DEVNULL,
                 stderr=STDOUT,
                 check=False,
@@ -96,7 +96,7 @@ class Instance:
                 return False
             return (
                 run(
-                    ["sudo", join(sep, "usr", "sbin", "nginx")],
+                    [join(sep, "usr", "sbin", "nginx"), "-e", "/var/log/bunkerweb/error.log"],
                     stdin=DEVNULL,
                     stderr=STDOUT,
                     check=False,
@@ -126,7 +126,7 @@ class Instances:
         # Docker instances (containers or services)
         if self.__docker_client is not None:
             for instance in self.__docker_client.containers.list(all=True, filters={"label": "bunkerweb.INSTANCE"}):
-                env_variables = {x[0]: x[1] for x in [env.split("=") for env in instance.attrs["Config"]["Env"]]}
+                env_variables = {x[0]: (x[1] if len(x) > 1 else "") for x in [env.split("=") for env in instance.attrs["Config"]["Env"]]}
 
                 instances.append(
                     Instance(

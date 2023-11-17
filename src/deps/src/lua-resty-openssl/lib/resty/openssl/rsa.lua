@@ -2,9 +2,6 @@ local ffi = require "ffi"
 local C = ffi.C
 
 local bn_lib = require "resty.openssl.bn"
-
-local OPENSSL_10 = require("resty.openssl.version").OPENSSL_10
-local OPENSSL_11_OR_LATER = require("resty.openssl.version").OPENSSL_11_OR_LATER
 local format_error = require("resty.openssl.err").format_error
 
 local _M = {}
@@ -18,51 +15,29 @@ function _M.get_parameters(rsa_st)
   return setmetatable(empty_table, {
     __index = function(_, k)
       local ptr, ret
-      if OPENSSL_11_OR_LATER then
-        ptr = bn_ptrptr_ct()
-      end
+      ptr = bn_ptrptr_ct()
 
       if k == 'n' then
-        if OPENSSL_11_OR_LATER then
-          C.RSA_get0_key(rsa_st, ptr, nil, nil)
-        end
+        C.RSA_get0_key(rsa_st, ptr, nil, nil)
       elseif k == 'e' then
-        if OPENSSL_11_OR_LATER then
-          C.RSA_get0_key(rsa_st, nil, ptr, nil)
-        end
+        C.RSA_get0_key(rsa_st, nil, ptr, nil)
       elseif k == 'd' then
-        if OPENSSL_11_OR_LATER then
-          C.RSA_get0_key(rsa_st, nil, nil, ptr)
-        end
+        C.RSA_get0_key(rsa_st, nil, nil, ptr)
       elseif k == 'p' then
-        if OPENSSL_11_OR_LATER then
-          C.RSA_get0_factors(rsa_st, ptr, nil)
-        end
+        C.RSA_get0_factors(rsa_st, ptr, nil)
       elseif k == 'q' then
-        if OPENSSL_11_OR_LATER then
-          C.RSA_get0_factors(rsa_st, nil, ptr)
-        end
+        C.RSA_get0_factors(rsa_st, nil, ptr)
       elseif k == 'dmp1' then
-        if OPENSSL_11_OR_LATER then
-          C.RSA_get0_crt_params(rsa_st, ptr, nil, nil)
-        end
+        C.RSA_get0_crt_params(rsa_st, ptr, nil, nil)
       elseif k == 'dmq1' then
-        if OPENSSL_11_OR_LATER then
-          C.RSA_get0_crt_params(rsa_st, nil, ptr, nil)
-        end
+        C.RSA_get0_crt_params(rsa_st, nil, ptr, nil)
       elseif k == 'iqmp' then
-        if OPENSSL_11_OR_LATER then
-          C.RSA_get0_crt_params(rsa_st, nil, nil, ptr)
-        end
+        C.RSA_get0_crt_params(rsa_st, nil, nil, ptr)
       else
         return nil, "rsa.get_parameters: unknown parameter \"" .. k .. "\" for RSA key"
       end
 
-      if OPENSSL_11_OR_LATER then
-        ret = ptr[0]
-      elseif OPENSSL_10 then
-        ret = rsa_st[k]
-      end
+      ret = ptr[0]
 
       if ret == nil then
         return nil
@@ -91,21 +66,24 @@ function _M.set_parameters(rsa_st, opts)
   local cleanup_from_idx = 1
   -- dup input
   local do_set_key, do_set_factors, do_set_crt_params
-  for k, v in pairs(opts) do
-    opts_bn[k], err = dup_bn_value(v)
-    if err then
-      err = "rsa.set_parameters: cannot process parameter \"" .. k .. "\":" .. err
-      goto cleanup_with_error
+
+  while true do -- luacheck: ignore
+    for k, v in pairs(opts) do
+      opts_bn[k], err = dup_bn_value(v)
+      if err then
+        -- luacheck: ignore
+        err = "rsa.set_parameters: cannot process parameter \"" .. k .. "\":" .. err
+        break
+      end
+      if k == "n" or k == "e" or k == "d" then
+        do_set_key = true
+      elseif k == "p" or k == "q" then
+        do_set_factors = true
+      elseif k == "dmp1" or k == "dmq1" or k == "iqmp" then
+        do_set_crt_params = true
+      end
     end
-    if k == "n" or k == "e" or k == "d" then
-      do_set_key = true
-    elseif k == "p" or k == "q" then
-      do_set_factors = true
-    elseif k == "dmp1" or k == "dmq1" or k == "iqmp" then
-      do_set_crt_params = true
-    end
-  end
-  if OPENSSL_11_OR_LATER then
+
     -- "The values n and e must be non-NULL the first time this function is called on a given RSA object."
     -- thus we force to set them together
     local code
@@ -113,37 +91,31 @@ function _M.set_parameters(rsa_st, opts)
       code = C.RSA_set0_key(rsa_st, opts_bn["n"], opts_bn["e"], opts_bn["d"])
       if code == 0 then
         err = format_error("rsa.set_parameters: RSA_set0_key")
-        goto cleanup_with_error
+        break
       end
     end
+
     cleanup_from_idx = cleanup_from_idx + 3
     if do_set_factors then
       code = C.RSA_set0_factors(rsa_st, opts_bn["p"], opts_bn["q"])
       if code == 0 then
         err = format_error("rsa.set_parameters: RSA_set0_factors")
-        goto cleanup_with_error
+        break
       end
     end
+
     cleanup_from_idx = cleanup_from_idx + 2
     if do_set_crt_params then
       code = C.RSA_set0_crt_params(rsa_st, opts_bn["dmp1"], opts_bn["dmq1"], opts_bn["iqmp"])
       if code == 0 then
         err = format_error("rsa.set_parameters: RSA_set0_crt_params")
-        goto cleanup_with_error
+        break
       end
     end
-    return true
-  elseif OPENSSL_10 then
-    for k, v in pairs(opts_bn) do
-      if rsa_st[k] ~= nil then
-        C.BN_free(rsa_st[k])
-      end
-      rsa_st[k]= v
-    end
+
     return true
   end
 
-::cleanup_with_error::
   for i, k in pairs(_M.params) do
     if i >= cleanup_from_idx then
       C.BN_free(opts_bn[k])

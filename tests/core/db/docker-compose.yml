@@ -2,10 +2,10 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.2
+    image: bunkerity/bunkerweb:1.5.3
     pull_policy: never
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     environment:
       SERVER_NAME: "bwadm.example.com"
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
@@ -18,13 +18,22 @@ services:
       REVERSE_PROXY_URL: "/"
       LOG_LEVEL: "info"
       CUSTOM_CONF_MODSEC_test_custom_conf: 'SecRule REQUEST_FILENAME "@rx ^/db" "id:10000,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog"'
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       bw-universe:
       bw-services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.2
+    image: bunkerity/bunkerweb-scheduler:1.5.3
     pull_policy: never
     depends_on:
       - bw

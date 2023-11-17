@@ -27,7 +27,7 @@ services:
   ...
 
   mybunker:
-    image: bunkerity/bunkerweb:1.5.2
+    image: bunkerity/bunkerweb:1.5.3
     ports:
       - 80:8080
       - 443:8443
@@ -42,7 +42,7 @@ services:
       - REVERSE_PROXY_URL=/
       - REVERSE_PROXY_HOST=http://10.7.7.253:8080
     labels:
-      - "bunkerweb.INSTANCE" # required for the scheduler to recognize the container
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
     # You have to put this IP address in your docker-compose.yml file
     networks:
       bbb-net:
@@ -50,7 +50,7 @@ services:
       bw-universe:
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.2
+    image: bunkerity/bunkerweb-scheduler:1.5.3
     depends_on:
       - mybunker
     environment:

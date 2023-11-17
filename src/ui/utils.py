@@ -68,7 +68,7 @@ def path_to_dict(
                 "path": join(
                     path,
                     type_lower,
-                    conf["service_id"] if conf["service_id"] else "",
+                    conf["service_id"] or "",
                     f"{conf['name']}.conf",
                 ),
                 "can_edit": conf["method"] == "ui",
@@ -111,7 +111,7 @@ def path_to_dict(
                 "type": "file",
                 "path": join(
                     path,
-                    conf["service_id"] if conf["service_id"] else "",
+                    conf["service_id"] or "",
                     conf["file_name"],
                 ),
                 "can_edit": False,

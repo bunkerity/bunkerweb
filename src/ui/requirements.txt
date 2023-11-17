@@ -31,9 +31,9 @@ beautifulsoup4==4.12.2 \
     --hash=sha256:492bbc69dca35d12daac71c4db1bfff0c876c00ef4a2ffacce226d4638eb72da \
     --hash=sha256:bd2520ca0d9d7d12694a53d44ac482d181b4ec1888909b035a3dbf40d0f57d4a
     # via -r requirements.in
-blinker==1.6.3 \
-    --hash=sha256:152090d27c1c5c722ee7e48504b02d76502811ce02e1523553b4cf8c8b3d3a8d \
-    --hash=sha256:296320d6c28b006eb5e32d4712202dbcdcbf5dc482da298c2f44881c43884aaa
+blinker==1.7.0 \
+    --hash=sha256:c3f865d4d54db7abc53758a01601cf343fe55b84c1de4e3fa910e420b438d5b9 \
+    --hash=sha256:e6820ff6fa4e4d1d8e2747c2283749c3f547e4fee112b98555cdcdae32996182
     # via flask
 click==8.1.7 \
     --hash=sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28 \
@@ -46,8 +46,9 @@ flask==3.0.0 \
     #   -r requirements.in
     #   flask-login
     #   flask-wtf
-flask-login @ https://github.com/maxcountryman/flask-login/archive/7d98a49bc38d0849367b348bfe37a2b689323419.zip#sha256=62db8eeeae5170f0d9b54d401d63b1a19d0df8944db9ae5332b350bc284f108b \
-    --hash=sha256:62db8eeeae5170f0d9b54d401d63b1a19d0df8944db9ae5332b350bc284f108b
+flask-login==0.6.3 \
+    --hash=sha256:5e23d14a607ef12806c699590b89d0f0e0d67baeec599d75947bf9c147330333 \
+    --hash=sha256:849b25b82a436bf830a054e74214074af59097171562ab10bfa999e6b78aae5d
     # via -r requirements.in
 flask-wtf==1.2.1 \
     --hash=sha256:8bb269eb9bb46b87e7c8233d7e7debdf1f8b74bf90cc1789988c29b37a97b695 \
@@ -246,15 +247,16 @@ soupsieve==2.5 \
     --hash=sha256:5663d5a7b3bfaeee0bc4372e7fc48f9cff4940b3eec54a6451cc5299f1097690 \
     --hash=sha256:eaa337ff55a1579b6549dc679565eac1e3d000563bcb1c8ab0d0fefbc0c2cdc7
     # via beautifulsoup4
-werkzeug==3.0.0 \
-    --hash=sha256:3ffff4dcc32db52ef3cc94dff3000a3c2846890f3a5a51800a27b909c5e770f0 \
-    --hash=sha256:cbb2600f7eabe51dbc0502f58be0b3e1b96b893b05695ea2b35b43d4de2d9962
+werkzeug==3.0.1 \
+    --hash=sha256:507e811ecea72b18a404947aded4b3390e1db8f826b494d76550ef45bb3b1dcc \
+    --hash=sha256:90a285dc0e42ad56b34e696398b8122ee4c681833fb35b8334a095d82c56da10
     # via
+    #   -r requirements.in
     #   flask
     #   flask-login
-wtforms==3.1.0 \
-    --hash=sha256:4edd15771630289a5fa343d58822f72749822ca5a39dd33f92ee917cf72b954b \
-    --hash=sha256:addd7899004fdf9318eb711d33aae9c1973fe80378257b7383e06de2eff7c559
+wtforms==3.1.1 \
+    --hash=sha256:5e51df8af9a60f6beead75efa10975e97768825a82146a65c7cbf5b915990620 \
+    --hash=sha256:ae7c54b29806c70f7bce8eb9f24afceb10ca5c32af3d9f04f74d2f66ccc5c7e0
     # via flask-wtf
 zipp==3.17.0 \
     --hash=sha256:0e923e726174922dce09c53c59ad483ff7bbb8e572e00c7f7c46b88556409f31 \

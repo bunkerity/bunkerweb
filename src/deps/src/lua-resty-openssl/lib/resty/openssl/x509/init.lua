@@ -8,7 +8,7 @@ require "resty.openssl.include.x509"
 require "resty.openssl.include.x509v3"
 require "resty.openssl.include.evp"
 require "resty.openssl.include.objects"
-local stack_macro = require("resty.openssl.include.stack")
+require "resty.openssl.include.stack"
 local stack_lib = require("resty.openssl.stack")
 local asn1_lib = require("resty.openssl.asn1")
 local digest_lib = require("resty.openssl.digest")
@@ -21,11 +21,7 @@ local ctypes = require "resty.openssl.auxiliary.ctypes"
 local ctx_lib = require "resty.openssl.ctx"
 local format_error = require("resty.openssl.err").format_error
 local version = require("resty.openssl.version")
-local OPENSSL_10 = version.OPENSSL_10
-local OPENSSL_11_OR_LATER = version.OPENSSL_11_OR_LATER
 local OPENSSL_3X = version.OPENSSL_3X
-local BORINGSSL = version.BORINGSSL
-local BORINGSSL_110 = version.BORINGSSL_110 -- used in boringssl-fips-20190808
 
 -- accessors provides an openssl version neutral interface to lua layer
 -- it doesn't handle any error, expect that to be implemented in
@@ -48,49 +44,12 @@ accessors.get_signature_nid = C.X509_get_signature_nid
 -- parent struct is freed.
 -- otherwise, use get0, which returns an internal pointer, we don't need to free it up.
 -- it will be gone together with the parent struct.
-
-if BORINGSSL_110 then
-  accessors.get_not_before = C.X509_get0_notBefore -- returns internal ptr, we convert to number
-  accessors.set_not_before = C.X509_set_notBefore
-  accessors.get_not_after = C.X509_get0_notAfter -- returns internal ptr, we convert to number
-  accessors.set_not_after = C.X509_set_notAfter
-  accessors.get_version = function(x509)
-    if x509 == nil or x509.cert_info == nil or x509.cert_info.validity == nil then
-      return nil
-    end
-    return C.ASN1_INTEGER_get(x509.cert_info.version)
-  end
-  accessors.get_serial_number = C.X509_get_serialNumber -- returns internal ptr, we convert to bn
-elseif OPENSSL_11_OR_LATER then
-  accessors.get_not_before = C.X509_get0_notBefore -- returns internal ptr, we convert to number
-  accessors.set_not_before = C.X509_set1_notBefore
-  accessors.get_not_after = C.X509_get0_notAfter -- returns internal ptr, we convert to number
-  accessors.set_not_after = C.X509_set1_notAfter
-  accessors.get_version = C.X509_get_version -- returns int
-  accessors.get_serial_number = C.X509_get0_serialNumber -- returns internal ptr, we convert to bn
-elseif OPENSSL_10 then
-  accessors.get_not_before = function(x509)
-    if x509 == nil or x509.cert_info == nil or x509.cert_info.validity == nil then
-      return nil
-    end
-    return x509.cert_info.validity.notBefore
-  end
-  accessors.set_not_before = C.X509_set_notBefore
-  accessors.get_not_after = function(x509)
-    if x509 == nil or x509.cert_info == nil or x509.cert_info.validity == nil then
-      return nil
-    end
-    return x509.cert_info.validity.notAfter
-  end
-  accessors.set_not_after = C.X509_set_notAfter
-  accessors.get_version = function(x509)
-    if x509 == nil or x509.cert_info == nil or x509.cert_info.validity == nil then
-      return nil
-    end
-    return C.ASN1_INTEGER_get(x509.cert_info.version)
-  end
-  accessors.get_serial_number = C.X509_get_serialNumber -- returns internal ptr, we convert to bn
-end
+accessors.get_not_before = C.X509_get0_notBefore -- returns internal ptr, we convert to number
+accessors.set_not_before = C.X509_set1_notBefore
+accessors.get_not_after = C.X509_get0_notAfter -- returns internal ptr, we convert to number
+accessors.set_not_after = C.X509_set1_notAfter
+accessors.get_version = C.X509_get_version -- returns int
+accessors.get_serial_number = C.X509_get0_serialNumber -- returns internal ptr, we convert to bn
 
 local function __tostring(self, fmt)
   if not fmt or fmt == 'PEM' then
@@ -241,7 +200,7 @@ end
 
 -- note: index is 0 based
 local OPENSSL_STRING_value_at = function(ctx, i)
-  local ct = ffi_cast("OPENSSL_STRING", stack_macro.OPENSSL_sk_value(ctx, i))
+  local ct = ffi_cast("OPENSSL_STRING", C.OPENSSL_sk_value(ctx, i))
   if ct == nil then
     return nil
   end
@@ -251,7 +210,7 @@ end
 function _M:get_ocsp_url(return_all)
   local st = C.X509_get1_ocsp(self.ctx)
 
-  local count = stack_macro.OPENSSL_sk_num(st)
+  local count = C.OPENSSL_sk_num(st)
   if count == 0 then
     return
   end
@@ -324,17 +283,11 @@ local digest_length = ctypes.ptr_of_uint()
 local digest_buf, digest_buf_size
 local function digest(self, cfunc, typ, properties)
   -- TODO: dedup the following with resty.openssl.digest
-  local ctx
-  if OPENSSL_11_OR_LATER then
-    ctx = C.EVP_MD_CTX_new()
-    ffi_gc(ctx, C.EVP_MD_CTX_free)
-  elseif OPENSSL_10 then
-    ctx = C.EVP_MD_CTX_create()
-    ffi_gc(ctx, C.EVP_MD_CTX_destroy)
-  end
+  local ctx = C.EVP_MD_CTX_new()
   if ctx == nil then
     return nil, "x509:digest: failed to create EVP_MD_CTX"
   end
+  ffi_gc(ctx, C.EVP_MD_CTX_free)
 
   local algo
   if OPENSSL_3X then
@@ -398,8 +351,6 @@ function _M:sign(pkey, digest)
       return false, "x509:sign: expect a digest instance to have algo member"
     end
     digest_algo = digest.algo
-  elseif BORINGSSL then
-    digest_algo = C.EVP_get_digestbyname('sha256')
   end
 
   -- returns size of signature if success
@@ -472,19 +423,6 @@ function _M:get_extension(nid_txt, last_pos)
   return ext, pos+1
 end
 
-local X509_delete_ext
-if OPENSSL_11_OR_LATER then
-  X509_delete_ext = C.X509_delete_ext
-elseif OPENSSL_10 then
-  X509_delete_ext = function(ctx, pos)
-    return C.X509v3_delete_ext(ctx.cert_info.extensions, pos)
-  end
-else
-  X509_delete_ext = function(...)
-    error("X509_delete_ext undefined")
-  end
-end
-
 -- AUTO GENERATED
 function _M:set_extension(extension, last_pos)
   if not extension_lib.istype(extension) then
@@ -497,7 +435,7 @@ function _M:set_extension(extension, last_pos)
   local pos = C.X509_get_ext_by_NID(self.ctx, nid, last_pos)
   -- pos may be -1, which means not found, it's fine, we will add new one instead of replace
 
-  local removed = X509_delete_ext(self.ctx, pos)
+  local removed = C.X509_delete_ext(self.ctx, pos)
   C.X509_EXTENSION_free(removed)
 
   if C.X509_add_ext(self.ctx, extension.ctx, pos) == nil then

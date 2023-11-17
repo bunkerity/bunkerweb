@@ -1,6 +1,6 @@
 from contextlib import suppress
 from os import getenv
-from subprocess import PIPE, run
+from subprocess import run
 from requests import get, post
 from requests.exceptions import RequestException
 from selenium import webdriver
@@ -13,13 +13,15 @@ try:
     retries = 0
     while not ready:
         with suppress(RequestException):
-            status_code = get("http://www.example.com", headers={"Host": "www.example.com"}).status_code
+            resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"})
+            status_code = resp.status_code
+            text = resp.text
 
             if status_code >= 500:
                 print("❌ An error occurred with the server, exiting ...", flush=True)
                 exit(1)
 
-            ready = status_code < 400
+            ready = status_code < 400 and text == "ready"
 
         if retries > 10:
             print("❌ The service took too long to be ready, exiting ...", flush=True)
@@ -76,22 +78,27 @@ try:
             print("❌ An error occurred when restarting BunkerWeb, exiting ...", flush=True)
             exit(1)
 
+        ready = False
         retries = 0
-        while (
-            b"BunkerWeb is ready"
-            not in run(
-                ["sudo", "tail", "-n", "1", "/var/log/bunkerweb/error.log"],
-                stdout=PIPE,
-                check=True,
-            ).stdout
-        ) and retries < 10:
-            retries += 1
-            print("ℹ️ Waiting for BunkerWeb to be ready, retrying in 5s ...")
-            sleep(5)
+        while not ready:
+            with suppress(RequestException):
+                resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"})
+                status_code = resp.status_code
+                text = resp.text
 
-        if retries >= 10:
-            print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
-            exit(1)
+                if status_code >= 500:
+                    print("❌ An error occurred with the server, exiting ...", flush=True)
+                    exit(1)
+
+                ready = status_code < 400 and text == "ready"
+
+            if retries > 10:
+                print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
+                exit(1)
+            elif not ready:
+                retries += 1
+                print("⚠️ Waiting for BunkerWeb to be ready, retrying in 5s ...", flush=True)
+                sleep(5)
 
     print("ℹ️ Starting Firefox again ...", flush=True)
     with webdriver.Firefox(options=firefox_options) as driver:

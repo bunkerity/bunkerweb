@@ -2,10 +2,10 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.2
+    image: bunkerity/bunkerweb:1.5.3
     pull_policy: never
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     volumes:
       - ./index.html:/var/www/html/index.html
     environment:
@@ -29,13 +29,22 @@ services:
       HTTP2: "yes"
       LISTEN_HTTP: "yes"
       DENY_HTTP_STATUS: "403"
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       bw-universe:
       bw-services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.2
+    image: bunkerity/bunkerweb-scheduler:1.5.3
     pull_policy: never
     depends_on:
       - bw

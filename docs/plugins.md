@@ -8,13 +8,13 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 |      Name      | Version | Description                                                                                                                      |                                                 Link                                                  |
 | :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------: |
-|   **ClamAV**   |   1.1   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
-| **Coraza** |   1.1   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).           | [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza) |
-|  **CrowdSec**  |   1.1   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
-| **Discord** | 1.1 | Send security notifications to a Discord channel using a Webhook. | [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord) |
-| **Slack** | 1.1 | Send security notifications to a Slack channel using a Webhook. | [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack) |
-| **VirusTotal** |   1.1   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-| **WebHook** | 1.1 | Send security notifications to a custom HTTP endpoint using a	Webhook. | [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook) |
+|   **ClamAV**   |   1.2   | Automatically scans uploaded files with the ClamAV antivirus engine and denies the request when a file is detected as malicious. |     [bunkerweb-plugins/clamav](https://github.com/bunkerity/bunkerweb-plugins/tree/main/clamav)     |
+| **Coraza** |   1.2   | Inspect requests using a the Coraza WAF (alternative of ModSecurity).           | [bunkerweb-plugins/coraza](https://github.com/bunkerity/bunkerweb-plugins/tree/main/coraza) |
+|  **CrowdSec**  |   1.2   | CrowdSec bouncer for BunkerWeb.                                                                                                  |   [bunkerweb-plugins/crowdsec](https://github.com/bunkerity/bunkerweb-plugins/tree/main/crowdsec)   |
+| **Discord** | 1.2 | Send security notifications to a Discord channel using a Webhook. | [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord) |
+| **Slack** | 1.2 | Send security notifications to a Slack channel using a Webhook. | [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack) |
+| **VirusTotal** |   1.2   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
+| **WebHook** | 1.2 | Send security notifications to a custom HTTP endpoint using a	Webhook. | [bunkerweb-plugins/webhook](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook) |
 
 ## How to use a plugin
 
@@ -22,7 +22,7 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 
 If you want to quickly install external plugins, you can use the `EXTERNAL_PLUGIN_URLS` setting. It takes a list of URLs, separated with space, pointing to compressed (zip format) archive containing one or more plugin(s).
 
-You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.1.zip`
+You can use the following value if you want to automatically install the official plugins : `EXTERNAL_PLUGIN_URLS=https://github.com/bunkerity/bunkerweb-plugins/archive/refs/tags/v1.2.zip`
 
 ### Manual
 
@@ -58,7 +58,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.2
+        image: bunkerity/bunkerweb-scheduler:1.5.3
         volumes:
           - ./bw-data:/data
     ...
@@ -95,7 +95,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.2
+        image: bunkerity/bunkerweb-scheduler:1.5.3
         volumes:
           - ./bw-data:/data
     ...
@@ -134,7 +134,7 @@ The first step is to install the plugin by putting the plugin files inside the c
     services:
     ...
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.2
+        image: bunkerity/bunkerweb-scheduler:1.5.3
         volumes:
           - /shared/bw-plugins:/data/plugins
     ...
@@ -181,7 +181,7 @@ The first step is to install the plugin by putting the plugin files inside the c
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.5.2
+              image: bunkerity/bunkerweb-scheduler:1.5.3
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -262,7 +262,7 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 !!! tip "Existing plugins"
 
-    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.5.2/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+    If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.5.3/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
 
 The first step is to create a folder that will contain the plugin :
 
@@ -507,7 +507,7 @@ end
 
 !!! tip "More examples"
 
-    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.5.2/src/bw/lua/bunkerweb) of the repository.
+    If you want to see the full list of available functions, you can have a look at the files present in the [lua directory](https://github.com/bunkerity/bunkerweb/tree/v1.5.3/src/bw/lua/bunkerweb) of the repository.
 
 ### Jobs
 

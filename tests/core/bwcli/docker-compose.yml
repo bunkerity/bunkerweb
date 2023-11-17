@@ -2,12 +2,12 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.2
+    image: bunkerity/bunkerweb:1.5.3
     pull_policy: never
     depends_on:
       - bw-redis
     labels:
-      - "bunkerweb.INSTANCE"
+      - "bunkerweb.INSTANCE=yes"
     environment:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       USE_BUNKERNET: "no"
@@ -15,11 +15,20 @@ services:
       LOG_LEVEL: "info"
       USE_REDIS: "yes"
       REDIS_HOST: "bw-redis"
+      CUSTOM_CONF_SERVER_HTTP_ready: |
+        location /ready {
+          default_type 'text/plain';
+          rewrite_by_lua_block {
+            ngx.print('ready')
+            ngx.flush(true)
+            ngx.exit(ngx.HTTP_OK)
+          }
+        }
     networks:
       - bw-universe
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.2
+    image: bunkerity/bunkerweb-scheduler:1.5.3
     pull_policy: never
     depends_on:
       - bw

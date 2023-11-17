@@ -66,6 +66,8 @@ else
     sudo sed -i "/--bind \"127.0.0.1:7000\" &/c\        --bind \"127.0.0.1:7000\" --log-level debug &" /usr/share/bunkerweb/scripts/bunkerweb-ui.sh
     sudo mkdir /var/www/html/app1.example.com
     sudo touch /var/www/html/app1.example.com/index.html
+    sudo find /etc/bunkerweb/configs/ -type f -exec rm -f {} \;
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
     export TEST_TYPE="linux"
 fi
 
@@ -160,6 +162,10 @@ if [ $? -ne 0 ] ; then
         sudo journalctl -u bunkerweb --no-pager
         echo "🛡️ Showing BunkerWeb UI journal logs ..."
         sudo journalctl -u bunkerweb-ui --no-pager
+        echo "🛡️ Showing BunkerWeb UI logs ..."
+        sudo cat /var/log/bunkerweb/ui.log
+        echo "🛡️ Showing BunkerWeb UI access logs ..."
+        sudo cat /var/log/bunkerweb/ui-access.log
         echo "🛡️ Showing BunkerWeb error logs ..."
         sudo cat /var/log/bunkerweb/error.log
         echo "🛡️ Showing BunkerWeb access logs ..."

@@ -11,14 +11,18 @@
 - [BUGFIX] Fix ACME renewal fails on redirection enabled Service
 - [BUGFIX] Fix errors when using a server name with multiple values in web UI
 - [BUGFIX] Fix error when deleting a service that have custom configs on web UI
+- [BUGFIX] Fix rare bug where database is locked
 - [MISC] Updated core dependencies
 - [MISC] Updated self-signed job to regenerate the cert if the subject or the expiration date has changed
 - [MISC] Jobs that download files from urls will now remove old cached files if urls are empty
 - [MISC] Replaced gevent with gthread in UI for security reasons
 - [MISC] Add HTML sanitization when injecting code in pages in the UI
 - [MISC] Optimize the way the UI handles services creation and edition
+- [MISC] Optimize certbot renew script to renew all domains in one command
+- [MISC] Use capability instead of sudo in Linux
+- [SECURITY] Init work on OpenSSF best practices
 
-## v1.5.2 - 2023/10/10
+## v1.5.2 - 2023/09/10
 
 - [BUGFIX] Fix UI fetching only default values from the database (fixes no trash button too)
 - [BUGFIX] Fix infinite loop when using autoconf

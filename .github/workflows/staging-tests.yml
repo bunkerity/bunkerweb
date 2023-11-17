@@ -25,7 +25,7 @@ jobs:
     steps:
       # Prepare
       - name: Checkout source code
-        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Login to ghcr
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
@@ -42,7 +42,7 @@ jobs:
         run: docker tag local/bunkerweb-tests:latest 192.168.42.100:5000/bunkerweb-tests:latest && docker push 192.168.42.100:5000/bunkerweb-tests:latest && docker tag local/scheduler-tests:latest 192.168.42.100:5000/scheduler-tests:latest && docker push 192.168.42.100:5000/scheduler-tests:latest && docker tag local/autoconf-tests:latest 192.168.42.100:5000/autoconf-tests:latest && docker push 192.168.42.100:5000/autoconf-tests:latest
         if: inputs.TYPE == 'swarm'
       - name: Install test dependencies
-        run: pip3 install --no-cache-dir --require-hashes -r tests/requirements.txt
+        run: pip3 install --no-cache-dir --require-hashes --no-deps -r tests/requirements.txt
       - uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: tf-k8s
@@ -68,6 +68,8 @@ jobs:
         if: inputs.TYPE == 'k8s'
       - uses: azure/setup-kubectl@901a10e89ea615cf61f57ac05cecdf23e7de06d8 # v3.2
         if: inputs.TYPE == 'k8s'
+        with:
+          version: "v1.28.2"
       - uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
         if: inputs.TYPE == 'k8s'
       - name: Pull BW linux ubuntu test image

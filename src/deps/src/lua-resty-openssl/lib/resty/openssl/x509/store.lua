@@ -11,9 +11,7 @@ local crl_lib = require "resty.openssl.x509.crl"
 local ctx_lib = require "resty.openssl.ctx"
 local format_all_error = require("resty.openssl.err").format_all_error
 local format_error = require("resty.openssl.err").format_error
-local OPENSSL_11_OR_LATER = require("resty.openssl.version").OPENSSL_11_OR_LATER
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
-local BORINGSSL = require("resty.openssl.version").BORINGSSL
 
 local _M = {}
 local mt = { __index = _M }
@@ -218,7 +216,7 @@ function _M:verify(x509, chain, return_chain, properties, verify_method, flags)
     if not return_chain then
       return true, nil
     end
-    local ret_chain_ctx = x509_vfy_macro.X509_STORE_CTX_get0_chain(ctx)
+    local ret_chain_ctx = C.X509_STORE_CTX_get0_chain(ctx)
     return chain_lib.dup(ret_chain_ctx)
   elseif code == 0 then -- unverified
     local vfy_code = C.X509_STORE_CTX_get_error(ctx)
@@ -232,14 +230,6 @@ function _M:verify(x509, chain, return_chain, properties, verify_method, flags)
 end
 
 function _M:check_revocation(verified_chain, properties)
-  if BORINGSSL then
-    return nil, "x509.store:check_revocation: this API is not supported in BoringSSL"
-  end
-
-  if not OPENSSL_11_OR_LATER then
-    return nil, "x509.store:check_revocation: this API is supported from OpenSSL 1.1.0"
-  end
-
   if not verified_chain or not chain_lib.istype(verified_chain) then
     return nil, "x509.store:check_revocation: expect a x509.chain instance at #1"
   end

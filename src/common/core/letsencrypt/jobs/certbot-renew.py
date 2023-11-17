@@ -25,39 +25,6 @@ from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from jobs import get_file_in_db, set_file_in_db  # type: ignore
 
-
-def renew(domain: str, letsencrypt_path: Path) -> int:
-    return run(
-        [
-            join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot"),
-            "renew",
-            "--config-dir",
-            str(letsencrypt_path.joinpath("etc")),
-            "--work-dir",
-            join(sep, "var", "lib", "bunkerweb", "letsencrypt"),
-            "--logs-dir",
-            join(sep, "var", "log", "bunkerweb"),
-            "--cert-name",
-            domain,
-            "--deploy-hook",
-            join(
-                sep,
-                "usr",
-                "share",
-                "bunkerweb",
-                "core",
-                "letsencrypt",
-                "jobs",
-                "certbot-deploy.py",
-            ),
-        ],
-        stdin=DEVNULL,
-        stderr=STDOUT,
-        env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
-        check=False,
-    ).returncode
-
-
 logger = setup_logger("LETS-ENCRYPT.renew", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
@@ -112,37 +79,38 @@ try:
     else:
         logger.info("No Let's Encrypt data found in db cache")
 
-    if getenv("MULTISITE", "no") == "yes":
-        servers = getenv("SERVER_NAME") or []
-
-        if isinstance(servers, str):
-            servers = servers.split(" ")
-
-        for first_server in servers:
-            if (
-                not first_server
-                or getenv(
-                    f"{first_server}_AUTO_LETS_ENCRYPT",
-                    getenv("AUTO_LETS_ENCRYPT", "no"),
-                )
-                != "yes"
-                or not letsencrypt_path.joinpath("etc", "live", first_server, "cert.pem").exists()
-            ):
-                continue
-
-            if renew(first_server, letsencrypt_path) != 0:
-                status = 2
-                logger.error(
-                    f"Certificates renewal for {first_server} failed",
-                )
-    elif getenv("AUTO_LETS_ENCRYPT", "no") == "yes" and getenv("SERVER_NAME", ""):
-        first_server = getenv("SERVER_NAME", "").split(" ")[0]
-        if letsencrypt_path.joinpath("etc", "live", first_server, "cert.pem").exists():
-            if renew(first_server, letsencrypt_path) != 0:
-                status = 2
-                logger.error(
-                    f"Certificates renewal for {first_server} failed",
-                )
+    if (
+        run(
+            [
+                join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot"),
+                "renew",
+                "--config-dir",
+                str(letsencrypt_path.joinpath("etc")),
+                "--work-dir",
+                join(sep, "var", "lib", "bunkerweb", "letsencrypt"),
+                "--logs-dir",
+                join(sep, "var", "log", "bunkerweb"),
+                "--deploy-hook",
+                join(
+                    sep,
+                    "usr",
+                    "share",
+                    "bunkerweb",
+                    "core",
+                    "letsencrypt",
+                    "jobs",
+                    "certbot-deploy.py",
+                ),
+            ],
+            stdin=DEVNULL,
+            stderr=STDOUT,
+            env=environ.copy() | {"PYTHONPATH": join(sep, "usr", "share", "bunkerweb", "deps", "python")},
+            check=False,
+        ).returncode
+        != 0
+    ):
+        status = 2
+        logger.error("Certificates renewal failed")
 
     # Put new folder in cache
     bio = BytesIO()

@@ -28,7 +28,7 @@ if [ "$integration" == "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb
-    MAKEFLAGS="-j $(nproc)" sudo pip install --no-cache-dir --require-hashes -r requirements.txt
+    MAKEFLAGS="-j $(nproc)" sudo pip install --no-cache-dir --require-hashes --no-deps -r requirements.txt
 
     echo "⌨️ Installing Redis ..."
     sudo apt install --no-install-recommends -y redis
@@ -45,6 +45,7 @@ else
     export USE_REDIS="yes"
     export REDIS_HOST="127.0.0.1"
     sudo touch /var/www/html/index.html
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 cleanup_stack () {

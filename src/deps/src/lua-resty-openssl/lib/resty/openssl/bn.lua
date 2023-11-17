@@ -9,7 +9,6 @@ require "resty.openssl.include.bn"
 local crypto_macro = require("resty.openssl.include.crypto")
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 local format_error = require("resty.openssl.err").format_error
-local OPENSSL_10 = require("resty.openssl.version").OPENSSL_10
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
 
 local _M = {}
@@ -55,8 +54,6 @@ function _M:to_binary(pad)
   if pad then
     if type(pad) ~= "number" then
       return nil, "bn:to_binary: expect a number at #1"
-    elseif OPENSSL_10 then
-      return nil, "bn:to_binary: padding is only supported on OpenSSL 1.1.0 or later"
     end
   end
 
@@ -167,30 +164,18 @@ end
 -- we only need one per worker
 local bn_ctx_tmp = C.BN_CTX_new()
 assert(bn_ctx_tmp ~= nil)
-if OPENSSL_10 then
-  C.BN_CTX_init(bn_ctx_tmp)
-end
 ffi_gc(bn_ctx_tmp, C.BN_CTX_free)
 
 _M.bn_ctx_tmp = bn_ctx_tmp
 
 -- mathematics
 
-local is_negative
-if OPENSSL_10 then
-  local bn_zero = assert(_M.new(0)).ctx
-  is_negative = function(ctx)
-    return C.BN_cmp(ctx, bn_zero) < 0 and 1 or 0
-  end
-else
-  is_negative = C.BN_is_negative
-end
 function mt.__unm(a)
   local b = _M.dup(a.ctx)
   if b == nil then
     error("BN_dup() failed")
   end
-  local sign = is_negative(b.ctx)
+  local sign = C.BN_is_negative(b.ctx)
   C.BN_set_negative(b.ctx, 1-sign)
   return b
 end
@@ -366,52 +351,20 @@ function mt.__le(a, b)
   return C.BN_cmp(a.ctx, b.ctx) <= 0
 end
 
-if OPENSSL_10 then
-  -- in openssl 1.0.x those functions are implemented as macros
-  -- don't want to copy paste all structs here
-  -- the followings are definitely slower, but works
-  local bn_zero = assert(_M.new(0)).ctx
-  local bn_one = assert(_M.new(1)).ctx
+function _M:is_zero()
+  return C.BN_is_zero(self.ctx) == 1
+end
 
-  function _M:is_zero()
-    return C.BN_cmp(self.ctx, bn_zero) == 0
-  end
+function _M:is_one()
+  return C.BN_is_one(self.ctx) == 1
+end
 
-  function _M:is_one()
-    return C.BN_cmp(self.ctx, bn_one) == 0
-  end
+function _M:is_word(n)
+  return C.BN_is_word(self.ctx, n) == 1
+end
 
-  function _M:is_word(n)
-    local ctx = C.BN_new()
-    ffi_gc(ctx, C.BN_free)
-    if ctx == nil then
-      return nil, "bn:is_word: BN_new() failed"
-    end
-    if C.BN_set_word(ctx, n) ~= 1 then
-      return nil, "bn:is_word: BN_set_word() failed"
-    end
-    return C.BN_cmp(self.ctx, ctx) == 0
-  end
-
-  function _M:is_odd()
-    return self:to_number() % 2 == 1
-  end
-else
-  function _M:is_zero()
-    return C.BN_is_zero(self.ctx) == 1
-  end
-
-  function _M:is_one()
-    return C.BN_is_one(self.ctx) == 1
-  end
-
-  function _M:is_word(n)
-    return C.BN_is_word(self.ctx, n) == 1
-  end
-
-  function _M:is_odd()
-    return C.BN_is_odd(self.ctx) == 1
-  end
+function _M:is_odd()
+  return C.BN_is_odd(self.ctx) == 1
 end
 
 function _M:is_prime(nchecks)

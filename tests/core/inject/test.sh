@@ -30,6 +30,7 @@ else
     sudo systemctl stop bunkerweb
     echo "INJECT_BODY=TEST" | sudo tee -a /etc/bunkerweb/variables.env
     sudo cp index.html /var/www/html/index.html
+    sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
 cleanup_stack () {

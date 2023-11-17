@@ -222,8 +222,10 @@ class DisabledPop {
   init() {
     window.addEventListener("pointerover", (e) => {
       //for checkbox and regular inputs
-      if (e.target.tagName === "INPUT" &&
-      e.target.hasAttribute('data-default-method')) {
+      if (
+        e.target.tagName === "INPUT" &&
+        e.target.hasAttribute("data-default-method")
+      ) {
         const el = e.target;
         this.showPopup(el, "input");
       }

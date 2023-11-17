@@ -1,3 +1,2 @@
-selenium==4.14.0
 requests==2.31.0
-urllib3[socks]==2.0.6
+selenium==4.15.2

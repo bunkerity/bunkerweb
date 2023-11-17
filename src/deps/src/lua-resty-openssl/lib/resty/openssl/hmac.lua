@@ -7,8 +7,6 @@ require "resty.openssl.include.hmac"
 require "resty.openssl.include.evp.md"
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 local format_error = require("resty.openssl.err").format_error
-local OPENSSL_10 = require("resty.openssl.version").OPENSSL_10
-local OPENSSL_11_OR_LATER = require("resty.openssl.version").OPENSSL_11_OR_LATER
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
 
 local _M = {}
@@ -20,18 +18,11 @@ local hmac_ctx_ptr_ct = ffi.typeof('HMAC_CTX*')
 -- Replace with EVP_MAC_* functions for OpenSSL 3.0
 
 function _M.new(key, typ)
-  local ctx
-  if OPENSSL_11_OR_LATER then
-    ctx = C.HMAC_CTX_new()
-    ffi_gc(ctx, C.HMAC_CTX_free)
-  elseif OPENSSL_10 then
-    ctx = ffi.new('HMAC_CTX')
-    C.HMAC_CTX_init(ctx)
-    ffi_gc(ctx, C.HMAC_CTX_cleanup)
-  end
+  local ctx = C.HMAC_CTX_new()
   if ctx == nil then
     return nil, "hmac.new: failed to create HMAC_CTX"
   end
+  ffi_gc(ctx, C.HMAC_CTX_free)
 
   local algo = C.EVP_get_digestbyname(typ or 'sha1')
   if algo == nil then

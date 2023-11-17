@@ -15,7 +15,7 @@ ffi.cdef [[
   OSSL_PARAM OSSL_PARAM_construct_uint(const char *key, unsigned int *buf);
   OSSL_PARAM OSSL_PARAM_construct_BN(const char *key, unsigned char *buf,
                                     size_t bsize);
-  OSSL_PARAM OSSL_PARAM_construct_double(const char *key, double *buf);
+  // OSSL_PARAM OSSL_PARAM_construct_double(const char *key, double *buf);
   OSSL_PARAM OSSL_PARAM_construct_utf8_string(const char *key, char *buf,
                                               size_t bsize);
   OSSL_PARAM OSSL_PARAM_construct_octet_string(const char *key, void *buf,

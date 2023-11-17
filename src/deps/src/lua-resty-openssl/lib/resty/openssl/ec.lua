@@ -5,11 +5,8 @@ local ffi_gc = ffi.gc
 require "resty.openssl.include.ec"
 local bn_lib = require "resty.openssl.bn"
 local objects_lib = require "resty.openssl.objects"
-local ctypes = require "resty.openssl.auxiliary.ctypes"
 
-local version_num = require("resty.openssl.version").version_num
 local format_error = require("resty.openssl.err").format_error
-local BORINGSSL = require("resty.openssl.version").BORINGSSL
 
 local _M = {}
 
@@ -38,27 +35,12 @@ function _M.get_parameters(ec_key_st)
         if point_form == nil then
           return nil, format_error("ec.get_parameters: EC_KEY_get_conv_form")
         end
-        if BORINGSSL then
-          local sz = tonumber(C.EC_POINT_point2oct(group, pub_point, point_form, nil, 0, bn_lib.bn_ctx_tmp))
-          if sz <= 0 then
-            return nil, format_error("ec.get_parameters: EC_POINT_point2oct")
-          end
-          local buf = ctypes.uchar_array(sz)
-          C.EC_POINT_point2oct(group, pub_point, point_form, buf, sz, bn_lib.bn_ctx_tmp)
-          buf = ffi.string(buf, sz)
-          local err
-          bn, err = bn_lib.from_binary(buf)
-          if bn == nil then
-            return nil, "ec.get_parameters: bn_lib.from_binary: " .. err
-          end
-          return bn
-        else
-          bn = C.EC_POINT_point2bn(group, pub_point, point_form, nil, bn_lib.bn_ctx_tmp)
-          if bn == nil then
-            return nil, format_error("ec.get_parameters: EC_POINT_point2bn")
-          end
-          ffi_gc(bn, C.BN_free)
+
+        bn = C.EC_POINT_point2bn(group, pub_point, point_form, nil, bn_lib.bn_ctx_tmp)
+        if bn == nil then
+          return nil, format_error("ec.get_parameters: EC_POINT_point2bn")
         end
+        ffi_gc(bn, C.BN_free)
       elseif k == 'private' or k == "priv_key" then
         -- get0, don't GC
         bn = C.EC_KEY_get0_private_key(ec_key_st)
@@ -72,17 +54,12 @@ function _M.get_parameters(ec_key_st)
           return nil, "ec.get_parameters: BN_new() failed"
         end
         ffi_gc(bn, C.BN_free)
-        local f
-        if version_num >= 0x10101000 then
-          f = C.EC_POINT_get_affine_coordinates
-        else
-          f = C.EC_POINT_get_affine_coordinates_GFp
-        end
+
         local code
         if k == 'x' then
-          code = f(group, pub_point, bn, nil, bn_lib.bn_ctx_tmp)
+          code = C.EC_POINT_get_affine_coordinates(group, pub_point, bn, nil, bn_lib.bn_ctx_tmp)
         else
-          code = f(group, pub_point, nil, bn, bn_lib.bn_ctx_tmp)
+          code = C.EC_POINT_get_affine_coordinates(group, pub_point, nil, bn, bn_lib.bn_ctx_tmp)
         end
         if code ~= 1 then
           return nil, format_error("ec.get_parameters: EC_POINT_get_affine_coordinates")

@@ -1,15 +1,17 @@
+* text=auto eol=lf
+
 # Folders
-src/deps/src/** linguist-vendored
-src/common/core/modsecurity/files/** linguist-vendored
-src/ui/static/js/editor/** linguist-vendored
-src/ui/static/js/utils/purify/** linguist-vendored
-src/ui/static/webfonts/** linguist-vendored
+src/deps/src/** -text -eol linguist-vendored=true
+src/common/core/modsecurity/files/** -text -eol linguist-vendored=true
+src/ui/static/js/editor/** -text -eol linguist-vendored=true
+src/ui/static/js/utils/purify/** -text -eol linguist-vendored=true
+src/ui/static/webfonts/** -text -eol linguist-vendored=true
 
 # Files
-src/deps/misc/lua-pack.Makefile -linguist-vendored
-src/deps/misc/ngx_http_modsecurity_access.c -linguist-vendored
-src/ui/static/css/datepicker-foundation.css -linguist-vendored
-src/ui/static/css/flatpickr.css -linguist-vendored
-src/ui/static/css/flatpickr.dark.css -linguist-vendored
-src/ui/static/js/tsparticles.bundle.min.js -linguist-vendored
-src/ui/static/js/utils/flatpickr.js -linguist-vendored
+src/deps/misc/lua-pack.Makefile -linguist-vendored=true
+src/deps/misc/ngx_http_modsecurity_access.c -linguist-vendored=true
+src/ui/static/css/datepicker-foundation.css -linguist-vendored=true
+src/ui/static/css/flatpickr.css -linguist-vendored=true
+src/ui/static/css/flatpickr.dark.css -linguist-vendored=true
+src/ui/static/js/tsparticles.bundle.min.js -linguist-vendored=true
+src/ui/static/js/utils/flatpickr.js -linguist-vendored=true
