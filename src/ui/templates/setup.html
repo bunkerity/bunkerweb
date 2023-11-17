@@ -83,7 +83,7 @@
           <h1 class="block text-center font-bold dark:text-white mb-8 text-3xl">
             Setup BunkerWeb
           </h1>
-          <form action="/setup" method="POST" autocomplete="off">
+          <form action="setup" method="POST" autocomplete="off">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input
               type="hidden"
@@ -104,6 +104,7 @@
                 name="ADMIN_USERNAME"
                 class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
                 placeholder="enter username"
+                value="{{ username }}"
                 pattern="(.*?)"
                 maxlength="256"
                 required
@@ -124,7 +125,9 @@
                 name="ADMIN_PASSWORD"
                 class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
                 placeholder="enter password"
-                pattern="(.*?)"
+                value="{{ password }}"
+                pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+                minlength="8"
                 required
               />
             </div>
@@ -138,12 +141,12 @@
               </h5>
               <label class="sr-only" for="HOSTNAME">Hostname</label>
               <input
-                type="password"
+                type="text"
                 id="HOSTNAME"
                 name="HOSTNAME"
                 class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
                 placeholder="enter hostname"
-                pattern="^https?:\/\/([a-zA-Z0-9.-]{1,255}(:((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4})))?)(\/.*)$"
+                pattern="^https?:\/\/([a-zA-Z0-9.\u002D]{1,255}(:((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4})))?)(\/.*)?$"
                 required
               />
             </div>

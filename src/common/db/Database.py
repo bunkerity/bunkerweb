@@ -28,6 +28,7 @@ from model import (
     Jobs_cache,
     Custom_configs,
     Selects,
+    Users,
     Metadata,
 )
 
@@ -1505,3 +1506,26 @@ class Database:
                 return None
 
             return page.template_file
+
+    def get_ui_user(self) -> Optional[dict]:
+        """Get ui user."""
+        with self.__db_session() as session:
+            user = session.query(Users).with_entities(Users.username, Users.password).filter_by(id=1).first()
+            if not user:
+                return None
+            return {"username": user.username, "password_hash": user.password.encode("utf-8")}
+
+    def create_ui_user(self, username: str, password: bytes) -> str:
+        """Create ui user."""
+        with self.__db_session() as session:
+            if self.get_ui_user():
+                return "User already exists"
+
+            session.add(Users(id=1, username=username, password=password.decode("utf-8")))
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
