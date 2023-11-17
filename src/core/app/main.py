@@ -368,7 +368,7 @@ CORE_CONFIG.logger.info("✅ BunkerWeb static instances updated to database")
 if CORE_CONFIG.integration in ("Linux", "Docker"):
     CORE_CONFIG.logger.info("Executing scheduler ...")
     DB.set_scheduler_initialized()
-    for thread in (Thread(target=test_and_send_to_instances, args=(None, {"plugins", "custom_configs", "config"}), kwargs={"no_reload": True}), Thread(target=run_jobs)):
+    for thread in (Thread(target=test_and_send_to_instances, args=(None, {"plugins", "custom_configs"}), kwargs={"no_reload": True}), Thread(target=run_jobs)):
         thread.start()
 
 

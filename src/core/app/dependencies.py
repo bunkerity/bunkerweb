@@ -67,6 +67,8 @@ SEMAPHORE = Semaphore(MAX_THREADS - 1 if MAX_THREADS > 1 else 1)
 
 # Create thread events
 api_started = Event()
+jobs_not_running = Event()
+jobs_not_running.set()
 
 # Create static paths
 CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
@@ -280,15 +282,25 @@ def generate_config(function: Optional[Callable] = None):
     def wrap(*args, **kwargs):
         assert DB
 
-        content = ""
-        db_config = DB.get_config()
+        if not jobs_not_running.is_set():
+            CORE_CONFIG.logger.info("⏲ Waiting for jobs to finish ...")
+            jobs_not_running.wait(60)
 
-        if isinstance(db_config, str):
-            CORE_CONFIG.logger.error(f"Can't get config from database : {db_config}")
-            stop(1)
+        db_config = "retry"
+        while db_config == "retry":
+            db_config = DB.get_config()
+
+            if db_config == "retry":
+                CORE_CONFIG.logger.warning("Can't get config from database, retrying in 5 seconds ...")
+                sleep(5)
+                continue
+            elif isinstance(db_config, str):
+                CORE_CONFIG.logger.error(f"Can't get config from database : {db_config}")
+                stop(1)
 
         assert isinstance(db_config, dict)
 
+        content = ""
         for k, v in db_config.items():
             content += f"{k}={v}\n"
         TMP_ENV_PATH.write_text(content)
@@ -482,43 +494,65 @@ def run_jobs():
 
     assert DB
 
-    db_config = DB.get_config()
+    jobs_not_running.wait(60)
 
-    if isinstance(db_config, str):
-        CORE_CONFIG.logger.error(f"Can't get config from database : {db_config}")
-        stop(1)
+    jobs_not_running.clear()
 
-    assert isinstance(db_config, dict)
+    try:
+        db_config = DB.get_config()
 
-    # Only run jobs once
-    if not SCHEDULER.reload(db_config | {"API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "core_token": CORE_CONFIG.core_token}):
-        CORE_CONFIG.logger.error("At least one job in run_once() failed")
-    else:
-        CORE_CONFIG.logger.info("All jobs in run_once() were successful")
+        if isinstance(db_config, str):
+            CORE_CONFIG.logger.error(f"Can't get config from database : {db_config}")
+            stop(1)
 
-    if test_and_send_to_instances(None, {"cache"}) != 0:
-        CORE_CONFIG.logger.warning("Can't send data to BunkerWeb instances, configuration will not work as expected")
+        assert isinstance(db_config, dict)
 
-    if not DB.is_scheduler_initialized():
-        DB.set_scheduler_initialized()
-    api_started.set()
+        # Only run jobs once
+        if not SCHEDULER.reload(db_config | {"API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "core_token": CORE_CONFIG.core_token}):
+            CORE_CONFIG.logger.error("At least one job in run_once() failed")
+        else:
+            CORE_CONFIG.logger.info("All jobs in run_once() were successful")
+
+        jobs_not_running.set()
+
+        if test_and_send_to_instances(None, {"cache", "config"}) != 0:
+            CORE_CONFIG.logger.warning("Can't send data to BunkerWeb instances, configuration will not work as expected")
+
+        if not DB.is_scheduler_initialized():
+            DB.set_scheduler_initialized()
+        api_started.set()
+    except:
+        CORE_CONFIG.logger.exception("Exception while running jobs")
+    finally:
+        jobs_not_running.set()
 
 
 def run_job(job_name: str):
     """Run a job"""
     assert DB
 
-    db_config = DB.get_config()
+    jobs_not_running.wait(60)
 
-    if isinstance(db_config, str):
-        CORE_CONFIG.logger.error(f"Can't get config from database : {db_config}")
-        stop(1)
+    jobs_not_running.clear()
 
-    assert isinstance(db_config, dict)
+    try:
+        db_config = DB.get_config()
 
-    SCHEDULER.reload(db_config | {"API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "core_token": CORE_CONFIG.core_token}, run=False)
-    SCHEDULER.run_single(job_name)
+        if isinstance(db_config, str):
+            CORE_CONFIG.logger.error(f"Can't get config from database : {db_config}")
+            stop(1)
 
-    # TODO: remove this when the soft reload will be available
-    if test_and_send_to_instances(None, {"cache"}) != 0:
-        CORE_CONFIG.logger.warning("Can't send data to BunkerWeb instances, configuration will not work as expected")
+        assert isinstance(db_config, dict)
+
+        SCHEDULER.reload(db_config | {"API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "core_token": CORE_CONFIG.core_token}, run=False)
+        SCHEDULER.run_single(job_name)
+
+        jobs_not_running.set()
+
+        # TODO: remove this when the soft reload will be available
+        if test_and_send_to_instances(None, {"cache", "config"}) != 0:
+            CORE_CONFIG.logger.warning("Can't send data to BunkerWeb instances, configuration will not work as expected")
+    except:
+        CORE_CONFIG.logger.exception(f"Exception while running job {job_name}")
+    finally:
+        jobs_not_running.set()
