@@ -1,8 +1,0 @@
-@font-face {
-  font-family: "Open Sans";
-  src: url("../webfonts/OpenSans.ttf");
-}
-
-* {
-  font-family: "Open Sans", sans-serif !important;
-}

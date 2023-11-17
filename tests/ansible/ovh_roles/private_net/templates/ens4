@@ -1,5 +1,0 @@
-auto ens4
-allow-hotplug ens4
-iface ens4 inet static
-    address {{ local_ip }}/24
-    mtu 9000
