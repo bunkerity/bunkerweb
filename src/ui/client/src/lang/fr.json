@@ -1,13 +1,18 @@
 {
   "login": {
-    "title": "Connexion",
-    "username": "utilisateur",
-    "username_placeholder": "entrer nom utilisateur",
+    "title": "connexion",
+    "username": "identifiant",
+    "username_placeholder": "entrer identifiant",
     "password": "mot de passe",
     "password_placeholder": "entrer mot de passe",
-    "log_button": "Se connecter"
+    "log_button": "se connecter"
   },
   "dashboard": {
+    "header": {
+      "buttons": {
+        "refresh": "récupération de toutes les données."
+      }
+    },
     "menu": {
       "nav": {
         "home": "accueil",
@@ -27,10 +32,10 @@
         "alt_link_github": "lien vers Github"
       },
       "plugins": {
-        "title": "pages plugins",
+        "title": "pages plugin",
         "none": {
-          "description": "Besoin d'un plugin custom ?",
-          "check_doc": "voir doc"
+          "description": "envie de vos propres plugins ?",
+          "check_doc": "voir la doc"
         }
       },
       "mode": {
@@ -41,9 +46,9 @@
     },
     "actions": {
       "title": "actions",
-      "subtitle": "Historique des modifications",
-      "close_button": "fermer la sidebar feedback",
-      "open_button": "ouvrir la sidebar feedback",
+      "subtitle": "liste des feedbacks",
+      "close_button": "fermer la sidebar de feeback",
+      "open_button": "ouvrir la sidebar de feeback",
       "tabs": {
         "ui": "ui",
         "core": "core",
@@ -52,24 +57,44 @@
     },
     "news": {
       "title": "news",
-      "subtitle": "Les dernières nouveautés !",
-      "fetch_error": "Impossible de récupérer les articles de blog.",
+      "subtitle": "restez à jour !",
+      "fetch_error": "Impossible de récupérer les news",
       "newsletter": {
-        "title": "joindre la newsletter",
-        "placeholder": "dupont.martin{'@'}example.com",
+        "title": "Rejoindre la newsletter",
+        "placeholder": "martin.dupont{'@'}example.com",
         "privacy": {
-          "text": "J'ai lu et accepte la",
-          "text_link": "politique de confidentialité"
+          "text": "j'ai lu et accepte",
+          "text_link": "la politique de confidentialité"
         },
         "subscribe_button": "souscrire"
+      }
+    },
+    "api": {
+      "state": {
+        "aria_description": "Montre les détails sur la récupération de données."
+      }
+    },
+    "alert": {
+      "base": {
+        "close_button": {
+          "aria_description": "Ferme l'alerte."
+        }
+      }
+    },
+    "feedback": {
+      "alert": {
+        "aria_description": "Retour sur vos propres actions."
+      },
+      "logs": {
+        "aria_description": "Retour sur les actions BunkerWeb."
       }
     }
   },
   "home": {
     "version": {
       "api": {
-        "pending": "Récupération de la version en cours",
-        "error": "Erreur récupération la de version"
+        "pending": "Tentative de récupération de la version",
+        "error": "Erreur de récupération de la version"
       },
       "card": {
         "name": "version",
@@ -78,20 +103,28 @@
       }
     },
     "instances": {
+      "hostname": "hostname",
+      "method": "method",
+      "port": "port",
       "api": {
-        "pending": "Récupération des instances en cours ",
-        "error": "Erreur récupération des instances"
+        "pending": "Tentative de récupération des instances",
+        "error": "Erreur de récupération des instances"
       },
       "card": {
         "name": "instances",
         "up": "up",
         "down": "down"
+      },
+      "actions": {
+        "stop": "stop",
+        "ping": "ping",
+        "reload": "reload"
       }
     },
     "services": {
       "api": {
-        "pending": "Récupération des services en cours ",
-        "error": "Erreur récupération des services"
+        "pending": "Tentative de récupération des services",
+        "error": "Erreur de récupération des services"
       },
       "card": {
         "name": "services",
@@ -101,28 +134,28 @@
     },
     "plugins": {
       "api": {
-        "pending": "Récupération des plugins en cours ",
-        "error": "Erreur récupération des plugins"
+        "pending": "Tentative de récupération des plugins",
+        "error": "Erreur de récupération des plugins"
       },
       "card": {
         "name": "plugins",
-        "internal": "interne",
-        "external": "externe"
+        "internal": "internes",
+        "external": "externes"
       }
     }
   },
   "actions": {
     "api": {
-      "pending": "Récupération des actions en cours",
-      "error": "Erreur récupération des actions"
+      "pending": "Tentative de récupération des actions",
+      "error": "Erreur de récupération des actions"
     },
     "card": {
       "info": {
         "title": "info",
         "items": {
-          "total": "total actions",
-          "ui": "ui actions",
-          "core": "core actions"
+          "total": "Actions total",
+          "ui": "Actions UI",
+          "core": "Actions CORE"
         }
       },
       "filter": {
@@ -134,7 +167,7 @@
           "label": "methodes"
         },
         "api_method": {
-          "label": "methodes api"
+          "label": "api methodes"
         }
       },
       "actions": {
@@ -151,102 +184,138 @@
   },
   "bans": {
     "api": {
-      "pending": "Récupération liste de bans",
-      "error": "Erreur récupération liste de bans"
+      "pending": "Tentative de récupération des bans list",
+      "error": "Erreur de récupération des bans list"
+    },
+    "tabs": {
+      "list": "Liste des bans",
+      "add": "Ajout de bans"
     },
     "card": {
       "info": {
         "title": "info",
         "items": {
-          "instances_total": "total instances",
-          "ip_bans_total": "total ip bans"
+          "instances_total": "Total instances",
+          "ip_bans_total": "Total ip bans"
         }
       },
       "filter": {
-        "title": "filtres liste de bans",
+        "title": "Filtres liste des bans",
         "search_ip": {
-          "label": "recherche ip"
+          "label": "recherche par ip"
         },
         "reason": {
-          "label": "recherche motif"
+          "label": "sélectionner une raison"
         }
       },
       "actions": {
         "title": "actions"
+      }
+    },
+    "list": {
+      "no_bans": "Pas de bans",
+      "select_all": "sélectionner tout",
+      "unselect_all": "déslectionner tout",
+      "unban": {
+        "label": "déban sélection",
+        "aria_description": "déban l'élément sélectionné dans la liste."
       },
-      "list": {
-        "no_bans": "Aucun ban à montrer",
-        "select_all": "sélectionner tout",
-        "unselect_all": "désélectionner tout",
-        "unban_select": "Déban les sélections"
-      },
-      "add": {
-        "actions": {
-          "add_field": "Ajouter ban",
-          "remove_all": "Supprimer tout",
-          "save_bans": "Sauvegarder"
+      "select": {
+        "aria_description": "Sélectionne un ban pour effectuer des actions."
+      }
+    },
+    "add": {
+      "actions": {
+        "add_field": {
+          "label": "Ajouter un ban",
+          "aria_description": "Ajoute un champ à remplir pour effectuer un ban."
         },
-        "header": {
-          "ip_number": "IP",
-          "ban_start": "début ban",
-          "ban_end": "fin ban",
-          "reason": "motif",
-          "delete": "supprimer"
+        "remove_bans": {
+          "label": "supprimer tout",
+          "aria_description": "Supprime tous les champs de bans."
+        },
+        "remove_ban": {
+          "label": "supprimer l'élément",
+          "aria_description": "Supprime le champ relié d'ajout de ban."
+        },
+        "save_bans": {
+          "label": "sauvegarder",
+          "aria_description": "sauvegarde les bans ajoutés."
         }
+      },
+      "header": {
+        "ip_number": "ip",
+        "ban_start": "début ban",
+        "ban_end": "fin ban",
+        "reason": "raison",
+        "delete": "supprimer"
       }
     }
   },
   "custom_conf": {
     "api": {
-      "pending": "Récupération des configs customs",
-      "error": "Erreur récupération des configs customs"
+      "pending": "Tentative de récupération de custom conf",
+      "error": "Erreur de récupération de custom conf"
     },
     "card": {
       "info": {
         "title": "info",
         "items": {
-          "conf_total": "total configs",
-          "conf_global": "configs globales",
-          "conf_services": "configs services"
+          "conf_total": "Configs total",
+          "conf_global": "Configs globales",
+          "conf_services": "Configs services"
         }
       },
       "filter": {
         "title": "filtres",
         "search_path": {
-          "label": "recherche par chemin"
+          "label": "Recherche par chemin"
         },
         "search_name": {
-          "label": "recherche par nom"
+          "label": "Recherche par nom"
         },
         "show_services_folders": {
-          "label": "voir les dossiers services"
+          "label": "Voir les dossiers services"
         },
         "show_path_with_conf": {
-          "label": "voir seulement si fichier"
+          "label": "Voir dossier si .conf seulement"
         }
       }
     },
     "file_manager": {
-      "add_file": "ajouter fichier",
+      "add_file": "Ajouter fichier",
       "actions": {
         "edit": "editer",
         "download": "télécharger",
         "delete": "supprimer",
-        "create": "creer",
+        "create": "créer",
         "view": "voir"
+      },
+      "breadcrumb": {
+        "item": {
+          "aria_description": "Cliquer pour se rendre au chemin relié."
+        }
+      },
+      "modal": {
+        "path": {
+          "aria_description": "Montre le chemien entier avec un input avec le nom du fichier conf."
+        },
+        "editor": {
+          "aria_description": "Remplir avec le script qui doit s'exécuter pour ce fichier."
+        }
       }
     }
   },
   "global_conf": {
     "api": {
-      "pending": "Récupération de la config globale",
-      "error": "Erreur récupération de la config globale"
+      "pending": "Tentative de récupération de la config globale",
+      "error": "Erreur de récupération de la config globale"
     },
     "card": {
       "plugin": {
         "title": "Config globale",
         "select_plugin": {
-          "label": "Sélection de plugin",
+          "label": "Sélectionner un plugin",
           "placeholder": "recherche"
         }
       },
@@ -254,10 +323,10 @@
         "title": "filtres",
         "search": {
           "label": "recherche",
-          "placeholder": "nom de setting"
+          "placeholder": "titre, description..."
         },
         "method": {
-          "label": "methode"
+          "label": "methodes"
         }
       },
       "structure": {
@@ -265,77 +334,180 @@
       }
     }
   },
-  "A11y": {
+  "jobs": {
     "api": {
-      "state": {
-        "aria_description": "Montre l'état de la récupération de donnée."
-      }
+      "pending": "Tentative de récupération des jobs",
+      "error": "Erreur de récupération des jobs"
     },
-    "alert": {
-      "base": {
-        "close_button": {
-          "aria_description": "Ferme l'alerte concernée."
-        }
-      }
-    },
-    "feedback": {
-      "alert": {
-        "aria_description": "Retour sur tes propres actions."
+    "card": {
+      "info": {
+        "title": "info",
+        "jobs_total": "Total jobs",
+        "jobs_reload": "Total rechargés",
+        "jobs_success": "Total réussis"
       },
-      "logs": {
-        "aria_description": "Retour sur les actions effectuées sur BunkerWeb."
+      "filter": {
+        "title": "filtres",
+        "search": {
+          "label": "recherche",
+          "placeholder": "mot clé"
+        },
+        "success_state": {
+          "label": "état de réussite"
+        },
+        "reload_state": {
+          "label": "état de rechargement"
+        },
+        "interval": {
+          "label": "interval"
+        }
+      },
+      "jobs": {
+        "title": "jobs",
+        "headers": {
+          "name": "nom",
+          "every": "interval",
+          "history": "historique",
+          "reload": "rechargement",
+          "success": "réussite",
+          "last_run": "dernier tour",
+          "cache": "cache",
+          "action": "action"
+        },
+        "state": {
+          "reload": {
+            "failed": "recharge échoué",
+            "succeed": "recharge réussie"
+          },
+          "success": {
+            "failed": "échec",
+            "succeed": "succès"
+          }
+        },
+        "actions": {
+          "run": "lancer",
+          "show_history": "Montre dans un modal l'historique des actions au clique.",
+          "cache_download": "Télécharger le cache"
+        },
+        "modal_history": {
+          "title": "historique",
+          "headers": {
+            "success": "réussite",
+            "start_date": "début exécution",
+            "end_date": "fin exécution"
+          },
+          "close": "fermer"
+        }
       }
+    }
+  },
+  "plugins": {
+    "api": {
+      "pending": "Tentative de récupération des plugins",
+      "error": "Erreur de récupération des plugins"
     },
-    "plugin": {
-      "setting": {
-        "select": {
-          "default": {
-            "aria_description": "Communique avec un select custom visible."
-          },
-          "dropdown_button": {
-            "aria_description": "Bouton pour ouvrir un dropdown custom."
-          },
-          "dropdown": {
-            "aria_description": " Custom select dropdown."
-          },
-          "option": {
-            "aria_description": "Custom select option."
-          }
+    "card": {
+      "info": {
+        "title": "info",
+        "plugins_total": "plugins total",
+        "plugins_internal": "plugins internes",
+        "plugins_external": "plugins externes"
+      },
+      "upload": {
+        "title": "upload"
+      },
+      "filter": {
+        "title": "filtres",
+        "search": {
+          "label": "recheche",
+          "placeholder": "mot clé"
         },
-        "input": {
-          "password": {
-            "aria_description": "Cache ou montre la valeur de l'input de type mot de passe."
-          }
-        },
-        "checkbox": {
-          "svg": {
-            "aria_description": "Montre si la checkbox est activée ou non."
-          }
+        "type": {
+          "label": "type de plugin"
         }
       }
     },
-    "bans": {
+    "list": {
+      "title": "liste des plugins",
+      "actions": {
+        "link": "lien vers la page custom du plugin",
+        "delete": "supprime le plugin relié."
+      }
+    },
+    "delete_modal": {
+      "title": "Supprimer le {name} ?",
+      "text": "Etes-vous sûr de vouloir supprimer le plugin {name} ?",
+      "close": "fermer",
+      "delete": "supprimer"
+    }
+  },
+  "services": {
+    "api": {
+      "pending": "Tentative de récupération des services",
+      "error": "Erreur de récupération des services"
+    },
+    "card": {
+      "info": {
+        "title": "info",
+        "total": "total",
+        "scheduler": "scheduler",
+        "ui": "ui"
+      },
       "list": {
-        "unban": {
-          "aria_description": "Déban les éléments de la liste sélectionnés."
+        "title": "Services and plugins",
+        "switch_warning": "Changer de services va réinitialiser les changements du service en cours.",
+        "select_service": {
+          "label": "sélectionner un service"
         },
-        "select": {
-          "aria_description": "Selectionne un élément pour effectuer des actions."
+        "select_plugin": {
+          "label": "sélectionner un plugin"
         }
       },
-      "add": {
-        "add_ban_field": {
-          "aria_description": "Ajoute un champ à remplir pour ban."
+      "filter": {
+        "title": "filtres",
+        "search_setting": {
+          "label": "recherche un paramètre",
+          "placeholder": "nom, titre, description..."
         },
-        "delete_bans": {
-          "aria_description": "Supprime tous les champs ajoutés."
-        },
-        "delete_ban": {
-          "aria_description": "Supprime l'élément relié."
-        },
-        "save_ban": {
-          "aria_description": "Sauvegarde les éléments ajoutés"
+        "method_setting": {
+          "label": "Sélectionner une méthode"
         }
+      }
+    },
+    "active": {
+      "label": {
+        "new": "Créer un nouveau service",
+        "base": "service {name}"
+      }
+    },
+    "actions": {
+      "new": "Nouveau service",
+      "save": "sauvegarder"
+    }
+  },
+  "plugin_settings": {
+    "select": {
+      "default": {
+        "aria_description": "Relié à un composant select custom visible."
+      },
+      "dropdown_button": {
+        "aria_description": "Bouton toggle de dropdown custom."
+      },
+      "dropdown": {
+        "aria_description": "Dropdown custom faisant office de select."
+      },
+      "option": {
+        "aria_description": "Option custom."
+      }
+    },
+    "input": {
+      "password": {
+        "aria_description": "Toggle l'input pour montrer/cacher une donnée de type mot de passe."
+      }
+    },
+    "checkbox": {
+      "svg": {
+        "aria_description": "Montre visuellement l'état de la checkbox custom."
       }
     }
   }

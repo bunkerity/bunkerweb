@@ -32,13 +32,30 @@ const emits = defineEmits(["cache", "run", "history"]);
       <span :class="[props.positions[1]]">{{ data["every"] }}</span>
       <div :class="[props.positions[2], 'ml-2']">
         <button @click="$emit('history', { jobName: key })">
+          <span class="sr-only">
+            {{ $t("jobs.card.jobs.actions.show_history") }}
+          </span>
           <JobsSvgHistory />
         </button>
       </div>
       <div class="translate-x-3" :class="[props.positions[3]]">
+        <span class="sr-only"
+          >{{
+            data["reload"]
+              ? $t("jobs.card.jobs.state.reload.succeed")
+              : $t("jobs.card.jobs.state.reload.failed")
+          }}
+        </span>
         <JobsSvgState :success="data['reload']" />
       </div>
       <div class="translate-x-4" :class="[props.positions[4]]">
+        <span class="sr-only">
+          {{
+            data["history"][0]["success"]
+              ? $t("jobs.card.jobs.state.success.succeed")
+              : $t("jobs.card.jobs.state.success.failed")
+          }}
+        </span>
         <JobsSvgState :success="data['history'][0]['success']" />
       </div>
       <div :class="[props.positions[5]]">
@@ -50,7 +67,7 @@ const emits = defineEmits(["cache", "run", "history"]);
           @inp="(v) => $emit('cache', { jobName: key, cacheName: v })"
           :settings="{
             id: 'cache-files',
-            value: 'select to download',
+            value: $t('jobs.card.jobs.actions.cache_download'),
             values: getJobsCacheNames(data['cache']),
           }"
         />
@@ -62,7 +79,7 @@ const emits = defineEmits(["cache", "run", "history"]);
           size="lg"
           @click="$emit('run', { jobName: key })"
         >
-          run
+          {{ $t("jobs.card.jobs.actions.run") }}
         </ButtonBase>
       </div>
     </div>

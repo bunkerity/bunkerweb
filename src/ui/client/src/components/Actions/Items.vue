@@ -46,9 +46,9 @@ const props = defineProps({
           />
         </SettingsLayout>
       </div>
-      <span class="ml-9" :class="[props.positions[4]]">{{
-        item["api_method"]
-      }}</span>
+      <span class="ml-9" :class="[props.positions[4]]"
+        >{{ item["api_method"] }}
+      </span>
     </div>
   </ListItem>
 </template>

@@ -72,7 +72,7 @@ const input = reactive({
     <div v-if="input.type === 'password'" class="input-pw-container">
       <button
         :aria-description="
-          $t('A11y.plugin.setting.input.password.aria_description')
+          $t('plugin_settings.input.password.aria_description')
         "
         :aria-controls="input.id"
         @click="input.showInp = input.showInp ? false : true"

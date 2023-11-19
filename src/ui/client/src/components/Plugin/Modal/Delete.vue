@@ -2,12 +2,9 @@
 import { defineProps, defineEmits } from "vue";
 import ButtonBase from "@components/Button/Base.vue";
 import ModalBase from "@components/Modal/Base.vue";
-import JobsSvgState from "@components/Jobs/Svg/State.vue";
-import ListBase from "@components/List/Base.vue";
-import ListItem from "@components/List/Item.vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
-import { computed, reactive } from "vue";
+import { reactive } from "vue";
 
 const feedbackStore = useFeedbackStore();
 
@@ -59,11 +56,13 @@ const emits = defineEmits(["pluginDelete", "close"]);
 <template>
   <ModalBase
     @backdrop="$emit('close')"
-    :title="`Delete plugin ${props.pluginName} ?`"
+    :title="$t('plugins.delete_modal.title', { name: props.pluginName })"
     v-if="props.isOpen"
   >
     <div class="col-span-12 overflow-x-auto overflow-y-hidden">
-      <p>Are you sure to delete plugin : {{ props.pluginName }}</p>
+      <p>
+        {{ $t("plugins.delete_modal.text", { name: props.pluginName }) }}
+      </p>
       <p>{{ props.pluginDesc }}</p>
     </div>
 
@@ -76,7 +75,7 @@ const emits = defineEmits(["pluginDelete", "close"]);
           type="button"
           class="text-xs"
         >
-          Close
+          {{ $t("plugins.delete_modal.close") }}
         </ButtonBase>
         <ButtonBase
           color="delete"
@@ -85,7 +84,7 @@ const emits = defineEmits(["pluginDelete", "close"]);
           type="button"
           class="text-xs"
         >
-          Delete
+          {{ $t("plugins.delete_modal.delete") }}
         </ButtonBase>
       </div>
     </div>

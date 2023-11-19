@@ -193,14 +193,19 @@ function formatData() {
     old_name: data.oldName,
     data: data.value,
   };
-  console.log(conf);
   return conf;
 }
 </script>
 <template>
   <ModalBase @backdrop="$emit('close')" :title="`${props.action} file`">
     <div class="w-full">
-      <div class="modal-path">
+      <div
+        role="group"
+        :aria-description="
+          $t('custom_conf.file_manager.modal.path.aria_description')
+        "
+        class="modal-path"
+      >
         <p class="modal-path-text mr-1">
           {{ data.prefix.replaceAll("/", " / ") }}
         </p>
@@ -226,7 +231,13 @@ function formatData() {
           v-if="!data.value"
           class="absolute w-full h-full border-2 border-red-500 z-100 pointer-events-none outline-red-500"
         ></div>
-        <div id="editor" class="modal-editor z-10"></div>
+        <div
+          :aria-description="
+            $t('custom_conf.file_manager.modal.editor.aria_description')
+          "
+          id="editor"
+          class="modal-editor z-10"
+        ></div>
       </div>
 
       <!-- editor-->

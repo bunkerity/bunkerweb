@@ -25,21 +25,34 @@ const props = defineProps({
 
 const positions = ["col-span-2", "col-span-5", "col-span-5"];
 
-const header = ["success", "start date", "end date"];
-
 const emits = defineEmits(["close"]);
 </script>
 <template>
   <ModalBase
     @backdrop="$emit('close')"
-    :title="`history ${props.jobName}`"
+    :title="`${$t('jobs.card.jobs.modal_history.title')} ${props.jobName}`"
     v-if="props.isOpen"
   >
     <div class="col-span-12 overflow-x-auto overflow-y-hidden">
-      <ListBase class="min-w-[500px]" :header="header" :positions="positions">
+      <ListBase
+        class="min-w-[500px]"
+        :header="[
+          $t('jobs.card.jobs.modal_history.headers.success'),
+          $t('jobs.card.jobs.modal_history.headers.start_date'),
+          $t('jobs.card.jobs.modal_history.headers.end_date'),
+        ]"
+        :positions="positions"
+      >
         <ListItem v-for="item in props.history">
           <div class="list-content-item-wrap">
             <div class="translate-x-3 col-span-2" :class="[positions[0]]">
+              <span class="sr-only">
+                {{
+                  item["success"]
+                    ? $t("jobs.card.jobs.state.success.succeed")
+                    : $t("jobs.card.jobs.state.success.failed")
+                }}
+              </span>
               <JobsSvgState :success="item['success']" />
             </div>
             <span :class="[positions[1]]">{{ item["start_date"] }}</span>
@@ -58,7 +71,7 @@ const emits = defineEmits(["close"]);
           type="button"
           class="text-xs"
         >
-          Close
+          {{ $t("jobs.card.jobs.modal_history.close") }}
         </ButtonBase>
       </div>
     </div>

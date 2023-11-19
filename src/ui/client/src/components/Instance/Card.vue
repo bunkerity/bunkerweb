@@ -62,12 +62,12 @@ const instance = reactive({
   ],
 
   actions: computed(() =>
-    props.status === "up" ? [actions.stop, actions.reload] : [actions.reload],
+    props.status === "up" ? [actions.stop, actions.reload] : [actions.reload]
   ),
   checks: computed(() =>
     props.method === "static"
       ? [topActions.ping]
-      : [topActions.delete, topActions.ping],
+      : [topActions.delete, topActions.ping]
   ),
 });
 
@@ -103,7 +103,7 @@ const emits = defineEmits(["action", "delete"]);
                     hostname: props.hostname,
                     operation: action.name,
                   }
-                : props.hostname,
+                : props.hostname
             )
           "
           @pointerover="action.popup = true"
@@ -116,13 +116,15 @@ const emits = defineEmits(["action", "delete"]);
             class="text-normal font-normal mx-1 mr-2 text-white whitespace-nowrap"
             v-show="action.popup"
           >
-            {{ action.name }}
+            {{ $t(`instances.actions.${action.name}`) }}
           </span>
         </button>
       </div>
       <div class="card-instance-info-container">
         <div v-for="item in instance.info" class="card-instance-info-item">
-          <p class="card-instance-info-item-title">{{ item.label }}</p>
+          <p class="card-instance-info-item-title">
+            {{ $t(`instances.actions.${item.label}`) }}
+          </p>
           <p class="card-instance-info-item-content">{{ item.text }}</p>
         </div>
       </div>
@@ -139,7 +141,7 @@ const emits = defineEmits(["action", "delete"]);
           size="normal"
           class="text-sm mx-1 my-1 w-full xs:w-fit max-w-[200px]"
         >
-          {{ action.name }}
+          {{ $t(`instances.actions.${action.name}`) }}
         </ButtonBase>
       </div>
     </div>

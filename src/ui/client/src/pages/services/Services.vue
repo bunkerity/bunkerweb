@@ -230,8 +230,8 @@ onMounted(() => {
       :isErr="conf.isErr || services.isErr"
       :isPend="conf.isPend || services.isPend"
       :textState="{
-        isPend: 'Try retrieve services',
-        isErr: 'Error retrieving services',
+        isPend: $t('services.api.pending'),
+        isErr: $t('services.api.error'),
       }"
     />
     <div
@@ -244,25 +244,26 @@ onMounted(() => {
           color="valid"
           size="normal"
           class="text-sm"
-          >Create new service
+        >
+          {{ $t("services.actions.new") }}
         </ButtonBase>
       </div>
       <CardBase
         class="z-[102] h-fit col-span-12 md:col-span-4 lg:col-span-3 3xl:col-span-2"
-        label="info"
+        :label="$t('services.card.info.title')"
       >
         <CardItemList
           :items="[
             {
-              label: 'total',
+              label: $t('services.card.info.total'),
               value: Object.keys(services.setup).length - 1,
             },
             {
-              label: 'scheduler',
+              label: $t('services.card.info.scheduler'),
               value: '',
             },
             {
-              label: 'ui',
+              label: $t('services.card.info.ui'),
               value: '',
             },
           ]"
@@ -271,11 +272,11 @@ onMounted(() => {
       <CardBase
         class="z-[101] h-fit col-span-12 md:col-span-8 lg:col-span-5 3xl:col-span-3"
       >
-        <CardLabel label="services / plugins" />
+        <CardLabel :label="$t('services.list.title')" />
         <SettingsLayout
           v-if="Object.keys(services.setup).length > 1"
           class="flex w-full col-span-12"
-          label="Select service"
+          :label="$t('services.list.select_service.label')"
           name="services-list"
         >
           <SettingsSelect
@@ -287,13 +288,12 @@ onMounted(() => {
               values: Object.keys(services.setup).filter(
                 (item) => item !== 'new'
               ),
-              placeholder: 'Services',
             }"
           />
         </SettingsLayout>
         <SettingsLayout
           class="flex w-full col-span-12"
-          label="Select plugin"
+          :label="$t('services.list.select_plugin.label')"
           name="plugins"
         >
           <SettingsSelect
@@ -302,7 +302,6 @@ onMounted(() => {
               id: 'plugins',
               value: services.activePlugin,
               values: services.activePlugins,
-              placeholder: 'Search',
             }"
           />
         </SettingsLayout>
@@ -312,17 +311,17 @@ onMounted(() => {
             <span class="mx-0.5">
               <SettingsUploadSvgWarning class="scale-90" />
             </span>
-            Switching services will reset unsaved changes
+            {{ $t("services.list.switch_warning") }}
           </p>
         </div>
       </CardBase>
       <CardBase
-        label="filters"
+        :label="$t('services.filter.title')"
         class="z-[100] h-fit col-span-12 lg:col-span-4 grid grid-cols-12 relative"
       >
         <SettingsLayout
           class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
-          label="Setting search"
+          :label="$t('services.filter.search_setting.label')"
           name="keyword"
         >
           <SettingsInput
@@ -331,13 +330,13 @@ onMounted(() => {
               id: 'keyword',
               type: 'text',
               value: '',
-              placeholder: 'label',
+              placeholder: $t('services.filter.search_setting.placeholder'),
             }"
           />
         </SettingsLayout>
         <SettingsLayout
           class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
-          label="Setting method"
+          :label="$t('services.filter.method_setting.label')"
           name="keyword"
         >
           <SettingsSelect
@@ -346,7 +345,6 @@ onMounted(() => {
               id: 'keyword',
               value: filters.method,
               values: getMethodList(),
-              placeholder: 'Search',
             }"
           />
         </SettingsLayout>
@@ -360,8 +358,10 @@ onMounted(() => {
           class="text-xl border-b border-slate-700/60 pb-2 mb-4"
           :label="
             services.activeService === 'new'
-              ? 'CREATE NEW SERVICE'
-              : `SERVICE ${services.activeService}`
+              ? $t('services.active.label.new')
+              : $t('services.active.label.base', {
+                  name: services.activeService,
+                })
           "
         />
         <div class="col-span-12" v-for="(value, key) in services.setup">
@@ -374,7 +374,7 @@ onMounted(() => {
         </div>
         <div class="col-span-12 flex w-full justify-center mt-8 mb-2">
           <ButtonBase @click="sendServConf()" color="valid" size="lg">
-            SAVE
+            {{ $t("services.actions.save") }}
           </ButtonBase>
         </div>
       </CardBase>

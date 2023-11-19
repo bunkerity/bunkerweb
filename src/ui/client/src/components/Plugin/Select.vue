@@ -104,9 +104,7 @@ onMounted(() => {
     :data-default-value="select.defaultValue"
     :id="select.id"
     :name="select.id"
-    :aria-description="
-      $t('A11y.plugin.setting.select.default.aria_description')
-    "
+    :aria-description="$t('plugin_settings.select.default.aria_description')"
     class="hidden"
   >
     <option
@@ -124,7 +122,7 @@ onMounted(() => {
     :aria-controls="`${select.id}-dropdown`"
     ref="selectBtn"
     :aria-description="
-      $t('A11y.plugin.setting.select.dropdown_button.aria_description')
+      $t('plugin_settings.select.dropdown_button.aria_description')
     "
     :data-select-dropdown="props.setting.id"
     :disabled="
@@ -153,9 +151,7 @@ onMounted(() => {
     :aria-hidden="select.isOpen ? 'false' : 'true'"
     :class="[select.isOpen ? 'flex' : 'hidden']"
     class="select-dropdown-container"
-    :aria-description="
-      $t('A11y.plugin.setting.select.dropdown.aria_description')
-    "
+    :aria-description="$t('plugin_settings.select.dropdown.aria_description')"
   >
     <button
       role="option"
@@ -179,9 +175,7 @@ onMounted(() => {
         value === select.value ? 'active' : '',
         'select-dropdown-btn',
       ]"
-      :aria-description="
-        $t('A11y.plugin.setting.select.option.aria_description')
-      "
+      :aria-description="$t('plugin_settings.select.option.aria_description')"
       :aria-current="value === select.value ? 'true' : 'false'"
     >
       {{ value }}

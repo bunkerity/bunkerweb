@@ -118,7 +118,7 @@ async function addBansFromList() {
     >
       <ButtonBase
         @click="addItem()"
-        :aria-description="$t('A11y.bans.add.add_ban_field.aria_description')"
+        :aria-description="$t('bans.add.actions.add_field.aria_description')"
         color="valid"
         size="normal"
         class="text-sm mb-2 sm:mb-0"
@@ -138,13 +138,13 @@ async function addBansFromList() {
           />
         </svg>
         <span class="ml-1 -translate-y-1">
-          {{ $t("bans.card.add.actions.add_field") }}
+          {{ $t("bans.add.actions.add_field.label") }}
         </span>
       </ButtonBase>
       <ButtonBase
         :disabled="bans.items.length <= 0 ? true : false"
         @click="deleteAllItems()"
-        :aria-description="$t('A11y.bans.add.delete_bans.aria_description')"
+        :aria-description="$t('bans.add.actions.remove_bans.aria_description')"
         color="delete"
         size="normal"
         class="text-sm ml-4"
@@ -164,7 +164,7 @@ async function addBansFromList() {
           />
         </svg>
         <span class="ml-1 -translate-y-1">
-          {{ $t("bans.card.add.actions.remove_all") }}
+          {{ $t("bans.add.actions.remove_bans.label") }}
         </span>
       </ButtonBase>
     </div>
@@ -173,11 +173,11 @@ async function addBansFromList() {
         v-if="bans.items.length > 0"
         class="min-w-[110px] h-full col-span-12"
         :header="[
-          $t('bans.card.add.header.ip_number'),
-          $t('bans.card.add.header.ban_start'),
-          $t('bans.card.add.header.ban_end'),
-          $t('bans.card.add.header.reason'),
-          $t('bans.card.add.header.delete'),
+          $t('bans.add.header.ip_number'),
+          $t('bans.add.header.ban_start'),
+          $t('bans.add.header.ban_end'),
+          $t('bans.add.header.reason'),
+          $t('bans.add.header.delete'),
         ]"
         :positions="addPositions"
       >
@@ -251,13 +251,16 @@ async function addBansFromList() {
             </SettingsLayout>
             <ButtonBase
               :aria-description="
-                $t('A11y.bans.add.delete_ban.aria_description')
+                $t('bans.add.actions.remove_ban.aria_description')
               "
               @click="deleteItem(item.id)"
               color="delete"
               size="normal"
               class="text-sm mx-4 py-1.5"
             >
+              <span class="sr-only">
+                {{ $t("bans.add.actions.remove_ban.label") }}
+              </span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -283,14 +286,14 @@ async function addBansFromList() {
       class="col-span-12 flex justify-center mt-4"
     >
       <ButtonBase
-        :aria-description="$t('A11y.bans.add.save_ban.aria_description')"
+        :aria-description="$t('bans.add.actions.save_bans.aria_description')"
         @click="addBansFromList()"
         :disabled="bans.isInvalidAdd"
         color="valid"
         size="normal"
         class="text-sm mb-2 sm:mb-0"
       >
-        {{ $t("bans.card.add.actions.save_bans") }}
+        {{ $t("bans.add.actions.save_bans.label") }}
       </ButtonBase>
     </div>
   </div>

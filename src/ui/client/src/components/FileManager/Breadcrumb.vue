@@ -40,7 +40,7 @@ function getClickPath(id) {
 </script>
 
 <template>
-  <ul aria-description="breadcrumb" class="file-manager-breadcrumb">
+  <ul role="breadcrumb" class="file-manager-breadcrumb">
     <li class="file-manager-breadcrumb-back-btn">
       <button @click="$emit('updatePath', getPrevPath())">
         <svg
@@ -65,6 +65,9 @@ function getClickPath(id) {
       :aria-current="id === pathSplit.length - 1 ? 'true' : 'false'"
     >
       <button
+        :aria-description="
+          $t('custom_conf.file_manager.breadcrumb.item.aria_description')
+        "
         @click="$emit('updatePath', getClickPath(id))"
         type="button"
         class="file-manager-breadcrumb-item-btn"

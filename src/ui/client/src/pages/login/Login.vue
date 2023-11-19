@@ -158,7 +158,7 @@ onMounted(() => {
         <img
           class="max-w-60 max-h-30"
           src="/images/BUNKERWEB-print-hd-blanc.png"
-          alt="logo"
+          :alt="$t('login.logo_alt')"
         />
       </div>
     </div>

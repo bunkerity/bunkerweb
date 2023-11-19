@@ -94,26 +94,35 @@ onMounted(() => {
       :isErr="plugins.isErr"
       :isPend="plugins.isPend"
       :textState="{
-        isPend: 'Try retrieve plugins',
-        isErr: 'Error retrieving plugins',
+        isPend: $t('plugins.api.pending'),
+        isErr: $t('plugins.api.error'),
       }"
     />
     <CardBase
       v-if="!plugins.isErr && !plugins.isPend && plugins.setup.length > 0"
       class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
-      label="info"
+      :label="$t('plugins.card.info.title')"
     >
       <CardItemList
         :items="[
-          { label: 'plugins total', value: plugins.total },
-          { label: 'plugins internal', value: plugins.internal },
-          { label: 'plugins external', value: plugins.external },
+          {
+            label: $t('plugins.card.info.plugins_total'),
+            value: plugins.total,
+          },
+          {
+            label: $t('plugins.card.info.plugins_internal'),
+            value: plugins.internal,
+          },
+          {
+            label: $t('plugins.card.info.plugins_external'),
+            value: plugins.external,
+          },
         ]"
       />
     </CardBase>
     <CardBase
       v-if="!plugins.isErr && !plugins.isPend"
-      label="upload"
+      :label="$t('plugins.card.upload.title')"
       class="h-fit col-span-12 md:col-span-8 2xl:col-span-4 3xl:col-span-3"
     >
       <SettingsUploadStructure />
@@ -121,20 +130,28 @@ onMounted(() => {
     <CardBase
       v-if="!plugins.isErr && !plugins.isPend"
       class="z-10 h-fit col-start-1 col-end-13 md:col-start-5 md:col-end-13 2xl:col-span-5 3xl:col-span-4"
-      label="filter"
+      :label="$t('plugins.card.filter.title')"
     >
-      <SettingsLayout class="sm:col-span-6" label="Search" name="keyword">
+      <SettingsLayout
+        class="sm:col-span-6"
+        :label="$t('plugins.card.filter.search.label')"
+        name="keyword"
+      >
         <SettingsInput
           @inp="(v) => (filters.name = v)"
           :settings="{
             id: 'keyword',
             type: 'text',
             value: '',
-            placeholder: 'keyword',
+            placeholder: $t('plugins.card.filter.search.placeholder'),
           }"
         />
       </SettingsLayout>
-      <SettingsLayout class="sm:col-span-6" label="Plugin type" name="state">
+      <SettingsLayout
+        class="sm:col-span-6"
+        :label="$t('plugins.card.filter.type.label')"
+        name="state"
+      >
         <SettingsSelect
           @inp="
             (v) =>
@@ -152,7 +169,7 @@ onMounted(() => {
     <CardBase
       v-if="!plugins.isPend && !plugins.isErr"
       class="h-fit col-span-12"
-      label="plugin list"
+      :label="$t('plugins.list.title')"
     >
       <PluginList @delete="(v) => openDelModal(v)" :items="plugins.setup" />
     </CardBase>

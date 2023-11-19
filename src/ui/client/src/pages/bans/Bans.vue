@@ -46,6 +46,7 @@ const bans = reactive({
   data: [],
   isPend: false,
   isErr: false,
+  tabs: [[{ tag: "list" }, { tag: "add" }]],
   total: "null",
   reasonList: ["all"], // Based on reasons find on fetch
   bansList: [], // Format {hostname : str, data : Array}
@@ -220,7 +221,7 @@ const tab = reactive({
       class="max-w-[1200px] col-span-12 overflow-y-hidden min-h-[400px]"
       :label="$t('bans.card.actions.title')"
     >
-      <BansTabs @tab="(v) => (tab.current = v)" />
+      <BansTabs :tabs="bans.tabs" @tab="(v) => (tab.current = v)" />
       <BansList
         role="tabpanel"
         @unban="getData()"

@@ -39,17 +39,6 @@ const positions = [
   "col-span-1",
 ];
 
-const header = [
-  "Name",
-  "Every",
-  "History",
-  "Reload",
-  "Success",
-  "Last run",
-  "Cache",
-  "Action",
-];
-
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
   name: "",
@@ -148,8 +137,8 @@ onMounted(() => {
       :isErr="jobs.isErr"
       :isPend="jobs.isPend"
       :textState="{
-        isPend: 'Try retrieve jobs',
-        isErr: 'Error retrieving jobs',
+        isPend: $t('jobs.api.pending'),
+        isErr: $t('jobs.api.error'),
       }"
     />
     <CardBase
@@ -159,31 +148,35 @@ onMounted(() => {
     >
       <CardItemList
         :items="[
-          { label: 'jobs total', value: jobs.total },
-          { label: 'jobs reload', value: jobs.reload },
-          { label: 'jobs success', value: jobs.success },
+          { label: $t('jobs.card.info.jobs_total'), value: jobs.total },
+          { label: $t('jobs.card.info.jobs_reload'), value: jobs.reload },
+          { label: $t('jobs.card.info.jobs_success'), value: jobs.success },
         ]"
       />
     </CardBase>
     <CardBase
       v-if="!jobs.isErr && !jobs.isPend"
       class="z-10 h-fit col-span-12 md:col-span-8 xl:col-span-8 2xl:col-span-5 3xl:col-span-4"
-      label="filter"
+      :label="$t('jobs.card.filter.title')"
     >
-      <SettingsLayout class="sm:col-span-6" label="Search" name="keyword">
+      <SettingsLayout
+        class="sm:col-span-6"
+        :label="$t('jobs.card.filter.search.label')"
+        name="keyword"
+      >
         <SettingsInput
           @inp="(v) => (filters.name = v)"
           :settings="{
             id: 'keyword',
             type: 'text',
             value: '',
-            placeholder: 'keyword',
+            placeholder: $t('jobs.card.filter.search.placeholder'),
           }"
         />
       </SettingsLayout>
       <SettingsLayout
         class="sm:col-span-6"
-        label="Success state"
+        :label="$t('jobs.card.filter.success_state.label')"
         name="success-state"
       >
         <SettingsSelect
@@ -201,7 +194,7 @@ onMounted(() => {
       </SettingsLayout>
       <SettingsLayout
         class="sm:col-span-6"
-        label="Reload state"
+        :label="$t('jobs.card.filter.reload_state.label')"
         name="reload-state"
       >
         <SettingsSelect
@@ -217,7 +210,11 @@ onMounted(() => {
           }"
         />
       </SettingsLayout>
-      <SettingsLayout class="sm:col-span-6" label="Interval" name="every">
+      <SettingsLayout
+        class="sm:col-span-6"
+        :label="$t('jobs.card.filter.interval.label')"
+        name="every"
+      >
         <SettingsSelect
           @inp="(v) => (filters.every = v)"
           :settings="{
@@ -231,11 +228,20 @@ onMounted(() => {
     <CardBase
       v-if="!jobs.isErr && !jobs.isPend"
       class="col-span-12 overflow-x-auto overflow-y-hidden"
-      label="jobs"
+      :label="$t('jobs.card.jobs.title')"
     >
       <ListBase
         class="min-w-[1100px] col-span-12"
-        :header="header"
+        :header="[
+          $t('jobs.card.jobs.headers.name'),
+          $t('jobs.card.jobs.headers.every'),
+          $t('jobs.card.jobs.headers.history'),
+          $t('jobs.card.jobs.headers.reload'),
+          $t('jobs.card.jobs.headers.success'),
+          $t('jobs.card.jobs.headers.last_run'),
+          $t('jobs.card.jobs.headers.cache'),
+          $t('jobs.card.jobs.headers.action'),
+        ]"
         :positions="positions"
       >
         <JobsItems

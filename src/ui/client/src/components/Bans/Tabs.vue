@@ -1,12 +1,14 @@
 <script setup>
 import { reactive } from "vue";
+const props = defineProps({
+  tabs: {
+    type: Array,
+    required: true,
+  },
+});
 
 const tabs = reactive({
   current: "list",
-  els: [
-    { text: "Ban list", tag: "list" },
-    { text: "Add ban", tag: "add" },
-  ],
   inactiveTabClass:
     "inline-flex items-center justify-center p-4 hover:border-b-2 border-transparent rounded-t-lg hover:text-gray-700 hover:border-gray-700 border-gray-600 dark:border-gray-300 dark:hover:text-gray-300 text-gray-600 dark:text-gray-500 group",
   activeTabClass:
@@ -25,7 +27,7 @@ const emits = defineEmits(["tab"]);
       class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400"
     >
       <li
-        v-for="(item, id) in tabs.els"
+        v-for="(item, id) in props.tabs"
         role="tab"
         :tabindex="id"
         :aria-selected="tabs.current === item.tag ? 'true' : 'false'"
@@ -86,7 +88,7 @@ const emits = defineEmits(["tab"]);
               d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          {{ item.text }}
+          {{ $t(`bans.tabs.${item.tag}`) }}
         </a>
       </li>
     </ul>
