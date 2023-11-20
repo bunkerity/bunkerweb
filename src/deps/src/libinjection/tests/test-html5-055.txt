@@ -1,0 +1,9 @@
+--TEST--
+cdata, degenerate
+--INPUT--
+<![CDATA foo>
+--EXPECTED--
+TAG_COMMENT,10,[CDATA foo
+
+
+

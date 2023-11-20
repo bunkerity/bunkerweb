@@ -1,0 +1,61 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: MULTIPART_INVALID_HEADER_FOLDING",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[  
+                "-------------------------------69343412719991675451336310646",
+                "Content-Disposition: form-data;",
+                " name=\"a\"",
+                "",
+                "1",
+                "-------------------------------69343412719991675451336310646",
+                "Content-Disposition: form-data;",
+                "    name=\"b\"",
+                "",
+                "2",
+                "-------------------------------69343412719991675451336310646--"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"ARGS:a"
+    },
+    "rules":[
+        "SecRule MULTIPART_STRICT_ERROR \"!@eq 1\" \"phase:2,deny,status:403,id:500074\"",
+        "SecRule MULTIPART_HEADER_FOLDING \"!@eq 1\" \"phase:2,deny,status:403,id:500075\"",
+        "SecRule MULTIPART_INVALID_HEADER_FOLDING \"!@eq 0\" \"phase:2,deny,status:403,id:500076\"",
+        "SecRule REQBODY_PROCESSOR_ERROR \"@eq 1\" \"phase:2,deny,status:403,id:500077\"",
+        "SecRule ARGS \"@eq 1\" \"phase:2,deny,status:403,id:5000277\""
+    ]
+  }
+]
+

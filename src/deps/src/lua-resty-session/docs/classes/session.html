@@ -1,0 +1,545 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Session Library for OpenResty Documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>resty.session</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+<li><a href="#Methods">Methods</a></li>
+</ul>
+
+
+<h2>Classes</h2>
+<ul class="nowrap">
+  <li><strong>session</strong></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/resty.session.dshm.html">resty.session.dshm</a></li>
+  <li><a href="../modules/resty.session.file.html">resty.session.file</a></li>
+  <li><a href="../modules/resty.session.memcached.html">resty.session.memcached</a></li>
+  <li><a href="../modules/resty.session.mysql.html">resty.session.mysql</a></li>
+  <li><a href="../modules/resty.session.postgres.html">resty.session.postgres</a></li>
+  <li><a href="../modules/resty.session.redis.html">resty.session.redis</a></li>
+  <li><a href="../modules/resty.session.redis-cluster.html">resty.session.redis-cluster</a></li>
+  <li><a href="../modules/resty.session.redis-sentinel.html">resty.session.redis-sentinel</a></li>
+  <li><a href="../modules/resty.session.shm.html">resty.session.shm</a></li>
+  <li><a href="../modules/resty.session.utils.html">resty.session.utils</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Class <code>session</code></h1>
+<p>Session library provides HTTP session management capabilities for OpenResty based
+ applications, libraries and proxies.</p>
+<p>
+</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#session_instance:open">session_instance:open ()</a></td>
+	<td class="summary">Opens session</p>
+
+<p> This can be used to open a session.</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#session.configuration">session.configuration</a></td>
+	<td class="summary">Session configuration options</td>
+	</tr>
+</table>
+<h2><a href="#Methods">Methods</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#session:init">session:init ([configuration])</a></td>
+	<td class="summary">Initializes session library</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#session:new">session:new ([configuration])</a></td>
+	<td class="summary">Creates new session</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#session:open">session:open ([configuration])</a></td>
+	<td class="summary">Opens session</p>
+
+<p> This can be used to open a session.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#session:start">session:start ([configuration])</a></td>
+	<td class="summary">Starts the session and refreshes it as needed</p>
+
+<p> This can be used to start a session.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#session:logout">session:logout ([configuration])</a></td>
+	<td class="summary">Logouts session</p>
+
+<p> It logouts from a specific audience.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#session:destroy">session:destroy ([configuration])</a></td>
+	<td class="summary">Destroys session</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+    Methods
+    <dl class="function">
+    <dt>
+    <a name = "session_instance:open"></a>
+    <strong>session_instance:open ()</strong>
+    </dt>
+    <dd>
+    Opens session</p>
+
+<p> This can be used to open a session.  It will either return an existing
+ session or a new session.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">true</span> or <span class="type">nil</span></span>
+        session instance</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        information why session could not be opened</li>
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "session.configuration"></a>
+    <strong>session.configuration</strong>
+    </dt>
+    <dd>
+    Session configuration options
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">secret</span>
+         Secret used for the key derivation. The secret is hashed with SHA-256 before using it. E.g. <code>&quot;RaJKp8UQW1&quot;</code>.
+        </li>
+        <li><span class="parameter">secret_fallbacks</span>
+         Array of secrets that can be used as alternative secrets (when doing key rotation), E.g. <code>{ &quot;6RfrAYYzYq&quot;, &quot;MkbTkkyF9C&quot; }</code>.
+        </li>
+        <li><span class="parameter">ikm</span>
+         Initial key material (or ikm) can be specified directly (without using a secret) with exactly 32 bytes of data, e.g. <code>&quot;5ixIW4QVMk0dPtoIhn41Eh1I9enP2060&quot;</code>
+        </li>
+        <li><span class="parameter">ikm_fallbacks</span>
+         Array of initial key materials that can be used as alternative keys (when doing key rotation), E.g. <code>{ &quot;QvPtlPKxOKdP5MCu1oI3lOEXIVuDckp7&quot; }</code>.
+        </li>
+        <li><span class="parameter">cookie_prefix</span>
+         Cookie prefix, use <code>nil</code>, <code>&quot;__Host-&quot;</code> or <code>&quot;__Secure-&quot;</code> (defaults to <code>nil</code>)
+        </li>
+        <li><span class="parameter">cookie_name</span>
+         Session cookie name, e.g. <code>&quot;session&quot;</code> (defaults to <code>&quot;session&quot;</code>)
+        </li>
+        <li><span class="parameter">cookie_path</span>
+         Cookie path, e.g. <code>&quot;/&quot;</code> (defaults to <code>&quot;/&quot;</code>)
+        </li>
+        <li><span class="parameter">cookie_domain</span>
+         Cookie domain, e.g. <code>&quot;example.com&quot;</code> (defaults to <code>nil</code>)
+        </li>
+        <li><span class="parameter">cookie_http_only</span>
+         Mark cookie HTTP only, use <code>true</code> or <code>false</code> (defaults to <code>true</code>)
+        </li>
+        <li><span class="parameter">cookie_secure</span>
+         Mark cookie secure, use <code>nil</code>, <code>true</code> or <code>false</code> (defaults to <code>nil</code>)
+        </li>
+        <li><span class="parameter">cookie_priority</span>
+         Cookie priority, use <code>nil</code>, <code>&quot;Low&quot;</code>, <code>&quot;Medium&quot;</code>, or <code>&quot;High&quot;</code> (defaults to <code>nil</code>)
+        </li>
+        <li><span class="parameter">cookie_same_site</span>
+         Cookie same-site policy, use <code>nil</code>, <code>&quot;Lax&quot;</code>, <code>&quot;Strict&quot;</code>, or <code>&quot;None&quot;</code> (defaults to <code>&quot;Lax&quot;</code>)
+        </li>
+        <li><span class="parameter">cookie_same_party</span>
+         Mark cookie with same party flag, use <code>nil</code>, <code>true</code>, or <code>false</code> (default: <code>nil</code>)
+        </li>
+        <li><span class="parameter">cookie_partitioned</span>
+         Mark cookie with partitioned flag, use <code>nil</code>, <code>true</code>, or <code>false</code> (default: <code>nil</code>)
+        </li>
+        <li><span class="parameter">remember</span>
+         Enable or disable persistent sessions, use <code>nil</code>, <code>true</code>, or <code>false</code> (defaults to <code>false</code>)
+        </li>
+        <li><span class="parameter">remember_cookie_name</span>
+         Persistent session cookie name, e.g. <code>&quot;remember&quot;</code> (defaults to <code>&quot;remember&quot;</code>)
+        </li>
+        <li><span class="parameter">audience</span>
+         Session audience, e.g. <code>&quot;my-application&quot;</code> (defaults to <code>&quot;default&quot;</code>)
+        </li>
+        <li><span class="parameter">subject</span>
+         Session subject, e.g. <code>&quot;john.doe@example.com&quot;</code> (defaults to <code>nil</code>)
+        </li>
+        <li><span class="parameter">stale_ttl</span>
+         When session is saved a new session is created, stale ttl specifies how long the old one can still be used, e.g. <code>10</code> (defaults to <code>10</code>) (in seconds)
+        </li>
+        <li><span class="parameter">idling_timeout</span>
+         Idling timeout specifies how long the session can be inactive until it is considered invalid, e.g. <code>900</code> (defaults to <code>900</code>, or 15 minutes) (in seconds)
+        </li>
+        <li><span class="parameter">rolling_timeout</span>
+         Rolling timeout specifies how long the session can be used until it needs to be renewed, e.g. <code>3600</code> (defaults to <code>3600</code>, or an hour) (in seconds)
+        </li>
+        <li><span class="parameter">absolute_timeout</span>
+         Absolute timeout limits how long the session can be renewed, until re-authentication is required, e.g. <code>86400</code> (defaults to <code>86400</code>, or a day) (in seconds)
+        </li>
+        <li><span class="parameter">remember_timeout</span>
+         Remember timeout specifies how long the persistent session is considered valid, e.g. <code>604800</code> (defaults to <code>604800</code>, or a week) (in seconds)
+        </li>
+        <li><span class="parameter">storage</span>
+         Storage is responsible of storing session data, use <code>nil</code> (data is stored in cookie), <code>dshm</code>, <code>file</code>, <code>memcached</code>, <code>mysql</code>, <code>postgres</code>, <code>redis</code>, <code>redis-cluster</code>, <code>redis-sentinel</code>, or <code>shm</code>, or give a name of custom module (<code>&quot;custom.session.storage&quot;</code>), or a <a href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a> that implements session storage interface (defaults to <code>nil</code>)
+        </li>
+        <li><span class="parameter">dshm</span>
+         Configuration for dshm storage, e.g. <code>{ prefix = &quot;sessions&quot; }</code>
+        </li>
+        <li><span class="parameter">file</span>
+         Configuration for file storage, e.g. <code>{ path = &quot;/tmp&quot;, suffix = &quot;session&quot; }</code>
+        </li>
+        <li><span class="parameter">memcached</span>
+         Configuration for memcached storage, e.g. <code>{ prefix = &quot;sessions&quot; }</code>
+        </li>
+        <li><span class="parameter">mysql</span>
+         Configuration for MySQL / MariaDB storage, e.g. <code>{ database = &quot;sessions&quot; }</code>
+        </li>
+        <li><span class="parameter">postgres</span>
+         Configuration for Postgres storage, e.g. <code>{ database = &quot;sessions&quot; }</code>
+        </li>
+        <li><span class="parameter">redis</span>
+         Configuration for Redis / Redis Sentinel / Redis Cluster storages, e.g. <code>{ prefix = &quot;sessions&quot; }</code>
+        </li>
+        <li><span class="parameter">shm</span>
+         Configuration for shared memory storage, e.g. <code>{ zone = &quot;sessions&quot; }</code>
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Methods"></a>Methods</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "session:init"></a>
+    <strong>session:init ([configuration])</strong>
+    </dt>
+    <dd>
+    Initializes session library  This function can be called on <a href="../classes/session.html#session:init">init</a> or <code>init_worker</code> phases on OpenResty
+ to set global default configuration to all session instances created by this
+ library.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">configuration</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+          session <a href="../classes/session.html#session.configuration">configuration</a> overrides
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">require</span> <span class="string">"resty.session"</span>.init({
+  audience = <span class="string">"my-application"</span>,
+})</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "session:new"></a>
+    <strong>session:new ([configuration])</strong>
+    </dt>
+    <dd>
+    Creates new session  This creates a new session instance.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">configuration</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+          session <a href="../classes/session.html#session.configuration">configuration</a> overrides
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        session instance
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.new()
+<span class="comment">-- OR
+</span><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.new({
+  audience = <span class="string">"my-application"</span>,
+})</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "session:open"></a>
+    <strong>session:open ([configuration])</strong>
+    </dt>
+    <dd>
+    Opens session</p>
+
+<p> This can be used to open a session.  It will either return an existing
+ session or a new session.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">configuration</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+          session <a href="../classes/session.html#session.configuration">configuration</a> overrides
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        session instance</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        information why session could not be opened</li>
+        <li>
+           <span class="types"><span class="type">boolean</span></span>
+        <code>true</code>, if session existed, otherwise <code>false</code></li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.open()
+<span class="comment">-- OR
+</span><span class="keyword">local</span> session, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.open({
+  audience = <span class="string">"my-application"</span>,
+})</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "session:start"></a>
+    <strong>session:start ([configuration])</strong>
+    </dt>
+    <dd>
+    Starts the session and refreshes it as needed</p>
+
+<p> This can be used to start a session.  It will either return an existing
+ session or a new session. In case there is an existing session, the
+ session will be refreshed as well (as needed).
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">configuration</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+          session <a href="../classes/session.html#session.configuration">configuration</a> overrides
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        session instance</li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        information why session could not be logged out</li>
+        <li>
+           <span class="types"><span class="type">boolean</span></span>
+        <code>true</code>, if session existed, otherwise <code>false</code></li>
+        <li>
+           <span class="types"><span class="type">boolean</span></span>
+        <code>true</code>, if session was refreshed, otherwise <code>false</code></li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> session = <span class="global">require</span> <span class="string">"resty.session"</span>.start()
+<span class="comment">-- OR
+</span><span class="keyword">local</span> session, err, exists, refreshed = <span class="global">require</span> <span class="string">"resty.session"</span>.start()
+  audience = <span class="string">"my-application"</span>,
+})</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "session:logout"></a>
+    <strong>session:logout ([configuration])</strong>
+    </dt>
+    <dd>
+    Logouts session</p>
+
+<p> It logouts from a specific audience. </p>
+
+<p> A single session cookie may be shared between multiple audiences
+ (or applications), thus there is a need to be able to logout from
+ just a single audience while keeping the session for the other
+ audiences.</p>
+
+<p> When there is only a single audience, then this can be considered
+ equal to <a href="../classes/session.html#session:destroy">session.destroy</a>.</p>
+
+<p> When the last audience is logged out, the cookie will be destroyed
+ as well and invalidated on a client.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">configuration</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+          session <a href="../classes/session.html#session.configuration">configuration</a> overrides
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">boolean</span></span>
+        <code>true</code> session exists for an audience and was logged out successfully, otherwise <code>false</code></li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        information why the session could not be logged out</li>
+        <li>
+           <span class="types"><span class="type">boolean</span></span>
+        <code>true</code> if session existed, otherwise <code>false</code></li>
+        <li>
+           <span class="types"><span class="type">boolean</span></span>
+        <code>true</code> if session was logged out, otherwise <code>false</code></li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">require</span> <span class="string">"resty.session"</span>.logout()
+<span class="comment">-- OR
+</span><span class="keyword">local</span> ok, err, exists, logged_out = <span class="global">require</span> <span class="string">"resty.session"</span>.logout({
+  audience = <span class="string">"my-application"</span>,
+})</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "session:destroy"></a>
+    <strong>session:destroy ([configuration])</strong>
+    </dt>
+    <dd>
+    Destroys session  It destroys the whole session and clears the cookies.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">configuration</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+          session <a href="../classes/session.html#session.configuration">configuration</a> overrides
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">boolean</span></span>
+        <code>true</code> session exists and was destroyed successfully, otherwise <code>nil</code></li>
+        <li>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        information why session could not be destroyed</li>
+        <li>
+           <span class="types"><span class="type">boolean</span></span>
+        <code>true</code> if session existed, otherwise <code>false</code></li>
+        <li>
+           <span class="types"><span class="type">boolean</span></span>
+        <code>true</code> if session was destroyed, otherwise <code>false</code></li>
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="global">require</span> <span class="string">"resty.session"</span>.destroy()
+<span class="comment">-- OR
+</span><span class="keyword">local</span> ok, err, exists = <span class="global">require</span> <span class="string">"resty.session"</span>.destroy({
+  cookie_name = <span class="string">"auth"</span>,
+})</pre>
+    </ul>
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-12-16 00:35:34 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

@@ -1,0 +1,10 @@
+--TEST--
+keyword unary-operator [1vsnf]
+--INPUT--
+select - sin(1);
+--EXPECTED--
+E select
+f sin
+( (
+1 1
+) )

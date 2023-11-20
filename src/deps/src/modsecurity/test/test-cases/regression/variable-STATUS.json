@@ -1,0 +1,93 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: STATUS (1/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/",
+      "method":"GET",
+      "body": [
+        "param1=value1&param2=value2"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"200\" \\(Variable: RESPONSE_STATUS\\)"
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule RESPONSE_STATUS \"@contains test\" \"id:1,phase:5,rev:1.3,pass,t:trim\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: STATUS (2/2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/",
+      "method":"GET",
+      "body": [
+        "param1=value1&param2=value2"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Target value: \"500\" \\(Variable: RESPONSE_STATUS\\)",
+      "http_code": 500
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS \"@pm value\" \"id:1,phase:2,t:trim,status:500,deny\"",
+      "SecRule RESPONSE_STATUS \"@contains test\" \"id:2,phase:5,rev:1.3,pass,t:trim\""
+    ]
+  }
+]
+

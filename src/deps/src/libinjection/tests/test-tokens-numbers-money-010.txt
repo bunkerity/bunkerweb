@@ -1,0 +1,8 @@
+--TEST--
+"$." isn't a number or a money value.  reparse as word
+--INPUT--
+SELECT $.foo;
+--EXPECTED--
+E SELECT
+n $.foo
+; ;

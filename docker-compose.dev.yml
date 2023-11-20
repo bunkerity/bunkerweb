@@ -1,0 +1,76 @@
+version: "3"
+
+services:
+
+  bunkerweb:
+    build:
+      context: .
+      dockerfile: ./src/bw/Dockerfile
+    ports:
+      - "80:8080"
+      - "443:8443"
+    environment:
+      - API_WHITELIST_IP=127.0.0.0/8 192.168.64.0/24
+    networks:
+      bw-universe:
+        ipv4_address: 192.168.64.42
+      bw-services:
+        aliases:
+          - bunkerweb
+
+  bw-core:
+    build:
+      context: .
+      dockerfile: ./src/core/Dockerfile
+    ports:
+      - "1337:1337"
+    volumes:
+      - bw-data:/data
+    environment:
+      - TOKEN=ChangeMe42!!!
+      - WHITELIST=0.0.0.0/0
+      - BUNKERWEB_INSTANCES=192.168.64.42
+      - API_WHITELIST_IP=127.0.0.0/8 192.168.64.0/24
+      - CHECK_TOKEN=no
+      - CHECK_WHITELIST=no
+      - USE_BUNKERNET=no
+      - USE_BLACKLIST=no
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL=/
+      - REVERSE_PROXY_HOST=http://myapp1
+    networks:
+      - bw-universe
+
+  # bw-ui:
+  #   build:
+  #     context: .
+  #     dockerfile: ./src/ui/Dockerfile
+  #   ports:
+  #     - "80:7000"
+  #   environment:
+  #     - API_ADDR=http://bw-core:1337
+  #     - API_TOKEN=ChangeMe42!!!
+  #     - ADMIN_PASSWORD=P@ssw0rd
+  #   networks:
+  #     - bw-universe
+
+  myapp1:
+    image: tutum/hello-world
+    networks:
+      bw-services:
+        aliases:
+          - myapp1
+
+volumes:
+  bw-data:
+
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.64.0/24
+  bw-services:
+    name: bw-services

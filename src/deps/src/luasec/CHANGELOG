@@ -1,0 +1,257 @@
+--------------------------------------------------------------------------------
+LuaSec 1.3.2
+---------------
+This version includes:
+
+* Fix: place EAI_OVERFLOW inside macro, unbreak build on <10.7 (Sergey Fedorov)
+* Fix: Expand workaround for zero errno to OpenSSL 3.0.x (Kim Alvefur)
+* Fix: reset block timeout at send or receive (MartinDahlberg)
+
+--------------------------------------------------------------------------------
+LuaSec 1.3.1
+---------------
+This version includes:
+
+* Fix: check if PSK is available
+
+--------------------------------------------------------------------------------
+LuaSec 1.3.0
+---------------
+This version includes:
+
+* Add :getlocalchain() + :getlocalcertificate() to mirror the peer methods (@mwild1)
+* Add Pre-Shared Key (PSK) support (@jclab-joseph)
+
+--------------------------------------------------------------------------------
+LuaSec 1.2.0
+---------------
+This version includes:
+
+* Add key material export method
+* Backguard compat for openssl on providers, like LTS linuxes
+
+--------------------------------------------------------------------------------
+LuaSec 1.1.0
+---------------
+This version includes:
+
+* Fix missing DANE flag
+* Remove unused parameter in https.lua
+
+--------------------------------------------------------------------------------
+LuaSec 1.0.2
+---------------
+This version includes:
+
+* Fix handle SSL_send SYSCALL error without errno
+* Fix off by one in cert:validat(notafter)
+* Fix meth_get_{sinagure => signature}_name function name
+* Fix update the Lua state reference on the selected SSL context after SNI
+* Fix ignore SSL_OP_BIT(n) macro and update option.c
+
+--------------------------------------------------------------------------------
+LuaSec 1.0.1
+---------------
+This version includes:
+
+
+* Fix luaL_buffinit() can use the stack and broke buffer_meth_receive()
+
+--------------------------------------------------------------------------------
+LuaSec 1.0
+---------------
+This version includes:
+
+
+* Add cert:getsignaturename()
+
+--------------------------------------------------------------------------------
+LuaSec 0.9
+---------------
+This version includes:
+
+
+* Add DNS-based Authentication of Named Entities (DANE) support
+* Add __close() metamethod
+* Fix deprecation warnings with OpenSSL 1.1
+* Fix special case listing of TLS 1.3 EC curves
+* Fix general_name leak in cert:extensions()
+* Fix unexported 'ssl.config' table
+* Replace $(LD) with $(CCLD) variable
+* Remove multiple definitions of 'ssl_options' variable
+* Use tag in git format: v0.9
+
+--------------------------------------------------------------------------------
+LuaSec 0.8.2
+---------------
+This version includes:
+
+* Fix unexported 'ssl.config' table (backported)
+
+--------------------------------------------------------------------------------
+LuaSec 0.8.1
+---------------
+This version includes:
+
+* Fix general_name leak in cert:extensions() (backported)
+
+--------------------------------------------------------------------------------
+LuaSec 0.8
+---------------
+This version includes:
+
+* Add support to ALPN
+* Add support to TLS 1.3
+* Add support to multiple certificates
+* Add timeout to https module (https.TIMEOUT)
+* Drop support to SSL 3.0
+* Drop support to TLS 1.0 from https module
+* Fix invalid reference to Lua state
+* Fix memory leak when get certficate extensions
+
+--------------------------------------------------------------------------------
+LuaSec 0.7.2
+---------------
+This version includes:
+
+* Fix unexported 'ssl.config' table (backported)
+
+--------------------------------------------------------------------------------
+LuaSec 0.7.1
+---------------
+This version includes:
+
+* Fix general_name leak in cert:extensions() (backported)
+
+--------------------------------------------------------------------------------
+LuaSec 0.7
+---------------
+LuaSec depends  on OpenSSL, and  integrates with LuaSocket to  make it
+easy to add secure connections to any Lua applications or scripts.
+
+Documentation: https://github.com/brunoos/luasec/wiki
+
+This version includes:
+
+* Add support to OpenSSL 1.1.0
+* Add support to elliptic curves list
+* Add ssl.config that exports some OpenSSL information
+* Add integration with luaossl
+
+--------------------------------------------------------------------------------
+LuaSec 0.6
+------------
+LuaSec depends  on OpenSSL, and  integrates with LuaSocket to  make it
+easy to add secure connections to any Lua applications or scripts.
+
+Documentation: https://github.com/brunoos/luasec/wiki
+
+This version includes:
+
+* Lua 5.2 and 5.3 compatibility
+
+* Context module:
+  - Add ctx:checkkey()
+
+* SSL module:
+  - Add conn:sni() and conn:getsniname()
+
+* Context options:
+  - Add "any" protocol ("sslv23" is deprecated)
+
+* HTTPS module:
+  - Using "any" protocol without SSLv2/SSLv3, by default
+
+* X509 module:
+  - Human readable IP address
+  - Add cert:issued()
+  - Add cert:pubkey()
+
+* Some bug fixes
+
+
+=> Thanks to everyone who collaborate with LuaSec <=
+
+--------------------------------------------------------------------------------
+LuaSec 0.5
+------------
+LuaSec depends  on OpenSSL, and  integrates with LuaSocket to  make it
+easy to add secure connections to any Lua applications or scripts.
+
+This  version  includes:
+
+  * A new certificate (X509) API, which supports:
+    - Reading  the subject  (identity) and  issuer of the certificate.
+    - Reading  various X509  extensions, including email  and dnsName.
+    - Converting  certificates  to and  from  the  standard ASCII  PEM
+      format.
+    - Generating the fingerprint/digest of a certificate  (using SHA1,
+      SHA256 or SHA512).
+    - Reading the  certificate's expiration, serial number,  and other
+      info.
+
+  * The ability  to get more  detailed information from  OpenSSL about
+    why a certificate failed verification, for each certificate in the
+    chain.
+  
+  * Flags to  force acceptance of invalid certificates,  e.g. to allow
+    the use of self-signed certificates in a Trust On First Use model.
+
+  * Flags to control checking CRLs for certificate revocation status.
+  
+  * Support for ECDH cipher suites.
+  
+  * An API  to get the TLS  'finished' messages used  for SASL channel
+    binding (e.g. the SCRAM PLUS mechanisms).
+
+The work in  this release was undertaken by  Kim Alvefur, Paul Aurich,
+Tobias Markmann, Bruno Silvestre and Matthew Wild.
+
+--------------------------------------------------------------------------------
+LuaSec 0.4.1
+------------
+- SSL options updated --- based on OpenSSL 1.0.0d.
+- Activate SSL_MODE_RELEASE_BUFFERS by default if it is available.
+  (thanks Prosody project)
+
+---------------------------------------------------------------------------------
+LuaSec 0.4
+------------
+- Add option 'no_ticket' (included in OpenSSL 0.9.8f).
+- Add HTTPS module. (thanks Tomas Guisasola and Pablo Musa)
+
+--------------------------------------------------------------------------------
+LuaSec 0.3.3
+------------
+- BUG: Clear the error queue before call I/O functions (see SSL_get_error 
+  manual).
+  (thanks Matthew Wild)
+
+--------------------------------------------------------------------------------
+LuaSec 0.3.2
+------------
+- BUG: Windows uses a different way to report socket error.
+  (thanks Sebastien Perin)
+
+--------------------------------------------------------------------------------
+LuaSec 0.3.1
+------------
+- BUG: receive("a") returns 'closed' error instead of the content when the
+  SSL/TLS connection is shut down cleanly. (thanks Matthias Diener)
+
+--------------------------------------------------------------------------------
+LuaSec 0.3
+----------
+- Add functions ssl.rawcontext() and ssl.rawconnection()
+- Add support to encrypted key password. (thanks Norbert Kiesel)
+
+--------------------------------------------------------------------------------
+LuaSec 0.2.1
+------------
+- 'key' and 'certificate' configurations become optional. (thanks René Rebe)
+- Add '_VERSION' variable to module.
+
+--------------------------------------------------------------------------------
+LuaSec 0.2
+----------
+Initial version

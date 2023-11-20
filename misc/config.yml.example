@@ -1,0 +1,16 @@
+global: # Global configuration that every BunkerWeb service will read
+  core_addr: http://127.0.0.1:1337
+  core_token: changeme
+
+core: # Specific configuration for the core, can also contain overrides
+  listen_addr: 127.0.0.1
+  listen_port: 1337
+  whitelist: 127.0.0.1
+  check_token: yes
+  check_whitelist: yes
+  database_uri: sqlite:////var/lib/bunkerweb/db.sqlite
+  bunkerweb_instances:
+
+ui: # Specific configuration for the UI, can also contain overrides
+  admin_username: admin
+  admin_password: changeme # replace with a stronger password

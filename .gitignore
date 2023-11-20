@@ -1,0 +1,7 @@
+.idea/
+.vscode/
+__pycache__
+env
+node_modules
+.mypy_cache
+src/ui/static

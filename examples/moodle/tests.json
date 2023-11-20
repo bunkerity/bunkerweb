@@ -1,0 +1,13 @@
+{
+  "name": "moodle",
+  "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
+  "timeout": 300,
+  "delay": 300,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "moodle"
+    }
+  ]
+}

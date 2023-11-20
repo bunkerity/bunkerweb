@@ -1,0 +1,239 @@
+{
+  "download": [
+    {
+      "name": "Lua",
+      "url": "https://www.lua.org/ftp/lua-5.1.5.tar.gz",
+      "sha512": "0142fefcbd13afcd9b201403592aa60620011cc8e8559d4d2db2f92739d18186860989f48caa45830ff4f99bfc7483287fd3ff3a16d4dec928e2767ce4d542a9"
+    }
+  ],
+  "git_repository": [
+    {
+      "id": "luajit",
+      "name": "LuaJIT v2.1-20231117",
+      "url": "https://github.com/openresty/luajit2.git",
+      "commit": "4182d6bf37e9f8d1cb5d6e83b1db66de84b95101"
+    },
+    {
+      "id": "modsecurity",
+      "name": "ModSecurity v3.0.10",
+      "url": "https://github.com/SpiderLabs/ModSecurity.git",
+      "commit": "ccc2d9b53632fb5088673bbaafedf0d8d4b5f1d8",
+      "post_install": "patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch && rm -rf src/deps/src/modsecurity/others/libinjection"
+    },
+    {
+      "id": "modsecurity-nginx",
+      "name": "ModSecurity-nginx v1.0.3",
+      "url": "https://github.com/SpiderLabs/ModSecurity-nginx.git",
+      "commit": "d59e4ad121df702751940fd66bcc0b3ecb51a079",
+      "post_install": "patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/config.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch"
+    },
+    {
+      "id": "nginx",
+      "name": "Nginx v1.24.0",
+      "url": "https://github.com/nginx/nginx.git",
+      "commit": "84cd7217778b8b3a2e395194b641ea14050344f1"
+    },
+    {
+      "id": "ngx_brotli",
+      "name": "Nginx Brotli v1.0.9",
+      "url": "https://github.com/google/ngx_brotli.git",
+      "commit": "6e975bcb015f62e1f303054897783355e2a877dc"
+    },
+    {
+      "id": "nginx_cookie_flag_module",
+      "name": "Nginx cookie flag module v1.1.0",
+      "url": "https://github.com/AirisX/nginx_cookie_flag_module.git",
+      "commit": "4e48acf132952bbed43b28a8e6af0584dacb7b4c"
+    },
+    {
+      "id": "ngx_devel_kit",
+      "name": "Nginx devel kit v0.3.3",
+      "url": "https://github.com/vision5/ngx_devel_kit.git",
+      "commit": "91e30eb05085e7f9762f130cbb883a0e753cf74d"
+    },
+    {
+      "id": "headers-more-nginx-module",
+      "name": "headers-more-nginx-module v0.34",
+      "url": "https://github.com/openresty/headers-more-nginx-module.git",
+      "commit": "bea1be3bbf6af28f6aa8cf0c01c07ee1637e2bd0"
+    },
+    {
+      "id": "lbase64",
+      "name": "lbase64 v1.5.3",
+      "url": "https://github.com/iskolbin/lbase64.git",
+      "commit": "c261320edbdf82c16409d893a96c28c704aa0ab8"
+    },
+    {
+      "id": "libinjection",
+      "name": "libinjection v3.10.0+",
+      "url": "https://github.com/libinjection/libinjection.git",
+      "commit": "49904c42a6e68dc8f16c022c693e897e4010a06c"
+    },
+    {
+      "id": "libmaxminddb",
+      "name": "libmaxminddb v1.8.0",
+      "url": "https://github.com/maxmind/libmaxminddb.git",
+      "commit": "93a7e0e5627686deb82aa636376f53b1c7af3d9a"
+    },
+    {
+      "id": "lua-cjson",
+      "name": "lua-cjson v2.1.0.12",
+      "url": "https://github.com/openresty/lua-cjson.git",
+      "commit": "881accc8fadca5ec02aa34d364df2a1aa25cd2f9"
+    },
+    {
+      "id": "lua-ffi-zlib",
+      "name": "lua-ffi-zlib v0.6",
+      "url": "https://github.com/hamishforbes/lua-ffi-zlib.git",
+      "commit": "61e95cb434e4047c8bc65a180c293a05bf754416",
+      "post_install": "patch --forward src/deps/src/lua-ffi-zlib/lib/ffi-zlib.lua src/deps/misc/lua-ffi-zlib.patch"
+    },
+    {
+      "id": "lua-gd",
+      "name": "lua-gd v2.0.33r3+",
+      "url": "https://github.com/ittner/lua-gd.git",
+      "commit": "2ce8e478a8591afd71e607506bc8c64b161bbd30"
+    },
+    {
+      "id": "lua-nginx-module",
+      "name": "lua-nginx-module v0.10.25",
+      "url": "https://github.com/openresty/lua-nginx-module.git",
+      "commit": "c47084b5d719ce507d2419d8660f39544a9d1fea"
+    },
+    {
+      "id": "lua-resty-core",
+      "name": "lua-resty-core v0.1.27",
+      "url": "https://github.com/openresty/lua-resty-core.git",
+      "commit": "31fae862a1ed64033591f991fadb0dd80358ba0b"
+    },
+    {
+      "id": "lua-resty-dns",
+      "name": "lua-resty-dns v0.22",
+      "url": "https://github.com/openresty/lua-resty-dns.git",
+      "commit": "869d2fbb009b6ada93a5a10cb93acd1cc12bd53f"
+    },
+    {
+      "id": "lua-resty-env",
+      "name": "lua-resty-env v0.4.0",
+      "url": "https://github.com/3scale/lua-resty-env.git",
+      "commit": "adb294def823dd910ffa11972d2c61eab7cfce3e"
+    },
+    {
+      "id": "lua-resty-http",
+      "name": "lua-resty-http v0.17.1",
+      "url": "https://github.com/ledgetech/lua-resty-http.git",
+      "commit": "4ab4269cf442ba52507aa2c718f606054452fcad"
+    },
+    {
+      "id": "lua-resty-ipmatcher",
+      "name": "lua-resty-ipmatcher v0.6.1 (3 commits after just in case)",
+      "url": "https://github.com/api7/lua-resty-ipmatcher.git",
+      "commit": "7fbb618f7221b1af1451027d3c64e51f3182761c",
+      "post_install": "patch --forward src/deps/src/lua-resty-ipmatcher/resty/ipmatcher.lua src/deps/misc/ipmatcher.patch"
+    },
+    {
+      "id": "lua-resty-lock",
+      "name": "lua-resty-lock v0.09",
+      "url": "https://github.com/openresty/lua-resty-lock.git",
+      "commit": "9dc550e56b6f3b1a2f1a31bb270a91813b5b6861"
+    },
+    {
+      "id": "lua-resty-lrucache",
+      "name": "lua-resty-lrucache v0.13",
+      "url": "https://github.com/openresty/lua-resty-lrucache.git",
+      "commit": "a79615ec9dc547fdb4aaee59ef8f5a50648ce9fd"
+    },
+    {
+      "id": "lua-resty-mlcache",
+      "name": "lua-resty-mlcache v2.6.0",
+      "url": "https://github.com/thibaultcha/lua-resty-mlcache.git",
+      "commit": "f140f56663cbdb9cdd247d29f75c299c702ff6b4"
+    },
+    {
+      "id": "lua-resty-openssl",
+      "name": "lua-resty-openssl v1.0.1",
+      "url": "https://github.com/fffonion/lua-resty-openssl.git",
+      "commit": "89195843cfbfac9dcbf071832aa9303a347871b4",
+      "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
+    },
+    {
+      "id": "lua-resty-random",
+      "name": "lua-resty-random (latest commit)",
+      "url": "https://github.com/bungle/lua-resty-random.git",
+      "commit": "17b604f7f7dd217557ca548fc1a9a0d373386480"
+    },
+    {
+      "id": "lua-resty-redis",
+      "name": "lua-resty-redis v0.30",
+      "url": "https://github.com/openresty/lua-resty-redis.git",
+      "commit": "d7c25f1b339d79196ff67f061c547a73a920b580"
+    },
+    {
+      "id": "lua-resty-session",
+      "name": "lua-resty-session v4.0.5",
+      "url": "https://github.com/bungle/lua-resty-session.git",
+      "commit": "5f2aed616d16fa7ca04dc40e23d6941740cd634d"
+    },
+    {
+      "id": "lua-resty-signal",
+      "name": "lua-resty-signal v0.03",
+      "url": "https://github.com/openresty/lua-resty-signal.git",
+      "commit": "d07163e8cfa673900e66048cd2a1f18523aecf16"
+    },
+    {
+      "id": "lua-resty-string",
+      "name": "lua-resty-string v0.15",
+      "url": "https://github.com/openresty/lua-resty-string.git",
+      "commit": "b192878f6ed31b0af237935bbc5a8110a3c2256c"
+    },
+    {
+      "id": "lua-resty-template",
+      "name": "lua-resty-template v2.0",
+      "url": "https://github.com/bungle/lua-resty-template.git",
+      "commit": "c08c6bc9e27710806990f2dec0f03b19406976ac"
+    },
+    {
+      "id": "lua-resty-upload",
+      "name": "lua-resty-upload v0.11",
+      "url": "https://github.com/openresty/lua-resty-upload.git",
+      "commit": "03704aee42f7135e7782688d8a9af63a16015edc"
+    },
+    {
+      "id": "luajit-geoip",
+      "name": "luajit-geoip v2.1.0",
+      "url": "https://github.com/leafo/luajit-geoip.git",
+      "commit": "fde33e045083522d73665a6894d78dbf995b9e12",
+      "post_install": "patch --forward src/deps/src/luajit-geoip/geoip/mmdb.lua src/deps/misc/mmdb.patch"
+    },
+    {
+      "id": "lualogging",
+      "name": "lualogging v1.8.2",
+      "url": "https://github.com/lunarmodules/lualogging.git",
+      "commit": "465c994788f1bc18fca950934fa5ec9a909f496c"
+    },
+    {
+      "id": "luasec",
+      "name": "luasec v1.3.2",
+      "url": "https://github.com/brunoos/luasec.git",
+      "commit": "4c06287052d68fdbe7429b8f967cdc8ee94aa44a"
+    },
+    {
+      "id": "luasocket",
+      "name": "luasocket v3.1.0",
+      "url": "https://github.com/diegonehab/luasocket.git",
+      "commit": "95b7efa9da506ef968c1347edf3fc56370f0deed"
+    },
+    {
+      "id": "stream-lua-nginx-module",
+      "name": "stream-lua-nginx-module v0.0.13",
+      "url": "https://github.com/openresty/stream-lua-nginx-module.git",
+      "commit": "309198abf26266f1a3e53c71388ed7bb9d1e5ea2"
+    },
+    {
+      "id": "zlib",
+      "name": "zlib v1.3",
+      "url": "https://github.com/madler/zlib.git",
+      "commit": "09155eaa2f9270dc4ed1fa13e2b4b2613e6e4851"
+    }
+  ]
+}

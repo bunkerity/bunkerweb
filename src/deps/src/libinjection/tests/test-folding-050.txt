@@ -1,0 +1,9 @@
+--TEST--
+pgsql type intents
+--INPUT--
+SELECT character varying '1';
+--EXPECTED--
+E SELECT
+s '1'
+; ;
+

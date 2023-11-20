@@ -1,0 +1,199 @@
+---
+meta:
+  author: studersi
+  description: Test whether the recommended rules can be fooled into using the wrong body processor which can result in bypasses
+  enabled: true
+  name: 921421.yaml
+tests:
+  - test_title: 921421-1
+    desc: Bypass targeting recommended rules (rule 200000)
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: OWASP ModSecurity Core Rule Set
+              Content-Type: application/x-www-form-urlencoded;boundary="application/json"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            log_contains: id "921421"
+  - test_title: 921421-2
+    desc: Bypass targeting recommended rules (rule 200006)
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: OWASP ModSecurity Core Rule Set
+              Content-Type: application/x-www-form-urlencoded;boundary="application/vnd.mycompany.myapp.customer-v2+json"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            log_contains: id "921421"
+  - test_title: 921421-3
+    desc: Bypass targeting recommended rules (rule 200001)
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: OWASP ModSecurity Core Rule Set
+              Content-Type: application/x-www-form-urlencoded;boundary="text/xml"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            log_contains: id "921421"
+  - test_title: 921421-4
+    desc: Bypass targeting recommended rules (rule 200001)
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: OWASP ModSecurity Core Rule Set
+              Content-Type: application/x-www-form-urlencoded;boundary="application/xml"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            log_contains: id "921421"
+  - test_title: 921421-5
+    desc: Bypass targeting recommended rules (rule 200001)
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: OWASP ModSecurity Core Rule Set
+              Content-Type: application/x-www-form-urlencoded;boundary="application/soap+xml"
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            log_contains: id "921421"
+  - test_title: 921421-6
+    desc: Negative test for 921421-1
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: OWASP ModSecurity Core Rule Set
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "921421"
+  - test_title: 921421-7
+    desc: Negative test for 921421-2
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: OWASP ModSecurity Core Rule Set
+              Content-Type: application/vnd.mycompany.myapp.customer-v2+json
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "921421"
+  - test_title: 921421-8
+    desc: Negative test for 921421-3
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: OWASP ModSecurity Core Rule Set
+              Content-Type: text/xml
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "921421"
+  - test_title: 921421-9
+    desc: Negative test for 921421-4
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: OWASP ModSecurity Core Rule Set
+              Content-Type: application/xml
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "921421"
+  - test_title: 921421-10
+    desc: Negative test for 921421-5
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: OWASP ModSecurity Core Rule Set
+              Content-Type: application/soap+xml
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "921421"
+  - test_title: 921421-11
+    desc: Negative test for rule 921421-6
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: OWASP ModSecurity Core Rule Set
+              Content-Type: text/html; charset=UTF-8
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "921421"
+  - test_title: 921421-12
+    desc: Negative test for rule 921421-7
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: OWASP ModSecurity Core Rule Set
+              Content-Type: multipart/form-data; boundary=something
+            method: POST
+            port: 80
+            uri: /post
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "921421"

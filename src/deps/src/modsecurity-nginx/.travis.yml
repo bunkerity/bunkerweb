@@ -1,0 +1,47 @@
+sudo: required
+dist: bionic
+
+os: linux
+
+language: c
+
+compiler:
+  - gcc
+
+addons:
+  apt:
+    packages:
+    - libyajl-dev
+    - libgeoip-dev
+    - liblmdb-dev
+
+env:
+  - VER_NGINX=1.21.0
+  - VER_NGINX=1.20.1
+
+before_script:
+  - cd ..
+  - git clone https://github.com/SpiderLabs/ModSecurity.git
+  - cd ModSecurity
+  - git checkout v3/master
+  - git submodule init
+  - git submodule update
+  - ./build.sh
+  - ./configure --without-lmdb
+  - make
+  - sudo make install
+  - cd ..
+  - wget http://nginx.org/download/nginx-${VER_NGINX}.tar.gz && tar -xf nginx-${VER_NGINX}.tar.gz
+  - cd nginx-${VER_NGINX}
+  - ./configure --with-http_auth_request_module --with-http_v2_module --add-module=../ModSecurity-nginx
+  - make
+  - sudo make install
+  - cd ..
+  - wget http://hg.nginx.org/nginx-tests/archive/tip.tar.gz
+  - tar xvzf tip.tar.gz
+  - cd nginx-tests-*
+  - cp ../ModSecurity-nginx/tests/* .
+  - export TEST_NGINX_BINARY=/usr/local/nginx/sbin/nginx
+
+script:
+    - prove .

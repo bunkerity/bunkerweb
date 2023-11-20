@@ -1,0 +1,218 @@
+<script setup>
+import Dashboard from "@layouts/Dashboard.vue";
+import ApiState from "@components/Api/State.vue";
+import CardBase from "@components/Card/Base.vue";
+import CardItemList from "@components/Card/Item/List.vue";
+import { reactive, computed, onMounted, watch } from "vue";
+import { fetchAPI } from "@utils/api.js";
+import {
+  generateConfTree,
+  getCustomConfByFilter,
+} from "@utils/custom_configs.js";
+import SettingsLayout from "@components/Settings/Layout.vue";
+import SettingsInput from "@components/Settings/Input.vue";
+import SettingsCheckbox from "@components/Settings/Checkbox.vue";
+import { useFeedbackStore } from "@store/global.js";
+import FileManagerStructure from "@components/FileManager/Structure.vue";
+import { useLogsStore } from "@store/logs.js";
+import { useRefreshStore } from "@store/global.js";
+
+// Refresh when related btn is clicked
+const refreshStore = useRefreshStore();
+
+watch(refreshStore, () => {
+  getData();
+});
+
+const logsStore = useLogsStore();
+logsStore.setTags(["custom_config"]);
+
+const feedbackStore = useFeedbackStore();
+
+// Hide / Show settings and plugin base on that filters
+const filters = reactive({
+  pathKeyword: "",
+  nameKeyword: "",
+  showServices: "yes",
+  showOnlyCaseConf: "no",
+});
+
+const conf = reactive({
+  isPend: false,
+  isErr: false,
+  // Data from fetch
+  data: [],
+});
+
+const customConf = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+  total: computed(() => customConf.data.length || 0),
+  global: computed(
+    () => customConf.data.filter((item) => !item["service_id"]).length || 0
+  ),
+  service: computed(
+    () => customConf.data.filter((item) => item["service_id"]).length || 0
+  ),
+  setup: computed(() => {
+    if (
+      conf.isPend ||
+      conf.isErr ||
+      conf.data.length === 0 ||
+      customConf.isPend ||
+      customConf.isErr
+    ) {
+      return [];
+    }
+    const config = JSON.parse(JSON.stringify(conf.data));
+    const services = Object.keys(config["services"]);
+    const confTree = generateConfTree(customConf.data, services);
+    const filterManager = getCustomConfByFilter(confTree, filters);
+    return filterManager;
+  }),
+});
+
+async function getCustomConf(isFeedback = true) {
+  await fetchAPI(
+    "/api/custom_configs",
+    "GET",
+    null,
+    customConf,
+    isFeedback ? feedbackStore.addFeedback : null
+  );
+}
+
+async function getConfig(isFeedback = true) {
+  await fetchAPI(
+    "/api/config?methods=1&new_format=1",
+    "GET",
+    null,
+    conf,
+    isFeedback ? feedbackStore.addFeedback : null
+  );
+}
+
+async function getData() {
+  await getConfig();
+  await getCustomConf();
+}
+
+onMounted(() => {
+  getData();
+});
+</script>
+
+<template>
+  <Dashboard>
+    <ApiState
+      class="col-span-12 md:col-start-4 md:col-span-6"
+      :isErr="customConf.isErr"
+      :isPend="conf.isPend || customConf.isPend"
+      :textState="{
+        isPend: $t('custom_conf.api.pending'),
+        isErr: $t('custom_conf.api.error'),
+      }"
+    />
+    <CardBase
+      v-if="
+        !customConf.isPend && !customConf.isErr && !conf.isPend && !conf.isErr
+      "
+      class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
+      :label="$t('custom_conf.card.info.title')"
+    >
+      <CardItemList
+        :items="[
+          {
+            label: $t('custom_conf.card.info.items.conf_total'),
+            value: customConf.total,
+          },
+          {
+            label: $t('custom_conf.card.info.items.conf_global'),
+            value: customConf.global,
+          },
+          {
+            label: $t('custom_conf.card.info.items.conf_services'),
+            value: customConf.service,
+          },
+        ]"
+      />
+    </CardBase>
+    <CardBase
+      v-if="
+        !customConf.isPend && !customConf.isErr && !conf.isPend && !conf.isErr
+      "
+      :label="$t('custom_conf.card.filter.title')"
+      class="z-[100] col-span-12 md:col-span-8 lg:col-span-6 2xl:col-span-5 3xl:col-span-4 grid grid-cols-12 relative"
+    >
+      <SettingsLayout
+        class="flex w-full col-span-12 md:col-span-6"
+        :label="$t('custom_conf.card.filter.search_path.label')"
+        name="pathKeyword"
+      >
+        <SettingsInput
+          @inp="(v) => (filters.pathKeyword = v)"
+          :settings="{
+            id: 'pathKeyword',
+            type: 'text',
+            value: '',
+            placeholder: 'base/service/conf',
+          }"
+        />
+      </SettingsLayout>
+      <SettingsLayout
+        class="flex w-full col-span-12 md:col-span-6"
+        :label="$t('custom_conf.card.filter.search_name.label')"
+        name="nameKeyword"
+      >
+        <SettingsInput
+          @inp="(v) => (filters.nameKeyword = v)"
+          :settings="{
+            id: 'nameKeyword',
+            type: 'text',
+            value: '',
+            placeholder: 'label',
+          }"
+        />
+      </SettingsLayout>
+      <SettingsLayout
+        class="flex w-full col-span-12 md:col-span-6"
+        :label="$t('custom_conf.card.filter.show_services_folders.label')"
+        name="show-service"
+      >
+        <SettingsCheckbox
+          @inp="(v) => (filters.showServices = v)"
+          :settings="{
+            id: 'show-service',
+            value: 'yes',
+          }"
+        />
+      </SettingsLayout>
+      <SettingsLayout
+        class="flex w-full col-span-12 md:col-span-6 capitalize-first"
+        :label="$t('custom_conf.card.filter.show_path_with_conf.label')"
+        name="show-only-conf"
+      >
+        <SettingsCheckbox
+          @inp="(v) => (filters.showOnlyCaseConf = v)"
+          :settings="{
+            id: 'show-only-conf',
+            value: 'no',
+          }"
+        />
+      </SettingsLayout>
+    </CardBase>
+    <FileManagerStructure
+      @updateFile="getData()"
+      v-if="
+        !customConf.isPend &&
+        !customConf.isErr &&
+        !conf.isPend &&
+        !conf.isErr &&
+        customConf.setup.length > 0
+      "
+      :config="customConf.setup"
+      class="col-span-12"
+    />
+  </Dashboard>
+</template>

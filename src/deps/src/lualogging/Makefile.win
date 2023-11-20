@@ -1,0 +1,12 @@
+
+LUA_DIR= c:\lua5.1\lua
+
+LUAS= src\logging\console.lua src\logging\email.lua src\logging\file.lua src\logging\rolling_file.lua src\logging\socket.lua src\logging\sql.lua src/logging/nginx.lua src/logging/rsyslog.lua src/logging/envconfig.lua
+ROOT_LUAS= src\logging.lua 
+
+build clean:
+
+install:
+	IF NOT EXIST $(LUA_DIR)\logging mkdir $(LUA_DIR)\logging
+	FOR %i IN ($(LUAS)) DO copy %i $(LUA_DIR)\logging
+	FOR %i IN ($(ROOT_LUAS)) DO copy %i $(LUA_DIR)

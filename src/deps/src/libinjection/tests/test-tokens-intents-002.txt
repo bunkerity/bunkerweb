@@ -1,0 +1,9 @@
+--TEST--
+mysql character encoding intents
+--INPUT--
+SELECT _latin1'foo
+--EXPECTED--
+E SELECT
+t _latin1
+s 'foo
+

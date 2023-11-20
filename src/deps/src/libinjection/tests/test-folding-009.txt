@@ -1,0 +1,7 @@
+--TEST--
+only two tokens
+--INPUT--
+123;
+--EXPECTED--
+1 123
+; ;

@@ -1,0 +1,30 @@
+name: Scorecard analysis workflow
+
+on:
+  branch_protection_rule:
+  schedule:
+    # Weekly on Saturdays.
+    - cron: "30 1 * * 6"
+  workflow_call:
+
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          persist-credentials: false
+      - name: "Run analysis"
+        uses: ossf/scorecard-action@0864cf19026789058feabb7e87baa5f140aac736 # v2.3.1
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+      - name: "Upload SARIF results to code scanning"
+        uses: github/codeql-action/upload-sarif@66b90a5db151a8042fa97405c6cf843bbe433f7b # v2.22.7
+        with:
+          sarif_file: results.sarif

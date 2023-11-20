@@ -1,0 +1,40 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"SecRuleEngine DetectionOnly with disruptive SecDefaultAction",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host": "localhost"
+      },
+      "uri":"?a=a",
+      "method":"GET"
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code":200
+    },
+    "rules":[
+      "SecRuleEngine DetectionOnly",
+      "SecDefaultAction \"phase:1,deny,status:403\"",
+      "SecRule ARGS \"@rx a\" \"id:1,phase:1,block"
+    ]
+  }
+]

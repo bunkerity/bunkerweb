@@ -1,0 +1,18 @@
+version: "3.5"
+
+services:
+  tests:
+    build: .
+    environment:
+      PYTHONUNBUFFERED: "1"
+      USE_BUNKERNET: "yes"
+      BUNKERNET_SERVER: "http://bunkernet-api:8080"
+    extra_hosts:
+      - "www.example.com:1.0.0.2"
+    networks:
+      bw-services:
+        ipv4_address: 1.0.0.3
+
+networks:
+  bw-services:
+    external: true
