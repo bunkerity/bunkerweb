@@ -23,6 +23,11 @@ const props = defineProps({
       <p
         class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500"
       >
+        <span class="sr-only">{{
+          detail.isActive
+            ? $t("services.card.detail.state.active")
+            : $t("services.card.detail.state.inactive")
+        }}</span>
         <svg
           v-if="detail.isActive"
           class="h-4 w-4 fill-green-500"

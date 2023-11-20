@@ -8,6 +8,10 @@ const props = defineProps({
     required: false,
     default: "button",
   },
+  label: {
+    type: String,
+    required: false,
+  },
 });
 
 // Determine popover need to be display
@@ -45,12 +49,15 @@ function hidePopover() {
 
 <template>
   <component
+    :aria-controls="`${props.label}-popover`"
     :is="props.tag"
     :type="props.tag !== 'button' ? 'button' : false"
     @pointerover="showPopover()"
     @pointerleave="hidePopover()"
+    :aria-description="$t('dashboard.popover.button.aria_description')"
     class="cursor-pointer flex justify-start w-full"
   >
+    <span class="sr-only"> {{ $t("dashboard.popover.button.label") }}</span>
     <div class="popover-background"></div>
     <svg
       class="popover-settings-svg"
@@ -63,9 +70,12 @@ function hidePopover() {
     </svg>
   </component>
   <div
+    :id="`${props.label}-popover`"
+    role="status"
     :aria-hidden="popover.isOpen ? 'false' : 'true'"
     v-show="popover.isOpen"
     :class="['popover-settings-container']"
+    :aria-description="$t('dashboard.popover.detail.aria_description')"
   >
     <p class="popover-settings-text"><slot></slot></p>
   </div>

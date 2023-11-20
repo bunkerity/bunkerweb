@@ -20,7 +20,9 @@ const props = defineProps({
     </h5>
     <!-- popover -->
     <div class="relative">
-      <PopoverSetting tag="div"> {{ props.help }}</PopoverSetting>
+      <PopoverSetting :label="props.label" tag="div">
+        {{ props.help }}
+      </PopoverSetting>
     </div>
   </div>
   <!-- end title and info -->

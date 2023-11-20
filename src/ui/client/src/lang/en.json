@@ -9,6 +9,15 @@
     "logo_alt": "BunkerWeb logo"
   },
   "dashboard": {
+    "loader": {
+      "label": "loading",
+      "alt_logo": "logo image"
+    },
+    "lang": {
+      "dropdown_button": {
+        "aria_description": "Toggle show/hide radiogroup to choose another langage."
+      }
+    },
     "header": {
       "buttons": {
         "refresh": "Refetch all data."
@@ -87,7 +96,16 @@
         "aria_description": "Feedback of your own actions."
       },
       "logs": {
-        "aria_description": "Feedback of actions on BunkerWeb"
+        "aria_description": "Feedback of actions on BunkerWeb."
+      }
+    },
+    "popover": {
+      "button": {
+        "aria_description": "Show detail about the setting on hover with a popover.",
+        "label": "show popover with details"
+      },
+      "detail": {
+        "aria_description": "container with detail about related setting."
       }
     }
   },
@@ -104,12 +122,19 @@
       }
     },
     "instances": {
+      "hostname": "hostname",
+      "method": "method",
+      "port": "port",
       "api": {
         "pending": "Try retrieve instances",
         "error": "Error retrieving instances"
       },
       "card": {
         "name": "instances",
+        "status": {
+          "active": "instance is active",
+          "inactive": "instance is inactive"
+        },
         "up": "up",
         "down": "down"
       },
@@ -119,17 +144,6 @@
         "hostname": "hostname",
         "method": "method",
         "port": "port"
-      }
-    },
-    "services": {
-      "api": {
-        "pending": "Try retrieve services",
-        "error": "Error retrieving services"
-      },
-      "card": {
-        "name": "services",
-        "ui": "ui",
-        "autoconf": "autoconf"
       }
     },
     "plugins": {
@@ -218,10 +232,10 @@
       "unselect_all": "unselect all",
       "unban": {
         "label": "unban select",
-        "aria_description": "Unban selected ban items from list"
+        "aria_description": "Unban selected ban items from list."
       },
       "select": {
-        "aria_description": "Select ban item to make action"
+        "aria_description": "Select ban item to make action."
       }
     },
     "add": {
@@ -280,6 +294,12 @@
         "show_path_with_conf": {
           "label": "Only path with .conf"
         }
+      },
+      "detail": {
+        "state": {
+          "active": "Related setting is active",
+          "inactive": "Related setting is inactive"
+        }
       }
     },
     "file_manager": {
@@ -293,15 +313,15 @@
       },
       "breadcrumb": {
         "item": {
-          "aria_description": "Click to go to related path"
+          "aria_description": "Click to go to related path."
         }
       },
       "modal": {
         "path": {
-          "aria_description": "Show total path with conf file name input to fill"
+          "aria_description": "Show total path with conf file name input to fill."
         },
         "editor": {
-          "aria_description": "Fill the script related to the config file"
+          "aria_description": "Fill the script related to the config file."
         }
       }
     }
@@ -485,7 +505,7 @@
       "save": "save"
     }
   },
-  "plugin_settings": {
+  "custom_inputs": {
     "select": {
       "default": {
         "aria_description": "Communicate with a custom visible select."
@@ -508,6 +528,1515 @@
     "checkbox": {
       "svg": {
         "aria_description": "Show a check related to current checkbox state."
+      }
+    }
+  },
+  "core_plugins": {
+    "general": {
+      "id": "general",
+      "name": "General",
+      "description": "The general settings for the server",
+      "settings": {
+        "IS_LOADING": {
+          "help": "Internal use : set to yes when BW is loading.",
+          "id": "internal-use",
+          "label": "internal use"
+        },
+        "NGINX_PREFIX": {
+          "help": "Where nginx will search for configurations.",
+          "id": "nginx-prefix",
+          "label": "nginx prefix"
+        },
+        "HTTP_PORT": {
+          "help": "HTTP port number which bunkerweb binds to.",
+          "id": "http-port",
+          "label": "HTTP port"
+        },
+        "HTTPS_PORT": {
+          "help": "HTTPS port number which bunkerweb binds to.",
+          "id": "https-port",
+          "label": "HTTPS port"
+        },
+        "MULTISITE": {
+          "help": "Multi site activation.",
+          "id": "multisite",
+          "label": "Multisite"
+        },
+        "SERVER_NAME": {
+          "help": "List of the virtual hosts served by bunkerweb.",
+          "id": "server-name",
+          "label": "Server name"
+        },
+        "WORKER_PROCESSES": {
+          "help": "Number of worker processes.",
+          "id": "worker-processes",
+          "label": "Worker processes"
+        },
+        "WORKER_RLIMIT_NOFILE": {
+          "help": "Maximum number of open files for worker processes.",
+          "id": "worker-rlimit-nofile",
+          "label": "Open files per worker"
+        },
+        "WORKER_CONNECTIONS": {
+          "help": "Maximum number of connections per worker.",
+          "id": "worker-connections",
+          "label": "Connections per worker"
+        },
+        "LOG_FORMAT": {
+          "help": "The format to use for access logs.",
+          "id": "log-format",
+          "label": "Log format"
+        },
+        "LOG_LEVEL": {
+          "help": "The level to use for error logs.",
+          "id": "log-level",
+          "label": "Log level",
+          "select": [
+            "alert",
+            "crit",
+            "debug",
+            "emerg",
+            "error",
+            "info",
+            "notice",
+            "warn"
+          ]
+        },
+        "DNS_RESOLVERS": {
+          "help": "DNS addresses of resolvers to use.",
+          "id": "dns-resolvers",
+          "label": "DNS resolvers"
+        },
+        "DATASTORE_MEMORY_SIZE": {
+          "help": "Size of the internal datastore.",
+          "id": "datastore-memory-size",
+          "label": "Datastore memory size"
+        },
+        "CACHESTORE_MEMORY_SIZE": {
+          "help": "Size of the internal cachestore.",
+          "id": "cachestore-memory-size",
+          "label": "Cachestore memory size"
+        },
+        "CACHESTORE_IPC_MEMORY_SIZE": {
+          "help": "Size of the internal cachestore (ipc).",
+          "id": "cachestore-ipc-memory-size",
+          "label": "Cachestore ipc memory size"
+        },
+        "CACHESTORE_MISS_MEMORY_SIZE": {
+          "help": "Size of the internal cachestore (miss).",
+          "id": "cachestore-miss-memory-size",
+          "label": "Cachestore miss memory size"
+        },
+        "CACHESTORE_LOCKS_MEMORY_SIZE": {
+          "help": "Size of the internal cachestore (locks).",
+          "id": "cachestore-locks-memory-size",
+          "label": "Cachestore locks memory size"
+        },
+        "USE_API": {
+          "help": "Activate the API to control BunkerWeb.",
+          "id": "use-api",
+          "label": "Activate API"
+        },
+        "API_HTTP_PORT": {
+          "help": "Listen port number for the API.",
+          "id": "api-http-listen",
+          "label": "API port number"
+        },
+        "API_LISTEN_IP": {
+          "help": "Listen IP address for the API.",
+          "id": "api-ip-listen",
+          "label": "API listen IP"
+        },
+        "API_SERVER_NAME": {
+          "help": "Server name (virtual host) for the API.",
+          "id": "api-server-name",
+          "label": "API server name"
+        },
+        "API_WHITELIST_IP": {
+          "help": "List of IP/network allowed to contact the API.",
+          "id": "api-whitelist-ip",
+          "label": "API whitelist IP"
+        },
+        "AUTOCONF_MODE": {
+          "help": "Enable Autoconf Docker integration.",
+          "id": "autoconf-mode",
+          "label": "Autoconf mode"
+        },
+        "SWARM_MODE": {
+          "help": "Enable Docker Swarm integration.",
+          "id": "swarm-mode",
+          "label": "Swarm mode"
+        },
+        "KUBERNETES_MODE": {
+          "help": "Enable Kubernetes integration.",
+          "id": "kubernetes-mode",
+          "label": "Kubernetes mode"
+        },
+        "SERVER_TYPE": {
+          "help": "Server type : http or stream.",
+          "id": "server-type",
+          "label": "Server type",
+          "select": ["http", "stream"]
+        },
+        "LISTEN_STREAM": {
+          "help": "Enable listening for non-ssl (passthrough).",
+          "id": "listen-stream",
+          "label": "Listen stream"
+        },
+        "LISTEN_STREAM_PORT": {
+          "help": "Listening port for non-ssl (passthrough).",
+          "id": "listen-stream-port",
+          "label": "Listen stream port"
+        },
+        "LISTEN_STREAM_PORT_SSL": {
+          "help": "Listening port for ssl (passthrough).",
+          "id": "listen-stream-port-ssl",
+          "label": "Listen stream port ssl"
+        },
+        "USE_UDP": {
+          "help": "UDP listen instead of TCP (stream).",
+          "id": "use-udp",
+          "label": "Listen UDP"
+        },
+        "USE_IPV6": {
+          "help": "Enable IPv6 connectivity.",
+          "id": "use-ipv6",
+          "label": "Use IPv6"
+        }
+      }
+    },
+    "reversescan": {
+      "id": "reversescan",
+      "name": "Reverse scan",
+      "description": "Scan clients ports to detect proxies or servers.",
+      "settings": {
+        "USE_REVERSE_SCAN": {
+          "help": "Enable scanning of clients ports and deny access if one is opened.",
+          "id": "use-reverse-scan",
+          "label": "Reverse scan"
+        },
+        "REVERSE_SCAN_PORTS": {
+          "help": "List of port to scan when using reverse scan feature.",
+          "id": "reverse-scan-ports",
+          "label": "Reverse scan ports"
+        },
+        "REVERSE_SCAN_TIMEOUT": {
+          "help": "Specify the maximum timeout (in ms) when scanning a port.",
+          "id": "reverse-scan-timeout",
+          "label": "Reverse scan timeout"
+        }
+      }
+    },
+    "whitelist": {
+      "id": "whitelist",
+      "name": "Whitelist",
+      "description": "Allow access based on internal and external IP/network/rDNS/ASN whitelists.",
+      "settings": {
+        "USE_WHITELIST": {
+          "help": "Activate whitelist feature.",
+          "id": "use-whitelist",
+          "label": "Activate whitelisting"
+        },
+        "WHITELIST_IP": {
+          "help": "List of IP/network, separated with spaces, to put into the whitelist.",
+          "id": "whitelist-ip",
+          "label": "Whitelist IP/network"
+        },
+        "WHITELIST_IP_URLS": {
+          "help": "List of URLs, separated with spaces, containing good IP/network to whitelist.",
+          "id": "whitelist-ip-urls",
+          "label": "Whitelist IP/network URLs"
+        },
+        "WHITELIST_RDNS_GLOBAL": {
+          "help": "Only perform RDNS whitelist checks on global IP addresses.",
+          "id": "whitelist-rdns-global",
+          "label": "Whitelist reverse DNS global IPs"
+        },
+        "WHITELIST_RDNS": {
+          "help": "List of reverse DNS suffixes, separated with spaces, to whitelist.",
+          "id": "whitelist-rdns",
+          "label": "Whitelist reverse DNS"
+        },
+        "WHITELIST_RDNS_URLS": {
+          "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to whitelist.",
+          "id": "whitelist-rdns-urls",
+          "label": "Whitelist reverse DNS URLs"
+        },
+        "WHITELIST_ASN": {
+          "help": "List of ASN numbers, separated with spaces, to whitelist.",
+          "id": "whitelist-asn",
+          "label": "Whitelist ASN"
+        },
+        "WHITELIST_ASN_URLS": {
+          "help": "List of URLs, separated with spaces, containing ASN to whitelist.",
+          "id": "whitelist-asn-urls",
+          "label": "Whitelist ASN URLs"
+        },
+        "WHITELIST_USER_AGENT": {
+          "help": "List of User-Agent (PCRE regex), separated with spaces, to whitelist.",
+          "id": "whitelist-user-agent",
+          "label": "Whitelist User-Agent"
+        },
+        "WHITELIST_USER_AGENT_URLS": {
+          "help": "List of URLs, separated with spaces, containing good User-Agent to whitelist.",
+          "id": "whitelist-user-agent-urls",
+          "label": "Whitelist User-Agent URLs"
+        },
+        "WHITELIST_URI": {
+          "help": "List of URI (PCRE regex), separated with spaces, to whitelist.",
+          "id": "whitelist-uri",
+          "label": "Whitelist URI"
+        },
+        "WHITELIST_URI_URLS": {
+          "help": "List of URLs, separated with spaces, containing bad URI to whitelist.",
+          "id": "whitelist-uri-urls",
+          "label": "Whitelist URI URLs"
+        }
+      }
+    },
+    "greylist": {
+      "id": "greylist",
+      "name": "Greylist",
+      "description": "Allow access while keeping security features based on internal and external IP/network/rDNS/ASN greylists.",
+      "settings": {
+        "USE_GREYLIST": {
+          "help": "Activate greylist feature.",
+          "id": "use-greylist",
+          "label": "Activate greylisting"
+        },
+        "GREYLIST_IP": {
+          "help": "List of IP/network, separated with spaces, to put into the greylist.",
+          "id": "greylist-ip",
+          "label": "Greylist IP/network"
+        },
+        "GREYLIST_IP_URLS": {
+          "help": "List of URLs, separated with spaces, containing good IP/network to put into the greylist.",
+          "id": "greylist-ip-urls",
+          "label": "Greylist IP/network URLs"
+        },
+        "GREYLIST_RDNS_GLOBAL": {
+          "help": "Only perform RDNS greylist checks on global IP addresses.",
+          "id": "greylist-rdns-global",
+          "label": "Greylist reverse DNS global IPs"
+        },
+        "GREYLIST_RDNS": {
+          "help": "List of reverse DNS suffixes, separated with spaces, to put into the greylist.",
+          "id": "greylist-rdns",
+          "label": "Greylist reverse DNS"
+        },
+        "GREYLIST_RDNS_URLS": {
+          "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.",
+          "id": "greylist-rdns-urls",
+          "label": "Greylist reverse DNS URLs"
+        },
+        "GREYLIST_ASN": {
+          "help": "List of ASN numbers, separated with spaces, to put into the greylist.",
+          "id": "greylist-asn",
+          "label": "Greylist ASN"
+        },
+        "GREYLIST_ASN_URLS": {
+          "help": "List of URLs, separated with spaces, containing ASN to put into the greylist.",
+          "id": "greylist-asn-urls",
+          "label": "Greylist ASN URLs"
+        },
+        "GREYLIST_USER_AGENT": {
+          "help": "List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.",
+          "id": "greylist-user-agent",
+          "label": "Greylist User-Agent"
+        },
+        "GREYLIST_USER_AGENT_URLS": {
+          "help": "List of URLs, separated with spaces, containing good User-Agent to put into the greylist.",
+          "id": "greylist-user-agent-urls",
+          "label": "Greylist User-Agent URLs"
+        },
+        "GREYLIST_URI": {
+          "help": "List of URI (PCRE regex), separated with spaces, to put into the greylist.",
+          "id": "greylist-uri",
+          "label": "Greylist URI"
+        },
+        "GREYLIST_URI_URLS": {
+          "help": "List of URLs, separated with spaces, containing bad URI to put into the greylist.",
+          "id": "greylist-uri-urls",
+          "label": "Greylist URI URLs"
+        }
+      }
+    },
+    "headers": {
+      "id": "headers",
+      "name": "Headers",
+      "description": "Manage HTTP headers sent to clients.",
+      "settings": {
+        "CUSTOM_HEADER": {
+          "help": "Custom header to add (HeaderName: HeaderValue).",
+          "id": "custom-header",
+          "label": "Custom header (HeaderName: HeaderValue)",
+          "multiple": "custom-headers"
+        },
+        "REMOVE_HEADERS": {
+          "help": "Headers to remove (Header1 Header2 Header3 ...)",
+          "id": "remove-headers",
+          "label": "Remove headers"
+        },
+        "KEEP_UPSTREAM_HEADERS": {
+          "help": "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all).",
+          "id": "keep-upstream-headers",
+          "label": "Keep upstream headers"
+        },
+        "STRICT_TRANSPORT_SECURITY": {
+          "help": "Value for the Strict-Transport-Security header.",
+          "id": "strict-transport-security",
+          "label": "Strict-Transport-Security"
+        },
+        "COOKIE_FLAGS": {
+          "help": "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module).",
+          "id": "cookie-flags",
+          "label": "Cookie flags",
+          "multiple": "cookie-flags"
+        },
+        "COOKIE_AUTO_SECURE_FLAG": {
+          "help": "Automatically add the Secure flag to all cookies.",
+          "id": "cookie-auto-secure-flag",
+          "label": "Cookie auto Secure flag"
+        },
+        "CONTENT_SECURITY_POLICY": {
+          "help": "Value for the Content-Security-Policy header.",
+          "id": "content-security-policy",
+          "label": "Content-Security-Policy"
+        },
+        "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
+          "help": "Send reports for violations of the Content-Security-Policy header instead of blocking them.",
+          "id": "content-security-policy-report-only",
+          "label": "Content-Security-Policy-Report-Only"
+        },
+        "REFERRER_POLICY": {
+          "help": "Value for the Referrer-Policy header.",
+          "id": "referrer-policy",
+          "label": "Referrer-Policy",
+          "select": [
+            "",
+            "no-referrer",
+            "no-referrer-when-downgrade",
+            "origin",
+            "origin-when-cross-origin",
+            "same-origin",
+            "strict-origin",
+            "strict-origin-when-cross-origin",
+            "unsafe-url"
+          ]
+        },
+        "PERMISSIONS_POLICY": {
+          "help": "Value for the Permissions-Policy header.",
+          "id": "permissions-policy",
+          "label": "Permissions-Policy"
+        },
+        "FEATURE_POLICY": {
+          "help": "Value for the Feature-Policy header.",
+          "id": "feature-policy",
+          "label": "Feature-Policy"
+        },
+        "X_FRAME_OPTIONS": {
+          "help": "Value for the X-Frame-Options header.",
+          "id": "x-frame-options",
+          "label": "X-Frame-Options",
+          "select": ["", "DENY", "SAMEORIGIN"]
+        },
+        "X_CONTENT_TYPE_OPTIONS": {
+          "help": "Value for the X-Content-Type-Options header.",
+          "id": "x-content-type-options",
+          "label": "X-Content-Type-Options",
+          "select": ["", "nosniff"]
+        },
+        "X_XSS_PROTECTION": {
+          "help": "Value for the X-XSS-Protection header.",
+          "id": "x-xss-protection",
+          "label": "X-XSS-Protection"
+        }
+      }
+    },
+    "inject": {
+      "id": "inject",
+      "name": "HTML injection",
+      "description": "Inject custom HTML code before the </body> tag.",
+      "settings": {
+        "INJECT_BODY": {
+          "help": "The HTML code to inject.",
+          "id": "inject-body",
+          "label": "HTML code"
+        }
+      }
+    },
+    "gzip": {
+      "id": "gzip",
+      "name": "Gzip",
+      "description": "Compress HTTP requests with the gzip algorithm.",
+      "settings": {
+        "USE_GZIP": {
+          "help": "Use gzip",
+          "id": "use-gzip",
+          "label": "Use gzip"
+        },
+        "GZIP_TYPES": {
+          "help": "List of MIME types that will be compressed with gzip.",
+          "id": "gzip-types",
+          "label": "MIME types"
+        },
+        "GZIP_MIN_LENGTH": {
+          "help": "Minimum length for gzip compression.",
+          "id": "gzip-min-length",
+          "label": "Minimum length"
+        },
+        "GZIP_COMP_LEVEL": {
+          "help": "The compression level of the gzip algorithm.",
+          "id": "gzip-comp-level",
+          "label": "Compression level",
+          "select": ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        }
+      }
+    },
+    "errors": {
+      "id": "errors",
+      "name": "Errors",
+      "description": "Manage default error pages",
+      "settings": {
+        "ERRORS": {
+          "help": "List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).",
+          "id": "errors",
+          "label": "Errors"
+        },
+        "INTERCEPTED_ERROR_CODES": {
+          "help": "List of HTTP error code intercepted by Bunkerweb",
+          "id": "intercepted-error-codes",
+          "label": "Intercepted error codes"
+        }
+      }
+    },
+    "ui": {
+      "id": "ui",
+      "name": "UI",
+      "description": "Integrate easily the BunkerWeb UI.",
+      "settings": {
+        "USE_UI": { "help": "Use UI", "id": "use-ui", "label": "Use UI" }
+      }
+    },
+    "db": {
+      "id": "db",
+      "name": "DB",
+      "description": "Integrate easily the Database.",
+      "settings": {
+        "DATABASE_URI": {
+          "help": "The database URI, following the sqlalchemy format.",
+          "id": "database-uri",
+          "label": "The database URI"
+        },
+        "DATABASE_MAX_JOBS_RUNS": {
+          "help": "The maximum number of jobs runs to keep in the database.",
+          "id": "database-max-jobs-runs",
+          "label": "The maximum number of jobs runs to keep in the database"
+        },
+        "DATABASE_MAX_ACTIONS": {
+          "help": "The maximum number of actions to keep in the database.",
+          "id": "database-max-actions",
+          "label": "The maximum number of actions to keep in the database"
+        }
+      }
+    },
+    "php": {
+      "id": "php",
+      "name": "PHP",
+      "description": "Manage local or remote PHP-FPM.",
+      "settings": {
+        "REMOTE_PHP": {
+          "help": "Hostname of the remote PHP-FPM instance.",
+          "id": "remote-php",
+          "label": "Remote PHP"
+        },
+        "REMOTE_PHP_PATH": {
+          "help": "Root folder containing files in the remote PHP-FPM instance.",
+          "id": "remote-php-path",
+          "label": "Remote PHP path"
+        },
+        "LOCAL_PHP": {
+          "help": "Path to the PHP-FPM socket file.",
+          "id": "local",
+          "label": "Local PHP"
+        },
+        "LOCAL_PHP_PATH": {
+          "help": "Root folder containing files in the local PHP-FPM instance.",
+          "id": "local-php-path",
+          "label": "Local PHP path"
+        }
+      }
+    },
+    "modsecurity": {
+      "id": "modsecurity",
+      "name": "ModSecurity",
+      "description": "Management of the ModSecurity WAF.",
+      "settings": {
+        "USE_MODSECURITY": {
+          "help": "Enable ModSecurity WAF.",
+          "id": "use-modsecurity",
+          "label": "Use ModSecurity"
+        },
+        "USE_MODSECURITY_CRS": {
+          "help": "Enable OWASP Core Rule Set.",
+          "id": "use-modsecurity-crs",
+          "label": "Use Core Rule Set"
+        },
+        "MODSECURITY_SEC_AUDIT_ENGINE": {
+          "help": "SecAuditEngine directive of ModSecurity.",
+          "id": "modsecurity-sec-audit-engine",
+          "label": "SecAuditEngine",
+          "select": ["Off", "On", "RelevantOnly"]
+        },
+        "MODSECURITY_SEC_RULE_ENGINE": {
+          "help": "SecRuleEngine directive of ModSecurity.",
+          "id": "modsecurity-sec-rule-engine",
+          "label": "SecRuleEngine",
+          "select": ["DetectionOnly", "Off", "On"]
+        },
+        "MODSECURITY_SEC_AUDIT_LOG_PARTS": {
+          "help": "SecAuditLogParts directive of ModSecurity.",
+          "id": "modsecurity-sec-audit-log-parts",
+          "label": "SecAuditLogParts"
+        }
+      }
+    },
+    "country": {
+      "id": "country",
+      "name": "Country",
+      "description": "Deny access based on the country of the client IP.",
+      "settings": {
+        "BLACKLIST_COUNTRY": {
+          "help": "Deny access if the country of the client is in the list (2 letters code).",
+          "id": "country-blacklist",
+          "label": "Country blacklist"
+        },
+        "WHITELIST_COUNTRY": {
+          "help": "Deny access if the country of the client is not in the list (2 letters code).",
+          "id": "country-whitelist",
+          "label": "Country whitelist"
+        }
+      }
+    },
+    "limit": {
+      "id": "limit",
+      "name": "Limit",
+      "description": "Limit maximum number of requests and connections.",
+      "settings": {
+        "USE_LIMIT_REQ": {
+          "help": "Activate limit requests feature.",
+          "id": "use-limit-req",
+          "label": "Activate limit requests"
+        },
+        "LIMIT_REQ_URL": {
+          "help": "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
+          "id": "limit-req-url",
+          "label": "Limit request URL",
+          "multiple": "limit-req"
+        },
+        "LIMIT_REQ_RATE": {
+          "help": "Rate to apply to the URL (s for second, m for minute, h for hour and d for day).",
+          "id": "limit-req-rate",
+          "label": "Limit request Rate",
+          "multiple": "limit-req"
+        },
+        "USE_LIMIT_CONN": {
+          "help": "Activate limit connections feature.",
+          "id": "use-limit-conn",
+          "label": "Activate limit connections"
+        },
+        "LIMIT_CONN_MAX_HTTP1": {
+          "help": "Maximum number of connections per IP when using HTTP/1.X protocol.",
+          "id": "limit-conn-max-http1",
+          "label": "Maximum number of HTTP/1.X connections"
+        },
+        "LIMIT_CONN_MAX_HTTP2": {
+          "help": "Maximum number of streams per IP when using HTTP/2 protocol.",
+          "id": "limit-conn-max-http2",
+          "label": "Maximum number of HTTP/2 streams"
+        },
+        "LIMIT_CONN_MAX_STREAM": {
+          "help": "Maximum number of connections per IP when using stream.",
+          "id": "limit-conn-max-stream",
+          "label": "Maximum number of stream connections"
+        }
+      }
+    },
+    "redirect": {
+      "id": "redirect",
+      "name": "Redirect",
+      "description": "Manage HTTP redirects.",
+      "settings": {
+        "REDIRECT_TO": {
+          "help": "Redirect a whole site to another one.",
+          "id": "redirect-to",
+          "label": "Redirect to"
+        },
+        "REDIRECT_TO_REQUEST_URI": {
+          "help": "Append the requested URI to the redirect address.",
+          "id": "redirect-to-request-uri",
+          "label": "Append request URI"
+        },
+        "REDIRECT_TO_STATUS_CODE": {
+          "help": "Status code to send to client when redirecting.",
+          "id": "redirect-to-status-code",
+          "label": "Append request URI",
+          "select": ["301", "302"]
+        }
+      }
+    },
+    "blacklist": {
+      "id": "blacklist",
+      "name": "Blacklist",
+      "description": "Deny access based on internal and external IP/network/rDNS/ASN blacklists.",
+      "settings": {
+        "USE_BLACKLIST": {
+          "help": "Activate blacklist feature.",
+          "id": "use-blacklist",
+          "label": "Activate blacklisting"
+        },
+        "BLACKLIST_IP": {
+          "help": "List of IP/network, separated with spaces, to block.",
+          "id": "blacklist-ip",
+          "label": "Blacklist IP/network"
+        },
+        "BLACKLIST_IP_URLS": {
+          "help": "List of URLs, separated with spaces, containing bad IP/network to block.",
+          "id": "blacklist-ip-urls",
+          "label": "Blacklist IP/network URLs"
+        },
+        "BLACKLIST_RDNS_GLOBAL": {
+          "help": "Only perform RDNS blacklist checks on global IP addresses.",
+          "id": "blacklist-rdns-global",
+          "label": "Blacklist reverse DNS global IPs"
+        },
+        "BLACKLIST_RDNS": {
+          "help": "List of reverse DNS suffixes, separated with spaces, to block.",
+          "id": "blacklist-rdns",
+          "label": "Blacklist reverse DNS"
+        },
+        "BLACKLIST_RDNS_URLS": {
+          "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to block.",
+          "id": "blacklist-rdns-urls",
+          "label": "Blacklist reverse DNS URLs"
+        },
+        "BLACKLIST_ASN": {
+          "help": "List of ASN numbers, separated with spaces, to block.",
+          "id": "blacklist-asn",
+          "label": "Blacklist ASN"
+        },
+        "BLACKLIST_ASN_URLS": {
+          "help": "List of URLs, separated with spaces, containing ASN to block.",
+          "id": "blacklist-asn-urls",
+          "label": "Blacklist ASN URLs"
+        },
+        "BLACKLIST_USER_AGENT": {
+          "help": "List of User-Agent (PCRE regex), separated with spaces, to block.",
+          "id": "blacklist-user-agent",
+          "label": "Blacklist User-Agent"
+        },
+        "BLACKLIST_USER_AGENT_URLS": {
+          "help": "List of URLs, separated with spaces, containing bad User-Agent to block.",
+          "id": "blacklist-user-agent-urls",
+          "label": "Blacklist User-Agent URLs"
+        },
+        "BLACKLIST_URI": {
+          "help": "List of URI (PCRE regex), separated with spaces, to block.",
+          "id": "blacklist-uri",
+          "label": "Blacklist URI"
+        },
+        "BLACKLIST_URI_URLS": {
+          "help": "List of URLs, separated with spaces, containing bad URI to block.",
+          "id": "blacklist-uri-urls",
+          "label": "Blacklist URI URLs"
+        },
+        "BLACKLIST_IGNORE_IP": {
+          "help": "List of IP/network, separated with spaces, to ignore in the blacklist.",
+          "id": "blacklist-ignore-ip",
+          "label": "Blacklist ignore IP/network"
+        },
+        "BLACKLIST_IGNORE_IP_URLS": {
+          "help": "List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.",
+          "id": "blacklist-ignore-ip-urls",
+          "label": "Blacklist ignore IP/network URLs"
+        },
+        "BLACKLIST_IGNORE_RDNS": {
+          "help": "List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.",
+          "id": "blacklist-ignore-rdns",
+          "label": "Blacklist ignore reverse DNS"
+        },
+        "BLACKLIST_IGNORE_RDNS_URLS": {
+          "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.",
+          "id": "blacklist-ignore-rdns-urls",
+          "label": "Blacklist ignore reverse DNS URLs"
+        },
+        "BLACKLIST_IGNORE_ASN": {
+          "help": "List of ASN numbers, separated with spaces, to ignore in the blacklist.",
+          "id": "blacklist-ignore-asn",
+          "label": "Blacklist ignore ASN"
+        },
+        "BLACKLIST_IGNORE_ASN_URLS": {
+          "help": "List of URLs, separated with spaces, containing ASN to ignore in the blacklist.",
+          "id": "blacklist-ignore-asn-urls",
+          "label": "Blacklist ignore ASN URLs"
+        },
+        "BLACKLIST_IGNORE_USER_AGENT": {
+          "help": "List of User-Agent (PCRE regex), separated with spaces, to ignore in the blacklist.",
+          "id": "blacklist-ignore-user-agent",
+          "label": "Blacklist ignore User-Agent"
+        },
+        "BLACKLIST_IGNORE_USER_AGENT_URLS": {
+          "help": "List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.",
+          "id": "blacklist-ignore-user-agent-urls",
+          "label": "Blacklist ignore User-Agent URLs"
+        },
+        "BLACKLIST_IGNORE_URI": {
+          "help": "List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.",
+          "id": "blacklist-ignore-uri",
+          "label": "Blacklist ignore URI"
+        },
+        "BLACKLIST_IGNORE_URI_URLS": {
+          "help": "List of URLs, separated with spaces, containing URI to ignore in the blacklist.",
+          "id": "blacklist-ignore-uri-urls",
+          "label": "Blacklist ignore URI URLs"
+        }
+      }
+    },
+    "authbasic": {
+      "id": "authbasic",
+      "name": "Auth basic",
+      "description": "Enforce login before accessing a resource or the whole site using HTTP basic auth method.",
+      "settings": {
+        "USE_AUTH_BASIC": {
+          "help": "Use HTTP basic auth",
+          "id": "use-auth-basic",
+          "label": "Use HTTP basic auth"
+        },
+        "AUTH_BASIC_LOCATION": {
+          "help": "URL of the protected resource or sitewide value.",
+          "id": "auth-basic-location",
+          "label": "Auth basic Location"
+        },
+        "AUTH_BASIC_USER": {
+          "help": "Username",
+          "id": "auth-basic-user",
+          "label": "Auth basic Username"
+        },
+        "AUTH_BASIC_PASSWORD": {
+          "help": "Password",
+          "id": "auth-basic-password",
+          "label": "Password"
+        },
+        "AUTH_BASIC_TEXT": {
+          "help": "Text to display",
+          "id": "auth-basic-text",
+          "label": "Text"
+        }
+      }
+    },
+    "redis": {
+      "id": "redis",
+      "name": "Redis",
+      "description": "Redis server configuration when using BunkerWeb in cluster mode.",
+      "settings": {
+        "USE_REDIS": {
+          "help": "Activate Redis.",
+          "id": "use-redis",
+          "label": "Activate Redis"
+        },
+        "REDIS_HOST": {
+          "help": "Redis server IP or hostname.",
+          "id": "redis-host",
+          "label": "Redis server"
+        },
+        "REDIS_PORT": {
+          "help": "Redis server port.",
+          "id": "redis-port",
+          "label": "Redis port"
+        },
+        "REDIS_DATABASE": {
+          "help": "Redis database number.",
+          "id": "redis-database",
+          "label": "Redis database"
+        },
+        "REDIS_SSL": {
+          "help": "Use SSL/TLS connection with Redis server.",
+          "id": "redis-ssl",
+          "label": "Redis SSL/TLS"
+        },
+        "REDIS_TIMEOUT": {
+          "help": "Redis server timeout (in ms) for connect, read and write.",
+          "id": "redis-timeout",
+          "label": "Redis timeout (ms)"
+        },
+        "REDIS_KEEPALIVE_IDLE": {
+          "help": "Max idle time (in ms) before closing redis connection in the pool.",
+          "id": "redis-keepalive-idle",
+          "label": "Redis keepalive idle (ms)"
+        },
+        "REDIS_KEEPALIVE_POOL": {
+          "help": "Max number of redis connection(s) kept in the pool.",
+          "id": "redis-keepalive-pool",
+          "label": "Redis keepalive pool"
+        }
+      }
+    },
+    "letsencrypt": {
+      "id": "letsencrypt",
+      "name": "Let's Encrypt",
+      "description": "Automatic creation, renewal and configuration of Let's Encrypt certificates.",
+      "settings": {
+        "AUTO_LETS_ENCRYPT": {
+          "help": "Activate automatic Let's Encrypt mode.",
+          "id": "auto-lets-encrypt",
+          "label": "Automatic Let's Encrypt"
+        },
+        "EMAIL_LETS_ENCRYPT": {
+          "help": "Email used for Let's Encrypt notification and in certificate.",
+          "id": "email-lets-encrypt",
+          "label": "Email Let's Encrypt"
+        },
+        "USE_LETS_ENCRYPT_STAGING": {
+          "help": "Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.",
+          "id": "use-lets-encrypt-staging",
+          "label": "Use Let's Encrypt Staging"
+        }
+      }
+    },
+    "selfsigned": {
+      "id": "selfsigned",
+      "name": "Self-signed certificate",
+      "description": "Generate self-signed certificate.",
+      "settings": {
+        "GENERATE_SELF_SIGNED_SSL": {
+          "help": "Generate and use self-signed certificate.",
+          "id": "generate-self-signed-ssl",
+          "label": "Activate self-signed certificate"
+        },
+        "SELF_SIGNED_SSL_EXPIRY": {
+          "help": "Self-signed certificate expiry in days.",
+          "id": "self-signed-ssl-expiry",
+          "label": "Certificate expiry"
+        },
+        "SELF_SIGNED_SSL_SUBJ": {
+          "help": "Self-signed certificate subject.",
+          "id": "self-signed-ssl-subj",
+          "label": "Certificate subject"
+        }
+      }
+    },
+    "sessions": {
+      "id": "sessions",
+      "name": "Sessions",
+      "description": "Management of session used by other plugins.",
+      "settings": {
+        "SESSIONS_SECRET": {
+          "help": "Secret used to encrypt sessions variables for storing data related to challenges.",
+          "id": "session-secret",
+          "label": "Sessions secret"
+        },
+        "SESSIONS_NAME": {
+          "help": "Name of the cookie given to clients.",
+          "id": "sessions-name",
+          "label": "Sessions name"
+        },
+        "SESSIONS_IDLING_TIMEOUT": {
+          "help": "Maximum time (in seconds) of inactivity before the session is invalidated.",
+          "id": "sessions-idling-timeout",
+          "label": "Sessions idling timeout"
+        },
+        "SESSIONS_ROLLING_TIMEOUT": {
+          "help": "Maximum time (in seconds) before a session must be renewed.",
+          "id": "sessions-rolling-timeout",
+          "label": "Sessions rolling timeout"
+        },
+        "SESSIONS_ABSOLUTE_TIMEOUT": {
+          "help": "Maximum time (in seconds) before a session is destroyed.",
+          "id": "sessions-absolute-timeout",
+          "label": "Sessions absolute timeout"
+        },
+        "SESSIONS_CHECK_IP": {
+          "help": "Destroy session if IP address is different than original one.",
+          "id": "sessions-check-ip",
+          "label": "Sessions check IP"
+        },
+        "SESSIONS_CHECK_USER_AGENT": {
+          "help": "Destroy session if User-Agent is different than original one.",
+          "id": "sessions-user-agent",
+          "label": "Sessions check User-Agent"
+        }
+      }
+    },
+    "reverseproxy": {
+      "id": "reverseproxy",
+      "name": "Reverse proxy",
+      "description": "Manage reverse proxy configurations.",
+      "settings": {
+        "USE_REVERSE_PROXY": {
+          "help": "Activate reverse proxy mode.",
+          "id": "use-reverse-proxy",
+          "label": "Use reverse proxy"
+        },
+        "REVERSE_PROXY_INTERCEPT_ERRORS": {
+          "help": "Intercept and rewrite errors.",
+          "id": "reverse-proxy-intercept-errors",
+          "label": "Intercept errors"
+        },
+        "REVERSE_PROXY_HOST": {
+          "help": "Full URL of the proxied resource (proxy_pass).",
+          "id": "reverse-proxy-host",
+          "label": "Reverse proxy host",
+          "multiple": "reverse-proxy"
+        },
+        "REVERSE_PROXY_URL": {
+          "help": "Location URL that will be proxied.",
+          "id": "reverse-proxy-url",
+          "label": "Reverse proxy url",
+          "multiple": "reverse-proxy"
+        },
+        "REVERSE_PROXY_WS": {
+          "help": "Enable websocket on the proxied resource.",
+          "id": "reverse-proxy-ws",
+          "label": "Reverse proxy WS",
+          "multiple": "reverse-proxy"
+        },
+        "REVERSE_PROXY_HEADERS": {
+          "help": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
+          "id": "reverse-proxy-headers",
+          "label": "Reverse proxy headers",
+          "multiple": "reverse-proxy"
+        },
+        "REVERSE_PROXY_HEADERS_CLIENT": {
+          "help": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
+          "id": "reverse-proxy-headers-client",
+          "label": "Reverse proxy headers-client",
+          "multiple": "reverse-proxy"
+        },
+        "REVERSE_PROXY_BUFFERING": {
+          "help": "Enable or disable buffering of responses from proxied resource.",
+          "id": "reverse-proxy-buffering",
+          "label": "Reverse proxy buffering",
+          "multiple": "reverse-proxy"
+        },
+        "REVERSE_PROXY_KEEPALIVE": {
+          "help": "Enable or disable keepalive connections with the proxied resource.",
+          "id": "reverse-proxy-keepalive",
+          "label": "Reverse proxy keepalive",
+          "multiple": "reverse-proxy"
+        },
+        "REVERSE_PROXY_AUTH_REQUEST": {
+          "help": "Enable authentication using an external provider (value of auth_request directive).",
+          "id": "reverse-proxy-auth-request",
+          "label": "Reverse proxy auth request",
+          "multiple": "reverse-proxy"
+        },
+        "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
+          "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
+          "id": "reverse-proxy-auth-request-signin-url",
+          "label": "Auth request signin URL",
+          "multiple": "reverse-proxy"
+        },
+        "REVERSE_PROXY_AUTH_REQUEST_SET": {
+          "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
+          "id": "reverse-proxy-auth-request-set",
+          "label": "Reverse proxy auth request set",
+          "multiple": "reverse-proxy"
+        },
+        "USE_PROXY_CACHE": {
+          "help": "Enable or disable caching of the proxied resources.",
+          "id": "use-proxy-cache",
+          "label": "Reverse proxy cache"
+        },
+        "PROXY_CACHE_PATH_LEVELS": {
+          "help": "Hierarchy levels of the cache.",
+          "id": "proxy-cache-path-levels",
+          "label": "Hierarchy levels"
+        },
+        "PROXY_CACHE_PATH_ZONE_SIZE": {
+          "help": "Maximum size of cached metadata when caching proxied resources.",
+          "id": "proxy-cache-path-zone-size",
+          "label": "Reverse proxy cache zone size"
+        },
+        "PROXY_CACHE_PATH_PARAMS": {
+          "help": "Additional parameters to add to the proxy_cache directive.",
+          "id": "proxy-cache-path-params",
+          "label": "Reverse proxy cache params"
+        },
+        "PROXY_CACHE_METHODS": {
+          "help": "HTTP methods that should trigger a cache operation.",
+          "id": "proxy-cache-methods",
+          "label": "Reverse proxy cache methods"
+        },
+        "PROXY_CACHE_MIN_USES": {
+          "help": "The minimum number of requests before a response is cached.",
+          "id": "proxy-cache-min-uses",
+          "label": "Reverse proxy cache minimum uses"
+        },
+        "PROXY_CACHE_KEY": {
+          "help": "The key used to uniquely identify a cached response.",
+          "id": "proxy-cache-key",
+          "label": "Reverse proxy cache key"
+        },
+        "PROXY_CACHE_VALID": {
+          "help": "Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.",
+          "id": "proxy-cache-valid",
+          "label": "Reverse proxy cache valid"
+        },
+        "PROXY_NO_CACHE": {
+          "help": "Conditions to disable caching of responses.",
+          "id": "proxy-no-cache",
+          "label": "Reverse proxy no cache"
+        },
+        "PROXY_CACHE_BYPASS": {
+          "help": "Conditions to bypass caching of responses.",
+          "id": "proxy-cache-bypass",
+          "label": "Reverse proxy bypass"
+        },
+        "REVERSE_PROXY_CONNECT_TIMEOUT": {
+          "help": "Timeout when connecting to the proxied resource.",
+          "id": "reverse-proxy-connect-timeout",
+          "label": "Reverse proxy connect timeout",
+          "multiple": "reverse-proxy"
+        },
+        "REVERSE_PROXY_READ_TIMEOUT": {
+          "help": "Timeout when reading from the proxied resource.",
+          "id": "reverse-proxy-read-timeout",
+          "label": "Reverse proxy read timeout",
+          "multiple": "reverse-proxy"
+        },
+        "REVERSE_PROXY_SEND_TIMEOUT": {
+          "help": "Timeout when sending to the proxied resource.",
+          "id": "reverse-proxy-send-timeout",
+          "label": "Reverse proxy send timeout",
+          "multiple": "reverse-proxy"
+        }
+      }
+    },
+    "antibot": {
+      "id": "antibot",
+      "name": "Antibot",
+      "description": "Bot detection by using a challenge.",
+      "settings": {
+        "USE_ANTIBOT": {
+          "help": "Activate antibot feature.",
+          "id": "use-antibot",
+          "label": "Antibot challenge",
+          "select": [
+            "captcha",
+            "cookie",
+            "hcaptcha",
+            "javascript",
+            "no",
+            "recaptcha",
+            "turnstile"
+          ]
+        },
+        "ANTIBOT_URI": {
+          "help": "Unused URI that clients will be redirected to to solve the challenge.",
+          "id": "antibot-uri",
+          "label": "Antibot URL"
+        },
+        "ANTIBOT_RECAPTCHA_SCORE": {
+          "help": "Minimum score required for reCAPTCHA challenge.",
+          "id": "antibot-recaptcha-score",
+          "label": "reCAPTCHA score"
+        },
+        "ANTIBOT_RECAPTCHA_SITEKEY": {
+          "help": "Sitekey for reCAPTCHA challenge.",
+          "id": "antibot-recaptcha-sitekey",
+          "label": "reCAPTCHA sitekey"
+        },
+        "ANTIBOT_RECAPTCHA_SECRET": {
+          "help": "Secret for reCAPTCHA challenge.",
+          "id": "antibot-recaptcha-secret",
+          "label": "reCAPTCHA secret"
+        },
+        "ANTIBOT_HCAPTCHA_SITEKEY": {
+          "help": "Sitekey for hCaptcha challenge.",
+          "id": "antibot-hcaptcha-sitekey",
+          "label": "hCaptcha sitekey"
+        },
+        "ANTIBOT_HCAPTCHA_SECRET": {
+          "help": "Secret for hCaptcha challenge.",
+          "id": "antibot-hcaptcha-secret",
+          "label": "hCaptcha secret"
+        },
+        "ANTIBOT_TURNSTILE_SITEKEY": {
+          "help": "Sitekey for Turnstile challenge.",
+          "id": "antibot-turnstile-sitekey",
+          "label": "Turnstile sitekey"
+        },
+        "ANTIBOT_TURNSTILE_SECRET": {
+          "help": "Secret for Turnstile challenge.",
+          "id": "antibot-turnstile-secret",
+          "label": "Turnstile secret"
+        },
+        "ANTIBOT_TIME_RESOLVE": {
+          "help": "Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.",
+          "id": "antibot-time-resolve",
+          "label": "Time to resolve"
+        },
+        "ANTIBOT_TIME_VALID": {
+          "help": "Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.",
+          "id": "antibot-time-valid",
+          "label": "Time valid"
+        }
+      }
+    },
+    "realip": {
+      "id": "realip",
+      "name": "Real IP",
+      "description": "Get real IP of clients when BunkerWeb is behind a reverse proxy / load balancer.",
+      "settings": {
+        "USE_REAL_IP": {
+          "help": "Retrieve the real IP of client.",
+          "id": "use-real-ip",
+          "label": "Use real ip"
+        },
+        "USE_PROXY_PROTOCOL": {
+          "help": "Enable PROXY protocol communication.",
+          "id": "use-proxy-protocol",
+          "label": "Use PROXY protocol"
+        },
+        "REAL_IP_FROM": {
+          "help": "List of trusted IPs / networks, separated with spaces, where proxied requests come from.",
+          "id": "real-ip-from",
+          "label": "Real IP from"
+        },
+        "REAL_IP_FROM_URLS": {
+          "help": "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.",
+          "id": "real-ip-from-urls",
+          "label": "Real IP from URLs"
+        },
+        "REAL_IP_HEADER": {
+          "help": "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.",
+          "id": "real-ip-header",
+          "label": "Real IP header"
+        },
+        "REAL_IP_RECURSIVE": {
+          "help": "Perform a recursive search in the header container IP address.",
+          "id": "real-ip-recursive",
+          "label": "Real IP recursive"
+        }
+      }
+    },
+    "cors": {
+      "id": "cors",
+      "name": "CORS",
+      "description": "Cross-Origin Resource Sharing.",
+      "settings": {
+        "USE_CORS": {
+          "help": "Use CORS",
+          "id": "use-cors",
+          "label": "Use CORS"
+        },
+        "CORS_ALLOW_ORIGIN": {
+          "help": "Allowed origins to make CORS requests : PCRE regex or *.",
+          "id": "cors-allow-origin",
+          "label": "Allowed origins"
+        },
+        "CORS_EXPOSE_HEADERS": {
+          "help": "Value of the Access-Control-Expose-Headers header.",
+          "id": "cors-expose-headers",
+          "label": "Access-Control-Expose-Headers value"
+        },
+        "CROSS_ORIGIN_OPENER_POLICY": {
+          "help": "Value for the Cross-Origin-Opener-Policy header.",
+          "id": "cross-origin-opener-policy",
+          "label": "Cross-Origin-Opener-Policy",
+          "select": [
+            "",
+            "same-origin",
+            "same-origin-allow-popups",
+            "unsafe-none"
+          ]
+        },
+        "CROSS_ORIGIN_EMBEDDER_POLICY": {
+          "help": "Value for the Cross-Origin-Embedder-Policy header.",
+          "id": "cross-origin-embedder-policy",
+          "label": "Cross-Origin-Embedder-Policy",
+          "select": ["", "credentialless", "require-corp", "unsafe-none"]
+        },
+        "CROSS_ORIGIN_RESOURCE_POLICY": {
+          "help": "Value for the Cross-Origin-Resource-Policy header.",
+          "id": "cross-origin-resource-policy",
+          "label": "Cross-Origin-Resource-Policy",
+          "select": ["", "cross-origin", "same-origin", "same-site"]
+        },
+        "CORS_MAX_AGE": {
+          "help": "Value of the Access-Control-Max-Age header.",
+          "id": "cors-max-age",
+          "label": "Access-Control-Max-Age value"
+        },
+        "CORS_ALLOW_CREDENTIALS": {
+          "help": "Send the Access-Control-Allow-Credentials header.",
+          "id": "cors-allow-credentials",
+          "label": "Send Access-Control-Allow-Credentials"
+        },
+        "CORS_ALLOW_METHODS": {
+          "help": "Value of the Access-Control-Allow-Methods header.",
+          "id": "cors-allow-methods",
+          "label": "Access-Control-Allow-Methods value"
+        },
+        "CORS_ALLOW_HEADERS": {
+          "help": "Value of the Access-Control-Allow-Headers header.",
+          "id": "cors-allow-headers",
+          "label": "Access-Control-Allow-Headers value"
+        },
+        "CORS_DENY_REQUEST": {
+          "help": "Deny request and don't send it to backend if Origin is not allowed.",
+          "id": "cors-deny-request",
+          "label": "Deny request"
+        }
+      }
+    },
+    "brotli": {
+      "id": "brotli",
+      "name": "Brotli",
+      "description": "Compress HTTP requests with the brotli algorithm.",
+      "settings": {
+        "USE_BROTLI": {
+          "help": "Use brotli",
+          "id": "use-brotli",
+          "label": "Use brotli"
+        },
+        "BROTLI_TYPES": {
+          "help": "List of MIME types that will be compressed with brotli.",
+          "id": "brotli-types",
+          "label": "MIME types"
+        },
+        "BROTLI_MIN_LENGTH": {
+          "help": "Minimum length for brotli compression.",
+          "id": "brotli-min-length",
+          "label": "Minimum length"
+        },
+        "BROTLI_COMP_LEVEL": {
+          "help": "The compression level of the brotli algorithm.",
+          "id": "brotli-comp-level",
+          "label": "Compression level",
+          "select": [
+            "0",
+            "1",
+            "10",
+            "11",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"
+          ]
+        }
+      }
+    },
+    "clientcache": {
+      "id": "clientcache",
+      "name": "Client cache",
+      "description": "Manage caching for clients.",
+      "settings": {
+        "USE_CLIENT_CACHE": {
+          "help": "Tell client to store locally static files.",
+          "id": "use-client-cache",
+          "label": "Use client cache"
+        },
+        "CLIENT_CACHE_EXTENSIONS": {
+          "help": "List of file extensions, separated with pipes that should be cached.",
+          "id": "client-cache-extensions",
+          "label": "Extensions that should be cached by the client"
+        },
+        "CLIENT_CACHE_ETAG": {
+          "help": "Send the HTTP ETag header for static resources.",
+          "id": "client-cache-etag",
+          "label": "ETag"
+        },
+        "CLIENT_CACHE_CONTROL": {
+          "help": "Value of the Cache-Control HTTP header.",
+          "id": "client-cache-control",
+          "label": "Cache-Control header"
+        }
+      }
+    },
+    "dnsbl": {
+      "id": "dnsbl",
+      "name": "DNSBL",
+      "description": "Deny access based on external DNSBL servers.",
+      "settings": {
+        "USE_DNSBL": {
+          "help": "Activate DNSBL feature.",
+          "id": "use-dnsbl",
+          "label": "Activate DNSBL"
+        },
+        "DNSBL_LIST": {
+          "help": "List of DNSBL servers.",
+          "id": "dnsbl-list",
+          "label": "DNSBL list"
+        }
+      }
+    },
+    "customcert": {
+      "id": "customcert",
+      "name": "Custom HTTPS certificate",
+      "description": "Choose custom certificate for HTTPS.",
+      "settings": {
+        "USE_CUSTOM_SSL": {
+          "help": "Use custom HTTPS certificate.",
+          "id": "use-custom-https",
+          "label": "Use custom certificate"
+        },
+        "CUSTOM_SSL_CERT": {
+          "help": "Full path of the certificate or bundle file (must be readable by the scheduler).",
+          "id": "custom-https-cert",
+          "label": "Certificate path"
+        },
+        "CUSTOM_SSL_KEY": {
+          "help": "Full path of the key file (must be readable by the scheduler).",
+          "id": "custom-https-key",
+          "label": "Key path"
+        }
+      }
+    },
+    "misc": {
+      "id": "misc",
+      "name": "Miscellaneous",
+      "description": "Miscellaneous settings.",
+      "settings": {
+        "DISABLE_DEFAULT_SERVER": {
+          "help": "Close connection if the request vhost is unknown.",
+          "id": "disable-default-server",
+          "label": "Disable default server"
+        },
+        "REDIRECT_HTTP_TO_HTTPS": {
+          "help": "Redirect all HTTP request to HTTPS.",
+          "id": "redirect-http-to-https",
+          "label": "Redirect HTTP to HTTPS"
+        },
+        "AUTO_REDIRECT_HTTP_TO_HTTPS": {
+          "help": "Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.",
+          "id": "auto-redirect-http-to-https",
+          "label": "Auto redirect HTTP to HTTPS"
+        },
+        "ALLOWED_METHODS": {
+          "help": "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
+          "id": "allowed-methods",
+          "label": "Allowed methods"
+        },
+        "MAX_CLIENT_SIZE": {
+          "help": "Maximum body size (0 for infinite).",
+          "id": "max-client-size",
+          "label": "Maximum body size"
+        },
+        "SERVE_FILES": {
+          "help": "Serve files from the local folder.",
+          "id": "serve-files",
+          "label": "Serve files"
+        },
+        "ROOT_FOLDER": {
+          "help": "Root folder containing files to serve (/var/www/html/{server_name} if unset).",
+          "id": "root-folder",
+          "label": "Root folder"
+        },
+        "SSL_PROTOCOLS": {
+          "help": "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
+          "id": "https-protocols",
+          "label": "HTTPS protocols"
+        },
+        "HTTP2": {
+          "help": "Support HTTP2 protocol when HTTPS is enabled.",
+          "id": "http2",
+          "label": "HTTP2"
+        },
+        "LISTEN_HTTP": {
+          "help": "Respond to (insecure) HTTP requests.",
+          "id": "http-listen",
+          "label": "HTTP listen"
+        },
+        "USE_OPEN_FILE_CACHE": {
+          "help": "Enable open file cache feature",
+          "id": "use-open-file-cache",
+          "label": "Use open file cache"
+        },
+        "OPEN_FILE_CACHE": {
+          "help": "Open file cache directive",
+          "id": "open-file-cache",
+          "label": "Use open file cache"
+        },
+        "OPEN_FILE_CACHE_ERRORS": {
+          "help": "Enable open file cache for errors",
+          "id": "open-file-cache-errors",
+          "label": "Open file cache errors"
+        },
+        "OPEN_FILE_CACHE_MIN_USES": {
+          "help": "Enable open file cache minimum uses",
+          "id": "open-file-cache-min-uses",
+          "label": "Open file cache min uses"
+        },
+        "OPEN_FILE_CACHE_VALID": {
+          "help": "Open file cache valid time",
+          "id": "open-file-cache-valid",
+          "label": "Open file cache valid time"
+        },
+        "EXTERNAL_PLUGIN_URLS": {
+          "help": "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
+          "id": "external-plugin-urls",
+          "label": "External plugin URLs"
+        },
+        "DENY_HTTP_STATUS": {
+          "help": "HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.",
+          "id": "deny-http-status",
+          "label": "Deny HTTP status",
+          "select": ["403", "444"]
+        }
+      }
+    },
+    "bunkernet": {
+      "id": "bunkernet",
+      "name": "BunkerNet",
+      "description": "Share threat data with other BunkerWeb instances via BunkerNet.",
+      "settings": {
+        "USE_BUNKERNET": {
+          "help": "Activate BunkerNet feature.",
+          "id": "use-bunkernet",
+          "label": "Activate BunkerNet"
+        },
+        "BUNKERNET_SERVER": {
+          "help": "Address of the BunkerNet API.",
+          "id": "bunkernet-server",
+          "label": "BunkerNet server"
+        }
+      }
+    },
+    "badbehavior": {
+      "id": "badbehavior",
+      "name": "Bad behavior",
+      "description": "Ban IP generating too much 'bad' HTTP status code in a period of time.",
+      "settings": {
+        "USE_BAD_BEHAVIOR": {
+          "help": "Activate Bad behavior feature.",
+          "id": "use-bad-behavior",
+          "label": "Activate bad behavior"
+        },
+        "BAD_BEHAVIOR_STATUS_CODES": {
+          "help": "List of HTTP status codes considered as 'bad'.",
+          "id": "bad-behavior-status-code",
+          "label": "Bad status codes"
+        },
+        "BAD_BEHAVIOR_BAN_TIME": {
+          "help": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.",
+          "id": "bad-behavior-ban-time",
+          "label": "Ban duration (in seconds)"
+        },
+        "BAD_BEHAVIOR_THRESHOLD": {
+          "help": "Maximum number of 'bad' HTTP status codes within the period of time before IP is banned.",
+          "id": "bad-behavior-threshold",
+          "label": "Threshold"
+        },
+        "BAD_BEHAVIOR_COUNT_TIME": {
+          "help": "Period of time (in seconds) during which we count 'bad' HTTP status codes.",
+          "id": "bad-behavior-period",
+          "label": "Period (in seconds)"
+        }
       }
     }
   }

@@ -79,13 +79,20 @@ const emits = defineEmits(["action", "delete"]);
 <template>
   <div class="card-instance-container h-max">
     <div class="w-full relative">
-      <input type="hidden" name="csrf_token" :value="props.csrfToken" />
       <div class="grid grid-cols-12 items-center">
         <div class="col-span-10 flex items-center">
           <div
             :class="[props.status === 'up' ? 'bg-green-500' : 'bg-red-500']"
             class="h-4 w-4 rounded-full"
-          ></div>
+          >
+            <p class="sr-only">
+              {{
+                props.status === "up"
+                  ? $t(`instances.card.status.active`)
+                  : $t(`instances.card.status.inactive`)
+              }}
+            </p>
+          </div>
           <h5 class="card-instance-title">
             {{ props.serverName }}
           </h5>
