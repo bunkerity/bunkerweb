@@ -7,8 +7,6 @@ require "resty.openssl.include.evp.md"
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 local ctx_lib = require "resty.openssl.ctx"
 local format_error = require("resty.openssl.err").format_error
-local OPENSSL_10 = require("resty.openssl.version").OPENSSL_10
-local OPENSSL_11_OR_LATER = require("resty.openssl.version").OPENSSL_11_OR_LATER
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
 
 local _M = {}
@@ -17,17 +15,11 @@ local mt = {__index = _M}
 local md_ctx_ptr_ct = ffi.typeof('EVP_MD_CTX*')
 
 function _M.new(typ, properties)
-  local ctx
-  if OPENSSL_11_OR_LATER then
-    ctx = C.EVP_MD_CTX_new()
-    ffi_gc(ctx, C.EVP_MD_CTX_free)
-  elseif OPENSSL_10 then
-    ctx = C.EVP_MD_CTX_create()
-    ffi_gc(ctx, C.EVP_MD_CTX_destroy)
-  end
+  local ctx = C.EVP_MD_CTX_new()
   if ctx == nil then
     return nil, "digest.new: failed to create EVP_MD_CTX"
   end
+  ffi_gc(ctx, C.EVP_MD_CTX_free)
 
   local err_new = string.format("digest.new: invalid digest type \"%s\"", typ)
 
@@ -37,6 +29,7 @@ function _M.new(typ, properties)
   else
     if OPENSSL_3X then
       algo = C.EVP_MD_fetch(ctx_lib.get_libctx(), typ or 'sha1', properties)
+      ffi_gc(algo, C.EVP_MD_free)
     else
       algo = C.EVP_get_digestbyname(typ or 'sha1')
     end

@@ -7,7 +7,7 @@ require "resty.openssl.include.pem"
 require "resty.openssl.include.x509v3"
 require "resty.openssl.include.x509.csr"
 require "resty.openssl.include.asn1"
-local stack_macro = require "resty.openssl.include.stack"
+require "resty.openssl.include.stack"
 local stack_lib = require "resty.openssl.stack"
 local pkey_lib = require "resty.openssl.pkey"
 local digest_lib = require("resty.openssl.digest")
@@ -20,11 +20,7 @@ local txtnid2nid = require("resty.openssl.objects").txtnid2nid
 local find_sigid_algs = require("resty.openssl.objects").find_sigid_algs
 local format_error = require("resty.openssl.err").format_error
 local version = require("resty.openssl.version")
-local OPENSSL_10 = version.OPENSSL_10
-local OPENSSL_11_OR_LATER = version.OPENSSL_11_OR_LATER
 local OPENSSL_3X = version.OPENSSL_3X
-local BORINGSSL = version.BORINGSSL
-local BORINGSSL_110 = version.BORINGSSL_110 -- used in boringssl-fips-20190808
 
 local accessors = {}
 
@@ -32,35 +28,9 @@ accessors.set_subject_name = C.X509_REQ_set_subject_name
 accessors.get_pubkey = C.X509_REQ_get_pubkey
 accessors.set_pubkey = C.X509_REQ_set_pubkey
 accessors.set_version = C.X509_REQ_set_version
-
-if OPENSSL_11_OR_LATER or BORINGSSL_110 then
-  accessors.get_signature_nid = C.X509_REQ_get_signature_nid
-elseif OPENSSL_10 then
-  accessors.get_signature_nid = function(csr)
-    if csr == nil or csr.sig_alg == nil then
-      return nil
-    end
-    return C.OBJ_obj2nid(csr.sig_alg.algorithm)
-  end
-end
-
-if OPENSSL_11_OR_LATER and not BORINGSSL_110 then
-  accessors.get_subject_name = C.X509_REQ_get_subject_name -- returns internal ptr
-  accessors.get_version = C.X509_REQ_get_version
-elseif OPENSSL_10 or BORINGSSL_110 then
-  accessors.get_subject_name = function(csr)
-    if csr == nil or csr.req_info == nil then
-      return nil
-    end
-    return csr.req_info.subject
-  end
-  accessors.get_version = function(csr)
-    if csr == nil or csr.req_info == nil then
-      return nil
-    end
-    return C.ASN1_INTEGER_get(csr.req_info.version)
-  end
-end
+accessors.get_signature_nid = C.X509_REQ_get_signature_nid
+accessors.get_subject_name = C.X509_REQ_get_subject_name -- returns internal ptr
+accessors.get_version = C.X509_REQ_get_version
 
 local function __tostring(self, fmt)
   if not fmt or fmt == 'PEM' then
@@ -108,7 +78,7 @@ function _M.new(csr, fmt, properties)
           -- BIO_reset; #define BIO_CTRL_RESET 1
           local code = C.BIO_ctrl(bio, 1, 0, nil)
           if code ~= 1 then
-              return nil, "x509.csr.new: BIO_ctrl() failed: " .. code
+            return nil, "x509.csr.new: BIO_ctrl() failed: " .. code
           end
         end
       end
@@ -186,7 +156,7 @@ local function get_extension(ctx, nid_txt, last_pos)
   ffi_gc(extensions, x509_extensions_gc)
 
   -- make 1-index array to 0-index
-  last_pos = (last_pos or 0) -1
+  last_pos = (last_pos or 0) - 1
   local ext_idx = C.X509v3_get_ext_by_NID(extensions, nid, last_pos)
   if ext_idx == -1 then
     err = ("X509v3_get_ext_by_NID extension for %d not found"):format(nid)
@@ -215,18 +185,18 @@ function _M:get_extension(nid_txt, last_pos)
   if err then
     return nil, nil, "x509.csr:get_extension: " .. err
   end
-  return ext, pos+1
+  return ext, pos + 1
 end
 
 local function modify_extension(replace, ctx, nid, toset, crit)
   local extensions_ptr = stack_ptr_type()
   extensions_ptr[0] = C.X509_REQ_get_extensions(ctx)
   local need_cleanup = extensions_ptr[0] ~= nil and
-  -- extensions_ptr being nil is fine: it may just because there's no extension yet
-  -- https://github.com/openssl/openssl/commit/2039ac07b401932fa30a05ade80b3626e189d78a
-  -- introduces a change that a empty stack instead of NULL will be returned in no extension
-  -- is found. so we need to double check the number if it's not NULL.
-                        stack_macro.OPENSSL_sk_num(extensions_ptr[0]) > 0
+      -- extensions_ptr being nil is fine: it may just because there's no extension yet
+      -- https://github.com/openssl/openssl/commit/2039ac07b401932fa30a05ade80b3626e189d78a
+      -- introduces a change that a empty stack instead of NULL will be returned in no extension
+      -- is found. so we need to double check the number if it's not NULL.
+      C.OPENSSL_sk_num(extensions_ptr[0]) > 0
 
   local flag
   if replace then
@@ -260,11 +230,7 @@ local function modify_extension(replace, ctx, nid, toset, crit)
   end
 
   -- mark encoded form as invalid so next time it will be re-encoded
-  if OPENSSL_11_OR_LATER then
-    C.i2d_re_X509_REQ_tbs(ctx, nil)
-  else
-    ctx.req_info.enc.modified = 1
-  end
+  C.i2d_re_X509_REQ_tbs(ctx, nil)
 
   return true
 end
@@ -339,8 +305,6 @@ function _M:sign(pkey, digest)
       return false, "x509.csr:sign: expect a digest instance to have algo member"
     end
     digest_algo = digest.algo
-  elseif BORINGSSL then
-    digest_algo = C.EVP_get_digestbyname('sha256')
   end
 
   -- returns size of signature if success
@@ -366,6 +330,7 @@ function _M:verify(pkey)
     return false, format_error("x509.csr:verify", code)
   end
 end
+
 -- AUTO GENERATED
 function _M:get_subject_name()
   local got = accessors.get_subject_name(self.ctx)
@@ -457,7 +422,7 @@ function _M:get_subject_alt_name()
     return nil
   elseif crit == -2 then
     return nil, "x509.csr:get_subject_alt_name: extension of subject_alt_name occurs more than one times, " ..
-                "this is not yet implemented. Please use get_extension instead."
+        "this is not yet implemented. Please use get_extension instead."
   elseif got == nil then
     return nil, format_error("x509.csr:get_subject_alt_name")
   end
@@ -493,7 +458,6 @@ function _M:get_subject_alt_name_critical()
   return _M.get_extension_critical(self, NID_subject_alt_name)
 end
 
-
 -- AUTO GENERATED
 function _M:get_signature_nid()
   local nid = accessors.get_signature_nid(self.ctx)
@@ -525,7 +489,7 @@ function _M:get_signature_digest_name()
 
   return ffi.string(C.OBJ_nid2sn(nid))
 end
+
 -- END AUTO GENERATED CODE
 
 return _M
-

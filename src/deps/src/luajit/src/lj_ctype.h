@@ -276,6 +276,8 @@ typedef struct CTState {
 #define CTTYDEFP(_)
 #endif
 
+#define CTF_LONG_IF8		(CTF_LONG * (sizeof(long) == 8))
+
 /* Common types. */
 #define CTTYDEF(_) \
   _(NONE,		0,	CT_ATTRIB, CTATTRIB(CTA_BAD)) \
@@ -289,8 +291,8 @@ typedef struct CTState {
   _(UINT16,		2,	CT_NUM, CTF_UNSIGNED|CTALIGN(1)) \
   _(INT32,		4,	CT_NUM, CTALIGN(2)) \
   _(UINT32,		4,	CT_NUM, CTF_UNSIGNED|CTALIGN(2)) \
-  _(INT64,		8,	CT_NUM, CTF_LONG|CTALIGN(3)) \
-  _(UINT64,		8,	CT_NUM, CTF_UNSIGNED|CTF_LONG|CTALIGN(3)) \
+  _(INT64,		8,	CT_NUM, CTF_LONG_IF8|CTALIGN(3)) \
+  _(UINT64,		8,	CT_NUM, CTF_UNSIGNED|CTF_LONG_IF8|CTALIGN(3)) \
   _(FLOAT,		4,	CT_NUM, CTF_FP|CTALIGN(2)) \
   _(DOUBLE,		8,	CT_NUM, CTF_FP|CTALIGN(3)) \
   _(COMPLEX_FLOAT,	8,	CT_ARRAY, CTF_COMPLEX|CTALIGN(2)|CTID_FLOAT) \

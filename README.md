@@ -287,7 +287,9 @@ Check the [settings section](https://docs.bunkerweb.io/1.5.3/settings) of the do
 # Web UI
 
 <p align="center">
-	<iframe style="display: block;" width="560" height="315" alt="BunkerWeb UI demo" src="https://www.youtube-nocookie.com/embed/Ao20SfvQyr4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+	<a href="https://www.youtube.com/watch?v=Ao20SfvQyr4">
+		<img src="https://github.com/bunkerity/bunkerweb/raw/v1.5.3/docs/assets/img/user_interface_demo.png" height="300" />
+	</a>
 </p>
 
 The "Web UI" is a web application that helps you manage your BunkerWeb instance using a user-friendly interface instead of the command-line one.

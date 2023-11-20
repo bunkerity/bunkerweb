@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.9)
 
 project(maxminddb
   LANGUAGES C
-  VERSION 1.7.1
+  VERSION 1.8.0
 )
 set(MAXMINDDB_SOVERSION 0.0.7)
 set(CMAKE_C_STANDARD 99)
@@ -48,7 +48,7 @@ add_library(maxminddb::maxminddb ALIAS maxminddb)
 
 set_target_properties(maxminddb PROPERTIES VERSION ${MAXMINDDB_SOVERSION})
 
-target_compile_definitions(maxminddb PUBLIC PACKAGE_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(maxminddb PRIVATE PACKAGE_VERSION="${PROJECT_VERSION}")
 
 if(NOT IS_BIG_ENDIAN)
   target_compile_definitions(maxminddb PRIVATE MMDB_LITTLE_ENDIAN=1)

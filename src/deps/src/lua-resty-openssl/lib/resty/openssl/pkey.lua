@@ -27,10 +27,7 @@ local ctypes = require "resty.openssl.auxiliary.ctypes"
 local ecdsa_util = require "resty.openssl.auxiliary.ecdsa"
 local format_error = require("resty.openssl.err").format_error
 
-local OPENSSL_11_OR_LATER = require("resty.openssl.version").OPENSSL_11_OR_LATER
-local OPENSSL_111_OR_LATER = require("resty.openssl.version").OPENSSL_111_OR_LATER
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
-local BORINGSSL = require("resty.openssl.version").BORINGSSL
 
 local ptr_of_uint = ctypes.ptr_of_uint
 local ptr_of_size_t = ctypes.ptr_of_size_t
@@ -40,20 +37,11 @@ local null = ctypes.null
 local load_pem_args = { null, null, null }
 local load_der_args = { null }
 
-local get_pkey_key
-if OPENSSL_11_OR_LATER then
-  get_pkey_key = {
-    [evp_macro.EVP_PKEY_RSA] = function(ctx) return C.EVP_PKEY_get0_RSA(ctx) end,
-    [evp_macro.EVP_PKEY_EC] = function(ctx) return C.EVP_PKEY_get0_EC_KEY(ctx) end,
-    [evp_macro.EVP_PKEY_DH]  = function(ctx) return C.EVP_PKEY_get0_DH(ctx) end
-  }
-else
-  get_pkey_key = {
-    [evp_macro.EVP_PKEY_RSA] = function(ctx) return ctx.pkey and ctx.pkey.rsa end,
-    [evp_macro.EVP_PKEY_EC] = function(ctx) return ctx.pkey and ctx.pkey.ec end,
-    [evp_macro.EVP_PKEY_DH]  = function(ctx) return ctx.pkey and ctx.pkey.dh end,
-  }
-end
+local get_pkey_key = {
+  [evp_macro.EVP_PKEY_RSA] = function(ctx) return C.EVP_PKEY_get0_RSA(ctx) end,
+  [evp_macro.EVP_PKEY_EC] = function(ctx) return C.EVP_PKEY_get0_EC_KEY(ctx) end,
+  [evp_macro.EVP_PKEY_DH]  = function(ctx) return C.EVP_PKEY_get0_DH(ctx) end
+}
 
 local load_rsa_key_funcs
 
@@ -212,17 +200,18 @@ local function generate_param(key_type, config)
     if nid == 0 then
       return nil, "unknown curve " .. curve
     end
+
     if pkey_macro.EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pctx, nid) <= 0 then
       return nil, format_error("EVP_PKEY_CTX_ctrl: EC: curve_nid")
     end
-    if not BORINGSSL then
-      -- use the named-curve encoding for best backward-compatibilty
-      -- and for playing well with go:crypto/x509
-      -- # define OPENSSL_EC_NAMED_CURVE  0x001
-      if pkey_macro.EVP_PKEY_CTX_set_ec_param_enc(pctx, 1) <= 0 then
-        return nil, format_error("EVP_PKEY_CTX_ctrl: EC: param_enc")
-      end
+
+    -- use the named-curve encoding for best backward-compatibilty
+    -- and for playing well with go:crypto/x509
+    -- # define OPENSSL_EC_NAMED_CURVE  0x001
+    if pkey_macro.EVP_PKEY_CTX_set_ec_param_enc(pctx, 1) <= 0 then
+      return nil, format_error("EVP_PKEY_CTX_ctrl: EC: param_enc")
     end
+
   elseif key_type == evp_macro.EVP_PKEY_DH then
     local bits = config.bits
     if not config.param and not bits then
@@ -530,10 +519,6 @@ function _M:get_key_type()
 end
 
 function _M:get_default_digest_type()
-  if BORINGSSL then
-    return nil, "BoringSSL doesn't have default digest for pkey"
-  end
-
   local nid = ptr_of_int()
   local code = C.EVP_PKEY_get_default_digest_nid(self.ctx, nid)
   if code == -2 then
@@ -788,14 +773,6 @@ function _M:sign(digest, md_alg, padding, opts)
     end
     ret = ffi_str(self.buf, length[0])
   elseif type(digest) == "string" then
-    if not OPENSSL_111_OR_LATER and not BORINGSSL then
-      -- we can still support earilier version with *Update and *Final
-      -- but we choose to not relying on the legacy interface for simplicity
-      return nil, "pkey:sign: new-style sign only available in OpenSSL 1.1.1 (or BoringSSL 1.1.0) or later"
-    elseif BORINGSSL and not md_alg and not self.key_type_is_ecx then
-      return nil, "pkey:sign: BoringSSL doesn't provide default digest, md_alg must be specified"
-    end
-
     local md_ctx, err = sign_verify_prepare(self, C.EVP_DigestSignInit, md_alg, padding, opts)
     if err then
       return nil, err
@@ -811,10 +788,6 @@ function _M:sign(digest, md_alg, padding, opts)
   end
 
   if self.key_type == evp_macro.EVP_PKEY_EC and opts and opts.ecdsa_use_raw then
-    if not OPENSSL_11_OR_LATER then
-      return nil, "pkey:sign: opts.ecdsa_use_raw is only supported on OpenSSL 1.1.0 or later"
-    end
-
     local ec_key = get_pkey_key[evp_macro.EVP_PKEY_EC](self.ctx)
 
     ret, err = ecdsa_util.sig_der2raw(ret, ec_key)
@@ -833,10 +806,6 @@ function _M:verify(signature, digest, md_alg, padding, opts)
   local err
 
   if self.key_type == evp_macro.EVP_PKEY_EC and opts and opts.ecdsa_use_raw then
-    if not OPENSSL_11_OR_LATER then
-      return nil, "pkey:sign: opts.ecdsa_use_raw is only supported on OpenSSL 1.1.0 or later"
-    end
-
     local ec_key = get_pkey_key[evp_macro.EVP_PKEY_EC](self.ctx)
 
     signature, err = ecdsa_util.sig_raw2der(signature, ec_key)
@@ -849,14 +818,6 @@ function _M:verify(signature, digest, md_alg, padding, opts)
   if digest_lib.istype(digest) then
     code = C.EVP_VerifyFinal(digest.ctx, signature, #signature, self.ctx)
   elseif type(digest) == "string" then
-    if not OPENSSL_111_OR_LATER and not BORINGSSL then
-      -- we can still support earilier version with *Update and *Final
-      -- but we choose to not relying on the legacy interface for simplicity
-      return nil, "pkey:verify: new-style verify only available in OpenSSL 1.1.1 (or BoringSSL 1.1.0) or later"
-    elseif BORINGSSL and not md_alg and not self.key_type_is_ecx then
-      return nil, "pkey:verify: BoringSSL doesn't provide default digest, md_alg must be specified"
-    end
-
     local md_ctx, err = sign_verify_prepare(self, C.EVP_DigestVerifyInit, md_alg, padding, opts)
     if err then
       return nil, err

@@ -10,9 +10,7 @@ require("resty.openssl.include.evp.pkey")
 local kdf_macro = require "resty.openssl.include.evp.kdf"
 local ctx_lib = require "resty.openssl.ctx"
 local format_error = require("resty.openssl.err").format_error
-local version_num = require("resty.openssl.version").version_num
 local version_text = require("resty.openssl.version").version_text
-local BORINGSSL = require("resty.openssl.version").BORINGSSL
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 
@@ -26,23 +24,17 @@ OpenSSL 3.0 additionally provides Single Step KDF, SSH KDF, PBKDF2, Scrypt, HKDF
 From OpenSSL 3.0 the recommended way of performing key derivation is to use the EVP_KDF functions. If compatibility with OpenSSL 1.1.1 is required then a limited set of KDFs can be used via EVP_PKEY_derive.
 ]]
 
-local NID_id_pbkdf2 = -1
-local NID_id_scrypt = -2
-local NID_tls1_prf = -3
-local NID_hkdf = -4
-if version_num >= 0x10002000 then
-  NID_id_pbkdf2 = C.OBJ_txt2nid("PBKDF2")
-  assert(NID_id_pbkdf2 > 0)
-end
-if version_num >= 0x10100000 and not BORINGSSL then
-  NID_hkdf = C.OBJ_txt2nid("HKDF")
-  assert(NID_hkdf > 0)
-  NID_tls1_prf = C.OBJ_txt2nid("TLS1-PRF")
-  assert(NID_tls1_prf > 0)
-  -- we use EVP_PBE_scrypt to do scrypt, so this is supported >= 1.1.0
-  NID_id_scrypt = C.OBJ_txt2nid("id-scrypt")
-  assert(NID_id_scrypt > 0)
-end
+local NID_id_pbkdf2 = C.OBJ_txt2nid("PBKDF2")
+assert(NID_id_pbkdf2 > 0)
+
+local NID_hkdf = C.OBJ_txt2nid("HKDF")
+assert(NID_hkdf > 0)
+
+local NID_tls1_prf = C.OBJ_txt2nid("TLS1-PRF")
+assert(NID_tls1_prf > 0)
+-- we use EVP_PBE_scrypt to do scrypt, so this is supported >= 1.1.0
+local NID_id_scrypt = C.OBJ_txt2nid("id-scrypt")
+assert(NID_id_scrypt > 0)
 
 local _M = {
   HKDEF_MODE_EXTRACT_AND_EXPAND = kdf_macro.EVP_PKEY_HKDEF_MODE_EXTRACT_AND_EXPAND,
@@ -93,7 +85,7 @@ end
 
 local function check_hkdf_options(opt)
   local mode = opt.hkdf_mode
-  if not mode or version_num < 0x10101000 then
+  if not mode then
     mode = _M.HKDEF_MODE_EXTRACT_AND_EXPAND
   end
 
@@ -184,11 +176,6 @@ function _M.derive(options)
   -- begin legacay low level routines
   local code
   if typ == NID_id_pbkdf2 then
-    -- make openssl 1.0.2 happy
-    if version_num < 0x10100000 and not options.pass then
-      options.pass = ""
-      pass_len = 0
-    end
     -- https://www.openssl.org/docs/man1.1.0/man3/PKCS5_PBKDF2_HMAC.html
     local iter = options.pbkdf2_iter
     if iter < 1 then
@@ -257,22 +244,18 @@ function _M.derive(options)
       return nil, format_error("kdf.derive: EVP_PKEY_CTX_add1_hkdf_info")
     end
     if options.hkdf_mode then
-      if version_num >= 0x10101000 then
-        if kdf_macro.EVP_PKEY_CTX_set_hkdf_mode(ctx, options.hkdf_mode) ~= 1 then
-          return nil, format_error("kdf.derive: EVP_PKEY_CTX_set_hkdf_mode")
+      if kdf_macro.EVP_PKEY_CTX_set_hkdf_mode(ctx, options.hkdf_mode) ~= 1 then
+        return nil, format_error("kdf.derive: EVP_PKEY_CTX_set_hkdf_mode")
+      end
+      if options.hkdf_mode == _M.HKDEF_MODE_EXTRACT_ONLY then
+        local md_size = OPENSSL_3X and C.EVP_MD_get_size(md) or C.EVP_MD_size(md)
+        if options.outlen ~= md_size then
+          options.outlen = md_size
+          ngx.log(ngx.WARN, "hkdf_mode EXTRACT_ONLY outputs fixed length of ", md_size,
+                  " key, ignoring options.outlen")
         end
-        if options.hkdf_mode == _M.HKDEF_MODE_EXTRACT_ONLY then
-          local md_size = OPENSSL_3X and C.EVP_MD_get_size(md) or C.EVP_MD_size(md)
-          if options.outlen ~= md_size then
-            options.outlen = md_size
-            ngx.log(ngx.WARN, "hkdf_mode EXTRACT_ONLY outputs fixed length of ", md_size,
-                    " key, ignoring options.outlen")
-          end
-          outlen[0] = md_size
-          buf = ctypes.uchar_array(md_size)
-        end
-      else
-        ngx.log(ngx.WARN, "hkdf_mode is not effective in ", version_text)
+        outlen[0] = md_size
+        buf = ctypes.uchar_array(md_size)
       end
     end
   else
@@ -307,6 +290,7 @@ function _M.new(typ, properties)
   if algo == nil then
     return nil, format_error(string.format("mac.new: invalid mac type \"%s\"", typ))
   end
+  ffi_gc(algo, C.EVP_KDF_free)
 
   local ctx = C.EVP_KDF_CTX_new(algo)
   if ctx == nil then

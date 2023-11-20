@@ -29,11 +29,6 @@ jobs:
         # TODO: arm64
         # latest and one version older for valgrind and perf test
         - nginx: "1.19.9"
-          openssl: "1.0.2u"
-          extras: "valgrind"
-          lua_nginx_module: "v0.10.20"
-          lua_resty_core: "v0.1.22"
-        - nginx: "1.19.9"
           openssl: "1.1.1w"
           extras: "valgrind"
           lua_nginx_module: "v0.10.20"
@@ -45,11 +40,6 @@ jobs:
           lua_nginx_module: "v0.10.20"
           lua_resty_core: "v0.1.22"
           nginx_cc_opts: "-Wno-error"
-        - nginx: "1.21.4"
-          openssl: "1.0.2u"
-          extras: "valgrind"
-          lua_nginx_module: "v0.10.25"
-          lua_resty_core: "v0.1.27"
         - nginx: "1.21.4"
           openssl: "1.1.1w"
           extras: "valgrind perf"
@@ -76,23 +66,6 @@ jobs:
           lua_nginx_module: "v0.10.25"
           lua_resty_core: "v0.1.27"
           nginx_cc_opts: "-Wno-error"
-        #
-        # latest version with EOL 1.1.0
-        - nginx: "1.21.4"
-          openssl: "1.1.0l"
-          lua_nginx_module: "v0.10.25"
-          lua_resty_core: "v0.1.27"
-        # version that kong uses, for fips
-        - nginx: "1.21.4"
-          boringssl: "ae223d6138807a13006342edfeef32e813246b39" # fips-20190808
-          extras: "valgrind perf"
-          lua_nginx_module: "v0.10.25"
-          lua_resty_core: "v0.1.27"
-        - nginx: "1.21.4"
-          boringssl: "853ca1ea1168dff08011e5d42d94609cc0ca2e27" # fips-20210429, not active yet
-          extras: "valgrind perf"
-          lua_nginx_module: "v0.10.25"
-          lua_resty_core: "v0.1.27"
 
     env:
       JOBS: 3
@@ -122,7 +95,7 @@ jobs:
       with:
         path: |
           /home/runner/work/cache
-        key: ${{ runner.os }}-${{ hashFiles('**/tests.yml') }}-nginx-${{ matrix.nginx }}-openssl-${{ matrix.openssl }}-${{ matrix.fips2 }}-boringssl-${{ matrix.boringssl }}
+        key: ${{ runner.os }}-${{ hashFiles('**/tests.yml') }}-nginx-${{ matrix.nginx }}-openssl-${{ matrix.openssl }}-fips-${{ matrix.openssl_fips }}
 
     - name: Setup tools
       run: |
@@ -152,8 +125,6 @@ jobs:
       run: |
         T=$OPENSSL_PREFIX
         mkdir -p $T
-        # fips doesn't seem to support to build parallelly 
-        if [ "X${{ matrix.fips2 }}" != "X" ]; then wget https://www.openssl.org/source/old/fips/openssl-fips-${{ matrix.fips2 }}.tar.gz -qO - | tar zxf - ; pushd openssl-fips-${{ matrix.fips2 }}/; FIPSDIR=$T/fips ./config; make; make install; popd; fi
         if [ "X$OPENSSL_HASH" != "X" ]; then wget https://github.com/openssl/openssl/archive/$OPENSSL_HASH.tar.gz -qO - | tar zxf ; pushd openssl-$OPENSSL_HASH/; fi
         if [ "X$OPENSSL_HASH" = "X" ] ; then wget https://www.openssl.org/source/openssl-${{ matrix.openssl }}.tar.gz -qO - | tar zxf -; pushd openssl-${{ matrix.openssl }}/; fi
         if [ ! -e $T/include ]; then ./config shared -d --prefix=$T -DPURIFY > build.log 2>&1 || (cat build.log && exit 1); fi
@@ -177,47 +148,6 @@ jobs:
         mkdir -p $OPENSSL_PREFIX/ssl && cp $T/ssl/fipsmodule.cnf $OPENSSL_PREFIX/ssl/fipsmodule.cnf
         # don't activate by default
         sed -i "/activate = 1/d" $OPENSSL_PREFIX/ssl/fipsmodule.cnf
-
-
-    - name: Build BoringSSL
-      if: matrix.boringssl != ''
-      run: |
-        mkdir -p $OPENSSL_PREFIX
-        if [ ! -e $OPENSSL_PREFIX/include ]; then
-          # libtinfo5 is a dependency of clang7 on ubuntu20.04
-          sudo apt-get install -qq -y cmake libtinfo5 unzip libunwind-dev libgcc-9-dev libstdc++-9-dev
-
-          wget https://releases.llvm.org/7.0.1/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04.tar.xz -qO - |tar Jxf -
-          export HOME="$PWD"
-          printf "set(CMAKE_C_COMPILER \"clang\")\nset(CMAKE_CXX_COMPILER \"clang++\")\n" > ${HOME}/toolchain
-          export PATH="$PWD/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
-          clang --version
-
-          wget https://dl.google.com/go/go1.12.7.linux-amd64.tar.gz -qO - |tar zxf -
-          export GOPATH="$PWD/gopath"
-          export GOROOT="$PWD/go"
-          export PATH="$GOPATH/bin:$GOROOT/bin:$PATH"
-          go version
-
-          wget https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip -q
-          unzip -o ninja-linux.zip
-          export PATH="$PWD:$PATH"
-          ninja --version
-
-          wget https://commondatastorage.googleapis.com/chromium-boringssl-fips/boringssl-${{ matrix.boringssl }}.tar.xz -qO - | tar Jxf -; pushd boringssl
-          if [ "${{ matrix.boringssl }}" == "ae223d6138807a13006342edfeef32e813246b39" ]; then
-            patch -p1 < ../t/fixtures/boringssl_fips.patch
-          fi
-          rm -rf build; mkdir build; pushd build
-          cmake -GNinja -DCMAKE_TOOLCHAIN_FILE=${HOME}/toolchain -DFIPS=1 -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=1 ..  > build.log 2>&1 || (cat build.log && exit 1)
-          ninja > build.log 2>&1 || (cat build.log && exit 1)
-
-          ./tool/bssl isfips
-
-          popd; rm -rf $OPENSSL_INC; cp -r include $OPENSSL_INC
-          mkdir -p $OPENSSL_LIB; cp -r build/*/*.so $OPENSSL_LIB
-        fi
-        mkdir -p $OPENSSL_PREFIX/certs/ && sudo cp -r /etc/ssl/certs/* $OPENSSL_PREFIX/certs/
 
     - name: Build LuaJIT
       env:
@@ -302,22 +232,6 @@ jobs:
           export OPENSSL_CONF=$OPENSSL_PREFIX/openssl-fips.cnf
           popd
 
-          export TEST_NGINX_FIPS=1
-        fi
-
-        # openssl 1.0.2 with fips module
-        if [ "X${{ matrix.fips2 }}" != "X" ]; then
-          echo "FIPS for OpenSSL 1.0.2"
-          export TEST_NGINX_FIPS=1
-        fi
-
-        # BoringSSL
-        if [ "X${{ matrix.boringssl }}" != "X" ]; then
-          echo "FIPS for BoringSSL ${{ matrix.boringssl }}"
-          export TEST_NGINX_FIPS=1
-        fi
-
-        if [ "X$TEST_NGINX_FIPS" != "X" ]; then
           echo "Running FIPS tests"
 
           export LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
@@ -325,6 +239,7 @@ jobs:
 
           TEST_NGINX_FIPS=1 TEST_NGINX_TIMEOUT=10 prove -j$JOBS -r t/ 2>&1
 
-          TEST_NGINX_TIMEOUT=20 prove -j$JOBS -r t/ 2>&1
+        else
+          echo "FIPS tests are skipped"
         fi
         

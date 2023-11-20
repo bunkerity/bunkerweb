@@ -5,7 +5,7 @@ local ffi_str = ffi.string
 
 local format_error = require("resty.openssl.err").format_error
 
-local OPENSSL_3X, BORINGSSL
+local OPENSSL_3X
 
 local function try_require_modules()
   package.loaded["resty.openssl.version"] = nil
@@ -13,7 +13,6 @@ local function try_require_modules()
   local pok, lib = pcall(require, "resty.openssl.version")
   if pok then
     OPENSSL_3X = lib.OPENSSL_3X
-    BORINGSSL = lib.BORINGSSL
 
     require "resty.openssl.include.crypto"
     require "resty.openssl.include.objects"
@@ -25,7 +24,7 @@ try_require_modules()
 
 
 local _M = {
-  _VERSION = '0.8.26',
+  _VERSION = '1.0.1',
 }
 
 local libcrypto_name
@@ -176,7 +175,7 @@ function _M.luaossl_compat()
       if cert:check_private_key(tbl.key) then
         tbl.cert = cert
       else
-        certs[#certs+1] = cert
+        certs[#certs + 1] = cert
       end
     end
     tbl.cacerts = certs
@@ -188,7 +187,6 @@ function _M.luaossl_compat()
 
   for mod, tbl in pairs(_M) do
     if type(tbl) == 'table' then
-
       -- avoid using a same table as the iterrator will change
       local new_tbl = {}
       -- luaossl always error() out
@@ -260,7 +258,6 @@ if OPENSSL_3X then
           return false, err
         end
       end
-
     elseif fips_provider_ctx then -- disable
       local p = fips_provider_ctx
       fips_provider_ctx = nil
@@ -286,6 +283,13 @@ if OPENSSL_3X then
     return C.EVP_default_properties_is_fips_enabled(ctx_lib.get_libctx()) == 1
   end
 
+  function _M.get_fips_version_text()
+    if not fips_provider_ctx then
+      return false, "FIPS mode is not enabled"
+    end
+
+    return fips_provider_ctx:get_params("version")
+  end
 else
   function _M.set_fips_mode(enable)
     if (not not enable) == _M.get_fips_mode() then
@@ -301,6 +305,10 @@ else
 
   function _M.get_fips_mode()
     return C.FIPS_mode() == 1
+  end
+
+  function _M.get_fips_version_text()
+    return nil, "openssl.get_fips_version_text not supported on OpenSSL 1.1.1"
   end
 end
 
@@ -320,17 +328,17 @@ end
 
 local function list_legacy(typ, get_nid_cf)
   local typ_lower = string.lower(typ:sub(5)) -- cut off EVP_
-  require ("resty.openssl.include.evp." .. typ_lower)
+  require("resty.openssl.include.evp." .. typ_lower)
 
   local ret = {}
   local fn = ffi_cast("fake_openssl_" .. typ_lower .. "_list_fn*",
-              function(elem, from, to, arg)
-                if elem ~= nil then
-                  local nid = get_nid_cf(elem)
-                  table.insert(ret, ffi_str(C.OBJ_nid2sn(nid)))
-                end
-                -- from/to (renamings) are ignored
-              end)
+    function(elem, from, to, arg)
+      if elem ~= nil then
+        local nid = get_nid_cf(elem)
+        table.insert(ret, ffi_str(C.OBJ_nid2sn(nid)))
+      end
+      -- from/to (renamings) are ignored
+    end)
   C[typ .. "_do_all_sorted"](fn, nil)
   fn:free()
 
@@ -340,19 +348,19 @@ end
 local function list_provided(typ)
   local typ_lower = string.lower(typ:sub(5)) -- cut off EVP_
   local typ_ptr = typ .. "*"
-  require ("resty.openssl.include.evp." .. typ_lower)
+  require("resty.openssl.include.evp." .. typ_lower)
   local ctx_lib = require "resty.openssl.ctx"
 
   local ret = {}
 
   local fn = ffi_cast("fake_openssl_" .. typ_lower .. "_provided_list_fn*",
-              function(elem, _)
-                elem = ffi_cast(typ_ptr, elem)
-                local name = ffi_str(C[typ .. "_get0_name"](elem))
-                -- alternate names are ignored, retrieve use TYPE_names_do_all
-                local prov = ffi_str(C.OSSL_PROVIDER_get0_name(C[typ .. "_get0_provider"](elem)))
-                table.insert(ret, name .. " @ " .. prov)
-              end)
+    function(elem, _)
+      elem = ffi_cast(typ_ptr, elem)
+      local name = ffi_str(C[typ .. "_get0_name"](elem))
+      -- alternate names are ignored, retrieve use TYPE_names_do_all
+      local prov = ffi_str(C.OSSL_PROVIDER_get0_name(C[typ .. "_get0_provider"](elem)))
+      table.insert(ret, name .. " @ " .. prov)
+    end)
 
   C[typ .. "_do_all_provided"](ctx_lib.get_libctx(), fn, nil)
   fn:free()
@@ -362,13 +370,9 @@ local function list_provided(typ)
 end
 
 function _M.list_cipher_algorithms()
-  if BORINGSSL then
-    return nil, "openssl.list_cipher_algorithms is not supported on BoringSSL"
-  end
-
   require "resty.openssl.include.evp.cipher"
   local ret = list_legacy("EVP_CIPHER",
-              OPENSSL_3X and C.EVP_CIPHER_get_nid or C.EVP_CIPHER_nid)
+    OPENSSL_3X and C.EVP_CIPHER_get_nid or C.EVP_CIPHER_nid)
 
   if OPENSSL_3X then
     local ret_provided = list_provided("EVP_CIPHER")
@@ -381,13 +385,9 @@ function _M.list_cipher_algorithms()
 end
 
 function _M.list_digest_algorithms()
-  if BORINGSSL then
-    return nil, "openssl.list_digest_algorithms is not supported on BoringSSL"
-  end
-
   require "resty.openssl.include.evp.md"
   local ret = list_legacy("EVP_MD",
-              OPENSSL_3X and C.EVP_MD_get_type or C.EVP_MD_type)
+    OPENSSL_3X and C.EVP_MD_get_type or C.EVP_MD_type)
 
   if OPENSSL_3X then
     local ret_provided = list_provided("EVP_MD")
@@ -448,8 +448,8 @@ function _M.list_ssl_ciphers(cipher_list, ciphersuites, protocol)
 
   if protocol then
     if ssl_macro.SSL_set_min_proto_version(ssl, protocol) == 0 or
-    ssl_macro.SSL_set_max_proto_version(ssl, protocol) == 0 then
-        return nil, format_error("SSL_set_min/max_proto_version")
+        ssl_macro.SSL_set_max_proto_version(ssl, protocol) == 0 then
+      return nil, format_error("SSL_set_min/max_proto_version")
     end
   end
 

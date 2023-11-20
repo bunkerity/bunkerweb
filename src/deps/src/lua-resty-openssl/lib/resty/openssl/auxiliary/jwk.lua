@@ -202,6 +202,10 @@ end
 
 function _M.dump_jwk(pkey, is_priv)
   local jwk
+  if is_priv and not pkey:is_private() then
+      return nil, "jwk.dump_jwk: could not dump public key as private key"
+  end
+
   if pkey.key_type == evp_macro.EVP_PKEY_RSA then
     local param_keys = { "n" , "e" }
     if is_priv then

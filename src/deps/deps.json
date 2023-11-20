@@ -9,9 +9,9 @@
   "git_repository": [
     {
       "id": "luajit",
-      "name": "LuaJIT v2.1-20231006",
+      "name": "LuaJIT v2.1-20231117",
       "url": "https://github.com/openresty/luajit2.git",
-      "commit": "492cfdd0d829e21abbf8ef8761aa48a3daf5a73f"
+      "commit": "4182d6bf37e9f8d1cb5d6e83b1db66de84b95101"
     },
     {
       "id": "modsecurity",
@@ -47,9 +47,9 @@
     },
     {
       "id": "ngx_devel_kit",
-      "name": "Nginx devel kit v0.3.2",
+      "name": "Nginx devel kit v0.3.3",
       "url": "https://github.com/vision5/ngx_devel_kit.git",
-      "commit": "b4642d6ca01011bd8cd30b253f5c3872b384fd21"
+      "commit": "91e30eb05085e7f9762f130cbb883a0e753cf74d"
     },
     {
       "id": "headers-more-nginx-module",
@@ -71,9 +71,9 @@
     },
     {
       "id": "libmaxminddb",
-      "name": "libmaxminddb v1.7.1",
+      "name": "libmaxminddb v1.8.0",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "ac4d0d2480032a8664e251588e57d7b306ca630c"
+      "commit": "93a7e0e5627686deb82aa636376f53b1c7af3d9a"
     },
     {
       "id": "lua-cjson",
@@ -151,9 +151,9 @@
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v0.8.26",
+      "name": "lua-resty-openssl v1.0.1",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "8d12024e4404a4e52810a81db3e47bb63a254468",
+      "commit": "89195843cfbfac9dcbf071832aa9303a347871b4",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {

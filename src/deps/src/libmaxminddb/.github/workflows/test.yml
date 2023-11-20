@@ -17,7 +17,7 @@ jobs:
       CC: ${{ matrix.cc }}
       VERBOSE: 1
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - run: sudo apt install libipc-run3-perl
@@ -27,9 +27,7 @@ jobs:
       - run: ./bootstrap
       - run: ./configure
         env:
-          # -Wno-unknown-pragmas because we have some Clang specific pragmas
-          # which aren't interesting to cause failures for.
-          CFLAGS: -std=c99 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter -Wno-unknown-pragmas ${{ matrix.posix }}
+          CFLAGS: -std=c99 -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-parameter ${{ matrix.posix }}
       - run: make
       - run: make check
 
@@ -40,7 +38,7 @@ jobs:
     name: CMake build on ${{matrix.os}}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - run: cmake -DBUILD_TESTING=ON .

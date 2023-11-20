@@ -15,7 +15,7 @@ WORKDIR /tmp
 
 COPY requirements.txt .
 
-RUN MAKEFLAGS="-j $(nproc)" pip install --no-cache-dir --require-hashes -r requirements.txt && \
+RUN MAKEFLAGS="-j $(nproc)" pip install --no-cache-dir --require-hashes --no-deps -r requirements.txt && \
   rm -f requirements.txt
 
 WORKDIR /opt/tests

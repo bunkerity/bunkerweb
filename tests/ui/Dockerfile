@@ -15,7 +15,7 @@ WORKDIR /opt/tests_ui
 
 COPY requirements.txt .
 
-RUN MAKEFLAGS="-j $(nproc)" pip install --no-cache-dir --require-hashes -r requirements.txt
+RUN MAKEFLAGS="-j $(nproc)" pip install --no-cache-dir --require-hashes --no-deps -r requirements.txt
 
 RUN touch test.txt && \
   zip test.zip test.txt && \

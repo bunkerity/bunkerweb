@@ -1195,8 +1195,11 @@ static void build_subroutines(BuildCtx *ctx)
   |//-- Base library: catch errors ----------------------------------------
   |
   |.ffunc pcall
+  |   ldr RB, L->maxstack
+  |   add INS, BASE, NARGS8:RC
   |  ldrb RA, [DISPATCH, #DISPATCH_GL(hookmask)]
   |   cmp NARGS8:RC, #8
+  |   cmphs RB, INS
   |   blo ->fff_fallback
   |  tst RA, #HOOK_ACTIVE		// Remember active hook before pcall.
   |   mov RB, BASE
@@ -1207,7 +1210,11 @@ static void build_subroutines(BuildCtx *ctx)
   |  b ->vm_call_dispatch
   |
   |.ffunc_2 xpcall
+  |   ldr RB, L->maxstack
+  |   add INS, BASE, NARGS8:RC
   |  ldrb RA, [DISPATCH, #DISPATCH_GL(hookmask)]
+  |   cmp RB, INS
+  |   blo ->fff_fallback
   |  checkfunc CARG4, ->fff_fallback	// Traceback must be a function.
   |   mov RB, BASE
   |  strd CARG12, [BASE, #8]		// Swap function and traceback.

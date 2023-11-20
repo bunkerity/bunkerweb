@@ -10,7 +10,6 @@ local x509_lib = require("resty.openssl.x509")
 local chain_lib = require("resty.openssl.x509.chain")
 local stack_lib = require("resty.openssl.stack")
 local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
-local OPENSSL_10 = require("resty.openssl.version").OPENSSL_10
 local format_error = require("resty.openssl.err").format_error
 
 local _M = {
@@ -265,22 +264,13 @@ function _M:set_options(...)
     bitmask = bit.bor(bitmask, opt)
   end
 
-  if OPENSSL_10 then
-    bitmask = C.SSL_ctrl(self.ctx, 32, bitmask, nil) -- SSL_CTRL_OPTIONS
-  else
-    bitmask = C.SSL_set_options(self.ctx, bitmask)
-  end
+  bitmask = C.SSL_set_options(self.ctx, bitmask)
 
   return tonumber(bitmask)
 end
 
 function _M:get_options(readable)
-  local bitmask
-  if OPENSSL_10 then
-    bitmask = C.SSL_ctrl(self.ctx, 32, 0, nil) -- SSL_CTRL_OPTIONS
-  else
-    bitmask = C.SSL_get_options(self.ctx)
-  end
+  local bitmask = C.SSL_get_options(self.ctx)
 
   if not readable then
     return tonumber(bitmask)
@@ -303,11 +293,7 @@ function _M:clear_options(...)
     bitmask = bit.bor(bitmask, opt)
   end
 
-  if OPENSSL_10 then
-    bitmask = C.SSL_ctrl(self.ctx, 77, bitmask, nil) -- SSL_CTRL_CLEAR_OPTIONS
-  else
-    bitmask = C.SSL_clear_options(self.ctx, bitmask)
-  end
+  bitmask = C.SSL_clear_options(self.ctx, bitmask)
 
   return tonumber(bitmask)
 end
@@ -336,18 +322,10 @@ function _M:set_protocols(...)
   end
 
   -- first disable all protocols
-  if OPENSSL_10 then
-    C.SSL_ctrl(self.ctx, 32, ops.SSL_OP_NO_SSL_MASK, nil) -- SSL_CTRL_OPTIONS
-  else
-    C.SSL_set_options(self.ctx, ops.SSL_OP_NO_SSL_MASK)
-  end
+  C.SSL_set_options(self.ctx, ops.SSL_OP_NO_SSL_MASK)
   
   -- then enable selected protocols
-  if OPENSSL_10 then
-    return tonumber(C.SSL_clear_options(self.ctx, bitmask))
-  else
-    return tonumber(C.SSL_ctrl(self.ctx, 77, bitmask, nil)) -- SSL_CTRL_CLEAR_OPTIONS)
-  end
+  return tonumber(C.SSL_clear_options(self.ctx, bitmask))
 end
 
 return _M

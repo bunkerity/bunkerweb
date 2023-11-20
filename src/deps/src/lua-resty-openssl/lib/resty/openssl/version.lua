@@ -3,7 +3,7 @@ local ffi = require "ffi"
 local C = ffi.C
 local ffi_str = ffi.string
 
-ffi.cdef[[
+ffi.cdef [[
   // 1.0
   unsigned long SSLeay(void);
   const char *SSLeay_version(int t);
@@ -12,8 +12,6 @@ ffi.cdef[[
   const char *OpenSSL_version(int t);
   // >= 3.0
   const char *OPENSSL_info(int t);
-  // BoringSSL
-  int BORINGSSL_self_test(void);
 ]]
 
 local version_func, info_func
@@ -58,7 +56,7 @@ end
 
 if not ok then
   error(string.format("OpenSSL has encountered an error: %s; is OpenSSL library loaded?",
-        tostring(version_num)))
+    tostring(version_num)))
 elseif type(version_num) == 'number' and version_num < 0x10000000 then
   error(string.format("OpenSSL version %s is not supported", tostring(version_num or 0)))
 elseif not version_num then
@@ -88,31 +86,18 @@ else
   end
 end
 
-local BORINGSSL = false
-pcall(function()
-  local _ = C.BORINGSSL_self_test
-  BORINGSSL = true
-end)
-
 return setmetatable({
-    version_num = tonumber(version_num),
-    version_text = ffi_str(version_func(0)),
-    version = function(t)
-      return ffi_str(version_func(t))
-    end,
-    info = function(t)
-      return ffi_str(info_func(t))
-    end,
-    -- the following has implict upper bound of 4.x
-    OPENSSL_3X = version_num >= 0x30000000 and version_num < 0x40000000,
-    OPENSSL_30 = version_num >= 0x30000000 and version_num < 0x30100000, -- for backward compat, deprecated
-    OPENSSL_11 = version_num >= 0x10100000 and version_num < 0x10200000,
-    OPENSSL_111 = version_num >= 0x10101000 and version_num < 0x10200000,
-    OPENSSL_11_OR_LATER = version_num >= 0x10100000 and version_num < 0x40000000,
-    OPENSSL_111_OR_LATER = version_num >= 0x10101000 and version_num < 0x40000000,
-    OPENSSL_10 = version_num < 0x10100000 and version_num > 0x10000000,
-    BORINGSSL = BORINGSSL,
-    BORINGSSL_110 = BORINGSSL and version_num >= 0x10100000 and version_num < 0x10101000
-  }, {
-    __index = types_table,
+  version_num = tonumber(version_num),
+  version_text = ffi_str(version_func(0)),
+  version = function(t)
+    return ffi_str(version_func(t))
+  end,
+  info = function(t)
+    return ffi_str(info_func(t))
+  end,
+  -- the following has implict upper bound of 4.x
+  OPENSSL_3X = version_num >= 0x30000000 and version_num < 0x40000000,
+  OPENSSL_111 = version_num >= 0x10101000 and version_num < 0x10200000,
+}, {
+  __index = types_table,
 })

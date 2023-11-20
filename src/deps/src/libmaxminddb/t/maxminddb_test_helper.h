@@ -1,6 +1,8 @@
-/* Some test files may require something newer */
-#if !defined(_GNU_SOURCE) && !defined(_POSIX_C_SOURCE)
-#define _POSIX_C_SOURCE 200112L
+// The spec says this should be set prior to including any headers, but since
+// this is test code, it should be fine to set it here. Setting it here avoids
+// setting it in every test program.
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
 #endif
 
 #if HAVE_CONFIG_H

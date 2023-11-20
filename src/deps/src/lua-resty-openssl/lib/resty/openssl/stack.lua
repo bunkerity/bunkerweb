@@ -10,7 +10,7 @@ local C = ffi.C
 local ffi_cast = ffi.cast
 local ffi_gc = ffi.gc
 
-local stack_macro = require "resty.openssl.include.stack"
+require "resty.openssl.include.stack"
 local format_error = require("resty.openssl.err").format_error
 
 local _M = {}
@@ -18,7 +18,7 @@ local _M = {}
 local function gc_of(typ)
   local f = C[typ .. "_free"]
   return function (st)
-    stack_macro.OPENSSL_sk_pop_free(st, f)
+    C.OPENSSL_sk_pop_free(st, f)
   end
 end
 
@@ -35,7 +35,7 @@ _M.mt_of = function(typ, convert, index_tbl, no_gc)
 
   -- starts from 0
   local function value_at(ctx, i)
-    local elem = stack_macro.OPENSSL_sk_value(ctx, i)
+    local elem = C.OPENSSL_sk_value(ctx, i)
     if elem == nil then
       error(format_error("OPENSSL_sk_value"))
     end
@@ -49,7 +49,7 @@ _M.mt_of = function(typ, convert, index_tbl, no_gc)
   local function iter(tbl)
     if not tbl then error("instance is nil") end
     local i = 0
-    local n = tonumber(stack_macro.OPENSSL_sk_num(tbl.ctx))
+    local n = tonumber(C.OPENSSL_sk_num(tbl.ctx))
     return function()
       i = i + 1
       if i <= n then
@@ -63,7 +63,7 @@ _M.mt_of = function(typ, convert, index_tbl, no_gc)
     __ipairs = iter,
     __len = function(tbl)
       if not tbl then error("instance is nil") end
-      return tonumber(stack_macro.OPENSSL_sk_num(tbl.ctx))
+      return tonumber(C.OPENSSL_sk_num(tbl.ctx))
     end,
     __index = function(tbl, k)
       if not tbl then error("instance is nil") end
@@ -71,7 +71,7 @@ _M.mt_of = function(typ, convert, index_tbl, no_gc)
       if not i then
         return index_tbl[k]
       end
-      local n = stack_macro.OPENSSL_sk_num(tbl.ctx)
+      local n = C.OPENSSL_sk_num(tbl.ctx)
       if i <= 0 or i > n then
         return nil
       end
@@ -88,7 +88,7 @@ end
 _M.new_of = function(typ)
   local gc = gc_of(typ)
   return function()
-    local raw = stack_macro.OPENSSL_sk_new_null()
+    local raw = C.OPENSSL_sk_new_null()
     if raw == nil then
       return nil, "stack.new_of: OPENSSL_sk_new_null() failed"
     end
@@ -104,7 +104,7 @@ _M.add_of = function(typ)
     if ctx == nil or not ffi.istype(ptr, ctx) then
       return false, "stack.add_of: expect a " .. typ .. "* at #1"
     end
-    local code = stack_macro.OPENSSL_sk_push(stack, ctx)
+    local code = C.OPENSSL_sk_push(stack, ctx)
     if code == 0 then
       return false, "stack.add_of: OPENSSL_sk_push() failed"
     end
@@ -118,13 +118,13 @@ _M.dup_of = function(_)
     if ctx == nil or not ffi.istype(stack_ptr_ct, ctx) then
       return nil, "stack.dup_of: expect a stack ctx at #1"
     end
-    local ctx = stack_macro.OPENSSL_sk_dup(ctx)
+    local ctx = C.OPENSSL_sk_dup(ctx)
     if ctx == nil then
       return nil, "stack.dup_of: OPENSSL_sk_dup() failed"
     end
     -- if the stack is duplicated: since we don't copy the elements
     -- then we only control gc of the stack itself here
-    ffi_gc(ctx, stack_macro.OPENSSL_sk_free)
+    ffi_gc(ctx, C.OPENSSL_sk_free)
     return ctx
   end
 end
@@ -152,7 +152,7 @@ _M.deep_copy_of = function(typ)
   local free = C[typ .. "_free"]
 
   return function(ctx)
-    return stack_macro.OPENSSL_sk_deep_copy(ctx, dup, free)
+    return C.OPENSSL_sk_deep_copy(ctx, dup, free)
   end
 end
 

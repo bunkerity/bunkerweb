@@ -960,22 +960,30 @@ static void asm_hrefk(ASMState *as, IRIns *ir)
 static void asm_uref(ASMState *as, IRIns *ir)
 {
   Reg dest = ra_dest(as, ir, RSET_GPR);
-  if (irref_isk(ir->op1)) {
+  int guarded = (irt_t(ir->t) & (IRT_GUARD|IRT_TYPE)) == (IRT_GUARD|IRT_PGC);
+  if (irref_isk(ir->op1) && !guarded) {
     GCfunc *fn = ir_kfunc(IR(ir->op1));
     MRef *v = &gcref(fn->l.uvptr[(ir->op2 >> 8)])->uv.v;
     emit_lsptr(as, A64I_LDRx, dest, v);
   } else {
-    if (ir->o == IR_UREFC) {
-      asm_guardcnb(as, A64I_CBZ, RID_TMP);
+    if (guarded)
+      asm_guardcnb(as, ir->o == IR_UREFC ? A64I_CBZ : A64I_CBNZ, RID_TMP);
+    if (ir->o == IR_UREFC)
       emit_opk(as, A64I_ADDx, dest, dest,
 	       (int32_t)offsetof(GCupval, tv), RSET_GPR);
+    else
+      emit_lso(as, A64I_LDRx, dest, dest, (int32_t)offsetof(GCupval, v));
+    if (guarded)
       emit_lso(as, A64I_LDRB, RID_TMP, dest,
 	       (int32_t)offsetof(GCupval, closed));
+    if (irref_isk(ir->op1)) {
+      GCfunc *fn = ir_kfunc(IR(ir->op1));
+      uint64_t k = gcrefu(fn->l.uvptr[(ir->op2 >> 8)]);
+      emit_loadu64(as, dest, k);
     } else {
-      emit_lso(as, A64I_LDRx, dest, dest, (int32_t)offsetof(GCupval, v));
+      emit_lso(as, A64I_LDRx, dest, ra_alloc1(as, ir->op1, RSET_GPR),
+	       (int32_t)offsetof(GCfuncL, uvptr) + 8*(int32_t)(ir->op2 >> 8));
     }
-    emit_lso(as, A64I_LDRx, dest, ra_alloc1(as, ir->op1, RSET_GPR),
-	     (int32_t)offsetof(GCfuncL, uvptr) + 8*(int32_t)(ir->op2 >> 8));
   }
 }
 
@@ -2040,7 +2048,7 @@ static Reg asm_setup_call_slots(ASMState *as, IRIns *ir, const CCallInfo *ci)
       as->evenspill = nslots;
   }
 #endif
-  return REGSP_HINT(RID_RET);
+  return REGSP_HINT(irt_isfp(ir->t) ? RID_FPRET : RID_RET);
 }
 
 static void asm_setup_target(ASMState *as)

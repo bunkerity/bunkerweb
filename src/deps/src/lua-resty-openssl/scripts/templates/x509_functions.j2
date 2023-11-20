@@ -13,8 +13,6 @@ function _M:sign(pkey, digest)
       return false, "{{modname}}:sign: expect a digest instance to have algo member"
     end
     digest_algo = digest.algo
-  elseif BORINGSSL then
-    digest_algo = C.EVP_get_digestbyname('sha256')
   end
 
   -- returns size of signature if success
@@ -89,19 +87,6 @@ function _M:get_extension(nid_txt, last_pos)
   return ext, pos+1
 end
 
-local {{ module.type }}_delete_ext
-if OPENSSL_11_OR_LATER then
-  {{ module.type }}_delete_ext = C.{{ module.type }}_delete_ext
-elseif OPENSSL_10 then
-  {{ module.type }}_delete_ext = function(ctx, pos)
-    return C.X509v3_delete_ext(ctx.{{ module.extensions_in_struct }}, pos)
-  end
-else
-  {{ module.type }}_delete_ext = function(...)
-    error("{{ module.type }}_delete_ext undefined")
-  end
-end
-
 -- AUTO GENERATED
 function _M:set_extension(extension, last_pos)
   if not extension_lib.istype(extension) then
@@ -114,7 +99,7 @@ function _M:set_extension(extension, last_pos)
   local pos = C.{{ module.type }}_get_ext_by_NID(self.ctx, nid, last_pos)
   -- pos may be -1, which means not found, it's fine, we will add new one instead of replace
 
-  local removed = {{ module.type }}_delete_ext(self.ctx, pos)
+  local removed = C.{{ module.type }}_delete_ext(self.ctx, pos)
   C.X509_EXTENSION_free(removed)
 
   if C.{{ module.type }}_add_ext(self.ctx, extension.ctx, pos) == nil then

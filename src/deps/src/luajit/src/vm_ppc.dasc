@@ -977,8 +977,11 @@ static void build_subroutines(BuildCtx *ctx)
   |.if FFI
   |  cmplwi TMP0, 1
   |.endif
-  |     lwz PC, -16(RB)			// Restore PC from [cont|PC].
-  |   subi TMP2, RD, 8
+  |// PC value corrected to avoid segfault
+  |   lwz PC, FRAME_CONTPC(RB)        // Restore PC from [cont|PC].
+  |	addi BASEP4, BASE, 4 
+  |	addi TMP2, RD, WORD_HI-8
+  |	lwz TMP1, LFUNC:TMP1->pc
   |   stwx TISNIL, RA, TMP2		// Ensure one valid arg.
   |.if P64
   |   ld TMP3, 0(DISPATCH)
@@ -986,7 +989,9 @@ static void build_subroutines(BuildCtx *ctx)
   |.if FFI
   |  ble >1
   |.endif
-  |    lwz TMP1, LFUNC:TMP1->pc
+  |.if P64
+  |  add TMP0, TMP0, TMP3
+  |.endif
   |    lwz KBASE, PC2PROTO(k)(TMP1)
   |  // BASE = base, RA = resultptr, RB = meta base
   |  mtctr TMP0
@@ -1715,14 +1720,23 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |//-- Base library: iterators -------------------------------------------
   |
-  |.ffunc_1 next
-  |   stwx TISNIL, BASE, NARGS8:RC	// Set missing 2nd arg to nil.
-  |  checktab CARG3
+  |.ffunc next
+  |  cmplwi NARGS8:RC, 8
+  |    lwz TAB:CARG1, WORD_LO(BASE)
+  |  blt ->fff_fallback
+  |.if ENDIAN_LE
+  |   add TMP1, BASE, NARGS8:RC
+  |   stw TISNIL, WORD_HI(TMP1)         // Set missing 2nd arg to nil.
+  |.else
+  |   stwx TISNIL, BASE, NARGS8:RC      // Set missing 2nd arg to nil.
+  |.endif
   |   lwz PC, FRAME_PC(BASE)
-  |  bne ->fff_fallback
+  |   stp BASE, L->base                 // Add frame since C call can throw.
+  |   stp BASE, L->top                  // Dummy frame length is ok.
   |  la CARG2, 8(BASE)
   |  la CARG3, -8(BASE)
-  |  bl extern lj_tab_next		// (GCtab *t, cTValue *key, TValue *o)
+  |   stw PC, SAVE_PC
+  |  bl extern lj_tab_next      // (GCtab *t, cTValue *key,TValue *o)
   |  // Returns 1=found, 0=end, -1=error.
   |  cmpwi CRET1, 0
   |   la RA, -8(BASE)
@@ -1891,8 +1905,12 @@ static void build_subroutines(BuildCtx *ctx)
   |//-- Base library: catch errors ----------------------------------------
   |
   |.ffunc pcall
+  |    lwz TMP1, L->maxstack
+  |    add TMP2, BASE, NARGS8:RC
   |  cmplwi NARGS8:RC, 8
   |   lbz TMP3, DISPATCH_GL(hookmask)(DISPATCH)
+  |    cmplw cr1, TMP1, TMP2
+  |  cror 4*cr0+lt, 4*cr0+lt, 4*cr1+lt
   |  blt ->fff_fallback
   |   mr TMP2, BASE
   |   la BASE, 8(BASE)
@@ -1903,14 +1921,19 @@ static void build_subroutines(BuildCtx *ctx)
   |  b ->vm_call_dispatch
   |
   |.ffunc xpcall
+  |     lwz TMP1, L->maxstack
+  |     add TMP2, BASE, NARGS8:RC
   |  cmplwi NARGS8:RC, 16
   |   lwz CARG3, 8+WORD_HI(BASE)
+  |     cmplw cr1, TMP1, TMP2
   |.if FPU
   |    lfd FARG2, 8(BASE)
+  |  cror 4*cr0+lt, 4*cr0+lt, 4*cr1+lt
   |    lfd FARG1, 0(BASE)
   |.else
   |    lwz CARG1, 0(BASE)
   |    lwz CARG2, 4(BASE)
+  |  cror 4*cr0+lt, 4*cr0+lt, 4*cr1+lt
   |    lwz CARG4, 12(BASE)
   |.endif
   |  blt ->fff_fallback
@@ -3539,7 +3562,7 @@ static void build_subroutines(BuildCtx *ctx)
   |  .endif
   |   cmpwi cr1, CARG3, 0
   |  mr TMP2, sp
-  |   addic. CARG2, CARG2, -4
+  |   addic. CARG2, CARG2, -PSIZE
   |  .if GPR64
   |  stdux sp, sp, TMP1
   |  .else
@@ -5680,10 +5703,10 @@ static void build_ins(BuildCtx *ctx, BCOp op, int defop)
     |  crand 4*cr0+eq, 4*cr0+eq, 4*cr7+eq
     |    add TMP3, PC, TMP0
     |  bne cr0, >5
-    |  lus TMP1, (LJ_KEYINDEX >> 16)
-    |  ori TMP1, TMP1, (LJ_KEYINDEX & 0xffff)
-    |  stw ZERO, -4(RA)			// Initialize control var.
-    |  stw TMP1, -8(RA)
+    |  lus TMP1, 0xfffe
+    |  ori TMP1, TMP1, 0x7fff
+    |  stw ZERO, WORD_LO-8(RA)          // Initialize control var.
+    |  stw TMP1, WORD_HI-8(RA)
     |    addis PC, TMP3, -(BCBIAS_J*4 >> 16)
     |1:
     |  ins_next

@@ -1374,9 +1374,13 @@ static void build_subroutines(BuildCtx *ctx)
   |//-- Base library: catch errors ----------------------------------------
   |
   |.ffunc pcall
+  |   lw TMP1, L->maxstack
+  |   addu TMP2, BASE, NARGS8:RC
   |  lbu TMP3, DISPATCH_GL(hookmask)(DISPATCH)
   |  beqz NARGS8:RC, ->fff_fallback
-  |   move TMP2, BASE
+  |.  sltu AT, TMP1, TMP2
+  |   bnez AT, ->fff_fallback
+  |.   move TMP2, BASE
   |   addiu BASE, BASE, 8
   |  // Remember active hook before pcall.
   |  srl TMP3, TMP3, HOOK_ACTIVE_SHIFT
@@ -1386,8 +1390,12 @@ static void build_subroutines(BuildCtx *ctx)
   |.  addiu NARGS8:RC, NARGS8:RC, -8
   |
   |.ffunc xpcall
+  |   lw TMP1, L->maxstack
+  |   addu TMP2, BASE, NARGS8:RC
   |    sltiu AT, NARGS8:RC, 16
   |  lw CARG4, 8+HI(BASE)
+  |   sltu TMP1, TMP1, TMP2
+  |    or AT, AT, TMP1
   |    bnez AT, ->fff_fallback
   |.  lw CARG3, 8+LO(BASE)
   |   lw CARG1, LO(BASE)

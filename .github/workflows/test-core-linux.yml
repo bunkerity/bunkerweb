@@ -92,6 +92,6 @@ jobs:
       - name: Run tests
         run: |
           cd ./tests/core/${{ inputs.TEST }}
-          MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install --no-cache-dir --require-hashes -r {} \;
+          MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install --no-cache-dir --require-hashes --no-deps -r {} \;
           sudo truncate -s 0 /var/log/bunkerweb/error.log
           ./test.sh "linux"

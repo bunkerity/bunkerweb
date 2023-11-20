@@ -28,7 +28,7 @@ if [ "$integration" == "docker" ] ; then
     fi
 else
     sudo systemctl stop bunkerweb
-    MAKEFLAGS="-j $(nproc)" sudo pip install --no-cache-dir --require-hashes -r requirements.txt
+    MAKEFLAGS="-j $(nproc)" sudo pip install --no-cache-dir --require-hashes --no-deps -r requirements.txt
     echo "USE_REAL_IP=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REAL_IP_FROM=127.0.0.0/24" | sudo tee -a /etc/bunkerweb/variables.env
 

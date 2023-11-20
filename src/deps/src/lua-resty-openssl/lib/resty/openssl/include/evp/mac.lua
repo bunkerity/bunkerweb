@@ -26,7 +26,7 @@ ffi.cdef [[
   void EVP_MAC_do_all_provided(OSSL_LIB_CTX *libctx,
                               fake_openssl_mac_provided_list_fn*,
                               void *arg);
-  int EVP_MAC_up_ref(EVP_MAC *mac);
+  // int EVP_MAC_up_ref(EVP_MAC *mac);
   void EVP_MAC_free(EVP_MAC *mac);
 
   const char *EVP_MAC_get0_name(const EVP_MAC *mac);
