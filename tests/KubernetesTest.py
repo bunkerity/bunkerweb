@@ -138,6 +138,16 @@ class KubernetesTest(Test):
                     cwd="/tmp/kubernetes",
                     shell=True,
                 )
+                run(
+                    "kubectl describe pvc",
+                    cwd="/tmp/kubernetes",
+                    shell=True,
+                )
+                run(
+                    "kubectl describe pv",
+                    cwd="/tmp/kubernetes",
+                    shell=True,
+                )
                 raise (Exception("k8s stack is not healthy"))
             sleep(60)
         except:
