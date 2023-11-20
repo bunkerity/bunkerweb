@@ -1,14 +1,9 @@
 <script setup>
 import { reactive } from "vue";
-const props = defineProps({
-  tabs: {
-    type: Array,
-    required: true,
-  },
-});
 
 const tabs = reactive({
   current: "list",
+  items: ["list", "add"],
   inactiveTabClass:
     "inline-flex items-center justify-center p-4 hover:border-b-2 border-transparent rounded-t-lg hover:text-gray-700 hover:border-gray-700 border-gray-600 dark:border-gray-300 dark:hover:text-gray-300 text-gray-600 dark:text-gray-500 group",
   activeTabClass:
@@ -27,31 +22,29 @@ const emits = defineEmits(["tab"]);
       class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400"
     >
       <li
-        v-for="(item, id) in props.tabs"
+        v-for="(item, id) in tabs.items"
         role="tab"
         :tabindex="id"
-        :aria-selected="tabs.current === item.tag ? 'true' : 'false'"
+        :aria-selected="tabs.current === item ? 'true' : 'false'"
         class="mr-2 uppercase font-bold"
       >
         <a
           @click="
             () => {
-              tabs.current = item.tag;
-              $emit('tab', item.tag);
+              tabs.current = item;
+              $emit('tab', item);
             }
           "
           href="#"
           :class="[
-            tabs.current === item.tag
-              ? tabs.activeTabClass
-              : tabs.inactiveTabClass,
+            tabs.current === item ? tabs.activeTabClass : tabs.inactiveTabClass,
           ]"
-          :aria-current="tabs.current === item.tag ? 'page' : false"
+          :aria-current="tabs.current === item ? 'page' : false"
         >
           <svg
-            v-if="item.tag === 'list'"
+            v-if="item === 'list'"
             :class="[
-              tabs.current === item.tag
+              tabs.current === item
                 ? tabs.activeSvgClass
                 : tabs.inactiveSvgClass,
               'w-5 h-5',
@@ -69,9 +62,9 @@ const emits = defineEmits(["tab"]);
             />
           </svg>
           <svg
-            v-if="item.tag === 'add'"
+            v-if="item === 'add'"
             :class="[
-              tabs.current === item.tag
+              tabs.current === item
                 ? tabs.activeSvgClass
                 : tabs.inactiveSvgClass,
               'h-5.5 w-5.5',
@@ -88,7 +81,7 @@ const emits = defineEmits(["tab"]);
               d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          {{ $t(`bans.tabs.${item.tag}`) }}
+          {{ $t(`bans.tabs.${item}`) }}
         </a>
       </li>
     </ul>

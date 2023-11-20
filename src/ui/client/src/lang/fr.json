@@ -526,6 +526,16 @@
       "svg": {
         "aria_description": "Montre visuellement l'état de la checkbox custom."
       }
+    },
+    "upload": {
+      "add": "cliquez ou glissez-déposez",
+      "warning": "Les fichiers upload sont exécutés directement.",
+      "state": {
+        "upload": "upload en cours",
+        "fail": "upload ratée",
+        "success": "upload réussie",
+        "close": "fermer"
+      }
     }
   },
   "core_plugins": {

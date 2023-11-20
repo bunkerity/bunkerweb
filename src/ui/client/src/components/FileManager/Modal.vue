@@ -159,8 +159,8 @@ async function sendData() {
   const conf = formatData();
   const api =
     method.toLowerCase() === "delete"
-      ? `/api/custom_configs/${data.name}?method=ui`
-      : `/api/custom_configs?method=ui`;
+      ? `/api/custom_confs/${data.name}?method=ui`
+      : `/api/custom_confs?method=ui`;
 
   // Fetch
   await fetchAPI(api, method, conf, updateConf, feedbackStore.addFeedback)
@@ -258,7 +258,7 @@ function formatData() {
           ]"
           class="text-xs ml-2"
         >
-          {{ $t(`custom_config.file_manager.actions.${props.action}`) }}
+          {{ $t(`custom_conf.file_manager.actions.${props.action}`) }}
         </ButtonBase>
       </div>
     </div>

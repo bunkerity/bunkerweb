@@ -130,7 +130,7 @@ const emits = defineEmits(["action", "delete"]);
       <div class="card-instance-info-container">
         <div v-for="item in instance.info" class="card-instance-info-item">
           <p class="card-instance-info-item-title">
-            {{ $t(`instances.actions.${item.label}`) }}
+            {{ $t(`instances.${item.label}`) }}
           </p>
           <p class="card-instance-info-item-content">{{ item.text }}</p>
         </div>

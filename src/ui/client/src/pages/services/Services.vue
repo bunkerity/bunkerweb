@@ -78,6 +78,8 @@ const services = reactive({
       )
     );
 
+    console.log(cloneMultisitePlugin);
+
     // Get only services custom conf
     const cloneServConf = JSON.parse(JSON.stringify(conf.data["services"]));
 
@@ -272,11 +274,11 @@ onMounted(() => {
       <CardBase
         class="z-[101] h-fit col-span-12 md:col-span-8 lg:col-span-5 3xl:col-span-3"
       >
-        <CardLabel :label="$t('services.list.title')" />
+        <CardLabel :label="$t('services.card.list.title')" />
         <SettingsLayout
           v-if="Object.keys(services.setup).length > 1"
           class="flex w-full col-span-12"
-          :label="$t('services.list.select_service.label')"
+          :label="$t('services.card.list.select_service.label')"
           name="services-list"
         >
           <SettingsSelect
@@ -293,7 +295,7 @@ onMounted(() => {
         </SettingsLayout>
         <SettingsLayout
           class="flex w-full col-span-12"
-          :label="$t('services.list.select_plugin.label')"
+          :label="$t('services.card.list.select_plugin.label')"
           name="plugins"
         >
           <SettingsSelect
@@ -311,17 +313,17 @@ onMounted(() => {
             <span class="mx-0.5">
               <SettingsUploadSvgWarning class="scale-90" />
             </span>
-            {{ $t("services.list.switch_warning") }}
+            {{ $t("services.card.list.switch_warning") }}
           </p>
         </div>
       </CardBase>
       <CardBase
-        :label="$t('services.filter.title')"
+        :label="$t('services.card.filter.title')"
         class="z-[100] h-fit col-span-12 lg:col-span-4 grid grid-cols-12 relative"
       >
         <SettingsLayout
           class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
-          :label="$t('services.filter.search_setting.label')"
+          :label="$t('services.card.filter.search_setting.label')"
           name="keyword"
         >
           <SettingsInput
@@ -330,13 +332,15 @@ onMounted(() => {
               id: 'keyword',
               type: 'text',
               value: '',
-              placeholder: $t('services.filter.search_setting.placeholder'),
+              placeholder: $t(
+                'services.card.filter.search_setting.placeholder'
+              ),
             }"
           />
         </SettingsLayout>
         <SettingsLayout
           class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
-          :label="$t('services.filter.method_setting.label')"
+          :label="$t('services.card.filter.method_setting.label')"
           name="keyword"
         >
           <SettingsSelect

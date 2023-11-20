@@ -32,6 +32,9 @@ const emits = defineEmits(["close"]);
 <template>
   <div class="mt-2 rounded p-2 w-full bg-gray-100 dark:bg-gray-800">
     <div class="flex items-center justify-between">
+      <span class="sr-only">
+        {{ $t(`custom_inputs.upload.state.${props.state}`) }}
+      </span>
       <SettingsUploadSvgUpload v-if="props.state === 'upload'" />
       <SettingsUploadSvgError v-if="props.state === 'fail'" />
       <SettingsUploadSvgSuccess v-if="props.state === 'success'" />
@@ -56,6 +59,9 @@ const emits = defineEmits(["close"]);
           })
         "
       >
+        <span class="sr-only">
+          {{ $t(`custom_inputs.upload.state.close`) }}
+        </span>
         <SettingsUploadSvgCross />
       </button>
     </div>

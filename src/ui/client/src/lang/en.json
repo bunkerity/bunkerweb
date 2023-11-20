@@ -140,10 +140,7 @@
       },
       "actions": {
         "delete": "delete",
-        "ping": "ping",
-        "hostname": "hostname",
-        "method": "method",
-        "port": "port"
+        "ping": "ping"
       }
     },
     "plugins": {
@@ -528,6 +525,16 @@
     "checkbox": {
       "svg": {
         "aria_description": "Show a check related to current checkbox state."
+      }
+    },
+    "upload": {
+      "add": "click or drag and drop",
+      "warning": "uploaded files are directly executed",
+      "state": {
+        "upload": "uploading",
+        "fail": "upload failed",
+        "success": "upload success",
+        "close": "close"
       }
     }
   },
