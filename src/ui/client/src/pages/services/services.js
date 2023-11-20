@@ -7,5 +7,5 @@ const pinia = createPinia();
 
 createApp(Services)
   .use(pinia)
-  .use(getI18n(["services", "dashboard", "custom_inputs"]))
+  .use(getI18n(["services", "dashboard", "custom_inputs", "core_plugins"]))
   .mount("#app");

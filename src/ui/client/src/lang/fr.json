@@ -121,9 +121,6 @@
       }
     },
     "instances": {
-      "hostname": "hostname",
-      "method": "method",
-      "port": "port",
       "api": {
         "pending": "Tentative de récupération des instances",
         "error": "Erreur de récupération des instances"
@@ -131,16 +128,18 @@
       "card": {
         "name": "instances",
         "up": "up",
-        "down": "down",
-        "status": {
-          "active": "instance is active",
-          "inactive": "instance is inactive"
-        }
+        "down": "down"
+      }
+    },
+    "services": {
+      "api": {
+        "pending": "Tentative de récupération des services",
+        "error": "Erreur de récupération des services"
       },
-      "actions": {
-        "stop": "stop",
-        "ping": "ping",
-        "reload": "reload"
+      "card": {
+        "name": "services",
+        "ui": "ui",
+        "autoconf": "autoconf"
       }
     },
     "plugins": {
@@ -153,6 +152,29 @@
         "internal": "internes",
         "external": "externes"
       }
+    }
+  },
+  "instances": {
+    "hostname": "hostname",
+    "method": "method",
+    "port": "port",
+    "api": {
+      "pending": "Tentative de récupération des instances",
+      "error": "Erreur de récupération des instances"
+    },
+    "card": {
+      "name": "instances",
+      "up": "up",
+      "down": "down",
+      "status": {
+        "active": "instance is active",
+        "inactive": "instance is inactive"
+      }
+    },
+    "actions": {
+      "stop": "stop",
+      "ping": "ping",
+      "reload": "reload"
     }
   },
   "actions": {
@@ -430,7 +452,7 @@
       "filter": {
         "title": "filtres",
         "search": {
-          "label": "recheche",
+          "label": "recherche",
           "placeholder": "mot clé"
         },
         "type": {

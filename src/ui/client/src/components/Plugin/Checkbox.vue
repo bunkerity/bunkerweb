@@ -69,7 +69,7 @@ function updateCheckbox() {
     />
 
     <svg
-      :aria-description="$t('custom_inputs.checkbox.svg.aria-description')"
+      :aria-description="$t('custom_inputs.checkbox.svg.aria_description')"
       :aria-hidden="checkbox.value === 'yes' ? 'false' : 'true'"
       v-show="checkbox.value === 'yes'"
       class="checkbox-svg"

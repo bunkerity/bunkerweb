@@ -44,7 +44,7 @@ function updateValue() {
     />
 
     <svg
-      :aria-description="$t('custom_inputs.checkbox.svg.aria-description')"
+      :aria-description="$t('custom_inputs.checkbox.svg.aria_description')"
       v-show="checkbox.value === 'yes'"
       class="checkbox-svg"
       xmlns="http://www.w3.org/2000/svg"

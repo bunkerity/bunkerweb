@@ -122,25 +122,25 @@
       }
     },
     "instances": {
-      "hostname": "hostname",
-      "method": "method",
-      "port": "port",
       "api": {
         "pending": "Try retrieve instances",
         "error": "Error retrieving instances"
       },
       "card": {
         "name": "instances",
-        "status": {
-          "active": "instance is active",
-          "inactive": "instance is inactive"
-        },
         "up": "up",
         "down": "down"
+      }
+    },
+    "services": {
+      "api": {
+        "pending": "Try retrieve services",
+        "error": "Error retrieving services"
       },
-      "actions": {
-        "delete": "delete",
-        "ping": "ping"
+      "card": {
+        "name": "services",
+        "ui": "ui",
+        "autoconf": "autoconf"
       }
     },
     "plugins": {
@@ -153,6 +153,28 @@
         "internal": "internal",
         "external": "external"
       }
+    }
+  },
+  "instances": {
+    "hostname": "hostname",
+    "method": "method",
+    "port": "port",
+    "api": {
+      "pending": "Try retrieve instances",
+      "error": "Error retrieving instances"
+    },
+    "card": {
+      "name": "instances",
+      "status": {
+        "active": "instance is active",
+        "inactive": "instance is inactive"
+      },
+      "up": "up",
+      "down": "down"
+    },
+    "actions": {
+      "delete": "delete",
+      "ping": "ping"
     }
   },
   "actions": {

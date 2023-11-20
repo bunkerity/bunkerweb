@@ -27,7 +27,7 @@ const props = defineProps({
 <template>
   <div
     role="alert"
-    :aria-description="$t('A11y.api.state.aria_description')"
+    :aria-description="$t('dashboard.api.state.aria_description')"
     v-if="isErr || isPend"
   >
     <CardBase :color="props.isErr ? 'error' : 'pending'">

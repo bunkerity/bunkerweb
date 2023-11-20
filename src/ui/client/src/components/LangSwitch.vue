@@ -43,7 +43,7 @@ function updateLangStorage(lang) {
     <!-- current -->
     <button
       aria-controls="switch-lang"
-      :aria_description="$t('dashboard.lang.dropdown_button.aria_desription')"
+      :aria_description="$t('dashboard.lang.dropdown_button.aria_description')"
       @click="lang.isOpen = lang.isOpen ? false : true"
     >
       <span class="sr-only">{{ $i18n.locale }}</span>

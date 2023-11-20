@@ -33,7 +33,7 @@ const emits = defineEmits(["close"]);
       </p>
       <button @click="$emit('close')" class="absolute right-8 top-3">
         <span class="sr-only">{{
-          $t("A11y.alert.base.close_button.aria_description")
+          $t("dashboard.alert.base.close_button.aria_description")
         }}</span>
         <svg
           class="cursor-pointer fill-white dark:opacity-80 absolute h-5 w-5"
