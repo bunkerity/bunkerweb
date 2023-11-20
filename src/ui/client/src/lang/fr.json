@@ -194,7 +194,7 @@
       "filter": {
         "title": "filtres",
         "search": {
-          "label": "recherche"
+          "label": "rechercher"
         },
         "method": {
           "label": "methodes"
@@ -235,7 +235,7 @@
       "filter": {
         "title": "Filtres liste des bans",
         "search_ip": {
-          "label": "recherche par ip"
+          "label": "rechercher par ip"
         },
         "reason": {
           "label": "sélectionner une raison"
@@ -302,10 +302,10 @@
       "filter": {
         "title": "filtres",
         "search_path": {
-          "label": "Recherche par chemin"
+          "label": "Rechercher par chemin"
         },
         "search_name": {
-          "label": "Recherche par nom"
+          "label": "Rechercher par nom"
         },
         "show_services_folders": {
           "label": "Voir les dossiers services"
@@ -349,13 +349,13 @@
         "title": "Config globale",
         "select_plugin": {
           "label": "Sélectionner un plugin",
-          "placeholder": "recherche"
+          "placeholder": "rechercher"
         }
       },
       "filter": {
         "title": "filtres",
         "search": {
-          "label": "recherche",
+          "label": "rechercher",
           "placeholder": "titre, description..."
         },
         "method": {
@@ -382,7 +382,7 @@
       "filter": {
         "title": "filtres",
         "search": {
-          "label": "recherche",
+          "label": "rechercher",
           "placeholder": "mot clé"
         },
         "success_state": {
@@ -452,7 +452,7 @@
       "filter": {
         "title": "filtres",
         "search": {
-          "label": "recherche",
+          "label": "rechercher",
           "placeholder": "mot clé"
         },
         "type": {
@@ -499,7 +499,7 @@
       "filter": {
         "title": "filtres",
         "search_setting": {
-          "label": "recherche un paramètre",
+          "label": "rechercher un paramètre",
           "placeholder": "nom, titre, description..."
         },
         "method_setting": {
@@ -1746,7 +1746,7 @@
           "label": "En-tête adresse IP réelle"
         },
         "REAL_IP_RECURSIVE": {
-          "help": "Effectuer une recherche récursive dans l'en-tête contenant l'adresse IP.",
+          "help": "Effectuer une rechercher récursive dans l'en-tête contenant l'adresse IP.",
           "id": "real-ip-recursive",
           "label": "Adresse IP réelle récursive"
         }

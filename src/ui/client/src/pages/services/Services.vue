@@ -22,6 +22,8 @@ import { useFeedbackStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 // Refresh when related btn is clicked
 const refreshStore = useRefreshStore();
@@ -78,7 +80,20 @@ const services = reactive({
       )
     );
 
-    console.log(cloneMultisitePlugin);
+    // translate
+    cloneMultisitePlugin.forEach((plugin) => {
+      const id = plugin.id;
+      // global info
+      plugin.name = t(`core_plugins.${id}.name`);
+      plugin.description = t(`core_plugins.${id}.description`);
+
+      for (const [key, value] of Object.entries(plugin.settings)) {
+        try {
+          value["help"] = t(`core_plugins.${id}.settings.${key}.help`);
+          value["label"] = t(`core_plugins.${id}.settings.${key}.label`);
+        } catch (err) {}
+      }
+    });
 
     // Get only services custom conf
     const cloneServConf = JSON.parse(JSON.stringify(conf.data["services"]));
