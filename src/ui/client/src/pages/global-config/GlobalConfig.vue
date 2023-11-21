@@ -14,12 +14,16 @@ import {
   setPluginsData,
   addConfToPlugins,
   getPluginsByContext,
+  pluginI18n,
+  getRemainFromFilter,
 } from "@utils/plugins.js";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 // Refresh when related btn is clicked
 const refreshStore = useRefreshStore();
@@ -70,8 +74,11 @@ const plugins = reactive({
       JSON.parse(JSON.stringify(plugins.data)),
       "global"
     );
-    const cloneGlobalConf = JSON.parse(JSON.stringify(conf.data["global"]));
+    // Translate
+    pluginI18n(t, cloneGlobalPlugin);
+
     // Format and keep only global config
+    const cloneGlobalConf = JSON.parse(JSON.stringify(conf.data["global"]));
     const setPlugins = setPluginsData(cloneGlobalPlugin);
     const mergeConf = addConfToPlugins(setPlugins, cloneGlobalConf);
     // Filter data to display
@@ -79,11 +86,7 @@ const plugins = reactive({
 
     // Get remain plugin after filter
     // Use active service but is impersonal (no specific service logic)
-    const remainPlugins = [];
-    filter.forEach((item) => {
-      item["isMatchFilter"] ? remainPlugins.push(item.name) : false;
-    });
-    plugins.activePlugins = remainPlugins;
+    plugins.activePlugins = getRemainFromFilter(filter);
 
     // Set first plugin as active if none
     if (!plugins.activePlugin)

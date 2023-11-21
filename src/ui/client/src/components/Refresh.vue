@@ -22,12 +22,7 @@ function refreshBtn() {
 
 <template>
   <!-- float button-->
-  <button
-    :aria-checked="refresh.isOn ? 'true' : 'false'"
-    type="button"
-    @click="refreshBtn()"
-    class="refresh-float-btn"
-  >
+  <button @click="refreshBtn()" class="refresh-float-btn">
     <span class="sr-only">{{ $t("dashboard.header.buttons.refresh") }}</span>
     <svg
       :class="[refresh.isOn ? 'btn-spin' : '']"

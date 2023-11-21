@@ -110,3 +110,28 @@ export function getPluginsByFilter(plugins, filters) {
   // Update plugins removing empty index (deleted plugins)
   return plugins.filter(String);
 }
+
+// Translate plugins using i18n vue
+export function pluginI18n(i18n, plugins) {
+  plugins.forEach((plugin) => {
+    const id = plugin.id;
+    // global info
+    plugin.name = i18n(`core_plugins.${id}.name`);
+    plugin.description = i18n(`core_plugins.${id}.description`);
+
+    for (const [key, value] of Object.entries(plugin.settings)) {
+      try {
+        value["help"] = i18n(`core_plugins.${id}.settings.${key}.help`);
+        value["label"] = i18n(`core_plugins.${id}.settings.${key}.label`);
+      } catch (err) {}
+    }
+  });
+}
+
+export function getRemainFromFilter(filterPlugins) {
+  const remainPlugins = [];
+  filterPlugins.forEach((item) => {
+    item["isMatchFilter"] ? remainPlugins.push(item.name) : false;
+  });
+  return remainPlugins;
+}

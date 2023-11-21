@@ -108,10 +108,10 @@ onMounted(() => {
     class="hidden"
   >
     <option
-      v-for="value in select.values"
+      v-for="(value, id) in select.values"
       :value="value"
       :selected="value === select.value ? true : false"
-      :id="`${select.id}-option`"
+      :id="`${select.id}-option-${id}`"
     >
       {{ value }}
     </option>
@@ -155,7 +155,7 @@ onMounted(() => {
   >
     <button
       role="option"
-      :aria-controls="`${select.id}-option`"
+      :aria-controls="`${select.id}-option-${id}`"
       v-for="(value, id) in select.values"
       @click="
         () => {

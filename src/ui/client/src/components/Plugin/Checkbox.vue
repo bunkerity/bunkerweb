@@ -61,7 +61,6 @@ function updateCheckbox() {
           ? true
           : false
       "
-      :aria-checked="checkbox.value === 'yes' ? 'true' : 'false'"
       checked
       :class="[checkbox.value === 'yes' ? 'check' : '', 'checkbox']"
       type="checkbox"

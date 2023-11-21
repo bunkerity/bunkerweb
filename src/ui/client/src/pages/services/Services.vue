@@ -16,6 +16,8 @@ import {
   setPluginsData,
   addConfToPlugins,
   getPluginsByContext,
+  pluginI18n,
+  getRemainFromFilter,
 } from "@utils/plugins.js";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
@@ -81,19 +83,7 @@ const services = reactive({
     );
 
     // translate
-    cloneMultisitePlugin.forEach((plugin) => {
-      const id = plugin.id;
-      // global info
-      plugin.name = t(`core_plugins.${id}.name`);
-      plugin.description = t(`core_plugins.${id}.description`);
-
-      for (const [key, value] of Object.entries(plugin.settings)) {
-        try {
-          value["help"] = t(`core_plugins.${id}.settings.${key}.help`);
-          value["label"] = t(`core_plugins.${id}.settings.${key}.label`);
-        } catch (err) {}
-      }
-    });
+    pluginI18n(t, cloneMultisitePlugin);
 
     // Get only services custom conf
     const cloneServConf = JSON.parse(JSON.stringify(conf.data["services"]));
@@ -131,11 +121,7 @@ const services = reactive({
       services.activeService = services.servicesName[0] || "";
     // Get remain plugin after filter
     // Use new service because always here
-    const remainPlugins = [];
-    cloneServConf["new"].forEach((item) => {
-      item["isMatchFilter"] ? remainPlugins.push(item.name) : false;
-    });
-    services.activePlugins = remainPlugins;
+    services.activePlugins = getRemainFromFilter(cloneServConf["new"]);
 
     // Set first plugin as active if none
     if (!services.activePlugin)

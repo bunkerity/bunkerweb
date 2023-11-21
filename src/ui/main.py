@@ -17,7 +17,7 @@ from routes.dashboard import dashboard
 
 from middleware.jwt import setup_jwt
 
-from utils import setupUIException, validate_env_data, default_error_handler
+from utils import setupUIException, validate_env_data, default_error_handler, create_action_format
 
 from werkzeug.exceptions import HTTPException
 import os
@@ -130,3 +130,4 @@ if not HEALTHY_PATH.exists():
     HEALTHY_PATH.write_text("ok", encoding="utf-8")
 
 LOGGER.info("UI RUNNING")
+create_action_format("success", "200", "UI started", "UI started properly.", ["ui", "setup"])

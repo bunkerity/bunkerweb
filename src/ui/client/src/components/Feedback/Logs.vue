@@ -36,7 +36,7 @@ const props = defineProps({
 <template>
   <div
     role="alert"
-    :aria_description="$t('A11y.feedback.logs.aria_description')"
+    :aria-description="$t('dashboard.feedback.logs.aria_description')"
     :class="[
       props.status === 'error' ? 'bg-red-500' : '',
       props.status === 'success' ? 'bg-green-500' : '',

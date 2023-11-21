@@ -12,8 +12,27 @@ import MenuSvgServices from "@components/Menu/Svg/Services.vue";
 import MenuSvgGithub from "@components/Menu/Svg/Github.vue";
 import MenuSvgBans from "@components/Menu/Svg/Bans.vue";
 import MenuSvgActions from "@components/Menu/Svg/Actions.vue";
-import { reactive, onMounted, computed } from "vue";
+import { reactive, onMounted } from "vue";
 import { getDarkMode } from "@utils/global.js";
+import { getCookie } from "@utils/api";
+
+async function getlogout() {
+  fetch("/logout", {
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": getCookie("csrf_access_token"),
+    },
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      if (data.type === "success")
+        return (window.location = `${window.location.origin}/admin/login`);
+    })
+    .catch((err) => {});
+}
 
 // Navigation with components
 // resolveComponent allow to replace a tag by a real Vue component
@@ -135,9 +154,7 @@ function toggleMenu() {
 <template>
   <!-- float button-->
   <button
-    :aria-checked="menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'"
-    aria-describedby="sidebar-menu"
-    type="button"
+    aria-controls="sidebar-menu"
     @click="toggleMenu()"
     class="menu-float-btn"
   >
@@ -161,21 +178,20 @@ function toggleMenu() {
     :class="[menu.isDesktop ? true : menu.isActive ? '' : 'active']"
     class="menu-container xl:translate-x-0"
     :aria-expanded="menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'"
-    :aria-hidden="menu.isDesktop ? 'false' : menu.isActive ? 'false' : 'true'"
   >
     <!-- close btn-->
-    <svg
-      type="button"
-      @click="closeMenu()"
-      data-sidebar-menu-close
-      class="menu-close-btn"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 320 512"
-    >
-      <path
-        d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
-      />
-    </svg>
+    <button data-sidebar-menu-close @click="closeMenu()">
+      <svg
+        class="menu-close-btn"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 320 512"
+      >
+        <path
+          d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
+        />
+      </svg>
+    </button>
+
     <!-- close btn-->
     <!-- top sidebar -->
     <div class="w-full">
@@ -233,12 +249,12 @@ function toggleMenu() {
           <!-- plugins -->
           <ul>
             <li class="w-full mt-4">
-              <h6 class="menu-page-plugin-title">
+              <p class="menu-page-plugin-title">
                 {{ $t("dashboard.menu.plugins.title") }}
-              </h6>
+              </p>
             </li>
             <li v-if="menu.pagePlugins.length === 0" class="w-full mt-6">
-              <h6 class="menu-page-plugin-empty-title">
+              <div class="menu-page-plugin-empty-title">
                 {{ $t("dashboard.menu.plugins.none.description") }} <br />
                 <a
                   class="menu-page-plugin-empty-anchor"
@@ -247,7 +263,7 @@ function toggleMenu() {
                 >
                   {{ $t("dashboard.menu.plugins.none.check_doc") }}
                 </a>
-              </h6>
+              </div>
             </li>
 
             <li v-for="plugin in menu.pagePlugins" class="mt-0.5 w-full">
@@ -317,11 +333,9 @@ function toggleMenu() {
 
       <!-- logout-->
       <div class="w-full">
-        <form action="/logout" method="POST" autocomplete="off">
-          <button type="submit" class="menu-logout">
-            {{ $t("dashboard.menu.log_out") }}
-          </button>
-        </form>
+        <button @click="getlogout()" class="menu-logout">
+          {{ $t("dashboard.menu.log_out") }}
+        </button>
       </div>
       <!-- end logout-->
     </div>

@@ -1,5 +1,6 @@
 <script setup>
 import { reactive, onMounted, defineProps } from "vue";
+import { v4 as uuidv4 } from "uuid";
 
 const props = defineProps({
   // Sometimes we can't have a button tag (like popover on another btn)
@@ -23,6 +24,9 @@ const popover = reactive({
 // Different style for desktop and mobile
 const tab = reactive({
   isMobile: false,
+  // format label to fit id
+  label: props.label.trim().toLowerCase().replaceAll(" ", "-").substring(0, 15),
+  id: uuidv4(),
 });
 
 onMounted(() => {
@@ -49,9 +53,9 @@ function hidePopover() {
 
 <template>
   <component
-    :aria-controls="`${props.label}-popover`"
+    :aria-controls="`${tab.label}-popover-${tab.id}`"
     :is="props.tag"
-    :type="props.tag !== 'button' ? 'button' : false"
+    role="button"
     @pointerover="showPopover()"
     @pointerleave="hidePopover()"
     :aria-description="$t('dashboard.popover.button.aria_description')"
@@ -70,7 +74,7 @@ function hidePopover() {
     </svg>
   </component>
   <div
-    :id="`${props.label}-popover`"
+    :id="`${tab.label}-popover-${tab.id}`"
     role="status"
     :aria-hidden="popover.isOpen ? 'false' : 'true'"
     v-show="popover.isOpen"
