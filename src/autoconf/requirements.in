@@ -1,5 +1,5 @@
 docker==6.1.3
 kubernetes==28.1.0
-pydantic_settings==2.0.3
+pydantic_settings==2.1.0
 python_multipart==0.0.6
 PyYAML==6.0.1
