@@ -25,13 +25,14 @@ jobs:
         run: |
           sudo apt purge -y firefox
           sudo apt update
-          sudo apt install --no-install-recommends -y openssl git nodejs tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 libasound2 libdbus-glib-1-2 libxtst6 libxt6 php-fpm unzip
-          wget -O firefox-setup.tar.bz2 "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64"
-          sudo tar -xjf firefox-setup.tar.bz2 -C /opt/
-          sudo rm -f /usr/bin/firefox
-          sudo ln -s /opt/firefox/firefox /usr/bin/firefox
-          sudo chmod 755 /opt/firefox /opt/firefox/firefox
-          rm -f firefox-setup.tar.bz2
+          sudo add-apt-repository ppa:mozillateam/ppa -y
+          echo '
+          Package: *
+          Pin: release o=LP-PPA-mozillateam
+          Pin-Priority: 1001
+          ' | sudo tee /etc/apt/preferences.d/mozilla-firefox
+          sudo apt update
+          sudo apt install --no-install-recommends -y openssl git nodejs tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 libasound2 libdbus-glib-1-2 libxtst6 libxt6 php-fpm unzip firefox
       - name: Download geckodriver
         uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4 # v2.9.0
         with:
