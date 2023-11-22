@@ -18,6 +18,8 @@
 </p>
 
 <p align="center">
+	🌐 <a href="https://www.bunkerweb.io">Website</a>
+	 &#124;
 	📓 <a href="https://docs.bunkerweb.io">Documentation</a>
 	 &#124;
 	👨‍💻 <a href="https://demo.bunkerweb.io">Demo</a>
@@ -27,7 +29,7 @@
 	💬 <a href="https://discord.com/invite/fTf46FmtyD">Chat</a>
 	 &#124;
 	📝 <a href="https://github.com/bunkerity/bunkerweb/discussions">Forum</a>
-	 &#124;
+	<br/>
 	⚙️ <a href="https://config.bunkerweb.io">Configurator</a>
 	 &#124;
 	🗺️ <a href="https://threatmap.bunkerweb.io">Threatmap</a>
