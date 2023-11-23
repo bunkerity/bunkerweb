@@ -238,13 +238,11 @@ class CacheFileInfoModel(CacheFileModel):
 
 class CustomConfigModel(CacheFileModel):
     type: str = Field(examples=["server_http"], description="The config type")
+    method: str = Field(examples=["core"], description="Which service created the custom config")
 
 
-class CustomConfigNameModel(CustomConfigModel):
+class CustomConfigDataModel(CustomConfigModel):
     name: str = Field(examples=["my_custom_config"], description="The config name")
-
-
-class CustomConfigDataModel(CustomConfigNameModel):
     data: bytes = Field(
         examples=[b"BunkerWeb forever"],
         description="The custom config content in bytes",

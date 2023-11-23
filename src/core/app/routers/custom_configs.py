@@ -74,19 +74,19 @@ async def get_custom_configs(background_tasks: BackgroundTasks):
         },
     },
 )
-async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, method: str, background_tasks: BackgroundTasks, reload: bool = True):
+async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, background_tasks: BackgroundTasks, reload: bool = True):
     """Update one or more custom configs"""
 
-    if method == "static":
+    if custom_config.method == "static":
         message = f"Can't upsert custom config {custom_config.name} : method can't be static"
         background_tasks.add_task(
             DB.add_action,
-            {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["custom_config"], "title": f"Tried to update custom config {custom_config.name}", "description": message, "status": "error"},
+            {"date": datetime.now(), "api_method": "PUT", "method": custom_config.method, "tags": ["custom_config"], "title": f"Tried to update custom config {custom_config.name}", "description": message, "status": "error"},
         )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
-    custom_config_data = custom_config.model_dump() | {"method": method}
+    custom_config_data = custom_config.model_dump()
     custom_config_data["config_type"] = custom_config_data.pop("type")
     resp = DB.upsert_custom_config(**custom_config_data)
 
@@ -96,7 +96,9 @@ async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, metho
             + (f" from service {custom_config.service_id}" if custom_config.service_id else "")
             + " because it is either static or was created by the core or the autoconf and the method isn't one of them"
         )
-        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["custom_config"], "title": f"Tried to update custom config {custom_config.name}", "description": message, "status": "error"})
+        background_tasks.add_task(
+            DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": custom_config.method, "tags": ["custom_config"], "title": f"Tried to update custom config {custom_config.name}", "description": message, "status": "error"}
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif resp == "retry":
@@ -111,7 +113,7 @@ async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, metho
         message = f"Can't upsert custom config: {resp}"
         background_tasks.add_task(
             DB.add_action,
-            {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["custom_config"], "title": f"Tried to update custom config {custom_config.name}", "description": message, "status": "error"},
+            {"date": datetime.now(), "api_method": "PUT", "method": custom_config.method, "tags": ["custom_config"], "title": f"Tried to update custom config {custom_config.name}", "description": message, "status": "error"},
         )
         CORE_CONFIG.logger.error(message)
         return JSONResponse(
@@ -121,7 +123,7 @@ async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, metho
 
     message = f"Custom config {custom_config.name} {resp}"
 
-    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["custom_config"], "title": "Updated custom configs", "description": message})
+    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": custom_config.method, "tags": ["custom_config"], "title": "Updated custom configs", "description": message})
     CORE_CONFIG.logger.info(f"✅ {message} in the database")
 
     if reload:
@@ -154,23 +156,25 @@ async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, metho
         },
     },
 )
-async def delete_custom_config(custom_config_name: str, custom_config: CustomConfigModel, method: str, background_tasks: BackgroundTasks):
+async def delete_custom_config(custom_config_name: str, custom_config: CustomConfigModel, background_tasks: BackgroundTasks):
     """Update a custom config"""
 
-    if method == "static":
+    if custom_config.method == "static":
         message = f"Can't delete custom config {custom_config_name} : method can't be static"
         background_tasks.add_task(
             DB.add_action,
-            {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Tried to delete custom config {custom_config_name}", "description": message, "status": "error"},
+            {"date": datetime.now(), "api_method": "DELETE", "method": custom_config.method, "tags": ["custom_config"], "title": f"Tried to delete custom config {custom_config_name}", "description": message, "status": "error"},
         )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
-    resp = DB.delete_custom_config(custom_config.service_id, custom_config.type, custom_config_name, method)
+    resp = DB.delete_custom_config(custom_config.service_id, custom_config.type, custom_config_name, custom_config.method)
 
     if resp == "not_found":
         message = f"Custom config {custom_config_name} not found"
-        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Tried to delete custom config {custom_config_name}", "description": message, "status": "error"})
+        background_tasks.add_task(
+            DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": custom_config.method, "tags": ["custom_config"], "title": f"Tried to delete custom config {custom_config_name}", "description": message, "status": "error"}
+        )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "method_conflict":
@@ -180,7 +184,7 @@ async def delete_custom_config(custom_config_name: str, custom_config: CustomCon
             + " because it is either static or was created by the core or the autoconf and the method isn't one of them"
         )
         background_tasks.add_task(
-            DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Trired to delete custom config {custom_config_name}", "description": message, "status": "error"}
+            DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": custom_config.method, "tags": ["custom_config"], "title": f"Trired to delete custom config {custom_config_name}", "description": message, "status": "error"}
         )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
@@ -196,7 +200,7 @@ async def delete_custom_config(custom_config_name: str, custom_config: CustomCon
         message = f"Can't delete custom config {custom_config_name}: {resp}"
         background_tasks.add_task(
             DB.add_action,
-            {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Trired to delete custom config {custom_config_name}", "description": message, "status": "error"},
+            {"date": datetime.now(), "api_method": "DELETE", "method": custom_config.method, "tags": ["custom_config"], "title": f"Trired to delete custom config {custom_config_name}", "description": message, "status": "error"},
         )
         CORE_CONFIG.logger.error(message)
         return JSONResponse(
@@ -205,7 +209,7 @@ async def delete_custom_config(custom_config_name: str, custom_config: CustomCon
         )
 
     background_tasks.add_task(
-        DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Delete custom config {custom_config_name}", "description": f"Delete custom config {custom_config_name}"}
+        DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": custom_config.method, "tags": ["custom_config"], "title": f"Delete custom config {custom_config_name}", "description": f"Delete custom config {custom_config_name}"}
     )
     CORE_CONFIG.logger.info(f"✅ Custom config {custom_config_name} deleted from database")
 
