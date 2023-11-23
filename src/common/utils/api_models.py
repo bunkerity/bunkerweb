@@ -259,3 +259,9 @@ class JobRun(BaseModel):
     success: bool = Field(examples=[True], description="If the job run was successful")
     start_date: datetime = Field(examples=["2021-01-01T00:00:00.000Z"], description="The job run start date")
     end_date: Optional[datetime] = Field(None, examples=["2021-01-01T00:00:00.000Z"], description="The job run end date")
+
+
+class Ban(BaseModel):
+    ip: str = Field(examples=["127.0.0.1"], description="The banned IP")
+    end_date: Optional[datetime] = Field(None, examples=["2021-01-01T00:00:00.000Z"], description="The ban end date")
+    reason: str = Field("manual", examples=["manual"], description="The ban reason")
