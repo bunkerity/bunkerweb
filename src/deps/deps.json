@@ -151,9 +151,9 @@
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v1.0.1",
+      "name": "lua-resty-openssl v1.0.2",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "89195843cfbfac9dcbf071832aa9303a347871b4",
+      "commit": "5aba923e78ae0f213f3b4719effa879e3971821f",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {
