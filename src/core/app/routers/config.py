@@ -3,14 +3,21 @@ from copy import deepcopy
 from datetime import datetime
 from functools import wraps
 from json import dumps
+from os.path import join, sep
 from random import uniform
 from re import match
+from sys import path as sys_path
 from typing import Callable, Dict, List, Literal, Optional, Tuple, Union
+
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
 from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
-from ..models import ErrorMessage
 from ..dependencies import CORE_CONFIG, DB, run_jobs, send_to_instances
+from api_models import ErrorMessage  # type: ignore
 
 router = APIRouter(
     prefix="/config",

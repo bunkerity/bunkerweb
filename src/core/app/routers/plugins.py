@@ -2,14 +2,21 @@
 from datetime import datetime
 from io import BytesIO
 from json import dumps
+from os.path import join, sep
 from random import uniform
+from sys import path as sys_path
 from tarfile import open as tar_open
 from typing import Dict, List, Literal
+
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
 from fastapi import APIRouter, BackgroundTasks, Response, status
 from fastapi.responses import JSONResponse
 
-from ..models import AddedPlugin, ErrorMessage, Plugin
 from ..dependencies import CORE_CONFIG, DB, EXTERNAL_PLUGINS_PATH, generate_external_plugins, run_jobs, send_to_instances, update_app_mounts
+from api_models import AddedPlugin, ErrorMessage, Plugin  # type: ignore
 
 router = APIRouter(prefix="/plugins", tags=["plugins"])
 

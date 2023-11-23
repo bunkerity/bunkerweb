@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
 from contextlib import suppress
 from datetime import datetime, timedelta
+from os.path import join, sep
 from random import uniform
+from sys import path as sys_path
 from typing import Annotated, Dict, List, Literal, Union
+
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
 from fastapi import APIRouter, BackgroundTasks, status, Path as fastapi_Path
 from fastapi.responses import JSONResponse
 
-from ..models import ErrorMessage, InstanceWithInfo, InstanceWithMethod, UpsertInstance
 from ..dependencies import CORE_CONFIG, DB, test_and_send_to_instances
+from api_models import ErrorMessage, InstanceWithInfo, InstanceWithMethod, UpsertInstance  # type: ignore
 from API import API  # type: ignore
 
 router = APIRouter(

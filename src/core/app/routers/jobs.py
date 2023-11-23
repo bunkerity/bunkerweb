@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+from os.path import join, sep
 from random import uniform
+from sys import path as sys_path
 from typing import Annotated, Dict, Literal, Optional
+
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
 from fastapi import APIRouter, BackgroundTasks, File, Form, status
 from fastapi.responses import JSONResponse
 
-from ..models import CacheFileDataModel, CacheFileModel, ErrorMessage, Job, JobCache, JobRun
 from ..dependencies import CORE_CONFIG, DB, run_job, run_jobs as deps_run_jobs
+from api_models import CacheFileDataModel, CacheFileModel, ErrorMessage, Job, JobCache, JobRun  # type: ignore
 
 router = APIRouter(
     prefix="/jobs",

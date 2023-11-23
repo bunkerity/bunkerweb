@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+from os.path import join, sep
 from random import uniform
+from sys import path as sys_path
 from typing import Dict, List, Literal
+
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
+
 from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
-from ..models import CustomConfigModel, CustomConfigDataModel, ErrorMessage, UpsertCustomConfigDataModel
 from ..dependencies import CORE_CONFIG, DB, send_to_instances
+from api_models import CustomConfigModel, CustomConfigDataModel, ErrorMessage, UpsertCustomConfigDataModel  # type: ignore
 
 router = APIRouter(
     prefix="/custom_configs",
