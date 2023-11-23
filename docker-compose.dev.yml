@@ -1,7 +1,6 @@
 version: "3"
 
 services:
-
   bunkerweb:
     build:
       context: .
@@ -41,18 +40,20 @@ services:
     networks:
       - bw-universe
 
-  # bw-ui:
-  #   build:
-  #     context: .
-  #     dockerfile: ./src/ui/Dockerfile
-  #   ports:
-  #     - "80:7000"
-  #   environment:
-  #     - API_ADDR=http://bw-core:1337
-  #     - API_TOKEN=ChangeMe42!!!
-  #     - ADMIN_PASSWORD=P@ssw0rd
-  #   networks:
-  #     - bw-universe
+  bw-ui:
+    build:
+      context: .
+      dockerfile: ./src/ui/Dockerfile
+    ports:
+      - "7000:7000"
+    volumes:
+      - ./src/ui/static:/usr/share/bunkerweb/ui/static
+    environment:
+      - CORE_ADDR=http://bw-core:1337
+      - CORE_TOKEN=ChangeMe42!!!
+      - ADMIN_PASSWORD=P@ssw0rd
+    networks:
+      - bw-universe
 
   myapp1:
     image: tutum/hello-world
@@ -63,7 +64,6 @@ services:
 
 volumes:
   bw-data:
-
 
 networks:
   bw-universe:
