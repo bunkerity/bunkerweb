@@ -95,8 +95,7 @@ class Job:
 
         sent, _, status, resp = self.api.request(
             "GET",
-            f"/jobs/{job_name or self.job_name}/cache/{name}?method=core",
-            data={"service_id": service_id, "with_info": with_info, "with_data": with_data},
+            f"/jobs/{job_name or self.job_name}/cache/{name}?method=core&service_id={service_id}&with_info={with_info}&with_data={with_data}",
             additonal_headers=self.api_token_header,
         )
 
