@@ -2023,21 +2023,25 @@ class Database:
     def get_job_cache(
         self,
         job_name: str,
-        file_name: str,
+        file_name: Optional[str] = None,
         *,
         service_id: Optional[str] = None,
         with_info: bool = False,
         with_data: bool = True,
     ) -> Optional[Any]:
         """Get job cache file."""
-        entities = []
+        entities = [Jobs_cache.file_name]
         if with_info:
             entities.extend([Jobs_cache.last_update, Jobs_cache.checksum])
         if with_data:
             entities.append(Jobs_cache.data)
 
         with suppress(BaseException), self._db_session() as session:
-            return session.query(Jobs_cache).with_entities(*entities).filter_by(job_name=job_name, service_id=service_id, file_name=file_name).first()
+            if file_name:
+                return session.query(Jobs_cache).with_entities(*entities).filter_by(job_name=job_name, service_id=service_id, file_name=file_name).first()
+            if service_id:
+                return session.query(Jobs_cache).with_entities(*entities).filter_by(job_name=job_name, service_id=service_id).all()
+            return session.query(Jobs_cache).with_entities(*entities).filter_by(job_name=job_name).all()
         return (self._exceptions.get(getpid()) or [None]).pop()
 
     def get_jobs_cache_files(self) -> List[Dict[str, Any]]:

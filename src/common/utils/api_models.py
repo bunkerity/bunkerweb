@@ -214,19 +214,6 @@ class CacheFileModel(BaseModel):
     )
 
 
-class CacheFileDataModel(CacheFileModel):
-    with_info: bool = Field(
-        False,
-        examples=[True],
-        description="Will return the cache file info, being: last_update and checksum",
-    )
-    with_data: bool = Field(
-        True,
-        examples=[False],
-        description="Will return the cache file data",
-    )
-
-
 class CacheFileInfoModel(CacheFileModel):
     last_update: Union[datetime, float] = Field(examples=["1609459200.0"], description="The last update date")
     checksum: Optional[str] = Field(
