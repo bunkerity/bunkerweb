@@ -521,7 +521,8 @@
     },
     "actions": {
       "new": "Nouveau service",
-      "save": "sauvegarder"
+      "save": "sauvegarder",
+      "warning": "Besoin d'un nom de serveur valide pour sauvegarder."
     }
   },
   "custom_inputs": {
@@ -594,7 +595,7 @@
         "SERVER_NAME": {
           "help": "Liste des hôtes virtuels desservis par BunkerWeb.",
           "id": "server-name",
-          "label": "Nom de(s) server(s)"
+          "label": "Nom du serveur"
         },
         "WORKER_PROCESSES": {
           "help": "Nombre de workers processes.",

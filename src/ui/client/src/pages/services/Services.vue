@@ -39,12 +39,36 @@ logsStore.setTags(["plugin", "config"]);
 
 const config = useConfigStore();
 
+// Disabled save when no SERVER_NAME value
+watch(config.data, () => {
+  // Case new service and no SERVER_NAME set
+  try {
+    if (
+      services.activeService === "new" &&
+      !config.data[services.activeService]["SERVER_NAME"]
+    )
+      return (saveBtn.disabled = true);
+  } catch (err) {}
+
+  // Case any service with a SERVER_NAME falsy
+  try {
+    if (!config.data[services.activeService]["SERVER_NAME"])
+      return (saveBtn.disabled = true);
+  } catch (err) {}
+
+  return (saveBtn.disabled = false);
+});
 const feedbackStore = useFeedbackStore();
 
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
   keyword: "",
   method: "all",
+});
+
+// Disabled in case we are creating a new service (empty SERVER_NAME)
+const saveBtn = reactive({
+  disabled: false,
 });
 
 // Plugins data to render components
@@ -110,6 +134,18 @@ const services = reactive({
     // Will not be add to config store until a default value is change
     // services.setup is at least length 1
     cloneServConf["new"] = JSON.parse(JSON.stringify(cloneMultisitePlugin));
+    // New default server_name should be empty
+    cloneServConf["new"].forEach((plugin) => {
+      if (plugin.id.toLowerCase() !== "general") return;
+
+      for (const [key, value] of Object.entries(plugin.settings)) {
+        if (key.toUpperCase() !== "SERVER_NAME") continue;
+        value["default"] = "";
+      }
+    });
+    for (const [key, value] of Object.entries(cloneServConf)) {
+      cloneServConf[key] = getSettingsByFilter(cloneServConf[key], filters);
+    }
 
     // Filter data to display for each service
     for (const [key, value] of Object.entries(cloneServConf)) {
@@ -142,7 +178,6 @@ const services = reactive({
           services.activePlugins.length > 0 ? services.activePlugins[0] : "";
       }
     }
-
     return cloneServConf;
   }),
 });
@@ -184,12 +219,6 @@ function refresh() {
   resetValues();
 }
 
-function changeServ(servName) {
-  services.activeService = servName;
-  // Remove previous config services changes
-  config.$reset();
-}
-
 async function sendServConf() {
   // Case nothing to send
   if (Object.keys(config.data.services).length === 0) return;
@@ -202,6 +231,7 @@ async function sendServConf() {
       if (Object.keys(value).length === 0) continue;
       // Case new, replace by SERVER_NAME
       const serviceName = key === "new" ? services[key]["SERVER_NAME"] : key;
+      console.log(services[key]);
       promises.push(
         await fetchAPI(
           `/api/config/service/${serviceName}?method=ui`,
@@ -218,6 +248,18 @@ async function sendServConf() {
       getGlobalConf(false);
     });
   }
+}
+
+function changeServ(servName) {
+  saveBtn.disabled = false;
+  services.activeService = servName;
+  // Remove previous config services changes
+  config.$reset();
+}
+
+function showNewServ() {
+  saveBtn.disabled = true;
+  services.activeService = "new";
 }
 
 // Show service data logic
@@ -243,7 +285,7 @@ onMounted(() => {
     >
       <div class="col-span-12 flex justify-center mt-2">
         <ButtonBase
-          @click="services.activeService = 'new'"
+          @click="showNewServ()"
           color="valid"
           size="normal"
           class="text-sm"
@@ -377,10 +419,25 @@ onMounted(() => {
             :active="services.activePlugin"
           />
         </div>
-        <div class="col-span-12 flex w-full justify-center mt-8 mb-2">
-          <ButtonBase @click="sendServConf()" color="valid" size="lg">
+        <div
+          class="col-span-12 flex flex-col items-center w-full justify-center mt-8 mb-2"
+        >
+          <ButtonBase
+            :disabled="saveBtn.disabled"
+            @click="sendServConf()"
+            color="valid"
+            size="lg"
+            class="w-fit"
+          >
             {{ $t("services.actions.save") }}
           </ButtonBase>
+          <hr class="line-separator z-10 w-full" />
+          <p class="dark:text-gray-500 text-xs text-center mt-1 mb-2">
+            <span class="mx-0.5">
+              <SettingsUploadSvgWarning class="scale-90" />
+            </span>
+            {{ $t("services.actions.warning") }}
+          </p>
         </div>
       </CardBase>
     </div>

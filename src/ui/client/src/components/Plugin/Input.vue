@@ -67,7 +67,7 @@ const input = reactive({
       :data-default-value="input.defaultValue"
       :data-default-method="input.defaultMethod"
       :name="input.id"
-      :value="input.value ? input.value : input.defaultValue"
+      :value="input.value"
     />
     <div v-if="input.type === 'password'" class="input-pw-container">
       <button

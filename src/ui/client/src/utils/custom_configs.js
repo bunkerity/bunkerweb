@@ -44,7 +44,8 @@ export function generateItem(
   canEdit,
   canDelete,
   children = [],
-  data = ""
+  data = "",
+  method = ""
 ) {
   const fullPath = `root${path ? `/${path}` : ``}`;
   return {
@@ -57,6 +58,7 @@ export function generateItem(
     canCreateFolder: canCreateFolder,
     data: data,
     children: children,
+    method: method,
   };
 }
 
@@ -105,10 +107,11 @@ export function generateConfTree(configs, services) {
         }/${configs[i].name}`,
         false,
         false,
-        true,
-        true,
+        configs[i].method === "static" ? false : true,
+        configs[i].method === "static" ? false : true,
         [],
-        configs[i].data || ""
+        configs[i].data || "",
+        configs[i].method || ""
       )
     );
   }

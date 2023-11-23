@@ -30,6 +30,7 @@ const modal = reactive({
   action: "",
   path: "",
   value: "",
+  method: "",
 });
 
 // When dropdown action is clicked on item (view, delete...)
@@ -40,6 +41,7 @@ function updateModal(type, action, path, value) {
   modal.action = action;
   modal.path = path;
   modal.value = value;
+  modal.method = method;
   modal.isOpen = true;
 }
 
@@ -87,7 +89,14 @@ watch(path, () => {
               :canDownload="child.canDownload || false"
               @updatePath="(v) => (path.current = v)"
               @action="
-                (v) => updateModal(child.type, v, child.path, child.data || '')
+                (v) =>
+                  updateModal(
+                    child.type,
+                    v,
+                    child.path,
+                    child.data,
+                    child.method || ''
+                  )
               "
             />
           </div>

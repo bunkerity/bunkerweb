@@ -42,6 +42,12 @@ const props = defineProps({
     required: true,
     default: "",
   },
+  // Method to avoid override static ones
+  method: {
+    type: String,
+    required: true,
+    default: "",
+  },
 });
 
 const emits = defineEmits(["close", "updateFile"]);
@@ -52,6 +58,7 @@ const data = reactive({
   name: "",
   oldName: props.path.split("/")[props.path.split("/").length - 1],
   value: props.value,
+  method: props.method,
   prefix: computed(() => {
     const arr = props.path.split("/");
     arr.pop();
@@ -192,6 +199,7 @@ function formatData() {
     name: data.name,
     old_name: data.oldName,
     data: data.value,
+    method: data.method,
   };
   return conf;
 }
