@@ -231,7 +231,7 @@ function _M.dump_jwk(pkey, is_priv)
       kty = "EC",
       crv = ec_curves_reverse[params.group],
       x = b64.encode_base64url(params.x:to_binary()),
-      y = b64.encode_base64url(params.x:to_binary()),
+      y = b64.encode_base64url(params.y:to_binary()),
     }
     if is_priv then
       jwk.d = b64.encode_base64url(params.private:to_binary())
