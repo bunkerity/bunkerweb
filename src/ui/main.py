@@ -362,7 +362,7 @@ def setup():
             flash("Missing form data.", "error")
             return redirect(url_for("setup"))
 
-        if not any(key in request.form for key in ("admin_username", "admin_password", "server_name", "hostname")):
+        if not any(key in request.form for key in ("admin_username", "admin_password", "admin_password_check", "server_name", "hostname")):
             flash("Missing either admin_username, admin_password, server_name or hostname parameter.", "error")
             return redirect(url_for("setup"))
 
@@ -370,6 +370,10 @@ def setup():
 
         if len(request.form["admin_username"]) > 256:
             flash("The admin username is too long. It must be less than 256 characters.", "error")
+            error = True
+
+        if request.form["admin_password"] != request.form["admin_password_check"]:
+            flash("The passwords do not match.", "error")
             error = True
 
         if not USER_PASSWORD_RX.match(request.form["admin_password"]):
