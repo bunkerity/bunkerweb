@@ -277,7 +277,7 @@ async function addBansFromList() {
       >
         {{ $t("bans.add.actions.save_bans.label") }}
       </ButtonBase>
-      <hr class="line-separator z-10 w-full" />
+      <hr class="line-separator z-10 w-1/2" />
       <p class="dark:text-gray-500 text-xs text-center mt-1 mb-2">
         <span class="mx-0.5">
           <SettingsUploadSvgWarning class="scale-90" />

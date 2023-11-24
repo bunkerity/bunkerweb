@@ -489,7 +489,7 @@
       },
       "list": {
         "title": "Services and plugins",
-        "switch_warning": "Changer de services va réinitialiser les changements du service en cours.",
+        "switch_warning": "Changer de services réinitialise les changements du service en cours.",
         "select_service": {
           "label": "sélectionner un service"
         },
@@ -523,7 +523,7 @@
     "actions": {
       "new": "Nouveau service",
       "save": "sauvegarder",
-      "warning": "Besoin d'un nom de serveur valide pour sauvegarder."
+      "warning": "Au moins un nom de serveur valide et disponible pour sauvegarder."
     }
   },
   "custom_inputs": {

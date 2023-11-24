@@ -40,27 +40,40 @@ logsStore.setTags(["plugin", "config"]);
 const config = useConfigStore();
 
 // Disabled save when no SERVER_NAME value
-watch(config.data, () => {
-  // Case new service and no SERVER_NAME set
+watch(config, () => {
+  // Enable when new service with a valid SERVER_NAME
   try {
     if (
       services.activeService === "new" &&
-      !config.data.services[services.activeService]["SERVER_NAME"]
+      !!("SERVER_NAME" in config.data.services[services.activeService]) &&
+      config.data.services[services.activeService]["SERVER_NAME"]
     )
-      return (saveBtn.disabled = true);
+      return (saveBtn.disabled = false);
   } catch (err) {}
 
-  // Case any service with a SERVER_NAME falsy
+  // Enable when not new and didn't change SERVER_NAME
+  try {
+    if (
+      services.activeService !== "new" &&
+      !("SERVER_NAME" in config.data.services[services.activeService])
+    )
+      return (saveBtn.disabled = false);
+  } catch (err) {}
+
+  // Enable when not new, update name but is not falsy and not taken
   try {
     if (
       services.activeService !== "new" &&
       !!("SERVER_NAME" in config.data.services[services.activeService]) &&
-      !config.data.services[services.activeService]["SERVER_NAME"]
+      config.data.services[services.activeService]["SERVER_NAME"] &&
+      services.servicesName.includes(
+        config.data.services[services.activeService]["SERVER_NAME"]
+      )
     )
-      return (saveBtn.disabled = true);
+      return (saveBtn.disabled = false);
   } catch (err) {}
 
-  return (saveBtn.disabled = false);
+  return (saveBtn.disabled = true);
 });
 
 const feedbackStore = useFeedbackStore();
@@ -183,6 +196,7 @@ const services = reactive({
           services.activePlugins.length > 0 ? services.activePlugins[0] : "";
       }
     }
+    console.log(cloneServConf);
     return cloneServConf;
   }),
 });
@@ -242,8 +256,6 @@ async function sendServConf() {
       try {
         serviceName = services[key]["SERVER_NAME"];
       } catch (err) {}
-      console.log(serviceName);
-      console.log(services[key]);
       promises.push(
         await fetchAPI(
           `/api/config/service/${serviceName}?method=ui`,
@@ -266,20 +278,20 @@ function changeServ(servName) {
   // Case current service, stop
   if (services.activeService === servName) return;
   // Else setup
-  saveBtn.disabled = false;
-  services.activeService = servName;
   // Remove previous config services changes
   config.$reset();
+  saveBtn.disabled = false;
+  services.activeService = servName;
 }
 
 function showNewServ() {
   // Case already new service, stop
   if (services.activeService === "new") return;
   // Else setup
-  saveBtn.disabled = true;
-  services.activeService = "new";
   // Remove previous config services changes
   config.$reset();
+  saveBtn.disabled = true;
+  services.activeService = "new";
 }
 
 // Show service data logic
@@ -451,7 +463,7 @@ onMounted(() => {
           >
             {{ $t("services.actions.save") }}
           </ButtonBase>
-          <hr class="line-separator z-10 w-full" />
+          <hr class="line-separator z-10 w-1/2" />
           <p class="dark:text-gray-500 text-xs text-center mt-1 mb-2">
             <span class="mx-0.5">
               <SettingsUploadSvgWarning class="scale-90" />

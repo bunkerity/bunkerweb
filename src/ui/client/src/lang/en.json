@@ -523,7 +523,7 @@
     "actions": {
       "new": "Create new service",
       "save": "save",
-      "warning": "Need at least a valid server name to save."
+      "warning": "Need at least a valid and available server name to save."
     }
   },
   "custom_inputs": {

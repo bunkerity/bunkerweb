@@ -57,7 +57,7 @@ def update_global_config():
 @config.route(f"{PREFIX}/service/<string:service_name>", methods=["PUT"])
 @jwt_required()
 def update_service_config(service_name):
-    """Update service config"""
+    """Create or update service config"""
     # is_valid_model(service_name, Model) True | False
     args = request.args.to_dict()
     method = args.get("method") or "ui"
@@ -65,7 +65,7 @@ def update_service_config(service_name):
     config = request.get_json()
     # is_valid_model(config, Model) True | False
     data = json.dumps(config, skipkeys=True, allow_nan=True, indent=6)
-    return get_core_format_res(f"{CORE_API}/config/service/{service_name}?method={method}", "PUT", data, f"Update service config {service_name}")
+    return get_core_format_res(f"{CORE_API}/config/service/{service_name}?method={method}", "PUT", data, f"Create / update service config {service_name}")
 
 
 @config.route(f"{PREFIX}/service/<string:service_name>", methods=["DELETE"])
