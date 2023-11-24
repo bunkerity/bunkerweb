@@ -476,19 +476,6 @@ class Database:
 
                 if config.get("MULTISITE", "no") == "yes":
                     global_values = []
-                    db_services = session.query(Services).with_entities(Services.id, Services.method).all()
-                    db_ids = [service.id for service in db_services]
-                    services = config.get("SERVER_NAME", [])
-
-                    if isinstance(services, str):
-                        services = services.split()
-
-                    if db_services:
-                        missing_ids = [service.id for service in db_services if (service.method == method) and service.id not in services]
-
-                        if missing_ids:
-                            # Remove services that are no longer in the list
-                            session.query(Services).filter(Services.id.in_(missing_ids)).delete()
 
                     for key, value in deepcopy(config).items():
                         suffix = 0
@@ -704,94 +691,98 @@ class Database:
     def save_service_config(self, service_name: str, config: Dict[str, Any], method: str) -> str:
         """Save the service config in the database"""
         to_put = []
+        ret = "updated"
         with suppress(BaseException), self._db_session() as session:
             # Delete all the old service config
             db_service = session.query(Services).with_entities(Services.id, Services.method).filter_by(id=service_name).first()
 
-            if not db_service:
-                return "not_found"
+            if "SERVER_NAME" not in config:
+                config["SERVER_NAME"] = service_name
 
-            first_server_name: str = config.get("SERVER_NAME", service_name).split()[0]
+            first_server_name: str = config["SERVER_NAME"].split(" ")[0]
 
-            if first_server_name != service_name:
-                if method not in (db_service.method, "core", "autoconf"):
-                    return "method_conflict"
+            if db_service:
+                if first_server_name != service_name:
+                    if method not in (db_service.method, "core", "autoconf"):
+                        return "method_conflict"
 
-                service_settings = session.query(Services_settings).with_entities(Services_settings.method).filter_by(service_id=service_name).all()
+                    service_settings = session.query(Services_settings).with_entities(Services_settings.method).filter_by(service_id=service_name).all()
 
-                if method not in ("core", "autoconf") and not all(setting.method == method for setting in service_settings):
-                    return "method_conflict"
+                    if method not in ("core", "autoconf") and not all(setting.method == method for setting in service_settings):
+                        return "method_conflict"
 
-                session.query(Services).filter(Services.id == service_name).update({Services.id: first_server_name, Services.method: method})
+                    session.query(Services).filter(Services.id == service_name).update({Services.id: first_server_name, Services.method: method})
+
+                session.query(Services_settings).filter(
+                    Services_settings.method == method,
+                    Services_settings.service_id == first_server_name,
+                ).delete()
+            else:
+                to_put.append(Services(id=first_server_name, method=method))
+                ret = "created"
 
             service_name = first_server_name
 
-            session.query(Services_settings).filter(
-                Services_settings.method == method,
-                Services_settings.service_id == service_name,
-            ).delete()
+            for key, value in deepcopy(config).items():
+                suffix = 0
+                if self.suffix_rx.search(key):
+                    suffix = int(key.split("_")[-1])
+                    key = key[: -len(str(suffix)) - 1]
 
-            if config:
-                for key, value in deepcopy(config).items():
-                    suffix = 0
-                    if self.suffix_rx.search(key):
-                        suffix = int(key.split("_")[-1])
-                        key = key[: -len(str(suffix)) - 1]
+                key = key.replace(f"{service_name}_", "", 1)
+                setting = session.query(Settings).with_entities(Settings.default).filter_by(id=key).first()
 
-                    key = key.replace(f"{service_name}_", "", 1)
-                    setting = session.query(Settings).with_entities(Settings.default).filter_by(id=key).first()
+                if not setting:
+                    continue
 
-                    if not setting:
+                service_setting = (
+                    session.query(Services_settings)
+                    .with_entities(Services_settings.value, Services_settings.method)
+                    .filter_by(
+                        service_id=service_name,
+                        setting_id=key,
+                        suffix=suffix,
+                    )
+                    .first()
+                )
+
+                if not service_setting:
+                    if key != "SERVER_NAME" and ((key not in config and value == setting.default) or (key in config and value == config[key])):
                         continue
 
-                    service_setting = (
-                        session.query(Services_settings)
-                        .with_entities(Services_settings.value, Services_settings.method)
-                        .filter_by(
+                    to_put.append(
+                        Services_settings(
                             service_id=service_name,
                             setting_id=key,
+                            value=value,
                             suffix=suffix,
+                            method=method,
                         )
-                        .first()
                     )
-
-                    if not service_setting:
-                        if key != "SERVER_NAME" and ((key not in config and value == setting.default) or (key in config and value == config[key])):
-                            continue
-
-                        to_put.append(
-                            Services_settings(
-                                service_id=service_name,
-                                setting_id=key,
-                                value=value,
-                                suffix=suffix,
-                                method=method,
-                            )
-                        )
-                    elif method in (service_setting.method, "autoconf") and service_setting.value != value:
-                        if key != "SERVER_NAME" and ((key not in config and value == setting.default) or (key in config and value == config[key])):
-                            session.query(Services_settings).filter(
-                                Services_settings.service_id == service_name,
-                                Services_settings.setting_id == key,
-                                Services_settings.suffix == suffix,
-                            ).delete()
-                            continue
-
+                elif method in (service_setting.method, "autoconf") and service_setting.value != value:
+                    if key != "SERVER_NAME" and ((key not in config and value == setting.default) or (key in config and value == config[key])):
                         session.query(Services_settings).filter(
                             Services_settings.service_id == service_name,
                             Services_settings.setting_id == key,
                             Services_settings.suffix == suffix,
-                        ).update(
-                            {
-                                Services_settings.value: value,
-                                Services_settings.method: method,
-                            }
-                        )
+                        ).delete()
+                        continue
+
+                    session.query(Services_settings).filter(
+                        Services_settings.service_id == service_name,
+                        Services_settings.setting_id == key,
+                        Services_settings.suffix == suffix,
+                    ).update(
+                        {
+                            Services_settings.value: value,
+                            Services_settings.method: method,
+                        }
+                    )
 
             session.add_all(to_put)
             session.commit()
 
-        return (self._exceptions.get(getpid()) or [""]).pop()
+        return (self._exceptions.get(getpid()) or [ret]).pop()
 
     def remove_service(self, service_name: str, method: str) -> str:
         """Remove a service from the database"""

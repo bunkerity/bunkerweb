@@ -288,8 +288,8 @@ async def update_global_config(config: Dict[str, str], method: str, background_t
             "description": "Can't save service config to database",
             "model": ErrorMessage,
         },
-        status.HTTP_404_NOT_FOUND: {
-            "description": "Service not found",
+        status.HTTP_201_CREATED: {
+            "description": "Service successfully created",
             "model": ErrorMessage,
         },
         status.HTTP_403_FORBIDDEN: {
@@ -339,12 +339,7 @@ async def update_service_config(service_name: str, config: Dict[str, str], metho
 
     resp = DB.save_service_config(service_name, config, method)
 
-    if resp == "not_found":
-        message = f"Can't update {service_name} config : Service {service_name} not found"
-        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": f"Tried to update {service_name} config", "description": message, "status": "error"})
-        CORE_CONFIG.logger.warning(message)
-        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
-    elif resp == "method_conflict":
+    if resp == "method_conflict":
         message = f"Can't rename service {service_name} because its method or one of its setting's method belongs to the core or the autoconf and the method isn't one of them"
         background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": f"Tried to update {service_name} config", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
@@ -357,7 +352,7 @@ async def update_service_config(service_name: str, config: Dict[str, str], metho
             content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
             headers={"Retry-After": retry_in},
         )
-    elif resp:
+    elif resp not in ("created", "updated"):
         message = f"Can't save service {service_name} config to database : {resp}"
         background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "PUT", "method": method, "tags": ["config"], "title": f"Tried to update {service_name} config", "description": message, "status": "error"})
         CORE_CONFIG.logger.error(message)
@@ -370,18 +365,21 @@ async def update_service_config(service_name: str, config: Dict[str, str], metho
             "api_method": "PUT",
             "method": method,
             "tags": ["config"],
-            "title": "Update service config",
-            "description": f"Service {service_name} Config updated with these data : {dumps(config)} and these conflicts : {dumps(conflicts)}",
+            "title": "Upsert service config",
+            "description": f"Service {service_name} Config {resp} with these data : {dumps(config)}" + (f"and these conflicts : {dumps(conflicts)}" if conflicts else ""),
         },
     )
-    CORE_CONFIG.logger.info(f"✅ Service {service_name} config successfully saved to database")
+    CORE_CONFIG.logger.info(f"✅ Service {service_name} config successfully {resp} to database")
     if conflicts:
         CORE_CONFIG.logger.warning(f"Conflicts : {dumps(conflicts)}")
 
     background_tasks.add_task(run_jobs)
     background_tasks.add_task(send_to_instances, {"config", "cache"})
 
-    return JSONResponse(content={"message": {"data": {"settings": conflicts, "message": f"Service {service_name} config successfully saved"}}})
+    return JSONResponse(
+        content={"message": {"data": {"settings": conflicts, "message": f"Service {service_name} config successfully {resp}"}}},
+        status_code=200 if resp == "updated" else 201,
+    )
 
 
 @router.delete(
