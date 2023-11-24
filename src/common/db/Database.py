@@ -65,7 +65,7 @@ class Database:
     ) -> None:
         """Initialize the database"""
         self.__logger = logger
-        self.__sql_session = None
+        self.__session_factory = None
         self.__sql_engine = None
 
         if not sqlalchemy_string:
@@ -143,8 +143,7 @@ class Database:
 
         self.__logger.info("✅ Database connection established")
 
-        session_factory = sessionmaker(bind=self.__sql_engine, autoflush=True, expire_on_commit=False)
-        self.__sql_session = scoped_session(session_factory)
+        self.__session_factory = sessionmaker(bind=self.__sql_engine, autoflush=True, expire_on_commit=False)
         self.suffix_rx = re_compile(r"_\d+$")
 
         if sqlalchemy_string.startswith("sqlite"):
@@ -154,8 +153,8 @@ class Database:
 
     def __del__(self) -> None:
         """Close the database"""
-        if self.__sql_session:
-            self.__sql_session.remove()
+        if self.__session_factory:
+            self.__session_factory.close_all()
 
         if self.__sql_engine:
             self.__sql_engine.dispose()
@@ -163,12 +162,12 @@ class Database:
     @contextmanager
     def __db_session(self):
         try:
-            assert self.__sql_session is not None
+            assert self.__session_factory is not None
         except AssertionError:
             self.__logger.error("The database session is not initialized")
             _exit(1)
 
-        session = self.__sql_session()
+        session = scoped_session(self.__session_factory)
 
         try:
             yield session
@@ -176,7 +175,7 @@ class Database:
             session.rollback()
             raise
         finally:
-            session.close()
+            session.remove()
 
     def set_autoconf_load(self, value: bool = True) -> str:
         """Set the autoconf_loaded value"""
