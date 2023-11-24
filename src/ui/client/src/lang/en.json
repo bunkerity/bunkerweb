@@ -273,7 +273,8 @@
         },
         "save_bans": {
           "label": "save bans",
-          "aria_description": "Save added ban items"
+          "aria_description": "Save added ban items",
+          "warning": "Bans IP with conflicts (like whitelist) will be add but ignored"
         }
       },
       "header": {

@@ -45,19 +45,24 @@ watch(config.data, () => {
   try {
     if (
       services.activeService === "new" &&
-      !config.data[services.activeService]["SERVER_NAME"]
+      !config.data.services[services.activeService]["SERVER_NAME"]
     )
       return (saveBtn.disabled = true);
   } catch (err) {}
 
   // Case any service with a SERVER_NAME falsy
   try {
-    if (!config.data[services.activeService]["SERVER_NAME"])
+    if (
+      services.activeService !== "new" &&
+      !!("SERVER_NAME" in config.data.services[services.activeService]) &&
+      !config.data.services[services.activeService]["SERVER_NAME"]
+    )
       return (saveBtn.disabled = true);
   } catch (err) {}
 
   return (saveBtn.disabled = false);
 });
+
 const feedbackStore = useFeedbackStore();
 
 // Hide / Show settings and plugin base on that filters
@@ -229,8 +234,15 @@ async function sendServConf() {
   if (Object.keys(services).length > 0) {
     for (const [key, value] of Object.entries(services)) {
       if (Object.keys(value).length === 0) continue;
+      let serviceName;
       // Case new, replace by SERVER_NAME
-      const serviceName = key === "new" ? services[key]["SERVER_NAME"] : key;
+      if (key === "new") serviceName = services[key]["SERVER_NAME"];
+      if (key !== "new") serviceName = key;
+      // Case change existing service name
+      try {
+        serviceName = services[key]["SERVER_NAME"];
+      } catch (err) {}
+      console.log(serviceName);
       console.log(services[key]);
       promises.push(
         await fetchAPI(
@@ -251,6 +263,9 @@ async function sendServConf() {
 }
 
 function changeServ(servName) {
+  // Case current service, stop
+  if (services.activeService === servName) return;
+  // Else setup
   saveBtn.disabled = false;
   services.activeService = servName;
   // Remove previous config services changes
@@ -258,8 +273,13 @@ function changeServ(servName) {
 }
 
 function showNewServ() {
+  // Case already new service, stop
+  if (services.activeService === "new") return;
+  // Else setup
   saveBtn.disabled = true;
   services.activeService = "new";
+  // Remove previous config services changes
+  config.$reset();
 }
 
 // Show service data logic

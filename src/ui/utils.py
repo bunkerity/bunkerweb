@@ -137,7 +137,7 @@ def validate_env_data():
 
 # Exception on main.py when we are starting UI
 class setupUIException(Exception):
-    def __init__(self, log_type, msg):
+    def __init__(self, log_type, msg, send_action=True):
         # We can specify error or exception (traceback)
         if log_type == "error":
             LOGGER.error(msg)
@@ -147,15 +147,18 @@ class setupUIException(Exception):
 
         # Try to store exception as action on core to keep track
         try:
-            create_action_format("error", "500", "UI setup exception", "Impossible to execute UI properly.", ["exception", "ui", "setup"])
+            if send_action:
+                create_action_format("error", "500", "UI setup exception", "Impossible to execute UI properly.", ["exception", "ui", "setup"])
         except:
             pass
 
         # Exit or not on failure
         if not UI_CONFIG.EXIT_ON_FAILURE or UI_CONFIG.EXIT_ON_FAILURE == "yes":
             LOGGER.warn("Error while UI setup and exit on failure. Impossible to access UI.")
-            create_action_format("error", "500", "UI setup exception", "Error while UI setup and exit on failure. Impossible to access UI.", ["exception", "ui", "setup"])
+            if send_action:
+                create_action_format("error", "500", "UI setup exception", "Error while UI setup and exit on failure. Impossible to access UI.", ["exception", "ui", "setup"])
             exit(1)
         else:
             LOGGER.warn("Error while UI setup but keep running on failure. UI could not run correctly.")
-            create_action_format("error", "500", "UI setup exception", "Error while UI setup but keep running on failure. UI could not run correctly.", ["exception", "ui", "setup"])
+            if send_action:
+                create_action_format("error", "500", "UI setup exception", "Error while UI setup but keep running on failure. UI could not run correctly.", ["exception", "ui", "setup"])

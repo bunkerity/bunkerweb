@@ -68,7 +68,7 @@ for x in range(UI_CONFIG.MAX_WAIT_RETRIES):
     time.sleep(UI_CONFIG.WAIT_RETRY_INTERVAL)
 
 if not core_running:
-    raise setupUIException("exception", "PING CORE FAILED, STOP STARTING UI")
+    raise setupUIException("exception", "PING CORE FAILED, STOP STARTING UI", False)
 
 # Start UI app
 app = Flask(__name__)

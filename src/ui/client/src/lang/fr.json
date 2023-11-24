@@ -273,7 +273,8 @@
         },
         "save_bans": {
           "label": "sauvegarder",
-          "aria_description": "sauvegarde les bans ajoutés."
+          "aria_description": "sauvegarde les bans ajoutés.",
+          "warning": "Les bans avec un conflit (comme la whitelist) seront ajoutés mais ignorés."
         }
       },
       "header": {

@@ -57,7 +57,6 @@ function getRemain(ms) {
 function updateCheck(v, ip) {
   console.log(ip);
   v === "no" ? selectBanStore.deleteBanItem(ip) : selectBanStore.addBanItem(ip);
-  console.log(selectBanStore.data);
 }
 
 const list = reactive({
@@ -77,9 +76,10 @@ function toggleAllCheck() {
 }
 
 async function sendUnban() {
+  console.log(selectBanStore.data);
   await fetchAPI(
-    `/api/instances/bans`,
-    "POST",
+    `/api/instances/ban?method=ui`,
+    "DELETE",
     selectBanStore.data,
     addBans,
     feedbackStore.addFeedback

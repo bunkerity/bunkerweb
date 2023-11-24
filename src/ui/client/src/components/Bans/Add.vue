@@ -4,6 +4,7 @@ import ListItem from "@components/List/Item.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsDatepicker from "@components/Settings/Datepicker.vue";
+import SettingsUploadSvgWarning from "@components/Settings/Upload/Svg/Warning.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
@@ -20,7 +21,7 @@ const bans = reactive({
     let isInvalid = false;
     for (let i = 0; i < bans.items.length; i++) {
       const item = bans.items[i];
-      if (!item.stampEnd || !item.reason || !item.ip) isInvalid = true;
+      if (!item.end_date || !item.reason || !item.ip) isInvalid = true;
       if (isInvalid) break;
     }
     return isInvalid;
@@ -32,8 +33,8 @@ function addItem() {
     id: bans.count,
     ip: "",
     reason: "Manual",
-    stampDeb: Date.parse(new Date()),
-    stampEnd: "",
+    start_date: Date.parse(new Date()),
+    end_date: "",
   });
   bans.count++;
 }
@@ -67,7 +68,7 @@ const addBans = reactive({
 function getValidBans() {
   const validBans = [];
   bans.items.forEach((item) => {
-    if (!item.ip || !item.reason || !item.stampDeb || !item.stampEnd) return;
+    if (!item.ip || !item.reason || !item.start_date || !item.end_date) return;
     validBans.push(item);
   });
   return validBans;
@@ -79,24 +80,9 @@ const instances = reactive({
   data: [],
 });
 
-async function getInstances() {
-  await fetchAPI("/api/instances", "GET", null, instances, null);
-}
-
-async function isAvailableInst() {
-  if (instances.data.length <= 0) return false;
-  if (instances.data.length >= 1 && !instances.data[0].hostname) return false;
-  return true;
-}
-
 async function addBansFromList() {
-  // We need to send bans to an instance using hostname
-  // Any instance is fine because bans are global on DB
-  const getInsta = await getInstances();
-  const isInst = isAvailableInst();
-  if (!isInst) return;
   await fetchAPI(
-    `/api/instances/${instances.data[0].hostname}/bans?method=ui&action=bans`,
+    `/api/instances/ban?method=ui`,
     "POST",
     getValidBans(),
     addBans,
@@ -228,8 +214,8 @@ async function addBansFromList() {
                 :settings="{
                   id: `add-ban-date-end-${id}`,
                 }"
-                @inp="(v) => (item.stampEnd = v.timestamp)"
-                :inpClass="item.stampEnd ? '' : 'invalid'"
+                @inp="(v) => (item.end_date = v.timestamp)"
+                :inpClass="item.end_date ? '' : 'invalid'"
                 :noPickBeforeStamp="Date.parse(new Date())"
               />
             </SettingsLayout>
@@ -283,7 +269,7 @@ async function addBansFromList() {
 
     <div
       v-if="bans.items.length > 0"
-      class="col-span-12 flex justify-center mt-4"
+      class="col-span-12 flex flex-col items-center justify-center mt-4"
     >
       <ButtonBase
         :aria-description="$t('bans.add.actions.save_bans.aria_description')"
@@ -291,10 +277,17 @@ async function addBansFromList() {
         :disabled="bans.isInvalidAdd"
         color="valid"
         size="normal"
-        class="text-sm mb-2 sm:mb-0"
+        class="text-sm mb-2 sm:mb-0 w-fit"
       >
         {{ $t("bans.add.actions.save_bans.label") }}
       </ButtonBase>
+      <hr class="line-separator z-10 w-full" />
+      <p class="dark:text-gray-500 text-xs text-center mt-1 mb-2">
+        <span class="mx-0.5">
+          <SettingsUploadSvgWarning class="scale-90" />
+        </span>
+        {{ $t("bans.add.actions.save_bans.warning") }}
+      </p>
     </div>
   </div>
 </template>
