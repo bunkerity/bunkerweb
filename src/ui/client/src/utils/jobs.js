@@ -22,6 +22,21 @@ export function getJobsCacheNames(caches) {
   return names;
 }
 
+// Format cache data for select
+export function getServId(jobs, jobName, cacheName) {
+  let servID;
+  jobs.forEach((jobItem) => {
+    for (const [jobN, job] of Object.entries(jobItem)) {
+      if (jobN !== jobName) continue;
+      for (const [key, value] of Object.entries(job["cache"])) {
+        if (value["file_name"] !== cacheName) continue;
+        servID = value["service_id"];
+      }
+    }
+  });
+  return servID;
+}
+
 // Filter plugins
 export function getJobsByFilter(jobs, filters) {
   jobs.forEach((job, id) => {

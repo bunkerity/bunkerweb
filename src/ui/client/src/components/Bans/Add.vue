@@ -74,12 +74,6 @@ function getValidBans() {
   return validBans;
 }
 
-const instances = reactive({
-  isPend: false,
-  isErr: false,
-  data: [],
-});
-
 async function addBansFromList() {
   await fetchAPI(
     `/api/instances/ban?method=ui`,

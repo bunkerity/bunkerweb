@@ -81,38 +81,6 @@ async function getJobs() {
   await fetchAPI("/api/jobs", "GET", null, jobs, feedbackStore.addFeedback);
 }
 
-const run = reactive({
-  isPend: false,
-  isErr: false,
-  data: [],
-});
-
-async function runJob(data) {
-  await fetchAPI(
-    `/api/jobs/run?method=ui&job_name=${data.jobName}`,
-    "POST",
-    null,
-    run,
-    feedbackStore.addFeedback
-  );
-}
-
-const download = reactive({
-  isPend: false,
-  isErr: false,
-  data: [],
-});
-
-async function downloadFile(data) {
-  await fetchAPI(
-    `/api/jobs/${data.jobName}/cache/${data.cacheName}`,
-    "GET",
-    null,
-    download,
-    feedbackStore.addFeedback
-  );
-}
-
 const history = reactive({
   isOpen: false,
   jobName: "",
@@ -245,8 +213,6 @@ onMounted(() => {
         :positions="positions"
       >
         <JobsItems
-          @cache="(v) => downloadFile(v)"
-          @run="(v) => runJob(v)"
           @history="(v) => showHistory(v)"
           :positions="positions"
           :items="jobs.setup"
