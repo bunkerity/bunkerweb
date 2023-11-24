@@ -1,25 +1,20 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const useSelectBanStore = defineStore("selectBan", () => {
-  const data = ref([]);
+export const useSelectIPStore = defineStore("selectIP", () => {
+  const data = ref(new Set());
 
-  function addBanItem(ip) {
-    // Look if item already exists
-    data.value.forEach((ipValue) => {
-      if (ipValue === ip) return;
-    });
-
-    data.value.push(ip);
+  function addIP(ip) {
+    data.value.add(ip);
   }
 
-  function deleteBanItem(ip) {
-    data.value = data.value.filter((ipValue) => ip !== ipValue);
+  function deleteIP(ip) {
+    data.value.delete(ip);
   }
 
   function $reset() {
-    data.value = [];
+    data.value.clear();
   }
 
-  return { data, $reset, addBanItem, deleteBanItem };
+  return { data, $reset, addIP, deleteIP };
 });

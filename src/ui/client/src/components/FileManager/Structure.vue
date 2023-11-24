@@ -36,7 +36,7 @@ const modal = reactive({
 // When dropdown action is clicked on item (view, delete...)
 // Action emit with the clicked action value
 // We update data for the current item and display modal
-function updateModal(type, action, path, value) {
+function updateModal(type, action, path, value, method) {
   modal.type = type;
   modal.action = action;
   modal.path = path;
@@ -95,7 +95,7 @@ watch(path, () => {
                     v,
                     child.path,
                     child.data,
-                    child.method || ''
+                    child.method || 'ui'
                   )
               "
             />
@@ -103,7 +103,7 @@ watch(path, () => {
         </FileManagerContainer>
         <FileManagerActions
           @createFile="
-            () => updateModal('file', 'create', `${path.current}/`, '')
+            () => updateModal('file', 'create', `${path.current}/`, '', 'ui')
           "
           :canCreateFile="path.canCreateFile"
         />
@@ -116,6 +116,7 @@ watch(path, () => {
       :action="modal.action"
       :path="modal.path"
       :value="modal.value"
+      :method="modal.method"
       @close="modal.isOpen = false"
       @updateFile="
         () => {

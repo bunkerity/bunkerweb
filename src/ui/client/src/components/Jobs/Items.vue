@@ -72,8 +72,9 @@ async function downloadFile(jobName, cacheName) {
       return res.json();
     })
     .then((data) => {
-      if (data.type === "error") return;
-      dl(data.data, `${cacheName}.json`, "text/json");
+      if (data.type === "success") {
+        return dl(data.data, `${cacheName}.json`, "text/json");
+      }
     });
 }
 

@@ -43,7 +43,7 @@
       "plugins": {
         "title": "pages plugin",
         "none": {
-          "description": "envie de vos propres plugins ?",
+          "description": "envie de plugins custom ?",
           "check_doc": "voir la doc"
         }
       },

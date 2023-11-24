@@ -45,7 +45,7 @@ export function generateItem(
   canDelete,
   children = [],
   data = "",
-  method = ""
+  method = "static"
 ) {
   const fullPath = `root${path ? `/${path}` : ``}`;
   return {
@@ -98,7 +98,6 @@ export function generateConfTree(configs, services) {
   // Fetch config is always file type with data and actions
   // Retrieve file data and format
   for (let i = 0; i < configs.length; i++) {
-    console.log(configs[i]);
     conf.push(
       generateItem(
         "file",

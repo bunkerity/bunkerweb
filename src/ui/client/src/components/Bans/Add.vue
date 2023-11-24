@@ -82,11 +82,13 @@ async function addBansFromList() {
     addBans,
     feedbackStore.addFeedback
   ).then((res) => {
-    if (res.type === "error") return;
     // Case succeed, delete items from UI
     // And emit add event to refetch ban list
-    deleteAllItems();
-    emits("add");
+    if (res.type === "success") {
+      deleteAllItems();
+      emits("addBans");
+      return;
+    }
   });
 }
 </script>

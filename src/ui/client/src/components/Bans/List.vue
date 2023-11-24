@@ -6,12 +6,13 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsCheckbox from "@components/Settings/Checkbox.vue";
 import SettingsDatepicker from "@components/Settings/Datepicker.vue";
 import ButtonBase from "@components/Button/Base.vue";
-import { useSelectBanStore } from "@store/bans.js";
+import { useSelectIPStore } from "@store/bans.js";
 import { reactive } from "vue";
 import { useFeedbackStore } from "@store/global.js";
+import { fetchAPI } from "@utils/api.js";
 
 const feedbackStore = useFeedbackStore();
-const selectBanStore = useSelectBanStore();
+const selectIPStore = useSelectIPStore();
 const emits = defineEmits(["unban"]);
 
 const props = defineProps({
@@ -55,8 +56,7 @@ function getRemain(ms) {
 }
 
 function updateCheck(v, ip) {
-  console.log(ip);
-  v === "no" ? selectBanStore.deleteBanItem(ip) : selectBanStore.addBanItem(ip);
+  v === "no" ? selectIPStore.deleteIP(ip) : selectIPStore.addIP(ip);
 }
 
 const list = reactive({
@@ -75,20 +75,29 @@ function toggleAllCheck() {
   });
 }
 
+const delBans = reactive({
+  isErr: false,
+  isPend: false,
+  data: [],
+});
+
 async function sendUnban() {
-  console.log(selectBanStore.data);
+  const unbanList = Array.from(selectIPStore.data);
+  console.log(unbanList);
   await fetchAPI(
     `/api/instances/ban?method=ui`,
     "DELETE",
-    selectBanStore.data,
-    addBans,
+    unbanList,
+    delBans,
     feedbackStore.addFeedback
   ).then((res) => {
-    if (res.type === "error") return;
-    // Case succeed, delete items from UI
-    // And emit add event to refetch ban list
-    list.checkAll = false;
-    emits("unban");
+    if (res.type === "success") {
+      // Case succeed, delete items from UI
+      // And emit add event to refetch ban list
+      list.checkAll = false;
+      emits("unban");
+      return;
+    }
   });
 }
 </script>
@@ -252,7 +261,7 @@ async function sendUnban() {
         color="delete"
         size="normal"
         class="text-sm ml-4"
-        :disabled="selectBanStore.data.length > 0 ? false : true"
+        :disabled="selectIPStore.data.size > 0 ? false : true"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

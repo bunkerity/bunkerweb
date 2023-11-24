@@ -164,20 +164,23 @@ async function sendData() {
 
   const method = props.action.toLowerCase() === "delete" ? "DELETE" : "PUT";
   const conf = formatData();
-  const api =
-    method.toLowerCase() === "delete"
-      ? `/api/custom_confs/${data.name}?method=ui`
-      : `/api/custom_confs?method=ui`;
 
   // Fetch
-  await fetchAPI(api, method, conf, updateConf, feedbackStore.addFeedback)
+  await fetchAPI(
+    `/api/custom_configs?method=ui`,
+    method,
+    conf,
+    updateConf,
+    feedbackStore.addFeedback
+  )
     .then((res) => {
       // Case not save
-      if (res.type === "error") return;
-      // Case saved
-      alert.isOpen = false;
-      emits("close");
-      emits("updateFile");
+      if (res.type === "success") {
+        // Case saved
+        emits("close");
+        emits("updateFile");
+        return;
+      }
     })
     .catch((err) => {});
 }
