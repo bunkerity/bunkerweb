@@ -64,14 +64,14 @@ def action_instance(instance_hostname, action):
 @instances.route(f"{PREFIX}/ban", methods=["POST"])
 @jwt_required()
 def add_bans():
-    """Add bans ipfor all instances"""
+    """Add bans ip for all instances"""
     args = request.args.to_dict()
     method = args.get("method") or "ui"
     # is_valid_model(method, Model) True | False
     bans = request.get_json()
     # is_valid_model(instances, Model) True | False
     data = json.dumps(bans, skipkeys=True, allow_nan=True, indent=6)
-    return get_core_format_res(f"{CORE_API}/instances/ban?method={method}", "POST", data, "add bans ip")
+    return get_core_format_res(f"{CORE_API}/instances/ban?method={method}", "POST", data, "Add bans ip")
 
 
 @instances.route(f"{PREFIX}/ban", methods=["DELETE"])
@@ -84,4 +84,4 @@ def delete_bans():
     bans = request.get_json()
     # is_valid_model(instances, Model) True | False
     data = json.dumps(bans, skipkeys=True, allow_nan=True, indent=6)
-    return get_core_format_res(f"{CORE_API}/instances/ban?method={method}", "DELETE", data, "delete bans ip")
+    return get_core_format_res(f"{CORE_API}/instances/ban?method={method}", "DELETE", data, "Delete bans ip")

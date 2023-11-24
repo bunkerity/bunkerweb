@@ -62,12 +62,14 @@ const instance = reactive({
   ],
 
   actions: computed(() =>
-    props.status === "up" ? [actions.stop, actions.reload] : [actions.reload]
+    props.status === "up" ? [actions.stop, actions.reload] : []
   ),
   checks: computed(() =>
-    props.method === "static"
-      ? [topActions.ping]
-      : [topActions.delete, topActions.ping]
+    props.status === "up"
+      ? props.method === "static"
+        ? [topActions.ping]
+        : [topActions.delete, topActions.ping]
+      : []
   ),
 });
 

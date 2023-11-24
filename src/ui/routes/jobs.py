@@ -39,9 +39,12 @@ def run_job():
 @jwt_required()
 def get_job_cache_file(job_name, file_name):
     """Get a file from cache related to a job"""
+    args = request.args.to_dict()
+    service_id = args.get("service_id") or ""
+    # is_valid_model(service_id, Model) True | False
     # is_valid_model(job_name, Model) True | False
     # is_valid_model(file_name, Model) True | False
-    return get_core_format_res(f"{CORE_API}/jobs/{job_name}/cache/{file_name}", "GET", "", f"Get file {file_name} from cache for job {job_name}")
+    return get_core_format_res(f"{CORE_API}/jobs/{job_name}/cache/{file_name}{f'?service_id={service_id}' if service_id else '' }", "GET", "", f"Get file {file_name} from cache for job {job_name}")
 
 
 @jobs.route(f"{PREFIX}/<string:job_name>/cache/<string:file_name>", methods=["DELETE"])

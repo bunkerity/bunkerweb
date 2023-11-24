@@ -4,8 +4,13 @@ import JobsSvgState from "@components/Jobs/Svg/State.vue";
 import JobsSvgHistory from "@components/Jobs/Svg/History.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
-import { defineProps, defineEmits } from "vue";
-import { getJobsCacheNames } from "@utils/jobs";
+import { defineProps, defineEmits, reactive } from "vue";
+import { useFeedbackStore } from "@store/global.js";
+import { fetchAPI } from "@utils/api.js";
+import { getJobsCacheNames, getServId } from "@utils/jobs.js";
+
+const feedbackStore = useFeedbackStore();
+
 const props = defineProps({
   items: {
     type: Array,
@@ -17,9 +22,64 @@ const props = defineProps({
   },
 });
 
+const run = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+});
+
+async function runJob(jobName) {
+  await fetchAPI(
+    `/api/jobs/run?method=ui&job_name=${jobName}`,
+    "POST",
+    null,
+    run,
+    feedbackStore.addFeedback
+  );
+}
+
+const download = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+});
+
+// TODO : GET SERVICE ID for current job name
+
+function dl(content, filename, contentType) {
+  if (!contentType) contentType = "application/octet-stream";
+  var a = document.createElement("a");
+  var blob = new Blob([content], { type: contentType });
+  a.href = window.URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  a.remove();
+}
+
+async function downloadFile(jobName, cacheName) {
+  const servID = getServId(props.items, jobName, cacheName);
+
+  await fetchAPI(
+    `/api/jobs/${jobName}/cache/${cacheName}?service_id=${
+      servID ? servID : ""
+    }`,
+    "GET",
+    null,
+    download,
+    feedbackStore.addFeedback
+  )
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      if (data.type === "error") return;
+      dl(data.data, `${cacheName}.json`, "text/json");
+    });
+}
+
 // cache => return cache file name to download
 // run => return the job name that need to be run/rerun
-const emits = defineEmits(["cache", "run", "history"]);
+const emits = defineEmits(["history"]);
 </script>
 
 <template>
@@ -61,24 +121,19 @@ const emits = defineEmits(["cache", "run", "history"]);
       <div :class="[props.positions[5]]">
         <span>{{ data["history"][0]["end_date"] }}</span>
       </div>
-      <div :class="[props.positions[6]]">
+      <div class="mr-2" :class="[props.positions[6]]">
         <SettingsSelect
           v-if="data['cache'].length > 0"
-          @inp="(v) => $emit('cache', { jobName: key, cacheName: v })"
           :settings="{
-            id: 'cache-files',
             value: $t('jobs.card.jobs.actions.cache_download'),
             values: getJobsCacheNames(data['cache']),
           }"
-        />
+          @inp="(v) => downloadFile(key, v)"
+        >
+        </SettingsSelect>
       </div>
       <div :class="[props.positions[7], 'flex justify-center']">
-        <ButtonBase
-          class="py-1.5"
-          color="valid"
-          size="lg"
-          @click="$emit('run', { jobName: key })"
-        >
+        <ButtonBase class="py-1.5" color="valid" size="lg" @click="runJob(key)">
           {{ $t("jobs.card.jobs.actions.run") }}
         </ButtonBase>
       </div>
