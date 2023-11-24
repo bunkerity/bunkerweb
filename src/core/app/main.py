@@ -1,18 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from contextlib import asynccontextmanager, suppress
+from contextlib import suppress
 from copy import deepcopy
 from gc import collect as gc_collect
 from glob import glob
 from io import BytesIO
-from ipaddress import (
-    IPv4Address,
-    IPv4Network,
-    IPv6Address,
-    IPv6Network,
-    ip_address,
-)
+from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network, ip_address
 from itertools import chain
 from json import JSONDecodeError, loads as json_loads
 from shutil import rmtree
@@ -38,7 +32,6 @@ from regex import compile as re_compile
 
 from API import API  # type: ignore
 from configurator import Configurator  # type: ignore
-from database import Database  # type: ignore
 from jobs import bytes_hash  # type: ignore
 from .core import BUNKERWEB_VERSION, description, tags_metadata
 from .dependencies import (
@@ -82,16 +75,6 @@ signal(SIGINT, exit_handler)
 signal(SIGTERM, exit_handler)
 
 
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    global DB
-    del DB
-    DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI)
-    yield
-    del DB
-    stop_app(0)
-
-
 # ? APP
 app = FastAPI(
     title="BunkerWeb API",
@@ -101,7 +84,6 @@ app = FastAPI(
     contact={"name": "BunkerWeb Team", "url": "https://www.bunkerweb.io", "email": "contact@bunkerity.com"},
     license_info={"name": "GNU Affero General Public License v3.0", "url": "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE.md"},
     openapi_tags=tags_metadata,
-    lifespan=lifespan,
 )
 
 CORE_CONFIG.logger.info("Checking if database is initialized ...")

@@ -221,14 +221,14 @@ class Database:
                     "the database or network closed the connection",
                     "InternalError",  # ? Misc errors
                     "InterfaceError",
-                )
+                )  # ? I know this is ugly but I don't know how to do it better
             ):
                 self._exceptions[getpid()] = ["retry"]
             else:
                 self._exceptions[getpid()] = [error]
             raise
         finally:
-            session.close()
+            session.remove()
 
     def set_scheduler_initialized(self, value: bool = True) -> str:
         """Set the scheduler_initialized value"""

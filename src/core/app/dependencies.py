@@ -30,15 +30,19 @@ from fastapi.routing import Mount
 from magic import Magic
 from requests import get
 
+from .core import CoreConfig
+
 TMP_FOLDER = Path(sep, "var", "tmp", "bunkerweb")
 DB = None
 HEALTHY_PATH = TMP_FOLDER.joinpath("core.healthy")
+CORE_CONFIG = CoreConfig("core", **(environ if CoreConfig.get_instance() != "Linux" else {}))
 
 
 def stop(status):
     global DB
 
     for thread in all_threads():
+        CORE_CONFIG.logger.info(f"⏲ Waiting for thread {thread.name} to stop (timeout 3s) ...")
         if thread.name != "MainThread":
             thread.join(timeout=3)
 
@@ -47,11 +51,6 @@ def stop(status):
         del DB
     _exit(status)
 
-
-from .core import CoreConfig
-
-
-CORE_CONFIG = CoreConfig("core", **(environ if CoreConfig.get_instance() != "Linux" else {}))
 
 CORE_CONFIG.logger.info(f"🚀 {CORE_CONFIG.integration} integration detected")
 

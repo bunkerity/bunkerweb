@@ -17,3 +17,10 @@ threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
 worker_class = "uvicorn_worker.BwUvicornWorker"
 graceful_timeout = 5
 max_requests_jitter = min(8, MAX_WORKERS)
+
+
+def on_exit(server):
+    from pathlib import Path
+
+    Path(sep, "var", "tmp", "bunkerweb", "core.healthy").unlink(missing_ok=True)
+    pass
