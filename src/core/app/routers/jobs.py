@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from io import BytesIO
 from os.path import join, sep
 from random import uniform
 from sys import path as sys_path
 from typing import Annotated, Dict, Literal, Optional
-from zipfile import ZipFile
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
     if deps_path not in sys_path:
@@ -155,54 +153,6 @@ async def run_jobs(method: str, background_tasks: BackgroundTasks, job_name: Opt
     background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["job"], "title": title, "description": description})
 
     return JSONResponse(content={"message": "Successfully sent task to scheduler"})
-
-
-@router.get(
-    "/{job_name}/cache",
-    summary="Get a zip file containing all files from the cache",
-    response_description="Zip file",
-    responses={
-        status.HTTP_503_SERVICE_UNAVAILABLE: {
-            "description": "Database is locked or had trouble handling the request",
-            "model": ErrorMessage,
-        },
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Internal server error",
-            "model": ErrorMessage,
-        },
-    },
-)
-async def get_job_cache(job_name: str, background_tasks: BackgroundTasks, service_id: Optional[str] = None):
-    """
-    Get a file from the cache.
-    """
-    cached_files = DB.get_job_cache(job_name, service_id=service_id)
-
-    if cached_files == "retry":
-        retry_in = str(uniform(1.0, 5.0))
-        CORE_CONFIG.logger.warning(f"Can't get job {job_name} cache files in database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
-        return JSONResponse(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
-            headers={"Retry-After": retry_in},
-        )
-    elif isinstance(cached_files, str):
-        message = f"Can't get job {job_name} cache files from database : {cached_files}"
-        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["job"], "title": f"Tried to get job {job_name} cache files", "description": message, "status": "error"})
-        CORE_CONFIG.logger.error(message)
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"message": cached_files},
-        )
-
-    bytes_io = BytesIO()
-    with ZipFile(bytes_io, "w") as zip_file:  # type: ignore
-        for cached_file in cached_files:
-            zip_file.writestr(cached_file.file_name, cached_file.data)
-
-    bytes_io.seek(0, 0)
-
-    return Response(content=bytes_io.getvalue(), media_type="application/octet-stream", headers={"Content-Disposition": f"attachment; filename={job_name}.zip"})
 
 
 @router.get(
