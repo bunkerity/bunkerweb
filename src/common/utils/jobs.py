@@ -77,21 +77,15 @@ class Job:
         self.api = api
         self.api_token_header = {"Authorization": f"Bearer {api_token}"} if api_token else {}
 
-    def get_cache(self, name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None, with_info: bool = False, with_data: bool = True) -> Optional[Union[dict, Response]]:
+    def get_cache(self, name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None, with_info: bool = False, with_data: bool = True) -> Optional[Union[bytes, dict, Response]]:
         cache_path = self.job_path.joinpath(service_id or "", name)
         if cache_path.is_file():
-            return (
-                {}
-                | (
-                    {
-                        "last_update": cache_path.stat().st_mtime,
-                        "checksum": file_hash(cache_path),
-                    }
-                    if with_info
-                    else {}
-                )
-                | ({"data": cache_path.read_bytes()} if with_data else {})
-            )
+            if with_data or not with_info:
+                return cache_path.read_bytes()
+            return {
+                "last_update": cache_path.stat().st_mtime,
+                "checksum": file_hash(cache_path),
+            }
 
         sent, _, status, resp = self.api.request(
             "GET",
