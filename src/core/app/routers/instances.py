@@ -478,7 +478,7 @@ async def send_instance_ban(bans: Union[Ban, List[Ban]], method: str, background
         bans = [bans]
 
     for x, ban in enumerate(deepcopy(bans)):
-        if ban.end_date and ban.end_date < curr_date:
+        if ban.end_date and ban.end_date.timestamp() < curr_date.timestamp():
             message = f"Can't ban {ban.ip} : date can't be in the past"
             background_tasks.add_task(
                 DB.add_action,
@@ -497,7 +497,7 @@ async def send_instance_ban(bans: Union[Ban, List[Ban]], method: str, background
             sent, err, status_code, resp = instance_api.request(
                 "POST",
                 "/ban",
-                data={"ip": ban.ip, "exp": ceil((ban.end_date - curr_date if ban.end_date else timedelta(days=1)).total_seconds()), "reason": ban.reason},
+                data={"ip": ban.ip, "exp": ceil(ban.end_date.timestamp() - curr_date.timestamp() if ban.end_date else timedelta(days=1).total_seconds()), "reason": ban.reason},
                 timeout=(5, 10),
             )
 
