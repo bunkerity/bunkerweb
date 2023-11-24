@@ -71,6 +71,10 @@ async def get_custom_configs(background_tasks: BackgroundTasks):
             "description": "Not authorized to update the custom config",
             "model": ErrorMessage,
         },
+        status.HTTP_201_CREATED: {
+            "description": "Custom config successfully created",
+            "model": ErrorMessage,
+        },
         status.HTTP_503_SERVICE_UNAVAILABLE: {
             "description": "Database is locked or had trouble handling the request",
             "model": ErrorMessage,
