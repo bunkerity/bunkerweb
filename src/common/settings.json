@@ -37,7 +37,7 @@
   },
   "MULTISITE": {
     "context": "global",
-    "default": "no",
+    "default": "yes",
     "help": "Multi site activation.",
     "id": "multisite",
     "label": "Multisite",
