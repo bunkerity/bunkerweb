@@ -264,6 +264,112 @@ async def get_instance(instance_hostname: Annotated[str, fastapi_Path(title="The
 
 
 @router.delete(
+    "/ban",
+    response_model=Dict[Literal["message"], str],
+    summary="Unban multiple ip(s) on all BunkerWeb instances",
+    response_description="Message",
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Instance not found",
+            "model": ErrorMessage,
+        },
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
+        status.HTTP_400_BAD_REQUEST: {  # ? BunkerWeb instances sometimes may return 400
+            "description": "Invalid action",
+            "model": ErrorMessage,
+        },
+    },
+)
+async def send_instance_unban(ips: Union[str, Set[str]], method: str, background_tasks: BackgroundTasks) -> JSONResponse:
+    """
+    Unban multiple ip(s) on all BunkerWeb instances
+    """
+    db_instances = await get_instances(background_tasks)
+
+    if isinstance(db_instances, JSONResponse):
+        return db_instances
+
+    errors = []
+
+    if not isinstance(ips, set):
+        ips = {ips}
+
+    for ip in ips:
+        for db_instance in db_instances:
+            instance_api = API(
+                f"http://{db_instance['hostname']}:{db_instance['port']}",
+                db_instance["server_name"],
+            )
+
+            sent, err, status_code, resp = instance_api.request(
+                "POST",
+                "/unban",
+                data={"ip": ip},
+                timeout=(5, 10),
+            )
+
+            if not sent:
+                error = f"Can't send API request to {instance_api.endpoint}/unban : {err}"
+                background_tasks.add_task(
+                    DB.add_action,
+                    {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["instance"], "title": f"Unban {ip} failed on instance {db_instance['hostname']}", "description": error, "status": "error"},
+                )
+                CORE_CONFIG.logger.warning(error)
+                errors.append(error)
+            else:
+                if status_code != 200:
+                    resp = resp.json()
+                    error = f"Error while sending API request to {instance_api.endpoint}/unban : status = {resp['status']}, msg = {resp['msg']}"
+                    background_tasks.add_task(
+                        DB.add_action,
+                        {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["instance"], "title": f"Unban {ip} failed on instance {db_instance['hostname']}", "description": error, "status": "error"},
+                    )
+                    CORE_CONFIG.logger.warning(error)
+                    errors.append(error)
+
+    if len(errors) == len(db_instances) * len(ips):
+        background_tasks.add_task(
+            DB.add_action,
+            {
+                "date": datetime.now(),
+                "api_method": "POST",
+                "method": method,
+                "tags": ["instance"],
+                "title": "Unban ip(s) on all instances",
+                "description": "Failed to send API request to all instances",
+                "status": "error",
+            },
+        )
+        CORE_CONFIG.logger.error("Failed to send API request to all instances")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": "Failed to send API request to all instances"},
+        )
+
+    background_tasks.add_task(
+        DB.add_action,
+        {
+            "date": datetime.now(),
+            "api_method": "POST",
+            "method": method,
+            "tags": ["instance"],
+            "title": "Unban ip(s) on all instances",
+            "description": "Successfully sent API request to all instances",
+        },
+    )
+    CORE_CONFIG.logger.info("Successfully sent API request to all instances")
+
+    return JSONResponse(content={"message": "Successfully sent API request to all instances"})
+
+
+@router.delete(
     "/{instance_hostname}",
     response_model=Dict[Literal["message"], str],
     summary="Delete a BunkerWeb instance",
@@ -526,112 +632,6 @@ async def send_instance_ban(bans: Union[Ban, List[Ban]], method: str, background
             "method": method,
             "tags": ["instance"],
             "title": "Ban ip(s) on all instances",
-            "description": "Successfully sent API request to all instances",
-        },
-    )
-    CORE_CONFIG.logger.info("Successfully sent API request to all instances")
-
-    return JSONResponse(content={"message": "Successfully sent API request to all instances"})
-
-
-@router.delete(
-    "/ban",
-    response_model=Dict[Literal["message"], str],
-    summary="Unban multiple ip(s) on all BunkerWeb instances",
-    response_description="Message",
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            "description": "Instance not found",
-            "model": ErrorMessage,
-        },
-        status.HTTP_503_SERVICE_UNAVAILABLE: {
-            "description": "Database is locked or had trouble handling the request",
-            "model": ErrorMessage,
-        },
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Internal server error",
-            "model": ErrorMessage,
-        },
-        status.HTTP_400_BAD_REQUEST: {  # ? BunkerWeb instances sometimes may return 400
-            "description": "Invalid action",
-            "model": ErrorMessage,
-        },
-    },
-)
-async def send_instance_unban(ips: Union[str, Set[str]], method: str, background_tasks: BackgroundTasks) -> JSONResponse:
-    """
-    Unban multiple ip(s) on all BunkerWeb instances
-    """
-    db_instances = await get_instances(background_tasks)
-
-    if isinstance(db_instances, JSONResponse):
-        return db_instances
-
-    errors = []
-
-    if not isinstance(ips, set):
-        ips = {ips}
-
-    for ip in ips:
-        for db_instance in db_instances:
-            instance_api = API(
-                f"http://{db_instance['hostname']}:{db_instance['port']}",
-                db_instance["server_name"],
-            )
-
-            sent, err, status_code, resp = instance_api.request(
-                "POST",
-                "/unban",
-                data={"ip": ip},
-                timeout=(5, 10),
-            )
-
-            if not sent:
-                error = f"Can't send API request to {instance_api.endpoint}/unban : {err}"
-                background_tasks.add_task(
-                    DB.add_action,
-                    {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["instance"], "title": f"Unban {ip} failed on instance {db_instance['hostname']}", "description": error, "status": "error"},
-                )
-                CORE_CONFIG.logger.warning(error)
-                errors.append(error)
-            else:
-                if status_code != 200:
-                    resp = resp.json()
-                    error = f"Error while sending API request to {instance_api.endpoint}/unban : status = {resp['status']}, msg = {resp['msg']}"
-                    background_tasks.add_task(
-                        DB.add_action,
-                        {"date": datetime.now(), "api_method": "POST", "method": method, "tags": ["instance"], "title": f"Unban {ip} failed on instance {db_instance['hostname']}", "description": error, "status": "error"},
-                    )
-                    CORE_CONFIG.logger.warning(error)
-                    errors.append(error)
-
-    if len(errors) == len(db_instances) * len(ips):
-        background_tasks.add_task(
-            DB.add_action,
-            {
-                "date": datetime.now(),
-                "api_method": "POST",
-                "method": method,
-                "tags": ["instance"],
-                "title": "Unban ip(s) on all instances",
-                "description": "Failed to send API request to all instances",
-                "status": "error",
-            },
-        )
-        CORE_CONFIG.logger.error("Failed to send API request to all instances")
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"message": "Failed to send API request to all instances"},
-        )
-
-    background_tasks.add_task(
-        DB.add_action,
-        {
-            "date": datetime.now(),
-            "api_method": "POST",
-            "method": method,
-            "tags": ["instance"],
-            "title": "Unban ip(s) on all instances",
             "description": "Successfully sent API request to all instances",
         },
     )
