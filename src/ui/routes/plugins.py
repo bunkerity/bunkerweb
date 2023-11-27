@@ -49,7 +49,7 @@ def delete_plugin(plugin_id):
     return get_core_format_res(f"{CORE_API}/plugins/{plugin_id}", "DELETE", "", f"Delete plugin {plugin_id}")
 
 
-@plugins.route(f"{PREFIX}/externa/files", methods=["GET"])
+@plugins.route(f"{PREFIX}/external/files", methods=["GET"])
 @jwt_required()
 def external_files_plugin():
     """Get external files with plugins"""
