@@ -251,6 +251,14 @@ class Instances(Base):
     server_name = Column(String(256), nullable=False)
 
 
+class Users(Base):
+    __tablename__ = "bw_ui_users"
+
+    id = Column(Integer, primary_key=True, default=1)
+    username = Column(String(256), nullable=False, unique=True)
+    password = Column(String(60), nullable=False)
+
+
 class Metadata(Base):
     __tablename__ = "bw_metadata"
 

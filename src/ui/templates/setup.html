@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>BunkerWeb UI | Log in</title>
+    <title>BunkerWeb UI | Setup</title>
     <link href="images/favicon.ico" rel="icon" type="image/x-icon" />
     <link rel="stylesheet" href="css/dashboard.css" />
     <link rel="stylesheet" href="css/login.css" />
@@ -47,7 +47,7 @@
           ></path>
         </svg>
       </button>
-      {% if category == 'error' or (message|safe).startswith("Please log in") %}
+      {% if category == 'error' %}
       <h5 class="text-lg mb-0 text-red-500">Error</h5>
       <p class="text-gray-700 dark:text-gray-300 mb-0 text-sm">
         {{ message|safe }}
@@ -67,25 +67,23 @@
     <main class="grid grid-cols-2 align-middle items-center min-h-screen">
       <!--form -->
       <div
-        class="mx-4 lg:mx-0 col-span-2 lg:col-span-1 bg-none lg:bg-gray-50 h-full flex flex-col items-center justify-center"
+        class="mx-4 lg:mx-0 col-span-2 h-full flex flex-col items-center justify-center"
       >
         <div
-          class="bg-gray-50 rounded px-4 sm:px-12 py-16 w-full max-w-[400px]"
+          class="bg-gray-50 rounded px-4 sm:px-12 pt-10 pb-4 w-full max-w-[400px]"
         >
           <div class="flex justify-center">
             <img
-              class="lg:hidden max-w-60 max-h-30 mb-6"
+              class="max-w-60 max-h-30 mb-6"
               src="images/BUNKERWEB-print-hd.png"
               alt="logo"
               class="logo"
             />
           </div>
-          <h1
-            class="hidden lg:block text-center font-bold dark:text-white mb-8"
-          >
-            Log in
+          <h1 class="block text-center font-bold dark:text-white mb-8 text-3xl">
+            Setup BunkerWeb
           </h1>
-          <form action="login" method="POST" autocomplete="off">
+          <form id="setup-form" action="setup" method="POST" autocomplete="off">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input
               type="hidden"
@@ -95,18 +93,20 @@
             <!-- username inpt-->
             <div class="flex flex-col relative col-span-12 my-3">
               <h5
-                class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300"
+                class="text-lg my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300"
               >
                 Username
               </h5>
-              <label class="sr-only" for="username">username</label>
+              <label class="sr-only" for="admin_username">Username</label>
               <input
-                type="username"
-                id="username"
-                name="username"
+                type="text"
+                id="admin_username"
+                name="admin_username"
                 class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
                 placeholder="enter username"
+                value="{{ username }}"
                 pattern="(.*?)"
+                maxlength="256"
                 required
               />
             </div>
@@ -114,53 +114,101 @@
             <!-- password inpt-->
             <div class="flex flex-col relative col-span-12 my-3">
               <h5
-                class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300"
+                class="text-lg my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300"
               >
                 Password
               </h5>
-              <label class="sr-only" for="password">password</label>
+              <label class="sr-only" for="admin_password">Password</label>
               <input
                 type="password"
-                id="password"
-                name="password"
+                id="admin_password"
+                name="admin_password"
                 class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
                 placeholder="enter password"
-                pattern="(.*?)"
+                value="{{ password }}"
+                pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+                minlength="8"
                 required
               />
             </div>
             <!-- end password inpt-->
+            <!-- password inpt-->
+            <div class="flex flex-col relative col-span-12 my-3">
+              <h5
+                class="text-lg my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300"
+              >
+                Confirm Password
+              </h5>
+              <label class="sr-only" for="admin_password_check"
+                >Confirm Password</label
+              >
+              <input
+                type="password"
+                id="admin_password_check"
+                name="admin_password_check"
+                class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                placeholder="confirm password"
+                value="{{ password }}"
+                pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+                minlength="8"
+                required
+              />
+            </div>
+            <!-- end password inpt-->
+            <!-- hostname-->
+            <div class="flex flex-col relative col-span-12 my-3">
+              <h5
+                class="text-lg my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300"
+              >
+                Hostname
+              </h5>
+              <label class="sr-only" for="hostname">Hostname</label>
+              <input
+                type="text"
+                id="hostname"
+                name="hostname"
+                class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                placeholder="enter hostname"
+                pattern="^https?:\/\/([a-zA-Z0-9.\u002D]{1,255}(:((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4})))?)(\/.*)?$"
+                required
+              />
+            </div>
+            <!-- end hostname-->
+            <!-- server name-->
+            <div class="flex flex-col relative col-span-12 my-3">
+              <h5
+                class="text-lg my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300"
+              >
+                Server name
+              </h5>
+              <label class="sr-only" for="server_names">server name</label>
+              <input
+                type="text"
+                id="server_name"
+                name="server_name"
+                class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                placeholder="app1.example.com"
+                minlength="1"
+                required
+              />
+            </div>
+            <!-- end server name-->
             <div class="flex justify-center">
               <button
                 type="submit"
-                id="login"
-                name="login"
-                value="login"
-                class="my-4 dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+                id="setup-button"
+                name="setup-button"
+                value="setup"
+                class="tracking-wide my-4 dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
               >
-                Log in
+                Setup
               </button>
             </div>
           </form>
         </div>
       </div>
       <!-- end form -->
-      <!-- particles -->
-      <div class="-z-10 fixed lg:relative lg:col-span-1 bg-primary">
-        <div id="particles-js" class="login-img [&>*]:bg-primary"></div>
-        <div class="hidden lg:flex justify-center">
-          <img
-            class="max-w-60 max-h-30"
-            src="images/BUNKERWEB-print-hd-blanc.png"
-            alt="logo"
-            class="images login-logo"
-          />
-        </div>
-      </div>
     </main>
-    <!-- end particles -->
-    <!-- end content -->
-    <script src="js/tsparticles.bundle.min.js"></script>
     <script>
       class Loader {
         constructor() {
@@ -236,7 +284,6 @@
 
       const setLoader = new Loader();
       const setFlash = new FlashMsg();
-      tsParticles.loadJSON("particles-js", "json/particles.json");
     </script>
   </body>
 </html>
