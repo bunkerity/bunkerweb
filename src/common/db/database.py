@@ -11,6 +11,7 @@ from pathlib import Path
 from re import compile as re_compile
 from subprocess import DEVNULL, PIPE, STDOUT, run as subprocess_run
 from sys import path as sys_path
+from threading import Lock
 from typing import Any, Dict, List, Optional, Tuple, Union
 from time import sleep
 from traceback import format_exc
@@ -66,6 +67,8 @@ class Database:
         self._session_factory = None
         self._sql_engine = None
         self._exceptions = {}
+        self.__sqlite_database = False
+        self.lock = Lock()
 
         if not sqlalchemy_string:
             sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3")
@@ -176,6 +179,7 @@ class Database:
         self.suffix_rx = re_compile(r"_\d+$")
 
         if match.group("database").startswith("sqlite"):
+            self.__sqlite_database = True
             with self._db_session() as session:
                 session.execute(text("PRAGMA journal_mode=WAL"))
                 session.commit()
@@ -199,6 +203,8 @@ class Database:
         session = scoped_session(self._session_factory)
 
         try:
+            if self.__sqlite_database:
+                self.lock.acquire(timeout=10)
             yield session
         except BaseException as e:
             session.rollback()
@@ -229,6 +235,8 @@ class Database:
             raise
         finally:
             session.remove()
+            if self.__sqlite_database:
+                self.lock.release()
 
     def set_scheduler_initialized(self, value: bool = True) -> str:
         """Set the scheduler_initialized value"""
