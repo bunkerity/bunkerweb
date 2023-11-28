@@ -388,7 +388,7 @@ def setup():
             error = True
         else:
             for server_name in server_names:
-                if request.form["server_name"] in db_config[f"{server_name}_SERVER_NAME"].split(" "):
+                if request.form["server_name"] in db_config.get(f"{server_name}_SERVER_NAME", "").split(" "):
                     flash(f"The hostname {request.form['server_name']} is already in use.", "error")
                     error = True
                     break
