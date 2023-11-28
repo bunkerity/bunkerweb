@@ -231,7 +231,7 @@ csrf = CSRFProtect()
 csrf.init_app(app)
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
-REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://[a-zA-Z0-9.-]{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)(?P<url>/.*)?$")
+REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://[a-zA-Z0-9.-]{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
 
 
 def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
@@ -362,8 +362,8 @@ def setup():
             flash("Missing form data.", "error")
             return redirect(url_for("setup"))
 
-        if not any(key in request.form for key in ("admin_username", "admin_password", "admin_password_check", "server_name", "hostname")):
-            flash("Missing either admin_username, admin_password, server_name or hostname parameter.", "error")
+        if not any(key in request.form for key in ("admin_username", "admin_password", "admin_password_check", "server_name", "ui_host", "ui_url")):
+            flash("Missing either admin_username, admin_password, admin_password_check, server_name, ui_host, ui_url or auto_lets_encrypt parameter.", "error")
             return redirect(url_for("setup"))
 
         error = False
@@ -393,14 +393,12 @@ def setup():
                     error = True
                     break
 
-        if not (hostname := REVERSE_PROXY_PATH.search(request.form["hostname"])):
+        if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
             flash("The hostname is not valid.", "error")
             error = True
 
         if error:
             return redirect(url_for("setup"))
-
-        assert hostname
 
         app.config["USER"] = User(request.form["admin_username"], request.form["admin_password"])
 
@@ -422,8 +420,9 @@ def setup():
                     "SERVER_NAME": request.form["server_name"],
                     "USE_UI": "yes",
                     "USE_REVERSE_PROXY": "yes",
-                    "REVERSE_PROXY_HOST": hostname.group("host"),
-                    "REVERSE_PROXY_URL": hostname.group("url") or "/",
+                    "REVERSE_PROXY_HOST": request.form["ui_host"],
+                    "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
+                    "AUTO_LETS_ENCRYPT": request.form.get("auto_lets_encrypt", "no"),
                     "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
                 },
                 request.form["server_name"],
