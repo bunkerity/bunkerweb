@@ -10,8 +10,12 @@ import requests
 from importlib import import_module
 from utils import get_core_format_res
 import json
+
 from os import environ
 from ui import UiConfig
+
+from tempfile import TemporaryFile
+from importlib.machinery import SourceFileLoader
 
 UI_CONFIG = UiConfig("ui", **environ)
 
@@ -20,10 +24,10 @@ PREFIX = "/api/external"
 
 external = Blueprint("external", __name__)
 
-
-@external.route(f"{PREFIX}/<string:plugin_id>", methods=["GET", "POST", "PUT", "DELETE"])
+# Communicate with CORE retrieving ui api file and executing a specific function (action name)
+@external.route(f"{PREFIX}/<string:plugin_id>/action", methods=["GET", "POST", "PUT", "DELETE"])
 @jwt_required()
-def get_config(plugin_id):
+def exec_ext_plugin_action(plugin_id):
     """Execute custom external plugin action"""
     # Check if plugin id exists
     is_plugin = False
@@ -35,37 +39,38 @@ def get_config(plugin_id):
                 break
 
         if not is_plugin:
-            raise HTTPException(response=Response(status=500), description="Plugin not find to execute action.")
+            raise HTTPException(response=Response(status=500), description=f"Plugin {plugin_id} not find to execute action.")
 
     except:
-        raise HTTPException(response=Response(status=500), description="Error while trying to find plugin.")
+        raise HTTPException(response=Response(status=500), description=f"Error while trying to find plugin {plugin_id}.")
 
-    # Try to get module
+    # Try to get module (python file)
     module = None
     try:
-        module = requests.get(f"{CORE_API}/plugins/external/actions")
+        module = requests.get(f"{CORE_API}/plugins/external/{plugin_id}/action")
         if not str(module.status_code).startswith("2"):
-            raise HTTPException(response=Response(status=500), description="Actions module not find to execute action.")
+            raise HTTPException(response=Response(status=500), description=f"Actions module not find to execute action for plugin {plugin_id}.")
     except:
-        raise HTTPException(response=Response(status=500), description="Error while trying to get actions module.")
+        raise HTTPException(response=Response(status=500), description=f"Error while trying to get actions module for plugin {plugin_id}.")
 
     # Try to execute function
     args = request.args.to_dict()
-    action = args.get("action")
+    action = args.get("action") or ""
+    if not action:
+        raise HTTPException(response=Response(status=400), description=f"No action query found to execute action for plugin {plugin_id}.")
     body = request.get_json() or ""
-    result = None
+    # Create temp file that can be use as module to execute action (action = function name on the module)
     try:
-        # import module by name
-        m = import_module(module.content, __name__)
-        # get function by name
-        f = getattr(m, action)
-        # call function with params
-        # Need to return a standard format response
-        result = f(body, args)
-        if not str(result).startswith("2"):
-            raise HTTPException(response=Response(status=500), description="Action result error.")
+        content = module.content.decode("utf-8")
+        with TemporaryFile(mode="wb", suffix=".py", delete=False) as temp:
+            with open(temp.name, 'w') as f :
+                f.write(content)
+            loader = SourceFileLoader("actions", temp.name)
+            actions = loader.load_module()
+            f = getattr(actions, action)
+            # Send body and args
+            result = f(body, args, request.method)
+            return result
     except:
-        raise HTTPException(response=Response(status=500), description="Error while trying to execute action")
+        raise HTTPException(response=Response(status=500), description=f"Error while trying to execute action for plugin {plugin_id}.")
 
-    # Return format data
-    return result
