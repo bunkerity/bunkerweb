@@ -2,6 +2,8 @@
 
 from os import _exit, getenv, listdir, sep, urandom
 from os.path import basename, dirname, join
+from secrets import choice
+from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
 
@@ -433,7 +435,7 @@ def setup():
 
         return redirect(url_for("loading", next=url_for("services"), message=f"Creating service {request.form['server_name']} for the web UI"))
 
-    return render_template("setup.html", username=getenv("ADMIN_USERNAME", ""), password=getenv("ADMIN_PASSWORD", ""))
+    return render_template("setup.html", username=getenv("ADMIN_USERNAME", ""), password=getenv("ADMIN_PASSWORD", ""), random_url=f"/{''.join(choice(ascii_letters + digits) for _ in range(10))}")
 
 
 @app.route("/home")
