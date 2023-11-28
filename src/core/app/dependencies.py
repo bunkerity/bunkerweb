@@ -45,6 +45,8 @@ def stop(status):
         CORE_CONFIG.logger.info(f"⏲ Waiting for thread {thread.name} to stop (timeout 3s) ...")
         if thread.name != "MainThread":
             thread.join(timeout=3)
+            if thread.is_alive():
+                CORE_CONFIG.logger.warning(f"Thread {thread.name} is still alive, skipping ...")
 
     HEALTHY_PATH.unlink(missing_ok=True)
     if DB:
@@ -71,7 +73,6 @@ jobs_not_running.set()
 
 # Create static paths
 CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
-CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
 CORE_PLUGINS_PATH = Path(sep, "usr", "share", "bunkerweb", "core_plugins")
 CUSTOM_CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
@@ -228,18 +229,21 @@ def generate_external_plugins(
         CORE_CONFIG.logger.info("Generating new external plugins ...")
         original_path.mkdir(parents=True, exist_ok=True)
         for plugin in plugins:
-            # Extract plugin data
-            tmp_path = original_path.joinpath(plugin["id"], f"{plugin['name']}.tar.gz")
-            tmp_path.parent.mkdir(parents=True, exist_ok=True)
-            tmp_path.write_bytes(plugin["data"])
-            with tar_open(str(tmp_path), "r:gz") as tar:
-                tar.extractall(original_path)
-            tmp_path.unlink()
+            try:
+                # Extract plugin data
+                tmp_path = original_path.joinpath(plugin["id"], f"{plugin['name']}.tar.gz")
+                tmp_path.parent.mkdir(parents=True, exist_ok=True)
+                tmp_path.write_bytes(plugin["data"])
+                with tar_open(str(tmp_path), "r:gz") as tar:
+                    tar.extractall(original_path)
+                tmp_path.unlink()
 
-            # Add u+x permissions to jobs files
-            for job_file in glob(join(str(tmp_path.parent), "jobs", "*")):
-                st = Path(job_file).stat()
-                chmod(job_file, st.st_mode | S_IEXEC)
+                # Add u+x permissions to jobs files
+                for job_file in glob(join(str(tmp_path.parent), "jobs", "*")):
+                    st = Path(job_file).stat()
+                    chmod(job_file, st.st_mode | S_IEXEC)
+            except PermissionError:
+                CORE_CONFIG.logger.warning(f"Can't generate external plugin {plugin['id']}, permission denied")
 
 
 def generate_custom_configs(
@@ -286,10 +290,14 @@ def generate_config(function: Optional[Callable] = None):
             jobs_not_running.wait(60)
 
         db_config = "retry"
+        retries = 0
         while db_config == "retry":
             db_config = DB.get_config()
 
             if db_config == "retry":
+                if retries >= 5:
+                    CORE_CONFIG.logger.error("Can't get config from database after 5 retries, exiting ...")
+                    stop(1)
                 CORE_CONFIG.logger.warning("Can't get config from database, retrying in 5 seconds ...")
                 sleep(5)
                 continue

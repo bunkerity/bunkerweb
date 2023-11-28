@@ -12,7 +12,7 @@ from re import compile as re_compile
 from subprocess import DEVNULL, PIPE, STDOUT, run as subprocess_run
 from sys import path as sys_path
 from threading import Lock
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from time import sleep
 from traceback import format_exc
 
@@ -285,14 +285,15 @@ class Database:
 
         return (self._exceptions.get(getpid()) or [""]).pop()
 
-    def update_db_schema(self, version: str) -> str:
+    def update_db_schema(self, version: str) -> Tuple[bool, str]:
+        ret = True
         with suppress(BaseException), self._db_session() as session:
             metadata = session.query(Metadata).get(1)
 
             if not metadata:
-                return "The metadata are not set yet, try again"
+                return False, "The metadata are not set yet, try again"
             elif metadata.version == version:
-                return "The database is already up to date"
+                return False, "The database is already up to date"
 
             proc = subprocess_run(
                 ["python3", "-m", "alembic", "revision", "--autogenerate", "-m", f'"Update to version v{version}"'],
@@ -303,7 +304,7 @@ class Database:
             )
             if proc.returncode != 0:
                 session.rollback()
-                return "Error when trying to generate the migration script"
+                return True, "Error when trying to generate the migration script"
 
             proc = subprocess_run(
                 [
@@ -320,12 +321,13 @@ class Database:
             )
             if proc.returncode != 0:
                 session.rollback()
-                return "Error when trying to apply the migration script"
+                return True, "Error when trying to apply the migration script"
 
             metadata.version = version
             session.commit()
+            ret = False
 
-        return (self._exceptions.get(getpid()) or [""]).pop()
+        return ret, (self._exceptions.get(getpid()) or [""]).pop()
 
     def init_tables(self, default_plugins: List[dict]) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
@@ -711,12 +713,12 @@ class Database:
 
             if db_service:
                 if first_server_name != service_name:
-                    if method not in (db_service.method, "core", "autoconf"):
+                    if method not in (db_service.method, "autoconf"):
                         return "method_conflict"
 
                     service_settings = session.query(Services_settings).with_entities(Services_settings.method).filter_by(service_id=service_name).all()
 
-                    if method not in ("core", "autoconf") and not all(setting.method == method for setting in service_settings):
+                    if method != "autoconf" and not all(setting.method == method for setting in service_settings):
                         return "method_conflict"
 
                     session.query(Services).filter(Services.id == service_name).update({Services.id: first_server_name, Services.method: method})
@@ -836,7 +838,7 @@ class Database:
 
                 if not custom_conf:
                     to_put.append(Custom_configs(**config))
-                elif method in (custom_conf.method, "core", "autoconf"):
+                elif method in (custom_conf.method, "autoconf"):
                     session.query(Custom_configs).filter(Custom_configs.service_id == config.get("service_id", None), Custom_configs.type == config["type"], Custom_configs.name == config["name"]).update(
                         {Custom_configs.data: config["data"], Custom_configs.checksum: config["checksum"], Custom_configs.method: method}
                     )
@@ -1000,7 +1002,7 @@ class Database:
             if not custom_conf:
                 session.add(Custom_configs(**config))
                 ret = "created"
-            elif method not in (custom_conf.method, "core", "autoconf"):
+            elif method not in (custom_conf.method, "autoconf"):
                 ret = "method_conflict"
             else:
                 session.query(Custom_configs).filter(
@@ -1036,7 +1038,7 @@ class Database:
 
             if not custom_conf:
                 return "not_found"
-            elif method not in (custom_conf.method, "core", "autoconf"):
+            elif method not in (custom_conf.method, "autoconf"):
                 return "method_conflict"
 
             session.query(Custom_configs).filter(
@@ -1843,7 +1845,7 @@ class Database:
                 return "not_found"
             elif db_plugin.external is False:
                 return "not_external"
-            elif method not in (db_plugin.method, "core", "autoconf"):
+            elif method not in (db_plugin.method, "autoconf"):
                 return "method_conflict"
 
             session.query(Plugins).filter(Plugins.id == plugin_id).delete()
@@ -2092,7 +2094,7 @@ class Database:
 
         return (self._exceptions.get(getpid()) or [""]).pop()
 
-    def refresh_instances(self, instances: List[Dict[str, Any]], method: str) -> str:
+    def refresh_instances(self, instances: Iterable[Dict[str, Any]], method: str) -> str:
         """Update instances."""
         to_put = []
         with suppress(BaseException), self._db_session() as session:
@@ -2123,7 +2125,7 @@ class Database:
                     )
                 )
                 ret = "created"
-            elif method not in (db_instance.method, "core", "autoconf"):
+            elif method not in (db_instance.method, "autoconf"):
                 ret = "method_conflict"
             else:
                 session.query(Instances).filter_by(hostname=old_hostname).update(
@@ -2193,7 +2195,7 @@ class Database:
 
             if db_instance is None:
                 return "not_found"
-            elif method not in (db_instance.method, "core", "autoconf"):
+            elif method not in (db_instance.method, "autoconf"):
                 return "method_conflict"
 
             session.query(Instances).filter(Instances.hostname == instance_hostname).delete()

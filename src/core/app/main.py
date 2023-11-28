@@ -11,13 +11,15 @@ from itertools import chain
 from json import JSONDecodeError, loads as json_loads
 from shutil import rmtree
 from threading import Event, Thread
-from os import listdir, sep, walk
+from os import environ, listdir, sep, walk
 from os.path import basename, dirname, join
 from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
 from sys import path as sys_path
 from tarfile import open as tar_open
-from time import sleep
+from threading import enumerate as all_threads
+from time import sleep, time
+from typing import List, Union
 
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("db",), ("gen",), ("utils",))]:
@@ -29,23 +31,28 @@ from fastapi.datastructures import Address
 from fastapi.responses import JSONResponse
 from redis.client import Redis
 from regex import compile as re_compile
+from watchdog.observers import Observer
+from watchdog.events import FileOpenedEvent, FileClosedEvent, FileSystemEventHandler
 
 from API import API  # type: ignore
 from configurator import Configurator  # type: ignore
+from database import Database  # type: ignore (imported from /usr/share/bunkerweb/utils)
+from .job_scheduler import JobScheduler
 from jobs import bytes_hash  # type: ignore
-from .core import BUNKERWEB_VERSION, description, tags_metadata
+from .core import BUNKERWEB_VERSION, CONFIG_FILE, SECRETS_PATH, YAML_CONFIG_FILE, CoreConfig, description, tags_metadata
 from .dependencies import (
+    api_started,
     CORE_CONFIG,
-    CONFIGS_PATH,
     CORE_PLUGINS_PATH,
+    CUSTOM_CONFIGS_PATH,
     DB,
     dict_to_frozenset,
     EXTERNAL_PLUGINS_PATH,
     generate_external_plugins,
     HEALTHY_PATH,
     install_plugin,
-    SCHEDULER,
     run_jobs,
+    SCHEDULER,
     SEMAPHORE,
     SETTINGS_PATH,
     seen_instance,
@@ -59,10 +66,16 @@ PLUGIN_ID_REGEX = re_compile(r"^[\w.-]{1,64}$")
 CUSTOM_CONFIGS_RX = re_compile(r"^((?P<service_id>[^ ]{,255})_)?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(?P<name>.+)$")
 
 stop_event = Event()
+scheduler_initialized = Event()
+database_initialized = Event()
+is_not_reloading = Event()
+is_not_reloading.set()
+listen_for_dynamic_instances = Event()
 
 
 def stop_app(status):
     stop_event.set()
+    stop_observer()
     stop(status)
 
 
@@ -86,39 +99,8 @@ app = FastAPI(
     openapi_tags=tags_metadata,
 )
 
-CORE_CONFIG.logger.info("Checking if database is initialized ...")
 
-db_is_initialized = DB.is_initialized()
-
-db_config = {}
-db_plugins = []
-plugin_changes = False
-if db_is_initialized:
-    resp = DB.set_scheduler_initialized(False)
-
-    if resp:
-        CORE_CONFIG.logger.warning(f"Can't set scheduler as not initialized : {resp}")
-
-    db_config = DB.get_config()
-
-    if isinstance(db_config, str):
-        CORE_CONFIG.logger.error(
-            f"Can't get config from database : {db_config}",
-        )
-        stop_app(1)
-
-    assert isinstance(db_config, dict)
-
-    db_plugins = DB.get_plugins(external=True)
-
-    if isinstance(db_plugins, str):
-        CORE_CONFIG.logger.warning(
-            f"Can't get plugins from database : {db_plugins}",
-        )
-        db_plugins = []
-
-
-def extract_plugin_data(filename: str) -> dict:
+def extract_plugin_data(filename: str, dir_basename: str, _dir: str) -> dict:
     plugin_data = json_loads(Path(filename).read_text(encoding="utf-8"))
 
     if not all(key in plugin_data.keys() for key in PLUGIN_KEYS):
@@ -140,218 +122,439 @@ def extract_plugin_data(filename: str) -> dict:
     return plugin_data
 
 
-CORE_CONFIG.logger.info("Checking if any external plugin have been added or removed...")
+def update_external_plugins(db_plugins: List[dict], db_config: dict, db_initialized: bool = False) -> List[dict]:
+    plugin_changes = False
+    manual_plugins = []
+    manual_plugins_ids = []
+    for filename in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "plugin.json"))):
+        _dir = dirname(filename)
+        dir_basename = basename(_dir)
+        in_db = False
 
-manual_plugins = []
-manual_plugins_ids = []
-for filename in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "plugin.json"))):
-    _dir = dirname(filename)
-    dir_basename = basename(_dir)
-    in_db = False
+        for db_plugin in db_plugins:
+            if db_plugin["id"] == dir_basename and db_plugin["method"] != "static":
+                in_db = True
 
-    for db_plugin in db_plugins:
-        if db_plugin["id"] == dir_basename and db_plugin["method"] != "static":
-            in_db = True
+        if in_db:
+            continue
 
-    if in_db:
-        continue
+        plugin_data = extract_plugin_data(filename, dir_basename, _dir)
 
-    plugin_data = extract_plugin_data(filename)
+        if not plugin_data:
+            continue
 
-    if not plugin_data:
-        continue
+        plugin_data["method"] = "static"
 
-    plugin_data["method"] = "static"
+        manual_plugins_ids.append(plugin_data["id"])
+        manual_plugins.append(plugin_data)
 
-    manual_plugins_ids.append(plugin_data["id"])
-    manual_plugins.append(plugin_data)
+    if CORE_CONFIG.external_plugin_urls_str != db_config.get("EXTERNAL_PLUGIN_URLS", ""):
+        if db_initialized:
+            CORE_CONFIG.logger.info("External plugins urls changed, refreshing external plugins...")
+            for db_plugin in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*"))):
+                rmtree(db_plugin, ignore_errors=True)
+        else:
+            CORE_CONFIG.logger.info("Found external plugins to download, starting download...")
 
-if CORE_CONFIG.external_plugin_urls_str != db_config.get("EXTERNAL_PLUGIN_URLS", ""):
-    if db_is_initialized:
-        CORE_CONFIG.logger.info("External plugins urls changed, refreshing external plugins...")
-        for db_plugin in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*"))):
-            rmtree(db_plugin, ignore_errors=True)
-    else:
-        CORE_CONFIG.logger.info("Found external plugins to download, starting download...")
+        plugin_changes = True
+        threads = []
+        for plugin_url in CORE_CONFIG.external_plugin_urls:
+            threads.append(Thread(target=install_plugin, args=(plugin_url, CORE_CONFIG.logger)))
+            threads[-1].start()
 
-    plugin_changes = True
-    threads = []
-    for plugin_url in CORE_CONFIG.external_plugin_urls:
-        threads.append(Thread(target=install_plugin, args=(plugin_url, CORE_CONFIG.logger)))
-        threads[-1].start()
+        for thread in threads:
+            thread.join()
 
-    for thread in threads:
-        thread.join()
+        CORE_CONFIG.logger.info("External plugins download finished")
 
-    CORE_CONFIG.logger.info("External plugins download finished")
+    # Check if any external plugin has been added by the user
+    external_plugins = []
+    for filename in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "plugin.json"))):
+        _dir = dirname(filename)
+        dir_basename = basename(_dir)
 
-# Check if any external plugin has been added by the user
-external_plugins = []
-for filename in glob(str(EXTERNAL_PLUGINS_PATH.joinpath("*", "plugin.json"))):
-    _dir = dirname(filename)
-    dir_basename = basename(_dir)
+        if dir_basename in manual_plugins_ids:
+            continue
 
-    if dir_basename in manual_plugins_ids:
-        continue
+        plugin_data = extract_plugin_data(filename, dir_basename, _dir)
 
-    plugin_data = extract_plugin_data(filename)
+        if not plugin_data:
+            continue
 
-    if not plugin_data:
-        continue
+        plugin_data["method"] = "core"
 
-    plugin_data["method"] = "core"
+        external_plugins.append(plugin_data)
 
-    external_plugins.append(plugin_data)
+    external_plugins = list(chain(manual_plugins, external_plugins))
+    if db_initialized:
+        if not plugin_changes:
+            plugins = []
+            for plugin in deepcopy(external_plugins):
+                plugin.pop("data", None)
+                plugin.pop("checksum", None)
+                plugin.pop("jobs", None)
+                plugin.pop("method", None)
+                plugins.append(plugin)
 
-external_plugins = list(chain(manual_plugins, external_plugins))
-if db_is_initialized:
-    if not plugin_changes:
-        plugins = []
-        for plugin in deepcopy(external_plugins):
-            plugin.pop("data", None)
-            plugin.pop("checksum", None)
-            plugin.pop("jobs", None)
-            plugin.pop("method", None)
-            plugins.append(plugin)
+            tmp_db_plugins = []
+            for db_plugin in db_plugins.copy():
+                db_plugin.pop("method", None)
+                tmp_db_plugins.append(db_plugin)
 
-        tmp_db_plugins = []
-        for db_plugin in db_plugins.copy():
-            db_plugin.pop("method", None)
-            tmp_db_plugins.append(db_plugin)
+            plugin_changes = {hash(dict_to_frozenset(d)) for d in plugins} != {hash(dict_to_frozenset(d)) for d in tmp_db_plugins}
 
-        plugin_changes = {hash(dict_to_frozenset(d)) for d in plugins} != {hash(dict_to_frozenset(d)) for d in tmp_db_plugins}
+        if plugin_changes:
+            CORE_CONFIG.logger.info("External plugins changed, refreshing database...")
 
-    if plugin_changes:
-        CORE_CONFIG.logger.info("External plugins changed, refreshing database...")
+            err = DB.update_external_plugins(deepcopy(external_plugins), delete_missing=True)
+            if err:
+                CORE_CONFIG.logger.error(f"Couldn't save some manually added plugins to database: {err}")
 
-        err = DB.update_external_plugins(external_plugins, delete_missing=True)
+            generate_external_plugins(external_plugins, original_path=EXTERNAL_PLUGINS_PATH)
+
+    return external_plugins
+
+
+def update_custom_configs(db_config: dict):
+    db_configs = DB.get_custom_configs()
+    env_custom_configs = []
+    for k, v in CORE_CONFIG.settings.copy().items():
+        match = CUSTOM_CONFIGS_RX.search(k)
+        if match:
+            name = match.group("name").replace(".conf", "")
+            service = match.group("service_id")
+            CORE_CONFIG.logger.info(f"🛠️ Found custom conf env var \"{name}\"{' for service ' + service if service else ''} with type {match.group('type')}")
+            if db_config.get("MULTISITE", "no") == "no" and service:
+                CORE_CONFIG.logger.warning(f'🛠️ Because MULTISITE is set to "no", the service id will be ignored for custom conf env var "{name}" with type {match.group("type")}, the custom config will then be applied globally')
+                service = None
+            env_custom_configs.append({"value": v, "exploded": (service, match.group("type"), name)})
+
+    if {hash(dict_to_frozenset(d)) for d in env_custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs if d["method"] == "env"}:
+        err = DB.save_custom_configs(env_custom_configs, "env")
         if err:
-            CORE_CONFIG.logger.error(f"Couldn't save some manually added plugins to database: {err}")
+            for e in err:
+                if e.startswith("Couldn't"):
+                    CORE_CONFIG.logger.warning(e)
+                else:
+                    CORE_CONFIG.logger.error(f"Couldn't save some custom configs from env to database: {err}")
+        else:
+            CORE_CONFIG.logger.info("✅ Custom configs from env saved to database")
 
-        generate_external_plugins(external_plugins, original_path=EXTERNAL_PLUGINS_PATH)
+    files_custom_configs = []
+    max_num_sep = str(CUSTOM_CONFIGS_PATH).count(sep) + (3 if db_config.get("MULTISITE", "no") == "yes" else 2)
+    root_dirs = listdir(CUSTOM_CONFIGS_PATH)
+    for root, dirs, files in walk(CUSTOM_CONFIGS_PATH):
+        if root.count(sep) <= max_num_sep and (files or (dirs and basename(root) not in root_dirs)):
+            path_exploded = root.split("/")
+            for file in files:
+                content = Path(join(root, file)).read_text(encoding="utf-8")
+                custom_conf = {"value": content, "exploded": (f"{path_exploded.pop()}" if path_exploded[-1] not in root_dirs else None, path_exploded[-1], file.replace(".conf", ""))}
+                saving = True
 
-CORE_CONFIG.logger.info("Computing config ...")
+                for db_conf in db_configs:
+                    if db_conf["service_id"] == custom_conf["exploded"][0] and db_conf["name"] == custom_conf["exploded"][2]:
+                        if db_conf["method"] != "static":
+                            saving = False
+                        break
 
-config = Configurator(str(SETTINGS_PATH), str(CORE_PLUGINS_PATH), external_plugins, CORE_CONFIG.settings, CORE_CONFIG.logger)
-config_files = config.get_config()
+                if saving:
+                    files_custom_configs.append(custom_conf)
 
-if not db_is_initialized:
-    CORE_CONFIG.logger.info("Database not initialized, initializing ...")
-    ret, err = DB.init_tables([config.get_settings(), config.get_plugins("core"), config.get_plugins("external")])
+    if {hash(dict_to_frozenset(d)) for d in files_custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs if d["method"] == "static"}:
+        err = DB.save_custom_configs(files_custom_configs, "static")
+        if err:
+            for e in err:
+                if e.startswith("Couldn't"):
+                    CORE_CONFIG.logger.warning(e)
+                else:
+                    CORE_CONFIG.logger.error(f"Couldn't save some manually created custom configs to database: {err}")
+        else:
+            CORE_CONFIG.logger.info("✅ Custom configs from files saved to database")
 
-    # Initialize database tables
-    if err:
-        CORE_CONFIG.logger.error(f"Exception while initializing database : {err}")
-        stop_app(1)
-    elif not ret:
-        CORE_CONFIG.logger.info("Database tables are already initialized, skipping creation ...")
+
+def startup():
+    is_not_reloading.clear()
+
+    CORE_CONFIG.logger.info("Checking if database is initialized ...")
+
+    db_initialized = DB.is_initialized()
+
+    db_config = {}
+    db_plugins = []
+    if db_initialized:
+        resp = DB.set_scheduler_initialized(False)
+
+        if resp:
+            CORE_CONFIG.logger.warning(f"Can't set scheduler as not initialized : {resp}")
+
+        db_config = "retry"
+        retries = 0
+        while db_config == "retry":
+            db_config = DB.get_config()
+
+            if db_config == "retry":
+                if retries >= 5:
+                    CORE_CONFIG.logger.error("Can't get config from database after 5 retries, aborting ...")
+                    stop_app(1)
+                CORE_CONFIG.logger.warning("Can't get config from database, retrying in 5 seconds ...")
+                sleep(5)
+                continue
+            elif isinstance(db_config, str):
+                CORE_CONFIG.logger.error(f"Can't get config from database : {db_config}, retry later")
+                stop_app(1)
+
+        assert isinstance(db_config, dict)
+
+        db_plugins = DB.get_plugins(external=True)
+
+        if isinstance(db_plugins, str):
+            CORE_CONFIG.logger.warning(f"Can't get plugins from database : {db_plugins}")
+            db_plugins = []
+
+    CORE_CONFIG.logger.info("Checking if any external plugin have been added or removed...")
+
+    external_plugins = update_external_plugins(db_plugins, db_config, db_initialized)
+
+    CORE_CONFIG.logger.info("Computing config ...")
+
+    config = Configurator(str(SETTINGS_PATH), str(CORE_PLUGINS_PATH), external_plugins, CORE_CONFIG.settings, CORE_CONFIG.logger)
+    config_files = config.get_config()
+
+    if not db_initialized:
+        CORE_CONFIG.logger.info("Database not initialized, initializing ...")
+        ret, err = DB.init_tables([config.get_settings(), config.get_plugins("core"), config.get_plugins("external")])
+
+        # Initialize database tables
+        if err:
+            CORE_CONFIG.logger.error(f"Exception while initializing database : {err}")
+            stop_app(1)
+        elif not ret:
+            CORE_CONFIG.logger.info("Database tables are already initialized, skipping creation ...")
+        else:
+            CORE_CONFIG.logger.info("Database tables initialized")
+
+        err = DB.initialize_db(version=BUNKERWEB_VERSION, integration=CORE_CONFIG.integration)
+
+        if err:
+            CORE_CONFIG.logger.error(f"Can't Initialize database : {err}")
+            stop_app(1)
+        else:
+            CORE_CONFIG.logger.info("✅ Database initialized")
     else:
-        CORE_CONFIG.logger.info("Database tables initialized")
+        ret, resp = DB.update_db_schema(BUNKERWEB_VERSION)
 
-    err = DB.initialize_db(version=BUNKERWEB_VERSION, integration=CORE_CONFIG.integration)
+        if ret:
+            CORE_CONFIG.logger.error(f"Can't update database schema : {resp}")
+            stop_app(1)
+        elif not resp:
+            CORE_CONFIG.logger.info("✅ Database schema updated to latest version successfully")
+        else:
+            CORE_CONFIG.logger.info(resp)
+
+    if config_files != db_config:
+        err = DB.save_config(config_files, "core")
+
+        if err:
+            CORE_CONFIG.logger.error(f"Can't save config to database : {err}")
+            stop_app(1)
+
+        db_config = "retry"
+        retries = 0
+        while db_config == "retry":
+            db_config = DB.get_config()
+
+            if db_config == "retry":
+                if retries >= 5:
+                    CORE_CONFIG.logger.error("Can't get config from database after 5 retries, aborting ...")
+                    stop_app(1)
+                CORE_CONFIG.logger.warning("Can't get config from database, retrying in 5 seconds ...")
+                sleep(5)
+                continue
+            elif isinstance(db_config, str):
+                CORE_CONFIG.logger.error(f"Can't get config from database : {db_config}, retry later")
+                stop_app(1)
+
+        assert isinstance(db_config, dict)
+
+        CORE_CONFIG.logger.info("✅ Config successfully saved to database")
+
+    CORE_CONFIG.logger.info("Checking if any custom config have been added or removed...")
+
+    update_custom_configs(db_config)
+
+    if not db_initialized:
+        err = DB.refresh_instances([], "dynamic")
+
+        if err:
+            CORE_CONFIG.logger.error(f"Can't clear dynamic BunkerWeb instances to database : {err}")
+            stop_app(1)
+        CORE_CONFIG.logger.info("✅ BunkerWeb dynamic instances cleared from database")
+
+    err = DB.refresh_instances(CORE_CONFIG.bunkerweb_instances, "static")
 
     if err:
-        CORE_CONFIG.logger.error(f"Can't Initialize database : {err}")
+        CORE_CONFIG.logger.error(f"Can't refresh static BunkerWeb instances to database : {err}")
         stop_app(1)
-    else:
-        CORE_CONFIG.logger.info("✅ Database initialized")
-else:
-    err: str = DB.update_db_schema(BUNKERWEB_VERSION)
+    CORE_CONFIG.logger.info("✅ BunkerWeb static instances updated to database")
 
-    if err and not err.startswith("The database"):
-        CORE_CONFIG.logger.error(f"Can't update database schema : {err}")
-        stop_app(1)
-    elif not err:
-        CORE_CONFIG.logger.info("✅ Database schema updated to latest version successfully")
+    if CORE_CONFIG.integration in ("Linux", "Docker"):
+        CORE_CONFIG.logger.info("Executing scheduler ...")
+        DB.set_scheduler_initialized()
+        for thread in (Thread(target=test_and_send_to_instances, args=(None, {"plugins", "custom_configs"}), kwargs={"no_reload": True}), Thread(target=run_jobs)):
+            thread.start()
 
-if config_files != db_config:
-    err = DB.save_config(config_files, "core")
+    is_not_reloading.set()
 
-    if err:
-        CORE_CONFIG.logger.error(f"Can't save config to database : {err}")
-        stop_app(1)
 
-    db_config = DB.get_config()
+class ConfigHandler(FileSystemEventHandler):
+    def __init__(self):
+        super().__init__()
+        self.last_any_event = 0
+        self.last_modified_event = 0
 
-    CORE_CONFIG.logger.info("✅ Config successfully saved to database")
+    def __is_config_file(self, path: str) -> bool:
+        return path in (str(YAML_CONFIG_FILE.resolve()), str(CONFIG_FILE.resolve())) or path.startswith(str(SECRETS_PATH.resolve()))
 
-CORE_CONFIG.logger.info("Checking if any custom config have been added or removed...")
+    def on_any_event(self, event):
+        """Catch-all event handler.
 
-db_configs = DB.get_custom_configs()
-env_custom_configs = []
-for k, v in CORE_CONFIG.settings.copy().items():
-    match = CUSTOM_CONFIGS_RX.search(k)
-    if match:
-        name = match.group("name").replace(".conf", "")
-        service = match.group("service_id")
-        CORE_CONFIG.logger.info(f"🛠️ Found custom conf env var \"{name}\"{' for service ' + service if service else ''} with type {match.group('type')}")
-        if db_config.get("MULTISITE", "no") == "no" and service:
-            CORE_CONFIG.logger.warning(f'🛠️ Because MULTISITE is set to "no", the service id will be ignored for custom conf env var "{name}" with type {match.group("type")}, the custom config will then be applied globally')
-            service = None
-        env_custom_configs.append({"value": v, "exploded": (service, match.group("type"), name)})
+        :param event:
+            The event object representing the file system event.
+        :type event:
+            :class:`FileSystemEvent`
+        """
+        if isinstance(event, (FileOpenedEvent, FileClosedEvent)) or not api_started.is_set():
+            CORE_CONFIG.logger.debug(f"📝 File {event.src_path} has been modified but it's not a config file or the API is not started yet, ignoring it ...")
+            return
 
-if {hash(dict_to_frozenset(d)) for d in env_custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs if d["method"] == "env"}:
-    err = DB.save_custom_configs(env_custom_configs, "env")
-    if err:
-        for e in err:
-            if e.startswith("Couldn't"):
-                CORE_CONFIG.logger.warning(e)
-            else:
-                CORE_CONFIG.logger.error(f"Couldn't save some custom configs from env to database: {err}")
-    else:
-        CORE_CONFIG.logger.info("✅ Custom configs from env saved to database")
+        current_time = time()
+        if current_time - self.last_any_event <= 1:
+            CORE_CONFIG.logger.debug(f"📝 File {event.src_path} has been modified but the last event was less than 1 second ago, ignoring it ...")
+            return
+        self.last_any_event = current_time
 
-files_custom_configs = []
-custom_configs_changes = False
-max_num_sep = str(CONFIGS_PATH).count(sep) + (3 if config_files.get("MULTISITE", "no") == "yes" else 2)
-root_dirs = listdir(str(CONFIGS_PATH))
-for root, dirs, files in walk(str(CONFIGS_PATH)):
-    if root.count(sep) <= max_num_sep and (files or (dirs and basename(root) not in root_dirs)):
-        path_exploded = root.split("/")
-        for file in files:
-            content = Path(join(root, file)).read_text(encoding="utf-8")
-            custom_conf = {"value": content, "exploded": (f"{path_exploded.pop()}" if path_exploded[-1] not in root_dirs else None, path_exploded[-1], file.replace(".conf", ""))}
-            saving = True
+        CORE_CONFIG.logger.info(f"📝 File {event.src_path} has been modified")
+        if self.__is_config_file(event.src_path):
+            CORE_CONFIG.logger.info("🐕 Reloading watchdog ...")
+            if observer:
+                observer.unschedule_all()
+            setup_observer()
+        elif event.src_path.startswith(str(CUSTOM_CONFIGS_PATH.resolve())):
+            is_not_reloading.wait(timeout=60)
 
-            for db_conf in db_configs:
-                if db_conf["service_id"] == custom_conf["exploded"][0] and db_conf["name"] == custom_conf["exploded"][2]:
-                    if db_conf["method"] != "static":
-                        saving = False
+            db_config = "retry"
+            retries = 0
+            while db_config == "retry":
+                db_config = DB.get_config()
+
+                if db_config == "retry":
+                    if retries >= 5:
+                        CORE_CONFIG.logger.error("Can't get config from database after 5 retries, aborting ...")
+                        return
+                    CORE_CONFIG.logger.warning("Can't get config from database, retrying in 5 seconds ...")
+                    sleep(5)
+                    continue
+                elif isinstance(db_config, str):
+                    CORE_CONFIG.logger.error(f"Can't get config from database : {db_config}, retry later")
+                    return
+
+            assert isinstance(db_config, dict)
+
+            CORE_CONFIG.logger.info("Reloading custom configs...")
+            update_custom_configs(db_config)
+            Thread(target=test_and_send_to_instances, args=(None, {"custom_configs"})).start()
+            CORE_CONFIG.logger.info("✅ Custom configs reloaded successfully")
+
+    def on_modified(self, event):
+        """Called when a file or directory is modified.
+
+        :param event:
+            Event representing file/directory modification.
+        :type event:
+            :class:`DirModifiedEvent` or :class:`FileModifiedEvent`
+        """
+        if not self.__is_config_file(event.src_path) and not event.src_path.startswith(str(EXTERNAL_PLUGINS_PATH.resolve())):
+            return
+
+        current_time = time()
+        if current_time - self.last_modified_event <= 1:
+            CORE_CONFIG.logger.debug(f"📝 File {event.src_path} has been modified but the last event was less than 1 second ago, ignoring it ...")
+            return
+        self.last_modified_event = current_time
+
+        is_not_reloading.wait(timeout=60)
+
+        global CORE_CONFIG, DB, SCHEDULER
+
+        CORE_CONFIG.logger.info("Reloading config ...")
+
+        CORE_CONFIG = CoreConfig("core", **(environ if CoreConfig.get_instance() != "Linux" else {}))
+        del DB
+        DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI)  # noqa: F841
+        SCHEDULER = JobScheduler(
+            API(f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "bw-scheduler"), env=CORE_CONFIG.settings | {"API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "CORE_TOKEN": CORE_CONFIG.core_token}, logger=CORE_CONFIG.logger
+        )
+
+        startup()
+
+        if CORE_CONFIG.use_redis:
+            running = False
+            for thread in all_threads():
+                if thread.name == "redis_listener":
+                    running = True
                     break
 
-            if saving:
-                files_custom_configs.append(custom_conf)
-
-if {hash(dict_to_frozenset(d)) for d in files_custom_configs} != {hash(dict_to_frozenset(d)) for d in db_configs if d["method"] == "static"}:
-    err = DB.save_custom_configs(files_custom_configs, "static")
-    if err:
-        for e in err:
-            if e.startswith("Couldn't"):
-                CORE_CONFIG.logger.warning(e)
+            if CORE_CONFIG.REDIS_HOST:
+                if not running:
+                    listen_for_dynamic_instances.set()
+                    Thread(target=listen_dynamic_instances, name="redis_listener").start()
             else:
-                CORE_CONFIG.logger.error(f"Couldn't save some manually created custom configs to database: {err}")
-    else:
-        CORE_CONFIG.logger.info("✅ Custom configs from files saved to database")
+                CORE_CONFIG.logger.warning("USE_REDIS is set to yes but REDIS_HOST is not defined, app will not listen for dynamic instances")
+                listen_for_dynamic_instances.clear()
 
-err = DB.refresh_instances([], "dynamic")
+        CORE_CONFIG.logger.info("✅ Config reloaded successfully")
 
-if err:
-    CORE_CONFIG.logger.error(f"Can't clear dynamic BunkerWeb instances to database : {err}")
-    stop_app(1)
+        if not CORE_CONFIG.hot_reload:
+            CORE_CONFIG.logger.warning("🐕 Hot reload has been disabled, stopping watchdog ...")
+            stop_observer()
 
-err = DB.refresh_instances(CORE_CONFIG.bunkerweb_instances, "static")
+        is_not_reloading.set()
 
-if err:
-    CORE_CONFIG.logger.error(f"Can't refresh static BunkerWeb instances to database : {err}")
-    stop_app(1)
 
-CORE_CONFIG.logger.info("✅ BunkerWeb static instances updated to database")
+config_handler = ConfigHandler()
 
-if CORE_CONFIG.integration in ("Linux", "Docker"):
-    CORE_CONFIG.logger.info("Executing scheduler ...")
-    DB.set_scheduler_initialized()
-    for thread in (Thread(target=test_and_send_to_instances, args=(None, {"plugins", "custom_configs"}), kwargs={"no_reload": True}), Thread(target=run_jobs)):
-        thread.start()
+
+def stop_observer():
+    """Stop watchdog"""
+
+    if observer:
+        observer.unschedule_all()
+        observer.stop()
+
+
+def add_observer_schedule(path: Union[Path, str], recursive: bool = False):
+    """Setup watchdog"""
+
+    if observer:
+        observer.schedule(config_handler, path, recursive)
+
+        CORE_CONFIG.logger.info(f"🔍 Starting to watch {path} for changes{' recursively' if recursive else ''} ...")
+
+
+def setup_observer():
+    """Setup watchdog observer"""
+
+    if YAML_CONFIG_FILE.is_file():
+        add_observer_schedule(YAML_CONFIG_FILE.resolve())
+    if CONFIG_FILE.is_file():
+        add_observer_schedule(CONFIG_FILE.resolve())
+    if CORE_CONFIG.integration != "Linux" and SECRETS_PATH.is_dir():
+        add_observer_schedule(SECRETS_PATH.resolve(), recursive=True)
+
+    add_observer_schedule(CUSTOM_CONFIGS_PATH.resolve(), recursive=True)
+    add_observer_schedule(EXTERNAL_PLUGINS_PATH.resolve(), recursive=True)
+
+    CORE_CONFIG.logger.info("🐕 Watchdog started")
 
 
 def listen_dynamic_instances():
@@ -398,7 +601,7 @@ def listen_dynamic_instances():
     CORE_CONFIG.logger.info('listen_dynamic_instances - ✅ Subscribed to Redis channel "bw-instances", starting to listen for dynamic instances ...')
 
     try:
-        while not stop_event.is_set():
+        while not stop_event.is_set() and listen_for_dynamic_instances.is_set():
             pubsub_message = None
             try:
                 pubsub_message = pubsub.get_message(timeout=15)
@@ -472,24 +675,32 @@ def listen_dynamic_instances():
 
 
 def run_pending_jobs() -> None:
-    while not DB.is_scheduler_initialized():
-        CORE_CONFIG.logger.warning(f"run_pending_jobs - Scheduler is not initialized yet, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ...")
-        sleep(float(CORE_CONFIG.WAIT_RETRY_INTERVAL))
+    if not scheduler_initialized.is_set():
+        while not DB.is_scheduler_initialized():
+            CORE_CONFIG.logger.warning(f"run_pending_jobs - Scheduler is not initialized yet, retrying in {CORE_CONFIG.WAIT_RETRY_INTERVAL} seconds ...")
+            sleep(float(CORE_CONFIG.WAIT_RETRY_INTERVAL))
+        scheduler_initialized.set()
 
     SCHEDULER.run_pending()
 
 
 def instances_healthcheck() -> None:
-    if not DB or not DB.is_initialized():
-        return
+    if not database_initialized.is_set():
+        if not DB or not DB.is_initialized():
+            return
+        database_initialized.set()
 
-    instance_apis = {instance["hostname"]: API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"]) for instance in DB.get_instances()}
+    instance_apis = DB.get_instances()
 
     if not instance_apis:
         CORE_CONFIG.logger.warning("instances_healthcheck - No instances found in database, skipping healthcheck ...")
         return
+    elif isinstance(instance_apis, str):
+        CORE_CONFIG.logger.error(f"instances_healthcheck - Can't get instances from database : {instance_apis}, skipping healthcheck ...")
+        return
 
-    for instance, instance_api in instance_apis.items():
+    for instance in instance_apis:
+        instance_api = API(f"http://{instance['hostname']}:{instance['port']}", instance["server_name"])
         sent, err, status, resp = instance_api.request("GET", "ping")
         if not sent:
             CORE_CONFIG.logger.warning(f"instances_healthcheck - Can't send API request to {instance_api.endpoint}ping : {err}, healthcheck will be retried in 30 seconds ...")
@@ -501,7 +712,7 @@ def instances_healthcheck() -> None:
             else:
                 CORE_CONFIG.logger.info(f"instances_healthcheck - Successfully sent API request to {instance_api.endpoint}ping, marking instance as seen ...")
 
-                Thread(target=seen_instance, args=(instance,)).start()
+                Thread(target=seen_instance, args=(instance["hostname"],)).start()
 
 
 def run_repeatedly(delay: int, func, *, wait_first: bool = False, **kwargs):
@@ -563,6 +774,15 @@ async def get_version() -> JSONResponse:
     return JSONResponse(content={"message": BUNKERWEB_VERSION})
 
 
+observer = None
+if CORE_CONFIG.hot_reload:
+    CORE_CONFIG.logger.info("🐕 Hot reload is enabled, starting watchdog ...")
+    observer = Observer()
+    setup_observer()
+    observer.start()
+
+startup()
+
 # Include the routers to the main app
 
 from .routers import actions, config, custom_configs, instances, jobs, plugins
@@ -578,6 +798,7 @@ update_app_mounts(app)
 
 if CORE_CONFIG.use_redis:
     if CORE_CONFIG.REDIS_HOST:
+        listen_for_dynamic_instances.set()
         Thread(target=listen_dynamic_instances, name="redis_listener").start()
     else:
         CORE_CONFIG.logger.warning("USE_REDIS is set to yes but REDIS_HOST is not defined, app will not listen for dynamic instances")

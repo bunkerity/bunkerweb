@@ -14,14 +14,14 @@ from ipaddress import (
 )
 from logging import Logger
 from os import cpu_count, getenv, sep
-from os.path import join, normpath
+from os.path import join
 from pathlib import Path
 from pydantic import field_validator
 from regex import IGNORECASE, compile as re_compile
 from secrets import choice as secrets_choice
 from string import ascii_letters, digits, punctuation
 from sys import path as sys_path
-from typing import Dict, List, Literal, Union
+from typing import Dict, Iterable, List, Literal, Set, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("db",), ("utils",))]:
     if deps_path not in sys_path:
@@ -29,6 +29,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from logger import setup_logger  # type: ignore
 from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore (present in /usr/share/bunkerweb/utils/)
+
 
 BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(?P<hostname>(?<![:@])\b[^:@\s]+\b)(:(?P<port>\d+))?(@(?P<server_name>(?=[^\s]{1,255})[^\s]+))?")
 EXTERNAL_PLUGIN_URLS_RX = re_compile(r"^( *((https?://|file:///)[-\w@:%.+~#=]+[-\w()!@:%+.~?&/=$#]*)(?!.*\2(?!.)) *)*$")
@@ -38,20 +39,27 @@ IP_RX = re_compile(
 )
 TOKEN_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$")
 
+YAML_CONFIG_FILE = Path(getenv("SETTINGS_YAML_FILE", join(sep, "etc", "bunkerweb", "config.yaml") if Path(sep, "etc", "bunkerweb", "config.yaml").is_file() else join(sep, "etc", "bunkerweb", "config.yml")))
+CONFIG_FILE = Path(getenv("SETTINGS_ENV_FILE", join(sep, "etc", "bunkerweb", "core.conf")))
+SECRETS_PATH = Path(getenv("SETTINGS_SECRETS_DIR", join(sep, "run", "secrets")))
+
 
 class CoreConfig(YamlBaseSettings):
+    # ? Core specific settings
     LISTEN_ADDR: str = "0.0.0.0"
     LISTEN_PORT: Union[str, int] = 1337
     MAX_WORKERS: Union[str, int] = max((cpu_count() or 1) - 1, 1)
     MAX_THREADS: Union[str, int] = int(MAX_WORKERS) * 2 if isinstance(MAX_WORKERS, int) or MAX_WORKERS.isdigit() else 2
     WAIT_RETRY_INTERVAL: Union[str, float] = 5.0
-    HEALTHCHECK_INTERVAL: Union[str, int] = 30
+    HEALTHCHECK_INTERVAL: Union[str, int] = 60
     CHECK_WHITELIST: Union[Literal["yes", "no"], bool] = "yes"
-    WHITELIST: Union[str, set[str]] = {"127.0.0.1"}
+    WHITELIST: Union[str, Iterable[str]] = {"127.0.0.1"}
     CHECK_TOKEN: Union[Literal["yes", "no"], bool] = "yes"
     CORE_TOKEN: str = ""
-    BUNKERWEB_INSTANCES: Union[str, set[str]] = set()
+    BUNKERWEB_INSTANCES: Union[str, Iterable[str]] = set()
+    HOT_RELOAD: Union[Literal["yes", "no"], bool] = "no"
 
+    # ? Miscellaneous settings
     LOG_LEVEL: Literal["emerg", "alert", "crit", "error", "warn", "warning", "notice", "info", "debug", "EMERG", "ALERT", "CRIT", "ERROR", "WARN", "WARNING", "NOTICE", "INFO", "DEBUG"] = "notice"
     DATABASE_URI: str = "sqlite:////var/lib/bunkerweb/db.sqlite3"
     USE_REDIS: Union[Literal["yes", "no"], bool] = "no"
@@ -60,8 +68,7 @@ class CoreConfig(YamlBaseSettings):
     REDIS_DATABASE: Union[str, int] = 0
     REDIS_SSL: Union[str, bool] = False
     REDIS_TIMEOUT: Union[str, int] = 1000
-
-    EXTERNAL_PLUGIN_URLS: Union[str, set] = ""
+    EXTERNAL_PLUGIN_URLS: Union[str, Iterable[str]] = ""
     AUTOCONF_MODE: Union[Literal["yes", "no"], bool] = "no"
     KUBERNETES_MODE: Union[Literal["yes", "no"], bool] = "no"
     SWARM_MODE: Union[Literal["yes", "no"], bool] = "no"
@@ -73,9 +80,9 @@ class CoreConfig(YamlBaseSettings):
     # 4. .env file
     # 5. Default values
     model_config = YamlSettingsConfigDict(
-        yaml_file=normpath(getenv("SETTINGS_YAML_FILE", join(sep, "etc", "bunkerweb", "config.yaml") if Path(sep, "etc", "bunkerweb", "config.yaml").is_file() else join(sep, "etc", "bunkerweb", "config.yml"))),
-        env_file=normpath(getenv("SETTINGS_ENV_FILE", join(sep, "etc", "bunkerweb", "core.conf"))),
-        secrets_dir=normpath(getenv("SETTINGS_SECRETS_DIR", join(sep, "run", "secrets"))),
+        yaml_file=str(YAML_CONFIG_FILE),
+        env_file=str(CONFIG_FILE),
+        secrets_dir=str(SECRETS_PATH),
         env_file_encoding="utf-8",
         extra="allow",
     )
@@ -200,9 +207,9 @@ class CoreConfig(YamlBaseSettings):
     @cached_property
     def whitelist(
         self,
-    ) -> set[Union[IPv4Address, IPv6Address, IPv4Network, IPv6Network]]:
+    ) -> Set[Union[IPv4Address, IPv6Address, IPv4Network, IPv6Network]]:
         if isinstance(self.WHITELIST, str):
-            tmp_whitelist = self.WHITELIST.split()
+            tmp_whitelist = self.WHITELIST.split(" ")
         else:
             tmp_whitelist = self.WHITELIST
 
@@ -257,9 +264,9 @@ class CoreConfig(YamlBaseSettings):
         return bunkerweb_instances
 
     @cached_property
-    def external_plugin_urls(self) -> set[str]:
+    def external_plugin_urls(self) -> Set[str]:
         if isinstance(self.EXTERNAL_PLUGIN_URLS, str):
-            tmp_external_plugin_urls = set(self.EXTERNAL_PLUGIN_URLS.split())
+            tmp_external_plugin_urls = self.EXTERNAL_PLUGIN_URLS.split(" ")
         else:
             tmp_external_plugin_urls = self.EXTERNAL_PLUGIN_URLS
 
@@ -324,6 +331,8 @@ class CoreConfig(YamlBaseSettings):
                 "core_token",
                 "BUNKERWEB_INSTANCES",
                 "bunkerweb_instances",
+                "HOT_RELOAD",
+                "hot_reload",
                 "external_plugin_urls",
                 "external_plugin_urls_str",
                 "log_level",
@@ -376,6 +385,10 @@ class CoreConfig(YamlBaseSettings):
             return "Autoconf"
 
         return self.get_instance()
+
+    @cached_property
+    def hot_reload(self) -> bool:
+        return self.HOT_RELOAD == "yes" if isinstance(self.HOT_RELOAD, str) else self.HOT_RELOAD
 
     # ? METHODS
 
@@ -452,6 +465,7 @@ The API can be configured using the following settings:
 | `CHECK_TOKEN` | Activate the authentication token | `yes` |
 | `CORE_TOKEN` | The accepted authentication token | `<random>` |
 | `BUNKERWEB_INSTANCES` | The static BunkerWeb instances | `[]` |
+| `HOT_RELOAD` | Activate the hot reload | `no` |
 | `LOG_LEVEL` | The log level | `notice` |
 | `DATABASE_URI` | The database URI | `sqlite:////var/lib/bunkerweb/db.sqlite3` |
 | `USE_REDIS` | Activate Redis | `no` |

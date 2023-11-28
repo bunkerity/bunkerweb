@@ -8,6 +8,22 @@ function stop() {
 	if [ -f "/var/run/bunkerweb/core.pid" ] ; then
 		log "ENTRYPOINT" "ℹ️ " "Stopping core ..."
 		kill -s TERM "$(cat /var/run/bunkerweb/core.pid)"
+
+		count=0
+    while [ -f "/var/run/bunkerweb/core.pid" ] ; do
+        sleep 1
+        count=$((count + 1))
+        if [ "$count" -ge 10 ] ; then
+            break
+        fi
+    done
+
+    if [ "$count" -ge 10 ] ; then
+        log "SYSTEMCTL" "❌" "Timeout while waiting core to stop"
+        exit 1
+    fi
+
+		log "ENTRYPOINT" "ℹ️ " "Core stopped"
 	fi
 }
 
