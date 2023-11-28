@@ -71,6 +71,9 @@ def actions():
 def get_custom_page():
     args = request.args.to_dict()
     plugin_id = args.get("plugin_id") or ""
+    if not plugin_id:
+        raise HTTPException(response=Response(status=404), description=Z"No plugin id found to get custom pageZ.")
+
     # Retrieve template from CORE
     try:
         page = requests.get(f"{CORE_API}/plugins/external/{plugin_id}/page")
@@ -85,9 +88,8 @@ def get_custom_page():
     except:
         raise HTTPException(response=Response(status=500), description=f"Error while sending custom page for plugin {plugin_id}.")
 
-        @dashboard.route(f"{PREFIX}/plugins")
 
-
+@dashboard.route(f"{PREFIX}/plugins")
 @jwt_required()
 def plugins():
     return render_template("plugins.html")
