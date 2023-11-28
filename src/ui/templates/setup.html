@@ -6,7 +6,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <script src="https://cdn.tailwindcss.com"></script>
     <title>BunkerWeb UI | Setup</title>
     <link
       rel="shortcut icon"
@@ -1395,7 +1394,6 @@
               </h5>
               <div class="flex justify-start items-center">
                 <button
-                  type="button"
                   id="check-server-name"
                   class="flex justify-start w-fit tracking-wide dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-xs ease-in shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
                 >
@@ -1447,7 +1445,6 @@
           this.checkBtn = document.querySelector("#check-server-name");
           this.checkRes = document.querySelector("[aria-check-result]");
           this.checkColor = document.querySelector("[aria-check-color]");
-          this.servInp = document.querySelector("#server_name");
           this.sslCheck = document.querySelector("#auto_lets_encrypt");
           this.init();
         }
@@ -1459,7 +1456,8 @@
           });
 
           // Check for endpoint on button fetch
-          this.checkBtn.addEventListener("click", () => {
+          this.checkBtn.addEventListener("click", (e) => {
+            e.preventDefault();
             // get resume
             const api = `http${
               this.sslCheck.getAttribute("aria-checked") === "true" ? "s" : ""
@@ -1490,7 +1488,6 @@
         }
 
         setCheck(state, bgColor) {
-          print(state, bgColor);
           this.checkColor.classList.add(bgColor);
           this.checkRes.textContent = state;
         }
