@@ -18,7 +18,7 @@
         />
       </svg>
       <span class="file-manager-item-btn-text">
-        {{ $t("custom_conf.file_manager.actions.delete") }}
+        {{ $t("action_delete") }}
       </span>
     </span>
   </button>

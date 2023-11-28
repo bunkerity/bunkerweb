@@ -101,20 +101,20 @@ onMounted(() => {
           />
         </div>
         <h1 class="login-title-desktop">
-          {{ $t("login.title") }}
+          {{ $t("login_title") }}
         </h1>
         <form action="/login" method="POST" autocomplete="off">
           <!-- username inpt-->
           <div class="login-input-group">
             <label for="username" class="login-label">
-              {{ $t("login.username") }}
+              {{ $t("login_username") }}
             </label>
             <input
               type="username"
               id="username"
               name="username"
               class="login-input"
-              :placeholder="$t('login.username_placeholder')"
+              :placeholder="$t('login_username_placeholder')"
               pattern="(.*?)"
               required
             />
@@ -123,14 +123,14 @@ onMounted(() => {
           <!-- password inpt-->
           <div class="login-input-group">
             <label for="password" class="login-label">
-              {{ $t("login.password") }}
+              {{ $t("login_password") }}
             </label>
             <input
               type="password"
               id="password"
               name="password"
               class="login-input"
-              :placeholder="$t('login.password_placeholder')"
+              :placeholder="$t('login_password_placeholder')"
               pattern="(.*?)"
               required
             />
@@ -144,7 +144,7 @@ onMounted(() => {
               value="login"
               class="login-submit-btn"
             >
-              {{ $t("login.log_button") }}
+              {{ $t("login_log_button") }}
             </button>
           </div>
         </form>
@@ -158,7 +158,7 @@ onMounted(() => {
         <img
           class="max-w-60 max-h-30"
           src="/images/BUNKERWEB-print-hd-blanc.png"
-          :alt="$t('login.logo_alt')"
+          :alt="$t('login_logo_alt')"
         />
       </div>
     </div>

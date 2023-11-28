@@ -97,12 +97,13 @@ def log_format(type="error", status_code="500", path="", detail="Internal Server
 
 
 # Send action to CORE
-def create_action_format(type="info", status_code="500", title="", detail="", tags=["ui", "exception"]):
+def create_action_format(type="info", status_code="500", title="", detail="", tags=["ui", "exception"], exception_logger=True):
     data = json.dumps({"date": datetime.now().isoformat(), "api_method": "UNKNOWN", "method": "ui", "title": title, "description": f"{detail} (status {status_code})", "status": type, "tags": tags}, skipkeys=True, allow_nan=True, indent=6)
     try:
         requests.post(f"{CORE_API}/actions", data=data)
     except:
-        LOGGER.error(log_format("error", "500", "", f"Try to send action to CORE but failed. CORE down or data invalid ({data})."))
+        if exception_logger:
+            LOGGER.error(log_format("error", "500", "", f"Try to send action to CORE but failed. CORE down or data invalid ({data})."))
 
 
 # Handle error and exception with default format

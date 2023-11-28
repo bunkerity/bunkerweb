@@ -42,10 +42,10 @@ const plugins = reactive({
   data: [],
   total: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.data.filter((item) => item["external"] === false).length,
+    () => plugins.data.filter((item) => item["external"] === false).length
   ),
   external: computed(
-    () => plugins.data.filter((item) => item["external"] === true).length,
+    () => plugins.data.filter((item) => item["external"] === true).length
   ),
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
@@ -64,7 +64,7 @@ async function getPlugins() {
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -94,27 +94,27 @@ onMounted(() => {
       :isErr="plugins.isErr"
       :isPend="plugins.isPend"
       :textState="{
-        isPend: $t('plugins.api.pending'),
-        isErr: $t('plugins.api.error'),
+        isPend: $t('api_pending', { name: $t('dashboard_plugins') }),
+        isErr: $t('api_error', { name: $t('dashboard_plugins') }),
       }"
     />
     <CardBase
       v-if="!plugins.isErr && !plugins.isPend && plugins.setup.length > 0"
       class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
-      :label="$t('plugins.card.info.title')"
+      :label="$t('dashboard_plugins')"
     >
       <CardItemList
         :items="[
           {
-            label: $t('plugins.card.info.plugins_total'),
+            label: $t('plugins_total'),
             value: plugins.total,
           },
           {
-            label: $t('plugins.card.info.plugins_internal'),
+            label: $t('plugins_internal'),
             value: plugins.internal,
           },
           {
-            label: $t('plugins.card.info.plugins_external'),
+            label: $t('plugins_external'),
             value: plugins.external,
           },
         ]"
@@ -122,7 +122,7 @@ onMounted(() => {
     </CardBase>
     <CardBase
       v-if="!plugins.isErr && !plugins.isPend"
-      :label="$t('plugins.card.upload.title')"
+      :label="$t('action_upload')"
       class="h-fit col-span-12 md:col-span-8 2xl:col-span-4 3xl:col-span-3"
     >
       <SettingsUploadStructure />
@@ -130,11 +130,11 @@ onMounted(() => {
     <CardBase
       v-if="!plugins.isErr && !plugins.isPend"
       class="z-10 h-fit col-start-1 col-end-13 md:col-start-5 md:col-end-13 2xl:col-span-5 3xl:col-span-4"
-      :label="$t('plugins.card.filter.title')"
+      :label="$t('dashboard_filter')"
     >
       <SettingsLayout
         class="sm:col-span-6"
-        :label="$t('plugins.card.filter.search.label')"
+        :label="$t('plugins_filter_search')"
         name="keyword"
       >
         <SettingsInput
@@ -143,13 +143,13 @@ onMounted(() => {
             id: 'keyword',
             type: 'text',
             value: '',
-            placeholder: $t('plugins.card.filter.search.placeholder'),
+            placeholder: $t('plugins_filter_search_placeholder'),
           }"
         />
       </SettingsLayout>
       <SettingsLayout
         class="sm:col-span-6"
-        :label="$t('plugins.card.filter.type.label')"
+        :label="$t('plugins_filter_type')"
         name="state"
       >
         <SettingsSelect
@@ -169,7 +169,7 @@ onMounted(() => {
     <CardBase
       v-if="!plugins.isPend && !plugins.isErr"
       class="h-fit col-span-12"
-      :label="$t('plugins.list.title')"
+      :label="$t('plugins_list_title')"
     >
       <PluginList @delete="(v) => openDelModal(v)" :items="plugins.setup" />
     </CardBase>

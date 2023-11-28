@@ -23,7 +23,7 @@ const input = reactive({
   type: props.setting.type,
   value: props.setting.value || props.setting.default,
   defaultValue: props.setting.default,
-  method: props.setting.method || getDefaultMethod(),
+  method: props.setting.method.toLowerCase() || getDefaultMethod(),
   defaultMethod: getDefaultMethod(),
   pattern: props.setting.regex,
   placeholder: props.setting.placeholder || "",
@@ -43,7 +43,7 @@ const input = reactive({
           input.id,
           input.value,
           props.setting.value,
-          props.setting.regex,
+          props.setting.regex
         )
       "
       :type="
@@ -71,7 +71,7 @@ const input = reactive({
     />
     <div v-if="input.type === 'password'" class="input-pw-container">
       <button
-        :aria-description="$t('custom_inputs.input.password.aria_description')"
+        :aria-description="$t('inp_input_password_desc')"
         :aria-controls="input.id"
         @click="input.showInp = input.showInp ? false : true"
         class="input-pw-svg-visible"

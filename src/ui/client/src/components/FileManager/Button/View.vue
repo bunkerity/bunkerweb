@@ -23,7 +23,7 @@
         />
       </svg>
       <span class="file-manager-item-btn-text">
-        {{ $t("custom_conf.file_manager.actions.view") }}
+        {{ $t("action_view") }}
       </span>
     </span>
   </button>

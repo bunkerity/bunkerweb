@@ -83,7 +83,7 @@ async function getData() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   const hostnames = await getHostFromInst();
 
@@ -135,7 +135,7 @@ async function getHostBan(hostname) {
     "POST",
     null,
     data,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -155,8 +155,8 @@ const tab = reactive({
       :isErr="instances.isErr || bans.isErr"
       :isPend="instances.isPend || bans.isPend"
       :textState="{
-        isPend: $t('bans.api.pending'),
-        isErr: $t('bans.api.error'),
+        isPend: $t('api_pending', { name: $t('dashboard_bans') }),
+        isErr: $t('api_error', { name: $t('dashboard_bans') }),
       }"
     />
     <CardBase
@@ -164,16 +164,16 @@ const tab = reactive({
         !instances.isErr && !instances.isPend && !bans.isPend && !bans.isErr
       "
       class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
-      :label="$t('bans.card.info.title')"
+      :label="$t('dashboard_info')"
     >
       <CardItemList
         :items="[
           {
-            label: $t('bans.card.info.items.instances_total'),
+            label: $t('bans_instances_total'),
             value: instances.total,
           },
           {
-            label: $t('bans.card.info.items.ip_bans_total'),
+            label: $t('bans_ip_bans_total'),
             value: bans.total,
           },
         ]"
@@ -183,12 +183,12 @@ const tab = reactive({
       v-if="
         !instances.isErr && !instances.isPend && !bans.isPend && !bans.isErr
       "
-      :label="$t('bans.card.filter.title')"
+      :label="$t('dashboard_filter')"
       class="z-[100] col-span-12 md:col-span-8 lg:col-span-6 2xl:col-span-5 3xl:col-span-4 grid grid-cols-12 relative"
     >
       <SettingsLayout
         class="flex w-full col-span-12 md:col-span-6"
-        :label="$t('bans.card.filter.search_ip.label')"
+        :label="$t('bans_filter_search_ip')"
         name="ipName"
       >
         <SettingsInput
@@ -203,7 +203,7 @@ const tab = reactive({
       </SettingsLayout>
       <SettingsLayout
         class="sm:col-span-6"
-        :label="$t('bans.card.filter.reason.label')"
+        :label="$t('bans_filter_reason')"
         name="reason"
       >
         <SettingsSelect
@@ -218,7 +218,7 @@ const tab = reactive({
     </CardBase>
     <CardBase
       class="max-w-[1200px] col-span-12 overflow-y-hidden min-h-[400px]"
-      :label="$t('bans.card.actions.title')"
+      :label="$t('dashboard_bans')"
     >
       <BansTabs @tab="(v) => (tab.current = v)" />
       <BansList

@@ -34,7 +34,7 @@ async function runJob(jobName) {
     "POST",
     null,
     run,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -66,7 +66,7 @@ async function downloadFile(jobName, cacheName) {
     "GET",
     null,
     download,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       return res.json();
@@ -94,7 +94,7 @@ const emits = defineEmits(["history"]);
       <div :class="[props.positions[2], 'ml-2']">
         <button @click="$emit('history', { jobName: key })">
           <span class="sr-only">
-            {{ $t("jobs.card.jobs.actions.show_history") }}
+            {{ $t("jobs_actions_show_history") }}
           </span>
           <JobsSvgHistory />
         </button>
@@ -103,8 +103,8 @@ const emits = defineEmits(["history"]);
         <span class="sr-only"
           >{{
             data["reload"]
-              ? $t("jobs.card.jobs.state.reload.succeed")
-              : $t("jobs.card.jobs.state.reload.failed")
+              ? $t("jobs_state_reload_succeed")
+              : $t("jobs_state_reload_failed")
           }}
         </span>
         <JobsSvgState :success="data['reload']" />
@@ -113,8 +113,8 @@ const emits = defineEmits(["history"]);
         <span class="sr-only">
           {{
             data["history"][0]["success"]
-              ? $t("jobs.card.jobs.state.success.succeed")
-              : $t("jobs.card.jobs.state.success.failed")
+              ? $t("jobs_state_success_succeed")
+              : $t("jobs_state_success_failed")
           }}
         </span>
         <JobsSvgState :success="data['history'][0]['success']" />
@@ -126,7 +126,7 @@ const emits = defineEmits(["history"]);
         <SettingsSelect
           v-if="data['cache'].length > 0"
           :settings="{
-            value: $t('jobs.card.jobs.actions.cache_download'),
+            value: $t('jobs_actions_cache_download'),
             values: getJobsCacheNames(data['cache']),
           }"
           @inp="(v) => downloadFile(key, v)"
@@ -135,7 +135,7 @@ const emits = defineEmits(["history"]);
       </div>
       <div :class="[props.positions[7], 'flex justify-center']">
         <ButtonBase class="py-1.5" color="valid" size="lg" @click="runJob(key)">
-          {{ $t("jobs.card.jobs.actions.run") }}
+          {{ $t("jobs_actions_run") }}
         </ButtonBase>
       </div>
     </div>

@@ -50,8 +50,8 @@ const news = reactive({
     <!-- header -->
     <div class="news-sidebar-header">
       <div class="float-left">
-        <h5 class="news-sidebar-title">{{ $t("dashboard.news.title") }}</h5>
-        <p class="news-sidebar-subtitle">{{ $t("dashboard.news.subtitle") }}</p>
+        <h5 class="news-sidebar-title">{{ $t("dashboard_news_title") }}</h5>
+        <p class="news-sidebar-subtitle">{{ $t("dashboard_news_subtitle") }}</p>
       </div>
     </div>
     <hr class="line-separator" />
@@ -59,7 +59,7 @@ const news = reactive({
     <!-- news-->
     <div v-if="news.posts.length === 0" class="flex-auto overflow-auto">
       <p class="news-sidebar-no-posts-content">
-        {{ $t("dashboard.news.fetch_error") }}
+        {{ $t("dashboard_news_fetch_error") }}
       </p>
     </div>
     <!-- end news-->
@@ -74,7 +74,7 @@ const news = reactive({
       id="subscribe-newsletter"
     >
       <h5 class="news-newsletter-title">
-        {{ $t("dashboard.news.newsletter.title") }}
+        {{ $t("dashboard_newsletter_title") }}
       </h5>
       <div class="flex">
         <input
@@ -82,7 +82,7 @@ const news = reactive({
           id="newsletter-email"
           name="EMAIL"
           class="news-newsletter-input"
-          :placeholder="$t('dashboard.news.newsletter.placeholder')"
+          :placeholder="$t('dashboard_newsletter_placeholder')"
           pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}$"
           required
         />
@@ -114,13 +114,13 @@ const news = reactive({
           </div>
         </div>
         <label class="news-newsletter-checkbox-content" for="newsletter-check">
-          {{ $t("dashboard.news.newsletter.privacy.text") }}
+          {{ $t("dashboard_newsletter_privacy_text") }}
           <a
             class="italic"
             href="https://www.bunkerity.com/privacy-policy/"
             target="_blank"
           >
-            {{ $t("dashboard.news.newsletter.privacy.text_link") }}
+            {{ $t("dashboard_newsletter_privacy_text_link") }}
           </a>
         </label>
       </div>
@@ -129,7 +129,7 @@ const news = reactive({
         formtarget="_blank"
         class="news-newsletter-confirm-btn"
       >
-        {{ $t("dashboard.news.newsletter.subscribe_button") }}
+        {{ $t("dashboard_newsletter_subscribe_button") }}
       </button>
     </form>
     <!-- end newsletter -->

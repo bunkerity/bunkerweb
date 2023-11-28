@@ -28,7 +28,7 @@ const select = reactive({
   values: props.setting.select,
   value: props.setting.value || props.setting.default,
   defaultValue: props.setting.default,
-  method: props.setting.method || getDefaultMethod(),
+  method: props.setting.method.toLowerCase() || getDefaultMethod(),
   defaultMethod: getDefaultMethod(),
   isOpen: false,
 });
@@ -67,7 +67,7 @@ function updateTop() {
   selectTop.value = `${
     Math.abs(
       selectBtn.value.closest(".plugin-structure").scrollTop -
-        selectBtn.value.offsetTop,
+        selectBtn.value.offsetTop
     ) + selectBtn.value.clientHeight
   }px`;
 }
@@ -104,7 +104,7 @@ onMounted(() => {
     :data-default-value="select.defaultValue"
     :id="select.id"
     :name="select.id"
-    :aria-description="$t('custom_inputs.select.default.aria_description')"
+    :aria-description="$t('inp_select_default_desc')"
     class="hidden"
   >
     <option
@@ -121,9 +121,7 @@ onMounted(() => {
   <button
     :aria-controls="`${select.id}-dropdown`"
     ref="selectBtn"
-    :aria-description="
-      $t('custom_inputs.select.dropdown_button.aria_description')
-    "
+    :aria-description="$t('inp_select_dropdown_button_desc')"
     :data-select-dropdown="props.setting.id"
     :disabled="
       select.method !== 'ui' && select.method !== 'default' ? true : false
@@ -151,7 +149,7 @@ onMounted(() => {
     :aria-hidden="select.isOpen ? 'false' : 'true'"
     :class="[select.isOpen ? 'flex' : 'hidden']"
     class="select-dropdown-container"
-    :aria-description="$t('custom_inputs.select.dropdown.aria_description')"
+    :aria-description="$t('inp_select_dropdown_desc')"
   >
     <button
       role="option"
@@ -165,7 +163,7 @@ onMounted(() => {
             select.id,
             select.value,
             props.setting.value,
-            props.setting.regex,
+            props.setting.regex
           );
         }
       "
@@ -175,7 +173,7 @@ onMounted(() => {
         value === select.value ? 'active' : '',
         'select-dropdown-btn',
       ]"
-      :aria-description="$t('custom_inputs.select.option.aria_description')"
+      :aria-description="$t('inp_select_option_desc')"
       :aria-current="value === select.value ? 'true' : 'false'"
     >
       {{ value }}

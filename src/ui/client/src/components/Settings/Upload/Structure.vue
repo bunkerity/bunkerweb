@@ -69,7 +69,7 @@ function uploadFile(file) {
           item.name === name &&
           item.fileSize === fileSize &&
           item.state === "upload" &&
-          item.date === date,
+          item.date === date
       );
 
       if (xhr.status == 201) {
@@ -115,7 +115,7 @@ function uploadFile(file) {
       />
       <i class="fa-solid fa-cloud-upload-alt"></i>
       <p class="dark:text-gray-500 text-sm text-center my-3">
-        {{ $t("custom_inputs.upload.add") }}
+        {{ $t("inp_upload_add") }}
       </p>
     </form>
     <div class="col-span-12">
@@ -136,7 +136,7 @@ function uploadFile(file) {
         <span class="mx-0.5">
           <SettingsUploadSvgSuccess class="scale-90" />
         </span>
-        {{ $t("custom_inputs.upload.warning") }}
+        {{ $t("inp_upload_warning") }}
       </p>
     </div>
   </div>

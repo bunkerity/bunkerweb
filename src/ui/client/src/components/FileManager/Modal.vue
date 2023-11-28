@@ -171,7 +171,7 @@ async function sendData() {
     method,
     conf,
     updateConf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       // Case not save
@@ -212,9 +212,7 @@ function formatData() {
     <div class="w-full">
       <div
         role="group"
-        :aria-description="
-          $t('custom_conf.file_manager.modal.path.aria_description')
-        "
+        :aria-description="$t('custom_conf_modal_path_desc')"
         class="modal-path"
       >
         <p class="modal-path-text mr-1">
@@ -243,9 +241,7 @@ function formatData() {
           class="absolute w-full h-full border-2 border-red-500 z-100 pointer-events-none outline-red-500"
         ></div>
         <div
-          :aria-description="
-            $t('custom_conf.file_manager.modal.editor.aria_description')
-          "
+          :aria-description="$t('custom_conf_modal_editor_desc')"
           id="editor"
           class="modal-editor z-10"
         ></div>
@@ -269,7 +265,7 @@ function formatData() {
           ]"
           class="text-xs ml-2"
         >
-          {{ $t(`custom_conf.file_manager.actions.${props.action}`) }}
+          {{ $t(`action_${props.action}`) }}
         </ButtonBase>
       </div>
     </div>

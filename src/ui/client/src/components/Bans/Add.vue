@@ -80,7 +80,7 @@ async function addBansFromList() {
     "POST",
     getValidBans(),
     addBans,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     // Case succeed, delete items from UI
     // And emit add event to refetch ban list
@@ -100,7 +100,7 @@ async function addBansFromList() {
     >
       <ButtonBase
         @click="addItem()"
-        :aria-description="$t('bans.add.actions.add_field.aria_description')"
+        :aria-description="$t('bans_add_desc')"
         color="valid"
         size="normal"
         class="text-sm mb-2 sm:mb-0"
@@ -120,13 +120,13 @@ async function addBansFromList() {
           />
         </svg>
         <span class="ml-1 -translate-y-1">
-          {{ $t("bans.add.actions.add_field.label") }}
+          {{ $t("bans_add_label") }}
         </span>
       </ButtonBase>
       <ButtonBase
         :disabled="bans.items.length <= 0 ? true : false"
         @click="deleteAllItems()"
-        :aria-description="$t('bans.add.actions.remove_bans.aria_description')"
+        :aria-description="$t('bans_add_remove_bans_desc')"
         color="delete"
         size="normal"
         class="text-sm ml-4"
@@ -146,7 +146,7 @@ async function addBansFromList() {
           />
         </svg>
         <span class="ml-1 -translate-y-1">
-          {{ $t("bans.add.actions.remove_bans.label") }}
+          {{ $t("action_delete_all") }}
         </span>
       </ButtonBase>
     </div>
@@ -155,11 +155,11 @@ async function addBansFromList() {
         v-if="bans.items.length > 0"
         class="min-w-[110px] h-full col-span-12"
         :header="[
-          $t('bans.add.header.ip_number'),
-          $t('bans.add.header.ban_start'),
-          $t('bans.add.header.ban_end'),
-          $t('bans.add.header.reason'),
-          $t('bans.add.header.delete'),
+          $t('bans_add_header_ip'),
+          $t('bans_add_header_ban_start'),
+          $t('bans_add_header_ban_end'),
+          $t('bans_add_header_reason'),
+          $t('action_delete'),
         ]"
         :positions="addPositions"
       >
@@ -232,16 +232,14 @@ async function addBansFromList() {
               />
             </SettingsLayout>
             <ButtonBase
-              :aria-description="
-                $t('bans.add.actions.remove_ban.aria_description')
-              "
+              :aria-description="$t('bans_add_remove_ban_desc')"
               @click="deleteItem(item.id)"
               color="delete"
               size="normal"
               class="text-sm mx-4 py-1.5"
             >
               <span class="sr-only">
-                {{ $t("bans.add.actions.remove_ban.label") }}
+                {{ $t("bans_add_remove_ban") }}
               </span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -268,21 +266,21 @@ async function addBansFromList() {
       class="col-span-12 flex flex-col items-center justify-center mt-4"
     >
       <ButtonBase
-        :aria-description="$t('bans.add.actions.save_bans.aria_description')"
+        :aria-description="$t('bans_add_save_bans_desc')"
         @click="addBansFromList()"
         :disabled="bans.isInvalidAdd"
         color="valid"
         size="normal"
         class="text-sm mb-2 sm:mb-0 w-fit"
       >
-        {{ $t("bans.add.actions.save_bans.label") }}
+        {{ $t("bans_add_save_bans") }}
       </ButtonBase>
       <hr class="line-separator z-10 w-1/2" />
       <p class="dark:text-gray-500 text-xs text-center mt-1 mb-2">
         <span class="mx-0.5">
           <SettingsUploadSvgWarning class="scale-90" />
         </span>
-        {{ $t("bans.add.actions.save_bans.warning") }}
+        {{ $t("bans_add_save_bans_warning") }}
       </p>
     </div>
   </div>

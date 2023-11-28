@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from os import cpu_count, getenv, sep
 from os.path import join
+from utils import create_action_format
 
 MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
 MODE = getenv("MODE")
@@ -22,3 +23,8 @@ graceful_timeout = 0
 max_requests_jitter = min(8, MAX_WORKERS)
 secure_scheme_headers = {}
 strip_header_spaces = True
+
+
+def on_exit(server):
+    create_action_format("info", "", "", "Server stop", ["ui", "exception"], False)
+    pass

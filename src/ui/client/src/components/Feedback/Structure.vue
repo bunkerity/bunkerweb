@@ -132,7 +132,7 @@ onMounted(() => {
       @click="dropdown.isOpen = dropdown.isOpen ? false : true"
       class="transition scale-90 sm:scale-100 dark:brightness-95 p-3 text-xl bg-white shadow-sm cursor-pointer rounded-circle text-slate-700"
     >
-      <span class="sr-only">{{ $t("dashboard.actions.open_button") }}</span>
+      <span class="sr-only">{{ $t("dashboard_open_sidebar") }}</span>
       <svg
         class="pointer-events-none fill-yellow-500 -translate-y-0.4 h-6 w-6"
         xmlns="http://www.w3.org/2000/svg"
@@ -163,7 +163,7 @@ onMounted(() => {
       class="absolute h-5 w-5 top-4 right-4"
       @click="dropdown.isOpen = false"
     >
-      <span class="sr-only">{{ $t("dashboard.actions.open_button") }}</span>
+      <span class="sr-only">{{ $t("dashboard_close_sidebar") }}</span>
       <svg
         class="cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80"
         xmlns="http://www.w3.org/2000/svg"
@@ -180,18 +180,18 @@ onMounted(() => {
     <div class="px-6 pt-4 pb-0 mb-0 border-b-0 rounded-t-2xl">
       <div class="float-left">
         <h5 class="uppercase mt-4 mb-1 dark:text-white font-bold">
-          {{ $t("dashboard.actions.title") }}
+          {{ $t("dashboard_actions_title") }}
         </h5>
         <p class="capitalize-first dark:text-white dark:opacity-80 mb-0">
-          {{ $t("dashboard.actions.subtitle") }}
+          {{ $t("dashboard_actions_subtitle") }}
         </p>
         <TablistBase
           @tab="(v) => (logs.current = v)"
           :current="logs.current"
           :items="[
-            { text: $t('dashboard.actions.tabs.ui'), tag: 'ui' },
-            { text: $t('dashboard.actions.tabs.core'), tag: 'core' },
-            { text: $t('dashboard.actions.tabs.global'), tag: 'global' },
+            { text: $t('dashboard_ui'), tag: 'ui' },
+            { text: $t('dashboard_core'), tag: 'core' },
+            { text: $t('dashboard_global'), tag: 'global' },
           ]"
         />
       </div>
@@ -201,7 +201,7 @@ onMounted(() => {
           data-flash-sidebar-close
           class="inline-block p-0 mb-4 text-sm font-bold leading-normal text-center uppercase align-middle transition-all ease-in bg-transparent border-0 rounded-lg shadow-none cursor-pointer hover:-translate-y-px tracking-tight-rem bg-150 bg-x-25 active:opacity-85 dark:text-white text-slate-700"
         >
-          <span class="sr-only">{{ $t("dashboard.actions.open_button") }}</span>
+          <span class="sr-only">{{ $t("dashboard_close_sidebar") }}</span>
 
           <i class="fa fa-close"></i>
         </button>

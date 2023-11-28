@@ -65,9 +65,7 @@ function getClickPath(id) {
       :aria-current="id === pathSplit.length - 1 ? 'true' : 'false'"
     >
       <button
-        :aria-description="
-          $t('custom_conf.file_manager.breadcrumb.item.aria_description')
-        "
+        :aria-description="$t('custom_conf_breadcrumb_item_desc')"
         @click="$emit('updatePath', getClickPath(id))"
         type="button"
         class="file-manager-breadcrumb-item-btn"

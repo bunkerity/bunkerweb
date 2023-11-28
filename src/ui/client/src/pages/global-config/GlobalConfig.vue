@@ -72,7 +72,7 @@ const plugins = reactive({
     // Duplicate base data
     const cloneGlobalPlugin = getPluginsByContext(
       JSON.parse(JSON.stringify(plugins.data)),
-      "global",
+      "global"
     );
     // Translate
     pluginI18n(t, cloneGlobalPlugin);
@@ -126,14 +126,14 @@ async function getGlobalConf(isFeedback = true) {
     "GET",
     null,
     conf,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 
@@ -156,7 +156,7 @@ async function sendConf() {
     "PUT",
     config.data["global"],
     null,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await refresh(false);
 }
@@ -173,8 +173,8 @@ onMounted(() => {
       :isErr="conf.isErr || plugins.isErr"
       :isPend="plugins.isPend"
       :textState="{
-        isPend: $t('global_conf.api.pending'),
-        isErr: $t('global_conf.api.error'),
+        isPend: $t('api_pending', { name: $t('dashboard_global_config') }),
+        isErr: $t('api_error', { name: $t('dashboard_global_config') }),
       }"
     />
     <div
@@ -184,10 +184,10 @@ onMounted(() => {
       <CardBase
         class="z-100 h-fit col-span-12 md:col-span-5 lg:col-span-4 3xl:col-span-3 grid grid-cols-12 relative"
       >
-        <CardLabel :label="$t('global_conf.card.plugin.title')" />
+        <CardLabel :label="$t('dashboard_global_config')" />
         <SettingsLayout
           class="flex w-full col-span-12"
-          :label="$t('global_conf.card.plugin.select_plugin.label')"
+          :label="$t('global_conf_select_plugin')"
           name="plugins"
         >
           <SettingsSelect
@@ -196,20 +196,18 @@ onMounted(() => {
               id: 'plugins',
               value: plugins.activePlugin,
               values: plugins.activePlugins,
-              placeholder: $t(
-                'global_conf.card.plugin.select_plugin.placeholder',
-              ),
+              placeholder: $t('global_conf_select_plugin_placeholder'),
             }"
           />
         </SettingsLayout>
       </CardBase>
       <CardBase
-        :label="$t('global_conf.card.filter.title')"
+        :label="$t('dashboard_filter')"
         class="z-10 h-fit col-span-12 md:col-span-7 lg:col-span-5 3xl:col-span-3 grid grid-cols-12 relative"
       >
         <SettingsLayout
           class="flex w-full col-span-12 md:col-span-6"
-          :label="$t('global_conf.card.filter.search.label')"
+          :label="$t('global_conf_filter_search')"
           name="keyword"
         >
           <SettingsInput
@@ -218,7 +216,7 @@ onMounted(() => {
               id: 'keyword',
               type: 'text',
               value: '',
-              placeholder: $t('global_conf.card.filter.search.placeholder'),
+              placeholder: $t('global_conf_filter_search_placeholder'),
             }"
           />
         </SettingsLayout>
@@ -251,7 +249,7 @@ onMounted(() => {
             color="valid"
             size="lg"
           >
-            {{ $t("global_conf.card.structure.save") }}
+            {{ $t("action_save") }}
           </ButtonBase>
         </div>
       </CardBase>

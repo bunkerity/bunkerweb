@@ -62,14 +62,14 @@ const instance = reactive({
   ],
 
   actions: computed(() =>
-    props.status === "up" ? [actions.stop, actions.reload] : [],
+    props.status === "up" ? [actions.stop, actions.reload] : []
   ),
   checks: computed(() =>
     props.status === "up"
       ? props.method === "static"
         ? [topActions.ping]
         : [topActions.delete, topActions.ping]
-      : [],
+      : []
   ),
 });
 
@@ -90,8 +90,8 @@ const emits = defineEmits(["action", "delete"]);
             <p class="sr-only">
               {{
                 props.status === "up"
-                  ? $t(`instances.card.status.active`)
-                  : $t(`instances.card.status.inactive`)
+                  ? $t(`instances_active`)
+                  : $t(`instances_inactive`)
               }}
             </p>
           </div>
@@ -112,7 +112,7 @@ const emits = defineEmits(["action", "delete"]);
                     hostname: props.hostname,
                     operation: action.name,
                   }
-                : props.hostname,
+                : props.hostname
             )
           "
           @pointerover="action.popup = true"
@@ -125,14 +125,14 @@ const emits = defineEmits(["action", "delete"]);
             class="text-normal font-normal mx-1 mr-2 text-white whitespace-nowrap"
             v-show="action.popup"
           >
-            {{ $t(`instances.actions.${action.name}`) }}
+            {{ $t(`action_${action.name}`) }}
           </span>
         </button>
       </div>
       <div class="card-instance-info-container">
         <div v-for="item in instance.info" class="card-instance-info-item">
           <p class="card-instance-info-item-title">
-            {{ $t(`instances.${item.label}`) }}
+            {{ $t(`instances_${item.label}`) }}
           </p>
           <p class="card-instance-info-item-content">{{ item.text }}</p>
         </div>
@@ -150,7 +150,7 @@ const emits = defineEmits(["action", "delete"]);
           size="normal"
           class="text-sm mx-1 my-1 w-full xs:w-fit max-w-[200px]"
         >
-          {{ $t(`instances.actions.${action.name}`) }}
+          {{ $t(`action_${action.name}`) }}
         </ButtonBase>
       </div>
     </div>

@@ -89,7 +89,7 @@ const emits = defineEmits(["inp"]);
   <select
     :id="props.settings.id"
     :name="props.settings.id"
-    :aria-description="$t('custom_inputs.select.default.aria_description')"
+    :aria-description="$t('inp_select_default_desc')"
     class="hidden"
   >
     <option
@@ -106,9 +106,7 @@ const emits = defineEmits(["inp"]);
   <div class="relative">
     <button
       ref="selectBtn"
-      :aria-description="
-        $t('custom_inputs.select.dropdown_button.aria_description')
-      "
+      :aria-description="$t('inp_select_dropdown_button_desc')"
       data-select-dropdown
       :disabled="props.settings.disabled || false"
       :aria-expanded="select.isOpen ? 'true' : 'false'"
@@ -137,7 +135,7 @@ const emits = defineEmits(["inp"]);
       :aria-hidden="select.isOpen ? 'false' : 'true'"
       :class="[select.isOpen ? 'flex' : 'hidden']"
       class="select-dropdown-container"
-      :aria-description="$t('custom_inputs.select.dropdown.aria_description')"
+      :aria-description="$t('inp_select_dropdown_desc')"
     >
       <button
         v-for="(value, id) in props.settings.values"
@@ -148,7 +146,7 @@ const emits = defineEmits(["inp"]);
           value === props.settings.value ? 'active' : '',
           'select-dropdown-btn',
         ]"
-        :aria-description="$t('custom_inputs.select.option.aria_description')"
+        :aria-description="$t('inp_select_option_desc')"
         :aria-current="value === props.settings.value ? 'true' : 'false'"
       >
         {{ value }}

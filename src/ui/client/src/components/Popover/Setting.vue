@@ -58,10 +58,10 @@ function hidePopover() {
     role="button"
     @pointerover="showPopover()"
     @pointerleave="hidePopover()"
-    :aria-description="$t('dashboard.popover.button.aria_description')"
+    :aria-description="$t('dashboard_popover_button_desc')"
     class="cursor-pointer flex justify-start w-full"
   >
-    <span class="sr-only"> {{ $t("dashboard.popover.button.label") }}</span>
+    <span class="sr-only"> {{ $t("dashboard_popover_button") }}</span>
     <div class="popover-background"></div>
     <svg
       class="popover-settings-svg"
@@ -79,7 +79,7 @@ function hidePopover() {
     :aria-hidden="popover.isOpen ? 'false' : 'true'"
     v-show="popover.isOpen"
     :class="['popover-settings-container']"
-    :aria-description="$t('dashboard.popover.detail.aria_description')"
+    :aria-description="$t('dashboard_popover_detail_desc')"
   >
     <p class="popover-settings-text"><slot></slot></p>
   </div>

@@ -23,7 +23,7 @@ function refreshBtn() {
 <template>
   <!-- float button-->
   <button @click="refreshBtn()" class="refresh-float-btn">
-    <span class="sr-only">{{ $t("dashboard.header.buttons.refresh") }}</span>
+    <span class="sr-only">{{ $t("dashboard_refresh_button") }}</span>
     <svg
       :class="[refresh.isOn ? 'btn-spin' : '']"
       xmlns="http://www.w3.org/2000/svg"

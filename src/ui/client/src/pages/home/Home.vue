@@ -32,10 +32,10 @@ const instances = reactive({
   data: [],
   count: computed(() => instances.data.length),
   up: computed(() =>
-    instances.data.filter((item) => item.status === "up").length.toString(),
+    instances.data.filter((item) => item.status === "up").length.toString()
   ),
   down: computed(() =>
-    instances.data.filter((item) => item.status !== "up").length.toString(),
+    instances.data.filter((item) => item.status !== "up").length.toString()
   ),
 });
 
@@ -45,7 +45,7 @@ async function getInstances() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -66,7 +66,7 @@ async function getVersion() {
     "GET",
     null,
     version,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   // Get latest version from github
   await fetch("https://api.github.com/repos/bunkerity/bunkerweb/tags")
@@ -88,10 +88,10 @@ const plugins = reactive({
   data: [],
   num: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.data.filter((item) => item["external"] === false).length,
+    () => plugins.data.filter((item) => item["external"] === false).length
   ),
   external: computed(
-    () => plugins.data.filter((item) => item["external"] === true).length,
+    () => plugins.data.filter((item) => item["external"] === true).length
   ),
   services: computed(() => {
     if (
@@ -131,14 +131,14 @@ async function getConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -157,20 +157,20 @@ onMounted(() => {
       :isErr="version.isErr"
       :isPend="version.isPend"
       :textState="{
-        isPend: $t('home.version.api.pending'),
-        isErr: $t('home.version.api.error'),
+        isPend: $t('api_pending', { name: $t('dashboard_home') }),
+        isErr: $t('api_error', { name: $t('dashboard_home') }),
       }"
     />
     <HomeCardStructure
       v-if="!version.isPend && !version.isErr"
       :href="'#'"
-      :name="$t('home.version.card.name')"
+      :name="$t('home_version')"
       :count="version.num"
       :detailArr="[
         {
           text: version.isLatest
-            ? $t('home.version.card.latest')
-            : $t('home.version.card.is_latest'),
+            ? $t('home_version_latest_version')
+            : $t('home_version_is_latest'),
           num: version.isLatest ? '' : version.latest,
           textClass: version.isLatest ? 'text-green-500' : 'text-yellow-500',
           numClass: version.isLatest ? 'text-green-500' : 'text-yellow-500',
@@ -187,24 +187,24 @@ onMounted(() => {
       :isErr="instances.isErr"
       :isPend="instances.isPend"
       :textState="{
-        isPend: $t('home.instances.api.pending'),
-        isErr: $t('home.instances.api.error'),
+        isPend: $t('api_pending', { name: $t('dashboard_instances') }),
+        isErr: $t('api_error', { name: $t('dashboard_instances') }),
       }"
     />
     <HomeCardStructure
       v-if="!instances.isPend && !instances.isErr && instances.data"
       :href="'/admin/instances'"
-      :name="$t('home.instances.card.name')"
+      :name="$t('dashboard_instances')"
       :count="instances.count || '0'"
       :detailArr="[
         {
-          text: $t('home.instances.card.up'),
+          text: $t('dashboard_up'),
           num: instances.up,
           textClass: 'text-green-500',
           numClass: 'text-green-500',
         },
         {
-          text: $t('home.instances.card.down'),
+          text: $t('dashboard_down'),
           num: instances.down,
           textClass: 'text-red-500',
           numClass: 'text-red-500',
@@ -221,24 +221,24 @@ onMounted(() => {
       :isErr="plugins.isErr"
       :isPend="plugins.isPend"
       :textState="{
-        isPend: $t('home.services.api.pending'),
-        isErr: $t('home.services.api.error'),
+        isPend: $t('api_pending', { name: $t('dashboard_services') }),
+        isErr: $t('api_error', { name: $t('dashboard_services') }),
       }"
     />
     <HomeCardStructure
       v-if="!plugins.isPend && !plugins.isErr && plugins.data.length > 0"
       :href="'/admin/services'"
-      :name="$t('home.services.card.name')"
+      :name="$t('dashboard_services')"
       :count="plugins.servicesNum || '0'"
       :detailArr="[
         {
-          text: $t('home.services.card.ui'),
+          text: $t('dashboard_ui'),
           num: '',
           textClass: 'text-sky-500',
           numClass: 'text-sky-500',
         },
         {
-          text: $t('home.services.card.autoconf'),
+          text: $t('dashboard_autoconf'),
           num: '',
           textClass: 'text-sky-500',
           numClass: 'text-sky-500',
@@ -254,24 +254,24 @@ onMounted(() => {
       :isErr="conf.isErr"
       :isPend="conf.isPend"
       :textState="{
-        isPend: $t('home.plugins.api.pending'),
-        isErr: $t('home.plugins.api.error'),
+        isPend: $t('api_pending', { name: $t('dashboard_plugins') }),
+        isErr: $t('api_error', { name: $t('dashboard_plugins') }),
       }"
     />
     <HomeCardStructure
       v-if="!conf.isPend && !conf.isErr"
       :href="'/admin/plugins'"
-      :name="$t('home.plugins.card.name')"
+      :name="$t('dashboard_plugins')"
       :count="plugins.num || '0'"
       :detailArr="[
         {
-          text: $t('home.plugins.card.internal'),
+          text: $t('home_internal'),
           num: plugins.internal || '0',
           textClass: 'text-sky-500',
           numClass: 'text-sky-500',
         },
         {
-          text: $t('home.plugins.card.external'),
+          text: $t('home_external'),
           num: plugins.external || '0',
           textClass: 'text-sky-500',
           numClass: 'text-sky-500',

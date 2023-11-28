@@ -30,16 +30,16 @@ const emits = defineEmits(["close"]);
 <template>
   <ModalBase
     @backdrop="$emit('close')"
-    :title="`${$t('jobs.card.jobs.modal_history.title')} ${props.jobName}`"
+    :title="`${$t('jobs_history_title')} ${props.jobName}`"
     v-if="props.isOpen"
   >
     <div class="col-span-12 overflow-x-auto overflow-y-hidden">
       <ListBase
         class="min-w-[500px]"
         :header="[
-          $t('jobs.card.jobs.modal_history.headers.success'),
-          $t('jobs.card.jobs.modal_history.headers.start_date'),
-          $t('jobs.card.jobs.modal_history.headers.end_date'),
+          $t('jobs_history_headers_success'),
+          $t('jobs_history_headers_start_date'),
+          $t('jobs_history_headers_end_date'),
         ]"
         :positions="positions"
       >
@@ -49,8 +49,8 @@ const emits = defineEmits(["close"]);
               <span class="sr-only">
                 {{
                   item["success"]
-                    ? $t("jobs.card.jobs.state.success.succeed")
-                    : $t("jobs.card.jobs.state.success.failed")
+                    ? $t("jobs_state_success_succeed")
+                    : $t("jobs_state_success_failed")
                 }}
               </span>
               <JobsSvgState :success="item['success']" />
@@ -71,7 +71,7 @@ const emits = defineEmits(["close"]);
           type="button"
           class="text-xs"
         >
-          {{ $t("jobs.card.jobs.modal_history.close") }}
+          {{ $t("action_close") }}
         </ButtonBase>
       </div>
     </div>

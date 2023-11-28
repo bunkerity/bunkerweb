@@ -81,7 +81,7 @@ const emits = defineEmits(["tab"]);
               d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          {{ $t(`bans.tabs.${item}`) }}
+          {{ $t(`bans_tabs_${item}`) }}
         </a>
       </li>
     </ul>

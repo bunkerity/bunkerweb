@@ -237,7 +237,7 @@ function toggleMenu() {
                 <component :is="item.svg"></component>
               </div>
               <span class="menu-nav-item-title">{{
-                $t(`dashboard.menu.nav.${item.tag}`)
+                $t(`dashboard_${item.tag}`)
               }}</span>
             </a>
           </li>
@@ -250,18 +250,18 @@ function toggleMenu() {
           <ul>
             <li class="w-full mt-4">
               <p class="menu-page-plugin-title">
-                {{ $t("dashboard.menu.plugins.title") }}
+                {{ $t("dashboard_menu_plugins_title") }}
               </p>
             </li>
             <li v-if="menu.pagePlugins.length === 0" class="w-full mt-6">
               <div class="menu-page-plugin-empty-title">
-                {{ $t("dashboard.menu.plugins.none.description") }} <br />
+                {{ $t("dashboard_menu_plugins_none") }} <br />
                 <a
                   class="menu-page-plugin-empty-anchor"
                   target="_blank"
                   href="https://docs.bunkerweb.io/1.4/plugins/#writing-a-plugin"
                 >
-                  {{ $t("dashboard.menu.plugins.none.check_doc") }}
+                  {{ $t("dashboard_menu_plugins_none_doc") }}
                 </a>
               </div>
             </li>
@@ -311,8 +311,8 @@ function toggleMenu() {
         <label for="darkMode" data-dark-toggle-label class="menu-mode-label">
           {{
             menu.darkMode
-              ? $t("dashboard.menu.mode.dark")
-              : $t("dashboard.menu.mode.light")
+              ? $t("dashboard_menu_mode_dark")
+              : $t("dashboard_menu_mode_light")
           }}
         </label>
       </div>
@@ -323,7 +323,7 @@ function toggleMenu() {
         <li v-for="item in socialList" class="mx-2 w-6">
           <a :href="item.href" target="_blank">
             <span class="sr-only">
-              {{ $t(`dashboard.menu.socials.${item.tag}`) }}
+              {{ $t(`dashboard_menu_socials_${item.tag}`) }}
             </span>
             <component :is="item.svg"></component>
           </a>
@@ -334,7 +334,7 @@ function toggleMenu() {
       <!-- logout-->
       <div class="w-full">
         <button @click="getlogout()" class="menu-logout">
-          {{ $t("dashboard.menu.log_out") }}
+          {{ $t("dashboard_menu_log_out") }}
         </button>
       </div>
       <!-- end logout-->

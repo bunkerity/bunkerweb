@@ -20,7 +20,7 @@ const checkbox = reactive({
   context: props.setting.context,
   value: props.setting.value || props.setting.default,
   defaultValue: props.setting.default,
-  method: props.setting.method || getDefaultMethod(),
+  method: props.setting.method.toLowerCase() || getDefaultMethod(),
   defaultMethod: getDefaultMethod(),
 });
 
@@ -45,7 +45,7 @@ function updateCheckbox() {
             props.serviceName || checkbox.context,
             checkbox.id,
             checkbox.value,
-            props.setting.value,
+            props.setting.value
           );
         }
       "
@@ -68,7 +68,7 @@ function updateCheckbox() {
     />
 
     <svg
-      :aria-description="$t('custom_inputs.checkbox.svg.aria_description')"
+      :aria-description="$t('inp_checkbox_svg_desc')"
       :aria-hidden="checkbox.value === 'yes' ? 'false' : 'true'"
       v-show="checkbox.value === 'yes'"
       class="checkbox-svg"

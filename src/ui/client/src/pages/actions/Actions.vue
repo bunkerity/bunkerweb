@@ -97,7 +97,7 @@ async function getActions() {
     "GET",
     null,
     actions,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -113,31 +113,31 @@ onMounted(() => {
       :isErr="actions.isErr"
       :isPend="actions.isPend"
       :textState="{
-        isPend: $t('actions.api.pending'),
-        isErr: $t('actions.api.error'),
+        isPend: $t('api_pending', { name: $t('dashboard_actions') }),
+        isErr: $t('api_error', { name: $t('dashboard_actions') }),
       }"
     />
     <CardBase
       v-if="!actions.isErr && !actions.isPend"
       class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
-      :label="$t('actions.card.info.title')"
+      :label="$t('dashboard_info')"
     >
       <CardItemList
         :items="[
-          { label: $t('actions.card.info.items.total'), value: actions.total },
-          { label: $t('actions.card.info.items.ui'), value: actions.ui },
-          { label: $t('actions.card.info.items.core'), value: actions.core },
+          { label: $t('actions_total'), value: actions.total },
+          { label: $t('actions_ui'), value: actions.ui },
+          { label: $t('actions_core'), value: actions.core },
         ]"
       />
     </CardBase>
     <CardBase
       v-if="!actions.isErr && !actions.isPend"
       class="z-10 h-fit col-span-12 md:col-span-8 xl:col-span-8 2xl:col-span-5 3xl:col-span-4"
-      :label="$t('actions.card.filter.title')"
+      :label="$t('dashboard_filter')"
     >
       <SettingsLayout
         class="sm:col-span-6"
-        :label="$t('actions.card.filter.search.label')"
+        :label="$t('actions_filter_search')"
         name="keyword"
       >
         <SettingsInput
@@ -153,7 +153,7 @@ onMounted(() => {
 
       <SettingsLayout
         class="sm:col-span-6"
-        :label="$t('actions.card.filter.method.label')"
+        :label="$t('actions_filter_method')"
         name="actions-method"
       >
         <SettingsSelect
@@ -167,7 +167,7 @@ onMounted(() => {
       </SettingsLayout>
       <SettingsLayout
         class="sm:col-span-6"
-        :label="$t('actions.card.filter.api_method.label')"
+        :label="$t('actions_filter_api_method')"
         name="actions-action-api"
       >
         <SettingsSelect
@@ -183,16 +183,16 @@ onMounted(() => {
     <CardBase
       v-if="!actions.isErr && !actions.isPend"
       class="col-span-12 overflow-x-auto overflow-y-hidden"
-      :label="$t('actions.card.actions.title')"
+      :label="$t('dashboard_actions')"
     >
       <ListBase
         class="min-w-[1100px] col-span-12"
         :header="[
-          $t('actions.card.actions.header.method'),
-          $t('actions.card.actions.header.title'),
-          $t('actions.card.actions.header.description'),
-          $t('actions.card.actions.header.date'),
-          $t('actions.card.actions.header.action'),
+          $t('actions_header_method'),
+          $t('actions_header_title'),
+          $t('actions_header_description'),
+          $t('actions_header_date'),
+          $t('actions_header_action'),
         ]"
         :positions="positions"
       >

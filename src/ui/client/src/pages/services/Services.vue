@@ -67,7 +67,7 @@ watch(config, () => {
       !!("SERVER_NAME" in config.data.services[services.activeService]) &&
       config.data.services[services.activeService]["SERVER_NAME"] &&
       services.servicesName.includes(
-        config.data.services[services.activeService]["SERVER_NAME"],
+        config.data.services[services.activeService]["SERVER_NAME"]
       )
     )
       return (saveBtn.disabled = false);
@@ -120,8 +120,8 @@ const services = reactive({
     const cloneMultisitePlugin = setPluginsData(
       getPluginsByContext(
         JSON.parse(JSON.stringify(services.data)),
-        "multisite",
-      ),
+        "multisite"
+      )
     );
 
     // translate
@@ -216,14 +216,14 @@ async function getGlobalConf(isFeedback = true) {
     "GET",
     null,
     conf,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     services,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 
@@ -262,8 +262,8 @@ async function sendServConf() {
           "PUT",
           services[key],
           null,
-          feedbackStore.addFeedback,
-        ),
+          feedbackStore.addFeedback
+        )
       );
     }
 
@@ -307,8 +307,8 @@ onMounted(() => {
       :isErr="conf.isErr || services.isErr"
       :isPend="conf.isPend || services.isPend"
       :textState="{
-        isPend: $t('services.api.pending'),
-        isErr: $t('services.api.error'),
+        isPend: $t('api_pending', { name: $t('dashboard_services') }),
+        isErr: $t('api_error', { name: $t('dashboard_services') }),
       }"
     />
     <div
@@ -322,25 +322,25 @@ onMounted(() => {
           size="normal"
           class="text-sm"
         >
-          {{ $t("services.actions.new") }}
+          {{ $t("services_actions_new") }}
         </ButtonBase>
       </div>
       <CardBase
         class="z-[102] h-fit col-span-12 md:col-span-4 lg:col-span-3 3xl:col-span-2"
-        :label="$t('services.card.info.title')"
+        :label="$t('dashboard_info')"
       >
         <CardItemList
           :items="[
             {
-              label: $t('services.card.info.total'),
+              label: $t('services_total'),
               value: Object.keys(services.setup).length - 1,
             },
             {
-              label: $t('services.card.info.scheduler'),
+              label: $t('dashboard_scheduler'),
               value: '',
             },
             {
-              label: $t('services.card.info.ui'),
+              label: $t('dashboard_ui'),
               value: '',
             },
           ]"
@@ -349,11 +349,11 @@ onMounted(() => {
       <CardBase
         class="z-[101] h-fit col-span-12 md:col-span-8 lg:col-span-5 3xl:col-span-3"
       >
-        <CardLabel :label="$t('services.card.list.title')" />
+        <CardLabel :label="$t('services_list_title')" />
         <SettingsLayout
           v-if="Object.keys(services.setup).length > 1"
           class="flex w-full col-span-12"
-          :label="$t('services.card.list.select_service.label')"
+          :label="$t('services_list_select_service')"
           name="services-list"
         >
           <SettingsSelect
@@ -363,14 +363,14 @@ onMounted(() => {
               value:
                 services.activeService === 'new' ? '' : services.activeService,
               values: Object.keys(services.setup).filter(
-                (item) => item !== 'new',
+                (item) => item !== 'new'
               ),
             }"
           />
         </SettingsLayout>
         <SettingsLayout
           class="flex w-full col-span-12"
-          :label="$t('services.card.list.select_plugin.label')"
+          :label="$t('services_list_select_plugin')"
           name="plugins"
         >
           <SettingsSelect
@@ -388,17 +388,17 @@ onMounted(() => {
             <span class="mx-0.5">
               <SettingsUploadSvgWarning class="scale-90" />
             </span>
-            {{ $t("services.card.list.switch_warning") }}
+            {{ $t("services_list_switch_warning") }}
           </p>
         </div>
       </CardBase>
       <CardBase
-        :label="$t('services.card.filter.title')"
+        :label="$t('dashboard_filter')"
         class="z-[100] h-fit col-span-12 lg:col-span-4 grid grid-cols-12 relative"
       >
         <SettingsLayout
           class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
-          :label="$t('services.card.filter.search_setting.label')"
+          :label="$t('services_filter_search_setting')"
           name="keyword"
         >
           <SettingsInput
@@ -407,15 +407,13 @@ onMounted(() => {
               id: 'keyword',
               type: 'text',
               value: '',
-              placeholder: $t(
-                'services.card.filter.search_setting.placeholder',
-              ),
+              placeholder: $t('services_filter_search_setting_placeholder'),
             }"
           />
         </SettingsLayout>
         <SettingsLayout
           class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
-          :label="$t('services.card.filter.method_setting.label')"
+          :label="$t('services_filter_method_setting')"
           name="keyword"
         >
           <SettingsSelect
@@ -437,8 +435,8 @@ onMounted(() => {
           class="text-xl border-b border-slate-700/60 pb-2 mb-4"
           :label="
             services.activeService === 'new'
-              ? $t('services.active.label.new')
-              : $t('services.active.label.base', {
+              ? $t('services_active_new')
+              : $t('services_active_base', {
                   name: services.activeService,
                 })
           "
@@ -461,14 +459,14 @@ onMounted(() => {
             size="lg"
             class="w-fit"
           >
-            {{ $t("services.actions.save") }}
+            {{ $t("action_save") }}
           </ButtonBase>
           <hr class="line-separator z-10 w-1/2" />
           <p class="dark:text-gray-500 text-xs text-center mt-1 mb-2">
             <span class="mx-0.5">
               <SettingsUploadSvgWarning class="scale-90" />
             </span>
-            {{ $t("services.actions.warning") }}
+            {{ $t("services_actions_warning") }}
           </p>
         </div>
       </CardBase>

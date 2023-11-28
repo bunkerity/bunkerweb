@@ -41,7 +41,7 @@ async function pluginDelete() {
     "DELETE",
     null,
     delPlugin,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "error") return;
     // Case succeed, delete items from UI
@@ -56,12 +56,12 @@ const emits = defineEmits(["pluginDelete", "close"]);
 <template>
   <ModalBase
     @backdrop="$emit('close')"
-    :title="$t('plugins.delete_modal.title', { name: props.pluginName })"
+    :title="$t('plugins_delete_modal_title', { name: props.pluginName })"
     v-if="props.isOpen"
   >
     <div class="col-span-12 overflow-x-auto overflow-y-hidden">
       <p>
-        {{ $t("plugins.delete_modal.text", { name: props.pluginName }) }}
+        {{ $t("plugins_delete_modal_text", { name: props.pluginName }) }}
       </p>
       <p>{{ props.pluginDesc }}</p>
     </div>
@@ -75,7 +75,7 @@ const emits = defineEmits(["pluginDelete", "close"]);
           type="button"
           class="text-xs"
         >
-          {{ $t("plugins.delete_modal.close") }}
+          {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
           color="delete"
@@ -84,7 +84,7 @@ const emits = defineEmits(["pluginDelete", "close"]);
           type="button"
           class="text-xs"
         >
-          {{ $t("plugins.delete_modal.delete") }}
+          {{ $t("action_delete") }}
         </ButtonBase>
       </div>
     </div>

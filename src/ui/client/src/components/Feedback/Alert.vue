@@ -26,7 +26,7 @@ const emits = defineEmits(["close"]);
 <template>
   <div
     role="alert"
-    :aria-description="$t('dashboard.feedback.alert.aria_description')"
+    :aria-description="$t('dashboard_feedback_alert_desc')"
     :class="[
       props.type === 'error' ? 'bg-red-500' : '',
       props.type === 'success' ? 'bg-green-500' : '',

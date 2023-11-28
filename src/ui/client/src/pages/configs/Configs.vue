@@ -50,10 +50,10 @@ const customConf = reactive({
   data: [],
   total: computed(() => customConf.data.length || 0),
   global: computed(
-    () => customConf.data.filter((item) => !item["service_id"]).length || 0,
+    () => customConf.data.filter((item) => !item["service_id"]).length || 0
   ),
   service: computed(
-    () => customConf.data.filter((item) => item["service_id"]).length || 0,
+    () => customConf.data.filter((item) => item["service_id"]).length || 0
   ),
   setup: computed(() => {
     if (
@@ -80,7 +80,7 @@ async function getCustomConf(isFeedback = true) {
     "GET",
     null,
     customConf,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 
@@ -90,7 +90,7 @@ async function getConfig(isFeedback = true) {
     "GET",
     null,
     conf,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 
@@ -111,8 +111,8 @@ onMounted(() => {
       :isErr="customConf.isErr"
       :isPend="conf.isPend || customConf.isPend"
       :textState="{
-        isPend: $t('custom_conf.api.pending'),
-        isErr: $t('custom_conf.api.error'),
+        isPend: $t('api_pending', { name: $t('dashboard_configs') }),
+        isErr: $t('api_error', { name: $t('dashboard_configs') }),
       }"
     />
     <CardBase
@@ -120,20 +120,20 @@ onMounted(() => {
         !customConf.isPend && !customConf.isErr && !conf.isPend && !conf.isErr
       "
       class="h-fit col-span-12 md:col-span-4 2xl:col-span-3 3xl:col-span-2"
-      :label="$t('custom_conf.card.info.title')"
+      :label="$t('dashboard_info')"
     >
       <CardItemList
         :items="[
           {
-            label: $t('custom_conf.card.info.items.conf_total'),
+            label: $t('custom_conf_total'),
             value: customConf.total,
           },
           {
-            label: $t('custom_conf.card.info.items.conf_global'),
+            label: $t('custom_conf_global'),
             value: customConf.global,
           },
           {
-            label: $t('custom_conf.card.info.items.conf_services'),
+            label: $t('custom_conf_services'),
             value: customConf.service,
           },
         ]"
@@ -143,12 +143,12 @@ onMounted(() => {
       v-if="
         !customConf.isPend && !customConf.isErr && !conf.isPend && !conf.isErr
       "
-      :label="$t('custom_conf.card.filter.title')"
+      :label="$t('dashboard_filter')"
       class="z-[100] col-span-12 md:col-span-8 lg:col-span-6 2xl:col-span-5 3xl:col-span-4 grid grid-cols-12 relative"
     >
       <SettingsLayout
         class="flex w-full col-span-12 md:col-span-6"
-        :label="$t('custom_conf.card.filter.search_path.label')"
+        :label="$t('custom_conf_filter_search_path')"
         name="pathKeyword"
       >
         <SettingsInput
@@ -163,7 +163,7 @@ onMounted(() => {
       </SettingsLayout>
       <SettingsLayout
         class="flex w-full col-span-12 md:col-span-6"
-        :label="$t('custom_conf.card.filter.search_name.label')"
+        :label="$t('custom_conf_filter_search_name')"
         name="nameKeyword"
       >
         <SettingsInput
@@ -178,7 +178,7 @@ onMounted(() => {
       </SettingsLayout>
       <SettingsLayout
         class="flex w-full col-span-12 md:col-span-6"
-        :label="$t('custom_conf.card.filter.show_services_folders.label')"
+        :label="$t('custom_conf_filter_show_services_folders')"
         name="show-service"
       >
         <SettingsCheckbox
@@ -191,7 +191,7 @@ onMounted(() => {
       </SettingsLayout>
       <SettingsLayout
         class="flex w-full col-span-12 md:col-span-6 capitalize-first"
-        :label="$t('custom_conf.card.filter.show_path_with_conf.label')"
+        :label="$t('custom_conf_filter_show_path_with_conf')"
         name="show-only-conf"
       >
         <SettingsCheckbox

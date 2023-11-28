@@ -42,12 +42,12 @@ onMounted(() => {
 
 <template>
   <div role="group" data-loader class="loader-container">
-    <p class="sr-only">{{ $t("dashboard.loader.label") }}</p>
+    <p class="sr-only">{{ $t("dashboard_loader_label") }}</p>
     <img
       data-loader-img
       src="/images/logo-menu-2.png"
       class="loader-container-img"
-      :alt="$t('dashboard.loader.alt_logo')"
+      :alt="$t('dashboard_loader_alt_logo')"
     />
   </div>
 </template>
