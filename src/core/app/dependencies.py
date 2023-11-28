@@ -22,15 +22,21 @@ from typing import Any, Callable, Dict, List, Literal, Optional, Union
 from uuid import uuid4
 from zipfile import ZipFile
 
-deps_path = join(sep, "usr", "share", "bunkerweb", "deps", "python")
-if deps_path not in sys_path:
-    sys_path.append(deps_path)
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("db",), ("utils",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
 from fastapi.routing import Mount
 from magic import Magic
+from regex import compile as re_compile
 from requests import get
 
+from API import API  # type: ignore (imported from /usr/share/bunkerweb/utils)
+from api_caller import ApiCaller  # type: ignore (imported from /usr/share/bunkerweb/utils)
+from database import Database  # type: ignore (imported from /usr/share/bunkerweb/utils)
 from .core import CoreConfig
+from .job_scheduler import JobScheduler
+
 
 TMP_FOLDER = Path(sep, "var", "tmp", "bunkerweb")
 DB = None
@@ -56,20 +62,21 @@ def stop(status):
 
 CORE_CONFIG.logger.info(f"🚀 {CORE_CONFIG.integration} integration detected")
 
-from .job_scheduler import JobScheduler
-
-from API import API  # type: ignore (imported from /usr/share/bunkerweb/utils)
-from api_caller import ApiCaller  # type: ignore (imported from /usr/share/bunkerweb/utils)
-from database import Database  # type: ignore (imported from /usr/share/bunkerweb/utils)
-
 # Create a semaphore to limit the number of threads to the number of CPUs - 1
 MAX_THREADS = cpu_count() or 1
 SEMAPHORE = Semaphore(MAX_THREADS - 1 if MAX_THREADS > 1 else 1)
+PLUGIN_KEYS = ("id", "name", "description", "version", "stream", "settings")
+PLUGIN_ID_REGEX = re_compile(r"^[\w.-]{1,64}$")
+CUSTOM_CONFIGS_RX = re_compile(r"^((?P<service_id>[^ ]{,255})_)?CUSTOM_CONF_(?P<type>HTTP|SERVER_STREAM|STREAM|DEFAULT_SERVER_HTTP|SERVER_HTTP|MODSEC_CRS|MODSEC)_(?P<name>.+)$")
 
 # Create thread events
+stop_event = Event()
 api_started = Event()
 jobs_not_running = Event()
 jobs_not_running.set()
+is_not_reloading = Event()
+is_not_reloading.set()
+listen_for_dynamic_instances = Event()
 
 # Create static paths
 CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
@@ -84,15 +91,6 @@ DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI)
 
 # Instantiate scheduler
 SCHEDULER = JobScheduler(API(f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "bw-scheduler"), env=CORE_CONFIG.settings | {"API_ADDR": f"http://127.0.0.1:{CORE_CONFIG.LISTEN_PORT}", "CORE_TOKEN": CORE_CONFIG.core_token}, logger=CORE_CONFIG.logger)
-
-
-def dict_to_frozenset(d):
-    """Converts a dict to a frozenset recursively."""
-    if isinstance(d, list):
-        return tuple(sorted(d))
-    elif isinstance(d, dict):
-        return frozenset((k, dict_to_frozenset(v)) for k, v in d.items())
-    return d
 
 
 def update_app_mounts(app):

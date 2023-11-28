@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from functools import cached_property
 from glob import glob
 from io import BytesIO
 from json import loads
@@ -38,7 +39,7 @@ class Configurator:
         self.__setting_id_rx = re_compile(r"^[A-Z0-9_]{1,256}$")
         self.__name_rx = re_compile(r"^[\w.-]{1,128}$")
         self.__job_file_rx = re_compile(r"^[\w./-]{1,256}$")
-        self.__settings = self.__load_settings(settings)
+        self.settings = self.load_settings(settings)
         self.__core_plugins = []
         self.__load_plugins(core)
 
@@ -49,18 +50,23 @@ class Configurator:
             self.__external_plugins = external_plugins
 
         if isinstance(variables, str):
-            self.__variables = self.__load_variables(variables)
+            self.__variables = self.load_variables(variables)
         else:
             self.__variables = variables
 
         self.__multisite = self.__variables.get("MULTISITE", "no") == "yes"
         self.__servers = self.__map_servers()
 
-    def get_settings(self) -> Dict[str, Any]:
-        return self.__settings
-
     def get_plugins(self, _type: Union[Literal["core"], Literal["external"]]) -> List[Dict[str, Any]]:
         return self.__core_plugins if _type == "core" else self.__external_plugins
+
+    @cached_property
+    def core_plugins_settings(self) -> Dict[str, Any]:
+        return self.get_plugins_settings("core")
+
+    @cached_property
+    def external_plugins_settings(self) -> Dict[str, Any]:
+        return self.get_plugins_settings("external")
 
     def get_plugins_settings(self, _type: Union[Literal["core"], Literal["external"]]) -> Dict[str, Any]:
         if _type == "core":
@@ -79,7 +85,7 @@ class Configurator:
             return {}
         servers = {}
         for server_name in self.__variables["SERVER_NAME"].strip().split(" "):
-            if not re_search(self.__settings["SERVER_NAME"]["regex"], server_name):
+            if not re_search(self.settings["SERVER_NAME"]["regex"], server_name):
                 self.__logger.warning(
                     f"Ignoring server name {server_name} because regex is not valid",
                 )
@@ -87,7 +93,7 @@ class Configurator:
             names = [server_name]
             if f"{server_name}_SERVER_NAME" in self.__variables:
                 if not re_search(
-                    self.__settings["SERVER_NAME"]["regex"],
+                    self.settings["SERVER_NAME"]["regex"],
                     self.__variables[f"{server_name}_SERVER_NAME"],
                 ):
                     self.__logger.warning(
@@ -99,7 +105,8 @@ class Configurator:
             servers[server_name] = names
         return servers
 
-    def __load_settings(self, path: str) -> Dict[str, Any]:
+    @staticmethod
+    def load_settings(path: str) -> Dict[str, Any]:
         return loads(Path(path).read_text())
 
     def __load_plugins(self, path: str, _type: str = "core"):
@@ -115,7 +122,7 @@ class Configurator:
     def __load_plugin(self, file: str, _type: str = "core"):
         self.__semaphore.acquire(timeout=60)
         try:
-            data = self.__load_settings(file)
+            data = self.load_settings(file)
 
             resp, msg = self.__validate_plugin(data)
             if not resp:
@@ -142,7 +149,8 @@ class Configurator:
             self.__logger.exception(f"Exception while loading JSON from {file}")
         self.__semaphore.release()
 
-    def __load_variables(self, path: str) -> Dict[str, Any]:
+    @staticmethod
+    def load_variables(path: str) -> Dict[str, Any]:
         variables = {}
         with open(path) as f:
             lines = f.readlines()
@@ -157,11 +165,7 @@ class Configurator:
     def get_config(self) -> Dict[str, Any]:
         config = {}
         # Extract default settings
-        default_settings = [
-            self.__settings,
-            self.get_plugins_settings("core"),
-            self.get_plugins_settings("external"),
-        ]
+        default_settings = [self.settings, self.core_plugins_settings, self.external_plugins_settings]
         for settings in default_settings:
             for setting, data in settings.items():
                 config[setting] = data["default"]
@@ -243,11 +247,7 @@ class Configurator:
         return True, "ok"
 
     def __find_var(self, variable: str) -> Tuple[Optional[Dict[str, Any]], str]:
-        targets = [
-            self.__settings,
-            self.get_plugins_settings("core"),
-            self.get_plugins_settings("external"),
-        ]
+        targets = [self.settings, self.core_plugins_settings, self.external_plugins_settings]
         for target in targets:
             if variable in target:
                 return target, variable
