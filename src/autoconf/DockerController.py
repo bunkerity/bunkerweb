@@ -92,7 +92,7 @@ class DockerController(Controller):
         configs = {config_type: {} for config_type in self._supported_config_types}
         # get site configs from labels
         for container in self.__client.containers.list(filters={"label": "bunkerweb.SERVER_NAME"}):
-            labels = container.labels  # type: ignore (labels is inside a container)
+            labels = container.labels  # type: ignore
             if isinstance(labels, list):
                 labels = {label: "" for label in labels}
 

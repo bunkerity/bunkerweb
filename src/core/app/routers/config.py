@@ -39,7 +39,7 @@ PLUGINS = DB.get_plugins()
 def update_plugins(function: Optional[Callable] = None):
     """A decorator that also can be used as a context manager to update plugins"""
 
-    @wraps(function)  # type: ignore (if function is None, no error is raised)
+    @wraps(function)  # type: ignore
     def wrap(*args, **kwargs):
         global PLUGINS
         assert DB

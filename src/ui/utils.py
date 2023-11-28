@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
+from contextlib import suppress
 import requests, json  # noqa: E401
 from werkzeug.exceptions import HTTPException
 from werkzeug.sansio.response import Response
-import json
 from logging import Logger
 from os.path import join, sep
 from sys import path as sys_path
@@ -43,7 +43,7 @@ def get_core_format_res(path, method, data=None, message=None, retry=1):
     try:
         # Proceed data
         data = req.text
- 
+
         obj = json.loads(req.text)
         if isinstance(obj, dict):
             data = obj.get("message", obj)
@@ -52,7 +52,7 @@ def get_core_format_res(path, method, data=None, message=None, retry=1):
 
             data = json.dumps(data, skipkeys=True, allow_nan=True, indent=6)
 
-        # Additionnal info
+        # Additional info
         res_type = "success" if str(req.status_code).startswith("2") else "error"
         res_status = str(req.status_code)
 
@@ -86,7 +86,6 @@ def req_core(path, method, data=None):
     return req
 
 
-
 # Standard response format
 def res_format(type="error", status_code="500", path="", detail="Internal Server Error", data={}):
     return json.dumps({"type": type, "status": status_code, "message": f"{path} {detail}", "data": data}, skipkeys=True, allow_nan=True, indent=6)
@@ -101,7 +100,7 @@ def log_format(type="error", status_code="500", path="", detail="Internal Server
 def create_action_format(type="info", status_code="500", title="", detail="", tags=["ui", "exception"]):
     data = json.dumps({"date": datetime.now().isoformat(), "api_method": "UNKNOWN", "method": "ui", "title": title, "description": f"{detail} (status {status_code})", "status": type, "tags": tags}, skipkeys=True, allow_nan=True, indent=6)
     try:
-        req = requests.post(f"{CORE_API}/actions", data=data)
+        requests.post(f"{CORE_API}/actions", data=data)
     except:
         LOGGER.error(log_format("error", "500", "", f"Try to send action to CORE but failed. CORE down or data invalid ({data})."))
 
@@ -141,11 +140,9 @@ class setupUIException(Exception):
             LOGGER.exception(msg)
 
         # Try to store exception as action on core to keep track
-        try:
+        with suppress(BaseException):
             if send_action:
                 create_action_format("error", "500", "UI setup exception", "Impossible to execute UI properly.", ["exception", "ui", "setup"])
-        except:
-            pass
 
         # Exit or not on failure
         if not UI_CONFIG.EXIT_ON_FAILURE or UI_CONFIG.EXIT_ON_FAILURE == "yes":

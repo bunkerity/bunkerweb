@@ -66,7 +66,7 @@ const list = reactive({
 function toggleAllCheck() {
   list.checkAll = list.checkAll ? false : true;
   const banItemsChekbox = document.querySelectorAll(
-    '#banlist-container input[type="checkbox"]'
+    '#banlist-container input[type="checkbox"]',
   );
   banItemsChekbox.forEach((item) => {
     // Check current state to update
@@ -89,7 +89,7 @@ async function sendUnban() {
     "DELETE",
     unbanList,
     delBans,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "success") {
       // Case succeed, delete items from UI

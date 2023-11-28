@@ -347,11 +347,7 @@ async def get_plugins_files():
     """
     plugins_files = BytesIO()
     with tar_open(fileobj=plugins_files, mode="w:gz", compresslevel=9, dereference=True) as tar:
-        tar.add(
-            str(EXTERNAL_PLUGINS_PATH),
-            arcname=".",
-            recursive=True,
-        )
+        tar.add(str(EXTERNAL_PLUGINS_PATH), arcname=".", recursive=True)
     plugins_files.seek(0, 0)
 
     return Response(

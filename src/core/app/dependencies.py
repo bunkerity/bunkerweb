@@ -31,9 +31,9 @@ from magic import Magic
 from regex import compile as re_compile
 from requests import get
 
-from API import API  # type: ignore (imported from /usr/share/bunkerweb/utils)
-from api_caller import ApiCaller  # type: ignore (imported from /usr/share/bunkerweb/utils)
-from database import Database  # type: ignore (imported from /usr/share/bunkerweb/utils)
+from API import API  # type: ignore
+from api_caller import ApiCaller  # type: ignore
+from database import Database  # type: ignore
 from .core import CoreConfig
 from .job_scheduler import JobScheduler
 
@@ -279,7 +279,7 @@ def generate_custom_configs(
 def generate_config(function: Optional[Callable] = None):
     """A decorator that also can be used as a context manager to generate the config before running the function"""
 
-    @wraps(function)  # type: ignore (if function is None, no error is raised)
+    @wraps(function)  # type: ignore
     def wrap(*args, **kwargs):
         assert DB
 

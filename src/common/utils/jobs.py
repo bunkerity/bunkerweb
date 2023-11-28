@@ -51,7 +51,7 @@ def file_hash(file: Union[str, Path]) -> str:
 
 def bytes_hash(bio: Union[bytes, BytesIO]) -> str:
     if isinstance(bio, bytes):
-        bio = BytesIO(bio)  # type: ignore (bio will always be a bytes object in this case)
+        bio = BytesIO(bio)  # type: ignore
 
     assert isinstance(bio, BytesIO)
 

@@ -171,7 +171,7 @@ async function sendData() {
     method,
     conf,
     updateConf,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   )
     .then((res) => {
       // Case not save

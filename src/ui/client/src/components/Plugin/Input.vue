@@ -43,7 +43,7 @@ const input = reactive({
           input.id,
           input.value,
           props.setting.value,
-          props.setting.regex
+          props.setting.regex,
         )
       "
       :type="

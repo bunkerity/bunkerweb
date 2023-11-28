@@ -52,7 +52,7 @@ repos:
         args: ["--max-line-length=250", "--ignore=E266,E402,E722,W503"]
 
   - repo: https://github.com/dosisod/refurb
-    rev: 63209fc1735ef2497dd9c00774ba72a23bb1cdf9 # frozen: v1.23.0
+    rev: a25b5d6087bba1509f96654c583efcd7796452cd # frozen: v1.24.0
     hooks:
       - id: refurb
         name: Refurb Python Refactoring Tool
@@ -64,12 +64,12 @@ repos:
       - id: codespell
         name: Codespell Spell Checker
         exclude: (^src/(common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*)$
-        entry: codespell --ignore-regex="(Widgits)" --skip CHANGELOG.md
+        entry: codespell --ignore-regex="(Widgits|fo\b)" --skip CHANGELOG.md,src/ui/client/src/lang/fr.json
         language: python
         types: [text]
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: b813e6fe08b87541cb77296359ba1b7a50a00c98 # frozen: v8.18.0
+    rev: e815c559e3ac76227e8e7463cf3a6598b715687b # frozen: v8.18.1
     hooks:
       - id: gitleaks
 

@@ -15,7 +15,7 @@
     },
     "lang": {
       "dropdown_button": {
-        "aria_description": "Toggle show/hide radiogroup to choose another langage."
+        "aria_description": "Toggle show/hide radiogroup to choose another language."
       }
     },
     "header": {

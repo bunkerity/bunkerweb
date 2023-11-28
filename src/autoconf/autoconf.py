@@ -10,7 +10,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore (present in /usr/share/bunkerweb/utils/)
+from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore
 
 
 class AutoconfConfig(YamlBaseSettings):

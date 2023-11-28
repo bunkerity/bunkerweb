@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from flask import Flask
-from flask import request
 from flask import Blueprint
 
 import requests
@@ -21,7 +20,6 @@ from utils import setupUIException, validate_env_data, default_error_handler, cr
 
 from werkzeug.exceptions import HTTPException
 import os
-import json
 from pathlib import Path
 from logging import Logger
 from os.path import join, sep
@@ -50,7 +48,7 @@ LOGGER.warning(os.environ)
 # Check CORE to run UI
 core_running = False
 
-LOGGER.info(f"Check if CORE API is setup.")
+LOGGER.info("Check if CORE API is setup.")
 
 for x in range(UI_CONFIG.MAX_WAIT_RETRIES):
     if core_running:

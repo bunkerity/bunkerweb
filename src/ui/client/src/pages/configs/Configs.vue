@@ -50,10 +50,10 @@ const customConf = reactive({
   data: [],
   total: computed(() => customConf.data.length || 0),
   global: computed(
-    () => customConf.data.filter((item) => !item["service_id"]).length || 0
+    () => customConf.data.filter((item) => !item["service_id"]).length || 0,
   ),
   service: computed(
-    () => customConf.data.filter((item) => item["service_id"]).length || 0
+    () => customConf.data.filter((item) => item["service_id"]).length || 0,
   ),
   setup: computed(() => {
     if (
@@ -80,7 +80,7 @@ async function getCustomConf(isFeedback = true) {
     "GET",
     null,
     customConf,
-    isFeedback ? feedbackStore.addFeedback : null
+    isFeedback ? feedbackStore.addFeedback : null,
   );
 }
 
@@ -90,7 +90,7 @@ async function getConfig(isFeedback = true) {
     "GET",
     null,
     conf,
-    isFeedback ? feedbackStore.addFeedback : null
+    isFeedback ? feedbackStore.addFeedback : null,
   );
 }
 

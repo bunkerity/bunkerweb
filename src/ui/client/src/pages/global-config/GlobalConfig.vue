@@ -72,7 +72,7 @@ const plugins = reactive({
     // Duplicate base data
     const cloneGlobalPlugin = getPluginsByContext(
       JSON.parse(JSON.stringify(plugins.data)),
-      "global"
+      "global",
     );
     // Translate
     pluginI18n(t, cloneGlobalPlugin);
@@ -126,14 +126,14 @@ async function getGlobalConf(isFeedback = true) {
     "GET",
     null,
     conf,
-    isFeedback ? feedbackStore.addFeedback : null
+    isFeedback ? feedbackStore.addFeedback : null,
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    isFeedback ? feedbackStore.addFeedback : null
+    isFeedback ? feedbackStore.addFeedback : null,
   );
 }
 
@@ -156,7 +156,7 @@ async function sendConf() {
     "PUT",
     config.data["global"],
     null,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
   await refresh(false);
 }
@@ -197,7 +197,7 @@ onMounted(() => {
               value: plugins.activePlugin,
               values: plugins.activePlugins,
               placeholder: $t(
-                'global_conf.card.plugin.select_plugin.placeholder'
+                'global_conf.card.plugin.select_plugin.placeholder',
               ),
             }"
           />

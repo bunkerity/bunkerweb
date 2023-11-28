@@ -95,7 +95,7 @@ watch(path, () => {
                     v,
                     child.path,
                     child.data,
-                    child.method || 'ui'
+                    child.method || 'ui',
                   )
               "
             />

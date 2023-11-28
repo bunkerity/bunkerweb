@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pathlib import Path
 from flask import Blueprint
 from flask import request
 from flask_jwt_extended import jwt_required
@@ -7,9 +8,7 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.sansio.response import Response
 
 import requests
-from importlib import import_module
 from utils import get_core_format_res
-import json
 
 from os import environ
 from ui import UiConfig
@@ -23,6 +22,7 @@ CORE_API = UI_CONFIG.CORE_ADDR
 PREFIX = "/api/external"
 
 external = Blueprint("external", __name__)
+
 
 # Communicate with CORE retrieving ui api file and executing a specific function (action name)
 @external.route(f"{PREFIX}/<string:plugin_id>/action", methods=["GET", "POST", "PUT", "DELETE"])
@@ -63,8 +63,7 @@ def exec_ext_plugin_action(plugin_id):
     try:
         content = module.content.decode("utf-8")
         with TemporaryFile(mode="wb", suffix=".py", delete=False) as temp:
-            with open(temp.name, 'w') as f :
-                f.write(content)
+            Path(temp.name).write_text(content)
             loader = SourceFileLoader("actions", temp.name)
             actions = loader.load_module()
             f = getattr(actions, action)
@@ -73,4 +72,3 @@ def exec_ext_plugin_action(plugin_id):
             return result
     except:
         raise HTTPException(response=Response(status=500), description=f"Error while trying to execute action for plugin {plugin_id}.")
-

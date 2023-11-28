@@ -2,7 +2,6 @@
 from flask import request
 from flask import make_response
 from flask import redirect
-from flask import jsonify
 
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import set_access_cookies
@@ -30,7 +29,6 @@ from os.path import join, sep
 from sys import path as sys_path
 from ui import UiConfig
 from os import environ
-from ui import UiConfig
 
 deps_path = join(sep, "usr", "share", "bunkerweb", "utils")
 if deps_path not in sys_path:
@@ -49,7 +47,7 @@ def setup_jwt(app):
     app.config["JWT_SECRET_KEY"] = "super-secret"  # Change for prod
     app.config["JWT_COOKIE_CSRF_PROTECT"] = True  # Add CSRF TOKEN check
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
-    jwt = JWTManager(app)
+    JWTManager(app)
 
     # Override default exceptions to fit standard format
     @app.errorhandler(NoAuthorizationError)
@@ -114,7 +112,7 @@ def setup_jwt(app):
     @jwt_required()
     def delete_jwt():
         resp = make_response(res_format("success", "200", "", "Logout succeed.", {}), 200)
-        LOGGER.info(f"Try logout")
+        LOGGER.info("Try logout")
         identity = get_jwt_identity()
         LOGGER.info(f"logout identify {identity}")
         try:

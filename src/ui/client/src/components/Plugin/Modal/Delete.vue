@@ -41,7 +41,7 @@ async function pluginDelete() {
     "DELETE",
     null,
     delPlugin,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "error") return;
     // Case succeed, delete items from UI

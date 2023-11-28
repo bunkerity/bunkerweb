@@ -97,7 +97,7 @@ async function getActions() {
     "GET",
     null,
     actions,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 

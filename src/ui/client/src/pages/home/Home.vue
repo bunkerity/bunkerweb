@@ -32,10 +32,10 @@ const instances = reactive({
   data: [],
   count: computed(() => instances.data.length),
   up: computed(() =>
-    instances.data.filter((item) => item.status === "up").length.toString()
+    instances.data.filter((item) => item.status === "up").length.toString(),
   ),
   down: computed(() =>
-    instances.data.filter((item) => item.status !== "up").length.toString()
+    instances.data.filter((item) => item.status !== "up").length.toString(),
   ),
 });
 
@@ -45,7 +45,7 @@ async function getInstances() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -66,7 +66,7 @@ async function getVersion() {
     "GET",
     null,
     version,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
   // Get latest version from github
   await fetch("https://api.github.com/repos/bunkerity/bunkerweb/tags")
@@ -88,10 +88,10 @@ const plugins = reactive({
   data: [],
   num: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.data.filter((item) => item["external"] === false).length
+    () => plugins.data.filter((item) => item["external"] === false).length,
   ),
   external: computed(
-    () => plugins.data.filter((item) => item["external"] === true).length
+    () => plugins.data.filter((item) => item["external"] === true).length,
   ),
   services: computed(() => {
     if (
@@ -131,14 +131,14 @@ async function getConf() {
     "GET",
     null,
     conf,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 

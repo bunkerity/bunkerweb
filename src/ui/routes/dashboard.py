@@ -4,6 +4,7 @@ from flask import request
 from flask import render_template
 from flask_jwt_extended import jwt_required
 from flask import render_template_string
+import requests
 
 from werkzeug.exceptions import HTTPException
 from werkzeug.sansio.response import Response
@@ -72,16 +73,17 @@ def get_custom_page():
     args = request.args.to_dict()
     plugin_id = args.get("plugin_id") or ""
     if not plugin_id:
-        raise HTTPException(response=Response(status=404), description=Z"No plugin id found to get custom pageZ.")
+        raise HTTPException(response=Response(status=404), description="No plugin id found to get custom page.")
 
     # Retrieve template from CORE
     try:
-        page = requests.get(f"{CORE_API}/plugins/external/{plugin_id}/page")
+        # page = requests.get(f"{CORE_API}/plugins/external/{plugin_id}/page") # TODO fix this
+        page = requests.get(f"TODO/plugins/external/{plugin_id}/page")
         if not str(page.status_code).startswith("2"):
             raise HTTPException(response=Response(status=404), description=f"No custom page found for plugin {plugin_id}.")
     except:
         raise HTTPException(response=Response(status=500), description=f"Error while trying to get custom page for plugin {plugin_id}.")
-   # Send source code as template
+    # Send source code as template
     try:
         content = page.content.decode("utf-8")
         return render_template_string(content)

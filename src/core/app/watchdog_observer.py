@@ -16,7 +16,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileOpenedEvent, FileClosedEvent, FileSystemEventHandler
 
 from API import API  # type: ignore
-from database import Database  # type: ignore (imported from /usr/share/bunkerweb/utils)
+from database import Database  # type: ignore
 from .job_scheduler import JobScheduler
 from .core import CONFIG_FILE, SECRETS_PATH, YAML_CONFIG_FILE, CoreConfig
 from .dependencies import api_started, CORE_CONFIG, CUSTOM_CONFIGS_PATH, DB, EXTERNAL_PLUGINS_PATH, is_not_reloading, listen_for_dynamic_instances, SCHEDULER, test_and_send_to_instances  # noqa: F401
