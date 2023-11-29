@@ -6,4 +6,3 @@ env
 node_modules
 /src/ui/*.txt
 .mypy_cache
-src/ui/static
