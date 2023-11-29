@@ -178,7 +178,7 @@
   "services_filter_search_setting_placeholder": "name, title, description...",
   "services_filter_method_setting": "Select method",
   "services_detail_active": "Setting is active.",
-  "services_detail_inactive": "Settoing is inactive.",
+  "services_detail_inactive": "Setting is inactive.",
   "services_active_new": "Create new service",
   "services_active_base": "service {name}",
   "services_actions_new": "New service",

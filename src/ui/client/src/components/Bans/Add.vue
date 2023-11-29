@@ -120,7 +120,7 @@ async function addBansFromList() {
           />
         </svg>
         <span class="ml-1 -translate-y-1">
-          {{ $t("bans_add_label") }}
+          {{ $t("bans_add") }}
         </span>
       </ButtonBase>
       <ButtonBase
@@ -273,7 +273,7 @@ async function addBansFromList() {
         size="normal"
         class="text-sm mb-2 sm:mb-0 w-fit"
       >
-        {{ $t("bans_add_save_bans") }}
+        {{ $t("action_save") }}
       </ButtonBase>
       <hr class="line-separator z-10 w-1/2" />
       <p class="dark:text-gray-500 text-xs text-center mt-1 mb-2">

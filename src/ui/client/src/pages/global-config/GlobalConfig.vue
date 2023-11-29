@@ -222,7 +222,7 @@ onMounted(() => {
         </SettingsLayout>
         <SettingsLayout
           class="flex w-full col-span-12 md:col-span-6"
-          :label="$t('global_conf.card.filter.method.label')"
+          :label="$t('global_conf_filter_method')"
           name="method"
         >
           <SettingsSelect
