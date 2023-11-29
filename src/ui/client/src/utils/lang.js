@@ -12,12 +12,14 @@ function getAllLang() {
 function getAllLangCurrPage(pagesArr) {
   const langs = getAllLang();
   // for each lang
-  for (const [key, value] of Object.entries(langs)) {
+  for (const [langName, langVal] of Object.entries(langs)) {
     const data = {};
-    pagesArr.forEach((page) => {
-      data[page] = value[page];
-    });
-    langs[key] = data;
+    for (const [key, value] of Object.entries(langVal)) {
+      pagesArr.forEach((name) => {
+        if (key.startsWith(`${name}_`)) data[key] = value;
+      });
+    }
+    langs[langName] = data;
   }
   return langs;
 }
@@ -58,7 +60,7 @@ export function getLocalLang() {
     navigator.languages &&
     navigator.languages > 0 &&
     availablesLangs.indexOf(
-      navigator.languages[0].split("-")[0].toLowerCase(),
+      navigator.languages[0].split("-")[0].toLowerCase()
     ) !== -1
   ) {
     return navigator.languages[0].split("-")[0].toLowerCase();

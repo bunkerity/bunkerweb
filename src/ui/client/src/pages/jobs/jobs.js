@@ -7,5 +7,5 @@ const pinia = createPinia();
 
 createApp(Jobs)
   .use(pinia)
-  .use(getI18n(["jobs", "dashboard", "custom_inputs"]))
+  .use(getI18n(["dashboard", "api", "action", "jobs", "inp"]))
   .mount("#app");

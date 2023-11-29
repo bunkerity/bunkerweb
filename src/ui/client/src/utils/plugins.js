@@ -113,6 +113,7 @@ export function getPluginsByFilter(plugins, filters) {
 
 // Translate plugins using i18n vue
 export function pluginI18n(i18n, plugins) {
+  /*
   plugins.forEach((plugin) => {
     const id = plugin.id;
     // global info
@@ -126,6 +127,7 @@ export function pluginI18n(i18n, plugins) {
       } catch (err) {}
     }
   });
+  */
 }
 
 export function getRemainFromFilter(filterPlugins) {
