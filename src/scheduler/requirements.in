@@ -1,6 +1,6 @@
 certbot==2.7.3
 configobj==5.0.8
-cryptography==41.0.5
+cryptography==41.0.6
 maxminddb==2.4.0
 python-magic==0.4.27
 schedule==1.2.1
