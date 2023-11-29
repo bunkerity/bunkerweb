@@ -16,7 +16,7 @@ from routes.dashboard import dashboard
 
 from middleware.jwt import setup_jwt
 
-from utils import setupUIException, validate_env_data, default_error_handler, create_action_format
+from utils import setupUIException, default_error_handler, create_action_format
 
 from werkzeug.exceptions import HTTPException
 import os
@@ -39,9 +39,6 @@ if deps_path not in sys_path:
 from logger import setup_logger  # type: ignore
 
 LOGGER: Logger = setup_logger("UI")
-
-# Validate some env data
-validate_env_data()
 
 LOGGER.warning(os.environ)
 

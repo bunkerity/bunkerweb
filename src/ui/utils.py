@@ -121,15 +121,6 @@ def default_error_handler(code="500", path="", desc="Internal server error.", ta
         return res_format("error", "500", "", "Internal server error.", {})
 
 
-# Need this env to ping CORE for the UI setup
-def validate_env_data():
-    if not isinstance(UI_CONFIG.WAIT_RETRY_INTERVAL, int) and (not UI_CONFIG.WAIT_RETRY_INTERVAL.isdigit() or int(UI_CONFIG.WAIT_RETRY_INTERVAL) < 1):
-        raise setupUIException("error", f"Invalid WAIT_RETRY_INTERVAL provided: {UI_CONFIG.WAIT_RETRY_INTERVAL}, It must be a positive integer.")
-
-    if not isinstance(UI_CONFIG.MAX_WAIT_RETRIES, int) and (not UI_CONFIG.MAX_WAIT_RETRIES.isdigit() or int(UI_CONFIG.MAX_WAIT_RETRIES) < 1):
-        raise setupUIException("error", f"Invalid MAX_WAIT_RETRIES provided: {UI_CONFIG.MAX_WAIT_RETRIES}, It must be a positive integer.")
-
-
 # Exception on main.py when we are starting UI
 class setupUIException(Exception):
     def __init__(self, log_type, msg, send_action=True):
