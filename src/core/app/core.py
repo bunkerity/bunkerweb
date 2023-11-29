@@ -19,7 +19,7 @@ from pathlib import Path
 from secrets import choice as secrets_choice
 from string import ascii_letters, digits, punctuation
 from sys import path as sys_path
-from typing import Dict, Iterable, List, Literal, Set, Tuple, Union
+from typing import Dict, List, Literal, Set, Tuple, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("db",), ("utils",))]:
     if deps_path not in sys_path:
@@ -57,19 +57,18 @@ class CoreConfig(YamlBaseSettings):
     MAX_THREADS: Union[str, int] = int(MAX_WORKERS) * 2 if isinstance(MAX_WORKERS, int) or MAX_WORKERS.isdigit() else 2
     WAIT_RETRY_INTERVAL: Union[str, float] = 5.0
     HEALTHCHECK_INTERVAL: Union[str, int] = 60
-    CHECK_WHITELIST: Union[Literal["yes", "no"], bool] = "yes"
+    CHECK_WHITELIST: Union[Literal["yes", "no"], bool] = True
     WHITELIST: Union[str, List[str], Set[str], Tuple[str]] = {"127.0.0.1"}
-    CHECK_TOKEN: Union[Literal["yes", "no"], bool] = "yes"
+    CHECK_TOKEN: Union[Literal["yes", "no"], bool] = True
     CORE_TOKEN: str = ""
     BUNKERWEB_INSTANCES: Union[str, List[str], Set[str], Tuple[str]] = set()
-    HOT_RELOAD: Union[Literal["yes", "no"], bool] = "no"
+    HOT_RELOAD: Union[Literal["yes", "no"], bool] = False
     REVERSE_PROXY_IPS: Union[str, List[str], Set[str], Tuple[str]] = {
         "192.168.0.0/16",
         "172.16.0.0/12",
         "10.0.0.0/8",
         "127.0.0.0/8",
     }
-    CORE_USE_PROXY_PROTOCOL: Union[Literal["yes", "no"], bool] = "no"
 
     # ? Miscellaneous settings
     LOG_LEVEL: Literal["emerg", "alert", "crit", "error", "warn", "warning", "notice", "info", "debug", "EMERG", "ALERT", "CRIT", "ERROR", "WARN", "WARNING", "NOTICE", "INFO", "DEBUG"] = "notice"
@@ -160,7 +159,7 @@ class CoreConfig(YamlBaseSettings):
             v = {v}
 
         for ip in v:
-            if not ip:
+            if not ip or ip == "*":
                 continue
 
             if not NETWORK_RX.match(ip) and not IP_RX.match(ip):
@@ -212,17 +211,12 @@ class CoreConfig(YamlBaseSettings):
 
     @cached_property
     def reverse_proxy_ips(self) -> str:
-        if isinstance(self.REVERSE_PROXY_IPS, Iterable):
-            return " ".join(self.REVERSE_PROXY_IPS)
-        return self.REVERSE_PROXY_IPS
+        if "*" in self.REVERSE_PROXY_IPS:
+            return "0.0.0.0/0,::/0"
 
-    @cached_property
-    def use_proxy_protocol(self) -> bool:
-        return self.CORE_USE_PROXY_PROTOCOL == "yes" if isinstance(self.CORE_USE_PROXY_PROTOCOL, str) else self.CORE_USE_PROXY_PROTOCOL
-
-    @cached_property
-    def use_proxy_protocol_str(self) -> str:
-        return "yes" if self.use_proxy_protocol else "no"
+        if not isinstance(self.REVERSE_PROXY_IPS, str):
+            return ",".join(self.REVERSE_PROXY_IPS)
+        return self.REVERSE_PROXY_IPS.replace(" ", ",")
 
     @cached_property
     def hot_reload(self) -> bool:
@@ -342,7 +336,7 @@ class CoreConfig(YamlBaseSettings):
                     """
 ##############################################################################################################
 #                                                                                                            #
-# WARNING: No authentication token provided, generating a random one. Please save it for future use. #
+#     WARNING: No authentication token provided, generating a random one. Please save it for future use.     #
 #                                                                                                            #
 ##############################################################################################################"""
                 )
@@ -379,7 +373,6 @@ class CoreConfig(YamlBaseSettings):
                 "reverse_proxy_ips",
                 "HOT_RELOAD",
                 "hot_reload",
-                "CORE_USE_PROXY_PROTOCOL",
                 "external_plugin_urls",
                 "external_plugin_urls_str",
                 "log_level",
@@ -461,6 +454,14 @@ if __name__ == "__main__":
 
     CORE_CONFIG = CoreConfig("core", **environ)
 
+    CORE_CONFIG.logger.info(f"Will listen on {CORE_CONFIG.LISTEN_ADDR}:{CORE_CONFIG.LISTEN_PORT}")
+    CORE_CONFIG.logger.info(f"Maximum number of workers: {CORE_CONFIG.MAX_WORKERS}")
+    CORE_CONFIG.logger.info(f"Maximum number of threads: {CORE_CONFIG.MAX_THREADS}")
+    CORE_CONFIG.logger.info(f"Heathcheck interval: {CORE_CONFIG.HEALTHCHECK_INTERVAL}")
+    CORE_CONFIG.logger.info(f"Checking whitelist: {'yes' if CORE_CONFIG.check_whitelist else 'no'}")
+    CORE_CONFIG.logger.info(f"Checking token: {'yes' if CORE_CONFIG.check_token else 'no'}")
+    CORE_CONFIG.logger.info(f"Reverse proxy IPs: {CORE_CONFIG.reverse_proxy_ips.replace(',', ', ')}")
+
     data = {
         "LISTEN_ADDR": CORE_CONFIG.LISTEN_ADDR,
         "LISTEN_PORT": CORE_CONFIG.LISTEN_PORT,
@@ -468,7 +469,6 @@ if __name__ == "__main__":
         "MAX_THREADS": CORE_CONFIG.MAX_THREADS,
         "LOG_LEVEL": CORE_CONFIG.log_level,
         "REVERSE_PROXY_IPS": CORE_CONFIG.reverse_proxy_ips,
-        "CORE_USE_PROXY_PROTOCOL": CORE_CONFIG.use_proxy_protocol_str,
         "AUTOCONF_MODE": "yes" if CORE_CONFIG.autoconf_mode else "no",
         "KUBERNETES_MODE": "yes" if CORE_CONFIG.kubernetes_mode else "no",
         "SWARM_MODE": "yes" if CORE_CONFIG.swarm_mode else "no",
@@ -504,13 +504,14 @@ The API can be configured using the following settings:
 | `MAX_WORKERS` | The maximum number of workers | `cpu_count() - 1` |
 | `MAX_THREADS` | The maximum number of threads | `MAX_WORKERS * 2` |
 | `WAIT_RETRY_INTERVAL` | The interval between retries when waiting for a service to be up | `5` |
-| `HEALTHCHECK_INTERVAL` | The interval between healthchecks | `30` |
+| `HEALTHCHECK_INTERVAL` | The interval between healthchecks | `60` |
 | `CHECK_WHITELIST` | Activate the whitelist | `yes` |
 | `WHITELIST` | The whitelist | `127.0.0.1` |
 | `CHECK_TOKEN` | Activate the authentication token | `yes` |
 | `CORE_TOKEN` | The accepted authentication token | `<random>` |
 | `BUNKERWEB_INSTANCES` | The static BunkerWeb instances | `[]` |
 | `HOT_RELOAD` | Activate the hot reload | `no` |
+| `REVERSE_PROXY_IPS` | The reverse proxy IPs separated by spaces | `192.168.0.0/16 172.16.0.0/12 10.0.0.0/8 127.0.0.0/8` |
 | `LOG_LEVEL` | The log level | `notice` |
 | `DATABASE_URI` | The database URI | `sqlite:////var/lib/bunkerweb/db.sqlite3` |
 | `USE_REDIS` | Activate Redis | `no` |

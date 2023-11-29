@@ -28,13 +28,11 @@ function stop() {
 }
 
 function start() {
-	output="$(python3 /usr/share/bunkerweb/core/app/core.py 2>&1)"
+	python3 /usr/share/bunkerweb/core/app/core.py
+	ret=$?
 
-	# shellcheck disable=SC2181
-	if ! [ $? -eq 0 ] ; then
-		# Show the output of the core
-		echo "$output"
-		exit 1
+	if [ $ret -ne 0 ] ; then
+		exit $ret
 	fi
 
 	set -a # turn on automatic exporting

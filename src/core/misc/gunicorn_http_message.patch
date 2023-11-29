@@ -1,0 +1,21 @@
+@@ -6,2 +6,3 @@
+ import io
++import ipaddress
+ import re
+@@ -75,2 +76,8 @@
+             secure_scheme_headers = cfg.secure_scheme_headers
++        elif isinstance(self.peer_addr, tuple):
++            remote_host = ipaddress.ip_address(self.peer_addr[0])
++            for network in cfg.forwarded_allow_ips:
++                if network == '*' or remote_host in network:
++                    secure_scheme_headers = cfg.secure_scheme_headers
++                    break
+ 
+@@ -283,2 +290,7 @@
+             raise ForbiddenProxyRequest(self.peer_addr[0])
++        elif isinstance(self.peer_addr, tuple):
++            remote_host = ipaddress.ip_address(self.peer_addr[0])
++            for network in self.cfg.forwarded_allow_ips:
++                if network == '*' or remote_host in network:
++                    raise ForbiddenProxyRequest(self.peer_addr[0])
+ 

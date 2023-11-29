@@ -1,7 +1,7 @@
 FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8 AS builder
 
 # Install temporary requirements for the dependencies
-RUN apk add --no-cache --virtual .build-deps g++ gcc build-base linux-headers
+RUN apk add --no-cache --virtual .build-deps g++ gcc build-base linux-headers patch
 
 WORKDIR /usr/share/bunkerweb
 
@@ -14,17 +14,12 @@ COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.3
 WORKDIR /usr/share/bunkerweb
 
 RUN mkdir -p deps/python && \
-  cat /tmp/req/requirements.txt* > deps/requirements.txt && \
-  rm -rf /tmp/req
+  cat /tmp/req/requirements.txt* > deps/requirements.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
-
-# Clean up temporary dependencies
-RUN apk del .build-deps && \
-  rm -rf /var/cache/apk/*
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
@@ -40,6 +35,15 @@ COPY src/common/utils utils
 COPY src/VERSION VERSION
 
 COPY src/core core
+
+# Patch gunicorn to support IP networks in allow lists # TODO remove the following when https://github.com/benoitc/gunicorn/pull/2390 is merged and released
+RUN patch --forward deps/python/gunicorn/config.py core/misc/gunicorn_config.patch && \
+  patch --forward deps/python/gunicorn/http/message.py core/misc/gunicorn_http_message.patch
+
+# Clean up temporary dependencies
+RUN apk del .build-deps && \
+  rm -rf /var/cache/apk/* && \
+  rm -rf /tmp/requirements-deps.txt /tmp/req /tmp/patches
 
 FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8
 

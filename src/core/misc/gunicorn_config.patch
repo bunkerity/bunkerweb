@@ -1,0 +1,31 @@
+@@ -11,2 +11,3 @@
+ import inspect
++import ipaddress
+ import os
+@@ -520,2 +521,5 @@
+ 
++def validate_string_to_network_list(val):
++    val = validate_string_to_list(val)
++    return [v if v == '*' else ipaddress.ip_network(v) for v in val]
+ 
+@@ -1262,7 +1266,7 @@
+     meta = "STRING"
+-    validator = validate_string_to_list
++    validator = validate_string_to_network_list
+     default = os.environ.get("FORWARDED_ALLOW_IPS", "127.0.0.1")
+     desc = """\
+-        Front-end's IPs from which allowed to handle set secure headers.
+-        (comma separate).
++        Front-end's IP addresses or networks from which allowed to handle
++        set secure headers. (comma separate).
+ 
+@@ -2062,6 +2066,7 @@
+     cli = ["--proxy-allow-from"]
+-    validator = validate_string_to_list
++    validator = validate_string_to_network_list
+     default = "127.0.0.1"
+     desc = """\
+-        Front-end's IPs from which allowed accept proxy requests (comma separate).
++        Front-end's IP addresses or networks from which allowed accept
++        proxy requests (comma separate).
+ 

@@ -184,4 +184,4 @@ gc_collect()
 if __name__ == "__main__":
     from uvicorn import run
 
-    run(app, host=CORE_CONFIG.LISTEN_ADDR, port=int(CORE_CONFIG.LISTEN_PORT), reload=True, log_level=CORE_CONFIG.log_level, proxy_headers=False, server_header=False, date_header=False)
+    run(app, host=CORE_CONFIG.LISTEN_ADDR, port=int(CORE_CONFIG.LISTEN_PORT), reload=True, log_level=CORE_CONFIG.log_level, proxy_headers=True, server_header=False, date_header=False)
