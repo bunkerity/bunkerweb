@@ -1,33 +1,12 @@
 # -*- coding: utf-8 -*-
-from logging import (
-    CRITICAL,
-    DEBUG,
-    ERROR,
-    INFO,
-    WARNING,
-    Logger,
-    _nameToLevel,
-    addLevelName,
-    basicConfig,
-    getLogger,
-    setLoggerClass,
-)
+from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING, Logger, _nameToLevel, addLevelName, basicConfig, getLogger
 from os import getenv
 from typing import Optional, Union
 
-
-class BWLogger(Logger):
-    def __init__(self, name, level=INFO):
-        self.name = name
-        super(BWLogger, self).__init__(name, level)
-
-
-setLoggerClass(BWLogger)
-
 default_level = _nameToLevel.get(getenv("LOG_LEVEL", "INFO").upper(), INFO)
 basicConfig(
-    format="%(asctime)s - %(name)s - proc %(process)d - %(levelname)s - %(message)s",
-    datefmt="[%Y-%m-%d %H:%M:%S]",
+    format="%(asctime)s [%(name)s] [%(process)d] [%(levelname)s] - %(message)s",
+    datefmt="[%Y-%m-%d %H:%M:%S %z]",
     level=default_level,
 )
 
