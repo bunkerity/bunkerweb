@@ -21,6 +21,30 @@ LOGGER: Logger = setup_logger("UI")
 UI_CONFIG = UiConfig("ui", **os.environ)
 CORE_API = UI_CONFIG.CORE_ADDR
 
+def get_req_data(req, queries=[]):
+    # get body json or fallback
+    try :
+        body = req.get_json()
+    except:
+        body = None
+
+    data = {}
+    if body and len(body) > 0 :
+        data = json.dumps(body, skipkeys=True, allow_nan=True, indent=6)
+
+    # get queries
+    args = req.args.to_dict()
+
+    # Set data
+    result = {}
+
+    for query in queries:
+        result[query] = args.get(query) if args.get(query) else ""
+
+    result["args"] = args
+    result["data"] = data
+
+    return result
 
 # Communicate with core and send response to client
 def get_core_format_res(path, method, data=None, message=None, retry=1):
@@ -34,7 +58,7 @@ def get_core_format_res(path, method, data=None, message=None, retry=1):
         req = req_core(path, method, data)
         # Case 503, retry request
         if req.status_code == 503:
-            LOGGER.warn(f"Communicate with {path} {method} retry={retry}. Maybe CORE is setting something up on background.")
+            LOGGER.warn(log_format("warn", "503", path, f"Communicate with {path} {method} retry={retry}. Maybe CORE is setting something up on background.", data))
             return get_core_format_res(path, method, data, message, retry + 1)
     except:
         raise HTTPException(response=Response(status=500), description="Impossible to connect to CORE API")
@@ -87,13 +111,13 @@ def req_core(path, method, data=None):
 
 
 # Standard response format
-def res_format(type="error", status_code="500", path="", detail="Internal Server Error", data={}):
+def res_format(type="error", status_code="500", path="", detail="Internal Server Error", data={ "message" : "error"}):
     return json.dumps({"type": type, "status": status_code, "message": f"{path} {detail}", "data": data}, skipkeys=True, allow_nan=True, indent=6)
 
 
 # Standard log format
-def log_format(type="error", status_code="500", path="", detail="Internal Server Error", data=False):
-    return f"{type} {status_code} {path} || {detail} {data}"
+def log_format(type="", status_code="500", path="", detail="Internal Server Error", data=""):
+    return f"[UI] {status_code} {path} || {detail} || {f'data : {data}' if data else ''}"
 
 
 # Send action to CORE
@@ -113,12 +137,12 @@ def default_error_handler(code="500", path="", desc="Internal server error.", ta
     try:
         LOGGER.error(log_format("error", code, path, desc))
         create_action_format("error", code, f"UI exception {'path : ' + path if path else ''}", desc, tags)
-        return res_format("error", code, path, desc, {})
+        return res_format("error", code, path, desc)
     # Case impossible to send custom data and detail, send fallback
     except:
         LOGGER.error(log_format("error", "500", "", "Internal server error but impossible to get detail."))
         create_action_format("error", "500", "UI exception", "Internal server error but impossible to get detail.", tags)
-        return res_format("error", "500", "", "Internal server error.", {})
+        return res_format("error", "500", "", "Internal server error.")
 
 
 # Exception on main.py when we are starting UI
@@ -126,10 +150,10 @@ class setupUIException(Exception):
     def __init__(self, log_type, msg, send_action=True):
         # We can specify error or exception (traceback)
         if log_type == "error":
-            LOGGER.error(msg)
+            LOGGER.error(log_format("exception", "500", "", msg))
 
         if log_type == "exception":
-            LOGGER.exception(msg)
+            LOGGER.exception(log_format("exception", "500", "", msg))
 
         # Try to store exception as action on core to keep track
         with suppress(BaseException):
@@ -138,11 +162,11 @@ class setupUIException(Exception):
 
         # Exit or not on failure
         if not UI_CONFIG.EXIT_ON_FAILURE or UI_CONFIG.EXIT_ON_FAILURE == "yes":
-            LOGGER.warn("Error while UI setup and exit on failure. Impossible to access UI.")
+            LOGGER.warn(log_format("warn", "500", "", "Error while UI setup and exit on failure. Impossible to access UI."))
             if send_action:
                 create_action_format("error", "500", "UI setup exception", "Error while UI setup and exit on failure. Impossible to access UI.", ["exception", "ui", "setup"])
             exit(1)
         else:
-            LOGGER.warn("Error while UI setup but keep running on failure. UI could not run correctly.")
+            LOGGER.warn(log_format("warn", "500", "", "Error while UI setup but keep running on failure. UI could not run correctly."))
             if send_action:
                 create_action_format("error", "500", "UI setup exception", "Error while UI setup but keep running on failure. UI could not run correctly.", ["exception", "ui", "setup"])

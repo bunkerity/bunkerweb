@@ -16,7 +16,7 @@ from routes.dashboard import dashboard
 
 from middleware.jwt import setup_jwt
 
-from utils import setupUIException, default_error_handler, create_action_format
+from utils import setupUIException, default_error_handler, create_action_format, log_format
 
 from werkzeug.exceptions import HTTPException
 import os
@@ -45,11 +45,11 @@ LOGGER.warning(os.environ)
 # Check CORE to run UI
 core_running = False
 
-LOGGER.info("Check if CORE API is setup.")
+LOGGER.info(log_format("info", "", "", "Check if CORE API is setup."))
 
 for x in range(UI_CONFIG.MAX_WAIT_RETRIES):
     if core_running:
-        LOGGER.info("CORE API ping succeed.")
+        LOGGER.info(log_format("info", "", "", "CORE API ping succeed."))
         break
 
     try:
@@ -59,7 +59,7 @@ for x in range(UI_CONFIG.MAX_WAIT_RETRIES):
     except:
         core_running = False
 
-    LOGGER.warn(f"Ping CORE API, try={x}")
+    LOGGER.warn(log_format("warn", "", "", f"Ping CORE API, try={x}"))
     time.sleep(UI_CONFIG.WAIT_RETRY_INTERVAL)
 
 if not core_running:
@@ -68,13 +68,13 @@ if not core_running:
 # Start UI app
 app = Flask(__name__)
 
-LOGGER.info("START UI SETUP")
+LOGGER.info(log_format("info", "", "", "START UI SETUP"))
 
 try:
     setup_jwt(app)
-    LOGGER.info("ADDING MIDDLEWARE")
+    LOGGER.info(log_format("info", "", "", "ADDING JWT MIDDLEWARE"))
 except:
-    raise setupUIException("exception", "ADDING MIDDLEWARE")
+    raise setupUIException("exception", "ADDING JWT MIDDLEWARE")
 
 
 # Add API routes
@@ -87,7 +87,7 @@ try:
     app.register_blueprint(logs)
     app.register_blueprint(misc)
     app.register_blueprint(plugins)
-    LOGGER.info("ADDING API ROUTES")
+    LOGGER.info(log_format("info", "", "", "ADDING API ROUTES"))
 except:
     raise setupUIException("exception", "ADDING API ROUTES")
 
@@ -109,7 +109,7 @@ try:
     app.register_blueprint(js)
     app.register_blueprint(fonts)
     app.register_blueprint(flags)
-    LOGGER.info("ADDING TEMPLATES AND STATIC FILES")
+    LOGGER.info(log_format("info", "", "", "ADDING TEMPLATES AND STATIC FILES"))
 except:
     raise setupUIException("exception", "ADDING TEMPLATES AND STATIC FILES")
 
@@ -124,5 +124,5 @@ def handle_exception(e):
 if not HEALTHY_PATH.exists():
     HEALTHY_PATH.write_text("ok", encoding="utf-8")
 
-LOGGER.info("UI RUNNING")
+LOGGER.info(log_format("info", "", "", "UI STARTED PROPERLY"))
 create_action_format("success", "200", "UI started", "UI started properly.", ["ui", "setup"])

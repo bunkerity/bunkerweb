@@ -2,8 +2,10 @@
 from flask import Blueprint
 from flask import request
 from flask_jwt_extended import jwt_required
+from middleware.validator import model_validator
 
-from utils import get_core_format_res
+
+from utils import get_core_format_res, get_req_data
 import json
 from os import environ
 from ui import UiConfig
@@ -24,7 +26,6 @@ if deps_path not in sys_path:
 
 from api_models import BanAdd, BanDelete, Method  # type: ignore
 
-
 PREFIX = "/api/instances"
 
 instances = Blueprint("instances", __name__)
@@ -41,80 +42,39 @@ def get_instances():
 @jwt_required()
 def upsert_instance():
     """Upsert one or more BunkerWeb instances"""
-    args = request.args.to_dict()
-    method = args.get("method") or "ui"
-    # is_valid_model(method, Model) True | False
-    reload_instance = args.get("reload") or True
-    # is_valid_model(method, Model) True | False
-    instances = request.get_json()
-    # is_valid_model(instances, Model) True | False
-    data = json.dumps(instances, skipkeys=True, allow_nan=True, indent=6)
-    return get_core_format_res(f"{CORE_API}/instances?method={method}&reload={reload_instance}", "PUT", data, "Upsert instances")
+    args, data, method, reload_inst = [get_req_data(request, ['method', 'reload'])[k] for k in ('args','data', 'method', 'reload')]
+    return get_core_format_res(f"{CORE_API}/instances?method={method if method else 'ui'}&reload={reload_inst if reload_inst else True}", "PUT", data, "Upsert instances")
 
 
 @instances.route(f"{PREFIX}/<string:instance_hostname>", methods=["DELETE"])
 @jwt_required()
 def delete_instance(instance_hostname):
     """Delete BunkerWeb instance"""
-    # is_valid_model(instance_hostname, Model) True | False
-    args = request.args.to_dict()
-    method = args.get("method") or "ui"
-    # is_valid_model(method, Model) True | False
-    return get_core_format_res(f"{CORE_API}/instances/{instance_hostname}?method={method}", "DELETE", "", f"Delete instance {instance_hostname}")
+    args, data, method = [get_req_data(request, ['method'])[k] for k in ('args','data', 'method')]
+    return get_core_format_res(f"{CORE_API}/instances/{instance_hostname}?method={method if method else 'ui'}", "DELETE", "", f"Delete instance {instance_hostname}")
 
 
 @instances.route(f"{PREFIX}/<string:instance_hostname>/<string:action>", methods=["POST"])
 @jwt_required()
 def action_instance(instance_hostname, action):
     """Send action to a BunkerWeb instance"""
-    # is_valid_model(instance_hostname, Model) True | False
-    # is_valid_model(action, Model) True | False
-    args = request.args.to_dict()
-    method = args.get("method") or "ui"
-    # is_valid_model(method, Model) True | False
-    return get_core_format_res(f"{CORE_API}/instances/{instance_hostname}/{action}?method={method}", "POST", "", f"Send instance {instance_hostname} action : {action}")
+    args, data, method = [get_req_data(request, ['method'])[k] for k in ('args','data', 'method')]
+    return get_core_format_res(f"{CORE_API}/instances/{instance_hostname}/{action}?method={method if method else 'ui'}", "POST", "", f"Send instance {instance_hostname} action : {action}")
 
 
 @instances.route(f"{PREFIX}/ban", methods=["POST"])
 @jwt_required()
+@model_validator(body="BanAdd", queries={"method" : "Method"})
 def add_bans():
     """Add bans ip for all instances"""
-    args = request.args.to_dict()
-    method = args.get("method") or "ui"
-
-    try:
-        Method(method=method)
-    except:
-        raise HTTPException(response=Response(status=400), description=f"Request args bad format")
-
-    bans = request.get_json()
-    try:
-        BanAdd(list=bans)
-    except:
-        raise HTTPException(response=Response(status=400), description="Request body bad format")
-
-    # is_valid_model(instances, Model) True | False
-    data = json.dumps(bans, skipkeys=True, allow_nan=True, indent=6)
-    return get_core_format_res(f"{CORE_API}/instances/ban?method={method}", "POST", data, "Add bans ip")
+    args, data, method = [get_req_data(request, ['method'])[k] for k in ('args','data', 'method')]
+    return get_core_format_res(f"{CORE_API}/instances/ban?method={method if method else 'ui'}", "POST", data, "Add bans ip")
 
 
 @instances.route(f"{PREFIX}/ban", methods=["DELETE"])
 @jwt_required()
+@model_validator(body="BanDelete", queries={"method" : "Method"})
 def delete_bans():
     """Delete bans ip for all instances"""
-    args = request.args.to_dict()
-    method = args.get("method") or "ui"
-
-    try:
-        Method(method=method)
-    except:
-        raise HTTPException(response=Response(status=400), description=f"Request args bad format")
-
-    bans = request.get_json()
-    try:
-        BanDelete(list=bans)
-    except:
-        raise HTTPException(response=Response(status=400), description=f"Request body bad format")
-
-    data = json.dumps(bans, skipkeys=True, allow_nan=True, indent=6)
-    return get_core_format_res(f"{CORE_API}/instances/ban?method={method}", "DELETE", data, "Delete bans ip")
+    args, data, method = [get_req_data(request, ['method'])[k] for k in ('args','data', 'method')]
+    return get_core_format_res(f"{CORE_API}/instances/ban?method={method if method else 'ui'}", "DELETE", data, "Delete bans ip")
