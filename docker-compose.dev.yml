@@ -52,6 +52,7 @@ services:
       - CORE_ADDR=http://bw-core:1337
       - CORE_TOKEN=ChangeMe42!!!
       - ADMIN_PASSWORD=P@ssw0rd
+      - ADMIN_USERNAME=admin
     networks:
       - bw-universe
 

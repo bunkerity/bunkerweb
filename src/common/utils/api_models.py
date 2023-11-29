@@ -11,6 +11,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
         sys_path.append(deps_path)
 
 from pydantic import BaseModel, Field
+from pydantic.networks import IPvAnyAddress
 
 from API import API  # type: ignore
 
@@ -261,7 +262,23 @@ class JobRun(BaseModel):
     end_date: Optional[datetime] = Field(None, examples=["2021-01-01T00:00:00.000Z"], description="The job run end date")
 
 
+# Case no start_date set, this will be date.now() on CORE
+# Case no end_date set, this will be one hour on CORE
+# Case no reason set, this will be ui
 class Ban(BaseModel):
     ip: str = Field(examples=["127.0.0.1"], description="The banned IP")
     end_date: Optional[datetime] = Field(None, examples=["2021-01-01T00:00:00.000Z"], description="The ban end date")
+    start_date: Optional[datetime] = Field(None, examples=["2021-01-01T00:00:00.000Z"], description="The ban start date")
     reason: str = Field("manual", examples=["manual"], description="The ban reason")
+
+
+class BanAdd(BaseModel):
+    list: List[Ban]
+
+
+class BanDelete(BaseModel):
+    list: List[IPvAnyAddress]
+
+
+class Method(BaseModel):
+    method: str
