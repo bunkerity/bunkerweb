@@ -4,7 +4,7 @@ from os import cpu_count, getenv, sep
 from os.path import join, normpath
 from pathlib import Path
 from sys import path as sys_path
-from typing import List, Literal, Optional, Set, Tuple, Union
+from typing import Literal, Optional, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
     if deps_path not in sys_path:
@@ -37,16 +37,9 @@ class UiConfig(YamlBaseSettings):
     WAIT_RETRY_INTERVAL: Union[str, float] = 5.0
     MAX_WAIT_RETRIES: Union[str, int] = 10
     LOG_LEVEL: Literal["debug", "info", "warning", "error", "critical", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "info"
-    REVERSE_PROXY_IPS: Union[str, List[str], Set[str], Tuple[str]] = {
-        "192.168.0.0/16",
-        "172.16.0.0/12",
-        "10.0.0.0/8",
-        "127.0.0.0/8",
-    }
 
     ADMIN_USERNAME: Optional[str] = None
     ADMIN_PASSWORD: Optional[str] = None
-    UI_USE_PROXY_PROTOCOL: Union[Literal["yes", "no"], bool] = "no"
 
     # The reading order is:
     # 1. Environment variables
@@ -130,39 +123,11 @@ class UiConfig(YamlBaseSettings):
             raise ValueError("Invalid ADMIN_PASSWORD provided, it must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
         return v
 
-    @field_validator("REVERSE_PROXY_IPS")
-    @classmethod
-    def check_reverse_proxy_ips(cls, v: Union[str, List[str], Set[str], Tuple[str]]) -> Union[str, List[str], Set[str], Tuple[str]]:
-        if isinstance(v, str):
-            v = {v}
-
-        for ip in v:
-            if not ip:
-                continue
-
-            if not NETWORK_RX.match(ip) and not IP_RX.match(ip):
-                raise ValueError("Invalid REVERSE_PROXY_IPS provided, it must be a valid IPv4 or IPv6 address or network.")
-        return v
-
     # ? PROPERTIES
 
     @cached_property
     def log_level(self) -> str:
         return self.LOG_LEVEL.lower()
-
-    @cached_property
-    def reverse_proxy_ips(self) -> str:
-        if not isinstance(self.REVERSE_PROXY_IPS, str):
-            return " ".join(self.REVERSE_PROXY_IPS)
-        return self.REVERSE_PROXY_IPS
-
-    @cached_property
-    def use_proxy_protocol(self) -> bool:
-        return self.UI_USE_PROXY_PROTOCOL == "yes" if isinstance(self.UI_USE_PROXY_PROTOCOL, str) else self.UI_USE_PROXY_PROTOCOL
-
-    @cached_property
-    def use_proxy_protocol_str(self) -> str:
-        return "yes" if self.use_proxy_protocol else "no"
 
     @property
     def core_token(self) -> Optional[str]:
@@ -183,8 +148,6 @@ if __name__ == "__main__":
         "LISTEN_ADDR": UI_CONFIG.LISTEN_ADDR,
         "LISTEN_PORT": UI_CONFIG.LISTEN_PORT,
         "LOG_LEVEL": UI_CONFIG.log_level,
-        "REVERSE_PROXY_IPS": UI_CONFIG.reverse_proxy_ips,
-        "UI_USE_PROXY_PROTOCOL": UI_CONFIG.use_proxy_protocol_str,
     }
 
     content = ""
