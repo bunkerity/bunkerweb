@@ -8,9 +8,23 @@ import json
 from os import environ
 from ui import UiConfig
 
+from werkzeug.exceptions import HTTPException
+from werkzeug.sansio.response import Response
+
 UI_CONFIG = UiConfig("ui", **environ)
 
 CORE_API = UI_CONFIG.CORE_ADDR
+
+from os.path import join, sep
+from sys import path as sys_path
+
+deps_path = join(sep, "usr", "share", "bunkerweb", "utils")
+if deps_path not in sys_path:
+    sys_path.append(deps_path)
+
+from api_models import BanAdd, BanDelete, Method  # type: ignore
+
+
 PREFIX = "/api/instances"
 
 instances = Blueprint("instances", __name__)
@@ -67,8 +81,18 @@ def add_bans():
     """Add bans ip for all instances"""
     args = request.args.to_dict()
     method = args.get("method") or "ui"
-    # is_valid_model(method, Model) True | False
+
+    try:
+        Method(method=method)
+    except:
+        raise HTTPException(response=Response(status=400), description=f"Request args bad format")
+
     bans = request.get_json()
+    try:
+        BanAdd(list=bans)
+    except:
+        raise HTTPException(response=Response(status=400), description="Request body bad format")
+
     # is_valid_model(instances, Model) True | False
     data = json.dumps(bans, skipkeys=True, allow_nan=True, indent=6)
     return get_core_format_res(f"{CORE_API}/instances/ban?method={method}", "POST", data, "Add bans ip")
@@ -80,8 +104,17 @@ def delete_bans():
     """Delete bans ip for all instances"""
     args = request.args.to_dict()
     method = args.get("method") or "ui"
-    # is_valid_model(method, Model) True | False
+
+    try:
+        Method(method=method)
+    except:
+        raise HTTPException(response=Response(status=400), description=f"Request args bad format")
+
     bans = request.get_json()
-    # is_valid_model(instances, Model) True | False
+    try:
+        BanDelete(list=bans)
+    except:
+        raise HTTPException(response=Response(status=400), description=f"Request body bad format")
+
     data = json.dumps(bans, skipkeys=True, allow_nan=True, indent=6)
     return get_core_format_res(f"{CORE_API}/instances/ban?method={method}", "DELETE", data, "Delete bans ip")

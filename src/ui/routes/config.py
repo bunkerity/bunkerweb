@@ -37,7 +37,7 @@ def update_config():
     # is_valid_model(method, Model) True | False
     config = request.get_json()
     # is_valid_model(config, Model) True | False
-    # data = json.dumps(config, skipkeys=True, allow_nan=True, indent=6) # TODO
+    data = json.dumps(config, skipkeys=True, allow_nan=True, indent=6)
     return get_core_format_res(f"{CORE_API}/config?method={method}", "PUT", config, "Update config")
 
 

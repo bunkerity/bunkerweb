@@ -98,6 +98,8 @@ def setup_jwt(app):
         username = request.form.get("username", None)
         password = request.form.get("password", None)
         if username != UI_CONFIG.ADMIN_USERNAME or password != UI_CONFIG.ADMIN_PASSWORD:
+            LOGGER.info(f"User try to log in but failed")
+            create_action_format("error", "403", "Crendentials : UI failed login", f"User tried to login but failed", ["ui", "credentials"])
             return make_response(redirect("/admin/login?error=True", 302))
 
         access_token = create_access_token(identity=username)
