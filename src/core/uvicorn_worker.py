@@ -14,7 +14,7 @@ class BwUvicornWorker(UvicornWorker):
     CONFIG_KWARGS = {
         "loop": "auto",
         "http": "auto",
-        "proxy_headers": False,
+        "proxy_headers": True,
         "server_header": False,
         "date_header": False,
     }

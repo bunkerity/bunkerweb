@@ -16,25 +16,30 @@ from logging import Logger
 from os import cpu_count, getenv, sep
 from os.path import join
 from pathlib import Path
-from pydantic import field_validator
-from regex import IGNORECASE, compile as re_compile
 from secrets import choice as secrets_choice
 from string import ascii_letters, digits, punctuation
 from sys import path as sys_path
-from typing import Dict, Iterable, List, Literal, Set, Union
+from typing import Dict, Iterable, List, Literal, Set, Tuple, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("db",), ("utils",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from logger import setup_logger  # type: ignore
+from pydantic import field_validator
+from regex import IGNORECASE, compile as re_compile
 from yaml_base_settings import YamlBaseSettings, YamlSettingsConfigDict  # type: ignore
+
+from logger import setup_logger  # type: ignore
 
 
 BUNKERWEB_STATIC_INSTANCES_RX = re_compile(r"(?P<hostname>(?<![:@])\b[^:@\s]+\b)(:(?P<port>\d+))?(@(?P<server_name>(?=[^\s]{1,255})[^\s]+))?")
 EXTERNAL_PLUGIN_URLS_RX = re_compile(r"^( *((https?://|file:///)[-\w@:%.+~#=]+[-\w()!@:%+.~?&/=$#]*)(?!.*\2(?!.)) *)*$")
 IP_RX = re_compile(
     r"^((\b25[0-5]|\b2[0-4]\d|\b[01]?\d\d?)(\.(25[0-5]|2[0-4]\d|[01]?\d\d?)){3}|(([0-9a-f]{1,4}:){7,7}[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,7}:|([0-9a-f]{1,4}:){1,6}:[0-9a-f]{1,4}|([0-9a-f]{1,4}:){1,5}(:[0-9a-f]{1,4}){1,2}|([0-9a-f]{1,4}:){1,4}(:[0-9a-f]{1,4}){1,3}|([0-9a-f]{1,4}:){1,3}(:[0-9a-f]{1,4}){1,4}|([0-9a-f]{1,4}:){1,2}(:[0-9a-f]{1,4}){1,5}|[0-9a-f]{1,4}:((:[0-9a-f]{1,4}){1,6})|:((:[0-9a-f]{1,4}){1,7}|:)|fe80:(:[0-9a-f]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}\d){0,1}\d)\.){3,3}(25[0-5]|(2[0-4]|1{0,1}\d){0,1}\d)|([0-9a-f]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}\d){0,1}\d)\.){3,3}(25[0-5]|(2[0-4]|1{0,1}\d){0,1}\d)))$",  # noqa: E501
+    IGNORECASE,
+)
+NETWORK_RX = re_compile(
+    r"^((\b25[0-5]|\b2[0-4]\d|\b[01]?\d\d?)(\.(25[0-5]|2[0-4]\d|[01]?\d\d?)){3})(\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\d)?\d)\.){3}(25[0-5]|(2[0-4]|1?\d)?\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\d)?\d)\.){3}(25[0-5]|(2[0-4]|1?\d)?\d))(\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?(?!.*\D\2([^\d\/]|$))$",  # noqa: E501
     IGNORECASE,
 )
 TOKEN_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$")
@@ -53,11 +58,18 @@ class CoreConfig(YamlBaseSettings):
     WAIT_RETRY_INTERVAL: Union[str, float] = 5.0
     HEALTHCHECK_INTERVAL: Union[str, int] = 60
     CHECK_WHITELIST: Union[Literal["yes", "no"], bool] = "yes"
-    WHITELIST: Union[str, Iterable[str]] = {"127.0.0.1"}
+    WHITELIST: Union[str, List[str], Set[str], Tuple[str]] = {"127.0.0.1"}
     CHECK_TOKEN: Union[Literal["yes", "no"], bool] = "yes"
     CORE_TOKEN: str = ""
-    BUNKERWEB_INSTANCES: Union[str, Iterable[str]] = set()
+    BUNKERWEB_INSTANCES: Union[str, List[str], Set[str], Tuple[str]] = set()
     HOT_RELOAD: Union[Literal["yes", "no"], bool] = "no"
+    REVERSE_PROXY_IPS: Union[str, List[str], Set[str], Tuple[str]] = {
+        "192.168.0.0/16",
+        "172.16.0.0/12",
+        "10.0.0.0/8",
+        "127.0.0.0/8",
+    }
+    CORE_USE_PROXY_PROTOCOL: Union[Literal["yes", "no"], bool] = "no"
 
     # ? Miscellaneous settings
     LOG_LEVEL: Literal["emerg", "alert", "crit", "error", "warn", "warning", "notice", "info", "debug", "EMERG", "ALERT", "CRIT", "ERROR", "WARN", "WARNING", "NOTICE", "INFO", "DEBUG"] = "notice"
@@ -68,7 +80,7 @@ class CoreConfig(YamlBaseSettings):
     REDIS_DATABASE: Union[str, int] = 0
     REDIS_SSL: Union[str, bool] = False
     REDIS_TIMEOUT: Union[str, int] = 1000
-    EXTERNAL_PLUGIN_URLS: Union[str, Iterable[str]] = ""
+    EXTERNAL_PLUGIN_URLS: Union[str, List[str], Set[str], Tuple[str]] = ""
     AUTOCONF_MODE: Union[Literal["yes", "no"], bool] = "no"
     KUBERNETES_MODE: Union[Literal["yes", "no"], bool] = "no"
     SWARM_MODE: Union[Literal["yes", "no"], bool] = "no"
@@ -141,6 +153,20 @@ class CoreConfig(YamlBaseSettings):
             raise ValueError("Invalid token provided, it must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
         return v
 
+    @field_validator("REVERSE_PROXY_IPS")
+    @classmethod
+    def check_reverse_proxy_ips(cls, v: Union[str, List[str], Set[str], Tuple[str]]) -> Union[str, List[str], Set[str], Tuple[str]]:
+        if isinstance(v, str):
+            v = {v}
+
+        for ip in v:
+            if not ip:
+                continue
+
+            if not NETWORK_RX.match(ip) and not IP_RX.match(ip):
+                raise ValueError("Invalid REVERSE_PROXY_IPS provided, it must be a valid IPv4 or IPv6 address or network.")
+        return v
+
     @field_validator("REDIS_PORT")
     @classmethod
     def check_redis_port(cls, v: Union[str, int]) -> Union[str, int]:
@@ -183,6 +209,24 @@ class CoreConfig(YamlBaseSettings):
     @cached_property
     def check_token(self) -> bool:
         return self.CHECK_TOKEN == "yes" if isinstance(self.CHECK_TOKEN, str) else self.CHECK_TOKEN
+
+    @cached_property
+    def reverse_proxy_ips(self) -> str:
+        if isinstance(self.REVERSE_PROXY_IPS, Iterable):
+            return " ".join(self.REVERSE_PROXY_IPS)
+        return self.REVERSE_PROXY_IPS
+
+    @cached_property
+    def use_proxy_protocol(self) -> bool:
+        return self.CORE_USE_PROXY_PROTOCOL == "yes" if isinstance(self.CORE_USE_PROXY_PROTOCOL, str) else self.CORE_USE_PROXY_PROTOCOL
+
+    @cached_property
+    def use_proxy_protocol_str(self) -> str:
+        return "yes" if self.use_proxy_protocol else "no"
+
+    @cached_property
+    def hot_reload(self) -> bool:
+        return self.HOT_RELOAD == "yes" if isinstance(self.HOT_RELOAD, str) else self.HOT_RELOAD
 
     @cached_property
     def use_redis(self) -> bool:
@@ -331,8 +375,11 @@ class CoreConfig(YamlBaseSettings):
                 "core_token",
                 "BUNKERWEB_INSTANCES",
                 "bunkerweb_instances",
+                "REVERSE_PROXY_IPS",
+                "reverse_proxy_ips",
                 "HOT_RELOAD",
                 "hot_reload",
+                "CORE_USE_PROXY_PROTOCOL",
                 "external_plugin_urls",
                 "external_plugin_urls_str",
                 "log_level",
@@ -351,7 +398,7 @@ class CoreConfig(YamlBaseSettings):
         )
 
         for config, value in deepcopy(instances_config).items():
-            if isinstance(value, list):
+            if isinstance(value, (list, set, tuple)):
                 for i, setting in enumerate(value, start=1):
                     instances_config[f"{config}_{i}"] = setting
                 del instances_config[config]
@@ -385,10 +432,6 @@ class CoreConfig(YamlBaseSettings):
             return "Autoconf"
 
         return self.get_instance()
-
-    @cached_property
-    def hot_reload(self) -> bool:
-        return self.HOT_RELOAD == "yes" if isinstance(self.HOT_RELOAD, str) else self.HOT_RELOAD
 
     # ? METHODS
 
@@ -424,6 +467,8 @@ if __name__ == "__main__":
         "MAX_WORKERS": CORE_CONFIG.MAX_WORKERS,
         "MAX_THREADS": CORE_CONFIG.MAX_THREADS,
         "LOG_LEVEL": CORE_CONFIG.log_level,
+        "REVERSE_PROXY_IPS": CORE_CONFIG.reverse_proxy_ips,
+        "CORE_USE_PROXY_PROTOCOL": CORE_CONFIG.use_proxy_protocol_str,
         "AUTOCONF_MODE": "yes" if CORE_CONFIG.autoconf_mode else "no",
         "KUBERNETES_MODE": "yes" if CORE_CONFIG.kubernetes_mode else "no",
         "SWARM_MODE": "yes" if CORE_CONFIG.swarm_mode else "no",

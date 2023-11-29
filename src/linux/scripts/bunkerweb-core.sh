@@ -32,7 +32,6 @@ function start() {
 	rm -f /tmp/core.tmp.env
 
     python3 -m gunicorn --chdir /usr/share/bunkerweb/core \
-        --pythonpath /usr/share/bunkerweb/deps/python/ \
         --config /usr/share/bunkerweb/core/gunicorn.conf.py \
         --user nginx \
         --group nginx \
