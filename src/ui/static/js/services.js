@@ -222,9 +222,8 @@ class ServiceModal {
 
     if (action === "delete") {
       this.showDeleteForm();
-      formEl.querySelector(
-        `[data-services-modal-text]`,
-      ).textContent = `Are you sure you want to delete ${serviceName} ?`;
+      formEl.querySelector(`[data-services-modal-text]`).textContent =
+        `Are you sure you want to delete ${serviceName} ?`;
       const nameInp = formEl.querySelector(`input[name="SERVER_NAME"]`);
       nameInp.setAttribute("value", serviceName);
       nameInp.value = serviceName;
