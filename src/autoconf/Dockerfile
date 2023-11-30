@@ -1,26 +1,21 @@
 FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8 AS builder
 
 # Install python dependencies
-# RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo
+# RUN apk add --no-cache g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo
+
+WORKDIR /tmp
 
 # Copy python requirements
-COPY src/deps/requirements.txt /tmp/requirements-deps.txt
-COPY src/autoconf/requirements.txt /tmp/req/requirements.txt
+COPY src/deps/requirements.txt requirements-deps.txt
+COPY src/autoconf/requirements.txt req/requirements.txt
 
 WORKDIR /usr/share/bunkerweb
 
-RUN mkdir -p deps/python && \
-  cat /tmp/req/requirements.txt* > deps/requirements.txt && \
-  rm -rf /tmp/req
-
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
-  pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
-
-# Remove build dependencies
-# RUN apk del .build-deps && \
-RUN rm -rf /var/cache/apk/*
+  mkdir -p deps/python && \
+  pip install --no-cache-dir --require-hashes -r /tmp/requirements-deps.txt && \
+  pip install --no-cache-dir --require-hashes --target deps/python -r /tmp/req/requirements.txt
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand

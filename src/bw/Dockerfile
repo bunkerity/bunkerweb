@@ -1,7 +1,7 @@
 FROM nginx:1.24.0-alpine@sha256:76ca7f6bfe01c3e22e3af85fd37c30149ece3ac2a444973687cab1765abca115 AS builder
 
 # Install temporary requirements for the dependencies
-RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip
+RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip
 
 WORKDIR /tmp/bunkerweb/deps
 
@@ -12,8 +12,7 @@ COPY src/deps/deps.json deps.json
 COPY src/deps/install.sh install.sh
 
 # Compile and install dependencies
-RUN mkdir -p /usr/share/bunkerweb/deps/python && \
-	chmod +x install.sh && \
+RUN chmod +x install.sh && \
 	bash install.sh
 
 WORKDIR /usr/share/bunkerweb
@@ -24,12 +23,9 @@ COPY src/common/gen/requirements.txt deps/requirements.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-	pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
+	mkdir -p deps/python && \
+	pip install --no-cache-dir --require-hashes -r /tmp/requirements-deps.txt && \
 	pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
-
-# Clean up temporary dependencies
-RUN apk del .build-deps && \
-	rm -rf /var/cache/apk/*
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
