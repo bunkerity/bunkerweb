@@ -1,25 +1,23 @@
 FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8 AS builder
 
 # Install temporary requirements for the dependencies
-RUN apk add --no-cache --virtual .build-deps g++ gcc build-base linux-headers patch
+RUN apk add --no-cache g++ gcc build-base linux-headers
 
-WORKDIR /usr/share/bunkerweb
+WORKDIR /tmp
 
 # Copy python requirements
-COPY src/deps/requirements.txt /tmp/requirements-deps.txt
-COPY src/core/requirements.txt /tmp/req/requirements.txt
-COPY src/common/db/requirements.txt /tmp/req/requirements.txt.2
-COPY src/common/gen/requirements.txt /tmp/req/requirements.txt.3
+COPY src/deps/requirements.txt requirements-deps.txt
+COPY src/core/requirements.txt req/requirements-core.txt
+COPY src/common/db/requirements.txt req/requirements-db.txt
+COPY src/common/gen/requirements.txt req/requirements-gen.txt
 
 WORKDIR /usr/share/bunkerweb
-
-RUN mkdir -p deps/python && \
-  cat /tmp/req/requirements.txt* > deps/requirements.txt
 
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
-  pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
-  pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
+  mkdir -p deps/python && \
+  pip install --no-cache-dir --require-hashes -r /tmp/requirements-deps.txt && \
+  pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
@@ -35,15 +33,6 @@ COPY src/common/utils utils
 COPY src/VERSION VERSION
 
 COPY src/core core
-
-# Patch gunicorn to support IP networks in allow lists # TODO remove the following when https://github.com/benoitc/gunicorn/pull/2390 is merged and released
-RUN patch --forward deps/python/gunicorn/config.py core/misc/gunicorn_config.patch && \
-  patch --forward deps/python/gunicorn/http/message.py core/misc/gunicorn_http_message.patch
-
-# Clean up temporary dependencies
-RUN apk del .build-deps && \
-  rm -rf /var/cache/apk/* && \
-  rm -rf /tmp/requirements-deps.txt /tmp/req /tmp/patches
 
 FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8
 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network, ip_address, ip_network
+from ipaddress import IPv4Network, IPv6Network, ip_address, ip_network
 from logging import getLogger
 from os.path import join, sep
 from sys import path as sys_path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 deps_path = join(sep, "usr", "share", "bunkerweb", "deps", "python")
 if deps_path not in sys_path:
@@ -59,19 +59,23 @@ class BwUvicornWorker(UvicornWorker):
 
 
 class ProxyHeadersMiddleware:
-    def __init__(self, app: "ASGI3Application", trusted_networks: List[Union[IPv4Network, IPv6Network]] = [ip_network("127.0.0.1")]) -> None:
+    def __init__(self, app: "ASGI3Application", trusted_hosts: Union[List[str], str] = "127.0.0.1") -> None:
         self.app = app
-        self.always_trust = "0.0.0.0/0" in trusted_networks or "::/0" in trusted_networks
-        self.trusted_networks = set(trusted_networks)
+        if isinstance(trusted_hosts, str):
+            tmp_trusted_hosts = {item.strip() for item in trusted_hosts.split(",")}
+        else:
+            tmp_trusted_hosts = set(trusted_hosts)
+        self.always_trust = "*" in tmp_trusted_hosts
+        self.trusted_networks: Set[Union[IPv4Network, IPv6Network]] = {ip_network(host) for host in tmp_trusted_hosts if host != "*"}
 
-    def get_trusted_client_host(self, x_forwarded_for_hosts: List[str]) -> Optional[Union[str, IPv4Address, IPv6Address]]:
+    def get_trusted_client_host(self, x_forwarded_for_hosts: List[str]) -> Optional[str]:
         if self.always_trust:
             return x_forwarded_for_hosts[0]
 
         for host in reversed(x_forwarded_for_hosts):
-            host = ip_address(host)
+            address_host = ip_address(host)
             for network in self.trusted_networks:
-                if host not in network:
+                if address_host not in network:
                     return host
 
         return None
@@ -101,8 +105,6 @@ class ProxyHeadersMiddleware:
                     x_forwarded_for = headers[b"x-forwarded-for"].decode("latin1")
                     x_forwarded_for_hosts = [item.strip() for item in x_forwarded_for.split(",")]
                     host = self.get_trusted_client_host(x_forwarded_for_hosts)
-                    if host:
-                        host = str(host)
                     port = 0
                     scope["client"] = (host, port)  # type: ignore
 
@@ -114,4 +116,4 @@ class CustomConfig(Config):
         super().load()
 
         if self.proxy_headers:
-            self.loaded_app = ProxyHeadersMiddleware(self.loaded_app, trusted_networks=self.forwarded_allow_ips)  # type: ignore
+            self.loaded_app = ProxyHeadersMiddleware(self.loaded_app, trusted_hosts=self.forwarded_allow_ips)
