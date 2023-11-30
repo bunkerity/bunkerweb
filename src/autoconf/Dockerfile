@@ -1,7 +1,7 @@
 FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8 AS builder
 
 # Install python dependencies
-# RUN apk add --no-cache g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo
+# RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo
 
 WORKDIR /tmp
 
@@ -16,6 +16,10 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   mkdir -p deps/python && \
   pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python -r /tmp/req/requirements.txt
+
+# Remove build dependencies
+RUN apk del .build-deps && \
+  rm -rf /var/cache/apk/*
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
