@@ -1,7 +1,7 @@
 FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8 AS builder
 
 # Install temporary requirements for the dependencies
-RUN apk add --no-cache --virtual .build-deps g++ gcc build-base linux-headers
+RUN apk add --no-cache g++ gcc build-base linux-headers
 
 WORKDIR /tmp
 
@@ -18,10 +18,6 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
   mkdir -p deps/python && \
   pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
-
-# Remove build dependencies
-RUN apk del .build-deps && \
-  rm -rf /var/cache/apk/*
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
@@ -72,7 +68,9 @@ RUN apk add --no-cache bash grep libgcc libstdc++ libpq openssl libmagic && \
   find core_plugins/*/jobs/* -type f -exec chmod 750 {} \; && \
   chmod 750 cli/main.py core/app/*.py core/app/routers/*.py core/entrypoint.sh helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
   chmod 660 INTEGRATION && \
-  chown root:core INTEGRATION
+  chown root:core INTEGRATION && \
+  ln -s /proc/1/fd/1 /var/log/bunkerweb/core-access.log && \
+  ln -s /proc/1/fd/2 /var/log/bunkerweb/core.log
 
 COPY --chown=root:core src/bw/misc/asn.mmdb /var/tmp/bunkerweb/asn.mmdb
 COPY --chown=root:core src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.mmdb

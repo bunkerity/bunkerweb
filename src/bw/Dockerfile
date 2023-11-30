@@ -1,7 +1,7 @@
 FROM nginx:1.24.0-alpine@sha256:76ca7f6bfe01c3e22e3af85fd37c30149ece3ac2a444973687cab1765abca115 AS builder
 
 # Install temporary requirements for the dependencies
-RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip
+RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip
 
 WORKDIR /tmp/bunkerweb/deps
 
@@ -26,10 +26,6 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
 	mkdir -p deps/python && \
 	pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
 	pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
-
-# Remove build dependencies
-RUN apk del .build-deps && \
-	rm -rf /var/cache/apk/*
 
 # Copy files
 # can't exclude deps from . so we are copying everything by hand
