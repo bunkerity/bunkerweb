@@ -1,16 +1,24 @@
 global: # Global configuration that every BunkerWeb service will read
-  core_addr: http://127.0.0.1:1337
-  core_token: changeme
+  core_addr: "http://127.0.0.1:1337"
+  # core_token: "changeme" # If no core_token is specified, the core will generate one
 
 core: # Specific configuration for the core, can also contain overrides
-  listen_addr: 127.0.0.1
+  listen_addr: "127.0.0.1"
   listen_port: 1337
-  whitelist: 127.0.0.1
-  check_token: yes
-  check_whitelist: yes
-  database_uri: sqlite:////var/lib/bunkerweb/db.sqlite
+  max_workers: null # If null, the core will use the number of CPU cores minus 1
+  max_threads: null # If null, the core will use the max_workers value times 2
+  wait_retry_interval: 5
+  healthcheck_interval: 60
+  check_whitelist: true
+  whitelist:
+    - "127.0.0.1"
+  check_token: true
   bunkerweb_instances:
+  hot_reload: false
+  reverse_proxy_ips:
+    - "127.0.0.1"
+  database_uri: "sqlite:////var/lib/bunkerweb/db.sqlite"
 
 ui: # Specific configuration for the UI, can also contain overrides
-  admin_username: admin
-  admin_password: changeme # replace with a stronger password
+  admin_username: "admin"
+  admin_password: "changeme" # replace with a stronger password

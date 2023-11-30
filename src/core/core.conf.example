@@ -1,9 +1,13 @@
 LISTEN_ADDR=0.0.0.0
 LISTEN_PORT=1337
+# MAX_WORKERS=4 # If not specified, the core will use the number of cores available minus 1
+# MAX_THREADS=4 # If not specified, the core will use the value of MAX_WORKERS times 2
 WAIT_RETRY_INTERVAL=5
-HEALTHCHECK_INTERVAL=30
+HEALTHCHECK_INTERVAL=60
 CHECK_WHITELIST=yes
 WHITELIST=127.0.0.1
 CHECK_TOKEN=yes
-CORE_TOKEN=changeme
+# CORE_TOKEN=changeme # If no core_token is specified, the core will generate one
 BUNKERWEB_INSTANCES=
+HOT_RELOAD=no
+REVERSE_PROXY_IPS="192.168.0.0/16 172.16.0.0/12 10.0.0.0/8 127.0.0.0/8"
