@@ -273,12 +273,64 @@ class Ban(BaseModel):
 
 
 class BanAdd(BaseModel):
-    list: List[Ban]
+    list: List[Ban] = Field(examples=[{"ip": "127.0.0.1", "start_date": "1701343420", "end_date": "1701343648", "reason": "manual"}], description="List of dict with IP to ban")
 
 
 class BanDelete(BaseModel):
-    list: List[IPvAnyAddress]
+    list: List[IPvAnyAddress] = Field(examples=["127.0.0.1"], description="List of IP to ban")
 
 
 class Method(BaseModel):
-    method: str
+    method: str = Field(examples=["core", "ui"], description="The method used by the API")
+
+
+class ReloadInstance(BaseModel):
+    reload: str | bool = Field(examples=["true", True], description="If the instance should be reloaded")
+
+
+class Config(BaseModel):
+    config: Dict[str, str] = Field(examples=[{"global": {"setting": "value"}}], description="The config dict")
+
+
+class NewFormat(BaseModel):
+    new_format: str | bool = Field(examples=["true", True], description="If the config should be returned in the new format")
+
+
+class JobName(BaseModel):
+    job_name: str = Field(examples=["job_blacklist"], description="Name of the job to run")
+
+
+class ServiceId(BaseModel):
+    service_id: str = Field(examples=["www.example.com"], description="The service that the cache or config file belongs to")
+
+
+class CheckSum(BaseModel):
+    checksum: str = Field(
+        "",
+        examples=["b935addf904d374ad57b7985e821d6bab74ee1c18757479b33b855622ab78290ddb00b39be41e60df41bf4502b9c8796e975c2177e8000f068a5a4d6d9acac3d"],
+        description="SHA512 checksum of the file",
+    )
+
+
+class CacheFileName(BaseModel):
+    cache_file: str = Field(examples=["ASN"], description="The cache file name")
+
+
+class ServiceName(BaseModel):
+    service_name: str = Field(examples=["www.example.com"], description="The service name")
+
+
+class CustomConfigName(BaseModel):
+    custom_config_name: str = Field(examples=["my_custom_config"], description="The custom config name")
+
+
+class PluginId(BaseModel):
+    plugin_id: str = Field(examples=["blacklist"], description="The plugin id")
+
+
+class InstanceHostname(BaseModel):
+    instance_hostname: str = Field(examples=["bunkerweb-1"], description="The instance hostname")
+
+
+class InstanceAction(BaseModel):
+    instance_action: str = Field(examples=["reload"], description="The instance action")

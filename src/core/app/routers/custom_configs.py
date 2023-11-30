@@ -168,7 +168,7 @@ async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, backg
     },
 )
 async def delete_custom_config(custom_config_name: str, custom_config: CustomConfigModel, background_tasks: BackgroundTasks):
-    """Update a custom config"""
+    """Delete a custom config"""
 
     if custom_config.method == "static":
         message = f"Can't delete custom config {custom_config_name} : method can't be static"

@@ -3,7 +3,9 @@ from flask import Blueprint
 from flask import request
 from flask_jwt_extended import jwt_required
 
-from utils import get_core_format_res
+from middleware.validator import model_validator
+
+from utils import get_core_format_res, get_req_data
 import json
 from os import environ
 from ui import UiConfig
@@ -25,26 +27,17 @@ def get_custom_configs():
 
 @custom_configs.route(f"{PREFIX}", methods=["PUT"])
 @jwt_required()
+@model_validator(body="UpsertCustomConfigDataModel", queries={"method": "Method"})
 def update_custom_configs():
     """Update one or more custom configs"""
-    args = request.args.to_dict()
-    method = args.get("method") or "ui"
-    # is_valid_model(method, Model) True | False
-    custom_config = request.get_json()
-    # is_valid_model(custom_config, Model) True | False
-    data = json.dumps(custom_config, skipkeys=True, allow_nan=True, indent=6)
-    return get_core_format_res(f"{CORE_API}/custom_configs?method={method}", "PUT", data, "Update custom configs")
+    args, data, method = [get_req_data(request, ["method"])[k] for k in ("args", "data", "method")]
+    return get_core_format_res(f"{CORE_API}/custom_configs?method={method if method else 'ui'}", "PUT", data, "Update custom configs")
 
 
 @custom_configs.route(f"{PREFIX}/<string:custom_config_name>", methods=["DELETE"])
 @jwt_required()
+@model_validator(body="CustomConfigModel", queries={"method": "Method"}, params={"custom_config_name": "CustomConfigName"})
 def delete_custom_configs(custom_config_name):
     """Delete a custom config by name"""
-    # is_valid_model(custom_config_name, Model) True | False
-    args = request.args.to_dict()
-    method = args.get("method") or "ui"
-    # is_valid_model(method, Model) True | False
-    custom_config = request.get_json()
-    # is_valid_model(custom_config, Model) True | False
-    data = json.dumps(custom_config, skipkeys=True, allow_nan=True, indent=6)
-    return get_core_format_res(f"{CORE_API}/custom_configs/{custom_config_name}?method={method}", "DELETE", data, f"Delete custom config {custom_config_name}")
+    args, data, method = [get_req_data(request, ["method"])[k] for k in ("args", "data", "method")]
+    return get_core_format_res(f"{CORE_API}/custom_configs/{custom_config_name}?method={method if method else 'ui'}", "DELETE", data, f"Delete custom config {custom_config_name}")

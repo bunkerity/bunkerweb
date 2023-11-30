@@ -4,6 +4,8 @@ from flask import Blueprint
 from flask import request
 from flask_jwt_extended import jwt_required
 
+from middleware.validator import model_validator
+
 from werkzeug.exceptions import HTTPException
 from werkzeug.sansio.response import Response
 
@@ -26,6 +28,7 @@ external = Blueprint("external", __name__)
 
 # Communicate with CORE retrieving ui api file and executing a specific function (action name)
 @external.route(f"{PREFIX}/<string:plugin_id>/action", methods=["GET", "POST", "PUT", "DELETE"])
+@model_validator(params={"plugin_id": "PluginId"})
 @jwt_required()
 def exec_ext_plugin_action(plugin_id):
     """Execute custom external plugin action"""

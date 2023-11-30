@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
+from flask_jwt_extended import jwt_required
+
 from utils import get_core_format_res
 from os import environ
 from ui import UiConfig
-from flask_jwt_extended import jwt_required
+
 
 UI_CONFIG = UiConfig("ui", **environ)
 
