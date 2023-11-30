@@ -6,6 +6,8 @@ src/common/core/modsecurity/files/** -text -eol linguist-vendored=true
 src/ui/static/js/editor/** -text -eol linguist-vendored=true
 src/ui/static/js/utils/purify/** -text -eol linguist-vendored=true
 src/ui/static/webfonts/** -text -eol linguist-vendored=true
+src/ui/templates/*.html -text -eol linguist-vendored=true
+src/common/core/antibot/files/*.html -text -eol linguist-vendored=true
 
 # Files
 src/deps/misc/lua-pack.Makefile -linguist-vendored=true
@@ -15,3 +17,5 @@ src/ui/static/css/flatpickr.css -linguist-vendored=true
 src/ui/static/css/flatpickr.dark.css -linguist-vendored=true
 src/ui/static/js/tsparticles.bundle.min.js -linguist-vendored=true
 src/ui/static/js/utils/flatpickr.js -linguist-vendored=true
+src/common/core/errors/files/error.html -linguist-vendored=true
+src/common/core/misc/files/default.html -linguist-vendored=true
