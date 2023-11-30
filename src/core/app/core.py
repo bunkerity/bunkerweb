@@ -63,12 +63,7 @@ class CoreConfig(YamlBaseSettings):
     CORE_TOKEN: str = ""
     BUNKERWEB_INSTANCES: Union[str, List[str], Set[str], Tuple[str]] = set()
     HOT_RELOAD: Union[Literal["yes", "no"], bool] = False
-    REVERSE_PROXY_IPS: Union[str, List[str], Set[str], Tuple[str]] = {
-        "192.168.0.0/16",
-        "172.16.0.0/12",
-        "10.0.0.0/8",
-        "127.0.0.0/8",
-    }
+    REVERSE_PROXY_IPS: Union[str, List[str], Set[str], Tuple[str]] = {"192.168.0.0/16", "172.16.0.0/12", "10.0.0.0/8", "127.0.0.0/8"}
 
     # ? Miscellaneous settings
     LOG_LEVEL: Literal["emerg", "alert", "crit", "error", "warn", "warning", "notice", "info", "debug", "EMERG", "ALERT", "CRIT", "ERROR", "WARN", "WARNING", "NOTICE", "INFO", "DEBUG"] = "notice"
