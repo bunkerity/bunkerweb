@@ -1,43 +1,73 @@
 {
   "id": "gzip",
-  "name": "Gzip",
-  "description": "Compress HTTP requests with the gzip algorithm.",
+  "name": {
+    "en": "Gzip",
+    "fr": "Gzip"
+  },
+  "description": {
+    "en": "Compress HTTP requests with the gzip algorithm.",
+    "fr": "Compressez les requêtes HTTP avec l'algorithme gzip."
+  },
   "version": "1.0",
   "stream": "no",
   "settings": {
     "USE_GZIP": {
       "context": "multisite",
       "default": "no",
-      "help": "Use gzip",
+      "help": {
+        "en": "Use gzip compression.",
+        "fr": "Utiliser la compression gzip."
+      },
       "id": "use-gzip",
-      "label": "Use gzip",
+      "label": {
+        "en": "Use gzip",
+        "fr": "Utiliser gzip"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "GZIP_TYPES": {
       "context": "multisite",
       "default": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
-      "help": "List of MIME types that will be compressed with gzip.",
+      "help": {
+        "en": "List of MIME types that will be compressed with gzip.",
+        "fr": "Liste des types MIME qui seront compressés avec gzip."
+      },
       "id": "gzip-types",
-      "label": "MIME types",
+      "label": {
+        "en": "MIME types",
+        "fr": "Types MIME"
+      },
       "regex": "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
       "type": "text"
     },
     "GZIP_MIN_LENGTH": {
       "context": "multisite",
       "default": "1000",
-      "help": "Minimum length for gzip compression.",
+      "help": {
+        "en": "Minimum length for gzip compression.",
+        "fr": "Longueur minimale pour la compression gzip."
+      },
       "id": "gzip-min-length",
-      "label": "Minimum length",
+      "label": {
+        "en": "Minimum length",
+        "fr": "Longueur minimale"
+      },
       "regex": "^\\d+$",
       "type": "text"
     },
     "GZIP_COMP_LEVEL": {
       "context": "multisite",
       "default": "5",
-      "help": "The compression level of the gzip algorithm.",
+      "help": {
+        "en": "The compression level of the gzip algorithm.",
+        "fr": "Le niveau de compression de l'algorithme gzip."
+      },
       "id": "gzip-comp-level",
-      "label": "Compression level",
+      "label": {
+        "en": "Compression level",
+        "fr": "Niveau de compression"
+      },
       "regex": "^[1-9]$",
       "type": "select",
       "select": ["1", "2", "3", "4", "5", "6", "7", "8", "9"]

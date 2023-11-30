@@ -1,34 +1,58 @@
 {
   "id": "redirect",
-  "name": "Redirect",
-  "description": "Manage HTTP redirects.",
+  "name": {
+    "en": "Redirect",
+    "fr": "Redirection"
+  },
+  "description": {
+    "en": "Manage HTTP redirects.",
+    "fr": "Gérer les redirections HTTP."
+  },
   "version": "1.0",
   "stream": "no",
   "settings": {
     "REDIRECT_TO": {
       "context": "multisite",
       "default": "",
-      "help": "Redirect a whole site to another one.",
+      "help": {
+        "en": "Redirect a whole site to another one.",
+        "fr": "Rediriger un site entier vers un autre."
+      },
       "id": "redirect-to",
-      "label": "Redirect to",
+      "label": {
+        "en": "Redirect to",
+        "fr": "Rediriger vers"
+      },
       "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
       "type": "text"
     },
     "REDIRECT_TO_REQUEST_URI": {
       "context": "multisite",
       "default": "no",
-      "help": "Append the requested URI to the redirect address.",
+      "help": {
+        "en": "Append the requested URI to the redirect address.",
+        "fr": "Ajouter l'URI à la requête pour rediriger à cette l'adresse."
+      },
       "id": "redirect-to-request-uri",
-      "label": "Append request URI",
+      "label": {
+        "en": "Append request URI",
+        "fr": "Ajouter l'URI à la requête"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "REDIRECT_TO_STATUS_CODE": {
       "context": "multisite",
       "default": "301",
-      "help": "Status code to send to client when redirecting.",
+      "help": {
+        "en": "Status code to send to client when redirecting.",
+        "fr": "Code de statut à envoyer au client lors de la redirection."
+      },
       "id": "redirect-to-status-code",
-      "label": "Append request URI",
+      "label": {
+        "en": "Append request status code",
+        "fr": "Ajouter le code de statut à la requête"
+      },
       "regex": "^(301|302)$",
       "type": "select",
       "select": ["301", "302"]

@@ -1,34 +1,58 @@
 {
   "id": "reverseproxy",
-  "name": "Reverse proxy",
-  "description": "Manage reverse proxy configurations.",
+  "name": {
+    "en": "Reverse proxy",
+    "fr": "Proxy inverse"
+  },
+  "description": {
+    "en": "Manage reverse proxy configurations.",
+    "fr": "Gérer les configurations de proxy inverse."
+  },
   "version": "1.0",
   "stream": "partial",
   "settings": {
     "USE_REVERSE_PROXY": {
       "context": "multisite",
       "default": "no",
-      "help": "Activate reverse proxy mode.",
+      "help": {
+        "en": "Activate reverse proxy mode.",
+        "fr": "Activer le mode proxy inverse."
+      },
       "id": "use-reverse-proxy",
-      "label": "Use reverse proxy",
+      "label": {
+        "en": "Use reverse proxy",
+        "fr": "Utiliser le proxy inverse"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "REVERSE_PROXY_INTERCEPT_ERRORS": {
       "context": "multisite",
       "default": "yes",
-      "help": "Intercept and rewrite errors.",
+      "help": {
+        "en": "Intercept and rewrite errors.",
+        "fr": "Intercepter et réécrire les erreurs."
+      },
       "id": "reverse-proxy-intercept-errors",
-      "label": "Intercept errors",
+      "label": {
+        "en": "Intercept errors",
+        "fr": "Intercepter les erreurs"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "REVERSE_PROXY_HOST": {
       "context": "multisite",
       "default": "",
-      "help": "Full URL of the proxied resource (proxy_pass).",
+      "help": {
+        "en": "Full URL of the proxied resource (proxy_pass).",
+        "fr": "URL complète de la ressource proxifiée (proxy_pass)."
+      },
       "id": "reverse-proxy-host",
-      "label": "Reverse proxy host",
+      "label": {
+        "en": "Reverse proxy host",
+        "fr": "Hôte du proxy inverse"
+      },
       "regex": "^.*$",
       "type": "text",
       "multiple": "reverse-proxy"
@@ -36,9 +60,15 @@
     "REVERSE_PROXY_URL": {
       "context": "multisite",
       "default": "",
-      "help": "Location URL that will be proxied.",
+      "help": {
+        "en": "Location URL that will be proxied.",
+        "fr": "URL de la ressource proxifiée."
+      },
       "id": "reverse-proxy-url",
-      "label": "Reverse proxy url",
+      "label": {
+        "en": "Reverse proxy url",
+        "fr": "URL du proxy inverse"
+      },
       "regex": "^.*$",
       "type": "text",
       "multiple": "reverse-proxy"
@@ -46,9 +76,15 @@
     "REVERSE_PROXY_WS": {
       "context": "multisite",
       "default": "no",
-      "help": "Enable websocket on the proxied resource.",
+      "help": {
+        "en": "Enable websocket on the proxied resource.",
+        "fr": "Activer les websockets sur la ressource proxifiée."
+      },
       "id": "reverse-proxy-ws",
-      "label": "Reverse proxy WS",
+      "label": {
+        "en": "Reverse proxy WS",
+        "fr": "Proxy inverse WS"
+      },
       "regex": "^(yes|no)$",
       "type": "check",
       "multiple": "reverse-proxy"
@@ -56,9 +92,15 @@
     "REVERSE_PROXY_HEADERS": {
       "context": "multisite",
       "default": "",
-      "help": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
+      "help": {
+        "en": "List of HTTP headers to send to proxied resource separated with semicolons (values for proxy_set_header directive).",
+        "fr": "Liste des en-têtes HTTP à envoyer à la ressource proxifiée séparés par des points-virgules (valeurs pour la directive proxy_set_header)."
+      },
       "id": "reverse-proxy-headers",
-      "label": "Reverse proxy headers",
+      "label": {
+        "en": "Reverse proxy headers",
+        "fr": "En-têtes du proxy inverse"
+      },
       "regex": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
       "type": "text",
       "multiple": "reverse-proxy"
@@ -66,9 +108,15 @@
     "REVERSE_PROXY_HEADERS_CLIENT": {
       "context": "multisite",
       "default": "",
-      "help": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
+      "help": {
+        "en": "List of HTTP headers to send to client separated with semicolons (values for add_header directive).",
+        "fr": "Liste des en-têtes HTTP à envoyer au client séparés par des points-virgules (valeurs pour la directive add_header)."
+      },
       "id": "reverse-proxy-headers-client",
-      "label": "Reverse proxy headers-client",
+      "label": {
+        "en": "Reverse proxy headers-client",
+        "fr": "En-têtes du proxy inverse pour le client"
+      },
       "regex": "^(?![; ])(;? ?([\\w\\-]+)(?!.*\\2 ) [^;]+)*$",
       "type": "text",
       "multiple": "reverse-proxy"
@@ -76,9 +124,15 @@
     "REVERSE_PROXY_BUFFERING": {
       "context": "multisite",
       "default": "yes",
-      "help": "Enable or disable buffering of responses from proxied resource.",
+      "help": {
+        "en": "Enable or disable buffering of responses from proxied resource.",
+        "fr": "Activer ou désactiver le buffering des réponses de la ressource proxifiée."
+      },
       "id": "reverse-proxy-buffering",
-      "label": "Reverse proxy buffering",
+      "label": {
+        "en": "Reverse proxy buffering",
+        "fr": "Buffering du proxy inverse"
+      },
       "regex": "^(yes|no)$",
       "type": "check",
       "multiple": "reverse-proxy"
@@ -86,9 +140,15 @@
     "REVERSE_PROXY_KEEPALIVE": {
       "context": "multisite",
       "default": "no",
-      "help": "Enable or disable keepalive connections with the proxied resource.",
+      "help": {
+        "en": "Enable or disable keepalive connections with the proxied resource.",
+        "fr": "Activer ou désactiver les connexions keepalive avec la ressource proxifiée."
+      },
       "id": "reverse-proxy-keepalive",
-      "label": "Reverse proxy keepalive",
+      "label": {
+        "en": "Reverse proxy keepalive",
+        "fr": "Keepalive du proxy inverse"
+      },
       "regex": "^(yes|no)$",
       "type": "check",
       "multiple": "reverse-proxy"
@@ -96,9 +156,15 @@
     "REVERSE_PROXY_AUTH_REQUEST": {
       "context": "multisite",
       "default": "",
-      "help": "Enable authentication using an external provider (value of auth_request directive).",
+      "help": {
+        "en": "Enable authentication using an external provider (value of auth_request directive).",
+        "fr": "Activer l'authentification en utilisant un fournisseur externe (valeur de la directive auth_request)."
+      },
       "id": "reverse-proxy-auth-request",
-      "label": "Reverse proxy auth request",
+      "label": {
+        "en": "Reverse proxy auth request",
+        "fr": "Requête d'authentification du proxy inverse"
+      },
       "regex": "^(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*|off)?$",
       "type": "text",
       "multiple": "reverse-proxy"
@@ -106,9 +172,15 @@
     "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL": {
       "context": "multisite",
       "default": "",
-      "help": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
+      "help": {
+        "en": "Redirect clients to sign-in URL when using REVERSE_PROXY_AUTH_REQUEST (used when auth_request call returned 401).",
+        "fr": "Rediriger les clients vers l'URL de connexion lors de l'utilisation de REVERSE_PROXY_AUTH_REQUEST (utilisé lorsque l'appel auth_request a retourné 401)."
+      },
       "id": "reverse-proxy-auth-request-signin-url",
-      "label": "Auth request signin URL",
+      "label": {
+        "en": "Reverse proxy auth request signin URL",
+        "fr": "URL de la requête d'authentification pour connexion du proxy inverse"
+      },
       "regex": "^(https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)?$",
       "type": "text",
       "multiple": "reverse-proxy"
@@ -116,9 +188,15 @@
     "REVERSE_PROXY_AUTH_REQUEST_SET": {
       "context": "multisite",
       "default": "",
-      "help": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
+      "help": {
+        "en": "List of variables to set from the authentication provider, separated with semicolons (values of auth_request_set directives).",
+        "fr": "Liste des variables à définir à partir du fournisseur d'authentification, séparées par des points-virgules (valeurs des directives auth_request_set)."
+      },
       "id": "reverse-proxy-auth-request-set",
-      "label": "Reverse proxy auth request set",
+      "label": {
+        "en": "Reverse proxy auth request set",
+        "fr": "Définir les variables de la requête d'authentification du proxy inverse"
+      },
       "regex": "^(?! ;)(;? ?(\\$[a-z_\\-]+)(?!.*\\2 ) [^;]+)*$",
       "type": "text",
       "multiple": "reverse-proxy"
@@ -126,99 +204,165 @@
     "USE_PROXY_CACHE": {
       "context": "multisite",
       "default": "no",
-      "help": "Enable or disable caching of the proxied resources.",
+      "help": {
+        "en": "Enable or disable caching of the proxied resources.",
+        "fr": "Activer ou désactiver le caching des ressources proxifiées."
+      },
       "id": "use-proxy-cache",
-      "label": "Reverse proxy cache",
+      "label": {
+        "en": "Use proxy cache",
+        "fr": "Utiliser le cache du proxy inverse"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "PROXY_CACHE_PATH_LEVELS": {
       "context": "global",
       "default": "1:2",
-      "help": "Hierarchy levels of the cache.",
+      "help": {
+        "en": "Hierarchy levels of the cache.",
+        "fr": "Niveaux de hiérarchie du cache."
+      },
       "id": "proxy-cache-path-levels",
-      "label": "Hierarchy levels",
+      "label": {
+        "en": "Hierarchy levels",
+        "fr": "Niveaux de hiérarchie"
+      },
       "regex": "^(:?[12]){1,3}$",
       "type": "text"
     },
     "PROXY_CACHE_PATH_ZONE_SIZE": {
       "context": "global",
       "default": "10m",
-      "help": "Maximum size of cached metadata when caching proxied resources.",
+      "help": {
+        "en": "Maximum size of cached metadata when caching proxied resources.",
+        "fr": "Taille maximale des métadonnées en cache lors de la mise en cache des ressources proxifiées."
+      },
       "id": "proxy-cache-path-zone-size",
-      "label": "Reverse proxy cache zone size",
+      "label": {
+        "en": "Cache zone size",
+        "fr": "Taille de la zone de cache"
+      },
       "regex": "^\\d+[kKmMgG]?$",
       "type": "text"
     },
     "PROXY_CACHE_PATH_PARAMS": {
       "context": "global",
       "default": "max_size=100m",
-      "help": "Additional parameters to add to the proxy_cache directive.",
+      "help": {
+        "en": "Additional parameters to add to the proxy_cache_path directive.",
+        "fr": "Paramètres supplémentaires à ajouter à la directive proxy_cache_path."
+      },
       "id": "proxy-cache-path-params",
-      "label": "Reverse proxy cache params",
+      "label": {
+        "en": "Cache path params",
+        "fr": "Paramètres du chemin de cache"
+      },
       "regex": "^.*$",
       "type": "text"
     },
     "PROXY_CACHE_METHODS": {
       "context": "multisite",
       "default": "GET HEAD",
-      "help": "HTTP methods that should trigger a cache operation.",
+      "help": {
+        "en": "HTTP methods that should trigger a cache operation.",
+        "fr": "Méthodes HTTP qui doivent déclencher une opération de mise en cache."
+      },
       "id": "proxy-cache-methods",
-      "label": "Reverse proxy cache methods",
+      "label": {
+        "en": "Reverse proxy cache methods",
+        "fr": "Méthodes de cache du proxy inverse"
+      },
       "regex": "^(?! )( ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\2))+$",
       "type": "text"
     },
     "PROXY_CACHE_MIN_USES": {
       "context": "multisite",
       "default": "2",
-      "help": "The minimum number of requests before a response is cached.",
+      "help": {
+        "en": "The minimum number of requests before a response is cached.",
+        "fr": "Le nombre minimum de requêtes avant qu'une réponse ne soit mise en cache."
+      },
       "id": "proxy-cache-min-uses",
-      "label": "Reverse proxy cache minimum uses",
+      "label": {
+        "en": "Reverse proxy cache minimum uses",
+        "fr": "Nombre minimum d'utilisations  avant mise en cache du proxy inverse"
+      },
       "regex": "^[1-9]\\d*$",
       "type": "text"
     },
     "PROXY_CACHE_KEY": {
       "context": "multisite",
       "default": "$scheme$host$request_uri",
-      "help": "The key used to uniquely identify a cached response.",
+      "help": {
+        "en": "The key used to uniquely identify a cached response.",
+        "fr": "La clé utilisée pour identifier de manière unique une réponse mise en cache."
+      },
       "id": "proxy-cache-key",
-      "label": "Reverse proxy cache key",
+      "label": {
+        "en": "Reverse proxy cache key",
+        "fr": "Clé de cache du proxy inverse"
+      },
       "regex": "^(?! )( ?(\\$[a-z_]+)(?!.*\\2))+$",
       "type": "text"
     },
     "PROXY_CACHE_VALID": {
       "context": "multisite",
       "default": "200=24h 301=1h 302=24h",
-      "help": "Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.",
+      "help": {
+        "en": "Define the caching time depending on the HTTP status code (list of status=time), separated with spaces.",
+        "fr": "Définir le temps de mise en cache en fonction du code d'état HTTP (liste de status=time), séparés par des espaces."
+      },
       "id": "proxy-cache-valid",
-      "label": "Reverse proxy cache valid",
+      "label": {
+        "en": "Reverse proxy cache valid",
+        "fr": "Durée de mise en cache par code statut du proxy inverse"
+      },
       "regex": "^(?! )( ?([1-5]\\d{2})(?!.*\\2=)=\\d+(ms?|[shdwMy]))*$",
       "type": "text"
     },
     "PROXY_NO_CACHE": {
       "context": "multisite",
       "default": "$http_pragma $http_authorization",
-      "help": "Conditions to disable caching of responses.",
+      "help": {
+        "en": "Conditions to disable caching of responses.",
+        "fr": "Conditions pour désactiver la mise en cache des réponses."
+      },
       "id": "proxy-no-cache",
-      "label": "Reverse proxy no cache",
+      "label": {
+        "en": "Reverse proxy no cache conditions",
+        "fr": "Conditions pour désactiver le cache du proxy inverse"
+      },
       "regex": "^.*$",
       "type": "text"
     },
     "PROXY_CACHE_BYPASS": {
       "context": "multisite",
       "default": "0",
-      "help": "Conditions to bypass caching of responses.",
+      "help": {
+        "en": "Conditions to bypass caching of responses.",
+        "fr": "Conditions de bypass de la mise en cache des réponses."
+      },
       "id": "proxy-cache-bypass",
-      "label": "Reverse proxy bypass",
+      "label": {
+        "en": "Reverse proxy bypass",
+        "fr": "Bypass du proxy inverse"
+      },
       "regex": "^.*$",
       "type": "text"
     },
     "REVERSE_PROXY_CONNECT_TIMEOUT": {
       "context": "multisite",
       "default": "60s",
-      "help": "Timeout when connecting to the proxied resource.",
+      "help": {
+        "en": "Timeout when connecting to the proxied resource.",
+        "fr": "Délai d'attente lors de la connexion à la ressource proxifiée."
+      },
       "id": "reverse-proxy-connect-timeout",
-      "label": "Reverse proxy connect timeout",
+      "label": {
+        "en": "Reverse proxy connect timeout",
+        "fr": "Délai de connexion du proxy inverse"
+      },
       "regex": "^\\d+(ms?|[shdwMy])$",
       "type": "text",
       "multiple": "reverse-proxy"
@@ -226,9 +370,15 @@
     "REVERSE_PROXY_READ_TIMEOUT": {
       "context": "multisite",
       "default": "60s",
-      "help": "Timeout when reading from the proxied resource.",
+      "help": {
+        "en": "Timeout when reading from the proxied resource.",
+        "fr": "Délai d'attente lors de la lecture de la ressource proxifiée."
+      },
       "id": "reverse-proxy-read-timeout",
-      "label": "Reverse proxy read timeout",
+      "label": {
+        "en": "Reverse proxy read timeout",
+        "fr": "Délai de lecture du proxy inverse"
+      },
       "regex": "^\\d+(ms?|[shdwMy])$",
       "type": "text",
       "multiple": "reverse-proxy"
@@ -236,9 +386,15 @@
     "REVERSE_PROXY_SEND_TIMEOUT": {
       "context": "multisite",
       "default": "60s",
-      "help": "Timeout when sending to the proxied resource.",
+      "help": {
+        "en": "Timeout when sending to the proxied resource.",
+        "fr": "Délai d'attente lors de l'envoi à la ressource proxifiée."
+      },
       "id": "reverse-proxy-send-timeout",
-      "label": "Reverse proxy send timeout",
+      "label": {
+        "en": "Reverse proxy send timeout",
+        "fr": "Délai d'attente de l'envoi du proxy inverse"
+      },
       "regex": "^\\d+(ms?|[shdwMy])$",
       "type": "text",
       "multiple": "reverse-proxy"

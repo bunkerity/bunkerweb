@@ -1,16 +1,28 @@
 {
   "id": "ui",
-  "name": "UI",
-  "description": "Integrate easily the BunkerWeb UI.",
+  "name": {
+    "en": "UI",
+    "fr": "Interface utilisateur"
+  },
+  "description": {
+    "en": "Integrate easily the BunkerWeb UI.",
+    "fr": "Intégrez facilement l'interface utilisateur de BunkerWeb."
+  },
   "version": "1.0",
   "stream": "no",
   "settings": {
     "USE_UI": {
       "context": "multisite",
       "default": "no",
-      "help": "Use UI",
+      "help": {
+        "en": "Use UI",
+        "fr": "Utiliser l'interface utilisateur"
+      },
       "id": "use-ui",
-      "label": "Use UI",
+      "label": {
+        "en": "Use UI",
+        "fr": "Utiliser l'interface utilisateur"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     }

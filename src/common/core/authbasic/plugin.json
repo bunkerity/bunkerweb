@@ -1,52 +1,88 @@
 {
   "id": "authbasic",
-  "name": "Auth basic",
-  "description": "Enforce login before accessing a resource or the whole site using HTTP basic auth method.",
+  "name": {
+    "en": "Auth basic",
+    "fr": "Auth basic"
+  },
+  "description": {
+    "en": "Enforce login before accessing a resource or the whole site using HTTP basic auth method.",
+    "fr": "Renforcez la connexion avant d'accéder à une ressource ou à l'ensemble du site en utilisant la méthode d'authentification de base HTTP."
+  },
   "version": "1.0",
   "stream": "no",
   "settings": {
     "USE_AUTH_BASIC": {
       "context": "multisite",
       "default": "no",
-      "help": "Use HTTP basic auth",
+      "help": {
+        "en": "Use HTTP basic auth",
+        "fr": "Utiliser l'authentification de base HTTP"
+      },
       "id": "use-auth-basic",
-      "label": "Use HTTP basic auth",
+      "label": {
+        "en": "Use HTTP basic auth",
+        "fr": "Utiliser l'authentification de base HTTP"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "AUTH_BASIC_LOCATION": {
       "context": "multisite",
       "default": "sitewide",
-      "help": "URL of the protected resource or sitewide value.",
+      "help": {
+        "en": "URL of the protected resource or sitewide value.",
+        "fr": "URL de la ressource protégée ou valeur globale."
+      },
       "id": "auth-basic-location",
-      "label": "Auth basic Location",
+      "label": {
+        "en": "Auth basic Location",
+        "fr": "Location de l'authentification de base"
+      },
       "regex": "^(sitewide|/[a-zA-Z0-9.\\/\\-]*)$",
       "type": "text"
     },
     "AUTH_BASIC_USER": {
       "context": "multisite",
       "default": "changeme",
-      "help": "Username",
+      "help": {
+        "en": "Username",
+        "fr": "Nom d'utilisateur"
+      },
       "id": "auth-basic-user",
-      "label": "Auth basic Username",
+      "label": {
+        "en": "Auth basic Username",
+        "fr": "Nom d'utilisateur d'autorisation de base"
+      },
       "regex": "^[\\w\\-]+",
       "type": "text"
     },
     "AUTH_BASIC_PASSWORD": {
       "context": "multisite",
       "default": "changeme",
-      "help": "Password",
+      "help": {
+        "en": "Password",
+        "fr": "Mot de passe"
+      },
       "id": "auth-basic-password",
-      "label": "Password",
+      "label": {
+        "en": "Auth basic Password",
+        "fr": "Mot de passe d'autorisation de base"
+      },
       "regex": "^.+",
       "type": "password"
     },
     "AUTH_BASIC_TEXT": {
       "context": "multisite",
-      "default": "Restricted area",
+      "default": {
+        "en": "Restricted area",
+        "fr": "Zone restreinte"
+      },
       "help": "Text to display",
       "id": "auth-basic-text",
-      "label": "Text",
+      "label": {
+        "en": "Auth basic Text",
+        "fr": "Texte d'autorisation de base"
+      },
       "regex": "^.+",
       "type": "text"
     }

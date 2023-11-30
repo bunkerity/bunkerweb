@@ -1,115 +1,193 @@
 {
   "id": "greylist",
-  "name": "Greylist",
-  "description": "Allow access while keeping security features based on internal and external IP/network/rDNS/ASN greylists.",
+  "name": {
+    "en": "Greylist",
+    "fr": "Liste grise"
+  },
+  "description": {
+    "en": "Allow access while keeping security features based on internal and external IP/network/rDNS/ASN greylists.",
+    "fr": "Autorise l'accès tout en conservant les fonctionnalités de sécurité basées sur les listes grises d'IP/rDNS/ASN internes et externes."
+  },
   "version": "1.0",
   "stream": "partial",
   "settings": {
     "USE_GREYLIST": {
       "context": "multisite",
       "default": "no",
-      "help": "Activate greylist feature.",
+      "help": {
+        "en": "Activate greylist feature.",
+        "fr": "Active la fonctionnalité de liste grise."
+      },
       "id": "use-greylist",
-      "label": "Activate greylisting",
+      "label": {
+        "en": "Activate greylist",
+        "fr": "Activer la liste grise"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "GREYLIST_IP": {
       "context": "multisite",
       "default": "",
-      "help": "List of IP/network, separated with spaces, to put into the greylist.",
+      "help": {
+        "en": "List of IP/network, separated with spaces, to put into the greylist.",
+        "fr": "Liste d'IP/réseau, séparés par des espaces, à mettre dans la liste grise."
+      },
       "id": "greylist-ip",
-      "label": "Greylist IP/network",
+      "label": {
+        "en": "Greylist IP/network",
+        "fr": "Liste grise IP/réseau"
+      },
       "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
       "type": "text"
     },
     "GREYLIST_IP_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing good IP/network to put into the greylist.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing good IP/network to put into the greylist.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des IP/réseau à mettre dans la liste grise."
+      },
       "id": "greylist-ip-urls",
-      "label": "Greylist IP/network URLs",
+      "label": {
+        "en": "Greylist IP/network URLs",
+        "fr": "Liste grise IP/réseau URLs"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "GREYLIST_RDNS_GLOBAL": {
       "context": "multisite",
       "default": "yes",
-      "help": "Only perform RDNS greylist checks on global IP addresses.",
+      "help": {
+        "en": "Only perform RDNS greylist checks on global IP addresses.",
+        "fr": "Ne faire les vérifications de liste grise que sur les IP globales."
+      },
       "id": "greylist-rdns-global",
-      "label": "Greylist reverse DNS global IPs",
+      "label": {
+        "en": "Greylist reverse DNS global IPs",
+        "fr": "Liste grise reverse DNS IP globales"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "GREYLIST_RDNS": {
       "context": "multisite",
       "default": "",
-      "help": "List of reverse DNS suffixes, separated with spaces, to put into the greylist.",
+      "help": {
+        "en": "List of reverse DNS suffixes, separated with spaces, to put into the greylist.",
+        "fr": "Liste de suffixes de reverse DNS, séparés par des espaces, à mettre dans la liste grise."
+      },
       "id": "greylist-rdns",
-      "label": "Greylist reverse DNS",
+      "label": {
+        "en": "Greylist reverse DNS",
+        "fr": "Liste grise reverse DNS"
+      },
       "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
       "type": "text"
     },
     "GREYLIST_RDNS_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing reverse DNS suffixes to put into the greylist.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des suffixes de reverse DNS à mettre dans la liste grise."
+      },
       "id": "greylist-rdns-urls",
-      "label": "Greylist reverse DNS URLs",
+      "label": {
+        "en": "Greylist reverse DNS URLs",
+        "fr": "Liste grise reverse DNS URLs"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "GREYLIST_ASN": {
       "context": "multisite",
       "default": "",
-      "help": "List of ASN numbers, separated with spaces, to put into the greylist.",
+      "help": {
+        "en": "List of ASN numbers, separated with spaces, to put into the greylist.",
+        "fr": "Liste de numéros ASN, séparés par des espaces, à mettre dans la liste grise."
+      },
       "id": "greylist-asn",
-      "label": "Greylist ASN",
+      "label": {
+        "en": "Greylist ASN",
+        "fr": "Liste grise ASN"
+      },
       "regex": "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
       "type": "text"
     },
     "GREYLIST_ASN_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing ASN to put into the greylist.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing ASN to put into the greylist.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des ASN à mettre dans la liste grise."
+      },
       "id": "greylist-asn-urls",
-      "label": "Greylist ASN URLs",
+      "label": {
+        "en": "Greylist ASN URLs",
+        "fr": "Liste grise ASN URLs"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "GREYLIST_USER_AGENT": {
       "context": "multisite",
       "default": "",
-      "help": "List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.",
+      "help": {
+        "en": "List of User-Agent (PCRE regex), separated with spaces, to put into the greylist.",
+        "fr": "Liste de User-Agent (regex PCRE), séparés par des espaces, à mettre dans la liste grise."
+      },
       "id": "greylist-user-agent",
-      "label": "Greylist User-Agent",
+      "label": {
+        "en": "Greylist User-Agent",
+        "fr": "Liste grise User-Agent"
+      },
       "regex": "^.*$",
       "type": "text"
     },
     "GREYLIST_USER_AGENT_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing good User-Agent to put into the greylist.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing bad User-Agent to put into the greylist.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des User-Agent à mettre dans la liste grise."
+      },
       "id": "greylist-user-agent-urls",
-      "label": "Greylist User-Agent URLs",
+      "label": {
+        "en": "Greylist User-Agent URLs",
+        "fr": "Liste grise User-Agent URLs"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "GREYLIST_URI": {
       "context": "multisite",
       "default": "",
-      "help": "List of URI (PCRE regex), separated with spaces, to put into the greylist.",
+      "help": {
+        "en": "List of URI (PCRE regex), separated with spaces, to put into the greylist.",
+        "fr": "Liste de URI (regex PCRE), séparés par des espaces, à mettre dans la liste grise."
+      },
       "id": "greylist-uri",
-      "label": "Greylist URI",
+      "label": {
+        "en": "Greylist URI",
+        "fr": "Liste grise URI"
+      },
       "regex": "^.*$",
       "type": "text"
     },
     "GREYLIST_URI_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing bad URI to put into the greylist.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing bad URI to put into the greylist.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des URI à mettre dans la liste grise."
+      },
       "id": "greylist-uri-urls",
-      "label": "Greylist URI URLs",
+      "label": {
+        "en": "Greylist URI URLs",
+        "fr": "Liste grise URI URLs"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     }

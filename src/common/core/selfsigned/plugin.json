@@ -1,34 +1,58 @@
 {
   "id": "selfsigned",
-  "name": "Self-signed certificate",
-  "description": "Generate self-signed certificate.",
+  "name": {
+    "en": "Self-signed certificate",
+    "fr": "Certificat auto-signé"
+  },
+  "description": {
+    "en": "Generate self-signed certificate.",
+    "fr": "Générer un certificat auto-signé."
+  },
   "version": "1.0",
   "stream": "yes",
   "settings": {
     "GENERATE_SELF_SIGNED_SSL": {
       "context": "multisite",
       "default": "no",
-      "help": "Generate and use self-signed certificate.",
+      "help": {
+        "en": "Generate and use self-signed certificate.",
+        "fr": "Générer et utiliser un certificat auto-signé."
+      },
       "id": "generate-self-signed-ssl",
-      "label": "Activate self-signed certificate",
+      "label": {
+        "en": "Generate self-signed certificate",
+        "fr": "Générer un certificat auto-signé"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "SELF_SIGNED_SSL_EXPIRY": {
       "context": "multisite",
       "default": "365",
-      "help": "Self-signed certificate expiry in days.",
+      "help": {
+        "en": "Self-signed certificate expiry in days.",
+        "fr": "Durée de validité du certificat auto-signé en jours."
+      },
       "id": "self-signed-ssl-expiry",
-      "label": "Certificate expiry",
+      "label": {
+        "en": "Certificate expiry",
+        "fr": "Durée avant expiration du certificat"
+      },
       "regex": "^\\d+$",
       "type": "text"
     },
     "SELF_SIGNED_SSL_SUBJ": {
       "context": "multisite",
       "default": "/CN=www.example.com/",
-      "help": "Self-signed certificate subject.",
+      "help": {
+        "en": "Self-signed certificate subject.",
+        "fr": "Sujet du certificat auto-signé."
+      },
       "id": "self-signed-ssl-subj",
-      "label": "Certificate subject",
+      "label": {
+        "en": "Certificate subject",
+        "fr": "Sujet du certificat"
+      },
       "regex": "^/CN=[^,]+$",
       "type": "text"
     }

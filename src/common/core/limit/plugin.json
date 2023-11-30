@@ -1,25 +1,43 @@
 {
   "id": "limit",
-  "name": "Limit",
-  "description": "Limit maximum number of requests and connections.",
+  "name": {
+    "en": "Limit",
+    "fr": "Limite"
+  },
+  "description": {
+    "en": "Limit maximum number of requests and connections.",
+    "fr": "Limite le nombre maximum de requêtes et de connexions."
+  },
   "version": "1.0",
   "stream": "partial",
   "settings": {
     "USE_LIMIT_REQ": {
       "context": "multisite",
       "default": "yes",
-      "help": "Activate limit requests feature.",
+      "help": {
+        "en": "Activate limit requests feature.",
+        "fr": "Active la fonctionnalité de limitation des requêtes."
+      },
       "id": "use-limit-req",
-      "label": "Activate limit requests",
+      "label": {
+        "en": "Activate limit requests",
+        "fr": "Activer la limitation des requêtes"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "LIMIT_REQ_URL": {
       "context": "multisite",
       "default": "/",
-      "help": "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
+      "help": {
+        "en": "URL (PCRE regex) where the limit request will be applied or special value / for all requests.",
+        "fr": "URL (regex PCRE) où la limitation des requêtes sera appliquée ou la valeur spéciale / pour toutes les requêtes."
+      },
       "id": "limit-req-url",
-      "label": "Limit request URL",
+      "label": {
+        "en": "Limit request URL",
+        "fr": "URL de limitation des requêtes"
+      },
       "regex": "^.+$",
       "type": "text",
       "multiple": "limit-req"
@@ -27,9 +45,15 @@
     "LIMIT_REQ_RATE": {
       "context": "multisite",
       "default": "2r/s",
-      "help": "Rate to apply to the URL (s for second, m for minute, h for hour and d for day).",
+      "help": {
+        "en": "Rate to apply to the URL (s for second, m for minute, h for hour and d for day).",
+        "fr": "Taux à appliquer à l'URL (s pour seconde, m pour minute, h pour heure et d pour jour)."
+      },
       "id": "limit-req-rate",
-      "label": "Limit request Rate",
+      "label": {
+        "en": "Limit request Rate",
+        "fr": "Taux de limitation des requêtes"
+      },
       "regex": "^\\d+r/[smhd]$",
       "type": "text",
       "multiple": "limit-req"
@@ -37,36 +61,60 @@
     "USE_LIMIT_CONN": {
       "context": "multisite",
       "default": "yes",
-      "help": "Activate limit connections feature.",
+      "help": {
+        "en": "Activate limit connections feature.",
+        "fr": "Active la fonctionnalité de limitation des connexions."
+      },
       "id": "use-limit-conn",
-      "label": "Activate limit connections",
+      "label": {
+        "en": "Activate limit connections",
+        "fr": "Activer la limitation des connexions"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "LIMIT_CONN_MAX_HTTP1": {
       "context": "multisite",
       "default": "10",
-      "help": "Maximum number of connections per IP when using HTTP/1.X protocol.",
+      "help": {
+        "en": "Maximum number of connections per IP when using HTTP/1.X protocol.",
+        "fr": "Nombre maximum de connexions par IP lors de l'utilisation du protocole HTTP/1.X."
+      },
       "id": "limit-conn-max-http1",
-      "label": "Maximum number of HTTP/1.X connections",
+      "label": {
+        "en": "Maximum number of HTTP/1.X connections",
+        "fr": "Nombre maximum de connexions HTTP/1.X"
+      },
       "regex": "^\\d+$",
       "type": "text"
     },
     "LIMIT_CONN_MAX_HTTP2": {
       "context": "multisite",
       "default": "100",
-      "help": "Maximum number of streams per IP when using HTTP/2 protocol.",
+      "help": {
+        "en": "Maximum number of streams per IP when using HTTP/2 protocol.",
+        "fr": "Nombre maximum de flux par IP lors de l'utilisation du protocole HTTP/2."
+      },
       "id": "limit-conn-max-http2",
-      "label": "Maximum number of HTTP/2 streams",
+      "label": {
+        "en": "Maximum number of HTTP/2 streams",
+        "fr": "Nombre maximum de flux HTTP/2"
+      },
       "regex": "^\\d+$",
       "type": "text"
     },
     "LIMIT_CONN_MAX_STREAM": {
       "context": "multisite",
       "default": "10",
-      "help": "Maximum number of connections per IP when using stream.",
+      "help": {
+        "en": "Maximum number of connections per IP when using stream.",
+        "fr": "Nombre maximum de connexions par IP lors de l'utilisation du stream."
+      },
       "id": "limit-conn-max-stream",
-      "label": "Maximum number of stream connections",
+      "label": {
+        "en": "Maximum number of stream connections",
+        "fr": "Nombre maximum de connexions stream"
+      },
       "regex": "^\\d+$",
       "type": "text"
     }

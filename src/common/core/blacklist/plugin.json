@@ -1,205 +1,343 @@
 {
   "id": "blacklist",
-  "name": "Blacklist",
-  "description": "Deny access based on internal and external IP/network/rDNS/ASN blacklists.",
+  "name": {
+    "en": "Blacklist",
+    "fr": "Liste noire"
+  },
+  "description": {
+    "en": "Deny access based on internal and external IP/network/rDNS/ASN blacklists.",
+    "fr": "Refuser l'accès en fonction des listes noires IP/rDNS/ASN internes et externes."
+  },
   "version": "1.0",
   "stream": "partial",
   "settings": {
     "USE_BLACKLIST": {
       "context": "multisite",
       "default": "yes",
-      "help": "Activate blacklist feature.",
+      "help": {
+        "en": "Activate blacklist feature.",
+        "fr": "Activer la fonctionnalité de liste noire."
+      },
       "id": "use-blacklist",
-      "label": "Activate blacklisting",
+      "label": {
+        "en": "Activate blacklist",
+        "fr": "Activer la liste noire"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "BLACKLIST_IP": {
       "context": "multisite",
       "default": "",
-      "help": "List of IP/network, separated with spaces, to block.",
+      "help": {
+        "en": "List of IP/network, separated with spaces, to block.",
+        "fr": "Liste d'IP/réseau, séparés par des espaces, à bloquer."
+      },
       "id": "blacklist-ip",
-      "label": "Blacklist IP/network",
+      "label": {
+        "en": "Blacklist IP/network",
+        "fr": "Liste noire IP/réseau"
+      },
       "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IP_URLS": {
       "context": "global",
       "default": "https://www.dan.me.uk/torlist/?exit",
-      "help": "List of URLs, separated with spaces, containing bad IP/network to block.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing bad IP/network to block.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des IP/réseau à bloquer."
+      },
       "id": "blacklist-ip-urls",
-      "label": "Blacklist IP/network URLs",
+      "label": {
+        "en": "Blacklist IP/network URLs",
+        "fr": "Liste noire IP/réseau URLs"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_RDNS_GLOBAL": {
       "context": "multisite",
       "default": "yes",
-      "help": "Only perform RDNS blacklist checks on global IP addresses.",
+      "help": {
+        "en": "Only perform RDNS blacklist checks on global IP addresses.",
+        "fr": "Ne vérifier les listes noires DNS inverses que sur les adresses IP globales."
+      },
       "id": "blacklist-rdns-global",
-      "label": "Blacklist reverse DNS global IPs",
+      "label": {
+        "en": "Blacklist reverse DNS global IPs",
+        "fr": "Liste noire DNS inverses adresses IP globales"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "BLACKLIST_RDNS": {
       "context": "multisite",
       "default": ".shodan.io .censys.io",
-      "help": "List of reverse DNS suffixes, separated with spaces, to block.",
+      "help": {
+        "en": "List of reverse DNS suffixes, separated with spaces, to block.",
+        "fr": "Liste de suffixes DNS inverses, séparés par des espaces, à bloquer."
+      },
       "id": "blacklist-rdns",
-      "label": "Blacklist reverse DNS",
+      "label": {
+        "en": "Blacklist reverse DNS",
+        "fr": "Liste noire DNS inverses"
+      },
       "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
       "type": "text"
     },
     "BLACKLIST_RDNS_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to block.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing reverse DNS suffixes to block.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des suffixes DNS inverses à bloquer."
+      },
       "id": "blacklist-rdns-urls",
-      "label": "Blacklist reverse DNS URLs",
+      "label": {
+        "en": "Blacklist reverse DNS URLs",
+        "fr": "Liste noire DNS inverses URLs"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_ASN": {
       "context": "multisite",
       "default": "",
-      "help": "List of ASN numbers, separated with spaces, to block.",
+      "help": {
+        "en": "List of ASN numbers, separated with spaces, to block.",
+        "fr": "Liste de numéros ASN, séparés par des espaces, à bloquer."
+      },
       "id": "blacklist-asn",
-      "label": "Blacklist ASN",
+      "label": {
+        "en": "Blacklist ASN",
+        "fr": "Liste noire ASN"
+      },
       "regex": "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
       "type": "text"
     },
     "BLACKLIST_ASN_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing ASN to block.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing ASN to block.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des ASN à bloquer."
+      },
       "id": "blacklist-asn-urls",
-      "label": "Blacklist ASN URLs",
+      "label": {
+        "en": "Blacklist ASN URLs",
+        "fr": "Liste noire ASN URLs"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_USER_AGENT": {
       "context": "multisite",
       "default": "",
-      "help": "List of User-Agent (PCRE regex), separated with spaces, to block.",
+      "help": {
+        "en": "List of User-Agent (PCRE regex), separated with spaces, to block.",
+        "fr": "Liste de User-Agent (regex PCRE), séparés par des espaces, à bloquer."
+      },
       "id": "blacklist-user-agent",
-      "label": "Blacklist User-Agent",
+      "label": {
+        "en": "Blacklist User-Agent",
+        "fr": "Liste noire User-Agent"
+      },
       "regex": "^.*$",
       "type": "text"
     },
     "BLACKLIST_USER_AGENT_URLS": {
       "context": "global",
       "default": "https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list",
-      "help": "List of URLs, separated with spaces, containing bad User-Agent to block.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing bad User-Agent to block.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des User-Agent à bloquer."
+      },
       "id": "blacklist-user-agent-urls",
-      "label": "Blacklist User-Agent URLs",
+      "label": {
+        "en": "Blacklist User-Agent URLs",
+        "fr": "Liste noire User-Agent URLs"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_URI": {
       "context": "multisite",
       "default": "",
-      "help": "List of URI (PCRE regex), separated with spaces, to block.",
+      "help": {
+        "en": "List of URI (PCRE regex), separated with spaces, to block.",
+        "fr": "Liste d'URI (regex PCRE), séparés par des espaces, à bloquer."
+      },
       "id": "blacklist-uri",
-      "label": "Blacklist URI",
+      "label": {
+        "en": "Blacklist URI",
+        "fr": "Liste noire URI"
+      },
       "regex": "^( *(.*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_URI_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing bad URI to block.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing bad URI to block.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des URI à bloquer."
+      },
       "id": "blacklist-uri-urls",
-      "label": "Blacklist URI URLs",
+      "label": {
+        "en": "Blacklist URI URLs",
+        "fr": "Liste noire URI URLs"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_IP": {
       "context": "multisite",
       "default": "",
-      "help": "List of IP/network, separated with spaces, to ignore in the blacklist.",
+      "help": {
+        "en": "List of IP/network, separated with spaces, to ignore in the blacklist.",
+        "fr": "Liste d'IP/réseau, séparés par des espaces, à ignorer dans la liste noire."
+      },
       "id": "blacklist-ignore-ip",
-      "label": "Blacklist ignore IP/network",
+      "label": {
+        "en": "Blacklist ignore IP/network",
+        "fr": "Liste noire ignorer IP/réseau"
+      },
       "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_IP_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing IP/network to ignore in the blacklist.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des IP/réseau à ignorer dans la liste noire."
+      },
       "id": "blacklist-ignore-ip-urls",
-      "label": "Blacklist ignore IP/network URLs",
+      "label": {
+        "en": "Blacklist ignore IP/network URLs",
+        "fr": "Liste noire ignorer IP/réseau URLs"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_RDNS": {
       "context": "multisite",
       "default": "",
-      "help": "List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.",
+      "help": {
+        "en": "List of reverse DNS suffixes, separated with spaces, to ignore in the blacklist.",
+        "fr": "Liste de suffixes DNS inverses, séparés par des espaces, à ignorer dans la liste noire."
+      },
       "id": "blacklist-ignore-rdns",
-      "label": "Blacklist ignore reverse DNS",
+      "label": {
+        "en": "Blacklist ignore reverse DNS",
+        "fr": "Liste noire DNS inverses à ignorer "
+      },
       "regex": "^( *(([^ ]+)(?!.*\\3( |$))) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_RDNS_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing reverse DNS suffixes to ignore in the blacklist.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des suffixes DNS inverses à ignorer dans la liste noire."
+      },
       "id": "blacklist-ignore-rdns-urls",
-      "label": "Blacklist ignore reverse DNS URLs",
+      "label": {
+        "en": "Blacklist ignore reverse DNS URLs",
+        "fr": "Liste noire DNS inverses URLs à ignorer "
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_ASN": {
       "context": "multisite",
       "default": "",
-      "help": "List of ASN numbers, separated with spaces, to ignore in the blacklist.",
+      "help": {
+        "en": "List of ASN numbers, separated with spaces, to ignore in the blacklist.",
+        "fr": "Liste de numéros ASN, séparés par des espaces, à ignorer dans la liste noire."
+      },
       "id": "blacklist-ignore-asn",
-      "label": "Blacklist ignore ASN",
+      "label": {
+        "en": "Blacklist ignore ASN",
+        "fr": "Liste noire ASN à ignorer "
+      },
       "regex": "^^( *((ASN?)?(\\d+)\\b(?!.*[SN ]\\4\\b)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_ASN_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing ASN to ignore in the blacklist.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing ASN to ignore in the blacklist.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des ASN à ignorer dans la liste noire."
+      },
       "id": "blacklist-ignore-asn-urls",
-      "label": "Blacklist ignore ASN URLs",
+      "label": {
+        "en": "Blacklist ignore ASN URLs",
+        "fr": "Liste noire ASN URLs à ignorer "
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_USER_AGENT": {
       "context": "multisite",
       "default": "",
-      "help": "List of User-Agent (PCRE regex), separated with spaces, to ignore in the blacklist.",
+      "help": {
+        "en": "List of User-Agent (PCRE regex), separated with spaces, to ignore in the blacklist.",
+        "fr": "Liste de User-Agent (regex PCRE), séparés par des espaces, à ignorer dans la liste noire."
+      },
       "id": "blacklist-ignore-user-agent",
-      "label": "Blacklist ignore User-Agent",
+      "label": {
+        "en": "Blacklist ignore User-Agent",
+        "fr": "Liste noire User-Agent à ignorer "
+      },
       "regex": "^.*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_USER_AGENT_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing User-Agent to ignore in the blacklist.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des User-Agent à ignorer dans la liste noire."
+      },
       "id": "blacklist-ignore-user-agent-urls",
-      "label": "Blacklist ignore User-Agent URLs",
+      "label": {
+        "en": "Blacklist ignore User-Agent URLs",
+        "fr": "Liste noire User-Agent URLs à ignorer "
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_URI": {
       "context": "multisite",
       "default": "",
-      "help": "List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.",
+      "help": {
+        "en": "List of URI (PCRE regex), separated with spaces, to ignore in the blacklist.",
+        "fr": "Liste d'URI (regex PCRE), séparés par des espaces, à ignorer dans la liste noire."
+      },
       "id": "blacklist-ignore-uri",
-      "label": "Blacklist ignore URI",
+      "label": {
+        "en": "Blacklist ignore URI",
+        "fr": "Liste noire URI à ignorer "
+      },
       "regex": "^( *(.*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "BLACKLIST_IGNORE_URI_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs, separated with spaces, containing URI to ignore in the blacklist.",
+      "help": {
+        "en": "List of URLs, separated with spaces, containing URI to ignore in the blacklist.",
+        "fr": "Liste d'URLs, séparés par des espaces, contenant des URI à ignorer dans la liste noire."
+      },
       "id": "blacklist-ignore-uri-urls",
-      "label": "Blacklist ignore URI URLs",
+      "label": {
+        "en": "Blacklist ignore URI URLs",
+        "fr": "Liste noire URI URLs à ignorer "
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     }

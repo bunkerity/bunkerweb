@@ -1,16 +1,28 @@
 {
   "id": "inject",
-  "name": "HTML injection",
-  "description": "Inject custom HTML code before the </body> tag.",
+  "name": {
+    "en": "HTML injection",
+    "fr": "Injection HTML"
+  },
+  "description": {
+    "en": "Inject custom HTML code before the </body> tag.",
+    "fr": "Injecter du code HTML personnalisé avant la balise </body>."
+  },
   "version": "1.0",
   "stream": "no",
   "settings": {
     "INJECT_BODY": {
       "context": "multisite",
       "default": "",
-      "help": "The HTML code to inject.",
+      "help": {
+        "en": "The HTML code to inject.",
+        "fr": "Le code HTML à injecter."
+      },
       "id": "inject-body",
-      "label": "HTML code",
+      "label": {
+        "en": "HTML code",
+        "fr": "Code HTML"
+      },
       "regex": "^.*$",
       "type": "text"
     }

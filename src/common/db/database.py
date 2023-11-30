@@ -363,8 +363,11 @@ class Database:
                     settings = plugin
                     plugin = {
                         "id": "general",
-                        "name": "General",
-                        "description": "The general settings for the server",
+                        "name": {
+                            "en": "General",
+                            "fr": "Général",
+                        },
+                        "description": {"en": "The general settings for the server", "fr": "Les paramètres généraux du serveur"},
                         "version": "0.1",
                         "stream": "partial",
                         "external": False,

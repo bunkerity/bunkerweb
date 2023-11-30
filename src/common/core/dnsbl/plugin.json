@@ -1,25 +1,43 @@
 {
   "id": "dnsbl",
-  "name": "DNSBL",
-  "description": "Deny access based on external DNSBL servers.",
+  "name": {
+    "en": "DNSBL",
+    "fr": "DNSBL"
+  },
+  "description": {
+    "en": "Deny access based on external DNSBL servers.",
+    "fr": "Refuser l'accès en fonction des serveurs DNSBL externes."
+  },
   "version": "1.0",
   "stream": "yes",
   "settings": {
     "USE_DNSBL": {
       "context": "multisite",
       "default": "yes",
-      "help": "Activate DNSBL feature.",
+      "help": {
+        "en": "Activate DNSBL feature.",
+        "fr": "Activer la fonctionnalité DNSBL."
+      },
       "id": "use-dnsbl",
-      "label": "Activate DNSBL",
+      "label": {
+        "en": "Activate DNSBL",
+        "fr": "Activer DNSBL"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "DNSBL_LIST": {
       "context": "global",
       "default": "bl.blocklist.de problems.dnsbl.sorbs.net sbl.spamhaus.org xbl.spamhaus.org",
-      "help": "List of DNSBL servers.",
+      "help": {
+        "en": "List of DNSBL servers.",
+        "fr": "Liste des serveurs DNSBL."
+      },
       "id": "dnsbl-list",
-      "label": "DNSBL list",
+      "label": {
+        "en": "DNSBL list",
+        "fr": "Liste DNSBL"
+      },
       "regex": "^(?! )( ?((?!\\.)[\\w.]+)(?!.*\\2(?!.)))*$",
       "type": "text"
     }

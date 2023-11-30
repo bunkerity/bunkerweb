@@ -1,16 +1,28 @@
 {
   "id": "antibot",
-  "name": "Antibot",
-  "description": "Bot detection by using a challenge.",
+  "name": {
+    "en": "Antibot",
+    "fr": "Antibot"
+  },
+  "description": {
+    "en": "Bot detection by using a challenge.",
+    "fr": "Détection de bots en utilisant un challenge."
+  },
   "version": "1.0",
   "stream": "no",
   "settings": {
     "USE_ANTIBOT": {
       "context": "multisite",
       "default": "no",
-      "help": "Activate antibot feature.",
+      "help": {
+        "en": "Activate antibot feature.",
+        "fr": "Activer la fonctionnalité antibot."
+      },
       "id": "use-antibot",
-      "label": "Antibot challenge",
+      "label": {
+        "en": "Activate antibot",
+        "fr": "Activer antibot"
+      },
       "regex": "^(no|cookie|javascript|captcha|recaptcha|hcaptcha|turnstile)$",
       "type": "select",
       "select": [
@@ -26,90 +38,150 @@
     "ANTIBOT_URI": {
       "context": "multisite",
       "default": "/challenge",
-      "help": "Unused URI that clients will be redirected to to solve the challenge.",
+      "help": {
+        "en": "Unused URI that clients will be redirected to to solve the challenge.",
+        "fr": "URI inutilisée vers laquelle les clients seront redirigés pour résoudre le challenge."
+      },
       "id": "antibot-uri",
-      "label": "Antibot URL",
+      "label": {
+        "en": "Antibot URI",
+        "fr": "URI antibot"
+      },
       "regex": "^\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*$",
       "type": "text"
     },
     "ANTIBOT_RECAPTCHA_SCORE": {
       "context": "multisite",
       "default": "0.7",
-      "help": "Minimum score required for reCAPTCHA challenge.",
+      "help": {
+        "en": "Minimum score required for reCAPTCHA challenge.",
+        "fr": "Score minimum requis pour le challenge reCAPTCHA."
+      },
       "id": "antibot-recaptcha-score",
-      "label": "reCAPTCHA score",
+      "label": {
+        "en": "reCAPTCHA score",
+        "fr": "Score reCAPTCHA"
+      },
       "regex": "^(0\\.[1-9]|1\\.0)$",
       "type": "text"
     },
     "ANTIBOT_RECAPTCHA_SITEKEY": {
       "context": "multisite",
       "default": "",
-      "help": "Sitekey for reCAPTCHA challenge.",
+      "help": {
+        "en": "Sitekey for reCAPTCHA challenge.",
+        "fr": "Sitekey pour le challenge reCAPTCHA."
+      },
       "id": "antibot-recaptcha-sitekey",
-      "label": "reCAPTCHA sitekey",
+      "label": {
+        "en": "reCAPTCHA sitekey",
+        "fr": "Sitekey reCAPTCHA"
+      },
       "regex": "^[\\w\\-]*$",
       "type": "text"
     },
     "ANTIBOT_RECAPTCHA_SECRET": {
       "context": "multisite",
       "default": "",
-      "help": "Secret for reCAPTCHA challenge.",
+      "help": {
+        "en": "Secret for reCAPTCHA challenge.",
+        "fr": "Secret pour le challenge reCAPTCHA."
+      },
       "id": "antibot-recaptcha-secret",
-      "label": "reCAPTCHA secret",
+      "label": {
+        "en": "reCAPTCHA secret",
+        "fr": "Secret reCAPTCHA"
+      },
       "regex": "^[\\w\\-]*$",
       "type": "password"
     },
     "ANTIBOT_HCAPTCHA_SITEKEY": {
       "context": "multisite",
       "default": "",
-      "help": "Sitekey for hCaptcha challenge.",
+      "help": {
+        "en": "Sitekey for hCaptcha challenge.",
+        "fr": "Sitekey pour le challenge hCaptcha."
+      },
       "id": "antibot-hcaptcha-sitekey",
-      "label": "hCaptcha sitekey",
+      "label": {
+        "en": "hCaptcha sitekey",
+        "fr": "Sitekey hCaptcha"
+      },
       "regex": "^[a-zA-Z0-9\\-]*$",
       "type": "text"
     },
     "ANTIBOT_HCAPTCHA_SECRET": {
       "context": "multisite",
       "default": "",
-      "help": "Secret for hCaptcha challenge.",
+      "help": {
+        "en": "Secret for hCaptcha challenge.",
+        "fr": "Secret pour le challenge hCaptcha."
+      },
       "id": "antibot-hcaptcha-secret",
-      "label": "hCaptcha secret",
+      "label": {
+        "en": "hCaptcha secret",
+        "fr": "Secret hCaptcha"
+      },
       "regex": "^\\w*$",
       "type": "password"
     },
     "ANTIBOT_TURNSTILE_SITEKEY": {
       "context": "multisite",
       "default": "",
-      "help": "Sitekey for Turnstile challenge.",
+      "help": {
+        "en": "Sitekey for Turnstile challenge.",
+        "fr": "Sitekey pour le challenge Turnstile."
+      },
       "id": "antibot-turnstile-sitekey",
-      "label": "Turnstile sitekey",
+      "label": {
+        "en": "Turnstile sitekey",
+        "fr": "Sitekey Turnstile"
+      },
       "regex": "^(0x[\\w\\-]+)?$",
       "type": "text"
     },
     "ANTIBOT_TURNSTILE_SECRET": {
       "context": "multisite",
       "default": "",
-      "help": "Secret for Turnstile challenge.",
+      "help": {
+        "en": "Secret for Turnstile challenge.",
+        "fr": "Secret pour le challenge Turnstile."
+      },
       "id": "antibot-turnstile-secret",
-      "label": "Turnstile secret",
+      "label": {
+        "en": "Turnstile secret",
+        "fr": "Secret Turnstile"
+      },
       "regex": "^(0x[\\w\\-]+)?$",
       "type": "password"
     },
     "ANTIBOT_TIME_RESOLVE": {
       "context": "multisite",
       "default": "60",
-      "help": "Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.",
+      "help": {
+        "en": "Maximum time (in seconds) clients have to resolve the challenge. Once this time has passed, a new challenge will be generated.",
+        "fr": "Temps maximum (en secondes) dont disposent les clients pour résoudre le challenge. Une fois ce temps écoulé, un nouveau challenge sera généré."
+      },
       "id": "antibot-time-resolve",
-      "label": "Time to resolve",
+      "label": {
+        "en": "Time to resolve",
+        "fr": "Temps de résolution"
+      },
       "regex": "^[0-9]+$",
       "type": "text"
     },
     "ANTIBOT_TIME_VALID": {
       "context": "multisite",
       "default": "86400",
-      "help": "Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.",
+      "help": {
+        "en": "Maximum validity time of solved challenges. Once this time has passed, clients will need to resolve a new one.",
+        "fr": "Temps maximum de validité des challenges résolus. Une fois ce temps écoulé, les clients devront résoudre un nouveau challenge."
+      },
       "id": "antibot-time-valid",
-      "label": "Time valid",
+      "label": {
+        "en": "Time valid",
+        "fr": "Temps de validité"
+      },
       "regex": "^[0-9]+$",
       "type": "text"
     }

@@ -1,56 +1,92 @@
 {
-	"id": "modsecurity",
-	"name": "ModSecurity",
-	"description": "Management of the ModSecurity WAF.",
-	"version": "1.0",
-	"stream": "no",
-	"settings": {
-		"USE_MODSECURITY": {
-			"context": "multisite",
-			"default": "yes",
-			"help": "Enable ModSecurity WAF.",
-			"id": "use-modsecurity",
-			"label": "Use ModSecurity",
-			"regex": "^(yes|no)$",
-			"type": "check"
-		},
-		"USE_MODSECURITY_CRS": {
-			"context": "multisite",
-			"default": "yes",
-			"help": "Enable OWASP Core Rule Set.",
-			"id": "use-modsecurity-crs",
-			"label": "Use Core Rule Set",
-			"regex": "^(yes|no)$",
-			"type": "check"
-		},
-		"MODSECURITY_SEC_AUDIT_ENGINE": {
-			"context": "multisite",
-			"default": "RelevantOnly",
-			"help": "SecAuditEngine directive of ModSecurity.",
-			"id": "modsecurity-sec-audit-engine",
-			"label": "SecAuditEngine",
-			"regex": "^(On|RelevantOnly|Off)$",
-			"type": "select",
+  "id": "modsecurity",
+  "name": {
+    "en": "ModSecurity",
+    "fr": "ModSecurity"
+  },
+  "description": {
+    "en": "Management of the ModSecurity WAF.",
+    "fr": "Gestion du WAF ModSecurity."
+  },
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "USE_MODSECURITY": {
+      "context": "multisite",
+      "default": "yes",
+      "help": {
+        "en": "Enable ModSecurity WAF.",
+        "fr": "Activer le WAF ModSecurity."
+      },
+      "id": "use-modsecurity",
+      "label": {
+        "en": "Use ModSecurity",
+        "fr": "Utiliser ModSecurity"
+      },
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "USE_MODSECURITY_CRS": {
+      "context": "multisite",
+      "default": "yes",
+      "help": {
+        "en": "Enable OWASP Core Rule Set.",
+        "fr": "Activer le Core Rule Set OWASP."
+      },
+      "id": "use-modsecurity-crs",
+      "label": {
+        "en": "Use Core Rule Set",
+        "fr": "Utiliser Core Rule Set"
+      },
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
+    "MODSECURITY_SEC_AUDIT_ENGINE": {
+      "context": "multisite",
+      "default": "RelevantOnly",
+      "help": {
+        "en": "SecAuditEngine directive of ModSecurity.",
+        "fr": "Directive SecAuditEngine de ModSecurity."
+      },
+      "id": "modsecurity-sec-audit-engine",
+      "label": {
+        "en": "SecAuditEngine",
+        "fr": "SecAuditEngine"
+      },
+      "regex": "^(On|RelevantOnly|Off)$",
+      "type": "select",
       "select": ["On", "RelevantOnly", "Off"]
-		},
-		"MODSECURITY_SEC_RULE_ENGINE": {
-			"context": "multisite",
-			"default": "On",
-			"help": "SecRuleEngine directive of ModSecurity.",
-			"id": "modsecurity-sec-rule-engine",
-			"label": "SecRuleEngine",
-			"regex": "^(On|DetectionOnly|Off)$",
-			"type": "select",
+    },
+    "MODSECURITY_SEC_RULE_ENGINE": {
+      "context": "multisite",
+      "default": "On",
+      "help": {
+        "en": "SecRuleEngine directive of ModSecurity.",
+        "fr": "Directive SecRuleEngine de ModSecurity."
+      },
+      "id": "modsecurity-sec-rule-engine",
+      "label": {
+        "en": "SecRuleEngine",
+        "fr": "SecRuleEngine"
+      },
+      "regex": "^(On|DetectionOnly|Off)$",
+      "type": "select",
       "select": ["On", "DetectionOnly", "Off"]
-		},
-		"MODSECURITY_SEC_AUDIT_LOG_PARTS": {
-			"context": "multisite",
-			"default": "ABCFHZ",
-			"help": "SecAuditLogParts directive of ModSecurity.",
-			"id": "modsecurity-sec-audit-log-parts",
-			"label": "SecAuditLogParts",
-			"regex": "^A(([B-K])(?!.*\\2))+Z$",
-			"type": "text"
-		}
-	}
+    },
+    "MODSECURITY_SEC_AUDIT_LOG_PARTS": {
+      "context": "multisite",
+      "default": "ABCFHZ",
+      "help": {
+        "en": "SecAuditLogParts directive of ModSecurity.",
+        "fr": "Directive SecAuditLogParts de ModSecurity."
+      },
+      "id": "modsecurity-sec-audit-log-parts",
+      "label": {
+        "en": "SecAuditLogParts",
+        "fr": "SecAuditLogParts"
+      },
+      "regex": "^A(([B-K])(?!.*\\2))+Z$",
+      "type": "text"
+    }
+  }
 }

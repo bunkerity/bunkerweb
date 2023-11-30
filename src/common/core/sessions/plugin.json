@@ -1,70 +1,118 @@
 {
   "id": "sessions",
-  "name": "Sessions",
-  "description": "Management of session used by other plugins.",
+  "name": {
+    "en": "Sessions",
+    "fr": "Sessions"
+  },
+  "description": {
+    "en": "Management of session used by other plugins.",
+    "fr": "Gestion des sessions utilisées par d'autres plugins."
+  },
   "version": "1.0",
   "stream": "yes",
   "settings": {
     "SESSIONS_SECRET": {
       "context": "global",
       "default": "random",
-      "help": "Secret used to encrypt sessions variables for storing data related to challenges.",
+      "help": {
+        "en": "Secret used to encrypt sessions variables for storing data related to challenges.",
+        "fr": "Secret utilisé pour chiffrer les variables de session pour stocker les données relatives aux challenges."
+      },
       "id": "session-secret",
-      "label": "Sessions secret",
+      "label": {
+        "en": "Sessions secret",
+        "fr": "Secret des sessions"
+      },
       "regex": "^\\w+$",
       "type": "password"
     },
     "SESSIONS_NAME": {
       "context": "global",
       "default": "random",
-      "help": "Name of the cookie given to clients.",
+      "help": {
+        "en": "Name of the cookie given to clients.",
+        "fr": "Nom du cookie donné aux clients."
+      },
       "id": "sessions-name",
-      "label": "Sessions name",
+      "label": {
+        "en": "Sessions name",
+        "fr": "Nom des sessions"
+      },
       "regex": "^\\w+$",
       "type": "text"
     },
     "SESSIONS_IDLING_TIMEOUT": {
       "context": "global",
       "default": "1800",
-      "help": "Maximum time (in seconds) of inactivity before the session is invalidated.",
+      "help": {
+        "en": "Maximum time (in seconds) of inactivity before the session is invalidated.",
+        "fr": "Temps maximum (en secondes) d'inactivité avant que la session ne soit invalidée."
+      },
       "id": "sessions-idling-timeout",
-      "label": "Sessions idling timeout",
+      "label": {
+        "en": "Sessions idling timeout",
+        "fr": "Temps d'inactivité des sessions"
+      },
       "regex": "^\\d+$",
       "type": "text"
     },
     "SESSIONS_ROLLING_TIMEOUT": {
       "context": "global",
       "default": "3600",
-      "help": "Maximum time (in seconds) before a session must be renewed.",
+      "help": {
+        "en": "Maximum time (in seconds) before a session must be renewed.",
+        "fr": "Temps maximum (en secondes) avant qu'une session ne soit renouvelée."
+      },
       "id": "sessions-rolling-timeout",
-      "label": "Sessions rolling timeout",
+      "label": {
+        "en": "Sessions rolling timeout",
+        "fr": "Temps de renouvellement des sessions"
+      },
       "regex": "^\\d+$",
       "type": "text"
     },
     "SESSIONS_ABSOLUTE_TIMEOUT": {
       "context": "global",
       "default": "86400",
-      "help": "Maximum time (in seconds) before a session is destroyed.",
+      "help": {
+        "en": "Maximum time (in seconds) before a session is destroyed.",
+        "fr": "Temps maximum (en secondes) avant qu'une session ne soit détruite."
+      },
       "id": "sessions-absolute-timeout",
-      "label": "Sessions absolute timeout",
+      "label": {
+        "en": "Sessions absolute timeout",
+        "fr": "Temps maximum des sessions"
+      },
       "regex": "^\\d+$",
       "type": "text"
     },
     "SESSIONS_CHECK_IP": {
       "context": "global",
       "default": "yes",
-      "help": "Destroy session if IP address is different than original one.",
+      "help": {
+        "en": "Destroy session if IP address is different than original one.",
+        "fr": "Détruit la session si l'adresse IP est différente de celle d'origine."
+      },
       "id": "sessions-check-ip",
-      "label": "Sessions check IP",
+      "label": {
+        "en": "Sessions check IP",
+        "fr": "Vérification de l'adresse IP"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "SESSIONS_CHECK_USER_AGENT": {
       "context": "global",
       "default": "yes",
-      "help": "Destroy session if User-Agent is different than original one.",
+      "help": {
+        "en": "Destroy session if User-Agent is different than original one.",
+        "fr": "Détruit la session si le User-Agent est différent de celui d'origine."
+      },
       "id": "sessions-user-agent",
-      "label": "Sessions check User-Agent",
+      "label": {
+        "en": "Sessions check User-Agent",
+        "fr": "Vérification du User-Agent"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     }

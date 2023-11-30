@@ -1,61 +1,103 @@
 {
   "id": "realip",
-  "name": "Real IP",
-  "description": "Get real IP of clients when BunkerWeb is behind a reverse proxy / load balancer.",
+  "name": {
+    "en": "Real IP",
+    "fr": "IP réelle"
+  },
+  "description": {
+    "en": "Get real IP of clients when BunkerWeb is behind a reverse proxy / load balancer.",
+    "fr": "Obtenir l'IP réelle des clients lorsque BunkerWeb est derrière un reverse proxy / load balancer."
+  },
   "version": "1.0",
   "stream": "partial",
   "settings": {
     "USE_REAL_IP": {
       "context": "multisite",
       "default": "no",
-      "help": "Retrieve the real IP of client.",
+      "help": {
+        "en": "Retrieve the real IP of client.",
+        "fr": "Récupérer l'IP réelle du client."
+      },
       "id": "use-real-ip",
-      "label": "Use real ip",
+      "label": {
+        "en": "Use real ip",
+        "fr": "Utiliser l'IP réelle"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "USE_PROXY_PROTOCOL": {
       "context": "multisite",
       "default": "no",
-      "help": "Enable PROXY protocol communication.",
+      "help": {
+        "en": "Enable PROXY protocol communication.",
+        "fr": "Activer la communication PROXY protocol."
+      },
       "id": "use-proxy-protocol",
-      "label": "Use PROXY protocol",
+      "label": {
+        "en": "Use proxy protocol",
+        "fr": "Utiliser le protocole proxy"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "REAL_IP_FROM": {
       "context": "multisite",
       "default": "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
-      "help": "List of trusted IPs / networks, separated with spaces, where proxied requests come from.",
+      "help": {
+        "en": "List of trusted IPs / networks, separated with spaces, where proxied requests come from.",
+        "fr": "Liste des IP / réseaux de confiance, séparés par des espaces, d'où proviennent les requêtes proxy."
+      },
       "id": "real-ip-from",
-      "label": "Real IP from",
+      "label": {
+        "en": "Real IP from",
+        "fr": "IP réelle provenance"
+      },
       "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
       "type": "text"
     },
     "REAL_IP_FROM_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.",
+      "help": {
+        "en": "List of URLs containing trusted IPs / networks, separated with spaces, where proxied requests come from.",
+        "fr": "Liste des URLs contenant des IP / réseaux de confiance, séparés par des espaces, d'où proviennent les requêtes proxy."
+      },
       "id": "real-ip-from-urls",
-      "label": "Real IP from URLs",
+      "label": {
+        "en": "Real IP from URLs",
+        "fr": "IP réelle provenance URLs"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "REAL_IP_HEADER": {
       "context": "multisite",
       "default": "X-Forwarded-For",
-      "help": "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.",
+      "help": {
+        "en": "HTTP header containing the real IP or special value proxy_protocol for PROXY protocol.",
+        "fr": "En-tête HTTP contenant l'IP réelle ou la valeur spéciale proxy_protocol pour le protocole PROXY."
+      },
       "id": "real-ip-header",
-      "label": "Real IP header",
+      "label": {
+        "en": "Real IP header",
+        "fr": "IP réelle en-tête"
+      },
       "regex": "^(?! )(( ?(?!proxy_protocol)[\\w\\-]+)*|proxy_protocol)$",
       "type": "text"
     },
     "REAL_IP_RECURSIVE": {
       "context": "multisite",
       "default": "yes",
-      "help": "Perform a recursive search in the header container IP address.",
+      "help": {
+        "en": "Perform a recursive search in the header container IP address.",
+        "fr": "Effectuer une recherche récursive dans l'en-tête contenant l'adresse IP."
+      },
       "id": "real-ip-recursive",
-      "label": "Real IP recursive",
+      "label": {
+        "en": "Real IP recursive",
+        "fr": "IP réelle récursive"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     }

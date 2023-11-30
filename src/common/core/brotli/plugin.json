@@ -1,43 +1,73 @@
 {
   "id": "brotli",
-  "name": "Brotli",
-  "description": "Compress HTTP requests with the brotli algorithm.",
+  "name": {
+    "en": "Brotli",
+    "fr": "Brotli"
+  },
+  "description": {
+    "en": "Compress HTTP requests with the brotli algorithm.",
+    "fr": "Compresser les requêtes HTTP avec l'algorithme brotli."
+  },
   "version": "1.0",
   "stream": "no",
   "settings": {
     "USE_BROTLI": {
       "context": "multisite",
       "default": "no",
-      "help": "Use brotli",
+      "help": {
+        "en": "Use brotli",
+        "fr": "Utiliser brotli"
+      },
       "id": "use-brotli",
-      "label": "Use brotli",
+      "label": {
+        "en": "Use brotli",
+        "fr": "Utiliser brotli"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "BROTLI_TYPES": {
       "context": "multisite",
       "default": "application/atom+xml application/javascript application/json application/rss+xml application/vnd.ms-fontobject application/x-font-opentype application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/eot font/opentype font/otf font/truetype image/svg+xml image/vnd.microsoft.icon image/x-icon image/x-win-bitmap text/css text/javascript text/plain text/xml",
-      "help": "List of MIME types that will be compressed with brotli.",
+      "help": {
+        "en": "List of MIME types that will be compressed with brotli.",
+        "fr": "Liste des types MIME qui seront compressés avec brotli."
+      },
       "id": "brotli-types",
-      "label": "MIME types",
+      "label": {
+        "en": "MIME types",
+        "fr": "Types MIME"
+      },
       "regex": "^(?! )( ?([\\-\\w.]+/[\\-\\w.+]+)(?!.*\\2(?!.)))+$",
       "type": "text"
     },
     "BROTLI_MIN_LENGTH": {
       "context": "multisite",
       "default": "1000",
-      "help": "Minimum length for brotli compression.",
+      "help": {
+        "en": "Minimum length for brotli compression.",
+        "fr": "Longueur minimale pour la compression brotli."
+      },
       "id": "brotli-min-length",
-      "label": "Minimum length",
+      "label": {
+        "en": "Minimum length",
+        "fr": "Longueur minimale"
+      },
       "regex": "^\\d+",
       "type": "text"
     },
     "BROTLI_COMP_LEVEL": {
       "context": "multisite",
       "default": "6",
-      "help": "The compression level of the brotli algorithm.",
+      "help": {
+        "en": "The compression level of the brotli algorithm.",
+        "fr": "Le niveau de compression de l'algorithme brotli."
+      },
       "id": "brotli-comp-level",
-      "label": "Compression level",
+      "label": {
+        "en": "Compression level",
+        "fr": "Niveau de compression"
+      },
       "regex": "^([02-9]|1[01]?)$",
       "type": "select",
       "select": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"]

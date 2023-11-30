@@ -1,16 +1,28 @@
 {
   "id": "headers",
-  "name": "Headers",
-  "description": "Manage HTTP headers sent to clients.",
+  "name": {
+    "en": "Headers",
+    "fr": "Entêtes"
+  },
+  "description": {
+    "en": "Manage HTTP headers sent to clients.",
+    "fr": "Gérer les entêtes HTTP envoyées aux clients."
+  },
   "version": "1.0",
   "stream": "no",
   "settings": {
     "CUSTOM_HEADER": {
       "context": "multisite",
       "default": "",
-      "help": "Custom header to add (HeaderName: HeaderValue).",
+      "help": {
+        "en": "Custom header to add (HeaderName: HeaderValue).",
+        "fr": "Entête personnalisée à ajouter (NomEntête: ValeurEntête)."
+      },
       "id": "custom-header",
-      "label": "Custom header (HeaderName: HeaderValue)",
+      "label": {
+        "en": "Custom header (HeaderName: HeaderValue)",
+        "fr": "Entête personnalisée (NomEntête: ValeurEntête)"
+      },
       "regex": "^([\\w\\-]+: [^,]+)?$",
       "type": "text",
       "multiple": "custom-headers"
@@ -18,36 +30,60 @@
     "REMOVE_HEADERS": {
       "context": "multisite",
       "default": "Server Expect-CT X-Powered-By X-AspNet-Version X-AspNetMvc-Version",
-      "help": "Headers to remove (Header1 Header2 Header3 ...)",
+      "help": {
+        "en": "Headers to remove (Header1 Header2 Header3 ...)",
+        "fr": "Entêtes à supprimer (Entête1 Entête2 Entête3 ...)"
+      },
       "id": "remove-headers",
-      "label": "Remove headers",
+      "label": {
+        "en": "Remove headers",
+        "fr": "Supprimer les entêtes"
+      },
       "regex": "^(?! )( ?[\\w\\-]+)*$",
       "type": "text"
     },
     "KEEP_UPSTREAM_HEADERS": {
       "context": "multisite",
       "default": "Content-Security-Policy Permissions-Policy Feature-Policy X-Frame-Options",
-      "help": "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all).",
+      "help": {
+        "en": "Headers to keep from upstream (Header1 Header2 Header3 ... or * for all).",
+        "fr": "Entêtes à conserver de l'amont (Entête1 Entête2 Entête3 ... ou * pour toutes)."
+      },
       "id": "keep-upstream-headers",
-      "label": "Keep upstream headers",
+      "label": {
+        "en": "Keep upstream headers",
+        "fr": "Conserver les entêtes de l'amont"
+      },
       "regex": "^((?! )( ?[\\w\\-]+)+|\\*)?$",
       "type": "text"
     },
     "STRICT_TRANSPORT_SECURITY": {
       "context": "multisite",
       "default": "max-age=31536000",
-      "help": "Value for the Strict-Transport-Security header.",
+      "help": {
+        "en": "Value for the Strict-Transport-Security header.",
+        "fr": "Valeur pour l'entête Strict-Transport-Security."
+      },
       "id": "strict-transport-security",
-      "label": "Strict-Transport-Security",
+      "label": {
+        "en": "Strict-Transport-Security",
+        "fr": "Strict-Transport-Security"
+      },
       "regex": "^max-age=\\d+(; includeSubDomains(; preload)?)?$",
       "type": "text"
     },
     "COOKIE_FLAGS": {
       "context": "multisite",
       "default": "* HttpOnly SameSite=Lax",
-      "help": "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module).",
+      "help": {
+        "en": "Cookie flags automatically added to all cookies (value accepted for nginx_cookie_flag_module).",
+        "fr": "Les attirbutes de cookies ajoutés automatiquement à tous les cookies (valeur acceptée pour nginx_cookie_flag_module)."
+      },
       "id": "cookie-flags",
-      "label": "Cookie flags",
+      "label": {
+        "en": "Cookie flags",
+        "fr": "Les attirbutes de cookies"
+      },
       "regex": "^(\\*|[^;]+)( (HttpOnly|(SameSite)(?!.*\\4)(=(Lax|Strict))?)(?!.*\\3))*$",
       "type": "text",
       "multiple": "cookie-flags"
@@ -55,36 +91,60 @@
     "COOKIE_AUTO_SECURE_FLAG": {
       "context": "multisite",
       "default": "yes",
-      "help": "Automatically add the Secure flag to all cookies.",
+      "help": {
+        "en": "Automatically add the Secure flag to all cookies.",
+        "fr": "Ajouter automatiquement l'attribut Secure à tous les cookies."
+      },
       "id": "cookie-auto-secure-flag",
-      "label": "Cookie auto Secure flag",
+      "label": {
+        "en": "Cookie auto Secure flag",
+        "fr": "Attribut Secure automatique"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "CONTENT_SECURITY_POLICY": {
       "context": "multisite",
       "default": "object-src 'none'; form-action 'self'; frame-ancestors 'self';",
-      "help": "Value for the Content-Security-Policy header.",
+      "help": {
+        "en": "Value for the Content-Security-Policy header.",
+        "fr": "Valeur pour l'entête Content-Security-Policy."
+      },
       "id": "content-security-policy",
-      "label": "Content-Security-Policy",
+      "label": {
+        "en": "Content-Security-Policy",
+        "fr": "Content-Security-Policy"
+      },
       "regex": "^.*$",
       "type": "text"
     },
     "CONTENT_SECURITY_POLICY_REPORT_ONLY": {
       "context": "multisite",
       "default": "no",
-      "help": "Send reports for violations of the Content-Security-Policy header instead of blocking them.",
+      "help": {
+        "en": "Send reports for violations of the Content-Security-Policy header instead of blocking them.",
+        "fr": "Envoyer des rapports pour les violations de l'entête Content-Security-Policy au lieu de les bloquer."
+      },
       "id": "content-security-policy-report-only",
-      "label": "Content-Security-Policy-Report-Only",
+      "label": {
+        "en": "Content-Security-Policy-Report-Only",
+        "fr": "Content-Security-Policy-Report-Only"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "REFERRER_POLICY": {
       "context": "multisite",
       "default": "strict-origin-when-cross-origin",
-      "help": "Value for the Referrer-Policy header.",
+      "help": {
+        "en": "Value for the Referrer-Policy header.",
+        "fr": "Valeur pour l'entête Referrer-Policy."
+      },
       "id": "referrer-policy",
-      "label": "Referrer-Policy",
+      "label": {
+        "en": "Referrer-Policy",
+        "fr": "Referrer-Policy"
+      },
       "regex": "^(no-referrer|no-referrer-when-downgrade|origin|origin-when-cross-origin|same-origin|strict-origin|strict-origin-when-cross-origin|unsafe-url)?$",
       "type": "select",
       "select": [
@@ -102,27 +162,45 @@
     "PERMISSIONS_POLICY": {
       "context": "multisite",
       "default": "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()",
-      "help": "Value for the Permissions-Policy header.",
+      "help": {
+        "en": "Value for the Permissions-Policy header.",
+        "fr": "Valeur pour l'entête Permissions-Policy."
+      },
       "id": "permissions-policy",
-      "label": "Permissions-Policy",
+      "label": {
+        "en": "Permissions-Policy",
+        "fr": "Permissions-Policy"
+      },
       "regex": "^(?![, ])(,? ?([a-z\\-]+)(?!.*[^\\-]\\2=)=(\\*|\\(( ?(self|\\u0022https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*\\u0022)(?=[ \\)]))*\\)))*$",
       "type": "text"
     },
     "FEATURE_POLICY": {
       "context": "multisite",
       "default": "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';",
-      "help": "Value for the Feature-Policy header.",
+      "help": {
+        "en": "Value for the Feature-Policy header.",
+        "fr": "Valeur pour l'entête Feature-Policy."
+      },
       "id": "feature-policy",
-      "label": "Feature-Policy",
+      "label": {
+        "en": "Feature-Policy",
+        "fr": "Feature-Policy"
+      },
       "regex": "^(?![; ])( ?([\\w\\-]+)(?!.*[^\\-]\\2 )( ('(none|self|strict-dynamic|report-sample|unsafe-inline|unsafe-eval|unsafe-hashes|unsafe-allow-redirects)'|https?:\\/\\/[\\w@:%.+~#=\\-]+[\\w\\(\\)!@:%+.~#?&\\/=$\\-]*))+;)*$",
       "type": "text"
     },
     "X_FRAME_OPTIONS": {
       "context": "multisite",
       "default": "SAMEORIGIN",
-      "help": "Value for the X-Frame-Options header.",
+      "help": {
+        "en": "Value for the X-Frame-Options header.",
+        "fr": "Valeur pour l'entête X-Frame-Options."
+      },
       "id": "x-frame-options",
-      "label": "X-Frame-Options",
+      "label": {
+        "en": "X-Frame-Options",
+        "fr": "X-Frame-Options"
+      },
       "regex": "^(DENY|SAMEORIGIN)?$",
       "type": "select",
       "select": ["", "DENY", "SAMEORIGIN"]
@@ -130,9 +208,15 @@
     "X_CONTENT_TYPE_OPTIONS": {
       "context": "multisite",
       "default": "nosniff",
-      "help": "Value for the X-Content-Type-Options header.",
+      "help": {
+        "en": "Value for the X-Content-Type-Options header.",
+        "fr": "Valeur pour l'entête X-Content-Type-Options."
+      },
       "id": "x-content-type-options",
-      "label": "X-Content-Type-Options",
+      "label": {
+        "en": "X-Content-Type-Options",
+        "fr": "X-Content-Type-Options"
+      },
       "regex": "^(nosniff)?$",
       "type": "select",
       "select": ["", "nosniff"]
@@ -140,9 +224,15 @@
     "X_XSS_PROTECTION": {
       "context": "multisite",
       "default": "1; mode=block",
-      "help": "Value for the X-XSS-Protection header.",
+      "help": {
+        "en": "Value for the X-XSS-Protection header.",
+        "fr": "Valeur pour l'entête X-XSS-Protection."
+      },
       "id": "x-xss-protection",
-      "label": "X-XSS-Protection",
+      "label": {
+        "en": "X-XSS-Protection",
+        "fr": "X-XSS-Protection"
+      },
       "regex": "^0|1(; (mode=block|report=https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*))?$",
       "type": "text"
     }

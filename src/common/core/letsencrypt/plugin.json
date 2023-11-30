@@ -1,34 +1,58 @@
 {
   "id": "letsencrypt",
-  "name": "Let's Encrypt",
-  "description": "Automatic creation, renewal and configuration of Let's Encrypt certificates.",
+  "name": {
+    "en": "Let's Encrypt",
+    "fr": "Let's Encrypt"
+  },
+  "description": {
+    "en": "Automatic creation, renewal and configuration of Let's Encrypt certificates.",
+    "fr": "Création, renouvellement et configuration automatique des certificats Let's Encrypt."
+  },
   "version": "1.0",
   "stream": "yes",
   "settings": {
     "AUTO_LETS_ENCRYPT": {
       "context": "multisite",
       "default": "no",
-      "help": "Activate automatic Let's Encrypt mode.",
+      "help": {
+        "en": "Activate automatic Let's Encrypt mode.",
+        "fr": "Active le mode Let's Encrypt automatique."
+      },
       "id": "auto-lets-encrypt",
-      "label": "Automatic Let's Encrypt",
+      "label": {
+        "en": "Automatic Let's Encrypt",
+        "fr": "Let's Encrypt automatique"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "EMAIL_LETS_ENCRYPT": {
       "context": "multisite",
       "default": "",
-      "help": "Email used for Let's Encrypt notification and in certificate.",
+      "help": {
+        "en": "Email used for Let's Encrypt notification and in certificate.",
+        "fr": "Email utilisé pour les notifications Let's Encrypt et dans le certificat."
+      },
       "id": "email-lets-encrypt",
-      "label": "Email Let's Encrypt",
+      "label": {
+        "en": "Email Let's Encrypt",
+        "fr": "Email Let's Encrypt"
+      },
       "regex": "^([^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+)?$",
       "type": "text"
     },
     "USE_LETS_ENCRYPT_STAGING": {
       "context": "multisite",
       "default": "no",
-      "help": "Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.",
+      "help": {
+        "en": "Use the staging environment for Let’s Encrypt certificate generation. Useful when you are testing your deployments to avoid being rate limited in the production environment.",
+        "fr": "Utilise l'environnement de test pour la génération des certificats Let's Encrypt. Utile lorsque vous testez vos déploiements pour éviter d'être limité dans l'environnement de production."
+      },
       "id": "use-lets-encrypt-staging",
-      "label": "Use Let's Encrypt Staging",
+      "label": {
+        "en": "Use Let's Encrypt Staging",
+        "fr": "Utiliser Let's Encrypt Staging"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     }

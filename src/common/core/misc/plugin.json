@@ -1,41 +1,68 @@
 {
   "id": "misc",
-  "name": "Miscellaneous",
-  "description": "Miscellaneous settings.",
+  "name": {
+    "en": "Miscellaneous",
+    "fr": "Divers"
+  },
+  "description": {
+    "en": "Miscellaneous settings.",
+    "fr": "Paramètres divers."
+  },
   "version": "1.0",
   "stream": "partial",
   "settings": {
     "DISABLE_DEFAULT_SERVER": {
       "context": "global",
       "default": "no",
-      "help": "Close connection if the request vhost is unknown.",
+      "help": {
+        "en": "Close connection if the request vhost is unknown.",
+        "fr": "Ferme la connexion si le vhost de la requête est inconnu."
+      },
       "id": "disable-default-server",
-      "label": "Disable default server",
+      "label": {
+        "en": "Disable default server",
+        "fr": "Désactiver le serveur par défaut"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "REDIRECT_HTTP_TO_HTTPS": {
       "context": "multisite",
       "default": "no",
-      "help": "Redirect all HTTP request to HTTPS.",
+      "help": {
+        "en": "Redirect all HTTP request to HTTPS.",
+        "fr": "Redirige toutes les requêtes HTTP vers HTTPS."
+      },
       "id": "redirect-http-to-https",
-      "label": "Redirect HTTP to HTTPS",
+      "label": {
+        "en": "Redirect HTTP to HTTPS",
+        "fr": "Rediriger HTTP vers HTTPS"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "AUTO_REDIRECT_HTTP_TO_HTTPS": {
       "context": "multisite",
       "default": "yes",
-      "help": "Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.",
+      "help": {
+        "en": "Try to detect if HTTPS is used and activate HTTP to HTTPS redirection if that's the case.",
+        "fr": "Essaie de détecter si HTTPS est utilisé et active la redirection HTTP vers HTTPS si c'est le cas."
+      },
       "id": "auto-redirect-http-to-https",
-      "label": "Auto redirect HTTP to HTTPS",
+      "label": {
+        "en": "Auto redirect HTTP to HTTPS",
+        "fr": "Redirection automatique HTTP vers HTTPS"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "ALLOWED_METHODS": {
       "context": "multisite",
       "default": "GET|POST|HEAD",
-      "help": "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
+      "help": {
+        "en": "Allowed HTTP and WebDAV methods, separated with pipes to be sent by clients.",
+        "fr": "Méthodes HTTP et WebDAV autorisées, séparées par des pipes, à envoyer par les clients."
+      },
       "id": "allowed-methods",
       "label": "Allowed methods",
       "regex": "^(?!\\|)(\\|?([A-Z]{3,})(?!.*(^|\\|)\\2))+$",
@@ -44,115 +71,190 @@
     "MAX_CLIENT_SIZE": {
       "context": "multisite",
       "default": "10m",
-      "help": "Maximum body size (0 for infinite).",
+      "help": {
+        "en": "Maximum body size (0 for infinite).",
+        "fr": "Taille maximale du corps (body) (0 pour infini)."
+      },
       "id": "max-client-size",
-      "label": "Maximum body size",
+      "label": {
+        "en": "Maximum body size",
+        "fr": "Taille maximale du corps (body)"
+      },
       "regex": "^\\d+[kKmMgG]?$",
       "type": "text"
     },
     "SERVE_FILES": {
       "context": "multisite",
       "default": "yes",
-      "help": "Serve files from the local folder.",
+      "help": {
+        "en": "Serve files from the local folder.",
+        "fr": "Servir les fichiers du dossier local."
+      },
       "id": "serve-files",
-      "label": "Serve files",
+      "label": {
+        "en": "Serve files",
+        "fr": "Servir les fichiers"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "ROOT_FOLDER": {
       "context": "multisite",
       "default": "",
-      "help": "Root folder containing files to serve (/var/www/html/{server_name} if unset).",
+      "help": {
+        "en": "Root folder containing files to serve (/var/www/html/{server_name} if unset).",
+        "fr": "Dossier racine contenant les fichiers à servir (/var/www/html/{server_name} si non défini)."
+      },
       "id": "root-folder",
-      "label": "Root folder",
+      "label": {
+        "en": "Root folder",
+        "fr": "Dossier racine"
+      },
       "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     },
     "SSL_PROTOCOLS": {
       "context": "multisite",
       "default": "TLSv1.2 TLSv1.3",
-      "help": "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
+      "help": {
+        "en": "The supported version of TLS. We recommend the default value TLSv1.2 TLSv1.3 for compatibility reasons.",
+        "fr": "La version de TLS supportée. Nous recommandons la valeur par défaut TLSv1.2 TLSv1.3 pour des raisons de compatibilité."
+      },
       "id": "https-protocols",
-      "label": "HTTPS protocols",
+      "label": {
+        "en": "HTTPS protocols",
+        "fr": "Protocoles HTTPS"
+      },
       "regex": "^(?! )( ?TLSv1\\.[0-3])*$",
       "type": "text"
     },
     "HTTP2": {
       "context": "multisite",
       "default": "yes",
-      "help": "Support HTTP2 protocol when HTTPS is enabled.",
+      "help": {
+        "en": "Support HTTP2 protocol when HTTPS is enabled.",
+        "fr": "Support du protocole HTTP2 lorsque HTTPS est activé."
+      },
       "id": "http2",
-      "label": "HTTP2",
+      "label": {
+        "en": "HTTP2",
+        "fr": "HTTP2"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "LISTEN_HTTP": {
       "context": "multisite",
       "default": "yes",
-      "help": "Respond to (insecure) HTTP requests.",
+      "help": {
+        "en": "Respond to (insecure) HTTP requests.",
+        "fr": "Répondre aux requêtes HTTP (non sécurisées)."
+      },
       "id": "http-listen",
-      "label": "HTTP listen",
+      "label": {
+        "en": "HTTP listen",
+        "fr": "HTTP écoute"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "USE_OPEN_FILE_CACHE": {
       "context": "multisite",
       "default": "no",
-      "help": "Enable open file cache feature",
+      "help": {
+        "en": "Enable open file cache feature.",
+        "fr": "Active la fonctionnalité de cache de fichiers ouverts."
+      },
       "id": "use-open-file-cache",
-      "label": "Use open file cache",
+      "label": {
+        "en": "Use open file cache",
+        "fr": "Utiliser le cache de fichiers ouverts"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "OPEN_FILE_CACHE": {
       "context": "multisite",
       "default": "max=1000 inactive=20s",
-      "help": "Open file cache directive",
+      "help": {
+        "en": "Open file cache directive.",
+        "fr": "Ouvrir le fichier de directive de cache."
+      },
       "id": "open-file-cache",
-      "label": "Use open file cache",
+      "label": {
+        "en": "Use open file cache",
+        "fr": "Utiliser le fichier de directive de cache"
+      },
       "regex": "^(off|max=\\d+( inactive=\\d+(ms?|[shdwMy]))?)$",
       "type": "text"
     },
     "OPEN_FILE_CACHE_ERRORS": {
       "context": "multisite",
       "default": "yes",
-      "help": "Enable open file cache for errors",
+      "help": {
+        "en": "Enable open file cache for errors.",
+        "fr": "Autorise l'ouverture du fichier cache pour les erreurs"
+      },
       "id": "open-file-cache-errors",
-      "label": "Open file cache errors",
+      "label": {
+        "en": "Open file cache errors",
+        "fr": "Ouvrir le fichier cache pour les erreurs"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "OPEN_FILE_CACHE_MIN_USES": {
       "context": "multisite",
       "default": "2",
-      "help": "Enable open file cache minimum uses",
+      "help": {
+        "en": "Enable open file cache minimum uses.",
+        "fr": "Autoriser une utilisation minimale pour l'ouverture du fichier de cache."
+      },
       "id": "open-file-cache-min-uses",
-      "label": "Open file cache min uses",
+      "label": {
+        "en": "Open file cache min uses",
+        "fr": "Utilisation minimale pour ouvrir le fichier de cache"
+      },
       "regex": "^[1-9]\\d*$",
       "type": "text"
     },
     "OPEN_FILE_CACHE_VALID": {
       "context": "multisite",
       "default": "30s",
-      "help": "Open file cache valid time",
+      "help": {
+        "en": "Open file cache valid time.",
+        "fr": "Temps de validité pour l'ouverure du fichier de cache."
+      },
       "id": "open-file-cache-valid",
-      "label": "Open file cache valid time",
+      "label": {
+        "en": "Open file cache valid time",
+        "fr": "Temps de validité pour l'ouverture du fichier de cache"
+      },
       "regex": "^\\d+(ms?|[shdwMy])$",
       "type": "text"
     },
     "EXTERNAL_PLUGIN_URLS": {
       "context": "global",
       "default": "",
-      "help": "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
+      "help": {
+        "en": "List of external plugins URLs (direct download to .zip or .tar file) to download and install (URLs are separated with space).",
+        "fr": "Liste des URLs des plugins externes (téléchargement direct vers un fichier .zip ou .tar) à télécharger et installer (les URLs sont séparées par des espaces)."
+      },
       "id": "external-plugin-urls",
-      "label": "External plugin URLs",
+      "label": {
+        "en": "External plugin URLs",
+        "fr": "URLs des plugins externes"
+      },
       "regex": "^( *((https?:\\/\\/|file:\\/\\/\\/)[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*)(?!.*\\2(?!.)) *)*$",
       "type": "text"
     },
     "DENY_HTTP_STATUS": {
       "context": "global",
       "default": "403",
-      "help": "HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.",
+      "help": {
+        "en": "HTTP status code to send when the request is denied (403 or 444). When using 444, BunkerWeb will close the connection.",
+        "fr": "Code de statut HTTP à envoyer lorsque la requête est refusée (403 ou 444). Lorsque 444 est utilisé, BunkerWeb fermera la connexion."
+      },
       "id": "deny-http-status",
       "label": "Deny HTTP status",
       "regex": "^(403|444)$",

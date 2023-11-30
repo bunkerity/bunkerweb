@@ -2,99 +2,166 @@
   "IS_LOADING": {
     "context": "global",
     "default": "no",
-    "help": "Internal use : set to yes when BW is loading.",
+    "help": {
+      "en": "Internal use : set to yes when BW is loading.",
+      "fr": "Usage interne : mis à oui quand BW est en cours de chargement."
+    },
     "id": "internal-use",
-    "label": "internal use",
+    "label": {
+      "en": "Internal use",
+      "fr": "Usage interne"
+    },
     "regex": "^(yes|no)$",
     "type": "check"
   },
   "NGINX_PREFIX": {
     "context": "global",
     "default": "/etc/nginx/",
-    "help": "Where nginx will search for configurations.",
+    "help": {
+      "en": "Where nginx will search for configurations.",
+      "fr": "Où nginx va chercher les configurations."
+    },
+
     "id": "nginx-prefix",
-    "label": "nginx prefix",
+    "label": {
+      "en": "Nginx prefix",
+      "fr": "Préfixe nginx"
+    },
     "regex": "^(\\/[\\-\\w.\\s]+)*\\/$",
     "type": "text"
   },
   "HTTP_PORT": {
     "context": "global",
     "default": "8080",
-    "help": "HTTP port number which bunkerweb binds to.",
+    "help": {
+      "en": "HTTP port number which bunkerweb binds to.",
+      "fr": "Numéro de port HTTP sur lequel bunkerweb écoute."
+    },
     "id": "http-port",
-    "label": "HTTP port",
+    "label": {
+      "en": "HTTP port",
+      "fr": "Port HTTP"
+    },
     "regex": "^\\d+$",
     "type": "text"
   },
   "HTTPS_PORT": {
     "context": "global",
     "default": "8443",
-    "help": "HTTPS port number which bunkerweb binds to.",
+    "help": {
+      "en": "HTTPS port number which bunkerweb binds to.",
+      "fr": "Numéro de port HTTPS sur lequel bunkerweb écoute."
+    },
     "id": "https-port",
-    "label": "HTTPS port",
+    "label": {
+      "en": "HTTPS port",
+      "fr": "Port HTTPS"
+    },
     "regex": "^\\d+$",
     "type": "text"
   },
   "MULTISITE": {
     "context": "global",
     "default": "yes",
-    "help": "Multi site activation.",
+    "help": {
+      "en": "Multi site activation.",
+      "fr": "Activation du multi site."
+    },
     "id": "multisite",
-    "label": "Multisite",
+    "label": {
+      "en": "Multisite",
+      "fr": "Multisite"
+    },
     "regex": "^(yes|no)$",
     "type": "check"
   },
   "SERVER_NAME": {
     "context": "multisite",
     "default": "www.example.com",
-    "help": "List of the virtual hosts served by bunkerweb.",
+    "help": {
+      "en": "List of the virtual hosts served by bunkerweb.",
+      "fr": "Liste des virtual hosts servis par bunkerweb."
+    },
     "id": "server-name",
-    "label": "Server name",
+    "label": {
+      "en": "Server name",
+      "fr": "Nom du serveur"
+    },
     "regex": "^(?! )( ?((?=[^ ]{1,255}( |$))[^ ]+)(?!.* \\2))*$",
     "type": "text"
   },
   "WORKER_PROCESSES": {
     "context": "global",
     "default": "auto",
-    "help": "Number of worker processes.",
+    "help": {
+      "en": "Number of worker processes.",
+      "fr": "Nombre de processus worker."
+    },
     "id": "worker-processes",
-    "label": "Worker processes",
+    "label": {
+      "en": "Worker processes",
+      "fr": "Processus worker"
+    },
     "regex": "^(auto|\\d+)$",
     "type": "text"
   },
   "WORKER_RLIMIT_NOFILE": {
     "context": "global",
     "default": "2048",
-    "help": "Maximum number of open files for worker processes.",
+    "help": {
+      "en": "Maximum number of open files for worker processes.",
+      "fr": "Nombre maximum de fichiers ouverts par processus worker."
+    },
     "id": "worker-rlimit-nofile",
-    "label": "Open files per worker",
+    "label": {
+      "en": "Open files per worker",
+      "fr": "Fichiers ouverts par processus worker"
+    },
     "regex": "^\\d+$",
     "type": "text"
   },
   "WORKER_CONNECTIONS": {
     "context": "global",
     "default": "1024",
-    "help": "Maximum number of connections per worker.",
+    "help": {
+      "en": "Maximum number of connections per worker.",
+      "fr": "Nombre maximum de connexions par processus worker."
+    },
     "id": "worker-connections",
-    "label": "Connections per worker",
+    "label": {
+      "en": "Connections per worker",
+      "fr": "Connexions par processus worker"
+    },
     "regex": "^\\d+$",
     "type": "text"
   },
   "LOG_FORMAT": {
     "context": "global",
     "default": "$host $remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"",
-    "help": "The format to use for access logs.",
+    "help": {
+      "en": "The format to use for access logs.",
+      "fr": "Le format à utiliser pour les logs d'accès."
+    },
     "id": "log-format",
-    "label": "Log format",
+    "label": {
+      "en": "Log format",
+      "fr": "Format des logs"
+    },
     "regex": "^.*$",
     "type": "text"
   },
   "LOG_LEVEL": {
     "context": "global",
     "default": "notice",
-    "help": "The level to use for error logs.",
+    "help": {
+      "en": "The level to use for error logs.",
+      "fr": "Le niveau à utiliser pour les logs d'erreur."
+    },
     "id": "log-level",
-    "label": "Log level",
+    "label": {
+      "en": "Log level",
+      "fr": "Niveau des logs"
+    },
     "regex": "^(debug|info|notice|warn|error|crit|alert|emerg)$",
     "type": "select",
     "select": [
@@ -111,135 +178,225 @@
   "DNS_RESOLVERS": {
     "context": "global",
     "default": "127.0.0.11",
-    "help": "DNS addresses of resolvers to use.",
+    "help": {
+      "en": "DNS addresses of resolvers to use.",
+      "fr": "Adresses DNS des résolveurs à utiliser."
+    },
     "id": "dns-resolvers",
-    "label": "DNS resolvers",
+    "label": {
+      "en": "DNS resolvers",
+      "fr": "Résolveurs DNS"
+    },
     "regex": "^(?! )(( *[^ ]+)(?!.*\\2))*$",
     "type": "text"
   },
   "DATASTORE_MEMORY_SIZE": {
     "context": "global",
     "default": "64m",
-    "help": "Size of the internal datastore.",
+    "help": {
+      "en": "Size of the internal datastore.",
+      "fr": "Taille du datastore interne."
+    },
     "id": "datastore-memory-size",
-    "label": "Datastore memory size",
+    "label": {
+      "en": "Datastore memory size",
+      "fr": "Taille du datastore"
+    },
     "regex": "^\\d+[kKmMgG]?$",
     "type": "text"
   },
   "CACHESTORE_MEMORY_SIZE": {
     "context": "global",
     "default": "64m",
-    "help": "Size of the internal cachestore.",
+    "help": {
+      "en": "Size of the internal cachestore.",
+      "fr": "Taille du cachestore interne."
+    },
     "id": "cachestore-memory-size",
-    "label": "Cachestore memory size",
+    "label": {
+      "en": "Cachestore memory size",
+      "fr": "Taille du cachestore"
+    },
     "regex": "^\\d+[kKmMgG]?$",
     "type": "text"
   },
   "CACHESTORE_IPC_MEMORY_SIZE": {
     "context": "global",
     "default": "16m",
-    "help": "Size of the internal cachestore (ipc).",
+    "help": {
+      "en": "Size of the internal cachestore (ipc).",
+      "fr": "Taille du cachestore interne (ipc)."
+    },
     "id": "cachestore-ipc-memory-size",
-    "label": "Cachestore ipc memory size",
+    "label": {
+      "en": "Cachestore ipc memory size",
+      "fr": "Taille du cachestore ipc"
+    },
     "regex": "^\\d+[kKmMgG]?$",
     "type": "text"
   },
   "CACHESTORE_MISS_MEMORY_SIZE": {
     "context": "global",
     "default": "16m",
-    "help": "Size of the internal cachestore (miss).",
+    "help": {
+      "en": "Size of the internal cachestore (miss).",
+      "fr": "Taille du cachestore interne (miss)."
+    },
     "id": "cachestore-miss-memory-size",
-    "label": "Cachestore miss memory size",
+    "label": {
+      "en": "Cachestore miss memory size",
+      "fr": "Taille du cachestore miss"
+    },
     "regex": "^\\d+[kKmMgG]?$",
     "type": "text"
   },
   "CACHESTORE_LOCKS_MEMORY_SIZE": {
     "context": "global",
     "default": "16m",
-    "help": "Size of the internal cachestore (locks).",
+    "help": {
+      "en": "Size of the internal cachestore (locks).",
+      "fr": "Taille du cachestore interne (locks)."
+    },
     "id": "cachestore-locks-memory-size",
-    "label": "Cachestore locks memory size",
+    "label": {
+      "en": "Cachestore locks memory size",
+      "fr": "Taille du cachestore locks"
+    },
     "regex": "^\\d+[kKmMgG]?$",
     "type": "text"
   },
   "USE_API": {
     "context": "global",
     "default": "yes",
-    "help": "Activate the API to control BunkerWeb.",
+    "help": {
+      "en": "Activate the API to control BunkerWeb.",
+      "fr": "Active l'API pour contrôler BunkerWeb."
+    },
     "id": "use-api",
-    "label": "Activate API",
+    "label": {
+      "en": "Activate API",
+      "fr": "Activer l'API"
+    },
     "regex": "^(yes|no)$",
     "type": "check"
   },
   "API_HTTP_PORT": {
     "context": "global",
     "default": "5000",
-    "help": "Listen port number for the API.",
+    "help": {
+      "en": "Listen port number for the API.",
+      "fr": "Numéro de port d'écoute pour l'API."
+    },
     "id": "api-http-listen",
-    "label": "API port number",
+    "label": {
+      "en": "API port",
+      "fr": "Port de l'API"
+    },
     "regex": "^\\d+$",
     "type": "text"
   },
   "API_LISTEN_IP": {
     "context": "global",
     "default": "0.0.0.0",
-    "help": "Listen IP address for the API.",
+    "help": {
+      "en": "Listen IP address for the API.",
+      "fr": "Adresse IP d'écoute pour l'API."
+    },
     "id": "api-ip-listen",
-    "label": "API listen IP",
+    "label": {
+      "en": "API listen IP",
+      "fr": "IP d'écoute de l'API"
+    },
     "regex": "^.*$",
     "type": "text"
   },
   "API_SERVER_NAME": {
     "context": "global",
     "default": "bwapi",
-    "help": "Server name (virtual host) for the API.",
+    "help": {
+      "en": "Server name (virtual host) for the API.",
+      "fr": "Nom du serveur (virtual host) pour l'API."
+    },
     "id": "api-server-name",
-    "label": "API server name",
+    "label": {
+      "en": "API server name",
+      "fr": "Nom du serveur de l'API"
+    },
     "regex": "^[^ ]{1,255}$",
     "type": "text"
   },
   "API_WHITELIST_IP": {
     "context": "global",
     "default": "127.0.0.0/8",
-    "help": "List of IP/network allowed to contact the API.",
+    "help": {
+      "en": "List of IP/network allowed to contact the API.",
+      "fr": "Liste des IP/réseaux autorisés à contacter l'API."
+    },
     "id": "api-whitelist-ip",
-    "label": "API whitelist IP",
+    "label": {
+      "en": "API whitelist IP",
+      "fr": "IP whitelist de l'API"
+    },
     "regex": "^(?! )( *(((\\b25[0-5]|\\b2[0-4]\\d|\\b[01]?\\d\\d?)(\\.(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)){3})(\\/([1-2][0-9]?|3[0-2]?|[04-9]))?|(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]Z{0,4}){0,4}%[0-9a-zA-Z]+|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d)|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?\\d)?\\d)\\.){3}(25[0-5]|(2[0-4]|1?\\d)?\\d))(\\/(12[0-8]|1[01][0-9]|[0-9][0-9]?))?)(?!.*\\D\\2([^\\d\\/]|$)) *)*$",
     "type": "text"
   },
   "AUTOCONF_MODE": {
     "context": "global",
     "default": "no",
-    "help": "Enable Autoconf Docker integration.",
+    "help": {
+      "en": "Enable Autoconf Docker integration.",
+      "fr": "Active l'intégration Autoconf Docker."
+    },
     "id": "autoconf-mode",
-    "label": "Autoconf mode",
+    "label": {
+      "en": "Autoconf mode",
+      "fr": "Mode Autoconf"
+    },
     "regex": "^(yes|no)$",
     "type": "check"
   },
   "SWARM_MODE": {
     "context": "global",
     "default": "no",
-    "help": "Enable Docker Swarm integration.",
+    "help": {
+      "en": "Enable Docker Swarm integration.",
+      "fr": "Active l'intégration Docker Swarm."
+    },
     "id": "swarm-mode",
-    "label": "Swarm mode",
+    "label": {
+      "en": "Swarm mode",
+      "fr": "Mode Swarm"
+    },
     "regex": "^(yes|no)$",
     "type": "check"
   },
   "KUBERNETES_MODE": {
     "context": "global",
     "default": "no",
-    "help": "Enable Kubernetes integration.",
+    "help": {
+      "en": "Enable Kubernetes integration.",
+      "fr": "Active l'intégration Kubernetes."
+    },
     "id": "kubernetes-mode",
-    "label": "Kubernetes mode",
+    "label": {
+      "en": "Kubernetes mode",
+      "fr": "Mode Kubernetes"
+    },
     "regex": "^(yes|no)$",
     "type": "check"
   },
   "SERVER_TYPE": {
     "context": "multisite",
     "default": "http",
-    "help": "Server type : http or stream.",
+    "help": {
+      "en": "Server type : http or stream.",
+      "fr": "Type de serveur : http ou stream."
+    },
     "id": "server-type",
-    "label": "Server type",
+    "label": {
+      "en": "Server type",
+      "fr": "Type de serveur"
+    },
     "regex": "^(http|stream)$",
     "type": "select",
     "select": ["http", "stream"]
@@ -247,45 +404,75 @@
   "LISTEN_STREAM": {
     "context": "multisite",
     "default": "yes",
-    "help": "Enable listening for non-ssl (passthrough).",
+    "help": {
+      "en": "Enable listening for non-ssl (passthrough).",
+      "fr": "Active l'écoute pour le non-ssl (passthrough)."
+    },
     "id": "listen-stream",
-    "label": "Listen stream",
+    "label": {
+      "en": "Listen stream",
+      "fr": "Ecouter stream"
+    },
     "regex": "^(yes|no)$",
     "type": "check"
   },
   "LISTEN_STREAM_PORT": {
     "context": "multisite",
     "default": "1337",
-    "help": "Listening port for non-ssl (passthrough).",
+    "help": {
+      "en": "Listening port for non-ssl (passthrough).",
+      "fr": "Port d'écoute pour le non-ssl (passthrough)."
+    },
     "id": "listen-stream-port",
-    "label": "Listen stream port",
+    "label": {
+      "en": "Listen stream port",
+      "fr": "Port d'écoute stream"
+    },
     "regex": "^[0-9]+$",
     "type": "text"
   },
   "LISTEN_STREAM_PORT_SSL": {
     "context": "multisite",
     "default": "4242",
-    "help": "Listening port for ssl (passthrough).",
+    "help": {
+      "en": "Listening port for ssl (passthrough).",
+      "fr": "Port d'écoute pour le ssl (passthrough)."
+    },
     "id": "listen-stream-port-ssl",
-    "label": "Listen stream port ssl",
+    "label": {
+      "en": "Listen stream port ssl",
+      "fr": "Port d'écoute stream ssl"
+    },
     "regex": "^[0-9]+$",
     "type": "text"
   },
   "USE_UDP": {
     "context": "multisite",
     "default": "no",
-    "help": "UDP listen instead of TCP (stream).",
+    "help": {
+      "en": "UDP listen instead of TCP (stream).",
+      "fr": "Ecoute UDP au lieu de TCP (stream)."
+    },
     "id": "use-udp",
-    "label": "Listen UDP",
+    "label": {
+      "en": "Listen UDP",
+      "fr": "Ecouter UDP"
+    },
     "regex": "^(yes|no)$",
     "type": "check"
   },
   "USE_IPV6": {
     "context": "global",
     "default": "no",
-    "help": "Enable IPv6 connectivity.",
+    "help": {
+      "en": "Enable IPv6 connectivity.",
+      "fr": "Active la connectivité IPv6."
+    },
     "id": "use-ipv6",
-    "label": "Use IPv6",
+    "label": {
+      "en": "Use IPv6",
+      "fr": "Utiliser IPv6"
+    },
     "regex": "^(yes|no)$",
     "type": "check"
   }

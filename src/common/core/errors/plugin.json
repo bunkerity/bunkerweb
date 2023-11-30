@@ -1,25 +1,43 @@
 {
   "id": "errors",
-  "name": "Errors",
-  "description": "Manage default error pages",
+  "name": {
+    "en": "Errors",
+    "fr": "Erreurs"
+  },
+  "description": {
+    "en": "Manage default error pages",
+    "fr": "Gestion des pages d'erreur par défaut"
+  },
   "version": "1.0",
   "stream": "no",
   "settings": {
     "ERRORS": {
       "context": "multisite",
       "default": "",
-      "help": "List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).",
+      "help": {
+        "en": "List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).",
+        "fr": "Liste des codes d'erreur HTTP et des pages d'erreur correspondantes, séparés par des espaces (404=/my404.html 403=/errors/403.html ...)."
+      },
       "id": "errors",
-      "label": "Errors",
+      "label": {
+        "en": "Errors",
+        "fr": "Erreurs"
+      },
       "regex": "^(?! )( ?([1-5]\\d{2})(?!.*\\2(?![^=]))=(\\/[\\w\\].~:\\/?#\\[@!$\\&'\\(\\)*+,;=\\-]*)(?!.*\\3(?!.)))*$",
       "type": "text"
     },
     "INTERCEPTED_ERROR_CODES": {
       "context": "multisite",
       "default": "400 401 403 404 405 413 429 500 501 502 503 504",
-      "help": "List of HTTP error code intercepted by Bunkerweb",
+      "help": {
+        "en": "List of HTTP error code intercepted by Bunkerweb",
+        "fr": "Liste des codes d'erreur HTTP interceptés par Bunkerweb"
+      },
       "id": "intercepted-error-codes",
-      "label": "Intercepted error codes",
+      "label": {
+        "en": "Intercepted error codes",
+        "fr": "Codes d'erreur interceptés"
+      },
       "regex": "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
       "type": "text"
     }

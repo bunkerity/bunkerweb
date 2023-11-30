@@ -1,23 +1,38 @@
 {
   "id": "reversescan",
-  "name": "Reverse scan",
-  "description": "Scan clients ports to detect proxies or servers.",
+  "name": {
+    "en": "Reverse scan",
+    "fr": "Scan inversé"
+  },
+  "description": {
+    "en": "Scan clients ports to detect proxies or servers.",
+    "fr": "Scan les ports des clients pour détecter les proxies ou serveurs."
+  },
   "version": "1.0",
   "stream": "yes",
   "settings": {
     "USE_REVERSE_SCAN": {
       "context": "multisite",
       "default": "no",
-      "help": "Enable scanning of clients ports and deny access if one is opened.",
+      "help": {
+        "en": "Enable scanning of clients ports and deny access if one is opened.",
+        "fr": "Active le scan des ports des clients et refuse l'accès si un est ouvert."
+      },
       "id": "use-reverse-scan",
-      "label": "Reverse scan",
+      "label": {
+        "en": "Use reverse scan",
+        "fr": "Utiliser le scan inversé"
+      },
       "regex": "^(no|yes)$",
       "type": "check"
     },
     "REVERSE_SCAN_PORTS": {
       "context": "multisite",
       "default": "22 80 443 3128 8000 8080",
-      "help": "List of port to scan when using reverse scan feature.",
+      "help": {
+        "en": "List of port to scan when using reverse scan feature.",
+        "fr": "Liste des ports à scanner quand la fonctionnalité de scan inversé est activée."
+      },
       "id": "reverse-scan-ports",
       "label": "Reverse scan ports",
       "regex": "^.*$",
@@ -26,9 +41,15 @@
     "REVERSE_SCAN_TIMEOUT": {
       "context": "multisite",
       "default": "500",
-      "help": "Specify the maximum timeout (in ms) when scanning a port.",
+      "help": {
+        "en": "Specify the maximum timeout (in ms) when scanning a port.",
+        "fr": "Délai maximum (en ms) pour scanner un port."
+      },
       "id": "reverse-scan-timeout",
-      "label": "Reverse scan timeout",
+      "label": {
+        "en": "Reverse scan timeout",
+        "fr": "Délai de scan inversé"
+      },
       "regex": "^.*$",
       "type": "text"
     }

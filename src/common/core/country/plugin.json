@@ -1,25 +1,43 @@
 {
   "id": "country",
-  "name": "Country",
-  "description": "Deny access based on the country of the client IP.",
+  "name": {
+    "en": "Country",
+    "fr": "Pays"
+  },
+  "description": {
+    "en": "Deny access based on the country of the client IP.",
+    "fr": "Bloquer l'accès en fonction du pays de l'adresse IP du client."
+  },
   "version": "1.0",
   "stream": "yes",
   "settings": {
     "BLACKLIST_COUNTRY": {
       "context": "multisite",
       "default": "",
-      "help": "Deny access if the country of the client is in the list (2 letters code).",
+      "help": {
+        "en": "Deny access if the country of the client is in the list (2 letters code).",
+        "fr": "Bloquer l'accès si le pays du client est dans la liste (code à 2 lettres)."
+      },
       "id": "country-blacklist",
-      "label": "Country blacklist",
+      "label": {
+        "en": "Country blacklist",
+        "fr": "Liste noire des pays"
+      },
       "regex": "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
       "type": "text"
     },
     "WHITELIST_COUNTRY": {
       "context": "multisite",
       "default": "",
-      "help": "Deny access if the country of the client is not in the list (2 letters code).",
+      "help": {
+        "en": "Deny access if the country of the client is not in the list (2 letters code).",
+        "fr": "Bloquer l'accès si le pays du client n'est pas dans la liste (code à 2 lettres)."
+      },
       "id": "country-whitelist",
-      "label": "Country whitelist",
+      "label": {
+        "en": "Country whitelist",
+        "fr": "Liste blanche des pays"
+      },
       "regex": "^(?! )( *([A-Z]{2})(?!.*\\2) *)*$",
       "type": "text"
     }

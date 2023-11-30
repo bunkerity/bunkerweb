@@ -1,43 +1,73 @@
 {
   "id": "clientcache",
-  "name": "Client cache",
-  "description": "Manage caching for clients.",
+  "name": {
+    "en": "Client cache",
+    "fr": "Client-Cache"
+  },
+  "description": {
+    "en": "Manage caching for clients.",
+    "fr": "Gestion du cache pour les clients."
+  },
   "version": "1.0",
   "stream": "no",
   "settings": {
     "USE_CLIENT_CACHE": {
       "context": "multisite",
       "default": "no",
-      "help": "Tell client to store locally static files.",
+      "help": {
+        "en": "Tell client to store locally static files.",
+        "fr": "Indique au client de stocker localement les fichiers statiques."
+      },
       "id": "use-client-cache",
-      "label": "Use client cache",
+      "label": {
+        "en": "Use client cache",
+        "fr": "Utiliser le cache du client"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "CLIENT_CACHE_EXTENSIONS": {
       "context": "global",
       "default": "jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2",
-      "help": "List of file extensions, separated with pipes that should be cached.",
+      "help": {
+        "en": "List of file extensions, separated with pipes that should be cached.",
+        "fr": "Liste des extensions de fichiers, séparées par des pipes, qui doivent être mises en cache."
+      },
       "id": "client-cache-extensions",
-      "label": "Extensions that should be cached by the client",
+      "label": {
+        "en": "Extensions that should be cached by the client",
+        "fr": "Extensions qui doivent être mises en cache par le client"
+      },
       "regex": "^(?!\\|)(\\|?([a-z0-9]+)(?!.*\\2(?!.)))+$",
       "type": "text"
     },
     "CLIENT_CACHE_ETAG": {
       "context": "multisite",
       "default": "yes",
-      "help": "Send the HTTP ETag header for static resources.",
+      "help": {
+        "en": "Send the HTTP ETag header for static resources.",
+        "fr": "Envoie l'en-tête HTTP ETag pour les ressources statiques."
+      },
       "id": "client-cache-etag",
-      "label": "ETag",
+      "label": {
+        "en": "Send ETag header",
+        "fr": "Envoi de l'en-tête ETag"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "CLIENT_CACHE_CONTROL": {
       "context": "multisite",
       "default": "public, max-age=15552000",
-      "help": "Value of the Cache-Control HTTP header.",
+      "help": {
+        "en": "Value of the Cache-Control HTTP header.",
+        "fr": "Valeur de l'en-tête HTTP Cache-Control."
+      },
       "id": "client-cache-control",
-      "label": "Cache-Control header",
+      "label": {
+        "en": "Cache-Control header",
+        "fr": "En-tête Cache-Control"
+      },
       "regex": "^(?!(, ?| ))((, )?(((max-age|s-maxage|stale-while-revalidate|stale-if-error)=\\d+(?!.*\\6))|((?!.*public)private|(?!.*private)public)|(must|proxy)-revalidate|must-understand|immutable|no-(cache|store|transform))(?!.*\\4))+$",
       "type": "text"
     }

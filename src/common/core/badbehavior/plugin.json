@@ -1,52 +1,88 @@
 {
   "id": "badbehavior",
-  "name": "Bad behavior",
-  "description": "Ban IP generating too much 'bad' HTTP status code in a period of time.",
+  "name": {
+    "en": "Bad behavior",
+    "fr": "Mauvais comportement"
+  },
+  "description": {
+    "en": "Ban IP generating too much 'bad' HTTP status code in a period of time.",
+    "fr": "Bannir les IP générant trop de codes HTTP 'mauvais' dans une période de temps."
+  },
   "version": "1.0",
   "stream": "yes",
   "settings": {
     "USE_BAD_BEHAVIOR": {
       "context": "multisite",
       "default": "yes",
-      "help": "Activate Bad behavior feature.",
+      "help": {
+        "en": "Activate Bad behavior feature.",
+        "fr": "Activer la fonctionnalité Mauvais comportement."
+      },
       "id": "use-bad-behavior",
-      "label": "Activate bad behavior",
+      "label": {
+        "en": "Activate Bad behavior",
+        "fr": "Activer Mauvais comportement"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "BAD_BEHAVIOR_STATUS_CODES": {
       "context": "multisite",
       "default": "400 401 403 404 405 429 444",
-      "help": "List of HTTP status codes considered as 'bad'.",
+      "help": {
+        "en": "List of HTTP status codes considered as 'bad'.",
+        "fr": "Liste des codes HTTP considérés comme 'mauvais'."
+      },
       "id": "bad-behavior-status-code",
-      "label": "Bad status codes",
+      "label": {
+        "en": "Bad status codes",
+        "fr": "Codes HTTP mauvais"
+      },
       "regex": "^( *([1-5]\\d{2})(?!.*\\2) *)+$",
       "type": "text"
     },
     "BAD_BEHAVIOR_BAN_TIME": {
       "context": "multisite",
       "default": "86400",
-      "help": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.",
+      "help": {
+        "en": "The duration time (in seconds) of a ban when the corresponding IP has reached the threshold.",
+        "fr": "La durée (en secondes) d'un bannissement lorsque l'IP correspondante a atteint le seuil."
+      },
       "id": "bad-behavior-ban-time",
-      "label": "Ban duration (in seconds)",
+      "label": {
+        "en": "Ban duration (in seconds)",
+        "fr": "Durée du bannissement (en secondes)"
+      },
       "regex": "^\\d+",
       "type": "text"
     },
     "BAD_BEHAVIOR_THRESHOLD": {
       "context": "multisite",
       "default": "10",
-      "help": "Maximum number of 'bad' HTTP status codes within the period of time before IP is banned.",
+      "help": {
+        "en": "Maximum number of 'bad' HTTP status codes within the period of time before IP is banned.",
+        "fr": "Nombre maximum de codes HTTP 'mauvais' dans la période de temps avant que l'IP soit bannie."
+      },
       "id": "bad-behavior-threshold",
-      "label": "Threshold",
+      "label": {
+        "en": "Threshold",
+        "fr": "Seuil"
+      },
       "regex": "^[1-9][0-9]*",
       "type": "text"
     },
     "BAD_BEHAVIOR_COUNT_TIME": {
       "context": "multisite",
       "default": "60",
-      "help": "Period of time (in seconds) during which we count 'bad' HTTP status codes.",
+      "help": {
+        "en": "Period of time (in seconds) during which we count 'bad' HTTP status codes.",
+        "fr": "Période de temps (en secondes) pendant laquelle on compte les codes HTTP 'mauvais'."
+      },
       "id": "bad-behavior-period",
-      "label": "Period (in seconds)",
+      "label": {
+        "en": "Counting period (in seconds)",
+        "fr": "Période de comptage (en secondes)"
+      },
       "regex": "^\\d+",
       "type": "text"
     }

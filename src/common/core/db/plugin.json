@@ -1,34 +1,58 @@
 {
   "id": "db",
-  "name": "DB",
-  "description": "Integrate easily the Database.",
+  "name": {
+    "en": "DB",
+    "fr": "BDD"
+  },
+  "description": {
+    "en": "Integrate easily the Database.",
+    "fr": "Intégrez facilement la base de données."
+  },
   "version": "1.0",
   "stream": "yes",
   "settings": {
     "DATABASE_URI": {
       "context": "global",
       "default": "sqlite:////var/lib/bunkerweb/db.sqlite3",
-      "help": "The database URI, following the sqlalchemy format.",
+      "help": {
+        "en": "The database URI, following the sqlalchemy format.",
+        "fr": "L'URI de la base de données, suivant le format sqlalchemy."
+      },
       "id": "database-uri",
-      "label": "The database URI",
+      "label": {
+        "en": "The database URI",
+        "fr": "L'URI de la base de données"
+      },
       "regex": "^(postgresql|mysql|mariadb|sqlite|oracle)(\\+[\\w\\-]+)?:.+$",
       "type": "text"
     },
     "DATABASE_MAX_JOBS_RUNS": {
       "context": "global",
       "default": "1000",
-      "help": "The maximum number of jobs runs to keep in the database.",
+      "help": {
+        "en": "The maximum number of jobs runs to keep in the database.",
+        "fr": "Le nombre maximum d'exécutions de jobs à garder dans la base de données."
+      },
       "id": "database-max-jobs-runs",
-      "label": "The maximum number of jobs runs to keep in the database",
+      "label": {
+        "en": "The maximum number of jobs runs to keep in the database",
+        "fr": "Le nombre maximum d'exécutions de jobs à garder dans la base de données"
+      },
       "regex": "^\\d+$",
       "type": "text"
     },
     "DATABASE_MAX_ACTIONS": {
       "context": "global",
       "default": "10000",
-      "help": "The maximum number of actions to keep in the database.",
+      "help": {
+        "en": "The maximum number of actions to keep in the database.",
+        "fr": "Le nombre maximum d'actions à garder dans la base de données."
+      },
       "id": "database-max-actions",
-      "label": "The maximum number of actions to keep in the database",
+      "label": {
+        "en": "The maximum number of actions to keep in the database",
+        "fr": "Le nombre maximum d'actions à garder dans la base de données"
+      },
       "regex": "^\\d+$",
       "type": "text"
     }

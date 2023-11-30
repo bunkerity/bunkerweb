@@ -1,43 +1,73 @@
 {
   "id": "php",
-  "name": "PHP",
-  "description": "Manage local or remote PHP-FPM.",
+  "name": {
+    "en": "PHP",
+    "fr": "PHP"
+  },
+  "description": {
+    "en": "Manage local or remote PHP-FPM.",
+    "fr": "Gérer un PHP-FPM local ou distant."
+  },
   "version": "1.0",
   "stream": "no",
   "settings": {
     "REMOTE_PHP": {
       "context": "multisite",
       "default": "",
-      "help": "Hostname of the remote PHP-FPM instance.",
+      "help": {
+        "en": "Hostname of the remote PHP-FPM instance.",
+        "fr": "Nom d'hôte de l'instance PHP-FPM distante."
+      },
       "id": "remote-php",
-      "label": "Remote PHP",
+      "label": {
+        "en": "Remote PHP",
+        "fr": "PHP distant"
+      },
       "regex": "^((?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\\.?)?$",
       "type": "text"
     },
     "REMOTE_PHP_PATH": {
       "context": "multisite",
       "default": "",
-      "help": "Root folder containing files in the remote PHP-FPM instance.",
+      "help": {
+        "en": "Root folder containing files in the remote PHP-FPM instance.",
+        "fr": "Répertoire racine contenant les fichiers dans l'instance PHP-FPM distante."
+      },
       "id": "remote-php-path",
-      "label": "Remote PHP path",
+      "label": {
+        "en": "Remote PHP path",
+        "fr": "Chemin PHP distant"
+      },
       "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     },
     "LOCAL_PHP": {
       "context": "multisite",
       "default": "",
-      "help": "Path to the PHP-FPM socket file.",
+      "help": {
+        "en": "Path to the PHP-FPM socket file.",
+        "fr": "Chemin vers le fichier socket PHP-FPM."
+      },
       "id": "local",
-      "label": "Local PHP",
+      "label": {
+        "en": "Local PHP",
+        "fr": "PHP local"
+      },
       "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     },
     "LOCAL_PHP_PATH": {
       "context": "multisite",
       "default": "",
-      "help": "Root folder containing files in the local PHP-FPM instance.",
+      "help": {
+        "en": "Root folder containing files in the local PHP-FPM instance.",
+        "fr": "Répertoire racine contenant les fichiers dans l'instance PHP-FPM locale."
+      },
       "id": "local-php-path",
-      "label": "Local PHP path",
+      "label": {
+        "en": "Local PHP path",
+        "fr": "Chemin PHP local"
+      },
       "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     }

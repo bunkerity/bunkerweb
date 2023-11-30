@@ -1,43 +1,73 @@
 {
   "id": "cors",
-  "name": "CORS",
-  "description": "Cross-Origin Resource Sharing.",
+  "name": {
+    "en": "CORS",
+    "fr": "CORS"
+  },
+  "description": {
+    "en": "Cross-Origin Resource Sharing.",
+    "fr": "Cross-Origin Resource Sharing."
+  },
   "version": "1.0",
   "stream": "no",
   "settings": {
     "USE_CORS": {
       "context": "multisite",
       "default": "no",
-      "help": "Use CORS",
+      "help": {
+        "en": "Use CORS",
+        "fr": "Utiliser CORS"
+      },
       "id": "use-cors",
-      "label": "Use CORS",
+      "label": {
+        "en": "Use CORS",
+        "fr": "Utiliser CORS"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "CORS_ALLOW_ORIGIN": {
       "context": "multisite",
       "default": "*",
-      "help": "Allowed origins to make CORS requests : PCRE regex or *.",
+      "help": {
+        "en": "Allowed origins to make CORS requests : PCRE regex or *.",
+        "fr": "Origines autorisées à faire des requêtes CORS : PCRE regex ou *."
+      },
       "id": "cors-allow-origin",
-      "label": "Allowed origins",
+      "label": {
+        "en": "Allowed origins",
+        "fr": "Origines autorisées"
+      },
       "regex": "^.*$",
       "type": "text"
     },
     "CORS_EXPOSE_HEADERS": {
       "context": "multisite",
       "default": "Content-Length,Content-Range",
-      "help": "Value of the Access-Control-Expose-Headers header.",
+      "help": {
+        "en": "Value of the Access-Control-Expose-Headers header.",
+        "fr": "Valeur de l'en-tête Access-Control-Expose-Headers."
+      },
       "id": "cors-expose-headers",
-      "label": "Access-Control-Expose-Headers value",
+      "label": {
+        "en": "Access-Control-Expose-Headers value",
+        "fr": "Valeur de l'en-tête Access-Control-Expose-Headers"
+      },
       "regex": "^(\\*|(?![, ]+)(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
       "type": "text"
     },
     "CROSS_ORIGIN_OPENER_POLICY": {
       "context": "multisite",
       "default": "",
-      "help": "Value for the Cross-Origin-Opener-Policy header.",
+      "help": {
+        "en": "Value for the Cross-Origin-Opener-Policy header.",
+        "fr": "Valeur de l'en-tête Cross-Origin-Opener-Policy."
+      },
       "id": "cross-origin-opener-policy",
-      "label": "Cross-Origin-Opener-Policy",
+      "label": {
+        "en": "Cross-Origin-Opener-Policy",
+        "fr": "Cross-Origin-Opener-Policy"
+      },
       "regex": "^(unsafe-none|same-origin-allow-popups|same-origin)?$",
       "type": "select",
       "select": ["", "unsafe-none", "same-origin-allow-popups", "same-origin"]
@@ -45,9 +75,15 @@
     "CROSS_ORIGIN_EMBEDDER_POLICY": {
       "context": "multisite",
       "default": "",
-      "help": "Value for the Cross-Origin-Embedder-Policy header.",
+      "help": {
+        "en": "Value for the Cross-Origin-Embedder-Policy header.",
+        "fr": "Valeur de l'en-tête Cross-Origin-Embedder-Policy."
+      },
       "id": "cross-origin-embedder-policy",
-      "label": "Cross-Origin-Embedder-Policy",
+      "label": {
+        "en": "Cross-Origin-Embedder-Policy",
+        "fr": "Cross-Origin-Embedder-Policy"
+      },
       "regex": "^(unsafe-none|require-corp|credentialless)?$",
       "type": "select",
       "select": ["", "unsafe-none", "require-corp", "credentialless"]
@@ -55,9 +91,15 @@
     "CROSS_ORIGIN_RESOURCE_POLICY": {
       "context": "multisite",
       "default": "",
-      "help": "Value for the Cross-Origin-Resource-Policy header.",
+      "help": {
+        "en": "Value for the Cross-Origin-Resource-Policy header.",
+        "fr": "Valeur de l'en-tête Cross-Origin-Resource-Policy."
+      },
       "id": "cross-origin-resource-policy",
-      "label": "Cross-Origin-Resource-Policy",
+      "label": {
+        "en": "Cross-Origin-Resource-Policy",
+        "fr": "Cross-Origin-Resource-Policy"
+      },
       "regex": "^(same-site|same-origin|cross-origin)?$",
       "type": "select",
       "select": ["", "same-site", "same-origin", "cross-origin"]
@@ -65,45 +107,75 @@
     "CORS_MAX_AGE": {
       "context": "multisite",
       "default": "86400",
-      "help": "Value of the Access-Control-Max-Age header.",
+      "help": {
+        "en": "Value of the Access-Control-Max-Age header.",
+        "fr": "Valeur de l'en-tête Access-Control-Max-Age."
+      },
       "id": "cors-max-age",
-      "label": "Access-Control-Max-Age value",
+      "label": {
+        "en": "Access-Control-Max-Age value",
+        "fr": "Valeur de l'en-tête Access-Control-Max-Age"
+      },
       "regex": "^\\d+$",
       "type": "text"
     },
     "CORS_ALLOW_CREDENTIALS": {
       "context": "multisite",
       "default": "no",
-      "help": "Send the Access-Control-Allow-Credentials header.",
+      "help": {
+        "en": "Send the Access-Control-Allow-Credentials header.",
+        "fr": "Envoyer l'en-tête Access-Control-Allow-Credentials."
+      },
       "id": "cors-allow-credentials",
-      "label": "Send Access-Control-Allow-Credentials",
+      "label": {
+        "en": "Send Access-Control-Allow-Credentials",
+        "fr": "Envoyer Access-Control-Allow-Credentials"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "CORS_ALLOW_METHODS": {
       "context": "multisite",
       "default": "GET, POST, OPTIONS",
-      "help": "Value of the Access-Control-Allow-Methods header.",
+      "help": {
+        "en": "Value of the Access-Control-Allow-Methods header.",
+        "fr": "Valeur de l'en-tête Access-Control-Allow-Methods."
+      },
       "id": "cors-allow-methods",
-      "label": "Access-Control-Allow-Methods value",
+      "label": {
+        "en": "Access-Control-Allow-Methods value",
+        "fr": "Valeur de l'en-tête Access-Control-Allow-Methods"
+      },
       "regex": "^(\\*|(?![, ])(,? ?(GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH)(?!.*\\3))*)?$",
       "type": "text"
     },
     "CORS_ALLOW_HEADERS": {
       "context": "multisite",
       "default": "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range",
-      "help": "Value of the Access-Control-Allow-Headers header.",
+      "help": {
+        "en": "Value of the Access-Control-Allow-Headers header.",
+        "fr": "Valeur de l'en-tête Access-Control-Allow-Headers."
+      },
       "id": "cors-allow-headers",
-      "label": "Access-Control-Allow-Headers value",
+      "label": {
+        "en": "Access-Control-Allow-Headers value",
+        "fr": "Valeur de l'en-tête Access-Control-Allow-Headers"
+      },
       "regex": "^(\\*|(?![, ])(,? ?([\\w\\-]+)(?!.*\\3(?!.)))*)?$",
       "type": "text"
     },
     "CORS_DENY_REQUEST": {
       "context": "multisite",
       "default": "yes",
-      "help": "Deny request and don't send it to backend if Origin is not allowed.",
+      "help": {
+        "en": "Deny request and don't send it to backend if Origin is not allowed.",
+        "fr": "Refuser la requête et ne pas l'envoyer au backend si l'origine n'est pas autorisée."
+      },
       "id": "cors-deny-request",
-      "label": "Deny request",
+      "label": {
+        "en": "Deny request",
+        "fr": "Refuser la requête"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     }

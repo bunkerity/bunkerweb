@@ -1,25 +1,43 @@
 {
   "id": "bunkernet",
-  "name": "BunkerNet",
-  "description": "Share threat data with other BunkerWeb instances via BunkerNet.",
+  "name": {
+    "en": "BunkerNet",
+    "fr": "BunkerNet"
+  },
+  "description": {
+    "en": "Share threat data with other BunkerWeb instances via BunkerNet.",
+    "fr": "Partagez des données de menaces avec d'autres instances BunkerWeb via BunkerNet."
+  },
   "version": "1.0",
   "stream": "yes",
   "settings": {
     "USE_BUNKERNET": {
       "context": "multisite",
       "default": "yes",
-      "help": "Activate BunkerNet feature.",
+      "help": {
+        "en": "Activate BunkerNet feature.",
+        "fr": "Activer la fonctionnalité BunkerNet."
+      },
       "id": "use-bunkernet",
-      "label": "Activate BunkerNet",
+      "label": {
+        "en": "Activate BunkerNet",
+        "fr": "Activer BunkerNet"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "BUNKERNET_SERVER": {
       "context": "global",
       "default": "https://api.bunkerweb.io",
-      "help": "Address of the BunkerNet API.",
+      "help": {
+        "en": "Address of the BunkerNet API.",
+        "fr": "Adresse de l'API BunkerNet."
+      },
       "id": "bunkernet-server",
-      "label": "BunkerNet server",
+      "label": {
+        "en": "BunkerNet server",
+        "fr": "Serveur BunkerNet"
+      },
       "regex": "^https?:\\/\\/[\\-\\w@:%.+~#=]+[\\-\\w\\(\\)!@:%+.~#?&\\/=$]*$",
       "type": "text"
     }

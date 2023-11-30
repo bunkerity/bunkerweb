@@ -1,34 +1,58 @@
 {
   "id": "customcert",
-  "name": "Custom HTTPS certificate",
-  "description": "Choose custom certificate for HTTPS.",
+  "name": {
+    "en": "Custom HTTPS certificate",
+    "fr": "Certificat HTTPS personnalisé"
+  },
+  "description": {
+    "en": "Choose custom certificate for HTTPS.",
+    "fr": "Choisir un certificat personnalisé pour HTTPS."
+  },
   "version": "1.0",
   "stream": "yes",
   "settings": {
     "USE_CUSTOM_SSL": {
       "context": "multisite",
       "default": "no",
-      "help": "Use custom HTTPS certificate.",
+      "help": {
+        "en": "Use custom HTTPS certificate.",
+        "fr": "Utiliser un certificat HTTPS personnalisé."
+      },
       "id": "use-custom-https",
-      "label": "Use custom certificate",
+      "label": {
+        "en": "Use custom certificate",
+        "fr": "Utiliser un certificat personnalisé"
+      },
       "regex": "^(yes|no)$",
       "type": "check"
     },
     "CUSTOM_SSL_CERT": {
       "context": "multisite",
       "default": "",
-      "help": "Full path of the certificate or bundle file (must be readable by the scheduler).",
+      "help": {
+        "en": "Full path of the certificate or bundle file (must be readable by the scheduler).",
+        "fr": "Chemin complet du certificat ou du bundle (doit être lisible par le planificateur)."
+      },
       "id": "custom-https-cert",
-      "label": "Certificate path",
+      "label": {
+        "en": "Certificate path",
+        "fr": "Chemin du certificat"
+      },
       "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     },
     "CUSTOM_SSL_KEY": {
       "context": "multisite",
       "default": "",
-      "help": "Full path of the key file (must be readable by the scheduler).",
+      "help": {
+        "en": "Full path of the key file (must be readable by the scheduler).",
+        "fr": "Chemin complet de la clé (doit être lisible par le planificateur)."
+      },
       "id": "custom-https-key",
-      "label": "Key path",
+      "label": {
+        "en": "Key path",
+        "fr": "Chemin de la clé"
+      },
       "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
     }
