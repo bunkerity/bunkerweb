@@ -14,7 +14,7 @@ WORKDIR /usr/share/bunkerweb
 # Install python requirements
 RUN export MAKEFLAGS="-j$(nproc)" && \
   mkdir -p deps/python && \
-  pip install --no-cache-dir --require-hashes -r /tmp/requirements-deps.txt && \
+  pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
   pip install --no-cache-dir --require-hashes --target deps/python -r /tmp/req/requirements.txt
 
 # Copy files
