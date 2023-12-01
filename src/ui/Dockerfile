@@ -1,15 +1,13 @@
 FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8 AS builder
 
-# Install python dependencies
-# RUN apk add --no-cache g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev file make
+# Install temporary requirements for the dependencies
+RUN apk add --no-cache g++ gcc build-base linux-headers
 
 WORKDIR /tmp
 
 # Copy python requirements
 COPY src/deps/requirements.txt requirements-deps.txt
 COPY src/ui/requirements.txt req/requirements-ui.txt
-COPY src/common/db/requirements.txt req/requirements-db.txt
-COPY src/common/gen/requirements.txt req/requirements-gen.txt
 
 WORKDIR /usr/share/bunkerweb
 
@@ -17,7 +15,7 @@ WORKDIR /usr/share/bunkerweb
 RUN export MAKEFLAGS="-j$(nproc)" && \
   mkdir -p deps/python && \
   pip install --no-cache-dir --require-hashes --ignore-installed -r /tmp/requirements-deps.txt && \
-  pip install --no-cache-dir --require-hashes --target deps/python $(for file in $(ls /tmp/req/requirements*.txt) ; do echo "-r ${file}" ; done | xargs)
+  pip install --no-cache-dir --require-hashes --target deps/python -r /tmp/req/requirements-ui.txt
 
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand

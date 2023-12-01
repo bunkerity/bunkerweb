@@ -1,7 +1,7 @@
 FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8 AS builder
 
 # Install temporary requirements for the dependencies
-RUN apk add --no-cache g++ gcc build-base linux-headers
+RUN apk add --no-cache g++ gcc build-base linux-headers postgresql-dev
 
 WORKDIR /tmp
 
