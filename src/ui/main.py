@@ -359,6 +359,8 @@ def setup():
             return redirect(url_for("home"))
         return redirect(url_for("login"), 301)
 
+    db_config = app.config["CONFIG"].get_config(methods=False)
+
     if request.method == "POST":
         if not request.form:
             flash("Missing form data.", "error")
@@ -381,8 +383,6 @@ def setup():
         if not USER_PASSWORD_RX.match(request.form["admin_password"]):
             flash("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).", "error")
             error = True
-
-        db_config = app.config["CONFIG"].get_config(methods=False)
 
         server_names = db_config["SERVER_NAME"].split(" ")
         if request.form["server_name"] in server_names:
@@ -435,7 +435,13 @@ def setup():
 
         return redirect(url_for("loading", next=url_for("services"), message=f"Creating service {request.form['server_name']} for the web UI"))
 
-    return render_template("setup.html", username=getenv("ADMIN_USERNAME", ""), password=getenv("ADMIN_PASSWORD", ""), random_url=f"/{''.join(choice(ascii_letters + digits) for _ in range(10))}")
+    return render_template(
+        "setup.html",
+        username=getenv("ADMIN_USERNAME", ""),
+        password=getenv("ADMIN_PASSWORD", ""),
+        ui_host=db_config.get("UI_HOST", getenv("UI_HOST", "")),
+        random_url=f"/{''.join(choice(ascii_letters + digits) for _ in range(10))}",
+    )
 
 
 @app.route("/home")
