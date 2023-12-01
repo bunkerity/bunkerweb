@@ -29,6 +29,7 @@ from docker.errors import (
 )
 from flask import (
     Flask,
+    Response,
     flash,
     jsonify,
     redirect,
@@ -352,6 +353,14 @@ def loading():
     )
 
 
+@app.route("/check", methods=["GET"])
+def check():
+    if "Origin" not in request.headers:
+        return Response(status=403)
+
+    return Response(status=200, headers={"Access-Control-Allow-Origin": "*"})
+
+
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
     if app.config["USER"]:
@@ -433,7 +442,7 @@ def setup():
             kwargs={"operation": "new"},
         ).start()
 
-        return redirect(url_for("loading", next=url_for("services"), message=f"Creating service {request.form['server_name']} for the web UI"))
+        return Response(status=200)
 
     return render_template(
         "setup.html",
