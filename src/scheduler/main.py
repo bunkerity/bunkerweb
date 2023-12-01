@@ -584,30 +584,35 @@ if __name__ == "__main__":
                     logger.info("External plugins changed, generating ...")
 
                     if FIRST_RUN:
-                        # run the config saver to save potential ignored external plugins settings
-                        logger.info("Running config saver to save potential ignored external plugins settings ...")
-                        proc = subprocess_run(
-                            [
-                                "python",
-                                join(
-                                    sep,
-                                    "usr",
-                                    "share",
-                                    "bunkerweb",
-                                    "gen",
-                                    "save_config.py",
-                                ),
-                                "--settings",
-                                join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                            ],
-                            stdin=DEVNULL,
-                            stderr=STDOUT,
-                            check=False,
-                        )
-                        if proc.returncode != 0:
-                            logger.error(
-                                "Config saver failed, configuration will not work as expected...",
+                        if INTEGRATION not in (
+                            "Swarm",
+                            "Kubernetes",
+                            "Autoconf",
+                        ):
+                            # run the config saver to save potential ignored external plugins settings
+                            logger.info("Running config saver to save potential ignored external plugins settings ...")
+                            proc = subprocess_run(
+                                [
+                                    "python",
+                                    join(
+                                        sep,
+                                        "usr",
+                                        "share",
+                                        "bunkerweb",
+                                        "gen",
+                                        "save_config.py",
+                                    ),
+                                    "--settings",
+                                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                                ],
+                                stdin=DEVNULL,
+                                stderr=STDOUT,
+                                check=False,
                             )
+                            if proc.returncode != 0:
+                                logger.error(
+                                    "Config saver failed, configuration will not work as expected...",
+                                )
 
                         changes.update(
                             {
