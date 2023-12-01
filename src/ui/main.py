@@ -29,6 +29,7 @@ from docker.errors import (
 )
 from flask import (
     Flask,
+    Response,
     flash,
     jsonify,
     redirect,
@@ -426,6 +427,7 @@ def setup():
                     "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
                     "AUTO_LETS_ENCRYPT": request.form.get("auto_lets_encrypt", "no"),
                     "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
+                    "USE_CORS": "yes",
                 },
                 request.form["server_name"],
                 request.form["server_name"],
@@ -433,7 +435,7 @@ def setup():
             kwargs={"operation": "new"},
         ).start()
 
-        return redirect(url_for("loading", next=url_for("services"), message=f"Creating service {request.form['server_name']} for the web UI"))
+        return Response(status=200)
 
     return render_template(
         "setup.html",

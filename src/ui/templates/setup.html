@@ -1693,15 +1693,22 @@
               this.sslCheck.getAttribute("aria-checked") === "true" ? "s" : ""
             }://${this.servInp.value}${this.urlInp.value}`;
 
-            fetch(api, {
+            fetch(window.location.href, {
               method: "POST",
               body: new FormData(this.formEl),
             })
               .then((res) => {
                 if (res.status === 200) {
-                  setTimeout(() => {
-                    window.location.href = api;
-                  }, 400);
+                  setInterval(() => {
+                    fetch(api, {
+                      cache: "no-cache",
+                    })
+                      .then((res) => {
+                        if (res.status === 200 || res.status === 301) {
+                          window.location.replace(api);
+                        }
+                      });
+                  }, 5000);
                 }
               })
               .catch((err) => {
