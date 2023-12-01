@@ -2,6 +2,8 @@
 
 from os import _exit, getenv, listdir, sep, urandom
 from os.path import basename, dirname, join
+from secrets import choice
+from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
 
@@ -231,7 +233,7 @@ csrf = CSRFProtect()
 csrf.init_app(app)
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
-REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://[a-zA-Z0-9.-]{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
+REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
 
 
 def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
@@ -357,6 +359,8 @@ def setup():
             return redirect(url_for("home"))
         return redirect(url_for("login"), 301)
 
+    db_config = app.config["CONFIG"].get_config(methods=False)
+
     if request.method == "POST":
         if not request.form:
             flash("Missing form data.", "error")
@@ -380,15 +384,13 @@ def setup():
             flash("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).", "error")
             error = True
 
-        db_config = app.config["CONFIG"].get_config(methods=False)
-
         server_names = db_config["SERVER_NAME"].split(" ")
         if request.form["server_name"] in server_names:
             flash(f"The hostname {request.form['server_name']} is already in use.", "error")
             error = True
         else:
             for server_name in server_names:
-                if request.form["server_name"] in db_config[f"{server_name}_SERVER_NAME"].split(" "):
+                if request.form["server_name"] in db_config.get(f"{server_name}_SERVER_NAME", "").split(" "):
                     flash(f"The hostname {request.form['server_name']} is already in use.", "error")
                     error = True
                     break
@@ -433,7 +435,13 @@ def setup():
 
         return redirect(url_for("loading", next=url_for("services"), message=f"Creating service {request.form['server_name']} for the web UI"))
 
-    return render_template("setup.html", username=getenv("ADMIN_USERNAME", ""), password=getenv("ADMIN_PASSWORD", ""))
+    return render_template(
+        "setup.html",
+        username=getenv("ADMIN_USERNAME", ""),
+        password=getenv("ADMIN_PASSWORD", ""),
+        ui_host=db_config.get("UI_HOST", getenv("UI_HOST", "")),
+        random_url=f"/{''.join(choice(ascii_letters + digits) for _ in range(10))}",
+    )
 
 
 @app.route("/home")

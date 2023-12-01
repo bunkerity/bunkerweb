@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from functools import cached_property
 from typing import Optional
 from flask_login import UserMixin
 from bcrypt import checkpw, hashpw, gensalt
@@ -15,7 +14,7 @@ class User(UserMixin):
 
         self.__password = password_hash or hashpw(password.encode("utf-8"), gensalt())  # type: ignore
 
-    @cached_property
+    @property
     def password_hash(self) -> bytes:
         """
         Get the password hash
