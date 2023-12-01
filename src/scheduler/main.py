@@ -450,6 +450,23 @@ if __name__ == "__main__":
             else:
                 logger.info(f"Successfully sent {CACHE_PATH} folder")
 
+        def listen_for_instances_reload(db: Database):
+            from docker import DockerClient
+
+            global SCHEDULER
+
+            docker_client = DockerClient(base_url=getenv("DOCKER_HOST", "unix:///var/run/docker.sock"))
+            for event in docker_client.events(decode=True, filters={"type": "container", "label": "bunkerweb.INSTANCE"}):
+                if event["Action"] in ("start", "die"):
+                    logger.info(f"🐋 Detected {event['Action']} event on container {event['Actor']['Attributes']['name']}")
+                    SCHEDULER.auto_setup()
+                    db.update_instances([api_to_instance(api) for api in SCHEDULER.apis], changed=event["Action"] == "die")
+                    if event["Action"] == "start":
+                        db.checked_changes(value=True)
+
+        if INTEGRATION == "Docker":
+            Thread(target=listen_for_instances_reload, args=(db,), name="listen_for_instances_reload").start()
+
         while True:
             threads.clear()
             ret = db.checked_changes(CHANGES)
@@ -508,6 +525,8 @@ if __name__ == "__main__":
                         thread = Thread(target=send_nginx_configs)
                         thread.start()
                         threads.append(thread)
+                    elif INTEGRATION != "Linux":
+                        logger.warning("No BunkerWeb instance found, skipping nginx configs sending ...")
 
             try:
                 if SCHEDULER.apis:
@@ -523,7 +542,7 @@ if __name__ == "__main__":
                         logger.info("Successfully reloaded nginx")
                     else:
                         logger.error("Error while reloading nginx")
-                else:
+                elif INTEGRATION == "Linux":
                     # Reload nginx
                     logger.info("Reloading nginx ...")
                     proc = subprocess_run([join(sep, "usr", "sbin", "nginx"), "-s", "reload"], stdin=DEVNULL, stderr=STDOUT, env=env.copy(), check=False, stdout=PIPE)
@@ -533,46 +552,8 @@ if __name__ == "__main__":
                         logger.error(
                             f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stdout.decode('utf-8') if proc.stdout else 'no output'}",
                         )
-                    # # Stop temp nginx
-                    # logger.info("Stopping temp nginx ...")
-                    # proc = subprocess_run(
-                    #     [join(sep, "usr", "sbin", "nginx"), "-s", "stop"],
-                    #     stdin=DEVNULL,
-                    #     stderr=STDOUT,
-                    #     env=env.copy(),
-                    #     check=False,
-                    # )
-                    # if proc.returncode == 0:
-                    #     logger.info("Successfully sent stop signal to temp nginx")
-                    #     i = 0
-                    #     while i < 20:
-                    #         if not Path(sep, "var", "run", "bunkerweb", "nginx.pid").is_file():
-                    #             break
-                    #         logger.warning("Waiting for temp nginx to stop ...")
-                    #         sleep(1)
-                    #         i += 1
-                    #     if i >= 20:
-                    #         logger.error("Timeout error while waiting for temp nginx to stop")
-                    #     else:
-                    #         # Start nginx
-                    #         logger.info("Starting nginx ...")
-                    #         proc = subprocess_run(
-                    #             [join(sep, "usr", "sbin", "nginx"), "-e", "/var/log/bunkerweb/error.log"],
-                    #             stdin=DEVNULL,
-                    #             stderr=STDOUT,
-                    #             env=env.copy(),
-                    #             check=False,
-                    #         )
-                    #         if proc.returncode == 0:
-                    #             logger.info("Successfully started nginx")
-                    #         else:
-                    #             logger.error(
-                    #                 f"Error while starting nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
-                    #             )
-                    # else:
-                    #     logger.error(
-                    #         f"Error while sending stop signal to temp nginx - returncode: {proc.returncode} - error: {proc.stderr.decode('utf-8') if proc.stderr else 'Missing stderr'}",
-                    #     )
+                else:
+                    logger.warning("No BunkerWeb instance found, skipping nginx reload ...")
             except:
                 logger.error(
                     f"Exception while reloading after running jobs once scheduling : {format_exc()}",
@@ -659,7 +640,6 @@ if __name__ == "__main__":
                     logger.info("Instances changed, generating ...")
                     INSTANCES_NEED_GENERATION = True
                     CONFIG_NEED_GENERATION = True
-                    RUN_JOBS_ONCE = True
                     NEED_RELOAD = True
 
             FIRST_RUN = False
