@@ -1699,15 +1699,19 @@
             })
               .then((res) => {
                 if (res.status === 200) {
+                  setTimeout(() => {
+                    window.open(`${api}/login`, "_self");
+                  }, 60000);
                   setInterval(() => {
-                    fetch(api, {
+                    fetch(`${api}/check`, {
                       cache: "no-cache",
                     })
                       .then((res) => {
-                        if (res.status === 200 || res.status === 301) {
-                          window.location.replace(api);
+                        if (res.status === 200) {
+                          window.open(`${api}/login`, "_self");
                         }
-                      });
+                      })
+                      .catch((err) => {});
                   }, 5000);
                 }
               })

@@ -353,6 +353,14 @@ def loading():
     )
 
 
+@app.route("/check", methods=["GET"])
+def check():
+    if "Origin" not in request.headers:
+        return Response(status=403)
+
+    return Response(status=200, headers={"Access-Control-Allow-Origin": "*"})
+
+
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
     if app.config["USER"]:
@@ -427,7 +435,6 @@ def setup():
                     "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
                     "AUTO_LETS_ENCRYPT": request.form.get("auto_lets_encrypt", "no"),
                     "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
-                    "USE_CORS": "yes",
                 },
                 request.form["server_name"],
                 request.form["server_name"],
