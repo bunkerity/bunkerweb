@@ -1,6 +1,18 @@
 # Changelog
 
-## v1.5.3 -
+## v1.5.4 -
+
+- [BUGFIX] Fix issues with the Linux integration and external databases
+- [DOCUMENTATION] Add documentation about the new setup wizard
+- [MISC] Add a setup wizard 🧙‍♂️ for the web UI
+- [MISC] Refactor database session handling to make it more stable with SQLite
+- [MISC] Handle start and stop event of BunkerWeb with the scheduler in Docker
+- [MISC] Add conditional block for open file cache in nginx config
+- [MISC] Updated core dependencies
+- [MISC] Updated python dependencies
+- [MISC] Updated Python Docker image to 3.12.0-alpine3.18 in Dockerfiles
+
+## v1.5.3 - 2023/10/31
 
 - [BUGFIX] Fix BunkerWeb not loading his own settings after a docker restart
 - [BUGFIX] Fix Custom configs not following the service name after an update on the UI
