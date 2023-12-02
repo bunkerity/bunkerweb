@@ -89,7 +89,7 @@ async def add_plugin(plugin: AddedPlugin, background_tasks: BackgroundTasks) -> 
     Add a plugin to the database.
     """
     plugin_dict = plugin.model_dump()
-    resp = DB.add_external_plugin(plugin_dict)
+    resp = DB.upsert_external_plugin(plugin_dict, return_if_exists=True)
 
     if resp == "exists":
         message = f"Plugin {plugin.id} already exists"
@@ -171,7 +171,7 @@ async def update_plugin(plugin_id: str, plugin: AddedPlugin, background_tasks: B
     Update a plugin from the database.
     """
     plugin_dict = plugin.model_dump()
-    resp = DB.update_external_plugin(plugin_id, plugin_dict)
+    resp = DB.upsert_external_plugin(plugin_dict, plugin_id=plugin_id)
 
     if resp == "not_found":
         message = f"Plugin {plugin.id} not found"

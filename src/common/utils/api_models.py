@@ -48,11 +48,8 @@ class InstanceWithInfo(InstanceWithMethod):
 class Plugin(BaseModel):
     id: str = Field(examples=["blacklist"], description="The plugin id")
     stream: str = Field(examples=["partial"], description="The plugin stream")
-    name: str = Field(examples=["Blacklist"], description="The plugin name")
-    description: str = Field(
-        examples=["Deny access based on internal and external IP/network/rDNS/ASN blacklists."],
-        description="The plugin description",
-    )
+    name: Union[str, Dict[str, str]] = Field(examples=[{"en": "Blacklist"}], description="The plugin name")
+    description: Union[str, Dict[str, str]] = Field(examples=[{"en": "Deny access based on internal and external IP/network/rDNS/ASN blacklists."}], description="The plugin description")
     version: str = Field(examples=["1.0"], description="The plugin version")
     external: bool = Field(examples=[False], description="If the plugin is external")
     method: str = Field(examples=["core"], description="Which service created the plugin")
@@ -102,7 +99,7 @@ class Plugin(BaseModel):
                     "select",
                 ],
             ],
-            Union[str, List[str]],
+            Union[str, Dict[str, str], List[str]],
         ],
     ] = Field(
         examples=[
