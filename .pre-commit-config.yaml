@@ -58,12 +58,12 @@ repos:
         name: Refurb Python Refactoring Tool
         exclude: ^tests/ # TODO: remove this line when the test framework is ready
 
-  - repo: https://github.com/codespell-project/codespell
+  - repo: https://github.com/codespell-project/codespell # TODO: find a way to add french dictionary
     rev: 6e41aba91fb32e9feb741a6258eefeb9c6e4a482 # frozen: v2.2.6
     hooks:
       - id: codespell
         name: Codespell Spell Checker
-        exclude: (^src/(common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*)$
+        exclude: (^src/(common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|common/core/.+/plugin.json)$
         entry: codespell --ignore-regex="(Widgits|fo\b)" --skip CHANGELOG.md,src/ui/client/src/lang/fr.json
         language: python
         types: [text]

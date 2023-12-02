@@ -64,7 +64,10 @@
         "fr": "Méthodes HTTP et WebDAV autorisées, séparées par des pipes, à envoyer par les clients."
       },
       "id": "allowed-methods",
-      "label": "Allowed methods",
+      "label": {
+        "en": "Allowed methods",
+        "fr": "Méthodes autorisées"
+      },
       "regex": "^(?!\\|)(\\|?([A-Z]{3,})(?!.*(^|\\|)\\2))+$",
       "type": "text"
     },
@@ -256,7 +259,10 @@
         "fr": "Code de statut HTTP à envoyer lorsque la requête est refusée (403 ou 444). Lorsque 444 est utilisé, BunkerWeb fermera la connexion."
       },
       "id": "deny-http-status",
-      "label": "Deny HTTP status",
+      "label": {
+        "en": "Deny HTTP status",
+        "fr": "Code de statut HTTP de refus"
+      },
       "regex": "^(403|444)$",
       "type": "select",
       "select": ["403", "444"]

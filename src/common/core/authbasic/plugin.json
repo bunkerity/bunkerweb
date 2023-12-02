@@ -73,11 +73,11 @@
     },
     "AUTH_BASIC_TEXT": {
       "context": "multisite",
-      "default": {
-        "en": "Restricted area",
-        "fr": "Zone restreinte"
+      "default": "Restricted area",
+      "help": {
+        "en": "Text to display",
+        "fr": "Texte à afficher"
       },
-      "help": "Text to display",
       "id": "auth-basic-text",
       "label": {
         "en": "Auth basic Text",

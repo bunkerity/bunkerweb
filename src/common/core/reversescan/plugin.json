@@ -34,7 +34,10 @@
         "fr": "Liste des ports à scanner quand la fonctionnalité de scan inversé est activée."
       },
       "id": "reverse-scan-ports",
-      "label": "Reverse scan ports",
+      "label": {
+        "en": "Reverse scan ports",
+        "fr": "Ports à scanner"
+      },
       "regex": "^.*$",
       "type": "text"
     },
