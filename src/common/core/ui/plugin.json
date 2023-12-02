@@ -13,6 +13,15 @@
       "label": "Use UI",
       "regex": "^(yes|no)$",
       "type": "check"
+    },
+    "UI_HOST": {
+      "context": "global",
+      "default": "",
+      "help": "Address of the web UI used for initial setup",
+      "id": "ui-host",
+      "label": "UI host",
+      "regex": "^.*$",
+      "type": "text"
     }
   }
 }

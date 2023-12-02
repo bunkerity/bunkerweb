@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>BunkerWeb UI</title>
+    <title>BunkerWeb UI | Log in</title>
     <link href="images/favicon.ico" rel="icon" type="image/x-icon" />
     <link rel="stylesheet" href="css/dashboard.css" />
     <link rel="stylesheet" href="css/login.css" />
@@ -69,7 +69,9 @@
       <div
         class="mx-4 lg:mx-0 col-span-2 lg:col-span-1 bg-none lg:bg-gray-50 h-full flex flex-col items-center justify-center"
       >
-        <div class="bg-gray-50 rounded px-12 py-16 w-full max-w-[400px]">
+        <div
+          class="bg-gray-50 rounded px-4 sm:px-12 py-16 w-full max-w-[400px]"
+        >
           <div class="flex justify-center">
             <img
               class="lg:hidden max-w-60 max-h-30 mb-6"
@@ -97,6 +99,7 @@
               >
                 Username
               </h5>
+              <label class="sr-only" for="username">username</label>
               <input
                 type="username"
                 id="username"
@@ -115,6 +118,7 @@
               >
                 Password
               </h5>
+              <label class="sr-only" for="password">password</label>
               <input
                 type="password"
                 id="password"

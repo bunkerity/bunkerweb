@@ -413,6 +413,7 @@ Because the web UI is a web application, the recommended installation procedure 
         environment:
           - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
           - DOCKER_HOST=tcp://bw-docker:2375
+          - SWARM_MODE=yes
           - ADMIN_USERNAME=changeme
           - ADMIN_PASSWORD=changeme # Remember to set a stronger password for the changeme user
         networks:
@@ -779,7 +780,6 @@ Because the web UI is a web application, the recommended installation procedure 
       name: ingress
       annotations:
         bunkerweb.io/www.example.com_USE_UI: "yes"
-        bunkerweb.io/www.example.com_REVERSE_PROXY_INTERCEPT_ERRORS: "no"
         bunkerweb.io/www.example.com_INTERCEPTED_ERROR_CODES: '400 404 405 413 429 500 501 502 503 504'
     spec:
       rules:
@@ -825,7 +825,7 @@ Because the web UI is a web application, the recommended installation procedure 
     ```conf
     HTTP_PORT=80
     HTTPS_PORT=443
-    DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
     API_LISTEN_IP=127.0.0.1
     SERVER_NAME=www.example.com
     MULTISITE=yes
@@ -858,7 +858,7 @@ Because the web UI is a web application, the recommended installation procedure 
     ```conf
     HTTP_PORT=80
     HTTPS_PORT=443
-    DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
     API_LISTEN_IP=127.0.0.1
     SERVER_NAME=www.example.com
     MULTISITE=yes
@@ -932,7 +932,7 @@ Because the web UI is a web application, the recommended installation procedure 
     ```conf
     HTTP_PORT=80
     HTTPS_PORT=443
-    DNS_RESOLVERS=8.8.8.8 8.8.4.4
+    DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
     API_LISTEN_IP=127.0.0.1
     SERVER_NAME=www.example.com
     MULTISITE=yes
@@ -948,3 +948,677 @@ Because the web UI is a web application, the recommended installation procedure 
     ```shell
     systemctl restart bunkerweb
     ```
+
+## Setup Wizard
+
+!!! info "Information"
+
+    The setup wizard will only be available if the `UI_HOST` setting is set.
+
+The setup wizard is a web UI feature that helps you to configure your **web UI reverse proxy** settings but also the **admin credentials**. It is available at the `/setup` URI of your web UI.
+
+=== "Docker"
+
+    Follow the Installation section of the documentation to setup the web UI. If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the hostname of your web UI container. For example, if your web UI container is named `bw-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://bw-ui:7000`.
+
+    Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
+
+    ```yaml
+    version: "3.5"
+
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.5.3
+        ports:
+          - 80:8080
+          - 443:8443
+        labels:
+          - "bunkerweb.INSTANCE=yes"
+        environment:
+          - SERVER_NAME=
+          - MULTISITE=yes
+          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+          - SERVE_FILES=no
+          - DISABLE_DEFAULT_SERVER=yes
+          - USE_CLIENT_CACHE=yes
+          - USE_GZIP=yes
+          - UI_HOST=http://bw-ui:7000 # Remember to set the UI_HOST setting
+        networks:
+          - bw-universe
+          - bw-services
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.5.3
+        depends_on:
+          - bunkerweb
+          - bw-docker
+        environment:
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+          - DOCKER_HOST=tcp://bw-docker:2375
+        networks:
+          - bw-universe
+          - bw-docker
+
+      bw-docker:
+        image: tecnativa/docker-socket-proxy:nightly
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+          - CONTAINERS=1
+          - LOG_LEVEL=warning
+        networks:
+          - bw-docker
+
+      bw-ui:
+        image: bunkerity/bunkerweb-ui:1.5.3
+        depends_on:
+          - bw-docker
+        environment:
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+          - DOCKER_HOST=tcp://bw-docker:2375
+        networks:
+          - bw-universe
+          - bw-docker
+
+      bw-db:
+        image: mariadb:10.10
+        environment:
+          - MYSQL_RANDOM_ROOT_PASSWORD=yes
+          - MYSQL_DATABASE=db
+          - MYSQL_USER=bunkerweb
+          - MYSQL_PASSWORD=changeme # Remember to set a stronger password for the database
+        volumes:
+          - bw-data:/var/lib/mysql
+        networks:
+          - bw-docker
+
+    volumes:
+      bw-data:
+
+    networks:
+      bw-universe:
+        name: bw-universe
+        ipam:
+          driver: default
+          config:
+            - subnet: 10.20.30.0/24
+      bw-services:
+        name: bw-services
+      bw-docker:
+        name: bw-docker
+    ```
+
+=== "Docker autoconf"
+
+      Follow the Installation section of the documentation to setup the web UI. If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the hostname of your web UI container. For example, if your web UI container is named `bw-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://bw-ui:7000`.
+
+      Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
+
+      ```yaml
+      version: "3.5"
+
+      services:
+        bunkerweb:
+          image: bunkerity/bunkerweb:1.5.3
+          ports:
+            - 80:8080
+            - 443:8443
+          labels:
+            - "bunkerweb.INSTANCE=yes"
+          environment:
+            - SERVER_NAME=
+            - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+            - AUTOCONF_MODE=yes
+            - MULTISITE=yes
+            - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+            - UI_HOST=http://bw-ui:7000 # Remember to set the UI_HOST setting
+          networks:
+            - bw-universe
+            - bw-services
+
+        bw-autoconf:
+          image: bunkerity/bunkerweb-autoconf:1.5.3
+          depends_on:
+            - bunkerweb
+            - bw-docker
+          environment:
+            - AUTOCONF_MODE=yes
+            - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+            - DOCKER_HOST=tcp://bw-docker:2375
+          networks:
+            - bw-universe
+            - bw-docker
+
+        bw-scheduler:
+          image: bunkerity/bunkerweb-scheduler:1.5.3
+          depends_on:
+            - bunkerweb
+            - bw-docker
+          environment:
+            - AUTOCONF_MODE=yes
+            - DOCKER_HOST=tcp://bw-docker:2375
+            - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+          networks:
+            - bw-universe
+            - bw-docker
+
+        bw-docker:
+          image: tecnativa/docker-socket-proxy:nightly
+          volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+          environment:
+            - CONTAINERS=1
+            - LOG_LEVEL=warning
+          networks:
+            - bw-docker
+
+        bw-db:
+          image: mariadb:10.10
+          environment:
+            - MYSQL_RANDOM_ROOT_PASSWORD=yes
+            - MYSQL_DATABASE=db
+            - MYSQL_USER=bunkerweb
+            - MYSQL_PASSWORD=changeme
+          volumes:
+            - bw-data:/var/lib/mysql
+          networks:
+            - bw-docker
+
+        bw-ui:
+          image: bunkerity/bunkerweb-ui:1.5.3
+          networks:
+            bw-docker:
+            bw-universe:
+              aliases:
+                - bw-ui
+          environment:
+            - AUTOCONF_MODE=yes
+            - DOCKER_HOST=tcp://bw-docker:2375
+            - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+
+      volumes:
+        bw-data:
+
+      networks:
+        bw-universe:
+          name: bw-universe
+          ipam:
+            driver: default
+            config:
+              - subnet: 10.20.30.0/24
+        bw-services:
+          name: bw-services
+        bw-docker:
+          name: bw-docker
+      ```
+
+=== "Swarm"
+
+    Follow the Installation section of the documentation to setup the web UI. If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the hostname of your web UI container. For example, if your web UI container is named `bw-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://bw-ui:7000`.
+
+    Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
+
+    ```yaml
+    version: "3.5"
+
+    services:
+      bunkerweb:
+        image: bunkerity/bunkerweb:1.5.3
+        ports:
+          - published: 80
+            target: 8080
+            mode: host
+            protocol: tcp
+          - published: 443
+            target: 8443
+            mode: host
+            protocol: tcp
+        environment:
+          - SERVER_NAME=
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+          - SWARM_MODE=yes
+          - MULTISITE=yes
+          - USE_REDIS=yes
+          - REDIS_HOST=bw-redis
+          - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+          - UI_HOST=http://bw-ui:7000 # Remember to set the UI_HOST setting
+        networks:
+          - bw-universe
+          - bw-services
+        deploy:
+          mode: global
+          placement:
+            constraints:
+              - "node.role == worker"
+          labels:
+            - "bunkerweb.INSTANCE=yes"
+
+      bw-autoconf:
+        image: bunkerity/bunkerweb-autoconf:1.5.3
+        environment:
+          - SWARM_MODE=yes
+          - DOCKER_HOST=tcp://bw-docker:2375
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+        networks:
+          - bw-universe
+          - bw-docker
+
+      bw-docker:
+        image: tecnativa/docker-socket-proxy:nightly
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        environment:
+          - CONFIGS=1
+          - CONTAINERS=1
+          - SERVICES=1
+          - SWARM=1
+          - TASKS=1
+          - LOG_LEVEL=warning
+        networks:
+          - bw-docker
+        deploy:
+          placement:
+            constraints:
+              - "node.role == manager"
+
+      bw-scheduler:
+        image: bunkerity/bunkerweb-scheduler:1.5.3
+        environment:
+          - SWARM_MODE=yes
+          - DOCKER_HOST=tcp://bw-docker:2375
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db
+        networks:
+          - bw-universe
+          - bw-docker
+
+      bw-db:
+        image: mariadb:10.10
+        environment:
+          - MYSQL_RANDOM_ROOT_PASSWORD=yes
+          - MYSQL_DATABASE=db
+          - MYSQL_USER=bunkerweb
+          - MYSQL_PASSWORD=changeme
+        volumes:
+          - bw-data:/var/lib/mysql
+        networks:
+          - bw-docker
+
+      bw-redis:
+        image: redis:7-alpine
+        networks:
+          - bw-universe
+
+      bw-ui:
+        image: bunkerity/bunkerweb-ui:1.5.3
+        environment:
+          - SWARM_MODE=yes
+          - DOCKER_HOST=tcp://bw-docker:2375
+          - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+        networks:
+          - bw-universe
+          - bw-docker
+
+    volumes:
+      bw-data:
+
+    networks:
+      bw-universe:
+        name: bw-universe
+        driver: overlay
+        attachable: true
+        ipam:
+          config:
+            - subnet: 10.20.30.0/24
+      bw-services:
+        name: bw-services
+        driver: overlay
+        attachable: true
+      bw-docker:
+        name: bw-docker
+        driver: overlay
+        attachable: true
+    ```
+
+=== "Kubernetes"
+
+      Follow the Installation section of the documentation to setup the web UI. If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the hostname of your web UI container. For example, if your web UI container is named `bunkerweb-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://svc-bunkerweb-ui:7000`.
+
+      Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
+
+      ```yaml
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRole
+      metadata:
+        name: cr-bunkerweb
+      rules:
+        - apiGroups: [""]
+          resources: ["services", "pods", "configmaps"]
+          verbs: ["get", "watch", "list"]
+        - apiGroups: ["networking.k8s.io"]
+          resources: ["ingresses"]
+          verbs: ["get", "watch", "list"]
+      ---
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: sa-bunkerweb
+      ---
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: crb-bunkerweb
+      subjects:
+        - kind: ServiceAccount
+          name: sa-bunkerweb
+          namespace: default
+          apiGroup: ""
+      roleRef:
+        kind: ClusterRole
+        name: cr-bunkerweb
+        apiGroup: rbac.authorization.k8s.io
+      ---
+      apiVersion: apps/v1
+      kind: DaemonSet
+      metadata:
+        name: bunkerweb
+      spec:
+        selector:
+          matchLabels:
+            app: bunkerweb
+        template:
+          metadata:
+            labels:
+              app: bunkerweb
+            # mandatory annotation
+            annotations:
+              bunkerweb.io/INSTANCE: "yes"
+          spec:
+            containers:
+              # using bunkerweb as name is mandatory
+              - name: bunkerweb
+                image: bunkerity/bunkerweb:1.5.3
+                imagePullPolicy: Always
+                securityContext:
+                  runAsUser: 101
+                  runAsGroup: 101
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
+                ports:
+                  - containerPort: 8080
+                    hostPort: 80
+                  - containerPort: 8443
+                    hostPort: 443
+                env:
+                  - name: KUBERNETES_MODE
+                    value: "yes"
+                  # replace with your DNS resolvers
+                  # e.g. : kube-dns.kube-system.svc.cluster.local
+                  - name: DNS_RESOLVERS
+                    value: "coredns.kube-system.svc.cluster.local"
+                  - name: USE_API
+                    value: "yes"
+                  # 10.0.0.0/8 is the cluster internal subnet
+                  - name: API_WHITELIST_IP
+                    value: "127.0.0.0/8 10.0.0.0/8"
+                  - name: SERVER_NAME
+                    value: ""
+                  - name: MULTISITE
+                    value: "yes"
+                  - name: USE_REDIS
+                    value: "yes"
+                  - name: REDIS_HOST
+                    value: "svc-bunkerweb-redis.default.svc.cluster.local"
+                  # Remember to set the UI_HOST setting
+                  - name: UI_HOST
+                    value: "http://svc-bunkerweb-ui:7000"
+                livenessProbe:
+                  exec:
+                    command:
+                      - /usr/share/bunkerweb/helpers/healthcheck.sh
+                  initialDelaySeconds: 30
+                  periodSeconds: 5
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+                readinessProbe:
+                  exec:
+                    command:
+                      - /usr/share/bunkerweb/helpers/healthcheck.sh
+                  initialDelaySeconds: 30
+                  periodSeconds: 1
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+      ---
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: bunkerweb-controller
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate
+        selector:
+          matchLabels:
+            app: bunkerweb-controller
+        template:
+          metadata:
+            labels:
+              app: bunkerweb-controller
+          spec:
+            serviceAccountName: sa-bunkerweb
+            containers:
+              - name: bunkerweb-controller
+                image: bunkerity/bunkerweb-autoconf:1.5.3
+                imagePullPolicy: Always
+                env:
+                  - name: KUBERNETES_MODE
+                    value: "yes"
+                  - name: "DATABASE_URI"
+                    value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+      ---
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: bunkerweb-scheduler
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate
+        selector:
+          matchLabels:
+            app: bunkerweb-scheduler
+        template:
+          metadata:
+            labels:
+              app: bunkerweb-scheduler
+          spec:
+            serviceAccountName: sa-bunkerweb
+            containers:
+              - name: bunkerweb-scheduler
+                image: bunkerity/bunkerweb-scheduler:1.5.3
+                imagePullPolicy: Always
+                env:
+                  - name: KUBERNETES_MODE
+                    value: "yes"
+                  - name: "DATABASE_URI"
+                    value: "mariadb+pymysql://bunkerweb:changeme@svc-bunkerweb-db:3306/db"
+      ---
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: bunkerweb-redis
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate
+        selector:
+          matchLabels:
+            app: bunkerweb-redis
+        template:
+          metadata:
+            labels:
+              app: bunkerweb-redis
+          spec:
+            containers:
+              - name: bunkerweb-redis
+                image: redis:7-alpine
+                imagePullPolicy: Always
+      ---
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: bunkerweb-db
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate
+        selector:
+          matchLabels:
+            app: bunkerweb-db
+        template:
+          metadata:
+            labels:
+              app: bunkerweb-db
+          spec:
+            containers:
+              - name: bunkerweb-db
+                image: mariadb:10.10
+                imagePullPolicy: Always
+                env:
+                  - name: MYSQL_RANDOM_ROOT_PASSWORD
+                    value: "yes"
+                  - name: "MYSQL_DATABASE"
+                    value: "db"
+                  - name: "MYSQL_USER"
+                    value: "bunkerweb"
+                  - name: "MYSQL_PASSWORD"
+                    value: "changeme"
+                volumeMounts:
+                  - mountPath: "/var/lib/mysql"
+                    name: vol-db
+            volumes:
+              - name: vol-db
+                persistentVolumeClaim:
+                  claimName: pvc-bunkerweb
+      ---
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: bunkerweb-ui
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate
+        selector:
+          matchLabels:
+            app: bunkerweb-ui
+        template:
+          metadata:
+            labels:
+              app: bunkerweb-ui
+          spec:
+            containers:
+              - name: bunkerweb-ui
+                image: bunkerity/bunkerweb-ui:1.5.3
+                imagePullPolicy: Always
+                env:
+                  - name: KUBERNETES_MODE
+                    value: "YES"
+                  - name: "DATABASE_URI"
+                    value: "mariadb+pymysql://bunkerweb:testor@svc-bunkerweb-db:3306/db"
+      ---
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: svc-bunkerweb
+      spec:
+        clusterIP: None
+        selector:
+          app: bunkerweb
+      ---
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: svc-bunkerweb-db
+      spec:
+        type: ClusterIP
+        selector:
+          app: bunkerweb-db
+        ports:
+          - name: sql
+            protocol: TCP
+            port: 3306
+            targetPort: 3306
+      ---
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: svc-bunkerweb-redis
+      spec:
+        type: ClusterIP
+        selector:
+          app: bunkerweb-redis
+        ports:
+          - name: redis
+            protocol: TCP
+            port: 6379
+            targetPort: 6379
+      ---
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: svc-bunkerweb-ui
+      spec:
+        type: ClusterIP
+        selector:
+          app: bunkerweb-ui
+        ports:
+          - name: http
+            protocol: TCP
+            port: 7000
+            targetPort: 7000
+      ---
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: pvc-bunkerweb
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        volumeName: pv-bunkerweb
+      ```
+
+=== "Linux - Ansible - Vagrant"
+
+      Follow the Installation section of the documentation to setup the web UI. If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the hostname of your web UI. In this case, you will need to set the `UI_HOST` setting to `http://127.0.0.1:7000`.
+
+      Here is the `/etc/bunkerweb/variables.env` boilerplate you can use :
+
+      ```conf
+      HTTP_PORT=80
+      HTTPS_PORT=443
+      DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
+      API_LISTEN_IP=127.0.0.1
+      SERVER_NAME=
+      MULTISITE=yes
+      UI_HOST=http://127.0.0.1:7000 # Remember to set the UI_HOST setting
+      ```
+
+      As for the wizard to be available, the web UI needs to not have an `ADMIN_USERNAME` or an `ADMIN_PASSWORD` set. If you have already set those variables, you will need to unset them :
+
+      ```shell
+      truncate -s 0 /etc/bunkerweb/ui.env
+      ```
+
+      Remember to restart the `bunkerweb` and `bunkerweb-ui` services :
+
+      ```shell
+      systemctl restart bunkerweb
+      systemctl restart bunkerweb-ui
+      ```
+
+      You can now access the setup wizard at the URL `http://127.0.0.1/setup`.

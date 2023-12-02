@@ -515,9 +515,10 @@ STREAM support :x:
 
 Integrate easily the BunkerWeb UI.
 
-|Setting |Default| Context |Multiple|Description|
-|--------|-------|---------|--------|-----------|
-|`USE_UI`|`no`   |multisite|no      |Use UI     |
+| Setting |Default| Context |Multiple|                Description                 |
+|---------|-------|---------|--------|--------------------------------------------|
+|`USE_UI` |`no`   |multisite|no      |Use UI                                      |
+|`UI_HOST`|       |global   |no      |Address of the web UI used for initial setup|
 
 ### Whitelist
 

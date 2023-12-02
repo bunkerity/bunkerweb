@@ -2,6 +2,8 @@
 
 from os import _exit, getenv, listdir, sep, urandom
 from os.path import basename, dirname, join
+from secrets import choice
+from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
 
@@ -27,6 +29,7 @@ from docker.errors import (
 )
 from flask import (
     Flask,
+    Response,
     flash,
     jsonify,
     redirect,
@@ -52,8 +55,7 @@ from jinja2 import Template
 from kubernetes import client as kube_client
 from kubernetes import config as kube_config
 from kubernetes.client.exceptions import ApiException as kube_ApiException
-from re import compile as re_compile
-from regex import match as regex_match
+from regex import compile as re_compile, match as regex_match
 from requests import get
 from shutil import move, rmtree
 from signal import SIGINT, signal, SIGTERM
@@ -122,24 +124,10 @@ gunicorn_logger = getLogger("gunicorn.error")
 app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(gunicorn_logger.level)
 
-if not getenv("ADMIN_USERNAME"):
-    app.logger.error("ADMIN_USERNAME is not set")
-    stop(1)
-elif not getenv("ADMIN_PASSWORD"):
-    app.logger.error("ADMIN_PASSWORD is not set")
-    stop(1)
-
-if not getenv("FLASK_DEBUG", False) and not regex_match(
-    r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$",
-    getenv("ADMIN_PASSWORD", "changeme"),
-):
-    app.logger.error("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
-    stop(1)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
-user = User(getenv("ADMIN_USERNAME", "admin"), getenv("ADMIN_PASSWORD", "changeme"))
 PLUGIN_KEYS = [
     "id",
     "name",
@@ -192,6 +180,26 @@ while not db.is_initialized():
     )
     sleep(5)
 
+USER = db.get_ui_user()
+USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
+
+if USER:
+    USER = User(**USER)
+elif getenv("ADMIN_USERNAME") and getenv("ADMIN_PASSWORD"):
+    if len(getenv("ADMIN_USERNAME", "admin")) > 256:
+        app.logger.error("The admin username is too long. It must be less than 256 characters.")
+        stop(1)
+    if not getenv("FLASK_DEBUG", False) and not USER_PASSWORD_RX.match(getenv("ADMIN_PASSWORD", "changeme")):
+        app.logger.error("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
+        stop(1)
+
+    USER = User(getenv("ADMIN_USERNAME", "admin"), getenv("ADMIN_PASSWORD", "changeme"))
+    ret = db.create_ui_user(USER.get_id(), USER.password_hash)
+
+    if ret:
+        app.logger.error(f"Couldn't create the admin user in the database: {ret}")
+        stop(1)
+
 app.logger.info("Database is ready")
 Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").write_text("ok", encoding="utf-8")
 bw_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encoding="utf-8").strip()
@@ -204,7 +212,7 @@ try:
         CONFIG=Config(db),
         CONFIGFILES=ConfigFiles(app.logger, db),
         WTF_CSRF_SSL_STRICT=False,
-        USER=user,
+        USER=USER,
         SEND_FILE_MAX_AGE_DEFAULT=86400,
         PLUGIN_ARGS={},
         RELOADING=False,
@@ -226,6 +234,7 @@ csrf = CSRFProtect()
 csrf.init_app(app)
 
 LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]\s\d+#\d+:\s(?P<message>[^\n]+)$")
+REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
 
 
 def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
@@ -307,7 +316,7 @@ def set_csp_header(response):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User(user_id, getenv("ADMIN_PASSWORD", "changeme"))
+    return app.config["USER"] if app.config["USER"] and user_id == app.config["USER"].get_id() else None
 
 
 @app.errorhandler(CSRFError)
@@ -325,7 +334,11 @@ def handle_csrf_error(_):
 
 @app.route("/")
 def index():
-    return redirect(url_for("login"))
+    if app.config["USER"]:
+        if current_user.is_authenticated:  # type: ignore
+            return redirect(url_for("home"))
+        return redirect(url_for("login"), 301)
+    return redirect(url_for("setup"))
 
 
 @app.route("/loading")
@@ -337,6 +350,106 @@ def loading():
         "loading.html",
         message=message if message is not None else "Loading",
         next=next_url,
+    )
+
+
+@app.route("/check", methods=["GET"])
+def check():
+    if "Origin" not in request.headers:
+        return Response(status=403)
+
+    return Response(status=200, headers={"Access-Control-Allow-Origin": "*"})
+
+
+@app.route("/setup", methods=["GET", "POST"])
+def setup():
+    if app.config["USER"]:
+        if current_user.is_authenticated:  # type: ignore
+            return redirect(url_for("home"))
+        return redirect(url_for("login"), 301)
+
+    db_config = app.config["CONFIG"].get_config(methods=False)
+
+    if request.method == "POST":
+        if not request.form:
+            flash("Missing form data.", "error")
+            return redirect(url_for("setup"))
+
+        if not any(key in request.form for key in ("admin_username", "admin_password", "admin_password_check", "server_name", "ui_host", "ui_url")):
+            flash("Missing either admin_username, admin_password, admin_password_check, server_name, ui_host, ui_url or auto_lets_encrypt parameter.", "error")
+            return redirect(url_for("setup"))
+
+        error = False
+
+        if len(request.form["admin_username"]) > 256:
+            flash("The admin username is too long. It must be less than 256 characters.", "error")
+            error = True
+
+        if request.form["admin_password"] != request.form["admin_password_check"]:
+            flash("The passwords do not match.", "error")
+            error = True
+
+        if not USER_PASSWORD_RX.match(request.form["admin_password"]):
+            flash("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).", "error")
+            error = True
+
+        server_names = db_config["SERVER_NAME"].split(" ")
+        if request.form["server_name"] in server_names:
+            flash(f"The hostname {request.form['server_name']} is already in use.", "error")
+            error = True
+        else:
+            for server_name in server_names:
+                if request.form["server_name"] in db_config.get(f"{server_name}_SERVER_NAME", "").split(" "):
+                    flash(f"The hostname {request.form['server_name']} is already in use.", "error")
+                    error = True
+                    break
+
+        if not REVERSE_PROXY_PATH.match(request.form["ui_host"]):
+            flash("The hostname is not valid.", "error")
+            error = True
+
+        if error:
+            return redirect(url_for("setup"))
+
+        app.config["USER"] = User(request.form["admin_username"], request.form["admin_password"])
+
+        ret = db.create_ui_user(app.config["USER"].get_id(), app.config["USER"].password_hash)
+        if ret:
+            flash(f"Couldn't create the admin user in the database: {ret}", "error")
+            return redirect(url_for("setup"))
+
+        flash("The admin user was created successfully", "success")
+
+        app.config["RELOADING"] = True
+        app.config["LAST_RELOAD"] = time()
+        Thread(
+            target=manage_bunkerweb,
+            name="Reloading instances",
+            args=(
+                "services",
+                {
+                    "SERVER_NAME": request.form["server_name"],
+                    "USE_UI": "yes",
+                    "USE_REVERSE_PROXY": "yes",
+                    "REVERSE_PROXY_HOST": request.form["ui_host"],
+                    "REVERSE_PROXY_URL": request.form["ui_url"] or "/",
+                    "AUTO_LETS_ENCRYPT": request.form.get("auto_lets_encrypt", "no"),
+                    "INTERCEPTED_ERROR_CODES": "400 404 405 413 429 500 501 502 503 504",
+                },
+                request.form["server_name"],
+                request.form["server_name"],
+            ),
+            kwargs={"operation": "new"},
+        ).start()
+
+        return Response(status=200)
+
+    return render_template(
+        "setup.html",
+        username=getenv("ADMIN_USERNAME", ""),
+        password=getenv("ADMIN_PASSWORD", ""),
+        ui_host=db_config.get("UI_HOST", getenv("UI_HOST", "")),
+        random_url=f"/{''.join(choice(ascii_letters + digits) for _ in range(10))}",
     )
 
 
@@ -1418,7 +1531,9 @@ def login():
             401,
         )
 
-    if current_user.is_authenticated:
+    if not app.config["USER"]:
+        return redirect(url_for("setup"))
+    elif current_user.is_authenticated:  # type: ignore
         return redirect(url_for("home"))
     return render_template("login.html")
 
