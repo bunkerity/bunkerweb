@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.fad675c6.min.css">
       
       
 
@@ -461,6 +461,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href=".." class="md-nav__link">
         
@@ -477,6 +478,7 @@
     
       
       
+  
   
   
   
@@ -499,6 +501,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../concepts/" class="md-nav__link">
         
@@ -518,6 +521,7 @@
   
   
     
+  
   
   
     <li class="md-nav__item md-nav__item--active">
@@ -566,7 +570,9 @@
       
         <li class="md-nav__item">
   <a href="#docker" class="md-nav__link">
-    Docker
+    <span class="md-ellipsis">
+      Docker
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Docker">
@@ -574,28 +580,36 @@
         
           <li class="md-nav__item">
   <a href="#environment-variables" class="md-nav__link">
-    Environment variables
+    <span class="md-ellipsis">
+      Environment variables
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#scheduler" class="md-nav__link">
-    Scheduler
+    <span class="md-ellipsis">
+      Scheduler
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#networks" class="md-nav__link">
-    Networks
+    <span class="md-ellipsis">
+      Networks
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#full-compose-file" class="md-nav__link">
-    Full compose file
+    <span class="md-ellipsis">
+      Full compose file
+    </span>
   </a>
   
 </li>
@@ -607,42 +621,54 @@
       
         <li class="md-nav__item">
   <a href="#docker-autoconf" class="md-nav__link">
-    Docker autoconf
+    <span class="md-ellipsis">
+      Docker autoconf
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#swarm" class="md-nav__link">
-    Swarm
+    <span class="md-ellipsis">
+      Swarm
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#kubernetes" class="md-nav__link">
-    Kubernetes
+    <span class="md-ellipsis">
+      Kubernetes
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#linux" class="md-nav__link">
-    Linux
+    <span class="md-ellipsis">
+      Linux
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#ansible" class="md-nav__link">
-    Ansible
+    <span class="md-ellipsis">
+      Ansible
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#vagrant" class="md-nav__link">
-    Vagrant
+    <span class="md-ellipsis">
+      Vagrant
+    </span>
   </a>
   
 </li>
@@ -657,6 +683,7 @@
     
       
       
+  
   
   
   
@@ -679,6 +706,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../security-tuning/" class="md-nav__link">
         
@@ -695,6 +723,7 @@
     
       
       
+  
   
   
   
@@ -717,6 +746,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../web-ui/" class="md-nav__link">
         
@@ -733,6 +763,7 @@
     
       
       
+  
   
   
   
@@ -755,6 +786,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../plugins/" class="md-nav__link">
         
@@ -771,6 +803,7 @@
     
       
       
+  
   
   
   
@@ -1817,9 +1850,9 @@ MY_SETTING_2=value2
 <li>
 <p>Begin by creating an inventory file that lists the IP addresses or FQDNs of the remote systems you want to manage. You can either add this information to the <code>/etc/ansible/hosts</code> file or create a separate inventory file such as <code>inventory.yml</code>. Here's an example using a TOML format:</p>
 <div class="highlight"><pre><span></span><code><span class="k">[mybunkers]</span>
-<span class="mf">192.0.2.50</span>
-<span class="mf">192.0.2.51</span>
-<span class="mf">192.0.2.52</span>
+<span class="n">192</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">2</span><span class="p">.</span><span class="n">50</span>
+<span class="n">192</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">2</span><span class="p">.</span><span class="n">51</span>
+<span class="n">192</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">2</span><span class="p">.</span><span class="n">52</span>
 </code></pre></div>
 </li>
 <li>
@@ -2074,7 +2107,7 @@ end
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
+      <script src="../assets/javascripts/bundle.cd18aaf1.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       

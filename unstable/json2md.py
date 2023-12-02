@@ -3,6 +3,7 @@
 from io import StringIO
 from json import loads
 from glob import glob
+from pathlib import Path
 from pytablewriter import MarkdownTableWriter
 
 
@@ -85,5 +86,4 @@ content = doc.read()
 doc = StringIO(content.replace("\\|", "|"))
 doc.seek(0)
 
-with open("docs/settings.md", "w") as f:
-    f.write(doc.read())
+Path("docs", "settings.md").write_text(doc.read(), encoding="utf-8")

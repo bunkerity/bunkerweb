@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.fad675c6.min.css">
       
       
 
@@ -461,6 +461,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href=".." class="md-nav__link">
         
@@ -477,6 +478,7 @@
     
       
       
+  
   
   
   
@@ -499,6 +501,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../concepts/" class="md-nav__link">
         
@@ -515,6 +518,7 @@
     
       
       
+  
   
   
   
@@ -537,6 +541,7 @@
   
   
     
+  
   
   
     <li class="md-nav__item md-nav__item--active">
@@ -585,7 +590,9 @@
       
         <li class="md-nav__item">
   <a href="#protect-http-applications" class="md-nav__link">
-    Protect HTTP applications
+    <span class="md-ellipsis">
+      Protect HTTP applications
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Protect HTTP applications">
@@ -593,14 +600,18 @@
         
           <li class="md-nav__item">
   <a href="#single-application" class="md-nav__link">
-    Single application
+    <span class="md-ellipsis">
+      Single application
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#multiple-applications" class="md-nav__link">
-    Multiple applications
+    <span class="md-ellipsis">
+      Multiple applications
+    </span>
   </a>
   
 </li>
@@ -612,7 +623,9 @@
       
         <li class="md-nav__item">
   <a href="#behind-load-balancer-or-reverse-proxy" class="md-nav__link">
-    Behind load balancer or reverse proxy
+    <span class="md-ellipsis">
+      Behind load balancer or reverse proxy
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Behind load balancer or reverse proxy">
@@ -620,14 +633,18 @@
         
           <li class="md-nav__item">
   <a href="#http-header" class="md-nav__link">
-    HTTP header
+    <span class="md-ellipsis">
+      HTTP header
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#proxy-protocol" class="md-nav__link">
-    Proxy protocol
+    <span class="md-ellipsis">
+      Proxy protocol
+    </span>
   </a>
   
 </li>
@@ -639,28 +656,36 @@
       
         <li class="md-nav__item">
   <a href="#protect-udptcp-applications" class="md-nav__link">
-    Protect UDP/TCP applications
+    <span class="md-ellipsis">
+      Protect UDP/TCP applications
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#custom-configurations" class="md-nav__link">
-    Custom configurations
+    <span class="md-ellipsis">
+      Custom configurations
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#php" class="md-nav__link">
-    PHP
+    <span class="md-ellipsis">
+      PHP
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#ipv6" class="md-nav__link">
-    IPv6
+    <span class="md-ellipsis">
+      IPv6
+    </span>
   </a>
   
 </li>
@@ -675,6 +700,7 @@
     
       
       
+  
   
   
   
@@ -697,6 +723,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../settings/" class="md-nav__link">
         
@@ -713,6 +740,7 @@
     
       
       
+  
   
   
   
@@ -735,6 +763,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../troubleshooting/" class="md-nav__link">
         
@@ -754,6 +783,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../plugins/" class="md-nav__link">
         
@@ -770,6 +800,7 @@
     
       
       
+  
   
   
   
@@ -1010,7 +1041,7 @@
 <p>Configuration of BunkerWeb is done by editing the <code>/etc/bunkerweb/variables.env</code> file :</p>
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
 HTTPS_PORT=443
-DNS_RESOLVERS=8.8.8.8 8.8.4.4
+DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
 API_LISTEN_IP=127.0.0.1
 SERVER_NAME=www.example.com
 USE_REVERSE_PROXY=yes
@@ -1035,7 +1066,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <p>Content of the <code>my_variables.env</code> configuration file :</p>
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
 HTTPS_PORT=443
-DNS_RESOLVERS=8.8.8.8 8.8.4.4
+DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
 API_LISTEN_IP=127.0.0.1
 SERVER_NAME=www.example.com
 USE_REVERSE_PROXY=yes
@@ -1071,7 +1102,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <div class="highlight"><pre><span></span><code>SERVER_NAME=www.example.com
 HTTP_PORT=80
 HTTPS_PORT=443
-DNS_RESOLVERS=8.8.8.8 8.8.4.4
+DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
 API_LISTEN_IP=127.0.0.1
 USE_REVERSE_PROXY=yes
 REVERSE_PROXY_URL=/
@@ -1373,7 +1404,7 @@ REVERSE_PROXY_HOST=http://127.0.0.1:8000
 <p>Configuration of BunkerWeb is done by editing the <code>/etc/bunkerweb/variables.env</code> file :</p>
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
 HTTPS_PORT=443
-DNS_RESOLVERS=8.8.8.8 8.8.4.4
+DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
 API_LISTEN_IP=127.0.0.1
 MULTISITE=yes
 SERVER_NAME=app1.example.com app2.example.com app3.example.com
@@ -1401,7 +1432,7 @@ app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
 <p>Content of the <code>my_variables.env</code> configuration file :</p>
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
 HTTPS_PORT=443
-DNS_RESOLVERS=8.8.8.8 8.8.4.4
+DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
 API_LISTEN_IP=127.0.0.1
 MULTISITE=yes
 SERVER_NAME=app1.example.com app2.example.com app3.example.com
@@ -1438,7 +1469,7 @@ app3.example.com_REVERSE_PROXY_HOST=http://127.0.0.1:8003
 <p>And then you can edit the <code>variables.env</code> file in your host machine like this :</p>
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
 HTTPS_PORT=443
-DNS_RESOLVERS=8.8.8.8 8.8.4.4
+DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
 API_LISTEN_IP=127.0.0.1
 MULTISITE=yes
 SERVER_NAME=app1.example.com app2.example.com app3.example.com
@@ -2650,7 +2681,7 @@ find<span class="w"> </span>/var/www/html<span class="w"> </span>-type<span clas
 <p>You can now edit the <code>/etc/bunkerweb/variable.env</code> file :</p>
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
 HTTPS_PORT=443
-DNS_RESOLVERS=8.8.8.8 8.8.4.4
+DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
 API_LISTEN_IP=127.0.0.1
 MULTISITE=yes
 SERVER_NAME=app1.example.com app2.example.com app3.example.com
@@ -2680,7 +2711,7 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <p>Content of the <code>my_variables.env</code> configuration file :</p>
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
 HTTPS_PORT=443
-DNS_RESOLVERS=8.8.8.8 8.8.4.4
+DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
 API_LISTEN_IP=127.0.0.1
 MULTISITE=yes
 SERVER_NAME=app1.example.com app2.example.com app3.example.com
@@ -2718,7 +2749,7 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
 <p>Once PHP files are copied into the <code>/var/www/html</code>folder, you can now edit the <code>/etc/bunkerweb/variable.env</code> file :</p>
 <div class="highlight"><pre><span></span><code>HTTP_PORT=80
 HTTPS_PORT=443
-DNS_RESOLVERS=8.8.8.8 8.8.4.4
+DNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4
 API_LISTEN_IP=127.0.0.1
 MULTISITE=yes
 SERVER_NAME=app1.example.com app2.example.com app3.example.com
@@ -2912,7 +2943,7 @@ app3.example.com_LOCAL_PHP_PATH=/var/www/html/app3.example.com
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike", "version": "latest"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
+      <script src="../assets/javascripts/bundle.cd18aaf1.min.js"></script>
       
         <script src="../js/print-site.js"></script>
       
