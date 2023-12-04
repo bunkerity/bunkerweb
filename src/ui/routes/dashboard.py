@@ -6,7 +6,8 @@ from flask_jwt_extended import jwt_required
 from flask import render_template_string
 import requests
 
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import InternalServerError
 from werkzeug.sansio.response import Response
 
 PREFIX = "/admin/"
@@ -73,25 +74,31 @@ def get_custom_page():
     args = request.args.to_dict()
     plugin_id = args.get("plugin_id") or ""
     if not plugin_id:
-        raise HTTPException(response=Response(status=404), description="No plugin id found to get custom page.")
+        raise InternalServerError(response=Response(status=404), description="No plugin id found to get custom page.")
 
     # Retrieve template from CORE
     try:
         # page = requests.get(f"{CORE_API}/plugins/external/{plugin_id}/page") # TODO fix this
         page = requests.get(f"TODO/plugins/external/{plugin_id}/page")
         if not str(page.status_code).startswith("2"):
-            raise HTTPException(response=Response(status=404), description=f"No custom page found for plugin {plugin_id}.")
+            raise InternalServerError(response=Response(status=404), description=f"No custom page found for plugin {plugin_id}.")
     except:
-        raise HTTPException(response=Response(status=500), description=f"Error while trying to get custom page for plugin {plugin_id}.")
+        raise InternalServerError(response=Response(status=500), description=f"Error while trying to get custom page for plugin {plugin_id}.")
     # Send source code as template
     try:
         content = page.content.decode("utf-8")
         return render_template_string(content)
     except:
-        raise HTTPException(response=Response(status=500), description=f"Error while sending custom page for plugin {plugin_id}.")
+        raise InternalServerError(response=Response(status=500), description=f"Error while sending custom page for plugin {plugin_id}.")
 
 
 @dashboard.route(f"{PREFIX}/plugins")
 @jwt_required()
 def plugins():
     return render_template("plugins.html")
+
+
+@dashboard.route(f"{PREFIX}/<string:page>")
+@jwt_required()
+def not_found(page):
+    raise NotFound(response=Response(status=404), description=f"Not found")

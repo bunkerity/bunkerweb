@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Flask
 from flask import Blueprint
+from flask import Response
 
 import requests
 
@@ -15,10 +16,10 @@ from routes.plugins import plugins
 from routes.dashboard import dashboard
 
 from middleware.jwt import setup_jwt
+from middleware.exceptions import setup_exceptions
 
-from utils import setupUIException, default_error_handler, create_action_format, log_format
+from utils import setupUIException, create_action_format, log_format
 
-from werkzeug.exceptions import HTTPException
 import os
 from pathlib import Path
 from logging import Logger
@@ -113,12 +114,12 @@ try:
 except:
     raise setupUIException("exception", "ADDING TEMPLATES AND STATIC FILES")
 
-
-@app.errorhandler(HTTPException)
-def handle_exception(e):
-    """Return JSON instead of HTML for HTTP errors."""
-    return default_error_handler(e.code, "", e.description)
-
+# Add dashboard routes and related templates / files
+try:
+    setup_exceptions(app)
+    LOGGER.info(log_format("info", "", "", "ADDING EXCEPTIONS HANDLER"))
+except:
+    raise setupUIException("exception", "ADDING EXCEPTIONS HANDLER")
 
 # Everything worked
 if not HEALTHY_PATH.exists():

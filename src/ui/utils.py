@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contextlib import suppress
 import requests, json  # noqa: E401
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import InternalServerError
 from werkzeug.sansio.response import Response
 from logging import Logger
 from os.path import join, sep
@@ -52,7 +52,7 @@ def get_req_data(req, queries=[]):
 def get_core_format_res(path, method, data=None, message=None, retry=1):
     # Retry limit
     if retry == 5:
-        raise HTTPException(response=Response(status=500), description="Max retry to CORE  API for same request exceeded")
+        raise InternalServerError(response=Response(status=500), description="Max retry to CORE  API for same request exceeded")
 
     # Try request core
     req = None
@@ -63,7 +63,7 @@ def get_core_format_res(path, method, data=None, message=None, retry=1):
             LOGGER.warn(log_format("warn", "503", path, f"Communicate with {path} {method} retry={retry}. Maybe CORE is setting something up on background.", data))
             return get_core_format_res(path, method, data, message, retry + 1)
     except:
-        raise HTTPException(response=Response(status=500), description="Impossible to connect to CORE API")
+        raise InternalServerError(response=Response(status=500), description="Impossible to connect to CORE API")
 
     # Case response from core, format response for client
     try:
@@ -88,7 +88,7 @@ def get_core_format_res(path, method, data=None, message=None, retry=1):
         return res_format(res_type, res_status, "", message, data)
     # Case impossible to format
     except:
-        raise HTTPException(response=Response(status=500), description="Impossible for UI API to proceed data send by CORE API")
+        raise InternalServerError(response=Response(status=500), description="Impossible for UI API to proceed data send by CORE API")
 
 
 def req_core(path, method, data=None):

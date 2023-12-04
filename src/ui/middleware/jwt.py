@@ -2,6 +2,7 @@
 from flask import request
 from flask import make_response
 from flask import redirect
+from flask import abort
 
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import set_access_cookies
@@ -56,58 +57,47 @@ def setup_jwt(app):
     # Override default exceptions to fit standard format
     @app.errorhandler(NoAuthorizationError)
     def no_authorization_exception(e):
-        default_error_handler(403, request.path, "No authorization after token verification", ["ui", "exception", "credentials"])
-        return make_response(redirect("/admin/login", 302))
+        return abort(401, "Token unauthorized access.")
 
     @app.errorhandler(JWTDecodeError)
     def jwt_decode_exception(e):
-        default_error_handler(403, request.path, "JWT decode exception", ["ui", "exception", "credentials"])
-        return make_response(redirect("/admin/login", 302))
+        return abort(401, "Token Decode error.")
 
     @app.errorhandler(RevokedTokenError)
     def revoke_token_exception(e):
-        default_error_handler(403, request.path, "Revoked token exception", ["ui", "exception", "credentials"])
-        return make_response(redirect("/admin/login", 302))
+        return abort(401, "Token revoke token error.")
 
     @app.errorhandler(JWTDecodeError)
     def jwt_decode_exception(e):
-        default_error_handler(403, request.path, "JWT decode exception", ["ui", "exception", "credentials"])
-        return make_response(redirect("/admin/login", 302))
+        return abort(401, "Token decode error.")
 
     @app.errorhandler(UserClaimsVerificationError)
     def user_claim_verif_exception(e):
-        default_error_handler(403, request.path, "User claim verification exception", ["ui", "exception", "credentials"])
-        return make_response(redirect("/admin/login", 302))
+        return abort(401, "Token user claims verification error.")
 
     @app.errorhandler(WrongTokenError)
     def wrong_token_exception(e):
-        default_error_handler(403, request.path, "Wrong token exception", ["ui", "exception", "credentials"])
-        return make_response(redirect("/admin/login", 302))
+        return abort(401, "Token wrong token error.")
 
     @app.errorhandler(UserLookupError)
     def user_lookup_exception(e):
-        default_error_handler(403, request.path, "Impossible to verify user identity", ["ui", "exception", "credentials"])
-        return make_response(redirect("/admin/login", 302))
+        return abort(403, "Token user lookup error.")
 
     @app.errorhandler(CSRFError)
     def csrf_exception(e):
-        default_error_handler(403, request.path, "Error with CSRF token", ["ui", "exception", "credentials"])
-        return make_response(redirect("/admin/login", 302))
+        return abort(403, "CSRF error.")
 
     @app.errorhandler(FreshTokenRequired)
     def fresh_token_req_exception(e):
-        default_error_handler(403, request.path, "Token doesn't fit all conditions to get access", ["ui", "exception", "credentials"])
-        return make_response(redirect("/admin/login", 302))
+        return abort(401, "Token fresh required error.")
 
     @app.errorhandler(InvalidHeaderError)
     def invalid_header_exception(e):
-        default_error_handler(403, request.path, "Invalid request format, impossible to check token", ["ui", "exception", "credentials"])
-        return make_response(redirect("/admin/login", 302))
+        return abort(403, "Token invalid header error.")
 
     @app.errorhandler(InvalidQueryParamError)
     def invalid_query_param_exception(e):
-        default_error_handler(403, request.path, "Invalid request format, impossible to check token", ["ui", "exception", "credentials"])
-        return make_response(redirect("/admin/login", 302))
+        return abort(403, "Invalid query param error.")
 
     @app.after_request
     def refresh_expiring_jwts(response):
