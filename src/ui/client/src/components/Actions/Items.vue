@@ -18,6 +18,7 @@ const props = defineProps({
 
 <template>
   <ListItem
+    :aria-rowcount="id"
     v-for="(item, id) in props.items"
     :class="[
       id === props.items.length - 1 ? '' : 'border-b',

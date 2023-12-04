@@ -39,7 +39,9 @@ onMounted(() => {
           <!-- breadcrumb -->
           <h2 class="header-title">{{ header.currPath }}</h2>
           <ul class="header-breadcrumb-container">
-            <li class="header-breadcrumb-item first">BunkerWeb</li>
+            <li class="header-breadcrumb-item first">
+              {{ $t("dashboard_bw") }}
+            </li>
             <li
               v-for="(item, id) in header.splitPath"
               :class="[id === header.splitPath.length - 1 ? 'active' : 'prev']"

@@ -30,7 +30,6 @@ def get_plugins():
 def add_plugin():
     """Add a plugin to BunkerWeb"""
     plugin = request.get_data()
-    # is_valid_model(plugin, Model) True | False
     return get_core_format_res(f"{CORE_API}/plugins", "POST", plugin, "Adding plugin")
 
 
@@ -39,9 +38,7 @@ def add_plugin():
 @model_validator(is_body_json=False, params={"plugin_id": "PluginId"})
 def update_plugin(plugin_id):
     """Update a plugin"""
-    # is_valid_model(plugin_id, Model) True | False
     plugin = request.get_data()
-    # is_valid_model(plugin, Model) True | False
     return get_core_format_res(f"{CORE_API}/plugins/{plugin_id}", "PATCH", plugin, f"Update plugin {plugin_id}")
 
 
@@ -50,7 +47,6 @@ def update_plugin(plugin_id):
 @model_validator(params={"plugin_id": "PluginId"})
 def delete_plugin(plugin_id):
     """Delete a plugin"""
-    # is_valid_model(plugin_id, Model) True | False
     return get_core_format_res(f"{CORE_API}/plugins/{plugin_id}", "DELETE", "", f"Delete plugin {plugin_id}")
 
 

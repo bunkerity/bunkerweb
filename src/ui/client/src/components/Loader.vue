@@ -41,13 +41,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div role="group" data-loader class="loader-container">
+  <div role="alert" data-loader class="loader-container">
     <p class="sr-only">{{ $t("dashboard_loader_label") }}</p>
     <img
       data-loader-img
       src="/images/logo-menu-2.png"
       class="loader-container-img"
-      :alt="$t('dashboard_loader_alt_logo')"
+      :alt="$t('dashboard_logo_alt')"
     />
   </div>
 </template>

@@ -20,21 +20,17 @@ const emits = defineEmits(["close", "delete"]);
 <template>
   <ModalBase
     @backdrop="$emit('close')"
-    title="delete instance"
+    :title="$t('instances_modal_delete_title')"
     v-if="props.isOpen"
   >
     <div class="w-full">
       <div class="flex justify-center">
         <div class="modal-path">
           <p class="modal-path-text">
-            {{
-              `Are you sure to delete instance with hostname ${props.hostname} ?`
-            }}
+            {{ $t("instances_modal_delete_msg", { hostname: props.hostname }) }}
           </p>
         </div>
       </div>
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase
           color="close"
@@ -43,7 +39,7 @@ const emits = defineEmits(["close", "delete"]);
           type="button"
           class="text-xs"
         >
-          Close
+          {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
           color="delete"
@@ -56,7 +52,7 @@ const emits = defineEmits(["close", "delete"]);
           "
           class="text-xs ml-2"
         >
-          DELETE
+          {{ $t("action_delete") }}
         </ButtonBase>
       </div>
     </div>

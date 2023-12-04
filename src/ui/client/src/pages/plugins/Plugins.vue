@@ -11,11 +11,12 @@ import PluginModalDelete from "@components/Plugin/Modal/Delete.vue";
 import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
-import { getPluginsByFilter } from "@utils/plugins.js";
+import { getPluginsByFilter, pluginI18n } from "@utils/plugins.js";
 import ApiState from "@components/Api/State.vue";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
-
+import { useI18n } from "vue-i18n";
+const { locale, fallbackLocale } = useI18n();
 // Refresh when related btn is clicked
 const refreshStore = useRefreshStore();
 
@@ -53,6 +54,9 @@ const plugins = reactive({
 
     // Filter data to display
     const cloneBase = JSON.parse(JSON.stringify(plugins.data));
+    // translate
+    pluginI18n(cloneBase, locale.value, fallbackLocale.value);
+
     const filter = getPluginsByFilter(cloneBase, filters);
     return filter;
   }),
@@ -169,7 +173,7 @@ onMounted(() => {
     <CardBase
       v-if="!plugins.isPend && !plugins.isErr"
       class="h-fit col-span-12"
-      :label="$t('plugins_list_title')"
+      :label="$t('dashboard_plugins')"
     >
       <PluginList @delete="(v) => openDelModal(v)" :items="plugins.setup" />
     </CardBase>

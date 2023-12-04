@@ -85,6 +85,7 @@ const emits = defineEmits(["history"]);
 
 <template>
   <ListItem
+    :aria-rowcount="id"
     v-for="(item, id) in props.items"
     :class="[id === props.items.length - 1 ? '' : 'border-b', 'py-2']"
   >

@@ -111,23 +111,34 @@ export function getPluginsByFilter(plugins, filters) {
   return plugins.filter(String);
 }
 
-// Translate plugins using i18n vue
-export function pluginI18n(i18n, plugins) {
-  /*
+// Translate keys that support multiple languages
+export function pluginI18n(plugins, lang, fallback) {
   plugins.forEach((plugin) => {
-    const id = plugin.id;
-    // global info
-    plugin.name = i18n(`core_plugins.${id}.name`);
-    plugin.description = i18n(`core_plugins.${id}.description`);
-
-    for (const [key, value] of Object.entries(plugin.settings)) {
-      try {
-        value["help"] = i18n(`core_plugins.${id}.settings.${key}.help`);
-        value["label"] = i18n(`core_plugins.${id}.settings.${key}.label`);
-      } catch (err) {}
+    // Main plugin info
+    setLangOrFallback(plugin, "name", lang, fallback);
+    setLangOrFallback(plugin, "description", lang, fallback);
+    // Each settings info
+    for (const [key, value] of Object.entries(plugin["settings"])) {
+      setLangOrFallback(value, "help", lang, fallback);
+      setLangOrFallback(value, "label", lang, fallback);
     }
   });
-  */
+  return plugins;
+}
+
+function setLangOrFallback(obj, key, lang, fallback) {
+  try {
+    if (!!lang in obj[key]) {
+      obj[key] = obj[key][lang];
+    }
+  } catch (err) {}
+
+  // Case didn't find lang, we will get fallback (english)
+  try {
+    if (!!(fallback in obj[key])) {
+      obj[key] = obj[key][fallback];
+    }
+  } catch (err) {}
 }
 
 export function getRemainFromFilter(filterPlugins) {

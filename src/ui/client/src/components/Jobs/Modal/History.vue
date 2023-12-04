@@ -43,7 +43,7 @@ const emits = defineEmits(["close"]);
         ]"
         :positions="positions"
       >
-        <ListItem v-for="item in props.history">
+        <ListItem :aria-rowcount="id" v-for="(item, id) in props.history">
           <div class="list-content-item-wrap">
             <div class="translate-x-3 col-span-2" :class="[positions[0]]">
               <span class="sr-only">

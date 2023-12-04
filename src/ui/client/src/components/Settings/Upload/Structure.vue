@@ -82,7 +82,6 @@ function uploadFile(file) {
 
   const data = new FormData();
   data.set("file", file);
-  data.set("csrf_token", document.querySelector("#csrf_token").value);
   xhr.send(data);
 }
 </script>

@@ -76,22 +76,22 @@ const navList = [
 // Social links
 const socialList = [
   {
-    tag: "alt_link_twitter",
+    tag: "twitter",
     href: "https://twitter.com/bunkerity",
     svg: MenuSvgTwitter,
   },
   {
-    tag: "alt_link_linkedin",
+    tag: "linkedin",
     href: "https://www.linkedin.com/company/bunkerity/",
     svg: MenuSvgLinkedin,
   },
   {
-    tag: "alt_link_discord",
+    tag: "discord",
     href: "https://discord.gg/fTf46FmtyD",
     svg: MenuSvgDiscord,
   },
   {
-    tag: "alt_link_github",
+    tag: "github",
     href: "https://github.com/bunkerity",
     svg: MenuSvgGithub,
   },
@@ -173,6 +173,7 @@ function toggleMenu() {
 
   <!-- left sidebar  -->
   <aside
+    role="menu"
     id="sidebar-menu"
     data-sidebar-menu
     :class="[menu.isDesktop ? true : menu.isActive ? '' : 'active']"
@@ -204,12 +205,12 @@ function toggleMenu() {
           <img
             src="/images/logo-menu-2.png"
             class="menu-logo-dark"
-            alt="main logo dark"
+            :alt="$t('dashboard_logo_alt')"
           />
           <img
             src="/images/logo-menu.png"
             class="menu-logo-light"
-            alt="main logo light"
+            :alt="$t('dashboard_logo_alt')"
           />
         </a>
       </div>
@@ -236,9 +237,9 @@ function toggleMenu() {
               <div class="menu-nav-item-container">
                 <component :is="item.svg"></component>
               </div>
-              <span class="menu-nav-item-title">{{
-                $t(`dashboard_${item.tag}`)
-              }}</span>
+              <span class="menu-nav-item-title">
+                {{ $t(`dashboard_${item.tag}`) }}
+              </span>
             </a>
           </li>
           <!-- end item -->
@@ -323,7 +324,7 @@ function toggleMenu() {
         <li v-for="item in socialList" class="mx-2 w-6">
           <a :href="item.href" target="_blank">
             <span class="sr-only">
-              {{ $t(`dashboard_menu_socials_${item.tag}`) }}
+              {{ $t(`dashboard_link_${item.tag}`) }}
             </span>
             <component :is="item.svg"></component>
           </a>

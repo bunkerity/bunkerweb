@@ -131,7 +131,7 @@ async function getHostBan(hostname) {
     data: [],
   };
   return await fetchAPI(
-    `/api/instances/${hostname}/bans`,
+    `/api/instances/${hostname}/bans?method=ui`,
     "POST",
     null,
     data,

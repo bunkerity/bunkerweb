@@ -20,16 +20,16 @@ config = Blueprint("config", __name__)
 
 @config.route(f"{PREFIX}", methods=["GET"])
 @jwt_required()
-@model_validator(queries={"method": "Method", "new_format": "NewFormat"})
+@model_validator(queries={"methods": "ConfigMethod", "new_format": "NewFormat"})
 def get_config():
     """Get complete config"""
     args, data, methods, new_format = [get_req_data(request, ["methods", "new_format"])[k] for k in ("args", "data", "methods", "new_format")]
-    return get_core_format_res(f"{CORE_API}/config?methods={methods if methods else 'ui'}&new_format={new_format if new_format else 'true'}", "GET", "", "Retrieve config")
+    return get_core_format_res(f"{CORE_API}/config?methods={methods if methods else '1'}&new_format={new_format if new_format else '1'}", "GET", "", "Retrieve config")
 
 
 @config.route(f"{PREFIX}", methods=["PUT"])
 @jwt_required()
-@model_validator(body="Config", queries={"method": "Method"})
+@model_validator(body={"Config": "config"}, queries={"method": "Method"})
 def update_config():
     """Update whole config"""
     args, data, method = [get_req_data(request, ["method"])[k] for k in ("args", "data", "method")]
@@ -38,7 +38,7 @@ def update_config():
 
 @config.route(f"{PREFIX}/global", methods=["PUT"])
 @jwt_required()
-@model_validator(body="Config", queries={"method": "Method"})
+@model_validator(body={"Config": "config"}, queries={"method": "Method"})
 def update_global_config():
     """Update global config"""
     args, data, method = [get_req_data(request, ["method"])[k] for k in ("args", "data", "method")]
@@ -47,7 +47,7 @@ def update_global_config():
 
 @config.route(f"{PREFIX}/service/<string:service_name>", methods=["PUT"])
 @jwt_required()
-@model_validator(body="Config", queries={"method": "Method"}, params={"service_name": "ServiceName"})
+@model_validator(body={"Config": "config"}, queries={"method": "Method"}, params={"service_name": "ServiceName"})
 def update_service_config(service_name):
     """Create or update service config"""
     args, data, method = [get_req_data(request, ["method"])[k] for k in ("args", "data", "method")]

@@ -25,7 +25,7 @@ import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
 import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+const { locale, fallbackLocale } = useI18n();
 
 // Refresh when related btn is clicked
 const refreshStore = useRefreshStore();
@@ -101,6 +101,30 @@ const services = reactive({
   pluginsName: [],
   servicesName: [],
   activePlugins: [],
+  canDelete: computed(() => {
+    // Determine if we can delete current service
+    if (!services.activeService || services.activeService === "new")
+      return false;
+
+    let canDel = false;
+
+    if (services.activeService && services.activeService !== "new") {
+      services.setup[services.activeService].forEach((plugin) => {
+        if (plugin.id.toLowerCase() !== "general") return;
+
+        if (
+          !!("method" in plugin) &&
+          plugin.method !== "default" &&
+          plugin.method !== "ui"
+        ) {
+          return (canDel = false);
+        } else {
+          return (canDel = true);
+        }
+      });
+      return canDel;
+    }
+  }),
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
     if (
@@ -125,7 +149,7 @@ const services = reactive({
     );
 
     // translate
-    pluginI18n(t, cloneMultisitePlugin);
+    pluginI18n(cloneMultisitePlugin, locale.value, fallbackLocale.value);
 
     // Get only services custom conf
     const cloneServConf = JSON.parse(JSON.stringify(conf.data["services"]));
@@ -196,7 +220,6 @@ const services = reactive({
           services.activePlugins.length > 0 ? services.activePlugins[0] : "";
       }
     }
-    console.log(cloneServConf);
     return cloneServConf;
   }),
 });
@@ -292,6 +315,24 @@ function showNewServ() {
   config.$reset();
   saveBtn.disabled = true;
   services.activeService = "new";
+}
+
+const delServ = reactive({
+  isPend: false,
+  isErr: false,
+  // Data from fetch
+  data: [],
+});
+
+function deleteServ() {
+  config.$reset();
+  fetchAPI(
+    `/api/config/service/${services.activeService}?method=ui}`,
+    "DELETE",
+    null,
+    delServ,
+    isFeedback ? feedbackStore.addFeedback : null
+  );
 }
 
 // Show service data logic
@@ -431,16 +472,42 @@ onMounted(() => {
         v-if="services.activeService"
         class="z-10 col-span-12 grid grid-cols-12 relative"
       >
-        <CardLabel
-          class="text-xl border-b border-slate-700/60 pb-2 mb-4"
-          :label="
-            services.activeService === 'new'
-              ? $t('services_active_new')
-              : $t('services_active_base', {
-                  name: services.activeService,
-                })
-          "
-        />
+        <div class="col-span-12 flex items-center">
+          <button
+            v-if="services.canDelete"
+            @click="deleteServ()"
+            color="delete"
+            class="rounded-full bg-red-500 w-8 h-8 mr-1 mb-2 hover:brightness-90 dark:hover:brightness-75 dark:brightness-90"
+          >
+            <span class="sr-only">{{ `${$t("services_active_delete")}` }}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="pointer-events-none w-5 h-5 stroke-white"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+              />
+            </svg>
+          </button>
+          <CardLabel
+            class="w-full text-xl mb-0"
+            :label="
+              services.activeService === 'new'
+                ? $t('services_active_new')
+                : $t('services_active_base', {
+                    name: services.activeService,
+                  })
+            "
+          />
+        </div>
+        <hr class="col-span-12 line-separator z-10 w-full mb-6" />
+
         <div class="col-span-12" v-for="(value, key) in services.setup">
           <PluginStructure
             v-if="services.activeService === key"

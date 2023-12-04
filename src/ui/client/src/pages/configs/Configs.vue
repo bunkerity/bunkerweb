@@ -68,7 +68,6 @@ const customConf = reactive({
     const config = JSON.parse(JSON.stringify(conf.data));
     const services = Object.keys(config["services"]);
     const confTree = generateConfTree(customConf.data, services);
-    console.log(confTree);
     const filterManager = getCustomConfByFilter(confTree, filters);
     return filterManager;
   }),

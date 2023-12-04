@@ -164,6 +164,7 @@ async function addBansFromList() {
         :positions="addPositions"
       >
         <ListItem
+          :aria-rowcount="id"
           v-for="(item, id) in bans.items"
           :key="id"
           :class="[id === bans.items.length - 1 ? '' : 'border-b', 'py-1.5']"

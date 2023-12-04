@@ -54,7 +54,7 @@ def action_instance(instance_hostname, instance_action):
 
 @instances.route(f"{PREFIX}/ban", methods=["POST"])
 @jwt_required()
-@model_validator(body="BanAdd", queries={"method": "Method"})
+@model_validator(body={"BanAdd": "ban_add"}, queries={"method": "Method"})
 def add_bans():
     """Add bans ip for all instances"""
     args, data, method = [get_req_data(request, ["method"])[k] for k in ("args", "data", "method")]
@@ -63,7 +63,7 @@ def add_bans():
 
 @instances.route(f"{PREFIX}/ban", methods=["DELETE"])
 @jwt_required()
-@model_validator(body="BanDelete", queries={"method": "Method"})
+@model_validator(body={"BanDelete": "ban_delete"}, queries={"method": "Method"})
 def delete_bans():
     """Delete bans ip for all instances"""
     args, data, method = [get_req_data(request, ["method"])[k] for k in ("args", "data", "method")]

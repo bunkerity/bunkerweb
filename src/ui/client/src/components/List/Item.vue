@@ -1,3 +1,3 @@
 <template>
-  <li class="list-content-item"><slot></slot></li>
+  <li role="row" class="list-content-item"><slot></slot></li>
 </template>

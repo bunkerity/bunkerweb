@@ -23,7 +23,7 @@ import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
 import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+const { locale, fallbackLocale } = useI18n();
 
 // Refresh when related btn is clicked
 const refreshStore = useRefreshStore();
@@ -75,7 +75,7 @@ const plugins = reactive({
       "global"
     );
     // Translate
-    pluginI18n(t, cloneGlobalPlugin);
+    pluginI18n(cloneGlobalPlugin, locale.value, fallbackLocale.value);
 
     // Format and keep only global config
     const cloneGlobalConf = JSON.parse(JSON.stringify(conf.data["global"]));

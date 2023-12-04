@@ -270,15 +270,19 @@ class Ban(BaseModel):
 
 
 class BanAdd(BaseModel):
-    list: List[Ban] = Field(examples=[{"ip": "127.0.0.1", "start_date": "1701343420", "end_date": "1701343648", "reason": "manual"}], description="List of dict with IP to ban")
+    ban_add: List[Ban] = Field(examples=[{"ip": "127.0.0.1", "start_date": "1701343420", "end_date": "1701343648", "reason": "manual"}], description="List of dict with IP to ban")
 
 
 class BanDelete(BaseModel):
-    list: List[IPvAnyAddress] = Field(examples=["127.0.0.1"], description="List of IP to ban")
+    ban_delete: List[IPvAnyAddress] = Field(examples=["127.0.0.1"], description="List of IP to ban")
 
 
 class Method(BaseModel):
     method: str = Field(examples=["core", "ui"], description="The method used by the API")
+
+
+class ConfigMethod(BaseModel):
+    methods: bool | Literal["true", "false", "1", "0"] = Field(examples=["true", "1"], description="The method used by the API")
 
 
 class ReloadInstance(BaseModel):
@@ -290,7 +294,7 @@ class Config(BaseModel):
 
 
 class NewFormat(BaseModel):
-    new_format: str | bool = Field(examples=["true", True], description="If the config should be returned in the new format")
+    new_format: bool | Literal["true", "false", "1", "0"] = Field(examples=["true", "1"], description="The method used by the API")
 
 
 class JobName(BaseModel):
@@ -330,4 +334,4 @@ class InstanceHostname(BaseModel):
 
 
 class InstanceAction(BaseModel):
-    instance_action: str = Field(examples=["reload"], description="The instance action")
+    instance_action: Literal["ping", "bans", "stop", "reload"] = Field(examples=["ping", "bans", "stop", "reload"], description="The instance action")

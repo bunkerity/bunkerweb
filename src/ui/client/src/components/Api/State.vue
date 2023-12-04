@@ -16,10 +16,6 @@ const props = defineProps({
   textState: {
     type: Object,
     required: false,
-    default: {
-      isPend: "Pending data from API",
-      isErr: "Error accessing API",
-    },
   },
 });
 </script>
@@ -33,7 +29,11 @@ const props = defineProps({
     <CardBase :color="props.isErr ? 'error' : 'pending'">
       <div class="col-span-12 flex items-center justify-center">
         <p role="alertdialog" class="m-0 dark:text-white">
-          {{ isErr ? props.textState.isErr : props.textState.isPend }}
+          {{
+            isErr
+              ? props.textState.isErr || $t("api_error_default")
+              : props.textState.isPend || $t("api_pending_default")
+          }}
         </p>
       </div>
     </CardBase>

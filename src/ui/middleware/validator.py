@@ -20,9 +20,10 @@ from logger import setup_logger  # type: ignore
 LOGGER: Logger = setup_logger("UI")
 
 
-# body = str : name of the model to check body data
+# body = dict[modelName, modelKeyword || ""]: modelKeyword if we want to check data structure itself (for example, if we have a tuple, a dict...)
+# in case  modelKeyword =  "", we want to check kwargs
 # queries = dict[queryName, modelName] :  query and model name to check
-def model_validator(body=None, queries=None, is_body_json=True, params=None):
+def model_validator(body={}, queries={}, params={}, is_body_json=True):
     def decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
@@ -32,33 +33,38 @@ def model_validator(body=None, queries=None, is_body_json=True, params=None):
 
             try:
                 for p_name, p_value in params.items():
-                    p_model_name = queries[p_name]
-                    class_ = getattr(__import__("api_models"), p_model_name)
-                    data = {p_name: p_value}
+                    class_ = getattr(__import__("api_models"), p_value)
+                    data = {p_name: kwargs[p_name]}
+
                     class_(**data)
 
             except:
                 return abort(400, "Bad format request path params")
 
             # Validate body and queries
-            req_queries = request.args.to_dict() or None
-            data = request.get_json() or None
+            req_queries = request.args.to_dict() if len(request.args) else {}
+            data = request.get_json() if len(request.data) else {}
 
             # We need model name for body data because we can't deduce it from data itself
-            if not len(data) and len(body) and is_body_json or len(data) and len(body) and is_body_json:
+            if not len(data) and len(body) and is_body_json or len(data) and not len(body) and is_body_json:
                 return abort(400, "Bad format, missing parameters")
 
             # We need dict with { queryName : modelName } to handle queries
-            if len(req_queries) and not len(queries):
+            if len(req_queries) and not len(queries) or not len(req_queries) and len(queries):
                 return abort(400, "Bad format, missing parameters")
 
             # Check model body
             if len(body) and len(data) and is_body_json:
                 try:
-                    class_ = getattr(__import__("api_models"), body)
+                    body_model_name = list(body.keys())[0]
+                    body_model_key = body[body_model_name]
+                    class_ = getattr(__import__("api_models"), body_model_name)
 
-                    if isinstance(data, list):
-                        data = {"list": data}
+                    # Case we have a body_model_key, we want to put data in a dict with body_model_key as key
+                    # in order to destructure it and check data format itself (if it is a dict, a tuple, a list...)
+                    # else we are gonna check kwargs (dict or list content)
+                    if body_model_key:
+                        data = {body_model_key: data}
 
                     class_(**data)
 
@@ -68,10 +74,9 @@ def model_validator(body=None, queries=None, is_body_json=True, params=None):
             # check model query
             if len(req_queries) and len(queries):
                 try:
-                    for q_name, q_value in req_queries.items():
-                        q_model_name = queries[q_name]
-                        class_ = getattr(__import__("api_models"), q_model_name)
-                        data = {q_name: q_value}
+                    for q_name, q_value in queries.items():
+                        class_ = getattr(__import__("api_models"), q_value)
+                        data = {q_name: req_queries[q_name]}
                         class_(**data)
 
                 except:

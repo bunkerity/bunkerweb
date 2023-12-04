@@ -12,9 +12,11 @@ const props = defineProps({
 </script>
 
 <template>
-  <section class="list-container">
-    <div class="list-header-container">
+  <section role="table" class="list-container">
+    <div role="rowgroup" class="list-header-container">
       <label
+        role="rowheader"
+        :aria-rowcount="id"
         class="list-header-item"
         v-for="(item, id) in props.header"
         :class="[

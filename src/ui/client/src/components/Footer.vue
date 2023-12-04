@@ -1,13 +1,19 @@
 <script setup>
 import { onMounted, reactive } from "vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
+
 const items = [
-  { href: "https://www.bunkerweb.io", title: "Bunkerweb" },
-  { href: "https://docs.bunkerweb.io", title: "Docs" },
-  { href: "https://www.bunkerweb.io/privacy-policy", title: "Privacy" },
-  { href: "https://www.bunkerity.com/fr/blog/", title: "Blog" },
+  { href: "https://www.bunkerweb.io", title: t("dashboard_bw") },
+  { href: "https://docs.bunkerweb.io", title: t("dashboard_docs") },
+  {
+    href: "https://www.bunkerweb.io/privacy-policy",
+    title: t("dashboard_privacy"),
+  },
+  { href: "https://www.bunkerity.com/fr/blog/", title: t("dashboard_blog") },
   {
     href: "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE",
-    title: "License",
+    title: t("dashboard_license"),
   },
 ];
 
@@ -31,9 +37,9 @@ onMounted(() => {
         </div>
         <ul class="footer-list-container">
           <li v-for="item in items">
-            <a :href="item.href" class="footer-list-item" target="_blank">{{
-              item.title
-            }}</a>
+            <a :href="item.href" class="footer-list-item" target="_blank">
+              {{ item.title }}</a
+            >
           </li>
         </ul>
       </div>

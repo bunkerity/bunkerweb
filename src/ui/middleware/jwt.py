@@ -11,12 +11,16 @@ from flask_jwt_extended import unset_jwt_cookies
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import JWTManager
 
-from flask_jwt_extended.exceptions import NoAuthorizationError
-from flask_jwt_extended.exceptions import UserLookupError
 from flask_jwt_extended.exceptions import CSRFError
 from flask_jwt_extended.exceptions import FreshTokenRequired
 from flask_jwt_extended.exceptions import InvalidHeaderError
 from flask_jwt_extended.exceptions import InvalidQueryParamError
+from flask_jwt_extended.exceptions import NoAuthorizationError
+from flask_jwt_extended.exceptions import UserLookupError
+from flask_jwt_extended.exceptions import JWTDecodeError
+from flask_jwt_extended.exceptions import RevokedTokenError
+from flask_jwt_extended.exceptions import UserClaimsVerificationError
+from flask_jwt_extended.exceptions import WrongTokenError
 
 from datetime import datetime
 from datetime import timedelta
@@ -53,6 +57,31 @@ def setup_jwt(app):
     @app.errorhandler(NoAuthorizationError)
     def no_authorization_exception(e):
         default_error_handler(403, request.path, "No authorization after token verification", ["ui", "exception", "credentials"])
+        return make_response(redirect("/admin/login", 302))
+
+    @app.errorhandler(JWTDecodeError)
+    def jwt_decode_exception(e):
+        default_error_handler(403, request.path, "JWT decode exception", ["ui", "exception", "credentials"])
+        return make_response(redirect("/admin/login", 302))
+
+    @app.errorhandler(RevokedTokenError)
+    def revoke_token_exception(e):
+        default_error_handler(403, request.path, "Revoked token exception", ["ui", "exception", "credentials"])
+        return make_response(redirect("/admin/login", 302))
+
+    @app.errorhandler(JWTDecodeError)
+    def jwt_decode_exception(e):
+        default_error_handler(403, request.path, "JWT decode exception", ["ui", "exception", "credentials"])
+        return make_response(redirect("/admin/login", 302))
+
+    @app.errorhandler(UserClaimsVerificationError)
+    def user_claim_verif_exception(e):
+        default_error_handler(403, request.path, "User claim verification exception", ["ui", "exception", "credentials"])
+        return make_response(redirect("/admin/login", 302))
+
+    @app.errorhandler(WrongTokenError)
+    def wrong_token_exception(e):
+        default_error_handler(403, request.path, "Wrong token exception", ["ui", "exception", "credentials"])
         return make_response(redirect("/admin/login", 302))
 
     @app.errorhandler(UserLookupError)

@@ -167,7 +167,9 @@ async function sendData() {
 
   // Fetch
   await fetchAPI(
-    `/api/custom_configs?method=ui`,
+    `/api/custom_configs${
+      method === "DELETE" ? `/${conf.old_name}` : ``
+    }?method=ui`,
     method,
     conf,
     updateConf,
@@ -204,11 +206,15 @@ function formatData() {
     data: data.value,
     method: data.method,
   };
+
   return conf;
 }
 </script>
 <template>
-  <ModalBase @backdrop="$emit('close')" :title="`${props.action} file`">
+  <ModalBase
+    @backdrop="$emit('close')"
+    :title="$t('custom_conf_modal_title', { action: props.action })"
+  >
     <div class="w-full">
       <div
         role="group"
@@ -226,12 +232,12 @@ function formatData() {
           :value="data.name"
           class="modal-path-input"
           :class="[data.name ? '' : 'invalid']"
-          :placeholder="'filename'"
+          :placeholder="$t('custom_conf_modal_placeholder')"
           :disabled="data.isReadOnly"
           pattern="^(?=.*[a-zA-Z0-9]).{1,}$"
           required
         />
-        <p class="ml-1 modal-path-text">.conf</p>
+        <p class="ml-1 modal-path-text">{{ $t("custom_conf_dot_conf") }}</p>
       </div>
 
       <!-- editor-->
@@ -250,7 +256,7 @@ function formatData() {
       <!-- editor-->
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase size="lg" @click="$emit('close')" class="btn-close text-xs">
-          Close
+          {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
           :disabled="!data.name || !data.value ? true : false"
@@ -258,10 +264,11 @@ function formatData() {
           size="lg"
           v-if="props.action !== 'view'"
           :class="[
-            props.action === 'edit' ? 'btn-edit' : '',
-            props.action === 'download' ? 'btn-download' : '',
-            props.action === 'delete' ? 'btn-delete' : '',
-            props.action === 'create' ? 'btn-valid' : '',
+            props.action === 'create'
+              ? 'btn-valid'
+              : props.action
+              ? `btn-${props.action}`
+              : '',
           ]"
           class="text-xs ml-2"
         >

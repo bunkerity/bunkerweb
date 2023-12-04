@@ -12,8 +12,8 @@ const emits = defineEmits(["delete"]);
 </script>
 
 <template>
-  <div class="col-span-12 grid grid-cols-12 gap-3 mt-3">
-    <div
+  <ul class="col-span-12 grid grid-cols-12 gap-3 mt-3">
+    <li
       v-for="plugin in props.items"
       class="py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-3 p-1 flex justify-between items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
     >
@@ -27,7 +27,7 @@ const emits = defineEmits(["delete"]);
       </p>
       <div v-if="plugin.external" class="flex items-center">
         <a v-if="plugin.page" class="hover:-translate-y-px" :href="plugin.page">
-          <span class="sr-only">{{ $t("plugins_list_actions_link") }}</span>
+          <span class="sr-only">{{ $t("action_link") }}</span>
           <svg
             class="h-6 w-6 fill-sky-500 dark dark:brightness-90"
             xmlns="http://www.w3.org/2000/svg"
@@ -50,7 +50,7 @@ const emits = defineEmits(["delete"]);
           type="button"
           class="z-20 mx-2 inline-block font-bold text-left text-white uppercase align-middle transition-all cursor-pointer text-xs ease-in tracking-tight-rem hover:-translate-y-px"
         >
-          <span class="sr-only">{{ $t("plugins_list_actions_delete") }}</span>
+          <span class="sr-only">{{ $t("action_delete") }}</span>
           <svg
             class="h-5 w-5 fill-red-500 dark:brightness-90"
             xmlns="http://www.w3.org/2000/svg"
@@ -62,6 +62,6 @@ const emits = defineEmits(["delete"]);
           </svg>
         </button>
       </div>
-    </div>
-  </div>
+    </li>
+  </ul>
 </template>

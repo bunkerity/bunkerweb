@@ -21,15 +21,16 @@ LOGGER: Logger = setup_logger("UI")
 UI_CONFIG = UiConfig("ui", **os.environ)
 CORE_API = UI_CONFIG.CORE_ADDR
 
+
 def get_req_data(req, queries=[]):
     # get body json or fallback
-    try :
+    try:
         body = req.get_json()
     except:
         body = None
 
     data = {}
-    if body and len(body) > 0 :
+    if body and len(body) > 0:
         data = json.dumps(body, skipkeys=True, allow_nan=True, indent=6)
 
     # get queries
@@ -45,6 +46,7 @@ def get_req_data(req, queries=[]):
     result["data"] = data
 
     return result
+
 
 # Communicate with core and send response to client
 def get_core_format_res(path, method, data=None, message=None, retry=1):
@@ -111,7 +113,7 @@ def req_core(path, method, data=None):
 
 
 # Standard response format
-def res_format(type="error", status_code="500", path="", detail="Internal Server Error", data={ "message" : "error"}):
+def res_format(type="error", status_code="500", path="", detail="Internal Server Error", data={"message": "error"}):
     return json.dumps({"type": type, "status": status_code, "message": f"{path} {detail}", "data": data}, skipkeys=True, allow_nan=True, indent=6)
 
 
@@ -122,7 +124,12 @@ def log_format(type="", status_code="500", path="", detail="Internal Server Erro
 
 # Send action to CORE
 def create_action_format(type="info", status_code="500", title="", detail="", tags=["ui", "exception"], exception_logger=True):
-    data = json.dumps({"date": datetime.now().isoformat(), "api_method": "UNKNOWN", "method": "ui", "title": title, "description": f"{detail} (status {status_code})", "status": type, "tags": tags}, skipkeys=True, allow_nan=True, indent=6)
+    data = json.dumps(
+        {"date": datetime.now().isoformat(), "api_method": "UNKNOWN", "method": "ui", "title": title, "description": f"{detail} { f'(status {status_code})' if status_code else ''}", "status": type, "tags": tags},
+        skipkeys=True,
+        allow_nan=True,
+        indent=6,
+    )
     try:
         requests.post(f"{CORE_API}/actions", data=data)
     except:
