@@ -16,6 +16,34 @@ updates:
       prefix: "deps/gha"
     target-branch: "dev"
 
+  # Linux
+  - package-ecosystem: "docker"
+    directory: "/src/linux"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/linux"
+    target-branch: "dev"
+  - package-ecosystem: "docker"
+    directory: "/tests/linux"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    assignees:
+      - "TheophileDiot"
+    reviewers:
+      - "TheophileDiot"
+    commit-message:
+      prefix: "deps/tests/linux"
+    target-branch: "dev"
+
   # BW
   - package-ecosystem: "docker"
     directory: "/src/bw"
