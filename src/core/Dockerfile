@@ -45,7 +45,7 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 WORKDIR /usr/share/bunkerweb
 
 # Add core user, drop bwcli, install runtime dependencies, create data folders and set permissions
-RUN apk add --no-cache bash grep libgcc libstdc++ libpq openssl libmagic && \
+RUN apk add --no-cache bash grep libgcc libstdc++ libpq openssl libmagic postgresql-dev && \
   ln -s /usr/local/bin/python3 /usr/bin/python3 && \
   addgroup -g 101 core && \
   adduser -h /usr/share/bunkerweb/core -g core -s /bin/bash -G core -D -H -u 101 core && \
