@@ -1,12 +1,13 @@
 # Changelog
 
-## v1.5.4 -
+## v1.5.4 - 2023/12/04
 
+- [UI] Add an optional setup wizard for the web UI
 - [BUGFIX] Fix issues with the Linux integration and external databases
-- [DOCUMENTATION] Add documentation about the new setup wizard
-- [MISC] Add a setup wizard 🧙‍♂️ for the web UI
+- [BUGFIX] Fix scheduler trying to connect to Docker socket in k8s and swarm
+- [LINUX] Support Debian 12, Fedora 39 and RHEL 8.9
+- [DOCKER] Handle start and stop event of BunkerWeb with the scheduler
 - [MISC] Refactor database session handling to make it more stable with SQLite
-- [MISC] Handle start and stop event of BunkerWeb with the scheduler in Docker
 - [MISC] Add conditional block for open file cache in nginx config
 - [MISC] Updated core dependencies
 - [MISC] Updated python dependencies
