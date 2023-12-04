@@ -40,14 +40,14 @@ Because the web UI is a web application, the recommended installation procedure 
 The setup wizard is a feature that helps you to **configure** and **install the web UI** using a **user-friendly interface**. You will need to set the `UI_HOST` setting (`http://hostname-of-web-ui:7000`) and browse the `/setup` URI of your server to access the setup wizard.
 
 <figure markdown>
-  ![Overview](assets/img/ui-wizard-account.png){ align=center, width="600" }
+  ![Overview](assets/img/ui-wizard-account.png){ align=center, width="350" }
   <figcaption>Account section of the setup wizard</figcaption>
 </figure>
 
 Choose your administator username and password. Please note that password must have at least 8 chars with 1 lower case letter, 1 upper case letter, 1 digit and 1 special char.
 
 <figure markdown>
-  ![Overview](assets/img/ui-wizard-settings.png){ align=center, width="600" }
+  ![Overview](assets/img/ui-wizard-settings.png){ align=center, width="350" }
   <figcaption>Settings section of the setup wizard</figcaption>
 </figure>
 
