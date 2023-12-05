@@ -1785,10 +1785,10 @@ chmod -R 770 bw-data</code></p>
 </figure>
 <p>Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 architectures) include:</p>
 <ul>
-<li>Debian 11 "Bullseye"</li>
+<li>Debian 12 "Bookworm"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
-<li>Fedora 38</li>
-<li>Red Hat Enterprise Linux (RHEL) 8.7</li>
+<li>Fedora 39</li>
+<li>Red Hat Enterprise Linux (RHEL) 8.9</li>
 </ul>
 <p>Please ensure that you have <strong>NGINX 1.24.0 installed before installing BunkerWeb</strong>. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the <a href="https://nginx.org/en/linux_packages.html">official NGINX repository</a>. Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.</p>
 <p>To simplify the installation process, Linux package repositories for BunkerWeb are available on <a href="https://packagecloud.io/bunkerity/bunkerweb">PackageCloud</a>. They provide a bash script that automatically adds and trusts the repository. You can follow the provided script for automatic setup, or opt for <a href="https://packagecloud.io/bunkerity/bunkerweb/install">manual installation</a> instructions if you prefer.</p>
@@ -1916,10 +1916,10 @@ MY_SETTING_2=value2
 </figure>
 <p>Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 architectures) include:</p>
 <ul>
-<li>Debian 11 "Bullseye"</li>
+<li>Debian 12 "Bookworm"</li>
 <li>Ubuntu 22.04 "Jammy"</li>
-<li>Fedora 38</li>
-<li>Red Hat Enterprise Linux (RHEL) 8.7</li>
+<li>Fedora 39</li>
+<li>Red Hat Enterprise Linux (RHEL) 8.9</li>
 </ul>
 <p>To simplify the deployment and configuration process, <a href="https://docs.ansible.com/ansible/latest/index.html">Ansible</a> can be used as an IT automation tool. Ansible enables you to configure systems, deploy software, and perform advanced IT tasks such as continuous deployments or zero downtime rolling updates.</p>
 <p>For BunkerWeb, there is a dedicated Ansible role available on <a href="https://galaxy.ansible.com/bunkerity/bunkerweb">Ansible Galaxy</a>.</p>
@@ -7526,13 +7526,13 @@ Consider adding this feature if you want to detect possible open proxies or conn
 <h2 id="web-ui-setup-wizard">Setup wizard</h2>
 <p>The setup wizard is a feature that helps you to <strong>configure</strong> and <strong>install the web UI</strong> using a <strong>user-friendly interface</strong>. You will need to set the <code>UI_HOST</code> setting (<code>http://hostname-of-web-ui:7000</code>) and browse the <code>/setup</code> URI of your server to access the setup wizard.</p>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/ui-wizard-account.png" width="600" />
+<p><img align="center," alt="Overview" src="../assets/img/ui-wizard-account.png" width="350" />
   </p>
 <figcaption>Account section of the setup wizard</figcaption>
 </figure>
 <p>Choose your administator username and password. Please note that password must have at least 8 chars with 1 lower case letter, 1 upper case letter, 1 digit and 1 special char.</p>
 <figure>
-<p><img align="center," alt="Overview" src="../assets/img/ui-wizard-settings.png" width="600" />
+<p><img align="center," alt="Overview" src="../assets/img/ui-wizard-settings.png" width="350" />
   </p>
 <figcaption>Settings section of the setup wizard</figcaption>
 </figure>
