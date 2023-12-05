@@ -38,19 +38,19 @@
   @apply bg-gray-50 rounded px-12 py-16 w-full max-w-[400px];
 }
 
-.login-input-group {
-  @apply flex flex-col relative col-span-12 my-3;
+.account-input-group {
+  @apply flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full;
 }
 
-.login-label {
-  @apply text-primary text-lg capitalize-first my-1 transition duration-300 ease-in-out dark:opacity-90 font-bold m-0 dark:text-gray-300;
+.account-label {
+  @apply text-primary text-base capitalize-first my-1 transition duration-300 ease-in-out dark:opacity-90 font-bold m-0 dark:text-gray-300;
 }
 
-.login-input {
+.account-input {
   @apply col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500;
 }
 
-.login-submit-btn {
+.account-submit-btn {
   @apply my-4 dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md;
 }
 
@@ -62,7 +62,7 @@
   @apply -z-10 fixed lg:relative lg:col-span-1 bg-primary;
 }
 
-.login-alert-container {
+.account-alert-container {
   @apply fixed bottom-4 right-0 min-w-[340px];
 }
 

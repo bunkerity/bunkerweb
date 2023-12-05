@@ -15,6 +15,11 @@ PREFIX = "/admin/"
 dashboard = Blueprint("dashboard", __name__)
 
 
+@dashboard.route(f"{PREFIX}/setup")
+def setup():
+    return render_template("setup.html")
+
+
 @dashboard.route(f"{PREFIX}/login")
 def login():
     return render_template("login.html")

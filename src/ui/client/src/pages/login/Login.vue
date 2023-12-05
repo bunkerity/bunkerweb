@@ -1,8 +1,11 @@
 <script setup>
 import Loader from "@components/Loader.vue";
 import LangSwitch from "@components/LangSwitch.vue";
+import AccountInpGroup from "@components/Account/InpGroup.vue";
+import AccountInput from "@components/Account/Input.vue";
 import FeedbackAlert from "@components/Feedback/Alert.vue";
 import { onMounted, reactive } from "vue";
+
 const data = reactive({
   isErr: false,
 });
@@ -16,7 +19,7 @@ function showErr() {
 
 onMounted(() => {
   const query = window.location.search;
-  if (query.includes("errpr=True")) showErr();
+  if (query.includes("error=True")) showErr();
   tsParticles.load("particles-js", {
     background: {
       position: "82% 50%",
@@ -79,10 +82,10 @@ onMounted(() => {
 <template>
   <Loader />
   <LangSwitch />
-  <div class="login-alert-container">
+  <div class="account-alert-container">
     <FeedbackAlert
       @close="data.isErr = false"
-      id="login-error"
+      id="account-error"
       type="error"
       status="403"
       message="Wrong username or password"
@@ -105,36 +108,28 @@ onMounted(() => {
         </h1>
         <form action="/login" method="POST" autocomplete="off">
           <!-- username inpt-->
-          <div class="login-input-group">
-            <label for="username" class="login-label">
-              {{ $t("login_username") }}
-            </label>
-            <input
-              type="username"
-              id="username"
+          <AccountInpGroup>
+            <AccountInput
+              :label="$t('login_username')"
               name="username"
-              class="login-input"
-              :placeholder="$t('login_username_placeholder')"
               pattern="(.*?)"
-              required
+              :placeholder="$t('login_username_placeholder')"
+              type="text"
+              :required="true"
             />
-          </div>
+          </AccountInpGroup>
           <!-- end username inpt-->
           <!-- password inpt-->
-          <div class="login-input-group">
-            <label for="password" class="login-label">
-              {{ $t("login_password") }}
-            </label>
-            <input
-              type="password"
-              id="password"
+          <AccountInpGroup>
+            <AccountInput
+              :label="$t('login_password')"
               name="password"
-              class="login-input"
-              :placeholder="$t('login_password_placeholder')"
               pattern="(.*?)"
-              required
+              :placeholder="$t('login_password_placeholder')"
+              type="password"
+              :required="true"
             />
-          </div>
+          </AccountInpGroup>
           <!-- end password inpt-->
           <div class="flex justify-center">
             <button
@@ -142,7 +137,7 @@ onMounted(() => {
               id="login"
               name="login"
               value="login"
-              class="login-submit-btn"
+              class="account-submit-btn"
             >
               {{ $t("login_log_button") }}
             </button>
