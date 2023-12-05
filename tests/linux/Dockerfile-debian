@@ -1,4 +1,4 @@
-FROM debian:bullseye@sha256:54d33aaad0bc936a9a40d856764c7bc35c0afaa9cab51f88bb95f6cd8004438d
+FROM debian:bookworm@sha256:133a1f2aa9e55d1c93d0ae1aaa7b94fb141265d0ee3ea677175cdb96f5f990e5
 
 ENV container docker
 ENV LC_ALL C
@@ -25,11 +25,11 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
 
 RUN apt update && \
     apt-get install php-fpm curl gnupg2 ca-certificates python3-pip -y && \
-    echo "deb https://nginx.org/packages/debian/ bullseye nginx" > /etc/apt/sources.list.d/nginx.list && \
-    echo "deb-src https://nginx.org/packages/debian/ bullseye nginx" >> /etc/apt/sources.list.d/nginx.list && \
+    echo "deb https://nginx.org/packages/debian/ bookworm nginx" > /etc/apt/sources.list.d/nginx.list && \
+    echo "deb-src https://nginx.org/packages/debian/ bookworm nginx" >> /etc/apt/sources.list.d/nginx.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
     apt-get update && \
-    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~bullseye
+    apt-get install -y --no-install-recommends nginx=${NGINX_VERSION}-1~bookworm
 
 COPY ./package-debian/*.deb /opt
 

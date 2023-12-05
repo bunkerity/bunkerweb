@@ -78,7 +78,7 @@ metadata:
   name: cfg-bunkerweb-app2-server-http
   annotations:
     bunkerweb.io/CONFIG_TYPE: "server-http"
-    bunkerweb.io/SERVER_NAME: "app2.example.com"
+    bunkerweb.io/CONFIG_SITE: "app2.example.com"
 data:
   myconf: |
     location /app2 {
@@ -94,7 +94,7 @@ metadata:
   name: cfg-bunkerweb-app3-server-http
   annotations:
     bunkerweb.io/CONFIG_TYPE: "server-http"
-    bunkerweb.io/SERVER_NAME: "app3.example.com"
+    bunkerweb.io/CONFIG_SITE: "app3.example.com"
 data:
   myconf: |
     location /app3 {

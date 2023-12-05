@@ -56,9 +56,9 @@ class LinuxTest(Test):
                     LinuxTest.docker_cp(
                         distro,
                         "./tests/www-deb.conf",
-                        "/etc/php/7.4/fpm/pool.d/www.conf",
+                        "/etc/php/8.2/fpm/pool.d/www.conf",
                     )
-                    LinuxTest.docker_exec(distro, "systemctl stop php7.4-fpm ; systemctl start php7.4-fpm")
+                    LinuxTest.docker_exec(distro, "systemctl stop php8.2-fpm ; systemctl start php8.2-fpm")
             elif distro in ("centos", "fedora", "rhel"):
                 LinuxTest.docker_exec(distro, "dnf install -y php-fpm unzip")
                 LinuxTest.docker_cp(distro, "./tests/www-rpm.conf", "/etc/php-fpm.d/www.conf")
