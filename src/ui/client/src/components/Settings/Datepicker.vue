@@ -54,6 +54,15 @@ onMounted(() => {
       datepicker.setDate(`${dateStr}h`);
     },
   });
+  // change error non-standard attributes
+  const calendar = datepicker.calendarContainer;
+  const inps = calendar.querySelectorAll(
+    'input.numInput[type="number"][maxlength]'
+  );
+  inps.forEach((inp) => {
+    inp.setAttribute("data-maxlength", inp.getAttribute("maxlength"));
+    inp.removeAttribute("maxlength");
+  });
 });
 
 function checkToSend(date) {
