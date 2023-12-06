@@ -14,12 +14,17 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  show: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
 });
 </script>
 
 <template>
   <label
-    :class="[props.label ? '' : 'sr-only']"
+    :class="[props.label && props.show ? '' : 'sr-only']"
     :for="props.name"
     class="lowercase capitalize-first my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-300"
   >

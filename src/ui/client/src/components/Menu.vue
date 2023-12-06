@@ -173,7 +173,6 @@ function toggleMenu() {
 
   <!-- left sidebar  -->
   <aside
-    role="menu"
     id="sidebar-menu"
     data-sidebar-menu
     :class="[menu.isDesktop ? true : menu.isActive ? '' : 'active']"

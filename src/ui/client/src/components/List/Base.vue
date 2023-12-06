@@ -12,11 +12,10 @@ const props = defineProps({
 </script>
 
 <template>
-  <section role="table" class="list-container">
-    <div role="rowgroup" class="list-header-container">
-      <label
+  <div role="table" class="list-container">
+    <div role="row" class="list-header-container">
+      <span
         role="rowheader"
-        :aria-rowcount="id"
         class="list-header-item"
         v-for="(item, id) in props.header"
         :class="[
@@ -26,12 +25,12 @@ const props = defineProps({
         ]"
       >
         {{ item }}
-      </label>
+      </span>
     </div>
     <div class="list-content-container">
-      <ul class="list-content-wrap max-h-[300px]">
+      <div role="rowgroup" class="list-content-wrap max-h-[300px]">
         <slot></slot>
-      </ul>
+      </div>
     </div>
-  </section>
+  </div>
 </template>

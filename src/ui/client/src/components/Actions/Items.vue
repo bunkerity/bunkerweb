@@ -18,7 +18,6 @@ const props = defineProps({
 
 <template>
   <ListItem
-    :aria-rowcount="id"
     v-for="(item, id) in props.items"
     :class="[
       id === props.items.length - 1 ? '' : 'border-b',
@@ -26,18 +25,22 @@ const props = defineProps({
       'py-1',
     ]"
   >
-    <div class="list-content-item-wrap">
-      <span class="pl-2" :class="[props.positions[0]]">{{
-        item["method"].toUpperCase()
-      }}</span>
-      <span class="ml-2" :class="[props.positions[1]]">{{
-        item["title"]
-      }}</span>
-      <span class="ml-3" :class="[props.positions[2]]">{{
-        item["description"]
-      }}</span>
-      <div :class="[props.positions[3], 'ml-2']">
-        <SettingsLayout label="" :name="`action-${id}`">
+    <div role="row" class="list-content-item-wrap">
+      <span role="cell" class="pl-2" :class="[props.positions[0]]"
+        >{{ item["method"].toUpperCase() }}
+      </span>
+      <span role="cell" class="ml-2" :class="[props.positions[1]]"
+        >{{ item["title"] }}
+      </span>
+      <span role="cell" class="ml-3" :class="[props.positions[2]]"
+        >{{ item["description"] }}
+      </span>
+      <div role="cell" :class="[props.positions[3], 'ml-2']">
+        <SettingsLayout
+          :showLabel="false"
+          :label="$t('actions_header_date')"
+          :name="`action-${id}`"
+        >
           <SettingsDatepicker
             :settings="{
               id: `action-${id}`,
@@ -47,7 +50,7 @@ const props = defineProps({
           />
         </SettingsLayout>
       </div>
-      <span class="ml-9" :class="[props.positions[4]]"
+      <span role="cell" class="ml-9" :class="[props.positions[4]]"
         >{{ item["api_method"] }}
       </span>
     </div>

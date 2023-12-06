@@ -16,10 +16,10 @@ const props = defineProps({
     required: false,
     default: "",
   },
-  noLabel: {
+  showLabel: {
     type: Boolean,
     required: false,
-    default: false,
+    default: true,
   },
 });
 </script>
@@ -27,7 +27,7 @@ const props = defineProps({
 <template>
   <div class="col-span-12 flex flex-col px-2 py-1">
     <SettingsLabel
-      v-show="!props.noLabel"
+      :show="props.showLabel"
       :label="props.label"
       :name="props.name"
       :version="props.version"

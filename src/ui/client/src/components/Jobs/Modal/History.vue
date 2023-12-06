@@ -43,9 +43,13 @@ const emits = defineEmits(["close"]);
         ]"
         :positions="positions"
       >
-        <ListItem :aria-rowcount="id" v-for="(item, id) in props.history">
-          <div class="list-content-item-wrap">
-            <div class="translate-x-3 col-span-2" :class="[positions[0]]">
+        <ListItem v-for="(item, id) in props.history">
+          <div role="row" class="list-content-item-wrap">
+            <div
+              role="cell"
+              class="translate-x-3 col-span-2"
+              :class="[positions[0]]"
+            >
               <span class="sr-only">
                 {{
                   item["success"]
@@ -55,8 +59,12 @@ const emits = defineEmits(["close"]);
               </span>
               <JobsSvgState :success="item['success']" />
             </div>
-            <span :class="[positions[1]]">{{ item["start_date"] }}</span>
-            <span :class="[positions[2]]">{{ item["end_date"] }}</span>
+            <span role="cell" :class="[positions[1]]">{{
+              item["start_date"]
+            }}</span>
+            <span role="cell" :class="[positions[2]]">{{
+              item["end_date"]
+            }}</span>
           </div>
         </ListItem>
       </ListBase>

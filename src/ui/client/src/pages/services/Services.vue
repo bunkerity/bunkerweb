@@ -455,12 +455,12 @@ onMounted(() => {
         <SettingsLayout
           class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
           :label="$t('services_filter_method_setting')"
-          name="keyword"
+          name="method"
         >
           <SettingsSelect
             @inp="(v) => (filters.method = v)"
             :settings="{
-              id: 'keyword',
+              id: 'method',
               value: filters.method,
               values: getMethodList(),
             }"

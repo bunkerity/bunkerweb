@@ -31,15 +31,6 @@ const listPositions = [
   "col-span-3",
 ];
 
-const listHeader = [
-  "Check",
-  "IP number",
-  "Reason",
-  "Ban start",
-  "Ban End",
-  "Remain",
-];
-
 function getRemain(ms) {
   let seconds = Math.floor(ms / 1000);
   let minutes = Math.floor(seconds / 60);
@@ -163,90 +154,112 @@ async function sendUnban() {
     >
       <ListBase
         class="min-w-[1100px] h-full col-span-12"
-        :header="listHeader"
+        :header="[
+          $t('bans_list_header_check'),
+          $t('bans_list_header_ip'),
+          $t('bans_list_header_reason'),
+          $t('bans_list_header_ban_start'),
+          $t('bans_list_header_ban_end'),
+          $t('bans_list_header_remain'),
+        ]"
         :positions="listPositions"
       >
-        <div>
-          <div id="banlist-container">
-            <ListItem
-              :aria-rowcount="id"
-              v-for="(item, id) in props.items"
-              :class="[
-                id === props.items.length - 1 ? '' : 'border-b',
-                item.isMatchFilter ? '' : 'hidden',
-                'py-1.5',
-              ]"
-            >
-              <div class="list-content-item-wrap">
-                <div :class="[listPositions[0], 'ml-2 mb-2 mr-2']">
-                  <SettingsLayout class="" label="" :name="`check-${id}`">
-                    <SettingsCheckbox
-                      :aria-description="$t('bans_list_select_desc')"
-                      @inp="(v) => updateCheck(v, item.ip)"
-                      :settings="{
-                        id: `check-${id}`,
-                        value: 'no',
-                      }"
-                    />
-                  </SettingsLayout>
-                </div>
-                <div :class="[listPositions[1], 'mr-2']">
-                  <SettingsLayout label="" :name="`ip-${id}`">
-                    <SettingsInput
-                      :settings="{
-                        id: `ip-${id}`,
-                        type: 'text',
-                        value: item.ip,
-                        placeholder: '127.0.0.1',
-                        disabled: true,
-                      }"
-                    />
-                  </SettingsLayout>
-                </div>
-                <div :class="[listPositions[2], 'mr-2']">
-                  <SettingsLayout label="" :name="`ip-reason-${id}`">
-                    <SettingsInput
-                      :settings="{
-                        id: `ip-reason-${id}`,
-                        type: 'text',
-                        value: item.reason,
-                        placeholder: '127.0.0.1',
-                        disabled: true,
-                      }"
-                    />
-                  </SettingsLayout>
-                </div>
-                <div :class="[listPositions[3], 'mr-2']">
-                  <SettingsLayout label="" :name="`ban-deb-${id}`">
-                    <SettingsDatepicker
-                      :settings="{
-                        id: `ban-deb-${id}`,
-                        disabled: true,
-                      }"
-                      :defaultDate="new Date(+`${item.date}000`)"
-                    />
-                  </SettingsLayout>
-                </div>
-                <div :class="[listPositions[4], 'mr-2']">
-                  <SettingsLayout label="" :name="`ban-end-${id}`">
-                    <SettingsDatepicker
-                      :settings="{
-                        id: `ban-end-${id}`,
-                        disabled: true,
-                      }"
-                      :defaultDate="Date.now() + `${item.exp}000`"
-                    />
-                  </SettingsLayout>
-                </div>
-                <div :class="[listPositions[5], 'ml-4']">
-                  <p class="text-sm mb-0">
-                    {{ getRemain(+`${item.exp}000`) }}
-                  </p>
-                </div>
-              </div>
-            </ListItem>
+        <ListItem
+          v-for="(item, id) in props.items"
+          :class="[
+            id === props.items.length - 1 ? '' : 'border-b',
+            item.isMatchFilter ? '' : 'hidden',
+            'py-1.5',
+          ]"
+        >
+          <div role="row" class="list-content-item-wrap">
+            <div role="cell" :class="[listPositions[0], 'ml-2 mb-2 mr-2']">
+              <SettingsLayout
+                :showLabel="false"
+                :label="$t('bans_list_header_check')"
+                :name="`check-${id}`"
+              >
+                <SettingsCheckbox
+                  :aria-description="$t('bans_list_select_desc')"
+                  @inp="(v) => updateCheck(v, item.ip)"
+                  :settings="{
+                    id: `check-${id}`,
+                    value: 'no',
+                  }"
+                />
+              </SettingsLayout>
+            </div>
+            <div role="cell" :class="[listPositions[1], 'mr-2']">
+              <SettingsLayout
+                :showLabel="false"
+                :label="$t('bans_list_header_ip')"
+                :name="`ip-${id}`"
+              >
+                <SettingsInput
+                  :settings="{
+                    id: `ip-${id}`,
+                    type: 'text',
+                    value: item.ip,
+                    placeholder: '127.0.0.1',
+                    disabled: true,
+                  }"
+                />
+              </SettingsLayout>
+            </div>
+            <div role="cell" :class="[listPositions[2], 'mr-2']">
+              <SettingsLayout
+                :showLabel="false"
+                :label="$t('bans_list_header_reason')"
+                :name="`ip-reason-${id}`"
+              >
+                <SettingsInput
+                  :settings="{
+                    id: `ip-reason-${id}`,
+                    type: 'text',
+                    value: item.reason,
+                    placeholder: '127.0.0.1',
+                    disabled: true,
+                  }"
+                />
+              </SettingsLayout>
+            </div>
+            <div role="cell" :class="[listPositions[3], 'mr-2']">
+              <SettingsLayout
+                :showLabel="false"
+                :label="$t('bans_list_header_ban_start')"
+                :name="`ban-deb-${id}`"
+              >
+                <SettingsDatepicker
+                  :settings="{
+                    id: `ban-deb-${id}`,
+                    disabled: true,
+                  }"
+                  :defaultDate="new Date(+`${item.date}000`)"
+                />
+              </SettingsLayout>
+            </div>
+            <div role="cell" :class="[listPositions[4], 'mr-2']">
+              <SettingsLayout
+                :showLabel="false"
+                :label="$t('bans_list_header_ban_end')"
+                :name="`ban-end-${id}`"
+              >
+                <SettingsDatepicker
+                  :settings="{
+                    id: `ban-end-${id}`,
+                    disabled: true,
+                  }"
+                  :defaultDate="Date.now() + `${item.exp}000`"
+                />
+              </SettingsLayout>
+            </div>
+            <div role="cell" :class="[listPositions[5], 'ml-4']">
+              <p class="text-sm mb-0">
+                {{ getRemain(+`${item.exp}000`) }}
+              </p>
+            </div>
           </div>
-        </div>
+        </ListItem>
       </ListBase>
     </div>
 

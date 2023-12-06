@@ -85,14 +85,15 @@ const emits = defineEmits(["history"]);
 
 <template>
   <ListItem
-    :aria-rowcount="id"
     v-for="(item, id) in props.items"
     :class="[id === props.items.length - 1 ? '' : 'border-b', 'py-2']"
   >
-    <div class="list-content-item-wrap" v-for="(data, key) in item">
-      <span class="pl-4" :class="[props.positions[0]]">{{ key }}</span>
-      <span :class="[props.positions[1]]">{{ data["every"] }}</span>
-      <div :class="[props.positions[2], 'ml-2']">
+    <div role="row" class="list-content-item-wrap" v-for="(data, key) in item">
+      <span role="cell" class="pl-4" :class="[props.positions[0]]">{{
+        key
+      }}</span>
+      <span role="cell" :class="[props.positions[1]]">{{ data["every"] }}</span>
+      <div role="cell" :class="[props.positions[2], 'ml-2']">
         <button @click="$emit('history', { jobName: key })">
           <span class="sr-only">
             {{ $t("jobs_actions_show_history") }}
@@ -100,7 +101,7 @@ const emits = defineEmits(["history"]);
           <JobsSvgHistory />
         </button>
       </div>
-      <div class="translate-x-3" :class="[props.positions[3]]">
+      <div role="cell" class="translate-x-3" :class="[props.positions[3]]">
         <span class="sr-only"
           >{{
             data["reload"]
@@ -110,7 +111,7 @@ const emits = defineEmits(["history"]);
         </span>
         <JobsSvgState :success="data['reload']" />
       </div>
-      <div class="translate-x-4" :class="[props.positions[4]]">
+      <div role="cell" class="translate-x-4" :class="[props.positions[4]]">
         <span class="sr-only">
           {{
             data["history"][0]["success"]
@@ -120,10 +121,10 @@ const emits = defineEmits(["history"]);
         </span>
         <JobsSvgState :success="data['history'][0]['success']" />
       </div>
-      <div :class="[props.positions[5]]">
+      <div role="cell" :class="[props.positions[5]]">
         <span>{{ data["history"][0]["end_date"] }}</span>
       </div>
-      <div class="mr-2" :class="[props.positions[6]]">
+      <div role="cell" class="mr-2" :class="[props.positions[6]]">
         <SettingsSelect
           v-if="data['cache'].length > 0"
           :settings="{
@@ -134,7 +135,7 @@ const emits = defineEmits(["history"]);
         >
         </SettingsSelect>
       </div>
-      <div :class="[props.positions[7], 'flex justify-center']">
+      <div role="cell" :class="[props.positions[7], 'flex justify-center']">
         <ButtonBase class="py-1.5" color="valid" size="lg" @click="runJob(key)">
           {{ $t("jobs_actions_run") }}
         </ButtonBase>

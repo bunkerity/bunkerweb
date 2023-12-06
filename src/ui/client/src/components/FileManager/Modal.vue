@@ -14,6 +14,8 @@ import "@assets/script/editor/theme-dracula.js";
 import "@assets/script/editor/theme-dawn.js";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const feedbackStore = useFeedbackStore();
 
