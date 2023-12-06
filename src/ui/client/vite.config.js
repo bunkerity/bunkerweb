@@ -31,7 +31,7 @@ export default defineConfig({
         configs: resolve(__dirname, "./src/pages/configs/index.html"),
         "global-config": resolve(
           __dirname,
-          "./src/pages/global-config/index.html",
+          "./src/pages/global-config/index.html"
         ),
         instances: resolve(__dirname, "./src/pages/instances/index.html"),
         jobs: resolve(__dirname, "./src/pages/jobs/index.html"),
@@ -39,6 +39,7 @@ export default defineConfig({
         plugs: resolve(__dirname, "./src/pages/plugins/index.html"),
         services: resolve(__dirname, "./src/pages/services/index.html"),
         actions: resolve(__dirname, "./src/pages/actions/index.html"),
+        setup: resolve(__dirname, "./src/pages/setup/index.html"),
       },
     },
   },

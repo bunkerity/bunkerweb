@@ -1,4 +1,6 @@
 <script setup>
+import { onMounted, reactive, ref } from "vue";
+
 const props = defineProps({
   label: {
     type: String,
@@ -28,12 +30,12 @@ const props = defineProps({
     default: false,
   },
   maxlength: {
-    type: [Number, Boolean],
+    type: [Number, String, Boolean],
     required: false,
     default: false,
   },
   minlength: {
-    type: [Number, Boolean],
+    type: [Number, String, Boolean],
     required: false,
     default: false,
   },
@@ -42,6 +44,27 @@ const props = defineProps({
     required: false,
     default: "",
   },
+  isInvalid: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  invalidText: {
+    type: String,
+    required: false,
+    default: "",
+  },
+});
+
+// Avoid mutating a prop directly since the value will be overwritten
+const inp = reactive({
+  value: props.value,
+});
+
+const inpEl = ref(null);
+onMounted(() => {
+  if (props.maxlength) inpEl.value.setAttribute("maxlength", props.maxlength);
+  if (props.minlength) inpEl.value.setAttribute("minlength", props.minlength);
 });
 </script>
 
@@ -50,15 +73,23 @@ const props = defineProps({
     {{ props.label }}
   </label>
   <input
+    ref="inpEl"
+    v-model="inp.value"
+    @input="(e) => $emit('inp', inp.value)"
     :type="props.type"
     :id="props.name"
     :name="props.name"
     class="account-input"
+    :class="[props.isInvalid ? `invalid` : '']"
     :placeholder="props.placeholder"
     :pattern="props.pattern"
     :required="props.required"
-    :maxlength="props.maxlength"
-    :minlength="props.minlength"
-    :value="props.value"
+    :value="inp.value"
   />
+  <strong
+    :aria-hidden="props.isInvalid ? 'false' : 'true'"
+    :class="[props.isInvalid && props.invalidText ? 'block' : 'hidden']"
+    class="font-normal text-sm text-red-500"
+    >{{ props.invalidText }}
+  </strong>
 </template>

@@ -61,7 +61,7 @@ function updateCheckbox() {
           ? true
           : false
       "
-      checked
+      :checked="checkbox.value === 'yes' ? true : false"
       :class="[checkbox.value === 'yes' ? 'check' : '', 'checkbox']"
       type="checkbox"
       :value="checkbox.value"

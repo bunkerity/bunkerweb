@@ -20,10 +20,6 @@ onMounted(() => {
         this.isLoading = false;
         this.logoContainer.classList.add("hidden");
       }, 1650);
-
-      setTimeout(() => {
-        this.logoContainer.remove();
-      }, 1800);
     }
 
     loading() {
