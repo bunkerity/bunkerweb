@@ -287,8 +287,8 @@ class CoreConfig(YamlBaseSettings):
                 bunkerweb_instances.append(
                     {
                         "hostname": match.group("hostname"),
-                        "port": match.group("port") or 5000,
-                        "server_name": match.group("server_name") or "bwapi",
+                        "port": match.group("port") or getattr(self, "API_HTTP_PORT", 5000),
+                        "server_name": match.group("server_name") or getattr(self, "API_SERVER_NAME", "bwapi"),
                     }
                 )
             else:
@@ -554,9 +554,9 @@ The static instances are declared in the configuration file or as environment va
 
 - `hostname`: The hostname of the instance
 
-- `port`: The port of the instance (default: `5000`)
+- `port`: The port of the instance (default: the value of the `API_HTTP_PORT` setting or `5000`)
 
-- `server_name`: The server name of the instance (default: `bwapi`)
+- `server_name`: The server name of the instance (default: the value of the `API_SERVER_NAME` setting or `bwapi`)
 
 Example:
 
