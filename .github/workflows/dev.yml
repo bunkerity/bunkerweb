@@ -175,12 +175,12 @@ jobs:
           - linux: debian
             separator: _
             suffix: ""
-            version: bullseye
+            version: bookworm
             package: deb
           - linux: fedora
             separator: "-"
             suffix: "1."
-            version: 38
+            version: 39
             package: rpm
           - linux: el
             separator: "-"

@@ -8,6 +8,7 @@ bcrypt==4.1.1 \
     --hash=sha256:12611c4b0a8b1c461646228344784a1089bc0c49975680a2f54f516e71e9b79e \
     --hash=sha256:12f40f78dcba4aa7d1354d35acf45fae9488862a4fb695c7eeda5ace6aae273f \
     --hash=sha256:14d41933510717f98aac63378b7956bbe548986e435df173c841d7f2bd0b2de7 \
+    --hash=sha256:196008d91201bbb1aa4e666fee5e610face25d532e433a560cabb33bfdff958b \
     --hash=sha256:24c2ebd287b5b11016f31d506ca1052d068c3f9dc817160628504690376ff050 \
     --hash=sha256:2ade10e8613a3b8446214846d3ddbd56cfe9205a7d64742f0b75458c868f7492 \
     --hash=sha256:2e197534c884336f9020c1f3a8efbaab0aa96fc798068cb2da9c671818b7fbb0 \
@@ -55,9 +56,9 @@ gunicorn==21.2.0 \
     # via
     #   -r requirements.in
     #   gunicorn
-importlib-metadata==6.8.0 \
-    --hash=sha256:3ebb78df84a805d7698245025b975d9d67053cd94c79245ba4b3eb694abe68bb \
-    --hash=sha256:dbace7892d8c0c4ac1ad096662232f831d4e64f4c4545bd53016a3e9d4654743
+importlib-metadata==7.0.0 \
+    --hash=sha256:7fc841f8b8332803464e5dc1c63a2e59121f46ca186c0e2e182e80bf8c1319f7 \
+    --hash=sha256:d97503976bb81f40a193d41ee6570868479c69d5068651eb039c40d850c59d67
     # via
     #   -r requirements.in
     #   flask

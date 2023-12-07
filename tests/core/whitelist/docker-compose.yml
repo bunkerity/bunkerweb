@@ -12,6 +12,7 @@ services:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       HTTP_PORT: "80"
       USE_BUNKERNET: "no"
+      SEND_ANONYMOUS_REPORT: "no"
       LOG_LEVEL: "info"
       USE_BLACKLIST: "yes"
       BLACKLIST_IP: "0.0.0.0/0"

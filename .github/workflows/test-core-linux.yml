@@ -18,7 +18,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Set up Python 3.11
-        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
           python-version: "3.11"
       - name: Install Firefox manually and dependencies
@@ -85,6 +85,7 @@ jobs:
           echo 'API_LISTEN_IP=127.0.0.1' | sudo tee -a /etc/bunkerweb/variables.env
           echo "USE_BUNKERNET=no" | sudo tee -a /etc/bunkerweb/variables.env
           echo "USE_BLACKLIST=no" | sudo tee -a /etc/bunkerweb/variables.env
+          echo "SEND_ANONYMOUS_REPORT=no" | sudo tee -a /etc/bunkerweb/variables.env
           echo "LOG_LEVEL=info" | sudo tee -a /etc/bunkerweb/variables.env
           sudo chown nginx:nginx /etc/bunkerweb/variables.env
           sudo chmod 777 /etc/bunkerweb/variables.env

@@ -12,6 +12,7 @@ services:
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
       LOG_LEVEL: "info"
       USE_REDIS: "yes"
       REDIS_HOST: "bw-redis"
