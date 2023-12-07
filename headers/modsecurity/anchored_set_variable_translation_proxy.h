@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -47,7 +47,7 @@ class AnchoredSetVariableTranslationProxy {
                 VariableValue *newVariableValue = new VariableValue(name, &l->at(i)->getKey(), &l->at(i)->getKey());
                 const VariableValue *oldVariableValue = l->at(i);
                 l->at(i) = newVariableValue;
-                for (auto &oldOrigin : oldVariableValue->getOrigin()) {
+                for (const auto &oldOrigin : oldVariableValue->getOrigin()) {
                     std::unique_ptr<VariableOrigin> newOrigin(new VariableOrigin);
                     newOrigin->m_length = oldVariableValue->getKey().size();
                     newOrigin->m_offset = oldOrigin->m_offset - oldVariableValue->getKey().size() - 1;

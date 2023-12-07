@@ -49,7 +49,6 @@ functionStatic:src/operators/geo_lookup.h:35
 duplicateBreak:src/operators/validate_utf8_encoding.cc
 syntaxError:src/transaction.cc:62
 noConstructor:src/variables/variable.h:152
-duplicateBranch:src/request_body_processor/multipart.cc:93
 danglingTempReference:src/modsecurity.cc:206
 knownConditionTrueFalse:src/operators/validate_url_encoding.cc:77
 knownConditionTrueFalse:src/operators/verify_svnr.cc:87
@@ -74,10 +73,13 @@ variableScope:src/operators/rx_global.cc
 noExplicitConstructor:seclang-parser.hh
 constParameter:seclang-parser.hh
 accessMoved:seclang-parser.hh
+returnTempReference:seclang-parser.hh
 
 unreadVariable:src/operators/rx.cc
 unreadVariable:src/operators/rx_global.cc
 
+noExplicitConstructor:src/collection/backend/collection_data.h
+stlIfStrFind:src/collection/backend/collection_data.cc
 
 unusedFunction
 missingIncludeSystem
@@ -94,7 +96,6 @@ cstyleCast
 functionStatic
 shadowFunction
 
-constVariable
 stlcstrConstructor
 stlcstrStream
 uselessCallsSubstr

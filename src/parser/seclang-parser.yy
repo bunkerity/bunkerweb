@@ -44,6 +44,7 @@ class Driver;
 #include "src/actions/disruptive/redirect.h"
 #include "src/actions/init_col.h"
 #include "src/actions/exec.h"
+#include "src/actions/expire_var.h"
 #include "src/actions/log_data.h"
 #include "src/actions/log.h"
 #include "src/actions/maturity.h"
@@ -2744,10 +2745,9 @@ act:
       {
         ACTION_CONTAINER($$, new actions::Exec($1));
       }
-    | ACTION_EXPIRE_VAR
+    | ACTION_EXPIRE_VAR run_time_string
       {
-        //ACTION_NOT_SUPPORTED("ExpireVar", @0);
-        ACTION_CONTAINER($$, new actions::Action($1));
+        ACTION_CONTAINER($$, new actions::ExpireVar(std::move($2)));
       }
     | ACTION_ID
       {

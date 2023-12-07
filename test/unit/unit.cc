@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
                 if (r.size() == 0) {
                     std::cout << KGRN << "0 tests failed.";
                 } else {
-                    for (auto &i : r) {
+                    for (const auto &i : r) {
                         if (i->skipped == true) {
                             skp++;
                         }
@@ -203,7 +203,7 @@ int main(int argc, char **argv) {
             std::cout << KGRN << "All tests passed" << RESET << std::endl;
         } else {
             int skp = 0;
-            for (auto &i : results) {
+            for (const auto &i : results) {
                 if (i->skipped == true) {
                     skp++;
                 }

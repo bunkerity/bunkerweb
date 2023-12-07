@@ -1242,7 +1242,7 @@ int Transaction::processResponseBody() {
         return true;
     }
 
-    std::set<std::string> &bi = \
+    const std::set<std::string> &bi = \
         m_rules->m_responseBodyTypeToBeInspected.m_value;
     auto t = bi.find(m_variableResponseContentType.m_value);
     if (t == bi.end()
