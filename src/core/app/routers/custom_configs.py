@@ -3,7 +3,7 @@ from datetime import datetime
 from os.path import join, sep
 from random import uniform
 from sys import path as sys_path
-from typing import Dict, List, Literal
+from typing import Dict, List, Literal, Optional
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
     if deps_path not in sys_path:
@@ -13,7 +13,7 @@ from fastapi import APIRouter, BackgroundTasks, status
 from fastapi.responses import JSONResponse
 
 from ..dependencies import CORE_CONFIG, DB, send_to_instances
-from api_models import CustomConfigModel, CustomConfigDataModel, ErrorMessage, UpsertCustomConfigDataModel  # type: ignore
+from api_models import CustomConfigDataModel, ErrorMessage, UpsertCustomConfigDataModel  # type: ignore
 
 router = APIRouter(
     prefix="/custom_configs",
@@ -167,51 +167,49 @@ async def upsert_custom_config(custom_config: UpsertCustomConfigDataModel, backg
         },
     },
 )
-async def delete_custom_config(custom_config_name: str, custom_config: CustomConfigModel, background_tasks: BackgroundTasks):
+async def delete_custom_config(custom_config_name: str, method: str, config_type: str, background_tasks: BackgroundTasks, service_id: Optional[str] = None):
     """Delete a custom config"""
 
-    if custom_config.method == "static":
+    if method == "static":
         message = f"Can't delete custom config {custom_config_name} : method can't be static"
         background_tasks.add_task(
             DB.add_action,
-            {"date": datetime.now(), "api_method": "DELETE", "method": custom_config.method, "tags": ["custom_config"], "title": f"Tried to delete custom config {custom_config_name}", "description": message, "status": "error"},
+            {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Tried to delete custom config {custom_config_name}", "description": message, "status": "error"},
         )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
 
-    resp = DB.delete_custom_config(custom_config.service_id, custom_config.type, custom_config_name, custom_config.method)
+    resp = DB.delete_custom_config(service_id, config_type, custom_config_name, method)
 
     if resp == "not_found":
-        message = f"Custom config {custom_config_name} not found"
-        background_tasks.add_task(
-            DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": custom_config.method, "tags": ["custom_config"], "title": f"Tried to delete custom config {custom_config_name}", "description": message, "status": "error"}
-        )
+        message = f"Custom config {custom_config_name}{' from service ' + service_id if service_id else ''} not found"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Tried to delete custom config {custom_config_name}", "description": message, "status": "error"})
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
     elif resp == "method_conflict":
         message = (
-            f"Can't delete custom config {custom_config_name}"
-            + (f" from service {custom_config.service_id}" if custom_config.service_id else "")
+            f"Can't delete custom config {custom_config_name}{' from service ' + service_id if service_id else ''}"
+            + (f" from service {service_id}" if service_id else "")
             + " because it is either static or was created by the core or the autoconf and the method isn't one of them"
         )
         background_tasks.add_task(
-            DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": custom_config.method, "tags": ["custom_config"], "title": f"Trired to delete custom config {custom_config_name}", "description": message, "status": "error"}
+            DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Trired to delete custom config {custom_config_name}", "description": message, "status": "error"}
         )
         CORE_CONFIG.logger.warning(message)
         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": message})
     elif resp == "retry":
         retry_in = str(uniform(1.0, 5.0))
-        CORE_CONFIG.logger.warning(f"Can't delete custom config: Database is locked or had trouble handling the request, retry in {retry_in} seconds")
+        CORE_CONFIG.logger.warning(f"Can't delete custom config{' from service ' + service_id if service_id else ''}: Database is locked or had trouble handling the request, retry in {retry_in} seconds")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
             headers={"Retry-After": retry_in},
         )
     elif resp:
-        message = f"Can't delete custom config {custom_config_name}: {resp}"
+        message = f"Can't delete custom config {custom_config_name}{' from service ' + service_id if service_id else ''}: {resp}"
         background_tasks.add_task(
             DB.add_action,
-            {"date": datetime.now(), "api_method": "DELETE", "method": custom_config.method, "tags": ["custom_config"], "title": f"Trired to delete custom config {custom_config_name}", "description": message, "status": "error"},
+            {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Trired to delete custom config {custom_config_name}", "description": message, "status": "error"},
         )
         CORE_CONFIG.logger.error(message)
         return JSONResponse(
@@ -220,10 +218,10 @@ async def delete_custom_config(custom_config_name: str, custom_config: CustomCon
         )
 
     background_tasks.add_task(
-        DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": custom_config.method, "tags": ["custom_config"], "title": f"Delete custom config {custom_config_name}", "description": f"Delete custom config {custom_config_name}"}
+        DB.add_action, {"date": datetime.now(), "api_method": "DELETE", "method": method, "tags": ["custom_config"], "title": f"Delete custom config {custom_config_name}", "description": f"Delete custom config {custom_config_name}"}
     )
-    CORE_CONFIG.logger.info(f"✅ Custom config {custom_config_name} deleted from database")
+    CORE_CONFIG.logger.info(f"✅ Custom config {custom_config_name}{' from service ' + service_id if service_id else ''} deleted from database")
 
     background_tasks.add_task(send_to_instances, {"custom_configs"})
 
-    return JSONResponse(content={"message": f"Custom config {custom_config_name} deleted"})
+    return JSONResponse(content={"message": f"Custom config {custom_config_name}{' from service ' + service_id if service_id else ''} deleted"})
