@@ -6,7 +6,6 @@ from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network, ip_add
 from threading import Event, Thread
 from os import sep
 from os.path import join
-from signal import SIGINT, SIGTERM, signal
 from sys import path as sys_path
 from time import sleep
 
@@ -23,28 +22,19 @@ from API import API  # type: ignore
 from .core import BUNKERWEB_VERSION, description, tags_metadata
 from .dependencies import CORE_CONFIG, DB, HEALTHY_PATH, listen_for_dynamic_instances, SCHEDULER, seen_instance, stop, stop_event, update_app_mounts
 from .utils import listen_dynamic_instances, run_repeatedly, startup
-from .watchdog_observer import WatchdogObserver
+from .watchdog_observer import ConfigHandler
 
 scheduler_initialized = Event()
 database_initialized = Event()
 
-observer = None
+config_handler = None
 
 
 def stop_app(status):
     stop_event.set()
-    if observer:
-        observer.stop()
+    if config_handler:
+        config_handler.observer.stop()
     stop(status)
-
-
-def exit_handler(signum, frame):
-    CORE_CONFIG.logger.info("Stop signal received, exiting...")
-    stop_app(0)
-
-
-signal(SIGINT, exit_handler)
-signal(SIGTERM, exit_handler)
 
 
 # ? APP
@@ -67,6 +57,12 @@ def run_pending_jobs() -> None:
         scheduler_initialized.set()
 
     SCHEDULER.run_pending()
+
+
+def listen_app_stop() -> None:
+    while HEALTHY_PATH.exists() and not stop_event.is_set():
+        sleep(1)
+    stop_app(0)
 
 
 def instances_healthcheck() -> None:
@@ -149,7 +145,9 @@ async def get_version() -> JSONResponse:
 
 if CORE_CONFIG.hot_reload:
     CORE_CONFIG.logger.info("🐕 Hot reload is enabled, starting watchdog ...")
-    observer = WatchdogObserver()
+    config_handler = ConfigHandler()
+    config_handler.setup_observer()
+    config_handler.observer.start()
 
 startup()
 
@@ -178,6 +176,8 @@ Thread(target=run_repeatedly, args=(1, run_pending_jobs), name="run_pending_jobs
 
 if not HEALTHY_PATH.exists():
     HEALTHY_PATH.write_text("ok", encoding="utf-8")
+
+Thread(target=listen_app_stop, name="listen_app_stop").start()
 
 gc_collect()
 

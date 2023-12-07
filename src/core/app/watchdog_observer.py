@@ -26,9 +26,12 @@ from .utils import listen_dynamic_instances, startup, update_custom_configs
 class ConfigHandler(FileSystemEventHandler):
     def __init__(self):
         super().__init__()
-        self.__observer = WatchdogObserver()
+        self.observer = WatchdogObserver()
         self.last_any_event = 0
         self.last_modified_event = 0
+
+    def setup_observer(self):
+        self.observer.setup(self)
 
     def __is_config_file(self, path: str) -> bool:
         return path in (str(YAML_CONFIG_FILE.resolve()), str(CONFIG_FILE.resolve())) or path.startswith(str(SECRETS_PATH.resolve()))
@@ -54,8 +57,8 @@ class ConfigHandler(FileSystemEventHandler):
         CORE_CONFIG.logger.info(f"📝 File {event.src_path} has been modified")
         if self.__is_config_file(event.src_path):
             CORE_CONFIG.logger.info("🐕 Reloading watchdog ...")
-            self.__observer.unschedule_all()
-            self.__observer.setup()
+            self.observer.unschedule_all()
+            self.observer.setup(self)
         elif event.src_path.startswith(str(CUSTOM_CONFIGS_PATH.resolve())):
             is_not_reloading.wait(timeout=60)
 
@@ -133,7 +136,7 @@ class ConfigHandler(FileSystemEventHandler):
 
         if not CORE_CONFIG.hot_reload:
             CORE_CONFIG.logger.warning("🐕 Hot reload has been disabled, stopping watchdog ...")
-            self.__observer.stop()
+            self.observer.stop()
 
         is_not_reloading.set()
 
@@ -141,33 +144,30 @@ class ConfigHandler(FileSystemEventHandler):
 class WatchdogObserver(Observer):  # type: ignore
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.__config_handler = ConfigHandler()
-        self.setup()
-        self.start()
 
     def stop(self):
         CORE_CONFIG.logger.debug("🐕 Stopping watchdog ...")
         self.unschedule_all()
         super().stop()
 
-    def schedule(self, path: Union[Path, str], recursive: bool = False):
-        super().schedule(self.__config_handler, path, recursive=recursive)
+    def schedule(self, handler: ConfigHandler, path: Union[Path, str], recursive: bool = False):
+        super().schedule(handler, path, recursive=recursive)
         CORE_CONFIG.logger.info(f"🔍 Starting to watch {path} for changes{' recursively' if recursive else ''} ...")
 
-    def setup(self):
+    def setup(self, handler: ConfigHandler):
         """Setup watchdog observer"""
 
         if YAML_CONFIG_FILE.is_file():
-            self.schedule(YAML_CONFIG_FILE.resolve())
+            self.schedule(handler, YAML_CONFIG_FILE.resolve())
         if CONFIG_FILE.is_file():
-            self.schedule(CONFIG_FILE.resolve())
+            self.schedule(handler, CONFIG_FILE.resolve())
         if CORE_CONFIG.integration != "Linux" and SECRETS_PATH.is_dir():
-            self.schedule(SECRETS_PATH.resolve(), recursive=True)
+            self.schedule(handler, SECRETS_PATH.resolve(), recursive=True)
 
-        self.schedule(CUSTOM_CONFIGS_PATH.resolve(), recursive=True)
-        self.schedule(EXTERNAL_PLUGINS_PATH.resolve(), recursive=True)
+        self.schedule(handler, CUSTOM_CONFIGS_PATH.resolve(), recursive=True)
+        self.schedule(handler, EXTERNAL_PLUGINS_PATH.resolve(), recursive=True)
 
         CORE_CONFIG.logger.info("🐕 Watchdog started")
 
 
-__ALL__ = ("WatchdogObserver",)
+__ALL__ = ("ConfigHandler",)

@@ -50,7 +50,8 @@ def stop(status):
     for thread in all_threads():
         if thread.name != "MainThread":
             CORE_CONFIG.logger.info(f"⏲ Waiting for thread {thread.name} to stop (timeout 3s) ...")
-            thread.join(timeout=3)
+            if thread.is_alive():
+                thread.join(timeout=3)
             if thread.is_alive():
                 CORE_CONFIG.logger.warning(f"Thread {thread.name} is still alive, skipping ...")
 
