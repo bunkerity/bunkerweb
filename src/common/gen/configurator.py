@@ -54,7 +54,7 @@ class Configurator:
         else:
             self.__variables = variables
 
-        self.__multisite = self.__variables.get("MULTISITE", "no") == "yes"
+        self.__multisite = self.__variables.get("MULTISITE", "yes") == "yes"
         self.__servers = self.__map_servers()
 
     def get_plugins(self, _type: Union[Literal["core"], Literal["external"]]) -> List[Dict[str, Any]]:
@@ -200,7 +200,7 @@ class Configurator:
             ):
                 self.__logger.warning(f"Ignoring variable {variable} : {err}")
         # Expand variables to each sites if MULTISITE=yes and if not present
-        if config.get("MULTISITE", "no") == "yes":
+        if config.get("MULTISITE", "yes") == "yes":
             for server_name in config["SERVER_NAME"].split(" "):
                 server_name = server_name.strip()
                 if not server_name:

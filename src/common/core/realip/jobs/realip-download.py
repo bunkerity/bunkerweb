@@ -39,7 +39,7 @@ try:
     # Check if at least a server has Realip activated
     realip_activated = False
     # Multisite case
-    if getenv("MULTISITE", "no") == "yes":
+    if getenv("MULTISITE", "yes") == "yes":
         servers = getenv("SERVER_NAME", [])
 
         if isinstance(servers, str):

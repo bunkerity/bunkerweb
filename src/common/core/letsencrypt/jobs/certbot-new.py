@@ -97,7 +97,7 @@ try:
     use_letsencrypt = False
     if getenv("AUTO_LETS_ENCRYPT", "no") == "yes":
         use_letsencrypt = True
-    elif getenv("MULTISITE", "no") == "yes":
+    elif getenv("MULTISITE", "yes") == "yes":
         for first_server in getenv("SERVER_NAME", "").split(" "):
             if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes":
                 use_letsencrypt = True
@@ -128,7 +128,7 @@ try:
         LOGGER.info("No Let's Encrypt data found in db cache")
 
     # Multisite case
-    if getenv("MULTISITE", "no") == "yes" and getenv("SERVER_NAME"):
+    if getenv("MULTISITE", "yes") == "yes" and getenv("SERVER_NAME"):
         for first_server in getenv("SERVER_NAME", "").split():
             if not first_server or getenv(f"{first_server}_AUTO_LETS_ENCRYPT", getenv("AUTO_LETS_ENCRYPT", "no")) != "yes":
                 continue

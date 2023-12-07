@@ -25,7 +25,7 @@ try:
     # Check if at least a server has BunkerNet activated
     bunkernet_activated = False
     # Multisite case
-    if getenv("MULTISITE", "no") == "yes":
+    if getenv("MULTISITE", "yes") == "yes":
         servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):

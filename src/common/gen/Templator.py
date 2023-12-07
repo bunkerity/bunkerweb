@@ -39,7 +39,7 @@ class Templator:
     def render(self):
         self.__render_global()
         servers = [self.__config.get("SERVER_NAME", "").strip()]
-        if self.__config.get("MULTISITE", "no") == "yes":
+        if self.__config.get("MULTISITE", "yes") == "yes":
             servers = self.__config.get("SERVER_NAME", "").strip().split()
         for server in servers:
             self.__render_server(server)
@@ -79,7 +79,7 @@ class Templator:
 
     def __render_server(self, server: str):
         templates = self.__find_templates(["modsec", "modsec-crs", "server-http", "server-stream"])
-        if self.__config.get("MULTISITE", "no") == "yes":
+        if self.__config.get("MULTISITE", "yes") == "yes":
             config = self.__config.copy()
             for variable, value in self.__config.items():
                 if variable.startswith(f"{server}_"):
@@ -90,7 +90,7 @@ class Templator:
             subpath = None
             config = None
             name = None
-            if self.__config.get("MULTISITE", "no") == "yes":
+            if self.__config.get("MULTISITE", "yes") == "yes":
                 subpath = server
                 config = self.__config.copy()
                 for variable, value in self.__config.items():
@@ -144,7 +144,7 @@ class Templator:
     def has_variable(all_vars: Dict[str, Any], variable: str, value: Any) -> bool:
         if all_vars.get(variable) == value:
             return True
-        elif all_vars.get("MULTISITE", "no") == "yes":
+        elif all_vars.get("MULTISITE", "yes") == "yes":
             for server_name in all_vars["SERVER_NAME"].strip().split():
                 if all_vars.get(f"{server_name}_{variable}") == value:
                     return True

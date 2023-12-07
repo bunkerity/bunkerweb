@@ -59,7 +59,7 @@ try:
     # Check if at least a server has Blacklist activated
     blacklist_activated = False
     # Multisite case
-    if getenv("MULTISITE", "no") == "yes":
+    if getenv("MULTISITE", "yes") == "yes":
         for first_server in getenv("SERVER_NAME", "").split():
             if getenv(f"{first_server}_USE_BLACKLIST", getenv("USE_BLACKLIST", "yes")) == "yes":
                 blacklist_activated = True

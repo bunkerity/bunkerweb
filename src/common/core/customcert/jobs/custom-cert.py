@@ -79,7 +79,7 @@ try:
         else:
             LOGGER.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates")
 
-    if getenv("MULTISITE", "no") == "yes":
+    if getenv("MULTISITE", "yes") == "yes":
         servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):

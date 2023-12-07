@@ -119,7 +119,7 @@ class Config:
         # Replace with instances values
         for k, v in env_instances.items():
             full_env[k] = v
-            if not self._is_setting_context(k, "global") and env_instances.get("MULTISITE", "no") == "yes" and env_instances.get("SERVER_NAME", "") != "":
+            if not self._is_setting_context(k, "global") and env_instances.get("MULTISITE", "yes") == "yes" and env_instances.get("SERVER_NAME", "") != "":
                 for server_name in env_instances["SERVER_NAME"].strip().split():
                     full_env[f"{server_name}_{k}"] = v
         # Replace with services values

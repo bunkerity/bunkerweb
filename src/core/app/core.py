@@ -400,7 +400,7 @@ class CoreConfig(YamlBaseSettings):
 
         instances_config.update(
             {
-                "MULTISITE": "yes" if any((self.kubernetes_mode, self.swarm_mode, self.autoconf_mode)) else instances_config.get("MULTISITE", "no"),
+                "MULTISITE": "yes" if any((self.kubernetes_mode, self.swarm_mode, self.autoconf_mode)) else instances_config.get("MULTISITE", "yes"),
                 "LOG_LEVEL": self.log_level_setting,
                 "EXTERNAL_PLUGIN_URLS": self.external_plugin_urls_str,
                 "AUTOCONF_MODE": "yes" if self.autoconf_mode else "no",

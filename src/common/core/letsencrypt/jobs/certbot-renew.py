@@ -28,7 +28,7 @@ try:
     use_letsencrypt = False
     if getenv("AUTO_LETS_ENCRYPT", "no") == "yes":
         use_letsencrypt = True
-    elif getenv("MULTISITE", "no") == "yes":
+    elif getenv("MULTISITE", "yes") == "yes":
         for first_server in getenv("SERVER_NAME", "").split(" "):
             if first_server and getenv(f"{first_server}_AUTO_LETS_ENCRYPT", "no") == "yes":
                 use_letsencrypt = True

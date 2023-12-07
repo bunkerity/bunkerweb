@@ -531,7 +531,7 @@ class Database:
                         # Remove services that are no longer in the list
                         session.query(Services).filter(Services.id.in_(missing_ids)).delete()
 
-                if config.get("MULTISITE", "no") == "yes":
+                if config.get("MULTISITE", "yes") == "yes":
                     global_values = []
 
                     for key, value in deepcopy(config).items():
@@ -929,7 +929,7 @@ class Database:
                 if setting.context == "multisite":
                     multisite.append(setting.id)
 
-            is_multisite = global_config.get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else global_config.get("MULTISITE", "no") == "yes"
+            is_multisite = global_config.get("MULTISITE", {"value": "yes"})["value"] == "yes" if methods else global_config.get("MULTISITE", "yes") == "yes"
 
             if is_multisite:
                 for service in session.query(Services).with_entities(Services.id).all():

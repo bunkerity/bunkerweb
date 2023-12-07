@@ -23,7 +23,7 @@ status = 0
 try:
     # Check if we need to generate a self-signed default cert for non-SNI "clients"
     need_default_cert = False
-    if getenv("MULTISITE", "no") == "yes":
+    if getenv("MULTISITE", "yes") == "yes":
         for first_server in getenv("SERVER_NAME", "").split():
             for check_var in ("USE_CUSTOM_SSL", "AUTO_LETS_ENCRYPT", "GENERATE_SELF_SIGNED_SSL"):
                 if getenv(f"{first_server}_{check_var}", getenv(check_var, "no")) == "yes":

@@ -183,7 +183,7 @@ def update_custom_configs(db_config: dict):
             name = match.group("name").replace(".conf", "")
             service = match.group("service_id")
             CORE_CONFIG.logger.info(f"🛠️ Found custom conf env var \"{name}\"{' for service ' + service if service else ''} with type {match.group('type')}")
-            if db_config.get("MULTISITE", "no") == "no" and service:
+            if db_config.get("MULTISITE", "yes") == "no" and service:
                 CORE_CONFIG.logger.warning(f'🛠️ Because MULTISITE is set to "no", the service id will be ignored for custom conf env var "{name}" with type {match.group("type")}, the custom config will then be applied globally')
                 service = None
             env_custom_configs.append({"value": v, "exploded": (service, match.group("type"), name)})
@@ -200,7 +200,7 @@ def update_custom_configs(db_config: dict):
             CORE_CONFIG.logger.info("✅ Custom configs from env saved to database")
 
     files_custom_configs = []
-    max_num_sep = str(CUSTOM_CONFIGS_PATH).count(sep) + (3 if db_config.get("MULTISITE", "no") == "yes" else 2)
+    max_num_sep = str(CUSTOM_CONFIGS_PATH).count(sep) + (3 if db_config.get("MULTISITE", "yes") == "yes" else 2)
     root_dirs = listdir(CUSTOM_CONFIGS_PATH)
     for root, dirs, files in walk(CUSTOM_CONFIGS_PATH):
         if root.count(sep) <= max_num_sep and (files or (dirs and basename(root) not in root_dirs)):
