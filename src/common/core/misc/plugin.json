@@ -158,6 +158,15 @@
       "regex": "^(403|444)$",
       "type": "select",
       "select": ["403", "444"]
+    },
+    "SEND_ANONYMOUS_REPORT": {
+      "context": "global",
+      "default": "yes",
+      "help": "Send anonymous report to BunkerWeb maintainers.",
+      "id": "send-anonymous-report",
+      "label": "Send anonymous report",
+      "regex": "^(yes|no)$",
+      "type": "check"
     }
   },
   "jobs": [
@@ -170,6 +179,12 @@
     {
       "name": "update-check",
       "file": "update-check.py",
+      "every": "day",
+      "reload": false
+    },
+    {
+      "name": "anonymous-report",
+      "file": "anonymous-report.py",
       "every": "day",
       "reload": false
     }

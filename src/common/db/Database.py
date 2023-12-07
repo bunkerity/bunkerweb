@@ -265,6 +265,17 @@ class Database:
 
         return ""
 
+    def get_metadata(self) -> Dict[str, str]:
+        """Get the metadata from the database"""
+        data = {"version": "1.5.4", "integration": "unknown"}
+        with self.__db_session() as session:
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration).filter_by(id=1).first()
+                if metadata:
+                    data = {"version": metadata.version, "integration": metadata.integration}
+
+        return data
+
     def check_changes(self) -> Union[Dict[str, bool], bool, str]:
         """Check if either the config, the custom configs, plugins or instances have changed inside the database"""
         with self.__db_session() as session:
