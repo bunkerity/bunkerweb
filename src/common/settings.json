@@ -265,21 +265,6 @@
     "regex": "^\\d+[kKmMgG]?$",
     "type": "text"
   },
-  "USE_API": {
-    "context": "global",
-    "default": "yes",
-    "help": {
-      "en": "Activate the API to control BunkerWeb.",
-      "fr": "Active l'API pour contrôler BunkerWeb."
-    },
-    "id": "use-api",
-    "label": {
-      "en": "Activate API",
-      "fr": "Activer l'API"
-    },
-    "regex": "^(yes|no)$",
-    "type": "check"
-  },
   "API_HTTP_PORT": {
     "context": "global",
     "default": "5000",

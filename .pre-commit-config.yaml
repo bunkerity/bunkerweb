@@ -63,7 +63,7 @@ repos:
     hooks:
       - id: codespell
         name: Codespell Spell Checker
-        exclude: (^src/(common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|common/core/.+/plugin.json)$
+        exclude: (^src/(common/core/.+/files|bw/loading)/.+.html|modsecurity-rules.conf.*|common/(settings|core/.+/plugin).json)$
         entry: codespell --ignore-regex="(Widgits|fo\b)" --skip CHANGELOG.md,src/ui/client/src/lang/fr.json
         language: python
         types: [text]
