@@ -1,4 +1,4 @@
-FROM nginx:1.24.0-alpine@sha256:76ca7f6bfe01c3e22e3af85fd37c30149ece3ac2a444973687cab1765abca115 AS builder
+FROM nginx:1.24.0-alpine-slim@sha256:9f2f5675034f8a3ba56b193bf6f9b4a38bb59fbceefe7294f485860cc688f4c5 AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip
@@ -44,7 +44,7 @@ COPY src/common/utils utils
 COPY src/VERSION VERSION
 COPY misc/*.ascii misc/
 
-FROM nginx:1.24.0-alpine@sha256:76ca7f6bfe01c3e22e3af85fd37c30149ece3ac2a444973687cab1765abca115
+FROM nginx:1.24.0-alpine-slim@sha256:9f2f5675034f8a3ba56b193bf6f9b4a38bb59fbceefe7294f485860cc688f4c5
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -54,8 +54,8 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
-# Install runtime dependencies, pypi packages, move bwcli, create data folders and set permissions
-RUN apk add --no-cache pcre bash python3 yajl && \
+# Install runtime dependencies, create data folders and set permissions
+RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 && \
 	cp helpers/bwcli /usr/bin/ && \
 	mkdir -p /var/tmp/bunkerweb && \
 	mkdir -p /var/run/bunkerweb && \

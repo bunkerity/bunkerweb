@@ -1,4 +1,4 @@
-FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8 AS builder
+FROM python:3.12.0-alpine3.18@sha256:09f18c1f8ca777f63934b415af9a781a0e5aaba5e005ba0475cba71bb3e8e609 AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache g++ gcc build-base linux-headers postgresql-dev
@@ -34,7 +34,7 @@ COPY src/VERSION VERSION
 
 COPY src/core core
 
-FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8
+FROM python:3.12.0-alpine3.18@sha256:09f18c1f8ca777f63934b415af9a781a0e5aaba5e005ba0475cba71bb3e8e609
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
