@@ -60,6 +60,7 @@ else
     export GLOBAL_LOG_LEVEL="info"
     export GLOBAL_USE_BUNKERNET="no"
     export GLOBAL_USE_BLACKLIST="no"
+    export GLOBAL_SEND_ANONYMOUS_REPORT="no"
     export GLOBAL_USE_REVERSE_PROXY="yes"
     export GLOBAL_REVERSE_PROXY_HOST="http://app1:8080"
     export GLOBAL_REVERSE_PROXY_URL="/"

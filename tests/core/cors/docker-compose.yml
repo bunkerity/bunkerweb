@@ -16,6 +16,7 @@ services:
       HTTPS_PORT: "443"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
       REMOTE_PHP: "app1"
       REMOTE_PHP_PATH: "/app"
       LOG_LEVEL: "info"
