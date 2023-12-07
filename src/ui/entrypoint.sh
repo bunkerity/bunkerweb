@@ -37,7 +37,7 @@ set +a # turn off automatic exporting
 
 # execute ui
 log "ENTRYPOINT" "ℹ️ " "Executing UI ..."
-python3 -m gunicorn --config /usr/share/bunkerweb/ui/gunicorn.conf.py --bind "$LISTEN_ADDR":"$LISTEN_PORT" &
+python3 -m gunicorn --config /usr/share/bunkerweb/ui/gunicorn.conf.py --bind "$LISTEN_ADDR":"$LISTEN_PORT" --access-logfile "-" &
 pid="$!"
 wait "$pid"
 while [ -f /var/run/bunkerweb/ui.pid ] ; do

@@ -6,6 +6,16 @@ source /usr/share/bunkerweb/helpers/utils.sh
 # shellcheck disable=SC1091
 source /usr/share/bunkerweb/scripts/utils.sh
 
+export PYTHONPATH=/usr/share/bunkerweb/deps/python/
+
+function get_var() {
+    rerunuserlt="$(grep "^$1=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
+    if [ "$rerunuserlt" = "" ] ; then
+        rerunuserlt="$(echo "$@" | cut -d ' ' -f 2-)"
+    fi
+    echo "$rerunuserlt"
+}
+
 # Start the bunkerweb service
 function start() {
     log "SYSTEMCTL" "ℹ️" "Starting BunkerWeb service ..."
@@ -15,63 +25,27 @@ function start() {
 
     # Create dummy variables.env
     if [ ! -f /etc/bunkerweb/variables.env ]; then
-        sudo -E -u nginx -g nginx /bin/bash -c "echo -ne '# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nDNS_RESOLVERS=8.8.8.8 8.8.4.4\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env"
+        runuser -p -g nginx -s /bin/bash -c "echo -ne '# remove IS_LOADING=yes when your config is ready\nIS_LOADING=yes\nUSE_BUNKERNET=no\nDNS_RESOLVERS=9.9.9.9 8.8.8.8 8.8.4.4\nHTTP_PORT=80\nHTTPS_PORT=443\nAPI_LISTEN_IP=127.0.0.1\nSERVER_NAME=\n' > /etc/bunkerweb/variables.env" nginx
         log "SYSTEMCTL" "ℹ️" "Created dummy variables.env file"
     fi
 
     # Stop nginx if it's running
     stop
 
-    # TODO change this to the new format
-
     # Generate temp conf for jobs and start nginx
-    DNS_RESOLVERS="$(grep "^DNS_RESOLVERS=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    if [ "$DNS_RESOLVERS" = "" ] ; then
-        DNS_RESOLVERS="8.8.8.8 8.8.4.4"
-    fi
-    API_LISTEN_IP="$(grep "^API_LISTEN_IP=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    if [ "$API_LISTEN_IP" = "" ] ; then
-        API_LISTEN_IP="127.0.0.1"
-    fi
-    API_HTTP_PORT="$(grep "^API_HTTP_PORT=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    if [ "$API_HTTP_PORT" = "" ] ; then
-        API_HTTP_PORT="5000"
-    fi
-    API_SERVER_NAME="$(grep "^API_SERVER_NAME=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    if [ "$API_SERVER_NAME" = "" ] ; then
-        API_SERVER_NAME="bwapi"
-    fi
-    API_WHITELIST_IP="$(grep "^API_WHITELIST_IP=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    if [ "$API_WHITELIST_IP" = "" ] ; then
-        API_WHITELIST_IP="127.0.0.0/8"
-    fi
-    USE_REAL_IP="$(grep "^USE_REAL_IP=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    if [ "$USE_REAL_IP" = "" ] ; then
-        USE_REAL_IP="no"
-    fi
-    USE_PROXY_PROTOCOL="$(grep "^USE_PROXY_PROTOCOL=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    if [ "$USE_PROXY_PROTOCOL" = "" ] ; then
-        USE_PROXY_PROTOCOL="no"
-    fi
-    REAL_IP_FROM="$(grep "^REAL_IP_FROM=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    if [ "$REAL_IP_FROM" = "" ] ; then
-        REAL_IP_FROM="192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"
-    fi
-    REAL_IP_HEADER="$(grep "^REAL_IP_HEADER=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    if [ "$REAL_IP_HEADER" = "" ] ; then
-        REAL_IP_HEADER="X-Forwarded-For"
-    fi
-    HTTP_PORT="$(grep "^HTTP_PORT=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    if [ "$HTTP_PORT" = "" ] ; then
-        HTTP_PORT="80"
-    fi
-
-    HTTPS_PORT="$(grep "^HTTPS_PORT=" /etc/bunkerweb/variables.env | cut -d '=' -f 2)"
-    if [ "$HTTPS_PORT" = "" ] ; then
-        HTTPS_PORT="443"
-    fi
-    sudo -E -u nginx -g nginx /bin/bash -c "echo -ne 'IS_LOADING=yes\nUSE_BUNKERNET=no\nSERVER_NAME=\nDNS_RESOLVERS=${DNS_RESOLVERS}\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_LISTEN_IP=${API_LISTEN_IP}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\n' > /var/tmp/bunkerweb/tmp.env"
-    sudo -E -u nginx -g nginx /bin/bash -c "PYTHONPATH=/usr/share/bunkerweb/deps/python/ /usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env --no-linux-reload"
+    DNS_RESOLVERS="$(get_var "DNS_RESOLVERS" "9.9.9.9 8.8.8.8 8.8.4.4")"
+    API_LISTEN_IP="$(get_var "API_LISTEN_IP" "127.0.0.1")"
+    API_HTTP_PORT="$(get_var "API_HTTP_PORT" "5000")"
+    API_SERVER_NAME="$(get_var "API_SERVER_NAME" "bwapi")"
+    API_WHITELIST_IP="$(get_var "API_WHITELIST_IP" "127.0.0.0/8")"
+    USE_REAL_IP="$(get_var "USE_REAL_IP" "no")"
+    USE_PROXY_PROTOCOL="$(get_var "USE_PROXY_PROTOCOL" "no")"
+    REAL_IP_FROM="$(get_var "REAL_IP_FROM" "192.168.0.0/16 172.16.0.0/12 10.0.0.0/8")"
+    REAL_IP_HEADER="$(get_var "REAL_IP_HEADER" "X-Forwarded-For")"
+    HTTP_PORT="$(get_var "HTTP_PORT" "80")"
+    HTTPS_PORT="$(get_var "HTTPS_PORT" "443")"
+    runuser -p -g nginx -s /bin/bash -c "echo -ne 'IS_LOADING=yes\nUSE_BUNKERNET=no\nSERVER_NAME=\nDNS_RESOLVERS=${DNS_RESOLVERS}\nAPI_HTTP_PORT=${API_HTTP_PORT}\nAPI_LISTEN_IP=${API_LISTEN_IP}\nAPI_SERVER_NAME=${API_SERVER_NAME}\nAPI_WHITELIST_IP=${API_WHITELIST_IP}\nUSE_REAL_IP=${USE_REAL_IP}\nUSE_PROXY_PROTOCOL=${USE_PROXY_PROTOCOL}\nREAL_IP_FROM=${REAL_IP_FROM}\nREAL_IP_HEADER=${REAL_IP_HEADER}\nHTTP_PORT=${HTTP_PORT}\nHTTPS_PORT=${HTTPS_PORT}\n' > /var/tmp/bunkerweb/tmp.env" nginx
+    runuser -p -g nginx -s /bin/bash -c "/usr/share/bunkerweb/gen/main.py --variables /var/tmp/bunkerweb/tmp.env --no-linux-reload" nginx
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while generating config from /var/tmp/bunkerweb/tmp.env"
@@ -80,12 +54,12 @@ function start() {
 
     if [ ! -f /var/run/bunkerweb ] ; then
         mkdir -p /var/run/bunkerweb
-        chown nginx:nginx /var/run/bunkerweb
+        chown root:nginx /var/run/bunkerweb
     fi
 
     # Start nginx
     log "SYSTEMCTL" "ℹ️" "Starting nginx ..."
-    sudo -E -u nginx -g nginx /usr/sbin/nginx -e /var/log/bunkerweb/error.log
+    runuser -p -g nginx -s /bin/bash -c "/usr/sbin/nginx -e /var/log/bunkerweb/error.log" nginx
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
         log "SYSTEMCTL" "❌" "Error while executing temp nginx"

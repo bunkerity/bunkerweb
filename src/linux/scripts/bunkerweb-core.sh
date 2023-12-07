@@ -31,12 +31,10 @@ function start() {
 	set +a # turn off automatic exporting
 	rm -f /tmp/core.tmp.env
 
-    python3 -m gunicorn --chdir /usr/share/bunkerweb/core \
-        --config /usr/share/bunkerweb/core/gunicorn.conf.py \
-        --user nginx \
-        --group nginx \
-        --bind "127.0.0.1":"$LISTEN_PORT" &
-    echo $! > /var/run/bunkerweb/core.pid
+    python3 -m gunicorn --chdir /usr/share/bunkerweb/core --config /usr/share/bunkerweb/core/gunicorn.conf.py --access-logfile /var/log/bunkerweb/core-access.log &
+    while [ ! -f /var/run/bunkerweb/core.pid ]; do
+        sleep 1
+    done
 }
 
 # Check the command line argument

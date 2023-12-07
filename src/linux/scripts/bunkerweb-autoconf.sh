@@ -14,8 +14,7 @@ fi
 # Function to start the UI
 function start() {
     log "SYSTEMCTL" "ℹ️" "Starting Autoconf"
-    python /usr/share/bunkerweb/autoconf/main.py &
-    echo $! > /var/run/bunkerweb/autoconf.pid
+    python3 /usr/share/bunkerweb/autoconf/main.py &
 }
 
 # Check the command line argument

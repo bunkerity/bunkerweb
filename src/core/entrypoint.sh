@@ -51,7 +51,7 @@ function start() {
 
 	# Execute core
 	log "ENTRYPOINT" "ℹ️ " "Executing core ..."
-	python3 -m gunicorn --config /usr/share/bunkerweb/core/gunicorn.conf.py --bind "$LISTEN_ADDR":"$LISTEN_PORT" &
+	python3 -m gunicorn --config /usr/share/bunkerweb/core/gunicorn.conf.py --access-logfile "-" &
 	pid="$!"
 	wait "$pid"
 	while [ -f /var/run/bunkerweb/core.pid ] ; do

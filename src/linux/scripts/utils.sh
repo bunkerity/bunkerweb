@@ -33,12 +33,14 @@ function stop() {
 
     if [ -f "/var/run/bunkerweb/$service.pid" ] ; then
         service_pid=$(cat "/var/run/bunkerweb/$service.pid")
-        log "SYSTEMCTL" "ℹ️ " "Stopping $service..."
-        kill -SIGINT "$service_pid"
-        # shellcheck disable=SC2181
-        if [ $? -ne 0 ] ; then
-            log "SYSTEMCTL" "❌" "Error while sending stop signal to $service"
-            exit 1
+        if [ -n "$service_pid" ] ; then
+            log "SYSTEMCTL" "ℹ️ " "Stopping $service..."
+            kill -SIGINT "$service_pid"
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                log "SYSTEMCTL" "❌" "Error while sending stop signal to $service"
+                exit 1
+            fi
         fi
     else
         log "SYSTEMCTL" "ℹ️ " "$service_name already stopped"

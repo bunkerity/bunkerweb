@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Flask
 from flask import Blueprint
-from flask import Response
 
 import requests
 
@@ -54,7 +53,7 @@ for x in range(UI_CONFIG.MAX_WAIT_RETRIES):
         break
 
     try:
-        req = requests.get(f"{CORE_API}/ping")
+        req = requests.get(f"{CORE_API}/ping", headers={"Authorization": f"Bearer {UI_CONFIG.core_token}"} if UI_CONFIG.core_token else {})
         if req.status_code == 200:
             core_running = True
     except:

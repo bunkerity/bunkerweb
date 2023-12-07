@@ -20,7 +20,7 @@ function start() {
 
     # shellcheck disable=SC2181
 	if ! [ $? -eq 0 ] ; then
-		# Show the output of the core
+		# Show the output of the ui
 		echo "$output"
 		exit 1
 	fi
@@ -29,12 +29,10 @@ function start() {
     source /etc/bunkerweb/ui.env
     set +a # turn off automatic exporting
 
-    python3 -m gunicorn --chdir /usr/share/bunkerweb/ui \
-        --config /usr/share/bunkerweb/ui/gunicorn.conf.py \
-        --user nginx \
-        --group nginx \
-        --bind "$LISTEN_ADDR":"$LISTEN_PORT" &
-    echo $! > /var/run/bunkerweb/ui.pid
+    python3 -m gunicorn --chdir /usr/share/bunkerweb/ui --config /usr/share/bunkerweb/ui/gunicorn.conf.py --access-logfile /var/log/bunkerweb/ui-access.log &
+    while [ ! -f /var/run/bunkerweb/ui.pid ]; do
+        sleep 1
+    done
 }
 
 # Check the command line argument

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from ipaddress import IPv4Network, IPv6Network, ip_address, ip_network
-from logging import getLogger
+from logging import Formatter, getLogger
 from os.path import join, sep
 from sys import path as sys_path
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
@@ -27,6 +27,22 @@ class BwUvicornWorker(UvicornWorker):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(UvicornWorker, self).__init__(*args, **kwargs)
+
+        formatter = Formatter(fmt="%(asctime)s [%(name)s] [%(process)d] [%(levelname)s] - %(message)s", datefmt="[%Y-%m-%d %H:%M:%S %z]")
+
+        logger = getLogger("uvicorn.error")
+        logger.handlers = self.log.error_log.handlers
+        for handler in logger.handlers:
+            handler.setFormatter(formatter)
+        logger.setLevel(self.log.error_log.level)
+        logger.propagate = False
+
+        logger = getLogger("uvicorn.access")
+        logger.handlers = self.log.access_log.handlers
+        for handler in logger.handlers:
+            handler.setFormatter(formatter)
+        logger.setLevel(self.log.access_log.level)
+        logger.propagate = False
 
         config_kwargs: dict = {
             "app": None,

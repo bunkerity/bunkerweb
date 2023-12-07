@@ -6,13 +6,14 @@ After=network.target
 [Service]
 Restart=no
 User=nginx
+Group=nginx
 PIDFile=/var/run/bunkerweb/core.pid
 ExecStart=/usr/share/bunkerweb/scripts/bunkerweb-core.sh start
 ExecStop=/usr/share/bunkerweb/scripts/bunkerweb-core.sh stop
 ExecReload=/usr/share/bunkerweb/scripts/bunkerweb-core.sh reload
 Type=simple
-StandardOutput=journal+console
-StandardError=journal+console
+StandardOutput=append:/var/log/bunkerweb/core.log
+StandardError=append:/var/log/bunkerweb/core.log
 
 [Install]
 WantedBy=multi-user.target
