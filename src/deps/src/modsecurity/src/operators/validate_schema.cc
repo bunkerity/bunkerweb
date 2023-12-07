@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -39,12 +39,23 @@ bool ValidateSchema::init(const std::string &file, std::string *error) {
 }
 
 
-bool ValidateSchema::evaluate(Transaction *t,
+bool ValidateSchema::evaluate(Transaction *transaction,
     const std::string &str) {
-    int rc;
 
-    m_parserCtx = xmlSchemaNewParserCtxt(m_resource.c_str());
-    if (m_parserCtx == NULL) {
+    if (transaction->m_xml->m_data.doc == NULL) {
+        ms_dbg_a(transaction, 4, "XML document tree could not be found for " \
+            "schema validation.");
+        return true;
+    }
+
+    if (transaction->m_xml->m_data.well_formed != 1) {
+        ms_dbg_a(transaction, 4, "XML: Schema validation failed because " \
+            "content is not well formed.");
+        return true;
+    }
+
+    xmlSchemaParserCtxtPtr parserCtx = xmlSchemaNewParserCtxt(m_resource.c_str());
+    if (parserCtx == NULL) {
         std::stringstream err;
         err << "XML: Failed to load Schema from file: ";
         err << m_resource;
@@ -52,22 +63,22 @@ bool ValidateSchema::evaluate(Transaction *t,
         if (m_err.empty() == false) {
             err << m_err;
         }
-        ms_dbg_a(t, 4, err.str());
+        ms_dbg_a(transaction, 4, err.str());
         return true;
     }
 
-    xmlSchemaSetParserErrors(m_parserCtx,
+    xmlSchemaSetParserErrors(parserCtx,
         (xmlSchemaValidityErrorFunc)error_load,
         (xmlSchemaValidityWarningFunc)warn_load, &m_err);
 
-    xmlThrDefSetGenericErrorFunc(m_parserCtx,
+    xmlThrDefSetGenericErrorFunc(parserCtx,
         null_error);
 
-    xmlSetGenericErrorFunc(m_parserCtx,
+    xmlSetGenericErrorFunc(parserCtx,
         null_error);
 
-    m_schema = xmlSchemaParse(m_parserCtx);
-    if (m_schema == NULL) {
+    xmlSchemaPtr schema = xmlSchemaParse(parserCtx);
+    if (schema == NULL) {
         std::stringstream err;
         err << "XML: Failed to load Schema: ";
         err << m_resource;
@@ -75,61 +86,41 @@ bool ValidateSchema::evaluate(Transaction *t,
         if (m_err.empty() == false) {
             err << " " << m_err;
         }
-        ms_dbg_a(t, 4, err.str());
-        xmlSchemaFreeParserCtxt(m_parserCtx);
+        ms_dbg_a(transaction, 4, err.str());
+        xmlSchemaFreeParserCtxt(parserCtx);
         return true;
     }
 
-    m_validCtx = xmlSchemaNewValidCtxt(m_schema);
-    if (m_validCtx == NULL) {
+    xmlSchemaValidCtxtPtr validCtx = xmlSchemaNewValidCtxt(schema);
+    if (validCtx == NULL) {
         std::stringstream err("XML: Failed to create validation context.");
         if (m_err.empty() == false) {
             err << " " << m_err;
         }
-        ms_dbg_a(t, 4, err.str());
+        ms_dbg_a(transaction, 4, err.str());
+        xmlSchemaFree(schema);
+        xmlSchemaFreeParserCtxt(parserCtx);
         return true;
     }
 
     /* Send validator errors/warnings to msr_log */
-    xmlSchemaSetValidErrors(m_validCtx,
+    xmlSchemaSetValidErrors(validCtx,
         (xmlSchemaValidityErrorFunc)error_runtime,
-        (xmlSchemaValidityWarningFunc)warn_runtime, t);
+        (xmlSchemaValidityWarningFunc)warn_runtime, transaction);
 
-    if (t->m_xml->m_data.doc == NULL) {
-        ms_dbg_a(t, 4, "XML document tree could not be found for " \
-            "schema validation.");
-        return true;
-    }
+    int rc = xmlSchemaValidateDoc(validCtx, transaction->m_xml->m_data.doc);
 
-    if (t->m_xml->m_data.well_formed != 1) {
-        ms_dbg_a(t, 4, "XML: Schema validation failed because " \
-            "content is not well formed.");
-        return true;
-    }
-
-    /* Make sure there were no other generic processing errors */
-    /*
-    if (msr->msc_reqbody_error) {
-        ms_dbg_a(t, 4, "XML: Schema validation could not proceed due to previous"
-                " processing errors.");
-        return true;
-    }
-    */
-
-    rc = xmlSchemaValidateDoc(m_validCtx, t->m_xml->m_data.doc);
+    xmlSchemaFreeValidCtxt(validCtx);
+    xmlSchemaFree(schema);
+    xmlSchemaFreeParserCtxt(parserCtx);
     if (rc != 0) {
-        ms_dbg_a(t, 4, "XML: Schema validation failed.");
-        xmlSchemaFree(m_schema);
-        xmlSchemaFreeParserCtxt(m_parserCtx);
+        ms_dbg_a(transaction, 4, "XML: Schema validation failed.");
         return true; /* No match. */
+    } else {
+        ms_dbg_a(transaction, 4, "XML: Successfully validated payload against " \
+            "Schema: " + m_resource);
+        return false;
     }
-
-    ms_dbg_a(t, 4, "XML: Successfully validated payload against " \
-        "Schema: " + m_resource);
-    xmlSchemaFree(m_schema);
-    xmlSchemaFreeParserCtxt(m_parserCtx);
-
-    return false;
 }
 
 #endif

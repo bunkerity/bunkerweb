@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -30,7 +30,7 @@ bool RuleRemoveById::init(std::string *error) {
     std::string what(m_parser_payload, 15, m_parser_payload.size() - 15);
     bool added = false;
     std::vector<std::string> toRemove = utils::string::ssplit(what, ' ');
-    for (std::string &a : toRemove) {
+    for (const std::string &a : toRemove) {
         std::string b = modsecurity::utils::string::parserSanitizer(a);
         if (b.size() == 0) {
             continue;

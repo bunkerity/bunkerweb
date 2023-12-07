@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -36,27 +36,10 @@ namespace operators {
 class ValidateSchema : public Operator {
  public:
     /** @ingroup ModSecurity_Operator */
-#ifndef WITH_LIBXML2
     explicit ValidateSchema(std::unique_ptr<RunTimeString> param)
         : Operator("ValidateSchema", std::move(param)) { }
-#else
-    explicit ValidateSchema(std::unique_ptr<RunTimeString> param)
-        : Operator("ValidateSchema", std::move(param)),
-        m_parserCtx(NULL),
-        m_validCtx(NULL),
-        m_schema(NULL) { }
-    ~ValidateSchema() {
-        /*
-        if (m_schema != NULL) {
-            xmlSchemaFree(m_schema);
-            m_schema = NULL;
-        }
-        */
-        if (m_validCtx != NULL) {
-            xmlSchemaFreeValidCtxt(m_validCtx);
-            m_validCtx = NULL;
-        }
-    }
+    ~ValidateSchema() { }
+#ifdef WITH_LIBXML2
 
     bool evaluate(Transaction *transaction, const std::string  &str) override;
     bool init(const std::string &file, std::string *error) override;
@@ -129,9 +112,6 @@ class ValidateSchema : public Operator {
     }
 
  private:
-    xmlSchemaParserCtxtPtr m_parserCtx;
-    xmlSchemaValidCtxtPtr m_validCtx;
-    xmlSchemaPtr m_schema;
     std::string m_resource;
     std::string m_err;
 #endif

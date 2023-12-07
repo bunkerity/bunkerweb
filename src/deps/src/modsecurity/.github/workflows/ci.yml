@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04]
         platform: [x32, x64]
         compiler: [gcc, clang]
         configure:
@@ -24,7 +24,6 @@ jobs:
     steps:
       - name: Setup Dependencies
         run: |
-          sudo add-apt-repository --yes ppa:maxmind/ppa
           sudo apt-get update -y -qq
           sudo apt-get install -y libfuzzy-dev libyajl-dev libgeoip-dev liblua5.2-dev liblmdb-dev cppcheck libmaxminddb-dev libcurl4-openssl-dev libpcre2-dev pcre2-utils
       - uses: actions/checkout@v2

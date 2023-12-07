@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <string>
 #include <iostream>
 #include <unordered_map>
+#include <chrono>
 #include <list>
 #include <vector>
 #include <algorithm>
@@ -27,6 +28,7 @@
 
 #include "modsecurity/variable_value.h"
 #include "modsecurity/collection/collection.h"
+#include "src/collection/backend/collection_data.h"
 #include "src/variables/variable.h"
 
 #ifndef SRC_COLLECTION_BACKEND_IN_MEMORY_PER_PROCESS_H_
@@ -68,13 +70,13 @@ struct MyHash{
 };
 
 class InMemoryPerProcess :
-    public std::unordered_multimap<std::string, std::string,
+    public std::unordered_multimap<std::string, CollectionData,
         /*std::hash<std::string>*/MyHash, MyEqual>,
     public Collection {
  public:
     explicit InMemoryPerProcess(const std::string &name);
     ~InMemoryPerProcess();
-    void store(std::string key, std::string value) override;
+    void store(std::string key, std::string value);
 
     bool storeOrUpdateFirst(const std::string &key,
         const std::string &value) override;
@@ -83,6 +85,10 @@ class InMemoryPerProcess :
         const std::string &value) override;
 
     void del(const std::string& key) override;
+
+    void delIfExpired(const std::string& key);
+
+    void setExpiry(const std::string& key, int32_t expiry_seconds) override;
 
     std::unique_ptr<std::string> resolveFirst(const std::string& var) override;
 
@@ -94,6 +100,20 @@ class InMemoryPerProcess :
     void resolveRegularExpression(const std::string& var,
         std::vector<const VariableValue *> *l,
         variables::KeyExclusions &ke) override;
+
+    /* store */
+    virtual void store(std::string key, std::string compartment,
+        std::string value) {
+        std::string nkey = compartment + "::" + key;
+        store(nkey, value);
+    }
+
+
+    virtual void store(std::string key, std::string compartment,
+        std::string compartment2, std::string value) {
+        std::string nkey = compartment + "::" + compartment2 + "::" + key;
+        store(nkey, value);
+    }
 
  private:
     pthread_mutex_t m_lock;

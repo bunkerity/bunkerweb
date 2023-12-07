@@ -103,6 +103,7 @@ TESTS+=test/test-cases/regression/action-ctl_rule_remove_target_by_id.json
 TESTS+=test/test-cases/regression/action-ctl_rule_remove_target_by_tag.json
 TESTS+=test/test-cases/regression/action-disruptive.json
 TESTS+=test/test-cases/regression/action-exec.json
+TESTS+=test/test-cases/regression/action-expirevar.json
 TESTS+=test/test-cases/regression/action-id.json
 TESTS+=test/test-cases/regression/action-initcol.json
 TESTS+=test/test-cases/regression/action-msg.json

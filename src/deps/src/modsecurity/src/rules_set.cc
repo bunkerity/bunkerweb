@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -162,7 +162,7 @@ int RulesSet::evaluate(int phase, Transaction *t) {
             }
             bool remove_rule = false;
             if (ruleWithActions && m_exceptions.m_remove_rule_by_msg.empty() == false) {
-                for (auto &z : m_exceptions.m_remove_rule_by_msg) {
+                for (const auto &z : m_exceptions.m_remove_rule_by_msg) {
                     if (ruleWithActions->containsMsg(z, t) == true) {
                         ms_dbg_a(t, 9, "Skipped rule id '" \
                             + ruleWithActions->getReference() \
@@ -177,7 +177,7 @@ int RulesSet::evaluate(int phase, Transaction *t) {
             }
 
             if (ruleWithActions && m_exceptions.m_remove_rule_by_tag.empty() == false) {
-                for (auto &z : m_exceptions.m_remove_rule_by_tag) {
+                for (const auto &z : m_exceptions.m_remove_rule_by_tag) {
                     if (ruleWithActions->containsTag(z, t) == true) {
                         ms_dbg_a(t, 9, "Skipped rule id '" \
                             + ruleWithActions->getReference() \
@@ -193,7 +193,7 @@ int RulesSet::evaluate(int phase, Transaction *t) {
 
 
             if (ruleWithActions) {
-                for (auto &z : t->m_ruleRemoveByTag) {
+                for (const auto &z : t->m_ruleRemoveByTag) {
                     if (ruleWithActions->containsTag(z, t) == true) {
                         ms_dbg_a(t, 9, "Skipped rule id '" \
                             + ruleWithActions->getReference() \
