@@ -4,13 +4,13 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --strip-extras requirements.in
 #
-acme==2.7.4 \
-    --hash=sha256:b9d27f49156b111e207be4aae6fc468c273572c99461f05fd65d679e338322f6 \
-    --hash=sha256:c72662887ec1c5ddc3c2e6103b89a22e12d67befc44f14b3d41874f3236d7a6b
+acme==2.8.0 \
+    --hash=sha256:0955694971d638a5797fa5cc17ef90ad92b070ca6a0bf32d377077781ba617c2 \
+    --hash=sha256:f1f700ce60d84512fcd19a887f03557fd58e861b3fa061861f90cb90fdbbf208
     # via certbot
-certbot==2.7.4 \
-    --hash=sha256:173778fef4e2e3014f60be02d4798dff7ea32790277b90b3c7249c5d46d17c75 \
-    --hash=sha256:d2b344a7357b38565e465678ba9e0e7ecbbdc5332832404b58499691c88cdbb9
+certbot==2.8.0 \
+    --hash=sha256:95234695951e458fcc4199b8bc60589d5c7055193265ea0973773b01c5293d4d \
+    --hash=sha256:b98513b1c2a5a68d5dfe6fe333a5755b657af3720b44ec94651869233a7c3f0a
     # via -r requirements.in
 certifi==2023.11.17 \
     --hash=sha256:9b469f3a900bf28dc19b8cfbf8019bf47f7fdd1a65a1d4ffb98fc14166beb4d1 \
@@ -210,9 +210,9 @@ idna==3.6 \
     --hash=sha256:9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca \
     --hash=sha256:c05567e9c24a6b9faaa835c4821bad0590fbb9d5779e7caa6e1cc4978e7eb24f
     # via requests
-importlib-metadata==6.8.0 \
-    --hash=sha256:3ebb78df84a805d7698245025b975d9d67053cd94c79245ba4b3eb694abe68bb \
-    --hash=sha256:dbace7892d8c0c4ac1ad096662232f831d4e64f4c4545bd53016a3e9d4654743
+importlib-metadata==7.0.0 \
+    --hash=sha256:7fc841f8b8332803464e5dc1c63a2e59121f46ca186c0e2e182e80bf8c1319f7 \
+    --hash=sha256:d97503976bb81f40a193d41ee6570868479c69d5068651eb039c40d850c59d67
     # via certbot
 josepy==1.14.0 \
     --hash=sha256:308b3bf9ce825ad4d4bba76372cf19b5dc1c2ce96a9d298f9642975e64bd13dd \
