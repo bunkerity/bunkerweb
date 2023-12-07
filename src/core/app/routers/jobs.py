@@ -13,7 +13,7 @@ from fastapi import APIRouter, BackgroundTasks, File, Form, Response, status
 from fastapi.responses import JSONResponse
 
 from ..dependencies import CORE_CONFIG, DB, run_job, run_jobs as deps_run_jobs
-from api_models import CacheFileModel, ErrorMessage, Job, JobCache, JobRun  # type: ignore
+from api_models import ErrorMessage, Job, JobCache, JobRun  # type: ignore
 
 router = APIRouter(
     prefix="/jobs",
@@ -293,12 +293,12 @@ async def upsert_cache(
         },
     },
 )
-async def delete_cache(job_name: str, file_name: str, method: str, data: CacheFileModel, background_tasks: BackgroundTasks):
+async def delete_cache(job_name: str, file_name: str, method: str, background_tasks: BackgroundTasks, service_id: Optional[str] = None):
     """
     Delete a file from the cache.
     """
     # TODO add a background task that sends a request to the instances to delete the cache when soft reload will be available
-    resp = DB.delete_job_cache(job_name, file_name, service_id=data.service_id)
+    resp = DB.delete_job_cache(job_name, file_name, service_id=service_id)
 
     if not resp:
         message = f"Job {job_name} cache file {file_name} not found"
@@ -330,7 +330,7 @@ async def delete_cache(job_name: str, file_name: str, method: str, data: CacheFi
             "method": method,
             "tags": ["job"],
             "title": f"Job {job_name} cache file {file_name} deleted",
-            "description": f"Job {job_name} cache file {file_name} deleted" + (f" for service {data.service_id}" if data.service_id else ""),
+            "description": f"Job {job_name} cache file {file_name} deleted" + (f" for service {service_id}" if service_id else ""),
         },
     )
     CORE_CONFIG.logger.info(f"✅ Job {job_name} cache successfully deleted from database")

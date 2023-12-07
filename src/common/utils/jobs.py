@@ -218,8 +218,7 @@ class Job:
         try:
             sent, err, status, resp = self.api.request(
                 "DELETE",
-                f"/jobs/{job_name}/cache/{name}?method=core",
-                data={"service_id": service_id},
+                f"/jobs/{job_name}/cache/{name}?method=core" + (f"&service_id={service_id}" if service_id else ""),
                 additonal_headers=self.api_token_header,
             )
 
