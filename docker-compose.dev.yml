@@ -32,11 +32,16 @@ services:
       - API_WHITELIST_IP=127.0.0.0/8 192.168.64.0/24
       - CHECK_TOKEN=no
       - CHECK_WHITELIST=no
+      - SERVER_NAME=www.example.com app1.example.com
       - USE_BUNKERNET=no
       - USE_BLACKLIST=no
       - USE_REVERSE_PROXY=yes
-      - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://myapp1
+      - www.example.com_USE_UI=yes
+      - www.example.com_REVERSE_PROXY_URL=/admin
+      - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
+      - www.example.com_INTERCEPTED_ERROR_CODES=404 405 413 429 500 501 502 503 504
+      - app1.example.com_REVERSE_PROXY_URL=/
+      - app1.example.com_REVERSE_PROXY_HOST=http://myapp1
     networks:
       - bw-universe
 
@@ -51,8 +56,9 @@ services:
     environment:
       - CORE_ADDR=http://bw-core:1337
       - CORE_TOKEN=ChangeMe42!!!
-      - ADMIN_PASSWORD=P@ssw0rd
       - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=P@ssw0rd
+      - MODE=dev
     networks:
       - bw-universe
 
