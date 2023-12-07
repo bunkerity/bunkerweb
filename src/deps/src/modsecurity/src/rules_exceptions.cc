@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -122,7 +122,7 @@ bool RulesExceptions::loadUpdateTargetById(double id,
 bool RulesExceptions::load(const std::string &a, std::string *error) {
     bool added = false;
     std::vector<std::string> toRemove = utils::string::ssplit(a, ' ');
-    for (std::string &r : toRemove) {
+    for (const std::string &r : toRemove) {
         std::string b = modsecurity::utils::string::parserSanitizer(r);
         if (b.size() == 0) {
             continue;

@@ -4,7 +4,7 @@ dnl CHECK_PCRE2(ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND])
 AC_DEFUN([PROG_PCRE2], [
 
 # Possible names for the pcre2 library/package (pkg-config)
-PCRE2_POSSIBLE_LIB_NAMES="pcre2 pcre2-8"
+PCRE2_POSSIBLE_LIB_NAMES="pcre2 pcre2-8 libpcre2-8"
 
 # Possible extensions for the library
 PCRE2_POSSIBLE_EXTENSIONS="so so0 la sl dll dylib so.0.0.0"

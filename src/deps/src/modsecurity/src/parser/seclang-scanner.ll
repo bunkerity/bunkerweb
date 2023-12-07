@@ -545,10 +545,7 @@ EQUALS_MINUS                            (?i:=\-)
 {ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG}[=]{REMOVE_RULE_BY}               { return p::make_ACTION_CTL_RULE_REMOVE_TARGET_BY_TAG(yytext, *driver.loc.back()); }
 {ACTION_EXEC}:'{VAR_FREE_TEXT_QUOTE}'                                   { return p::make_ACTION_EXEC(yytext, *driver.loc.back()); }
 {ACTION_EXEC}:{VAR_FREE_TEXT_SPACE_COMMA}                               { return p::make_ACTION_EXEC(yytext, *driver.loc.back()); }
-{ACTION_EXPIRE_VAR}:'{VAR_FREE_TEXT_QUOTE}={VAR_FREE_TEXT_QUOTE}'       { return p::make_ACTION_EXPIRE_VAR(yytext, *driver.loc.back()); }
-{ACTION_EXPIRE_VAR}:'{VAR_FREE_TEXT_QUOTE}'                             { return p::make_ACTION_EXPIRE_VAR(yytext, *driver.loc.back()); }
-{ACTION_EXPIRE_VAR}:{VAR_FREE_TEXT_SPACE_COMMA}                         { return p::make_ACTION_EXPIRE_VAR(yytext, *driver.loc.back()); }
-{ACTION_EXPIRE_VAR}:{VAR_FREE_TEXT_SPACE}={VAR_FREE_TEXT_SPACE_COMMA}   { return p::make_ACTION_EXPIRE_VAR(yytext, *driver.loc.back()); }
+{ACTION_EXPIRE_VAR}:                                                    { BEGIN(EXPECTING_ACTION_PREDICATE); return p::make_ACTION_EXPIRE_VAR(yytext, *driver.loc.back()); }
 {ACTION_INITCOL}:{COL_NAME}=                                            { BEGIN(EXPECTING_ACTION_PREDICATE); return p::make_ACTION_INITCOL(yytext, *driver.loc.back()); }
 {ACTION_MATURITY}:'{FREE_TEXT_QUOTE}'                                   { return p::make_ACTION_MATURITY(yytext, *driver.loc.back()); }
 {ACTION_MATURITY}:{FREE_TEXT_QUOTE}                                     { return p::make_ACTION_MATURITY(yytext, *driver.loc.back()); }

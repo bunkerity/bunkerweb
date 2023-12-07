@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -69,7 +69,7 @@ void RemoteUser::evaluate(Transaction *transaction,
     var = new VariableValue(&l2->at(0)->getKeyWithCollection(),
         &transaction->m_variableRemoteUser);
 
-    for (auto &i : l2->at(0)->getOrigin()) {
+    for (const auto &i : l2->at(0)->getOrigin()) {
         std::unique_ptr<VariableOrigin> origin(new VariableOrigin());
         origin->m_offset = i->m_offset;
         origin->m_length = i->m_length;

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -33,18 +33,31 @@
 namespace modsecurity {
 namespace operators {
 
+#ifdef WITH_LIBXML2
+class XmlDtdPtrManager {
+ public:
+    /** @ingroup ModSecurity_Operator */
+    explicit XmlDtdPtrManager(xmlDtdPtr dtd)
+        : m_dtd(dtd) { }
+    ~XmlDtdPtrManager() {
+        if (m_dtd != NULL) {
+            xmlFreeDtd(m_dtd);
+            m_dtd = NULL;
+        }
+    }
+    xmlDtdPtr get() const {return m_dtd;}
+ private:
+    xmlDtdPtr m_dtd; // The resource being managed
+};
+#endif
+
 class ValidateDTD : public Operator {
  public:
     /** @ingroup ModSecurity_Operator */
     explicit ValidateDTD(std::unique_ptr<RunTimeString> param)
         : Operator("ValidateDTD", std::move(param)) { }
 #ifdef WITH_LIBXML2
-    ~ValidateDTD() {
-        if (m_dtd != NULL) {
-            xmlFreeDtd(m_dtd);
-            m_dtd = NULL;
-        }
-    }
+    ~ValidateDTD() { }
 
     bool evaluate(Transaction *transaction, const std::string  &str) override;
     bool init(const std::string &file, std::string *error) override;
@@ -89,7 +102,6 @@ class ValidateDTD : public Operator {
 
  private:
     std::string m_resource;
-    xmlDtdPtr m_dtd = NULL;
 #endif
 };
 

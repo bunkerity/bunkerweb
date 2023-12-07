@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 
 #include "src/collection/backend/lmdb.h"
+#include "src/collection/backend/collection_data.h"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -158,6 +159,7 @@ std::unique_ptr<std::string> LMDB::resolveFirst(const std::string& var) {
     MDB_val mdb_value_ret;
     std::unique_ptr<std::string> ret = NULL;
     MDB_txn *txn = NULL;
+    CollectionData collectionData;
 
     string2val(var, &mdb_key);
 
@@ -172,16 +174,124 @@ std::unique_ptr<std::string> LMDB::resolveFirst(const std::string& var) {
         goto end_get;
     }
 
-    ret = std::unique_ptr<std::string>(new std::string(
-        reinterpret_cast<char *>(mdb_value_ret.mv_data),
-        mdb_value_ret.mv_size));
+    collectionData.setFromSerialized(reinterpret_cast<char *>(mdb_value_ret.mv_data), mdb_value_ret.mv_size);
+    if ((!collectionData.isExpired()) && (collectionData.hasValue())) {
+        ret = std::unique_ptr<std::string>(new std::string(collectionData.getValue()));
+    }
 
 end_get:
     mdb_txn_abort(txn);
 end_txn:
+    // The read-only transaction is complete. Now we can do a delete if the item was expired.
+    if (collectionData.isExpired()) {
+        delIfExpired(var);
+    }
     return ret;
 }
 
+
+void LMDB::setExpiry(const std::string &key, int32_t expiry_seconds) {
+    int rc;
+    MDB_txn *txn;
+    MDB_val mdb_key;
+    MDB_val mdb_value;
+    MDB_val mdb_value_ret;
+    CollectionData previous_data;
+    CollectionData new_data;
+    std::string serializedData;
+
+    string2val(key, &mdb_key);
+
+    rc = txn_begin(0, &txn);
+    lmdb_debug(rc, "txn", "setExpiry");
+    if (rc != 0) {
+        goto end_txn;
+    }
+
+    rc = mdb_get(txn, m_dbi, &mdb_key, &mdb_value_ret);
+    lmdb_debug(rc, "get", "setExpiry");
+    if (rc == 0) {
+        previous_data.setFromSerialized(reinterpret_cast<char *>(mdb_value_ret.mv_data), mdb_value_ret.mv_size);
+        rc = mdb_del(txn, m_dbi, &mdb_key, &mdb_value_ret);
+        lmdb_debug(rc, "del", "setExpiry");
+        if (rc != 0) {
+            goto end_del;
+        }
+    }
+
+    if (previous_data.hasValue()) {
+        new_data = previous_data;
+    };
+    new_data.setExpiry(expiry_seconds);
+    serializedData = new_data.getSerialized();
+    string2val(serializedData, &mdb_value);
+
+    rc = mdb_put(txn, m_dbi, &mdb_key, &mdb_value, 0);
+    lmdb_debug(rc, "put", "setExpiry");
+    if (rc != 0) {
+        goto end_put;
+    }
+
+    rc = mdb_txn_commit(txn);
+    lmdb_debug(rc, "commit", "setExpiry");
+    if (rc != 0) {
+        goto end_commit;
+    }
+
+end_put:
+end_del:
+    if (rc != 0) {
+        mdb_txn_abort(txn);
+    }
+end_commit:
+end_txn:
+    return;
+}
+
+void LMDB::delIfExpired(const std::string& key) {
+    MDB_txn *txn;
+    MDB_val mdb_key;
+    MDB_val mdb_value_ret;
+    CollectionData collectionData;
+
+    int rc = txn_begin(0, &txn);
+    lmdb_debug(rc, "txn", "del");
+    if (rc != 0) {
+        goto end_txn;
+    }
+
+    string2val(key, &mdb_key);
+
+    rc = mdb_get(txn, m_dbi, &mdb_key, &mdb_value_ret);
+    lmdb_debug(rc, "get", "del");
+    if (rc != 0) {
+        goto end_get;
+    }
+
+    collectionData.setFromSerialized(reinterpret_cast<char *>(mdb_value_ret.mv_data), mdb_value_ret.mv_size);
+    if (collectionData.isExpired()) {
+        rc = mdb_del(txn, m_dbi, &mdb_key, &mdb_value_ret);
+        lmdb_debug(rc, "del", "del");
+        if (rc != 0) {
+            goto end_del;
+        }
+    }
+
+    rc = mdb_txn_commit(txn);
+    lmdb_debug(rc, "commit", "del");
+    if (rc != 0) {
+        goto end_commit;
+    }
+
+end_del:
+end_get:
+    if (rc != 0) {
+        mdb_txn_abort(txn);
+    }
+end_commit:
+end_txn:
+    return;
+}
 
 bool LMDB::storeOrUpdateFirst(const std::string &key,
     const std::string &value) {
@@ -190,9 +300,11 @@ bool LMDB::storeOrUpdateFirst(const std::string &key,
     MDB_val mdb_key;
     MDB_val mdb_value;
     MDB_val mdb_value_ret;
+    CollectionData previous_data;
+    CollectionData new_data;
+    std::string serializedData;
 
     string2val(key, &mdb_key);
-    string2val(value, &mdb_value);
 
     rc = txn_begin(0, &txn);
     lmdb_debug(rc, "txn", "storeOrUpdateFirst");
@@ -203,12 +315,20 @@ bool LMDB::storeOrUpdateFirst(const std::string &key,
     rc = mdb_get(txn, m_dbi, &mdb_key, &mdb_value_ret);
     lmdb_debug(rc, "get", "storeOrUpdateFirst");
     if (rc == 0) {
+        previous_data.setFromSerialized(reinterpret_cast<char *>(mdb_value_ret.mv_data), mdb_value_ret.mv_size);
         rc = mdb_del(txn, m_dbi, &mdb_key, &mdb_value_ret);
         lmdb_debug(rc, "del", "storeOrUpdateFirst");
         if (rc != 0) {
             goto end_del;
         }
     }
+
+    if (previous_data.hasExpiry()) {
+        new_data = previous_data;
+    };
+    new_data.setValue(value);
+    serializedData = new_data.getSerialized();
+    string2val(serializedData, &mdb_value);
 
     rc = mdb_put(txn, m_dbi, &mdb_key, &mdb_value, 0);
     lmdb_debug(rc, "put", "storeOrUpdateFirst");
@@ -241,6 +361,8 @@ void LMDB::resolveSingleMatch(const std::string& var,
     MDB_val mdb_value;
     MDB_val mdb_value_ret;
     MDB_cursor *cursor;
+    CollectionData collectionData;
+    std::list<std::string> expiredVars;
 
     rc = txn_begin(MDB_RDONLY, &txn);
     lmdb_debug(rc, "txn", "resolveSingleMatch");
@@ -253,53 +375,24 @@ void LMDB::resolveSingleMatch(const std::string& var,
     mdb_cursor_open(txn, m_dbi, &cursor);
     while ((rc = mdb_cursor_get(cursor, &mdb_key,
             &mdb_value_ret, MDB_NEXT_DUP)) == 0) {
-        std::string *a = new std::string(
-            reinterpret_cast<char *>(mdb_value_ret.mv_data),
-            mdb_value_ret.mv_size);
-        VariableValue *v = new VariableValue(&var, a);
+        collectionData.setFromSerialized(reinterpret_cast<char *>(mdb_value_ret.mv_data), mdb_value_ret.mv_size);
+        if (collectionData.isExpired()) {
+            expiredVars.push_back(std::string(reinterpret_cast<char *>(mdb_key.mv_data), mdb_key.mv_size));
+            continue;
+        }
+        if (!collectionData.hasValue()) {
+            continue;
+        }
+        VariableValue *v = new VariableValue(&var, &collectionData.getValue());
         l->push_back(v);
     }
 
     mdb_cursor_close(cursor);
     mdb_txn_abort(txn);
 end_txn:
-    return;
-}
-
-
-void LMDB::store(std::string key, std::string value) {
-    MDB_val mdb_key, mdb_data;
-    MDB_txn *txn = NULL;
-    int rc;
-    MDB_stat mst;
-
-    rc = txn_begin(0, &txn);
-    lmdb_debug(rc, "txn", "store");
-    if (rc != 0) {
-        goto end_txn;
+    for (const auto& expiredVar : expiredVars) {
+        delIfExpired(expiredVar);
     }
-
-    string2val(key, &mdb_key);
-    string2val(value, &mdb_data);
-    rc = mdb_put(txn, m_dbi, &mdb_key, &mdb_data, 0);
-    lmdb_debug(rc, "put", "store");
-    if (rc != 0) {
-        goto end_put;
-    }
-
-    rc = mdb_txn_commit(txn);
-    lmdb_debug(rc, "commit", "store");
-    if (rc != 0) {
-        goto end_commit;
-    }
-
-end_put:
-end_dbi:
-    if (rc != 0) {
-        mdb_txn_abort(txn);
-    }
-end_commit:
-end_txn:
     return;
 }
 
@@ -311,6 +404,9 @@ bool LMDB::updateFirst(const std::string &key,
     MDB_val mdb_key;
     MDB_val mdb_value;
     MDB_val mdb_value_ret;
+    CollectionData previous_data;
+    CollectionData new_data;
+    std::string serializedData;
 
     rc = txn_begin(0, &txn);
     lmdb_debug(rc, "txn", "updateFirst");
@@ -319,7 +415,6 @@ bool LMDB::updateFirst(const std::string &key,
     }
 
     string2val(key, &mdb_key);
-    string2val(value, &mdb_value);
 
     rc = mdb_get(txn, m_dbi, &mdb_key, &mdb_value_ret);
     lmdb_debug(rc, "get", "updateFirst");
@@ -327,11 +422,19 @@ bool LMDB::updateFirst(const std::string &key,
         goto end_get;
     }
 
+    previous_data.setFromSerialized(reinterpret_cast<char *>(mdb_value_ret.mv_data), mdb_value_ret.mv_size);
     rc = mdb_del(txn, m_dbi, &mdb_key, &mdb_value_ret);
     lmdb_debug(rc, "del", "updateFirst");
     if (rc != 0) {
         goto end_del;
     }
+
+    if (previous_data.hasExpiry()) {
+        new_data = previous_data;
+    };
+    new_data.setValue(value);
+    serializedData = new_data.getSerialized();
+    string2val(serializedData, &mdb_value);
 
     rc = mdb_put(txn, m_dbi, &mdb_key, &mdb_value, 0);
     lmdb_debug(rc, "put", "updateFirst");
@@ -402,7 +505,6 @@ end_txn:
     return;
 }
 
-
 void LMDB::resolveMultiMatches(const std::string& var,
     std::vector<const VariableValue *> *l,
     variables::KeyExclusions &ke) {
@@ -412,6 +514,8 @@ void LMDB::resolveMultiMatches(const std::string& var,
     MDB_stat mst;
     size_t keySize = var.size();
     MDB_cursor *cursor;
+    CollectionData collectionData;
+    std::list<std::string> expiredVars;
 
     rc = txn_begin(MDB_RDONLY, &txn);
     lmdb_debug(rc, "txn", "resolveMultiMatches");
@@ -427,23 +531,36 @@ void LMDB::resolveMultiMatches(const std::string& var,
 
     if (keySize == 0) {
         while ((rc = mdb_cursor_get(cursor, &key, &data, MDB_NEXT)) == 0) {
+            collectionData.setFromSerialized(reinterpret_cast<char *>(data.mv_data), data.mv_size);
+
+            if (collectionData.isExpired()) {
+                expiredVars.push_back(std::string(reinterpret_cast<char *>(key.mv_data), key.mv_size));
+                continue;
+            }
+            if (!collectionData.hasValue()) {
+                continue;
+            }
+
+            std::string key_to_insert(reinterpret_cast<char *>(key.mv_data), key.mv_size);
             l->insert(l->begin(), new VariableValue(
-                &m_name,
-                new std::string(reinterpret_cast<char *>(key.mv_data),
-                key.mv_size),
-                new std::string(reinterpret_cast<char *>(data.mv_data),
-                data.mv_size)));
+                &m_name, &key_to_insert, &collectionData.getValue()));
         }
     } else {
         while ((rc = mdb_cursor_get(cursor, &key, &data, MDB_NEXT)) == 0) {
+            collectionData.setFromSerialized(reinterpret_cast<char *>(data.mv_data), data.mv_size);
+
+            if (collectionData.isExpired()) {
+                expiredVars.push_back(std::string(reinterpret_cast<char *>(key.mv_data), key.mv_size));
+                continue;
+            }
+            if (!collectionData.hasValue()) {
+                continue;
+            }
+
             char *a = reinterpret_cast<char *>(key.mv_data);
             if (strncmp(var.c_str(), a, keySize) == 0) {
-                l->insert(l->begin(), new VariableValue(
-                    &m_name,
-                    new std::string(reinterpret_cast<char *>(key.mv_data),
-                    key.mv_size),
-                    new std::string(reinterpret_cast<char *>(data.mv_data),
-                    data.mv_size)));
+                std::string key_to_insert(reinterpret_cast<char *>(key.mv_data), key.mv_size);
+                l->insert(l->begin(), new VariableValue(&m_name, &key_to_insert, &collectionData.getValue()));
             }
         }
     }
@@ -452,6 +569,9 @@ void LMDB::resolveMultiMatches(const std::string& var,
 end_cursor_open:
     mdb_txn_abort(txn);
 end_txn:
+    for (const auto& expiredVar : expiredVars) {
+        delIfExpired(expiredVar);
+    }
     return;
 }
 
@@ -464,6 +584,8 @@ void LMDB::resolveRegularExpression(const std::string& var,
     int rc;
     MDB_stat mst;
     MDB_cursor *cursor;
+    CollectionData collectionData;
+    std::list<std::string> expiredVars;
 
     Utils::Regex r(var, true);
 
@@ -480,21 +602,26 @@ void LMDB::resolveRegularExpression(const std::string& var,
     }
 
     while ((rc = mdb_cursor_get(cursor, &key, &data, MDB_NEXT)) == 0) {
-        char *a = reinterpret_cast<char *>(key.mv_data);
-        int ret = Utils::regex_search(a, r);
-        if (ret <= 0) {
+        collectionData.setFromSerialized(reinterpret_cast<char *>(data.mv_data), data.mv_size);
+
+	if (collectionData.isExpired()) {
+            expiredVars.push_back(std::string(reinterpret_cast<char *>(key.mv_data), key.mv_size));
             continue;
         }
-        if (ke.toOmit(std::string(reinterpret_cast<char *>(key.mv_data),
-                key.mv_size))) {
+        if (!collectionData.hasValue()) {
             continue;
         }
 
-        VariableValue *v = new VariableValue(
-            new std::string(reinterpret_cast<char *>(key.mv_data),
-                key.mv_size),
-            new std::string(reinterpret_cast<char *>(data.mv_data),
-                data.mv_size));
+        std::string key_to_insert(reinterpret_cast<char *>(key.mv_data), key.mv_size);
+        int ret = Utils::regex_search(key_to_insert, r);
+        if (ret <= 0) {
+            continue;
+        }
+        if (ke.toOmit(key_to_insert)) {
+            continue;
+        }
+
+        VariableValue *v = new VariableValue(&key_to_insert, &collectionData.getValue());
         l->insert(l->begin(), v);
     }
 
@@ -502,6 +629,9 @@ void LMDB::resolveRegularExpression(const std::string& var,
 end_cursor_open:
     mdb_txn_abort(txn);
 end_txn:
+    for (const auto& expiredVar : expiredVars) {
+        delIfExpired(expiredVar);
+    }
     return;
 }
 
