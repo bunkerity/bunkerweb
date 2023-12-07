@@ -78,7 +78,7 @@ COPY --chown=root:scheduler src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.
 RUN chmod 770 /var/tmp/bunkerweb/asn.mmdb /var/tmp/bunkerweb/country.mmdb
 
 # Fix CVEs
-# RUN apk add --no-cache "libpq>=15.5-r0"
+# There are no CVEs to fix in this image
 
 VOLUME /data /etc/nginx
 
