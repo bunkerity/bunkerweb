@@ -15,9 +15,9 @@
     },
     {
       "id": "modsecurity",
-      "name": "ModSecurity v3.0.10",
+      "name": "ModSecurity v3.0.11",
       "url": "https://github.com/SpiderLabs/ModSecurity.git",
-      "commit": "ccc2d9b53632fb5088673bbaafedf0d8d4b5f1d8",
+      "commit": "bbde9381cbccb49ea73f6194b08b478adc53f3bc",
       "post_install": "patch --forward src/deps/src/modsecurity/configure.ac src/deps/misc/modsecurity.patch && rm -rf src/deps/src/modsecurity/others/libinjection"
     },
     {
