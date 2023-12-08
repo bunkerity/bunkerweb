@@ -12,13 +12,13 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from API import API  # type: ignore
+
 from logger import setup_logger  # type: ignore
 from jobs import Job, file_hash  # type: ignore
 
 
 LOGGER = setup_logger("CUSTOM-CERT", getenv("LOG_LEVEL", "INFO"))
-JOB = Job(API(getenv("API_ADDR", ""), "job-custom-cert"), getenv("CORE_TOKEN", None))
+JOB = Job()
 
 
 def check_cert(cert_path: str, key_path: str, first_server: Optional[str] = None) -> bool:  # type: ignore

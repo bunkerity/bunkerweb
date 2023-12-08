@@ -14,7 +14,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from requests import get
 
-from API import API  # type: ignore
+
 from logger import setup_logger  # type: ignore
 from jobs import bytes_hash, Job  # type: ignore
 
@@ -32,7 +32,7 @@ def check_line(line):
 
 
 LOGGER = setup_logger("REALIP", getenv("LOG_LEVEL", "INFO"))
-JOB = Job(API(getenv("API_ADDR", ""), "job-realip-download"), getenv("CORE_TOKEN", None))
+JOB = Job()
 status = 0
 
 try:

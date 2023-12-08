@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from hashlib import sha512
 from inspect import getsourcefile
 from io import BytesIO
+from os import getenv
 from os.path import normpath, sep
 from pathlib import Path
 from re import IGNORECASE, compile as re_compile
@@ -15,6 +16,8 @@ from traceback import format_exc
 from typing import Literal, Optional, Tuple, Union
 
 from requests import Response
+
+from API import API  # type: ignore
 
 lock = Lock()
 
@@ -66,7 +69,7 @@ def bytes_hash(bio: Union[bytes, BytesIO]) -> str:
 
 
 class Job:
-    def __init__(self, api, api_token: Optional[str] = None, *, job_name: Optional[str] = None):
+    def __init__(self, api: Optional[API] = None, api_token: Optional[str] = None, *, job_name: Optional[str] = None):
         source_file = getsourcefile(_getframe(1))
         if source_file is None:
             return None
@@ -74,7 +77,8 @@ class Job:
         self.job_path = Path(sep, "var", "cache", "bunkerweb", self.source_path.parent.parent.name)
 
         self.job_name = job_name or self.source_path.name.replace(".py", "")
-        self.api = api
+        self.api = api or API(getenv("API_ADDR", ""), f"job-{self.job_name}")
+        api_token = api_token or getenv("CORE_TOKEN", None)
         self.api_token_header = {"Authorization": f"Bearer {api_token}"} if api_token else {}
 
     def get_cache(self, name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None, with_info: bool = False, with_data: bool = True) -> Optional[Union[bytes, dict, Response]]:

@@ -18,12 +18,12 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from maxminddb import open_database
 from requests import RequestException, get
 
-from API import API  # type: ignore
+
 from logger import setup_logger  # type: ignore
 from jobs import file_hash, Job  # type: ignore
 
 LOGGER = setup_logger("JOBS.mmdb-asn", getenv("LOG_LEVEL", "INFO"))
-JOB = Job(API(getenv("API_ADDR", ""), "job-mmdb-asn"), getenv("CORE_TOKEN", None))
+JOB = Job()
 status = 0
 lock = Lock()
 

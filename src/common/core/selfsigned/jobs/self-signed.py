@@ -24,12 +24,12 @@ for deps_path in [
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 
-from API import API  # type: ignore
+
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
 
 LOGGER = setup_logger("self-signed", getenv("LOG_LEVEL", "INFO"))
-JOB = Job(API(getenv("API_ADDR", ""), "job-self-signed"), getenv("CORE_TOKEN", None))
+JOB = Job()
 status = 0
 
 

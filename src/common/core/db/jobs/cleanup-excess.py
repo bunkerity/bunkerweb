@@ -18,6 +18,7 @@ for deps_path in [
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
+
 from API import API  # type: ignore
 from logger import setup_logger  # type: ignore
 

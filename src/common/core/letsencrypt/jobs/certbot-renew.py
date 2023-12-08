@@ -15,12 +15,12 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from API import API  # type: ignore
+
 from logger import setup_logger  # type: ignore
 from jobs import Job  # type: ignore
 
 LOGGER = setup_logger("LETS-ENCRYPT.renew", getenv("LOG_LEVEL", "INFO"))
-JOB = Job(API(getenv("API_ADDR", ""), "job-certbot-renew"), getenv("CORE_TOKEN", None))
+JOB = Job()
 status = 0
 
 try:
