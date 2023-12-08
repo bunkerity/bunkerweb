@@ -6,7 +6,7 @@ from functools import partial
 from glob import glob
 from json import loads
 from logging import Logger
-from os import cpu_count, getenv, sep
+from os import cpu_count, sep
 from os.path import basename, dirname, join
 from pathlib import Path
 from re import match
@@ -40,9 +40,9 @@ class JobScheduler:
         *,
         lock: Optional[Lock] = None,
     ):
-        self.__logger = logger or setup_logger("Scheduler", getenv("LOG_LEVEL", "INFO"))
         self.__api = api
         self.__env = {k: v for k, v in env.items() if isinstance(v, str)} if env else {}
+        self.__logger = logger or setup_logger("Scheduler", self.__env.get("LOG_LEVEL", None))
         self.__jobs = self.__get_jobs()
         self.__lock = lock
         self.__thread_lock = Lock()

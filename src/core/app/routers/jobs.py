@@ -13,7 +13,7 @@ from fastapi import APIRouter, BackgroundTasks, File, Form, Response, status
 from fastapi.responses import JSONResponse
 
 from ..dependencies import CORE_CONFIG, DB, run_job, run_jobs as deps_run_jobs
-from api_models import ErrorMessage, Job, JobCache, JobRun  # type: ignore
+from api_models import ErrorMessage, Job, JobRun  # type: ignore
 
 router = APIRouter(
     prefix="/jobs",
@@ -157,7 +157,6 @@ async def run_jobs(method: str, background_tasks: BackgroundTasks, job_name: Opt
 
 @router.get(
     "/{job_name}/cache/{file_name}",
-    response_model=JobCache,
     summary="Get a file from the cache",
     response_description="Job cache data",
     responses={

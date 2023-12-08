@@ -165,7 +165,7 @@ def update_external_plugins(db_plugins: List[dict], db_config: dict, db_initiali
         if plugin_changes:
             CORE_CONFIG.logger.info("External plugins changed, refreshing database...")
 
-            err = DB.update_external_plugins(deepcopy(external_plugins), delete_missing=True)
+            err = DB.update_external_plugins(deepcopy(external_plugins))
             if err:
                 CORE_CONFIG.logger.error(f"Couldn't save some manually added plugins to database: {err}")
 
