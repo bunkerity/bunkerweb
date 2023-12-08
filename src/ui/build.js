@@ -1,14 +1,17 @@
 const { execSync } = require("child_process");
 const { resolve } = require("path");
 const fs = require("fs");
+
 const clientBuildDir = "static";
-// CLIENT : Build vite with child process
-function buildClient() {
+const setupBuildDir = "setup/output";
+
+// Run subprocess command on specific dir
+function runCommand(dir, command) {
   let isErr = false;
   try {
     execSync(
-      "npm run build",
-      { cwd: resolve(__dirname + "/client") },
+      command,
+      { cwd: resolve(__dirname + dir) },
       function (err, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
@@ -22,6 +25,17 @@ function buildClient() {
     isErr = true;
   }
 
+  return isErr;
+}
+
+// Install deps and build vite (work for client and setup)
+function buildVite(dir) {
+  let isErr = false;
+  // Install packages
+  isErr = runCommand(dir, "npm install");
+  if (isErr) return isErr;
+  // Build vite
+  isErr = runCommand(dir, "npm run build");
   return isErr;
 }
 
@@ -61,40 +75,41 @@ function updateClientDir() {
       fs.rmSync(templateDir, { recursive: true, force: true });
     });
   } catch (err) {
-    console.error(err);
     isErr = true;
   }
   return isErr;
 }
 
-// Build and update dir of setup inline html
-function buildSetup() {
+// SETUP : rename and move to /static as html file
+function updateSetupDir() {
   let isErr = false;
+  const srcDir = resolve(__dirname + `/${setupBuildDir}`);
+  const destDir = resolve(__dirname + `/${clientBuildDir}`);
+
   try {
-    execSync(
-      "npm run build",
-      { cwd: resolve(__dirname + "/client") },
-      function (err, stdout, stderr) {
-        console.log(stdout);
-        console.log(stderr);
-        if (err !== null) {
-          isErr = true;
-          console.log(`exec error: ${err}`);
-        }
-      }
-    );
+    // Copy file from src to dest
+    fs.copyFileSync(`${srcDir}/index.html`, `${destDir}/setup.html`);
   } catch (err) {
     isErr = true;
   }
-
   return isErr;
 }
 
-const isBuildErr = buildClient();
-if (isBuildErr)
+// Build client and setup
+const buildClientErr = buildVite("/client");
+if (buildClientErr)
   return console.log("Error while building client. Impossible to continue.");
+const buildSetupErr = buildVite("/setup");
+if (buildSetupErr)
+  return console.log("Error while building client. Impossible to continue.");
+// Change client dir structure
 const isUpdateDirErr = updateClientDir();
 if (isUpdateDirErr)
   return console.log(
-    "Error while changing dir structure. Impossible to continue."
+    "Error while changing client dir structure. Impossible to continue."
+  );
+const isUpdateSetupErr = updateSetupDir();
+if (isUpdateSetupErr)
+  return console.log(
+    "Error while changing setup dir structure. Impossible to continue."
   );

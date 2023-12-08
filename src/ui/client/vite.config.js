@@ -39,7 +39,6 @@ export default defineConfig({
         plugs: resolve(__dirname, "./src/pages/plugins/index.html"),
         services: resolve(__dirname, "./src/pages/services/index.html"),
         actions: resolve(__dirname, "./src/pages/actions/index.html"),
-        setup: resolve(__dirname, "./src/pages/setup/index.html"),
       },
     },
   },

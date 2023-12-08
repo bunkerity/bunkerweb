@@ -5,6 +5,7 @@ export default {
   content: [
     "./src/pages/**/*.{js,vue,ts,jsx,tsx,mdx, html}",
     "./src/components/**/*.{js,vue,ts,jsx,tsx,mdx}",
+    "../setup/src/*.{js,vue,ts,jsx,tsx,mdx}",
   ],
   important: true,
   darkMode: "class",
