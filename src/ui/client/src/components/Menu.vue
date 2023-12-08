@@ -259,7 +259,7 @@ function toggleMenu() {
                 <a
                   class="menu-page-plugin-empty-anchor"
                   target="_blank"
-                  href="https://docs.bunkerweb.io/1.4/plugins/#writing-a-plugin"
+                  href="https://docs.bunkerweb.io/latest/plugins?utm_campaign=self&utm_source=ui"
                 >
                   {{ $t("dashboard_menu_plugins_none_doc") }}
                 </a>

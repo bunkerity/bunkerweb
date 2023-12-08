@@ -4,13 +4,22 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 const items = [
-  { href: "https://www.bunkerweb.io", title: t("dashboard_bw") },
-  { href: "https://docs.bunkerweb.io", title: t("dashboard_docs") },
   {
-    href: "https://www.bunkerweb.io/privacy-policy",
+    href: "https://www.bunkerweb.io?utm_campaign=self&utm_source=ui",
+    title: t("dashboard_bw"),
+  },
+  {
+    href: "https://docs.bunkerweb.io?utm_campaign=self&utm_source=ui",
+    title: t("dashboard_docs"),
+  },
+  {
+    href: "https://www.bunkerweb.io/privacy-policy?utm_campaign=self&utm_source=ui",
     title: t("dashboard_privacy"),
   },
-  { href: "https://www.bunkerity.com/fr/blog/", title: t("dashboard_blog") },
+  {
+    href: "https://www.bunkerity.com/fr/blog?utm_campaign=self&utm_source=ui",
+    title: t("dashboard_blog"),
+  },
   {
     href: "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE",
     title: t("dashboard_license"),

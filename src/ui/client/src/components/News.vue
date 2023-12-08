@@ -117,7 +117,7 @@ const news = reactive({
           {{ $t("dashboard_newsletter_privacy_text") }}
           <a
             class="italic"
-            href="https://www.bunkerity.com/privacy-policy/"
+            href="https://www.bunkerity.com/privacy-policy?utm_campaign=self&utm_source=ui"
             target="_blank"
           >
             {{ $t("dashboard_newsletter_privacy_text_link") }}
