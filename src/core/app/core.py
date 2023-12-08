@@ -67,6 +67,7 @@ class CoreConfig(YamlBaseSettings):
 
     # ? Miscellaneous settings
     LOG_LEVEL: Literal["emerg", "alert", "crit", "error", "warn", "warning", "notice", "info", "debug", "EMERG", "ALERT", "CRIT", "ERROR", "WARN", "WARNING", "NOTICE", "INFO", "DEBUG"] = "notice"
+    DATABASE_LOG_LEVEL: Literal["error", "warn", "warning", "info", "debug", "ERROR", "WARN", "WARNING", "INFO", "DEBUG"] = "warning"
     DATABASE_URI: str = "sqlite:////var/lib/bunkerweb/db.sqlite3"
     USE_REDIS: Union[Literal["yes", "no"], bool] = "no"
     REDIS_HOST: str = ""
@@ -187,6 +188,10 @@ class CoreConfig(YamlBaseSettings):
     @cached_property
     def log_level(self) -> str:
         return self.LOG_LEVEL.upper() if self.LOG_LEVEL in ("error", "ERROR", "info", "INFO", "debug", "DEBUG") else ("WARNING" if self.LOG_LEVEL in ("warn", "WARN", "warning", "WARNING") else "INFO")
+
+    @cached_property
+    def database_log_level(self) -> str:
+        return self.DATABASE_LOG_LEVEL.upper() if self.DATABASE_LOG_LEVEL in ("error", "ERROR", "info", "INFO", "debug", "DEBUG") else "WARNING"
 
     @cached_property
     def logger(self) -> Logger:
@@ -508,6 +513,7 @@ The API can be configured using the following settings:
 | `HOT_RELOAD` | Activate the hot reload | `no` |
 | `REVERSE_PROXY_IPS` | The reverse proxy IPs separated by spaces | `192.168.0.0/16 172.16.0.0/12 10.0.0.0/8 127.0.0.0/8` |
 | `LOG_LEVEL` | The log level | `notice` |
+| `DATABASE_LOG_LEVEL` | The database log level | `warning` |
 | `DATABASE_URI` | The database URI | `sqlite:////var/lib/bunkerweb/db.sqlite3` |
 | `USE_REDIS` | Activate Redis | `no` |
 | `REDIS_HOST` | The Redis host | `""` |
