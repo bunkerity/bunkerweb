@@ -63,7 +63,7 @@ RUN apk add --no-cache bash nodejs npm && \
   ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.1.4-r1" "libssl3>=3.1.4-r1"
+# There are no CVEs to fix in this image
 
 # Change working directory
 WORKDIR /usr/share/bunkerweb/ui
