@@ -18,11 +18,13 @@
 </p>
 
 <p align="center">
-	🌐 <a href="https://www.bunkerweb.io">Website</a>
+	🌐 <a href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=github">Website</a>
 	 &#124;
-	📓 <a href="https://docs.bunkerweb.io">Documentation</a>
+	📓 <a href="https://docs.bunkerweb.io/?utm_campaign=self&utm_source=github">Documentation</a>
 	 &#124;
-	👨‍💻 <a href="https://demo.bunkerweb.io">Demo</a>
+	👨‍💻 <a href="https://demo.bunkerweb.io/?utm_campaign=self&utm_source=github">Demo</a>
+	 &#124;
+	🤝 <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=github">Panel</a>
 	 &#124;
 	🛡️ <a href="https://github.com/bunkerity/bunkerweb/raw/v1.5.4/examples">Examples</a>
 	 &#124;
@@ -30,9 +32,9 @@
 	 &#124;
 	📝 <a href="https://github.com/bunkerity/bunkerweb/discussions">Forum</a>
 	<br/>
-	⚙️ <a href="https://config.bunkerweb.io">Configurator</a>
+	⚙️ <a href="https://config.bunkerweb.io/?utm_campaign=self&utm_source=github">Configurator</a>
 	 &#124;
-	🗺️ <a href="https://threatmap.bunkerweb.io">Threatmap</a>
+	🗺️ <a href="https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=github">Threatmap</a>
 </p>
 
 > 🛡️ Make security by default great again !
@@ -51,25 +53,26 @@ BunkerWeb contains primary [security features](https://docs.bunkerweb.io/1.5.4/s
 
 ## Why BunkerWeb ?
 
-- **Easy integration into existing environments** : support for Linux, Docker, Swarm, Kubernetes, Ansible, Vagrant, ...
-- **Highly customizable** : enable, disable and configure features easily to meet your use case
-- **Secure by default** : offers out-of-the-box and hassle-free minimal security for your web services
-- **Awesome web UI** : keep control of everything more efficiently without the need of the CLI
-- **Plugin system** : extend BunkerWeb to meet your own use-cases
-- **Free as in "freedom"** : licensed under the free [AGPLv3 license](https://www.gnu.org/licenses/agpl-3.0.en.html)
+- **Easy integration into existing environments** : Seamlessly integrate BunkerWeb into various environments such as Linux, Docker, Swarm, Kubernetes and more. Enjoy a smooth transition and hassle-free implementation.
+- **Highly customizable** : Tailor BunkerWeb to your specific requirements with ease. Enable, disable, and configure features effortlessly, allowing you to customize the security settings according to your unique use case.
+- **Secure by default** : BunkerWeb provides out-of-the-box, hassle-free minimal security for your web services. Experience peace of mind and enhanced protection right from the start.
+- **Awesome web UI** : Take control of BunkerWeb more efficiently with the exceptional web user interface (UI). Navigate settings and configurations effortlessly through a user-friendly graphical interface, eliminating the need for the command-line interface (CLI).
+- **Plugin system** : Extend the capabilities of BunkerWeb to meet your own use cases. Seamlessly integrate additional security measures and customize the functionality of BunkerWeb according to your specific requirements.
+- **Free as in "freedom"** : BunkerWeb is licensed under the free [AGPLv3 license](https://www.gnu.org/licenses/agpl-3.0.en.html), embracing the principles of freedom and openness. Enjoy the freedom to use, modify, and distribute the software, backed by a supportive community.
+- **Professional services** : Get technical support, tailored consulting and custom development directly from the maintainers of BunkerWeb. Visit the [Bunker Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=github) for more information.
 
 ## Security features
 
-A non-exhaustive list of security features :
+Explore the impressive array of security features offered by BunkerWeb. While not exhaustive, here are some notable highlights:
 
-- **HTTPS** support with transparent **Let's Encrypt** automation
-- **State-of-the-art web security** : HTTP security headers, prevent leaks, TLS hardening, ...
-- Integrated **ModSecurity WAF** with the **OWASP Core Rule Set**
-- **Automatic ban** of strange behaviors based on HTTP status code
-- Apply **connections and requests limit** for clients
-- **Block bots** by asking them to solve a **challenge** (e.g. : cookie, javascript, captcha, hCaptcha or reCAPTCHA)
-- **Block known bad IPs** with external blacklists and DNSBL
-- And much more ...
+- **HTTPS** support with transparent **Let's Encrypt** automation : Easily secure your web services with automated Let's Encrypt integration, ensuring encrypted communication between clients and your server.
+- **State-of-the-art web security** : Benefit from cutting-edge web security measures, including comprehensive HTTP security headers, prevention of data leaks, and TLS hardening techniques.
+- Integrated **ModSecurity WAF** with the **OWASP Core Rule Set** : Enjoy enhanced protection against web application attacks with the integration of ModSecurity, fortified by the renowned OWASP Core Rule Set.
+- **Automatic ban** of strange behaviors based on HTTP status code : BunkerWeb intelligently identifies and blocks suspicious activities by automatically banning behaviors that trigger abnormal HTTP status codes.
+- Apply **connections and requests limit** for clients : Set limits on the number of connections and requests from clients, preventing resource exhaustion and ensuring fair usage of server resources.
+- **Block bots** with **challenge-based verification** : Keep malicious bots at bay by challenging them to solve puzzles such as cookies, JavaScript tests, captcha, hCaptcha, reCAPTCHA or Turnstile, effectively blocking unauthorized access.
+- **Block known bad IPs** with external blacklists and DNSBL : Utilize external blacklists and DNS-based blackhole lists (DNSBL) to proactively block known malicious IP addresses, bolstering your defense against potential threats.
+- **And much more...** : BunkerWeb is packed with a plethora of additional security features that go beyond this list, providing you with comprehensive protection and peace of mind.
 
 Learn more about the core security features in the [security tuning](https://docs.bunkerweb.io/1.5.4/security-tuning/) section of the documentation.
 
@@ -80,6 +83,14 @@ Learn more about the core security features in the [security tuning](https://doc
 </p>
 
 A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io). Feel free to visit it and perform some security tests.
+
+## Professional services
+
+Get the most of BunkerWeb by getting professional services directly from the maintainers of the project. From technical support to tailored consulting and development, we are here to assist you in the security of your web services.
+
+You will find more information by visiting the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=github), our dedicated platform for professional services.
+
+Don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=github) if you have any question, we will be more than happy to respond to your needs.
 
 # Concepts
 

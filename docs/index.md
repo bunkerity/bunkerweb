@@ -7,24 +7,15 @@
   <figcaption>Make your web services secure by default !</figcaption>
 </figure>
 
-Introducing BunkerWeb, the **cutting-edge** and **open-source Web Application Firewall** (WAF) that will revolutionize your web security experience.
+BunkerWeb is a next-generation and open-source Web Application Firewall (WAF).
 
-With BunkerWeb, your web services are safeguarded by default, providing you with peace of mind and enhanced protection. Powered by [NGINX](https://nginx.org/), this comprehensive web server combines advanced features seamlessly, ensuring your online assets remain secure.
+Being a full-featured web server (based on [NGINX](https://nginx.org/) under the hood), it will protect your web services to make them "secure by default". BunkerWeb integrates seamlessly into your existing environments ([Linux](integrations.md#linux), [Docker](integrations.md#docker), [Swarm](integrations.md#swarm), [Kubernetes](integrations.md#kubernetes), …) and is fully configurable (don't panic, there is an [awesome web UI](web-ui.md) if you don't like the CLI) to meet your own use-cases . In other words, cybersecurity is no more a hassle.
 
-BunkerWeb effortlessly integrates into your existing environments, whether it's [Linux](integrations.md#linux), [Docker](integrations.md#docker), [Swarm](integrations.md#swarm), [Kubernetes](integrations.md#kubernetes), or more. Its versatility allows for easy configuration to suit your specific requirements. Don't worry if you prefer a user-friendly interface—BunkerWeb offers an exceptional [web UI](web-ui.md) alongside the command-line interface (CLI), ensuring accessibility for all users.
-
-Experience the transformation in cybersecurity, where complexities and obstacles are a thing of the past. With BunkerWeb, fortifying your digital assets has never been more delightful and hassle-free.
-
-Furthermore, BunkerWeb boasts a comprehensive set of primary [security features](security-tuning.md) at its core. However, what sets it apart is its remarkable flexibility through an intuitive [plugin system](plugins.md). This ingenious design empowers you to effortlessly enhance BunkerWeb with additional security measures, ensuring a tailored and robust defense for your web applications.
-
-By seamlessly integrating new plugins into BunkerWeb, you can customize and expand its capabilities to address specific security requirements unique to your environment. Whether you need to strengthen authentication protocols, bolster threat detection, or implement specialized security measures, BunkerWeb's [plugin system](plugins.md) grants you the freedom to fortify your web infrastructure with ease.
-
-With BunkerWeb's dynamic [plugin system](plugins.md), security becomes an enjoyable journey of exploration and empowerment. Discover the endless possibilities and create a fortified web environment that perfectly aligns with your needs.
-
+BunkerWeb contains primary [security features](security-tuning.md) as part of the core but can be easily extended with additional ones thanks to a [plugin system](plugins.md).
 
 ## Why BunkerWeb ?
 
-- **Easy integration into existing environments** : Seamlessly integrate BunkerWeb into various environments such as Linux, Docker, Swarm, Kubernetes, Ansible, Vagrant, and more. Enjoy a smooth transition and hassle-free implementation.
+- **Easy integration into existing environments** : Seamlessly integrate BunkerWeb into various environments such as Linux, Docker, Swarm, Kubernetes and more. Enjoy a smooth transition and hassle-free implementation.
 
 - **Highly customizable** : Tailor BunkerWeb to your specific requirements with ease. Enable, disable, and configure features effortlessly, allowing you to customize the security settings according to your unique use case.
 
@@ -35,6 +26,8 @@ With BunkerWeb's dynamic [plugin system](plugins.md), security becomes an enjoya
 - **Plugin system** : Extend the capabilities of BunkerWeb to meet your own use cases. Seamlessly integrate additional security measures and customize the functionality of BunkerWeb according to your specific requirements.
 
 - **Free as in "freedom"** : BunkerWeb is licensed under the free [AGPLv3 license](https://www.gnu.org/licenses/agpl-3.0.en.html), embracing the principles of freedom and openness. Enjoy the freedom to use, modify, and distribute the software, backed by a supportive community.
+
+- **Professional services** : Get technical support, tailored consulting and custom development directly from the maintainers of BunkerWeb. Visit the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) for more information.
 
 ## Security features
 
@@ -65,3 +58,11 @@ To delve deeper into the core security features, we invite you to explore the [s
 </p>
 
 A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io). Feel free to visit it and perform some security tests.
+
+## Professional services
+
+Get the most of BunkerWeb by getting professional services directly from the maintainers of the project. From technical support to tailored consulting and development, we are here to assist you in the security of your web services.
+
+You will find more information by visiting the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc), our dedicated platform for professional services.
+
+Don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any question, we will be more than happy to respond to your needs.
