@@ -75,7 +75,7 @@ RUN cd client && \
 RUN node build.js
 
 # Remove no longer needed files
-RUN rm -rf client build.js
+RUN rm -rf client setup build.js
 
 USER ui:ui
 
