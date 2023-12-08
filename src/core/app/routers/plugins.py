@@ -6,7 +6,7 @@ from os.path import join, sep
 from random import uniform
 from sys import path as sys_path
 from tarfile import open as tar_open
-from typing import Dict, List, Literal
+from typing import Dict, List, Literal, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
     if deps_path not in sys_path:
@@ -63,11 +63,76 @@ async def get_plugins(background_tasks: BackgroundTasks):
     return plugins
 
 
+@router.get(
+    "/{plugin_id}/page",
+    summary="Get either a plugin page file",
+    response_description="File",
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Plugin not found or doesn't have a page",
+            "model": ErrorMessage,
+        },
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "description": "Database is locked or had trouble handling the request",
+            "model": ErrorMessage,
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error",
+            "model": ErrorMessage,
+        },
+    },
+)
+async def get_plugin_page_file(plugin_id: str, background_tasks: BackgroundTasks):
+    """
+    Get either a plugin page.
+    """
+    plugin_page = DB.get_plugin_template(plugin_id)
+
+    if not plugin_page:
+        message = f"Plugin {plugin_id} not found or doesn't have a page"
+        background_tasks.add_task(
+            DB.add_action,
+            {
+                "date": datetime.now(),
+                "api_method": "GET",
+                "method": "unknown",
+                "tags": ["plugin"],
+                "title": f"Tried to get plugin {plugin_id} page",
+                "description": message,
+                "status": "error",
+            },
+        )
+        CORE_CONFIG.logger.warning(message)
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": message})
+    elif plugin_page == "retry":
+        retry_in = str(uniform(1.0, 5.0))
+        CORE_CONFIG.logger.warning(f"Can't get plugin {plugin_id} page from database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
+            headers={"Retry-After": retry_in},
+        )
+    elif isinstance(plugin_page, str):
+        message = f"Can't get plugin {plugin_id} page from database : {plugin_page}"
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "GET", "method": "unknown", "tags": ["plugin"], "title": f"Tried to get plugin {plugin_id} page", "description": message, "status": "error"})
+        CORE_CONFIG.logger.error(message)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": plugin_page},
+        )
+
+    return Response(
+        content=plugin_page,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f"attachment; filename={plugin_id}.html"},
+    )
+
+
 @router.post(
     "",
     response_model=Dict[Literal["message"], str],
     status_code=status.HTTP_201_CREATED,
-    summary="Add a plugin",
+    summary="Add one or more plugins",
     response_description="Message",
     responses={
         status.HTTP_409_CONFLICT: {
@@ -84,57 +149,59 @@ async def get_plugins(background_tasks: BackgroundTasks):
         },
     },
 )
-async def add_plugin(plugin: AddedPlugin, background_tasks: BackgroundTasks) -> JSONResponse:
+async def add_plugin(plugin: Union[AddedPlugin, List[AddedPlugin]], background_tasks: BackgroundTasks) -> JSONResponse:
     """
-    Add a plugin to the database.
+    Add one or more plugins to the database.
     """
-    plugin_dict = plugin.model_dump()
-    resp = DB.upsert_external_plugin(plugin_dict, return_if_exists=True)
+    if isinstance(plugin, list):
+        resp = DB.update_external_plugins([plugin.model_dump() for plugin in plugin], delete_missing=False)
+    else:
+        plugin_dict = plugin.model_dump()
+        resp = DB.upsert_external_plugin(plugin_dict.copy(), return_if_exists=True)
+        plugin_dict.pop("data", None)
+        plugin_dict.pop("template_file", None)
+        plugin_dict.pop("actions_file", None)
 
-    if resp == "exists":
-        message = f"Plugin {plugin.id} already exists"
-        background_tasks.add_task(
-            DB.add_action,
-            {
-                "date": datetime.now(),
-                "api_method": "POST",
-                "method": plugin.method,
-                "tags": ["plugin"],
-                "title": f"Tried to add plugin {plugin.id}",
-                "description": f"Tried to add plugin {plugin.id} with data {dumps(plugin_dict)} but it already exists",
-                "status": "error",
-            },
-        )
-        CORE_CONFIG.logger.warning(message)
-        return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"message": message})
-    elif resp == "retry":
-        retry_in = str(uniform(1.0, 5.0))
-        CORE_CONFIG.logger.warning(f"Can't add plugin {plugin.id} to database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
-        return JSONResponse(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
-            headers={"Retry-After": retry_in},
-        )
-    elif resp:
-        message = f"Can't add plugin to database : {resp}"
-        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": plugin.method, "tags": ["plugin"], "title": f"Tried to add plugin {plugin.id}", "description": message, "status": "error"})
-        CORE_CONFIG.logger.error(message)
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"message": resp},
-        )
+        if resp == "exists":
+            message = f"Plugin {plugin.id} already exists"
+            background_tasks.add_task(
+                DB.add_action,
+                {
+                    "date": datetime.now(),
+                    "api_method": "POST",
+                    "method": plugin.method,
+                    "tags": ["plugin"],
+                    "title": f"Tried to add plugin {plugin.id}",
+                    "description": f"Tried to add plugin {plugin.id} with data {dumps(plugin_dict)} but it already exists",
+                    "status": "error",
+                },
+            )
+            CORE_CONFIG.logger.warning(message)
+            return JSONResponse(status_code=status.HTTP_409_CONFLICT, content={"message": message})
+        elif resp == "retry":
+            retry_in = str(uniform(1.0, 5.0))
+            CORE_CONFIG.logger.warning(f"Can't add plugin {plugin.id} to database : database is locked or had trouble handling the request, retry in {retry_in} seconds")
+            return JSONResponse(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                content={"message": f"Database is locked or had trouble handling the request, retry in {retry_in} seconds"},
+                headers={"Retry-After": retry_in},
+            )
+        elif resp:
+            message = f"Can't add plugin to database : {resp}"
+            background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": plugin.method, "tags": ["plugin"], "title": f"Tried to add plugin {plugin.id}", "description": message, "status": "error"})
+            CORE_CONFIG.logger.error(message)
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"message": resp},
+            )
 
-    background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": plugin.method, "tags": ["plugin"], "title": f"Add plugin {plugin.id}", "description": f"Add plugin {plugin.id} with data {dumps(plugin_dict)}"})
-    background_tasks.add_task(
-        generate_external_plugins,
-        None,
-        original_path=EXTERNAL_PLUGINS_PATH,
-    )
+        background_tasks.add_task(DB.add_action, {"date": datetime.now(), "api_method": "POST", "method": plugin.method, "tags": ["plugin"], "title": f"Add plugin {plugin.id}", "description": f"Add plugin {plugin.id} with data {dumps(plugin_dict)}"})
+        CORE_CONFIG.logger.info(f"✅ Plugin {plugin.id} successfully added to database")
+
+    background_tasks.add_task(generate_external_plugins, None, original_path=EXTERNAL_PLUGINS_PATH)
     background_tasks.add_task(run_jobs)
     background_tasks.add_task(send_to_instances, {"plugins", "cache"})
     background_tasks.add_task(update_app_mounts, router)
-
-    CORE_CONFIG.logger.info(f"✅ Plugin {plugin.id} successfully added to database")
 
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,

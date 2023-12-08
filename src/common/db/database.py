@@ -370,7 +370,7 @@ class Database:
                             "fr": "Général",
                         },
                         "description": {"en": "The general settings for the server", "fr": "Les paramètres généraux du serveur"},
-                        "version": "0.1",
+                        "version": Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip() or "0.1",
                         "stream": "partial",
                         "external": False,
                     }
@@ -1118,12 +1118,13 @@ class Database:
 
         return services
 
-    def upsert_external_plugin(self, plugin_data: Dict[str, Any], *, plugin_id: Optional[str] = None, return_if_exists: bool = False) -> str:
+    def upsert_external_plugin(self, plugin_data: Dict[str, Any], *, plugin_id: Optional[str] = None, return_if_exists: bool = False, passed_session: Optional[scoped_session] = None) -> str:
         """Upsert an external plugin from the database."""
         to_put = []
         with suppress(BaseException), self._db_session() as session:
             db_plugin = (
-                session.query(Plugins)
+                (passed_session or session)
+                .query(Plugins)
                 .with_entities(
                     Plugins.id,
                     Plugins.version,
@@ -1183,14 +1184,14 @@ class Database:
                     updates[Plugins.checksum] = plugin_data.get("checksum")
 
                 if updates:
-                    session.query(Plugins).filter(Plugins.id == plugin_id).update(updates)
+                    (passed_session or session).query(Plugins).filter(Plugins.id == plugin_id).update(updates)
 
-                db_plugin_translations = session.query(Plugins_translations).with_entities(Plugins_translations.name, Plugins_translations.description).filter_by(plugin_id=plugin_data["id"]).all()
+                db_plugin_translations = (passed_session or session).query(Plugins_translations).with_entities(Plugins_translations.name, Plugins_translations.description).filter_by(plugin_id=plugin_data["id"]).all()
                 db_names = {translation.language: translation.name for translation in db_plugin_translations}
                 db_descriptions = {translation.language: translation.description for translation in db_plugin_translations}
 
                 if plugin_data["id"] != db_plugin.id or plugin_data["name"] != db_names or plugin_data["description"] != db_descriptions:
-                    session.query(Plugins_translations).filter(Plugins_translations.plugin_id == plugin_id).delete()
+                    (passed_session or session).query(Plugins_translations).filter(Plugins_translations.plugin_id == plugin_id).delete()
                     for language in plugin_translations:
                         to_put.append(
                             Plugins_translations(
@@ -1201,14 +1202,14 @@ class Database:
                             )
                         )
 
-                db_plugin_settings = session.query(Settings).with_entities(Settings.id).filter_by(plugin_id=plugin_id).all()
+                db_plugin_settings = (passed_session or session).query(Settings).with_entities(Settings.id).filter_by(plugin_id=plugin_id).all()
                 db_ids = [setting.id for setting in db_plugin_settings]
                 setting_ids = [setting for setting in settings]
                 missing_ids = [setting for setting in db_ids if setting not in setting_ids]
 
                 if missing_ids:
                     # Remove settings that are no longer in the list
-                    session.query(Settings).filter(Settings.id.in_(missing_ids)).delete()
+                    (passed_session or session).query(Settings).filter(Settings.id.in_(missing_ids)).delete()
 
                 for setting, value in settings.items():
                     if isinstance(value["help"], str):
@@ -1229,7 +1230,8 @@ class Database:
                         }
                     )
                     db_setting = (
-                        session.query(Settings)
+                        (passed_session or session)
+                        .query(Settings)
                         .with_entities(
                             Settings.name,
                             Settings.context,
@@ -1285,10 +1287,11 @@ class Database:
                             updates[Settings.multiple] = value.get("multiple")
 
                         if updates:
-                            session.query(Settings).filter(Settings.id == setting).update(updates)
+                            (passed_session or session).query(Settings).filter(Settings.id == setting).update(updates)
 
                         db_setting_translations = (
-                            session.query(Settings_translations)
+                            (passed_session or session)
+                            .query(Settings_translations)
                             .with_entities(
                                 Settings_translations.help,
                                 Settings_translations.label,
@@ -1300,7 +1303,7 @@ class Database:
                         db_label = {translation.language: translation.label for translation in db_setting_translations}
 
                         if value["help"] != db_help or value["label"] != db_label:
-                            session.query(Settings_translations).filter(Settings_translations.setting_id == setting).delete()
+                            (passed_session or session).query(Settings_translations).filter(Settings_translations.setting_id == setting).delete()
                             for translation in translations:
                                 to_put.append(
                                     Settings_translations(
@@ -1311,30 +1314,30 @@ class Database:
                                     )
                                 )
 
-                        db_selects = session.query(Selects).with_entities(Selects.value).filter_by(setting_id=setting).all()
+                        db_selects = (passed_session or session).query(Selects).with_entities(Selects.value).filter_by(setting_id=setting).all()
                         db_values = [select.value for select in db_selects]
                         select_values = value.get("select", [])
                         missing_values = [select for select in db_values if select not in select_values]
 
                         if missing_values:
                             # Remove selects that are no longer in the list
-                            session.query(Selects).filter(Selects.value.in_(missing_values)).delete()
+                            (passed_session or session).query(Selects).filter(Selects.value.in_(missing_values)).delete()
 
                         for select in value.get("select", []):
                             if select not in db_values:
                                 to_put.append(Selects(setting_id=setting, value=select))
 
-                db_jobs = session.query(Jobs).with_entities(Jobs.name).filter_by(plugin_id=plugin_id).all()
+                db_jobs = (passed_session or session).query(Jobs).with_entities(Jobs.name).filter_by(plugin_id=plugin_id).all()
                 db_names = [job.name for job in db_jobs]
                 job_names = [job["name"] for job in jobs]
                 missing_names = [job for job in db_names if job not in job_names]
 
                 if missing_names:
                     # Remove jobs that are no longer in the list
-                    session.query(Jobs).filter(Jobs.name.in_(missing_names)).delete()
+                    (passed_session or session).query(Jobs).filter(Jobs.name.in_(missing_names)).delete()
 
                 for job in jobs:
-                    db_job = session.query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin_id).first()
+                    db_job = (passed_session or session).query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin_id).first()
 
                     if job["name"] not in db_names or not db_job:
                         job["file_name"] = job.pop("file")
@@ -1357,8 +1360,8 @@ class Database:
 
                         if updates:
                             updates[Jobs.last_run] = None
-                            session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
-                            session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)
+                            (passed_session or session).query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
+                            (passed_session or session).query(Jobs).filter(Jobs.name == job["name"]).update(updates)
 
                 ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui", plugin_data["id"], "ui")
                 if plugin_id and not ui_path.exists():
@@ -1376,7 +1379,8 @@ class Database:
                         template_checksum = plugin_data.pop("template_checksum", bytes_hash(template_file))
                         actions_checksum = plugin_data.pop("actions_checksum", bytes_hash(actions_file))
                         db_plugin_page = (
-                            session.query(Plugin_pages)
+                            (passed_session or session)
+                            .query(Plugin_pages)
                             .with_entities(
                                 Plugin_pages.template_checksum,
                                 Plugin_pages.actions_checksum,
@@ -1418,10 +1422,10 @@ class Database:
                                 )
 
                             if updates:
-                                session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin_id).update(updates)
+                                (passed_session or session).query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin_id).update(updates)
 
                     else:
-                        session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin_id).delete()
+                        (passed_session or session).query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin_id).delete()
 
                         self._logger.warning(
                             f'Plugin "{plugin_id}" has a page but no template or actions file, skipping page addition and removing existing page.',
@@ -1450,7 +1454,7 @@ class Database:
                     )
 
                 for setting, value in settings.items():
-                    db_setting = session.query(Settings).filter_by(id=setting).first()
+                    db_setting = (passed_session or session).query(Settings).filter_by(id=setting).first()
 
                     if db_setting is not None:
                         self._logger.warning(f"A setting with id {setting} already exists, therefore it will not be added.")
@@ -1494,7 +1498,7 @@ class Database:
                     to_put.append(Settings(**value))
 
                 for job in jobs:
-                    db_job = session.query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin_data["id"]).first()
+                    db_job = (passed_session or session).query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin_data["id"]).first()
 
                     if db_job is not None:
                         self._logger.warning(f"A job with the name {job['name']} already exists in the database, therefore it will not be added.")
@@ -1516,7 +1520,7 @@ class Database:
                     if not actions_file:
                         actions_file = ui_path.joinpath("actions.py").read_bytes()
 
-                    session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin_id).delete()
+                    (passed_session or session).query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin_id).delete()
 
                     to_put.append(
                         Plugin_pages(
@@ -1528,8 +1532,9 @@ class Database:
                         )
                     )
 
-            session.add_all(to_put)
-            session.commit()
+            (passed_session or session).add_all(to_put)
+            if not passed_session:
+                session.commit()
 
         return (self._exceptions.get(getpid()) or [""]).pop()
 
@@ -1549,11 +1554,18 @@ class Database:
                     session.query(Plugins).filter(Plugins.id.in_(missing_ids)).delete()
 
             for plugin in plugins:
-                ret = self.upsert_external_plugin(plugin)
-                if ret == "no_en_translation":
-                    self._logger.error(f"Plugin {plugin['id']} doesn't have an english translation, skipping it")
+                ret = self.upsert_external_plugin(plugin, return_if_exists=not delete_missing, passed_session=session)
+                if ret == "retry":
+                    session.rollback()
+                    return ret
+                elif ret == "exists":
+                    self._logger.warning(f"Plugin {plugin['id']} already exists, skipping it")
+                elif ret == "no_en_translation":
+                    self._logger.warning(f"Plugin {plugin['id']} doesn't have an english translation, skipping it")
                 elif ret:
                     self._logger.error(f"An error occurred while updating plugin {plugin['id']}: {ret}")
+
+            session.commit()
 
         return (self._exceptions.get(getpid()) or [""]).pop()
 
