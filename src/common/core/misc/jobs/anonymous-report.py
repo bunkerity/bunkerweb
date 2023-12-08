@@ -45,7 +45,7 @@ try:
     data["external_plugins"] = [plugin["id"] for plugin in db.get_plugins(external=True)]
 
     response = post(
-        "http://api:8080/data",
+        "https://api.bunkerweb.io/data",
         json=data,
         headers={"User-Agent": f"BunkerWeb/{data['version']}"},
         allow_redirects=True,
