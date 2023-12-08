@@ -7,7 +7,7 @@ from functools import wraps
 from glob import glob
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
-from json import loads
+from json import dumps, loads
 from logging import Logger
 from os import _exit, chmod, cpu_count, environ
 from os.path import basename, dirname, join, normpath, sep
@@ -16,7 +16,7 @@ from shutil import copytree, rmtree
 from stat import S_IEXEC
 from subprocess import run as subprocess_run, DEVNULL, STDOUT
 from sys import path as sys_path
-from tarfile import open as tar_open
+from tarfile import ReadError, open as tar_open
 from threading import enumerate as all_threads, Event, Semaphore, Thread
 from time import sleep
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
@@ -35,6 +35,7 @@ from requests import get
 from API import API  # type: ignore
 from api_caller import ApiCaller  # type: ignore
 from database import Database  # type: ignore
+from logger import setup_db_logger  # type: ignore
 from .core import CoreConfig
 from .job_scheduler import JobScheduler
 
@@ -88,6 +89,8 @@ CUSTOM_CONFIGS_PATH = Path(sep, "etc", "bunkerweb", "configs")
 EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
 SETTINGS_PATH = Path(sep, "usr", "share", "bunkerweb", "settings.json")
 TMP_ENV_PATH = TMP_FOLDER.joinpath("core.env")
+
+setup_db_logger(CORE_CONFIG.database_log_level)
 
 # Instantiate database and api caller
 DB = Database(CORE_CONFIG.logger, CORE_CONFIG.DATABASE_URI)
@@ -231,18 +234,43 @@ def generate_external_plugins(
         original_path.mkdir(parents=True, exist_ok=True)
         for plugin in plugins:
             try:
-                # Extract plugin data
-                tmp_path = original_path.joinpath(plugin["id"], f"{plugin['name']}.tar.gz")
-                tmp_path.parent.mkdir(parents=True, exist_ok=True)
-                tmp_path.write_bytes(plugin["data"])
-                with tar_open(str(tmp_path), "r:gz") as tar:
-                    tar.extractall(original_path)
-                tmp_path.unlink()
+                tar_path = original_path.joinpath(plugin["id"], f"{plugin['name']['en']}.tar.gz")
+                tar_path.parent.mkdir(parents=True, exist_ok=True)
 
-                # Add u+x permissions to jobs files
-                for job_file in glob(join(str(tmp_path.parent), "jobs", "*")):
-                    st = Path(job_file).stat()
-                    chmod(job_file, st.st_mode | S_IEXEC)
+                try:
+                    # Extract plugin data
+                    tar_path.write_bytes(plugin["data"])
+                    with tar_open(str(tar_path), "r:gz") as tar:
+                        tar.extractall(original_path)
+
+                    # Add u+x permissions to jobs files
+                    for job_file in glob(join(str(tar_path.parent), "jobs", "*")):
+                        st = Path(job_file).stat()
+                        chmod(job_file, st.st_mode | S_IEXEC)
+                except ReadError as re:
+                    CORE_CONFIG.logger.warning(f"Can't generate external plugin {plugin['id']}, {re}, will generate only the plugin.json and ui files")
+                    tar_path.parent.joinpath("plugin.json").write_text(
+                        dumps(
+                            {"id": plugin["id"], "stream": plugin["stream"], "name": plugin["name"], "description": plugin["description"], "version": plugin["version"], "settings": plugin["settings"]}
+                            | ({"jobs": plugin["jobs"]} if plugin.get("jobs") else {}),
+                            indent=4,
+                        ),
+                        encoding="utf-8",
+                    )
+                    if plugin["page"] and (plugin["template_file"] or plugin["actions_file"]):
+                        tar_path.parent.joinpath("ui").mkdir(parents=True, exist_ok=True)
+                        if plugin["template_file"]:
+                            tar_path.parent.joinpath("ui", "index.html").write_bytes(plugin["template_file"])
+                        if plugin["actions_file"]:
+                            tar_path.parent.joinpath("ui", "actions.py").write_bytes(plugin["actions_file"])
+
+                # Add u+x permissions to actions file
+                ui_actions_file = tar_path.parent.joinpath("ui", "actions.py")
+                if ui_actions_file.is_file():
+                    st = ui_actions_file.stat()
+                    tar_path.parent.joinpath("ui", "actions.py").chmod(st.st_mode | S_IEXEC)
+
+                tar_path.unlink(missing_ok=True)
             except PermissionError:
                 CORE_CONFIG.logger.warning(f"Can't generate external plugin {plugin['id']}, permission denied")
 

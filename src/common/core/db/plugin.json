@@ -55,6 +55,22 @@
       },
       "regex": "^\\d+$",
       "type": "text"
+    },
+    "DATABASE_LOG_LEVEL": {
+      "context": "global",
+      "default": "warn",
+      "help": {
+        "en": "The level to use for database logs.",
+        "fr": "Le niveau à utiliser pour les logs de la base de données."
+      },
+      "id": "database-log-level",
+      "label": {
+        "en": "Database log level",
+        "fr": "Niveau des logs de la base de données"
+      },
+      "regex": "^(debug|info|warn|error)$",
+      "type": "select",
+      "select": ["debug", "info", "warn", "error"]
     }
   },
   "jobs": [

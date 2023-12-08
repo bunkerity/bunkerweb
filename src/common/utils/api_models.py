@@ -47,13 +47,13 @@ class InstanceWithInfo(InstanceWithMethod):
 
 class Plugin(BaseModel):
     id: str = Field(examples=["blacklist"], description="The plugin id")
-    stream: str = Field(examples=["partial"], description="The plugin stream")
+    stream: Literal["yes", "no", "partial"] = Field(examples=["partial"], description="The plugin stream")
     name: Union[str, Dict[str, str]] = Field(examples=[{"en": "Blacklist"}], description="The plugin name")
     description: Union[str, Dict[str, str]] = Field(examples=[{"en": "Deny access based on internal and external IP/network/rDNS/ASN blacklists."}], description="The plugin description")
-    version: str = Field(examples=["1.0"], description="The plugin version")
-    external: bool = Field(examples=[False], description="If the plugin is external")
+    version: str = Field(examples=["1.0"], description="The plugin version", pattern=r"^\d+\.\d+(\.\d+)?$")
+    external: bool = Field(True, examples=[False], description="If the plugin is external")
     method: str = Field(examples=["core"], description="Which service created the plugin")
-    page: bool = Field(examples=[False], description="If the plugin has a page")
+    page: bool = Field(False, examples=[False], description="If the plugin has a page")
     settings: Dict[
         str,
         Dict[
@@ -102,6 +102,7 @@ class Plugin(BaseModel):
             Union[str, Dict[str, str], List[str]],
         ],
     ] = Field(
+        {},
         examples=[
             {
                 "USE_BLACKLIST": {
@@ -118,7 +119,7 @@ class Plugin(BaseModel):
         description="The plugin settings",
     )
     jobs: List[Dict[Literal["name", "file", "every", "reload"], Union[str, bool]]] = Field(
-        None,
+        [],
         examples=[
             [
                 {
