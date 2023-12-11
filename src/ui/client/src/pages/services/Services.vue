@@ -25,6 +25,7 @@ import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
 import { useI18n } from "vue-i18n";
+import { ref } from "vue";
 const { locale, fallbackLocale } = useI18n();
 
 // Refresh when related btn is clicked
@@ -41,39 +42,47 @@ const config = useConfigStore();
 
 // Disabled save when no SERVER_NAME value
 watch(config, () => {
-  // Enable when new service with a valid SERVER_NAME
-  try {
-    if (
-      services.activeService === "new" &&
-      !!("SERVER_NAME" in config.data.services[services.activeService]) &&
-      config.data.services[services.activeService]["SERVER_NAME"]
-    )
-      return (saveBtn.disabled = false);
-  } catch (err) {}
+  if (!services.activeService) return (saveBtn.disabled = true);
+  // Case active service has no setting, he is not store on config even if he is active
+  const isServ = !!(services.activeService in config.data.services);
+  if (!isServ) return (saveBtn.disabled = true);
+  const isNewName = !!(
+    "SERVER_NAME" in config.data.services[services.activeService]
+  );
 
-  // Enable when not new and didn't change SERVER_NAME
-  try {
-    if (
-      services.activeService !== "new" &&
-      !("SERVER_NAME" in config.data.services[services.activeService])
-    )
-      return (saveBtn.disabled = false);
-  } catch (err) {}
+  // Check if can save regarding name logic
+  // new service must have SERVER_NAME
+  if (services.activeService === "new" && !isNewName)
+    return (saveBtn.disabled = true);
 
-  // Enable when not new, update name but is not falsy and not taken
-  try {
+  // When a SERVER_NAME is set, it must be unique (not taken, not falsy)
+  if (isNewName) {
+    console.log(
+      "name : " + config.data.services[services.activeService]["SERVER_NAME"]
+    );
     if (
-      services.activeService !== "new" &&
-      !!("SERVER_NAME" in config.data.services[services.activeService]) &&
-      config.data.services[services.activeService]["SERVER_NAME"] &&
-      services.servicesName.includes(
-        config.data.services[services.activeService]["SERVER_NAME"]
-      )
-    )
-      return (saveBtn.disabled = false);
-  } catch (err) {}
+      !config.data.services[services.activeService]["SERVER_NAME"] ||
+      (config.data.services[services.activeService]["SERVER_NAME"] &&
+        services.servicesName.includes(
+          config.data.services[services.activeService]["SERVER_NAME"]
+        ))
+    ) {
+      return (saveBtn.disabled = true);
+    }
+  }
 
-  return (saveBtn.disabled = true);
+  // Case not new service
+  // We can save if at least one value is different from default
+  if (
+    (services.activeService !== "new" &&
+      Object.keys(config.data.services).length === 0) ||
+    (Object.keys(config.data.services).length > 0 &&
+      Object.keys(config.data.services[services.activeService]).length === 0)
+  ) {
+    return (saveBtn.disabled = true);
+  }
+
+  return (saveBtn.disabled = false);
 });
 
 const feedbackStore = useFeedbackStore();
@@ -108,22 +117,17 @@ const services = reactive({
 
     let canDel = false;
 
-    if (services.activeService && services.activeService !== "new") {
-      services.setup[services.activeService].forEach((plugin) => {
-        if (plugin.id.toLowerCase() !== "general") return;
+    services.setup[services.activeService].forEach((plugin) => {
+      if (plugin.id.toLowerCase() !== "general") return;
 
-        if (
-          !!("method" in plugin) &&
-          plugin.method !== "default" &&
-          plugin.method !== "ui"
-        ) {
-          return (canDel = false);
-        } else {
-          return (canDel = true);
-        }
-      });
-      return canDel;
-    }
+      for (const [key, value] of Object.entries(plugin.settings)) {
+        if (key.toUpperCase() !== "SERVER_NAME") continue;
+        const method = value["method"];
+        if (method === "default" || method === "ui") canDel = true;
+        break;
+      }
+    });
+    return canDel;
   }),
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
@@ -232,6 +236,8 @@ const conf = reactive({
 });
 
 async function getGlobalConf(isFeedback = true) {
+  // Remove previous config services changes
+  resetValues();
   conf.isPend = true;
   services.isPend = true;
   await fetchAPI(
@@ -252,13 +258,15 @@ async function getGlobalConf(isFeedback = true) {
 
 // Refetch and reset all states
 function resetValues() {
+  services.activeService = "";
+  services.activePlugin = "";
   filters.label = "";
   config.$reset();
 }
 
 function refresh() {
-  getGlobalConf();
   resetValues();
+  getGlobalConf();
 }
 
 async function sendServConf() {
@@ -273,7 +281,6 @@ async function sendServConf() {
       if (Object.keys(value).length === 0) continue;
       let serviceName;
       // Case new, replace by SERVER_NAME
-      if (key === "new") serviceName = services[key]["SERVER_NAME"];
       if (key !== "new") serviceName = key;
       // Case change existing service name
       try {
@@ -302,37 +309,34 @@ function changeServ(servName) {
   if (services.activeService === servName) return;
   // Else setup
   // Remove previous config services changes
-  config.$reset();
-  saveBtn.disabled = false;
+  resetValues();
   services.activeService = servName;
 }
 
-function showNewServ() {
-  // Case already new service, stop
-  if (services.activeService === "new") return;
-  // Else setup
-  // Remove previous config services changes
-  config.$reset();
-  saveBtn.disabled = true;
-  services.activeService = "new";
-}
-
-const delServ = reactive({
+const deleteServ = reactive({
   isPend: false,
   isErr: false,
   // Data from fetch
   data: [],
 });
 
-function deleteServ() {
-  config.$reset();
-  fetchAPI(
-    `/api/config/service/${services.activeService}?method=ui}`,
+async function delServ() {
+  await fetchAPI(
+    `/api/config/service/${services.activeService}?method=ui`,
     "DELETE",
     null,
-    delServ,
+    deleteServ,
     isFeedback ? feedbackStore.addFeedback : null
-  );
+  )
+    .then((res) => {
+      // Case not save
+      if (res.type === "success") {
+        // Case saved
+        refresh();
+        return;
+      }
+    })
+    .catch((err) => {});
 }
 
 // Show service data logic
@@ -358,7 +362,7 @@ onMounted(() => {
     >
       <div class="col-span-12 flex justify-center mt-2">
         <ButtonBase
-          @click="showNewServ()"
+          @click="changeServ('new')"
           color="valid"
           size="normal"
           class="text-sm"
@@ -475,7 +479,7 @@ onMounted(() => {
         <div class="col-span-12 flex items-center">
           <button
             v-if="services.canDelete"
-            @click="deleteServ()"
+            @click="delServ()"
             color="delete"
             class="rounded-full bg-red-500 w-8 h-8 mr-1 mb-2 hover:brightness-90 dark:hover:brightness-75 dark:brightness-90"
           >

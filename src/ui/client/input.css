@@ -147,7 +147,7 @@ body {
 }
 
 .checkbox-svg {
-  @apply pointer-events-none absolute fill-gray-700 dark:fill-gray-100 left-0 top-0 translate-x-[3px] translate-y-[7px] h-3.5 w-3.5;
+  @apply z-10 pointer-events-none absolute fill-gray-700 dark:fill-gray-100 left-0 top-0 translate-x-[3px] translate-y-[7px] h-3.5 w-3.5;
 }
 
 .select-btn {

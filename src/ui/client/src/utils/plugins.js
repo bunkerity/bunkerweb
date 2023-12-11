@@ -128,7 +128,7 @@ export function pluginI18n(plugins, lang, fallback) {
 
 function setLangOrFallback(obj, key, lang, fallback) {
   try {
-    if (!!lang in obj[key]) {
+    if (!!(lang in obj[key])) {
       obj[key] = obj[key][lang];
     }
   } catch (err) {}

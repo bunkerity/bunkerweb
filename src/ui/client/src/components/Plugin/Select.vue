@@ -26,7 +26,8 @@ const select = reactive({
   id: props.setting.id,
   context: props.setting.context,
   values: props.setting.select,
-  value: props.setting.value || props.setting.default,
+  value: props.setting.value || props.setting.default, // Value onMount that can ben changed
+  valueStatic: props.setting.value || props.setting.default, // Value onMount to compare to add config (don't touch)
   defaultValue: props.setting.default,
   method: props.setting.method.toLowerCase() || getDefaultMethod(),
   defaultMethod: getDefaultMethod(),
@@ -158,11 +159,20 @@ onMounted(() => {
       @click="
         () => {
           changeValue(value);
-          config.updateConf(
+          // Case is same value as store on core
+          if (value === select.valueStatic)
+            return config.removeConf(
+              props.serviceName || select.context,
+              select.id,
+              select.value,
+              props.setting.regex
+            );
+
+          // Case not same value as store on core
+          return config.updateConf(
             props.serviceName || select.context,
             select.id,
             select.value,
-            props.setting.value,
             props.setting.regex
           );
         }

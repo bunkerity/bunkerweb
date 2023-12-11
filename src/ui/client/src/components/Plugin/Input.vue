@@ -21,7 +21,8 @@ const input = reactive({
   id: props.setting.id,
   context: props.setting.context,
   type: props.setting.type,
-  value: props.setting.value || props.setting.default,
+  value: props.setting.value || props.setting.default, // Value onMount that can ben changed
+  valueStatic: props.setting.value || props.setting.default, // Value onMount to compare to add config (don't touch)
   defaultValue: props.setting.default,
   method: props.setting.method.toLowerCase() || getDefaultMethod(),
   defaultMethod: getDefaultMethod(),
@@ -38,13 +39,24 @@ const input = reactive({
     <input
       v-model="input.value"
       @input="
-        config.updateConf(
-          props.serviceName || input.context,
-          input.id,
-          input.value,
-          props.setting.value,
-          props.setting.regex
-        )
+        () => {
+          // Case is same value as store on core
+          console.log(input.value, input.valueStatic);
+          if (input.value === input.valueStatic)
+            return config.removeConf(
+              props.serviceName || input.context,
+              input.id,
+              input.value
+            );
+
+          // Case not same value as store on core
+          return config.updateConf(
+            props.serviceName || input.context,
+            input.id,
+            input.value,
+            props.setting.regex
+          );
+        }
       "
       :type="
         input.type === 'password'
@@ -66,6 +78,7 @@ const input = reactive({
       "
       :data-default-value="input.defaultValue"
       :data-default-method="input.defaultMethod"
+      :data-value="input.value"
       :name="input.id"
       :value="input.value"
     />

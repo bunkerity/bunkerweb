@@ -234,7 +234,7 @@
   "services_active_delete": "Delete active service {name}",
   "services_active_base": "service {name}",
   "services_actions_new": "New service",
-  "services_actions_warning": "Need at least an available and valid server name to save.",
+  "services_actions_warning": "At least an available and valid server name and/or update a setting to save.",
   "inp_select_default_desc": "Link to a custom visible select component.",
   "inp_select_dropdown_button_desc": "Custom dropdown toggle button.",
   "inp_select_dropdown_desc": "Custom select dropdown.",

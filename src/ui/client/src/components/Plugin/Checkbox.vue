@@ -18,7 +18,8 @@ const props = defineProps({
 const checkbox = reactive({
   id: props.setting.id,
   context: props.setting.context,
-  value: props.setting.value || props.setting.default,
+  value: props.setting.value || props.setting.default, // Value onMount that can ben changed
+  valueStatic: props.setting.value || props.setting.default, // Value onMount to compare to add config (don't touch)
   defaultValue: props.setting.default,
   method: props.setting.method.toLowerCase() || getDefaultMethod(),
   defaultMethod: getDefaultMethod(),
@@ -41,11 +42,19 @@ function updateCheckbox() {
       @click="
         () => {
           updateCheckbox();
-          config.updateConf(
+          // Case is same value as store on core
+          if (checkbox.value === checkbox.valueStatic)
+            return config.removeConf(
+              props.serviceName || checkbox.context,
+              checkbox.id,
+              checkbox.value
+            );
+
+          // Case not same value as store on core
+          return config.updateConf(
             props.serviceName || checkbox.context,
             checkbox.id,
-            checkbox.value,
-            props.setting.value
+            checkbox.value
           );
         }
       "
@@ -55,6 +64,7 @@ function updateCheckbox() {
         modes.indexOf(checkbox.method) !== -1 ? 'mode' : checkbox.method
       "
       :data-default-value="checkbox.defaultValue"
+      :data-value="checkbox.value"
       :disabled="
         modes.indexOf(checkbox.method) !== -1 ||
         (checkbox.method !== 'ui' && checkbox.method !== 'default')

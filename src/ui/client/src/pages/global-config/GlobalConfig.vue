@@ -140,12 +140,13 @@ async function getGlobalConf(isFeedback = true) {
 // Refetch and reset all states
 async function resetValues() {
   filters.label = "";
+  plugins.activePlugin = "";
   config.$reset();
 }
 
 async function refresh(isFeedback = true) {
-  await getGlobalConf(isFeedback);
   await resetValues();
+  await getGlobalConf(isFeedback);
 }
 
 async function sendConf() {
