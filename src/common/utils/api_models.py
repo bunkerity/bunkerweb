@@ -326,6 +326,14 @@ class CustomConfigName(BaseModel):
     custom_config_name: str = Field(examples=["my_custom_config"], description="The custom config name")
 
 
+class CustomConfigType(BaseModel):
+    config_type: Literal["http", "server_http", "default_server_http", "modsec", "modsec_crs", "stream", "server_stream"] = Field(examples=["http"], description="The config type")
+
+
+class CustomConfigServiceId(BaseModel):
+    service_id: str = Field(examples=["www.example.com"], description="The id of the service that the custom config belongs to")
+
+
 class PluginId(BaseModel):
     plugin_id: str = Field(examples=["blacklist"], description="The plugin id")
 

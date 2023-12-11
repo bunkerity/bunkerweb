@@ -36,8 +36,13 @@ def update_custom_configs():
 
 @custom_configs.route(f"{PREFIX}/<string:custom_config_name>", methods=["DELETE"])
 @jwt_required()
-@model_validator(queries={"method": "Method"}, params={"custom_config_name": "CustomConfigName"})
+@model_validator(queries={"method": "Method", "custom_config_name": "CustomConfigName", "config_type": "CustomConfigType", "service_id": "CustomConfigServiceId"}, params={"custom_config_name": "CustomConfigName"})
 def delete_custom_configs(custom_config_name):
     """Delete a custom config by name"""
-    args, data, method = [get_req_data(request, ["method"])[k] for k in ("args", "data", "method")]
-    return get_core_format_res(f"{CORE_API}/custom_configs/{custom_config_name}?method={method if method else 'ui'}", "DELETE", {}, f"Delete custom config {custom_config_name}")
+    args, data, method, custom_config_name, config_type, service_id = [get_req_data(request, ["method", "custom_config_name", "config_type", "service_id"])[k] for k in ("args", "data", "method", "custom_config_name", "config_type", "service_id")]
+    return get_core_format_res(
+        f"{CORE_API}/custom_configs/{custom_config_name}?method={method if method else 'ui'}&custom_config_name={custom_config_name}&config_type={config_type}&service_id={service_id if service_id else ''}",
+        "DELETE",
+        {},
+        f"Delete custom config {custom_config_name}",
+    )

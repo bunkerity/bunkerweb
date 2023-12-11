@@ -14,8 +14,6 @@ import "@assets/script/editor/theme-dracula.js";
 import "@assets/script/editor/theme-dawn.js";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
 
 const feedbackStore = useFeedbackStore();
 
@@ -158,37 +156,6 @@ const updateConf = reactive({
   data: [],
 });
 
-async function sendData() {
-  // Send only if filename and content
-  if (!data.name && !data.value) return;
-
-  // Case all needed data
-
-  const method = props.action.toLowerCase() === "delete" ? "DELETE" : "PUT";
-  const conf = formatData();
-
-  // Fetch
-  await fetchAPI(
-    `/api/custom_configs${
-      method === "DELETE" ? `/${conf.old_name}` : ``
-    }?method=ui`,
-    method,
-    conf,
-    updateConf,
-    feedbackStore.addFeedback
-  )
-    .then((res) => {
-      // Case not save
-      if (res.type === "success") {
-        // Case saved
-        emits("close");
-        emits("updateFile");
-        return;
-      }
-    })
-    .catch((err) => {});
-}
-
 function formatData() {
   // Format data, we need to remove root that is only functional
   // And the current file name to keep only type/service?
@@ -210,6 +177,41 @@ function formatData() {
   };
 
   return conf;
+}
+
+async function sendData() {
+  // Send only if filename and content
+  if (!data.name && !data.value) return;
+
+  // Case all needed data
+  const conf = formatData();
+  const method = props.action.toLowerCase() === "delete" ? "DELETE" : "PUT";
+  const baseURL = `/api/custom_configs${
+    method === "DELETE" ? `/${conf.old_name}` : ``
+  }`;
+  const queries =
+    props.action.toLowerCase() === "delete"
+      ? `?method=ui&custom_config_name=${conf.old_name}&config_type=${conf.type}&service_id=${conf.service_id}`
+      : `?method=ui`;
+  const api = `${baseURL}${queries}`;
+  // Fetch
+  await fetchAPI(
+    api,
+    method,
+    props.action.toLowerCase() === "delete" ? null : conf,
+    updateConf,
+    feedbackStore.addFeedback
+  )
+    .then((res) => {
+      // Case not save
+      if (res.type === "success") {
+        // Case saved
+        emits("close");
+        emits("updateFile");
+        return;
+      }
+    })
+    .catch((err) => {});
 }
 </script>
 <template>

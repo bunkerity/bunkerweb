@@ -73,7 +73,7 @@ function getClickPath(id) {
         type="button"
         class="file-manager-breadcrumb-item-btn"
       >
-        {{ item === "root" ? "" : item }}
+        {{ item === "root" ? "" : item.replaceAll("_", "-") }}
       </button>
     </li>
   </ul>
