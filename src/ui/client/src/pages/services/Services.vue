@@ -10,6 +10,7 @@ import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import SettingsUploadSvgWarning from "@components/Settings/Upload/Svg/Warning.vue";
+import ServicesModalDelete from "@components/Services/Modal/Delete.vue";
 import { reactive, computed, onMounted, watch } from "vue";
 import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
 import {
@@ -25,7 +26,6 @@ import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
 import { useI18n } from "vue-i18n";
-import { ref } from "vue";
 const { locale, fallbackLocale } = useI18n();
 
 // Refresh when related btn is clicked
@@ -57,9 +57,6 @@ watch(config, () => {
 
   // When a SERVER_NAME is set, it must be unique (not taken, not falsy)
   if (isNewName) {
-    console.log(
-      "name : " + config.data.services[services.activeService]["SERVER_NAME"]
-    );
     if (
       !config.data.services[services.activeService]["SERVER_NAME"] ||
       (config.data.services[services.activeService]["SERVER_NAME"] &&
@@ -313,31 +310,9 @@ function changeServ(servName) {
   services.activeService = servName;
 }
 
-const deleteServ = reactive({
-  isPend: false,
-  isErr: false,
-  // Data from fetch
-  data: [],
+const delModal = reactive({
+  isOpen: false,
 });
-
-async function delServ() {
-  await fetchAPI(
-    `/api/config/service/${services.activeService}?method=ui`,
-    "DELETE",
-    null,
-    deleteServ,
-    isFeedback ? feedbackStore.addFeedback : null
-  )
-    .then((res) => {
-      // Case not save
-      if (res.type === "success") {
-        // Case saved
-        refresh();
-        return;
-      }
-    })
-    .catch((err) => {});
-}
 
 // Show service data logic
 onMounted(() => {
@@ -347,6 +322,12 @@ onMounted(() => {
 
 <template>
   <Dashboard>
+    <ServicesModalDelete
+      :serviceName="services.activeService"
+      :isOpen="delModal.isOpen"
+      @close="delModal.isOpen = false"
+      @delete="refresh()"
+    />
     <ApiState
       class="col-span-12 md:col-start-4 md:col-span-6"
       :isErr="conf.isErr || services.isErr"
@@ -479,7 +460,7 @@ onMounted(() => {
         <div class="col-span-12 flex items-center">
           <button
             v-if="services.canDelete"
-            @click="delServ()"
+            @click="delModal.isOpen = true"
             color="delete"
             class="rounded-full bg-red-500 w-8 h-8 mr-1 mb-2 hover:brightness-90 dark:hover:brightness-75 dark:brightness-90"
           >
