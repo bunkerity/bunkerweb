@@ -9,8 +9,10 @@ services:
     labels:
       - "bunkerweb.INSTANCE=yes"
     environment:
-      - SERVER_NAME=www.example.com
+      - SERVER_NAME=
+      - MULTISITE=yes
       - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+      - UI_HOST=http://bw-ui:7000 # Change it if needed
     networks:
       - bw-universe
       - bw-services
@@ -20,9 +22,8 @@ services:
     depends_on:
       - bunkerweb
       - bw-docker
-    volumes:
-      - bw-data:/data
     environment:
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
       - DOCKER_HOST=tcp://bw-docker:2375
     networks:
       - bw-universe
@@ -35,6 +36,29 @@ services:
     environment:
       - CONTAINERS=1
       - LOG_LEVEL=warning
+    networks:
+      - bw-docker
+
+  bw-ui:
+    image: bunkerity/bunkerweb-ui:1.5.4
+    depends_on:
+      - bw-docker
+    environment:
+      - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
+      - DOCKER_HOST=tcp://bw-docker:2375
+    networks:
+      - bw-universe
+      - bw-docker
+
+  bw-db:
+    image: mariadb:10.10
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=bunkerweb
+      - MYSQL_PASSWORD=changeme # Remember to set a stronger password for the database
+    volumes:
+      - bw-data:/var/lib/mysql
     networks:
       - bw-docker
 
