@@ -72,7 +72,7 @@ class News {
         excerpt,
         tags,
         date,
-        lastUpdate,
+        lastUpdate
       );
       let cleanHTML = DOMPurify.sanitize(cardHTML);
       //add to DOM
@@ -191,7 +191,7 @@ class darkMode {
     };
     const send = await fetch(
       `${location.href.split("/").slice(0, -1).join("/")}/darkmode`,
-      data,
+      data
     );
   }
 }
@@ -231,7 +231,7 @@ class FlashMsg {
           flashEl.remove();
           //update count
           this.flashCount.textContent = document.querySelectorAll(
-            "[data-flash-message]",
+            "[data-flash-message]"
           ).length;
         }
       } catch (err) {}
@@ -295,12 +295,64 @@ class Loader {
   }
 }
 
+class Banner {
+  constructor() {
+    this.bannerEl = document.getElementById("banner");
+    this.bannerItems = this.bannerEl.querySelectorAll('[role="listitem"]');
+    this.nextDelay = 9000;
+    this.transDuration = 700;
+    this.init();
+  }
+
+  init() {
+    setInterval(() => {
+      // Get current visible
+      let visibleEl;
+      this.bannerItems.forEach((item) => {
+        if (item.getAttribute("aria-hidden") === "false") {
+          visibleEl = item;
+        }
+      });
+
+      // Get next one to show (next index or first one)
+      let nextEl =
+        this.bannerEl.querySelector(
+          `[role="listitem"][data-id="${
+            +visibleEl.getAttribute("data-id") + 1
+          }"]`
+        ) || this.bannerEl.querySelector(`[role="listitem"][data-id="0"]`);
+
+      // Hide current one
+      visibleEl.classList.add("-left-full");
+      visibleEl.classList.remove("left-0");
+      visibleEl.setAttribute("aria-hidden", "true");
+      setTimeout(() => {
+        visibleEl.classList.remove("transition-all");
+      }, this.transDuration + 10);
+      setTimeout(() => {
+        visibleEl.classList.add("opacity-0");
+      }, this.transDuration + 20);
+      setTimeout(() => {
+        visibleEl.classList.remove("-left-full");
+        visibleEl.classList.add("left-full");
+      }, this.transDuration * 2);
+
+      // Show next one
+      nextEl.classList.remove("opacity-0");
+      nextEl.classList.add("transition-all");
+      nextEl.classList.add("left-0");
+      nextEl.classList.remove("left-full");
+      nextEl.setAttribute("aria-hidden", "false");
+    }, this.nextDelay);
+  }
+}
+
 const setLoader = new Loader();
 const setMenu = new Menu();
 const setNewsSidebar = new Sidebar(
   "[data-sidebar-info]",
   "[data-sidebar-info-open]",
-  "[data-sidebar-info-close]",
+  "[data-sidebar-info-close]"
 );
 
 const setCheckbox = new Checkbox();
@@ -311,8 +363,10 @@ const setDisabledPop = new DisabledPop();
 const setFlashSidebar = new Sidebar(
   "[data-flash-sidebar]",
   "[data-flash-sidebar-open]",
-  "[data-flash-sidebar-close]",
+  "[data-flash-sidebar-close]"
 );
 const setNews = new News();
 const setDarkM = new darkMode();
 const setFlash = new FlashMsg();
+
+const setBanner = new Banner();
