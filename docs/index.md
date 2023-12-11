@@ -57,7 +57,7 @@ To delve deeper into the core security features, we invite you to explore the [s
 	<iframe style="display: block;" width="560" height="315" src="https://www.youtube-nocookie.com/embed/ZhYV-QELzA4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
-A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io). Feel free to visit it and perform some security tests.
+A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io?utm_campaign=self&utm_source=doc). Feel free to visit it and perform some security tests.
 
 ## Professional services
 

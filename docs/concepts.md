@@ -48,7 +48,7 @@ USE_BROTLI=no
 
 !!! info "Settings generator tool"
 
-    To help you tune BunkerWeb, we offer an easy-to-use settings generator tool available at [config.bunkerweb.io](https://config.bunkerweb.io).
+    To help you tune BunkerWeb, we offer an easy-to-use settings generator tool available at [config.bunkerweb.io](https://config.bunkerweb.io?utm_campaign=self&utm_source=doc).
 
 ## Multisite mode
 

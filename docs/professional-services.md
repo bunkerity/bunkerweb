@@ -8,7 +8,7 @@ But dedicating time to a specific technology may not be easy depending on your b
 
 Getting professional services in addition to the open-source solution is the ideal solution to cover your business needs. You can focus on your top priorities and rely on a trusted partner when it comes to web security.
 
-Please note that professionnal services are directly offered by [Bunkerity](https://www.bunkerity.com), the company maintaining the BunkerWeb project, through our [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) online platform.
+Please note that professionnal services are directly offered by [Bunkerity](https://www.bunkerity.com?utm_campaign=self&utm_source=doc), the company maintaining the BunkerWeb project, through our [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) online platform.
 
 ## Which professional services do you offer ?
 
@@ -19,6 +19,7 @@ According to your needs you have the choice between "one time" and subscriptions
 One important thing to note is that the support service is based on "credit" system where you pay for a number of support hours dedicated for you. Time passed on your requests will be deducted to your credit. In other words, you only pay for real time dedicated to your needs.
 
 In addition to the support service, we also offer custom services around the BunkerWeb solution to meet your specific needs :
+
 - Consulting : a dedicated expert will give you advices on your project
 - Development : if you need specific features in BunkerWeb, we can do it for you
 
