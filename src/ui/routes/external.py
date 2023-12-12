@@ -25,6 +25,39 @@ PREFIX = "/api/external"
 
 external = Blueprint("external", __name__)
 
+@external.route(f"{PREFIX}/page/<string:plugin_id>/<string:plugin_page_name>", methods=["GET"])
+@jwt_required()
+@model_validator(params={"plugin_id": "PluginId", "plugin_page_name" : "PluginPageName"})
+def get_custom_page(plugin_id, plugin_page_name):
+      # Check if plugin id exists
+    is_plugin = False
+    try:
+        plugins = get_core_format_res(f"{CORE_API}/plugins")
+        for item in plugins["data"]:
+            if plugin_id == item["id"]:
+                is_plugin = True
+                break
+
+        if not is_plugin:
+            raise HTTPException(response=Response(status=500), description=f"Plugin {plugin_id} not find to execute action.")
+
+    except:
+        raise HTTPException(response=Response(status=500), description=f"Error while trying to find plugin {plugin_id}.")
+
+    # Retrieve template from CORE
+    try:
+        page = requests.get(f"{CORE_API}/plugins/external/page/{plugin_id}/{page}")
+        if not str(page.status_code).startswith("2"):
+            raise InternalServerError(response=Response(status=404), description=f"No custom page found for plugin {plugin_id}.")
+    except:
+        raise InternalServerError(response=Response(status=500), description=f"Error while trying to get custom page for plugin {plugin_id}.")
+    # Send source code as template
+    try:
+        content = page.content.decode("utf-8")
+        return render_template_string(content)
+    except:
+        raise InternalServerError(response=Response(status=500), description=f"Error while sending custom page for plugin {plugin_id}.")
+
 
 # Communicate with CORE retrieving ui api file and executing a specific function (action name)
 @external.route(f"{PREFIX}/<string:plugin_id>/action", methods=["GET", "POST", "PUT", "DELETE"])
