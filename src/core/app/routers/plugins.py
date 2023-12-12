@@ -37,11 +37,11 @@ router = APIRouter(prefix="/plugins", tags=["plugins"])
         },
     },
 )
-async def get_plugins(background_tasks: BackgroundTasks):
+async def get_plugins(background_tasks: BackgroundTasks, external: bool = False):
     """
     Get core and external plugins from the database.
     """
-    plugins = DB.get_plugins()
+    plugins = DB.get_plugins(external=external)
 
     if plugins == "retry":
         retry_in = str(uniform(1.0, 5.0))
