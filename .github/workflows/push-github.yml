@@ -23,7 +23,7 @@ jobs:
         with:
           name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
       # Create tag
-      - uses: rickstaa/action-create-tag@861755f3fcbce1b21a65c17bad10e7d35c27b6d9 # v1.7.1
+      - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
         name: Create tag
         if: inputs.VERSION != 'testing'
         with:
@@ -31,7 +31,7 @@ jobs:
           message: "v${{ inputs.VERSION }}"
           force_push_tag: true
       # Create tag
-      - uses: rickstaa/action-create-tag@861755f3fcbce1b21a65c17bad10e7d35c27b6d9 # v1.7.1
+      - uses: rickstaa/action-create-tag@a1c7777fcb2fee4f19b0f283ba888afa11678b72 # v1.7.2
         name: Create tag
         if: inputs.VERSION == 'testing'
         with:
