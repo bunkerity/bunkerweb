@@ -40,15 +40,19 @@ class News {
   }
 
   init() {
-    window.addEventListener("load", async () => {
+    window.addEventListener("load", () => {
       try {
-        const res = await fetch("https://www.bunkerweb.io/api/posts/0/2", {
-          headers: {
-            method: "GET",
-          },
-        });
-        return await this.render(res);
-      } catch (err) {}
+        fetch("https://www.bunkerweb.io/api/posts/0/1")
+          .then((res) => {
+            return res.json();
+          })
+          .then((res) => {
+            console.log(res);
+            return this.render(res.data);
+          });
+      } catch (err) {
+        console.log(err);
+      }
     });
   }
 
@@ -58,21 +62,14 @@ class News {
     newsContainer.textContent = "";
     //render last news
     lastNews.forEach((news) => {
-      //get info
-      const slug = news.slug;
-      const img = news.photo.url;
-      const excerpt = news.excerpt;
-      const tags = news.tags;
-      const date = news.date;
-      const lastUpdate = news.lastUpdate;
       //create html card from  infos
       const cardHTML = this.template(
-        slug,
-        img,
-        excerpt,
-        tags,
-        date,
-        lastUpdate
+        news.title,
+        news.slug,
+        news.photo.url,
+        news.excerpt,
+        news.tags,
+        news.date
       );
       let cleanHTML = DOMPurify.sanitize(cardHTML);
       //add to DOM
@@ -82,7 +79,7 @@ class News {
     });
   }
 
-  template(slug, img, excerpt, tags, date, lastUpdate) {
+  template(title, slug, img, excerpt, tags, date) {
     //loop on tags to get list
     let tagList = "";
     tags.forEach((tag) => {
@@ -96,7 +93,7 @@ class News {
     //create card
     const card = `
       <div
-        class="min-h-[400px] w-full col-span-12 transition hover:-translate-y-2  bg-gray-100 dark:bg-slate-900 rounded px-6 py-4 m-2  flex flex-col justify-between"
+        class="min-h-[350px] w-full col-span-12 transition dark:bg-slate-700 dark:brightness-[0.885] bg-gray-100 rounded px-6 py-4 my-4 mx-0 flex flex-col justify-between"
       >
         <div>
             <img  role="link"
@@ -107,12 +104,12 @@ class News {
             />
             <h3 role="link"
             onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
-            class="cursor-pointer mt-3 mb-1  text-3xl dark:text-white tracking-wide">{{ post['title'] }}</h3>
+            class="cursor-pointer mt-3 mb-1  text-xl dark:text-white tracking-wide">${title}</h3>
         </div>
         <div>
             <div  role="link"
             onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
-            class="cursor-pointer min-h-[130px] mb-3 text-lg dark:text-gray-300 text-gray-600 pt-3">
+            class="cursor-pointer min-h-[100px] mb-3 dark:text-gray-300 text-gray-600 pt-3">
                 ${excerpt}
             </div>
             <div class="min-h-[75px] mt-2 flex flex-wrap justify-start items-end align-bottom">
@@ -121,13 +118,8 @@ class News {
 
             <div class="mt-2 flex flex-col justify-start items-start">
                 <span class="text-xs  dark:text-gray-300 text-gray-600"
-                >Posted on : ${date}</span
-                >
-                {% if post["updatedAt"] %}
-                <span class="text-xs  dark:text-gray-300 text-gray-600"
-                >Last update : ${lastUpdate}</span
-                >
-                {%endif%}
+                >Posted on : ${date}
+                </span>
             </div>
         </div>
       </div>  `;
