@@ -20,11 +20,11 @@
 <p align="center">
 	🌐 <a href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=github">Website</a>
 	 &#124;
+	🤝 <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=github">Panel</a>
+	 &#124;
 	📓 <a href="https://docs.bunkerweb.io/?utm_campaign=self&utm_source=github">Documentation</a>
 	 &#124;
 	👨‍💻 <a href="https://demo.bunkerweb.io/?utm_campaign=self&utm_source=github">Demo</a>
-	 &#124;
-	🤝 <a href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=github">Panel</a>
 	 &#124;
 	🛡️ <a href="https://github.com/bunkerity/bunkerweb/raw/v1.5.4/examples">Examples</a>
 	 &#124;
@@ -63,16 +63,16 @@ BunkerWeb contains primary [security features](https://docs.bunkerweb.io/1.5.4/s
 
 ## Security features
 
-Explore the impressive array of security features offered by BunkerWeb. While not exhaustive, here are some notable highlights:
+A non-exhaustive list of security features :
 
-- **HTTPS** support with transparent **Let's Encrypt** automation : Easily secure your web services with automated Let's Encrypt integration, ensuring encrypted communication between clients and your server.
-- **State-of-the-art web security** : Benefit from cutting-edge web security measures, including comprehensive HTTP security headers, prevention of data leaks, and TLS hardening techniques.
-- Integrated **ModSecurity WAF** with the **OWASP Core Rule Set** : Enjoy enhanced protection against web application attacks with the integration of ModSecurity, fortified by the renowned OWASP Core Rule Set.
-- **Automatic ban** of strange behaviors based on HTTP status code : BunkerWeb intelligently identifies and blocks suspicious activities by automatically banning behaviors that trigger abnormal HTTP status codes.
-- Apply **connections and requests limit** for clients : Set limits on the number of connections and requests from clients, preventing resource exhaustion and ensuring fair usage of server resources.
-- **Block bots** with **challenge-based verification** : Keep malicious bots at bay by challenging them to solve puzzles such as cookies, JavaScript tests, captcha, hCaptcha, reCAPTCHA or Turnstile, effectively blocking unauthorized access.
-- **Block known bad IPs** with external blacklists and DNSBL : Utilize external blacklists and DNS-based blackhole lists (DNSBL) to proactively block known malicious IP addresses, bolstering your defense against potential threats.
-- **And much more...** : BunkerWeb is packed with a plethora of additional security features that go beyond this list, providing you with comprehensive protection and peace of mind.
+- **HTTPS** support with transparent **Let's Encrypt** automation
+- **State-of-the-art web security** : HTTP security headers, prevent leaks, TLS hardening, ...
+- Integrated **ModSecurity WAF** with the **OWASP Core Rule Set**
+- **Automatic ban** of strange behaviors based on HTTP status code
+- Apply **connections and requests limit** for clients
+- **Block bots** by asking them to solve a **challenge** (e.g. : cookie, javascript, captcha, hCaptcha or reCAPTCHA)
+- **Block known bad IPs** with external blacklists and DNSBL
+- And much more ...
 
 Learn more about the core security features in the [security tuning](https://docs.bunkerweb.io/1.5.4/security-tuning/?utm_campaign=self&utm_source=github) section of the documentation.
 
@@ -86,7 +86,7 @@ A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](http
 
 ## Professional services
 
-Get the most of BunkerWeb by getting professional services directly from the maintainers of the project. From technical support to tailored consulting and development, we are here to assist you in the security of your web services.
+Maximize your BunkerWeb experience by getting professional services directly from the maintainers of the project. Whether you require technical support, personalized consulting, or development services, we stand ready to assist you in fortifying the security of your web services.
 
 You will find more information by visiting the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=github), our dedicated platform for professional services.
 
@@ -233,10 +233,10 @@ You will find more information in the [Kubernetes section](https://docs.bunkerwe
 
 List of supported Linux distros :
 
-- Debian 12 "Bookworm"
+- Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
-- Fedora 39
-- RHEL 8.9
+- Fedora 38
+- RHEL 8.7
 
 Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
 
@@ -250,10 +250,10 @@ You will find more information in the [Linux section](https://docs.bunkerweb.io/
 
 List of supported Linux distros :
 
-- Debian 12 "Bookworm"
+- Debian 11 "Bullseye"
 - Ubuntu 22.04 "Jammy"
-- Fedora 39
-- RHEL 8.9
+- Fedora 38
+- RHEL 8.7
 
 [Ansible](https://www.ansible.com/) is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.
 
@@ -321,7 +321,7 @@ You will find more information in the [Web UI section](https://docs.bunkerweb.io
 
 BunkerWeb comes with a plugin system to make it possible to easily add new features. Once a plugin is installed, you can manage it using additional settings defined by the plugin.
 
-Here is the list of "official" plugins that we maintain (see the [bunkerweb-plugins](https://github.com/bunkerity/bunkerweb-plugins) repository for more information) :
+Here is the list of "official" plugins that we maintain (see the [bunkerweb-plugins](https://github.com/bunkerity/bunkerweb-plugins/?utm_campaign=self&utm_source=github) repository for more information) :
 
 |      Name      | Version | Description                                                                                                                      |                                                Link                                                 |
 | :------------: | :-----: | :------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------: |
@@ -331,7 +331,7 @@ Here is the list of "official" plugins that we maintain (see the [bunkerweb-plug
 |  **Discord**   |   1.2   | Send security notifications to a Discord channel using a Webhook.                                                                |    [bunkerweb-plugins/discord](https://github.com/bunkerity/bunkerweb-plugins/tree/main/discord)    |
 |   **Slack**    |   1.2   | Send security notifications to a Slack channel using a Webhook.                                                                  |      [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/slack)      |
 | **VirusTotal** |   1.2   | Automatically scans uploaded files with the VirusTotal API and denies the request when a file is detected as malicious.          | [bunkerweb-plugins/virustotal](https://github.com/bunkerity/bunkerweb-plugins/tree/main/virustotal) |
-|  **WebHook**   |   1.2   | Send security notifications to a custom HTTP endpoint using a	Webhook.                                                           |     [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
+|  **WebHook**   |   1.2   | Send security notifications to a custom HTTP endpoint using a Webhook.                                                           |     [bunkerweb-plugins/slack](https://github.com/bunkerity/bunkerweb-plugins/tree/main/webhook)     |
 
 You will find more information in the [plugins section](https://docs.bunkerweb.io/1.5.4/plugins/?utm_campaign=self&utm_source=github) of the documentation.
 
@@ -347,10 +347,10 @@ Don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campai
 
 To get free community support you can use the following media :
 
-* The #help channel of BunkerWeb in the [Discord server](https://discord.com/invite/fTf46FmtyD)
-* The help category of [GitHub discussions](https://github.com/bunkerity/bunkerweb/discussions)
-* The [/r/BunkerWeb](https://www.reddit.com/r/BunkerWeb) subreddit
-* The [Server Fault](https://serverfault.com/) and [Super User](https://superuser.com/) forums
+- The #help channel of BunkerWeb in the [Discord server](https://discord.com/invite/fTf46FmtyD)
+- The help category of [GitHub discussions](https://github.com/bunkerity/bunkerweb/discussions)
+- The [/r/BunkerWeb](https://www.reddit.com/r/BunkerWeb) subreddit
+- The [Server Fault](https://serverfault.com/) and [Super User](https://superuser.com/) forums
 
 Please don't use [GitHub issues](https://github.com/bunkerity/bunkerweb/issues) to ask for help, use it only for bug reports and feature requests.
 
