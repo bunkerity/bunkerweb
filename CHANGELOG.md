@@ -3,7 +3,8 @@
 ## v1.5.5 - YYYY/MM/DD
 
 - [FEATURE] Add Anonymous reporting feature
-- [MISC] Updated ModSecurity to v3.0.11
+- [FEATURE] Add support for fallback Referrer-Policies
+- [DEPS] Updated ModSecurity to v3.0.11
 
 ## v1.5.4 - 2023/12/04
 
