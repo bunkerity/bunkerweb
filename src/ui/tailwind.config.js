@@ -38,10 +38,10 @@ module.exports = {
       black: colors.black,
       white: colors.white,
       primary: {
-        DEFAULT: "#085577",
+        DEFAULT: "#0b5577",
       },
       secondary: {
-        DEFAULT: "#40bb6b",
+        DEFAULT: "#2eac68",
       },
       slate: {
         DEFAULT: colors.slate,

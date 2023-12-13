@@ -301,10 +301,15 @@ class Banner {
     this.bannerItems = this.bannerEl.querySelectorAll('[role="listitem"]');
     this.nextDelay = 9000;
     this.transDuration = 700;
+    this.menuBtn = document.querySelector("[data-sidebar-menu-toggle]");
+    this.menuEl = document.querySelector("[data-sidebar-menu]");
+    this.newsBtn = document.querySelector("[data-sidebar-info-open]");
+    this.flashBtn = document.querySelector("[data-flash-group]");
     this.init();
   }
 
   init() {
+    this.changeMenu();
     setInterval(() => {
       // Get current visible
       let visibleEl;
@@ -344,6 +349,42 @@ class Banner {
       nextEl.classList.remove("left-full");
       nextEl.setAttribute("aria-hidden", "false");
     }, this.nextDelay);
+  }
+
+  changeMenu() {
+    let options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.35,
+    };
+
+    let observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          this.menuEl.classList.add("mt-[4.5rem]");
+          this.menuBtn.classList.add("top-[8.2rem]", "sm:top-[4.5rem]");
+          this.newsBtn.classList.add("top-[4.5rem]");
+          this.flashBtn.classList.add("top-[4.5rem]");
+          this.menuBtn.classList.remove("top-16", "sm:top-2");
+          this.newsBtn.classList.remove("top-2");
+          this.flashBtn.classList.remove("top-2");
+          this.menuEl.classList.remove("mt-2");
+        }
+
+        if (!entry.isIntersecting) {
+          this.menuEl.classList.add("mt-2");
+          this.menuBtn.classList.add("top-16", "sm:top-2");
+          this.newsBtn.classList.add("top-2");
+          this.flashBtn.classList.add("top-2");
+          this.menuBtn.classList.remove("top-[8.2rem]", "sm:top-[4.5rem]");
+          this.newsBtn.classList.remove("top-[4.5rem]");
+          this.flashBtn.classList.remove("top-[4.5rem]");
+          this.menuEl.classList.remove("mt-[4.5rem]");
+        }
+      });
+    }, options);
+
+    observer.observe(this.bannerEl);
   }
 }
 
