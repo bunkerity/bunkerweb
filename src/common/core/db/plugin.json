@@ -68,9 +68,9 @@
         "en": "Database log level",
         "fr": "Niveau des logs de la base de données"
       },
-      "regex": "^(debug|info|warn|error)$",
+      "regex": "^(debug|info|warn|warning|error)$",
       "type": "select",
-      "select": ["debug", "info", "warn", "error"]
+      "select": ["debug", "info", "warn", "warning", "error"]
     }
   },
   "jobs": [
