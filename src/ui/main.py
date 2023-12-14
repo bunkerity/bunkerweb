@@ -517,6 +517,48 @@ def home():
     )
 
 
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    if request.method == "POST":
+        # Check form data validity
+        if not request.form:
+            flash("Missing form data.", "error")
+            return redirect(url_for("profile"))
+
+        if not any(key in request.form for key in ("admin_username", "admin_password", "admin_password_check")):
+            flash("Missing either admin_username, admin_password or admin_password_check.", "error")
+            return redirect(url_for("profile"))
+
+        error = False
+
+        if len(request.form["admin_username"]) > 256:
+            flash("The admin username is too long. It must be less than 256 characters.", "error")
+            error = True
+
+        if request.form["admin_password"] != request.form["admin_password_check"]:
+            flash("The passwords do not match.", "error")
+            error = True
+
+        if not USER_PASSWORD_RX.match(request.form["admin_password"]):
+            flash("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).", "error")
+            error = True
+
+        if error:
+            return redirect(url_for("profile"))
+
+        # TODO: Update username and password (if changed)
+        return Response(status=200)
+
+    return render_template(
+        "profile.html",
+        title="Profile",
+        username=getenv("ADMIN_USERNAME", ""),
+        password=getenv("ADMIN_PASSWORD", ""),
+        dark_mode=app.config["DARK_MODE"],
+    )
+
+
 @app.route("/instances", methods=["GET", "POST"])
 @login_required
 def instances():

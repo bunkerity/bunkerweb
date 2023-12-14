@@ -47,12 +47,9 @@ class News {
             return res.json();
           })
           .then((res) => {
-            console.log(res);
             return this.render(res.data);
           });
-      } catch (err) {
-        console.log(err);
-      }
+      } catch (err) {}
     });
   }
 

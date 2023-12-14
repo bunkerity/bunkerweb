@@ -1,0 +1,263 @@
+{% extends "base.html" %} {% block content %} {% set current_endpoint =
+url_for(request.endpoint)[1:].split("/")[-1].strip() %}
+
+<div
+  class="w-full overflow-hidden overflow-y-auto overflow-x-auto max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+>
+  <h5 class="my-2 font-bold dark:text-white/90 mx-2">PROFILE</h5>
+  <div class="grid grid-cols-12 justify-items-center w-full">
+    <div
+      class="flex flex-col relative col-span-12 md:col-span-6 lg:col-span-4 px-4 my-2 md:px-6 md:my-3 md:col-span-6 lg:px-6 lg:my-3 max-w-[400px] w-full"
+    >
+      <h5
+        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
+      >
+        Username
+      </h5>
+      <label class="sr-only" for="profile_username">Username</label>
+      <input
+        type="text"
+        id="profile_username"
+        name="profile_username"
+        class="col-span-12 regular-input"
+        placeholder="enter username"
+        value="{{ username }}"
+        disabled
+        pattern="(.*?)"
+        maxlength="256"
+      />
+    </div>
+    <div
+      data-input-group
+      class="flex flex-col relative col-span-12 md:col-span-6 lg:col-span-4 px-4 my-2 md:px-6 md:my-3 md:col-span-6 lg:px-6 lg:my-3 max-w-[400px] w-full"
+    >
+      <h5
+        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
+      >
+        Password
+      </h5>
+      <label class="sr-only" for="profile_password">Password</label>
+      <input
+        type="password"
+        id="profile_password"
+        name="profile_password"
+        class="col-span-12 regular-input"
+        placeholder="enter password"
+        value="{{ password }}"
+        pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+        minlength="8"
+        disabled
+      />
+      <div
+        data-setting-password-container
+        class="absolute flex right-8 h-5 w-5 top-[60%]"
+      >
+        <button
+          data-setting-password="visible"
+          class="h-5 w-5 flex items-center align-middle"
+          type="button"
+        >
+          <svg
+            class="fill-primary pointer-events-none"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 576 512"
+          >
+            <path
+              d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"
+            />
+          </svg>
+        </button>
+        <button
+          data-setting-password="invisible"
+          class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
+        >
+          <svg
+            class="fill-primary pointer-events-none"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 640 512"
+          >
+            <path
+              d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="w-full overflow-hidden overflow-y-auto overflow-x-auto max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+>
+  <h5 class="my-2 font-bold dark:text-white/90 mx-2">EDIT PROFILE</h5>
+  <form
+    class="grid grid-cols-12 w-full justify-items-center"
+    id="profile-form"
+    action="profile"
+    method="POST"
+    autocomplete="off"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input
+      type="hidden"
+      name="next"
+      value="{{ request.values.get('next', '') }}"
+    />
+    <!-- username inpt-->
+    <div
+      class="flex flex-col relative col-span-12 md:col-span-6 lg:col-span-4 px-4 my-2 md:px-6 md:my-3 md:col-span-6 lg:px-6 lg:my-3 max-w-[400px] w-full"
+    >
+      <h5
+        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
+      >
+        Username
+      </h5>
+      <label class="sr-only" for="admin_username">Username</label>
+      <input
+        type="text"
+        id="admin_username"
+        name="admin_username"
+        class="col-span-12 regular-input"
+        placeholder="enter username"
+        value="{{ username }}"
+        pattern="(.*?)"
+        maxlength="256"
+        required
+      />
+    </div>
+    <!-- end username inpt-->
+    <!-- password inpt-->
+    <div
+      data-input-group
+      class="flex flex-col relative col-span-12 md:col-span-6 lg:col-span-4 px-4 my-2 md:px-6 md:my-3 md:col-span-6 lg:px-6 lg:my-3 max-w-[400px] w-full"
+    >
+      <h5
+        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
+      >
+        New password
+      </h5>
+      <label class="sr-only" for="admin_password">New Password</label>
+      <input
+        type="password"
+        id="admin_password"
+        name="admin_password"
+        class="col-span-12 regular-input"
+        placeholder="enter password"
+        value=""
+        pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+        minlength="8"
+        required
+      />
+      <div
+        data-setting-password-container
+        class="absolute flex right-8 h-5 w-5 top-[60%] md:top-11"
+      >
+        <button
+          data-setting-password="visible"
+          class="h-5 w-5 flex items-center align-middle"
+          type="button"
+        >
+          <svg
+            class="fill-primary pointer-events-none"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 576 512"
+          >
+            <path
+              d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"
+            />
+          </svg>
+        </button>
+        <button
+          data-setting-password="invisible"
+          class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
+        >
+          <svg
+            class="fill-primary pointer-events-none"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 640 512"
+          >
+            <path
+              d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <!-- end password inpt-->
+    <!-- password inpt-->
+    <div
+      data-input-group
+      class="flex flex-col relative col-span-12 md:col-span-6 lg:col-span-4 px-4 my-2 md:px-6 md:my-3 md:col-span-6 lg:px-6 lg:my-3 max-w-[400px] w-full"
+    >
+      <h5
+        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
+      >
+        Confirm New Password
+      </h5>
+      <label class="sr-only" for="admin_password_check"
+        >Confirm new password
+      </label>
+      <input
+        type="password"
+        id="admin_password_check"
+        name="admin_password_check"
+        class="col-span-12 regular-input"
+        placeholder="confirm password"
+        value=""
+        pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+        minlength="8"
+        required
+      />
+      <div
+        data-setting-password-container
+        class="absolute flex right-8 h-5 w-5 top-[43%] md:top-[45%]"
+      >
+        <button
+          data-setting-password="visible"
+          class="h-5 w-5 flex items-center align-middle"
+          type="button"
+        >
+          <svg
+            class="fill-primary pointer-events-none"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 576 512"
+          >
+            <path
+              d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"
+            />
+          </svg>
+        </button>
+        <button
+          data-setting-password="invisible"
+          class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
+        >
+          <svg
+            class="fill-primary pointer-events-none"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 640 512"
+          >
+            <path
+              d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"
+            />
+          </svg>
+        </button>
+      </div>
+      <strong class="opacity-0 font-normal text-sm text-red-500" data-pw-alert
+        >Value does not match password
+      </strong>
+    </div>
+
+    <div class="col-span-12 flex justify-center">
+      <button
+        type="submit"
+        id="profile-button"
+        name="profile-button"
+        value="profile"
+        class="valid-btn"
+      >
+        Save
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

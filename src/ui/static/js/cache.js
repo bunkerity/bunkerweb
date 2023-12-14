@@ -33,8 +33,8 @@ class Download {
     window.open(
       `${location.href.replace(
         "cache",
-        "jobs",
-      )}/download?job_name=${jobName}&file_name=${fileName}`,
+        "jobs"
+      )}/download?job_name=${jobName}&file_name=${fileName}`
     );
   }
 }
