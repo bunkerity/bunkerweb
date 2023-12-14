@@ -4,13 +4,13 @@ from os.path import join, sep
 from sys import path as sys_path
 from typing import Annotated
 
-from fastapi.responses import JSONResponse
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form, Request, status
+from fastapi.responses import JSONResponse
 
 from API import API  # type: ignore
 from api_caller import ApiCaller  # type: ignore
@@ -63,38 +63,38 @@ async def middleware(request: Request, call_next):
 
 @app.post("/challenge")
 async def post_challenge(token: Annotated[str, Form()], validation: Annotated[str, Form()]):
-    _, resp = API_CALLER.send_to_apis(
+    failed_apis, resp = API_CALLER.send_to_apis(
         "POST",
         "/lets-encrypt/challenge",
         data={"token": token, "validation": validation},
         response=True,
     )
 
-    return JSONResponse(status_code=int(resp["status"]), content=resp)
+    return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR if failed_apis else status.HTTP_200_OK, content=resp)
 
 
 @app.delete("/challenge")
 async def delete_challenge(token: Annotated[str, Form()]):
-    _, resp = API_CALLER.send_to_apis(
+    failed_apis, resp = API_CALLER.send_to_apis(
         "DELETE",
         "/lets-encrypt/challenge",
         data={"token": token},
         response=True,
     )
 
-    return JSONResponse(status_code=int(resp["status"]), content=resp)
+    return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR if failed_apis else status.HTTP_200_OK, content=resp)
 
 
 @app.post("/certificates")
 async def post_certificates(certificates: Annotated[bytes, Form()]):
-    _, resp = API_CALLER.send_to_apis(
+    failed_apis, resp = API_CALLER.send_to_apis(
         "POST",
         "/lets-encrypt/certificates",
         files={"archive.tar.gz": certificates},
         response=True,
     )
 
-    return JSONResponse(status_code=int(resp["status"]), content=resp)
+    return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR if failed_apis else status.HTTP_200_OK, content=resp)
 
 
 __ALL__ = (app, root_path)

@@ -156,15 +156,22 @@ if __name__ == "__main__":
             )
             config: Dict[str, Any] = db.get_config()
 
+        # Create a backup of the old config just in case
+        # if Path(sep, "etc", "nginx").is_dir():  # TODO
+        #     logger.info("🗃 Creating backup of the old config ...")
+        #     backup_path = Path(sep, "var", "tmp", "bunkerweb", "config_backup.zip")
+        #     with ZipFile(backup_path, "w") as backup:
+        #         for file in glob(join(args.output, "*")):
+        #             backup.write(file, arcname=basename(file))
+
         # Remove old files
         logger.info("Removing old files ...")
-        files = glob(join(args.output, "*"))
-        for file in files:
+        for file in glob(join(args.output, "*")):
             file = Path(file)
-            if file.is_symlink() or file.is_file():
-                file.unlink()
-            elif file.is_dir():
+            if file.is_dir():
                 rmtree(str(file), ignore_errors=True)
+                continue
+            file.unlink()
 
         # Render the templates
         logger.info("Rendering templates ...")

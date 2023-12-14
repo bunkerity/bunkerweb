@@ -403,9 +403,10 @@ def send_plugins_to_instances(api_caller: ApiCaller):
 
 @generate_config
 @assert_api_caller
-def send_config_to_instances(api_caller: ApiCaller):
+def send_config_to_instances(api_caller: ApiCaller):  # , *, old_config: bool = False):
     """Send the config to the instances"""
     nginx_prefix = Path(sep, "etc", "nginx")
+    # backup_path = Path(sep, "var", "tmp", "bunkerweb", "config_backup.zip") # TODO
     instances_endpoints = ", ".join(api.endpoint for api in api_caller.apis)
 
     if not nginx_prefix.is_dir():
@@ -413,9 +414,65 @@ def send_config_to_instances(api_caller: ApiCaller):
         return 1
 
     CORE_CONFIG.logger.info(f"Sending {nginx_prefix} folder to instances {instances_endpoints} ...")
-    ret = api_caller.send_files(nginx_prefix, "/confs")
-    if not ret:
-        CORE_CONFIG.logger.error("Not all instances have received the configuration, configuration will not work as expected...")
+    failed_apis, responses = api_caller.send_files(nginx_prefix, "/confs")
+    if len(failed_apis) == len(api_caller.apis):
+        message = "An error occurred while sending the config to all instances, check your actions,"
+        # if old_config:
+        CORE_CONFIG.logger.debug(f"{responses}")
+        CORE_CONFIG.logger.error(f"{message} configuration will not work as expected...")
+        DB.add_action(
+            {
+                "date": datetime.now(),
+                "api_method": "POST",
+                "method": "unknown",
+                "tags": ["instance"],
+                "title": "Send config failed to all instances",
+                "message": f"{message.replace(' check your actions,', '')} response: {responses}",
+                "status": "error",
+            },
+        )
+        return 1
+
+        # CORE_CONFIG.logger.warning(f"{message} trying to send old config to instances ...") # TODO
+
+        # if not backup_path.is_file():
+        #     CORE_CONFIG.logger.error(f"No backup found at {backup_path}, configuration will not work as expected...")
+        #     return 1
+
+        # CORE_CONFIG.logger.warning(f"Cleaning {nginx_prefix} folder ...")
+
+        # for file in glob(str(nginx_prefix.joinpath("*"))):
+        #     file = Path(file)
+        #     if file.is_dir():
+        #         rmtree(str(file), ignore_errors=True)
+        #         continue
+        #     file.unlink()
+
+        # CORE_CONFIG.logger.warning(f"Unpacking backup {backup_path} to {nginx_prefix} ...")
+
+        # with ZipFile(backup_path, "r") as backup:
+        #     backup.extractall(path=nginx_prefix)
+
+        # CORE_CONFIG.logger.info(f"Successfully unpacked backup {backup_path} to {nginx_prefix}")
+        # return send_config_to_instances(api_caller, old_config=True)
+    for failed_api in failed_apis:
+        CORE_CONFIG.logger.error(f"Can't send config to instance {failed_api.endpoint}, configuration will not work as expected...")
+        response = responses[failed_api.endpoint.split("://", 1).pop().split(":")[0]]
+        CORE_CONFIG.logger.debug(f"{response}")
+        DB.add_action(
+            {
+                "date": datetime.now(),
+                "api_method": "POST",
+                "method": "unknown",
+                "tags": ["instance"],
+                "title": "Send config failed",
+                "message": f"Can't send config to instance {failed_api.endpoint}, response: {response}",
+                "status": "error",
+            },
+        )
+        sleep(0.5)
+
+    # backup_path.unlink(missing_ok=True) # TODO
 
 
 @assert_api_caller
@@ -508,7 +565,7 @@ def test_and_send_to_instances(instance_apis: Union[set[API], ApiCaller], types:
             else:
                 CORE_CONFIG.logger.info(f"Successfully sent API request to {instance_api.endpoint}ping, sending data to it ...")
 
-        Thread(target=seen_instance, args=(instance_api.endpoint.replace("http://", "").split(":")[0],)).start()
+        Thread(target=seen_instance, args=(instance_api.endpoint.split("://", 1).pop().split(":")[0],)).start()
 
     if instance_apis if isinstance(instance_apis, set) else instance_apis.apis:
         api_caller = instance_apis if isinstance(instance_apis, ApiCaller) else ApiCaller(instance_apis)

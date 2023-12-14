@@ -39,8 +39,8 @@ class ApiCaller:
         files: Optional[Dict[str, BytesIO]] = None,
         data: Optional[Dict[str, Any]] = None,
         response: bool = False,
-    ) -> Tuple[bool, Optional[Dict[str, Any]]]:
-        ret = True
+    ) -> Tuple[List[API], Optional[Dict[str, Any]]]:
+        ret = []
         url = url if not url.startswith("/") else url[1:]
         responses = {}
         for api in self.__apis:
@@ -49,13 +49,13 @@ class ApiCaller:
                     buffer.seek(0, 0)
             sent, err, status, resp = api.request(method, url, files=files, data=data)
             if not sent:
-                ret = False
+                ret.append(api)
                 self.__logger.error(
                     f"Can't send API request to {api.endpoint}{url} : {err}",
                 )
             else:
                 if status != 200:
-                    ret = False
+                    ret.append(api)
                     msg = "No message"
                     if resp.headers.get("Content-Type", "").startswith("application/json"):
                         resp = resp.json()
@@ -70,7 +70,7 @@ class ApiCaller:
                     )
 
                     if response:
-                        instance = api.endpoint.replace("http://", "").split(":")[0]
+                        instance = api.endpoint.split("://", 1).pop().split(":")[0]
                         if isinstance(resp, dict):
                             responses[instance] = resp
                         else:
@@ -78,13 +78,12 @@ class ApiCaller:
 
         return ret, responses
 
-    def send_files(self, path: str, url: str) -> bool:
-        ret = True
+    def send_files(self, path: str, url: str) -> Tuple[List[API], Optional[Dict[str, Any]]]:
+        ret = []
         with BytesIO() as tgz:
             with tar_open(mode="w:gz", fileobj=tgz, dereference=True, compresslevel=3) as tf:
                 tf.add(path, arcname=".")
             tgz.seek(0, 0)
             files = {"archive.tar.gz": tgz}
-            if not self.send_to_apis("POST", url, files=files):
-                ret = False
+            ret = self.send_to_apis("POST", url, files=files, response=True)
         return ret
