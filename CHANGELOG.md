@@ -2,6 +2,7 @@
 
 ## v1.5.5 - YYYY/MM/DD
 
+- [BUGFIX] Fix issues with the database when upgrading from version 1.5.3 and 1.5.4 to the most recent version
 - [FEATURE] Add Anonymous reporting feature
 - [FEATURE] Add support for fallback Referrer-Policies
 - [DEPS] Updated ModSecurity to v3.0.11

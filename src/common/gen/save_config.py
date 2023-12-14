@@ -309,9 +309,23 @@ if __name__ == "__main__":
             else:
                 logger.info("Database initialized")
         else:
-            logger.info(
-                "Database is already initialized, skipping ...",
+            logger.info("Database is already initialized, checking for changes ...")
+
+            ret, err = db.init_tables(
+                [
+                    config.get_settings(),
+                    config.get_plugins("core"),
+                    config.get_plugins("external"),
+                ]
             )
+
+            if not ret and err:
+                logger.error(f"Exception while checking database tables : {err}")
+                sys_exit(1)
+            elif not ret:
+                logger.info("Database tables didn't change, skipping update ...")
+            else:
+                logger.info("Database tables successfully updated")
 
         if args.init:
             sys_exit(0)
