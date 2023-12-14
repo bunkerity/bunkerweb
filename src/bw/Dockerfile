@@ -34,7 +34,6 @@ COPY src/bw/loading loading
 COPY src/bw/lua lua
 COPY src/bw/misc misc
 COPY src/common/api api
-COPY src/common/cli cli
 COPY src/common/confs confs
 COPY src/common/core core_plugins
 COPY src/common/gen gen
@@ -56,7 +55,6 @@ WORKDIR /usr/share/bunkerweb
 
 # Install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd && \
-	cp helpers/bwcli /usr/bin/ && \
 	mkdir -p /var/tmp/bunkerweb && \
 	mkdir -p /var/run/bunkerweb && \
 	mkdir -p /var/log/bunkerweb && \
@@ -65,9 +63,9 @@ RUN apk add --no-cache openssl pcre bash python3 yajl geoip libxml2 libgd && \
 	mkdir -p /data/cache && ln -s /data/cache /var/cache/bunkerweb && \
 	for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
 	for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
-	chown -R root:nginx /data /etc/nginx /var/cache/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
+	chown -R root:nginx /data /etc/nginx /var/cache/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
 	chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/tmp/bunkerweb /var/log/bunkerweb /var/run/bunkerweb && \
-	chmod 750 cli/main.py gen/main.py helpers/*.sh entrypoint.sh /usr/bin/bwcli deps/python/bin/* && \
+	chmod 750 gen/main.py helpers/*.sh entrypoint.sh deps/python/bin/* && \
 	rm -f /var/log/bunkerweb/* && \
 	ln -s /proc/1/fd/2 /var/log/bunkerweb/error.log && \
 	ln -s /proc/1/fd/2 /var/log/bunkerweb/modsec_audit.log && \

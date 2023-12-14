@@ -22,7 +22,6 @@ RUN export MAKEFLAGS="-j$(nproc)" && \
 # Copy files
 # can't exclude specific files/dir from . so we are copying everything by hand
 COPY src/common/api api
-COPY src/common/cli cli
 COPY src/common/confs confs
 COPY src/common/core core_plugins
 COPY src/common/db db
@@ -44,12 +43,11 @@ COPY --from=builder --chown=0:101 /usr/share/bunkerweb /usr/share/bunkerweb
 
 WORKDIR /usr/share/bunkerweb
 
-# Add core user, drop bwcli, install runtime dependencies, create data folders and set permissions
+# Add core user, install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache bash grep libgcc libstdc++ libpq openssl libmagic postgresql-dev && \
   ln -s /usr/local/bin/python3 /usr/bin/python3 && \
   addgroup -g 101 core && \
   adduser -h /usr/share/bunkerweb/core -g core -s /bin/bash -G core -D -H -u 101 core && \
-  cp helpers/bwcli /usr/bin/ && \
   echo "Docker" > INTEGRATION && \
   mkdir -p /etc/bunkerweb && \
   mkdir -p /etc/nginx && \
@@ -63,10 +61,10 @@ RUN apk add --no-cache bash grep libgcc libstdc++ libpq openssl libmagic postgre
   touch /etc/bunkerweb/core.conf /etc/bunkerweb/config.yml && \
   for dir in $(echo "configs plugins") ; do mkdir -p "/data/${dir}" && ln -s "/data/${dir}" "/etc/bunkerweb/${dir}" ; done && \
   for dir in $(echo "configs/http configs/stream configs/server-http configs/server-stream configs/default-server-http configs/default-server-stream configs/modsec configs/modsec-crs") ; do mkdir "/data/${dir}" ; done && \
-  chown -R root:core /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb /usr/bin/bwcli && \
+  chown -R root:core /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   chmod -R 770 /data /etc/nginx /var/cache/bunkerweb /var/lib/bunkerweb /etc/bunkerweb /var/tmp/bunkerweb /var/run/bunkerweb /var/log/bunkerweb && \
   find core_plugins/*/jobs/* -type f -exec chmod 750 {} \; && \
-  chmod 750 cli/main.py core/app/*.py core/app/routers/*.py core/entrypoint.sh helpers/*.sh deps/python/bin/* /usr/bin/bwcli && \
+  chmod 750 core/app/*.py core/app/routers/*.py core/entrypoint.sh helpers/*.sh deps/python/bin/* && \
   chmod 660 INTEGRATION && \
   chown root:core INTEGRATION && \
   ln -s /proc/1/fd/1 /var/log/bunkerweb/core-access.log && \
