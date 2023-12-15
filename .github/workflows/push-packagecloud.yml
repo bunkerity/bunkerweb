@@ -48,12 +48,12 @@ jobs:
       - name: Install packagecloud
         run: gem install package_cloud
       # Download packages
-      - uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+      - uses: actions/download-artifact@7a1cd3216ca9260cd8022db641d960b1db4d1be4 # v4.0.0
         if: inputs.LINUX != 'el'
         with:
           name: package-${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
           path: /tmp/${{ inputs.LINUX }}
-      - uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+      - uses: actions/download-artifact@7a1cd3216ca9260cd8022db641d960b1db4d1be4 # v4.0.0
         if: inputs.LINUX == 'el'
         with:
           name: package-rhel-${{ inputs.PACKAGE_ARCH }}
