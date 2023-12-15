@@ -51,22 +51,6 @@ Explore the impressive array of security features offered by BunkerWeb. While no
 
 To delve deeper into the core security features, we invite you to explore the [security tuning](security-tuning.md) section of the documentation. Discover how BunkerWeb empowers you to fine-tune and optimize security measures according to your specific needs.
 
-## Ecosystem
-
-To make the solution even more user-friendly, we're putting forward tools that make it easier to test, use or request advice or services.
-
-[A veritable ecosystem exists around BunkerWeb.](ecosystem.md)
-
-BunkerWeb's ecosystem includes :
-
-- [**BunkerWeb Panel**](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) : It's a solution that allows you to request advice and services from BunkerWeb's creators in a centralized and simplified way.
-
-- [**BunkerWeb Demo**](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=doc) : This website integrates the BunkerWeb solution, so don't hesitate to attempt attacks to test the robustness of the solution.
-
-- [**BunkerWeb Config**](https://config.bunkerweb.io/?utm_campaign=self&utm_source=doc) : This site lets you create services and view/apply different parameters to obtain a ready-to-use configuration.
-
-- [**BunkerWeb Threatmap**](https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=doc) : This site gives you a real-time view of malicious requests that have been intercepted by the solution.
-
 ## Demo
 
 <p align="center">
@@ -82,3 +66,21 @@ Get the most of BunkerWeb by getting professional services directly from the mai
 You will find more information by visiting the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc), our dedicated platform for professional services.
 
 Don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any question, we will be more than happy to respond to your needs.
+
+## Ecosystem, community and resources
+
+Official websites, tools and resources about BunkerWeb :
+
+- [**Website**](https://www.bunkerweb.io/?utm_campaign=self&utm_source=doc) : get more information, news and articles about BunkerWeb
+- [**Panel**](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) : dedicated platform to order and manage professional services (e.g. technical support) around BunkerWeb
+- [**Documentation**](https://docs.bunkerweb.io) : technical documentation of the BunkerWeb solution
+- [**Demo**](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=doc) : demonstration website of BunkerWeb, don't hesitate to attempt attacks to test the robustness of the solution
+- [**Configurator**](https://config.bunkerweb.io/?utm_campaign=self&utm_source=doc) : user-friendly tool to help you configure BunkerWeb
+- [**Threatmap**](https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=doc) : live cyber attack blocked by BunkerWeb instances all around the world
+
+Community and social networks :
+
+- [**Discord**](https://discord.com/invite/fTf46FmtyD)
+- [**LinkedIn**](https://www.linkedin.com/company/bunkerity/)
+- [**Twitter**](https://twitter.com/bunkerity)
+- [**Reddit**](https://www.reddit.com/r/BunkerWeb/)

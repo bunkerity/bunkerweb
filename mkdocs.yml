@@ -72,6 +72,6 @@ plugins:
   - social:
       cards_layout_options:
         background_color: "#0b5577"
-        color: "#2eac68"
+        color: "white"
   - mike:
       canonical_version: latest
