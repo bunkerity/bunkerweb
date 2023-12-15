@@ -18,8 +18,9 @@ end
 function customcert:ssl_certificate()
     if self.variables["USE_CUSTOM_SSL"] == "yes" then
         
+        return true, ""
     end
-    return self:ret(false, "missing instance ID")
+    return true, "customcert is not used"
 end
 
 return customcert
