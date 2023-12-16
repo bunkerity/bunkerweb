@@ -680,6 +680,7 @@ utils.get_phases = function()
 		"init_worker",
 		"set",
 		"access",
+		"ssl_certificate",
 		"header",
 		"log",
 		"preread",
@@ -692,6 +693,7 @@ utils.is_cosocket_available = function()
 	local phases = {
 		"timer",
 		"access",
+		"ssl_certificate",
 		"preread",
 	}
 	local current_phase = ngx.get_phase()
