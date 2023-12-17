@@ -121,10 +121,6 @@ class IngressController(Controller):
                 location += 1
             services.append(service)
 
-        # parse tls
-        if controller_service.spec.tls:  # TODO: support tls
-            self._logger.warning("Ignoring unsupported tls.")
-
         # parse annotations
         if controller_service.metadata.annotations:
             for service in services:
@@ -142,6 +138,37 @@ class IngressController(Controller):
                     variable = variable.replace(f"{server_name}_", "", 1)
                     if self._is_setting_context(variable, "multisite"):
                         service[variable] = value
+    
+        # parse tls
+        if controller_service.spec.tls:
+            for tls in controller_service.spec.tls:
+                if tls.hosts and tls.secret_name:
+                    for host in tls.hosts:
+                        for service in services:
+                            if host in service["SERVER_NAME"].split(" "):
+                                secret_tls = self.__corev1.list_secret_for_all_namespaces(
+                                    watch=False,
+                                    field_selector=f"metadata.name={tls.secret_name},metadata.namespace={namespace}",
+                                ).items
+                                if not secret_tls:
+                                    self._logger.warning(
+                                        f"Ignoring tls setting for {host} : secret {tls.secret_name} not found.",
+                                    )
+                                    break
+                                if not secret_tls.data:
+                                    self._logger.warning(
+                                        f"Ignoring tls setting for {host} : secret {tls.secret_name} contains no data.",
+                                    )
+                                    break
+                                if "tls.crt" not in secret_tls.data or "tls.key" not in secret_tls.data:
+                                    self._logger.warning(
+                                        f"Ignoring tls setting for {host} : secret {tls.secret_name} is missing tls data.",
+                                    )
+                                    break
+                                service["USE_CUSTOM_SSL"] = "yes"
+                                service["CUSTOM_SSL_CERT_DATA"] = secret_tls.data["tls.crt"]
+                                service["CUSTOM_SSL_KEY_DATA"] = secret_tls.data["tls.key"]
+                                break
         return services
 
     def _get_static_services(self) -> List[dict]:
