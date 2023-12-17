@@ -168,7 +168,6 @@ class IngressController(Controller):
                                 service["USE_CUSTOM_SSL"] = "yes"
                                 service["CUSTOM_SSL_CERT_DATA"] = secret_tls.data["tls.crt"]
                                 service["CUSTOM_SSL_KEY_DATA"] = secret_tls.data["tls.key"]
-                                break
         return services
 
     def _get_static_services(self) -> List[dict]:
