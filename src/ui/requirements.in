@@ -1,4 +1,4 @@
-bcrypt==4.1.1
+bcrypt==4.1.2
 beautifulsoup4==4.12.2
 Flask==3.0.0
 Flask-Login==0.6.3
