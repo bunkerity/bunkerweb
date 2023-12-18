@@ -1,4 +1,4 @@
-pip==23.3.1
+pip==23.3.2
 pip-compile-multi==2.6.3
 pip-tools==7.3.0
 pip-upgrader==1.4.15
