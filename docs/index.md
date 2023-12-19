@@ -54,10 +54,10 @@ To delve deeper into the core security features, we invite you to explore the [s
 ## Demo
 
 <p align="center">
-	<iframe style="display: block;" width="560" height="315" src="https://www.youtube-nocookie.com/embed/ZhYV-QELzA4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe style="display: block;" width="560" height="315" src="https://www.youtube-nocookie.com/embed/ZhYV-QELzA4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
-A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io?utm_campaign=self&utm_source=doc). Feel free to visit it and perform some security tests.
+A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=doc). Feel free to visit it and perform some security tests.
 
 ## Professional services
 
@@ -66,3 +66,21 @@ Get the most of BunkerWeb by getting professional services directly from the mai
 You will find more information by visiting the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc), our dedicated platform for professional services.
 
 Don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any question, we will be more than happy to respond to your needs.
+
+## Ecosystem, community and resources
+
+Official websites, tools and resources about BunkerWeb :
+
+- [**Website**](https://www.bunkerweb.io/?utm_campaign=self&utm_source=doc) : get more information, news and articles about BunkerWeb
+- [**Panel**](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) : dedicated platform to order and manage professional services (e.g. technical support) around BunkerWeb
+- [**Documentation**](https://docs.bunkerweb.io) : technical documentation of the BunkerWeb solution
+- [**Demo**](https://demo.bunkerweb.io/?utm_campaign=self&utm_source=doc) : demonstration website of BunkerWeb, don't hesitate to attempt attacks to test the robustness of the solution
+- [**Configurator**](https://config.bunkerweb.io/?utm_campaign=self&utm_source=doc) : user-friendly tool to help you configure BunkerWeb
+- [**Threatmap**](https://threatmap.bunkerweb.io/?utm_campaign=self&utm_source=doc) : live cyber attack blocked by BunkerWeb instances all around the world
+
+Community and social networks :
+
+- [**Discord**](https://discord.com/invite/fTf46FmtyD)
+- [**LinkedIn**](https://www.linkedin.com/company/bunkerity/)
+- [**Twitter**](https://twitter.com/bunkerity)
+- [**Reddit**](https://www.reddit.com/r/BunkerWeb/)

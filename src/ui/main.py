@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from contextlib import suppress
 from os import _exit, getenv, listdir, sep, urandom
 from os.path import basename, dirname, join
 from secrets import choice
@@ -180,7 +181,11 @@ while not db.is_initialized():
     )
     sleep(5)
 
-USER = db.get_ui_user()
+USER = "Error"
+while USER == "Error":
+    with suppress(Exception):
+        USER = db.get_ui_user()
+
 USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
 
 if USER:

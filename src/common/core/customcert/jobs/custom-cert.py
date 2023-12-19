@@ -6,6 +6,7 @@ from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
 from typing import Optional
+from base64 import b64decode
 
 for deps_path in [
     join(sep, "usr", "share", "bunkerweb", *paths)
@@ -99,6 +100,28 @@ try:
         cert_path = getenv("CUSTOM_SSL_CERT", "")
         key_path = getenv("CUSTOM_SSL_KEY", "")
 
+        cert_data = b64decode(getenv("CUSTOM_SSL_CERT_DATA", ""))
+        key_data = b64decode(getenv("CUSTOM_SSL_KEY_DATA", ""))
+        for file, data in [("cert.pem", cert_data), ("key.pem", key_data)]:
+            if data != b"":
+                file_path = Path(
+                    sep,
+                    "var",
+                    "tmp",
+                    "bunkerweb",
+                    "customcert",
+                    file
+                )
+                file_path.parent.mkdir(parents=True, exist_ok=True)
+                file_path.write_bytes(data)
+                if file == "cert.pem":
+                    cert_path = str(file_path)
+                else:
+                    key_path = str(file_path)
+                
+        if cert_data != b"":
+            with open()
+
         if cert_path and key_path:
             logger.info(f"Checking certificate {cert_path} ...")
             need_reload = check_cert(cert_path, key_path)
@@ -123,6 +146,26 @@ try:
 
             cert_path = getenv(f"{first_server}_CUSTOM_SSL_CERT", "")
             key_path = getenv(f"{first_server}_CUSTOM_SSL_KEY", "")
+
+            cert_data = b64decode(getenv(f"{first_server}_CUSTOM_SSL_CERT_DATA", ""))
+            key_data = b64decode(getenv(f"{first_server}_CUSTOM_SSL_KEY_DATA", ""))
+            for file, data in [("cert.pem", cert_data), ("key.pem", key_data)]:
+                if data != b"":
+                    file_path = Path(
+                        sep,
+                        "var",
+                        "tmp",
+                        "bunkerweb",
+                        "customcert",
+                        server_name,
+                        file
+                    )
+                    file_path.parent.mkdir(parents=True, exist_ok=True)
+                    file_path.write_bytes(data)
+                    if file == "cert.pem":
+                        cert_path = str(file_path)
+                    else:
+                        key_path = str(file_path)
 
             if cert_path and key_path:
                 logger.info(

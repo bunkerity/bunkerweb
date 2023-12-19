@@ -101,6 +101,8 @@ class Templator:
             for root_conf in (
                 "server.conf",
                 "access-lua.conf",
+                "ssl-certificate-lua.conf",
+                "header-lua.conf",
                 "init-lua.conf",
                 "log-lua.conf",
                 "set-lua.conf",
