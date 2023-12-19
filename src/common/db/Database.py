@@ -431,6 +431,7 @@ class Database:
                             }
                         )
                         db_setting = session.query(Settings).filter_by(id=setting).first()
+                        select_values = value.pop("select", [])
 
                         if db_setting:
                             updates = {}
@@ -469,7 +470,6 @@ class Database:
 
                         db_selects = session.query(Selects).with_entities(Selects.value).filter_by(setting_id=value["id"]).all()
                         db_values = [select.value for select in db_selects]
-                        select_values = value.pop("select", [])
                         missing_values = [select for select in db_values if select not in select_values]
 
                         if select_values:
