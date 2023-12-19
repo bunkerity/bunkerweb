@@ -118,9 +118,6 @@ try:
                     cert_path = str(file_path)
                 else:
                     key_path = str(file_path)
-                
-        if cert_data != b"":
-            with open()
 
         if cert_path and key_path:
             logger.info(f"Checking certificate {cert_path} ...")
