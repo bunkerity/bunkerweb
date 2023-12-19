@@ -723,8 +723,8 @@ class Database:
                                     }
                                 )
                 else:
-                    if config.get("SERVER_NAME", "") != "" and not (session.query(Services).with_entities(Services.id).filter_by(id=config["SERVER_NAME"].split(" ")[0]).first()):
-                        to_put.append(Services(id=config["SERVER_NAME"].split(" ")[0], method=method))
+                    if not (session.query(Services).with_entities(Services.id).filter_by(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0]).first()):
+                        to_put.append(Services(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0], method=method))
 
                     for key, value in config.items():
                         suffix = 0
