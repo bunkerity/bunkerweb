@@ -938,9 +938,8 @@ class Database:
                                 }
                             )
 
-            if is_multisite:
-                servers = " ".join(service.id for service in session.query(Services).all())
-                config["SERVER_NAME"] = servers if not methods else {"value": servers, "global": True, "method": "default"}
+            servers = " ".join(service.id for service in session.query(Services).all())
+            config["SERVER_NAME"] = servers if not methods else {"value": servers, "global": True, "method": "default"}
 
             return config
 
