@@ -45,7 +45,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
           class="leading-normal text-sm"
         >
           <button
-            
+
             class="dark:text-gray-500 text-gray-600 after:float-right after:pl-2 after:text-gray-600 dark:after:text-gray-500 after:content-['/']"
           >
             {{current_endpoint}}
@@ -226,7 +226,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         <!-- view button-->
         <button
         role="tab"
-          
+
           value="view"
           data-{{current_endpoint}}-action-dropdown-btn="{{child['name']}}"
           class="duration-300 border-gray-300 hover:brightness-90 bg-white text-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 w-full border-t rounded-t border-b border-l border-r hover:bg-gray-100"
@@ -265,7 +265,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         child['type'] == "folder" and child['can_edit'] == True %}
         <button
         role="tab"
-          
+
           value="edit"
           data-{{current_endpoint}}-action-dropdown-btn="{{child['name']}}"
           class="duration-300 border-gray-300 hover:brightness-90 bg-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 w-full border-b border-l border-r hover:bg-gray-100"
@@ -290,7 +290,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         {% if current_endpoint == "cache" %}
         <button
         role="tab"
-          
+
           value="download"
           data-{{current_endpoint}}-download="{{child['name'].split('/')[0]}}"
           data-{{current_endpoint}}-file="{{child['name'].split('/')[1]}}"
@@ -313,7 +313,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         {%else%}
         <button
         role="tab"
-        
+
         value="download"
         data-{{current_endpoint}}-action-dropdown-btn="{{child['name']}}"
         class="duration-300 border-gray-300 hover:brightness-90 bg-white text-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 w-full border-b border-l border-r hover:bg-gray-100"
@@ -339,7 +339,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
         {% if child['can_delete'] == True %}
         <button
         role="tab"
-          
+
           value="delete"
           data-{{current_endpoint}}-action-dropdown-btn="{{child['name']}}"
           class="bg-white duration-300 border-gray-300 hover:brightness-90 text-white my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 w-full border-b border-l border-r hover:bg-gray-100"
@@ -431,7 +431,7 @@ data-{{current_endpoint}}-modal
       <div class="mt-4 w-full justify-end flex">
         <button
         data-{{current_endpoint}}-modal-close
-          
+
           class="close-btn text-xs mr-2"
         >
           Close

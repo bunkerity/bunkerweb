@@ -14,6 +14,7 @@ from ssl import SSLContext, create_connection
 import OpenSSL.crypto as crypto
 from urllib.parse import urlparse
 
+
 class Test(ABC):
     def __init__(self, name, kind, timeout, tests, no_copy_container=False, delay=0):
         self._name = name

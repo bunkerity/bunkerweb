@@ -11,7 +11,7 @@
     and check_settings(plugin["settings"], "global") %}
     <button role="tab"
     data-tab-handler="{{ plugin['id'] }}"
-    
+
     class="{% if loop.first %}active{% endif %} settings-tabs-tab-btn"
   >
     <span class="w-full flex justify-between items-center">
@@ -77,7 +77,7 @@
   {% if loop.first %}
   <button role="option"
   data-tab-handler-mobile="{{ plugin['id'] }}"
-    
+
     data-select="false"
     id="edit-{{current_endpoint}}-{{ plugin['id'] }}-tab"
     class="active first settings-tabs-mobile-dropdown-btn">
@@ -86,7 +86,7 @@
   {% else %}
   <button role="option"
   data-tab-handler-mobile="{{ plugin['id'] }}"
-    
+
     data-select="false"
     id="edit-{{current_endpoint}}-{{ plugin['id'] }}-tab"
     class="settings-tabs-mobile-dropdown-btn {% if loop.index == loop.length %}rounded-b {% endif %}">

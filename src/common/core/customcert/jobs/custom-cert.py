@@ -118,7 +118,7 @@ try:
                     cert_path = str(file_path)
                 else:
                     key_path = str(file_path)
-                
+
         if cert_data != b"":
             with open()
 

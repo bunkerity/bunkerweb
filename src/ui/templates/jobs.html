@@ -240,25 +240,25 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       {% for job_name, value in jobs.items() %}
       <!-- job item-->
       <li
-        
+
         class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5"
       >
         <p
-          
+
           class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0 my-1"
           data-{{current_endpoint}}-name
         >
           {{job_name}}
         </p>
         <p
-          
+
           class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0 my-1"
           data-{{current_endpoint}}-last_run
         >
           {{value['last_run']}}
         </p>
         <p
-          
+
           class="dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
           data-{{current_endpoint}}-every
         >
@@ -266,7 +266,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         </p>
         {% if value["reload"] %}
         <p
-          
+
           class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
           data-{{current_endpoint}}-reload="true"
         >
@@ -283,7 +283,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
 
         {%endif %} {% if not value["reload"] %}
         <p
-          
+
           class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
           data-{{current_endpoint}}-reload="false"
         >
@@ -299,7 +299,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         </p>
         {% endif %} {% if value["success"] %}
         <p
-          
+
           class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
           data-{{current_endpoint}}-success="true"
         >
@@ -315,7 +315,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         </p>
         {% elif not value["success"] %}
         <p
-          
+
           class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
           data-{{current_endpoint}}-success="false"
         >
@@ -331,7 +331,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         </p>
         {% endif %}
         <div
-          
+
           class="relative dark:text-gray-400 text-sm col-span-3 m-0 my-1"
           data-{{current_endpoint}}-files
         >

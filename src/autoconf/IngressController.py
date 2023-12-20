@@ -138,7 +138,7 @@ class IngressController(Controller):
                     variable = variable.replace(f"{server_name}_", "", 1)
                     if self._is_setting_context(variable, "multisite"):
                         service[variable] = value
-    
+
         # parse tls
         if controller_service.spec.tls:
             for tls in controller_service.spec.tls:

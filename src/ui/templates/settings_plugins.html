@@ -100,7 +100,7 @@ data-plugin-item="{{plugin['id']}}"
 
       <!--custom-->
       <div data-select-container class="relative">
-        <button 
+        <button
         {% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default'  %} disabled {% endif %}    data-setting-select="{{value['id']}}"
         data-default-value="{{global_config[setting]['value']}}"
         data-default-method="{{global_config[setting]['method']}}"
@@ -109,7 +109,7 @@ data-plugin-item="{{plugin['id']}}"
           >
           {% for item in value['select'] %} {% if global_config[setting]['value'] and
           global_config[setting]['value'] == item %}
-          <span 
+          <span
           data-setting-select-text="{{value['id']}}"
             data-value="{{global_config[setting]['value']}}"
             >{{global_config[setting]['value']}}</span
