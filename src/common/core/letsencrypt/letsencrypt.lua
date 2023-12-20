@@ -12,9 +12,9 @@ function letsencrypt:initialize(ctx)
 end
 
 function letsencrypt:init()
-	local ok, err = true, "success"
+	local ret_ok, ret_err = true, "success"
     if utils.has_variable("AUTO_LETS_ENCRYPT", "yes") then
-		local multisite, err = utils.get_variable("MULTISITE")
+		local multisite, err = utils.get_variable("MULTISITE", false)
 		if not multisite then
 			return self:ret(false, "can't get MULTISITE variable : " .. err)
 		end
@@ -27,49 +27,53 @@ function letsencrypt:init()
 				if multisite_vars["AUTO_LETS_ENCRYPT"] == "yes" then
 					local check, data = self:read_files(server_name)
 					if not check then
-						self.logger:log(ngx.ERR, "error while reading files : " .. err)
-						ok = false
-						err = "error reading files"
+						self.logger:log(ngx.ERR, "error while reading files : " .. data)
+						ret_ok = false
+						ret_err = "error reading files"
 					else
 						local check, err = self:load_data(data, server_name)
 						if not check then
 							self.logger:log(ngx.ERR, "error while loading data : " .. err)
-							ok = false
-							err = "error loading data"
+							ret_ok = false
+							ret_err = "error loading data"
 						end
 					end
 				end
 			end
 		else
-			local server_name, err = utils.get_variable("SERVER_NAME")
+			local server_name, err = utils.get_variable("SERVER_NAME", false)
 			if not server_name then
 				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 			end
 			local check, data = self:read_files(server_name:gmatch("%S+")[1])
 			if not check then
-				self.logger:log(ngx.ERR, "error while reading files : " .. err)
-				ok = false
-				err = "error reading files"
+				self.logger:log(ngx.ERR, "error while reading files : " .. data)
+				ret_ok = false
+				ret_err = "error reading files"
 			else
 				local check, err = self:load_data(data)
 				if not check then
 					self.logger:log(ngx.ERR, "error while loading data : " .. err)
-					ok = false
-					err = "error loading data"
+					ret_ok = false
+					ret_err = "error loading data"
 				end
 			end
 		end
 	else
-		err = "let's encrypt is not used"
+		ret_err = "let's encrypt is not used"
     end
-	return self:ret(ok, err)
+	return self:ret(ret_ok, ret_err)
 end
 
 function letsencrypt:ssl_certificate()
+	local server_name, err = ssl.server_name()
+	if not server_name then
+		return self:ret(false, "can't get server_name : " .. err)
+	end
     if self.variables["AUTO_LETS_ENCRYPT"] == "yes" then
-		local data, err = self.datastore:get("plugin_letsencrypt_" .. self.ctx.bw.server_name, true)
+		local data, err = self.datastore:get("plugin_letsencrypt_" .. server_name, true)
 		if not data then
-			return self:ret(false, "error while getting plugin_letsencrypt_" .. self.ctx.bw.server_name .. " from datastore : " .. err)
+			return self:ret(false, "error while getting plugin_letsencrypt_" .. server_name .. " from datastore : " .. err)
 		end
         return self:ret(true, "certificate/key data found", data)
     end
@@ -100,7 +104,7 @@ function letsencrypt:load_data(data, server_name)
 		return false, "error while parsing pem cert : " .. err
 	end
 	-- Load key
-	local priv_key, err = ssl.parse_priv_key(data[2])
+	local priv_key, err = ssl.pars_pem_priv_key(data[2])
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end

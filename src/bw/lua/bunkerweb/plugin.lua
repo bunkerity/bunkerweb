@@ -13,7 +13,6 @@ function plugin:initialize(id, ctx)
 	local current_phase = ngx.get_phase()
 	for _, check_phase in ipairs {
 		"set",
-		"ssl_certificate",
 		"access",
 		"content",
 		"header_filter",

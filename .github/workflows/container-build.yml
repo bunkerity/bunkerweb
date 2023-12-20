@@ -84,7 +84,7 @@ jobs:
       # Compute metadata
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@31cebacef4805868f9ce9a0cb03ee36c32df2ac4 # v5.3.0
+        uses: docker/metadata-action@9dc751fe249ad99385a2583ee0d084c400eee04e # v5.4.0
         with:
           images: bunkerity/${{ inputs.IMAGE }}
       # Build cached image
@@ -115,7 +115,7 @@ jobs:
       # Check OS vulnerabilities
       - name: Check OS vulnerabilities
         if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
-        uses: aquasecurity/trivy-action@69cbbc0cbbf6a2b0bab8dcf0e9f2d7ead08e87e4 # master
+        uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601 # master
         with:
           vuln-type: os
           skip-dirs: /root/.cargo
