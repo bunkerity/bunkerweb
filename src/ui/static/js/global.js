@@ -27,15 +27,21 @@ class Menu {
   toggle() {
     this.sidebarEl.classList.toggle("-translate-x-full");
     if (this.sidebarEl.classList.contains("-translate-x-full")) {
-      this.sidebarEl.setAttribute("aria-expanded", "false");
+      this.sidebarEl.setAttribute("aria-hidden", "true");
+      this.toggleBtn.setAttribute("aria-expanded", "false");
+      this.closeBtn.setAttribute("aria-expanded", "false");
     } else {
-      this.sidebarEl.setAttribute("aria-expanded", "true");
+      this.sidebarEl.setAttribute("aria-hidden", "false");
+      this.toggleBtn.setAttribute("aria-expanded", "true");
+      this.closeBtn.setAttribute("aria-expanded", "true");
     }
   }
 
   close() {
+    this.toggleBtn.setAttribute("aria-expanded", "false");
+    this.closeBtn.setAttribute("aria-expanded", "false");
     this.sidebarEl.classList.add("-translate-x-full");
-    this.sidebarEl.setAttribute("aria-expanded", "false");
+    this.sidebarEl.setAttribute("aria-hidden", "true");
   }
 }
 
@@ -105,9 +111,9 @@ class News {
                 src="${img}"
                 alt="image"
             />
-            <h3 role="link"
+            <span role="link"
             onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
-            class="cursor-pointer mt-3 mb-1  text-xl dark:text-white tracking-wide">${title}</h3>
+            class="cursor-pointer mt-3 mb-1 text-xl dark:text-white tracking-wide">${title}</span>
         </div>
         <div>
             <div  role="link"
@@ -137,23 +143,29 @@ class Sidebar {
     this.closeBtn = document.querySelector(btnCloseAtt);
     this.openBtn.addEventListener("click", this.open.bind(this));
     this.closeBtn.addEventListener("click", this.close.bind(this));
-    init();
+    this.init();
   }
 
   init() {
-    this.sidebarEl.setAttribute("aria-expand", "false");
+    this.openBtn.setAttribute("aria-expanded", "false");
+    this.closeBtn.setAttribute("aria-expanded", "false");
+    this.sidebarEl.setAttribute("aria-hidden", "false");
   }
 
   open() {
+    this.openBtn.setAttribute("aria-expanded", "true");
+    this.closeBtn.setAttribute("aria-expanded", "true");
     this.sidebarEl.classList.add("translate-x-0");
     this.sidebarEl.classList.remove("translate-x-90");
-    this.sidebarEl.setAttribute("aria-expand", "true");
+    this.sidebarEl.setAttribute("aria-hidden", "false");
   }
 
   close() {
+    this.openBtn.setAttribute("aria-expanded", "false");
+    this.closeBtn.setAttribute("aria-expanded", "false");
     this.sidebarEl.classList.add("translate-x-90");
     this.sidebarEl.classList.remove("translate-x-0");
-    this.sidebarEl.setAttribute("aria-expand", "false");
+    this.sidebarEl.setAttribute("aria-hidden", "true");
   }
 }
 
@@ -390,26 +402,25 @@ class Banner {
   }
 }
 
+const setCheckbox = new Checkbox();
+const setSelect = new Select();
+const setPassword = new Password();
+const setDisabledPop = new DisabledPop();
+const setNews = new News();
+const setDarkM = new darkMode();
+const setFlash = new FlashMsg();
+const setBanner = new Banner();
 const setLoader = new Loader();
 const setMenu = new Menu();
+
 const setNewsSidebar = new Sidebar(
   "[data-sidebar-info]",
   "[data-sidebar-info-open]",
   "[data-sidebar-info-close]"
 );
 
-const setCheckbox = new Checkbox();
-const setSelect = new Select();
-const setPassword = new Password();
-const setDisabledPop = new DisabledPop();
-
 const setFlashSidebar = new Sidebar(
   "[data-flash-sidebar]",
   "[data-flash-sidebar-open]",
   "[data-flash-sidebar-close]"
 );
-const setNews = new News();
-const setDarkM = new darkMode();
-const setFlash = new FlashMsg();
-
-const setBanner = new Banner();

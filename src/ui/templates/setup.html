@@ -980,14 +980,14 @@
         --tw-text-opacity: 1;
         color: rgb(73 80 87 / var(--tw-text-opacity));
       }
-      .checkbox[aria-checked="true"] {
+      .checkbox[data-checked="true"] {
         z-index: 0;
         --tw-border-opacity: 1;
         border-color: rgb(8 85 119 / var(--tw-border-opacity));
         --tw-bg-opacity: 1;
         background-color: rgb(8 85 119 / var(--tw-bg-opacity));
       }
-      .checkbox:disabled[aria-checked="true"] {
+      .checkbox:disabled[data-checked="true"] {
         --tw-border-opacity: 1;
         border-color: rgb(206 212 218 / var(--tw-border-opacity));
         --tw-bg-opacity: 1;
@@ -1009,13 +1009,13 @@
         --tw-text-opacity: 1;
         color: rgb(210 214 218 / var(--tw-text-opacity));
       }
-      :is(.dark .checkbox[aria-checked="true"]) {
+      :is(.dark .checkbox[data-checked="true"]) {
         --tw-border-opacity: 1;
         border-color: rgb(8 85 119 / var(--tw-border-opacity));
         --tw-bg-opacity: 1;
         background-color: rgb(8 85 119 / var(--tw-bg-opacity));
       }
-      :is(.dark .checkbox:disabled[aria-checked="true"]) {
+      :is(.dark .checkbox:disabled[data-checked="true"]) {
         --tw-border-opacity: 1;
         border-color: rgb(37 47 64 / var(--tw-border-opacity));
         --tw-bg-opacity: 1;
@@ -1411,7 +1411,7 @@
                   type="checkbox"
                   id="auto_lets_encrypt"
                   name="auto_lets_encrypt"
-                  aria-checked="false"
+                  data-checked="false"
                   class="checkbox"
                   value="no"
                 />
@@ -1483,7 +1483,7 @@
             this.updateCheck("unknown");
             // get resume
             const api = `http${
-              this.sslCheck.getAttribute("aria-checked") === "true" ? "s" : ""
+              this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
             }://${this.servInp.value}/setup/check`;
             fetch(api)
               .then((res) => {
@@ -1552,7 +1552,7 @@
 
         updateResume() {
           this.resumeEl.textContent = `http${
-            this.sslCheck.getAttribute("aria-checked") === "true" ? "s" : ""
+            this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
           }://${this.servInp.value}${this.urlInp.value}`;
         }
       }
@@ -1624,8 +1624,8 @@
                 //set custom input hidden value
                 const newValue = checkboxEl.getAttribute("value");
                 newValue === "yes"
-                  ? checkboxEl.setAttribute("aria-checked", "true")
-                  : checkboxEl.setAttribute("aria-checked", "false");
+                  ? checkboxEl.setAttribute("data-checked", "true")
+                  : checkboxEl.setAttribute("data-checked", "false");
 
                 //force checked for submit
                 checkboxEl.checked = true;
@@ -1690,7 +1690,7 @@
             // Else, send form and wait for response
 
             const api = `http${
-              this.sslCheck.getAttribute("aria-checked") === "true" ? "s" : ""
+              this.sslCheck.getAttribute("data-checked") === "true" ? "s" : ""
             }://${this.servInp.value}${this.urlInp.value}`;
 
             fetch(window.location.href, {

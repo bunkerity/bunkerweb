@@ -11,6 +11,9 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
+      data: {
+        checked: "checked=true",
+      },
       aria: {
         checked: 'checked="true"',
       },

@@ -34,15 +34,15 @@ instances_batched %}
     <div role="grid" class="grid grid-cols-1 gap-2 mt-4 mb-6 ml-1">
       <!-- detail -->
       <div
-        role="gridcell"
+        role="row"
         class="flex flex-col items-center sm:flex-row col-span-1 py-1 sm:py-0"
       >
-        <p
+        <p role="gridcell"
           class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 dark:opacity-80"
         >
           TYPE
         </p>
-        <p
+        <p role="gridcell"
           class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-80"
         >
           {{ instance._type }}
@@ -51,15 +51,15 @@ instances_batched %}
       <!-- end detail -->
       <!-- detail -->
       <div
-        role="gridcell"
+        role="row"
         class="flex flex-col items-center sm:flex-row col-span-1 py-1 sm:py-0"
       >
-        <p
+        <p role="gridcell"
           class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 dark:opacity-90"
         >
           HOSTNAME
         </p>
-        <p
+        <p role="gridcell"
           class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-90"
         >
           {{ instance.hostname }}

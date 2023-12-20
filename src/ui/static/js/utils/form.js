@@ -29,9 +29,19 @@ class Checkbox {
 
           //set custom input hidden value
           const newValue = checkboxEl.getAttribute("value");
-          newValue === "yes"
-            ? checkboxEl.setAttribute("aria-checked", "true")
-            : checkboxEl.setAttribute("aria-checked", "false");
+          try {
+            if (checkboxEl.hasAttribute("aria-checked")) {
+              newValue === "yes"
+                ? checkboxEl.setAttribute("aria-checked", "true")
+                : checkboxEl.setAttribute("aria-checked", "false");
+            }
+          } catch (err) {}
+
+          try {
+            newValue === "yes"
+              ? checkboxEl.setAttribute("data-checked", "true")
+              : checkboxEl.setAttribute("data-checked", "false");
+          } catch (err) {}
 
           //force checked for submit
           checkboxEl.checked = true;
@@ -52,18 +62,18 @@ class Select {
       try {
         if (!e.target.closest("button")) {
           const selectEls = document.querySelectorAll(
-            "div[data-setting-select-dropdown]",
+            "div[data-setting-select-dropdown]"
           );
           selectEls.forEach((select) => {
             select.classList.add("hidden");
             select.classList.remove("flex");
           });
           const btnEls = document.querySelectorAll(
-            "button[data-setting-select]",
+            "button[data-setting-select]"
           );
           btnEls.forEach((btn) => {
             const dropdownChevron = btn.querySelector(
-              `svg[data-setting-select]`,
+              `svg[data-setting-select]`
             );
             dropdownChevron.classList.remove("rotate-180");
           });
@@ -87,7 +97,7 @@ class Select {
             .hasAttribute(`data-setting-select-dropdown-btn`)
         ) {
           const btn = e.target.closest(
-            `button[data-setting-select-dropdown-btn]`,
+            `button[data-setting-select-dropdown-btn]`
           );
           const btnValue = btn.getAttribute("value");
 
@@ -116,7 +126,7 @@ class Select {
 
           //close dropdown
           const dropdownChevron = selectCustom.querySelector(
-            `svg[data-setting-select]`,
+            `svg[data-setting-select]`
           );
           dropdownChevron.classList.remove("rotate-180");
 
@@ -139,7 +149,7 @@ class Select {
     });
     //select new one
     const newOption = selectEl.querySelector(
-      `option[value="${selectedValue}"]`,
+      `option[value="${selectedValue}"]`
     );
     newOption.selected = true;
     newOption.setAttribute("selected", "");

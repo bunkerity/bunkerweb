@@ -2,6 +2,7 @@
 <button
   data-sidebar-info-open
   aria-controls="sidebar-news"
+  aria-expanded="false"
   aria-label="Open news sidebar"
   class="transition-all scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-[4.5rem] right-5 sm:right-40 xl:right-6 z-990 rounded-circle text-slate-700"
 >
@@ -20,14 +21,17 @@
 <!-- right sidebar -->
 <aside
   id="sidebar-news"
-  aria-expanded="false"
+  aria-hidden="true"
   data-sidebar-info
   class="translate-x-90 -right-0 transition z-sticky dark:bg-slate-850 dark:brightness-110 shadow-3xl max-w-full w-90 ease fixed top-0 left-auto flex h-full min-w-0 flex-col break-words rounded-none border-0 bg-white bg-clip-border px-0.5"
 >
   <!-- close btn-->
-  <button aria-label="close news sidebar" data-sidebar-info-close>
+  <button     
+  aria-controls="sidebar-news"
+  aria-expanded="false"
+  aria-label="close news sidebar" data-sidebar-info-close>
     <svg
-      class="pointer-events-none fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-8 w-8 top-4 right-4"
+      class="fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-8 w-8 top-4 right-4"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 320 512"
     >
@@ -83,7 +87,7 @@
   >
     <h5 class="mb-4 dark:text-white font-bold">JOIN THE NEWSLETTER</h5>
     <div class="flex">
-      <label for="EMAIL" class="hidden">EMAIL</label>
+      <label for="newsletter-email" class="sr-only">EMAIL</label>
       <input
         type="text"
         id="newsletter-email"

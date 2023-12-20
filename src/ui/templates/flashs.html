@@ -6,6 +6,7 @@
 >
   <button
     aria-controls="sidebar-flash"
+    aria-expanded="false"
     aria-label="Open flash action sidebar"
     data-flash-sidebar-open
     class="transition scale-90 sm:scale-100 dark:brightness-95 p-3 text-xl bg-white shadow-sm cursor-pointer rounded-circle text-slate-700"
@@ -34,13 +35,13 @@
 <aside
   id="sidebar-flash"
   data-flash-sidebar
-  aria-expanded="false"
+  aria-hidden="true"
   class="translate-x-90 -right-0 transition z-sticky dark:bg-slate-850 dark:brightness-110 shadow-3xl max-w-full w-90 ease fixed top-0 left-auto flex h-full min-w-0 flex-col break-words rounded-none border-0 bg-white bg-clip-border px-0.5"
 >
   <!-- close btn-->
-  <button aria-label="close flash sidebar" data-flash-sidebar-close>
+  <button  aria-controls="sidebar-flash" aria-expanded="false" aria-label="close flash sidebar" data-flash-sidebar-close>
     <svg
-      class="pointer-events-none fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-8 w-8 top-4 right-4"
+      class=" fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-8 w-8 top-4 right-4"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 320 512"
     >
