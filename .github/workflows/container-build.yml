@@ -115,7 +115,7 @@ jobs:
       # Check OS vulnerabilities
       - name: Check OS vulnerabilities
         if: ${{ inputs.CACHE_SUFFIX != 'arm' }}
-        uses: aquasecurity/trivy-action@69cbbc0cbbf6a2b0bab8dcf0e9f2d7ead08e87e4 # master
+        uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601 # master
         with:
           vuln-type: os
           skip-dirs: /root/.cargo
