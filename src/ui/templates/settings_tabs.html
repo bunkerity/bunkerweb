@@ -11,7 +11,7 @@
     and check_settings(plugin["settings"], "global") %}
     <button role="tab"
     data-tab-handler="{{ plugin['id'] }}"
-    type="button"
+    
     class="{% if loop.first %}active{% endif %} settings-tabs-tab-btn"
   >
     <span class="w-full flex justify-between items-center">
@@ -46,10 +46,10 @@
  <div  class="md:hidden relative col-span-12 h-full">
   <button
   data-tab-dropdown-btn
-    type="button"
+    aria-controls="tab-dropdown-mobile"
     class="settings-tabs-mobile-btn"
   >
-    <span class="settings-tabs-mobile-btn-text">{% if current_endpoint == "global-config" %}general {% endif %} </span>
+    <span aria-label="current tab" class="settings-tabs-mobile-btn-text">{% if current_endpoint == "global-config" %}general {% endif %} </span>
     <!-- chevron -->
     <svg
 
@@ -64,7 +64,8 @@
     <!-- end chevron -->
   </button>
   <!-- dropdown-->
-  <div
+  <div     id="tab-dropdown-mobile" role="listbox"
+
   data-tab-dropdown
     class="hidden z-100 absolute flex-col w-full overflow-hidden overflow-y-auto max-h-90"
   >
@@ -74,18 +75,18 @@
   and check_settings(plugin["settings"], "global") %}
 
   {% if loop.first %}
-  <button
+  <button role="option"
   data-tab-handler-mobile="{{ plugin['id'] }}"
-    type="button"
+    
     data-select="false"
     id="edit-{{current_endpoint}}-{{ plugin['id'] }}-tab"
     class="active first settings-tabs-mobile-dropdown-btn">
     {{ plugin["name"] }}
   </button>
   {% else %}
-  <button
+  <button role="option"
   data-tab-handler-mobile="{{ plugin['id'] }}"
-    type="button"
+    
     data-select="false"
     id="edit-{{current_endpoint}}-{{ plugin['id'] }}-tab"
     class="settings-tabs-mobile-dropdown-btn {% if loop.index == loop.length %}rounded-b {% endif %}">

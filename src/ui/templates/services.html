@@ -38,14 +38,12 @@
     </h5>
     <h6 class="text-center sm:text-left mb-2 font-semibold text-gray-600 dark:text-white/80">{{ service["SERVER_NAME"]['method'] }}</h5>
 
-
-
     <!-- detail list -->
-    <div
+    <div role="grid"
       class="w-full grid grid-cols-12 justify-items-center sm:justify-items-start gap-2 mt-4 mb-6 ml-3 sm:ml-1"
     >
       <!-- detail -->
-      <div class="flex items-center col-span-12 sm:col-span-6">
+      <div role="gridcell" class="flex items-center col-span-12 sm:col-span-6">
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 "
         >
@@ -55,6 +53,7 @@
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
           {% if service['USE_REVERSE_PROXY']['value'] == 'yes' %}
+          <span class="sr-only">yes</span>
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -65,6 +64,7 @@
             />
           </svg>
           {% else %}
+          <span class="sr-only">no</span>
           <svg
             class="h-4 w-4 fill-red-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -80,7 +80,7 @@
       </div>
       <!-- end detail -->
       <!-- detail -->
-      <div class="flex items-center col-span-12 sm:col-span-6">
+      <div role="gridcell" class="flex items-center col-span-12 sm:col-span-6">
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 "
         >
@@ -90,6 +90,8 @@
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
           {% if service['SERVE_FILES']['value'] == 'yes' %}
+          <span class="sr-only">yes</span>
+
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -100,6 +102,8 @@
             />
           </svg>
           {% else %}
+          <span class="sr-only">no</span>
+
           <svg
             class="h-4 w-4 fill-red-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -114,7 +118,7 @@
       </div>
       <!-- end detail -->
       <!-- detail -->
-      <div class="flex items-center col-span-12 sm:col-span-6">
+      <div role="gridcell" class="flex items-center col-span-12 sm:col-span-6">
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 "
         >
@@ -124,6 +128,7 @@
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
           {% if service['REMOTE_PHP']['value'] != '' %}
+          <span class="sr-only">yes</span>
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -134,6 +139,7 @@
             />
           </svg>
           {% else %}
+          <span class="sr-only">no</span>
           <svg
             class="h-4 w-4 fill-red-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -148,7 +154,7 @@
       </div>
       <!-- end detail -->
       <!-- detail -->
-      <div class="flex items-center col-span-12 sm:col-span-6">
+      <div role="gridcell" class="flex items-center col-span-12 sm:col-span-6">
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 "
         >
@@ -158,6 +164,7 @@
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
           {% if service['AUTO_LETS_ENCRYPT']['value'] == 'yes' or service['USE_CUSTOM_SSL']['value'] == 'yes' or service['GENERATE_SELF_SIGNED_SSL']['value'] == 'yes' %}
+          <span class="sr-only">yes</span>
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -168,6 +175,7 @@
             />
           </svg>
           {% else %}
+          <span class="sr-only">no</span>
           <svg
             class="h-4 w-4 fill-red-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -182,7 +190,7 @@
       </div>
       <!-- end detail -->
       <!-- detail -->
-      <div class="flex items-center col-span-12 sm:col-span-6">
+      <div role="gridcell" class="flex items-center col-span-12 sm:col-span-6">
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 "
         >
@@ -192,6 +200,7 @@
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
           {% if service['USE_MODSECURITY']['value'] == 'yes' %}
+          <span class="sr-only">yes</span>
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -202,6 +211,7 @@
             />
           </svg>
           {% else %}
+          <span class="sr-only">no</span>
           <svg
             class="h-4 w-4 fill-red-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -216,7 +226,7 @@
       </div>
       <!-- end detail -->
       <!-- detail -->
-      <div class="flex items-center col-span-12 sm:col-span-6">
+      <div role="gridcell" class="flex items-center col-span-12 sm:col-span-6">
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 "
         >
@@ -226,6 +236,7 @@
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
           {% if service['USE_BAD_BEHAVIOR']['value'] == 'yes' %}
+          <span class="sr-only">yes</span>
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -236,6 +247,7 @@
             />
           </svg>
           {% else %}
+          <span class="sr-only">no</span>
           <svg
             class="h-4 w-4 fill-red-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -250,7 +262,7 @@
       </div>
       <!-- end detail -->
       <!-- detail -->
-      <div class="flex items-center col-span-12 sm:col-span-6">
+      <div role="gridcell" class="flex items-center col-span-12 sm:col-span-6">
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 "
         >
@@ -259,7 +271,9 @@
         <p
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
-          {% if service['USE_LIMIT_REQ']['value'] == 'yes' %}
+          {% if service['USE_LIMIT_REQ']['value'] == 'yes' %}$          
+          <span class="sr-only">yes</span>
+
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -270,6 +284,8 @@
             />
           </svg>
           {% else %}
+          <span class="sr-only">no</span>
+
           <svg
             class="h-4 w-4 fill-red-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -284,7 +300,7 @@
       </div>
       <!-- end detail -->
       <!-- detail -->
-      <div class="flex items-center col-span-12 sm:col-span-6">
+      <div role="gridcell" class="flex items-center col-span-12 sm:col-span-6">
         <p
           class="font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500"
         >
@@ -294,6 +310,7 @@
           class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500 "
         >
           {% if service['USE_DNSBL']['value'] == 'yes' %}
+          <span class="sr-only">yes</span>
           <svg
             class="h-4 w-4 fill-green-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -304,6 +321,7 @@
             />
           </svg>
           {% else %}
+          <span class="sr-only">no</span>
           <svg
             class="h-4 w-4 fill-red-500"
             xmlns="http://www.w3.org/2000/svg"
@@ -322,7 +340,7 @@
 
     <!-- button list-->
     <div class="relative w-full flex justify-center sm:justify-end">
-      <a href="http://{{service["SERVER_NAME"]['value']}}"
+      <a aria-label="access service url" href="http://{{service["SERVER_NAME"]['value']}}"
         target="_blank"
         class="dark:brightness-90 z-20 mx-1 bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25  active:opacity-85 hover:shadow-md"
       >
@@ -340,7 +358,7 @@
 
       <button
       data-services-action="edit"
-      type="button"
+      aria-label="edit service settings"
       data-services-name="{{service["SERVER_NAME"]['value']}}"
 
         class="dark:brightness-90 z-20 mx-1 bg-yellow-500 hover:bg-yellow-500/80 focus:bg-yellow-500/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25  active:opacity-85 hover:shadow-md"
@@ -355,7 +373,7 @@
       {% if service["SERVER_NAME"]['method'] == "ui" %}
       <button
       data-services-action="delete"
-      type="button"
+      aria-label="delete service"
       data-services-name="{{service["SERVER_NAME"]['value']}}"
         class="dark:brightness-90 z-20 mx-1 bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25  active:opacity-85 hover:shadow-md"
       >

@@ -1,7 +1,8 @@
 <!-- float button-->
 <button
-  type="button"
   data-sidebar-info-open
+  aria-controls="sidebar-news"
+  aria-label="Open news sidebar"
   class="transition-all scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-[4.5rem] right-5 sm:right-40 xl:right-6 z-990 rounded-circle text-slate-700"
 >
   <svg
@@ -18,20 +19,23 @@
 
 <!-- right sidebar -->
 <aside
+  id="sidebar-news"
+  aria-expanded="false"
   data-sidebar-info
   class="translate-x-90 -right-0 transition z-sticky dark:bg-slate-850 dark:brightness-110 shadow-3xl max-w-full w-90 ease fixed top-0 left-auto flex h-full min-w-0 flex-col break-words rounded-none border-0 bg-white bg-clip-border px-0.5"
 >
   <!-- close btn-->
-  <svg
-    data-sidebar-info-close
-    class="cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-8 w-8 top-4 right-4"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 320 512"
-  >
-    <path
-      d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
-    />
-  </svg>
+  <button aria-label="close news sidebar" data-sidebar-info-close>
+    <svg
+      class="pointer-events-none fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-8 w-8 top-4 right-4"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 320 512"
+    >
+      <path
+        d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
+      />
+    </svg>
+  </button>
   <!-- close btn-->
 
   <!-- header -->
@@ -43,6 +47,7 @@
     <!-- close button -->
     <div class="float-right mt-6">
       <button
+        aria-label="close news sidebar"
         data-sidebar-info-close
         class="inline-block p-0 mb-4 text-sm font-bold leading-normal text-center uppercase align-middle transition-all ease-in bg-transparent border-0 rounded-lg shadow-none cursor-pointer hover:-translate-y-px tracking-tight-rem bg-150 bg-x-25 active:opacity-85 dark:text-white text-slate-700"
       >
@@ -78,6 +83,7 @@
   >
     <h5 class="mb-4 dark:text-white font-bold">JOIN THE NEWSLETTER</h5>
     <div class="flex">
+      <label for="EMAIL" class="hidden">EMAIL</label>
       <input
         type="text"
         id="newsletter-email"
@@ -94,12 +100,15 @@
           data-checkbox-handler="newsletter-check"
           class="relative mb-7 md:mb-0"
         >
+          <label class="hidden" for="newsletter-check">agree privacy</label>
           <input
             id="newsletter-check"
+            name="newsletter-check"
             class="mr-2 relative cursor-pointer dark:border-slate-600 dark:bg-slate-700 z-10 checked:z-0 w-5 h-5 ease text-base rounded-1.4 checked:bg-primary checked:border-primary dark:checked:bg-primary dark:checked:border-primary duration-250 float-left mt-1 appearance-none border border-gray-300 bg-white bg-contain bg-center bg-no-repeat align-top transition-all disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 disabled:text-gray-700 dark:disabled:text-gray-300"
             type="checkbox"
             data-pattern="^(yes|no)$"
             value="no"
+            required
           />
           <svg
             data-checkbox-handler="newsletter-check"
@@ -126,7 +135,6 @@
     <button
       type="submit"
       formtarget="_blank"
-      type="button"
       class="dark:brightness-125 hover:brightness-75 w-full inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-gradient-to-tl bg-primary leading-normal text-xs ease-in tracking-wide shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
     >
       Subscribe

@@ -28,13 +28,14 @@
     <!-- flash message-->
     {% for category, message in messages %}
     <div
+      role="alert"
+      aria-description="login message alert"
       data-flash-message
       class="p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 bg-white rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border"
     >
       <button
         data-close-flash-message
         role="close alert message"
-        type="button"
         class="absolute right-7 top-1.5"
       >
         <svg

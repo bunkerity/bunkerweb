@@ -50,7 +50,7 @@ data-plugin-item="{{plugin['id']}}"
           />
         </svg>
         <!-- popover -->
-        <div  class="popover-settings-container  hidden"
+        <div role="alert" aria-description="show detail"  class="popover-settings-container  hidden"
         data-popover-content="{{ value["label"] }}"
         >
           <p  class="popover-settings-text" >{{value['help']}}
@@ -63,6 +63,7 @@ data-plugin-item="{{plugin['id']}}"
       <!-- input -->
       {% if value["type"] != "select" and value["type"] != "check" %}
       <div class="relative flex items-center">
+        <label class="sr-only" for="{{setting}}">{{setting}}</label>
         <input
         {% if setting == "SERVER_NAME" %}required{%endif%}
         data-default-value="{{global_config[setting]['value']}}" data-default-method="{{global_config[setting]['method']}}"
@@ -99,22 +100,22 @@ data-plugin-item="{{plugin['id']}}"
 
       <!--custom-->
       <div data-select-container class="relative">
-        <button
+        <button 
         {% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default'  %} disabled {% endif %}    data-setting-select="{{value['id']}}"
         data-default-value="{{global_config[setting]['value']}}"
         data-default-method="{{global_config[setting]['method']}}"
-          type="button"
+          aria-controls="{{settings}}-dropdown"
           class="custom-select-btn"
           >
           {% for item in value['select'] %} {% if global_config[setting]['value'] and
           global_config[setting]['value'] == item %}
-          <span
+          <span 
           data-setting-select-text="{{value['id']}}"
             data-value="{{global_config[setting]['value']}}"
             >{{global_config[setting]['value']}}</span
           >
           {% elif not global_config[setting]['value'] and value['default'] == item %}
-          <span
+          <span  aria-label="current value"
           data-setting-select-text="{{value['id']}}"
             data-value="{{value['default']}}"
             >{{value['default']}}</span
@@ -135,14 +136,15 @@ data-plugin-item="{{plugin['id']}}"
         </button>
               <!-- dropdown-->
           <div
+          id="{{settings}}-dropdown"
+          role="listbox"
           data-setting-select-dropdown="{{value['id']}}"
           class="hidden z-[20] absolute h-full flex-col w-full mt-2"
         >
           {% for item in value['select'] %} {% if global_config[setting]['value'] and
           global_config[setting]['value'] == item or not global_config[setting]['value']
           and value['default'] == item %}
-          <button
-            type="button"
+          <button role="option"
             value="{{item}}"
             data-setting-select-dropdown-btn="{{value['id']}}"
             type="button"
@@ -151,8 +153,7 @@ data-plugin-item="{{plugin['id']}}"
             {{item}}
           </button>
           {% else %}
-          <button
-            type="button"
+          <button role="option"
             value="{{item}}"
             data-setting-select-dropdown-btn="{{value['id']}}"
             type="button"
@@ -170,6 +171,7 @@ data-plugin-item="{{plugin['id']}}"
       <!-- checkbox -->
       {% if value["type"] == "check" %}
       <div data-checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0 z-10 ">
+        <label class="sr-only" for="{{setting}}">{{setting}}</label>
         <input  id="{{setting}}" name="{{setting}}"
         data-default-method="{% if setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] %}mode{% else %}{{global_config[setting]['method']}}{% endif %}"
         data-default-value="{{global_config[setting]['value']}}"
@@ -200,7 +202,7 @@ data-plugin-item="{{plugin['id']}}"
       <!-- end checkbox -->
 
       <!-- invalid feedback -->
-      <div class="hidden text-sm dark:text-red-500">
+      <div role="alert" aria-label="show when invalid input" class="hidden text-sm dark:text-red-500">
         {{value['label']}} is invalid and must match this pattern:
         {{value['regex']|safe}}
       </div>
@@ -266,7 +268,7 @@ data-plugin-item="{{plugin['id']}}"
           />
         </svg>
         <!-- popover -->
-        <div  class="popover-settings-container hidden"
+        <div role="alert" aria-description="show detail"  class="popover-settings-container hidden"
         data-popover-content="{{ value["label"] }}"
         >
           <p  class="popover-settings-text" >{{value['help']}}
@@ -279,6 +281,7 @@ data-plugin-item="{{plugin['id']}}"
       <!-- input -->
       {% if value["type"] != "select" and value["type"] != "check" %}
       <div class="relative flex items-center">
+        <label class="sr-only" for="{{setting}}_SCHEMA">{{setting}}</label>
         <input
         data-default-value="{{value['default']}}" data-default-method="default" id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
         class="regular-input"
@@ -315,11 +318,11 @@ data-plugin-item="{{plugin['id']}}"
         <button
         data-setting-select="{{value['id']}}"
         data-default-value="{{value['default']}}"
-          type="button"
+          aria-controls="{{settings}}-dropdown"
           class="custom-select-btn"
           >
           {% for item in value['select'] %} {% if value['default'] == item %}
-          <span
+          <span aria-label="current value"
           data-setting-select-text="{{value['id']}}"
             data-value="{{value['default']}}"
             >{{value['default']}}</span
@@ -339,26 +342,24 @@ data-plugin-item="{{plugin['id']}}"
           <!-- end chevron -->
         </button>
               <!-- dropdown-->
-          <div
+          <div id="{{settings}}-dropdown"
+          role="listbox"
           data-setting-select-dropdown="{{value['id']}}"
           class="hidden z-[20] absolute h-full flex-col w-full mt-2"
         >
           {% for item in value['select'] %} {% if value['default'] == item %}
-          <button
-            type="button"
+          <button role="option"
             value="{{item}}"
             data-setting-select-dropdown-btn="{{value['id']}}"
-            type="button"
             class="active custom-dropdown-btn {% if loop.index == 1 %} border-t rounded-t {% endif %} {% if loop.index == loop.length %}rounded-b {% endif %}"
           >
             {{item}}
           </button>
           {% else %}
           <button
-            type="button"
+            role="option"
             value="{{item}}"
             data-setting-select-dropdown-btn="{{value['id']}}"
-            type="button"
             class="custom-dropdown-btn  {% if loop.index == 1 %} border-t rounded-t {% endif %} {% if loop.index == loop.length %}rounded-b {% endif %}"
           >
             {{item}}
@@ -373,6 +374,7 @@ data-plugin-item="{{plugin['id']}}"
       <!-- checkbox -->
       {% if value["type"] == "check" %}
       <div data-checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0">
+        <label class="sr-only" for="{{setting}}_SCHEMA">{{setting}}</label>
         <input id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
         data-default-method="default"
         data-default-value="{{value['default']}}" {% if value['default'] == 'yes' %} checked {%
@@ -394,7 +396,7 @@ data-plugin-item="{{plugin['id']}}"
       <!-- end checkbox -->
 
       <!-- invalid feedback -->
-      <div class="hidden text-sm dark:text-red-500">
+      <div role="alert" aria-label="show when invalid" class="hidden text-sm dark:text-red-500">
         {{value['label']}} is invalid and must match this pattern:
         {{value['regex']|safe}}
       </div>

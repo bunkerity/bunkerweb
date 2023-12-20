@@ -14,7 +14,11 @@
       >
         DELETE PLUGINS
       </p>
-      <button class="-translate-y-1" type="button" data-plugins-modal-close>
+      <button
+        aria-label="close modal"
+        class="-translate-y-1"
+        data-plugins-modal-close
+      >
         <svg
           class="transition duration-300 ease-in-out dark:opacity-90 h-6 w-6 sm:h-7 sm:w-7 fill-slate-800 dark:fill-gray-300"
           xmlns="http://www.w3.org/2000/svg"
@@ -39,6 +43,7 @@
       <input type="hidden" value="delete" name="operation" id="operation" />
       <div>
         <p
+          aria-description="delete plugin message"
           data-plugins-modal-text
           class="text-center mx-2 mb-2 mt-8 font-semibold font-sans leading-normal uppercase text-sm"
         ></p>
@@ -47,7 +52,6 @@
       <div class="w-full justify-center flex mt-10">
         <button
           data-plugins-modal-close
-          type="button"
           class="dark:brightness-90 mr-3 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
         >
           Close
