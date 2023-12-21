@@ -41,7 +41,7 @@ async function pluginDelete() {
     "DELETE",
     null,
     delPlugin,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "error") return;
     // Case succeed, delete items from UI
@@ -55,9 +55,11 @@ const emits = defineEmits(["pluginDelete", "close"]);
 </script>
 <template>
   <ModalBase
+    id="plugin-delete-modal"
+    :aria-hidden="props.isOpen ? 'false' : 'true'"
     @backdrop="$emit('close')"
     :title="$t('plugins_delete_modal_title', { name: props.pluginName })"
-    v-if="props.isOpen"
+    v-show="props.isOpen"
   >
     <div class="col-span-12 overflow-x-auto overflow-y-hidden">
       <p>
@@ -74,6 +76,8 @@ const emits = defineEmits(["pluginDelete", "close"]);
           @click="$emit('close')"
           type="button"
           class="text-xs"
+          aria-controls="plugin-delete-modal"
+          :aria-expanded="props.isOpen ? 'true' : 'false'"
         >
           {{ $t("action_close") }}
         </ButtonBase>

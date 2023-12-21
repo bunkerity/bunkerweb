@@ -337,8 +337,10 @@ class CustomConfigServiceId(BaseModel):
 class PluginId(BaseModel):
     plugin_id: str = Field(examples=["blacklist"], description="The plugin id")
 
+
 class PluginPageName(BaseModel):
     plugin_page_name: str = Field(examples=["index"], description="The plugin page name")
+
 
 class InstanceHostname(BaseModel):
     instance_hostname: str = Field(examples=["bunkerweb-1"], description="The instance hostname")

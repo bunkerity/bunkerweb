@@ -68,10 +68,15 @@ RUN apk add --no-cache bash nodejs npm && \
 # Change working directory
 WORKDIR /usr/share/bunkerweb/ui
 
-# Initialize project
+# Init needed dashboard package to build
 RUN cd client && \
   npm install
 
+# Init setup standalone page
+RUN cd setup && \
+  npm install
+
+# Build ui
 RUN node build.js
 
 # Remove no longer needed files

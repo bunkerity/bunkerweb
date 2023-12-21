@@ -19,7 +19,7 @@ function runCommand(dir, command) {
           isErr = true;
           console.log(`exec error: ${err}`);
         }
-      }
+      },
     );
   } catch (err) {
     isErr = true;
@@ -62,14 +62,14 @@ function updateClientDir() {
       subdirs.forEach((subdir) => {
         // Get absolute path of current subdir
         const currPath = resolve(
-          __dirname + `/${clientBuildDir}/templates/${subdir}`
+          __dirname + `/${clientBuildDir}/templates/${subdir}`,
         );
         // Rename index.html by subdir name
         fs.renameSync(`${currPath}/index.html`, `${currPath}/${subdir}.html`);
         // Copy file to move it from /template/page to /template
         fs.copyFileSync(
           `${currPath}/${subdir}.html`,
-          resolve(__dirname + `/static/${subdir}.html`)
+          resolve(__dirname + `/static/${subdir}.html`),
         );
       });
       fs.rmSync(templateDir, { recursive: true, force: true });
@@ -106,10 +106,10 @@ if (buildSetupErr)
 const isUpdateDirErr = updateClientDir();
 if (isUpdateDirErr)
   return console.log(
-    "Error while changing client dir structure. Impossible to continue."
+    "Error while changing client dir structure. Impossible to continue.",
   );
 const isUpdateSetupErr = updateSetupDir();
 if (isUpdateSetupErr)
   return console.log(
-    "Error while changing setup dir structure. Impossible to continue."
+    "Error while changing setup dir structure. Impossible to continue.",
   );

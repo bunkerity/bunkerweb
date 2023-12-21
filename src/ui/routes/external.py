@@ -25,11 +25,12 @@ PREFIX = "/api/external"
 
 external = Blueprint("external", __name__)
 
+
 @external.route(f"{PREFIX}/page/<string:plugin_id>/<string:plugin_page_name>", methods=["GET"])
 @jwt_required()
-@model_validator(params={"plugin_id": "PluginId", "plugin_page_name" : "PluginPageName"})
+@model_validator(params={"plugin_id": "PluginId", "plugin_page_name": "PluginPageName"})
 def get_custom_page(plugin_id, plugin_page_name):
-      # Check if plugin id exists
+    # Check if plugin id exists
     is_plugin = False
     try:
         plugins = get_core_format_res(f"{CORE_API}/plugins")

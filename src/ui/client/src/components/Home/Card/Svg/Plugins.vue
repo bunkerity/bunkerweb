@@ -1,5 +1,10 @@
+<script setup></script>
 <template>
-  <div class="inline-block w-12 h-12 text-center rounded-circle bg-yellow-500">
+  <div
+    role="img"
+    :aria-label="$t('home_svg_plugins_desc')"
+    class="inline-block w-12 h-12 text-center rounded-circle bg-yellow-500"
+  >
     <svg
       class="scale-50 -translate-y-1.5 leading-none text-lg relative fill-white"
       xmlns="http://www.w3.org/2000/svg"

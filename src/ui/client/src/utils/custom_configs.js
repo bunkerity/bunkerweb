@@ -22,7 +22,7 @@ export function getBaseConfig() {
   const types = getTypes();
   for (let i = 0; i < types.length; i++) {
     baseConfig.push(
-      generateItem("folder", types[i], true, false, false, false)
+      generateItem("folder", types[i], true, false, false, false),
     );
   }
 
@@ -45,7 +45,7 @@ export function generateItem(
   canDelete,
   children = [],
   data = "",
-  method = "static"
+  method = "static",
 ) {
   const fullPath = `root${path ? `/${path}` : ``}`;
   return {
@@ -87,7 +87,7 @@ export function generateConfTree(configs, services) {
         true,
         false,
         false,
-        false
+        false,
       );
       folder.children.push(servItem);
       servItems.push(servItem);
@@ -110,8 +110,8 @@ export function generateConfTree(configs, services) {
         configs[i].method === "static" ? false : true,
         [],
         configs[i].data || "",
-        configs[i].method || ""
-      )
+        configs[i].method || "",
+      ),
     );
   }
 
@@ -146,8 +146,8 @@ export function generateConfTree(configs, services) {
           true,
           canCreateFolder,
           true,
-          true
-        )
+          true,
+        ),
       );
     }
   }
@@ -211,7 +211,7 @@ export function getCustomConfByFilter(items, filters) {
       if (key === "showOnlyCaseConf" && value === "yes") {
         isMatch =
           items.filter(
-            (item) => item.pathLevel === 3 && item.path.includes(path)
+            (item) => item.pathLevel === 3 && item.path.includes(path),
           ).length === 0
             ? false
             : true;

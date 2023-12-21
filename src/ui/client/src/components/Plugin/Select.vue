@@ -68,7 +68,7 @@ function updateTop() {
   selectTop.value = `${
     Math.abs(
       selectBtn.value.closest(".plugin-structure").scrollTop -
-        selectBtn.value.offsetTop
+        selectBtn.value.offsetTop,
     ) + selectBtn.value.clientHeight
   }px`;
 }
@@ -111,6 +111,7 @@ onMounted(() => {
     <option
       v-for="(value, id) in select.values"
       :value="value"
+      :label="value ? value : $t('inp_select_label_empty')"
       :selected="value === select.value ? true : false"
       :id="`${select.id}-option-${id}`"
     >
@@ -121,13 +122,13 @@ onMounted(() => {
 
   <button
     :aria-controls="`${select.id}-dropdown`"
+    :aria-expanded="select.isOpen ? 'true' : 'false'"
     ref="selectBtn"
     :aria-description="$t('inp_select_dropdown_button_desc')"
     :data-select-dropdown="props.setting.id"
     :disabled="
       select.method !== 'ui' && select.method !== 'default' ? true : false
     "
-    :aria-expanded="select.isOpen ? 'true' : 'false'"
     @click="toggleSelect()"
     class="select-btn"
   >
@@ -165,7 +166,7 @@ onMounted(() => {
               props.serviceName || select.context,
               select.id,
               select.value,
-              props.setting.regex
+              props.setting.regex,
             );
 
           // Case not same value as store on core
@@ -173,7 +174,7 @@ onMounted(() => {
             props.serviceName || select.context,
             select.id,
             select.value,
-            props.setting.regex
+            props.setting.regex,
           );
         }
       "
@@ -184,7 +185,7 @@ onMounted(() => {
         'select-dropdown-btn',
       ]"
       :aria-description="$t('inp_select_option_desc')"
-      :aria-current="value === select.value ? 'true' : 'false'"
+      :aria-selected="value === select.value ? 'true' : 'false'"
     >
       {{ value }}
     </button>

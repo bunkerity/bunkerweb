@@ -47,6 +47,8 @@ function getClickPath(id) {
     <li class="file-manager-breadcrumb-back-btn">
       <button @click="$emit('updatePath', getPrevPath())">
         <svg
+          role="img"
+          :aria-label="$t('custom_conf_svg_back_desc')"
           class="file-manager-breadcrumb-back-svg"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -70,7 +72,6 @@ function getClickPath(id) {
       <button
         :aria-description="$t('custom_conf_breadcrumb_item_desc')"
         @click="$emit('updatePath', getClickPath(id))"
-        type="button"
         class="file-manager-breadcrumb-item-btn"
       >
         {{ item === "root" ? "" : item.replaceAll("_", "-") }}

@@ -21,6 +21,8 @@ const emits = defineEmits(["close", "delete"]);
   <ModalBase
     @backdrop="$emit('close')"
     :title="$t('instances_modal_delete_title')"
+    id="instance-modal"
+    :aria-hidden="props.isOpen ? 'false' : 'true'"
     v-if="props.isOpen"
   >
     <div class="w-full">
@@ -38,6 +40,8 @@ const emits = defineEmits(["close", "delete"]);
           @click="$emit('close')"
           type="button"
           class="text-xs"
+          aria-controls="instance-modal"
+          :aria-expanded="props.isOpen ? 'true' : 'false'"
         >
           {{ $t("action_close") }}
         </ButtonBase>

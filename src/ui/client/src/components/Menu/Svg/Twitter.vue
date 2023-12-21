@@ -1,5 +1,8 @@
+<script setup></script>
 <template>
   <svg
+    role="img"
+    :aria-label="$t('dashboard_svg_twitter_desc')"
     class="hover:opacity-80"
     fill="#1DA1F2"
     xmlns="http://www.w3.org/2000/svg"

@@ -37,7 +37,7 @@ async function delServ() {
     "DELETE",
     null,
     deleteServ,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   )
     .then((res) => {
       // Case not save
@@ -55,6 +55,8 @@ const emits = defineEmits(["close", "delete"]);
 </script>
 <template>
   <ModalBase
+    id="service-delete-modal"
+    :aria-hidden="props.isOpen ? 'false' : 'true'"
     @backdrop="$emit('close')"
     :title="$t('services_delete_title')"
     v-if="props.isOpen"
@@ -74,6 +76,8 @@ const emits = defineEmits(["close", "delete"]);
           @click="$emit('close')"
           type="button"
           class="text-xs"
+          aria-controls="service-delete-modal"
+          :aria-expanded="props.isOpen ? 'true' : 'false'"
         >
           {{ $t("action_close") }}
         </ButtonBase>

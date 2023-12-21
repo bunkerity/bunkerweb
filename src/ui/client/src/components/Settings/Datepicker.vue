@@ -1,6 +1,7 @@
 <script setup>
-import { ref, reactive, defineEmits, defineProps, onMounted } from "vue";
+import { reactive, defineEmits, defineProps, onMounted } from "vue";
 import flatpickr from "flatpickr";
+
 import "@assets/css/datepicker-foundation.css";
 import "@assets/css/flatpickr.css";
 import "@assets/css/flatpickr.dark.css";
@@ -38,6 +39,10 @@ const date = reactive({
   format: "m/d/Y H:i:S",
 });
 
+const picker = reactive({
+  isOpen: false,
+});
+
 let datepicker;
 let currStamp;
 onMounted(() => {
@@ -50,14 +55,20 @@ onMounted(() => {
     time_24hr: true,
     minuteIncrement: 1,
     onChange(selectedDates, dateStr, instance) {
-      console.log(dateStr);
       datepicker.setDate(`${dateStr}h`);
+    },
+    onOpen(selectedDates, dateStr, instance) {
+      picker.isOpen = true;
+    },
+    onClose(selectedDates, dateStr, instance) {
+      picker.isOpen = false;
     },
   });
   // change error non-standard attributes
   const calendar = datepicker.calendarContainer;
+  calendar.setAttribute("id", props.settings.id);
   const inps = calendar.querySelectorAll(
-    'input.numInput[type="number"][maxlength]'
+    'input.numInput[type="number"][maxlength]',
   );
   inps.forEach((inp) => {
     inp.setAttribute("data-maxlength", inp.getAttribute("maxlength"));
@@ -99,6 +110,8 @@ const emits = defineEmits(["inp"]);
 <template>
   <div class="relative flex items-center">
     <input
+      :aria-controls="props.settings.id"
+      :aria-selected="picker.isOpen ? 'true' : 'false'"
       @change="(v) => $emit('inp', checkToSend(v.target.value))"
       type="text"
       :class="[

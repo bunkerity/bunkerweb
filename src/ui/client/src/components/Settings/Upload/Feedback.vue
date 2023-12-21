@@ -30,7 +30,11 @@ const emits = defineEmits(["close"]);
 </script>
 
 <template>
-  <div class="mt-2 rounded p-2 w-full bg-gray-100 dark:bg-gray-800">
+  <div
+    :id="`feedback-${props.name}-${date}`"
+    :aria-hidden="'false'"
+    class="mt-2 rounded p-2 w-full bg-gray-100 dark:bg-gray-800"
+  >
     <div class="flex items-center justify-between">
       <span class="sr-only">
         {{ $t(`inp_upload_state_${props.state}`) }}
@@ -58,6 +62,8 @@ const emits = defineEmits(["close"]);
             date: props.date,
           })
         "
+        :aria-controls="`feedback-${props.name}-${date}`"
+        :aria-expanded="'true'"
       >
         <span class="sr-only">
           {{ $t(`action_close`) }}

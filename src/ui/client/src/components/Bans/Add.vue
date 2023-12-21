@@ -80,7 +80,7 @@ async function addBansFromList() {
     "POST",
     getValidBans(),
     addBans,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     // Case succeed, delete items from UI
     // And emit add event to refetch ban list

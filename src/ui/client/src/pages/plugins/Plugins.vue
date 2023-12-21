@@ -43,10 +43,10 @@ const plugins = reactive({
   data: [],
   total: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.data.filter((item) => item["external"] === false).length
+    () => plugins.data.filter((item) => item["external"] === false).length,
   ),
   external: computed(
-    () => plugins.data.filter((item) => item["external"] === true).length
+    () => plugins.data.filter((item) => item["external"] === true).length,
   ),
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
@@ -68,7 +68,7 @@ async function getPlugins() {
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -175,7 +175,11 @@ onMounted(() => {
       class="h-fit col-span-12"
       :label="$t('dashboard_plugins')"
     >
-      <PluginList @delete="(v) => openDelModal(v)" :items="plugins.setup" />
+      <PluginList
+        :isModalOpen="modalDel.isOpen"
+        @delete="(v) => openDelModal(v)"
+        :items="plugins.setup"
+      />
     </CardBase>
     <PluginModalDelete
       @close="modalDel.isOpen = false"

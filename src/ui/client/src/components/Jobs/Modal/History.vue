@@ -29,9 +29,11 @@ const emits = defineEmits(["close"]);
 </script>
 <template>
   <ModalBase
+    :id="`history-modal-${props.jobName}`"
+    :aria-hidden="props.isOpen ? 'false' : 'true'"
     @backdrop="$emit('close')"
     :title="`${$t('jobs_history_title')} ${props.jobName}`"
-    v-if="props.isOpen"
+    v-show="props.isOpen"
   >
     <div class="col-span-12 overflow-x-auto overflow-y-hidden">
       <ListBase
@@ -78,6 +80,8 @@ const emits = defineEmits(["close"]);
           @click="$emit('close')"
           type="button"
           class="text-xs"
+          :aria-controls="`history-modal-${props.jobName}`"
+          :aria-expanded="props.isOpen ? 'true' : 'false'"
         >
           {{ $t("action_close") }}
         </ButtonBase>

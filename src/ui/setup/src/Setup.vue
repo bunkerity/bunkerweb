@@ -312,8 +312,8 @@ onMounted(() => {
                     setup.servDNSIsOn === null
                       ? 'bg-gray-300'
                       : setup.servDNSIsOn
-                      ? 'bg-green-500'
-                      : 'bg-red-500',
+                        ? 'bg-green-500'
+                        : 'bg-red-500',
                   ]"
                   class="block ml-2 rounded-full w-4 h-4"
                 ></span>
@@ -324,9 +324,9 @@ onMounted(() => {
                         setup.servDNSIsOn === null
                           ? "unknown"
                           : setup.servDNSIsOn
-                          ? "success"
-                          : "error"
-                      }`
+                            ? "success"
+                            : "error"
+                      }`,
                     )
                   }}
                 </span>

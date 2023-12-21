@@ -6,6 +6,8 @@ import {
   reactive,
   onMounted,
   onUnmounted,
+  onBeforeUpdate,
+  onUpdated,
 } from "vue";
 import ModalBase from "@components/Modal/Base.vue";
 import ButtonBase from "@components/Button/Base.vue";
@@ -21,6 +23,10 @@ const feedbackStore = useFeedbackStore();
 // With the current folder / file data
 // Update name or content file if wanted
 const props = defineProps({
+  isOpen: {
+    type: Boolean,
+    required: true,
+  },
   // File or folder
   type: {
     type: String,
@@ -144,6 +150,30 @@ onMounted(() => {
   });
 });
 
+onBeforeUpdate(() => {
+  data.oldName = props.path.split("/")[props.path.split("/").length - 1];
+  data.name = data.oldName;
+  data.value = props.value;
+  data.method = props.method;
+  try {
+    editor.destroy();
+  } catch (err) {}
+});
+
+onUpdated(() => {
+  if (props.type === "file") {
+    // default value
+    data.name = data.oldName;
+    if (props.type !== "file") return;
+    editor = new FileEditor();
+    editor.setValue(props.value);
+    editor.readOnlyBool(data.isReadOnly);
+    editor.editor.on("change", () => {
+      data.value = editor.getValue();
+    });
+  }
+});
+
 onUnmounted(() => {
   try {
     editor.destroy();
@@ -200,7 +230,7 @@ async function sendData() {
     method,
     props.action.toLowerCase() === "delete" ? null : conf,
     updateConf,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   )
     .then((res) => {
       // Case not save
@@ -216,8 +246,13 @@ async function sendData() {
 </script>
 <template>
   <ModalBase
+    v-show="props.isOpen"
+    :aria-hidden="props.isOpen ? 'false' : 'true'"
+    id="file-manager-modal"
     @backdrop="$emit('close')"
-    :title="$t('custom_conf_modal_title', { action: props.action })"
+    :title="
+      $t('custom_conf_modal_title', { action: $t(`action_${props.action}`) })
+    "
   >
     <div class="w-full">
       <div
@@ -259,7 +294,13 @@ async function sendData() {
 
       <!-- editor-->
       <div class="mt-2 w-full justify-end flex">
-        <ButtonBase size="lg" @click="$emit('close')" class="btn-close text-xs">
+        <ButtonBase
+          aria-controls="file-manager-modal"
+          :aria-expanded="props.isOpen ? 'true' : 'false'"
+          size="lg"
+          @click="$emit('close')"
+          class="btn-close text-xs"
+        >
           {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
@@ -271,8 +312,8 @@ async function sendData() {
             props.action === 'create'
               ? 'btn-valid'
               : props.action
-              ? `btn-${props.action}`
-              : '',
+                ? `btn-${props.action}`
+                : '',
           ]"
           class="text-xs ml-2"
         >

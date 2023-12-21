@@ -19,6 +19,7 @@ const props = defineProps({
 <template>
   <div
     :aria-current="props.path === props.currPath ? 'true' : 'false'"
+    :aria-hidden="props.path === props.currPath ? 'false' : 'true'"
     v-if="props.path === props.currPath"
     class="w-full grid grid-cols-12 gap-4 mt-4"
   >

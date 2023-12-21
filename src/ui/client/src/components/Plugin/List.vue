@@ -6,6 +6,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  isModalOpen: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 const emits = defineEmits(["delete"]);
@@ -39,6 +43,8 @@ const emits = defineEmits(["delete"]);
           </svg>
         </a>
         <button
+          aria-controls="plugin-delete-modal"
+          :aria-expanded="props.isModalOpen ? 'true' : 'false'"
           v-if="plugin.method.toLowerCase() !== 'static'"
           @click="
             $emit('delete', {

@@ -155,6 +155,7 @@ function toggleMenu() {
   <!-- float button-->
   <button
     aria-controls="sidebar-menu"
+    :aria-expanded="menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'"
     @click="toggleMenu()"
     class="menu-float-btn"
   >
@@ -177,10 +178,18 @@ function toggleMenu() {
     data-sidebar-menu
     :class="[menu.isDesktop ? true : menu.isActive ? '' : 'active']"
     class="menu-container xl:translate-x-0"
-    :aria-expanded="menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'"
+    :aria-hidden="menu.isDesktop ? 'false' : menu.isActive ? 'false' : 'true'"
   >
     <!-- close btn-->
-    <button data-sidebar-menu-close @click="closeMenu()">
+    <button
+      aria-controls="sidebar-menu"
+      :aria-expanded="
+        menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'
+      "
+      data-sidebar-menu-close
+      @click="closeMenu()"
+    >
+      <span class="sr-only">{{ $t("action_delete") }}</span>
       <svg
         class="menu-close-btn"
         xmlns="http://www.w3.org/2000/svg"

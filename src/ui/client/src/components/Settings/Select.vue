@@ -93,7 +93,9 @@ const emits = defineEmits(["inp"]);
     class="hidden"
   >
     <option
-      v-for="value in props.settings.values"
+      v-for="(value, id) in props.settings.values"
+      :id="`${props.settings.id}-option-${id}`"
+      :label="value ? value : $t('inp_select_label_empty')"
       :value="value"
       :selected="value === props.settings.value ? true : false"
     >
@@ -106,10 +108,11 @@ const emits = defineEmits(["inp"]);
   <div class="relative">
     <button
       ref="selectBtn"
+      :aria-controls="`${props.settings.id}-custom`"
+      :aria-expanded="select.isOpen ? 'true' : 'false'"
       :aria-description="$t('inp_select_dropdown_button_desc')"
       data-select-dropdown
       :disabled="props.settings.disabled || false"
-      :aria-expanded="select.isOpen ? 'true' : 'false'"
       @click="toggleSelect()"
       :class="['select-btn', props.inpClass]"
     >
@@ -131,14 +134,18 @@ const emits = defineEmits(["inp"]);
     </button>
     <!-- dropdown-->
     <div
+      role="listbox"
       :style="{ width: selectWidth }"
       :aria-hidden="select.isOpen ? 'false' : 'true'"
+      :id="`${props.settings.id}-custom`"
       :class="[select.isOpen ? 'flex' : 'hidden']"
       class="select-dropdown-container"
       :aria-description="$t('inp_select_dropdown_desc')"
     >
       <button
         v-for="(value, id) in props.settings.values"
+        role="option"
+        :aria-controls="`${props.settings.id}-option-${id}`"
         @click="$emit('inp', changeValue(value))"
         :class="[
           id === 0 ? 'first' : '',
@@ -147,7 +154,7 @@ const emits = defineEmits(["inp"]);
           'select-dropdown-btn',
         ]"
         :aria-description="$t('inp_select_option_desc')"
-        :aria-current="value === props.settings.value ? 'true' : 'false'"
+        :aria-selected="value === props.settings.value ? 'true' : 'false'"
       >
         {{ value }}
       </button>

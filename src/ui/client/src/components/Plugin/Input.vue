@@ -46,7 +46,7 @@ const input = reactive({
             return config.removeConf(
               props.serviceName || input.context,
               input.id,
-              input.value
+              input.value,
             );
 
           // Case not same value as store on core
@@ -54,7 +54,7 @@ const input = reactive({
             props.serviceName || input.context,
             input.id,
             input.value,
-            props.setting.regex
+            props.setting.regex,
           );
         }
       "

@@ -34,7 +34,7 @@ async function runJob(jobName) {
     "POST",
     null,
     run,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -66,7 +66,7 @@ async function downloadFile(jobName, cacheName) {
     "GET",
     null,
     download,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   )
     .then((res) => {
       return res.json();
@@ -128,6 +128,7 @@ const emits = defineEmits(["history"]);
         <SettingsSelect
           v-if="data['cache'].length > 0"
           :settings="{
+            id: `cache-${key}-${id}`,
             value: $t('jobs_actions_cache_download'),
             values: getJobsCacheNames(data['cache']),
           }"

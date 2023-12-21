@@ -1,7 +1,18 @@
-<script setup></script>
+<script setup>
+const props = defineProps({
+  isModalOpen: {
+    type: Boolean,
+    required: true,
+  },
+});
+</script>
 
 <template>
-  <button role="tab" type="button" class="file-manager-item-btn">
+  <button
+    :aria-expanded="props.isModalOpen ? 'true' : 'false'"
+    aria-controls="file-manager-modal"
+    class="file-manager-item-btn"
+  >
     <span class="flex justify-start items-center">
       <svg
         class="h-5.5 w-5.5 stroke-yellow-500"

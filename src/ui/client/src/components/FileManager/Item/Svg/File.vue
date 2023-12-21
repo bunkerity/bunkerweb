@@ -1,5 +1,8 @@
+<script setup></script>
 <template>
   <svg
+    role="img"
+    :aria-label="$t('custom_conf_svg_file_desc')"
     class="file-manager-item-svg"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"

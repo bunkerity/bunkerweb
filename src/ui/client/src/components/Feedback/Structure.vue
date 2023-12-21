@@ -129,6 +129,8 @@ onMounted(() => {
     class="group group-hover hover:brightness-75 dark:hover:brightness-105 fixed top-2 sm:top-3 right-20 sm:right-24 xl:right-24 z-990"
   >
     <button
+      aria-controls="feedback-sidebar"
+      :aria-expanded="dropdown.isOpen ? 'true' : 'false'"
       @click="dropdown.isOpen = dropdown.isOpen ? false : true"
       class="transition scale-90 sm:scale-100 dark:brightness-95 p-3 text-xl bg-white shadow-sm cursor-pointer rounded-circle text-slate-700"
     >
@@ -155,11 +157,15 @@ onMounted(() => {
 
   <!-- right sidebar -->
   <aside
+    id="feedback-sidebar"
+    :aria-hidden="dropdown.isOpen ? 'false' : 'true'"
     :class="[dropdown.isOpen ? '' : 'translate-x-90']"
     class="-right-0 transition z-sticky dark:bg-slate-850 dark:brightness-110 shadow-3xl max-w-full w-90 ease fixed top-0 left-auto flex h-full min-w-0 flex-col break-words rounded-none border-0 bg-white bg-clip-border px-0.5"
   >
     <!-- close btn-->
     <button
+      aria-controls="feedback-sidebar"
+      :aria-expanded="dropdown.isOpen ? 'true' : 'false'"
       class="absolute h-5 w-5 top-4 right-4"
       @click="dropdown.isOpen = false"
     >

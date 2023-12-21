@@ -8,6 +8,10 @@ import { reactive, defineProps, defineEmits } from "vue";
 // Case folder, emit the folder path on click to update display
 // Emit on filemanager layout the value of buttons list @action
 const props = defineProps({
+  isModalOpen: {
+    type: Boolean,
+    required: true,
+  },
   type: {
     type: String,
     required: true,
@@ -76,6 +80,7 @@ const emits = defineEmits(["updatePath", "action"]);
       </span>
     </button>
     <FileManagerItemDropdown
+      :isModalOpen="props.isModalOpen"
       @action="(v) => $emit('action', v)"
       :canEdit="props.canEdit"
       :canDelete="props.canDelete"

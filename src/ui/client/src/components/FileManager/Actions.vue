@@ -6,6 +6,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  isModalOpen: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 const emits = defineEmits(["createFile", "createFolder"]);
@@ -18,9 +22,14 @@ const emits = defineEmits(["createFile", "createFolder"]);
         <button
           @click="$emit('createFile')"
           :disabled="props.canCreateFile ? false : true"
+          :aria-disabled="props.canCreateFile ? false : true"
+          aria-controls="file-manager-modal"
+          :aria-expanded="props.isModalOpen ? 'true' : 'false'"
           class="file-manager-actions-item-btn"
         >
           <svg
+            role="img"
+            :aria-label="$t('custom_conf_svg_file_desc')"
             :class="[
               props.canCreateFile ? 'active' : 'disabled',
               ,

@@ -79,6 +79,7 @@ watch(path, () => {
             :key="childID"
           >
             <FileManagerItemBase
+              :isModalOpen="modal.isOpen"
               :type="child.type"
               :path="child.path"
               :pathLevel="child.pathLevel"
@@ -102,6 +103,7 @@ watch(path, () => {
           </div>
         </FileManagerContainer>
         <FileManagerActions
+          :isModalOpen="modal.isOpen"
           @createFile="
             () => updateModal('file', 'create', `${path.current}/`, '', 'ui')
           "
@@ -111,7 +113,7 @@ watch(path, () => {
     </CardBase>
     <FileManagerModal
       :aria-hidden="modal.isOpen ? 'false' : 'true'"
-      v-if="modal.isOpen"
+      :isOpen="modal.isOpen"
       :type="modal.type"
       :action="modal.action"
       :path="modal.path"

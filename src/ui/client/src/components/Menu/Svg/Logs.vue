@@ -1,5 +1,8 @@
+<script setup></script>
 <template>
   <svg
+    role="img"
+    :aria-label="$t('dashboard_svg_logs_desc')"
     class="stroke-gray-600 dark:fill-gray-500 h-6 w-6 relative"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"

@@ -16,11 +16,14 @@ const path = reactive({
 <template>
   <!-- service root folder -->
   <svg
+    role="img"
+    :aria-label="$t('custom_conf_svg_root_desc')"
     v-if="path.isRoot"
     class="file-manager-item-svg"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
-    viewBox="0 0 24 24"
+    viewBox="0
+    0 24 24"
     stroke="currentColor"
   >
     <path
@@ -32,6 +35,8 @@ const path = reactive({
 
   <!-- services folder -->
   <svg
+    role="img"
+    :aria-label="$t('custom_conf_svg_folder_desc')"
     v-if="!path.isRoot"
     class="file-manager-item-svg"
     xmlns="http://www.w3.org/2000/svg"

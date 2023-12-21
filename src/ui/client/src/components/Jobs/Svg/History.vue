@@ -11,6 +11,8 @@ const props = defineProps({
 
 <template>
   <svg
+    role="img"
+    :aria-label="$t('jobs_svg_history_desc')"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"

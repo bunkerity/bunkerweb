@@ -46,9 +46,12 @@ services:
       - bw-universe
 
   bw-ui:
+    # On dev, Docker is looking for ui files in local machine (allow Vite hot reload and so on...)
+    # Need to npm i on .src/ui/client and .src/ui/setup
+    # Then run node build on .src/ui/
     build:
       context: .
-      dockerfile: ./src/ui/Dockerfile
+      dockerfile: ./src/ui/Dockerfile.dev
     ports:
       - "7000:7000"
     volumes:

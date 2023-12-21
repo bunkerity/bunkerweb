@@ -18,7 +18,7 @@ export async function fetchAPI(
   state = null,
   addFeedback = null,
   isJSON = true,
-  fileName = null // test.json (name +  extension)
+  fileName = null, // test.json (name +  extension)
 ) {
   // Block scope state object if any passed to avoid error
   !state ? (state = { isPend: false, isErr: false, data: {} }) : false;
@@ -61,7 +61,7 @@ export async function fetchAPI(
         state.data = JSON.parse(
           typeof data["data"] === "string"
             ? data["data"]
-            : JSON.stringify(data["data"])
+            : JSON.stringify(data["data"]),
         );
         addFeedback
           ? addFeedback(data["type"], data["status"], data["message"])
@@ -80,7 +80,7 @@ export async function fetchAPI(
               err["type"] || "error",
               err["status"] || 500,
               err["message"] ||
-                "Internal Server Error, impossible to download file"
+                "Internal Server Error, impossible to download file",
             )
           : false;
       }
@@ -90,7 +90,7 @@ export async function fetchAPI(
           ? addFeedback(
               err["type"] || "error",
               err["status"] || 500,
-              err["message"] || "Internal Server Error, impossible to get JSON"
+              err["message"] || "Internal Server Error, impossible to get JSON",
             )
           : false;
       }

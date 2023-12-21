@@ -12,6 +12,7 @@ const news = reactive({
   <!-- float button-->
   <button
     aria-controls="sidebar-news"
+    :aria-expanded="news.isActive ? 'true' : 'false'"
     @click="news.isActive = news.isActive ? false : true"
     class="news-float-btn"
   >
@@ -30,11 +31,15 @@ const news = reactive({
   <!-- right sidebar -->
   <aside
     id="sidebar-news"
-    :aria-expanded="news.isActive ? 'true' : 'false'"
+    :aria-hidden="news.isActive ? 'false' : 'true'"
     :class="[news.isActive ? '' : 'translate-x-[22.5rem]', 'news-sidebar']"
   >
     <!-- close btn-->
-    <button @click="news.isActive = false">
+    <button
+      aria-controls="sidebar-news"
+      :aria-expanded="news.isActive ? 'true' : 'false'"
+      @click="news.isActive = false"
+    >
       <svg
         class="news-close-btn"
         xmlns="http://www.w3.org/2000/svg"
