@@ -26,36 +26,6 @@ logger = setup_logger("DEFAULT-SERVER-CERT", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
-    # Check if we need to generate a self-signed default cert for non-SNI "clients"
-    # need_default_cert = False
-    # if getenv("MULTISITE", "no") == "yes":
-    #     for first_server in getenv("SERVER_NAME", "").split(" "):
-    #         for check_var in (
-    #             "USE_CUSTOM_SSL",
-    #             "AUTO_LETS_ENCRYPT",
-    #             "GENERATE_SELF_SIGNED_SSL",
-    #         ):
-    #             if getenv(f"{first_server}_{check_var}", getenv(check_var, "no")) == "yes":
-    #                 need_default_cert = True
-    #                 break
-    #         if need_default_cert:
-    #             break
-    # elif getenv("DISABLE_DEFAULT_SERVER", "no") == "yes" and (
-    #     "yes"
-    #     in (
-    #         getenv("USE_CUSTOM_SSL", "no"),
-    #         getenv("AUTO_LETS_ENCRYPT", "no"),
-    #         getenv("GENERATE_SELF_SIGNED_SSL", "no"),
-    #     )
-    # ):
-    #     need_default_cert = True
-
-    # # Generate the self-signed certificate
-    # if not need_default_cert:
-    #     logger.info(
-    #         "Skipping generation of self-signed certificate for default server (not needed)",
-    #     )
-    #     _exit(0)
 
     cert_path = Path(sep, "var", "cache", "bunkerweb", "default-server-cert")
     cert_path.mkdir(parents=True, exist_ok=True)

@@ -45,7 +45,7 @@ function letsencrypt:init()
 			if not server_name then
 				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 			end
-			local check, data = self:read_files(server_name:gmatch("%S+")[1])
+			local check, data = self:read_files(server_name:match("%S+"))
 			if not check then
 				self.logger:log(ngx.ERR, "error while reading files : " .. data)
 				ret_ok = false
