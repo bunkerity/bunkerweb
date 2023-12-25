@@ -56,9 +56,9 @@ gunicorn==21.2.0 \
     # via
     #   -r requirements.in
     #   gunicorn
-importlib-metadata==7.0.0 \
-    --hash=sha256:7fc841f8b8332803464e5dc1c63a2e59121f46ca186c0e2e182e80bf8c1319f7 \
-    --hash=sha256:d97503976bb81f40a193d41ee6570868479c69d5068651eb039c40d850c59d67
+importlib-metadata==7.0.1 \
+    --hash=sha256:4805911c3a4ec7c3966410053e9ec6a1fecd629117df5adee56dfc9432a1081e \
+    --hash=sha256:f238736bb06590ae52ac1fab06a3a9ef1d8dce2b7a35b5ab329371d6c8f5d2cc
     # via
     #   -r requirements.in
     #   flask
