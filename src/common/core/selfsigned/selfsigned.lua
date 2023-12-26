@@ -18,19 +18,19 @@ function selfsigned:init()
 			return self:ret(false, "can't get MULTISITE variable : " .. err)
 		end
 		if multisite == "yes" then
-			local vars, err = utils.get_multiple_variables({"GENERATE_SELF_SIGNED_SSL"})
+			local vars, err = utils.get_multiple_variables({"GENERATE_SELF_SIGNED_SSL", "SERVER_NAME"})
 			if not vars then
 				return self:ret(false, "can't get GENERATE_SELF_SIGNED_SSL variables : " .. err)
 			end
 			for server_name, multisite_vars in pairs(vars) do
-				if multisite_vars["GENERATE_SELF_SIGNED_SSL"] == "yes" then
+				if multisite_vars["GENERATE_SELF_SIGNED_SSL"] == "yes" and server_name ~= "global" then
 					local check, data = self:read_files(server_name)
 					if not check then
 						self.logger:log(ngx.ERR, "error while reading files : " .. data)
 						ret_ok = false
 						ret_err = "error reading files"
 					else
-						local check, err = self:load_data(data, server_name)
+						local check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
 						if not check then
 							self.logger:log(ngx.ERR, "error while loading data : " .. err)
 							ret_ok = false
@@ -50,7 +50,7 @@ function selfsigned:init()
 				ret_ok = false
 				ret_err = "error reading files"
 			else
-				local check, err = self:load_data(data)
+				local check, err = self:load_data(data, server_name)
 				if not check then
 					self.logger:log(ngx.ERR, "error while loading data : " .. err)
 					ret_ok = false
@@ -107,10 +107,13 @@ function selfsigned:load_data(data, server_name)
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
-	local cache_key = "plugin_selfsigned_" .. (server_name or "global")
-	local ok, err = self.datastore:set(cache_key, {cert_chain, priv_key}, nil, true)
-	if not ok then
-		return false, "error while setting data into datastore : " .. err
+	-- Cache data
+	for key in server_name:gmatch("%S+") do
+		local cache_key = "plugin_selfsigned_" .. key
+		local ok, err = self.datastore:set(cache_key, {cert_chain, priv_key}, nil, true)
+		if not ok then
+			return false, "error while setting data into datastore : " .. err
+		end
 	end
 	return true
 end

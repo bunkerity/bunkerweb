@@ -23,8 +23,7 @@ function badbehavior:log()
 		return self:ret(true, "not increasing counter")
 	end
 	-- Check if we are already banned
-	local banned, _ = self.datastore:get("bans_ip_" .. self.ctx.bw.remote_addr)
-	if banned then
+	if self.ctx.bw.is_banned then
 		return self:ret(true, "already banned")
 	end
 	-- Call increase function later and with cosocket enabled
