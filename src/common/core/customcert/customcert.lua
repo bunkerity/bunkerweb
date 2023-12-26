@@ -18,34 +18,19 @@ function customcert:init()
 			return self:ret(false, "can't get MULTISITE variable : " .. err)
 		end
 		if multisite == "yes" then
-			local vars, err = utils.get_multiple_variables({"USE_CUSTOM_SSL"})
+			local vars, err = utils.get_multiple_variables({"USE_CUSTOM_SSL", "SERVER_NAME"})
 			if not vars then
 				return self:ret(false, "can't get USE_CUSTOM_SSL variables : " .. err)
 			end
-			if vars["global"]["USE_CUSTOM_SSL"] == "yes" then
-				local check, data = self:read_files()
-				if not check then
-					self.logger:log(ngx.ERR, "error while reading files : " .. err)
-					ret_ok = false
-					ret_err = "error reading files"
-				else
-					local check, err = self:load_data(data)
-					if not check then
-						self.logger:log(ngx.ERR, "error while loading data : " .. err)
-						ret_ok = false
-						ret_err = "error loading data"
-					end
-				end
-			end
 			for server_name, multisite_vars in pairs(vars) do
-				if multisite_vars["USE_CUSTOM_SSL"] == "yes" then
+				if multisite_vars["USE_CUSTOM_SSL"] == "yes" and server_name ~= "global" then
 					local check, data = self:read_files(server_name)
 					if not check then
 						self.logger:log(ngx.ERR, "error while reading files : " .. data)
 						ret_ok = false
 						ret_err = "error reading files"
 					else
-						local check, err = self:load_data(data, server_name)
+						local check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
 						if not check then
 							self.logger:log(ngx.ERR, "error while loading data : " .. err)
 							ret_ok = false
@@ -55,13 +40,17 @@ function customcert:init()
 				end
 			end
 		else
-			local check, data = self:read_files()
+			local server_name, err = utils.get_variable("SERVER_NAME", false)
+			if not server_name then
+				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
+			end
+			local check, data = self:read_files(server_name:match("%S+"))
 			if not check then
 				self.logger:log(ngx.ERR, "error while reading files : " .. data)
 				ret_ok = false
 				ret_err = "error reading files"
 			else
-				local check, err = self:load_data(data)
+				local check, err = self:load_data(data, server_name)
 				if not check then
 					self.logger:log(ngx.ERR, "error while loading data : " .. err)
 					ret_ok = false
@@ -70,7 +59,7 @@ function customcert:init()
 			end
 		end
 	else
-		ret_err = "custom ssl is not used"
+		ret_err = "custom cert is not used"
     end
 	return self:ret(ret_ok, ret_err)
 end
@@ -81,26 +70,19 @@ function customcert:ssl_certificate()
 		return self:ret(false, "can't get server_name : " .. err)
 	end
     if self.variables["USE_CUSTOM_SSL"] == "yes" then
-		local global_data, err = self.datastore:get("plugin_customcert_global", true)
-		if not global_data and err ~= "not found" then
-			return self:ret(false, "error while getting plugin_customcert_global from datastore : " .. err)
-		end
-		local site_data, err = self.datastore:get("plugin_customcert_" .. server_name, true)
-		if not site_data and err ~= "not found" then
+		local data, err = self.datastore:get("plugin_customcert_" .. server_name, true)
+		if not data then
 			return self:ret(false, "error while getting plugin_customcert_" .. server_name .. " from datastore : " .. err)
 		end
-		if not global_data and not site_data then
-			return self:ret(false, "both global and site cert are not present in datastore")
-		end
-        return self:ret(true, "certificate/key data found", site_data or global_data)
+        return self:ret(true, "certificate/key data found", data)
     end
     return self:ret(true, "custom certificate is not used")
 end
 
 function customcert:read_files(server_name)
 	local files = {
-		"/var/cache/bunkerweb/customcert/" .. (server_name or "") .. "/cert.pem",
-		"/var/cache/bunkerweb/customcert/" .. (server_name or "") .. "/key.pem"
+		"/var/cache/bunkerweb/customcert/" .. server_name .. "/cert.pem",
+		"/var/cache/bunkerweb/customcert/" .. server_name .. "/key.pem"
 	}
 	local data = {}
 	for i, file in ipairs(files) do
@@ -125,10 +107,13 @@ function customcert:load_data(data, server_name)
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
-	local cache_key = "plugin_customcert_" .. (server_name or "global")
-	local ok, err = self.datastore:set(cache_key, {cert_chain, priv_key}, nil, true)
-	if not ok then
-		return false, "error while setting data into datastore : " .. err
+	-- Cache data
+	for key in server_name:gmatch("%S+") do
+		local cache_key = "plugin_customcert_" .. key
+		local ok, err = self.datastore:set(cache_key, {cert_chain, priv_key}, nil, true)
+		if not ok then
+			return false, "error while setting data into datastore : " .. err
+		end
 	end
 	return true
 end

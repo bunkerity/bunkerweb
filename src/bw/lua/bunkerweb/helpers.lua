@@ -1,5 +1,7 @@
 local cjson = require "cjson"
 local utils = require "bunkerweb.utils"
+local bwctx = require "bunkerweb.ctx"
+local base 	= require "resty.core.base"
 
 local helpers = {}
 
@@ -148,6 +150,10 @@ end
 helpers.fill_ctx = function()
 	-- Return errors as table
 	local errors = {}
+	-- Try to load saved ctx
+	if base.get_request() then
+		bwctx.apply_ref()
+	end
 	local ctx = ngx.ctx
 	-- Check if ctx is already filled
 	if not ctx.bw then
@@ -198,6 +204,12 @@ helpers.fill_ctx = function()
 	ctx.bw.clusterstore = require "bunkerweb.clusterstore":new()
 	ctx.bw.cachestore = require "bunkerweb.cachestore":new(use_redis == "yes")
 	return true, "ctx filled", errors, ctx
+end
+
+helpers.save_ctx = function(ctx)
+	if base.get_request() then
+		bwctx.stash_ref(ctx)
+	end
 end
 
 function helpers.load_variables(all_variables, plugins)
