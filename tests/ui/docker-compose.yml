@@ -15,6 +15,7 @@ services:
       LOG_LEVEL: "info"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
       DISABLE_DEFAULT_SERVER: "yes"
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"

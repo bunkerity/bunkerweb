@@ -23,7 +23,7 @@ ready = False
 retries = 0
 while not ready:
     with suppress(RequestException):
-        status_code = get("http://www.example.com/admin").status_code
+        status_code = get("http://www.example.com/admin/login").status_code
 
         if status_code > 500 and status_code != 502:
             print("An error occurred with the server, exiting ...", flush=True)
@@ -116,7 +116,7 @@ def assert_alert_message(driver, message: str):
 
     print(f'Message "{message}" found in one of the messages in the list', flush=True)
 
-    assert_button_click(driver, "//aside[@data-flash-sidebar='']/*[local-name() = 'svg']")
+    assert_button_click(driver, "//button[@data-flash-sidebar-close='']/*[local-name() = 'svg']")
 
 
 def access_page(
@@ -178,9 +178,9 @@ with driver_func() as driver:
         driver.maximize_window()
         driver_wait = WebDriverWait(driver, 60)
 
-        print("Navigating to http://www.example.com/admin ...", flush=True)
+        print("Navigating to http://www.example.com/admin/login ...", flush=True)
 
-        driver.get("http://www.example.com/admin")
+        driver.get("http://www.example.com/admin/login")
 
         ### LOGIN PAGE
 
@@ -1171,7 +1171,7 @@ location /hello {
             exit(1)
 
         assert_button_click(driver, instances[0])
-        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-settings"))
+        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-data"))
 
         sleep(3)
 
@@ -1184,7 +1184,7 @@ location /hello {
         print("Logs found, trying auto refresh ...", flush=True)
 
         assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
-        assert_button_click(driver, "//button[@id='submit-settings' and contains(text(), 'Go Live')]")
+        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-live"))
 
         sleep(3)
 
@@ -1202,7 +1202,7 @@ location /hello {
         print("Auto refresh is working, deactivating it ...", flush=True)
 
         assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
-        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-settings"))
+        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-data"))
 
         sleep(3)
 
