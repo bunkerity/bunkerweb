@@ -7,6 +7,7 @@
 - [FEATURE] Add Anonymous reporting feature
 - [FEATURE] Add support for fallback Referrer-Policies
 - [MISC] Fallback to default HTTPS certificate to prevent errors
+- [MISC] Updated Python Docker image to 3.12.1-alpine3.18 in Dockerfiles
 - [DEPS] Updated ModSecurity to v3.0.11
 
 ## v1.5.4 - 2023/12/04
