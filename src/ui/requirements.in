@@ -1,11 +1,11 @@
 Flask==3.0.0
-Flask-JWT-Extended==4.5.3
+Flask-JWT-Extended==4.6.0
 Flask-Session==0.5.0
 gevent==23.9.1
 gunicorn==21.2.0
-pydantic==2.5.2
+pydantic==2.5.3
 pydantic-settings==2.1.0
 PyYAML==6.0.1
-regex==2023.10.3
+regex==2023.12.25
 requests==2.31.0
 urllib3<2.0.0
