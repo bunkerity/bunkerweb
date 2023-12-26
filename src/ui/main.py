@@ -37,15 +37,10 @@ from flask import (
     render_template,
     request,
     send_file,
+    session,
     url_for,
 )
-from flask_login import (
-    current_user,
-    LoginManager,
-    login_required,
-    login_user,
-    logout_user,
-)
+from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 from glob import glob
 from hashlib import sha256
@@ -113,14 +108,10 @@ app = Flask(
     static_folder="static",
     template_folder="templates",
 )
+app.secret_key = getenv("FLASK_SECRET", urandom(32))
+
 PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
-app.wsgi_app = ReverseProxied(
-    app.wsgi_app,
-    x_for=PROXY_NUMBERS,
-    x_proto=PROXY_NUMBERS,
-    x_host=PROXY_NUMBERS,
-    x_prefix=PROXY_NUMBERS,
-)
+app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
 gunicorn_logger = getLogger("gunicorn.error")
 app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(gunicorn_logger.level)
@@ -129,14 +120,7 @@ app.logger.setLevel(gunicorn_logger.level)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
-PLUGIN_KEYS = [
-    "id",
-    "name",
-    "description",
-    "version",
-    "stream",
-    "settings",
-]
+PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
 
 INTEGRATION = "Linux"
 integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
@@ -332,9 +316,25 @@ def handle_csrf_error(_):
     :param e: The exception object
     :return: A template with the error message and a 401 status code.
     """
+    session.clear()
     logout_user()
     flash("Wrong CSRF token !", "error")
     return render_template("login.html"), 403
+
+
+@app.before_request
+def before_request():
+    if app.config["USER"]:
+        if current_user.is_authenticated:
+            passed = True
+            if session.get("ip") != request.remote_addr:
+                passed = False
+            elif session.get("user_agent") != request.headers.get("User-Agent"):
+                passed = False
+
+            if not passed:
+                logout_user()
+                session.clear()
 
 
 @app.route("/")
@@ -573,6 +573,7 @@ def profile():
             flash(f"Couldn't update the admin user in the database: {ret}", "error")
             return redirect(url_for("profile"), 500)
 
+        session.clear()
         logout_user()
         return redirect(url_for("profile"))
 
@@ -1580,7 +1581,9 @@ def login():
         if app.config["USER"].get_id() == request.form["username"] and app.config["USER"].check_password(request.form["password"]):
             # log the user in
             next_url = request.form.get("next")
-            login_user(app.config["USER"])
+            session["ip"] = request.remote_addr
+            session["user_agent"] = request.headers.get("User-Agent")
+            login_user(app.config["USER"], duration=timedelta(hours=1))
 
             # redirect him to the page he originally wanted or to the home page
             return redirect(url_for("loading", next=next_url or url_for("home")))
@@ -1638,5 +1641,6 @@ def check_reloading():
 @app.route("/logout")
 @login_required
 def logout():
+    session.clear()
     logout_user()
     return redirect(url_for("login"))
