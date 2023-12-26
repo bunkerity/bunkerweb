@@ -26,7 +26,6 @@ logger = setup_logger("DEFAULT-SERVER-CERT", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 try:
-
     cert_path = Path(sep, "var", "cache", "bunkerweb", "default-server-cert")
     cert_path.mkdir(parents=True, exist_ok=True)
     if not cert_path.joinpath("cert.pem").is_file():
