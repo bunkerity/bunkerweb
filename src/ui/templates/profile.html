@@ -63,10 +63,8 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         name="admin_username"
         class="col-span-12 regular-input"
         placeholder="enter username"
-        value="{{ username }}"
         pattern="(.*?)"
         maxlength="256"
-        required
       />
     </div>
     <!-- end username inpt-->
@@ -148,7 +146,6 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         value=""
         pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
         minlength="8"
-        required
       />
       <div
         data-setting-password-container
@@ -208,7 +205,6 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         value=""
         pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
         minlength="8"
-        required
       />
       <div
         data-setting-password-container

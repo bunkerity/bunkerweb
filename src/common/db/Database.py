@@ -1693,3 +1693,20 @@ class Database:
                 return format_exc()
 
         return ""
+
+    def update_ui_user(self, username: str, password: bytes) -> str:
+        """Update ui user."""
+        with self.__db_session() as session:
+            user = session.query(Users).filter_by(id=1).first()
+            if not user:
+                return "User not found"
+
+            user.username = username
+            user.password = password.decode("utf-8")
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""

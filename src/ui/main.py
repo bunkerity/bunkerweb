@@ -414,11 +414,11 @@ def setup():
             error = True
 
         if error:
-            return redirect(url_for("setup"))
+            return redirect(url_for("setup"), 400)
 
         app.config["USER"] = User(request.form["admin_username"], request.form["admin_password"])
 
-        ret = db.create_ui_user(app.config["USER"].get_id(), app.config["USER"].password_hash)
+        ret = db.create_ui_user(request.form["admin_username"], app.config["USER"].password_hash)
         if ret:
             flash(f"Couldn't create the admin user in the database: {ret}", "error")
             return redirect(url_for("setup"))
@@ -531,37 +531,52 @@ def profile():
             flash("Missing form data.", "error")
             return redirect(url_for("profile"))
 
-        if not any(key in request.form for key in ("admin_username", "admin_password", "admin_password_check")):
-            flash("Missing either admin_username, admin_password or admin_password_check.", "error")
+        if "curr_password" not in request.form:
+            flash("Missing curr_password parameter.", "error")
             return redirect(url_for("profile"))
 
         error = False
 
-        if len(request.form["admin_username"]) > 256:
+        if not app.config["USER"].check_password(request.form["curr_password"]):
+            flash("The current password is incorrect.", "error")
+            error = True
+
+        if request.form.get("admin_username") and len(request.form["admin_username"]) > 256:
             flash("The admin username is too long. It must be less than 256 characters.", "error")
             error = True
 
-        if request.form["admin_password"] != request.form["admin_password_check"]:
-            flash("The passwords do not match.", "error")
+        if request.form.get("admin_password"):
+            if not request.form.get("admin_password_check"):
+                flash("Missing admin_password_check parameter.", "error")
+                error = True
+            elif request.form["admin_password"] != request.form["admin_password_check"]:
+                flash("The passwords do not match.", "error")
+                error = True
+            elif not USER_PASSWORD_RX.match(request.form["admin_password"]):
+                flash("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).", "error")
+                error = True
+        elif request.form.get("admin_password_check"):
+            flash("Missing admin_password parameter.", "error")
             error = True
 
-        if not USER_PASSWORD_RX.match(request.form["admin_password"]):
-            flash("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).", "error")
+        if not error and not any(request.form.get(key) for key in ("admin_username", "admin_password")):
+            flash("Nothing to update.")
             error = True
 
         if error:
-            return redirect(url_for("profile"))
+            return redirect(url_for("profile"), 400)
 
-        # TODO: Update username and password (if changed)
-        return Response(status=200)
+        app.config["USER"] = User(request.form.get("admin_username") or app.config["USER"].get_id(), request.form.get("admin_password") or request.form["curr_password"])
 
-    return render_template(
-        "profile.html",
-        title="Profile",
-        username=getenv("ADMIN_USERNAME", ""),
-        password=getenv("ADMIN_PASSWORD", ""),
-        dark_mode=app.config["DARK_MODE"],
-    )
+        ret = db.update_ui_user(app.config["USER"].get_id(), app.config["USER"].password_hash)
+        if ret:
+            flash(f"Couldn't update the admin user in the database: {ret}", "error")
+            return redirect(url_for("profile"), 500)
+
+        logout_user()
+        return redirect(url_for("profile"))
+
+    return render_template("profile.html", username=app.config["USER"].get_id(), dark_mode=app.config["DARK_MODE"])
 
 
 @app.route("/instances", methods=["GET", "POST"])
@@ -1570,6 +1585,7 @@ def login():
             # redirect him to the page he originally wanted or to the home page
             return redirect(url_for("loading", next=next_url or url_for("home")))
         else:
+            flash("Invalid username or password", "error")
             fail = True
 
     if fail:
