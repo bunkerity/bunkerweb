@@ -105,6 +105,7 @@ data-plugin-item="{{plugin['id']}}"
         data-default-value="{{global_config[setting]['value']}}"
         data-default-method="{{global_config[setting]['method']}}"
           aria-controls="{{value['id']}}-dropdown"
+          type="button"
           class="custom-select-btn"
           >
           {% for item in value['select'] %} {% if global_config[setting]['value'] and
@@ -319,6 +320,7 @@ data-plugin-item="{{plugin['id']}}"
         data-setting-select="{{value['id']}}"
         data-default-value="{{value['default']}}"
           aria-controls="{{value['id']}}-dropdown"
+          type="button"
           class="custom-select-btn"
           >
           {% for item in value['select'] %} {% if value['default'] == item %}
