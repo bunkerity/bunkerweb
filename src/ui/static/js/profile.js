@@ -1,3 +1,5 @@
+import { Tabs, Popover } from "./utils/settings.js";
+
 class SubmitProfile {
   constructor() {
     this.pwEl = document.querySelector("#admin_password");
@@ -41,7 +43,7 @@ class SubmitProfile {
       "focus:valid:!border-red-500",
       "active:!border-red-500",
       "active:valid:!border-red-500",
-      "valid:!border-red-500",
+      "valid:!border-red-500"
     );
     this.pwAlertEl.classList.add("opacity-0");
     this.pwAlertEl.setAttribute("aria-hidden", "true");
@@ -53,7 +55,7 @@ class SubmitProfile {
       "focus:valid:!border-red-500",
       "active:!border-red-500",
       "active:valid:!border-red-500",
-      "valid:!border-red-500",
+      "valid:!border-red-500"
     );
     this.pwAlertEl.classList.remove("opacity-0");
     this.pwAlertEl.setAttribute("aria-hidden", "false");
@@ -71,14 +73,14 @@ class PwBtn {
       const passwordContainer = e.target.closest("[data-input-group]");
       const inpEl = passwordContainer.querySelector("input");
       const invBtn = passwordContainer.querySelector(
-        '[data-setting-password="invisible"]',
+        '[data-setting-password="invisible"]'
       );
       const visBtn = passwordContainer.querySelector(
-        '[data-setting-password="visible"]',
+        '[data-setting-password="visible"]'
       );
       inpEl.setAttribute(
         "type",
-        inpEl.getAttribute("type") === "password" ? "text" : "password",
+        inpEl.getAttribute("type") === "password" ? "text" : "password"
       );
 
       if (inpEl.getAttribute("type") === "password") {
@@ -96,3 +98,5 @@ class PwBtn {
 
 const setPWBtn = new PwBtn();
 const setSubmit = new SubmitProfile();
+const setTabs = new Tabs();
+const setPopover = new Popover();
