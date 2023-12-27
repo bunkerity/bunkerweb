@@ -1674,18 +1674,24 @@ class Database:
     def get_ui_user(self) -> Optional[dict]:
         """Get ui user."""
         with self.__db_session() as session:
-            user = session.query(Users).with_entities(Users.username, Users.password).filter_by(id=1).first()
+            user = session.query(Users).with_entities(Users.username, Users.password, Users.is_two_factor_enabled, Users.secret_token, Users.method).filter_by(id=1).first()
             if not user:
                 return None
-            return {"username": user.username, "password_hash": user.password.encode("utf-8")}
+            return {
+                "username": user.username,
+                "password_hash": user.password.encode("utf-8"),
+                "is_two_factor_enabled": user.is_two_factor_enabled,
+                "secret_token": user.secret_token,
+                "method": user.method,
+            }
 
-    def create_ui_user(self, username: str, password: bytes) -> str:
+    def create_ui_user(self, username: str, password: bytes, *, secret_token: Optional[str] = None, method: str = "manual") -> str:
         """Create ui user."""
         with self.__db_session() as session:
             if self.get_ui_user():
                 return "User already exists"
 
-            session.add(Users(id=1, username=username, password=password.decode("utf-8")))
+            session.add(Users(id=1, username=username, password=password.decode("utf-8"), secret_token=secret_token, method=method))
 
             try:
                 session.commit()
@@ -1694,7 +1700,7 @@ class Database:
 
         return ""
 
-    def update_ui_user(self, username: str, password: bytes) -> str:
+    def update_ui_user(self, username: str, password: bytes, is_two_factor_enabled: bool = False, secret_token: Optional[str] = None) -> str:
         """Update ui user."""
         with self.__db_session() as session:
             user = session.query(Users).filter_by(id=1).first()
@@ -1703,6 +1709,8 @@ class Database:
 
             user.username = username
             user.password = password.decode("utf-8")
+            user.is_two_factor_enabled = is_two_factor_enabled
+            user.secret_token = secret_token
 
             try:
                 session.commit()

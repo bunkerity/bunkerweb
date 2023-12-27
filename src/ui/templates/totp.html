@@ -126,6 +126,82 @@
       </div>
       <!-- end form -->
     </main>
+    <script>
+      class Loader {
+        constructor() {
+          this.menuContainer = document.querySelector("[data-menu-container]");
+          this.logoContainer = document.querySelector("[data-loader]");
+          this.logoEl = document.querySelector("[data-loader-img]");
+          this.isLoading = true;
+          this.init();
+        }
+
+        init() {
+          this.loading();
+          window.addEventListener("load", (e) => {
+            setTimeout(() => {
+              this.logoContainer.classList.add("opacity-0");
+            }, 350);
+
+            setTimeout(() => {
+              this.isLoading = false;
+              this.logoContainer.classList.add("hidden");
+            }, 650);
+
+            setTimeout(() => {
+              this.logoContainer.remove();
+            }, 800);
+          });
+        }
+
+        loading() {
+          if ((this.isLoading = true)) {
+            setTimeout(() => {
+              this.logoEl.classList.toggle("scale-105");
+              this.loading();
+            }, 300);
+          }
+        }
+      }
+
+      class FlashMsg {
+        constructor() {
+          this.delayBeforeRemove = 8000;
+          this.init();
+        }
+
+        //remove flash message after this.delay if exist
+        init() {
+          window.addEventListener("DOMContentLoaded", () => {
+            try {
+              const flashEl = document.querySelector("[data-flash-message]");
+              setTimeout(() => {
+                try {
+                  flashEl.remove();
+                } catch (err) {}
+              }, this.delayBeforeRemove);
+            } catch (err) {}
+          });
+
+          window.addEventListener("click", (e) => {
+            try {
+              if (
+                e.target
+                  .closest("button")
+                  .hasAttribute("data-close-flash-message")
+              ) {
+                const closeBtn = e.target.closest("button");
+                const flashEl = closeBtn.closest("[data-flash-message]");
+                flashEl.remove();
+              }
+            } catch (err) {}
+          });
+        }
+      }
+
+      const setLoader = new Loader();
+      const setFlash = new FlashMsg();
+    </script>
   </body>
 </html>
 
