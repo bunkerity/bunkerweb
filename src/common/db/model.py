@@ -257,6 +257,9 @@ class Users(Base):
     id = Column(Integer, primary_key=True, default=1)
     username = Column(String(256), nullable=False, unique=True)
     password = Column(String(60), nullable=False)
+    is_two_factor_enabled = Column(Boolean, nullable=False, default=False)
+    secret_token = Column(String(32), nullable=True, unique=True)
+    method = Column(METHODS_ENUM, nullable=False, default="manual")
 
 
 class Metadata(Base):
