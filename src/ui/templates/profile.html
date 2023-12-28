@@ -1,40 +1,12 @@
 {% extends "base.html" %} {% block content %} {% set current_endpoint =
 url_for(request.endpoint)[1:].split("/")[-1].strip() %}
 
-<div
-  class="h-fit w-full overflow-hidden overflow-y-auto overflow-x-auto col-span-12 md:col-span-6 2xl:col-span-4 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
->
-  <h5 class="my-2 font-bold dark:text-white/90 mx-2">PROFILE</h5>
-  <div class="grid grid-cols-12 justify-items-center w-full">
-    <div
-      class="flex flex-col relative col-span-12 px-4 md:px-6 mb-4 md:mb-3 lg:px-6 lg:mb-1 max-w-[400px] w-full"
-    >
-      <h5
-        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
-      >
-        Username
-      </h5>
-      <label class="sr-only" for="profile_username">Username</label>
-      <input
-        type="text"
-        id="profile_username"
-        name="profile_username"
-        class="col-span-12 regular-input"
-        placeholder="enter username"
-        value="{{ username }}"
-        disabled
-        pattern="(.*?)"
-        maxlength="256"
-      />
-    </div>
-  </div>
-</div>
 
 <div
   data-service-content
-  class="w-full overflow-hidden overflow-y-auto overflow-x-auto col-span-12 lg:col-span-6 2xl:col-span-8 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class="md:max-w-[600px] first-letter:w-full overflow-hidden overflow-y-auto overflow-x-auto col-span-12  p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="my-2 font-bold dark:text-white/90 mx-2">EDIT PROFILE</h5>
+  <h5 class="my-2 font-bold dark:text-white/90 mx-2">SETTINGS</h5>
   <!-- desktop tabs -->
   <div
     role="tablist"
@@ -162,6 +134,13 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     method="POST"
     autocomplete="off"
   >
+  <div class="col-span-12">
+    <h5
+    class="text-xl my-1 transition duration-300 ease-in-out text-md font-bold m-0"
+    >
+      PROFILE
+    </h5>
+  </div>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <input
       type="hidden"
@@ -390,6 +369,13 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     method="POST"
     autocomplete="off"
   >
+  <div class="col-span-12">
+    <h5
+    class="text-xl my-1 transition duration-300 ease-in-out text-md font-bold m-0"
+    >
+      TOTP
+    </h5>
+  </div>
     <h5
       class="{% if not is_totp %} text-red-500 {% else %} text-green-500 {% endif %} uppercase col-span-12 text-sm my-2 font-bold dark:text-white/90 mx-2"
     >
