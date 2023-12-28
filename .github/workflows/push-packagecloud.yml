@@ -42,7 +42,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Install ruby
-        uses: ruby/setup-ruby@b256bd96bb4867e7d23e92e087d9bb697270b725 # v1.163.0
+        uses: ruby/setup-ruby@961f85197f92e4842e3cb92a4f97bd8e010cdbaf # v1.165.0
         with:
           ruby-version: "3.0"
       - name: Install packagecloud
