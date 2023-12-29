@@ -1660,6 +1660,7 @@ def jobs_download():
 def login():
     fail = False
     if request.method == "POST" and "username" in request.form and "password" in request.form:
+        app.logger.warning(f"Login attempt from {request.remote_addr} with username \"{request.form['username']}\"")
         if app.config["USER"].get_id() == request.form["username"] and app.config["USER"].check_password(request.form["password"]):
             # log the user in
             session["ip"] = request.remote_addr
