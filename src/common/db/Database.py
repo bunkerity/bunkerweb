@@ -1700,7 +1700,7 @@ class Database:
 
         return ""
 
-    def update_ui_user(self, username: str, password: bytes, is_two_factor_enabled: bool = False, secret_token: Optional[str] = None) -> str:
+    def update_ui_user(self, username: str, password: bytes, is_two_factor_enabled: bool = False, secret_token: Optional[str] = None, method: str = "ui") -> str:
         """Update ui user."""
         with self.__db_session() as session:
             user = session.query(Users).filter_by(id=1).first()
@@ -1711,6 +1711,7 @@ class Database:
             user.password = password.decode("utf-8")
             user.is_two_factor_enabled = is_two_factor_enabled
             user.secret_token = secret_token
+            user.method = method
 
             try:
                 session.commit()
