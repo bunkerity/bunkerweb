@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from functools import wraps
 from flask import request
-from flask import abort
+
+from exceptions.validator import ValidatorFormatException
+from exceptions.validator import ValidatorBodyException
+from exceptions.validator import ValidatorQueryException
+
+from hook import hooks
 
 from logging import Logger
-from os.path import join, sep
-from sys import path as sys_path
-
 from os.path import join, sep
 from sys import path as sys_path
 
@@ -20,26 +22,30 @@ from logger import setup_logger  # type: ignore
 LOGGER: Logger = setup_logger("UI")
 
 
+# Add decorator to routes in order to validate model
+
+
 # body = dict[modelName, modelKeyword || ""]: modelKeyword if we want to check data structure itself (for example, if we have a tuple, a dict...)
 # in case  modelKeyword =  "", we want to check kwargs
 # queries = dict[queryName, modelName] :  query and model name to check
+@hooks(hooks=["BeforeValidator", "AfterValidator"])
 def model_validator(body={}, queries={}, params={}, is_body_json=True):
     def decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
             # Validate dynamic route params
             if kwargs and not params:
-                return abort(400, "Bad format, missing parameters")
+                raise ValidatorFormatException
 
+            # Validate path params
             try:
                 for p_name, p_value in params.items():
                     class_ = getattr(__import__("api_models"), p_value)
                     data = {p_name: kwargs[p_name]}
 
                     class_(**data)
-
             except:
-                return abort(400, "Bad format request path params")
+                raise ValidatorFormatException
 
             # Validate body and queries
             req_queries = request.args.to_dict() if len(request.args) else {}
@@ -47,11 +53,11 @@ def model_validator(body={}, queries={}, params={}, is_body_json=True):
 
             # We need model name for body data because we can't deduce it from data itself
             if not len(data) and len(body) and is_body_json or len(data) and not len(body) and is_body_json:
-                return abort(400, "Bad format, missing parameters")
+                raise ValidatorFormatException
 
             # We need dict with { queryName : modelName } to handle queries
             if len(req_queries) and not len(queries) or not len(req_queries) and len(queries):
-                return abort(400, "Bad format, missing parameters")
+                raise ValidatorFormatException
 
             # Check model body
             if len(body) and len(data) and is_body_json:
@@ -69,7 +75,7 @@ def model_validator(body={}, queries={}, params={}, is_body_json=True):
                     class_(**data)
 
                 except:
-                    return abort(400, "Bad format request body")
+                    raise ValidatorBodyException(f"Request body ({body}) doesn't match model ({body_model_name})")
 
             # check model query
             if len(req_queries) and len(queries):
@@ -80,7 +86,7 @@ def model_validator(body={}, queries={}, params={}, is_body_json=True):
                         class_(**data)
 
                 except:
-                    return abort(400, "Bad format request queries")
+                    raise ValidatorQueryException(f"Queries ({req_queries}) doesn't match model ({queries})")
 
             return f(*args, **kwargs)
 

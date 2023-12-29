@@ -14,10 +14,18 @@ from routes.misc import misc
 from routes.plugins import plugins
 from routes.dashboard import dashboard
 
-from middleware.jwt import setup_jwt
-from middleware.exceptions import setup_exceptions
+from exceptions.setup import setupUIException
+from exceptions.default import setup_default_exceptions
+from exceptions.hook import setup_hook_exceptions
+from exceptions.jwt import setup_jwt_exceptions
+from exceptions.database import setup_db_exceptions
+from exceptions.api import setup_api_exceptions
+from exceptions.validator import setup_validator_exceptions
 
-from utils import setupUIException, create_action_format, log_format
+from middleware.jwt import setup_jwt
+
+from utils import log_format
+from utils import create_action_format
 
 import os
 from pathlib import Path
@@ -71,14 +79,26 @@ app = Flask(__name__)
 LOGGER.info(log_format("info", "", "", "START UI SETUP"))
 
 try:
-    setup_jwt(app)
     LOGGER.info(log_format("info", "", "", "ADDING JWT MIDDLEWARE"))
+    setup_jwt(app)
 except:
     raise setupUIException("exception", "ADDING JWT MIDDLEWARE")
 
+# Setup exceptions
+try:
+    LOGGER.info(log_format("info", "", "", "ADDING EXCEPTIONS"))
+    setup_default_exceptions(app)
+    setup_jwt_exceptions(app)
+    setup_hook_exceptions(app)
+    setup_db_exceptions(app)
+    setup_api_exceptions(app)
+    setup_validator_exceptions(app)
+except:
+    raise setupUIException("exception", "ADDING EXCEPTIONS")
 
 # Add API routes
 try:
+    LOGGER.info(log_format("info", "", "", "ADDING API ROUTES"))
     app.register_blueprint(actions)
     app.register_blueprint(config)
     app.register_blueprint(custom_configs)
@@ -87,13 +107,13 @@ try:
     app.register_blueprint(logs)
     app.register_blueprint(misc)
     app.register_blueprint(plugins)
-    LOGGER.info(log_format("info", "", "", "ADDING API ROUTES"))
 except:
     raise setupUIException("exception", "ADDING API ROUTES")
 
 
 # Add dashboard routes and related templates / files
 try:
+    LOGGER.info(log_format("info", "", "", "ADDING TEMPLATES AND STATIC FILES"))
     app.register_blueprint(dashboard)
     templates = Blueprint("static", __name__, template_folder="static")
     assets = Blueprint("assets", __name__, static_folder="static/assets")
@@ -109,16 +129,9 @@ try:
     app.register_blueprint(js)
     app.register_blueprint(fonts)
     app.register_blueprint(flags)
-    LOGGER.info(log_format("info", "", "", "ADDING TEMPLATES AND STATIC FILES"))
 except:
     raise setupUIException("exception", "ADDING TEMPLATES AND STATIC FILES")
 
-# Add dashboard routes and related templates / files
-try:
-    setup_exceptions(app)
-    LOGGER.info(log_format("info", "", "", "ADDING EXCEPTIONS HANDLER"))
-except:
-    raise setupUIException("exception", "ADDING EXCEPTIONS HANDLER")
 
 # Everything worked
 if not HEALTHY_PATH.exists():

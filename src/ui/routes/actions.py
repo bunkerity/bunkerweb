@@ -5,6 +5,8 @@ from flask_jwt_extended import jwt_required
 
 from middleware.validator import model_validator
 
+from hook import hooks
+
 from utils import get_core_format_res, get_req_data
 from os import environ
 from ui import UiConfig
@@ -20,6 +22,7 @@ actions = Blueprint("actions", __name__)
 
 @actions.route(f"{PREFIX}", methods=["GET"])
 @jwt_required()
+@hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def get_actions():
     """Get all actions"""
     return get_core_format_res(f"{CORE_API}/actions", "GET", "", "Retrieve actions")
@@ -27,6 +30,7 @@ def get_actions():
 
 @actions.route(f"{PREFIX}", methods=["POST"])
 @jwt_required()
+@hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 @model_validator(body="Action")
 def create_action():
     """Create new action"""
