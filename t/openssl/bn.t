@@ -9,33 +9,27 @@ my $pwd = cwd();
 my $use_luacov = $ENV{'TEST_NGINX_USE_LUACOV'} // '';
 
 our $HttpConfig = qq{
-    lua_package_path "$pwd/lib/?.lua;$pwd/lib/?/init.lua;;";
+    lua_package_path "$pwd/t/openssl/?.lua;$pwd/lib/?.lua;$pwd/lib/?/init.lua;$pwd/../lua-resty-string/lib/?.lua;;";
     init_by_lua_block {
         if "1" == "$use_luacov" then
             require 'luacov.tick'
             jit.off()
         end
+        _G.myassert = require("helper").myassert
     }
 };
 
 run_tests();
 
 __DATA__
+
 === TEST 1: New BIGNUM instance correctly
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local bn, err = require("resty.openssl.bn").new()
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local b, err = bn:to_binary()
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local bn = myassert(require("resty.openssl.bn").new())
+            local b = myassert(bn:to_binary())
             ngx.print(ngx.encode_base64(b))
         }
     }
@@ -46,21 +40,15 @@ __DATA__
 --- error_log
 bn:to_binary failed
 
+
+
 === TEST 2: New BIGNUM instance from number
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local bn, err = require("resty.openssl.bn").new(0x5b25)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local b, err = bn:to_binary()
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local bn = myassert(require("resty.openssl.bn").new(0x5b25))
+            local b = myassert(bn:to_binary())
             ngx.print(ngx.encode_base64(b))
         }
     }
@@ -71,29 +59,50 @@ bn:to_binary failed
 --- no_error_log
 [error]
 
-=== TEST 3: Duplicate the ctx
+
+
+=== TEST 3: New BIGNUM instance from string
+--- http_config eval: $::HttpConfig
+--- config
+    location =/t {
+        content_by_lua_block {
+            local data = {
+                ["23333"] = 10,
+                ["5b25"] = 16,
+                ["5B25"] = 16,
+                ["\x5b\x25"] = 2,
+                ["\x00\x00\x00\x02\x5b\x25"] = 0,
+            }
+            for k, v in pairs(data) do
+                local bn = myassert(require("resty.openssl.bn").new(k, v))
+                if bn:to_number() ~= 23333 then
+                    ngx.log(ngx.ERR, bn, " != 23333: ", k, " ", v)
+                    return
+                end
+            end
+            ngx.print("ok")
+        }
+    }
+--- request
+    GET /t
+--- response_body eval
+"ok"
+--- no_error_log
+[error]
+
+
+
+=== TEST 4: Duplicate the ctx
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             require('ffi').cdef('typedef struct bignum_st BIGNUM; void BN_free(BIGNUM *a);')
-            local bn, err = require("resty.openssl.bn").new(0x5b25)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local bn2, err = require("resty.openssl.bn").dup(bn.ctx)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local bn = myassert(require("resty.openssl.bn").new(0x5b25))
+            local bn2 = myassert(require("resty.openssl.bn").dup(bn.ctx))
             bn = nil
             collectgarbage("collect")
-            local b, err = bn2:to_binary()
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local b = myassert(bn2:to_binary())
             ngx.print(ngx.encode_base64(b))
         }
     }
@@ -104,29 +113,55 @@ bn:to_binary failed
 --- no_error_log
 [error]
 
-=== TEST 4: from_binary, to_binary
+
+
+=== TEST 5: set
+--- http_config eval: $::HttpConfig
+--- config
+    location =/t {
+        content_by_lua_block {
+            local data = {
+                ["23333"] = 10,
+                ["5b25"] = 16,
+                ["5B25"] = 16,
+                ["\x5b\x25"] = 2,
+                ["\x00\x00\x00\x02\x5b\x25"] = 0,
+            }
+            for k, v in pairs(data) do
+                local bn = myassert(require("resty.openssl.bn").new(0))
+                local new_bn = myassert(bn:set(k, v))
+                if bn:to_number() ~= 23333 then
+                    ngx.log(ngx.ERR, bn, " != 23333: ", k, " ", v)
+                    return
+                end
+                if tostring(bn.ctx) ~= tostring(new_bn.ctx) then
+                    ngx.log(ngx.ERR, tostring(bn.ctx), " != ", tostring(new_bn.ctx), " (ctx not properly reused)")
+                    return
+                end
+            end
+            ngx.print("ok")
+        }
+    }
+--- request
+    GET /t
+--- response_body eval
+"ok"
+--- no_error_log
+[error]
+
+
+
+=== TEST 6: from_binary, to_binary
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             local d = ngx.decode_base64('WyU=')
-            local bn, err = require("resty.openssl.bn").from_binary(d)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local b, err = bn:to_binary()
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local bn = myassert(require("resty.openssl.bn").from_binary(d))
+            local b = myassert(bn:to_binary())
             ngx.print(ngx.encode_base64(b))
 
-            local b, err = bn:to_binary(10)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local b = myassert(bn:to_binary(10))
             ngx.print(ngx.encode_base64(b))
         }
     }
@@ -137,46 +172,34 @@ bn:to_binary failed
 --- no_error_log
 [error]
 
-=== TEST 5: from_hex, to_hex
+
+
+=== TEST 7: from_hex, to_hex
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local bn, err = require("resty.openssl.bn").from_hex("5B25")
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local b, err = bn:to_hex()
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local bn = myassert(require("resty.openssl.bn").from_hex("5B25"))
+            local b = myassert(bn:to_hex())
             ngx.print(b)
         }
     }
 --- request
     GET /t
---- response_body_like eval
-"5[Bb]25"
+--- response_body eval
+"5B25"
 --- no_error_log
 [error]
 
-=== TEST 6: from_dec, to_dec
+
+
+=== TEST 8: from_dec, to_dec
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local bn, err = require("resty.openssl.bn").from_dec("23333")
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local b, err = bn:to_dec()
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local bn = myassert(require("resty.openssl.bn").from_dec("23333"))
+            local b = myassert(bn:to_dec())
             ngx.print(b)
         }
     }
@@ -187,34 +210,40 @@ bn:to_binary failed
 --- no_error_log
 [error]
 
-=== TEST 7: to_number
+
+
+=== TEST 9: from_mpi, to_mpi
+--- http_config eval: $::HttpConfig
+--- config
+    location =/t {
+        content_by_lua_block {
+            local to_hex = require "resty.string".to_hex
+            local bn = myassert(require("resty.openssl.bn").from_mpi("\x00\x00\x00\x02\x5b\x25"))
+            local b = myassert(bn:to_mpi())
+            ngx.print(to_hex(b))
+        }
+    }
+--- request
+    GET /t
+--- response_body eval
+"000000025b25"
+--- no_error_log
+[error]
+
+
+
+=== TEST 10: to_number
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             local bn = require("resty.openssl.bn")
-            local b, err = bn.new(23333)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local n, err = b:to_number()
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local b = myassert(bn.new(23333))
+            local n = myassert(b:to_number())
             ngx.say(tostring(n),type(n))
 
-            b, err = bn.from_dec('184467440737095516161844674407370955161618446744073709551616')
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local n, err = b:to_number()
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            b = myassert(bn.from_dec('184467440737095516161844674407370955161618446744073709551616'))
+            local n = myassert(b:to_number())
             ngx.say(tostring(n),type(n))
 
         }
@@ -228,27 +257,17 @@ bn:to_binary failed
 --- no_error_log
 [error]
 
-=== TEST 8: unary minus
+
+
+=== TEST 11: unary minus
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local bn, err = require("resty.openssl.bn").new(23333)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local b, err = (-bn):to_dec()
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local bn = myassert(require("resty.openssl.bn").new(23333))
+            local b = myassert((-bn):to_dec())
             ngx.say(b)
-            local b, err = (-(-bn)):to_dec()
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local b = myassert((-(-bn)):to_dec())
             ngx.say(b)
         }
     }
@@ -261,21 +280,15 @@ bn:to_binary failed
 --- no_error_log
 [error]
 
-=== TEST 9: metamethods checks arg
+
+
+=== TEST 12: metamethods checks arg
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local a, err = require("resty.openssl.bn").new(23578164761333)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local b, err = require("resty.openssl.bn").new(2478652)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local a = myassert(require("resty.openssl.bn").new(23578164761333))
+            local b = myassert(require("resty.openssl.bn").new(2478652))
             local pok, perr = pcall(function() return a + "233" end)
             ngx.say(perr)
             local pok, perr = pcall(function() return "233" - a end)
@@ -291,22 +304,16 @@ bn:to_binary failed
 --- no_error_log
 [error]
 
-=== TEST 10: add, sub, mul, div mod
+
+
+=== TEST 13: add, sub, mul, div mod
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             local bn = require("resty.openssl.bn")
-            local a, err = bn.new(23578164761333)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local b, err = bn.new(2478652)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local a = myassert(bn.new(23578164761333))
+            local b = myassert(bn.new(2478652))
             ngx.say(tostring(a+b))
             ngx.say(tostring(a-b))
             ngx.say(tostring(a*b))
@@ -336,22 +343,16 @@ bn:to_binary failed
 --- no_error_log
 [error]
 
-=== TEST 11: sqr, exp
+
+
+=== TEST 14: sqr, exp
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             local bn = require("resty.openssl.bn")
-            local a, err = bn.new(23578164761333)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local b, err = bn.new(97)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local a = myassert(bn.new(23578164761333))
+            local b = myassert(bn.new(97))
             ngx.say(tostring(a:sqr()))
             ngx.say(tostring(a:exp(2)))
             ngx.say(tostring(a:pow(2)))
@@ -377,22 +378,16 @@ bn:to_binary failed
 --- no_error_log
 [error]
 
-=== TEST 12: gcd
+
+
+=== TEST 15: gcd
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             local bn = require("resty.openssl.bn")
-            local a, err = bn.new(23578164761333)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local b, err = bn.new(97)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local a = myassert(bn.new(23578164761333))
+            local b = myassert(bn.new(97))
             ngx.say(tostring(a:gcd(b)))
             ngx.say(tostring(bn.gcd(a, b)))
             ngx.say(tostring(bn.gcd(a, 97)))
@@ -410,17 +405,15 @@ bn:to_binary failed
 --- no_error_log
 [error]
 
-=== TEST 13: lshift, rshift
+
+
+=== TEST 16: lshift, rshift
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             local bn = require("resty.openssl.bn")
-            local a, err = bn.new(23578164761333)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local a = myassert(bn.new(23578164761333))
             ngx.say(tostring(a:lshift(2)))
             ngx.say(tostring(a:rshift(2)))
         }
@@ -434,22 +427,16 @@ bn:to_binary failed
 --- no_error_log
 [error]
 
-=== TEST 14: comparasion
+
+
+=== TEST 17: comparasion
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             local bn = require("resty.openssl.bn")
-            local a, err = bn.new(23578164761333)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local b, err = bn.new(97)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local a = myassert(bn.new(23578164761333))
+            local b = myassert(bn.new(97))
             ngx.say(tostring(a == b))
             ngx.say(tostring(a ~= b))
             ngx.say(tostring(a >= b))
@@ -485,7 +472,9 @@ true
 --- no_error_log
 [error]
 
-=== TEST 15: is_one, is_zero, is_odd, is_word
+
+
+=== TEST 18: is_one, is_zero, is_odd, is_word
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -516,7 +505,9 @@ false
 --- no_error_log
 [error]
 
-=== TEST 16: is_prime
+
+
+=== TEST 19: is_prime
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -539,27 +530,17 @@ true
 --- no_error_log
 [error]
 
-=== TEST 17: mod_add, mod_sub, mod_mul, mul_exp, mul_sqr mod
+
+
+=== TEST 20: mod_add, mod_sub, mod_mul, mul_exp, mul_sqr mod
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             local bn = require("resty.openssl.bn")
-            local a, err = bn.new(23578164761333)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local b, err = bn.new(2478652)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
-            local m, err = bn.new(65537)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local a = myassert(bn.new(23578164761333))
+            local b = myassert(bn.new(2478652))
+            local m = myassert(bn.new(65537))
             ngx.say(tostring(a:mod_add(b, m)))
             ngx.say(tostring(a:mod_sub(b, m)))
             ngx.say(tostring(a:mod_mul(b, m)))
@@ -583,26 +564,20 @@ true
 --- no_error_log
 [error]
 
-=== TEST 18: generate_prime
+
+
+=== TEST 21: generate_prime
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             local bn = require("resty.openssl.bn")
-            local a, err = bn.generate_prime(10, false)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local a = myassert(bn.generate_prime(10, false))
             if not a:is_prime() then
                 ngx.log(ngx.ERR, "not prime")
                 return
             end
-            local a, err = bn.generate_prime(10, true)
-            if err then
-                ngx.log(ngx.ERR, err)
-                return
-            end
+            local a = myassert(bn.generate_prime(10, true))
             if not a:is_prime() then
                 ngx.log(ngx.ERR, "not prime")
                 return

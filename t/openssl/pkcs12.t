@@ -23,6 +23,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Loads password protected pkcs12
 --- http_config eval: $::HttpConfig
 --- config
@@ -39,8 +40,8 @@ __DATA__
 
             local r = myassert(pkcs12.decode(pp, "badssl.com"))
 
-            ngx.say(r.key:get_parameters().d:to_hex():upper())
-            ngx.say(r.cert:get_serial_number():to_hex():upper())
+            ngx.say(r.key:get_parameters().d:to_hex())
+            ngx.say(r.cert:get_serial_number():to_hex())
         }
     }
 --- request
@@ -50,6 +51,8 @@ __DATA__
 2B936CE32D82CE8B01FD9A0595AC6366AA014C82
 --- no_error_log
 [error]
+
+
 
 === TEST 2: Errors on bad password
 --- http_config eval: $::HttpConfig
@@ -78,12 +81,14 @@ __DATA__
     GET /t
 --- response_body_like eval
 'true
-pkcs12.decode.+(mac verify failure|INCORRECT_PASSWORD)
+pkcs12.decode.+mac verify failure.*
 true
-pkcs12.decode.+(mac verify failure|INCORRECT_PASSWORD)
+pkcs12.decode.+mac verify failure.*
 '
 --- no_error_log
 [error]
+
+
 
 === TEST 3: Creates pkcs12
 --- http_config eval: $::HttpConfig
@@ -96,7 +101,7 @@ pkcs12.decode.+(mac verify failure|INCORRECT_PASSWORD)
             end
 
             local pkcs12 = require "resty.openssl.pkcs12"
-            local cert, key = require("helper").create_self_signed({ type = 'EC', curve = "prime256v1" })
+            local cert, key = require("helper").create_self_signed({ type = 'EC' })
             local x509 = require("resty.openssl.x509")
             local ca1 = myassert(x509.new(io.open("t/fixtures/GlobalSign.pem"):read("*a")))
             local ca2 = myassert(x509.new(io.open("t/fixtures/GlobalSign_sub.pem"):read("*a")))
@@ -141,6 +146,8 @@ pkcs12.decode.+(mac verify failure|INCORRECT_PASSWORD)
 --- no_error_log
 [error]
 
+
+
 === TEST 4: Uses empty string password when omitted
 --- http_config eval: $::HttpConfig
 --- config
@@ -152,7 +159,7 @@ pkcs12.decode.+(mac verify failure|INCORRECT_PASSWORD)
             end
     
             local pkcs12 = require "resty.openssl.pkcs12"
-            local cert, key = require("helper").create_self_signed({ type = 'EC', curve = "prime256v1" })
+            local cert, key = require("helper").create_self_signed({ type = 'EC' })
             local x509 = require("resty.openssl.x509")
             local ca1 = myassert(x509.new(io.open("t/fixtures/GlobalSign.pem"):read("*a")))
             local ca2 = myassert(x509.new(io.open("t/fixtures/GlobalSign_sub.pem"):read("*a")))
@@ -165,8 +172,8 @@ pkcs12.decode.+(mac verify failure|INCORRECT_PASSWORD)
             }))
 
             local r = myassert(pkcs12.decode(p12, nil))
-            ngx.say(#r.key:get_parameters().x:to_hex():upper())
-            ngx.say(r.cert:get_serial_number():to_hex():upper())
+            ngx.say(#r.key:get_parameters().x:to_hex())
+            ngx.say(r.cert:get_serial_number():to_hex())
             ngx.say(#r.cacerts)
             ngx.say(r.friendly_name)
             -- same as empty string
@@ -181,15 +188,17 @@ pkcs12.decode.+(mac verify failure|INCORRECT_PASSWORD)
 --- request
     GET /t
 --- response_body_like eval
-'6\d
+'4\d
 0
 2
 myname
 true
-pkcs12.decode.+(mac verify failure|INCORRECT_PASSWORD)
+pkcs12.decode.+mac verify failure.*
 '
 --- no_error_log
 [error]
+
+
 
 === TEST 5: Check cert and key mismatch
 --- http_config eval: $::HttpConfig
@@ -202,8 +211,8 @@ pkcs12.decode.+(mac verify failure|INCORRECT_PASSWORD)
             end
 
             local pkcs12 = require "resty.openssl.pkcs12"
-            local cert, key = require("helper").create_self_signed({ type = 'EC', curve = "prime256v1" })
-            local key2 = require("resty.openssl.pkey").new({ type = 'EC', curve = "prime256v1" })
+            local cert, key = require("helper").create_self_signed({ type = 'EC' })
+            local key2 = require("resty.openssl.pkey").new({ type = 'EC' })
             
             local r, err = pkcs12.encode({
                 friendly_name = "myname",
@@ -217,10 +226,12 @@ pkcs12.decode.+(mac verify failure|INCORRECT_PASSWORD)
 --- request
     GET /t
 --- response_body_like eval
-'true.+(key values mismatch|KEY_VALUES_MISMATCH)
+'true.+key values mismatch.*
 '
 --- no_error_log
 [error]
+
+
 
 === TEST 6: Creates pkcs12 with newer algorithm
 --- http_config eval: $::HttpConfig

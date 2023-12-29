@@ -22,12 +22,13 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Creates cipher correctly
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local cipher = myassert(require("resty.openssl.cipher").new("aes-256-cbc"))
+            local cipher = myassert(require("resty.openssl.cipher").new("aes256"))
 
             myassert(cipher:init(string.rep("0", 32), string.rep("0", 16), {
                 is_encrypt = true,
@@ -42,6 +43,7 @@ __DATA__
 "VhGyRCcMvlAgUjTYrqiWpg=="
 --- no_error_log
 [error]
+
 
 
 === TEST 2: Rejects unknown cipher
@@ -60,12 +62,14 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 3: Unintialized ctx throw errors
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local cipher = myassert(require("resty.openssl.cipher").new("aes-256-cbc"))
+            local cipher = myassert(require("resty.openssl.cipher").new("aes256"))
 
             local s, err = cipher:update("1")
             ngx.say(err)
@@ -82,12 +86,14 @@ cipher:update: cipher not initalized, call cipher:init first
 --- no_error_log
 [error]
 
+
+
 === TEST 4: Encrypt
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local cipher = myassert(require("resty.openssl.cipher").new("aes-256-cbc"))
+            local cipher = myassert(require("resty.openssl.cipher").new("aes256"))
 
             local s = myassert(cipher:encrypt(string.rep("0", 32), string.rep("0", 16), '1'))
 
@@ -101,12 +107,14 @@ cipher:update: cipher not initalized, call cipher:init first
 --- no_error_log
 [error]
 
+
+
 === TEST 5: Encrypt no padding
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local cipher = myassert(require("resty.openssl.cipher").new("aes-256-cbc"))
+            local cipher = myassert(require("resty.openssl.cipher").new("aes256"))
 
             local s, err = cipher:encrypt(string.rep("0", 32), string.rep("0", 16), '1', true)
             ngx.say(s)
@@ -122,17 +130,19 @@ cipher:update: cipher not initalized, call cipher:init first
     GET /t
 --- response_body_like eval
 "nil
-.+(?:data not multiple of block length|wrong final block length|DATA_NOT_MULTIPLE_OF_BLOCK_LENGTH)
+.+(?:data not multiple of block length|wrong final block length).*
 VhGyRCcMvlAgUjTYrqiWpg=="
 --- no_error_log
 [error]
+
+
 
 === TEST 6: Decrypt
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local cipher = myassert(require("resty.openssl.cipher").new("aes-256-cbc"))
+            local cipher = myassert(require("resty.openssl.cipher").new("aes256"))
 
             local s = myassert(cipher:decrypt(string.rep("0", 32), string.rep("0", 16),
                 ngx.decode_base64("VhGyRCcMvlAgUjTYrqiWpg==")))
@@ -147,12 +157,14 @@ VhGyRCcMvlAgUjTYrqiWpg=="
 --- no_error_log
 [error]
 
+
+
 === TEST 7: Decrypt no padding
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local cipher = myassert(require("resty.openssl.cipher").new("aes-256-cbc"))
+            local cipher = myassert(require("resty.openssl.cipher").new("aes256"))
 
             local s = myassert(cipher:decrypt(string.rep("0", 32), string.rep("0", 16),
                 ngx.decode_base64("VhGyRCcMvlAgUjTYrqiWpg=="), true))
@@ -167,12 +179,14 @@ VhGyRCcMvlAgUjTYrqiWpg=="
 --- no_error_log
 [error]
 
+
+
 === TEST 8: Encrypt streaming
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local cipher = myassert(require("resty.openssl.cipher").new("aes-256-cbc"))
+            local cipher = myassert(require("resty.openssl.cipher").new("aes256"))
 
             local ok = myassert(cipher:init(string.rep("0", 32), string.rep("0", 16), {
                 is_encrypt = true,
@@ -209,12 +223,14 @@ dtpklHxY9IbgmSw84+2XMr0Vy/S1392+rvu0A3GW1Wo=
 --- no_error_log
 [error]
 
+
+
 === TEST 9: Decrypt streaming
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local cipher = myassert(require("resty.openssl.cipher").new("aes-256-cbc"))
+            local cipher = myassert(require("resty.openssl.cipher").new("aes256"))
 
             local ok = myassert(cipher:init(string.rep("0", 32), string.rep("0", 16), {
                 is_encrypt = false,
@@ -253,13 +269,14 @@ nothing
 hiabcdefghiabcde
 fghiabcdefghiabc
 nothing
-.+(wrong final block length|WRONG_FINAL_BLOCK_LENGTH)
+.+wrong final block length.*
 nil
 final
 defghi
 "
 --- no_error_log
 [error]
+
 
 
 === TEST 10: Derive key and iv
@@ -273,9 +290,9 @@ defghi
                 end))
             end
 
-            local cipher = myassert(require("resty.openssl.cipher").new("aes-256-cbc"))
+            local cipher = myassert(require("resty.openssl.cipher").new("aes256"))
 
-            -- openssl enc -aes-256-cbc -pass pass:xxx -S 797979 -P -md md5
+            -- openssl enc -aes256 -pass pass:xxx -S 797979 -P -md md5
             local key, iv = cipher:derive("xxx", "yyy", 1, "md5")
 
             ngx.say(key:tohex())
@@ -300,6 +317,8 @@ no iv
 --- no_error_log
 [error]
 
+
+
 === TEST 11: Derive key and iv: salt, count and md is optional
 --- http_config eval: $::HttpConfig
 --- config
@@ -311,9 +330,9 @@ no iv
                 end))
             end
 
-            local cipher = myassert(require("resty.openssl.cipher").new("aes-256-cbc"))
+            local cipher = myassert(require("resty.openssl.cipher").new("aes256"))
 
-            -- openssl enc -aes-256-cbc -pass pass:xxx -nosalt -P -md sha1
+            -- openssl enc -aes256 -pass pass:xxx -nosalt -P -md sha1
             local key, iv = cipher:derive("xxx")
 
             ngx.say(key:tohex())
@@ -328,6 +347,8 @@ no iv
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 12: AEAD modes
 --- http_config eval: $::HttpConfig
@@ -368,6 +389,8 @@ nil
 --- no_error_log
 [error]
 
+
+
 === TEST 13: Returns provider
 --- http_config eval: $::HttpConfig
 --- config
@@ -390,6 +413,8 @@ default
 --- no_error_log
 [error]
 
+
+
 === TEST 14: Returns gettable, settable params
 --- http_config eval: $::HttpConfig
 --- config
@@ -409,10 +434,12 @@ default
 --- request
     GET /t
 --- response_body_like
-.+ivlen.+
-.+padding.+
+.+ivlen.*
+.+padding.*
 --- no_error_log
 [error]
+
+
 
 === TEST 15: Get params, set params
 --- http_config eval: $::HttpConfig
@@ -462,6 +489,7 @@ nil
 "
 --- no_error_log
 [error]
+
 
 
 === TEST 16: Update with segements larger than 1024

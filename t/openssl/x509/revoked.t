@@ -24,6 +24,7 @@ no_long_string();
 run_tests();
 
 __DATA__
+
 === TEST 1:revoked.new should create new revoked instance
 --- http_config eval: $::HttpConfig
 --- config
@@ -46,6 +47,8 @@ __DATA__
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 2:revoked.new should fail when invalid parameters are given
 --- http_config eval: $::HttpConfig

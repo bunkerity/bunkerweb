@@ -21,6 +21,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Don't cry if there's no error
 --- http_config eval: $::HttpConfig
 --- config

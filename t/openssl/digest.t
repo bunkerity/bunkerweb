@@ -22,6 +22,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Calculate digest correctly
 --- http_config eval: $::HttpConfig
 --- config
@@ -39,6 +40,8 @@ __DATA__
 "2iuYqSWdAyVAtQxL/p+AOl2kqp83fN4k+da6ngAt8+s="
 --- no_error_log
 [error]
+
+
 
 === TEST 2: Update accepts vardiac args
 --- http_config eval: $::HttpConfig
@@ -58,6 +61,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 3: Final accepts optional arg
 --- http_config eval: $::HttpConfig
 --- config
@@ -76,6 +81,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 4: Rejects unknown hash
 --- http_config eval: $::HttpConfig
 --- config
@@ -91,6 +98,8 @@ __DATA__
 "digest.new: invalid digest type \"sha257\".*"
 --- no_error_log
 [error]
+
+
 
 === TEST 5: Can be reused
 --- http_config eval: $::HttpConfig
@@ -116,6 +125,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 6: Returns provider
 --- http_config eval: $::HttpConfig
 --- config
@@ -137,6 +148,8 @@ __DATA__
 default
 --- no_error_log
 [error]
+
+
 
 === TEST 7: Returns gettable, settable params
 --- http_config eval: $::HttpConfig
@@ -161,6 +174,8 @@ default
 .+ssl3-ms.+
 --- no_error_log
 [error]
+
+
 
 === TEST 8: Get params, set params
 --- http_config eval: $::HttpConfig

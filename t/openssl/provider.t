@@ -23,6 +23,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Loads default and legacy provider
 --- http_config eval: $::HttpConfig
 --- config
@@ -59,6 +60,8 @@ true
 --- no_error_log
 [error]
 
+
+
 === TEST 2: Self test default and legacy provider
 --- http_config eval: $::HttpConfig
 --- config
@@ -91,13 +94,15 @@ true
 --- no_error_log
 [error]
 
+
+
 === TEST 3: Set default search path
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             if not require("resty.openssl.version").OPENSSL_3X then
-                ngx.say("true\ncommon libcrypto routines::init fail")
+                ngx.say("true\ncommon libcrypto routines:provider_init:")
                 ngx.exit(0)
             end
 
@@ -112,9 +117,11 @@ true
     GET /t
 --- response_body_like
 true
-.+(?:init fail|common libcrypto routines::reason\(\d+\))
+.*(?:init fail|common libcrypto routines:provider_init).*
 --- no_error_log
 [error]
+
+
 
 === TEST 4: Get parameters
 --- http_config eval: $::HttpConfig
@@ -138,4 +145,3 @@ true
 {"buildinfo":"3.+","name":"OpenSSL Default Provider","status":1,"version":"3.+"}
 --- no_error_log
 [error]
-

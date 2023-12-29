@@ -24,6 +24,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Creates extension by nconf
 --- http_config eval: $::HttpConfig
 --- config
@@ -38,6 +39,8 @@ __DATA__
     GET /t
 --- no_error_log
 [error]
+
+
 
 === TEST 2: Gets extension object
 --- http_config eval: $::HttpConfig
@@ -58,6 +61,8 @@ __DATA__
 '
 --- no_error_log
 [error]
+
+
 
 === TEST 3: Gets extension critical
 --- http_config eval: $::HttpConfig
@@ -91,6 +96,8 @@ false
 --- no_error_log
 [error]
 
+
+
 === TEST 4: Set extension critical
 --- http_config eval: $::HttpConfig
 --- config
@@ -114,6 +121,8 @@ true
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 5: Prints human readable txt of extension
 --- http_config eval: $::HttpConfig
@@ -162,6 +171,8 @@ CA Issuers - URI:http://cacerts.digicert.com/DigiCertHighAssuranceTLSHybridECCSH
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 6: Creates extension by X509V3_CTX
 --- http_config eval: $::HttpConfig
@@ -222,6 +233,8 @@ keyid:CF:03:F5:09:EB:83:D2:4F:10:DE:65:92:90:E9:93:3E:38:4C:E8:7C
 --- no_error_log
 [error]
 
+
+
 === TEST 7: Creates extension by data
 --- http_config eval: $::HttpConfig
 --- config
@@ -246,6 +259,8 @@ DNS:test.com, DNS:test2.com
 --- no_error_log
 [error]
 
+
+
 === TEST 8: Convert extension to data
 --- http_config eval: $::HttpConfig
 --- config
@@ -269,6 +284,8 @@ DNS:test.com, DNS:test2.com
 --- no_error_log
 [error]
 
+
+
 === TEST 9: Creates extension by der
 --- http_config eval: $::HttpConfig
 --- config
@@ -287,6 +304,8 @@ DNS:test.com, DNS:test2.com
 '
 --- no_error_log
 [error]
+
+
 
 === TEST 10: Creates extension by nconf
 --- http_config eval: $::HttpConfig
@@ -329,6 +348,8 @@ Policy: 1.3.5.8
 '
 --- no_error_log
 [error]
+
+
 
 === TEST 11: Returns DER encoded data
 --- http_config eval: $::HttpConfig

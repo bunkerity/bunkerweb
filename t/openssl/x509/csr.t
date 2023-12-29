@@ -24,6 +24,7 @@ no_long_string();
 run_tests();
 
 __DATA__
+
 === TEST 1: Loads a csr
 --- http_config eval: $::HttpConfig
 --- config
@@ -42,6 +43,8 @@ __DATA__
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 2: Converts and loads PEM format
 --- http_config eval: $::HttpConfig
@@ -63,9 +66,11 @@ __DATA__
 --- request
     GET /t
 --- response_body_like eval
-"x509.csr.new.+(nested asn1 error|NESTED_ASN1_ERROR).+"
+"x509.csr.new.+nested asn1 error.+"
 --- no_error_log
 [error]
+
+
 
 === TEST 3: Converts and loads DER format
 --- http_config eval: $::HttpConfig
@@ -87,9 +92,11 @@ __DATA__
 --- request
     GET /t
 --- response_body_like eval
-"x509.csr.new.+(no start line|NO_START_LINE).+"
+"x509.csr.new.+no start line.+"
 --- no_error_log
 [error]
+
+
 
 === TEST 4: Generates CSR with RSA pkey correctly
 --- http_config eval: $::HttpConfig
@@ -115,6 +122,8 @@ __DATA__
 ".+CN\\s*=\\s*dns1.com.+rsaEncryption.+2048 bit.+DNS:dns1.com.+DNS:dns2.com.+DNS:dns3.com"
 --- no_error_log
 [error]
+
+
 
 === TEST 5: Rejects invalid arguments
 --- http_config eval: $::HttpConfig
@@ -144,6 +153,7 @@ x509.csr:sign: expect a pkey instance at #1
 [error]
 
 
+
 === TEST 6: x509.csr:get_extensions of csr
 --- http_config eval: $::HttpConfig
 --- config
@@ -165,6 +175,7 @@ x509.csr:sign: expect a pkey instance at #1
 "4"
 --- no_error_log
 [error]
+
 
 
 === TEST 7: x509.csr:get_extension by nid
@@ -198,6 +209,8 @@ nil
 --- no_error_log
 [error]
 
+
+
 === TEST 8: x509.csr:get_extension by nid name
 --- http_config eval: $::HttpConfig
 --- config
@@ -220,6 +233,8 @@ nil
 --- no_error_log
 [error]
 
+
+
 === TEST 9: x509.csr:get_extension should return nil if wrong nid name is given
 --- http_config eval: $::HttpConfig
 --- config
@@ -241,6 +256,8 @@ nil
 "ok"
 --- no_error_log
 [error]
+
+
 
 === TEST 10: Adds extension
 --- http_config eval: $::HttpConfig
@@ -276,6 +293,8 @@ nil
 --- no_error_log
 [error]
 
+
+
 === TEST 11: Set extension
 --- http_config eval: $::HttpConfig
 --- config
@@ -304,6 +323,8 @@ nil
 --- no_error_log
 [error]
 
+
+
 === TEST 12: x509.csr:sign should succeed
 --- http_config eval: $::HttpConfig
 --- config
@@ -328,13 +349,15 @@ nil
 --- no_error_log
 [error]
 
-=== TEST 14: Check private key match
+
+
+=== TEST 13: Check private key match
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             local util = require("csr")
-            local pkey = require("resty.openssl.pkey").new({ type = "EC", curve = "prime256v1" })
+            local pkey = require("resty.openssl.pkey").new({ type = "EC" })
             local der = myassert(util.create_csr(pkey, "dns1.com", "dns2.com", "dns3.com"))
             local csr = myassert(require("resty.openssl.x509.csr").new(der))
             local ok, err = csr:check_private_key(pkey)
@@ -349,7 +372,6 @@ nil
 
             local key2 = require("resty.openssl.pkey").new({
                 type = 'EC',
-                curve = "prime256v1",
             })
             local ok, err = csr:check_private_key(key2)
             ngx.say(ok)
@@ -362,8 +384,8 @@ nil
 "true
 nil
 false
-.+(key type mismatch|KEY_TYPE_MISMATCH)
-.+(key values mismatch|KEY_VALUES_MISMATCH)
+.+key type mismatch.*
+.+key values mismatch.*
 "
 --- no_error_log
 [error]
@@ -371,7 +393,8 @@ false
 # START AUTO GENERATED CODE
 
 
-=== TEST 15: x509.csr:get_subject_name (AUTOGEN)
+
+=== TEST 14: x509.csr:get_subject_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -391,7 +414,9 @@ false
 --- no_error_log
 [error]
 
-=== TEST 16: x509.csr:set_subject_name (AUTOGEN)
+
+
+=== TEST 15: x509.csr:set_subject_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -419,7 +444,9 @@ false
 --- no_error_log
 [error]
 
-=== TEST 17: x509.csr:get_pubkey (AUTOGEN)
+
+
+=== TEST 16: x509.csr:get_pubkey (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -448,7 +475,9 @@ cwIDAQAB
 --- no_error_log
 [error]
 
-=== TEST 18: x509.csr:set_pubkey (AUTOGEN)
+
+
+=== TEST 17: x509.csr:set_pubkey (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -476,7 +505,9 @@ cwIDAQAB
 --- no_error_log
 [error]
 
-=== TEST 19: x509.csr:get_version (AUTOGEN)
+
+
+=== TEST 18: x509.csr:get_version (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -495,7 +526,9 @@ cwIDAQAB
 --- no_error_log
 [error]
 
-=== TEST 20: x509.csr:set_version (AUTOGEN)
+
+
+=== TEST 19: x509.csr:set_version (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -521,7 +554,9 @@ cwIDAQAB
 --- no_error_log
 [error]
 
-=== TEST 21: x509.csr:get_subject_alt_name (AUTOGEN)
+
+
+=== TEST 20: x509.csr:get_subject_alt_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -541,7 +576,9 @@ cwIDAQAB
 --- no_error_log
 [error]
 
-=== TEST 22: x509.csr:set_subject_alt_name (AUTOGEN)
+
+
+=== TEST 21: x509.csr:set_subject_alt_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -569,7 +606,9 @@ cwIDAQAB
 --- no_error_log
 [error]
 
-=== TEST 24: x509.csr:get/set_subject_alt_name_critical (AUTOGEN)
+
+
+=== TEST 22: x509.csr:get/set_subject_alt_name_critical (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -591,7 +630,9 @@ true
 --- no_error_log
 [error]
 
-=== TEST 25: x509.csr:get_get_signature_name (AUTOGEN)
+
+
+=== TEST 23: x509.csr:get_signature_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {

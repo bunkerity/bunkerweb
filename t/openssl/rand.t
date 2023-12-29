@@ -21,6 +21,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Geneartes random bytes
 --- http_config eval: $::HttpConfig
 --- config
@@ -53,6 +54,7 @@ false
 [error]
 
 
+
 === TEST 2: Rejects invalid arguments
 --- http_config eval: $::HttpConfig
 --- config
@@ -76,5 +78,3 @@ rand.bytes: expect a number at #1
 "
 --- no_error_log
 [error]
-
-

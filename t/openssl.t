@@ -10,7 +10,7 @@ my $use_luacov = $ENV{'TEST_NGINX_USE_LUACOV'} // '';
 my $fips = $ENV{'TEST_NGINX_FIPS'} // '';
 
 our $HttpConfig = qq{
-    lua_package_path "$pwd/lib/?.lua;$pwd/lib/?/init.lua;$pwd/../lua-resty-hmac/lib/?.lua;$pwd/../lua-resty-string/lib/?.lua;;";
+    lua_package_path "$pwd/lib/?.lua;$pwd/lib/?/init.lua;$pwd/../lua-resty-string/lib/?.lua;;";
     init_by_lua_block {
         if "1" == "$use_luacov" then
             require 'luacov.tick'
@@ -24,6 +24,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Load ffi openssl library
 --- http_config eval: $::HttpConfig
 --- config
@@ -40,6 +41,7 @@ __DATA__
 \d{6}[0-9a-f][0f]
 --- no_error_log
 [error]
+
 
 
 === TEST 2: Luaossl compat pattern
@@ -64,13 +66,14 @@ false
 [error]
 
 
+
 === TEST 3: List cipher algorithms
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             local openssl = require("resty.openssl")
-            ngx.say(require("cjson").encode(openssl.list_cipher_algorithms()))
+            ngx.say(require("cjson").encode(openssl.list_cipher_algorithms(true)))
             local version = require("resty.openssl.version")
             if not version.OPENSSL_3X then
                 ngx.say("[\"AES-256-GCM @ default\"]")
@@ -87,13 +90,15 @@ false
 --- no_error_log
 [error]
 
+
+
 === TEST 4: List digest algorithms
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
             local openssl = require("resty.openssl")
-            ngx.say(require("cjson").encode(openssl.list_digest_algorithms()))
+            ngx.say(require("cjson").encode(openssl.list_digest_algorithms(true)))
             local version = require("resty.openssl.version")
             if not version.OPENSSL_3X then
                 ngx.say("[\"SHA2-256 @ default\"]")
@@ -109,6 +114,8 @@ false
 \[.+SHA2-256 @ default.+\]
 --- no_error_log
 [error]
+
+
 
 === TEST 5: List mac algorithms
 --- http_config eval: $::HttpConfig
@@ -131,6 +138,8 @@ false
 --- no_error_log
 [error]
 
+
+
 === TEST 6: List kdf algorithms
 --- http_config eval: $::HttpConfig
 --- config
@@ -151,6 +160,8 @@ false
 \[.+HKDF @ default.+\]
 --- no_error_log
 [error]
+
+
 
 === TEST 7: List SSL cipher
 --- http_config eval: $::HttpConfig

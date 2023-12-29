@@ -22,6 +22,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Convert nid to table
 --- http_config eval: $::HttpConfig
 --- config
@@ -37,6 +38,7 @@ __DATA__
 '{"id":"2.5.29.19","ln":"X509v3 Basic Constraints","nid":87,"sn":"basicConstraints"}'
 --- no_error_log
 [error]
+
 
 
 === TEST 2: Convert txt to nid
@@ -63,6 +65,8 @@ __DATA__
 '{"id":87,"ln":87,"sn":87}'
 --- no_error_log
 [error]
+
+
 
 === TEST 3: Convert sigid to nid
 --- http_config eval: $::HttpConfig

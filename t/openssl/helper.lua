@@ -51,7 +51,7 @@ local function to_hex(bin)
   if err then
     error(err)
   end
-  return hex:upper()
+  return hex
 end
 
 local function myassert(...)

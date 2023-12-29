@@ -25,6 +25,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: FIPS mode can be turned on and off
 --- http_config eval: $::HttpConfig
 --- config
@@ -51,6 +52,8 @@ false
 --- no_error_log
 [error]
 
+
+
 === TEST 2: CIPHER, MD and PKEY provider is directed to fips
 --- http_config eval: $::HttpConfig
 --- config
@@ -76,6 +79,8 @@ fips
 fips
 --- no_error_log
 [error]
+
+
 
 === TEST 3: Non-FIPS compliant algorithms are not allowed
 --- http_config eval: $::HttpConfig
@@ -121,6 +126,8 @@ true
 .*invalid digest type "md5".+(?:unsupported|disabled for fips).*
 --- no_error_log
 [error]
+
+
 
 === TEST 4: Get FIPS version text
 --- http_config eval: $::HttpConfig

@@ -25,6 +25,7 @@ no_long_string();
 run_tests();
 
 __DATA__
+
 === TEST 1: Loads a cert
 --- http_config eval: $::HttpConfig
 --- config
@@ -42,6 +43,8 @@ __DATA__
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 2: Converts and loads PEM format
 --- http_config eval: $::HttpConfig
@@ -63,9 +66,11 @@ __DATA__
 --- request
     GET /t
 --- response_body_like eval
-"x509.new.+(nested asn1 error|NESTED_ASN1_ERROR).+"
+"x509.new.+nested asn1 error.+"
 --- no_error_log
 [error]
+
+
 
 === TEST 3: Converts and loads DER format
 --- http_config eval: $::HttpConfig
@@ -87,9 +92,11 @@ __DATA__
 --- request
     GET /t
 --- response_body_like eval
-"x509.new.+(no start line|NO_START_LINE).+"
+"x509.new.+no start line.+"
 --- no_error_log
 [error]
+
+
 
 === TEST 4: Rejectes invalid cert
 --- http_config eval: $::HttpConfig
@@ -107,10 +114,12 @@ __DATA__
     GET /t
 --- response_body_like eval
 "expect nil or a string at #1
-x509.new: .*(not enough data|NOT_ENOUGH_DATA)
+x509.new: .*not enough data.*
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 5: Calculates cert digest
 --- http_config eval: $::HttpConfig
@@ -121,7 +130,7 @@ x509.new: .*(not enough data|NOT_ENOUGH_DATA)
             local c = myassert(require("resty.openssl.x509").new(f))
             local dd = myassert(c:digest())
 
-            local h = string.upper(myassert(require("helper").to_hex(dd)))
+            local h = myassert(require("helper").to_hex(dd))
             ngx.say(h)
         }
     }
@@ -133,6 +142,8 @@ x509.new: .*(not enough data|NOT_ENOUGH_DATA)
 --- no_error_log
 [error]
 
+
+
 === TEST 6: Calculates pubkey digest
 --- http_config eval: $::HttpConfig
 --- config
@@ -142,7 +153,7 @@ x509.new: .*(not enough data|NOT_ENOUGH_DATA)
             local c = myassert(require("resty.openssl.x509").new(f))
             local dd = myassert(c:pubkey_digest())
 
-            local h, err = string.upper(require("helper").to_hex(dd))
+            local h, err = require("helper").to_hex(dd)
             ngx.say(h)
         }
     }
@@ -153,6 +164,8 @@ x509.new: .*(not enough data|NOT_ENOUGH_DATA)
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 7: Gets extension
 --- http_config eval: $::HttpConfig
@@ -175,6 +188,8 @@ TLS Web Server Authentication, TLS Web Client Authentication
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 8: Adds extension
 --- http_config eval: $::HttpConfig
@@ -200,6 +215,8 @@ TLS Web Server Authentication, TLS Web Client Authentication
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 9: Set extension
 --- http_config eval: $::HttpConfig
@@ -227,6 +244,7 @@ TLS Web Server Authentication, TLS Web Client Authentication
 [error]
 
 
+
 === TEST 10: Reads basic constraints
 --- http_config eval: $::HttpConfig
 --- config
@@ -247,6 +265,8 @@ TLS Web Server Authentication, TLS Web Client Authentication
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 11: Set basic constraints
 --- http_config eval: $::HttpConfig
@@ -274,6 +294,8 @@ TLS Web Server Authentication, TLS Web Client Authentication
 --- no_error_log
 [error]
 
+
+
 === TEST 12: Get authority info access
 --- http_config eval: $::HttpConfig
 --- config
@@ -298,6 +320,8 @@ CA Issuers - URI:http://cacerts.digicert.com/DigiCertHighAssuranceTLSHybridECCSH
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 13: Set authority info access
 --- http_config eval: $::HttpConfig
@@ -329,6 +353,8 @@ OCSP - URI:http://somedomain.com
 --- no_error_log
 [error]
 
+
+
 === TEST 14: Get CRL distribution points
 --- http_config eval: $::HttpConfig
 --- config
@@ -356,6 +382,8 @@ URI http://crl4.digicert.com/DigiCertHighAssuranceTLSHybridECCSHA2562020CA1.crl
 --- no_error_log
 [error]
 
+
+
 === TEST 15: Set CRL distribution points
 --- http_config eval: $::HttpConfig
 --- config
@@ -368,6 +396,8 @@ URI http://crl4.digicert.com/DigiCertHighAssuranceTLSHybridECCSHA2562020CA1.crl
     GET /t
 --- no_error_log
 [error]
+
+
 
 === TEST 16: Get OCSP url
 --- http_config eval: $::HttpConfig
@@ -399,6 +429,8 @@ nil
 --- no_error_log
 [error]
 
+
+
 === TEST 17: Get CRL url
 --- http_config eval: $::HttpConfig
 --- config
@@ -429,6 +461,8 @@ nil
 --- no_error_log
 [error]
 
+
+
 === TEST 18: Get non existend extension, return nil, nil
 --- http_config eval: $::HttpConfig
 --- config
@@ -449,12 +483,14 @@ nil
 --- no_error_log
 [error]
 
+
+
 === TEST 19: Check private key match
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
         content_by_lua_block {
-            local cert, key = require("helper").create_self_signed({ type = "EC", curve = "prime256v1" })
+            local cert, key = require("helper").create_self_signed({ type = "EC" })
             local ok, err = cert:check_private_key(key)
             ngx.say(ok)
             ngx.say(err)
@@ -467,7 +503,6 @@ nil
 
             local key2 = require("resty.openssl.pkey").new({
                 type = 'EC',
-                curve = "prime256v1",
             })
             local ok, err = cert:check_private_key(key2)
             ngx.say(ok)
@@ -480,13 +515,14 @@ nil
 "true
 nil
 false
-.+(key type mismatch|KEY_TYPE_MISMATCH)
-.+(key values mismatch|KEY_VALUES_MISMATCH)
+.+key type mismatch.*
+.+key values mismatch.*
 "
 --- no_error_log
 [error]
 
 # START AUTO GENERATED CODE
+
 
 
 === TEST 20: x509:get_serial_number (AUTOGEN)
@@ -498,7 +534,7 @@ false
             local c = myassert(require("resty.openssl.x509").new(f))
 
             local get = myassert(c:get_serial_number())
-            get = get:to_hex():upper()
+            get = get:to_hex()
             ngx.print(get)
         }
     }
@@ -508,6 +544,8 @@ false
 "0E8BF3770D92D196F0BB61F93C4166BE"
 --- no_error_log
 [error]
+
+
 
 === TEST 21: x509:set_serial_number (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -520,8 +558,8 @@ false
             local ok = myassert(c:set_serial_number(toset))
 
             local get = myassert(c:get_serial_number())
-            get = get:to_hex():upper()
-            toset = toset:to_hex():upper()
+            get = get:to_hex()
+            toset = toset:to_hex()
             if get ~= toset then
               ngx.say(get)
               ngx.say(toset)
@@ -536,6 +574,8 @@ false
 "ok"
 --- no_error_log
 [error]
+
+
 
 === TEST 22: x509:get_not_before (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -555,6 +595,8 @@ false
 "1616630400"
 --- no_error_log
 [error]
+
+
 
 === TEST 23: x509:set_not_before (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -582,6 +624,8 @@ false
 --- no_error_log
 [error]
 
+
+
 === TEST 24: x509:get_not_after (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
@@ -600,6 +644,8 @@ false
 "1648684799"
 --- no_error_log
 [error]
+
+
 
 === TEST 25: x509:set_not_after (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -627,6 +673,8 @@ false
 --- no_error_log
 [error]
 
+
+
 === TEST 26: x509:get_pubkey (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
@@ -650,6 +698,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 27: x509:set_pubkey (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -679,6 +729,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
 --- no_error_log
 [error]
 
+
+
 === TEST 28: x509:get_subject_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
@@ -698,6 +750,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
 "C=US/CN=github.com/L=San Francisco/O=GitHub, Inc./ST=California"
 --- no_error_log
 [error]
+
+
 
 === TEST 29: x509:set_subject_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -727,6 +781,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
 --- no_error_log
 [error]
 
+
+
 === TEST 30: x509:get_issuer_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
@@ -746,6 +802,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
 "C=US/CN=DigiCert High Assurance TLS Hybrid ECC SHA256 2020 CA1/O=DigiCert, Inc."
 --- no_error_log
 [error]
+
+
 
 === TEST 31: x509:set_issuer_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -775,6 +833,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
 --- no_error_log
 [error]
 
+
+
 === TEST 32: x509:get_version (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
@@ -793,6 +853,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
 "3"
 --- no_error_log
 [error]
+
+
 
 === TEST 33: x509:set_version (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -820,6 +882,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
 --- no_error_log
 [error]
 
+
+
 === TEST 34: x509:get_subject_alt_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
@@ -839,6 +903,8 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
 "DNS=github.com/DNS=www.github.com"
 --- no_error_log
 [error]
+
+
 
 === TEST 35: x509:set_subject_alt_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -868,7 +934,9 @@ Tp+h/rnQjL05vAwjx8+RppBa2EWrAxO+wSN6ucTInUf2luC5dmtQNmb3DQ==
 --- no_error_log
 [error]
 
-=== TEST 37: x509:get/set_subject_alt_name_critical (AUTOGEN)
+
+
+=== TEST 36: x509:get/set_subject_alt_name_critical (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -890,7 +958,9 @@ true
 --- no_error_log
 [error]
 
-=== TEST 38: x509:get/set_basic_constraints_critical (AUTOGEN)
+
+
+=== TEST 37: x509:get/set_basic_constraints_critical (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -912,7 +982,9 @@ true
 --- no_error_log
 [error]
 
-=== TEST 39: x509:get/set_info_access_critical (AUTOGEN)
+
+
+=== TEST 38: x509:get/set_info_access_critical (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -934,7 +1006,9 @@ true
 --- no_error_log
 [error]
 
-=== TEST 40: x509:get/set_crl_distribution_points_critical (AUTOGEN)
+
+
+=== TEST 39: x509:get/set_crl_distribution_points_critical (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -956,7 +1030,9 @@ true
 --- no_error_log
 [error]
 
-=== TEST 41: x509:get_get_signature_name (AUTOGEN)
+
+
+=== TEST 40: x509:get_signature_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {

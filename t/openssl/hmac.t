@@ -22,6 +22,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Calculate hmac correctly
 --- http_config eval: $::HttpConfig
 --- config
@@ -39,6 +40,8 @@ __DATA__
 "kwUMjYrP0BSJb8cIJvWYoiM1Kc4mQxZOTwSiTTLRhDM="
 --- no_error_log
 [error]
+
+
 
 === TEST 2: Update accepts vardiac args
 --- http_config eval: $::HttpConfig
@@ -58,6 +61,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 3: Final accepts optional arg
 --- http_config eval: $::HttpConfig
 --- config
@@ -76,6 +81,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 4: Rejects unknown hash
 --- http_config eval: $::HttpConfig
 --- config
@@ -91,6 +98,7 @@ __DATA__
 "hmac.new:.+(?:invalid|unsupported).*"
 --- no_error_log
 [error]
+
 
 
 === TEST 5: Can be reused

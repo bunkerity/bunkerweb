@@ -22,6 +22,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: kdf: invalid args are checked
 --- http_config eval: $::HttpConfig
 --- config
@@ -66,6 +67,7 @@ kdf.derive: unknown type 19823718236128632
 [error]
 
 
+
 === TEST 2: PBKDF2
 --- http_config eval: $::HttpConfig
 --- config
@@ -92,6 +94,7 @@ kdf.derive: unknown type 19823718236128632
 [error]
 
 
+
 === TEST 3: PBKDF2, optional args
 --- http_config eval: $::HttpConfig
 --- config
@@ -112,6 +115,7 @@ kdf.derive: unknown type 19823718236128632
 "HkN6HHnXW\\+YekRQdriCv/A=="
 --- no_error_log
 [error]
+
 
 
 === TEST 4: HKDF
@@ -139,6 +143,7 @@ kdf.derive: unknown type 19823718236128632
 "aqRd+gO5Ok3YneDEormTcg=="
 --- no_error_log
 [error]
+
 
 
 === TEST 5: HKDF, optional arg
@@ -178,6 +183,7 @@ W/tSxFnNsHIYwXa13eybYhW9W3Y=
 [error]
 
 
+
 === TEST 6: TLS1-PRF
 --- http_config eval: $::HttpConfig
 --- config
@@ -203,6 +209,7 @@ W/tSxFnNsHIYwXa13eybYhW9W3Y=
 [error]
 
 
+
 === TEST 7: TLS1-PRF, optional arg
 --- http_config eval: $::HttpConfig
 --- config
@@ -225,6 +232,7 @@ W/tSxFnNsHIYwXa13eybYhW9W3Y=
 "XVVDK9/puTqBOsyTKt8PKQ=="
 --- no_error_log
 [error]
+
 
 
 === TEST 8: scrypt
@@ -252,6 +260,8 @@ W/tSxFnNsHIYwXa13eybYhW9W3Y=
 --- no_error_log
 [error]
 
+
+
 === TEST 9: EVP_KDF API: new
 --- http_config eval: $::HttpConfig
 --- config
@@ -277,6 +287,8 @@ W/tSxFnNsHIYwXa13eybYhW9W3Y=
 --- no_error_log
 [error]
 
+
+
 === TEST 10: EVP_KDF API: Returns provider
 --- http_config eval: $::HttpConfig
 --- config
@@ -298,6 +310,7 @@ W/tSxFnNsHIYwXa13eybYhW9W3Y=
 default
 --- no_error_log
 [error]
+
 
 
 === TEST 11: EVP_KDF API: derive
@@ -327,6 +340,8 @@ cDRFLQ7NWt+AP4i0TdBzog==
 --- no_error_log
 [error]
 
+
+
 === TEST 12: EVP_KDF API: Returns gettable, settable params
 --- http_config eval: $::HttpConfig
 --- config
@@ -350,6 +365,8 @@ cDRFLQ7NWt+AP4i0TdBzog==
 .+digest.+
 --- no_error_log
 [error]
+
+
 
 === TEST 13: EVP_KDF API: Get params, set params
 --- http_config eval: $::HttpConfig
@@ -383,6 +400,8 @@ cDRFLQ7NWt+AP4i0TdBzog==
 18446744073709551615
 --- no_error_log
 [error]
+
+
 
 === TEST 14: EVP_KDF API: reset
 --- http_config eval: $::HttpConfig
@@ -421,7 +440,7 @@ cDRFLQ7NWt+AP4i0TdBzog==
 --- request
     GET /t
 --- response_body_like
-.+missing salt
+.+missing salt.*
 cDRFLQ7NWt\+AP4i0TdBzog==
 --- no_error_log
 [error]

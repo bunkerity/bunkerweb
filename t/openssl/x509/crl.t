@@ -24,6 +24,7 @@ no_long_string();
 run_tests();
 
 __DATA__
+
 === TEST 1: Loads a crl
 --- http_config eval: $::HttpConfig
 --- config
@@ -42,6 +43,8 @@ __DATA__
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 2: Converts and loads PEM format
 --- http_config eval: $::HttpConfig
@@ -63,9 +66,11 @@ __DATA__
 --- request
     GET /t
 --- response_body_like eval
-"x509.crl.new.+(nested asn1 error|NESTED_ASN1_ERROR).+"
+"x509.crl.new.+nested asn1 error.+"
 --- no_error_log
 [error]
+
+
 
 === TEST 3: Converts and loads DER format
 --- http_config eval: $::HttpConfig
@@ -87,9 +92,11 @@ __DATA__
 --- request
     GET /t
 --- response_body_like eval
-"x509.crl.new.+(no start line|NO_START_LINE).+"
+"x509.crl.new.+no start line.+"
 --- no_error_log
 [error]
+
+
 
 === TEST 4: x509.crl:add_revoked should add revoked to crl
 --- http_config eval: $::HttpConfig
@@ -122,6 +129,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 5: x509.crl:add_revoked should fail if revoked is not instance of revoked
 --- http_config eval: $::HttpConfig
 --- config
@@ -147,6 +156,7 @@ __DATA__
 "ok"
 --- no_error_log
 [error]
+
 
 
 === TEST 6: x509.crl:sign should succeed
@@ -178,6 +188,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 7: x509.crl:text
 --- http_config eval: $::HttpConfig
 --- config
@@ -194,6 +206,8 @@ __DATA__
 "Certificate Revocation List.+Revoked Certificates.+"
 --- no_error_log
 [error]
+
+
 
 === TEST 8: x509.crl metamethods
 --- http_config eval: $::HttpConfig
@@ -229,6 +243,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 9: x509.crl get_by_serial
 --- http_config eval: $::HttpConfig
 --- config
@@ -254,6 +270,8 @@ truetrue
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 10: x509.crl doesn't error if revoked is empty (regression)
 --- http_config eval: $::HttpConfig
@@ -282,6 +300,7 @@ truetrue
 # START AUTO GENERATED CODE
 
 
+
 === TEST 11: x509.crl:get_issuer_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
@@ -301,6 +320,8 @@ truetrue
 "C=CN/CN=TrustAsia EV TLS Pro CA G2/O=TrustAsia Technologies, Inc."
 --- no_error_log
 [error]
+
+
 
 === TEST 12: x509.crl:set_issuer_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -330,6 +351,8 @@ truetrue
 --- no_error_log
 [error]
 
+
+
 === TEST 13: x509.crl:get_last_update (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
@@ -348,6 +371,8 @@ truetrue
 "1580684546"
 --- no_error_log
 [error]
+
+
 
 === TEST 14: x509.crl:set_last_update (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -375,6 +400,8 @@ truetrue
 --- no_error_log
 [error]
 
+
+
 === TEST 15: x509.crl:get_next_update (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
@@ -393,6 +420,8 @@ truetrue
 "1581289346"
 --- no_error_log
 [error]
+
+
 
 === TEST 16: x509.crl:set_next_update (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -420,6 +449,8 @@ truetrue
 --- no_error_log
 [error]
 
+
+
 === TEST 17: x509.crl:get_version (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
@@ -438,6 +469,8 @@ truetrue
 "2"
 --- no_error_log
 [error]
+
+
 
 === TEST 18: x509.crl:set_version (AUTOGEN)
 --- http_config eval: $::HttpConfig
@@ -465,7 +498,9 @@ truetrue
 --- no_error_log
 [error]
 
-=== TEST 20: x509.crl:get_get_signature_name (AUTOGEN)
+
+
+=== TEST 19: x509.crl:get_signature_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {

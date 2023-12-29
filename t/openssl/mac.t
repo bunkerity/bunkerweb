@@ -22,6 +22,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Calculate mac correctly
 --- http_config eval: $::HttpConfig
 --- config
@@ -44,6 +45,8 @@ __DATA__
 "kwUMjYrP0BSJb8cIJvWYoiM1Kc4mQxZOTwSiTTLRhDM="
 --- no_error_log
 [error]
+
+
 
 === TEST 2: Update accepts vardiac args
 --- http_config eval: $::HttpConfig
@@ -68,6 +71,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 3: Final accepts optional arg
 --- http_config eval: $::HttpConfig
 --- config
@@ -91,6 +96,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 4: Rejects unknown hash
 --- http_config eval: $::HttpConfig
 --- config
@@ -110,6 +117,8 @@ __DATA__
 "mac.new: invalid cipher or digest type.*"
 --- no_error_log
 [error]
+
+
 
 === TEST 5: Returns provider
 --- http_config eval: $::HttpConfig
@@ -132,6 +141,8 @@ __DATA__
 default
 --- no_error_log
 [error]
+
+
 
 === TEST 6: Returns gettable, settable params
 --- http_config eval: $::HttpConfig
@@ -156,6 +167,8 @@ default
 .+digest.+
 --- no_error_log
 [error]
+
+
 
 === TEST 7: Get params, set params
 --- http_config eval: $::HttpConfig

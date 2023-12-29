@@ -22,6 +22,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Can create a ctx in ngx.ctx
 --- http_config eval: $::HttpConfig
 --- config
@@ -38,6 +39,7 @@ __DATA__
     GET /t
 --- no_error_log
 [error]
+
 
 
 === TEST 2: Can create a ctx in global namespace
@@ -58,6 +60,7 @@ __DATA__
 [error]
 
 
+
 === TEST 3: Can free ctx in ngx.ctx
 --- http_config eval: $::HttpConfig
 --- config
@@ -75,6 +78,7 @@ __DATA__
     GET /t
 --- no_error_log
 [error]
+
 
 
 === TEST 4: Can free ctx in global namespace

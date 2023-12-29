@@ -23,6 +23,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Creates stack properly
 --- http_config eval: $::HttpConfig
 --- config
@@ -41,6 +42,8 @@ __DATA__
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 2: Adds elements to stack properly
 --- http_config eval: $::HttpConfig
@@ -66,6 +69,8 @@ __DATA__
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 3: Element can be indexed properly
 --- http_config eval: $::HttpConfig
@@ -95,6 +100,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 4: Element is duplicated when added to stack
 --- http_config eval: $::HttpConfig
 --- config
@@ -118,6 +125,8 @@ __DATA__
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 5: Element is duplicated when returned
 --- http_config eval: $::HttpConfig
@@ -143,6 +152,8 @@ __DATA__
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 6: Element is not freed when stack is duplicated
 --- http_config eval: $::HttpConfig

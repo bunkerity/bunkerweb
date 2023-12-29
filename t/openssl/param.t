@@ -22,6 +22,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Construct
 --- http_config eval: $::HttpConfig
 --- config

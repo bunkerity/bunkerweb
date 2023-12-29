@@ -23,6 +23,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Creates store properly
 --- http_config eval: $::HttpConfig
 --- config
@@ -38,6 +39,7 @@ __DATA__
 ""
 --- no_error_log
 [error]
+
 
 
 === TEST 2: Loads a x509 object
@@ -59,6 +61,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 3: Loads default location
 --- http_config eval: $::HttpConfig
 --- config
@@ -75,6 +79,8 @@ __DATA__
 ""
 --- no_error_log
 [error]
+
+
 
 === TEST 4: Loads file
 --- http_config eval: $::HttpConfig
@@ -113,6 +119,7 @@ x509.store:load_file.+
 [error]
 
 
+
 === TEST 5: Verifies a x509 object
 --- http_config eval: $::HttpConfig
 --- config
@@ -147,6 +154,7 @@ true
 [error]
 
 
+
 === TEST 6: Using default CAs (skip due to hard to setup on custom-built openssl env)
 --- SKIP
 --- http_config eval: $::HttpConfig
@@ -174,6 +182,8 @@ true
 --- no_error_log
 [error]
 
+
+
 === TEST 7: Loads directory
 --- http_config eval: $::HttpConfig
 --- config
@@ -198,6 +208,8 @@ true
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 8: Verifies sub cert
 --- http_config eval: $::HttpConfig
@@ -237,6 +249,8 @@ B1BC968BD4F49D622AA89A81F2150152A41D829C
 --- no_error_log
 [error]
 
+
+
 === TEST 9: Set purpose
 --- http_config eval: $::HttpConfig
 --- config
@@ -275,6 +289,8 @@ truenil
 --- no_error_log
 [error]
 
+
+
 === TEST 10: Set depth
 --- http_config eval: $::HttpConfig
 --- config
@@ -308,6 +324,8 @@ nilcertificate chain too long
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 11: Verify with verify_method
 --- http_config eval: $::HttpConfig
@@ -348,6 +366,8 @@ nil(?:unsupported|unsuitable) certificate purpose
 --- no_error_log
 [error]
 
+
+
 === TEST 12: Set flags
 --- http_config eval: $::HttpConfig
 --- config
@@ -380,6 +400,8 @@ truenil
 --- no_error_log
 [error]
 
+
+
 === TEST 13: Set verify time flags
 --- http_config eval: $::HttpConfig
 --- config
@@ -410,6 +432,8 @@ truenil
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 14: Check revocation
 --- http_config eval: $::HttpConfig
@@ -467,4 +491,3 @@ nilcertificate revoked
 "
 --- no_error_log
 [error]
-

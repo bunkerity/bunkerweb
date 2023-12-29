@@ -23,6 +23,7 @@ our $HttpConfig = qq{
 run_tests();
 
 __DATA__
+
 === TEST 1: Duplicate the ctx
 --- http_config eval: $::HttpConfig
 --- config
@@ -47,6 +48,8 @@ __DATA__
 --- no_error_log
 [error]
 
+
+
 === TEST 2: Rejects invalid NID
 --- http_config eval: $::HttpConfig
 --- config
@@ -67,6 +70,8 @@ x509.name:add: invalid NID text whatever
 "
 --- no_error_log
 [error]
+
+
 
 === TEST 3: Finds by text
 --- http_config eval: $::HttpConfig
@@ -107,6 +112,7 @@ found 2 anotherdomain.com
 "
 --- no_error_log
 [error]
+
 
 
 === TEST 4: Pairs
