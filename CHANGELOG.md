@@ -6,6 +6,8 @@
 - [BUGFIX] Fix ModSecurity-nginx to make it work with brotli
 - [FEATURE] Add Anonymous reporting feature
 - [FEATURE] Add support for fallback Referrer-Policies
+- [FEATURE] Add profile page to web ui and the possibility to activate the 2FA
+- [FEATURE] Add setting REVERSE_PROXY_INCLUDES to manually add "include" directives in the reverse proxies
 - [MISC] Fallback to default HTTPS certificate to prevent errors
 - [MISC] Updated Python Docker image to 3.12.1-alpine3.18 in Dockerfiles
 - [DEPS] Updated ModSecurity to v3.0.11

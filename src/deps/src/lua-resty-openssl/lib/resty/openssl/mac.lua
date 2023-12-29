@@ -41,7 +41,8 @@ function _M.new(key, typ, cipher, digest, properties)
   params.cipher = cipher
   local p = param_lib.construct(params, 2, param_types)
 
-  local code = C.EVP_MAC_init(ctx, key, #key, p)
+  local keyl = #key
+  local code = C.EVP_MAC_init(ctx, key, keyl, p)
   if code ~= 1 then
     return nil, format_error(string.format("mac.new: invalid cipher or digest type"))
   end
@@ -53,6 +54,7 @@ function _M.new(key, typ, cipher, digest, properties)
     algo = algo,
     buf = ctypes.uchar_array(md_size),
     buf_size = md_size,
+    _reset = function() return C.EVP_MAC_init(ctx, key, keyl, p) end,
   }, mt), nil
 end
 
@@ -73,7 +75,7 @@ _M.settable_params, _M.set_params, _M.gettable_params, _M.get_param = param_lib.
 function _M:update(...)
   for _, s in ipairs({...}) do
     if C.EVP_MAC_update(self.ctx, s, #s) ~= 1 then
-      return false, format_error("digest:update")
+      return false, format_error("mac:update")
     end
   end
   return true, nil
@@ -81,17 +83,25 @@ end
 
 function _M:final(s)
   if s then
-    local _, err = self:update(s)
-    if err then
-      return nil, err
+    if C.EVP_MAC_update(self.ctx, s, #s) ~= 1 then
+      return false, format_error("mac:final")
     end
   end
 
   local length = ctypes.ptr_of_size_t()
   if C.EVP_MAC_final(self.ctx, self.buf, length, self.buf_size) ~= 1 then
-    return nil, format_error("digest:final: EVP_MAC_final")
+    return nil, format_error("mac:final: EVP_MAC_final")
   end
   return ffi_str(self.buf, length[0])
+end
+
+function _M:reset()
+  local code = self._reset()
+  if code ~= 1 then
+    return false, format_error("mac:reset")
+  end
+
+  return true
 end
 
 return _M

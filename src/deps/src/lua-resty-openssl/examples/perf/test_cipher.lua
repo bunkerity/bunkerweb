@@ -3,6 +3,7 @@ package.path = path .. "/?.lua;" .. package.path
 
 local test = require "framework".test
 local set_iteration = require "framework".set_iteration
+local write_seperator = require "framework".write_seperator
 local cipher = require "resty.openssl.cipher"
 local version = require("resty.openssl.version")
 
@@ -46,4 +47,6 @@ for _, t in ipairs({"aes-256-cbc", "aes-256-gcm", "chacha20-poly1305"}) do
         end
 ::continue::
     end
+
+    write_seperator()
 end

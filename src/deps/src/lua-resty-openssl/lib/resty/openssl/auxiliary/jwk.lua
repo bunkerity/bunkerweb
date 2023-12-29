@@ -2,8 +2,6 @@
 local ffi = require "ffi"
 local C = ffi.C
 
-local cjson = require("cjson.safe")
-local b64 = require("ngx.base64")
 
 local evp_macro = require "resty.openssl.include.evp"
 local rsa_lib = require "resty.openssl.rsa"
@@ -11,6 +9,9 @@ local ec_lib = require "resty.openssl.ec"
 local ecx_lib = require "resty.openssl.ecx"
 local bn_lib = require "resty.openssl.bn"
 local digest_lib = require "resty.openssl.digest"
+local encode_base64url = require "resty.openssl.auxiliary.compat".encode_base64url
+local decode_base64url = require "resty.openssl.auxiliary.compat".decode_base64url
+local json = require "resty.openssl.auxiliary.compat".json
 
 local _M = {}
 
@@ -27,7 +28,7 @@ local function load_jwk_rsa(tbl)
   for i, k in ipairs(rsa_jwk_params) do
     local v = tbl[k]
     if v then
-      v = b64.decode_base64url(v)
+      v = decode_base64url(v)
       if not v then
         return nil, "cannot decode parameter \"" .. k .. "\" from base64 " .. tbl[k]
       end
@@ -86,7 +87,7 @@ local function load_jwk_ec(tbl)
   for _, k in ipairs(ec_jwk_params) do
     local v = tbl[k]
     if v then
-      v = b64.decode_base64url(v)
+      v = decode_base64url(v)
       if not v then
         return nil, "cannot decode parameter \"" .. k .. "\" from base64 " .. tbl[k]
       end
@@ -122,9 +123,9 @@ end
 local function load_jwk_okp(key_type, tbl)
   local params = {}
   if tbl["d"] then
-    params.private = b64.decode_base64url(tbl["d"])
+    params.private = decode_base64url(tbl["d"])
   elseif tbl["x"] then
-    params.public = b64.decode_base64url(tbl["x"])
+    params.public = decode_base64url(tbl["x"])
   else
     return nil, "at least \"x\" or \"d\" parameter is required"
   end
@@ -141,7 +142,7 @@ for k, v in pairs(evp_macro.ecx_curves) do
 end
 
 function _M.load_jwk(txt)
-  local tbl, err = cjson.decode(txt)
+  local tbl, err = json.decode(txt)
   if err then
     return nil, "error decoding JSON from JWK: " .. err
   elseif type(tbl) ~= "table" then
@@ -220,7 +221,7 @@ function _M.dump_jwk(pkey, is_priv)
     }
     for i, p in ipairs(param_keys) do
       local v = params[rsa_openssl_params[i]]:to_binary()
-      jwk[p] = b64.encode_base64url(v)
+      jwk[p] = encode_base64url(v)
     end
   elseif pkey.key_type == evp_macro.EVP_PKEY_EC then
     local params, err = pkey:get_parameters()
@@ -230,11 +231,11 @@ function _M.dump_jwk(pkey, is_priv)
     jwk = {
       kty = "EC",
       crv = ec_curves_reverse[params.group],
-      x = b64.encode_base64url(params.x:to_binary()),
-      y = b64.encode_base64url(params.y:to_binary()),
+      x = encode_base64url(params.x:to_binary()),
+      y = encode_base64url(params.y:to_binary()),
     }
     if is_priv then
-      jwk.d = b64.encode_base64url(params.private:to_binary())
+      jwk.d = encode_base64url(params.private:to_binary())
     end
   elseif ecx_curves_reverse[pkey.key_type] then
     local params, err = pkey:get_parameters()
@@ -244,8 +245,8 @@ function _M.dump_jwk(pkey, is_priv)
     jwk = {
       kty = "OKP",
       crv = ecx_curves_reverse[pkey.key_type],
-      d = b64.encode_base64url(params.private),
-      x = b64.encode_base64url(params.public),
+      d = encode_base64url(params.private),
+      x = encode_base64url(params.public),
     }
   else
     return nil, "jwk.dump_jwk: not implemented for this key type"
@@ -257,9 +258,9 @@ function _M.dump_jwk(pkey, is_priv)
   if err then
     return nil, "jwk.dump_jwk: failed to calculate digest for key"
   end
-  jwk.kid = b64.encode_base64url(d)
+  jwk.kid = encode_base64url(d)
 
-  return cjson.encode(jwk)
+  return json.encode(jwk)
 end
 
 return _M

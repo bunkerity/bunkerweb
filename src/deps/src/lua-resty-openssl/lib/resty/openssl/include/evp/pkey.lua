@@ -81,6 +81,9 @@ ffi.cdef [[
   int EVP_PKEY_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY **ppkey);
   int EVP_PKEY_paramgen_init(EVP_PKEY_CTX *ctx);
   int EVP_PKEY_paramgen(EVP_PKEY_CTX *ctx, EVP_PKEY **ppkey);
+
+  int EVP_PKEY_CTX_ctrl_str(EVP_PKEY_CTX *ctx, const char *type,
+                          const char *value);
 ]]
 
 local _M = {}
@@ -102,6 +105,10 @@ if OPENSSL_3X then
 
     int EVP_PKEY_CTX_set_rsa_padding(EVP_PKEY_CTX *ctx, int pad);
     int EVP_PKEY_CTX_set_rsa_pss_saltlen(EVP_PKEY_CTX *ctx, int len);
+    int EVP_PKEY_CTX_set_rsa_mgf1_md_name(EVP_PKEY_CTX *ctx, const char *mdname,
+                                    const char *mdprops);
+    int EVP_PKEY_CTX_set_rsa_oaep_md_name(EVP_PKEY_CTX *ctx, const char *mdname,
+                                          const char *mdprops);
 
     int EVP_PKEY_CTX_set_dh_paramgen_prime_len(EVP_PKEY_CTX *ctx, int pbits);
 
@@ -121,6 +128,10 @@ if OPENSSL_3X then
     return C.EVP_PKEY_CTX_set_ec_param_enc(pctx, param_enc)
   end
 
+  _M.EVP_PKEY_CTX_set_dh_paramgen_prime_len = function(pctx, pbits)
+    return C.EVP_PKEY_CTX_set_dh_paramgen_prime_len(pctx, pbits)
+  end
+
   _M.EVP_PKEY_CTX_set_rsa_keygen_bits = function(pctx, mbits)
     return C.EVP_PKEY_CTX_set_rsa_keygen_bits(pctx, mbits)
   end
@@ -134,8 +145,11 @@ if OPENSSL_3X then
   _M.EVP_PKEY_CTX_set_rsa_pss_saltlen = function(pctx, len)
     return C.EVP_PKEY_CTX_set_rsa_pss_saltlen(pctx, len)
   end
-  _M.EVP_PKEY_CTX_set_dh_paramgen_prime_len = function(pctx, pbits)
-    return C.EVP_PKEY_CTX_set_dh_paramgen_prime_len(pctx, pbits)
+  _M.EVP_PKEY_CTX_set_rsa_mgf1_md_name = function(pctx, name ,props)
+    return C.EVP_PKEY_CTX_set_rsa_mgf1_md_name(pctx, name, props)
+  end
+  _M.EVP_PKEY_CTX_set_rsa_oaep_md_name = function(pctx, name, props)
+    return C.EVP_PKEY_CTX_set_rsa_oaep_md_name(pctx, name, props)
   end
 
 else
@@ -152,6 +166,13 @@ else
                                 evp.EVP_PKEY_OP_PARAMGEN + evp.EVP_PKEY_OP_KEYGEN,
                                 evp.EVP_PKEY_CTRL_EC_PARAM_ENC,
                                 param_enc, nil)
+  end
+
+  _M.EVP_PKEY_CTX_set_dh_paramgen_prime_len = function(pctx, pbits)
+    return C.EVP_PKEY_CTX_ctrl(pctx,
+            evp.EVP_PKEY_DH, evp.EVP_PKEY_OP_PARAMGEN,
+            evp.EVP_PKEY_CTRL_DH_PARAMGEN_PRIME_LEN,
+            pbits, nil)
   end
 
   _M.EVP_PKEY_CTX_set_rsa_keygen_bits = function(pctx, mbits)
@@ -183,11 +204,27 @@ else
                                 len, nil)
   end
 
-  _M.EVP_PKEY_CTX_set_dh_paramgen_prime_len = function(pctx, pbits)
+  _M.EVP_PKEY_CTX_set_rsa_mgf1_md_name = function(pctx, name, _)
+    local md = C.EVP_get_digestbyname(name)
+    if not md then
+      return -1, "unknown digest: " .. name
+    end
     return C.EVP_PKEY_CTX_ctrl(pctx,
-            evp.EVP_PKEY_DH, evp.EVP_PKEY_OP_PARAMGEN,
-            evp.EVP_PKEY_CTRL_DH_PARAMGEN_PRIME_LEN,
-            pbits, nil)
+                              evp.EVP_PKEY_RSA,
+                              evp.EVP_PKEY_OP_SIG + evp.EVP_PKEY_OP_TYPE_CRYPT,
+                              evp.EVP_PKEY_CTRL_RSA_MGF1_MD,
+                              0, ffi.cast("void *", md))
+  end
+  _M.EVP_PKEY_CTX_set_rsa_oaep_md_name = function(pctx, name, _)
+    local md = C.EVP_get_digestbyname(name)
+    if not md then
+      return -1, "unknown digest: " .. name
+    end
+    return C.EVP_PKEY_CTX_ctrl(pctx,
+                              evp.EVP_PKEY_RSA,
+                              evp.EVP_PKEY_OP_CRYPT,
+                              evp.EVP_PKEY_CTRL_RSA_OAEP_MD,
+                              0, ffi.cast("void *", md))
   end
 end
 

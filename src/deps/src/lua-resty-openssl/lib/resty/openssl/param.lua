@@ -8,6 +8,7 @@ require "resty.openssl.include.param"
 local format_error = require("resty.openssl.err").format_error
 local bn_lib = require("resty.openssl.bn")
 local null = require("resty.openssl.auxiliary.ctypes").null
+local nkeys = require "resty.openssl.auxiliary.compat".nkeys
 
 local OSSL_PARAM_INTEGER = 1
 local OSSL_PARAM_UNSIGNED_INTEGER = 2
@@ -22,8 +23,7 @@ local buf_param_key = {}
 
 local function construct(buf_t, length, types_map, types_size)
   if not length then
-    length = 0
-    for k, v in pairs(buf_t) do length = length + 1 end
+    length = nkeys(buf_t)
   end
 
   local params = ffi_new("OSSL_PARAM[?]", length + 1)
