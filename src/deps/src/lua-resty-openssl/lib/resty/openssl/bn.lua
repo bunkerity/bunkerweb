@@ -9,7 +9,6 @@ require "resty.openssl.include.bn"
 local crypto_macro = require("resty.openssl.include.crypto")
 local ctypes = require "resty.openssl.auxiliary.ctypes"
 local format_error = require("resty.openssl.err").format_error
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
 
 local _M = {}
 local mt = {__index = _M}
@@ -17,16 +16,73 @@ local mt = {__index = _M}
 local bn_ptr_ct = ffi.typeof('BIGNUM*')
 local bn_ptrptr_ct = ffi.typeof('BIGNUM*[1]')
 
-function _M.new(bn)
+local function set_binary(ctx, s)
+  local ctx = C.BN_bin2bn(s, #s, ctx)
+  if ctx == nil then
+    return nil, format_error("set_binary")
+  end
+  return ctx
+end
+
+local function set_mpi(ctx, s)
+  local ctx = C.BN_mpi2bn(s, #s, ctx)
+  if ctx == nil then
+    return nil, format_error("set_mpi")
+  end
+  return ctx
+end
+
+local function set_hex(ctx, s)
+  local p = ffi_new(bn_ptrptr_ct)
+  p[0] = ctx
+
+  if C.BN_hex2bn(p, s) == 0 then
+    return nil, format_error("set_hex")
+  end
+  return p[0]
+end
+
+local function set_dec(ctx, s)
+  local p = ffi_new(bn_ptrptr_ct)
+  p[0] = ctx
+
+  if C.BN_dec2bn(p, s) == 0 then
+    return nil, format_error("set_dec")
+  end
+  return p[0]
+end
+
+local function set_bn(ctx, s, base)
+  if type(s) == 'number' then
+    if C.BN_set_word(ctx, s) ~= 1 then
+      return nil, format_error("set_bn")
+    end
+  elseif type(s) == 'string' then
+    if not base or base == 10 then
+      return set_dec(ctx, s)
+    elseif base == 16 then
+      return set_hex(ctx, s)
+    elseif base == 2 then
+      return set_binary(ctx, s)
+    elseif base == 0 then
+      ctx = set_mpi(ctx, s)
+    else
+      return nil, "set_bn: unsupported base: " .. base
+    end
+  elseif s then
+    return nil, "set_bn: expect nil, a number or a string at #1"
+  end
+
+  return ctx
+end
+
+function _M.new(some, base)
   local ctx = C.BN_new()
   ffi_gc(ctx, C.BN_free)
 
-  if type(bn) == 'number' then
-    if C.BN_set_word(ctx, bn) ~= 1 then
-      return nil, format_error("bn.new")
-    end
-  elseif bn then
-    return nil, "bn.new: expect nil or a number at #1"
+  local ctx, err = set_bn(ctx, some, base)
+  if err then
+    return nil, "bn.new: " .. err
   end
 
   return setmetatable( { ctx = ctx }, mt), nil
@@ -46,6 +102,19 @@ function _M.dup(ctx)
   local self = setmetatable({
     ctx = ctx,
   }, mt)
+
+  return self
+end
+
+function _M:set(some, base)
+  if not some then
+    return nil, "expect a number or a string at #1"
+  end
+
+  local _, err = set_bn(self.ctx, some, base)
+  if err then
+    return nil, "bn:set: " .. err
+  end
 
   return self
 end
@@ -80,17 +149,22 @@ function _M:to_binary(pad)
   return ffi_str(buf, sz)
 end
 
-function _M.from_binary(s)
-  if type(s) ~= "string" then
-    return nil, "bn.from_binary: expect a string at #1"
+function _M:to_mpi(no_header)
+  local length = C.BN_bn2mpi(self.ctx, nil)
+  if length <= 0 then
+    return nil, format_error("bn:to_mpi")
   end
 
-  local ctx = C.BN_bin2bn(s, #s, nil)
-  if ctx == nil then
-    return nil, format_error("bn.from_binary")
+  local buf = ctypes.uchar_array(length)
+
+  local sz = C.BN_bn2mpi(self.ctx, buf)
+  if sz <= 0 then
+    return nil, format_error("bn:to_mpi")
   end
-  ffi_gc(ctx, C.BN_free)
-  return setmetatable( { ctx = ctx }, mt), nil
+
+  local ret = ffi_str(buf, sz)
+
+  return no_header and ret:sub(4) or ret
 end
 
 function _M:to_hex()
@@ -101,21 +175,6 @@ function _M:to_hex()
   ffi_gc(buf, crypto_macro.OPENSSL_free)
   local s = ffi_str(buf)
   return s
-end
-
-function _M.from_hex(s)
-  if type(s) ~= "string" then
-    return nil, "bn.from_hex: expect a string at #1"
-  end
-
-  local p = ffi_new(bn_ptrptr_ct)
-
-  if C.BN_hex2bn(p, s) == 0 then
-    return nil, format_error("bn.from_hex")
-  end
-  local ctx = p[0]
-  ffi_gc(ctx, C.BN_free)
-  return setmetatable( { ctx = ctx }, mt), nil
 end
 
 function _M:to_dec()
@@ -129,25 +188,34 @@ function _M:to_dec()
 end
 mt.__tostring = _M.to_dec
 
-function _M.from_dec(s)
-  if type(s) ~= "string" then
-    return nil, "bn.from_dec: expect a string at #1"
-  end
-
-  local p = ffi_new(bn_ptrptr_ct)
-
-  if C.BN_dec2bn(p, s) == 0 then
-    return nil, format_error("bn.from_dec")
-  end
-  local ctx = p[0]
-  ffi_gc(ctx, C.BN_free)
-  return setmetatable( { ctx = ctx }, mt), nil
-end
-
 function _M:to_number()
   return tonumber(C.BN_get_word(self.ctx))
 end
 _M.tonumber = _M.to_number
+
+local from_funcs = {
+  binary = set_binary,
+  mpi = set_mpi,
+  hex = set_hex,
+  dec = set_dec,
+}
+
+for typ, func in pairs(from_funcs) do
+  local sig = "from_" .. typ
+  _M[sig] = function(s)
+    if type(s) ~= "string" then
+      return nil, "bn." .. sig .. ": expect a string at #1"
+    end
+
+    local ctx, err = func(nil, s)
+    if not ctx then
+      return nil, "bn." .. sig .. ": " .. err
+    end
+
+    ffi_gc(ctx, C.BN_free)
+    return setmetatable( { ctx = ctx }, mt), nil
+  end
+end
 
 function _M.generate_prime(bits, safe)
   local ctx = C.BN_new()
@@ -373,12 +441,7 @@ function _M:is_prime(nchecks)
   end
   -- if nchecks is not defined, set to BN_prime_checks:
   -- select number of iterations based on the size of the number
-  local code
-  if OPENSSL_3X then
-    code = C.BN_check_prime(self.ctx, bn_ctx_tmp, nil)
-  else
-    code = C.BN_is_prime_ex(self.ctx, nchecks or 0, bn_ctx_tmp, nil)
-  end
+  local code = C.BN_is_prime_ex(self.ctx, nchecks or 0, bn_ctx_tmp, nil)
   if code == -1 then
     return nil, format_error("bn.is_prime")
   end

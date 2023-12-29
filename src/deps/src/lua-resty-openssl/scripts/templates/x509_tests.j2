@@ -1,7 +1,9 @@
-{%- set ns = namespace(idx=test_idx) %}
-{%- for f in module.fields %}
-  {%- if f.type in tests.types and not f.skip_tests%}
 
+
+
+{%+ set ns = namespace(idx=test_idx) -%}
+{%- for f in module.fields -%}
+  {%- if f.type in tests.types and not f.skip_tests -%}
 === TEST {{ ns.idx }}: {{ modname }}:get_{{ f.field }} (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
@@ -24,9 +26,10 @@
 "{{ f.sample_printable }}"
 --- no_error_log
 [error]
-    {%- set ns.idx = ns.idx + 1 %}
 
-=== TEST {{ ns.idx }}: {{ modname }}:set_{{ f.field }} (AUTOGEN)
+
+
+=== TEST {{ ns.idx + 1 }}: {{ modname }}:set_{{ f.field }} (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -61,11 +64,14 @@
 "ok"
 --- no_error_log
 [error]
-    {%- set ns.idx = ns.idx + 1 %}
-  {%- endif %}
-  {%- if f.extension_nid and not f.skip_tests %}
 
-=== TEST {{ ns.idx + 1 }}: {{ modname }}:get/set_{{ f.field }}_critical (AUTOGEN)
+
+
+{%+ set nop=1 -%}
+    {%- set ns.idx = ns.idx + 2 -%}
+  {%- endif -%}
+  {%- if f.extension_nid and not f.skip_tests -%}
+=== TEST {{ ns.idx }}: {{ modname }}:get/set_{{ f.field }}_critical (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
@@ -86,11 +92,14 @@
 true
 --- no_error_log
 [error]
-    {%- set ns.idx = ns.idx + 1 %}
-  {%- endif %}
-{%- endfor %}
 
-=== TEST {{ ns.idx + 1 }}: {{ modname }}:get_get_signature_name (AUTOGEN)
+
+
+{%+ set nop=1 -%}
+    {%- set ns.idx = ns.idx + 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+=== TEST {{ ns.idx }}: {{ modname }}:get_signature_name (AUTOGEN)
 --- http_config eval: $::HttpConfig
 --- config
     location =/t {
