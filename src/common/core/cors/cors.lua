@@ -4,6 +4,12 @@ local utils = require "bunkerweb.utils"
 
 local cors = class("cors", plugin)
 
+local ngx = ngx
+local HTTP_NO_CONTENT = ngx.HTTP_NO_CONTENT
+local WARN = ngx.WARN
+local regex_match = utils.regex_match
+local get_deny_status = utils.get_deny_status
+
 function cors:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "cors", ctx)
@@ -31,50 +37,51 @@ function cors:header()
 		return self:ret(true, "origin header not present")
 	end
 	-- Always include Vary header to prevent caching
-	local vary = ngx.header.Vary
+	local ngx_header = ngx.header
+	local vary = ngx_header.Vary
 	if vary then
 		if type(vary) == "string" then
-			ngx.header.Vary = { vary, "Origin" }
+			ngx_header.Vary = { vary, "Origin" }
 		else
 			table.insert(vary, "Origin")
-			ngx.header.Vary = vary
+			ngx_header.Vary = vary
 		end
 	else
-		ngx.header.Vary = "Origin"
+		ngx_header.Vary = "Origin"
 	end
 	-- Check if Origin is allowed
 	if
 		self.ctx.bw.http_origin
 		and self.variables["CORS_DENY_REQUEST"] == "yes"
 		and self.variables["CORS_ALLOW_ORIGIN"] ~= "*"
-		and not utils.regex_match(self.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"])
+		and not regex_match(self.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"])
 	then
-		self.logger:log(ngx.WARN, "origin " .. self.ctx.bw.http_origin .. " is not allowed")
+		self.logger:log(WARN, "origin " .. self.ctx.bw.http_origin .. " is not allowed")
 		return self:ret(true, "origin " .. self.ctx.bw.http_origin .. " is not allowed")
 	end
 	-- Set headers
 	if self.variables["CORS_ALLOW_ORIGIN"] == "*" then
-		ngx.header["Access-Control-Allow-Origin"] = "*"
+		ngx_header["Access-Control-Allow-Origin"] = "*"
 	else
-		ngx.header["Access-Control-Allow-Origin"] = self.ctx.bw.http_origin
+		ngx_header["Access-Control-Allow-Origin"] = self.ctx.bw.http_origin
 	end
 	for variable, header in pairs(self.all_headers) do
 		if self.variables[variable] ~= "" then
-			ngx.header[header] = self.variables[variable]
+			ngx_header[header] = self.variables[variable]
 		end
 	end
 	if self.ctx.bw.request_method == "OPTIONS" then
 		for variable, header in pairs(self.preflight_headers) do
 			if variable == "CORS_ALLOW_CREDENTIALS" then
 				if self.variables["CORS_ALLOW_CREDENTIALS"] == "yes" then
-					ngx.header[header] = "true"
+					ngx_header[header] = "true"
 				end
 			elseif self.variables[variable] ~= "" then
-				ngx.header[header] = self.variables[variable]
+				ngx_header[header] = self.variables[variable]
 			end
 		end
-		ngx.header["Content-Type"] = "text/html; charset=UTF-8"
-		ngx.header["Content-Length"] = "0"
+		ngx_header["Content-Type"] = "text/html; charset=UTF-8"
+		ngx_header["Content-Length"] = "0"
 		return self:ret(true, "edited headers for preflight request")
 	end
 	return self:ret(true, "edited headers for standard request")
@@ -90,17 +97,17 @@ function cors:access()
 		self.ctx.bw.http_origin
 		and self.variables["CORS_DENY_REQUEST"] == "yes"
 		and self.variables["CORS_ALLOW_ORIGIN"] ~= "*"
-		and not utils.regex_match(self.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"])
+		and not regex_match(self.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"])
 	then
 		return self:ret(
 			true,
 			"origin " .. self.ctx.bw.http_origin .. " is not allowed, denying access",
-			utils.get_deny_status(self.ctx)
+			get_deny_status()
 		)
 	end
 	-- Send CORS policy with a 204 (no content) status
 	if self.ctx.bw.request_method == "OPTIONS" and self.ctx.bw.http_origin then
-		return self:ret(true, "preflight request", ngx.HTTP_NO_CONTENT)
+		return self:ret(true, "preflight request", HTTP_NO_CONTENT)
 	end
 	return self:ret(true, "standard request")
 end

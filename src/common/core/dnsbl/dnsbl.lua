@@ -5,9 +5,20 @@ local utils = require "bunkerweb.utils"
 
 local dnsbl = class("dnsbl", plugin)
 
+local ngx = ngx
+local ERR = ngx.ERR
+local NOTICE = ngx.NOTICE
+local spawn = ngx.thread.spawn
+local wait = ngx.thread.wait
+local arpa_str = resolver.arpa_str
+local get_ips = utils.get_ips
+local has_variable = utils.has_variable
+local get_deny_status = utils.get_deny_status
+local kill_all_threads = utils.kill_all_threads
+
 local is_in_dnsbl = function(addr, server)
-	local request = resolver.arpa_str(addr):gsub("%.in%-addr%.arpa", ""):gsub("%.ip6%.arpa", "") .. "." .. server
-	local ips, err = utils.get_ips(request, false)
+	local request = arpa_str(addr):gsub("%.in%-addr%.arpa", ""):gsub("%.ip6%.arpa", "") .. "." .. server
+	local ips, err = get_ips(request, false, nil, true)
 	if not ips then
 		return nil, server, err
 	end
@@ -30,7 +41,7 @@ function dnsbl:init_worker()
 		return self:ret(false, "BW is loading")
 	end
 	-- Check if at least one service uses it
-	local is_needed, err = utils.has_variable("USE_DNSBL", "yes")
+	local is_needed, err = has_variable("USE_DNSBL", "yes")
 	if is_needed == nil then
 		return self:ret(false, "can't check USE_DNSBL variable : " .. err)
 	elseif not is_needed then
@@ -40,21 +51,21 @@ function dnsbl:init_worker()
 	local threads = {}
 	for server in self.variables["DNSBL_LIST"]:gmatch("%S+") do
 		-- Create thread
-		local thread = ngx.thread.spawn(is_in_dnsbl, "127.0.0.2", server)
+		local thread = spawn(is_in_dnsbl, "127.0.0.2", server)
 		threads[server] = thread
 	end
 	-- Wait for threads
 	for data, thread in pairs(threads) do
 		-- luacheck: ignore 421
-		local ok, result, server, err = ngx.thread.wait(thread)
+		local ok, result, server, err = wait(thread)
 		if not ok then
-			self.logger:log(ngx.ERR, "error while waiting thread of " .. data .. " check : " .. result)
+			self.logger:log(ERR, "error while waiting thread of " .. data .. " check : " .. result)
 		elseif result == nil then
-			self.logger:log(ngx.ERR, "error while sending DNS request to " .. server .. " : " .. err)
+			self.logger:log(ERR, "error while sending DNS request to " .. server .. " : " .. err)
 		elseif not result then
-			self.logger:log(ngx.ERR, "dnsbl check for " .. server .. " failed")
+			self.logger:log(ERR, "dnsbl check for " .. server .. " failed")
 		else
-			self.logger:log(ngx.NOTICE, "dnsbl check for " .. server .. " is successful")
+			self.logger:log(NOTICE, "dnsbl check for " .. server .. " is successful")
 		end
 	end
 	return self:ret(true, "success")
@@ -83,14 +94,14 @@ function dnsbl:access()
 		return self:ret(
 			true,
 			"client IP " .. self.ctx.bw.remote_addr .. " is in DNSBL cache (server = " .. cached .. ")",
-			utils.get_deny_status(self.ctx)
+			get_deny_status()
 		)
 	end
 	-- Loop on DNSBL list
 	local threads = {}
 	for server in self.variables["DNSBL_LIST"]:gmatch("%S+") do
 		-- Create thread
-		local thread = ngx.thread.spawn(is_in_dnsbl, self.ctx.bw.remote_addr, server)
+		local thread = spawn(is_in_dnsbl, self.ctx.bw.remote_addr, server)
 		threads[server] = thread
 	end
 	-- Wait for threads
@@ -109,7 +120,7 @@ function dnsbl:access()
 		end
 		-- Wait for first thread
 		-- luacheck: ignore 421
-		local ok, result, server, err = ngx.thread.wait(unpack(wait_threads))
+		local ok, result, server, err = wait(unpack(wait_threads))
 		-- Error case
 		if not ok then
 			ret_threads = false
@@ -120,7 +131,7 @@ function dnsbl:access()
 		threads[server] = nil
 		-- DNS error
 		if result == nil then
-			self.logger:log(ngx.ERR, "error while sending DNS request to " .. server .. " : " .. err)
+			self.logger:log(ERR, "error while sending DNS request to " .. server .. " : " .. err)
 		end
 		-- IP is in DNSBL
 		if result then
@@ -137,7 +148,7 @@ function dnsbl:access()
 			for _, thread in pairs(threads) do
 				table.insert(wait_threads, thread)
 			end
-			utils.kill_all_threads(wait_threads)
+			kill_all_threads(wait_threads)
 		end
 		-- Blacklisted by a server : add to cache and deny access
 		if ret_threads then
@@ -145,7 +156,7 @@ function dnsbl:access()
 			if not ok then
 				return self:ret(false, "error while adding element to cache : " .. err)
 			end
-			return self:ret(true, "IP is blacklisted by " .. ret_server, utils.get_deny_status(self.ctx))
+			return self:ret(true, "IP is blacklisted by " .. ret_server, get_deny_status())
 		end
 		-- Error case
 		return self:ret(false, ret_err)

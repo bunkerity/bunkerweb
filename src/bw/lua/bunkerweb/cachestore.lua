@@ -1,9 +1,19 @@
+local ngx = ngx
 local class = require "middleclass"
 local clusterstore = require "bunkerweb.clusterstore"
-local logger = require "bunkerweb.logger"
+local clogger = require "bunkerweb.logger"
 local mlcache = require "resty.mlcache"
 local utils = require "bunkerweb.utils"
 local cachestore = class("cachestore")
+
+local logger = clogger:new("CACHESTORE")
+
+local subsystem = ngx.config.subsystem
+local ERR = ngx.ERR
+local INFO = ngx.INFO
+local null = ngx.null
+local get_ctx_obj = utils.get_ctx_obj
+local is_cosocket_available = utils.is_cosocket_available
 
 -- Instantiate mlcache object at module level (which will be cached when running init phase)
 -- TODO : custom settings
@@ -11,7 +21,7 @@ local shm = "cachestore"
 local ipc_shm = "cachestore_ipc"
 local shm_miss = "cachestore_miss"
 local shm_locks = "cachestore_locks"
-if not ngx.shared.cachestore then
+if subsystem == "stream" then
 	shm = "cachestore_stream"
 	ipc_shm = "cachestore_ipc_stream"
 	shm_miss = "cachestore_miss_stream"
@@ -33,22 +43,18 @@ local cache, err = mlcache.new("cachestore", shm, {
 	},
 	ipc_shm = ipc_shm,
 })
-local module_logger = logger:new("CACHESTORE")
 if not cache then
-	module_logger:log(ngx.ERR, "can't instantiate mlcache : " .. err)
+	logger:log(ERR, "can't instantiate mlcache : " .. err)
 end
 
-function cachestore:initialize(use_redis, new_cs, ctx)
-	self.ctx = ctx
-	self.cache = cache
+function cachestore:initialize(use_redis, ctx, pool)
 	self.use_redis = use_redis or false
-	self.logger = module_logger
-	if new_cs then
-		self.clusterstore = clusterstore:new(false)
-		self.shared_cs = false
-	else
-		self.clusterstore = utils.get_ctx_obj("clusterstore", self.ctx)
-		self.shared_cs = true
+	if self.use_redis then
+		if ctx then
+			self.clusterstore = get_ctx_obj("clusterstore", ctx)
+		else
+			self.clusterstore = clusterstore:new(pool)
+		end
 	end
 end
 
@@ -57,8 +63,7 @@ function cachestore:get(key)
 	local callback = function(key, cs)
 		-- Connect to redis
 		-- luacheck: ignore 431
-		local clusterstore = cs or require "bunkerweb.clusterstore":new(false)
-		local ok, err, _ = clusterstore:connect()
+		local ok, err, _ = cs:connect()
 		if not ok then
 			return nil, "can't connect to redis : " .. err, nil
 		end
@@ -76,14 +81,14 @@ function cachestore:get(key)
 			end
 			return {ret_get, ret_ttl}
 		]]
-		local ret, err = clusterstore:call("eval", redis_script, 1, key)
+		local ret, err = cs:call("eval", redis_script, 1, key)
 		if not ret then
-			clusterstore:close()
+			cs:close()
 			return nil, err, nil
 		end
 		-- Extract values
-		clusterstore:close()
-		if ret[1] == ngx.null then
+		cs:close()
+		if ret[1] == null then
 			ret[1] = nil
 			ret[2] = -1
 		elseif ret[2] < 0 then
@@ -96,29 +101,25 @@ function cachestore:get(key)
 	end
 	-- luacheck: ignore 431
 	local value, err, hit_level
-	if self.use_redis and utils.is_cosocket_available() then
-		local cs = nil
-		if self.shared_cs then
-			cs = self.clusterstore
-		end
-		value, err, hit_level = self.cache:get(key, nil, callback, key, cs)
+	if self.use_redis and is_cosocket_available() then
+		value, err, hit_level = self.cache:get(key, nil, callback, key, self.clusterstore)
 	else
 		value, err, hit_level = self.cache:get(key, nil, callback_no_miss)
 	end
 	if value == nil and err ~= nil then
 		return false, err
 	end
-	self.logger:log(ngx.INFO, "hit level for " .. key .. " = " .. tostring(hit_level))
+	logger:log(INFO, "hit level for " .. key .. " = " .. tostring(hit_level))
 	return true, value
 end
 
 function cachestore:set(key, value, ex)
 	-- luacheck: ignore 431
 	local ok, err
-	if self.use_redis and utils.is_cosocket_available() then
+	if self.use_redis and is_cosocket_available() then
 		ok, err = self:set_redis(key, value, ex)
 		if not ok then
-			self.logger:log(ngx.ERR, err)
+			logger:log(ERR, err)
 		end
 	end
 	if ex then
@@ -153,10 +154,10 @@ end
 function cachestore:delete(key)
 	-- luacheck: ignore 431
 	local ok, err
-	if self.use_redis and utils.is_cosocket_available() then
+	if self.use_redis and is_cosocket_available() then
 		ok, err = self:del_redis(key)
 		if not ok then
-			self.logger:log(ngx.ERR, err)
+			logger:log(ERR, err)
 		end
 	end
 	ok, err = self.cache:delete(key)

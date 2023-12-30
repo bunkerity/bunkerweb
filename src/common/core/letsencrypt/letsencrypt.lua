@@ -6,6 +6,27 @@ local ssl = require "ngx.ssl"
 
 local letsencrypt = class("letsencrypt", plugin)
 
+local ngx = ngx
+local ERR = ngx.ERR
+local NOTICE = ngx.NOTICE
+local OK = ngx.OK
+local HTTP_NOT_FOUND = ngx.HTTP_NOT_FOUND
+local HTTP_OK = ngx.HTTP_OK
+local HTTP_BAD_REQUEST = ngx.HTTP_BAD_REQUEST
+local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
+local parse_pem_cert = ssl.parse_pem_cert
+local parse_pem_priv_key = ssl.parse_pem_priv_key
+local ssl_server_name = ssl.server_name
+local get_variable = utils.get_variable
+local get_multiple_variables = utils.get_multiple_variables
+local has_variable = utils.has_variable
+local open = io.open
+local sub = string.sub
+local match = string.match
+local decode = cjson.decode
+local execute = os.execute
+local remove = os.remove
+
 function letsencrypt:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "letsencrypt", ctx)
@@ -13,13 +34,13 @@ end
 
 function letsencrypt:init()
 	local ret_ok, ret_err = true, "success"
-    if utils.has_variable("AUTO_LETS_ENCRYPT", "yes") then
-		local multisite, err = utils.get_variable("MULTISITE", false)
+    if has_variable("AUTO_LETS_ENCRYPT", "yes") then
+		local multisite, err = get_variable("MULTISITE", false)
 		if not multisite then
 			return self:ret(false, "can't get MULTISITE variable : " .. err)
 		end
 		if multisite == "yes" then
-			local vars, err = utils.get_multiple_variables({"AUTO_LETS_ENCRYPT", "SERVER_NAME"})
+			local vars, err = get_multiple_variables({"AUTO_LETS_ENCRYPT", "SERVER_NAME"})
 			if not vars then
 				return self:ret(false, "can't get AUTO_LETS_ENCRYPT variables : " .. err)
 			end
@@ -27,13 +48,13 @@ function letsencrypt:init()
 				if multisite_vars["AUTO_LETS_ENCRYPT"] == "yes" and server_name ~= "global" then
 					local check, data = self:read_files(server_name)
 					if not check then
-						self.logger:log(ngx.ERR, "error while reading files : " .. data)
+						self.logger:log(ERR, "error while reading files : " .. data)
 						ret_ok = false
 						ret_err = "error reading files"
 					else
 						local check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
 						if not check then
-							self.logger:log(ngx.ERR, "error while loading data : " .. err)
+							self.logger:log(ERR, "error while loading data : " .. err)
 							ret_ok = false
 							ret_err = "error loading data"
 						end
@@ -41,19 +62,19 @@ function letsencrypt:init()
 				end
 			end
 		else
-			local server_name, err = utils.get_variable("SERVER_NAME", false)
+			local server_name, err = get_variable("SERVER_NAME", false)
 			if not server_name then
 				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 			end
 			local check, data = self:read_files(server_name:match("%S+"))
 			if not check then
-				self.logger:log(ngx.ERR, "error while reading files : " .. data)
+				self.logger:log(ERR, "error while reading files : " .. data)
 				ret_ok = false
 				ret_err = "error reading files"
 			else
 				local check, err = self:load_data(data, server_name)
 				if not check then
-					self.logger:log(ngx.ERR, "error while loading data : " .. err)
+					self.logger:log(ERR, "error while loading data : " .. err)
 					ret_ok = false
 					ret_err = "error loading data"
 				end
@@ -66,7 +87,7 @@ function letsencrypt:init()
 end
 
 function letsencrypt:ssl_certificate()
-	local server_name, err = ssl.server_name()
+	local server_name, err = ssl_server_name()
 	if not server_name then
 		return self:ret(false, "can't get server_name : " .. err)
 	end
@@ -87,7 +108,7 @@ function letsencrypt:read_files(server_name)
 	}
 	local data = {}
 	for i, file in ipairs(files) do
-		local f, err = io.open(file, "r")
+		local f, err = open(file, "r")
 		if not f then
 			return false, file .. " = " .. err
 		end
@@ -99,12 +120,12 @@ end
 
 function letsencrypt:load_data(data, server_name)
 	-- Load certificate
-	local cert_chain, err = ssl.parse_pem_cert(data[1])
+	local cert_chain, err = parse_pem_cert(data[1])
 	if not cert_chain then
 		return false, "error while parsing pem cert : " .. err
 	end
 	-- Load key
-	local priv_key, err = ssl.parse_pem_priv_key(data[2])
+	local priv_key, err = parse_pem_priv_key(data[2])
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
@@ -120,48 +141,45 @@ function letsencrypt:load_data(data, server_name)
 end
 
 function letsencrypt:access()
-	if string.sub(self.ctx.bw.uri, 1, string.len("/.well-known/acme-challenge/")) == "/.well-known/acme-challenge/" then
-		self.logger:log(ngx.NOTICE, "got a visit from Let's Encrypt, let's whitelist it")
-		return self:ret(true, "visit from LE", ngx.OK)
+	if sub(self.ctx.bw.uri, 1, string.len("/.well-known/acme-challenge/")) == "/.well-known/acme-challenge/" then
+		self.logger:log(NOTICE, "got a visit from Let's Encrypt, let's whitelist it")
+		return self:ret(true, "visit from LE", OK)
 	end
 	return self:ret(true, "success")
 end
 
 -- luacheck: ignore 212
-function letsencrypt:api(ctx)
+function letsencrypt:api()
 	if
-		not string.match(ctx.bw.uri, "^/lets%-encrypt/challenge$")
-		or (ctx.bw.request_method ~= "POST" and ctx.bw.request_method ~= "DELETE")
+		not match(self.ctx.bw.uri, "^/lets%-encrypt/challenge$")
+		or (self.ctx.bw.request_method ~= "POST" and self.ctx.bw.request_method ~= "DELETE")
 	then
-		return false, nil, nil
+		return self:ret(false, "success")
 	end
 	local acme_folder = "/var/tmp/bunkerweb/lets-encrypt/.well-known/acme-challenge/"
-	ngx.req.read_body()
-	local ret, data = pcall(cjson.decode, ngx.req.get_body_data())
+	local ngx_req = ngx.req
+	ngx_req.read_body()
+	local ret, data = pcall(decode, ngx_req.get_body_data())
 	if not ret then
-		return true, ngx.HTTP_BAD_REQUEST, { status = "error", msg = "json body decoding failed" }
+		return self:ret(true, "json body decoding failed", HTTP_BAD_REQUEST)
 	end
-	os.execute("mkdir -p " .. acme_folder)
-	if ctx.bw.request_method == "POST" then
-		local file, err = io.open(acme_folder .. data.token, "w+")
+	execute("mkdir -p " .. acme_folder)
+	if self.ctx.bw.request_method == "POST" then
+		local file, err = open(acme_folder .. data.token, "w+")
 		if not file then
-			return true,
-				ngx.HTTP_INTERNAL_SERVER_ERROR,
-				{ status = "error", msg = "can't write validation token : " .. err }
+			return self:ret(true, "can't write validation token : " .. err, HTTP_INTERNAL_SERVER_ERROR)
 		end
 		file:write(data.validation)
 		file:close()
-		return true, ngx.HTTP_OK, { status = "success", msg = "validation token written" }
+		return self:ret(true, "validation token written", HTTP_OK)
 	elseif ctx.bw.request_method == "DELETE" then
-		local ok, err = os.remove(acme_folder .. data.token)
+		local ok, err = remove(acme_folder .. data.token)
 		if not ok then
-			return true,
-				ngx.HTTP_INTERNAL_SERVER_ERROR,
-				{ status = "error", msg = "can't remove validation token : " .. err }
+			return self:ret(true, "can't remove validation token : " .. err, HTTP_INTERNAL_SERVER_ERROR)
 		end
-		return true, ngx.HTTP_OK, { status = "success", msg = "validation token removed" }
+		return true, HTTP_OK, { status = "success", msg = "validation token removed" }
 	end
-	return true, ngx.HTTP_NOT_FOUND, { status = "error", msg = "unknown request" }
+	return true, HTTP_NOT_FOUND, { status = "error", msg = "unknown request" }
 end
 
 return letsencrypt

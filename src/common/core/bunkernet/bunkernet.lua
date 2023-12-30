@@ -6,18 +6,41 @@ local utils = require "bunkerweb.utils"
 
 local bunkernet = class("bunkernet", plugin)
 
+local ngx = ngx
+local ERR = ngx.ERR
+local NOTICE = ngx.NOTICE
+local WARN = ngx.WARN
+local timer_at = ngx.timer.at
+local get_phase = ngx.get_phase
+local get_version = utils.get_version
+local get_integration = utils.get_integration
+local get_deny_status = utils.get_deny_status
+local is_ipv4 = utils.is_ipv4
+local is_ipv6 = utils.is_ipv6
+local ip_is_global = utils.ip_is_global
+local has_variable = utils.has_variable
+local is_whitelisted = utils.is_whitelisted
+local is_ip_in_networks = utils.is_ip_in_networks
+local get_reason = utils.get_reason
+local get_variable = utils.get_variable
+local tostring = tostring
+local open = io.open
+local encode = cjson.encode
+local decode = cjson.decode
+local http_new = http.new
+
 function bunkernet:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "bunkernet", ctx)
 	-- Get BunkerNet ID and save info
-	if ngx.get_phase() ~= "init" and self:is_needed() then
+	if get_phase() ~= "init" and self:is_needed() then
 		local id, err = self.datastore:get("plugin_bunkernet_id", true)
 		if id then
 			self.bunkernet_id = id
-			self.version = (self.ctx and self.ctx.bw.version) or utils.get_version()
-			self.integration = (self.ctx and self.ctx.bw.integration) or utils.get_integration()
+			self.version = (self.ctx and self.ctx.bw.version) or get_version()
+			self.integration = (self.ctx and self.ctx.bw.integration) or get_integration()
 		else
-			self.logger:log(ngx.ERR, "can't get BunkerNet ID from datastore : " .. err)
+			self.logger:log(ERR, "can't get BunkerNet ID from datastore : " .. err)
 		end
 	end
 end
@@ -32,9 +55,9 @@ function bunkernet:is_needed()
 		return self.variables["USE_BUNKERNET"] == "yes"
 	end
 	-- Other cases : at least one service uses it
-	local is_needed, err = utils.has_variable("USE_BUNKERNET", "yes")
+	local is_needed, err = has_variable("USE_BUNKERNET", "yes")
 	if is_needed == nil then
-		self.logger:log(ngx.ERR, "can't check USE_BUNKERNET variable : " .. err)
+		self.logger:log(ERR, "can't check USE_BUNKERNET variable : " .. err)
 	end
 	return is_needed
 end
@@ -59,7 +82,7 @@ function bunkernet:init_worker()
 			"received status " .. tostring(status) .. " from API using instance ID " .. self.bunkernet_id
 		)
 	end
-	self.logger:log(ngx.NOTICE, "connectivity with API using instance ID " .. self.bunkernet_id .. " is successful")
+	self.logger:log(NOTICE, "connectivity with API using instance ID " .. self.bunkernet_id .. " is successful")
 	return self:ret(true, "connectivity with API using instance ID " .. self.bunkernet_id .. " is successful")
 end
 
@@ -69,7 +92,7 @@ function bunkernet:init()
 		return self:ret(true, "no service uses BunkerNet, skipping init")
 	end
 	-- Check if instance ID is present
-	local f, err = io.open("/var/cache/bunkerweb/bunkernet/instance.id", "r")
+	local f, err = open("/var/cache/bunkerweb/bunkernet/instance.id", "r")
 	if not f then
 		return self:ret(false, "can't read instance id : " .. err)
 	end
@@ -87,12 +110,12 @@ function bunkernet:init()
 	local db = {
 		ip = {},
 	}
-	local f, err = io.open("/var/cache/bunkerweb/bunkernet/ip.list", "r")
+	local f, err = open("/var/cache/bunkerweb/bunkernet/ip.list", "r")
 	if not f then
 		ret = false
 	else
 		for line in f:lines() do
-			if (utils.is_ipv4(line) or utils.is_ipv6(line)) and utils.ip_is_global(line) then
+			if (is_ipv4(line) or is_ipv6(line)) and ip_is_global(line) then
 				table.insert(db.ip, line)
 				i = i + 1
 			end
@@ -123,7 +146,7 @@ function bunkernet:access()
 		return self:ret(true, "IP is not global")
 	end
 	-- Check if whitelisted
-	if self.ctx.bw.is_whitelisted == "yes" then
+	if is_whitelisted(self.ctx) then
 		return self:ret(true, "client is whitelisted")
 	end
 	-- Extract DB
@@ -132,12 +155,12 @@ function bunkernet:access()
 		-- Check if is IP is present
 		if #db.ip > 0 then
 			-- luacheck: ignore 421
-			local present, err = utils.is_ip_in_networks(self.ctx.bw.remote_addr, db.ip)
+			local present, err = is_ip_in_networks(self.ctx.bw.remote_addr, db.ip)
 			if present == nil then
 				return self:ret(false, "can't check if ip is in db : " .. err)
 			end
 			if present then
-				return self:ret(true, "ip is in db", utils.get_deny_status(self.ctx))
+				return self:ret(true, "ip is in db", get_deny_status())
 			end
 		end
 	else
@@ -158,7 +181,7 @@ function bunkernet:log(bypass_checks)
 		end
 	end
 	-- Check if IP has been blocked
-	local reason = utils.get_reason(self.ctx)
+	local reason = get_reason(self.ctx)
 	if not reason then
 		return self:ret(true, "ip is not blocked")
 	end
@@ -169,20 +192,30 @@ function bunkernet:log(bypass_checks)
 	if not self.ctx.bw.ip_is_global then
 		return self:ret(true, "IP is not global")
 	end
-	-- TODO : check if IP has been reported recently
+	-- Check if IP has been reported recently
+	local ok, data = self.cachestore:get("plugin_bunkernet_" .. self.ctx.bw.remote_addr .. "_" .. reason)
+	if not ok then
+		self.logger:log(ERR, "can't check cachestore : " .. data)
+	elseif data then
+		return self:ret(true, "already reported recently")
+	end
 	-- luacheck: ignore 212 431
-	local function report_callback(premature, obj, ip, reason, method, url, headers)
+	local function report_callback(premature, obj, ip, reason, method, url, headers, use_redis)
 		local ok, err, status, _ = obj:report(ip, reason, method, url, headers)
 		if status == 429 then
-			obj.logger:log(ngx.WARN, "bunkernet API is rate limiting us")
+			obj.logger:log(WARN, "bunkernet API is rate limiting us")
 		elseif not ok then
-			obj.logger:log(ngx.ERR, "can't report IP : " .. err)
+			obj.logger:log(ERR, "can't report IP : " .. err)
 		else
-			obj.logger:log(ngx.NOTICE, "successfully reported IP " .. ip .. " (reason : " .. reason .. ")")
+			obj.logger:log(NOTICE, "successfully reported IP " .. ip .. " (reason : " .. reason .. ")")
+			local cachestore = require "bunkerweb.cachestore":new(use_redis, nil, true)
+			local ok, err = cachestore:set("plugin_bunkernet_" .. ip .. "_" .. reason)
+			if not ok then
+				obj.logger:log(ERR, "error from cachestore : " .. err)
+			end
 		end
 	end
-
-	local hdr, err = ngx.timer.at(
+	local hdr, err = timer_at(
 		0,
 		report_callback,
 		self,
@@ -208,7 +241,7 @@ function bunkernet:log_default()
 		return self:ret(false, "missing instance ID")
 	end
 	-- Check if default server is disabled
-	local check, err = utils.get_variable("DISABLE_DEFAULT_SERVER", false)
+	local check, err = get_variable("DISABLE_DEFAULT_SERVER", false)
 	if check == nil then
 		return self:ret(false, "error while getting variable DISABLE_DEFAULT_SERVER : " .. err)
 	end
@@ -224,7 +257,7 @@ function bunkernet:log_stream()
 end
 
 function bunkernet:request(method, url, data)
-	local httpc, err = http.new()
+	local httpc, err = http_new()
 	if not httpc then
 		return false, "can't instantiate http object : " .. err
 	end
@@ -240,7 +273,7 @@ function bunkernet:request(method, url, data)
 	end
 	local res, err = httpc:request_uri(self.variables["BUNKERNET_SERVER"] .. url, {
 		method = method,
-		body = cjson.encode(all_data),
+		body = encode(all_data),
 		headers = {
 			["Content-Type"] = "application/json",
 			["User-Agent"] = "BunkerWeb/" .. self.version,
@@ -253,7 +286,7 @@ function bunkernet:request(method, url, data)
 	if res.status ~= 200 then
 		return false, "status code != 200", res.status, nil
 	end
-	local ok, ret = pcall(cjson.decode, res.body)
+	local ok, ret = pcall(decode, res.body)
 	if not ok then
 		return false, "error while decoding json : " .. ret
 	end
