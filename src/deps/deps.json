@@ -234,6 +234,12 @@
       "name": "zlib v1.3",
       "url": "https://github.com/madler/zlib.git",
       "commit": "09155eaa2f9270dc4ed1fa13e2b4b2613e6e4851"
+    },
+    {
+      "id": "lua-resty-redis-connector",
+      "name": "lua-resty-redis-connector v0.11.0",
+      "url": "https://github.com/ledgetech/lua-resty-redis-connector.git",
+      "commit": "02a29f93253d1f6ad392c5ac2b643c57e62b5979"
     }
   ]
 }

@@ -6,9 +6,10 @@ local utils = require "bunkerweb.utils"
 local country = class("country", plugin)
 
 local ngx = ngx
+local get_country = utils.get_country
 local get_deny_status = utils.get_deny_status
 local decode = cjson.decode
-local get_country = cjson.get_country
+local encode = cjson.encode
 
 function country:initialize(ctx)
 	-- Call parent initialize
@@ -130,7 +131,7 @@ end
 function country:add_to_cache(ip, country_data, result)
 	local ok, err = self.cachestore:set(
 		"plugin_country_" .. self.ctx.bw.server_name .. ip,
-		encode { country = country_data, result = result },
+		encode({ country = country_data, result = result }),
 		86400
 	)
 	if not ok then

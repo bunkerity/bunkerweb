@@ -321,7 +321,7 @@ end
 utils.is_whitelisted = function(ctx)
 	-- ngx.ctx
 	if ctx and ctx.bw and ctx.bw.is_whitelisted then
-		return ctx.bw.is_whitelisted
+		return ctx.bw.is_whitelisted == "yes"
 	end
 	-- ngx.var
 	if var.is_whitelisted and var.is_whitelisted == "yes" then
