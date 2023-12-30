@@ -1,7 +1,8 @@
 local ngx = ngx
 local class = require "middleclass"
 local clogger = require "bunkerweb.logger"
-local redis = require "resty.redis"
+local rc = require "resty.redis.connector"
+local rs = require("resty.redis.sentinel")
 local utils = require "bunkerweb.utils"
 
 local clusterstore = class("clusterstore")
@@ -12,6 +13,7 @@ local get_variable = utils.get_variable
 local is_cosocket_available = utils.is_cosocket_available
 local ERR = ngx.ERR
 local tonumber = tonumber
+local random = math.random
 
 function clusterstore:initialize(pool)
 	-- Get variables
@@ -23,6 +25,12 @@ function clusterstore:initialize(pool)
 		["REDIS_TIMEOUT"] = "",
 		["REDIS_KEEPALIVE_IDLE"] = "",
 		["REDIS_KEEPALIVE_POOL"] = "",
+		["REDIS_USERNAME"] = "",
+		["REDIS_PASSWORD"] = "",
+		["REDIS_SENTINEL_HOSTS"] = "",
+		["REDIS_SENTINEL_USERNAME"] = "",
+		["REDIS_SENTINEL_PASSWORD"] = "",
+		["REDIS_SENTINEL_MASTER"] = ""
 	}
 	-- Set them for later use
 	self.variables = {}
@@ -33,55 +41,98 @@ function clusterstore:initialize(pool)
 		end
 		self.variables[k] = value
 	end
+	-- Compute options
+	local options = {
+		connect_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
+		read_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
+		write_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
+		keepalive_timeout = tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]),
+		keepalive_poolsize = tonumber(self.variables["REDIS_KEEPALIVE_POOL"]),
+		connection_options = {
+			ssl = self.variables["REDIS_SSL"] == "yes",
+			
+		},
+		host = self.variables["REDIS_HOST"],
+		port = tonumber(self.variables["REDIS_PORT"]),
+		db = tonumber(self.variables["REDIS_DATABASE"]),
+		username = self.variables["REDIS_USERNAME"],
+		password = self.variables["REDIS_PASSWORD"],
+		sentinel_username = self.variables["REDIS_SENTINEL_USERNAME"],
+		sentinel_password = self.variables["REDIS_SENTINEL_PASSWORD"],
+		master_name = self.variables["REDIS_SENTINEL_MASTER"],
+		role = "master",
+		sentinels = {}
+	}
+	if pool == nil or pool then
+		options.connection_options.pool = "bw-redis",
+		options.connection_options.pool_size = tonumber(self.variables["REDIS_KEEPALIVE_POOL"])
+	end
+	if self.variables["REDIS_SENTINEL_HOSTS"] ~= "" then
+		for sentinel_host in self.variables["REDIS_SENTINEL_HOSTS"]:gmatch("%S+") do
+			local shost, sport = sentinel_host:match("([^:]+):?(%d*)")
+			if sport == "" then
+				sport = 26379
+			else
+				sport = tonumber(sport)
+			end
+			table.insert(options.sentinel, {host = shost, port = sport})
+		end
+	end
+	self.options = options
 	-- Instantiate object
-	self.pool = pool == nil or pool
 	if is_cosocket_available() then
-		local redis_client, err = redis:new()
-		self.redis_client = redis_client
-		if self.redis_client == nil then
+		local redis_connector, err = rc:new(self.options)
+		self.redis_connector = redis_connector
+		if self.redis_connector == nil then
 			logger:log(ERR, "can't instantiate redis object : " .. err)
 			return
 		end
-		self.redis_client:set_timeout(tonumber(self.variables["REDIS_TIMEOUT"]))
 	end
 end
 
-function clusterstore:connect()
-	-- Check if client is created
-	if not self.redis_client then
-		return false, "client is not instantiated"
+function clusterstore:connect(readonly)
+	-- Check if connector is created
+	if not self.redis_connector then
+		return false, "connector is not instantiated"
 	end
-	-- Set options
-	local options = {
-		ssl = self.variables["REDIS_SSL"] == "yes",
-	}
-	if self.pool then
-		options.pool = "bw-redis"
-		options.pool_size = tonumber(self.variables["REDIS_KEEPALIVE_POOL"])
+	-- Disconnect if needed
+	if self.redis_client then
+		self:close()
 	end
-	-- Connect
-	local ok, err = self.redis_client:connect(self.variables["REDIS_HOST"], tonumber(self.variables["REDIS_PORT"]), options)
-	if not ok then
-		return false, err
-	end
-	-- Select database if needed
-	local times, err = self.redis_client:get_reused_times()
-	if err then
-		self.redis_client:close()
-		return false, err
-	end
-	if times < 2 then
-		-- luacheck: ignore 421
-		local _, err = self.redis_client:select(tonumber(self.variables["REDIS_DATABASE"]))
-		if err then
-			self.redis_client:close()
-			return false, err
+	-- Connect to sentinels if needed
+	local redis_client, err
+	if #self.options.sentinels > 0 then
+		local redis_sentinel, err = self.redis_connector:connect()
+		if not redis_sentinel then
+			return false, "error while connecting to sentinels : " .. err
 		end
+		if readonly then
+			redis_clients, err = rs.get_slaves(redis_sentinel, self.options.master_name)
+			if redis_clients then
+				redis_client = redis_clients[random(#redis_clients)]
+			else
+				redis_client = nil
+			end
+		else
+			redis_client, err = rs.get_master(redis_sentinel, self.options.master_name)
+		end
+	-- Classic connection
+	else
+		redis_client, err = self.redis_connector:connect()
 	end
-	return true, "success", times
+	self.redis_client = redis_client
+	if not self.redis_client then
+		return false, "error while getting redis client : " .. err
+	end
+	-- Everything went well
+	return true, "success", self.redis_client:get_reused_times()
 end
 
 function clusterstore:close()
+	-- Check if connected is created
+	if not self.redis_connector then
+		return false, "connector is not instantiated"
+	end
 	-- Check if client is created
 	if not self.redis_client then
 		return false, "client is not instantiated"
@@ -89,14 +140,12 @@ function clusterstore:close()
 	-- Pool case
 	local ok, err
 	if self.pool then
-		ok, err = self.redis_client:set_keepalive(
-			tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]),
-			tonumber(self.variables["REDIS_KEEPALIVE_POOL"])
-		)
+		ok, err = self.redis_connector:set_keepalive(self.redis_client)
 	-- No pool
 	else
 		ok, err = self.redis_client:close()
 	end
+	self.redis_client = nil
 	if err then
 		logger:log(ERR, "error while closing redis_client : " .. err)
 	end
