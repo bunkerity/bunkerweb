@@ -102,9 +102,9 @@ function cachestore:get(key)
 	-- luacheck: ignore 431
 	local value, err, hit_level
 	if self.use_redis and is_cosocket_available() then
-		value, err, hit_level = self.cache:get(key, nil, callback, key, self.clusterstore)
+		value, err, hit_level = cache:get(key, nil, callback, key, self.clusterstore)
 	else
-		value, err, hit_level = self.cache:get(key, nil, callback_no_miss)
+		value, err, hit_level = cache:get(key, nil, callback_no_miss)
 	end
 	if value == nil and err ~= nil then
 		return false, err
@@ -123,9 +123,9 @@ function cachestore:set(key, value, ex)
 		end
 	end
 	if ex then
-		ok, err = self.cache:set(key, { ttl = ex }, value)
+		ok, err = cache:set(key, { ttl = ex }, value)
 	else
-		ok, err = self.cache:set(key, nil, value)
+		ok, err = cache:set(key, nil, value)
 	end
 	if not ok then
 		return false, err
@@ -160,7 +160,7 @@ function cachestore:delete(key)
 			logger:log(ERR, err)
 		end
 	end
-	ok, err = self.cache:delete(key)
+	ok, err = cache:delete(key)
 	if not ok then
 		return false, err
 	end
@@ -185,7 +185,11 @@ function cachestore:del_redis(key)
 end
 
 function cachestore:purge()
-	return self.cache:purge(true)
+	return cache:purge(true)
+end
+
+function cachestore:update()
+	return cache:update()
 end
 
 return cachestore

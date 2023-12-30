@@ -37,8 +37,8 @@ function bunkernet:initialize(ctx)
 		local id, err = self.datastore:get("plugin_bunkernet_id", true)
 		if id then
 			self.bunkernet_id = id
-			self.version = (self.ctx and self.ctx.bw.version) or get_version()
-			self.integration = (self.ctx and self.ctx.bw.integration) or get_integration()
+			self.version = get_version(self.ctx)
+			self.integration = get_integration(self.ctx)
 		else
 			self.logger:log(ERR, "can't get BunkerNet ID from datastore : " .. err)
 		end

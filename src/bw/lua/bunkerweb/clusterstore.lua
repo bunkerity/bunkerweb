@@ -9,6 +9,7 @@ local clusterstore = class("clusterstore")
 local logger = clogger:new("CLUSTERSTORE")
 
 local get_variable = utils.get_variable
+local is_cosocket_available = utils.is_cosocket_available
 local ERR = ngx.ERR
 local tonumber = tonumber
 
@@ -34,13 +35,15 @@ function clusterstore:initialize(pool)
 	end
 	-- Instantiate object
 	self.pool = pool == nil or pool
-	local redis_client, err = redis:new()
-	self.redis_client = redis_client
-	if self.redis_client == nil then
-		logger:log(ERR, "can't instantiate redis object : " .. err)
-		return
+	if is_cosocket_available() then
+		local redis_client, err = redis:new()
+		self.redis_client = redis_client
+		if self.redis_client == nil then
+			logger:log(ERR, "can't instantiate redis object : " .. err)
+			return
+		end
+		self.redis_client:set_timeout(tonumber(self.variables["REDIS_TIMEOUT"]))
 	end
-	self.redis_client:set_timeout(tonumber(self.variables["REDIS_TIMEOUT"]))
 end
 
 function clusterstore:connect()

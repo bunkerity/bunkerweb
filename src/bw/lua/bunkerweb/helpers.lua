@@ -16,8 +16,6 @@ local subsystem = ngx.config.subsystem
 local var = ngx.var
 local req = ngx.req
 local ip_is_global = utils.ip_is_global
-local get_integration = utils.get_integration
-local get_version = utils.get_version
 local is_ipv4 = utils.is_ipv4
 local is_ipv6 = utils.is_ipv6
 local get_variable = utils.get_variable
@@ -209,9 +207,6 @@ helpers.fill_ctx = function()
 			-- IP data : v4 / v6
 			data.ip_is_ipv4 = is_ipv4(data.ip)
 			data.ip_is_ipv6 = is_ipv6(data.ip)
-			-- Misc info
-			data.integration = get_integration()
-			data.version = get_version()
 		end
 		-- Fill ctx
 		ctx.bw = data

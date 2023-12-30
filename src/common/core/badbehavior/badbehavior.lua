@@ -4,7 +4,7 @@ local utils = require "bunkerweb.utils"
 
 local badbehavior = class("badbehavior", plugin)
 
-local ngx
+local ngx = ngx
 local ERR = ngx.ERR
 local WARN = ngx.WARN
 local NOTICE = ngx.NOTICE

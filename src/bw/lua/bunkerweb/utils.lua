@@ -198,7 +198,11 @@ utils.ip_is_global = function(ip)
 	return not matched, "success"
 end
 
-utils.get_integration = function()
+utils.get_integration = function(ctx)
+	-- Check if already in ctx
+	if ctx and ctx.bw.integration then
+		return ctx.bw.integration
+	end
 	-- Check if already in datastore
 	local integration, _ = datastore:get("misc_integration", true)
 	if integration then
@@ -248,10 +252,17 @@ utils.get_integration = function()
 	if not ok then
 		logger:log(ERR, "can't cache integration to datastore : " .. err)
 	end
+	if ctx then
+		ctx.bw.integration = integration
+	end
 	return integration
 end
 
-utils.get_version = function()
+utils.get_version = function(ctx)
+	-- Check if already in ctx
+	if ctx and ctx.bw.version then
+		return ctx.bw.version
+	end
 	-- Check if already in datastore
 	local version, _ = datastore:get("misc_version", true)
 	if version then
@@ -265,10 +276,13 @@ utils.get_version = function()
 	end
 	version = f:read("*a"):gsub("[\n\r]", "")
 	f:close()
-	-- Save it to datastore
+	-- Save version
 	local ok, err = datastore:set("misc_version", version, nil, true)
 	if not ok then
 		logger:log(ERR, "can't cache version to datastore : " .. err)
+	end
+	if ctx then
+		ctx.bw.version = version
 	end
 	return version
 end
@@ -725,6 +739,7 @@ utils.get_phases = function()
 		"init",
 		"init_worker",
 		"set",
+		"rewrite",
 		"access",
 		"content",
 		"ssl_certificate",
@@ -732,16 +747,18 @@ utils.get_phases = function()
 		"log",
 		"preread",
 		"log_stream",
-		"log_default",
+		"log_default"
 	}
 end
 
 utils.is_cosocket_available = function()
 	local phases = {
 		"timer",
+		"rewrite",
 		"access",
+		"content",
 		"ssl_certificate",
-		"preread",
+		"preread"
 	}
 	local current_phase = get_phase()
 	for _, phase in ipairs(phases) do
