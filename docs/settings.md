@@ -205,11 +205,13 @@ STREAM support :white_check_mark:
 
 Choose custom certificate for HTTPS.
 
-|     Setting     |Default| Context |Multiple|                                  Description                                   |
-|-----------------|-------|---------|--------|--------------------------------------------------------------------------------|
-|`USE_CUSTOM_SSL` |`no`   |multisite|no      |Use custom HTTPS certificate.                                                   |
-|`CUSTOM_SSL_CERT`|       |multisite|no      |Full path of the certificate or bundle file (must be readable by the scheduler).|
-|`CUSTOM_SSL_KEY` |       |multisite|no      |Full path of the key file (must be readable by the scheduler).                  |
+|       Setting        |Default| Context |Multiple|                                  Description                                   |
+|----------------------|-------|---------|--------|--------------------------------------------------------------------------------|
+|`USE_CUSTOM_SSL`      |`no`   |multisite|no      |Use custom HTTPS certificate.                                                   |
+|`CUSTOM_SSL_CERT`     |       |multisite|no      |Full path of the certificate or bundle file (must be readable by the scheduler).|
+|`CUSTOM_SSL_KEY`      |       |multisite|no      |Full path of the key file (must be readable by the scheduler).                  |
+|`CUSTOM_SSL_CERT_DATA`|       |multisite|no      |Certificate data encoded in base64.                                             |
+|`CUSTOM_SSL_KEY_DATA` |       |multisite|no      |Key data encoded in base64.                                                     |
 
 ### DB
 
@@ -425,16 +427,22 @@ STREAM support :white_check_mark:
 
 Redis server configuration when using BunkerWeb in cluster mode.
 
-|       Setting        |Default|Context|Multiple|                           Description                            |
-|----------------------|-------|-------|--------|------------------------------------------------------------------|
-|`USE_REDIS`           |`no`   |global |no      |Activate Redis.                                                   |
-|`REDIS_HOST`          |       |global |no      |Redis server IP or hostname.                                      |
-|`REDIS_PORT`          |`6379` |global |no      |Redis server port.                                                |
-|`REDIS_DATABASE`      |`0`    |global |no      |Redis database number.                                            |
-|`REDIS_SSL`           |`no`   |global |no      |Use SSL/TLS connection with Redis server.                         |
-|`REDIS_TIMEOUT`       |`1000` |global |no      |Redis server timeout (in ms) for connect, read and write.         |
-|`REDIS_KEEPALIVE_IDLE`|`30000`|global |no      |Max idle time (in ms) before closing redis connection in the pool.|
-|`REDIS_KEEPALIVE_POOL`|`10`   |global |no      |Max number of redis connection(s) kept in the pool.               |
+|         Setting         |Default|Context|Multiple|                            Description                            |
+|-------------------------|-------|-------|--------|-------------------------------------------------------------------|
+|`USE_REDIS`              |`no`   |global |no      |Activate Redis.                                                    |
+|`REDIS_HOST`             |       |global |no      |Redis server IP or hostname.                                       |
+|`REDIS_PORT`             |`6379` |global |no      |Redis server port.                                                 |
+|`REDIS_DATABASE`         |`0`    |global |no      |Redis database number.                                             |
+|`REDIS_SSL`              |`no`   |global |no      |Use SSL/TLS connection with Redis server.                          |
+|`REDIS_TIMEOUT`          |`1000` |global |no      |Redis server timeout (in ms) for connect, read and write.          |
+|`REDIS_KEEPALIVE_IDLE`   |`30000`|global |no      |Max idle time (in ms) before closing redis connection in the pool. |
+|`REDIS_KEEPALIVE_POOL`   |`10`   |global |no      |Max number of redis connection(s) kept in the pool.                |
+|`REDIS_USERNAME`         |       |global |no      |Redis username used in AUTH command.                               |
+|`REDIS_PASSWORD`         |       |global |no      |Redis password used in AUTH command.                               |
+|`REDIS_SENTINEL_HOSTS`   |       |global |no      |Redis sentinel hosts with format host:[port] separated with spaces.|
+|`REDIS_SENTINEL_USERNAME`|       |global |no      |Redis sentinel username.                                           |
+|`REDIS_SENTINEL_PASSWORD`|       |global |no      |Redis sentinel password.                                           |
+|`REDIS_SENTINEL_MASTER`  |       |global |no      |Redis sentinel master name.                                        |
 
 ### Reverse proxy
 
@@ -469,6 +477,7 @@ Manage reverse proxy configurations.
 |`REVERSE_PROXY_CONNECT_TIMEOUT`        |`60s`                             |multisite|yes     |Timeout when connecting to the proxied resource.                                                                             |
 |`REVERSE_PROXY_READ_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when reading from the proxied resource.                                                                              |
 |`REVERSE_PROXY_SEND_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when sending to the proxied resource.                                                                                |
+|`REVERSE_PROXY_INCLUDES`               |                                  |multisite|yes     |Additional configuration to include in the location block, separated with spaces.                                            |
 
 ### Reverse scan
 
@@ -541,3 +550,4 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
 |`WHITELIST_URI`            |                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |
+

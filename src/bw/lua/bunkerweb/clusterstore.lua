@@ -18,6 +18,7 @@ local random = math.random
 function clusterstore:initialize(pool)
 	-- Get variables
 	local variables = {
+		["USE_REDIS"] = "",
 		["REDIS_HOST"] = "",
 		["REDIS_PORT"] = "",
 		["REDIS_DATABASE"] = "",
@@ -41,11 +42,15 @@ function clusterstore:initialize(pool)
 		end
 		self.variables[k] = value
 	end
+	-- Don't go further if redis is not used
+	if self.variables["USE_REDIS"] ~= "yes" then
+		return
+	end
 	-- Compute options
 	local options = {
 		connect_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
 		read_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
-		write_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
+		send_timeout = tonumber(self.variables["REDIS_TIMEOUT"]),
 		keepalive_timeout = tonumber(self.variables["REDIS_KEEPALIVE_IDLE"]),
 		keepalive_poolsize = tonumber(self.variables["REDIS_KEEPALIVE_POOL"]),
 		connection_options = {
@@ -64,7 +69,7 @@ function clusterstore:initialize(pool)
 		sentinels = {}
 	}
 	if pool == nil or pool then
-		options.connection_options.pool = "bw-redis",
+		options.connection_options.pool = "bw-redis"
 		options.connection_options.pool_size = tonumber(self.variables["REDIS_KEEPALIVE_POOL"])
 	end
 	if self.variables["REDIS_SENTINEL_HOSTS"] ~= "" then
@@ -81,7 +86,7 @@ function clusterstore:initialize(pool)
 	self.options = options
 	-- Instantiate object
 	if is_cosocket_available() then
-		local redis_connector, err = rc:new(self.options)
+		local redis_connector, err = rc.new(self.options)
 		self.redis_connector = redis_connector
 		if self.redis_connector == nil then
 			logger:log(ERR, "can't instantiate redis object : " .. err)
