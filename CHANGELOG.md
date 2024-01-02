@@ -8,7 +8,10 @@
 - [FEATURE] Add support for fallback Referrer-Policies
 - [FEATURE] Add profile page to web ui and the possibility to activate the 2FA
 - [FEATURE] Add setting REVERSE_PROXY_INCLUDES to manually add "include" directives in the reverse proxies
+- [FEATURE] Add support for Redis Sentinel
+- [FEATURE] Add support for tls in Ingress definition
 - [MISC] Fallback to default HTTPS certificate to prevent errors
+- [MISC] Various internal improvements in LUA code
 - [MISC] Updated Python Docker image to 3.12.1-alpine3.18 in Dockerfiles
 - [DEPS] Updated ModSecurity to v3.0.11
 

@@ -5,6 +5,12 @@ local utils = require "bunkerweb.utils"
 
 local sessions = class("sessions", plugin)
 
+local ngx = ngx
+local ERR = ngx.ERR
+local get_variable = utils.get_variable
+local session_init = session.init
+local tonumber = tonumber
+
 function sessions:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "sessions", ctx)
@@ -57,7 +63,7 @@ function sessions:init()
 		["REDIS_KEEPALIVE_POOL"] = "",
 	}
 	for k, _ in pairs(redis_vars) do
-		local value, err = utils.get_variable(k, false)
+		local value, err = get_variable(k, false)
 		if value == nil then
 			return self:ret(false, "can't get " .. k .. " variable : " .. err)
 		end
@@ -78,7 +84,7 @@ function sessions:init()
 			config.secret = utils.rand(16)
 			local ok, err = self.datastore:set("storage_sessions_SESSIONS_SECRET", config.secret)
 			if not ok then
-				self.logger:log(ngx.ERR, "error from datastore:set : " .. err)
+				self.logger:log(ERR, "error from datastore:set : " .. err)
 			end
 		end
 	end
@@ -89,7 +95,7 @@ function sessions:init()
 			config.cookie_name = utils.rand(16)
 			local ok, err = self.datastore:set("storage_sessions_SESSIONS_NAME", config.cookie_name)
 			if not ok then
-				self.logger:log(ngx.ERR, "error from datastore:set : " .. err)
+				self.logger:log(ERR, "error from datastore:set : " .. err)
 			end
 		end
 	end
@@ -111,7 +117,7 @@ function sessions:init()
 			database = tonumber(redis_vars["REDIS_DATABASE"]),
 		}
 	end
-	session.init(config)
+	session_init(config)
 	return self:ret(true, "sessions init successful")
 end
 

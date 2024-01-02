@@ -1,0 +1,23 @@
+version: "3.5"
+
+services:
+  tests:
+    build: .
+    environment:
+      PYTHONUNBUFFERED: "1"
+      USE_REVERSE_SCAN: "no"
+      USE_ANTIBOT: "no"
+
+      REDIS_SENTINEL_HOSTS: "bw-sentinel-1 bw-sentinel-2 bw-sentinel-3"
+      REDIS_SENTINEL_MASTER: "mymasterset"
+      REDIS_DATABASE: "0"
+      REDIS_SSL: "no"
+    extra_hosts:
+      - "www.example.com:1.0.0.2"
+    networks:
+      bw-services:
+        ipv4_address: 1.0.0.3
+
+networks:
+  bw-services:
+    external: true

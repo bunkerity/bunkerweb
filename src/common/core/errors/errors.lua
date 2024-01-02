@@ -1,8 +1,14 @@
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
+
+local ngx = ngx
+local subsystem = ngx.config.subsystem
+
 local template = nil
-if ngx.shared.datastore then
+local render = nil
+if subsystem == "http" then
 	template = require "resty.template"
+	render = template.render
 end
 
 local errors = class("errors", plugin)
@@ -65,7 +71,7 @@ end
 
 function errors:render_template(code)
 	-- Render template
-	template.render("error.html", {
+	render("error.html", {
 		title = code .. " - " .. self.default_errors[code].title,
 		error_title = self.default_errors[code].title,
 		error_code = code,

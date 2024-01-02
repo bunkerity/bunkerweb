@@ -1,18 +1,25 @@
+local ngx = ngx
 local class = require "middleclass"
+local clogger = require "bunkerweb.logger"
 local lrucache = require "resty.lrucache"
 local datastore = class("datastore")
 
-local lru, err = lrucache.new(100000)
+local logger = clogger:new("DATASTORE")
+
+local ERR = ngx.ERR
+local subsystem = ngx.config.subsystem
+local shared = ngx.shared
+
+local lru, err_lru = lrucache.new(100000)
 if not lru then
-	require "bunkerweb.logger"
-		:new("DATASTORE")
-		:log(ngx.ERR, "failed to instantiate LRU cache : " .. (err or "unknown error"))
+	logger:log(ERR, "failed to instantiate LRU cache : " .. err_lru)
 end
 
 function datastore:initialize()
-	self.dict = ngx.shared.datastore
-	if not self.dict then
-		self.dict = ngx.shared.datastore_stream
+	if subsystem == "http" then
+		self.dict = shared.datastore
+	else
+		self.dict = shared.datastore_stream
 	end
 end
 
@@ -20,6 +27,9 @@ function datastore:get(key, worker)
 	-- luacheck: ignore 431
 	local value, err
 	if worker then
+		if not lru then
+			return nil, "lru is not instantiated"
+		end
 		value, err = lru:get(key)
 		return value, err or "not found"
 	end
@@ -32,6 +42,9 @@ end
 
 function datastore:set(key, value, exptime, worker)
 	if worker then
+		if not lru then
+			return false, "lru is not instantiated"
+		end
 		lru:set(key, value, exptime)
 		return true, "success"
 	end
@@ -41,6 +54,9 @@ end
 
 function datastore:delete(key, worker)
 	if worker then
+		if not lru then
+			return false, "lru is not instantiated"
+		end
 		lru:delete(key)
 		return true, "success"
 	end
@@ -50,6 +66,9 @@ end
 
 function datastore:keys(worker)
 	if worker then
+		if not lru then
+			return false, "lru is not instantiated"
+		end
 		return lru:keys(0)
 	end
 	return self.dict:get_keys(0)
@@ -70,6 +89,9 @@ end
 function datastore:delete_all(pattern, worker)
 	local keys
 	if worker then
+		if not lru then
+			return false, "lru is not instantiated"
+		end
 		keys = lru:keys(0)
 	else
 		keys = self.dict:get_keys(0)
@@ -84,6 +106,9 @@ end
 
 -- luacheck: ignore 212
 function datastore:flush_lru()
+	if not lru then
+		return false, "lru is not instantiated"
+	end
 	lru:flush_all()
 end
 

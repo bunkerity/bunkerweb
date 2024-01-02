@@ -1,7 +1,7 @@
 from contextlib import suppress
 from datetime import datetime, timedelta
 from functools import partial
-from os import getenv, listdir
+from os import getenv, listdir, sep
 from os.path import join
 from pathlib import Path
 from time import sleep
@@ -20,11 +20,20 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException, WebDriverException
 
+default_server = "127.0.0.1"
+
+integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
+os_release_path = Path(sep, "etc", "os-release")
+if getenv("KUBERNETES_MODE", "no").lower() == "yes" or getenv("SWARM_MODE", "no").lower() == "yes" or getenv("AUTOCONF_MODE", "no").lower() == "yes":
+    default_server = "192.168.0.2"
+elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
+    default_server = "192.168.0.2"
+
 ready = False
 retries = 0
 while not ready:
     with suppress(RequestException):
-        status_code = get("http://127.0.0.1/setup").status_code
+        status_code = get(f"http://{default_server}/setup").status_code
 
         if status_code > 500 and status_code != 502:
             print("An error occurred with the server, exiting ...", flush=True)
@@ -179,9 +188,9 @@ with driver_func() as driver:
         driver.maximize_window()
         driver_wait = WebDriverWait(driver, 60)
 
-        print("Navigating to http://127.0.0.1/setup ...", flush=True)
+        print(f"Navigating to http://{default_server}/setup ...", flush=True)
 
-        driver.get("http://127.0.0.1/setup")
+        driver.get(f"http://{default_server}/setup")
 
         ### WIZARD PAGE
 

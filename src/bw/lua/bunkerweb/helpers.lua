@@ -1,18 +1,35 @@
+local ngx	= ngx
 local cjson = require "cjson"
 local utils = require "bunkerweb.utils"
 local bwctx = require "bunkerweb.ctx"
 local base 	= require "resty.core.base"
 
+local open = io.open
+local decode = cjson.decode
+local encode = cjson.encode
+local tostring = tostring
+local get_phases = utils.get_phases
+local get_request = base.get_request
+local apply_ref = bwctx.apply_ref
+local stash_ref = bwctx.stash_ref
+local subsystem = ngx.config.subsystem
+local var = ngx.var
+local req = ngx.req
+local ip_is_global = utils.ip_is_global
+local is_ipv4 = utils.is_ipv4
+local is_ipv6 = utils.is_ipv6
+local get_variable = utils.get_variable
+
 local helpers = {}
 
 helpers.load_plugin = function(json)
 	-- Open file
-	local file, err, nb = io.open(json, "r")
+	local file, err, nb = open(json, "r")
 	if not file then
 		return false, "can't load JSON at " .. json .. " : " .. err .. " (nb = " .. tostring(nb) .. ")"
 	end
 	-- Decode JSON
-	local ok, plugin = pcall(cjson.decode, file:read("*a"))
+	local ok, plugin = pcall(decode, file:read("*a"))
 	file:close()
 	if not ok then
 		return false, "invalid JSON at " .. json .. " : " .. err
@@ -26,7 +43,7 @@ helpers.load_plugin = function(json)
 		end
 	end
 	if #missing_fields > 0 then
-		return false, "missing field(s) " .. cjson.encode(missing_fields) .. " for JSON at " .. json
+		return false, "missing field(s) " .. encode(missing_fields) .. " for JSON at " .. json
 	end
 	-- Try require
 	local plugin_lua, err = helpers.require_plugin(plugin.id)
@@ -34,7 +51,7 @@ helpers.load_plugin = function(json)
 		return false, err
 	end
 	-- Fill phases
-	local phases = utils.get_phases()
+	local phases = get_phases()
 	plugin.phases = {}
 	if plugin_lua then
 		for _, phase in ipairs(phases) do
@@ -49,11 +66,11 @@ end
 
 helpers.order_plugins = function(plugins)
 	-- Extract orders
-	local file, err, nb = io.open("/usr/share/bunkerweb/core/order.json", "r")
+	local file, err, nb = open("/usr/share/bunkerweb/core/order.json", "r")
 	if not file then
 		return false, err .. " (nb = " .. tostring(nb) .. ")"
 	end
-	local ok, orders = pcall(cjson.decode, file:read("*a"))
+	local ok, orders = pcall(decode, file:read("*a"))
 	file:close()
 	if not ok then
 		return false, "invalid order.json : " .. err
@@ -68,7 +85,7 @@ helpers.order_plugins = function(plugins)
 	end
 	-- Order result
 	local result_orders = {}
-	for _, phase in ipairs(utils.get_phases()) do
+	for _, phase in ipairs(get_phases()) do
 		result_orders[phase] = {}
 	end
 	-- Fill order first
@@ -82,7 +99,7 @@ helpers.order_plugins = function(plugins)
 		end
 	end
 	-- Then append missing plugins to the end
-	for _, phase in ipairs(utils.get_phases()) do
+	for _, phase in ipairs(get_phases()) do
 		for id, plugin in pairs(plugins_phases) do
 			if plugin[phase] then
 				table.insert(result_orders[phase], id)
@@ -141,7 +158,7 @@ helpers.call_plugin = function(plugin, method)
 		end
 	end
 	if #missing_values > 0 then
-		return false, "missing required return value(s) : " .. cjson.encode(missing_values)
+		return false, "missing required return value(s) : " .. encode(missing_values)
 	end
 	-- Return
 	return true, ret
@@ -151,64 +168,63 @@ helpers.fill_ctx = function()
 	-- Return errors as table
 	local errors = {}
 	-- Try to load saved ctx
-	if base.get_request() then
-		bwctx.apply_ref()
+	local request = get_request()
+	if request then
+		apply_ref()
 	end
 	local ctx = ngx.ctx
 	-- Check if ctx is already filled
 	if not ctx.bw then
 		-- Instantiate bw table
 		local data = {}
-		-- Common vars
-		data.kind = "http"
-		if ngx.shared.datastore_stream then
-			data.kind = "stream"
+		if request then
+			-- Common vars
+			data.kind = "http"
+			if subsystem == "stream" then
+				data.kind = "stream"
+			end
+			data.remote_addr = var.remote_addr
+			data.server_name = var.server_name
+			if data.kind == "http" then
+				data.uri = var.uri
+				data.request_uri = var.request_uri
+				data.request_method = var.request_method
+				data.http_user_agent = var.http_user_agent
+				data.http_host = var.http_host
+				data.http_content_type = var.http_content_type
+				data.http_content_length = var.http_content_length
+				data.http_origin = var.http_origin
+				data.http_version = req.http_version()
+				data.scheme = var.scheme
+			end
+			-- IP data : global
+			local ip_global, err = ip_is_global(data.remote_addr)
+			if ip_global == nil then
+				table.insert(errors, "can't check if IP is global : " .. err)
+			else
+				data.ip_is_global = ip_global
+			end
+			-- IP data : v4 / v6
+			data.ip_is_ipv4 = is_ipv4(data.ip)
+			data.ip_is_ipv6 = is_ipv6(data.ip)
 		end
-		data.remote_addr = ngx.var.remote_addr
-		data.server_name = ngx.var.server_name
-		if data.kind == "http" then
-			data.uri = ngx.var.uri
-			data.request_uri = ngx.var.request_uri
-			data.request_method = ngx.var.request_method
-			data.http_user_agent = ngx.var.http_user_agent
-			data.http_host = ngx.var.http_host
-			data.server_name = ngx.var.server_name
-			data.http_content_type = ngx.var.http_content_type
-			data.http_content_length = ngx.var.http_content_length
-			data.http_origin = ngx.var.http_origin
-			data.http_version = ngx.req.http_version()
-			data.scheme = ngx.var.scheme
-		end
-		-- IP data : global
-		local ip_is_global, err = utils.ip_is_global(data.remote_addr)
-		if ip_is_global == nil then
-			table.insert(errors, "can't check if IP is global : " .. err)
-		else
-			data.ip_is_global = ip_is_global
-		end
-		-- IP data : v4 / v6
-		data.ip_is_ipv4 = utils.is_ipv4(data.ip)
-		data.ip_is_ipv6 = utils.is_ipv6(data.ip)
-		-- Misc info
-		data.integration = utils.get_integration()
-		data.version = utils.get_version()
 		-- Fill ctx
 		ctx.bw = data
 	end
 	-- Always create new objects for current phases in case of cosockets
-	local use_redis, err = utils.get_variable("USE_REDIS", false)
+	local use_redis, err = get_variable("USE_REDIS", false)
 	if not use_redis then
 		table.insert(errors, "can't get variable from datastore : " .. err)
 	end
 	ctx.bw.datastore = require "bunkerweb.datastore":new()
 	ctx.bw.clusterstore = require "bunkerweb.clusterstore":new()
-	ctx.bw.cachestore = require "bunkerweb.cachestore":new(use_redis == "yes")
+	ctx.bw.cachestore = require "bunkerweb.cachestore":new(use_redis == "yes", ctx)
 	return true, "ctx filled", errors, ctx
 end
 
 helpers.save_ctx = function(ctx)
-	if base.get_request() then
-		bwctx.stash_ref(ctx)
+	if get_request() then
+		stash_ref(ctx)
 	end
 end
 
@@ -222,11 +238,11 @@ function helpers.load_variables(all_variables, plugins)
 			end
 		end
 	end
-	local file = io.open("/usr/share/bunkerweb/settings.json")
+	local file = open("/usr/share/bunkerweb/settings.json")
 	if not file then
 		return false, "can't open settings.json"
 	end
-	local ok, settings = pcall(cjson.decode, file:read("*a"))
+	local ok, settings = pcall(decode, file:read("*a"))
 	file:close()
 	if not ok then
 		return false, "invalid settings.json : " .. settings

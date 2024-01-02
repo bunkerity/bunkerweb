@@ -5,11 +5,24 @@ local utils = require "bunkerweb.utils"
 
 local limit = class("limit", plugin)
 
+local ngx = ngx
+local ERR = ngx.ERR
+local HTTP_TOO_MANY_REQUESTS = ngx.HTTP_TOO_MANY_REQUESTS
+local get_phase = ngx.get_phase
+local has_variable = utils.has_variable
+local get_multiple_variables = utils.get_multiple_variables
+local is_whitelisted = utils.is_whitelisted
+local regex_match = utils.regex_match
+local time = os.time
+local date = os.date
+local encode = cjson.encode
+local decode = cjson.decode
+
 local limit_req_timestamps = function(rate_max, rate_time, timestamps)
 	-- Compute new timestamps
 	local updated = false
 	local new_timestamps = {}
-	local current_timestamp = os.time(os.date "!*t")
+	local current_timestamp = time(date("!*t"))
 	local delay = 0
 	if rate_time == "s" then
 		delay = 1
@@ -40,11 +53,11 @@ function limit:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "limit", ctx)
 	-- Load rules if needed
-	if ngx.get_phase() ~= "init" and self:is_needed() then
+	if get_phase() ~= "init" and self:is_needed() then
 		-- Get all rules from datastore
 		local all_rules, err = self.datastore:get("plugin_limit_rules", true)
 		if not all_rules then
-			self.logger:log(ngx.ERR, err)
+			self.logger:log(ERR, err)
 			return
 		end
 		self.rules = {}
@@ -73,7 +86,7 @@ function limit:is_needed()
 		return self.variables["USE_LIMIT_REQ"] == "yes"
 	end
 	-- Other cases : at least one service uses it
-	local is_needed, err = utils.has_variable("USE_LIMIT_REQ", "yes")
+	local is_needed, err = has_variable("USE_LIMIT_REQ", "yes")
 	if is_needed == nil then
 		self.logger:log(ngx.ERR, "can't check USE_LIMIT_REQ variable : " .. err)
 	end
@@ -86,7 +99,7 @@ function limit:init()
 		return self:ret(true, "no service uses limit for requests, skipping init")
 	end
 	-- Get variables
-	local variables, err = utils.get_multiple_variables({ "LIMIT_REQ_URL", "LIMIT_REQ_RATE" })
+	local variables, err = get_multiple_variables({ "LIMIT_REQ_URL", "LIMIT_REQ_RATE" })
 	if variables == nil then
 		return self:ret(false, err)
 	end
@@ -95,7 +108,7 @@ function limit:init()
 	local i = 0
 	for srv, vars in pairs(variables) do
 		for var, value in pairs(vars) do
-			if utils.regex_match(var, "LIMIT_REQ_URL") then
+			if regex_match(var, "LIMIT_REQ_URL") then
 				local url = value
 				local rate = vars[var:gsub("URL", "RATE")]
 				if data[srv] == nil then
@@ -115,7 +128,7 @@ end
 
 function limit:access()
 	-- Check if we are whitelisted
-	if self.ctx.bw.is_whitelisted == "yes" then
+	if is_whitelisted(self.ctx) then
 		return self:ret(true, "client is whitelisted")
 	end
 	-- Check if access is needed
@@ -125,7 +138,7 @@ function limit:access()
 	-- Check if URI is limited
 	local rate
 	for k, v in pairs(self.rules) do
-		if k ~= "/" and utils.regex_match(self.ctx.bw.uri, k) then
+		if k ~= "/" and regex_match(self.ctx.bw.uri, k) then
 			rate = v
 			break
 		end
@@ -158,7 +171,7 @@ function limit:access()
 				.. " and max rate = "
 				.. rate
 				.. ")",
-			ngx.HTTP_TOO_MANY_REQUESTS
+			HTTP_TOO_MANY_REQUESTS
 		)
 	end
 	-- Limit not reached
@@ -184,14 +197,14 @@ function limit:limit_req(rate_max, rate_time)
 	if self.use_redis then
 		local redis_timestamps, err = self:limit_req_redis(rate_max, rate_time)
 		if redis_timestamps == nil then
-			self.logger:log(ngx.ERR, "limit_req_redis failed, falling back to local : " .. err)
+			self.logger:log(ERR, "limit_req_redis failed, falling back to local : " .. err)
 		else
 			timestamps = redis_timestamps
 			-- Save the new timestamps
 			-- luacheck: ignore 421
 			local ok, err = self.datastore:set(
 				"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
-				cjson.encode(timestamps),
+				encode(timestamps),
 				delay
 			)
 			if not ok then
@@ -222,7 +235,7 @@ function limit:limit_req_local(rate_max, rate_time)
 	elseif err == "not found" then
 		timestamps = "{}"
 	end
-	timestamps = cjson.decode(timestamps)
+	timestamps = decode(timestamps)
 	-- Compute new timestamps
 	local updated, new_timestamps, delay = limit_req_timestamps(rate_max, rate_time, timestamps)
 	-- Save new timestamps if needed
@@ -230,7 +243,7 @@ function limit:limit_req_local(rate_max, rate_time)
 		-- luacheck: ignore 421
 		local ok, err = self.datastore:set(
 			"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
-			cjson.encode(new_timestamps),
+			encode(new_timestamps),
 			delay
 		)
 		if not ok then
@@ -303,7 +316,7 @@ function limit:limit_req_redis(rate_max, rate_time)
 		"plugin_limit_" .. self.ctx.bw.server_name .. self.ctx.bw.remote_addr .. self.ctx.bw.uri,
 		rate_max,
 		rate_time,
-		os.time(os.date("!*t"))
+		time(date("!*t"))
 	)
 	if not timestamps then
 		self.clusterstore:close()

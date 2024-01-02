@@ -5,14 +5,26 @@ local utils = require "bunkerweb.utils"
 
 local greylist = class("greylist", plugin)
 
+local ngx = ngx
+local ERR = ngx.ERR
+local get_phase = ngx.get_phase
+local has_variable = utils.has_variable
+local get_deny_status = utils.get_deny_status
+local get_rdns = utils.get_rdns
+local get_asn = utils.get_asn
+local regex_match = utils.regex_match
+local ipmatcher_new = ipmatcher.new
+local tostring = tostring
+local open = io.open
+
 function greylist:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "greylist", ctx)
 	-- Decode lists
-	if ngx.get_phase() ~= "init" and self:is_needed() then
+	if get_phase() ~= "init" and self:is_needed() then
 		local lists, err = self.datastore:get("plugin_greylist_lists", true)
 		if not lists then
-			self.logger:log(ngx.ERR, err)
+			self.logger:log(ERR, err)
 			self.lists = {}
 		else
 			self.lists = lists
@@ -45,9 +57,9 @@ function greylist:is_needed()
 		return self.variables["USE_GREYLIST"] == "yes"
 	end
 	-- Other cases : at least one service uses it
-	local is_needed, err = utils.has_variable("USE_GREYLIST", "yes")
+	local is_needed, err = has_variable("USE_GREYLIST", "yes")
 	if is_needed == nil then
-		self.logger:log(ngx.ERR, "can't check USE_GREYLIST variable : " .. err)
+		self.logger:log(ERR, "can't check USE_GREYLIST variable : " .. err)
 	end
 	return is_needed
 end
@@ -67,7 +79,7 @@ function greylist:init()
 	}
 	local i = 0
 	for kind, _ in pairs(greylists) do
-		local f, _ = io.open("/var/cache/bunkerweb/greylist/" .. kind .. ".list", "r")
+		local f, _ = open("/var/cache/bunkerweb/greylist/" .. kind .. ".list", "r")
 		if f then
 			for line in f:lines() do
 				table.insert(greylists[kind], line)
@@ -107,7 +119,7 @@ function greylist:access()
 	for k, v in pairs(checks) do
 		local ok, cached = self:is_in_cache(v)
 		if not ok then
-			self.logger:log(ngx.ERR, "error while checking cache : " .. cached)
+			self.logger:log(ERR, "error while checking cache : " .. cached)
 		elseif cached and cached ~= "ko" then
 			return self:ret(true, k .. " is in cached greylist (info : " .. cached .. ")")
 		end
@@ -124,12 +136,12 @@ function greylist:access()
 		if not already_cached[k] then
 			local ok, greylisted = self:is_greylisted(k)
 			if ok == nil then
-				self.logger:log(ngx.ERR, "error while checking if " .. k .. " is greylisted : " .. greylisted)
+				self.logger:log(ERR, "error while checking if " .. k .. " is greylisted : " .. greylisted)
 			else
 				-- luacheck: ignore 421
 				local ok, err = self:add_to_cache(self:kind_to_ele(k), greylisted)
 				if not ok then
-					self.logger:log(ngx.ERR, "error while adding element to cache : " .. err)
+					self.logger:log(ERR, "error while adding element to cache : " .. err)
 				end
 				if greylisted ~= "ko" then
 					return self:ret(true, k .. " is in greylist")
@@ -139,7 +151,7 @@ function greylist:access()
 	end
 
 	-- Return
-	return self:ret(true, "not in greylist", utils.get_deny_status(self.ctx))
+	return self:ret(true, "not in greylist", get_deny_status())
 end
 
 function greylist:preread()
@@ -169,7 +181,7 @@ end
 
 function greylist:is_greylisted_ip()
 	-- Check if IP is in greylist
-	local ipm, err = ipmatcher.new(self.lists["IP"])
+	local ipm, err = ipmatcher_new(self.lists["IP"])
 	if not ipm then
 		return nil, err
 	end
@@ -189,7 +201,7 @@ function greylist:is_greylisted_ip()
 	if check_rdns then
 		-- Get rDNS
 		-- luacheck: ignore 421
-		local rdns_list, err = utils.get_rdns(self.ctx.bw.remote_addr)
+		local rdns_list, err = get_rdns(self.ctx.bw.remote_addr, self.ctx, true)
 		-- Check if rDNS is in greylist
 		if rdns_list then
 			for _, rdns in ipairs(rdns_list) do
@@ -200,15 +212,15 @@ function greylist:is_greylisted_ip()
 				end
 			end
 		else
-			self.logger:log(ngx.ERR, "error while getting rdns : " .. err)
+			self.logger:log(ERR, "error while getting rdns : " .. err)
 		end
 	end
 
 	-- Check if ASN is in greylist
 	if self.ctx.bw.ip_is_global then
-		local asn, err = utils.get_asn(self.ctx.bw.remote_addr)
+		local asn, err = get_asn(self.ctx.bw.remote_addr)
 		if not asn then
-			self.logger:log(ngx.ERR, "can't get ASN of IP " .. self.ctx.bw.remote_addr .. " : " .. err)
+			self.logger:log(ERR, "can't get ASN of IP " .. self.ctx.bw.remote_addr .. " : " .. err)
 		else
 			for _, bl_asn in ipairs(self.lists["ASN"]) do
 				if bl_asn == tostring(asn) then
@@ -225,7 +237,7 @@ end
 function greylist:is_greylisted_uri()
 	-- Check if URI is in greylist
 	for _, uri in ipairs(self.lists["URI"]) do
-		if utils.regex_match(self.ctx.bw.uri, uri) then
+		if regex_match(self.ctx.bw.uri, uri) then
 			return true, "URI " .. uri
 		end
 	end
@@ -236,7 +248,7 @@ end
 function greylist:is_greylisted_ua()
 	-- Check if UA is in greylist
 	for _, ua in ipairs(self.lists["USER_AGENT"]) do
-		if utils.regex_match(self.ctx.bw.http_user_agent, ua) then
+		if regex_match(self.ctx.bw.http_user_agent, ua) then
 			return true, "UA " .. ua
 		end
 	end

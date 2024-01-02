@@ -4,6 +4,16 @@ local utils = require "bunkerweb.utils"
 
 local badbehavior = class("badbehavior", plugin)
 
+local ngx = ngx
+local ERR = ngx.ERR
+local WARN = ngx.WARN
+local NOTICE = ngx.NOTICE
+local timer_at = ngx.timer.at
+local add_ban = utils.add_ban
+local is_whitelisted = utils.is_whitelisted
+local is_banned = utils.is_banned
+local tostring = tostring
+
 function badbehavior:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "badbehavior", ctx)
@@ -11,7 +21,7 @@ end
 
 function badbehavior:log()
 	-- Check if we are whitelisted
-	if self.ctx.bw.is_whitelisted == "yes" then
+	if is_whitelisted(self.ctx) == "yes" then
 		return self:ret(true, "client is whitelisted")
 	end
 	-- Check if bad behavior is activated
@@ -23,11 +33,11 @@ function badbehavior:log()
 		return self:ret(true, "not increasing counter")
 	end
 	-- Check if we are already banned
-	if self.ctx.bw.is_banned then
+	if is_banned(self.ctx.bw.remote_addr) then
 		return self:ret(true, "already banned")
 	end
 	-- Call increase function later and with cosocket enabled
-	local ok, err = ngx.timer.at(
+	local ok, err = timer_at(
 		0,
 		badbehavior.increase,
 		self.ctx.bw.remote_addr,
@@ -55,13 +65,14 @@ function badbehavior.increase(premature, ip, count_time, ban_time, threshold, us
 	-- Instantiate objects
 	local logger = require "bunkerweb.logger":new("badbehavior")
 	local datastore = require "bunkerweb.datastore":new()
+	
 	-- Declare counter
 	local counter = false
 	-- Redis case
 	if use_redis then
 		local redis_counter, err = badbehavior.redis_increase(ip, count_time, ban_time)
 		if not redis_counter then
-			logger:log(ngx.ERR, "(increase) redis_increase failed, falling back to local : " .. err)
+			logger:log(ERR, "(increase) redis_increase failed, falling back to local : " .. err)
 		else
 			counter = redis_counter
 		end
@@ -70,7 +81,7 @@ function badbehavior.increase(premature, ip, count_time, ban_time, threshold, us
 	if not counter then
 		local local_counter, err = datastore:get("plugin_badbehavior_count_" .. ip)
 		if not local_counter and err ~= "not found" then
-			logger:log(ngx.ERR, "(increase) can't get counts from the datastore : " .. err)
+			logger:log(ERR, "(increase) can't get counts from the datastore : " .. err)
 		end
 		if local_counter == nil then
 			local_counter = 0
@@ -78,25 +89,25 @@ function badbehavior.increase(premature, ip, count_time, ban_time, threshold, us
 		counter = local_counter + 1
 	end
 	-- Call decrease later
-	local ok, err = ngx.timer.at(count_time, badbehavior.decrease, ip, count_time, threshold, use_redis)
+	local ok, err = timer_at(count_time, badbehavior.decrease, ip, count_time, threshold, use_redis)
 	if not ok then
-		logger:log(ngx.ERR, "(increase) can't create decrease timer : " .. err)
+		logger:log(ERR, "(increase) can't create decrease timer : " .. err)
 	end
 	-- Store local counter
 	local ok, err = datastore:set("plugin_badbehavior_count_" .. ip, counter, count_time)
 	if not ok then
-		logger:log(ngx.ERR, "(increase) can't save counts to the datastore : " .. err)
+		logger:log(ERR, "(increase) can't save counts to the datastore : " .. err)
 		return
 	end
 	-- Store local ban
 	if counter > threshold then
-		ok, err = utils.add_ban(ip, "bad behavior", ban_time)
+		ok, err = add_ban(ip, "bad behavior", ban_time)
 		if not ok then
-			logger:log(ngx.ERR, "(increase) can't save ban : " .. err)
+			logger:log(ERR, "(increase) can't save ban : " .. err)
 			return
 		end
 		logger:log(
-			ngx.WARN,
+			WARN,
 			"IP "
 				.. ip
 				.. " is banned for "
@@ -109,7 +120,7 @@ function badbehavior.increase(premature, ip, count_time, ban_time, threshold, us
 		)
 	end
 	logger:log(
-		ngx.NOTICE,
+		NOTICE,
 		"increased counter for IP " .. ip .. " (" .. tostring(counter) .. "/" .. tostring(threshold) .. ")"
 	)
 end
@@ -124,7 +135,7 @@ function badbehavior.decrease(premature, ip, count_time, threshold, use_redis)
 	if use_redis then
 		local redis_counter, err = badbehavior.redis_decrease(ip, count_time)
 		if not redis_counter then
-			logger:log(ngx.ERR, "(decrease) redis_decrease failed, falling back to local : " .. err)
+			logger:log(ERR, "(decrease) redis_decrease failed, falling back to local : " .. err)
 		else
 			counter = redis_counter
 		end
@@ -133,7 +144,7 @@ function badbehavior.decrease(premature, ip, count_time, threshold, use_redis)
 	if not counter then
 		local local_counter, err = datastore:get("plugin_badbehavior_count_" .. ip)
 		if not local_counter and err ~= "not found" then
-			logger:log(ngx.ERR, "(decrease) can't get counts from the datastore : " .. err)
+			logger:log(ERR, "(decrease) can't get counts from the datastore : " .. err)
 		end
 		if local_counter == nil or local_counter <= 1 then
 			counter = 0
@@ -148,19 +159,19 @@ function badbehavior.decrease(premature, ip, count_time, threshold, use_redis)
 	else
 		local ok, err = datastore:set("plugin_badbehavior_count_" .. ip, counter, count_time)
 		if not ok then
-			logger:log(ngx.ERR, "(decrease) can't save counts to the datastore : " .. err)
+			logger:log(ERR, "(decrease) can't save counts to the datastore : " .. err)
 			return
 		end
 	end
 	logger:log(
-		ngx.NOTICE,
+		NOTICE,
 		"decreased counter for IP " .. ip .. " (" .. tostring(counter) .. "/" .. tostring(threshold) .. ")"
 	)
 end
 
 function badbehavior.redis_increase(ip, count_time, ban_time)
 	-- Instantiate objects
-	local clusterstore = require "bunkerweb.clusterstore":new(false)
+	local clusterstore = require "bunkerweb.clusterstore":new()
 	-- Our LUA script to execute on redis
 	local redis_script = [[
 		local ret_incr = redis.pcall("INCR", KEYS[1])
@@ -201,7 +212,7 @@ end
 
 function badbehavior.redis_decrease(ip, count_time)
 	-- Instantiate objects
-	local clusterstore = require "bunkerweb.clusterstore":new(false)
+	local clusterstore = require "bunkerweb.clusterstore":new()
 	-- Our LUA script to execute on redis
 	local redis_script = [[
 		local ret_decr = redis.pcall("DECR", KEYS[1])

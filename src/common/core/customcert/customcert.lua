@@ -5,6 +5,16 @@ local ssl = require "ngx.ssl"
 
 local customcert = class("customcert", plugin)
 
+local ngx = ngx
+local ERR = ngx.ERR
+local parse_pem_cert = ssl.parse_pem_cert
+local parse_pem_priv_key = ssl.parse_pem_priv_key
+local ssl_server_name = ssl.server_name
+local get_variable = utils.get_variable
+local get_multiple_variables = utils.get_multiple_variables
+local has_variable = utils.has_variable
+local open = io.open
+
 function customcert:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "customcert", ctx)
@@ -12,13 +22,13 @@ end
 
 function customcert:init()
 	local ret_ok, ret_err = true, "success"
-    if utils.has_variable("USE_CUSTOM_SSL", "yes") then
-		local multisite, err = utils.get_variable("MULTISITE", false)
+    if has_variable("USE_CUSTOM_SSL", "yes") then
+		local multisite, err = get_variable("MULTISITE", false)
 		if not multisite then
 			return self:ret(false, "can't get MULTISITE variable : " .. err)
 		end
 		if multisite == "yes" then
-			local vars, err = utils.get_multiple_variables({"USE_CUSTOM_SSL", "SERVER_NAME"})
+			local vars, err = get_multiple_variables({"USE_CUSTOM_SSL", "SERVER_NAME"})
 			if not vars then
 				return self:ret(false, "can't get USE_CUSTOM_SSL variables : " .. err)
 			end
@@ -26,13 +36,13 @@ function customcert:init()
 				if multisite_vars["USE_CUSTOM_SSL"] == "yes" and server_name ~= "global" then
 					local check, data = self:read_files(server_name)
 					if not check then
-						self.logger:log(ngx.ERR, "error while reading files : " .. data)
+						self.logger:log(ERR, "error while reading files : " .. data)
 						ret_ok = false
 						ret_err = "error reading files"
 					else
 						local check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
 						if not check then
-							self.logger:log(ngx.ERR, "error while loading data : " .. err)
+							self.logger:log(ERR, "error while loading data : " .. err)
 							ret_ok = false
 							ret_err = "error loading data"
 						end
@@ -40,19 +50,19 @@ function customcert:init()
 				end
 			end
 		else
-			local server_name, err = utils.get_variable("SERVER_NAME", false)
+			local server_name, err = get_variable("SERVER_NAME", false)
 			if not server_name then
 				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 			end
 			local check, data = self:read_files(server_name:match("%S+"))
 			if not check then
-				self.logger:log(ngx.ERR, "error while reading files : " .. data)
+				self.logger:log(ERR, "error while reading files : " .. data)
 				ret_ok = false
 				ret_err = "error reading files"
 			else
 				local check, err = self:load_data(data, server_name)
 				if not check then
-					self.logger:log(ngx.ERR, "error while loading data : " .. err)
+					self.logger:log(ERR, "error while loading data : " .. err)
 					ret_ok = false
 					ret_err = "error loading data"
 				end
@@ -65,7 +75,7 @@ function customcert:init()
 end
 
 function customcert:ssl_certificate()
-	local server_name, err = ssl.server_name()
+	local server_name, err = ssl_server_name()
 	if not server_name then
 		return self:ret(false, "can't get server_name : " .. err)
 	end
@@ -86,7 +96,7 @@ function customcert:read_files(server_name)
 	}
 	local data = {}
 	for i, file in ipairs(files) do
-		local f, err = io.open(file, "r")
+		local f, err = open(file, "r")
 		if not f then
 			return false, file .. " = " .. err
 		end
@@ -98,12 +108,12 @@ end
 
 function customcert:load_data(data, server_name)
 	-- Load certificate
-	local cert_chain, err = ssl.parse_pem_cert(data[1])
+	local cert_chain, err = parse_pem_cert(data[1])
 	if not cert_chain then
 		return false, "error while parsing pem cert : " .. err
 	end
 	-- Load key
-	local priv_key, err = ssl.parse_pem_priv_key(data[2])
+	local priv_key, err = parse_pem_priv_key(data[2])
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
