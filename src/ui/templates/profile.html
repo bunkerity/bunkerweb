@@ -10,19 +10,19 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
   <div
     role="tablist"
     data-{{current_endpoint}}-tabs-desktop
-    class="hidden md:block col-span-12 mb-4"
+    class="hidden md:block col-span-12 mb-4 mx-2"
   >
     <!-- tabs -->
     <button
       role="tab"
-      data-tab-handler="profile"
+      data-tab-handler="username"
       class="active settings-tabs-tab-btn"
     >
       <span class="w-full flex justify-between items-center">
         <!-- text and icon -->
-        <span class="settings-tabs-name"> User </span>
+        <span class="settings-tabs-name"> Username </span>
         <svg
-          data-popover-btn="profile"
+          data-popover-btn="username"
           class="fill-blue-500 h-5 w-5 mr-2 hover:brightness-95"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 512 512"
@@ -34,12 +34,39 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         <!-- end text and icon -->
         <!-- popover -->
         <span
-          data-popover-content="profile"
+          data-popover-content="username"
           class="settings-tabs-popover-container hidden"
         >
-          <span class="settings-tabs-popover-text"
-            >Update profile data (username, password...)</span
-          >
+          <span class="settings-tabs-popover-text">Edit your username</span>
+        </span>
+        <!-- end popover -->
+      </span>
+    </button>
+    <button
+      role="tab"
+      data-tab-handler="password"
+      class="settings-tabs-tab-btn"
+    >
+      <span class="w-full flex justify-between items-center">
+        <!-- text and icon -->
+        <span class="settings-tabs-name"> Password </span>
+        <svg
+          data-popover-btn="password"
+          class="fill-blue-500 h-5 w-5 mr-2 hover:brightness-95"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+        >
+          <path
+            d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-144c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32z"
+          />
+        </svg>
+        <!-- end text and icon -->
+        <!-- popover -->
+        <span
+          data-popover-content="password"
+          class="settings-tabs-popover-container hidden"
+        >
+          <span class="settings-tabs-popover-text">Update your password</span>
         </span>
         <!-- end popover -->
       </span>
@@ -71,6 +98,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         <!-- end popover -->
       </span>
     </button>
+
     <!--end tabs-->
   </div>
   <!-- end desktop tabs -->
@@ -82,7 +110,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       class="settings-tabs-mobile-btn"
     >
       <span aria-description="current tab" class="settings-tabs-mobile-btn-text"
-        >Profile
+        >Username
       </span>
       <!-- chevron -->
       <svg
@@ -105,12 +133,21 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     >
       <button
         role="option"
-        data-tab-handler-mobile="profile"
+        data-tab-handler-mobile="username"
         data-select="false"
-        id="edit-{{current_endpoint}}-profile-tab"
+        id="edit-{{current_endpoint}}-username-tab"
         class="active first settings-tabs-mobile-dropdown-btn"
       >
-        Profile
+        Username
+      </button>
+      <button
+        role="option"
+        data-tab-handler-mobile="password"
+        data-select="false"
+        id="edit-{{current_endpoint}}-password-tab"
+        class="settings-tabs-mobile-dropdown-btn"
+      >
+        Password
       </button>
       <button
         role="option"
@@ -125,9 +162,131 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     <!-- end dropdown-->
   </div>
   <!-- end mobile tabs -->
-  <form
-    data-plugin-item="profile"
+  <div
+    data-plugin-item="username"
     class="grid grid-cols-12 w-full justify-items-center"
+  >
+    <div class="col-span-12">
+      <h5
+        class="text-xl my-1 transition duration-300 ease-in-out font-bold m-0 mb-4"
+      >
+        USERNAME
+      </h5>
+    </div>
+    <!-- update username -->
+    <form
+      class="col-span-12 grid grid-cols-12 w-full justify-items-center"
+      id="username-form"
+      action="profile"
+      method="POST"
+      autocomplete="off"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <input
+        type="hidden"
+        name="next"
+        value="{{ request.values.get('next', '') }}"
+      />
+      <!-- username inpt-->
+      <div
+        class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
+      >
+        <h5
+          class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
+        >
+          Username
+        </h5>
+        <label class="sr-only" for="admin_username">New username</label>
+        <input
+          type="text"
+          id="admin_username"
+          name="admin_username"
+          class="col-span-12 regular-input"
+          placeholder="blank will remain previous username"
+          pattern="(.*?)"
+          maxlength="256"
+          value="{{ username }}"
+        />
+      </div>
+      <!-- end username inpt-->
+      <!-- password inpt-->
+      <div
+        data-input-group
+        class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
+      >
+        <h5
+          class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
+        >
+          Password
+        </h5>
+        <label class="sr-only" for="curr_password">Password</label>
+        <input
+          type="password"
+          id="curr_password"
+          name="curr_password"
+          class="col-span-12 regular-input"
+          placeholder="enter current password"
+          value=""
+          pattern="^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$"
+          minlength="8"
+          required
+        />
+        <div
+          data-setting-password-container
+          class="absolute flex right-6 md:right-8 h-5 w-5 top-[59%]"
+        >
+          <button
+            data-setting-password="visible"
+            class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
+            type="button"
+          >
+            <svg
+              class="fill-primary pointer-events-none"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 576 512"
+            >
+              <path
+                d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"
+              />
+            </svg>
+          </button>
+          <button
+            data-setting-password="invisible"
+            class="hidden -translate-y-0.2 scale-110 h-5 w-5 items-center align-middle"
+            type="button"
+          >
+            <svg
+              class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 640 512"
+            >
+              <path
+                d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <!-- end password inpt-->
+
+      <div class="col-span-12 flex justify-center mt-6">
+        <button
+          type="submit"
+          id="username-button"
+          name="username-button"
+          value="username"
+          class="edit-btn"
+        >
+          Edit
+        </button>
+      </div>
+    </form>
+    <!-- end update username -->
+  </div>
+
+  <form
+    data-plugin-item="password"
+    class="hidden col-span-12 grid grid-cols-12 w-full justify-items-center mt-4"
     id="profile-form"
     action="profile"
     method="POST"
@@ -135,9 +294,9 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
   >
     <div class="col-span-12">
       <h5
-        class="text-xl my-1 transition duration-300 ease-in-out text-md font-bold m-0"
+        class="text-xl my-1 transition duration-300 ease-in-out font-bold m-0 mb-4"
       >
-        PROFILE
+        PASSWORD
       </h5>
     </div>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
@@ -146,28 +305,6 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       name="next"
       value="{{ request.values.get('next', '') }}"
     />
-    <!-- username inpt-->
-    <div
-      class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
-    >
-      <h5
-        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
-      >
-        Username
-      </h5>
-      <label class="sr-only" for="admin_username">New username</label>
-      <input
-        type="text"
-        id="admin_username"
-        name="admin_username"
-        class="col-span-12 regular-input"
-        placeholder="enter username"
-        pattern="(.*?)"
-        maxlength="256"
-        value="{{ username }}"
-      />
-    </div>
-    <!-- end username inpt-->
     <!-- password inpt-->
     <div
       data-input-group
@@ -176,9 +313,9 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       <h5
         class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
       >
-        Current password
+        Password
       </h5>
-      <label class="sr-only" for="curr_password">Current password</label>
+      <label class="sr-only" for="curr_password">Password</label>
       <input
         type="password"
         id="curr_password"
@@ -192,7 +329,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       />
       <div
         data-setting-password-container
-        class="absolute flex right-8 h-5 w-5 top-[60%] lg:top-11"
+        class="absolute flex right-6 md:right-8 h-5 w-5 top-[59%]"
       >
         <button
           data-setting-password="visible"
@@ -250,7 +387,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       />
       <div
         data-setting-password-container
-        class="absolute flex right-8 h-5 w-5 top-[60%] lg:top-11"
+        class="absolute flex right-6 md:right-8 h-5 w-5 top-[59%] md:top-[58%]"
       >
         <button
           data-setting-password="visible"
@@ -310,7 +447,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       />
       <div
         data-setting-password-container
-        class="absolute flex right-8 h-5 w-5 top-[43%] md:top-[45%]"
+        class="absolute flex right-6 md:right-8 h-5 w-5 top-[43%] md:top-[44%]"
       >
         <button
           data-setting-password="visible"
@@ -351,8 +488,8 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     <div class="col-span-12 flex justify-center">
       <button
         type="submit"
-        id="profile-button"
-        name="profile-button"
+        id="pw-button"
+        name="pw-button"
         value="profile"
         class="edit-btn"
       >
@@ -360,6 +497,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       </button>
     </div>
   </form>
+
   <form
     data-plugin-item="totp"
     class="hidden grid grid-cols-12 w-full justify-items-center"
@@ -429,7 +567,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       />
       <div
         data-setting-password-container
-        class="absolute flex right-8 h-5 w-5 top-[60%] lg:top-11"
+        class="absolute flex right-6 md:right-8 h-5 w-5 top-[59%]"
       >
         <button
           data-setting-password="visible"
@@ -495,9 +633,9 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       <h5
         class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
       >
-        Current password
+        Password
       </h5>
-      <label class="sr-only" for="totp_password">Current password</label>
+      <label class="sr-only" for="totp_password">Password</label>
       <input
         type="password"
         id="totp_password"
@@ -511,7 +649,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       />
       <div
         data-setting-password-container
-        class="absolute flex right-8 h-5 w-5 top-[60%] lg:top-11"
+        class="absolute flex right-6 md:right-8 h-5 w-5 top-[59%]"
       >
         <button
           data-setting-password="visible"
