@@ -63,7 +63,7 @@ function cachestore:get(key)
 	local callback = function(key, cs)
 		-- Connect to redis
 		-- luacheck: ignore 431
-		local ok, err, _ = cs:connect()
+		local ok, err, _ = cs:connect(true)
 		if not ok then
 			return nil, "can't connect to redis : " .. err, nil
 		end

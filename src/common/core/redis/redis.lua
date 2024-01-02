@@ -17,7 +17,7 @@ function redis:init_worker()
 		return self:ret(true, "init_worker not needed")
 	end
 	-- Check redis connection
-	local ok, err = self.clusterstore:connect()
+	local ok, err = self.clusterstore:connect(true)
 	if not ok then
 		return self:ret(false, "redis connect error : " .. err)
 	end

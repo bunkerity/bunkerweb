@@ -637,7 +637,7 @@ utils.is_banned = function(ip)
 	end
 	-- Connect
 	local clusterstore = require "bunkerweb.clusterstore":new()
-	local ok, err = clusterstore:connect()
+	local ok, err = clusterstore:connect(true)
 	if not ok then
 		return nil, "can't connect to redis server : " .. err
 	end
