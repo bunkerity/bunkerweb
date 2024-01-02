@@ -9,11 +9,13 @@ from sys import path as sys_path
 from typing import Tuple
 
 
-if join(sep, "usr", "share", "bunkerweb", "utils") not in sys_path:
-    sys_path.append(join(sep, "usr", "share", "bunkerweb", "utils"))
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
+    if deps_path not in sys_path:
+        sys_path.append(deps_path)
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
+from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
 
@@ -40,21 +42,13 @@ def format_remaining_time(seconds):
 class CLI(ApiCaller):
     def __init__(self):
         self.__logger = setup_logger("CLI", getenv("LOG_LEVEL", "INFO"))
-        db_path = Path(sep, "usr", "share", "bunkerweb", "db")
+        variables_path = Path(sep, "etc", "nginx", "variables.env")
+        self.__variables = {}
+        if variables_path.is_file():
+            self.__variables = dotenv_values(variables_path)
 
-        if not db_path.is_dir():
-            self.__variables = dotenv_values(join(sep, "etc", "nginx", "variables.env"))
-        else:
-            if str(db_path) not in sys_path:
-                sys_path.append(str(db_path))
-
-            from Database import Database  # type: ignore
-
-            db = Database(
-                self.__logger,
-                sqlalchemy_string=getenv("DATABASE_URI", None),
-            )
-            self.__variables = db.get_config()
+        db = Database(self.__logger, sqlalchemy_string=self.__variables.get("DATABASE_URI", None))
+        self.__variables = db.get_config()
 
         self.__integration = self.__detect_integration()
         self.__use_redis = self.__variables.get("USE_REDIS", "no") == "yes"
@@ -102,12 +96,7 @@ class CLI(ApiCaller):
                 self.__logger.error("USE_REDIS is set to yes but REDIS_HOST is not set, disabling redis")
                 self.__use_redis = False
 
-        if not db_path.is_dir() or self.__integration not in (
-            "kubernetes",
-            "swarm",
-            "autoconf",
-        ):
-            # Docker & Linux case
+        if self.__integration == "linux":
             super().__init__(
                 [
                     API(
