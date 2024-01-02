@@ -1588,7 +1588,7 @@ location /hello {
         access_page(
             driver,
             driver_wait,
-            "//button[@id='profile-button' and @class='valid-btn']",
+            "//button[@id='totp-button' and @class='valid-btn']",
             "profile",
         )
 
@@ -1667,7 +1667,7 @@ location /hello {
         access_page(
             driver,
             driver_wait,
-            "//button[@id='profile-button' and @class='delete-btn']",
+            "//button[@id='totp-button' and @class='delete-btn']",
             "profile",
         )
 
