@@ -168,7 +168,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
   >
     <div class="col-span-12">
       <h5
-        class="text-xl my-1 transition duration-300 ease-in-out font-bold m-0 mb-4"
+        class="text-xl my-1 transition duration-300 ease-in-out font-bold m-0 mb-4 dark:text-gray-200"
       >
         USERNAME
       </h5>
@@ -191,11 +191,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       <div
         class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
       >
-        <h5
-          class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
-        >
-          Username
-        </h5>
+        <h5 class="input-title">Username</h5>
         <label class="sr-only" for="admin_username">New username</label>
         <input
           type="text"
@@ -214,11 +210,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         data-input-group
         class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
       >
-        <h5
-          class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
-        >
-          Password
-        </h5>
+        <h5 class="input-title">Password</h5>
         <label class="sr-only" for="curr_password">Password</label>
         <input
           type="password"
@@ -233,7 +225,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         />
         <div
           data-setting-password-container
-          class="absolute flex right-6 md:right-8 h-5 w-5 top-[59%]"
+          class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]"
         >
           <button
             data-setting-password="visible"
@@ -241,7 +233,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
             type="button"
           >
             <svg
-              class="fill-primary pointer-events-none"
+              class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 576 512"
             >
@@ -294,7 +286,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
   >
     <div class="col-span-12">
       <h5
-        class="text-xl my-1 transition duration-300 ease-in-out font-bold m-0 mb-4"
+        class="text-xl my-1 transition duration-300 ease-in-out font-bold m-0 mb-4 dark:text-gray-200"
       >
         PASSWORD
       </h5>
@@ -310,11 +302,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       data-input-group
       class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
     >
-      <h5
-        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
-      >
-        Password
-      </h5>
+      <h5 class="input-title">Password</h5>
       <label class="sr-only" for="curr_password">Password</label>
       <input
         type="password"
@@ -329,7 +317,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       />
       <div
         data-setting-password-container
-        class="absolute flex right-6 md:right-8 h-5 w-5 top-[59%]"
+        class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]"
       >
         <button
           data-setting-password="visible"
@@ -337,7 +325,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
           type="button"
         >
           <svg
-            class="fill-primary pointer-events-none"
+            class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 576 512"
           >
@@ -369,11 +357,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       data-input-group
       class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
     >
-      <h5
-        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
-      >
-        New password
-      </h5>
+      <h5 class="input-title">New password</h5>
       <label class="sr-only" for="admin_password">New password</label>
       <input
         type="password"
@@ -387,11 +371,11 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       />
       <div
         data-setting-password-container
-        class="absolute flex right-6 md:right-8 h-5 w-5 top-[59%] md:top-[58%]"
+        class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]"
       >
         <button
           data-setting-password="visible"
-          class="h-5 w-5 flex items-center align-middle"
+          class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
           type="button"
         >
           <svg
@@ -427,11 +411,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       data-input-group
       class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
     >
-      <h5
-        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
-      >
-        Confirm new password
-      </h5>
+      <h5 class="input-title">Confirm new password</h5>
       <label class="sr-only" for="admin_password_check"
         >Confirm new password
       </label>
@@ -447,11 +427,11 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       />
       <div
         data-setting-password-container
-        class="absolute flex right-6 md:right-8 h-5 w-5 top-[43%] md:top-[44%]"
+        class="absolute flex right-6 md:right-8 h-5 w-5 top-[38%] md:top-[40%]"
       >
         <button
           data-setting-password="visible"
-          class="h-5 w-5 flex items-center align-middle"
+          class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
           type="button"
         >
           <svg
@@ -508,13 +488,13 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
   >
     <div class="col-span-12">
       <h5
-        class="text-xl my-1 transition duration-300 ease-in-out text-md font-bold m-0"
+        class="text-xl my-1 transition duration-300 ease-in-out text-md font-bold m-0 dark:text-gray-200"
       >
         TOTP
       </h5>
     </div>
     <h5
-      class="{% if not is_totp %} text-red-500 {% else %} text-green-500 {% endif %} uppercase col-span-12 text-sm my-2 font-bold dark:text-white/90 mx-2"
+      class="{% if not is_totp %} text-red-500 {% else %} text-green-500 {% endif %} uppercase col-span-12 text-sm my-2 font-bold mx-2"
     >
       {% if not is_totp %} TOTP is currently off {% else %} TOTP is currently on
       {% endif %}
@@ -531,12 +511,8 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       data-input-group
       class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
     >
-      <h5
-        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
-      >
-        2FA QR CODE
-      </h5>
-      <div class="flex justify-center">
+      <h5 class="input-title text-center">2FA QR CODE</h5>
+      <div class="flex justify-center mt-2">
         <img
           src="data:image/png;base64, {{ totp_qr_image }}"
           alt="Secret Token"
@@ -550,11 +526,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       data-input-group
       class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
     >
-      <h5
-        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
-      >
-        Secret token
-      </h5>
+      <h5 class="input-title">Secret token</h5>
       <label class="sr-only" for="secret_token">secret token</label>
       <input
         type="password"
@@ -567,11 +539,11 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       />
       <div
         data-setting-password-container
-        class="absolute flex right-6 md:right-8 h-5 w-5 top-[59%]"
+        class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]"
       >
         <button
           data-setting-password="visible"
-          class="h-5 w-5 flex items-center align-middle"
+          class="h-5 w-5 flex items-center align-middle dark:fill-blue-500 hover:brightness-75 transition-all"
           type="button"
         >
           <svg
@@ -607,11 +579,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     <div
       class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
     >
-      <h5
-        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
-      >
-        2FA code
-      </h5>
+      <h5 class="input-title">2FA code</h5>
       <label class="sr-only" for="totp_token">totp code</label>
       <input
         type="text"
@@ -630,11 +598,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       data-input-group
       class="flex flex-col relative col-span-12 px-4 my-2 md:px-6 md:my-3 lg:px-6 lg:my-3 max-w-[400px] w-full"
     >
-      <h5
-        class="text-base my-1 transition duration-300 ease-in-out text-md font-bold m-0"
-      >
-        Password
-      </h5>
+      <h5 class="input-title">Password</h5>
       <label class="sr-only" for="totp_password">Password</label>
       <input
         type="password"
@@ -649,7 +613,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       />
       <div
         data-setting-password-container
-        class="absolute flex right-6 md:right-8 h-5 w-5 top-[59%]"
+        class="absolute flex right-6 md:right-8 h-5 w-5 top-[55%]"
       >
         <button
           data-setting-password="visible"
@@ -657,7 +621,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
           type="button"
         >
           <svg
-            class="fill-primary pointer-events-none"
+            class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 576 512"
           >

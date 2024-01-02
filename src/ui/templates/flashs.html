@@ -39,9 +39,14 @@
   class="translate-x-90 -right-0 transition z-sticky dark:bg-slate-850 dark:brightness-110 shadow-3xl max-w-full w-90 ease fixed top-0 left-auto flex h-full min-w-0 flex-col break-words rounded-none border-0 bg-white bg-clip-border px-0.5"
 >
   <!-- close btn-->
-  <button  aria-controls="sidebar-flash" aria-expanded="false" aria-label="close flash sidebar" data-flash-sidebar-close>
+  <button
+    aria-controls="sidebar-flash"
+    aria-expanded="false"
+    aria-label="close flash sidebar"
+    data-flash-sidebar-close
+  >
     <svg
-      class=" fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-8 w-8 top-4 right-4"
+      class="fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-8 w-8 top-4 right-4"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 320 512"
     >
@@ -82,7 +87,7 @@
       role="alert"
       aria-description="flash feedback message"
       data-flash-message
-      class="{% if category == 'error' %}bg-red-500 {%else%} bg-green-500 {%endif %} my-2 border relative p-4 w-11/12 min-h-20 rounded-lg hover:scale-102 transition shadow-md break-words dark:brightness-90"
+      class="{% if category == 'error' %} bg-red-500 {%else%} bg-green-500 {%endif %} my-2 border relative p-4 w-11/12 min-h-20 rounded-lg hover:scale-102 transition shadow-md break-words dark:brightness-90"
     >
       <div class="flex justify-between align-top items-start">
         {% if category == 'error' %}
