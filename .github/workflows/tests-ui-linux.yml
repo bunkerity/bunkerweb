@@ -86,9 +86,10 @@ jobs:
           echo "USE_GZIP=yes" | sudo tee -a /etc/bunkerweb/variables.env
           echo "DATASTORE_MEMORY_SIZE=384m" | sudo tee -a /etc/bunkerweb/variables.env
           echo "UI_HOST=http://127.0.0.1:7000" | sudo tee -a /etc/bunkerweb/variables.env
+          sudo touch /etc/bunkerweb/ui.env
 
-          sudo chown nginx:nginx /etc/bunkerweb/variables.env
-          sudo chmod 777 /etc/bunkerweb/variables.env
+          sudo chown nginx:nginx /etc/bunkerweb/variables.env /etc/bunkerweb/ui.env
+          sudo chmod 777 /etc/bunkerweb/variables.env /etc/bunkerweb/ui.env
       - name: Run tests
         run: |
           cd ./tests/ui
