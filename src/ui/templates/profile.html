@@ -181,6 +181,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       method="POST"
       autocomplete="off"
     >
+    <input type="hidden" name="operation" value="username" />
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <input
         type="hidden"
@@ -291,6 +292,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         PASSWORD
       </h5>
     </div>
+    <input type="hidden" name="operation" value="password" />
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <input
       type="hidden"
@@ -499,6 +501,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       {% if not is_totp %} TOTP is currently off {% else %} TOTP is currently on
       {% endif %}
     </h5>
+    <input type="hidden" name="operation" value="totp" />
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <input
       type="hidden"
