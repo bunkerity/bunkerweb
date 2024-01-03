@@ -8,7 +8,7 @@ copyright: Copyright &copy; <script>document.write(new Date().getFullYear())</sc
 
 nav:
   - Introduction: 'index.md'
-  - Migrating from 1.4.X: 'migrating.md'
+  - Migrating: 'migrating.md'
   - Concepts: 'concepts.md'
   - Integrations: 'integrations.md'
   - Quickstart guide: 'quickstart-guide.md'

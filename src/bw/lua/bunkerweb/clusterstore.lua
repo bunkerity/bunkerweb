@@ -12,7 +12,9 @@ local logger = clogger:new("CLUSTERSTORE")
 local get_variable = utils.get_variable
 local is_cosocket_available = utils.is_cosocket_available
 local ERR = ngx.ERR
+local INFO = ngx.INFO
 local tonumber = tonumber
+local tostring = tostring
 local random = math.random
 
 function clusterstore:initialize(pool)
@@ -112,7 +114,7 @@ function clusterstore:connect(readonly)
 			return false, "error while connecting to sentinels : " .. err
 		end
 		if readonly then
-			redis_clients, err = rs.get_slaves(redis_sentinel, self.options.master_name)
+			local redis_clients, err = rs.get_slaves(redis_sentinel, self.options.master_name)
 			if redis_clients then
 				redis_client = redis_clients[random(#redis_clients)]
 			else
@@ -130,7 +132,13 @@ function clusterstore:connect(readonly)
 		return false, "error while getting redis client : " .. err
 	end
 	-- Everything went well
-	return true, "success", self.redis_client:get_reused_times()
+	local times, err = self.redis_client:get_reused_times()
+	if times == nil then
+		self:close()
+		return false, "error while getting reused times : " .. err
+	end
+	logger:log(INFO, "redis reused times = " .. tostring(times))
+	return true, "success", times
 end
 
 function clusterstore:close()

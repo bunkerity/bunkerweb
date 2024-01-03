@@ -164,12 +164,12 @@ helpers.call_plugin = function(plugin, method)
 	return true, ret
 end
 
-helpers.fill_ctx = function()
+helpers.fill_ctx = function(no_ref)
 	-- Return errors as table
 	local errors = {}
 	-- Try to load saved ctx
 	local request = get_request()
-	if request then
+	if no_ref ~= true and request then
 		apply_ref()
 	end
 	local ctx = ngx.ctx

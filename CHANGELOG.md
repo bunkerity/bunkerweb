@@ -13,6 +13,7 @@
 - [MISC] Fallback to default HTTPS certificate to prevent errors
 - [MISC] Various internal improvements in LUA code
 - [MISC] Updated Python Docker image to 3.12.1-alpine3.18 in Dockerfiles
+- [MISC] Switch gunicorn worker_class back to gevent in web UI
 - [DEPS] Updated ModSecurity to v3.0.11
 
 ## v1.5.4 - 2023/12/04

@@ -61,6 +61,12 @@ function sessions:init()
 		["REDIS_TIMEOUT"] = "",
 		["REDIS_KEEPALIVE_IDLE"] = "",
 		["REDIS_KEEPALIVE_POOL"] = "",
+		["REDIS_USERNAME"] = "",
+		["REDIS_PASSWORD"] = "",
+		["REDIS_SENTINEL_HOSTS"] = "",
+		["REDIS_SENTINEL_USERNAME"] = "",
+		["REDIS_SENTINEL_PASSWORD"] = "",
+		["REDIS_SENTINEL_MASTER"] = ""
 	}
 	for k, _ in pairs(redis_vars) do
 		local value, err = get_variable(k, false)
@@ -105,6 +111,8 @@ function sessions:init()
 		config.storage = "redis"
 		config.redis = {
 			prefix = "sessions_",
+			username = redis_vars["REDIS_USERNAME"],
+			password = redis_vars["REDIS_PASSWORD"],
 			connect_timeout = tonumber(redis_vars["REDIS_TIMEOUT"]),
 			send_timeout = tonumber(redis_vars["REDIS_TIMEOUT"]),
 			read_timeout = tonumber(redis_vars["REDIS_TIMEOUT"]),
@@ -112,10 +120,27 @@ function sessions:init()
 			pool = "bw-redis",
 			pool_size = tonumber(redis_vars["REDIS_KEEPALIVE_POOL"]),
 			ssl = redis_vars["REDIS_SSL"] == "yes",
-			host = redis_vars["REDIS_HOST"],
-			port = tonumber(redis_vars["REDIS_PORT"]),
-			database = tonumber(redis_vars["REDIS_DATABASE"]),
+			database = tonumber(redis_vars["REDIS_DATABASE"])
 		}
+		if redis_vars["REDIS_SENTINEL_HOSTS"] ~= "" then
+			config.redis.master = redis_vars["REDIS_SENTINEL_MASTER"]
+			config.redis.role = "master"
+			config.redis.sentinel_username = redis_vars["REDIS_SENTINEL_USERNAME"]
+			config.redis.sentinel_password = redis_vars["REDIS_SENTINEL_PASSWORD"]
+			config.redis.sentinels = {}
+			for sentinel_host in redis_vars["REDIS_SENTINEL_HOSTS"]:gmatch("%S+") do
+				local shost, sport = sentinel_host:match("([^:]+):?(%d*)")
+				if sport == "" then
+					sport = 26379
+				else
+					sport = tonumber(sport)
+				end
+				table.insert(config.redis.sentinels, {host = shost, port = sport})
+			end
+		else
+			config.redis.host = redis_vars["REDIS_HOST"]
+			config.redis.port = tonumber(redis_vars["REDIS_PORT"])
+		end
 	end
 	session_init(config)
 	return self:ret(true, "sessions init successful")
