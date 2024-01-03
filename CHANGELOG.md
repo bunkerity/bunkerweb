@@ -5,6 +5,7 @@
 - [BUGFIX] Fix issues with the database when upgrading from version 1.5.3 and 1.5.4 to the most recent version
 - [BUGFIX] Fix ModSecurity-nginx to make it work with brotli
 - [BUGFIX] Remove certbot renew delay causing errors on k8s
+- [BUGFIX] Fix missing custom modsec files when BW instances change
 - [FEATURE] Add Anonymous reporting feature
 - [FEATURE] Add support for fallback Referrer-Policies
 - [FEATURE] Add profile page to web ui and the possibility to activate the 2FA
