@@ -5,7 +5,7 @@ class SubmitProfile {
     this.pwEl = document.querySelector("#admin_password");
     this.pwCheckEl = document.querySelector("#admin_password_check");
     this.pwAlertEl = document.querySelector("[data-pw-alert]");
-    this.formEl = document.querySelector("#profile-form");
+    this.formEl = document.querySelector("#password-form");
     this.init();
   }
 
@@ -96,7 +96,36 @@ class PwBtn {
   }
 }
 
+// Check flash message
+// Show previous failed form tab
+class SwitchTabForm {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    window.addEventListener("load", () => {
+      // Check flash
+      const flashMsg = document.querySelector("[data-flash-message]");
+      if (!flashMsg) return;
+      const content = flashMsg.querySelector("p").textContent.toLowerCase();
+
+      const names = ["password", "username", "totp"];
+
+      names.forEach((name) => {
+        this.showRelateTab(name);
+      });
+    });
+  }
+
+  showRelateTab(name) {
+    if (!content.includes(`(${name})`)) return;
+    document.querySelector(`button[data-tab-handler="${name}"]`).click();
+  }
+}
+
 const setPWBtn = new PwBtn();
 const setSubmit = new SubmitProfile();
 const setTabs = new Tabs();
 const setPopover = new Popover();
+const setSwitchTabForm = new SwitchTabForm();
