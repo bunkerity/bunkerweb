@@ -1,11 +1,15 @@
-
-from utils import create_action_format
+# -*- coding: utf-8 -*-
+from utils import create_action_format, log_format
 from logging import Logger
 from os.path import join, sep
+from os import _exit
 from sys import path as sys_path
 import os
 from ui import UiConfig
-from datetime import datetime
+from pathlib import Path
+from contextlib import suppress
+from signal import SIGINT, signal, SIGTERM
+from subprocess import PIPE, Popen, call
 
 deps_path = join(sep, "usr", "share", "bunkerweb", "utils")
 if deps_path not in sys_path:
@@ -17,6 +21,20 @@ LOGGER: Logger = setup_logger("UI")
 
 UI_CONFIG = UiConfig("ui", **os.environ)
 CORE_API = UI_CONFIG.CORE_ADDR
+
+
+def stop_gunicorn():
+    p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
+    out, _ = p.communicate()
+    pid = out.strip().decode().split("\n")[0]
+    call(["kill", "-SIGTERM", pid])
+
+
+def stop_ui():
+    Path(sep, "var", "run", "bunkerweb", "ui.pid").unlink(missing_ok=True)
+    Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").unlink(missing_ok=True)
+    _exit(500)
+
 
 # Exception on main.py when we are starting UI
 class setupUIException(Exception):
@@ -38,8 +56,13 @@ class setupUIException(Exception):
             LOGGER.warn(log_format("warn", "500", "", "Error while UI setup and exit on failure. Impossible to access UI."))
             if send_action:
                 create_action_format("error", "500", "UI setup exception", "Error while UI setup and exit on failure. Impossible to access UI.", ["exception", "ui", "setup"])
-            exit(1)
+            signal(SIGINT)
+            signal(SIGTERM)
+            stop_gunicorn()
+
         else:
             LOGGER.warn(log_format("warn", "500", "", "Error while UI setup but keep running on failure. UI could not run correctly."))
             if send_action:
                 create_action_format("error", "500", "UI setup exception", "Error while UI setup but keep running on failure. UI could not run correctly.", ["exception", "ui", "setup"])
+
+        stop_ui()

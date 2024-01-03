@@ -2,9 +2,6 @@
 from functools import wraps
 import requests, json  # noqa: E401
 
-from exceptions.api import ProceedCoreException
-from exceptions.api import CoreReqException
-
 from flask import request
 
 from logging import Logger
@@ -54,6 +51,9 @@ def get_req_data(req, queries=[]):
 
 # Communicate with core and send response to client
 def get_core_format_res(path, method, data=None, message=None, retry=1):
+    from exceptions.api import ProceedCoreException
+    from exceptions.api import CoreReqException
+
     # Retry limit
     if retry == 5:
         raise CoreReqException(code=500, description="Max retry to CORE  API for same request exceeded")

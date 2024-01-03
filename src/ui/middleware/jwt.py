@@ -3,7 +3,9 @@ from flask import request
 from flask import make_response
 from flask import redirect
 
+from flask_jwt_extended.exceptions import CSRFError
 
+from flask_jwt_extended import verify_jwt_in_request
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import set_access_cookies
 from flask_jwt_extended import get_jwt_identity
@@ -48,6 +50,22 @@ def setup_jwt(app):
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
     JWTManager(app)
 
+    @app.before_request
+    def jwt_additionnal_checks():
+        """Security middleware for login users."""
+        # Case user is not logged in
+        if verify_jwt_in_request(True) is None:
+            return
+
+        # Case user is logged in, look for security check
+        jwt = get_jwt()
+
+        if not jwt["ip"] or not jwt["user_agent"]:
+            raise CSRFError("Some security check failed. JWT is missing some data.")
+
+        if jwt["ip"] != request.remote_addr or jwt["user_agent"] != request.headers.get("User-Agent"):
+            raise CSRFError("Some security check failed after checking JWT data.")
+
     @app.after_request
     @hooks(hooks=["BeforeRefreshToken", "AfterRefreshToken"])
     def refresh_expiring_jwts(response):
@@ -78,7 +96,10 @@ def setup_jwt(app):
             create_action_format("error", "403", "Crendentials : UI failed login", f"User tried to login but failed", ["ui", "credentials"])  # type: ignore
             raise LoginFailedException
 
-        access_token = create_access_token(identity=username)
+        # We will check for loggin user ip and user agent matching (on default middleware)
+        security_data = {"ip": request.remote_addr, "user_agent": request.headers.get("User-Agent")}
+
+        access_token = create_access_token(identity=username, additional_claims=security_data)
         resp = make_response(redirect("/admin/home", 302))
         set_access_cookies(resp, access_token)
         LOGGER.info(log_format("info", "", "", f"User {username} login"))

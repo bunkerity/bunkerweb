@@ -23,6 +23,7 @@ from exceptions.api import setup_api_exceptions
 from exceptions.validator import setup_validator_exceptions
 
 from middleware.jwt import setup_jwt
+from middleware.default import setup_default_middleware
 
 from utils import log_format
 from utils import create_action_format
@@ -34,6 +35,7 @@ from os.path import join, sep
 from sys import path as sys_path
 import time
 from ui import UiConfig
+
 
 # Setup data and logger
 UI_CONFIG = UiConfig("ui", **os.environ)
@@ -81,6 +83,7 @@ LOGGER.info(log_format("info", "", "", "START UI SETUP"))
 try:
     LOGGER.info(log_format("info", "", "", "ADDING JWT MIDDLEWARE"))
     setup_jwt(app)
+    setup_default_middleware(app)
 except:
     raise setupUIException("exception", "ADDING JWT MIDDLEWARE")
 

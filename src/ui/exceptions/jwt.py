@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from werkzeug.exceptions import HTTPException
 from hook import hooks
@@ -14,31 +15,36 @@ from flask_jwt_extended.exceptions import RevokedTokenError
 from flask_jwt_extended.exceptions import UserClaimsVerificationError
 from flask_jwt_extended.exceptions import WrongTokenError
 
+
 # Error while trying to login
 class LoginFailedException(HTTPException):
     code = 403
     description = "Error while trying to login"
 
+
 @hooks(hooks=["LoginException"])
 @format_exception()
 def login_failed_exception(e):
     return e
+
 
 # Error while trying to login
 class LogoutFailedException(HTTPException):
     code = 500
     description = "Error while trying to logout"
 
-@hooks(hooks=["LoginException"])
+
+@hooks(hooks=["LogoutException"])
 @format_exception()
-def login_failed_exception(e):
+def logout_failed_exception(e):
     return e
+
 
 # Export on main app to register
 def setup_jwt_exceptions(app):
-
     # Custom exceptions
     app.register_error_handler(LoginFailedException, login_failed_exception)
+    app.register_error_handler(LogoutFailedException, logout_failed_exception)
 
     # JWT DEFAULT EXCEPTIONS
     @app.errorhandler(NoAuthorizationError)
@@ -56,21 +62,13 @@ def setup_jwt_exceptions(app):
         e.code = 401
         e.description = "Token Decode error."
         return e
-        
+
     @app.errorhandler(RevokedTokenError)
     @hooks(hooks=["TokenException"])
     @format_exception()
     def revoke_token_exception(e):
         e.code = 401
         e.description = "Token revoke token error."
-        return e
-
-    @app.errorhandler(JWTDecodeError)
-    @hooks(hooks=["TokenException"])
-    @format_exception()
-    def jwt_decode_exception(e):
-        e.code = 401
-        e.description = "Token decode error."
         return e
 
     @app.errorhandler(UserClaimsVerificationError)
