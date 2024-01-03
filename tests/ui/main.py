@@ -1467,7 +1467,7 @@ location /hello {
 
         password_input.send_keys("S$cr3tP@ssw0rd")
 
-        assert_button_click(driver, "//button[@id='profile-button' and @class='edit-btn']")
+        assert_button_click(driver, "//button[@id='username-button' and @class='edit-btn']")
 
         try:
             title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/main/div[1]/div/h1")))
@@ -1501,7 +1501,9 @@ location /hello {
 
         print("Successfully logged in with new username, trying to change password ...", flush=True)
 
-        password_input = safe_get_element(driver, By.ID, "curr_password")
+        assert_button_click(driver, "//button[@data-tab-handler='password']")
+
+        password_input = safe_get_element(driver, By.XPATH, "//form[@data-plugin-item='password']//input[@id='curr_password']")
 
         if password_input.get_attribute("value") != "":
             print("The current password is not empty, exiting ...", flush=True)
@@ -1525,7 +1527,7 @@ location /hello {
 
         new_password_check_input.send_keys("P@ssw0rd")
 
-        assert_button_click(driver, "//button[@id='profile-button' and @class='edit-btn']")
+        assert_button_click(driver, "//button[@id='pw-button' and @class='edit-btn']")
 
         try:
             title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/main/div[1]/div/h1")))
