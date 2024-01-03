@@ -174,7 +174,7 @@ if USER:
                 app.logger.info("The admin user was updated successfully")
         else:
             app.logger.error("The admin user wasn't created manually. You can't change it from the environment variables.")
-elif getenv("FLASK_DEBUG", False) or getenv("ADMIN_USERNAME") and getenv("ADMIN_PASSWORD"):
+elif getenv("ADMIN_USERNAME") and getenv("ADMIN_PASSWORD"):
     if not getenv("FLASK_DEBUG", False):
         if len(getenv("ADMIN_USERNAME", "admin")) > 256:
             app.logger.error("The admin username is too long. It must be less than 256 characters.")
@@ -374,12 +374,14 @@ def check():
 
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
-    if app.config["USER"]:
-        if current_user.is_authenticated:  # type: ignore
-            return redirect(url_for("home"))
-        return redirect(url_for("login"), 301)
+    if current_user.is_authenticated:  # type: ignore
+        return redirect(url_for("home"))
 
     db_config = app.config["CONFIG"].get_config(methods=False)
+
+    for server_name in db_config["SERVER_NAME"].split(" "):
+        if db_config.get(f"{server_name}_USE_UI", "no") == "yes":
+            return redirect(url_for("login"), 301)
 
     if request.method == "POST":
         if not request.form:
