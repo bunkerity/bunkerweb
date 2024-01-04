@@ -3,7 +3,7 @@ from flask import request
 from flask import make_response
 from flask import redirect
 
-from flask_jwt_extended.exceptions import CSRFError
+from flask_jwt_extended.exceptions import NoAuthorizationError
 
 from flask_jwt_extended import verify_jwt_in_request
 from flask_jwt_extended import create_access_token
@@ -57,14 +57,18 @@ def setup_jwt(app):
         if verify_jwt_in_request(True) is None:
             return
 
+        LOGGER.info(log_format("info", "", "", f"Find jwt"))
+
         # Case user is logged in, look for security check
-        jwt = get_jwt()
+        try :
+            jwt = get_jwt()
+            LOGGER.info(log_format("info", "", "", f"JWT is {jwt}"))
 
-        if not jwt["ip"] or not jwt["user_agent"]:
-            raise CSRFError("Some security check failed. JWT is missing some data.")
+            if jwt["ip"] != request.remote_addr or jwt["user_agent"] != request.headers.get("User-Agent"):
+                raise NoAuthorizationError("fail.")
 
-        if jwt["ip"] != request.remote_addr or jwt["user_agent"] != request.headers.get("User-Agent"):
-            raise CSRFError("Some security check failed after checking JWT data.")
+        except :
+            raise NoAuthorizationError("Some security check failed after checking JWT data.")
 
     @app.after_request
     @hooks(hooks=["BeforeRefreshToken", "AfterRefreshToken"])
@@ -75,9 +79,14 @@ def setup_jwt(app):
             now = datetime.now(timezone.utc)
             target_timestamp = datetime.timestamp(now + timedelta(minutes=5))
             if target_timestamp > exp_timestamp:
-                access_token = create_access_token(identity=get_jwt_identity())
-                set_access_cookies(response, access_token)
+
+                # We will check for loggin user ip and user agent matching (on default middleware)
+                security_data = {"ip": request.remote_addr, "user_agent": request.headers.get("User-Agent")}
                 identity = get_jwt_identity()
+
+                access_token = create_access_token(identity=identity, additional_claims=security_data)
+                set_access_cookies(response, access_token)
+                
                 LOGGER.info(log_format("info", "", "", f"Refresh JWT for user {identity}"))
                 create_action_format("success", "200", "Crendentials : refresh token", f"Refresh token for user {identity}.", ["ui", "credentials"])
             return response

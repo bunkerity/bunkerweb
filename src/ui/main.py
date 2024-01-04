@@ -13,6 +13,8 @@ from routes.logs import logs
 from routes.misc import misc
 from routes.plugins import plugins
 from routes.dashboard import dashboard
+from routes.external import external
+from routes.database import database
 
 from exceptions.setup import setupUIException
 from exceptions.default import setup_default_exceptions
@@ -100,21 +102,17 @@ except:
     raise setupUIException("exception", "ADDING EXCEPTIONS")
 
 # Add API routes
+api_routes = [actions, config, custom_configs, instances, jobs, logs, misc, plugins, external, database]
+
 try:
     LOGGER.info(log_format("info", "", "", "ADDING API ROUTES"))
-    app.register_blueprint(actions)
-    app.register_blueprint(config)
-    app.register_blueprint(custom_configs)
-    app.register_blueprint(instances)
-    app.register_blueprint(jobs)
-    app.register_blueprint(logs)
-    app.register_blueprint(misc)
-    app.register_blueprint(plugins)
+    for route in api_routes:
+        app.register_blueprint(route)
 except:
     raise setupUIException("exception", "ADDING API ROUTES")
 
 
-# Add dashboard routes and related templates / files
+# Add dashboard routes and statics
 try:
     LOGGER.info(log_format("info", "", "", "ADDING TEMPLATES AND STATIC FILES"))
     app.register_blueprint(dashboard)

@@ -2,6 +2,8 @@
 from functools import wraps
 import requests, json  # noqa: E401
 
+from hook import hooks
+
 from flask import request
 
 from logging import Logger
@@ -50,31 +52,53 @@ def get_req_data(req, queries=[]):
 
 
 # Communicate with core and send response to client
+@hooks(hooks=["BeforeCoreReq", "AfterCoreReq"])
 def get_core_format_res(path, method, data=None, message=None, retry=1):
-    from exceptions.api import ProceedCoreException
     from exceptions.api import CoreReqException
 
     # Retry limit
     if retry == 5:
-        raise CoreReqException(code=500, description="Max retry to CORE  API for same request exceeded")
+        raise CoreReqException
 
     # Try request core
     req = None
     try:
-        req = req_core(path, method, data)
+        # Request core api and store response
+        if method.upper() == "GET":
+            req = requests.get(path)
+
+        if method.upper() == "POST":
+            req = requests.post(path, data=data)
+
+        if method.upper() == "DELETE":
+            req = requests.delete(path, data=data)
+
+        if method.upper() == "PATCH":
+            req = requests.patch(path, data=data)
+
+        if method.upper() == "PUT":
+            req = requests.put(path, data=data)
+
         # Case 503, retry request
         if req.status_code == 503:
             LOGGER.warn(log_format("warn", "503", path, f"Communicate with {path} {method} retry={retry}. Maybe CORE is setting something up on background.", data))
             return get_core_format_res(path, method, data, message, retry + 1)
     except:
-        raise CoreReqException(code=500, description="Impossible to connect to CORE API")
+        raise CoreReqException(f"CORE request failed on path {path}, method {method}, data : {data or 'none'}")
 
+    return proceed_core_data(req, path, method, data, message)
+
+@hooks(hooks=["BeforeProceedCore", "AfterProceedCore"])
+def proceed_core_data(res, path, method, data=None, message=None,):
+    from exceptions.api import ProceedCoreException
     # Case response from core, format response for client
+    LOGGER.warn(f"PROCEED CORE RESPONDR FOR PATH : {path} WITH DATA : {res.text}")
+
     try:
         # Proceed data
-        data = req.text
+        data = res.text
 
-        obj = json.loads(req.text)
+        obj = json.loads(res.text)
         if isinstance(obj, dict):
             data = obj.get("message", obj)
             if isinstance(data, dict):
@@ -83,8 +107,8 @@ def get_core_format_res(path, method, data=None, message=None, retry=1):
             data = json.dumps(data, skipkeys=True, allow_nan=True, indent=6)
 
         # Additional info
-        res_type = "success" if str(req.status_code).startswith("2") else "error"
-        res_status = str(req.status_code)
+        res_type = "success" if str(res.status_code).startswith("2") else "error"
+        res_status = str(res.status_code)
 
         if res_type == "error":
             LOGGER.error(log_format(res_type, res_status, path, message, data))
@@ -92,29 +116,7 @@ def get_core_format_res(path, method, data=None, message=None, retry=1):
         return res_format(res_type, res_status, "", message, data)
     # Case impossible to format
     except:
-        raise ProceedCoreException(code=500, description="Impossible for UI API to proceed data send by CORE API")
-
-
-def req_core(path, method, data=None):
-    # Request core api and store response
-    req = None
-    if method.upper() == "GET":
-        req = requests.get(path)
-
-    if method.upper() == "POST":
-        req = requests.post(path, data=data)
-
-    if method.upper() == "DELETE":
-        req = requests.delete(path, data=data)
-
-    if method.upper() == "PATCH":
-        req = requests.patch(path, data=data)
-
-    if method.upper() == "PUT":
-        req = requests.put(path, data=data)
-
-    return req
-
+        raise ProceedCoreException(f"Proceed CORE response failed on path {path}, method {method}")
 
 # Standard response format
 def res_format(type="error", status_code="500", path="", detail="Internal Server Error", data={"message": "error"}):
@@ -179,7 +181,8 @@ def format_exception():
                 LOGGER.error(log_format("error", "500", "", "Internal server error but impossible to get detail."))
                 create_action_format("error", "500", "UI exception", "Internal server error but impossible to get detail.", ["ui", "exception"])
                 return res_format("error", "500", "", "Internal server error.")
-
+            
         return wrapped
 
     return decorator
+

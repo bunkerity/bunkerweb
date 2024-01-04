@@ -23,17 +23,13 @@ UI_CONFIG = UiConfig("ui", **os.environ)
 CORE_API = UI_CONFIG.CORE_ADDR
 
 
-def stop_gunicorn():
-    p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
-    out, _ = p.communicate()
-    pid = out.strip().decode().split("\n")[0]
-    call(["kill", "-SIGTERM", pid])
-
-
 def stop_ui():
     Path(sep, "var", "run", "bunkerweb", "ui.pid").unlink(missing_ok=True)
     Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").unlink(missing_ok=True)
-    _exit(500)
+
+def stop_log():
+    LOGGER.warn(log_format("warn", "500", "", "EXIT ON FAILURE."))
+    create_action_format("error", "500", "UI setup exception", "EXIT ON FAILURE.", ["exception", "ui", "setup"])
 
 
 # Exception on main.py when we are starting UI
@@ -56,9 +52,9 @@ class setupUIException(Exception):
             LOGGER.warn(log_format("warn", "500", "", "Error while UI setup and exit on failure. Impossible to access UI."))
             if send_action:
                 create_action_format("error", "500", "UI setup exception", "Error while UI setup and exit on failure. Impossible to access UI.", ["exception", "ui", "setup"])
-            signal(SIGINT)
-            signal(SIGTERM)
-            stop_gunicorn()
+            signal(SIGINT, stop_log)
+            signal(SIGTERM, stop_log)
+            _exit(500)
 
         else:
             LOGGER.warn(log_format("warn", "500", "", "Error while UI setup but keep running on failure. UI could not run correctly."))
