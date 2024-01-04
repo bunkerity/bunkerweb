@@ -94,8 +94,10 @@ jobs:
           sudo chmod 777 /etc/bunkerweb/variables.env /etc/bunkerweb/ui.env
       - name: Run tests
         run: |
+          export MAKEFLAGS="-j $(nproc)"
+          pip install --no-cache-dir --ignore-installed --require-hashes -r src/deps/requirements-deps.txt
+          pip install --no-cache-dir --require-hashes -r tests/ui/requirements.txt
           cd ./tests/ui
-          MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install --no-cache-dir --require-hashes --no-deps -r {} \;
           touch test.txt
           zip test.zip test.txt
           rm test.txt

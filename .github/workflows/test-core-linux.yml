@@ -95,7 +95,9 @@ jobs:
         run: sudo apt install -fy /tmp/bunkerweb.deb
       - name: Run tests
         run: |
+          export MAKEFLAGS="-j $(nproc)"
+          pip install --no-cache-dir --ignore-installed --require-hashes -r src/deps/requirements-deps.txt
+          MAKEFLAGS="-j $(nproc)" find tests/core -name "requirements.txt" -exec pip install --no-cache-dir --require-hashes --no-deps -r {} \;
           cd ./tests/core/${{ inputs.TEST }}
-          MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install --no-cache-dir --require-hashes --no-deps -r {} \;
           sudo truncate -s 0 /var/log/bunkerweb/error.log
           ./test.sh "linux"
