@@ -56,8 +56,7 @@ RUN mkdir -p deps/python && \
 RUN easy_install-3.9 pip && \
   export MAKEFLAGS="-j$(nproc)" && \
   pip install --no-cache-dir --ignore-installed --require-hashes -r /tmp/requirements-deps.txt && \
-  pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt && \
-  if [ ! -f /usr/share/bunkerweb/deps/python/zope/__init__.py ] ; then touch /usr/share/bunkerweb/deps/python/zope/__init__.py ; fi
+  pip install --no-cache-dir --require-hashes --target deps/python -r deps/requirements.txt
 
 # Copy BW files
 # can't exclude deps from . so we are copying everything by hand
