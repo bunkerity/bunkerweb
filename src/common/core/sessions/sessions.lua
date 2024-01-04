@@ -73,7 +73,11 @@ function sessions:init()
 		if value == nil then
 			return self:ret(false, "can't get " .. k .. " variable : " .. err)
 		end
-		redis_vars[k] = value
+		if value == "" then
+			redis_vars[k] = nil
+		else
+			redis_vars[k] = value
+		end
 	end
 	-- Init configuration
 	local config = {
