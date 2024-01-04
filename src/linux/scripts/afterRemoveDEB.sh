@@ -128,9 +128,9 @@ elif [ "$1" = "purge" ]; then
     purge
 else
     echo "Package is being upgraded"
-    # Check the version of the package and if it's inferior to 1.5.4, we need to copy the variables.env file
+    # Check the version of the package and if it's inferior to 1.5.5, we need to copy the variables.env file
     VERSION=$(dpkg-query -W -f='${Version}' bunkerweb)
-    if [ "$VERSION" != "1.5.4" ]; then
+    if [ "$VERSION" != "1.5.5" ]; then
         echo "ℹ️ Copyenv variables to /var/tmp/bunkerweb/*.env"
         do_and_check_cmd cp -f /opt/bunkerweb/variables.env /var/tmp/variables.env
         do_and_check_cmd cp -f /opt/bunkerweb/ui.env /var/tmp/ui.env
