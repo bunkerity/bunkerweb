@@ -6,6 +6,7 @@ deps_path = join(sep, "usr", "share", "bunkerweb", "deps", "python")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
 
+from zope.event import subscribers  # noqa: F401
 from gevent import monkey
 
 monkey.patch_all()
