@@ -88,9 +88,17 @@ def get_core_format_res(path, method, data=None, message=None, retry=1):
 
     return proceed_core_data(req, path, method, data, message)
 
+
 @hooks(hooks=["BeforeProceedCore", "AfterProceedCore"])
-def proceed_core_data(res, path, method, data=None, message=None,):
+def proceed_core_data(
+    res,
+    path,
+    method,
+    data=None,
+    message=None,
+):
     from exceptions.api import ProceedCoreException
+
     # Case response from core, format response for client
     LOGGER.warn(f"PROCEED CORE RESPONDR FOR PATH : {path} WITH DATA : {res.text}")
 
@@ -117,6 +125,7 @@ def proceed_core_data(res, path, method, data=None, message=None,):
     # Case impossible to format
     except:
         raise ProceedCoreException(f"Proceed CORE response failed on path {path}, method {method}")
+
 
 # Standard response format
 def res_format(type="error", status_code="500", path="", detail="Internal Server Error", data={"message": "error"}):
@@ -181,8 +190,7 @@ def format_exception():
                 LOGGER.error(log_format("error", "500", "", "Internal server error but impossible to get detail."))
                 create_action_format("error", "500", "UI exception", "Internal server error but impossible to get detail.", ["ui", "exception"])
                 return res_format("error", "500", "", "Internal server error.")
-            
+
         return wrapped
 
     return decorator
-

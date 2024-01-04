@@ -9,7 +9,6 @@ from ui import UiConfig
 from pathlib import Path
 from contextlib import suppress
 from signal import SIGINT, signal, SIGTERM
-from subprocess import PIPE, Popen, call
 
 deps_path = join(sep, "usr", "share", "bunkerweb", "utils")
 if deps_path not in sys_path:
@@ -26,6 +25,7 @@ CORE_API = UI_CONFIG.CORE_ADDR
 def stop_ui():
     Path(sep, "var", "run", "bunkerweb", "ui.pid").unlink(missing_ok=True)
     Path(sep, "var", "tmp", "bunkerweb", "ui.healthy").unlink(missing_ok=True)
+
 
 def stop_log():
     LOGGER.warn(log_format("warn", "500", "", "EXIT ON FAILURE."))

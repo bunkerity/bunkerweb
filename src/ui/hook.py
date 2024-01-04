@@ -19,6 +19,7 @@ db_hooks = ["BeforeAccessDB", "AfterAccessDB", "DBException"]
 global_hooks = ["BeforeReq", "AfterReq", "GlobalException"]
 total_hooks = login_hooks + jwt_token_hooks + validator_hooks + api_hooks + pages_hooks + db_hooks + global_hooks
 
+
 # hooks params need to be a list
 def hooks(hooks):
     def decorator(f):
@@ -44,7 +45,7 @@ def hooks(hooks):
             # Before hooks
             run_hooks(before_hooks, args, kwargs)
             run_hooks(exception_hooks, args, kwargs)
-         
+
             # Run main
             main_f = f(*args, **kwargs)
 
@@ -57,7 +58,8 @@ def hooks(hooks):
 
     return decorator
 
-def run_hooks(hooks, args, kwargs, main_f = {}):
+
+def run_hooks(hooks, args, kwargs, main_f={}):
     for hook in hooks:
         # Get files for current hook, run if at least one
         files = get_files(hook)
@@ -92,7 +94,7 @@ def get_files(hook_name):
     return files
 
 
-def run_hook_files(files, hook_name, args, kwargs, main_f_res = {}):
+def run_hook_files(files, hook_name, args, kwargs, main_f_res={}):
     from exceptions.hook import HookRunException
 
     # Run every files
@@ -104,4 +106,3 @@ def run_hook_files(files, hook_name, args, kwargs, main_f_res = {}):
             hook_f(args, kwargs, main_f_res)
         except:
             raise HookRunException(f"Hook exception on file {file} with hook {hook_name}")
-

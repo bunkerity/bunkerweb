@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from flask import request
-
 from hook import hooks
 
 

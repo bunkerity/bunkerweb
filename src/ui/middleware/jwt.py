@@ -60,14 +60,14 @@ def setup_jwt(app):
         LOGGER.info(log_format("info", "", "", f"Find jwt"))
 
         # Case user is logged in, look for security check
-        try :
+        try:
             jwt = get_jwt()
             LOGGER.info(log_format("info", "", "", f"JWT is {jwt}"))
 
             if jwt["ip"] != request.remote_addr or jwt["user_agent"] != request.headers.get("User-Agent"):
                 raise NoAuthorizationError("fail.")
 
-        except :
+        except:
             raise NoAuthorizationError("Some security check failed after checking JWT data.")
 
     @app.after_request
@@ -79,14 +79,13 @@ def setup_jwt(app):
             now = datetime.now(timezone.utc)
             target_timestamp = datetime.timestamp(now + timedelta(minutes=5))
             if target_timestamp > exp_timestamp:
-
                 # We will check for loggin user ip and user agent matching (on default middleware)
                 security_data = {"ip": request.remote_addr, "user_agent": request.headers.get("User-Agent")}
                 identity = get_jwt_identity()
 
                 access_token = create_access_token(identity=identity, additional_claims=security_data)
                 set_access_cookies(response, access_token)
-                
+
                 LOGGER.info(log_format("info", "", "", f"Refresh JWT for user {identity}"))
                 create_action_format("success", "200", "Crendentials : refresh token", f"Refresh token for user {identity}.", ["ui", "credentials"])
             return response
