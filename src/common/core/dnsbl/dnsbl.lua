@@ -94,7 +94,12 @@ function dnsbl:access()
 		return self:ret(
 			true,
 			"client IP " .. self.ctx.bw.remote_addr .. " is in DNSBL cache (server = " .. cached .. ")",
-			get_deny_status()
+			get_deny_status(),
+			nil,
+			{
+				id = "dnsbl",
+				dnsbl = cached
+			}
 		)
 	end
 	-- Loop on DNSBL list
@@ -156,7 +161,7 @@ function dnsbl:access()
 			if not ok then
 				return self:ret(false, "error while adding element to cache : " .. err)
 			end
-			return self:ret(true, "IP is blacklisted by " .. ret_server, get_deny_status())
+			return self:ret(true, "IP is blacklisted by " .. ret_server, get_deny_status(), nil, {id = "dnsbl", dnsbl = ret_server})
 		end
 		-- Error case
 		return self:ret(false, ret_err)

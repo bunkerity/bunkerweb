@@ -42,7 +42,12 @@ function country:access()
 				.. " is in country cache (blacklisted, country = "
 				.. data.country
 				.. ")",
-			get_deny_status()
+			get_deny_status(),
+			nil,
+			{
+				id = "country",
+				country = data.country
+			}
 		)
 	end
 
@@ -84,7 +89,12 @@ function country:access()
 		return self:ret(
 			true,
 			"client IP " .. self.ctx.bw.remote_addr .. " is not whitelisted (country = " .. country_data .. ")",
-			get_deny_status()
+			get_deny_status(),
+			nil,
+			{
+				id = "country",
+				country = data.country
+			}
 		)
 	end
 
@@ -99,7 +109,12 @@ function country:access()
 				return self:ret(
 					true,
 					"client IP " .. self.ctx.bw.remote_addr .. " is blacklisted (country = " .. country_data .. ")",
-					get_deny_status()
+					get_deny_status(),
+					nil,
+					{
+						id = "country",
+						country = data.country
+					}
 				)
 			end
 		end

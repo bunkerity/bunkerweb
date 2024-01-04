@@ -184,7 +184,10 @@ function antibot:access()
 	end
 
 	-- Method is suspicious, let's deny the request
-	return self:ret(true, "unsupported HTTP method for antibot", get_deny_status())
+	local data = {}
+	data["id"] = "suspicious-method"
+	data["method"] = self.ctx.bw.request_method
+	return self:ret(true, "unsupported HTTP method for antibot", get_deny_status(), nil, data)
 end
 
 function antibot:content()

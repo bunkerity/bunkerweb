@@ -126,7 +126,7 @@ function sessions:init()
 			ssl = redis_vars["REDIS_SSL"] == "yes",
 			database = tonumber(redis_vars["REDIS_DATABASE"])
 		}
-		if redis_vars["REDIS_SENTINEL_HOSTS"] ~= "" then
+		if redis_vars["REDIS_SENTINEL_HOSTS"] ~= nil then
 			config.redis.master = redis_vars["REDIS_SENTINEL_MASTER"]
 			config.redis.role = "master"
 			config.redis.sentinel_username = redis_vars["REDIS_SENTINEL_USERNAME"]
