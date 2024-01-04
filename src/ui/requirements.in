@@ -3,7 +3,7 @@ beautifulsoup4==4.12.2
 Flask==3.0.0
 Flask-Login==0.6.3
 Flask_WTF==1.2.1
-gunicorn[gevent]==21.2.0
+gunicorn[gthread]==21.2.0
 importlib-metadata==7.0.1
 pyotp==2.9.0
 python_dateutil==2.8.2
