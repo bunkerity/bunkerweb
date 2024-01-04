@@ -80,13 +80,8 @@ signal(SIGTERM, handle_stop)
 sbin_nginx_path = Path(sep, "usr", "sbin", "nginx")
 
 # Flask app
-app = Flask(
-    __name__,
-    static_url_path="/",
-    static_folder="static",
-    template_folder="templates",
-)
-app.secret_key = getenv("FLASK_SECRET", urandom(32))
+app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
+app.config["SECRET_KEY"] = getenv("FLASK_SECRET", urandom(32))
 
 PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
 app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
@@ -188,7 +183,6 @@ bw_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encodin
 try:
     app.config.update(
         DEBUG=True,
-        SECRET_KEY=getenv("FLASK_SECRET", urandom(32)),
         INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION),
         CONFIG=Config(db),
         CONFIGFILES=ConfigFiles(app.logger, db),

@@ -10,7 +10,7 @@ from gevent import monkey
 
 monkey.patch_all()
 
-MAX_THREADS = int(getenv("MAX_THREADS", max((cpu_count() or 1) - 1, 1)) * 2)
+MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
 
 wsgi_app = "main:app"
 accesslog = "/var/log/bunkerweb/ui-access.log"
@@ -22,8 +22,8 @@ reuse_port = True
 pidfile = join(sep, "var", "run", "bunkerweb", "ui.pid")
 worker_tmp_dir = join(sep, "dev", "shm")
 tmp_upload_dir = join(sep, "var", "tmp", "bunkerweb", "ui")
+workers = MAX_WORKERS
 worker_class = "gevent"
-threads = MAX_THREADS
-workers = 1
+threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
 graceful_timeout = 0
 secure_scheme_headers = {}
