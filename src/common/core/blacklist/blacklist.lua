@@ -161,9 +161,6 @@ function blacklist:access()
 					self.logger:log(ERR, "error while adding element to cache : " .. err)
 				end
 				if blacklisted ~= "ok" then
-					local data = {}
-					data["id"] = "blacklisted-" .. 
-					data["method"] = self.ctx.bw.request_method
 					return self:ret(
 						true,
 						k .. " is blacklisted (info : " .. blacklisted .. ")",
