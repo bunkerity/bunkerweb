@@ -41,6 +41,8 @@ class SubmitProfile {
     this.pwCheckEl.classList.remove(
       "focus:!border-red-500",
       "focus:valid:!border-red-500",
+      "focus:!ring-red-500",
+      "focus:valid:!ring-red-500",
       "active:!border-red-500",
       "active:valid:!border-red-500",
       "valid:!border-red-500"
@@ -53,6 +55,8 @@ class SubmitProfile {
     this.pwCheckEl.classList.add(
       "focus:!border-red-500",
       "focus:valid:!border-red-500",
+      "focus:!ring-red-500",
+      "focus:valid:!ring-red-500",
       "active:!border-red-500",
       "active:valid:!border-red-500",
       "valid:!border-red-500"
@@ -113,12 +117,12 @@ class SwitchTabForm {
       const names = ["password", "username", "totp"];
 
       names.forEach((name) => {
-        this.showRelateTab(name);
+        this.showRelateTab(name, content);
       });
     });
   }
 
-  showRelateTab(name) {
+  showRelateTab(name, content) {
     if (!content.includes(`(${name})`)) return;
     document.querySelector(`button[data-tab-handler="${name}"]`).click();
   }

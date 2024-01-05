@@ -402,6 +402,44 @@ class Banner {
   }
 }
 
+class Clipboard {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    // Show clipboard copy if https
+    window.addEventListener("load", () => {
+      if (!window.location.href.startsWith("https://")) return;
+
+      document.querySelectorAll("[data-clipboard-copy]").forEach((el) => {
+        el.classList.remove("hidden");
+      });
+    });
+
+    window.addEventListener("click", (e) => {
+      if (!e.target.hasAttribute("data-clipboard-target")) return;
+
+      navigator.permissions
+        .query({ name: "clipboard-write" })
+        .then((result) => {
+          if (result.state === "granted" || result.state === "prompt") {
+            /* write to the clipboard now */
+            const copyEl = document.querySelector(
+              e.target.getAttribute("data-clipboard-target")
+            );
+
+            copyEl.select();
+            copyEl.setSelectionRange(0, 99999); // For mobile devices
+
+            // Copy the text inside the text field
+            navigator.clipboard.writeText(copyEl.value);
+          }
+        });
+    });
+  }
+}
+
 const setCheckbox = new Checkbox();
 const setSelect = new Select();
 const setPassword = new Password();
@@ -424,3 +462,5 @@ const setFlashSidebar = new Sidebar(
   "[data-flash-sidebar-open]",
   "[data-flash-sidebar-close]"
 );
+
+const setClipboard = new Clipboard();
