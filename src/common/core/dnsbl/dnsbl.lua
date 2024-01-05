@@ -179,7 +179,7 @@ function dnsbl:preread()
 end
 
 function dnsbl:is_in_cache(ip)
-	local ok, data = self.cachestore:get("plugin_dnsbl_" .. self.ctx.bw.server_name .. ip)
+	local ok, data = self.cachestore_local:get("plugin_dnsbl_" .. self.ctx.bw.server_name .. ip)
 	if not ok then
 		return false, data
 	end
@@ -187,7 +187,7 @@ function dnsbl:is_in_cache(ip)
 end
 
 function dnsbl:add_to_cache(ip, value)
-	local ok, err = self.cachestore:set("plugin_dnsbl_" .. self.ctx.bw.server_name .. ip, value, 86400)
+	local ok, err = self.cachestore_local:set("plugin_dnsbl_" .. self.ctx.bw.server_name .. ip, value, 86400)
 	if not ok then
 		return false, err
 	end

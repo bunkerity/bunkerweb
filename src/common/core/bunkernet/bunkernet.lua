@@ -209,7 +209,7 @@ function bunkernet:log(bypass_checks)
 		else
 			obj.logger:log(NOTICE, "successfully reported IP " .. ip .. " (reason : " .. reason .. ")")
 			local cachestore = require "bunkerweb.cachestore":new(use_redis, nil, true)
-			local ok, err = cachestore:set("plugin_bunkernet_" .. ip .. "_" .. reason)
+			local ok, err = cachestore:set("plugin_bunkernet_" .. ip .. "_" .. reason, "reported", 3600)
 			if not ok then
 				obj.logger:log(ERR, "error from cachestore : " .. err)
 			end

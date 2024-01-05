@@ -32,7 +32,7 @@ services:
       bw-universe:
       bw-us-network:
         ipv4_address: 8.0.0.2
-      bw-fr-network:
+      bw-gb-network:
         ipv4_address: 2.0.0.2
 
   bw-scheduler:
@@ -70,8 +70,8 @@ networks:
       driver: default
       config:
         - subnet: 8.0.0.0/8
-  bw-fr-network:
-    name: bw-fr-network
+  bw-gb-network:
+    name: bw-gb-network
     ipam:
       driver: default
       config:
