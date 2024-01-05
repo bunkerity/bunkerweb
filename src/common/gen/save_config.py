@@ -272,8 +272,9 @@ if __name__ == "__main__":
             config_files = config.get_config()
 
         bunkerweb_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip()
+        db_initialized = db.is_initialized()
 
-        if not db.is_initialized():
+        if not db_initialized:
             logger.info(
                 "Database not initialized, initializing ...",
             )
@@ -318,13 +319,13 @@ if __name__ == "__main__":
             else:
                 logger.info("Database tables successfully updated")
 
-            err = db.initialize_db(version=bunkerweb_version, integration=integration)
+        err = db.initialize_db(version=bunkerweb_version, integration=integration)
 
-            if err:
-                logger.error(f"Can't update database metadata : {err}")
-                sys_exit(1)
-            else:
-                logger.info("Database metadata successfully updated")
+        if err:
+            logger.error(f"Can't {'initialize' if not db_initialized else 'update'} database metadata : {err}")
+            sys_exit(1)
+        else:
+            logger.info("Database metadata successfully " + ("initialized" if not db_initialized else "updated"))
 
         if args.init:
             sys_exit(0)
