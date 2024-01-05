@@ -1,7 +1,7 @@
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
-local utils = require "bunkerweb.utils"
 local ssl = require "ngx.ssl"
+local utils = require "bunkerweb.utils"
 
 local selfsigned = class("selfsigned", plugin)
 
@@ -13,7 +13,7 @@ local ssl_server_name = ssl.server_name
 local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local has_variable = utils.has_variable
-local open = io.open
+local read_files = utils.read_files
 
 function selfsigned:initialize(ctx)
 	-- Call parent initialize
@@ -22,25 +22,29 @@ end
 
 function selfsigned:init()
 	local ret_ok, ret_err = true, "success"
-    if has_variable("GENERATE_SELF_SIGNED_SSL", "yes") then
+	if has_variable("GENERATE_SELF_SIGNED_SSL", "yes") then
 		local multisite, err = get_variable("MULTISITE", false)
 		if not multisite then
 			return self:ret(false, "can't get MULTISITE variable : " .. err)
 		end
 		if multisite == "yes" then
-			local vars, err = get_multiple_variables({"GENERATE_SELF_SIGNED_SSL", "SERVER_NAME"})
+			local vars
+			vars, err = get_multiple_variables({ "GENERATE_SELF_SIGNED_SSL", "SERVER_NAME" })
 			if not vars then
 				return self:ret(false, "can't get GENERATE_SELF_SIGNED_SSL variables : " .. err)
 			end
 			for server_name, multisite_vars in pairs(vars) do
 				if multisite_vars["GENERATE_SELF_SIGNED_SSL"] == "yes" and server_name ~= "global" then
-					local check, data = self:read_files(server_name)
+					local check, data = read_files({
+						"/var/cache/bunkerweb/selfsigned/" .. server_name .. ".pem",
+						"/var/cache/bunkerweb/selfsigned/" .. server_name .. ".key",
+					})
 					if not check then
 						self.logger:log(ERR, "error while reading files : " .. data)
 						ret_ok = false
 						ret_err = "error reading files"
 					else
-						local check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
+						check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
 						if not check then
 							self.logger:log(ERR, "error while loading data : " .. err)
 							ret_ok = false
@@ -50,17 +54,21 @@ function selfsigned:init()
 				end
 			end
 		else
-			local server_name, err = get_variable("SERVER_NAME", false)
+			local server_name
+			server_name, err = get_variable("SERVER_NAME", false)
 			if not server_name then
 				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 			end
-			local check, data = self:read_files(server_name:match("%S+"))
+			local check, data = read_files({
+				"/var/cache/bunkerweb/selfsigned/" .. server_name:match("%S+") .. ".pem",
+				"/var/cache/bunkerweb/selfsigned/" .. server_name:match("%S+") .. ".key",
+			})
 			if not check then
 				self.logger:log(ERR, "error while reading files : " .. data)
 				ret_ok = false
 				ret_err = "error reading files"
 			else
-				local check, err = self:load_data(data, server_name)
+				check, err = self:load_data(data, server_name)
 				if not check then
 					self.logger:log(ERR, "error while loading data : " .. err)
 					ret_ok = false
@@ -70,7 +78,7 @@ function selfsigned:init()
 		end
 	else
 		ret_err = "self signed is not used"
-    end
+	end
 	return self:ret(ret_ok, ret_err)
 end
 
@@ -79,31 +87,18 @@ function selfsigned:ssl_certificate()
 	if not server_name then
 		return self:ret(false, "can't get server_name : " .. err)
 	end
-    if self.variables["GENERATE_SELF_SIGNED_SSL"] == "yes" then
-		local data, err = self.datastore:get("plugin_selfsigned_" .. server_name, true)
+	if self.variables["GENERATE_SELF_SIGNED_SSL"] == "yes" then
+		local data
+		data, err = self.datastore:get("plugin_selfsigned_" .. server_name, true)
 		if not data then
-			return self:ret(false, "error while getting plugin_selfsigned_" .. server_name .. " from datastore : " .. err)
+			return self:ret(
+				false,
+				"error while getting plugin_selfsigned_" .. server_name .. " from datastore : " .. err
+			)
 		end
-        return self:ret(true, "certificate/key data found", data)
-    end
-    return self:ret(true, "selfsigned is not used")
-end
-
-function selfsigned:read_files(server_name)
-	local files = {
-		"/var/cache/bunkerweb/selfsigned/" .. server_name .. ".pem",
-		"/var/cache/bunkerweb/selfsigned/" .. server_name .. ".key"
-	}
-	local data = {}
-	for i, file in ipairs(files) do
-		local f, err = open(file, "r")
-		if not f then
-			return false, file .. " = " .. err
-		end
-		table.insert(data, f:read("*a"))
-		f:close()
+		return self:ret(true, "certificate/key data found", data)
 	end
-	return true, data
+	return self:ret(true, "selfsigned is not used")
 end
 
 function selfsigned:load_data(data, server_name)
@@ -120,7 +115,8 @@ function selfsigned:load_data(data, server_name)
 	-- Cache data
 	for key in server_name:gmatch("%S+") do
 		local cache_key = "plugin_selfsigned_" .. key
-		local ok, err = self.datastore:set(cache_key, {cert_chain, priv_key}, nil, true)
+		local ok
+		ok, err = self.datastore:set(cache_key, { cert_chain, priv_key }, nil, true)
 		if not ok then
 			return false, "error while setting data into datastore : " .. err
 		end

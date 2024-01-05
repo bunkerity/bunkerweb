@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from contextlib import suppress
 from os import _exit, getenv, listdir, sep, urandom
@@ -1132,11 +1132,11 @@ def plugins():
                 except (TarError, OSError) as e:
                     errors += 1
                     error = 1
-                    flash(f"{e}", "error")
+                    flash(str(e), "error")
                 except Exception as e:
                     errors += 1
                     error = 1
-                    flash(f"{e}", "error")
+                    flash(str(e), "error")
                 finally:
                     if error != 1:
                         flash(f"Successfully created plugin: <b><i>{folder_name}</i></b>")

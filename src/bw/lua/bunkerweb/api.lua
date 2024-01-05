@@ -1,14 +1,14 @@
 local ngx = ngx
 local ngx_req = ngx.req
+local cdatastore = require "bunkerweb.datastore"
 local cjson = require "cjson"
 local class = require "middleclass"
-local cdatastore = require "bunkerweb.datastore"
 local clogger = require "bunkerweb.logger"
+local helpers = require "bunkerweb.helpers"
 local process = require "ngx.process"
 local rsignal = require "resty.signal"
 local upload = require "resty.upload"
 local utils = require "bunkerweb.utils"
-local helpers = require "bunkerweb.helpers"
 
 local api = class("api")
 
@@ -287,13 +287,14 @@ function api:do_api_call()
 		return false, resp["msg"], HTTP_INTERNAL_SERVER_ERROR, encode(resp)
 	end
 	for _, plugin in ipairs(list) do
-		local plugin_lua, err = require_plugin(plugin.id)
+		local plugin_lua, _ = require_plugin(plugin.id)
 		if plugin_lua and plugin_lua.api ~= nil then
 			local ok, plugin_obj = new_plugin(plugin_lua, self.ctx)
 			if not ok then
 				logger:log(ERR, "can't instantiate " .. plugin.id .. " : " .. plugin_obj)
 			else
-				local ok, ret = call_plugin(plugin_obj, "api")
+				local ret
+				ok, ret = call_plugin(plugin_obj, "api")
 				if not ok then
 					logger:log(ERR, "error while executing " .. plugin.id .. ":api() : " .. ret)
 				else

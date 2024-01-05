@@ -1,7 +1,7 @@
 local ngx = ngx
 local class = require "middleclass"
-local clusterstore = require "bunkerweb.clusterstore"
 local clogger = require "bunkerweb.logger"
+local clusterstore = require "bunkerweb.clusterstore"
 local mlcache = require "resty.mlcache"
 local utils = require "bunkerweb.utils"
 local cachestore = class("cachestore")
@@ -184,10 +184,12 @@ function cachestore:del_redis(key)
 	return true
 end
 
+-- luacheck: ignore 212
 function cachestore:purge()
 	return cache:purge(true)
 end
 
+-- luacheck: ignore 212
 function cachestore:update()
 	return cache:update()
 end

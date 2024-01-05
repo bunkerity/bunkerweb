@@ -33,7 +33,7 @@ function clusterstore:initialize(pool)
 		["REDIS_SENTINEL_HOSTS"] = "",
 		["REDIS_SENTINEL_USERNAME"] = "",
 		["REDIS_SENTINEL_PASSWORD"] = "",
-		["REDIS_SENTINEL_MASTER"] = ""
+		["REDIS_SENTINEL_MASTER"] = "",
 	}
 	-- Set them for later use
 	self.variables = {}
@@ -57,7 +57,6 @@ function clusterstore:initialize(pool)
 		keepalive_poolsize = tonumber(self.variables["REDIS_KEEPALIVE_POOL"]),
 		connection_options = {
 			ssl = self.variables["REDIS_SSL"] == "yes",
-			
 		},
 		host = self.variables["REDIS_HOST"],
 		port = tonumber(self.variables["REDIS_PORT"]),
@@ -68,7 +67,7 @@ function clusterstore:initialize(pool)
 		sentinel_password = self.variables["REDIS_SENTINEL_PASSWORD"],
 		master_name = self.variables["REDIS_SENTINEL_MASTER"],
 		role = "master",
-		sentinels = {}
+		sentinels = {},
 	}
 	self.pool = pool == nil or pool
 	if self.pool then
@@ -83,7 +82,7 @@ function clusterstore:initialize(pool)
 			else
 				sport = tonumber(sport)
 			end
-			table.insert(options.sentinel, {host = shost, port = sport})
+			table.insert(options.sentinel, { host = shost, port = sport })
 		end
 	end
 	self.options = options
@@ -110,12 +109,13 @@ function clusterstore:connect(readonly)
 	-- Connect to sentinels if needed
 	local redis_client, err
 	if #self.options.sentinels > 0 then
-		local redis_sentinel, err = self.redis_connector:connect()
+		local redis_sentinel
+		redis_sentinel, err = self.redis_connector:connect()
 		if not redis_sentinel then
 			return false, "error while connecting to sentinels : " .. err
 		end
 		if readonly then
-			local redis_clients, err = rs.get_slaves(redis_sentinel, self.options.master_name)
+			local redis_clients, _ = rs.get_slaves(redis_sentinel, self.options.master_name)
 			if redis_clients then
 				redis_client = redis_clients[random(#redis_clients)]
 			else
@@ -124,7 +124,7 @@ function clusterstore:connect(readonly)
 		else
 			redis_client, err = rs.get_master(redis_sentinel, self.options.master_name)
 		end
-	-- Classic connection
+		-- Classic connection
 	else
 		redis_client, err = self.redis_connector:connect()
 	end
@@ -155,7 +155,7 @@ function clusterstore:close()
 	local ok, err
 	if self.pool then
 		ok, err = self.redis_connector:set_keepalive(self.redis_client)
-	-- No pool
+		-- No pool
 	else
 		ok, err = self.redis_client:close()
 	end

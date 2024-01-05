@@ -26,7 +26,7 @@ local to_hex = str.to_hex
 local http_new = http.new
 local decode = cjson.decode
 
-local template = nil
+local template
 local render = nil
 if subsystem == "http" then
 	template = require "resty.template"

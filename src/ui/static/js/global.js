@@ -78,7 +78,7 @@ class News {
         news.photo.url,
         news.excerpt,
         news.tags,
-        news.date
+        news.date,
       );
       let cleanHTML = DOMPurify.sanitize(cardHTML);
       //add to DOM
@@ -205,7 +205,7 @@ class darkMode {
     };
     const send = await fetch(
       `${location.href.split("/").slice(0, -1).join("/")}/darkmode`,
-      data
+      data,
     );
   }
 }
@@ -245,7 +245,7 @@ class FlashMsg {
           flashEl.remove();
           //update count
           this.flashCount.textContent = document.querySelectorAll(
-            "[data-flash-message]"
+            "[data-flash-message]",
           ).length;
         }
       } catch (err) {}
@@ -338,7 +338,7 @@ class Banner {
         this.bannerEl.querySelector(
           `[role="listitem"][data-id="${
             +visibleEl.getAttribute("data-id") + 1
-          }"]`
+          }"]`,
         ) || this.bannerEl.querySelector(`[role="listitem"][data-id="0"]`);
 
       // Hide current one
@@ -426,7 +426,7 @@ class Clipboard {
           if (result.state === "granted" || result.state === "prompt") {
             /* write to the clipboard now */
             const copyEl = document.querySelector(
-              e.target.getAttribute("data-clipboard-target")
+              e.target.getAttribute("data-clipboard-target"),
             );
 
             copyEl.select();
@@ -454,13 +454,13 @@ const setMenu = new Menu();
 const setNewsSidebar = new Sidebar(
   "[data-sidebar-info]",
   "[data-sidebar-info-open]",
-  "[data-sidebar-info-close]"
+  "[data-sidebar-info-close]",
 );
 
 const setFlashSidebar = new Sidebar(
   "[data-flash-sidebar]",
   "[data-flash-sidebar-open]",
-  "[data-flash-sidebar-close]"
+  "[data-flash-sidebar-close]",
 );
 
 const setClipboard = new Clipboard();

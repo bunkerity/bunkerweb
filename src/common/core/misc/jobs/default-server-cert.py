@@ -1,6 +1,6 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
-from os import _exit, getenv, sep
+from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, run

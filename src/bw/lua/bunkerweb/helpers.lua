@@ -1,8 +1,8 @@
-local ngx	= ngx
+local ngx = ngx
+local base = require "resty.core.base"
+local bwctx = require "bunkerweb.ctx"
 local cjson = require "cjson"
 local utils = require "bunkerweb.utils"
-local bwctx = require "bunkerweb.ctx"
-local base 	= require "resty.core.base"
 
 local open = io.open
 local decode = cjson.decode

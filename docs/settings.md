@@ -243,7 +243,7 @@ Manage default error pages
 |         Setting         |                     Default                     | Context |Multiple|                                                      Description                                                       |
 |-------------------------|-------------------------------------------------|---------|--------|------------------------------------------------------------------------------------------------------------------------|
 |`ERRORS`                 |                                                 |multisite|no      |List of HTTP error code and corresponding error pages, separated with spaces (404=/my404.html 403=/errors/403.html ...).|
-|`INTERCEPTED_ERROR_CODES`|`400 401 403 404 405 413 429 500 501 502 503 504`|multisite|no      |List of HTTP error code intercepted by Bunkerweb                                                                        |
+|`INTERCEPTED_ERROR_CODES`|`400 401 403 404 405 413 429 500 501 502 503 504`|multisite|no      |List of HTTP error code intercepted by BunkerWeb                                                                        |
 
 ### Greylist
 
@@ -550,4 +550,3 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
 |`WHITELIST_URI`            |                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |
-

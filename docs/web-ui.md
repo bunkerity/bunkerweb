@@ -44,7 +44,7 @@ The setup wizard is a feature that helps you to **configure** and **install the 
   <figcaption>Account section of the setup wizard</figcaption>
 </figure>
 
-Choose your administator username and password. Please note that password must have at least 8 chars with 1 lower case letter, 1 upper case letter, 1 digit and 1 special char.
+Choose your administrator username and password. Please note that password must have at least 8 chars with 1 lower case letter, 1 upper case letter, 1 digit and 1 special char.
 
 <figure markdown>
   ![Overview](assets/img/ui-wizard-settings.webp){ align=center, width="350" }

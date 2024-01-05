@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from typing import Literal, Optional, Union
 from requests import request

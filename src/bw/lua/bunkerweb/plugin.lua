@@ -26,7 +26,7 @@ function plugin:initialize(id, ctx)
 		"header_filter",
 		"body_filter",
 		"log",
-		"preread"
+		"preread",
 	} do
 		if current_phase == check_phase then
 			is_request = true
@@ -44,8 +44,7 @@ function plugin:initialize(id, ctx)
 	if self.is_request then
 		self.ctx = ctx or ngx.ctx
 		self.datastore = get_ctx_obj("datastore", self.ctx) or datastore:new()
-		self.cachestore = get_ctx_obj("cachestore", self.ctx)
-			or cachestore:new(use_redis == "yes", self.ctx)
+		self.cachestore = get_ctx_obj("cachestore", self.ctx) or cachestore:new(use_redis == "yes", self.ctx)
 		self.clusterstore = get_ctx_obj("clusterstore", self.ctx) or clusterstore:new()
 		self.cachestore_local = get_ctx_obj("cachestore_local", self.ctx) or cachestore:new(false, self.ctx)
 	else

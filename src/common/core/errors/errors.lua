@@ -4,7 +4,7 @@ local plugin = require "bunkerweb.plugin"
 local ngx = ngx
 local subsystem = ngx.config.subsystem
 
-local template = nil
+local template
 local render = nil
 if subsystem == "http" then
 	template = require "resty.template"

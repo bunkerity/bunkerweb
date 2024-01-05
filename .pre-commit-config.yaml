@@ -1,6 +1,6 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
-exclude: (^LICENSE.md$|^src/VERSION$|^src/(bw/misc/root-ca.pem$|deps/src/|common/core/modsecurity/files|ui/static/js/(editor/|utils/purify/|tsparticles\.bundle\.min\.js))|\.(svg|drawio|patch\d?|ascii|tf|tftpl)$)
+exclude: (^LICENSE.md$|^src/VERSION$|^env/|^src/(bw/misc/root-ca.pem$|deps/src/|common/core/modsecurity/files|ui/static/js/(editor/|utils/purify/|tsparticles\.bundle\.min\.js))|\.(svg|drawio|patch\d?|ascii|tf|tftpl|key)$)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: c4a0b883114b00d8d76b479c820ce7950211c99b # frozen: v4.5.0
@@ -16,8 +16,8 @@ repos:
         args: ["--allow-multiple-documents"]
       - id: check-case-conflict
 
-  - repo: https://github.com/ambv/black
-    rev: 2a1c67e0b2f81df602ec1f6e7aeb030b9709dc7c # frozen: 23.11.0
+  - repo: https://github.com/psf/black
+    rev: ec91a2be3c44d88e1a3960a4937ad6ed3b63464e # frozen: 23.12.1
     hooks:
       - id: black
         name: Black Python Formatter
@@ -36,21 +36,21 @@ repos:
         exclude: ^src/(bw/lua/middleclass.lua|common/core/antibot/captcha.lua)$
 
   - repo: https://github.com/lunarmodules/luacheck
-    rev: ababb6d403d634eb74d2c541035e9ede966e710d # frozen: v1.1.1
+    rev: 418f48976c73be697fe64b0eba9ea9821ac9bca8 # frozen: v1.1.2
     hooks:
       - id: luacheck
         exclude: ^src/(bw/lua/middleclass.lua|common/core/antibot/captcha.lua)$
         args: ["--std", "min", "--codes", "--ranges", "--no-cache"]
 
   - repo: https://github.com/pycqa/flake8
-    rev: 10f4af6dbcf93456ba7df762278ae61ba3120dc6 # frozen: 6.1.0
+    rev: 7d37d9032d0d161634be4554273c30efd4dea0b3 # frozen: 7.0.0
     hooks:
       - id: flake8
         name: Flake8 Python Linter
         args: ["--max-line-length=250", "--ignore=E266,E402,E722,W503"]
 
   - repo: https://github.com/dosisod/refurb
-    rev: a25b5d6087bba1509f96654c583efcd7796452cd # frozen: v1.24.0
+    rev: a7c461fcfaa2ca3248d489cdf7fed8e2d4fd8520 # frozen: v1.26.0
     hooks:
       - id: refurb
         name: Refurb Python Refactoring Tool

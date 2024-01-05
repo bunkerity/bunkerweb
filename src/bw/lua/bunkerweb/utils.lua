@@ -769,7 +769,7 @@ utils.get_phases = function()
 		"log",
 		"preread",
 		"log_stream",
-		"log_default"
+		"log_default",
 	}
 end
 
@@ -780,7 +780,7 @@ utils.is_cosocket_available = function()
 		"access",
 		"content",
 		"ssl_certificate",
-		"preread"
+		"preread",
 	}
 	local current_phase = get_phase()
 	for _, phase in ipairs(phases) do
@@ -806,6 +806,19 @@ utils.get_ctx_obj = function(obj, ctx)
 		return vctx.bw[obj]
 	end
 	return nil
+end
+
+utils.read_files = function(files)
+	local data = {}
+	for _, file in ipairs(files) do
+		local f, err = open(file, "r")
+		if not f then
+			return false, file .. " = " .. err
+		end
+		table.insert(data, f:read("*a"))
+		f:close()
+	end
+	return true, data
 end
 
 return utils
