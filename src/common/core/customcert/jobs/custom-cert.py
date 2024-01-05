@@ -1,11 +1,10 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from os import getenv, sep
 from os.path import join, normpath
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
-from typing import Optional
 from base64 import b64decode
 
 for deps_path in [
@@ -103,7 +102,7 @@ try:
 
         cert_data = b64decode(getenv("CUSTOM_SSL_CERT_DATA", ""))
         key_data = b64decode(getenv("CUSTOM_SSL_KEY_DATA", ""))
-        for file, data in [("cert.pem", cert_data), ("key.pem", key_data)]:
+        for file, data in (("cert.pem", cert_data), ("key.pem", key_data)):
             if data != b"":
                 file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", first_server, file)
                 file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -140,7 +139,7 @@ try:
 
             cert_data = b64decode(getenv(f"{first_server}_CUSTOM_SSL_CERT_DATA", ""))
             key_data = b64decode(getenv(f"{first_server}_CUSTOM_SSL_KEY_DATA", ""))
-            for file, data in [("cert.pem", cert_data), ("key.pem", key_data)]:
+            for file, data in (("cert.pem", cert_data), ("key.pem", key_data)):
                 if data != b"":
                     file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", first_server, file)
                     file_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from argparse import ArgumentParser
 from copy import deepcopy
@@ -6,16 +6,7 @@ from glob import glob
 from hashlib import sha256
 from io import BytesIO
 from json import load as json_load
-from os import (
-    _exit,
-    chmod,
-    environ,
-    getenv,
-    getpid,
-    listdir,
-    sep,
-    walk,
-)
+from os import _exit, chmod, environ, getenv, getpid, listdir, sep, walk
 from os.path import basename, dirname, join, normpath
 from pathlib import Path
 from shutil import copy, rmtree
@@ -322,11 +313,7 @@ if __name__ == "__main__":
                     content = Path(join(root, file)).read_text(encoding="utf-8")
                     custom_conf = {
                         "value": content,
-                        "exploded": (
-                            f"{path_exploded.pop()}" if path_exploded[-1] not in root_dirs else None,
-                            path_exploded[-1],
-                            file.replace(".conf", ""),
-                        ),
+                        "exploded": (path_exploded.pop() if path_exploded[-1] not in root_dirs else None, path_exploded[-1], file.replace(".conf", "")),
                     }
 
                     saving = True
@@ -673,7 +660,6 @@ if __name__ == "__main__":
                     CHANGES.append("config")
                     env = db.get_config()
                     env["DATABASE_URI"] = db.database_uri
-
 
     except:
         logger.error(

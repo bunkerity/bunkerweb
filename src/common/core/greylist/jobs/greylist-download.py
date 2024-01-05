@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from contextlib import suppress
 from ipaddress import ip_address, ip_network

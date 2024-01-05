@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from os import _exit, environ, getenv, sep
 from os.path import join
