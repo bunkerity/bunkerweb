@@ -4,6 +4,14 @@ local utils = require "bunkerweb.utils"
 
 local reversescan = class("reversescan", plugin)
 
+local ngx = ngx
+local spawn = ngx.thread.spawn
+local wait = ngx.thread.wait
+local ngx_socket = ngx.socket
+local kill_all_threads = utils.kill_all_threads
+local get_deny_status = utils.get_deny_status
+local tonumber = tonumber
+
 function reversescan:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "reversescan", ctx)
@@ -32,7 +40,7 @@ function reversescan:access()
 			break
 			-- Perform scan in a thread
 		elseif not cached then
-			local thread = ngx.thread.spawn(
+			local thread = spawn(
 				self.scan,
 				self.ctx.bw.remote_addr,
 				tonumber(port),
@@ -47,11 +55,11 @@ function reversescan:access()
 			for _, thread in pairs(threads) do
 				table.insert(wait_threads, thread)
 			end
-			utils.kill_all_threads(wait_threads)
+			kill_all_threads(wait_threads)
 		end
 		-- Open port case
 		if ret_threads then
-			return self:ret(true, ret_err, utils.get_deny_status(self.ctx))
+			return self:ret(true, ret_err, get_deny_status())
 		end
 		-- Error case
 		return self:ret(false, ret_err)
@@ -71,7 +79,7 @@ function reversescan:access()
 			break
 		end
 		-- Wait for first thread
-		local ok, open, port = ngx.thread.wait(unpack(wait_threads))
+		local ok, open, port = wait(unpack(wait_threads))
 		-- Error case
 		if not ok then
 			ret_threads = false
@@ -100,7 +108,7 @@ function reversescan:access()
 		for _, thread in pairs(threads) do
 			table.insert(wait_threads, thread)
 		end
-		utils.kill_all_threads(wait_threads)
+		kill_all_threads(wait_threads)
 	end
 	-- Cache results
 	for port, result in pairs(results) do
@@ -112,7 +120,7 @@ function reversescan:access()
 	if ret_threads ~= nil then
 		-- Open port case
 		if ret_threads then
-			return self:ret(true, ret_err, utils.get_deny_status(self.ctx))
+			return self:ret(true, ret_err, get_deny_status())
 		end
 		-- Error case
 		return self:ret(false, ret_err)
@@ -126,7 +134,7 @@ function reversescan:preread()
 end
 
 function reversescan.scan(ip, port, timeout)
-	local tcpsock = ngx.socket.tcp()
+	local tcpsock = ngx_socket.tcp()
 	tcpsock:settimeout(timeout)
 	local ok, _ = tcpsock:connect(ip, port)
 	tcpsock:close()

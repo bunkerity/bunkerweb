@@ -27,7 +27,11 @@ class Popover {
     const btn = el.closest("svg");
     //toggle curr popover
     const popover = btn.parentElement.querySelector(`[data-popover-content]`);
+    popover.classList.add("transition-all", "delay-200", "opacity-0");
     popover.classList.remove("hidden");
+    setTimeout(() => {
+      popover.classList.remove("opacity-0");
+    }, 10);
   }
 
   hidePopover(el) {
@@ -35,6 +39,7 @@ class Popover {
     //toggle curr popover
     const popover = btn.parentElement.querySelector(`[data-popover-content]`);
     popover.classList.add("hidden");
+    popover.classList.remove("transition-all", "delay-200");
   }
 }
 

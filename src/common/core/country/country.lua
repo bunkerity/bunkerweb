@@ -5,6 +5,11 @@ local utils = require "bunkerweb.utils"
 
 local country = class("country", plugin)
 
+local get_country = utils.get_country
+local get_deny_status = utils.get_deny_status
+local decode = cjson.decode
+local encode = cjson.encode
+
 function country:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "country", ctx)
@@ -18,7 +23,7 @@ function country:access()
 	-- Check if IP is in cache
 	local _, data = self:is_in_cache(self.ctx.bw.remote_addr)
 	if data then
-		data = cjson.decode(data)
+		data = decode(data)
 		if data.result == "ok" then
 			return self:ret(
 				true,
@@ -36,7 +41,12 @@ function country:access()
 				.. " is in country cache (blacklisted, country = "
 				.. data.country
 				.. ")",
-			utils.get_deny_status(self.ctx)
+			get_deny_status(),
+			nil,
+			{
+				id = "country",
+				country = data.country,
+			}
 		)
 	end
 
@@ -50,7 +60,7 @@ function country:access()
 	end
 
 	-- Get the country of client
-	local country_data, err = utils.get_country(self.ctx.bw.remote_addr)
+	local country_data, err = get_country(self.ctx.bw.remote_addr)
 	if not country_data then
 		return self:ret(false, "can't get country of client IP " .. self.ctx.bw.remote_addr .. " : " .. err)
 	end
@@ -78,7 +88,12 @@ function country:access()
 		return self:ret(
 			true,
 			"client IP " .. self.ctx.bw.remote_addr .. " is not whitelisted (country = " .. country_data .. ")",
-			utils.get_deny_status(self.ctx)
+			get_deny_status(),
+			nil,
+			{
+				id = "country",
+				country = country_data,
+			}
 		)
 	end
 
@@ -93,7 +108,12 @@ function country:access()
 				return self:ret(
 					true,
 					"client IP " .. self.ctx.bw.remote_addr .. " is blacklisted (country = " .. country_data .. ")",
-					utils.get_deny_status(self.ctx)
+					get_deny_status(),
+					nil,
+					{
+						id = "country",
+						country = country_data,
+					}
 				)
 			end
 		end
@@ -115,7 +135,7 @@ function country:preread()
 end
 
 function country:is_in_cache(ip)
-	local ok, data = self.cachestore:get("plugin_country_" .. self.ctx.bw.server_name .. ip)
+	local ok, data = self.cachestore_local:get("plugin_country_" .. self.ctx.bw.server_name .. ip)
 	if not ok then
 		return false, data
 	end
@@ -123,9 +143,9 @@ function country:is_in_cache(ip)
 end
 
 function country:add_to_cache(ip, country_data, result)
-	local ok, err = self.cachestore:set(
+	local ok, err = self.cachestore_local:set(
 		"plugin_country_" .. self.ctx.bw.server_name .. ip,
-		cjson.encode { country = country_data, result = result },
+		encode({ country = country_data, result = result }),
 		86400
 	)
 	if not ok then

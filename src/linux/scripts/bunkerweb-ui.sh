@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Set the PYTHONPATH
-export PYTHONPATH=/usr/share/bunkerweb/deps/python/:/usr/share/bunkerweb/ui/
+export PYTHONPATH=/usr/share/bunkerweb/deps/python/
 
 # Create the ui.env file if it doesn't exist
 if [ ! -f /etc/bunkerweb/ui.env ]; then
-    echo "ADMIN_USERNAME=admin" > /etc/bunkerweb/ui.env
-    echo "ADMIN_PASSWORD=changeme" >> /etc/bunkerweb/ui.env
+    echo "ADMIN_USERNAME=" > /etc/bunkerweb/ui.env
+    echo "ADMIN_PASSWORD=" >> /etc/bunkerweb/ui.env
 fi
 
 # Function to start the UI
@@ -15,8 +15,9 @@ start() {
     # shellcheck disable=SC2046
     export $(cat /etc/bunkerweb/ui.env)
     python3 -m gunicorn \
+        --chdir /usr/share/bunkerweb/ui \
         --config /usr/share/bunkerweb/ui/gunicorn.conf.py \
-        --pythonpath /usr/share/bunkerweb/deps/python/,/usr/share/bunkerweb/ui/ \
+        --pythonpath /usr/share/bunkerweb/deps/python/ \
         --user nginx \
         --group nginx \
         --bind "127.0.0.1:7000" &

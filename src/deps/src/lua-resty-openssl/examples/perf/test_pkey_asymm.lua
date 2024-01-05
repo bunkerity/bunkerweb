@@ -3,6 +3,7 @@ package.path = path .. "/?.lua;" .. package.path
 
 local test = require "framework".test
 local set_iteration = require "framework".set_iteration
+local write_seperator = require "framework".write_seperator
 local pkey = require "resty.openssl.pkey"
 local version = require("resty.openssl.version")
 local data = string.rep("=", 200)
@@ -26,6 +27,7 @@ for _, op in ipairs({"encrypt", "decrypt"}) do
     end
 end
 
+write_seperator()
 
 for _, t in ipairs({"RSA", "EC", "Ed25519", "Ed448"}) do
     for _, op in ipairs({"sign", "verify"}) do
@@ -61,4 +63,6 @@ for _, t in ipairs({"RSA", "EC", "Ed25519", "Ed448"}) do
         end
 ::continue::
     end
+
+    write_seperator()
 end

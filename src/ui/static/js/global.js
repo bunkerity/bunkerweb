@@ -26,10 +26,22 @@ class Menu {
 
   toggle() {
     this.sidebarEl.classList.toggle("-translate-x-full");
+    if (this.sidebarEl.classList.contains("-translate-x-full")) {
+      this.sidebarEl.setAttribute("aria-hidden", "true");
+      this.toggleBtn.setAttribute("aria-expanded", "false");
+      this.closeBtn.setAttribute("aria-expanded", "false");
+    } else {
+      this.sidebarEl.setAttribute("aria-hidden", "false");
+      this.toggleBtn.setAttribute("aria-expanded", "true");
+      this.closeBtn.setAttribute("aria-expanded", "true");
+    }
   }
 
   close() {
+    this.toggleBtn.setAttribute("aria-expanded", "false");
+    this.closeBtn.setAttribute("aria-expanded", "false");
     this.sidebarEl.classList.add("-translate-x-full");
+    this.sidebarEl.setAttribute("aria-hidden", "true");
   }
 }
 
@@ -40,14 +52,15 @@ class News {
   }
 
   init() {
-    window.addEventListener("load", async () => {
+    window.addEventListener("load", () => {
       try {
-        const res = await fetch("https://www.bunkerweb.io/api/posts/0/2", {
-          headers: {
-            method: "GET",
-          },
-        });
-        return await this.render(res);
+        fetch("https://www.bunkerweb.io/api/posts/0/2")
+          .then((res) => {
+            return res.json();
+          })
+          .then((res) => {
+            return this.render(res.data);
+          });
       } catch (err) {}
     });
   }
@@ -58,21 +71,14 @@ class News {
     newsContainer.textContent = "";
     //render last news
     lastNews.forEach((news) => {
-      //get info
-      const slug = news.slug;
-      const img = news.photo.url;
-      const excerpt = news.excerpt;
-      const tags = news.tags;
-      const date = news.date;
-      const lastUpdate = news.lastUpdate;
       //create html card from  infos
       const cardHTML = this.template(
-        slug,
-        img,
-        excerpt,
-        tags,
-        date,
-        lastUpdate,
+        news.title,
+        news.slug,
+        news.photo.url,
+        news.excerpt,
+        news.tags,
+        news.date,
       );
       let cleanHTML = DOMPurify.sanitize(cardHTML);
       //add to DOM
@@ -82,7 +88,7 @@ class News {
     });
   }
 
-  template(slug, img, excerpt, tags, date, lastUpdate) {
+  template(title, slug, img, excerpt, tags, date) {
     //loop on tags to get list
     let tagList = "";
     tags.forEach((tag) => {
@@ -96,7 +102,7 @@ class News {
     //create card
     const card = `
       <div
-        class="min-h-[400px] w-full col-span-12 transition hover:-translate-y-2  bg-gray-100 dark:bg-slate-900 rounded px-6 py-4 m-2  flex flex-col justify-between"
+        class="min-h-[350px] w-full col-span-12 transition dark:bg-slate-700 dark:brightness-[0.885] bg-gray-100 rounded px-6 py-4 my-4 mx-0 flex flex-col justify-between"
       >
         <div>
             <img  role="link"
@@ -105,14 +111,14 @@ class News {
                 src="${img}"
                 alt="image"
             />
-            <h3 role="link"
+            <span role="link"
             onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
-            class="cursor-pointer mt-3 mb-1  text-3xl dark:text-white tracking-wide">{{ post['title'] }}</h3>
+            class="block cursor-pointer mt-3 mb-1 text-xl font-semibold text-primary dark:text-white tracking-wide">${title}</span>
         </div>
         <div>
             <div  role="link"
             onclick="window.location.href='${this.BASE_URL}/blog/post/${slug}'"
-            class="cursor-pointer min-h-[130px] mb-3 text-lg dark:text-gray-300 text-gray-600 pt-3">
+            class="cursor-pointer min-h-[100px] mb-3 dark:text-gray-300 text-gray-600 pt-3">
                 ${excerpt}
             </div>
             <div class="min-h-[75px] mt-2 flex flex-wrap justify-start items-end align-bottom">
@@ -121,13 +127,8 @@ class News {
 
             <div class="mt-2 flex flex-col justify-start items-start">
                 <span class="text-xs  dark:text-gray-300 text-gray-600"
-                >Posted on : ${date}</span
-                >
-                {% if post["updatedAt"] %}
-                <span class="text-xs  dark:text-gray-300 text-gray-600"
-                >Last update : ${lastUpdate}</span
-                >
-                {%endif%}
+                >Posted on : ${date}
+                </span>
             </div>
         </div>
       </div>  `;
@@ -142,16 +143,29 @@ class Sidebar {
     this.closeBtn = document.querySelector(btnCloseAtt);
     this.openBtn.addEventListener("click", this.open.bind(this));
     this.closeBtn.addEventListener("click", this.close.bind(this));
+    this.init();
+  }
+
+  init() {
+    this.openBtn.setAttribute("aria-expanded", "false");
+    this.closeBtn.setAttribute("aria-expanded", "false");
+    this.sidebarEl.setAttribute("aria-hidden", "false");
   }
 
   open() {
+    this.openBtn.setAttribute("aria-expanded", "true");
+    this.closeBtn.setAttribute("aria-expanded", "true");
     this.sidebarEl.classList.add("translate-x-0");
     this.sidebarEl.classList.remove("translate-x-90");
+    this.sidebarEl.setAttribute("aria-hidden", "false");
   }
 
   close() {
+    this.openBtn.setAttribute("aria-expanded", "false");
+    this.closeBtn.setAttribute("aria-expanded", "false");
     this.sidebarEl.classList.add("translate-x-90");
     this.sidebarEl.classList.remove("translate-x-0");
+    this.sidebarEl.setAttribute("aria-hidden", "true");
   }
 }
 
@@ -295,24 +309,158 @@ class Loader {
   }
 }
 
+class Banner {
+  constructor() {
+    this.bannerEl = document.getElementById("banner");
+    this.bannerItems = this.bannerEl.querySelectorAll('[role="listitem"]');
+    this.nextDelay = 9000;
+    this.transDuration = 700;
+    this.menuBtn = document.querySelector("[data-sidebar-menu-toggle]");
+    this.menuEl = document.querySelector("[data-sidebar-menu]");
+    this.newsBtn = document.querySelector("[data-sidebar-info-open]");
+    this.flashBtn = document.querySelector("[data-flash-group]");
+    this.init();
+  }
+
+  init() {
+    this.changeMenu();
+    setInterval(() => {
+      // Get current visible
+      let visibleEl;
+      this.bannerItems.forEach((item) => {
+        if (item.getAttribute("aria-hidden") === "false") {
+          visibleEl = item;
+        }
+      });
+
+      // Get next one to show (next index or first one)
+      let nextEl =
+        this.bannerEl.querySelector(
+          `[role="listitem"][data-id="${
+            +visibleEl.getAttribute("data-id") + 1
+          }"]`,
+        ) || this.bannerEl.querySelector(`[role="listitem"][data-id="0"]`);
+
+      // Hide current one
+      visibleEl.classList.add("-left-full");
+      visibleEl.classList.remove("left-0");
+      visibleEl.setAttribute("aria-hidden", "true");
+      setTimeout(() => {
+        visibleEl.classList.remove("transition-all");
+      }, this.transDuration + 10);
+      setTimeout(() => {
+        visibleEl.classList.add("opacity-0");
+      }, this.transDuration + 20);
+      setTimeout(() => {
+        visibleEl.classList.remove("-left-full");
+        visibleEl.classList.add("left-full");
+      }, this.transDuration * 2);
+
+      // Show next one
+      nextEl.classList.remove("opacity-0");
+      nextEl.classList.add("transition-all");
+      nextEl.classList.add("left-0");
+      nextEl.classList.remove("left-full");
+      nextEl.setAttribute("aria-hidden", "false");
+    }, this.nextDelay);
+  }
+
+  changeMenu() {
+    let options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.35,
+    };
+
+    let observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          this.menuEl.classList.add("mt-[4.5rem]");
+          this.menuBtn.classList.add("top-[8.2rem]", "sm:top-[4.5rem]");
+          this.newsBtn.classList.add("top-[4.5rem]");
+          this.flashBtn.classList.add("top-[4.5rem]");
+          this.menuBtn.classList.remove("top-16", "sm:top-2");
+          this.newsBtn.classList.remove("top-2");
+          this.flashBtn.classList.remove("top-2");
+          this.menuEl.classList.remove("mt-2");
+        }
+
+        if (!entry.isIntersecting) {
+          this.menuEl.classList.add("mt-2");
+          this.menuBtn.classList.add("top-16", "sm:top-2");
+          this.newsBtn.classList.add("top-2");
+          this.flashBtn.classList.add("top-2");
+          this.menuBtn.classList.remove("top-[8.2rem]", "sm:top-[4.5rem]");
+          this.newsBtn.classList.remove("top-[4.5rem]");
+          this.flashBtn.classList.remove("top-[4.5rem]");
+          this.menuEl.classList.remove("mt-[4.5rem]");
+        }
+      });
+    }, options);
+
+    observer.observe(this.bannerEl);
+  }
+}
+
+class Clipboard {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    // Show clipboard copy if https
+    window.addEventListener("load", () => {
+      if (!window.location.href.startsWith("https://")) return;
+
+      document.querySelectorAll("[data-clipboard-copy]").forEach((el) => {
+        el.classList.remove("hidden");
+      });
+    });
+
+    window.addEventListener("click", (e) => {
+      if (!e.target.hasAttribute("data-clipboard-target")) return;
+
+      navigator.permissions
+        .query({ name: "clipboard-write" })
+        .then((result) => {
+          if (result.state === "granted" || result.state === "prompt") {
+            /* write to the clipboard now */
+            const copyEl = document.querySelector(
+              e.target.getAttribute("data-clipboard-target"),
+            );
+
+            copyEl.select();
+            copyEl.setSelectionRange(0, 99999); // For mobile devices
+
+            // Copy the text inside the text field
+            navigator.clipboard.writeText(copyEl.value);
+          }
+        });
+    });
+  }
+}
+
+const setCheckbox = new Checkbox();
+const setSelect = new Select();
+const setPassword = new Password();
+const setDisabledPop = new DisabledPop();
+const setNews = new News();
+const setDarkM = new darkMode();
+const setFlash = new FlashMsg();
+const setBanner = new Banner();
 const setLoader = new Loader();
 const setMenu = new Menu();
+
 const setNewsSidebar = new Sidebar(
   "[data-sidebar-info]",
   "[data-sidebar-info-open]",
   "[data-sidebar-info-close]",
 );
 
-const setCheckbox = new Checkbox();
-const setSelect = new Select();
-const setPassword = new Password();
-const setDisabledPop = new DisabledPop();
-
 const setFlashSidebar = new Sidebar(
   "[data-flash-sidebar]",
   "[data-flash-sidebar-open]",
   "[data-flash-sidebar-close]",
 );
-const setNews = new News();
-const setDarkM = new darkMode();
-const setFlash = new FlashMsg();
+
+const setClipboard = new Clipboard();

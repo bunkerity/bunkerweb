@@ -25,7 +25,7 @@
       "name": "ModSecurity-nginx v1.0.3",
       "url": "https://github.com/SpiderLabs/ModSecurity-nginx.git",
       "commit": "d59e4ad121df702751940fd66bcc0b3ecb51a079",
-      "post_install": "patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/config.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch"
+      "post_install": "patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_log.c src/deps/misc/modsecurity-nginx.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/config.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_common.h src/deps/misc/ngx_http_modsecurity_common.h.patch && patch --forward src/deps/src/modsecurity-nginx/src/ngx_http_modsecurity_module.c src/deps/misc/ngx_http_modsecurity_module.c.patch && patch --forward src/deps/src/modsecurity-nginx/config src/deps/misc/modsecurity-nginx-config.patch"
     },
     {
       "id": "nginx",
@@ -151,9 +151,9 @@
     },
     {
       "id": "lua-resty-openssl",
-      "name": "lua-resty-openssl v1.0.2",
+      "name": "lua-resty-openssl v1.2.0",
       "url": "https://github.com/fffonion/lua-resty-openssl.git",
-      "commit": "5aba923e78ae0f213f3b4719effa879e3971821f",
+      "commit": "7f25f00ba2b2140b794c94b5ae17f5a0736e3b03",
       "post_install": "rm -r src/deps/src/lua-resty-openssl/t"
     },
     {
@@ -234,6 +234,12 @@
       "name": "zlib v1.3",
       "url": "https://github.com/madler/zlib.git",
       "commit": "09155eaa2f9270dc4ed1fa13e2b4b2613e6e4851"
+    },
+    {
+      "id": "lua-resty-redis-connector",
+      "name": "lua-resty-redis-connector v0.11.0",
+      "url": "https://github.com/ledgetech/lua-resty-redis-connector.git",
+      "commit": "02a29f93253d1f6ad392c5ac2b643c57e62b5979"
     }
   ]
 }

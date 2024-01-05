@@ -1,7 +1,11 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
+from base64 import b64encode
+from io import BytesIO
 from os.path import join
 from typing import List, Optional
+
+from qrcode.main import QRCode
 
 
 def path_to_dict(
@@ -130,3 +134,13 @@ def path_to_dict(
 
 def check_settings(settings: dict, check: str) -> bool:
     return any(setting["context"] == check for setting in settings.values())
+
+
+def get_b64encoded_qr_image(data: str):
+    qr = QRCode(version=1, box_size=10, border=5)
+    qr.add_data(data)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="#0b5577", back_color="white")
+    buffered = BytesIO()
+    img.save(buffered)
+    return b64encode(buffered.getvalue()).decode("utf-8")

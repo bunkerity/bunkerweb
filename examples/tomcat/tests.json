@@ -6,7 +6,8 @@
     {
       "type": "string",
       "url": "https://www.example.com",
-      "string": "tomcat"
+      "string": "tomcat",
+      "tls": "www.example.com"
     }
   ]
 }

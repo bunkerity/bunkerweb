@@ -10,6 +10,9 @@ from subprocess import run
 from logger import log
 from string import ascii_lowercase, digits
 from random import choice
+from ssl import SSLContext, create_connection
+import OpenSSL.crypto as crypto
+from urllib.parse import urlparse
 
 
 class Test(ABC):
@@ -126,6 +129,7 @@ class Test(ABC):
     # run a single test
     def __run_test(self, test):
         try:
+            ok = False
             ex_url = test["url"]
             for ex_domain, test_domain in self._domains.items():
                 if search(ex_domain, ex_url):
@@ -133,10 +137,20 @@ class Test(ABC):
                     break
             if test["type"] == "string":
                 r = get(ex_url, timeout=10, verify=False)
-                return test["string"].casefold() in r.text.casefold()
+                ok = test["string"].casefold() in r.text.casefold()
             elif test["type"] == "status":
                 r = get(ex_url, timeout=10, verify=False)
-                return test["status"] == r.status_code
+                ok = test["status"] == r.status_code
+            if ok and "tls" in test:
+                connection = create_connection((urlparse(ex_url).netloc, 443))
+                context = SSLContext()
+                sock = context.wrap_socket(connection, server_hostname=urlparse(ex_url).netloc)
+                cert = sock.getpeercert(True)
+                sock.close()
+                x509 = crypto.load_certificate(crypto.FILETYPE_ASN1, cert)
+                if x509.get_subject().CN != test["tls"]:
+                    ok = False
+                    log("TEST", "⚠️", f"wrong cert CN : {x509.get_subject().CN}")
         except:
             return False
         raise (Exception(f"unknown test type {test['type']}"))

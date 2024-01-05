@@ -43,22 +43,24 @@ do
   url="$(echo "$repo" | jq -r .url)"
   commit="$(echo "$repo" | jq -r .commit)"
   post_install="$(echo "$repo" | jq -r .post_install)"
+  post="no"
 
   echo "ℹ️ Clone ${name} from $url at commit/version $commit"
 
   if [ ! -d "src/deps/src/$id" ] ; then
     do_and_check_cmd git subtree add --prefix "src/deps/src/$id" "$url" "$commit" --squash
+    post="yes"
   else
 		echo "⚠️ Skipping clone of $url because target directory is already present"
-    echo "ℹ️ Updating ${name} from $url at commit/version $commit"
-    do_and_check_cmd git subtree pull --prefix "src/deps/src/$id" "$url" "$commit" --squash
+    # echo "ℹ️ Updating ${name} from $url at commit/version $commit"
+    # do_and_check_cmd git subtree pull --prefix "src/deps/src/$id" "$url" "$commit" --squash
 	fi
 
   if [ -d "src/deps/src/$id/.git" ] ; then
     do_and_check_cmd rm -rf "src/deps/src/$id/.git"
   fi
 
-  if [ "$post_install" != "null" ] ; then
+  if [ "$post_install" != "null" ] && [ "$post" != "no" ]; then
     echo "ℹ️ Running post install script for ${name}"
     bash -c "$post_install"
   fi

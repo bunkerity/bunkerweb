@@ -31,11 +31,11 @@ jobs:
         if: inputs.TYPE == 'k8s'
         with:
           version: "v1.28.2"
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         if: inputs.TYPE != 'k8s'
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Install ansible
         run: pip install --no-cache-dir --require-hashes -r misc/requirements-ansible.txt
         if: inputs.TYPE != 'k8s'
@@ -55,7 +55,7 @@ jobs:
         if: always()
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      - uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+      - uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
         if: always()
         with:
           name: tf-${{ inputs.TYPE }}

@@ -50,7 +50,7 @@ data-plugin-item="{{plugin['id']}}"
           />
         </svg>
         <!-- popover -->
-        <div  class="popover-settings-container  hidden"
+        <div role="alert" aria-description="show detail"  class="popover-settings-container  hidden"
         data-popover-content="{{ value["label"] }}"
         >
           <p  class="popover-settings-text" >{{value['help']}}
@@ -63,6 +63,7 @@ data-plugin-item="{{plugin['id']}}"
       <!-- input -->
       {% if value["type"] != "select" and value["type"] != "check" %}
       <div class="relative flex items-center">
+        <label class="sr-only" for="{{setting}}">{{setting}}</label>
         <input
         {% if setting == "SERVER_NAME" %}required{%endif%}
         data-default-value="{{global_config[setting]['value']}}" data-default-method="{{global_config[setting]['method']}}"
@@ -73,10 +74,10 @@ data-plugin-item="{{plugin['id']}}"
         {% if value['type'] == "password" %}
         <div data-setting-password-container class="absolute flex right-2 h-5 w-5">
           <button type="button" data-setting-password="visible" class="h-5 w-5 flex items-center align-middle" type="button">
-            <svg class="fill-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg>
+            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg>
           </button>
           <button type="button"  data-setting-password="invisible" class="hidden -translate-y-0.2 scale-110 h-5 w-5  items-center align-middle">
-            <svg class="fill-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg>
+            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg>
           </button>
         </div>
         {%endif%}
@@ -92,7 +93,7 @@ data-plugin-item="{{plugin['id']}}"
         id="{{setting}}" name="{{setting}}" data-setting-select-default="{{value['id']}}" data-type="form-select" id="{{setting}}" name="{{setting}}"
           class="hidden">
           {% for item in value['select'] %}
-          <option value="{{item}}" {% if global_config[setting]['value'] and global_config[setting]['value'] == item or not global_config[setting]['value'] and value['default'] == item %} selected{% endif %}>{{item}}</option>
+          <option {% if not item %}label="empty" {% endif %} value="{{item}}" {% if global_config[setting]['value'] and global_config[setting]['value'] == item or not global_config[setting]['value'] and value['default'] == item %} selected{% endif %}>{{item}}</option>
           {% endfor %}
       </select>
       <!-- end default hidden-->
@@ -103,6 +104,7 @@ data-plugin-item="{{plugin['id']}}"
         {% if global_config[setting]['method'] != 'ui' and global_config[setting]['method'] != 'default'  %} disabled {% endif %}    data-setting-select="{{value['id']}}"
         data-default-value="{{global_config[setting]['value']}}"
         data-default-method="{{global_config[setting]['method']}}"
+          aria-controls="{{value['id']}}-dropdown"
           type="button"
           class="custom-select-btn"
           >
@@ -114,7 +116,7 @@ data-plugin-item="{{plugin['id']}}"
             >{{global_config[setting]['value']}}</span
           >
           {% elif not global_config[setting]['value'] and value['default'] == item %}
-          <span
+          <span  aria-description="current value"
           data-setting-select-text="{{value['id']}}"
             data-value="{{value['default']}}"
             >{{value['default']}}</span
@@ -135,14 +137,15 @@ data-plugin-item="{{plugin['id']}}"
         </button>
               <!-- dropdown-->
           <div
+          id="{{value['id']}}-dropdown"
+          role="listbox"
           data-setting-select-dropdown="{{value['id']}}"
           class="hidden z-[20] absolute h-full flex-col w-full mt-2"
         >
           {% for item in value['select'] %} {% if global_config[setting]['value'] and
           global_config[setting]['value'] == item or not global_config[setting]['value']
           and value['default'] == item %}
-          <button
-            type="button"
+          <button role="option"
             value="{{item}}"
             data-setting-select-dropdown-btn="{{value['id']}}"
             type="button"
@@ -151,8 +154,7 @@ data-plugin-item="{{plugin['id']}}"
             {{item}}
           </button>
           {% else %}
-          <button
-            type="button"
+          <button role="option"
             value="{{item}}"
             data-setting-select-dropdown-btn="{{value['id']}}"
             type="button"
@@ -170,6 +172,7 @@ data-plugin-item="{{plugin['id']}}"
       <!-- checkbox -->
       {% if value["type"] == "check" %}
       <div data-checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0 z-10 ">
+        <label class="sr-only" for="{{setting}}">{{setting}}</label>
         <input  id="{{setting}}" name="{{setting}}"
         data-default-method="{% if setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] %}mode{% else %}{{global_config[setting]['method']}}{% endif %}"
         data-default-value="{{global_config[setting]['value']}}"
@@ -178,7 +181,7 @@ data-plugin-item="{{plugin['id']}}"
         setting in ["AUTOCONF_MODE", "SWARM_MODE", "KUBERNETES_MODE"] or global_config[setting]['method'] != 'ui' and global_config[setting]['method']
         != 'default' %} disabled {% endif %}
 
-        aria-checked="{% if global_config[setting]['value'] == "yes" %}true{% else %}false{% endif %}"
+        data-checked="{% if global_config[setting]['value'] == "yes" %}true{% else %}false{% endif %}"
           checked
         id="checkbox-{{value['id']}}"
 
@@ -200,7 +203,7 @@ data-plugin-item="{{plugin['id']}}"
       <!-- end checkbox -->
 
       <!-- invalid feedback -->
-      <div class="hidden text-sm dark:text-red-500">
+      <div role="alert" aria-label="show when invalid input" class="hidden text-sm dark:text-red-500">
         {{value['label']}} is invalid and must match this pattern:
         {{value['regex']|safe}}
       </div>
@@ -266,7 +269,7 @@ data-plugin-item="{{plugin['id']}}"
           />
         </svg>
         <!-- popover -->
-        <div  class="popover-settings-container hidden"
+        <div role="alert" aria-description="show detail"  class="popover-settings-container hidden"
         data-popover-content="{{ value["label"] }}"
         >
           <p  class="popover-settings-text" >{{value['help']}}
@@ -279,6 +282,7 @@ data-plugin-item="{{plugin['id']}}"
       <!-- input -->
       {% if value["type"] != "select" and value["type"] != "check" %}
       <div class="relative flex items-center">
+        <label class="sr-only" for="{{setting}}_SCHEMA">{{setting}}</label>
         <input
         data-default-value="{{value['default']}}" data-default-method="default" id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
         class="regular-input"
@@ -286,11 +290,11 @@ data-plugin-item="{{plugin['id']}}"
 
         {% if value['type'] == "password" %}
         <div data-setting-password-container class="absolute flex right-2 h-5 w-5">
-          <button type="button"data- setting-password="visible" class="h-5 w-5 flex items-center align-middle" type="button">
-            <svg class="fill-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg>
+          <button type="button" data-setting-password="visible" class="h-5 w-5 flex items-center align-middle" type="button">
+            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg>
           </button>
           <button type="button"  data-setting-password="invisible" class="hidden -translate-y-0.2 scale-110 h-5 w-5  items-center align-middle">
-            <svg class="fill-primary" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg>
+            <svg class="fill-primary pointer-events-none dark:fill-blue-500 hover:brightness-75 transition-all" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg>
           </button>
         </div>
         {%endif%}
@@ -305,7 +309,7 @@ data-plugin-item="{{plugin['id']}}"
         id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA" data-select-default="{{value['id']}}" data-type="form-select" id="{{setting}}" name="{{setting}}"
           class="hidden">
           {% for item in value['select'] %}
-          <option value="{{item}}" {% if value['default'] == item %} selected {% endif %}>{{item}}</option>
+          <option {% if not item %}label="empty" {% endif %} value="{{item}}" {% if value['default'] == item %} selected {% endif %}>{{item}}</option>
           {% endfor %}
       </select>
       <!-- end default hidden-->
@@ -315,11 +319,12 @@ data-plugin-item="{{plugin['id']}}"
         <button
         data-setting-select="{{value['id']}}"
         data-default-value="{{value['default']}}"
+          aria-controls="{{value['id']}}-dropdown"
           type="button"
           class="custom-select-btn"
           >
           {% for item in value['select'] %} {% if value['default'] == item %}
-          <span
+          <span aria-description="current value"
           data-setting-select-text="{{value['id']}}"
             data-value="{{value['default']}}"
             >{{value['default']}}</span
@@ -339,26 +344,24 @@ data-plugin-item="{{plugin['id']}}"
           <!-- end chevron -->
         </button>
               <!-- dropdown-->
-          <div
+          <div id="{{value['id']}}-dropdown"
+          role="listbox"
           data-setting-select-dropdown="{{value['id']}}"
           class="hidden z-[20] absolute h-full flex-col w-full mt-2"
         >
           {% for item in value['select'] %} {% if value['default'] == item %}
-          <button
-            type="button"
+          <button role="option"
             value="{{item}}"
             data-setting-select-dropdown-btn="{{value['id']}}"
-            type="button"
             class="active custom-dropdown-btn {% if loop.index == 1 %} border-t rounded-t {% endif %} {% if loop.index == loop.length %}rounded-b {% endif %}"
           >
             {{item}}
           </button>
           {% else %}
           <button
-            type="button"
+            role="option"
             value="{{item}}"
             data-setting-select-dropdown-btn="{{value['id']}}"
-            type="button"
             class="custom-dropdown-btn  {% if loop.index == 1 %} border-t rounded-t {% endif %} {% if loop.index == loop.length %}rounded-b {% endif %}"
           >
             {{item}}
@@ -373,6 +376,7 @@ data-plugin-item="{{plugin['id']}}"
       <!-- checkbox -->
       {% if value["type"] == "check" %}
       <div data-checkbox-handler="{{value['id']}}" class="relative mb-7 md:mb-0">
+        <label class="sr-only" for="{{setting}}_SCHEMA">{{setting}}</label>
         <input id="{{setting}}_SCHEMA" name="{{setting}}_SCHEMA"
         data-default-method="default"
         data-default-value="{{value['default']}}" {% if value['default'] == 'yes' %} checked {%
@@ -394,7 +398,7 @@ data-plugin-item="{{plugin['id']}}"
       <!-- end checkbox -->
 
       <!-- invalid feedback -->
-      <div class="hidden text-sm dark:text-red-500">
+      <div role="alert" aria-label="show when invalid" class="hidden text-sm dark:text-red-500">
         {{value['label']}} is invalid and must match this pattern:
         {{value['regex']|safe}}
       </div>

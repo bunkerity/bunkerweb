@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from argparse import ArgumentParser
 from copy import deepcopy
@@ -6,16 +6,7 @@ from glob import glob
 from hashlib import sha256
 from io import BytesIO
 from json import load as json_load
-from os import (
-    _exit,
-    chmod,
-    environ,
-    getenv,
-    getpid,
-    listdir,
-    sep,
-    walk,
-)
+from os import _exit, chmod, environ, getenv, getpid, listdir, sep, walk
 from os.path import basename, dirname, join, normpath
 from pathlib import Path
 from shutil import copy, rmtree
@@ -322,11 +313,7 @@ if __name__ == "__main__":
                     content = Path(join(root, file)).read_text(encoding="utf-8")
                     custom_conf = {
                         "value": content,
-                        "exploded": (
-                            f"{path_exploded.pop()}" if path_exploded[-1] not in root_dirs else None,
-                            path_exploded[-1],
-                            file.replace(".conf", ""),
-                        ),
+                        "exploded": (path_exploded.pop() if path_exploded[-1] not in root_dirs else None, path_exploded[-1], file.replace(".conf", "")),
                     }
 
                     saving = True
@@ -644,6 +631,7 @@ if __name__ == "__main__":
                 if changes["instances_changed"]:
                     logger.info("Instances changed, generating ...")
                     INSTANCES_NEED_GENERATION = True
+                    CONFIGS_NEED_GENERATION = True
                     CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
 
@@ -651,6 +639,10 @@ if __name__ == "__main__":
 
             if NEED_RELOAD:
                 CHANGES.clear()
+
+                if INSTANCES_NEED_GENERATION:
+                    CHANGES.append("instances")
+                    SCHEDULER.update_instances()
 
                 if CONFIGS_NEED_GENERATION:
                     CHANGES.append("custom_configs")
@@ -669,9 +661,6 @@ if __name__ == "__main__":
                     env = db.get_config()
                     env["DATABASE_URI"] = db.database_uri
 
-                if INSTANCES_NEED_GENERATION:
-                    CHANGES.append("instances")
-                    SCHEDULER.update_instances()
     except:
         logger.error(
             f"Exception while executing scheduler : {format_exc()}",

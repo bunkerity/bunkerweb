@@ -1,5 +1,6 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
+from contextlib import suppress
 from os import _exit, getenv, listdir, sep, urandom
 from os.path import basename, dirname, join
 from secrets import choice
@@ -7,13 +8,7 @@ from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
 
-os_release_path = Path(sep, "etc", "os-release")
-if os_release_path.is_file() and "Alpine" not in os_release_path.read_text(encoding="utf-8"):
-    sys_path.append(join(sep, "usr", "share", "bunkerweb", "deps", "python"))
-
-del os_release_path
-
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("api",), ("db",))]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
@@ -22,29 +17,9 @@ from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from dateutil.parser import parse as dateutil_parse
 from docker import DockerClient
-from docker.errors import (
-    NotFound as docker_NotFound,
-    APIError as docker_APIError,
-    DockerException,
-)
-from flask import (
-    Flask,
-    Response,
-    flash,
-    jsonify,
-    redirect,
-    render_template,
-    request,
-    send_file,
-    url_for,
-)
-from flask_login import (
-    current_user,
-    LoginManager,
-    login_required,
-    login_user,
-    logout_user,
-)
+from docker.errors import NotFound as docker_NotFound, APIError as docker_APIError, DockerException
+from flask import Flask, Response, flash, jsonify, redirect, render_template, request, send_file, session, url_for
+from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 from glob import glob
 from hashlib import sha256
@@ -65,16 +40,15 @@ from threading import Thread
 from tempfile import NamedTemporaryFile
 from time import sleep, time
 from traceback import format_exc
-from typing import Optional
 from zipfile import BadZipFile, ZipFile
 
 from src.Instances import Instances
 from src.ConfigFiles import ConfigFiles
 from src.Config import Config
 from src.ReverseProxied import ReverseProxied
-from src.User import User
+from src.User import AnonymousUser, User
 
-from utils import check_settings, path_to_dict
+from utils import check_settings, get_b64encoded_qr_image, path_to_dict
 from Database import Database  # type: ignore
 from logging import getLogger
 
@@ -106,20 +80,11 @@ signal(SIGTERM, handle_stop)
 sbin_nginx_path = Path(sep, "usr", "sbin", "nginx")
 
 # Flask app
-app = Flask(
-    __name__,
-    static_url_path="/",
-    static_folder="static",
-    template_folder="templates",
-)
+app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
+app.config["SECRET_KEY"] = getenv("FLASK_SECRET", urandom(32))
+
 PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
-app.wsgi_app = ReverseProxied(
-    app.wsgi_app,
-    x_for=PROXY_NUMBERS,
-    x_proto=PROXY_NUMBERS,
-    x_host=PROXY_NUMBERS,
-    x_prefix=PROXY_NUMBERS,
-)
+app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
 gunicorn_logger = getLogger("gunicorn.error")
 app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(gunicorn_logger.level)
@@ -128,14 +93,8 @@ app.logger.setLevel(gunicorn_logger.level)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
-PLUGIN_KEYS = [
-    "id",
-    "name",
-    "description",
-    "version",
-    "stream",
-    "settings",
-]
+login_manager.anonymous_user = AnonymousUser
+PLUGIN_KEYS = ["id", "name", "description", "version", "stream", "settings"]
 
 INTEGRATION = "Linux"
 integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
@@ -163,38 +122,55 @@ elif INTEGRATION == "Kubernetes":
 
 db = Database(app.logger, ui=True)
 
-if INTEGRATION in (
-    "Swarm",
-    "Kubernetes",
-    "Autoconf",
-):
+if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
     while not db.is_autoconf_loaded():
-        app.logger.warning(
-            "Autoconf is not loaded yet in the database, retrying in 5s ...",
-        )
+        app.logger.warning("Autoconf is not loaded yet in the database, retrying in 5s ...")
         sleep(5)
 
 while not db.is_initialized():
-    app.logger.warning(
-        "Database is not initialized, retrying in 5s ...",
-    )
+    app.logger.warning("Database is not initialized, retrying in 5s ...")
     sleep(5)
 
-USER = db.get_ui_user()
+USER = "Error"
+while USER == "Error":
+    with suppress(Exception):
+        USER = db.get_ui_user()
+
 USER_PASSWORD_RX = re_compile(r"^(?=.*?\p{Lowercase_Letter})(?=.*?\p{Uppercase_Letter})(?=.*?\d)(?=.*?[ !\"#$%&'()*+,./:;<=>?@[\\\]^_`{|}~-]).{8,}$")
 
 if USER:
     USER = User(**USER)
-elif getenv("ADMIN_USERNAME") and getenv("ADMIN_PASSWORD"):
-    if len(getenv("ADMIN_USERNAME", "admin")) > 256:
-        app.logger.error("The admin username is too long. It must be less than 256 characters.")
-        stop(1)
-    if not getenv("FLASK_DEBUG", False) and not USER_PASSWORD_RX.match(getenv("ADMIN_PASSWORD", "changeme")):
-        app.logger.error("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
-        stop(1)
 
-    USER = User(getenv("ADMIN_USERNAME", "admin"), getenv("ADMIN_PASSWORD", "changeme"))
-    ret = db.create_ui_user(USER.get_id(), USER.password_hash)
+    if getenv("ADMIN_USERNAME") or getenv("ADMIN_PASSWORD"):
+        if USER.method == "manual":
+            updated = False
+            if getenv("ADMIN_USERNAME", "") and USER.get_id() != getenv("ADMIN_USERNAME", ""):
+                USER.id = getenv("ADMIN_USERNAME", "")
+                updated = True
+            if getenv("ADMIN_PASSWORD", "") and not USER.check_password(getenv("ADMIN_PASSWORD", "")):
+                USER.update_password(getenv("ADMIN_PASSWORD", ""))
+                updated = True
+
+            if updated:
+                ret = db.update_ui_user(USER.get_id(), USER.password_hash, USER.is_two_factor_enabled, USER.secret_token)
+                if ret:
+                    app.logger.error(f"Couldn't update the admin user in the database: {ret}")
+                    stop(1)
+                app.logger.info("The admin user was updated successfully")
+        else:
+            app.logger.warning("The admin user wasn't created manually. You can't change it from the environment variables.")
+elif getenv("ADMIN_USERNAME") and getenv("ADMIN_PASSWORD"):
+    if not getenv("FLASK_DEBUG", False):
+        if len(getenv("ADMIN_USERNAME", "admin")) > 256:
+            app.logger.error("The admin username is too long. It must be less than 256 characters.")
+            stop(1)
+        elif not USER_PASSWORD_RX.match(getenv("ADMIN_PASSWORD", "changeme")):
+            app.logger.error("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).")
+            stop(1)
+
+    user_name = getenv("ADMIN_USERNAME", "admin")
+    USER = User(user_name, getenv("ADMIN_PASSWORD", "changeme"))
+    ret = db.create_ui_user(user_name, USER.password_hash)
 
     if ret:
         app.logger.error(f"Couldn't create the admin user in the database: {ret}")
@@ -207,7 +183,6 @@ bw_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encodin
 try:
     app.config.update(
         DEBUG=True,
-        SECRET_KEY=getenv("FLASK_SECRET", urandom(32)),
         INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION),
         CONFIG=Config(db),
         CONFIGFILES=ConfigFiles(app.logger, db),
@@ -219,6 +194,7 @@ try:
         LAST_RELOAD=0,
         TO_FLASH=[],
         DARK_MODE=False,
+        CURRENT_TOTP_TOKEN=None,
     )
 except FileNotFoundError as e:
     app.logger.error(repr(e), e.filename)
@@ -276,6 +252,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads"):
                 # update changes in db
                 ret = db.checked_changes(changes, value=True)
                 if ret:
+                    app.logger.error(f"Couldn't set the changes to checked in the database: {ret}")
                     app.config["TO_FLASH"].append({"content": f"An error occurred when setting the changes to checked in the database : {ret}", "type": "error"})
     if method == "global_config":
         operation = app.config["CONFIG"].edit_global_conf(args[0])
@@ -316,7 +293,12 @@ def set_csp_header(response):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return app.config["USER"] if app.config["USER"] and user_id == app.config["USER"].get_id() else None
+    db_user = db.get_ui_user()
+    if not db_user:
+        app.logger.warning("Couldn't get the admin user from the database.")
+        return None
+    user = User(**db_user)
+    return user if user_id == user.get_id() else None
 
 
 @app.errorhandler(CSRFError)
@@ -327,9 +309,28 @@ def handle_csrf_error(_):
     :param e: The exception object
     :return: A template with the error message and a 401 status code.
     """
+    session.clear()
     logout_user()
     flash("Wrong CSRF token !", "error")
-    return render_template("login.html"), 403
+    if not app.config["USER"]:
+        return render_template("setup.html"), 403
+    return render_template("login.html", is_totp=current_user.is_two_factor_enabled), 403
+
+
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        passed = True
+        if not session.get("totp_validated", False) and current_user.is_two_factor_enabled and "/totp" not in request.path and not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")):
+            return redirect(url_for("totp", next=request.form.get("next")))
+        elif session.get("ip") != request.remote_addr:
+            passed = False
+        elif session.get("user_agent") != request.headers.get("User-Agent"):
+            passed = False
+
+        if not passed:
+            logout_user()
+            session.clear()
 
 
 @app.route("/")
@@ -344,13 +345,7 @@ def index():
 @app.route("/loading")
 @login_required
 def loading():
-    next_url: str = request.values.get("next", None) or url_for("home")
-    message: Optional[str] = request.values.get("message", None)
-    return render_template(
-        "loading.html",
-        message=message if message is not None else "Loading",
-        next=next_url,
-    )
+    return render_template("loading.html", message=request.values.get("message", "Loading"), next=request.values.get("next", None) or url_for("home"))
 
 
 @app.route("/check", methods=["GET"])
@@ -363,12 +358,14 @@ def check():
 
 @app.route("/setup", methods=["GET", "POST"])
 def setup():
-    if app.config["USER"]:
-        if current_user.is_authenticated:  # type: ignore
-            return redirect(url_for("home"))
-        return redirect(url_for("login"), 301)
+    if current_user.is_authenticated:  # type: ignore
+        return redirect(url_for("home"))
 
     db_config = app.config["CONFIG"].get_config(methods=False)
+
+    for server_name in db_config["SERVER_NAME"].split(" "):
+        if db_config.get(f"{server_name}_USE_UI", "no") == "yes":
+            return redirect(url_for("login"), 301)
 
     if request.method == "POST":
         if not request.form:
@@ -411,10 +408,11 @@ def setup():
         if error:
             return redirect(url_for("setup"))
 
-        app.config["USER"] = User(request.form["admin_username"], request.form["admin_password"])
+        app.config["USER"] = User(request.form["admin_username"], request.form["admin_password"], method="ui")
 
-        ret = db.create_ui_user(app.config["USER"].get_id(), app.config["USER"].password_hash)
+        ret = db.create_ui_user(request.form["admin_username"], app.config["USER"].password_hash, method="ui")
         if ret:
+            app.logger.error(f"Couldn't create the admin user in the database: {ret}")
             flash(f"Couldn't create the admin user in the database: {ret}", "error")
             return redirect(url_for("setup"))
 
@@ -453,6 +451,31 @@ def setup():
     )
 
 
+@app.route("/totp", methods=["GET", "POST"])
+@login_required
+def totp():
+    if request.method == "POST":
+        if not request.form:
+            flash("Missing form data.", "error")
+            return redirect(url_for("totp"))
+
+        if "totp_token" not in request.form:
+            flash("Missing token parameter.", "error")
+            return redirect(url_for("totp"))
+
+        if not current_user.check_otp(request.form["totp_token"]):
+            flash("The token is invalid.", "error")
+            return redirect(url_for("totp"))
+
+        session["totp_validated"] = True
+        redirect(url_for("loading", next=request.form.get("next") or url_for("home")))
+
+    if not current_user.is_two_factor_enabled or session.get("totp_validated", False):
+        return redirect(url_for("home"))
+
+    return render_template("totp.html", dark_mode=app.config["DARK_MODE"])
+
+
 @app.route("/home")
 @login_required
 def home():
@@ -466,13 +489,8 @@ def home():
         services_number: the number of services
         posts: a list of posts
     """
-
     try:
-        r = get(
-            "https://github.com/bunkerity/bunkerweb/releases/latest",
-            allow_redirects=True,
-            timeout=5,
-        )
+        r = get("https://github.com/bunkerity/bunkerweb/releases/latest", allow_redirects=True, timeout=5)
         r.raise_for_status()
     except BaseException:
         r = None
@@ -515,6 +533,102 @@ def home():
         services_autoconf_count=services_autoconf_count,
         dark_mode=app.config["DARK_MODE"],
     )
+
+
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    if request.method == "POST":
+        # Check form data validity
+        if not request.form:
+            flash("Missing form data.", "error")
+            return redirect(url_for("profile"))
+        elif "operation" not in request.form:
+            flash("Missing operation parameter.", "error")
+            return redirect(url_for("profile"))
+
+        if "curr_password" not in request.form or not current_user.check_password(request.form["curr_password"]):
+            flash(f"The current password is incorrect. ({request.form['operation']})", "error")
+            return redirect(url_for("profile"))
+
+        username = current_user.get_id()
+        password = request.form["curr_password"]
+        is_two_factor_enabled = current_user.is_two_factor_enabled
+        secret_token = current_user.secret_token
+
+        if request.form["operation"] == "username":
+            if "admin_username" not in request.form:
+                flash("Missing admin_username parameter. (username)", "error")
+                return redirect(url_for("profile"))
+            elif len(request.form["admin_username"]) > 256:
+                flash("The admin username is too long. It must be less than 256 characters. (username)", "error")
+                return redirect(url_for("profile"))
+
+            username = request.form["admin_username"]
+
+            session.clear()
+            logout_user()
+        elif request.form["operation"] == "password":
+            if "admin_password" not in request.form:
+                flash("Missing admin_password parameter. (password)", "error")
+                return redirect(url_for("profile"))
+            elif request.form.get("admin_password"):
+                if not request.form.get("admin_password_check"):
+                    flash("Missing admin_password_check parameter. (password)", "error")
+                    return redirect(url_for("profile"))
+                elif request.form["admin_password"] != request.form["admin_password_check"]:
+                    flash("The passwords does not match. (password)", "error")
+                    return redirect(url_for("profile"))
+                elif not USER_PASSWORD_RX.match(request.form["admin_password"]):
+                    flash("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). (password)", "error")
+                    return redirect(url_for("profile"))
+            elif request.form.get("admin_password_check"):
+                flash("Missing admin_password parameter. (password)", "error")
+                return redirect(url_for("profile"))
+
+            password = request.form["admin_password"]
+
+            session.clear()
+            logout_user()
+        elif request.form["operation"] == "totp":
+            if "totp_token" not in request.form:
+                flash("Missing totp_token parameter. (totp)", "error")
+                return redirect(url_for("profile"))
+            elif not current_user.check_otp(request.form["totp_token"], secret=app.config["CURRENT_TOTP_TOKEN"]):
+                flash("The totp token is invalid. (totp)", "error")
+                return redirect(url_for("profile"))
+
+            session["totp_validated"] = not current_user.is_two_factor_enabled
+            is_two_factor_enabled = session["totp_validated"]
+            secret_token = None if current_user.is_two_factor_enabled else app.config["CURRENT_TOTP_TOKEN"]
+            app.config["CURRENT_TOTP_TOKEN"] = None
+        else:
+            flash("Invalid operation parameter.", "error")
+            return redirect(url_for("profile"))
+
+        user = User(username, password, is_two_factor_enabled=is_two_factor_enabled, secret_token=secret_token, method=current_user.method)
+        ret = db.update_ui_user(username, user.password_hash, is_two_factor_enabled, secret_token, current_user.method if request.form["operation"] == "totp" else "ui")
+        if ret:
+            app.logger.error(f"Couldn't update the admin user in the database: {ret}")
+            flash(f"Couldn't update the admin user in the database: {ret}", "error")
+            return redirect(url_for("profile"))
+
+        flash(
+            f"The {request.form['operation']} has been successfully updated." if request.form["operation"] != "totp" else f"The two-factor authentication was successfully {'disabled' if current_user.is_two_factor_enabled else 'enabled'}.",
+        )
+
+        return redirect(url_for("profile" if request.form["operation"] == "totp" else "login"))
+
+    secret_token = ""
+    totp_qr_image = ""
+
+    if not current_user.is_two_factor_enabled:
+        current_user.refresh_totp()
+        secret_token = current_user.secret_token
+        totp_qr_image = get_b64encoded_qr_image(current_user.get_authentication_setup_uri())
+        app.config["CURRENT_TOTP_TOKEN"] = secret_token
+
+    return render_template("profile.html", username=current_user.get_id(), is_totp=current_user.is_two_factor_enabled, secret_token=secret_token, totp_qr_image=totp_qr_image, dark_mode=app.config["DARK_MODE"])
 
 
 @app.route("/instances", methods=["GET", "POST"])
@@ -764,7 +878,7 @@ def configs():
 
         if operation:
             flash(operation, "error")
-            return redirect(url_for("loading", next=url_for("configs"))), 500
+            return redirect(url_for("loading", next=url_for("configs")))
 
         if request.form["operation"] in ("new", "edit"):
             if not app.config["CONFIGFILES"].check_name(variables["name"]):
@@ -850,7 +964,7 @@ def plugins():
 
             if variables["external"] != "True":
                 flash(f"Can't delete internal plugin {variables['name']}", "error")
-                return redirect(url_for("loading", next=url_for("plugins"))), 500
+                return redirect(url_for("loading", next=url_for("plugins")))
 
             plugins = app.config["CONFIG"].get_plugins()
             for plugin in deepcopy(plugins):
@@ -1018,11 +1132,11 @@ def plugins():
                 except (TarError, OSError) as e:
                     errors += 1
                     error = 1
-                    flash(f"{e}", "error")
+                    flash(str(e), "error")
                 except Exception as e:
                     errors += 1
                     error = 1
-                    flash(f"{e}", "error")
+                    flash(str(e), "error")
                 finally:
                     if error != 1:
                         flash(f"Successfully created plugin: <b><i>{folder_name}</i></b>")
@@ -1513,29 +1627,38 @@ def jobs_download():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    fail = False
-    if request.method == "POST" and "username" in request.form and "password" in request.form:
-        if app.config["USER"].get_id() == request.form["username"] and app.config["USER"].check_password(request.form["password"]):
-            # log the user in
-            next_url = request.form.get("next")
-            login_user(app.config["USER"])
-
-            # redirect him to the page he originally wanted or to the home page
-            return redirect(url_for("loading", next=next_url or url_for("home")))
-        else:
-            fail = True
-
-    if fail:
-        return (
-            render_template("login.html", error="Invalid username or password"),
-            401,
-        )
-
     if not app.config["USER"]:
         return redirect(url_for("setup"))
     elif current_user.is_authenticated:  # type: ignore
         return redirect(url_for("home"))
-    return render_template("login.html")
+
+    fail = False
+    if request.method == "POST" and "username" in request.form and "password" in request.form:
+        app.logger.warning(f"Login attempt from {request.remote_addr} with username \"{request.form['username']}\"")
+        db_user = db.get_ui_user()
+        if not db_user:
+            app.logger.error("Couldn't get user from database")
+            stop(1)
+        user = User(**db_user)
+
+        if user.get_id() == request.form["username"] and user.check_password(request.form["password"]):
+            # log the user in
+            session["ip"] = request.remote_addr
+            session["user_agent"] = request.headers.get("User-Agent")
+            session["totp_validated"] = False
+            login_user(user, duration=timedelta(hours=1))
+
+            # redirect him to the page he originally wanted or to the home page
+            return redirect(url_for("loading", next=request.form.get("next") or url_for("home")))
+        else:
+            flash("Invalid username or password", "error")
+            fail = True
+
+    kwargs = {
+        "is_totp": current_user.is_two_factor_enabled,
+    } | ({"error": "Invalid username or password"} if fail else {})
+
+    return render_template("login.html", **kwargs), 401 if fail else 200
 
 
 @app.route("/darkmode", methods=["POST"])
@@ -1575,5 +1698,6 @@ def check_reloading():
 @app.route("/logout")
 @login_required
 def logout():
+    session.clear()
     logout_user()
     return redirect(url_for("login"))

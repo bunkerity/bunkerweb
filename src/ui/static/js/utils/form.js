@@ -29,9 +29,19 @@ class Checkbox {
 
           //set custom input hidden value
           const newValue = checkboxEl.getAttribute("value");
-          newValue === "yes"
-            ? checkboxEl.setAttribute("aria-checked", "true")
-            : checkboxEl.setAttribute("aria-checked", "false");
+          try {
+            if (checkboxEl.hasAttribute("aria-checked")) {
+              newValue === "yes"
+                ? checkboxEl.setAttribute("aria-checked", "true")
+                : checkboxEl.setAttribute("aria-checked", "false");
+            }
+          } catch (err) {}
+
+          try {
+            newValue === "yes"
+              ? checkboxEl.setAttribute("data-checked", "true")
+              : checkboxEl.setAttribute("data-checked", "false");
+          } catch (err) {}
 
           //force checked for submit
           checkboxEl.checked = true;

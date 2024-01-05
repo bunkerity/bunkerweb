@@ -3,9 +3,11 @@
 
 <!-- float button-->
 <button
-  type="button"
+  aria-controls="sidebar-menu"
+  aria-expanded="false"
+  aria-label="Open menu sidebar"
   data-sidebar-menu-toggle
-  class="scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 xl:hidden fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-2 sm:top-3 right-5 sm:right-6 z-990 rounded-circle text-slate-700"
+  class="transition-all scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 xl:hidden fixed p-3 text-xl bg-white shadow-sm cursor-pointer top-16 sm:top-[4.5rem] right-5 sm:right-6 z-990 rounded-circle text-slate-700"
 >
   <svg
     fill="#0D6EFD"
@@ -23,26 +25,29 @@
 <!-- left sidebar  -->
 <aside
   data-sidebar-menu
-  class="fixed flex inset-y-0 flex-wrap justify-between w-full p-0 my-4 overflow-y-auto antialiased transition-transform duration-200 -translate-x-full bg-white border-0 shadow-xl dark:shadow-none dark:bg-slate-850 dark:brightness-110 max-w-64 z-[1000] xl:ml-6 rounded-2xl xl:left-0 xl:translate-x-0"
-  aria-expanded="false"
+  class="transition-all mt-[4.5rem] fixed flex inset-y-0 flex-wrap justify-between w-full p-0 my-4 overflow-y-auto antialiased duration-200 -translate-x-full bg-white border-0 shadow-xl dark:shadow-none dark:bg-slate-850 dark:brightness-110 max-w-64 z-[1000] xl:ml-6 rounded-2xl xl:left-0 xl:translate-x-0"
+  aria-hidden="true"
+  id="sidebar-menu"
 >
   <!-- close btn-->
-  <svg
-    data-sidebar-menu-close
-    class="xl:hidden cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-6 w-6 top-4 right-4"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 320 512"
-  >
-    <path
-      d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
-    />
-  </svg>
+  <button   aria-controls="sidebar-menu" aria-expanded="false" aria-label="close menu sidebar" data-sidebar-menu-close>
+    <svg
+      class="xl:hidden  fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-6 w-6 top-4 right-4"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 320 512"
+    >
+      <path
+        d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
+      />
+    </svg>
+  </button>
   <!-- close btn-->
   <!-- top sidebar -->
   <div class="w-full">
     <!-- logo and version -->
     <div class="h-19">
       <a
+        aria-label="link to home"
         class="flex justify-center px-8 py-6 m-0 text-sm whitespace-nowrap dark:text-white text-slate-700"
         href="{% if current_endpoint == 'home' %}javascript:void(0){% else %}loading?next={{ url_for('home') }}{% endif %}"
       >
@@ -86,7 +91,6 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-6 h-6"
               >
                 <path
                   stroke-linecap="round"
@@ -118,7 +122,6 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-6 h-6"
               >
                 <path
                   stroke-linecap="round"
@@ -149,7 +152,6 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-6 h-6"
               >
                 <path
                   stroke-linecap="round"
@@ -180,7 +182,6 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-6 h-6"
               >
                 <path
                   stroke-linecap="round"
@@ -211,7 +212,6 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-6 h-6"
               >
                 <path
                   stroke-linecap="round"
@@ -247,7 +247,6 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-6 h-6"
               >
                 <path
                   stroke-linecap="round"
@@ -278,7 +277,6 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-6 h-6"
               >
                 <path
                   stroke-linecap="round"
@@ -309,7 +307,6 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-6 h-6"
               >
                 <path
                   stroke-linecap="round"
@@ -340,7 +337,6 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-6 h-6"
               >
                 <path
                   stroke-linecap="round"
@@ -352,6 +348,37 @@
             <span class="ml-1 duration-300 opacity-100 pointer-events-none ease"
               >Jobs</span
             >
+          </a>
+        </li>
+        <!-- end item -->
+        <li class="mt-0.5 w-full">
+          <a
+            class="{% if current_endpoint == 'profile' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
+            href="{% if current_endpoint == 'profile' %}javascript:void(0){% else %}loading?next={{ url_for('profile') }}{% endif %}"
+          >
+            <div
+              class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="stroke-teal-600 h-6 w-6 relative"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </div>
+            <span
+              class="ml-1 duration-300 opacity-100 pointer-events-none ease"
+            >
+              Profile
+            </span>
           </a>
         </li>
         <!-- end item -->
@@ -384,7 +411,7 @@
               <a
                 class="leading-8 font-bold hover:brightness-75"
                 target="_blank"
-                href="https://docs.bunkerweb.io/1.4/plugins/#writing-a-plugin"
+                href="https://docs.bunkerweb.io/1.5.4/plugins/?utm_campaign=self&utm_source=ui#writing-a-plugin"
                 >check doc</a
               >
             </h6>
@@ -457,7 +484,10 @@
     <!-- social-->
     <ul class="flex justify-center align-middle w-full mb-4">
       <li class="mx-2 w-6">
-        <a href="https://twitter.com/bunkerity" target="_blank"
+        <a
+          aria-label="link to twitter"
+          href="https://twitter.com/bunkerity"
+          target="_blank"
           ><svg
             class="hover:opacity-80"
             fill="#1DA1F2"
@@ -470,7 +500,10 @@
         ></a>
       </li>
       <li class="mx-2.5 w-6">
-        <a href="https://www.linkedin.com/company/bunkerity/" target="_blank"
+        <a
+          aria-label="link to linkedin"
+          href="https://www.linkedin.com/company/bunkerity/"
+          target="_blank"
           ><svg
             fill="#0A63BC"
             class="hover:opacity-80 dark:brightness-110"
@@ -483,7 +516,10 @@
         ></a>
       </li>
       <li class="mx-2.5 w-6 -translate-y-1">
-        <a href="https://discord.gg/fTf46FmtyD" target="_blank"
+        <a
+          aria-label="link to discord"
+          href="https://discord.gg/fTf46FmtyD"
+          target="_blank"
           ><svg
             class="translate-y-1 hover:opacity-80"
             fill="#5562EA"
@@ -496,7 +532,10 @@
         ></a>
       </li>
       <li class="mx-2.5 w-6">
-        <a href="https://github.com/bunkerity" target="_blank"
+        <a
+          aria-label="link to github"
+          href="https://github.com/bunkerity"
+          target="_blank"
           ><svg
             class="hover:opacity-80 dark:fill-gray-600"
             fill="#171A1F"

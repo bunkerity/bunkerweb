@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from os import _exit, getenv, sep
 from os.path import join
@@ -58,7 +58,7 @@ try:
     db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
     bunkernet_id = get_file_in_db("instance.id", db)
     if bunkernet_id:
-        bunkernet_path.joinpath("bunkernet.id").write_bytes(bunkernet_id)
+        bunkernet_path.joinpath("instance.id").write_bytes(bunkernet_id)
         logger.info("Successfully retrieved BunkerNet ID from db cache")
     else:
         logger.info("No BunkerNet ID found in db cache")

@@ -1,5 +1,3 @@
-import { Checkbox, Select } from "./utils/form.js";
-
 class Dropdown {
   constructor(prefix = "logs") {
     this.prefix = prefix;
@@ -275,8 +273,8 @@ class FetchLogs {
     });
 
     //live update disabled if to date is set
-    this.liveUpdateInp.addEventListener("input", (e) => {
-      this.liveUpdateInp.checked
+    this.liveUpdateInp.addEventListener("change", (e) => {
+      this.liveUpdateInp.getAttribute("value") === "yes"
         ? this.toDateInp.setAttribute("disabled", "")
         : this.toDateInp.removeAttribute("disabled");
     });

@@ -4,6 +4,13 @@ local utils = require "bunkerweb.utils"
 
 local headers = class("headers", plugin)
 
+local ngx = ngx
+local ERR = ngx.ERR
+local get_phase = ngx.get_phase
+local regex_match = utils.regex_match
+local get_multiple_variables = utils.get_multiple_variables
+local tostring = tostring
+
 function headers:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "headers", ctx)
@@ -18,11 +25,11 @@ function headers:initialize(ctx)
 		["X_XSS_PROTECTION"] = "X-XSS-Protection",
 	}
 	-- Load data from datastore if needed
-	if ngx.get_phase() ~= "init" then
+	if get_phase() ~= "init" then
 		-- Get custom headers from datastore
 		local custom_headers, err = self.datastore:get("plugin_headers_custom_headers", true)
 		if not custom_headers then
-			self.logger:log(ngx.ERR, err)
+			self.logger:log(ERR, err)
 			return
 		end
 		self.custom_headers = {}
@@ -43,7 +50,7 @@ end
 
 function headers:init()
 	-- Get variables
-	local variables, err = utils.get_multiple_variables({ "CUSTOM_HEADER" })
+	local variables, err = get_multiple_variables({ "CUSTOM_HEADER" })
 	if variables == nil then
 		return self:ret(false, err)
 	end
@@ -55,7 +62,7 @@ function headers:init()
 			if data[srv] == nil then
 				data[srv] = {}
 			end
-			local m = utils.regex_match(value, "([\\w-]+): ([^,]+)")
+			local m = regex_match(value, "([\\w-]+): ([^,]+)")
 			if m then
 				data[srv][m[1]] = m[2]
 			end
@@ -72,14 +79,15 @@ end
 
 function headers:header()
 	-- Override upstream headers if needed
+	local ngx_header = ngx.header
 	local ssl = self.ctx.bw.scheme == "https"
 	for variable, header in pairs(self.all_headers) do
 		if
-			ngx.header[header] == nil
+			ngx_header[header] == nil
 			or (
 				self.variables[variable] ~= ""
 				and self.variables["KEEP_UPSTREAM_HEADERS"] ~= "*"
-				and utils.regex_match(self.variables["KEEP_UPSTREAM_HEADERS"], "(^| )" .. header .. "($| )") == nil
+				and regex_match(self.variables["KEEP_UPSTREAM_HEADERS"], "(^| )" .. header .. "($| )") == nil
 			)
 		then
 			if header ~= "Strict-Transport-Security" or ssl then
@@ -87,21 +95,21 @@ function headers:header()
 					header == "Content-Security-Policy"
 					and self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes"
 				then
-					ngx.header["Content-Security-Policy-Report-Only"] = self.variables[variable]
+					ngx_header["Content-Security-Policy-Report-Only"] = self.variables[variable]
 				else
-					ngx.header[header] = self.variables[variable]
+					ngx_header[header] = self.variables[variable]
 				end
 			end
 		end
 	end
 	-- Add custom headers
 	for header, value in pairs(self.custom_headers) do
-		ngx.header[header] = value
+		ngx_header[header] = value
 	end
 	-- Remove headers
 	if self.variables["REMOVE_HEADERS"] ~= "" then
 		for header in self.variables["REMOVE_HEADERS"]:gmatch("%S+") do
-			ngx.header[header] = nil
+			ngx_header[header] = nil
 		end
 	end
 	return self:ret(true, "edited headers for request")

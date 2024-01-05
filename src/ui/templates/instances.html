@@ -16,14 +16,14 @@ instances_batched %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <input type="hidden" name="INSTANCE_ID" value="{{ instance._id }}" />
     <!-- state and title-->
-    <div class="flex items-center">
+    <div class="grid grid-cols-12">
       {% if instance.health %}
-      <div class="h-4 w-4 rounded-full bg-green-500"></div>
+      <div class="col-span-1 mt-2 h-4 w-4 rounded-full bg-green-500"></div>
       {% endif %} {% if not instance.health %}
-      <div class="h-4 w-4 rounded-full bg-red-500"></div>
+      <div class="col-span-1 mt-2 h-4 w-4 rounded-full bg-red-500"></div>
       {% endif %}
       <h5
-        class="ml-3 mb-1 font-bold dark:text-white/90 transition duration-300 ease-in-out"
+        class="col-span-11 break-words font-bold dark:text-white/90 transition duration-300 ease-in-out"
       >
         {{ instance.name }}
       </h5>
@@ -31,17 +31,18 @@ instances_batched %}
     <!-- end state and title-->
 
     <!-- detail list -->
-    <div class="grid grid-cols-1 gap-2 mt-4 mb-6 ml-1">
+    <div role="grid" class="grid grid-cols-1 gap-2 mt-4 mb-6 ml-1">
       <!-- detail -->
       <div
+        role="row"
         class="flex flex-col items-center sm:flex-row col-span-1 py-1 sm:py-0"
       >
-        <p
+        <p role="gridcell"
           class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 dark:opacity-80"
         >
           TYPE
         </p>
-        <p
+        <p role="gridcell"
           class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-80"
         >
           {{ instance._type }}
@@ -50,14 +51,15 @@ instances_batched %}
       <!-- end detail -->
       <!-- detail -->
       <div
+        role="row"
         class="flex flex-col items-center sm:flex-row col-span-1 py-1 sm:py-0"
       >
-        <p
+        <p role="gridcell"
           class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 dark:opacity-90"
         >
           HOSTNAME
         </p>
-        <p
+        <p role="gridcell"
           class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-90"
         >
           {{ instance.hostname }}

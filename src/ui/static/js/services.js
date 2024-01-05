@@ -158,9 +158,20 @@ class ServiceModal {
 
       //SET VALUE
       if (inp.getAttribute("type") === "checkbox") {
-        defaultVal === "yes"
-          ? inp.setAttribute("aria-checked", "true")
-          : inp.setAttribute("aria-checked", "false");
+        try {
+          if (inp.hasAttribute("aria-checked")) {
+            defaultVal === "yes"
+              ? inp.setAttribute("aria-checked", "true")
+              : inp.setAttribute("aria-checked", "false");
+          }
+        } catch (err) {}
+
+        try {
+          defaultVal === "yes"
+            ? inp.setAttribute("data-checked", "true")
+            : inp.setAttribute("data-checked", "false");
+        } catch (err) {}
+
         inp.setAttribute("value", defaultVal);
         inp.setAttribute("data-method", defaultMethod);
         inp.checked = true;
@@ -311,9 +322,20 @@ class ServiceModal {
             inp.tagName === "INPUT" &&
             inp.getAttribute("type") === "checkbox"
           ) {
-            value === "yes"
-              ? inp.setAttribute("aria-checked", "true")
-              : inp.setAttribute("aria-checked", "false");
+            try {
+              if (inp.hasAttribute("aria-checked")) {
+                value === "yes"
+                  ? inp.setAttribute("aria-checked", "true")
+                  : inp.setAttribute("aria-checked", "false");
+              }
+            } catch (err) {}
+
+            try {
+              value === "yes"
+                ? inp.setAttribute("data-checked", "true")
+                : inp.setAttribute("data-checked", "false");
+            } catch (err) {}
+
             inp.setAttribute("value", value);
             inp.setAttribute("data-method", method);
             inp.checked = true;
@@ -712,9 +734,20 @@ class Multiple {
 
         //for settings input
         if (inp.getAttribute("type") === "checkbox") {
-          value === "yes"
-            ? inp.setAttribute("aria-checked", "true")
-            : inp.setAttribute("aria-checked", "false");
+          try {
+            if (inp.hasAttribute("aria-checked")) {
+              value === "yes"
+                ? inp.setAttribute("aria-checked", "true")
+                : inp.setAttribute("aria-checked", "false");
+            }
+          } catch (err) {}
+
+          try {
+            value === "yes"
+              ? inp.setAttribute("data-checked", "true")
+              : inp.setAttribute("data-checked", "false");
+          } catch (err) {}
+
           inp.setAttribute("value", value);
           inp.setAttribute("data-method", method);
           inp.checked = true;

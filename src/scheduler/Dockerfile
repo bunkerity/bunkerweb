@@ -1,4 +1,4 @@
-FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8 AS builder
+FROM python:3.12.1-alpine3.18@sha256:af0d8da43677e3000ebdf4045508d891a87e7bd2d3ec87bc6e40403be97291b8 AS builder
 
 # Install python dependencies
 RUN apk add --no-cache --virtual .build-deps g++ gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf-dev openssl-dev cargo postgresql-dev
@@ -38,7 +38,7 @@ COPY src/common/utils utils
 COPY src/scheduler scheduler
 COPY src/VERSION VERSION
 
-FROM python:3.12.0-alpine3.18@sha256:f1d0d03700fb2d4480e89fb807e7346c14b88952f7bd58d56de54a24817cc2e8
+FROM python:3.12.1-alpine3.18@sha256:af0d8da43677e3000ebdf4045508d891a87e7bd2d3ec87bc6e40403be97291b8
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -50,7 +50,6 @@ WORKDIR /usr/share/bunkerweb
 
 # Add scheduler user, drop bwcli, install runtime dependencies, create data folders and set permissions
 RUN apk add --no-cache bash libgcc libstdc++ libpq openssl libmagic && \
-  ln -s /usr/local/bin/python3 /usr/bin/python3 && \
   addgroup -g 101 scheduler && \
   adduser -h /var/cache/nginx -g scheduler -s /bin/sh -G scheduler -D -H -u 101 scheduler && \
   cp helpers/bwcli /usr/bin/ && \

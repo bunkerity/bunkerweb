@@ -28,13 +28,14 @@
     <!-- flash message-->
     {% for category, message in messages %}
     <div
+      role="alert"
+      aria-description="login message alert"
       data-flash-message
       class="p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 bg-white rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border"
     >
       <button
         data-close-flash-message
         role="close alert message"
-        type="button"
         class="absolute right-7 top-1.5"
       >
         <svg
@@ -70,11 +71,11 @@
         class="mx-4 lg:mx-0 col-span-2 lg:col-span-1 bg-none lg:bg-gray-50 h-full flex flex-col items-center justify-center"
       >
         <div
-          class="bg-gray-50 rounded px-4 sm:px-12 py-16 w-full max-w-[400px]"
+          class="bg-gray-50 rounded px-8 sm:px-12 py-16 w-full max-w-[400px]"
         >
           <div class="flex justify-center">
             <img
-              class="lg:hidden max-w-60 max-h-30 mb-6"
+              class="lg:hidden w-full max-w-60 max-h-30 mb-6"
               src="images/BUNKERWEB-print-hd.png"
               alt="logo"
               class="logo"
@@ -101,7 +102,7 @@
               </h5>
               <label class="sr-only" for="username">username</label>
               <input
-                type="username"
+                type="text"
                 id="username"
                 name="username"
                 class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
@@ -130,6 +131,7 @@
               />
             </div>
             <!-- end password inpt-->
+            <!-- totp -->
             <div class="flex justify-center">
               <button
                 type="submit"

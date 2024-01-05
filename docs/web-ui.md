@@ -3,7 +3,7 @@
 ## Overview
 
 <p align="center">
-	<iframe style="display: block;" width="560" height="315" src="https://www.youtube-nocookie.com/embed/Ao20SfvQyr4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+	<iframe style="display: block;" width="560" height="315" data-src="https://www.youtube-nocookie.com/embed/Ao20SfvQyr4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 The "Web UI" is a web application that helps you manage your BunkerWeb instance using a user-friendly interface instead of the command-line one.
@@ -40,14 +40,14 @@ Because the web UI is a web application, the recommended installation procedure 
 The setup wizard is a feature that helps you to **configure** and **install the web UI** using a **user-friendly interface**. You will need to set the `UI_HOST` setting (`http://hostname-of-web-ui:7000`) and browse the `/setup` URI of your server to access the setup wizard.
 
 <figure markdown>
-  ![Overview](assets/img/ui-wizard-account.png){ align=center, width="350" }
+  ![Overview](assets/img/ui-wizard-account.webp){ align=center, width="350" }
   <figcaption>Account section of the setup wizard</figcaption>
 </figure>
 
-Choose your administator username and password. Please note that password must have at least 8 chars with 1 lower case letter, 1 upper case letter, 1 digit and 1 special char.
+Choose your administrator username and password. Please note that password must have at least 8 chars with 1 lower case letter, 1 upper case letter, 1 digit and 1 special char.
 
 <figure markdown>
-  ![Overview](assets/img/ui-wizard-settings.png){ align=center, width="350" }
+  ![Overview](assets/img/ui-wizard-settings.webp){ align=center, width="350" }
   <figcaption>Settings section of the setup wizard</figcaption>
 </figure>
 
@@ -73,7 +73,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.4
+        image: bunkerity/bunkerweb:1.5.5
         ports:
           - 80:8080
           - 443:8443
@@ -89,7 +89,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.4
+        image: bunkerity/bunkerweb-scheduler:1.5.5
         depends_on:
           - bunkerweb
           - bw-docker
@@ -111,7 +111,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.4
+        image: bunkerity/bunkerweb-ui:1.5.5
         depends_on:
           - bw-docker
         environment:
@@ -160,7 +160,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.4
+        image: bunkerity/bunkerweb:1.5.5
         ports:
           - 80:8080
           - 443:8443
@@ -177,7 +177,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-services
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.4
+        image: bunkerity/bunkerweb-autoconf:1.5.5
         depends_on:
           - bunkerweb
           - bw-docker
@@ -190,7 +190,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-docker
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.4
+        image: bunkerity/bunkerweb-scheduler:1.5.5
         depends_on:
           - bunkerweb
           - bw-docker
@@ -225,7 +225,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.4
+        image: bunkerity/bunkerweb-ui:1.5.5
         networks:
           bw-docker:
           bw-universe:
@@ -263,7 +263,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.4
+        image: bunkerity/bunkerweb:1.5.5
         ports:
           - published: 80
             target: 8080
@@ -293,7 +293,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
             - "bunkerweb.INSTANCE=yes"
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.4
+        image: bunkerity/bunkerweb-autoconf:1.5.5
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -321,7 +321,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
               - "node.role == manager"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.4
+        image: bunkerity/bunkerweb-scheduler:1.5.5
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -348,7 +348,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.4
+        image: bunkerity/bunkerweb-ui:1.5.5
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -435,7 +435,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           containers:
             # using bunkerweb as name is mandatory
             - name: bunkerweb
-              image: bunkerity/bunkerweb:1.5.4
+              image: bunkerity/bunkerweb:1.5.5
               imagePullPolicy: Always
               securityContext:
                 runAsUser: 101
@@ -508,7 +508,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.5.4
+              image: bunkerity/bunkerweb-autoconf:1.5.5
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -535,7 +535,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.5.4
+              image: bunkerity/bunkerweb-scheduler:1.5.5
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -619,7 +619,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
         spec:
           containers:
             - name: bunkerweb-ui
-              image: bunkerity/bunkerweb-ui:1.5.4
+              image: bunkerity/bunkerweb-ui:1.5.5
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -754,7 +754,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.4/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -763,7 +763,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.4
+        image: bunkerity/bunkerweb:1.5.5
         ports:
           - 80:8080
           - 443:8443
@@ -787,7 +787,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-services
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.4
+        image: bunkerity/bunkerweb-scheduler:1.5.5
         depends_on:
           - bunkerweb
           - bw-docker
@@ -809,7 +809,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.4
+        image: bunkerity/bunkerweb-ui:1.5.5
         depends_on:
           - bw-docker
         environment:
@@ -874,7 +874,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.4/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the docker-compose files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/misc/integrations) of the repository.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -883,7 +883,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.4
+        image: bunkerity/bunkerweb:1.5.5
         ports:
           - 80:8080
           - 443:8443
@@ -900,7 +900,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-services
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.4
+        image: bunkerity/bunkerweb-autoconf:1.5.5
         depends_on:
           - bunkerweb
           - bw-docker
@@ -913,7 +913,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-docker
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.4
+        image: bunkerity/bunkerweb-scheduler:1.5.5
         depends_on:
           - bunkerweb
           - bw-docker
@@ -948,7 +948,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-docker
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.4
+        image: bunkerity/bunkerweb-ui:1.5.5
         networks:
           bw-docker:
           bw-universe:
@@ -1009,7 +1009,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.4/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the stack files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/misc/integrations) of the repository.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -1018,7 +1018,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     services:
       bunkerweb:
-        image: bunkerity/bunkerweb:1.5.4
+        image: bunkerity/bunkerweb:1.5.5
         ports:
           - published: 80
             target: 8080
@@ -1048,7 +1048,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
             - "bunkerweb.INSTANCE=yes"
 
       bw-autoconf:
-        image: bunkerity/bunkerweb-autoconf:1.5.4
+        image: bunkerity/bunkerweb-autoconf:1.5.5
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -1076,7 +1076,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
               - "node.role == manager"
 
       bw-scheduler:
-        image: bunkerity/bunkerweb-scheduler:1.5.4
+        image: bunkerity/bunkerweb-scheduler:1.5.5
         environment:
           - SWARM_MODE=yes
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -1103,7 +1103,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           - bw-universe
 
       bw-ui:
-        image: bunkerity/bunkerweb-ui:1.5.4
+        image: bunkerity/bunkerweb-ui:1.5.5
         environment:
           - DATABASE_URI=mariadb+pymysql://bunkerweb:changeme@bw-db:3306/db # Remember to set a stronger password for the database
           - DOCKER_HOST=tcp://bw-docker:2375
@@ -1157,7 +1157,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     !!! info "Database backend"
 
-        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.4/misc/integrations) of the repository.
+        If you want another Database backend than MariaDB please refer to the yaml files in the [misc/integrations folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/misc/integrations) of the repository.
 
     Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -1212,7 +1212,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           containers:
             # using bunkerweb as name is mandatory
             - name: bunkerweb
-              image: bunkerity/bunkerweb:1.5.4
+              image: bunkerity/bunkerweb:1.5.5
               imagePullPolicy: Always
               securityContext:
                 runAsUser: 101
@@ -1282,7 +1282,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-controller
-              image: bunkerity/bunkerweb-autoconf:1.5.4
+              image: bunkerity/bunkerweb-autoconf:1.5.5
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -1309,7 +1309,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-scheduler
-              image: bunkerity/bunkerweb-scheduler:1.5.4
+              image: bunkerity/bunkerweb-scheduler:1.5.5
               imagePullPolicy: Always
               env:
                 - name: KUBERNETES_MODE
@@ -1393,7 +1393,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
         spec:
           containers:
             - name: bunkerweb-ui
-              image: bunkerity/bunkerweb-ui:1.5.4
+              image: bunkerity/bunkerweb-ui:1.5.5
               imagePullPolicy: Always
               env:
                 - name: ADMIN_USERNAME

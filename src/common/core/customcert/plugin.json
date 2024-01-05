@@ -31,6 +31,24 @@
       "label": "Key path",
       "regex": "^(/[\\w. \\-]+)*/?$",
       "type": "text"
+    },
+    "CUSTOM_SSL_CERT_DATA": {
+      "context": "multisite",
+      "default": "",
+      "help": "Certificate data encoded in base64.",
+      "id": "custom-https-cert-data",
+      "label": "Certificate data (base64)",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "CUSTOM_SSL_KEY_DATA": {
+      "context": "multisite",
+      "default": "",
+      "help": "Key data encoded in base64.",
+      "id": "custom-https-key-data",
+      "label": "Key data (base64)",
+      "regex": "^.*$",
+      "type": "text"
     }
   },
   "jobs": [

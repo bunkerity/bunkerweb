@@ -72,19 +72,19 @@ jobs:
 
   # UI tests
   tests-ui:
-    needs: [codeql, build-containers]
+    needs: [build-containers]
     uses: ./.github/workflows/tests-ui.yml
     with:
       RELEASE: dev
   tests-ui-linux:
-    needs: [codeql, build-packages]
+    needs: [build-packages]
     uses: ./.github/workflows/tests-ui-linux.yml
     with:
       RELEASE: dev
 
   # Core tests
   prepare-tests-core:
-    needs: [codeql, build-containers, build-packages]
+    needs: [build-containers, build-packages]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

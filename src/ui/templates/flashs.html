@@ -1,10 +1,13 @@
 <!-- float button-->
 {% with messages = get_flashed_messages(with_categories=true) %}
 <div
-  class="group group-hover hover:brightness-75 dark:hover:brightness-105 fixed top-2 sm:top-3 right-20 sm:right-24 xl:right-24 z-990"
+  data-flash-group
+  class="transition-all group group-hover hover:brightness-75 dark:hover:brightness-105 fixed top-[4.5rem] right-20 sm:right-24 xl:right-24 z-990"
 >
   <button
-    type="button"
+    aria-controls="sidebar-flash"
+    aria-expanded="false"
+    aria-label="Open flash action sidebar"
     data-flash-sidebar-open
     class="transition scale-90 sm:scale-100 dark:brightness-95 p-3 text-xl bg-white shadow-sm cursor-pointer rounded-circle text-slate-700"
   >
@@ -30,20 +33,28 @@
 
 <!-- right sidebar -->
 <aside
+  id="sidebar-flash"
   data-flash-sidebar
+  aria-hidden="true"
   class="translate-x-90 -right-0 transition z-sticky dark:bg-slate-850 dark:brightness-110 shadow-3xl max-w-full w-90 ease fixed top-0 left-auto flex h-full min-w-0 flex-col break-words rounded-none border-0 bg-white bg-clip-border px-0.5"
 >
   <!-- close btn-->
-  <svg
+  <button
+    aria-controls="sidebar-flash"
+    aria-expanded="false"
+    aria-label="close flash sidebar"
     data-flash-sidebar-close
-    class="cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-8 w-8 top-4 right-4"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 320 512"
   >
-    <path
-      d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
-    />
-  </svg>
+    <svg
+      class="fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-8 w-8 top-4 right-4"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 320 512"
+    >
+      <path
+        d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
+      />
+    </svg>
+  </button>
   <!-- close btn-->
 
   <!-- header -->
@@ -73,8 +84,10 @@
     <!-- flash message-->
     {% for category, message in messages %}
     <div
+      role="alert"
+      aria-description="flash feedback message"
       data-flash-message
-      class="{% if category == 'error' %}bg-red-500 {%else%} bg-green-500 {%endif %} my-2 border relative p-4 w-11/12 min-h-20 rounded-lg hover:scale-102 transition shadow-md break-words dark:brightness-90"
+      class="{% if category == 'error' %} bg-red-500 {%else%} bg-green-500 {%endif %} my-2 border relative p-4 w-11/12 min-h-20 rounded-lg hover:scale-102 transition shadow-md break-words dark:brightness-90"
     >
       <div class="flex justify-between align-top items-start">
         {% if category == 'error' %}
@@ -83,8 +96,8 @@
         <h5 class="text-lg mb-0 text-white">Success</h5>
         {%endif%}
         <button
+          aria-label="close flash message"
           data-close-flash-message
-          type="button"
           class="absolute right-8 top-2"
         >
           <svg
@@ -102,10 +115,11 @@
     </div>
     {% endfor %}
     <!-- end flash message-->
-    {% endif %} {% endwith %}
+    {% endif %}
   </div>
   <!-- end message-->
 
   <!-- end messages -->
 </aside>
+{% endwith %}
 <!-- end right sidebar -->

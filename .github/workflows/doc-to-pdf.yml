@@ -23,7 +23,7 @@ jobs:
       - name: Install chromium
         run: sudo apt install chromium-browser
       - name: Install node
-        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: 18
       - name: Install puppeteer
@@ -32,7 +32,7 @@ jobs:
         run: mkdocs serve & sleep 10
       - name: Run pdf script
         run: node docs/misc/pdf.js http://localhost:8000/print_page/ BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf 'BunkerWeb documentation v${{ inputs.VERSION }}'
-      - uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+      - uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
         with:
           name: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf
           path: BunkerWeb_documentation_v${{ inputs.VERSION }}.pdf

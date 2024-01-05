@@ -34,8 +34,8 @@
   {% elif current_endpoint == "logs" %}
   <link rel="stylesheet" type="text/css" href="./css/flatpickr.css" />
   <link rel="stylesheet" type="text/css" href="./css/flatpickr.dark.css" />
-  <script async type="module" src="./js/utils/flatpickr.js"></script>
-  <script type="module" src="./js/logs.js"></script>
+  <script defer src="./js/utils/flatpickr.js"></script>
+  <script defer src="./js/logs.js"></script>
   <link
     rel="stylesheet"
     type="text/css"
@@ -43,5 +43,7 @@
   />
   {% elif current_endpoint == "jobs" %}
   <script type="module" src="./js/jobs.js"></script>
+  {% elif current_endpoint == "profile" %}
+  <script type="module" src="./js/profile.js"></script>
   {% endif %}
 </head>

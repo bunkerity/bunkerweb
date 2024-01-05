@@ -1,7 +1,10 @@
+local ngx = ngx
+local ngx_req = ngx.req
+local cdatastore = require "bunkerweb.datastore"
 local cjson = require "cjson"
 local class = require "middleclass"
-local datastore = require "bunkerweb.datastore"
-local logger = require "bunkerweb.logger"
+local clogger = require "bunkerweb.logger"
+local helpers = require "bunkerweb.helpers"
 local process = require "ngx.process"
 local rsignal = require "resty.signal"
 local upload = require "resty.upload"
@@ -9,16 +12,41 @@ local utils = require "bunkerweb.utils"
 
 local api = class("api")
 
+local datastore = cdatastore:new()
+local logger = clogger:new("API")
+
+local get_variable = utils.get_variable
+local is_ip_in_networks = utils.is_ip_in_networks
+-- local run = shell.run
+local NOTICE = ngx.NOTICE
+local ERR = ngx.ERR
+local HTTP_OK = ngx.HTTP_OK
+local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
+local HTTP_BAD_REQUEST = ngx.HTTP_BAD_REQUEST
+local HTTP_NOT_FOUND = ngx.HTTP_NOT_FOUND
+local kill = rsignal.kill
+local get_master_pid = process.get_master_pid
+local execute = os.execute
+local open = io.open
+local read_body = ngx_req.read_body
+local get_body_data = ngx_req.get_body_data
+local get_body_file = ngx_req.get_body_file
+local decode = cjson.decode
+local encode = cjson.encode
+local floor = math.floor
+local match = string.match
+local require_plugin = helpers.require_plugin
+local new_plugin = helpers.new_plugin
+local call_plugin = helpers.call_plugin
+
 api.global = { GET = {}, POST = {}, PUT = {}, DELETE = {} }
 
-function api:initialize()
-	self.datastore = datastore:new()
-	self.logger = logger:new("API")
-	self.ctx = ngx.ctx
-	local data, err = utils.get_variable("API_WHITELIST_IP", false)
+function api:initialize(ctx)
+	self.ctx = ctx
+	local data, err = get_variable("API_WHITELIST_IP", false)
 	self.ips = {}
 	if not data then
-		self.logger.log(ngx.ERR, "can't get API_WHITELIST_IP variable : " .. err)
+		logger:log(ERR, "can't get API_WHITELIST_IP variable : " .. err)
 	else
 		for ip in data:gmatch("%S+") do
 			table.insert(self.ips, ip)
@@ -28,23 +56,23 @@ end
 
 -- luacheck: ignore 212
 function api:log_cmd(cmd, status, stdout, stderr)
-	local level = ngx.NOTICE
+	local level = NOTICE
 	local prefix = "success"
 	if status ~= 0 then
-		level = ngx.ERR
+		level = ERR
 		prefix = "error"
 	end
-	self.logger:log(level, prefix .. " while running command " .. cmd)
-	self.logger:log(level, "stdout = " .. stdout)
-	self.logger:log(level, "stdout = " .. stderr)
+	logger:log(level, prefix .. " while running command " .. cmd)
+	logger:log(level, "stdout = " .. stdout)
+	logger:log(level, "stdout = " .. stderr)
 end
 
 -- TODO : use this if we switch to OpenResty
 function api:cmd(cmd)
 	-- Non-blocking command
 	-- luacheck: ignore 113
-	local ok, stdout, stderr, reason, status = shell.run(cmd, nil, 10000)
-	self.logger:log_cmd(cmd, status, stdout, stderr)
+	local ok, stdout, stderr, reason, status = run(cmd, nil, 10000)
+	self:log_cmd(cmd, status, stdout, stderr)
 	-- Timeout
 	if ok == nil then
 		return nil, reason
@@ -62,25 +90,30 @@ function api:response(http_status, api_status, msg)
 end
 
 api.global.GET["^/ping$"] = function(self)
-	return self:response(ngx.HTTP_OK, "success", "pong")
+	return self:response(HTTP_OK, "success", "pong")
 end
 
 api.global.POST["^/reload$"] = function(self)
-	-- Send HUP signal to master process
-	local ok, err = rsignal.kill(process.get_master_pid(), "HUP")
-	if not ok then
-		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
+	-- Check config
+	local status = execute("nginx -t")
+	if status ~= 0 then
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "config check failed")
 	end
-	return self:response(ngx.HTTP_OK, "success", "reload successful")
+	-- Send HUP signal to master process
+	local ok, err = kill(get_master_pid(), "HUP")
+	if not ok then
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
+	end
+	return self:response(HTTP_OK, "success", "reload successful")
 end
 
 api.global.POST["^/stop$"] = function(self)
 	-- Send QUIT signal to master process
-	local ok, err = rsignal.kill(process.get_master_pid(), "QUIT")
+	local ok, err = kill(get_master_pid(), "QUIT")
 	if not ok then
-		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "err = " .. err)
 	end
-	return self:response(ngx.HTTP_OK, "success", "stop successful")
+	return self:response(HTTP_OK, "success", "stop successful")
 end
 
 api.global.POST["^/confs$"] = function(self)
@@ -99,16 +132,19 @@ api.global.POST["^/confs$"] = function(self)
 	end
 	local form, err = upload:new(4096)
 	if not form then
-		return self:response(ngx.HTTP_BAD_REQUEST, "error", err)
+		return self:response(HTTP_BAD_REQUEST, "error", err)
 	end
 	form:set_timeout(1000)
-	local file = io.open(tmp, "w+")
+	local file, err = open(tmp, "w+")
+	if not file then
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", err)
+	end
 	while true do
 		-- luacheck: ignore 421
 		local typ, res, err = form:read()
 		if not typ then
 			file:close()
-			return self:response(ngx.HTTP_BAD_REQUEST, "error", err)
+			return self:response(HTTP_BAD_REQUEST, "error", err)
 		end
 		if typ == "eof" then
 			break
@@ -124,12 +160,12 @@ api.global.POST["^/confs$"] = function(self)
 		"tar xzf " .. tmp .. " -C " .. destination,
 	}
 	for _, cmd in ipairs(cmds) do
-		local status = os.execute(cmd)
+		local status = execute(cmd)
 		if status ~= 0 then
-			return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
+			return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "exit status = " .. tostring(status))
 		end
 	end
-	return self:response(ngx.HTTP_OK, "success", "saved data at " .. destination)
+	return self:response(HTTP_OK, "success", "saved data at " .. destination)
 end
 
 api.global.POST["^/data$"] = api.global.POST["^/confs$"]
@@ -141,80 +177,86 @@ api.global.POST["^/custom_configs$"] = api.global.POST["^/confs$"]
 api.global.POST["^/plugins$"] = api.global.POST["^/confs$"]
 
 api.global.POST["^/unban$"] = function(self)
-	ngx.req.read_body()
-	local data = ngx.req.get_body_data()
+	read_body()
+	local data = get_body_data()
 	if not data then
-		local data_file = ngx.req.get_body_file()
+		local data_file = get_body_file()
 		if data_file then
-			local file = io.open(data_file)
+			local file, err = open(data_file)
+			if not file then
+				return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", err)
+			end
 			data = file:read("*a")
 			file:close()
 		end
 	end
-	local ok, ip = pcall(cjson.decode, data)
+	local ok, ip = pcall(decode, data)
 	if not ok then
-		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
-	self.datastore:delete("bans_ip_" .. ip["ip"])
-	return self:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " unbanned")
+	datastore:delete("bans_ip_" .. ip["ip"])
+	return self:response(HTTP_OK, "success", "ip " .. ip["ip"] .. " unbanned")
 end
 
 api.global.POST["^/ban$"] = function(self)
-	ngx.req.read_body()
-	local data = ngx.req.get_body_data()
+	read_body()
+	local data = get_body_data()
 	if not data then
-		local data_file = ngx.req.get_body_file()
+		local data_file = get_body_file()
 		if data_file then
-			local file = io.open(data_file)
+			local file, err = io.open(data_file)
+			if not file then
+				return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", err)
+			end
 			data = file:read("*a")
 			file:close()
 		end
 	end
-	local ok, ip = pcall(cjson.decode, data)
+	local ok, ip = pcall(decode, data)
 	if not ok then
-		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
-	self.datastore:set("bans_ip_" .. ip["ip"], "manual", ip["exp"])
-	return self:response(ngx.HTTP_OK, "success", "ip " .. ip["ip"] .. " banned")
+	datastore:set("bans_ip_" .. ip["ip"], "manual", ip["exp"])
+	return self:response(HTTP_OK, "success", "ip " .. ip["ip"] .. " banned")
 end
 
 api.global.GET["^/bans$"] = function(self)
 	local data = {}
-	for _, k in ipairs(self.datastore:keys()) do
+	for _, k in ipairs(datastore:keys()) do
 		if k:find("^bans_ip_") then
-			local reason, err = self.datastore:get(k)
+			local reason, err = datastore:get(k)
 			if err then
 				return self:response(
-					ngx.HTTP_INTERNAL_SERVER_ERROR,
+					HTTP_INTERNAL_SERVER_ERROR,
 					"error",
 					"can't access " .. k .. " from datastore : " .. reason
 				)
 			end
-			local ok, ttl = self.datastore:ttl(k)
+			local ok, ttl = datastore:ttl(k)
 			if not ok then
 				return self:response(
-					ngx.HTTP_INTERNAL_SERVER_ERROR,
+					HTTP_INTERNAL_SERVER_ERROR,
 					"error",
 					"can't access ttl " .. k .. " from datastore : " .. ttl
 				)
 			end
-			local ban = { ip = k:sub(9, #k), reason = reason, exp = math.floor(ttl) }
+			local ban = { ip = k:sub(9, #k), reason = reason, exp = floor(ttl) }
 			table.insert(data, ban)
 		end
 	end
-	return self:response(ngx.HTTP_OK, "success", data)
+	return self:response(HTTP_OK, "success", data)
 end
 
 api.global.GET["^/variables$"] = function(self)
 	local variables, err = datastore:get("variables", true)
 	if not variables then
-		return self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't access variables from datastore : " .. err)
+		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't access variables from datastore : " .. err)
 	end
-	return self:response(ngx.HTTP_OK, "success", variables)
+	return self:response(HTTP_OK, "success", variables)
 end
 
 function api:is_allowed_ip()
-	if utils.is_ip_in_networks(self.ctx.bw.remote_addr, self.ips) then
+	if is_ip_in_networks(self.ctx.bw.remote_addr, self.ips) then
 		return true, "ok"
 	end
 	return false, "IP is not in API_WHITELIST_IP"
@@ -223,10 +265,10 @@ end
 function api:do_api_call()
 	if self.global[self.ctx.bw.request_method] ~= nil then
 		for uri, api_fun in pairs(self.global[self.ctx.bw.request_method]) do
-			if string.match(self.ctx.bw.uri, uri) then
+			if match(self.ctx.bw.uri, uri) then
 				local status, resp = api_fun(self)
 				local ret = true
-				if status ~= ngx.HTTP_OK then
+				if status ~= HTTP_OK then
 					ret = false
 				end
 				if #resp["msg"] == 0 then
@@ -235,26 +277,37 @@ function api:do_api_call()
 					resp["data"] = resp["msg"]
 					resp["msg"] = resp["status"]
 				end
-				return ret, resp["msg"], status, cjson.encode(resp)
+				return ret, resp["msg"], status, encode(resp)
 			end
 		end
 	end
-	local list, err = self.datastore:get("plugins", true)
+	local list, err = datastore:get("plugins", true)
 	if not list then
-		local _, resp = self:response(ngx.HTTP_INTERNAL_SERVER_ERROR, "error", "can't list loaded plugins : " .. err)
-		return false, resp["msg"], ngx.HTTP_INTERNAL_SERVER_ERROR, cjson.encode(resp)
+		local _, resp = self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't list loaded plugins : " .. err)
+		return false, resp["msg"], HTTP_INTERNAL_SERVER_ERROR, encode(resp)
 	end
 	for _, plugin in ipairs(list) do
-		if pcall(require, plugin.id .. "/" .. plugin.id) then
-			local plugin_lua = require(plugin.id .. "/" .. plugin.id)
-			if plugin_lua.api ~= nil then
-				local matched, status, resp = plugin_lua:api(self.ctx)
-				if matched then
-					local ret = true
-					if status ~= ngx.HTTP_OK then
-						ret = false
+		local plugin_lua, _ = require_plugin(plugin.id)
+		if plugin_lua and plugin_lua.api ~= nil then
+			local ok, plugin_obj = new_plugin(plugin_lua, self.ctx)
+			if not ok then
+				logger:log(ERR, "can't instantiate " .. plugin.id .. " : " .. plugin_obj)
+			else
+				local ret
+				ok, ret = call_plugin(plugin_obj, "api")
+				if not ok then
+					logger:log(ERR, "error while executing " .. plugin.id .. ":api() : " .. ret)
+				else
+					if ret.ret then
+						local resp = {}
+						if ret.status == HTTP_OK then
+							resp["status"] = "success"
+						else
+							resp["status"] = "error"
+						end
+						resp["msg"] = ret.msg
+						return ret.status == HTTP_OK, resp["status"], ret.status, encode(resp)
 					end
-					return ret, resp["msg"], status, cjson.encode(resp)
 				end
 			end
 		end
@@ -262,7 +315,7 @@ function api:do_api_call()
 	local resp = {}
 	resp["status"] = "error"
 	resp["msg"] = "not found"
-	return false, "error", ngx.HTTP_NOT_FOUND, cjson.encode(resp)
+	return false, "error", HTTP_NOT_FOUND, encode(resp)
 end
 
 return api

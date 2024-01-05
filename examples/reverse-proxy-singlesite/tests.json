@@ -8,12 +8,14 @@
     {
       "type": "string",
       "url": "https://www.example.com/app1",
-      "string": "hello"
+      "string": "hello",
+      "tls": "www.example.com"
     },
     {
       "type": "string",
       "url": "https://www.example.com/app2",
-      "string": "hello"
+      "string": "hello",
+      "tls": "www.example.com"
     }
   ]
 }

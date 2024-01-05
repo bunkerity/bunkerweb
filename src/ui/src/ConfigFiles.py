@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from glob import glob
 from os import listdir, replace, sep, walk
@@ -62,11 +62,7 @@ class ConfigFiles:
                         custom_configs.append(
                             {
                                 "value": f.read(),
-                                "exploded": (
-                                    f"{path_exploded.pop()}" if path_exploded[-1] not in root_dirs else None,
-                                    path_exploded[-1],
-                                    file.replace(".conf", ""),
-                                ),
+                                "exploded": (path_exploded.pop() if path_exploded[-1] not in root_dirs else None, path_exploded[-1], file.replace(".conf", "")),
                             }
                         )
 
