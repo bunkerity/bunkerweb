@@ -1483,12 +1483,9 @@ location /hello {
         username_input.send_keys("admin2")
         password_input.send_keys("S$cr3tP@ssw0rd")
 
-        access_page(
-            driver,
-            driver_wait,
-            "//button[@value='login']",
-            "profile",
-        )
+        access_page(driver, driver_wait, "//button[@value='login']", "home")
+
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[10]/a", "profile")
 
         username_input = safe_get_element(driver, By.ID, "admin_username")
 
@@ -1543,12 +1540,9 @@ location /hello {
         username_input.send_keys("admin2")
         password_input.send_keys("P@ssw0rd")
 
-        access_page(
-            driver,
-            driver_wait,
-            "//button[@value='login']",
-            "profile",
-        )
+        access_page(driver, driver_wait, "//button[@value='login']", "home")
+
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[10]/a", "profile")
 
         print("Successfully logged in with new password, trying 2FA ...", flush=True)
 
@@ -1584,12 +1578,7 @@ location /hello {
 
         password_input.send_keys("P@ssw0rd")
 
-        access_page(
-            driver,
-            driver_wait,
-            "//button[@id='totp-button' and @class='valid-btn']",
-            "profile",
-        )
+        access_page(driver, driver_wait, "//button[@id='totp-button' and @class='valid-btn']", "profile")
 
         assert_button_click(driver, "//button[@data-tab-handler='totp']")
 
