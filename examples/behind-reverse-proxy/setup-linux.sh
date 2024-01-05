@@ -24,6 +24,7 @@ if [ -f /lib/systemd/system/haproxy.service ] ; then
 	systemctl daemon-reload
 fi
 systemctl start haproxy
+# shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
 	systemctl status haproxy
 	journalctl -u haproxy.service
