@@ -1,8 +1,8 @@
 local cjson = require "cjson"
 local class = require "middleclass"
 local plugin = require "bunkerweb.plugin"
-local utils = require "bunkerweb.utils"
 local ssl = require "ngx.ssl"
+local utils = require "bunkerweb.utils"
 
 local letsencrypt = class("letsencrypt", plugin)
 
@@ -20,6 +20,7 @@ local ssl_server_name = ssl.server_name
 local get_variable = utils.get_variable
 local get_multiple_variables = utils.get_multiple_variables
 local has_variable = utils.has_variable
+local read_files = utils.read_files
 local open = io.open
 local sub = string.sub
 local match = string.match
@@ -34,25 +35,29 @@ end
 
 function letsencrypt:init()
 	local ret_ok, ret_err = true, "success"
-    if has_variable("AUTO_LETS_ENCRYPT", "yes") then
+	if has_variable("AUTO_LETS_ENCRYPT", "yes") then
 		local multisite, err = get_variable("MULTISITE", false)
 		if not multisite then
 			return self:ret(false, "can't get MULTISITE variable : " .. err)
 		end
 		if multisite == "yes" then
-			local vars, err = get_multiple_variables({"AUTO_LETS_ENCRYPT", "SERVER_NAME"})
+			local vars
+			vars, err = get_multiple_variables({ "AUTO_LETS_ENCRYPT", "SERVER_NAME" })
 			if not vars then
 				return self:ret(false, "can't get AUTO_LETS_ENCRYPT variables : " .. err)
 			end
 			for server_name, multisite_vars in pairs(vars) do
 				if multisite_vars["AUTO_LETS_ENCRYPT"] == "yes" and server_name ~= "global" then
-					local check, data = self:read_files(server_name)
+					local check, data = read_files({
+						"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem",
+						"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem",
+					})
 					if not check then
 						self.logger:log(ERR, "error while reading files : " .. data)
 						ret_ok = false
 						ret_err = "error reading files"
 					else
-						local check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
+						check, err = self:load_data(data, multisite_vars["SERVER_NAME"])
 						if not check then
 							self.logger:log(ERR, "error while loading data : " .. err)
 							ret_ok = false
@@ -62,17 +67,21 @@ function letsencrypt:init()
 				end
 			end
 		else
-			local server_name, err = get_variable("SERVER_NAME", false)
+			local server_name
+			server_name, err = get_variable("SERVER_NAME", false)
 			if not server_name then
 				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 			end
-			local check, data = self:read_files(server_name:match("%S+"))
+			local check, data = read_files({
+				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name:match("%S+") .. "/fullchain.pem",
+				"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name:match("%S+") .. "/privkey.pem",
+			})
 			if not check then
 				self.logger:log(ERR, "error while reading files : " .. data)
 				ret_ok = false
 				ret_err = "error reading files"
 			else
-				local check, err = self:load_data(data, server_name)
+				check, err = self:load_data(data, server_name)
 				if not check then
 					self.logger:log(ERR, "error while loading data : " .. err)
 					ret_ok = false
@@ -82,7 +91,7 @@ function letsencrypt:init()
 		end
 	else
 		ret_err = "let's encrypt is not used"
-    end
+	end
 	return self:ret(ret_ok, ret_err)
 end
 
@@ -91,31 +100,18 @@ function letsencrypt:ssl_certificate()
 	if not server_name then
 		return self:ret(false, "can't get server_name : " .. err)
 	end
-    if self.variables["AUTO_LETS_ENCRYPT"] == "yes" then
-		local data, err = self.datastore:get("plugin_letsencrypt_" .. server_name, true)
+	if self.variables["AUTO_LETS_ENCRYPT"] == "yes" then
+		local data
+		data, err = self.datastore:get("plugin_letsencrypt_" .. server_name, true)
 		if not data then
-			return self:ret(false, "error while getting plugin_letsencrypt_" .. server_name .. " from datastore : " .. err)
+			return self:ret(
+				false,
+				"error while getting plugin_letsencrypt_" .. server_name .. " from datastore : " .. err
+			)
 		end
-        return self:ret(true, "certificate/key data found", data)
-    end
-    return self:ret(true, "let's encrypt is not used")
-end
-
-function letsencrypt:read_files(server_name)
-	local files = {
-		"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/fullchain.pem",
-		"/var/cache/bunkerweb/letsencrypt/etc/live/" .. server_name .. "/privkey.pem"
-	}
-	local data = {}
-	for i, file in ipairs(files) do
-		local f, err = open(file, "r")
-		if not f then
-			return false, file .. " = " .. err
-		end
-		table.insert(data, f:read("*a"))
-		f:close()
+		return self:ret(true, "certificate/key data found", data)
 	end
-	return true, data
+	return self:ret(true, "let's encrypt is not used")
 end
 
 function letsencrypt:load_data(data, server_name)
@@ -125,14 +121,16 @@ function letsencrypt:load_data(data, server_name)
 		return false, "error while parsing pem cert : " .. err
 	end
 	-- Load key
-	local priv_key, err = parse_pem_priv_key(data[2])
+	local priv_key
+	priv_key, err = parse_pem_priv_key(data[2])
 	if not priv_key then
 		return false, "error while parsing pem priv key : " .. err
 	end
 	-- Cache data
 	for key in server_name:gmatch("%S+") do
 		local cache_key = "plugin_letsencrypt_" .. key
-		local ok, err = self.datastore:set(cache_key, {cert_chain, priv_key}, nil, true)
+		local ok
+		ok, err = self.datastore:set(cache_key, { cert_chain, priv_key }, nil, true)
 		if not ok then
 			return false, "error while setting data into datastore : " .. err
 		end
@@ -172,7 +170,7 @@ function letsencrypt:api()
 		file:write(data.validation)
 		file:close()
 		return self:ret(true, "validation token written", HTTP_OK)
-	elseif ctx.bw.request_method == "DELETE" then
+	elseif self.ctx.bw.request_method == "DELETE" then
 		local ok, err = remove(acme_folder .. data.token)
 		if not ok then
 			return self:ret(true, "can't remove validation token : " .. err, HTTP_INTERNAL_SERVER_ERROR)

@@ -106,7 +106,7 @@ function cors:access()
 			nil,
 			{
 				id = "origin",
-				origin = self.ctx.bw.http_origin
+				origin = self.ctx.bw.http_origin,
 			}
 		)
 	end

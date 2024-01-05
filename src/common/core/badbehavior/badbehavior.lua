@@ -65,7 +65,7 @@ function badbehavior.increase(premature, ip, count_time, ban_time, threshold, us
 	-- Instantiate objects
 	local logger = require "bunkerweb.logger":new("badbehavior")
 	local datastore = require "bunkerweb.datastore":new()
-	
+
 	-- Declare counter
 	local counter = false
 	-- Redis case

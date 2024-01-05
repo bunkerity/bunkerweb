@@ -66,7 +66,7 @@ function sessions:init()
 		["REDIS_SENTINEL_HOSTS"] = "",
 		["REDIS_SENTINEL_USERNAME"] = "",
 		["REDIS_SENTINEL_PASSWORD"] = "",
-		["REDIS_SENTINEL_MASTER"] = ""
+		["REDIS_SENTINEL_MASTER"] = "",
 	}
 	for k, _ in pairs(redis_vars) do
 		local value, err = get_variable(k, false)
@@ -124,7 +124,7 @@ function sessions:init()
 			pool = "bw-redis",
 			pool_size = tonumber(redis_vars["REDIS_KEEPALIVE_POOL"]),
 			ssl = redis_vars["REDIS_SSL"] == "yes",
-			database = tonumber(redis_vars["REDIS_DATABASE"])
+			database = tonumber(redis_vars["REDIS_DATABASE"]),
 		}
 		if redis_vars["REDIS_SENTINEL_HOSTS"] ~= nil then
 			config.redis.master = redis_vars["REDIS_SENTINEL_MASTER"]
@@ -139,7 +139,7 @@ function sessions:init()
 				else
 					sport = tonumber(sport)
 				end
-				table.insert(config.redis.sentinels, {host = shost, port = sport})
+				table.insert(config.redis.sentinels, { host = shost, port = sport })
 			end
 		else
 			config.redis.host = redis_vars["REDIS_HOST"]

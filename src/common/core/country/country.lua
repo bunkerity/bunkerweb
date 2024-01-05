@@ -5,7 +5,6 @@ local utils = require "bunkerweb.utils"
 
 local country = class("country", plugin)
 
-local ngx = ngx
 local get_country = utils.get_country
 local get_deny_status = utils.get_deny_status
 local decode = cjson.decode
@@ -46,7 +45,7 @@ function country:access()
 			nil,
 			{
 				id = "country",
-				country = data.country
+				country = data.country,
 			}
 		)
 	end
@@ -93,7 +92,7 @@ function country:access()
 			nil,
 			{
 				id = "country",
-				country = country_data
+				country = country_data,
 			}
 		)
 	end
@@ -113,7 +112,7 @@ function country:access()
 					nil,
 					{
 						id = "country",
-						country = country_data
+						country = country_data,
 					}
 				)
 			end

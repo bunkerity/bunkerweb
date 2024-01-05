@@ -348,6 +348,7 @@ function blacklist:is_blacklisted_ua()
 	return false, "ok"
 end
 
+-- luacheck: ignore 212
 function blacklist:get_data(blacklisted)
 	local data = {}
 	if blacklisted == "ip" then

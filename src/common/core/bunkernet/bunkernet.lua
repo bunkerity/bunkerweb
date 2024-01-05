@@ -199,9 +199,11 @@ function bunkernet:log(bypass_checks)
 	elseif data then
 		return self:ret(true, "already reported recently")
 	end
+	local ok, err
 	-- luacheck: ignore 212 431
 	local function report_callback(premature, obj, ip, reason, reason_data, method, url, headers, use_redis)
-		local ok, err, status, _ = obj:report(ip, reason, reason_data, method, url, headers)
+		local status, _
+		ok, err, status, _ = obj:report(ip, reason, reason_data, method, url, headers)
 		if status == 429 then
 			obj.logger:log(WARN, "bunkernet API is rate limiting us")
 		elseif not ok then
