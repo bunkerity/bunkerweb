@@ -47,7 +47,7 @@ try:
                     "-days",
                     "3650",
                     "-subj",
-                    "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/",
+                    "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.org/",
                 ],
                 stdin=DEVNULL,
                 stderr=DEVNULL,

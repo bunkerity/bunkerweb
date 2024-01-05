@@ -7,17 +7,20 @@
     {
       "type": "string",
       "url": "https://app1.example.com",
-      "string": "hello"
+      "string": "hello",
+      "tls": "app1.example.com"
     },
     {
       "type": "string",
       "url": "https://app2.example.com",
-      "string": "hello"
+      "string": "hello",
+      "tls": "app2.example.com"
     },
     {
       "type": "string",
       "url": "https://app3.example.com",
-      "string": "hello"
+      "string": "hello",
+      "tls": "app3.example.com"
     }
   ]
 }

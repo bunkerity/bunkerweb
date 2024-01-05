@@ -7,7 +7,8 @@
     {
       "type": "string",
       "url": "https://www.example.com",
-      "string": "joomla"
+      "string": "joomla",
+      "tls": "www.example.com"
     }
   ]
 }
