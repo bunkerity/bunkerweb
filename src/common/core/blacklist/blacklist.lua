@@ -192,7 +192,7 @@ function blacklist:kind_to_ele(kind)
 end
 
 function blacklist:is_in_cache(ele)
-	local ok, data = self.cachestore:get("plugin_blacklist_" .. self.ctx.bw.server_name .. ele)
+	local ok, data = self.cachestore_local:get("plugin_blacklist_" .. self.ctx.bw.server_name .. ele)
 	if not ok then
 		return false, data
 	end
@@ -200,7 +200,7 @@ function blacklist:is_in_cache(ele)
 end
 
 function blacklist:add_to_cache(ele, value)
-	local ok, err = self.cachestore:set("plugin_blacklist_" .. self.ctx.bw.server_name .. ele, value, 86400)
+	local ok, err = self.cachestore_local:set("plugin_blacklist_" .. self.ctx.bw.server_name .. ele, value, 86400)
 	if not ok then
 		return false, err
 	end

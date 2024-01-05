@@ -93,7 +93,7 @@ function country:access()
 			nil,
 			{
 				id = "country",
-				country = data.country
+				country = country_data
 			}
 		)
 	end
@@ -113,7 +113,7 @@ function country:access()
 					nil,
 					{
 						id = "country",
-						country = data.country
+						country = country_data
 					}
 				)
 			end
@@ -136,7 +136,7 @@ function country:preread()
 end
 
 function country:is_in_cache(ip)
-	local ok, data = self.cachestore:get("plugin_country_" .. self.ctx.bw.server_name .. ip)
+	local ok, data = self.cachestore_local:get("plugin_country_" .. self.ctx.bw.server_name .. ip)
 	if not ok then
 		return false, data
 	end
@@ -144,7 +144,7 @@ function country:is_in_cache(ip)
 end
 
 function country:add_to_cache(ip, country_data, result)
-	local ok, err = self.cachestore:set(
+	local ok, err = self.cachestore_local:set(
 		"plugin_country_" .. self.ctx.bw.server_name .. ip,
 		encode({ country = country_data, result = result }),
 		86400

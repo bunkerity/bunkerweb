@@ -47,10 +47,12 @@ function plugin:initialize(id, ctx)
 		self.cachestore = get_ctx_obj("cachestore", self.ctx)
 			or cachestore:new(use_redis == "yes", self.ctx)
 		self.clusterstore = get_ctx_obj("clusterstore", self.ctx) or clusterstore:new()
+		self.cachestore_local = get_ctx_obj("cachestore_local", self.ctx) or cachestore:new(false, self.ctx)
 	else
 		self.datastore = datastore:new()
 		self.cachestore = cachestore:new(use_redis == "yes")
 		self.clusterstore = clusterstore:new(false)
+		self.cachestore_local = cachestore:new(false)
 	end
 	-- Get metadata
 	local metadata, err = self.datastore:get("plugin_" .. id, true)
