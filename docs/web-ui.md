@@ -1642,3 +1642,46 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
     ```shell
     systemctl restart bunkerweb
     ```
+
+## Manage profile
+
+You can manage some profile settings within the web UI. You do so by **accessing the profile page**.
+
+### Username / Password
+
+!!! info "Recover profile"
+
+    In case you forgot your UI logs, you can [access them from the CLI following these steps](troubleshooting.md#recover-profile).
+
+You can update your username or password by filling the dedicated forms (for security reason, you need to give your password even if you are connected).
+
+When updating username or password, you'll be logout from UI and you'll need to login again.
+
+<figure markdown>
+  ![Overview](assets/img/profile-username-password.webp){ align=center, width="800" }
+  <figcaption>Username / Password forms</figcaption>
+</figure>
+
+### 2FA
+
+!!! warning "Secret key loss"
+
+    In case you lost your secret key, you can [disable 2FA from the CLI following these steps](troubleshooting.md#disable-2fa).
+
+You can power-up your login security by adding 2FA inside your account.
+
+You need to store the secret key or scan code QR in a compatible auth manager (like Google Authenticator) and put the given code in the related input field when filling the form.
+
+In case you enable TOTP, you'll be able to disable it in the same place.
+
+<figure markdown>
+  ![Overview](assets/img/profile-totp.webp){ align=center, width="800" }
+  <figcaption>TOTP enable / disabled forms</figcaption>
+</figure>
+
+When it's enable, you'll get an additionnal page to login.
+
+<figure markdown>
+  ![Overview](assets/img/profile-2fa.webp){ align=center, width="400" }
+  <figcaption>Additionnal TOTP page</figcaption>
+</figure>
