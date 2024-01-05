@@ -158,7 +158,7 @@ if USER:
                     stop(1)
                 app.logger.info("The admin user was updated successfully")
         else:
-            app.logger.error("The admin user wasn't created manually. You can't change it from the environment variables.")
+            app.logger.warning("The admin user wasn't created manually. You can't change it from the environment variables.")
 elif getenv("ADMIN_USERNAME") and getenv("ADMIN_PASSWORD"):
     if not getenv("FLASK_DEBUG", False):
         if len(getenv("ADMIN_USERNAME", "admin")) > 256:
@@ -543,91 +543,81 @@ def profile():
         if not request.form:
             flash("Missing form data.", "error")
             return redirect(url_for("profile"))
+        elif "operation" not in request.form:
+            flash("Missing operation parameter.", "error")
+            return redirect(url_for("profile"))
 
-        error = False
+        if "curr_password" not in request.form or not current_user.check_password(request.form["curr_password"]):
+            flash(f"The current password is incorrect. ({request.form['operation']})", "error")
+            return redirect(url_for("profile"))
 
-        if "curr_password" in request.form:
-            if not current_user.check_password(request.form["curr_password"]):
-                flash("The current password is incorrect.", "error")
-                error = True
+        username = current_user.get_id()
+        password = request.form["curr_password"]
+        is_two_factor_enabled = current_user.is_two_factor_enabled
+        secret_token = current_user.secret_token
 
-            if request.form.get("admin_username") and len(request.form["admin_username"]) > 256:
-                flash("The admin username is too long. It must be less than 256 characters.", "error")
-                error = True
-
-            if request.form.get("admin_password"):
-                if not request.form.get("admin_password_check"):
-                    flash("Missing admin_password_check parameter.", "error")
-                    error = True
-                elif request.form["admin_password"] != request.form["admin_password_check"]:
-                    flash("The passwords do not match.", "error")
-                    error = True
-                elif not USER_PASSWORD_RX.match(request.form["admin_password"]):
-                    flash("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-).", "error")
-                    error = True
-            elif request.form.get("admin_password_check"):
-                flash("Missing admin_password parameter.", "error")
-                error = True
-
-            if not error and not any(request.form.get(key) for key in ("admin_username", "admin_password")):
-                flash("Nothing to update.")
-                error = True
-
-            if error:
+        if request.form["operation"] == "username":
+            if "admin_username" not in request.form:
+                flash("Missing admin_username parameter. (username)", "error")
+                return redirect(url_for("profile"))
+            elif len(request.form["admin_username"]) > 256:
+                flash("The admin username is too long. It must be less than 256 characters. (username)", "error")
                 return redirect(url_for("profile"))
 
-            user = User(
-                request.form.get("admin_username") or current_user.get_id(),
-                request.form.get("admin_password") or request.form["curr_password"],
-                is_two_factor_enabled=current_user.is_two_factor_enabled,
-                secret_token=current_user.secret_token,
-                method=current_user.method,
-            )
+            username = request.form["admin_username"]
 
             session.clear()
             logout_user()
-        elif "totp_password" in request.form:
-            if "totp_token" not in request.form:
-                flash("Missing totp_token parameter.", "error")
+        elif request.form["operation"] == "password":
+            if "admin_password" not in request.form:
+                flash("Missing admin_password parameter. (password)", "error")
+                return redirect(url_for("profile"))
+            elif request.form.get("admin_password"):
+                if not request.form.get("admin_password_check"):
+                    flash("Missing admin_password_check parameter. (password)", "error")
+                    return redirect(url_for("profile"))
+                elif request.form["admin_password"] != request.form["admin_password_check"]:
+                    flash("The passwords does not match. (password)", "error")
+                    return redirect(url_for("profile"))
+                elif not USER_PASSWORD_RX.match(request.form["admin_password"]):
+                    flash("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). (password)", "error")
+                    return redirect(url_for("profile"))
+            elif request.form.get("admin_password_check"):
+                flash("Missing admin_password parameter. (password)", "error")
                 return redirect(url_for("profile"))
 
-            if not current_user.check_password(request.form.get("totp_password", "")):
-                flash("The current password is incorrect.", "error")
-                error = True
+            password = request.form["admin_password"]
 
-            if not current_user.check_otp(request.form["totp_token"], secret=app.config["CURRENT_TOTP_TOKEN"]):
-                flash("The token is invalid.", "error")
-                error = True
-
-            if error:
+            session.clear()
+            logout_user()
+        elif request.form["operation"] == "totp":
+            if "totp_token" not in request.form:
+                flash("Missing totp_token parameter. (totp)", "error")
+                return redirect(url_for("profile"))
+            elif not current_user.check_otp(request.form["totp_token"], secret=app.config["CURRENT_TOTP_TOKEN"]):
+                flash("The totp token is invalid. (totp)", "error")
                 return redirect(url_for("profile"))
 
             session["totp_validated"] = not current_user.is_two_factor_enabled
-
-            user = User(
-                current_user.get_id(),
-                request.form["totp_password"],
-                is_two_factor_enabled=session["totp_validated"],
-                secret_token=None if current_user.is_two_factor_enabled else app.config["CURRENT_TOTP_TOKEN"],
-                method=current_user.method,
-            )
+            is_two_factor_enabled = session["totp_validated"]
+            secret_token = None if current_user.is_two_factor_enabled else app.config["CURRENT_TOTP_TOKEN"]
             app.config["CURRENT_TOTP_TOKEN"] = None
         else:
-            flash("Missing form data.", "error")
+            flash("Invalid operation parameter.", "error")
             return redirect(url_for("profile"))
 
-        ret = db.update_ui_user(
-            user.get_id(),
-            user.password_hash,
-            user.is_two_factor_enabled,
-            user.secret_token if user.is_two_factor_enabled else None,
-        )
+        user = User(username, password, is_two_factor_enabled=is_two_factor_enabled, secret_token=secret_token, method=current_user.method)
+        ret = db.update_ui_user(username, user.password_hash, is_two_factor_enabled, secret_token, current_user.method if request.form["operation"] == "totp" else "ui")
         if ret:
             app.logger.error(f"Couldn't update the admin user in the database: {ret}")
             flash(f"Couldn't update the admin user in the database: {ret}", "error")
             return redirect(url_for("profile"))
 
-        return redirect(url_for("profile"))
+        flash(
+            f"The {request.form['operation']} has been successfully updated." if request.form["operation"] != "totp" else f"The two-factor authentication was successfully {'disabled' if current_user.is_two_factor_enabled else 'enabled'}.",
+        )
+
+        return redirect(url_for("profile" if request.form["operation"] == "totp" else "login"))
 
     secret_token = ""
     totp_qr_image = ""

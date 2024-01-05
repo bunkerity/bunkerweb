@@ -1576,7 +1576,7 @@ location /hello {
         totp_input = safe_get_element(driver, By.ID, "totp_token")
         totp_input.send_keys(totp.now())
 
-        password_input = safe_get_element(driver, By.ID, "totp_password")
+        password_input = safe_get_element(driver, By.XPATH, "//form[@data-plugin-item='totp']//input[@id='curr_password']")
 
         if password_input.get_attribute("value") != "":
             print("The new password check is not empty, exiting ...", flush=True)
@@ -1660,7 +1660,7 @@ location /hello {
         totp_input = safe_get_element(driver, By.ID, "totp_token")
         totp_input.send_keys(totp.now())
 
-        password_input = safe_get_element(driver, By.ID, "totp_password")
+        password_input = safe_get_element(driver, By.XPATH, "//form[@data-plugin-item='totp']//input[@id='curr_password']")
         password_input.send_keys("P@ssw0rd")
 
         access_page(
