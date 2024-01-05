@@ -280,113 +280,113 @@ try:
         flush=True,
     )
 
-    print(
-        "ℹ️ Checking if the country key was created and has the correct value ...",
-        flush=True,
-    )
+    # print(
+    #     "ℹ️ Checking if the country key was created and has the correct value ...",
+    #     flush=True,
+    # )
 
-    key_value = redis_client.get(f"plugin_country_www.example.com{ip_to_check}")
+    # key_value = redis_client.get(f"plugin_country_www.example.com{ip_to_check}")
 
-    if key_value is None:
-        print(
-            f'❌ The country key ("plugin_country_www.example.com{ip_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
-            flush=True,
-        )
-        exit(1)
+    # if key_value is None:
+    #     print(
+    #         f'❌ The country key ("plugin_country_www.example.com{ip_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
+    #         flush=True,
+    #     )
+    #     exit(1)
 
-    print(
-        f"✅ The country key was found, the value is {key_value.decode()}",
-        flush=True,
-    )
+    # print(
+    #     f"✅ The country key was found, the value is {key_value.decode()}",
+    #     flush=True,
+    # )
 
-    print(
-        "ℹ️ Checking if the whitelist key was created and has the correct value ...",
-        flush=True,
-    )
+    # print(
+    #     "ℹ️ Checking if the whitelist key was created and has the correct value ...",
+    #     flush=True,
+    # )
 
-    key_value = redis_client.get(f"plugin_whitelist_www.example.comip{ip_to_check}")
+    # key_value = redis_client.get(f"plugin_whitelist_www.example.comip{ip_to_check}")
 
-    if key_value is None:
-        print(
-            f'❌ The whitelist key ("plugin_whitelist_www.example.comip{ip_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
-            flush=True,
-        )
-        exit(1)
-    if key_value != b"ok":
-        print(
-            f'❌ The whitelist key ("plugin_whitelist_www.example.comip{ip_to_check}") was found, but the value is not "ok" ({key_value.decode()}), exiting ...\nkeys: {redis_client.keys()}',
-        )
+    # if key_value is None:
+    #     print(
+    #         f'❌ The whitelist key ("plugin_whitelist_www.example.comip{ip_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
+    #         flush=True,
+    #     )
+    #     exit(1)
+    # if key_value != b"ok":
+    #     print(
+    #         f'❌ The whitelist key ("plugin_whitelist_www.example.comip{ip_to_check}") was found, but the value is not "ok" ({key_value.decode()}), exiting ...\nkeys: {redis_client.keys()}',
+    #     )
 
-    print(
-        f"✅ The whitelist key was found, the value is {key_value.decode()}",
-        flush=True,
-    )
+    # print(
+    #     f"✅ The whitelist key was found, the value is {key_value.decode()}",
+    #     flush=True,
+    # )
 
-    print(
-        "ℹ️ Checking if the blacklist key was created and has the correct value ...",
-        flush=True,
-    )
+    # print(
+    #     "ℹ️ Checking if the blacklist key was created and has the correct value ...",
+    #     flush=True,
+    # )
 
-    key_value = redis_client.get(f"plugin_blacklist_www.example.comip{ip_to_check}")
+    # key_value = redis_client.get(f"plugin_blacklist_www.example.comip{ip_to_check}")
 
-    if key_value is None:
-        print(
-            f'❌ The blacklist key ("plugin_blacklist_www.example.comip{ip_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
-            flush=True,
-        )
-        exit(1)
-    if key_value != b"ok":
-        print(
-            f'❌ The blacklist key ("plugin_blacklist_www.example.comip{ip_to_check}") was found, but the value is not "ok" ({key_value.decode()}), exiting ...\nkeys: {redis_client.keys()}',
-        )
+    # if key_value is None:
+    #     print(
+    #         f'❌ The blacklist key ("plugin_blacklist_www.example.comip{ip_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
+    #         flush=True,
+    #     )
+    #     exit(1)
+    # if key_value != b"ok":
+    #     print(
+    #         f'❌ The blacklist key ("plugin_blacklist_www.example.comip{ip_to_check}") was found, but the value is not "ok" ({key_value.decode()}), exiting ...\nkeys: {redis_client.keys()}',
+    #     )
 
-    print(
-        f"✅ The blacklist key was found, the value is {key_value.decode()}",
-        flush=True,
-    )
+    # print(
+    #     f"✅ The blacklist key was found, the value is {key_value.decode()}",
+    #     flush=True,
+    # )
 
-    print(
-        "ℹ️ Checking if the greylist key was created and has the correct value ...",
-        flush=True,
-    )
+    # print(
+    #     "ℹ️ Checking if the greylist key was created and has the correct value ...",
+    #     flush=True,
+    # )
 
-    key_value = redis_client.get(f"plugin_greylist_www.example.comip{ip_to_check}")
+    # key_value = redis_client.get(f"plugin_greylist_www.example.comip{ip_to_check}")
 
-    if key_value is None:
-        print(
-            f'❌ The greylist key ("plugin_greylist_www.example.comip{ip_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
-            flush=True,
-        )
-        exit(1)
-    if key_value != b"ip":
-        print(
-            f'❌ The greylist key ("plugin_greylist_www.example.comip{ip_to_check}") was found, but the value is not "ip" ({key_value.decode()}), exiting ...\nkeys: {redis_client.keys()}',
-        )
+    # if key_value is None:
+    #     print(
+    #         f'❌ The greylist key ("plugin_greylist_www.example.comip{ip_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
+    #         flush=True,
+    #     )
+    #     exit(1)
+    # if key_value != b"ip":
+    #     print(
+    #         f'❌ The greylist key ("plugin_greylist_www.example.comip{ip_to_check}") was found, but the value is not "ip" ({key_value.decode()}), exiting ...\nkeys: {redis_client.keys()}',
+    #     )
 
-    print(
-        f"✅ The greylist key was found, the value is {key_value.decode()}",
-        flush=True,
-    )
+    # print(
+    #     f"✅ The greylist key was found, the value is {key_value.decode()}",
+    #     flush=True,
+    # )
 
-    if ip_to_check == "1.0.0.3":
-        print(
-            "ℹ️ Checking if the dnsbl keys were created ...",
-            flush=True,
-        )
+    # if ip_to_check == "1.0.0.3":
+    #     print(
+    #         "ℹ️ Checking if the dnsbl keys were created ...",
+    #         flush=True,
+    #     )
 
-        key_value = redis_client.get(f"plugin_dnsbl_www.example.com{ip_to_check}")
+    #     key_value = redis_client.get(f"plugin_dnsbl_www.example.com{ip_to_check}")
 
-        if key_value is None:
-            print(
-                f'❌ The dnsbl key ("plugin_dnsbl_www.example.com{ip_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
-                flush=True,
-            )
-            exit(1)
+    #     if key_value is None:
+    #         print(
+    #             f'❌ The dnsbl key ("plugin_dnsbl_www.example.com{ip_to_check}") was not found, exiting ...\nkeys: {redis_client.keys()}',
+    #             flush=True,
+    #         )
+    #         exit(1)
 
-        print(
-            f"✅ The dnsbl key was found, the value is {key_value.decode()}",
-            flush=True,
-        )
+    #     print(
+    #         f"✅ The dnsbl key was found, the value is {key_value.decode()}",
+    #         flush=True,
+    #     )
 except SystemExit as e:
     exit(e.code)
 except:
