@@ -644,6 +644,7 @@ if __name__ == "__main__":
                 if changes["instances_changed"]:
                     logger.info("Instances changed, generating ...")
                     INSTANCES_NEED_GENERATION = True
+                    CONFIGS_NEED_GENERATION = True
                     CONFIG_NEED_GENERATION = True
                     NEED_RELOAD = True
 
@@ -651,6 +652,10 @@ if __name__ == "__main__":
 
             if NEED_RELOAD:
                 CHANGES.clear()
+
+                if INSTANCES_NEED_GENERATION:
+                    CHANGES.append("instances")
+                    SCHEDULER.update_instances()
 
                 if CONFIGS_NEED_GENERATION:
                     CHANGES.append("custom_configs")
@@ -669,9 +674,7 @@ if __name__ == "__main__":
                     env = db.get_config()
                     env["DATABASE_URI"] = db.database_uri
 
-                if INSTANCES_NEED_GENERATION:
-                    CHANGES.append("instances")
-                    SCHEDULER.update_instances()
+
     except:
         logger.error(
             f"Exception while executing scheduler : {format_exc()}",

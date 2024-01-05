@@ -723,7 +723,7 @@ class Database:
                                     }
                                 )
                 else:
-                    if not (session.query(Services).with_entities(Services.id).filter_by(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0]).first()):
+                    if config.get("SERVER_NAME", "www.example.com") and not session.query(Services).with_entities(Services.id).filter_by(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0]).first():
                         to_put.append(Services(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0], method=method))
 
                     for key, value in config.items():

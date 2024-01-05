@@ -135,7 +135,9 @@ function blacklist:access()
 			return self:ret(
 				true,
 				k .. " is in cached blacklist (info : " .. cached .. ")",
-				get_deny_status()
+				get_deny_status(),
+				nil,
+				self:get_data(cached)
 			)
 		end
 		if ok and cached then
@@ -162,7 +164,9 @@ function blacklist:access()
 					return self:ret(
 						true,
 						k .. " is blacklisted (info : " .. blacklisted .. ")",
-						get_deny_status()
+						get_deny_status(),
+						nil,
+						self:get_data(blacklisted)
 					)
 				end
 			end
@@ -342,6 +346,21 @@ function blacklist:is_blacklisted_ua()
 	end
 	-- UA is not blacklisted
 	return false, "ok"
+end
+
+function blacklist:get_data(blacklisted)
+	local data = {}
+	if blacklisted == "ip" then
+		data["id"] = "ip"
+	else
+		local id, value = blacklisted:match("^(.+) (.+)$")
+		if id and value then
+			id = id:lower()
+			data["id"] = id
+			data[id] = value
+		end
+	end
+	return data
 end
 
 return blacklist

@@ -13,7 +13,7 @@ Yes, we offer professional services related to BunkerWeb such as :
 - Custom development
 - Partnership
 
-**We have a [dedicated panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to centralise all professional requests.**
+**We have a [dedicated panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc) to centralize all professional requests.**
 
 You can also contact use at [contact@bunkerity.com](mailto:contact@bunkerity.com) if you are interested.
 

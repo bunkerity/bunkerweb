@@ -22,11 +22,8 @@ from selenium.common.exceptions import ElementClickInterceptedException, Timeout
 
 default_server = "127.0.0.1"
 
-integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
 os_release_path = Path(sep, "etc", "os-release")
-if getenv("KUBERNETES_MODE", "no").lower() == "yes" or getenv("SWARM_MODE", "no").lower() == "yes" or getenv("AUTOCONF_MODE", "no").lower() == "yes":
-    default_server = "192.168.0.2"
-elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
+if os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
     default_server = "192.168.0.2"
 
 ready = False

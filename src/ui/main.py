@@ -8,19 +8,9 @@ from string import ascii_letters, digits
 from sys import path as sys_path, modules as sys_modules
 from pathlib import Path
 
-os_release_path = Path(sep, "etc", "os-release")
-if os_release_path.is_file() and "Alpine" not in os_release_path.read_text(encoding="utf-8"):
-    sys_path.append(join(sep, "usr", "share", "bunkerweb", "deps", "python"))
-
-del os_release_path
-
-for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("api",), ("db",))]:
+for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
         sys_path.append(deps_path)
-
-from gevent import monkey
-
-monkey.patch_all()
 
 from bs4 import BeautifulSoup
 from copy import deepcopy
@@ -90,13 +80,8 @@ signal(SIGTERM, handle_stop)
 sbin_nginx_path = Path(sep, "usr", "sbin", "nginx")
 
 # Flask app
-app = Flask(
-    __name__,
-    static_url_path="/",
-    static_folder="static",
-    template_folder="templates",
-)
-app.secret_key = getenv("FLASK_SECRET", urandom(32))
+app = Flask(__name__, static_url_path="/", static_folder="static", template_folder="templates")
+app.config["SECRET_KEY"] = getenv("FLASK_SECRET", urandom(32))
 
 PROXY_NUMBERS = int(getenv("PROXY_NUMBERS", "1"))
 app.wsgi_app = ReverseProxied(app.wsgi_app, x_for=PROXY_NUMBERS, x_proto=PROXY_NUMBERS, x_host=PROXY_NUMBERS, x_prefix=PROXY_NUMBERS)
@@ -198,7 +183,6 @@ bw_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text(encodin
 try:
     app.config.update(
         DEBUG=True,
-        SECRET_KEY=getenv("FLASK_SECRET", urandom(32)),
         INSTANCES=Instances(docker_client, kubernetes_client, INTEGRATION),
         CONFIG=Config(db),
         CONFIGFILES=ConfigFiles(app.logger, db),

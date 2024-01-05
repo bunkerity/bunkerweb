@@ -88,8 +88,8 @@ function plugin:get_id()
 end
 
 -- luacheck: ignore 212
-function plugin:ret(ret, msg, status, redirect)
-	return { ret = ret, msg = msg, status = status, redirect = redirect }
+function plugin:ret(ret, msg, status, redirect, data)
+	return { ret = ret, msg = msg, status = status, redirect = redirect, data = data }
 end
 
 return plugin

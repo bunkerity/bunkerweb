@@ -45,7 +45,7 @@ cleanup_stack () {
     exit_code=$?
     if [[ $end -eq 1 || $exit_code = 1 ]] || [[ $end -eq 0 && $exit_code = 0 ]] && [ $manual = 0 ] ; then
         if [ "$integration" == "docker" ] ; then
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_COUNTRY: "US"@BLACKLIST_COUNTRY: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_COUNTRY: "GB"@BLACKLIST_COUNTRY: ""@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@WHITELIST_COUNTRY: "FR"@WHITELIST_COUNTRY: ""@' {} \;
         else
             sudo sed -i 's@BLACKLIST_COUNTRY=.*$@BLACKLIST_COUNTRY=@' /etc/bunkerweb/variables.env
@@ -86,15 +86,15 @@ do
     elif [ "$test" = "blacklist" ] ; then
         echo "🌍 Running tests when blacklisting United States ..."
         if [ "$integration" == "docker" ] ; then
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_COUNTRY: ""@BLACKLIST_COUNTRY: "US"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_COUNTRY: ""@BLACKLIST_COUNTRY: "GB"@' {} \;
         else
-            sudo sed -i 's@BLACKLIST_COUNTRY=.*$@BLACKLIST_COUNTRY=US@' /etc/bunkerweb/variables.env
-            export BLACKLIST_COUNTRY="US"
+            sudo sed -i 's@BLACKLIST_COUNTRY=.*$@BLACKLIST_COUNTRY=GB@' /etc/bunkerweb/variables.env
+            export BLACKLIST_COUNTRY="GB"
         fi
     elif [ "$test" = "whitelist" ] ; then
         echo "🌍 Running tests when whitelisting France ..."
         if [ "$integration" == "docker" ] ; then
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_COUNTRY: "US"@BLACKLIST_COUNTRY: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@BLACKLIST_COUNTRY: "GB"@BLACKLIST_COUNTRY: ""@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@WHITELIST_COUNTRY: ""@WHITELIST_COUNTRY: "FR"@' {} \;
         else
             sudo sed -i 's@BLACKLIST_COUNTRY=.*$@BLACKLIST_COUNTRY=@' /etc/bunkerweb/variables.env
@@ -226,17 +226,17 @@ do
         echo "🌍 Test \"$test\" succeeded for the FR country ✅"
     fi
 
-    echo "🌍 Starting the US country"
+    echo "🌍 Starting the GB country"
     if [ "$integration" == "docker" ] ; then
         docker compose -f docker-compose.test.yml up tests-us --abort-on-container-exit --exit-code-from tests-us
     else
-        export COUNTRY="US"
+        export COUNTRY="GB"
         python3 main.py
     fi
 
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
-        echo "🌍 Test \"$test\" failed for the US country ❌"
+        echo "🌍 Test \"$test\" failed for the GB country ❌"
         echo "🛡️ Showing BunkerWeb and BunkerWeb Scheduler logs ..."
         if [ "$integration" == "docker" ] ; then
             docker compose logs bw bw-scheduler
@@ -251,7 +251,7 @@ do
         fi
         exit 1
     else
-        echo "🌍 Test \"$test\" succeeded for the US country ✅"
+        echo "🌍 Test \"$test\" succeeded for the GB country ✅"
     fi
 
     manual=1

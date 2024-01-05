@@ -14,21 +14,23 @@ jobs:
       # Prepare
       - name: Checkout source code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Install Firefox manually and dependencies
         run: |
-          sudo apt purge -y firefox
-          sudo apt update
           sudo add-apt-repository ppa:mozillateam/ppa -y
+          sudo apt purge -y firefox
           echo '
           Package: *
           Pin: release o=LP-PPA-mozillateam
           Pin-Priority: 1001
+
+          Package: firefox
+          Pin: version 1:1snap1-0ubuntu2
+          Pin-Priority: -1
           ' | sudo tee /etc/apt/preferences.d/mozilla-firefox
-          sudo apt update
           sudo apt install --no-install-recommends -y openssl git nodejs tar bzip2 wget curl grep libx11-xcb1 libappindicator3-1 libasound2 libdbus-glib-1-2 libxtst6 libxt6 php-fpm unzip firefox
       - name: Download geckodriver
         uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4 # v2.9.0
@@ -54,7 +56,7 @@ jobs:
           container_id=$(docker create "ghcr.io/bunkerity/ubuntu-tests:${{ inputs.RELEASE }}")
           docker cp "$container_id:/opt/bunkerweb_${{ inputs.RELEASE }}-1_amd64.deb" "/tmp/bunkerweb.deb"
           docker rm "$container_id"
-      - name: Install BunkerWeb
+      - name: Install NGINX
         run: |
           sudo apt install -y gnupg2 ca-certificates lsb-release ubuntu-keyring
           curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
@@ -92,8 +94,10 @@ jobs:
           sudo chmod 777 /etc/bunkerweb/variables.env /etc/bunkerweb/ui.env
       - name: Run tests
         run: |
+          export MAKEFLAGS="-j $(nproc)"
+          pip install --no-cache-dir --ignore-installed --require-hashes -r src/deps/requirements-deps.txt
+          pip install --no-cache-dir --require-hashes -r tests/ui/requirements.txt
           cd ./tests/ui
-          MAKEFLAGS="-j $(nproc)" find . -name "requirements.txt" -exec pip install --no-cache-dir --require-hashes --no-deps -r {} \;
           touch test.txt
           zip test.zip test.txt
           rm test.txt

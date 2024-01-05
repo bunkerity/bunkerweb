@@ -102,7 +102,12 @@ function cors:access()
 		return self:ret(
 			true,
 			"origin " .. self.ctx.bw.http_origin .. " is not allowed, denying access",
-			get_deny_status()
+			get_deny_status(),
+			nil,
+			{
+				id = "origin",
+				origin = self.ctx.bw.http_origin
+			}
 		)
 	end
 	-- Send CORS policy with a 204 (no content) status

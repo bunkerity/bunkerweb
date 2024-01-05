@@ -70,7 +70,8 @@ function clusterstore:initialize(pool)
 		role = "master",
 		sentinels = {}
 	}
-	if pool == nil or pool then
+	self.pool = pool == nil or pool
+	if self.pool then
 		options.connection_options.pool = "bw-redis"
 		options.connection_options.pool_size = tonumber(self.variables["REDIS_KEEPALIVE_POOL"])
 	end

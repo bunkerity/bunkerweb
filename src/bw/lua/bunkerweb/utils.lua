@@ -290,15 +290,24 @@ end
 utils.get_reason = function(ctx)
 	-- ngx.ctx
 	if ctx and ctx.bw and ctx.bw.reason then
-		return ctx.bw.reason
+		return ctx.bw.reason, ctx.bw.reason_data or {}
 	end
 	-- ngx.var
-	if var.reason and var.reason ~= "" then
-		return var.reason
+	local var_reason = var.reason
+	if var_reason and var_reason ~= "" then
+		local reason_data = {}
+		local var_reason_data = var.reason_data
+		if var_reason_data and reason_data ~= "" then
+			local ok, data = pcall(decode, var_reason_data)
+			if ok then
+				reason_data = data
+			end
+		end
+		return var_reason, reason_data
 	end
 	-- os.getenv
 	if os.getenv("REASON") == "modsecurity" then
-		return "modsecurity"
+		return "modsecurity", {}
 	end
 	-- datastore ban
 	local ip
@@ -309,13 +318,26 @@ utils.get_reason = function(ctx)
 	end
 	local banned, _ = datastore:get("bans_ip_" .. ip)
 	if banned then
-		return banned
+		return banned, {}
 	end
 	-- unknown
 	if ngx.status == utils.get_deny_status() then
-		return "unknown"
+		return "unknown", {}
 	end
 	return nil
+end
+
+utils.set_reason = function(reason, reason_data, ctx)
+	if ctx and ctx.bw then
+		ctx.bw.reason = reason or "unknown"
+		ctx.bw.reason_data = reason_data or {}
+	end
+	if var.reason then
+		var.reason = reason
+		if var.reason_data then
+			var.reason_data = encode(reason_data or {})
+		end
+	end
 end
 
 utils.is_whitelisted = function(ctx)

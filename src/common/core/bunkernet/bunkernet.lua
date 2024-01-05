@@ -181,7 +181,7 @@ function bunkernet:log(bypass_checks)
 		end
 	end
 	-- Check if IP has been blocked
-	local reason = get_reason(self.ctx)
+	local reason, reason_data = get_reason(self.ctx)
 	if not reason then
 		return self:ret(true, "ip is not blocked")
 	end
@@ -200,8 +200,8 @@ function bunkernet:log(bypass_checks)
 		return self:ret(true, "already reported recently")
 	end
 	-- luacheck: ignore 212 431
-	local function report_callback(premature, obj, ip, reason, method, url, headers, use_redis)
-		local ok, err, status, _ = obj:report(ip, reason, method, url, headers)
+	local function report_callback(premature, obj, ip, reason, reason_data, method, url, headers, use_redis)
+		local ok, err, status, _ = obj:report(ip, reason, reason_data, method, url, headers)
 		if status == 429 then
 			obj.logger:log(WARN, "bunkernet API is rate limiting us")
 		elseif not ok then
@@ -221,6 +221,7 @@ function bunkernet:log(bypass_checks)
 		self,
 		self.ctx.bw.remote_addr,
 		reason,
+		reason_data,
 		self.ctx.bw.request_method,
 		self.ctx.bw.request_uri,
 		ngx.req.get_headers()
@@ -297,10 +298,11 @@ function bunkernet:ping()
 	return self:request("GET", "/ping", {})
 end
 
-function bunkernet:report(ip, reason, method, url, headers)
+function bunkernet:report(ip, reason, reason_data, method, url, headers)
 	local data = {
 		ip = ip,
 		reason = reason,
+		data = reason_data,
 		method = method,
 		url = url,
 		headers = headers,
