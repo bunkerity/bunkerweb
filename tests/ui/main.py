@@ -1578,7 +1578,7 @@ location /hello {
 
         password_input.send_keys("P@ssw0rd")
 
-        access_page(driver, driver_wait, "//button[@id='totp-button' and @class='valid-btn']", "profile")
+        access_page(driver, driver_wait, "//button[@id='totp-button' and @class='valid-btn']", "account")
 
         assert_button_click(driver, "//button[@data-tab-handler='totp']")
 
@@ -1656,7 +1656,7 @@ location /hello {
             driver,
             driver_wait,
             "//button[@id='totp-button' and @class='delete-btn']",
-            "profile",
+            "account",
         )
 
         assert_button_click(driver, "//button[@data-tab-handler='totp']")
