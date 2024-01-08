@@ -177,7 +177,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     <form
       class="col-span-12 grid grid-cols-12 w-full justify-items-center"
       id="username-form"
-      action="profile"
+      action="account"
       method="POST"
       autocomplete="off"
     >
@@ -282,7 +282,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     data-plugin-item="password"
     class="hidden col-span-12 grid grid-cols-12 w-full justify-items-center mt-4"
     id="password-form"
-    action="profile"
+    action="account"
     method="POST"
     autocomplete="off"
   >
@@ -471,13 +471,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     </div>
 
     <div class="col-span-12 flex justify-center">
-      <button
-        type="submit"
-        id="pw-button"
-        name="pw-button"
-        value="profile"
-        class="edit-btn"
-      >
+      <button type="submit" id="pw-button" name="pw-button" class="edit-btn">
         Edit
       </button>
     </div>
@@ -487,7 +481,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     data-plugin-item="totp"
     class="hidden grid grid-cols-12 w-full justify-items-center"
     id="totp-form"
-    action="profile"
+    action="account"
     method="POST"
     autocomplete="off"
   >

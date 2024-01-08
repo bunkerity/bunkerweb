@@ -531,25 +531,26 @@ def home():
         services_scheduler_count=services_scheduler_count,
         services_ui_count=services_ui_count,
         services_autoconf_count=services_autoconf_count,
+        username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
     )
 
 
-@app.route("/profile", methods=["GET", "POST"])
+@app.route("/account", methods=["GET", "POST"])
 @login_required
-def profile():
+def account():
     if request.method == "POST":
         # Check form data validity
         if not request.form:
             flash("Missing form data.", "error")
-            return redirect(url_for("profile"))
+            return redirect(url_for("account"))
         elif "operation" not in request.form:
             flash("Missing operation parameter.", "error")
-            return redirect(url_for("profile"))
+            return redirect(url_for("account"))
 
         if "curr_password" not in request.form or not current_user.check_password(request.form["curr_password"]):
             flash(f"The current password is incorrect. ({request.form['operation']})", "error")
-            return redirect(url_for("profile"))
+            return redirect(url_for("account"))
 
         username = current_user.get_id()
         password = request.form["curr_password"]
@@ -559,10 +560,10 @@ def profile():
         if request.form["operation"] == "username":
             if "admin_username" not in request.form:
                 flash("Missing admin_username parameter. (username)", "error")
-                return redirect(url_for("profile"))
+                return redirect(url_for("account"))
             elif len(request.form["admin_username"]) > 256:
                 flash("The admin username is too long. It must be less than 256 characters. (username)", "error")
-                return redirect(url_for("profile"))
+                return redirect(url_for("account"))
 
             username = request.form["admin_username"]
 
@@ -571,20 +572,20 @@ def profile():
         elif request.form["operation"] == "password":
             if "admin_password" not in request.form:
                 flash("Missing admin_password parameter. (password)", "error")
-                return redirect(url_for("profile"))
+                return redirect(url_for("account"))
             elif request.form.get("admin_password"):
                 if not request.form.get("admin_password_check"):
                     flash("Missing admin_password_check parameter. (password)", "error")
-                    return redirect(url_for("profile"))
+                    return redirect(url_for("account"))
                 elif request.form["admin_password"] != request.form["admin_password_check"]:
                     flash("The passwords does not match. (password)", "error")
-                    return redirect(url_for("profile"))
+                    return redirect(url_for("account"))
                 elif not USER_PASSWORD_RX.match(request.form["admin_password"]):
                     flash("The admin password is not strong enough. It must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character (#@?!$%^&*-). (password)", "error")
-                    return redirect(url_for("profile"))
+                    return redirect(url_for("account"))
             elif request.form.get("admin_password_check"):
                 flash("Missing admin_password parameter. (password)", "error")
-                return redirect(url_for("profile"))
+                return redirect(url_for("account"))
 
             password = request.form["admin_password"]
 
@@ -593,10 +594,10 @@ def profile():
         elif request.form["operation"] == "totp":
             if "totp_token" not in request.form:
                 flash("Missing totp_token parameter. (totp)", "error")
-                return redirect(url_for("profile"))
+                return redirect(url_for("account"))
             elif not current_user.check_otp(request.form["totp_token"], secret=app.config["CURRENT_TOTP_TOKEN"]):
                 flash("The totp token is invalid. (totp)", "error")
-                return redirect(url_for("profile"))
+                return redirect(url_for("account"))
 
             session["totp_validated"] = not current_user.is_two_factor_enabled
             is_two_factor_enabled = session["totp_validated"]
@@ -604,20 +605,20 @@ def profile():
             app.config["CURRENT_TOTP_TOKEN"] = None
         else:
             flash("Invalid operation parameter.", "error")
-            return redirect(url_for("profile"))
+            return redirect(url_for("account"))
 
         user = User(username, password, is_two_factor_enabled=is_two_factor_enabled, secret_token=secret_token, method=current_user.method)
         ret = db.update_ui_user(username, user.password_hash, is_two_factor_enabled, secret_token, current_user.method if request.form["operation"] == "totp" else "ui")
         if ret:
             app.logger.error(f"Couldn't update the admin user in the database: {ret}")
             flash(f"Couldn't update the admin user in the database: {ret}", "error")
-            return redirect(url_for("profile"))
+            return redirect(url_for("account"))
 
         flash(
             f"The {request.form['operation']} has been successfully updated." if request.form["operation"] != "totp" else f"The two-factor authentication was successfully {'disabled' if current_user.is_two_factor_enabled else 'enabled'}.",
         )
 
-        return redirect(url_for("profile" if request.form["operation"] == "totp" else "login"))
+        return redirect(url_for("account" if request.form["operation"] == "totp" else "login"))
 
     secret_token = ""
     totp_qr_image = ""
@@ -628,7 +629,7 @@ def profile():
         totp_qr_image = get_b64encoded_qr_image(current_user.get_authentication_setup_uri())
         app.config["CURRENT_TOTP_TOKEN"] = secret_token
 
-    return render_template("profile.html", username=current_user.get_id(), is_totp=current_user.is_two_factor_enabled, secret_token=secret_token, totp_qr_image=totp_qr_image, dark_mode=app.config["DARK_MODE"])
+    return render_template("account.html", username=current_user.get_id(), is_totp=current_user.is_two_factor_enabled, secret_token=secret_token, totp_qr_image=totp_qr_image, dark_mode=app.config["DARK_MODE"])
 
 
 @app.route("/instances", methods=["GET", "POST"])
@@ -674,6 +675,7 @@ def instances():
         "instances.html",
         title="Instances",
         instances=instances,
+        username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -796,6 +798,7 @@ def services():
             }
             for service in services
         ],
+        username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -851,6 +854,7 @@ def global_config():
     # Display global config
     return render_template(
         "global_config.html",
+        username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -945,6 +949,7 @@ def configs():
                 services=app.config["CONFIG"].get_config(methods=False).get("SERVER_NAME", "").split(" "),
             )
         ],
+        username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -1193,6 +1198,7 @@ def plugins():
             return template.render(
                 csrf_token=generate_csrf,
                 url_for=url_for,
+                username=current_user.get_id(),
                 dark_mode=app.config["DARK_MODE"],
                 **(plugin_args["args"] if plugin_args.get("plugin", None) == plugin_id else {}),
             )
@@ -1213,6 +1219,7 @@ def plugins():
         plugins_internal=plugins_internal,
         plugins_external=plugins_external,
         plugins_errors=db.get_plugins_errors(),
+        username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -1350,6 +1357,7 @@ def cache():
                 services=app.config["CONFIG"].get_config(methods=False).get("SERVER_NAME", "").split(" "),
             )
         ],
+        username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -1360,6 +1368,7 @@ def logs():
     return render_template(
         "logs.html",
         instances=app.config["INSTANCES"].get_instances(),
+        username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
     )
 
@@ -1587,6 +1596,7 @@ def jobs():
         "jobs.html",
         jobs=db.get_jobs(),
         jobs_errors=db.get_plugins_errors(),
+        username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
     )
 

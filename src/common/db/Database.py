@@ -250,15 +250,18 @@ class Database:
         """Initialize the database"""
         with self.__db_session() as session:
             try:
-                session.add(
-                    Metadata(
-                        is_initialized=True,
-                        first_config_saved=False,
-                        scheduler_first_start=True,
-                        version=version,
-                        integration=integration,
+                if session.query(Metadata).get(1):
+                    session.query(Metadata).filter_by(id=1).update({Metadata.version: version, Metadata.integration: integration})
+                else:
+                    session.add(
+                        Metadata(
+                            is_initialized=True,
+                            first_config_saved=False,
+                            scheduler_first_start=True,
+                            version=version,
+                            integration=integration,
+                        )
                     )
-                )
                 session.commit()
             except BaseException:
                 return format_exc()
@@ -332,19 +335,38 @@ class Database:
 
         return ""
 
-    def init_tables(self, default_plugins: List[dict]) -> Tuple[bool, str]:
+    def init_tables(self, default_plugins: List[dict], bunkerweb_version: str) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
         inspector = inspect(self.__sql_engine)
-        if len(Base.metadata.tables.keys()) <= len(inspector.get_table_names()):
-            has_all_tables = True
+        db_version = None
+        has_all_tables = True
+        if inspector and len(inspector.get_table_names()):
+            db_version = self.get_metadata()["version"]
 
-            for table in Base.metadata.tables:
-                if not inspector.has_table(table):
-                    has_all_tables = False
-                    break
+            if db_version != bunkerweb_version:
+                self.__logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), checking if it needs to be updated")
+                for table in Base.metadata.tables:
+                    if not inspector.has_table(table):
+                        has_all_tables = False
+                    else:
+                        missing_columns = []
 
-            if has_all_tables:
-                return False, ""
+                        db_columns = inspector.get_columns(table)
+                        for column in Base.metadata.tables[table].columns:
+                            if not any(db_column["name"] == column.name for db_column in db_columns):
+                                missing_columns.append(column)
+
+                        try:
+                            with self.__db_session() as session:
+                                if missing_columns:
+                                    for column in missing_columns:
+                                        session.execute(text(f"ALTER TABLE {table} ADD COLUMN {column.name} {column.type}"))
+                                session.commit()
+                        except BaseException:
+                            return False, format_exc()
+
+        if has_all_tables and db_version and db_version == bunkerweb_version:
+            return False, ""
 
         try:
             Base.metadata.create_all(self.__sql_engine, checkfirst=True)

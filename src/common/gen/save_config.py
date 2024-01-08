@@ -271,7 +271,10 @@ if __name__ == "__main__":
             )
             config_files = config.get_config()
 
-        if not db.is_initialized():
+        bunkerweb_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip()
+        db_initialized = db.is_initialized()
+
+        if not db_initialized:
             logger.info(
                 "Database not initialized, initializing ...",
             )
@@ -280,7 +283,8 @@ if __name__ == "__main__":
                     config.get_settings(),
                     config.get_plugins("core"),
                     config.get_plugins("external"),
-                ]
+                ],
+                bunkerweb_version,
             )
 
             # Initialize database tables
@@ -295,19 +299,6 @@ if __name__ == "__main__":
                 )
             else:
                 logger.info("Database tables initialized")
-
-            err = db.initialize_db(
-                version=Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip(),
-                integration=integration,
-            )
-
-            if err:
-                logger.error(
-                    f"Can't Initialize database : {err}",
-                )
-                sys_exit(1)
-            else:
-                logger.info("Database initialized")
         else:
             logger.info("Database is already initialized, checking for changes ...")
 
@@ -316,7 +307,8 @@ if __name__ == "__main__":
                     config.get_settings(),
                     config.get_plugins("core"),
                     config.get_plugins("external"),
-                ]
+                ],
+                bunkerweb_version,
             )
 
             if not ret and err:
@@ -326,6 +318,14 @@ if __name__ == "__main__":
                 logger.info("Database tables didn't change, skipping update ...")
             else:
                 logger.info("Database tables successfully updated")
+
+        err = db.initialize_db(version=bunkerweb_version, integration=integration)
+
+        if err:
+            logger.error(f"Can't {'initialize' if not db_initialized else 'update'} database metadata : {err}")
+            sys_exit(1)
+        else:
+            logger.info("Database metadata successfully " + ("initialized" if not db_initialized else "updated"))
 
         if args.init:
             sys_exit(0)

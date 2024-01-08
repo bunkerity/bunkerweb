@@ -258,7 +258,7 @@ class Users(Base):
     username = Column(String(256), nullable=False, unique=True)
     password = Column(String(60), nullable=False)
     is_two_factor_enabled = Column(Boolean, nullable=False, default=False)
-    secret_token = Column(String(32), nullable=True, unique=True)
+    secret_token = Column(String(32), nullable=True, unique=True, default=None)
     method = Column(METHODS_ENUM, nullable=False, default="manual")
 
 

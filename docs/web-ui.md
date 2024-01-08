@@ -727,6 +727,67 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
     systemctl restart bunkerweb-ui
     ```
 
+## Account management
+
+You can change the username, password needed and manage two-factor authentication by **accessing the account page** of the web UI from the menu.
+
+You need to click on `manage account` inside the sidebar menu.
+
+<figure markdown>
+  ![Overview](assets/img/manage-account.webp){ align=center, width="350" }
+  <figcaption>Account page access from menu</figcaption>
+</figure>
+
+### Username / Password
+
+!!! warning "Lost password/username"
+
+    In case you forgot your UI credentials, you can reset them from the CLI following [the steps described in the troubleshooting section](troubleshooting.md#web-ui).
+
+You can update your username or password by filling the dedicated forms. For security reason, you need to enter your current password even if you are connected.
+
+Please note that when your username or password is updated, you will be logout from the web UI to log in again.
+
+<figure markdown>
+  ![Overview](assets/img/profile-username-password.webp){ align=center, width="800" }
+  <figcaption>Username / Password forms</figcaption>
+</figure>
+
+### Two-Factor Authentication
+
+!!! warning "Lost secret key"
+
+    In case you lost your secret key, you can disable 2FA from the CLI following [the steps described in the troubleshooting section](troubleshooting.md#web-ui).
+
+You can power-up your login security by adding **Two-Factor Authentication (2FA)** to your account. By doing so, an extra code will be needed in addition to your password.
+
+The web UI uses [Time based One Time Password (TOTP)](https://en.wikipedia.org/wiki/Time-based_one-time_password) as 2FA implementation : using a **secret key**, the algorithm will generate **one time passwords only valid for a short period of time**.
+
+Any TOTP client such as Google Authenticator, Authy, FreeOTP, ... can be used to store the secret key and generate the codes. Please note that once TOTP is enabled, **you won't be able to retrieve it from the web UI**.
+
+The following steps are needed to enable the TOTP feature from the web UI :
+
+- Copy the secret key or use the QR code on your authenticator app
+- Enter the current TOTP code in the 2FA input
+- Enter your current password
+
+!!! info "Secret key refresh"
+    A new secret key is **generated each time** you visit the page or submit the form. In case something went wrong (e.g. : expired TOTP code), you will need to copy the new secret key to your authenticator app until 2FA is successfuly enabled.
+
+Once enabled, 2FA authentication can be disabled at the same place.
+
+<figure markdown>
+  ![Overview](assets/img/profile-totp.webp){ align=center, width="800" }
+  <figcaption>TOTP enable / disable forms</figcaption>
+</figure>
+
+After a successful login/password combination, you will be prompted to enter your TOTP code :
+
+<figure markdown>
+  ![Overview](assets/img/profile-2fa.webp){ align=center, width="400" }
+  <figcaption>Additional TOTP page</figcaption>
+</figure>
+
 ## Advanced installation
 
 === "Docker"
