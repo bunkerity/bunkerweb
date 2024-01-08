@@ -27,7 +27,7 @@ resource "scaleway_instance_server" "instances" {
   depends_on = [scaleway_account_ssh_key.ssh_key]
   name = "cicd_bw_swarm_${count.index}"
   type = "DEV1-L"
-  image = "debian_bullseye"
+  image = "debian_bookworm"
   ip_id = var.swarm_ips_id[count.index]
   private_network {
     pn_id = scaleway_vpc_private_network.pn.id
