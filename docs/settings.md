@@ -194,10 +194,10 @@ STREAM support :white_check_mark:
 
 Deny access based on the country of the client IP.
 
-|      Setting      |Default| Context |Multiple|                                 Description                                 |
-|-------------------|-------|---------|--------|-----------------------------------------------------------------------------|
-|`BLACKLIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is in the list (2 letters code).    |
-|`WHITELIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is not in the list (2 letters code).|
+|      Setting      |Default| Context |Multiple|                                                 Description                                                  |
+|-------------------|-------|---------|--------|--------------------------------------------------------------------------------------------------------------|
+|`BLACKLIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).    |
+|`WHITELIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).|
 
 ### Custom HTTPS certificate
 
@@ -550,3 +550,4 @@ Allow access based on internal and external IP/network/rDNS/ASN whitelists.
 |`WHITELIST_USER_AGENT_URLS`|                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing good User-Agent to whitelist.     |
 |`WHITELIST_URI`            |                                                                                                                                                                            |multisite|no      |List of URI (PCRE regex), separated with spaces, to whitelist.                    |
 |`WHITELIST_URI_URLS`       |                                                                                                                                                                            |global   |no      |List of URLs, separated with spaces, containing bad URI to whitelist.             |
+

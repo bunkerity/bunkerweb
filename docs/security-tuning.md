@@ -459,10 +459,10 @@ The country security feature allows you to apply policy based on the country of 
 
 Here is the list of related settings :
 
-|       Setting       | Default | Description                                  |
-| :-----------------: | :-----: | :------------------------------------------- |
-| `BLACKLIST_COUNTRY` |         | List of 2 letters country code to blacklist. |
-| `WHITELIST_COUNTRY` |         | List of 2 letters country code to whitelist. |
+|      Setting      |Default| Context |Multiple|                                                 Description                                                  |
+|-------------------|-------|---------|--------|--------------------------------------------------------------------------------------------------------------|
+|`BLACKLIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).    |
+|`WHITELIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).|
 
 Using both country blacklist and whitelist at the same time makes no sense. If you do, please note that only the whitelist will be executed.
 
