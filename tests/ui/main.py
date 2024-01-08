@@ -1441,11 +1441,11 @@ location /hello {
             print("The cache download is not working, exiting ...", flush=True)
             exit(1)
 
-        print("Cache download is working, trying profile page ...", flush=True)
+        print("Cache download is working, trying account page ...", flush=True)
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[10]/a", "profile")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
-        ### PROFILE PAGE
+        ### ACCOUNT PAGE
 
         username_input = safe_get_element(driver, By.ID, "admin_username")
 
@@ -1485,7 +1485,7 @@ location /hello {
 
         access_page(driver, driver_wait, "//button[@value='login']", "home")
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[10]/a", "profile")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
         username_input = safe_get_element(driver, By.ID, "admin_username")
 
@@ -1542,7 +1542,7 @@ location /hello {
 
         access_page(driver, driver_wait, "//button[@value='login']", "home")
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[10]/a", "profile")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
         print("Successfully logged in with new password, trying 2FA ...", flush=True)
 
@@ -1642,7 +1642,7 @@ location /hello {
 
         print("Successfully logged in with 2FA, trying to deactivate 2FA ...", flush=True)
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[10]/a", "profile")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
         assert_button_click(driver, "//button[@data-tab-handler='totp']")
 
