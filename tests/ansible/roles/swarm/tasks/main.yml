@@ -21,12 +21,12 @@
     state: forcereinstall
     executable: pip3
 
-- name: Pin version for urllib
-  pip:
-    name: urllib3<2
-    state: forcereinstall
-    executable: pip3
-    extra_args:
+# - name: Pin version for urllib
+#   pip:
+#     name: urllib3<2
+#     state: forcereinstall
+#     executable: pip3
+#     extra_args:
 
 - name: Init Docker Swarm
   community.docker.docker_swarm:
