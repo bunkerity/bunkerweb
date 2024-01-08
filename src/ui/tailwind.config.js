@@ -926,7 +926,7 @@ module.exports = {
       "5/6": "83.333333%",
       full: "100%",
       // sidenav: "calc(100vh - 310px)",
-      sidenav: "calc(100vh - 360px)", // for pro btn
+      sidenav: "calc(100vh - 450px)", // for pro btn
       screen: "100vh",
       min: "min-content",
       max: "max-content",
