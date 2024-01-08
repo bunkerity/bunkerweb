@@ -1651,7 +1651,7 @@ You can change the username and password needed to login, and you can add double
 
 ### Username / Password
 
-!!! info "Recover profile"
+!!! warning "Recover profile"
 
     In case you forgot your UI logs, you can [access them from the CLI following these steps](troubleshooting.md#recover-profile).
 
@@ -1666,7 +1666,7 @@ When updating username or password, you'll be logout from UI and you'll need to 
 
 ### 2FA
 
-!!! info "Secret key loss"
+!!! warning "Secret key loss"
 
     In case you lost your secret key, you can [disable 2FA from the CLI following these steps](troubleshooting.md#lost-2fa-authentication).
 
