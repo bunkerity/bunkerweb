@@ -54,7 +54,7 @@
       <a
         aria-label="link to home"
         class="flex justify-center px-8 py-6 m-0 text-sm whitespace-nowrap dark:text-white text-slate-700"
-        href="{% if current_endpoint == 'home' %}javascript:void(0){% else %}loading?next={{ url_for('home') }}{% endif %}"
+        href="{% if current_endpoint == 'home' %}#{% else %}loading?next={{ url_for('home') }}{% endif %}"
       >
         <img
           src="images/logo-menu-2.png"
@@ -71,14 +71,19 @@
 
     <div class="w-full px-1">
       <h1
-        class="mb-0 tracking-normal text-primary text-center text-lg break-words whitespace-normal dark:text-gray-300"
+        class="mb-0.5 tracking-normal text-primary text-center text-lg break-words whitespace-normal dark:text-gray-300"
       >
         {{ username }}
       </h1>
+      <a
+        class="block underline mb-2 text-gray-600 dark:text-gray-400 text-sm text-center hover:brightness-90"
+        href="{% if current_endpoint == 'account' %}#{% else %}loading?next={{ url_for('account') }}{% endif %}"
+        >manage account
+      </a>
     </div>
 
     <hr
-      class="h-px my-1 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent"
+      class="h-px mt-0 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent"
     />
     <!-- end logo version -->
 
@@ -92,7 +97,7 @@
         <li class="mt-0.5 w-full">
           <a
             class="{% if current_endpoint == 'home' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} dark:text-white dark:opacity-80 py-1 ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap rounded-lg px-4 transition text-sm"
-            href="{% if current_endpoint == 'home' %}javascript:void(0){% else %}loading?next={{ url_for('home') }}{% endif %}"
+            href="{% if current_endpoint == 'home' %}#{% else %}loading?next={{ url_for('home') }}{% endif %}"
           >
             <div
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
@@ -123,7 +128,7 @@
         <li class="mt-0.5 w-full">
           <a
             class="{% if current_endpoint == 'instances' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-            href="{% if current_endpoint == 'instances' %}javascript:void(0){% else %}loading?next={{ url_for('instances') }}{% endif %}"
+            href="{% if current_endpoint == 'instances' %}#{% else %}loading?next={{ url_for('instances') }}{% endif %}"
           >
             <div
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
@@ -153,7 +158,7 @@
         <li class="mt-0.5 w-full">
           <a
             class="{% if current_endpoint == 'global_config' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-            href="{% if current_endpoint == 'global_config' %}javascript:void(0){% else %}loading?next={{ url_for('global_config') }}{% endif %}"
+            href="{% if current_endpoint == 'global_config' %}#{% else %}loading?next={{ url_for('global_config') }}{% endif %}"
           >
             <div
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
@@ -183,7 +188,7 @@
         <li class="mt-0.5 w-full">
           <a
             class="{% if current_endpoint == 'services' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-            href="{% if current_endpoint == 'services' %}javascript:void(0){% else %}loading?next={{ url_for('services') }}{% endif %}"
+            href="{% if current_endpoint == 'services' %}#{% else %}loading?next={{ url_for('services') }}{% endif %}"
           >
             <div
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
@@ -213,7 +218,7 @@
         <li class="mt-0.5 w-full">
           <a
             class="{% if current_endpoint == 'configs' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-            href="{% if current_endpoint == 'configs' %}javascript:void(0){% else %}loading?next={{ url_for('configs') }}{% endif %}"
+            href="{% if current_endpoint == 'configs' %}#{% else %}loading?next={{ url_for('configs') }}{% endif %}"
           >
             <div
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
@@ -248,7 +253,7 @@
         <li class="mt-0.5 w-full">
           <a
             class="{% if current_endpoint == 'plugins' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-            href="{% if current_endpoint == 'plugins' %}javascript:void(0){% else %}loading?next={{ url_for('plugins') }}{% endif %}"
+            href="{% if current_endpoint == 'plugins' %}#{% else %}loading?next={{ url_for('plugins') }}{% endif %}"
           >
             <div
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
@@ -278,7 +283,7 @@
         <li class="mt-0.5 w-full">
           <a
             class="{% if current_endpoint == 'cache' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-            href="{% if current_endpoint == 'cache' %}javascript:void(0){% else %}loading?next={{ url_for('cache') }}{% endif %}"
+            href="{% if current_endpoint == 'cache' %}#{% else %}loading?next={{ url_for('cache') }}{% endif %}"
           >
             <div
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
@@ -308,7 +313,7 @@
         <li class="mt-0.5 w-full">
           <a
             class="{% if current_endpoint == 'logs' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-            href="{% if current_endpoint == 'logs' %}javascript:void(0){% else %}loading?next={{ url_for('logs') }}{% endif %}"
+            href="{% if current_endpoint == 'logs' %}#{% else %}loading?next={{ url_for('logs') }}{% endif %}"
           >
             <div
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
@@ -338,7 +343,7 @@
         <li class="mt-0.5 w-full">
           <a
             class="{% if current_endpoint == 'jobs' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-            href="{% if current_endpoint == 'jobs' %}javascript:void(0){% else %}loading?next={{ url_for('jobs') }}{% endif %}"
+            href="{% if current_endpoint == 'jobs' %}#{% else %}loading?next={{ url_for('jobs') }}{% endif %}"
           >
             <div
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
@@ -463,7 +468,7 @@
     <!-- end dark/light mode -->
 
     <!-- social-->
-    <ul class="flex justify-center align-middle w-full">
+    <ul class="mb-3 flex justify-center align-middle w-full">
       <li class="mx-2 w-6">
         <a
           aria-label="link to twitter"
@@ -530,14 +535,6 @@
       </li>
     </ul>
     <!-- end social-->
-    <hr
-      class="h-px mt-4 mb-2 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent"
-    />
-    <a
-      class="mb-2 text-gray-600 dark:text-gray-400 text-sm text-center hover:brightness-90"
-      href="{% if current_endpoint == 'account' %}javascript:void(0){% else %}loading?next={{ url_for('account') }}{% endif %}"
-      >manage account
-    </a>
 
     <!-- logout-->
     <div class="w-full">
