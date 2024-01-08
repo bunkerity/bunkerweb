@@ -731,7 +731,12 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
 You can change the username, password needed and manage two-factor authentication by **accessing the account page** of the web UI from the menu.
 
-TODO : insert menu image
+You need to click on `manage account` inside the sidebar menu.
+
+<figure markdown>
+  ![Overview](assets/img/manage-account.webp){ align=center, width="350" }
+  <figcaption>Account page access from menu</figcaption>
+</figure>
 
 ### Username / Password
 
