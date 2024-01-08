@@ -1647,6 +1647,8 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
 You can manage some profile settings within the web UI. You do so by **accessing the profile page**.
 
+You can change the username and password needed to login, and you can add double factor authentication.
+
 ### Username / Password
 
 !!! info "Recover profile"
@@ -1664,9 +1666,9 @@ When updating username or password, you'll be logout from UI and you'll need to 
 
 ### 2FA
 
-!!! warning "Secret key loss"
+!!! info "Secret key loss"
 
-    In case you lost your secret key, you can [disable 2FA from the CLI following these steps](troubleshooting.md#disable-2fa).
+    In case you lost your secret key, you can [disable 2FA from the CLI following these steps](troubleshooting.md#lost-2fa-authentication).
 
 You can power-up your login security by adding 2FA inside your account.
 
@@ -1679,7 +1681,7 @@ In case you enable TOTP, you'll be able to disable it in the same place.
   <figcaption>TOTP enable / disabled forms</figcaption>
 </figure>
 
-When it's enable, you'll get an additionnal page to login.
+When it's enable, you get an additionnal page to login.
 
 <figure markdown>
   ![Overview](assets/img/profile-2fa.webp){ align=center, width="400" }

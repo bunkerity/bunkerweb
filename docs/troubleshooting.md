@@ -289,11 +289,12 @@ If you have bots that need to access your website, the recommended way to avoid 
 
 When using container-based integrations, the timezone of the container may not match the one of the host machine. To resolve that, you can set the `TZ` environment variable to the timezone of your choice on your containers (e.g. `TZ=Europe/Paris`). You will find the list of timezone identifiers [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List).
 
-## Lost 2FA authentication
+## Recover profile
 
-If you lost your 2FA authentication, you can reset it by following these steps :
+In case you lost your UI logs, you can get them by accessing your database and checking `bw_ui_users` table.
 
-### Access your database
+### Access database
+
 
 === "SQLite"
 
@@ -381,9 +382,9 @@ If you lost your 2FA authentication, you can reset it by following these steps :
 
             Then enter your password of the database user and you should be able to access your database.
 
-### Check that the admin user exists
+### Check user table
 
-!!! note "Database schema"
+!!! info "Database schema"
     The database schema is the following:
 
     ```sql
@@ -395,7 +396,154 @@ If you lost your 2FA authentication, you can reset it by following these steps :
     method ("manual" or "ui") NOT NULL DEFAULT 'manual'
     ```
 
-### Execute the following command:
+By default, database table is `bw_ui_users`.
+
+Execute the following command:
+
+```sql
+SELECT * FROM bw_ui_users;
+```
+
+You should see something like this:
+```text
+1|<username>|<password_hash>|1|<secret_totp_token>|(manual or ui)
+```
+
+### Update profile
+
+!!! warning "Update password"
+
+    Contrary to username, password is hashed, you need to update it using the same hash algorithms and token from UI.
+
+You can update your username / password executing this command:
+
+```sql
+UPDATE bw_ui_users SET username = <username>, password = <password_hash> WHERE id = 1;
+```
+
+If you check again your `bw_ui_users` table following this command:
+
+```sql
+SELECT * FROM bw_ui_users;
+```
+
+You should see something like this:
+
+```text
+1|<username>|<password_hash>|0||(manual or ui)
+```
+
+And that's it ! Now use your logs on UI !
+
+## Lost 2FA authentication
+
+If you lost your 2FA authentication, you can reset it by following these steps :
+
+### Access database
+
+=== "SQLite"
+
+    === "Debian and Ubuntu"
+
+        Install SQLite:
+
+        ```shell
+        sudo apt install sqlite3
+        ```
+
+    === "Fedora and RedHat"
+
+        Install SQLite:
+
+        ```shell
+        sudo dnf install sqlite
+        ```
+
+    === "Docker"
+
+        1. Access you scheduler container
+
+            !!! note "Docker arguments"
+                - the `-u 0` option is to run the command as root (mandatory)
+                - the `-it` options are to run the command interactively (mandatory)
+                - `<bunkerweb_scheduler_container>`: the name or ID of your scheduler container
+
+            ```shell
+            docker exec -u 0 -it <bunkerweb_scheduler_container> bash
+            ```
+
+        2. Install SQLite
+
+            ```bash
+            apk add sqlite
+            ```
+
+    1. Access your database
+
+        !!! note "Database path"
+            We assume that you are using the default database path. If you are using a custom path, you will need to adapt the command.
+
+        ```bash
+        sqlite3 /data/lib/db.sqlite3
+        ```
+
+        You should see something like this:
+
+        ```text
+        SQLite version <VER> <DATE>
+        Enter ".help" for usage hints.
+        sqlite>
+        ```
+
+=== "MariaDB / MySQL"
+
+    !!! warning "MariaDB / MySQL only"
+        The following steps are only valid for MariaDB / MySQL databases. If you are using another database, please refer to the documentation of your database.
+
+    === "Linux"
+
+        1. Access your local database
+
+            ```bash
+            mysql -u root -p bunkerweb
+            ```
+
+            Then enter your password of the database user and you should be able to access your database.
+
+    === "Docker"
+
+        1. Access you database container
+
+            !!! note "Docker arguments"
+                - the `-u 0` option is to run the command as root (mandatory)
+                - the `-it` options are to run the command interactively (mandatory)
+                - `<bunkerweb_db_container>`: the name or ID of your database container
+                - `<user>`: the database user
+                - `<database>`: the database name
+
+            ```shell
+            docker exec -u 0 -it <bunkerweb_db_container> mysql -u <user> -p <database>
+            ```
+
+            Then enter your password of the database user and you should be able to access your database.
+
+### Check user table
+
+!!! info "Database schema"
+    The database schema is the following:
+
+    ```sql
+    id INTEGER PRIMARY KEY AUTOINCREMENT
+    username VARCHAR(256) NOT NULL UNIQUE
+    password VARCHAR(60) NOT NULL
+    is_two_factor_enabled BOOLEAN NOT NULL DEFAULT 0
+    secret_token VARCHAR(32) DEFAULT NULL
+    method ("manual" or "ui") NOT NULL DEFAULT 'manual'
+    ```
+
+By default, database table is `bw_ui_users`.
+
+Execute the following command:
 
 ```sql
 SELECT * FROM bw_ui_users;
@@ -408,11 +556,13 @@ You should see something like this:
 
 ### Deactivate 2FA
 
+You can deactivate 2FA executing this command:
+
 ```sql
 UPDATE bw_ui_users SET is_two_factor_enabled = 0, secret_token = NULL WHERE id = 1;
 ```
 
-### Check that the 2FA is deactivated
+If you check again your `bw_ui_users` table following this command:
 
 ```sql
 SELECT * FROM bw_ui_users;
