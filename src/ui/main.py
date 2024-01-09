@@ -321,6 +321,12 @@ def handle_csrf_error(_):
 def before_request():
     if current_user.is_authenticated:
         passed = True
+
+        # Go back from totp to login
+        if not session.get("totp_validated", False) and current_user.is_two_factor_enabled and "/totp" not in request.path and not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")) and request.path.endswith("/login"):
+            return redirect(url_for("login", next=request.path))
+
+        # Case not login page, keep on 2FA before any other access
         if not session.get("totp_validated", False) and current_user.is_two_factor_enabled and "/totp" not in request.path and not request.path.startswith(("/css", "/images", "/js", "/json", "/webfonts")):
             return redirect(url_for("totp", next=request.form.get("next")))
         elif session.get("ip") != request.remote_addr:
