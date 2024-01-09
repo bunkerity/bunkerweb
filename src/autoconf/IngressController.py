@@ -146,15 +146,16 @@ class IngressController(Controller):
                     for host in tls.hosts:
                         for service in services:
                             if host in service["SERVER_NAME"].split(" "):
-                                secret_tls = self.__corev1.list_secret_for_all_namespaces(
+                                secrets_tls = self.__corev1.list_secret_for_all_namespaces(
                                     watch=False,
                                     field_selector=f"metadata.name={tls.secret_name},metadata.namespace={namespace}",
                                 ).items
-                                if not secret_tls:
+                                if len(secrets_tls) == 0:
                                     self._logger.warning(
                                         f"Ignoring tls setting for {host} : secret {tls.secret_name} not found.",
                                     )
                                     break
+                                secret_tls = secrets_tls[0]
                                 if not secret_tls.data:
                                     self._logger.warning(
                                         f"Ignoring tls setting for {host} : secret {tls.secret_name} contains no data.",
