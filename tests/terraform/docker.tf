@@ -21,7 +21,7 @@ resource "scaleway_instance_server" "instance" {
   depends_on = [scaleway_account_ssh_key.ssh_key]
   name = "cicd_bw_docker"
   type = "DEV1-M"
-  image = "debian_bookworm"
+  image = "debian_bullseye"
   ip_id = var.docker_ip_id
 }
 

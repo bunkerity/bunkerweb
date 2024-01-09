@@ -333,7 +333,7 @@ def before_request():
             session.clear()
 
 
-@app.route("/")
+@app.route("/", strict_slashes=False)
 def index():
     if app.config["USER"]:
         if current_user.is_authenticated:  # type: ignore

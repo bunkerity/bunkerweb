@@ -251,10 +251,10 @@ You will find more information in the [Kubernetes section](https://docs.bunkerwe
 
 List of supported Linux distros :
 
-- Debian 11 "Bullseye"
+- Debian 12 "Bookworm"
 - Ubuntu 22.04 "Jammy"
-- Fedora 38
-- RHEL 8.7
+- Fedora 39
+- RHEL 8.9
 
 Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
 
@@ -268,10 +268,10 @@ You will find more information in the [Linux section](https://docs.bunkerweb.io/
 
 List of supported Linux distros :
 
-- Debian 11 "Bullseye"
+- Debian 12 "Bookworm"
 - Ubuntu 22.04 "Jammy"
-- Fedora 38
-- RHEL 8.7
+- Fedora 39
+- RHEL 8.9
 
 [Ansible](https://www.ansible.com/) is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.
 
