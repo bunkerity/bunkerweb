@@ -20,6 +20,7 @@ deps_path = join(sep, "usr", "share", "bunkerweb", "utils")
 if deps_path not in sys_path:
     sys_path.append(deps_path)
 
+from api_models import ResponseUI  # type: ignore
 from logger import setup_logger  # type: ignore
 
 LOGGER: Logger = setup_logger("UI")
@@ -137,7 +138,12 @@ def proceed_core_data(
 
 # Standard response format
 def res_format(type="error", status_code="500", path="", detail="Internal Server Error", data={"message": "error"}):
-    return json.dumps({"type": type, "status": status_code, "message": f"{path} {detail}", "data": data}, skipkeys=True, allow_nan=True, indent=6)
+    try:
+        format = {"type": type, "status": status_code, "message": f"{path} {detail}", "data": data}
+        ResponseUI(**format)
+        return format
+    except:
+        return json.dumps({"type": "error", "status": 500, "message": "Bad response format", "data": {}}, skipkeys=True, allow_nan=True, indent=6)
 
 
 # Standard log format

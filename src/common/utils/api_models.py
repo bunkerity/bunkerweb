@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+import re
 
 from datetime import datetime
 from os.path import join, sep
@@ -10,7 +11,9 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
     if deps_path not in sys_path:
         sys_path.append(deps_path)
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from pydantic import Field
+from pydantic import model_validator
 from pydantic.networks import IPvAnyAddress
 
 from API import API  # type: ignore
@@ -348,3 +351,58 @@ class InstanceHostname(BaseModel):
 
 class InstanceAction(BaseModel):
     instance_action: Literal["ping", "bans", "stop", "reload"] = Field(examples=["ping", "bans", "stop", "reload"], description="The instance action")
+
+
+class ResponseUI(BaseModel):
+    type: Literal["success", "error"] = Field(examples=["success"], description="Reponse status as literal")
+    status: Union[str, int] = Field(
+        examples=["success"],
+        description="The response status",
+    )
+    message: str = Field(examples=["BunkerWeb was reloaded"], description="The response message", max_length=255)
+    data: Optional[Union[str, Dict, Union[List, Dict]]] = Field(examples=[{"key": "value"}], description="The response data")
+
+    @model_validator(mode="after")
+    def check_status(self):
+        # Convert to string if int
+        status = str(self.status)
+        if len(status) != 3 or status[0] not in ("1", "2", "3", "4", "5"):
+            raise ValueError("invalid status code")
+
+        return self
+
+
+class SetupWizard(BaseModel):
+    username: str = Field(examples=["admin"], description="The username to use for the UI", max_length=255)
+    password: str = Field(examples=["P@ssw0rd"], description="The password to use for the UI", max_length=255)
+    password_check: str = Field(examples=["P@ssw0rd"], description="Duplicate of the password to use for the UI", max_length=255)
+    ui_host: str = Field(examples=["http://[hostname](:[port])"], description="This is setting REVERSE_PROXY_HOST")
+    ui_url: str = Field(examples=["/admin"], description="This is setting REVERSE_PROXY_URL")
+    server_name: str = Field(examples=["www.example.com"], description="This is the server name to use for the UI", max_length=255)
+    lets_encrypt: Literal["yes", "no"] = Field(examples=["yes"], description="If the UI should use Let's Encrypt")
+
+    @model_validator(mode="after")
+    def check_passwords(self):
+        # Check if password and password_check are the same
+        if self.password != self.password_check:
+            raise ValueError("password and password_check are not the same")
+
+        # Check password regex
+        if re.search(r"^(?=.*?\d)(?=.*?[ !\u0022#$%&'\(\)*+,.\/:;<=>?@\[\\\]^_`\u007B\u007C\u007D\u007E\u002D]).{8,}$", self.password) is None:
+            raise ValueError("invalid password format")
+
+        return self
+
+    @model_validator(mode="after")
+    def check_server_name(self):
+        if re.search(r"\/[a-zA-Z0-9-]{1,255}$", self.server_name) is None:
+            raise ValueError("server name is not valid")
+
+        return self
+
+    @model_validator(mode="after")
+    def check_ui_host(self):
+        if re.search(r"https?:\/\/.{1,255}(:((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4})))?$", self.ui_host) is None:
+            raise ValueError("UI host is not valid")
+
+        return self
