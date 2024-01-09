@@ -5,6 +5,7 @@ import AccountInput from "@components/Account/Input.vue";
 import AccountCheckbox from "@components/Account/Checkbox.vue";
 import AccountSubtitle from "@components/Account/Subtitle.vue";
 import FeedbackAlert from "@components/Feedback/Alert.vue";
+import { fetchAPI } from "@utils/api.js";
 import { computed, onMounted, reactive } from "vue";
 
 const setup = reactive({
@@ -17,8 +18,6 @@ const setup = reactive({
   urlInp: "",
   servDNSIsOn: null,
   showLoader: true,
-  trySetup: false,
-  setupErr: false,
   resume: computed(() => {
     return `http${setup.sslCheck ? "s" : ""}://${setup.servInp}${setup.urlInp}`;
   }),
@@ -39,6 +38,58 @@ const setup = reactive({
   }),
 });
 
+const sendData = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+});
+
+async function startSetup() {
+  if (!setup.canSubmit) return;
+  // Prepare data
+  const data = {
+    username: setup.username,
+    password: setup.pw,
+    password_check: setup.pwCheck,
+    ui_host: setup.hostInp,
+    ui_url: setup.urlInp,
+    server_name: setup.servInp,
+    lets_encrypt: setup.sslCheck ? "yes" : "no",
+  };
+
+  setup.showLoader = true;
+
+  // Send
+  await fetchAPI(window.location.href, "POST", data, sendData, null)
+    .then((res) => {
+      if (res.type === "success") {
+        setTimeout(() => {
+          window.open(`${setup.resume}/login`, "_self");
+        }, 60000);
+        setInterval(() => {
+          fetch(`${setup.resume}/check`, {
+            cache: "no-cache",
+          })
+            .then((res) => {
+              res.status === 200
+                ? window.open(`${setup.resume}/login`, "_self")
+                : null;
+
+              setupErr();
+            })
+            .catch((err) => {
+              setupErr();
+            });
+        }, 5000);
+      } else {
+        setupErr();
+      }
+    })
+    .catch((err) => {
+      setupErr();
+    });
+}
+
 function checkServDNS() {
   fetch(setup.servDNSPath)
     .then((res) => {
@@ -49,60 +100,15 @@ function checkServDNS() {
     });
 }
 
-function trySetup() {
-  // Check conditions
-  if (!canSubmit) return;
-
-  setup.setupErr = false;
-  setup.trySetup = true;
-  setup.showLoader = true;
-  // Show loader and remove err msg
-
-  // Contact api
-  fetch(window.location.href, {
-    method: "POST",
-    body: new FormData(document.getElementById("setup-form")),
-  })
-    .then((res) => {
-      if (res.status === 200) {
-        setTimeout(() => {
-          window.open(`${setup.resume}/login`, "_self");
-        }, 60000);
-        setInterval(() => {
-          fetch(`${setup.resume}/check`, {
-            cache: "no-cache",
-          })
-            .then((res) => {
-              if (res.status === 200) {
-                return window.open(`${setup.resume}/login`, "_self");
-              }
-              trySetupErr();
-            })
-            .catch((err) => {
-              trySetupErr();
-            });
-        }, 5000);
-      }
-    })
-    .catch((err) => {
-      setTimeout(() => {
-        setup.showLoader = false;
-      }, 400);
-    });
-}
-
-function trySetupErr() {
+function setupErr() {
+  // Start hiding loader, then show error msg
   setTimeout(() => {
     setup.showLoader = false;
-    showErr();
+    setup.setupErr = true;
+    setTimeout(() => {
+      setup.setupErr = false;
+    }, 5000);
   }, 400);
-}
-
-function showErr() {
-  setup.setupErr = true;
-  setTimeout(() => {
-    setup.setupErr = false;
-  }, 5000);
 }
 
 onMounted(() => {
@@ -351,11 +357,10 @@ onMounted(() => {
             class="mt-4 col-span-12 flex flex-col justify-center items-center"
           >
             <button
-              @click.prevent="trySetup()"
+              @click.prevent="startSetup()"
               type="submit"
               id="setup-button"
               name="setup-button"
-              value="setup"
               :disabled="!setup.canSubmit"
               class="btn btn-normal"
             >

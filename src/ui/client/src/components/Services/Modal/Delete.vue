@@ -40,9 +40,8 @@ async function delServ() {
     feedbackStore.addFeedback,
   )
     .then((res) => {
-      // Case not save
+      // Case saved
       if (res.type === "success") {
-        // Case saved
         emits("delete");
         emits("close");
         return;
