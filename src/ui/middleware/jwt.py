@@ -57,12 +57,11 @@ def setup_jwt(app):
         if verify_jwt_in_request(True) is None:
             return
 
-        LOGGER.info(log_format("info", "", "", f"Find jwt"))
+        LOGGER.info(log_format("info", "", "", f"Find jwt {get_jwt()}"))
 
         # Case user is logged in, look for security check
         try:
             jwt = get_jwt()
-            LOGGER.info(log_format("info", "", "", f"JWT is {jwt}"))
 
             if jwt["ip"] != request.remote_addr or jwt["user_agent"] != request.headers.get("User-Agent"):
                 raise NoAuthorizationError("fail.")

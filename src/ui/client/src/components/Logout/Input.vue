@@ -69,7 +69,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <label :for="props.name" class="account-label">
+  <label :for="props.name" class="logout-label">
     {{ props.label }}
   </label>
   <input
@@ -79,7 +79,7 @@ onMounted(() => {
     :type="props.type"
     :id="props.name"
     :name="props.name"
-    class="account-input"
+    class="logout-input"
     :class="[props.isInvalid ? `invalid` : '']"
     :placeholder="props.placeholder"
     :pattern="props.pattern"

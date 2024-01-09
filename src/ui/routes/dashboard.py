@@ -125,6 +125,13 @@ def plugins():
     return render_template("plugins.html")
 
 
+@dashboard.route(f"{PREFIX}/account", methods=["GET"])
+@jwt_required()
+@hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
+def account():
+    return render_template("account.html")
+
+
 @dashboard.route(f"{PREFIX}/<string:page>", methods=["GET"])
 @jwt_required()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])

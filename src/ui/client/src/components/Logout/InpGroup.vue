@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <div class="account-input-group">
+  <div class="logout-input-group">
     <slot></slot>
   </div>
 </template>

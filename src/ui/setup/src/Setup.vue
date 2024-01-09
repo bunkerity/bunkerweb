@@ -1,9 +1,9 @@
 <script setup>
 import LangSwitch from "@components/LangSwitch.vue";
-import AccountInpGroup from "@components/Account/InpGroup.vue";
-import AccountInput from "@components/Account/Input.vue";
-import AccountCheckbox from "@components/Account/Checkbox.vue";
-import AccountSubtitle from "@components/Account/Subtitle.vue";
+import LogoutInpGroup from "@components/Logout/InpGroup.vue";
+import LogoutInput from "@components/Logout/Input.vue";
+import LogoutCheckbox from "@components/Logout/Checkbox.vue";
+import LogoutSubtitle from "@components/Logout/Subtitle.vue";
 import FeedbackAlert from "@components/Feedback/Alert.vue";
 import { fetchAPI } from "@utils/api.js";
 import { computed, onMounted, reactive } from "vue";
@@ -163,10 +163,10 @@ onMounted(() => {
     />
   </div>
   <LangSwitch />
-  <div class="account-alert-container">
+  <div class="logout-alert-container">
     <FeedbackAlert
       @close="setup.setupErr = false"
-      id="account-error"
+      id="logout-error"
       type="error"
       status="500"
       :message="$t('setup_failed')"
@@ -197,10 +197,10 @@ onMounted(() => {
           method="POST"
           autocomplete="off"
         >
-          <AccountSubtitle :title="$t('setup_account')" />
+          <LogoutSubtitle :title="$t('setup_account')" />
           <!-- username inpt-->
-          <AccountInpGroup>
-            <AccountInput
+          <LogoutInpGroup>
+            <LogoutInput
               @inp="(e) => (setup.username = e)"
               :label="$t('setup_username')"
               name="username"
@@ -209,11 +209,11 @@ onMounted(() => {
               type="text"
               :required="true"
             />
-          </AccountInpGroup>
+          </LogoutInpGroup>
           <!-- end username inpt-->
           <!-- password inpt-->
-          <AccountInpGroup>
-            <AccountInput
+          <LogoutInpGroup>
+            <LogoutInput
               @inp="(e) => (setup.pw = e)"
               :label="$t('setup_password')"
               name="password"
@@ -222,11 +222,11 @@ onMounted(() => {
               type="password"
               :required="true"
             />
-          </AccountInpGroup>
+          </LogoutInpGroup>
           <!-- end password inpt-->
           <!-- password inpt-->
-          <AccountInpGroup>
-            <AccountInput
+          <LogoutInpGroup>
+            <LogoutInput
               @inp="(e) => (setup.pwCheck = e)"
               :label="$t('setup_password_check')"
               name="password_check"
@@ -237,13 +237,13 @@ onMounted(() => {
               :isInvalid="setup.pw !== setup.pwCheck ? true : false"
               :invalidText="$t('setup_password_check_invalid')"
             />
-          </AccountInpGroup>
+          </LogoutInpGroup>
           <!-- end password inpt-->
-          <AccountSubtitle :title="$t('setup_settings')" />
+          <LogoutSubtitle :title="$t('setup_settings')" />
 
           <!-- ui host-->
-          <AccountInpGroup>
-            <AccountInput
+          <LogoutInpGroup>
+            <LogoutInput
               :label="$t('setup_ui_host')"
               @inp="(e) => (setup.hostInp = e)"
               name="ui_host"
@@ -252,11 +252,11 @@ onMounted(() => {
               type="text"
               :required="true"
             />
-          </AccountInpGroup>
+          </LogoutInpGroup>
           <!-- end ui host-->
           <!-- ui url-->
-          <AccountInpGroup>
-            <AccountInput
+          <LogoutInpGroup>
+            <LogoutInput
               @inp="(e) => (setup.urlInp = e)"
               :label="$t('setup_ui_url')"
               name="ui_url"
@@ -265,11 +265,11 @@ onMounted(() => {
               type="text"
               :required="true"
             />
-          </AccountInpGroup>
+          </LogoutInpGroup>
           <!-- end ui url-->
           <!-- server name-->
-          <AccountInpGroup>
-            <AccountInput
+          <LogoutInpGroup>
+            <LogoutInput
               @inp="
                 (e) => {
                   setup.servDNSIsOn = null;
@@ -284,22 +284,22 @@ onMounted(() => {
               :value="$t('setup_server_name_value')"
               :required="true"
             />
-          </AccountInpGroup>
+          </LogoutInpGroup>
           <!-- end server name-->
 
           <!-- auto let's encrypt-->
-          <AccountInpGroup>
-            <AccountCheckbox
+          <LogoutInpGroup>
+            <LogoutCheckbox
               @inp="(e) => (setup.sslCheck = e === 'yes' ? true : false)"
               :label="$t('setup_lets_encrypt')"
               name="lets_encrypt"
               value="no"
               :required="true"
             />
-          </AccountInpGroup>
+          </LogoutInpGroup>
           <!-- end auto let's encrypt-->
-          <AccountInpGroup>
-            <label id="check-dns" class="account-label">
+          <LogoutInpGroup>
+            <label id="check-dns" class="logout-label">
               {{ $t("setup_check_dns") }}
             </label>
             <div class="flex justify-center items-center">
@@ -318,8 +318,8 @@ onMounted(() => {
                     setup.servDNSIsOn === null
                       ? 'bg-gray-300'
                       : setup.servDNSIsOn
-                        ? 'bg-green-500'
-                        : 'bg-red-500',
+                      ? 'bg-green-500'
+                      : 'bg-red-500',
                   ]"
                   class="block ml-2 rounded-full w-4 h-4"
                 ></span>
@@ -330,15 +330,15 @@ onMounted(() => {
                         setup.servDNSIsOn === null
                           ? "unknown"
                           : setup.servDNSIsOn
-                            ? "success"
-                            : "error"
-                      }`,
+                          ? "success"
+                          : "error"
+                      }`
                     )
                   }}
                 </span>
               </button>
             </div>
-          </AccountInpGroup>
+          </LogoutInpGroup>
           <div
             class="p-2 col-span-12 bg-gray-200 mt-4 md:mt-6 mb-1 py-2 px-2 rounded flex flex-col justify-center items-center w-full max-w-[400px] overflow-hidden"
           >

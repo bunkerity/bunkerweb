@@ -40,7 +40,7 @@ function updateValue() {
 </script>
 
 <template>
-  <label :for="props.name" class="account-label">
+  <label :for="props.name" class="logout-label">
     {{ props.label }}
   </label>
   <div class="relative z-10">
@@ -58,7 +58,7 @@ function updateValue() {
     <svg
       role="img"
       :aria-hidden="checkbox.value === 'yes' ? 'false' : 'true'"
-      :aria-description="$t('account_checkbox_svg_desc')"
+      :aria-description="$t('logout_checkbox_svg_desc')"
       v-show="checkbox.value === 'yes'"
       class="checkbox-svg"
       xmlns="http://www.w3.org/2000/svg"

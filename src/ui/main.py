@@ -14,7 +14,7 @@ from routes.misc import misc
 from routes.plugins import plugins
 from routes.dashboard import dashboard
 from routes.external import external
-from routes.database import database
+from routes.account import account
 
 from exceptions.setup import setupUIException
 from exceptions.default import setup_default_exceptions
@@ -102,7 +102,7 @@ except:
     raise setupUIException("exception", "ADDING EXCEPTIONS")
 
 # Add API routes
-api_routes = [actions, config, custom_configs, instances, jobs, logs, misc, plugins, external, database]
+api_routes = [actions, config, custom_configs, instances, jobs, logs, misc, plugins, external, account]
 
 try:
     LOGGER.info(log_format("info", "", "", "ADDING API ROUTES"))
