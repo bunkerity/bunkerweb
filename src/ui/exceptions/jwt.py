@@ -23,7 +23,7 @@ class LoginFailedException(HTTPException):
 
 
 @hooks(hooks=["LoginException"])
-@format_exception()
+@format_exception(_redirect=True)
 def login_failed_exception(e):
     return e
 
@@ -35,7 +35,7 @@ class LogoutFailedException(HTTPException):
 
 
 @hooks(hooks=["LogoutException"])
-@format_exception()
+@format_exception(_redirect=True)
 def logout_failed_exception(e):
     return e
 
@@ -49,7 +49,7 @@ def setup_jwt_exceptions(app):
     # JWT DEFAULT EXCEPTIONS
     @app.errorhandler(NoAuthorizationError)
     @hooks(hooks=["TokenException"])
-    @format_exception()
+    @format_exception(_redirect=True)
     def no_authorization_exception(e):
         e.code = 401
         e.description = "Token unauthorized access."
@@ -57,7 +57,7 @@ def setup_jwt_exceptions(app):
 
     @app.errorhandler(JWTDecodeError)
     @hooks(hooks=["TokenException"])
-    @format_exception()
+    @format_exception(_redirect=True)
     def jwt_decode_exception(e):
         e.code = 401
         e.description = "Token Decode error."
@@ -65,7 +65,7 @@ def setup_jwt_exceptions(app):
 
     @app.errorhandler(RevokedTokenError)
     @hooks(hooks=["TokenException"])
-    @format_exception()
+    @format_exception(_redirect=True)
     def revoke_token_exception(e):
         e.code = 401
         e.description = "Token revoke token error."
@@ -73,7 +73,7 @@ def setup_jwt_exceptions(app):
 
     @app.errorhandler(UserClaimsVerificationError)
     @hooks(hooks=["TokenException"])
-    @format_exception()
+    @format_exception(_redirect=True)
     def user_claim_verif_exception(e):
         e.code = 401
         e.description = "Token user claims verification error."
@@ -81,7 +81,7 @@ def setup_jwt_exceptions(app):
 
     @app.errorhandler(WrongTokenError)
     @hooks(hooks=["TokenException"])
-    @format_exception()
+    @format_exception(_redirect=True)
     def wrong_token_exception(e):
         e.code = 401
         e.description = "Token wrong token error."
@@ -89,7 +89,7 @@ def setup_jwt_exceptions(app):
 
     @app.errorhandler(UserLookupError)
     @hooks(hooks=["TokenException"])
-    @format_exception()
+    @format_exception(_redirect=True)
     def user_lookup_exception(e):
         e.code = 403
         e.description = "Token user lookup error."
@@ -97,7 +97,7 @@ def setup_jwt_exceptions(app):
 
     @app.errorhandler(CSRFError)
     @hooks(hooks=["TokenException"])
-    @format_exception()
+    @format_exception(_redirect=True)
     def csrf_exception(e):
         e.code = 403
         e.description = "CSRF error."
@@ -105,7 +105,7 @@ def setup_jwt_exceptions(app):
 
     @app.errorhandler(FreshTokenRequired)
     @hooks(hooks=["TokenException"])
-    @format_exception()
+    @format_exception(_redirect=True)
     def fresh_token_req_exception(e):
         e.code = 401
         e.description = "Token fresh required error."
@@ -113,7 +113,7 @@ def setup_jwt_exceptions(app):
 
     @app.errorhandler(InvalidHeaderError)
     @hooks(hooks=["TokenException"])
-    @format_exception()
+    @format_exception(_redirect=True)
     def invalid_header_exception(e):
         e.code = 403
         e.description = "Token invalid header error."
@@ -121,7 +121,7 @@ def setup_jwt_exceptions(app):
 
     @app.errorhandler(InvalidQueryParamError)
     @hooks(hooks=["TokenException"])
-    @format_exception()
+    @format_exception(_redirect=True)
     def invalid_query_param_exception(e):
         e.code = 403
         e.description = "Invalid query param error."

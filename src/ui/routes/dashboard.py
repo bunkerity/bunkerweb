@@ -1,13 +1,25 @@
 # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from flask import Blueprint
+from flask import redirect
 from flask import render_template
+
+
 from flask_jwt_extended import jwt_required
+from flask_jwt_extended import verify_jwt_in_request
 
 from hook import hooks
 
 from werkzeug.exceptions import NotFound
 
+from utils import get_core_format_res
+
+from os import environ
+from ui import UiConfig
+
+UI_CONFIG = UiConfig("ui", **environ)
 PREFIX = "/admin/"
+CORE_API = UI_CONFIG.CORE_ADDR
 
 dashboard = Blueprint("dashboard", __name__)
 
@@ -15,12 +27,28 @@ dashboard = Blueprint("dashboard", __name__)
 @dashboard.route(f"{PREFIX}/setup")
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def setup():
+    is_setup = get_core_format_res(f"{CORE_API}/setup", "GET", "", "Check if setup is done")
+
+    # Case setup is done and user is not logged in
+    if is_setup["data"]["setup"] and verify_jwt_in_request(True) is None:
+        return redirect(f"{PREFIX}/login", 302)
+
+    # Case setup is done and user logged
+    if is_setup["data"]["setup"] and verify_jwt_in_request(True) is not None:
+        return redirect(f"{PREFIX}/home", 302)
+
+    # Case setup not done
     return render_template("setup.html")
 
 
 @dashboard.route(f"{PREFIX}/login")
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def login():
+    # Case user logged
+    if verify_jwt_in_request(True) is not None:
+        return redirect(f"{PREFIX}/home", 302)
+
+    # Case user not logged
     return render_template("login.html")
 
 

@@ -5,6 +5,9 @@ import requests, json  # noqa: E401
 from hook import hooks
 
 from flask import request
+from flask import redirect
+
+from flask_jwt_extended import verify_jwt_in_request
 
 from logging import Logger
 from os.path import join, sep
@@ -22,6 +25,7 @@ from logger import setup_logger  # type: ignore
 LOGGER: Logger = setup_logger("UI")
 
 UI_CONFIG = UiConfig("ui", **os.environ)
+PREFIX = "/admin/"
 CORE_API = UI_CONFIG.CORE_ADDR
 
 
@@ -47,6 +51,8 @@ def get_req_data(req, queries=[]):
 
     result["args"] = args
     result["data"] = data
+
+    LOGGER.info(log_format("info", "", "", f"Get data {result}"))
 
     return result
 
@@ -86,6 +92,8 @@ def get_core_format_res(path, method, data=None, message=None, retry=1):
     except:
         raise CoreReqException(f"CORE request failed on path {path}, method {method}, data : {data or 'none'}")
 
+    LOGGER.info(log_format("info", "", "", f"Contact core succeed on path {path} with data {data or 'none'}"))
+
     return proceed_core_data(req, path, method, data, message)
 
 
@@ -100,7 +108,7 @@ def proceed_core_data(
     from exceptions.api import ProceedCoreException
 
     # Case response from core, format response for client
-    LOGGER.warn(f"PROCEED CORE RESPONDR FOR PATH : {path} WITH DATA : {res.text}")
+    LOGGER.warn(f"PROCEED CORE RESPONSE : {res.text}")
 
     try:
         # Proceed data
@@ -167,7 +175,7 @@ def default_error_handler(code="500", path="", desc="Internal server error.", ta
         return res_format("error", "500", "", "Internal server error.")
 
 
-def format_exception():
+def format_exception(_redirect=False):
     def decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
@@ -180,16 +188,19 @@ def format_exception():
             desc = error.split(":")[-1]
             path = request.path
 
-            # Send format and additionnal logic
-            try:
-                LOGGER.error(log_format("error", code, path, desc))
-                create_action_format("error", code, f"UI exception {'path : ' + path or ''}", f"{title} : {desc}", ["ui", "exception"])
-                return res_format("error", code, path, f"{title} : {desc}")
-            # Case impossible to send custom data and detail, send fallback
-            except:
-                LOGGER.error(log_format("error", "500", "", "Internal server error but impossible to get detail."))
-                create_action_format("error", "500", "UI exception", "Internal server error but impossible to get detail.", ["ui", "exception"])
-                return res_format("error", "500", "", "Internal server error.")
+            # Store info
+            LOGGER.error(log_format("error", code, path, desc))
+            create_action_format("error", code, f"UI exception {'path : ' + path or ''}", f"{title} : {desc}", ["ui", "exception"])
+
+            # Case we have to redirect
+            if _redirect and verify_jwt_in_request(True) is None:
+                return redirect(f"{PREFIX}/login", 302)
+
+            if _redirect and verify_jwt_in_request(True) is not None:
+                return redirect(f"{PREFIX}/home", 302)
+
+            # By default, we send JSON format response
+            return res_format("error", code, path, f"{title} : {desc}")
 
         return wrapped
 
