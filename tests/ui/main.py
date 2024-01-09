@@ -299,7 +299,7 @@ with driver_func() as driver:
         access_page(
             driver,
             driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[2]/a",
+            "/html/body/aside[1]/div[1]/div[3]/ul/li[2]/a",
             "instances",
         )
 
@@ -369,7 +369,7 @@ with driver_func() as driver:
         access_page(
             driver,
             driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[3]/a",
+            "/html/body/aside[1]/div[1]/div[3]/ul/li[3]/a",
             "global config",
         )
 
@@ -529,7 +529,7 @@ with driver_func() as driver:
         access_page(
             driver,
             driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[4]/a",
+            "/html/body/aside[1]/div[1]/div[3]/ul/li[4]/a",
             "services",
         )
 
@@ -891,7 +891,7 @@ with driver_func() as driver:
         access_page(
             driver,
             driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[5]/a",
+            "/html/body/aside[1]/div[1]/div[3]/ul/li[5]/a",
             "configs",
         )
 
@@ -1020,7 +1020,7 @@ location /hello {
         access_page(
             driver,
             driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[6]/a",
+            "/html/body/aside[1]/div[1]/div[3]/ul/li[6]/a",
             "plugins",
         )
 
@@ -1163,7 +1163,7 @@ location /hello {
 
         print("The plugin has been deleted, trying cache page ...", flush=True)
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[7]/a", "cache")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[7]/a", "cache")
 
         ### CACHE PAGE
 
@@ -1188,7 +1188,7 @@ location /hello {
 
         print("The cache file content is correct, trying logs page ...", flush=True)
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[8]/a", "logs")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[8]/a", "logs")
 
         ### LOGS PAGE
 
@@ -1310,7 +1310,7 @@ location /hello {
 
         print("Date filter is working, trying jobs page ...", flush=True)
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[9]/a", "jobs")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[9]/a", "jobs")
 
         ### JOBS PAGE
 
@@ -1441,11 +1441,11 @@ location /hello {
             print("The cache download is not working, exiting ...", flush=True)
             exit(1)
 
-        print("Cache download is working, trying profile page ...", flush=True)
+        print("Cache download is working, trying account page ...", flush=True)
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[10]/a", "profile")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
-        ### PROFILE PAGE
+        ### ACCOUNT PAGE
 
         username_input = safe_get_element(driver, By.ID, "admin_username")
 
@@ -1485,7 +1485,7 @@ location /hello {
 
         access_page(driver, driver_wait, "//button[@value='login']", "home")
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[10]/a", "profile")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
         username_input = safe_get_element(driver, By.ID, "admin_username")
 
@@ -1542,7 +1542,7 @@ location /hello {
 
         access_page(driver, driver_wait, "//button[@value='login']", "home")
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[10]/a", "profile")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
         print("Successfully logged in with new password, trying 2FA ...", flush=True)
 
@@ -1578,7 +1578,7 @@ location /hello {
 
         password_input.send_keys("P@ssw0rd")
 
-        access_page(driver, driver_wait, "//button[@id='totp-button' and @class='valid-btn']", "profile")
+        access_page(driver, driver_wait, "//button[@id='totp-button' and @class='valid-btn']", "account")
 
         assert_button_click(driver, "//button[@data-tab-handler='totp']")
 
@@ -1642,7 +1642,7 @@ location /hello {
 
         print("Successfully logged in with 2FA, trying to deactivate 2FA ...", flush=True)
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[10]/a", "profile")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
         assert_button_click(driver, "//button[@data-tab-handler='totp']")
 
@@ -1656,7 +1656,7 @@ location /hello {
             driver,
             driver_wait,
             "//button[@id='totp-button' and @class='delete-btn']",
-            "profile",
+            "account",
         )
 
         assert_button_click(driver, "//button[@data-tab-handler='totp']")
