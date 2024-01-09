@@ -13,7 +13,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 
 from pydantic import BaseModel
 from pydantic import Field
-from pydantic import model_validator
+from pydantic import model_validator as validator
 from pydantic.networks import IPvAnyAddress
 
 from API import API  # type: ignore
@@ -362,7 +362,7 @@ class ResponseUI(BaseModel):
     message: str = Field(examples=["BunkerWeb was reloaded"], description="The response message", max_length=255)
     data: Optional[Union[str, Dict, Union[List, Dict]]] = Field(examples=[{"key": "value"}], description="The response data")
 
-    @model_validator(mode="after")
+    @validator(mode="after")
     def check_status(self):
         # Convert to string if int
         status = str(self.status)
@@ -381,7 +381,7 @@ class SetupWizard(BaseModel):
     server_name: str = Field(examples=["www.example.com"], description="This is the server name to use for the UI", max_length=255)
     lets_encrypt: Literal["yes", "no"] = Field(examples=["yes"], description="If the UI should use Let's Encrypt")
 
-    @model_validator(mode="after")
+    @validator(mode="after")
     def check_passwords(self):
         # Check if password and password_check are the same
         if self.password != self.password_check:
@@ -393,14 +393,14 @@ class SetupWizard(BaseModel):
 
         return self
 
-    @model_validator(mode="after")
+    @validator(mode="after")
     def check_server_name(self):
         if re.search(r"\/[a-zA-Z0-9-]{1,255}$", self.server_name) is None:
             raise ValueError("server name is not valid")
 
         return self
 
-    @model_validator(mode="after")
+    @validator(mode="after")
     def check_ui_host(self):
         if re.search(r"https?:\/\/.{1,255}(:((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4})))?$", self.ui_host) is None:
             raise ValueError("UI host is not valid")

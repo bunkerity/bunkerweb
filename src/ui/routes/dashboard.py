@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
 from flask import redirect
+from flask import request
 from flask import render_template
 
+from middleware.validator import model_validator
 
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import verify_jwt_in_request
@@ -12,7 +14,7 @@ from hook import hooks
 
 from werkzeug.exceptions import NotFound
 
-from utils import get_core_format_res
+from utils import get_core_format_res, get_req_data
 
 from os import environ
 from ui import UiConfig
@@ -24,7 +26,7 @@ CORE_API = UI_CONFIG.CORE_ADDR
 dashboard = Blueprint("dashboard", __name__)
 
 
-@dashboard.route(f"{PREFIX}/setup")
+@dashboard.route(f"{PREFIX}/setup", methods=["GET"])
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def setup():
     is_setup = get_core_format_res(f"{CORE_API}/setup", "GET", "", "Check if setup is done")
@@ -41,7 +43,15 @@ def setup():
     return render_template("setup.html")
 
 
-@dashboard.route(f"{PREFIX}/login")
+@dashboard.route(f"{PREFIX}/setup", methods=["POST"])
+@model_validator(body="SetupWizard")
+@hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
+def setup_wizard():
+    args, data = [get_req_data(request, [])[k] for k in ("args", "data")]
+    return get_core_format_res(f"{CORE_API}/setup", "POST", data, "Setting up using setup wizard")
+
+
+@dashboard.route(f"{PREFIX}/login", methods=["GET"])
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def login():
     # Case user logged
@@ -52,70 +62,70 @@ def login():
     return render_template("login.html")
 
 
-@dashboard.route(f"{PREFIX}/home")
+@dashboard.route(f"{PREFIX}/home", methods=["GET"])
 @jwt_required()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def home():
     return render_template("home.html")
 
 
-@dashboard.route(f"{PREFIX}/bans")
+@dashboard.route(f"{PREFIX}/bans", methods=["GET"])
 @jwt_required()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def bans():
     return render_template("bans.html")
 
 
-@dashboard.route(f"{PREFIX}/configs")
+@dashboard.route(f"{PREFIX}/configs", methods=["GET"])
 @jwt_required()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def configs():
     return render_template("configs.html")
 
 
-@dashboard.route(f"{PREFIX}/global-config")
+@dashboard.route(f"{PREFIX}/global-config", methods=["GET"])
 @jwt_required()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def global_config():
     return render_template("global-config.html")
 
 
-@dashboard.route(f"{PREFIX}/instances")
+@dashboard.route(f"{PREFIX}/instances", methods=["GET"])
 @jwt_required()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def instances():
     return render_template("instances.html")
 
 
-@dashboard.route(f"{PREFIX}/jobs")
+@dashboard.route(f"{PREFIX}/jobs", methods=["GET"])
 @jwt_required()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def jobs():
     return render_template("jobs.html")
 
 
-@dashboard.route(f"{PREFIX}/services")
+@dashboard.route(f"{PREFIX}/services", methods=["GET"])
 @jwt_required()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def services():
     return render_template("services.html")
 
 
-@dashboard.route(f"{PREFIX}/actions")
+@dashboard.route(f"{PREFIX}/actions", methods=["GET"])
 @jwt_required()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def actions():
     return render_template("actions.html")
 
 
-@dashboard.route(f"{PREFIX}/plugins")
+@dashboard.route(f"{PREFIX}/plugins", methods=["GET"])
 @jwt_required()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def plugins():
     return render_template("plugins.html")
 
 
-@dashboard.route(f"{PREFIX}/<string:page>")
+@dashboard.route(f"{PREFIX}/<string:page>", methods=["GET"])
 @jwt_required()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def not_found(page):

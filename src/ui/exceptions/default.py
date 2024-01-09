@@ -42,7 +42,7 @@ def setup_default_exceptions(app):
 
     @app.errorhandler(NotFound)
     @hooks(hooks=["GlobalException"])
-    @format_exception(_redirect=True)
+    @format_exception()
     def handle_not_found(e):
         """Not Found mainly handle html pages not found"""
         return e
