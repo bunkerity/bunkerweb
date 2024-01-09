@@ -6,7 +6,7 @@ from glob import glob
 from os import _exit
 from os.path import isfile
 from traceback import format_exc
-from json import loads
+from json import loads, dumps
 from subprocess import run
 
 path.extend((f"{Path.cwd()}/utils", f"{Path.cwd()}/tests"))
@@ -64,6 +64,7 @@ for example in glob("./examples/*"):
                     "Skipping tests for " + tests["name"] + " (not in kinds)",
                 )
                 continue
+            log("TESTS", "ℹ️", f"JSON test = {dumps(tests)}")
             test_obj = None
             no_copy_container = False
             delay = 0
