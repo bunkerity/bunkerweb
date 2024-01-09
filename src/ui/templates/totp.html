@@ -10,6 +10,7 @@
     <link href="images/favicon.ico" rel="icon" type="image/x-icon" />
     <link rel="stylesheet" href="css/dashboard.css" />
     <link rel="stylesheet" href="css/login.css" />
+    <script defer src="./js/totp.js"></script>
   </head>
   <body>
     <div
@@ -31,7 +32,7 @@
       role="alert"
       aria-description="login message alert"
       data-flash-message
-      class="p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 bg-white rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border"
+      class="p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 bg-white rounded-lg hover:scale-102 transition shadow-md break-words bg-clip-border"
     >
       <button
         data-close-flash-message
@@ -39,7 +40,7 @@
         class="absolute right-7 top-1.5"
       >
         <svg
-          class="cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-5 w-5"
+          class="cursor-pointer fill-gray-600 absolute h-5 w-5"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 320 512"
         >
@@ -50,12 +51,12 @@
       </button>
       {% if category == 'error' or (message|safe).startswith("Please log in") %}
       <h5 class="text-lg mb-0 text-red-500">Error</h5>
-      <p class="text-gray-700 dark:text-gray-300 mb-0 text-sm">
+      <p class="text-gray-700  mb-0 text-sm">
         {{ message|safe }}
       </p>
       {% else %}
       <h5 class="text-lg mb-0 text-green-500">Success</h5>
-      <p class="text-gray-700 dark:text-gray-300 mb-0 text-sm">
+      <p class="text-gray-700  mb-0 text-sm">
         {{ message|safe }}
       </p>
       {% endif %}
@@ -71,9 +72,15 @@
         class="mx-4 col-span-2 bg-none h-full flex flex-col items-center justify-center"
       >
         <div
-          class="bg-gray-50 rounded px-8 sm:px-12 py-16 w-full max-w-[400px]"
+          class="bg-gray-50 rounded  pb-16 w-full max-w-[400px]"
         >
-          <div class="flex justify-center">
+        <a data-back-login class="hover:brightness-75 block text-gray-700 text-sm mx-2 mt-1 flex justify-start items-center" href="/login">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 stroke-gray-700 mr-1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+          </svg>
+          <span>back to login</span></a>
+
+          <div class="mt-12 flex justify-center">
             <img
               class="w-full max-w-60 max-h-30 mb-6"
               src="images/BUNKERWEB-print-hd.png"
@@ -81,10 +88,10 @@
               class="logo"
             />
           </div>
-          <h1 class="hidden text-center font-bold dark:text-white mb-8">
-            Log in
+          <h1 class="hidden text-center font-bold mb-8">
+            2FA
           </h1>
-          <form action="totp" method="POST" autocomplete="off">
+          <form class="px-8 sm:px-12" action="totp" method="POST" autocomplete="off">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input
               type="hidden"
@@ -94,7 +101,7 @@
             <!-- totp -->
             <div class="flex flex-col relative col-span-12 my-3">
               <h5
-                class="text-center my-1 transition duration-300 ease-in-out dark:opacity-90 text-md font-bold m-0 dark:text-gray-300"
+                class="text-center my-1 transition duration-300 ease-in-out  text-md font-bold m-0 "
               >
                 2FA
               </h5>
@@ -103,7 +110,7 @@
                 type="text"
                 id="totp_token"
                 name="totp_token"
-                class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                class="col-span-12 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 font-normal text-gray-700 transition-all placeholder:text-gray-500"
                 placeholder="enter totp"
                 pattern="(.*?)"
                 required
@@ -116,7 +123,7 @@
                 id="login"
                 name="login"
                 value="login"
-                class="my-4 dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+                class="my-4 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
               >
                 Log in
               </button>
