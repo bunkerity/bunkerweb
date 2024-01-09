@@ -97,7 +97,7 @@ class Global_values(Base):
         ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"),
         primary_key=True,
     )
-    value = Column(String(4096), nullable=False)
+    value = Column(String(8192), nullable=False)
     suffix = Column(Integer, primary_key=True, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
@@ -128,7 +128,7 @@ class Services_settings(Base):
         ForeignKey("bw_settings.id", onupdate="cascade", ondelete="cascade"),
         primary_key=True,
     )
-    value = Column(String(4096), nullable=False)
+    value = Column(String(8192), nullable=False)
     suffix = Column(Integer, primary_key=True, nullable=True, default=0)
     method = Column(METHODS_ENUM, nullable=False)
 
