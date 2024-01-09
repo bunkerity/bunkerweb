@@ -175,9 +175,9 @@ function letsencrypt:api()
 		if not ok then
 			return self:ret(true, "can't remove validation token : " .. err, HTTP_INTERNAL_SERVER_ERROR)
 		end
-		return true, HTTP_OK, { status = "success", msg = "validation token removed" }
+		return self:ret(true, "validation token removed", HTTP_OK)
 	end
-	return true, HTTP_NOT_FOUND, { status = "error", msg = "unknown request" }
+	return self:ret(true, "unknown request", HTTP_NOT_FOUND)
 end
 
 return letsencrypt
