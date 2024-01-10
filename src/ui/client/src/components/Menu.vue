@@ -223,6 +223,13 @@ function toggleMenu() {
         </a>
       </div>
 
+      <div class="w-full px-1">
+        <h2 class="menu-account-title">
+          {{ username }}
+        </h2>
+        <a class="menu-account-link" href="/account">manage account </a>
+      </div>
+
       <hr class="menu-separator" />
       <!-- end logo version -->
 

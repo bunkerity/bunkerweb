@@ -327,7 +327,37 @@ body {
   @apply border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300 z-[1000] dark:bg-primary bg-primary text-gray-300;
 }
 
+/* BANNER */
+
+.banner-container {
+  @apply relative flex justify-center gap-8 px-4 w-full h-[4rem] z-100 overflow-hidden;
+}
+
+.banner-bg {
+  @apply absolute left-0 h-[3.5rem] w-full bg-secondary dark:brightness-95;
+}
+
+.banner-item {
+  @apply h-[3.5rem] overflow-hidden flex justify-center items-center w-full left-0 transition-all duration-700 absolute px-1 md:px-4 py-1 bg-secondary dark:brightness-95;
+}
+
+.banner-item-text {
+  @apply dark:brightness-125 mb-0 text-center text-xs xs:text-sm text-white;
+}
+
+.banner-item-link {
+  @apply dark:brightness-125 font-medium underline text-gray-100 hover:no-underline;
+}
+
 /* MENU */
+
+.menu-account-title {
+  @apply mb-0.5 tracking-normal text-primary text-center text-lg break-word whitespace-normal dark:text-gray-300;
+}
+
+.menu-account-link {
+  @apply block underline mb-2 text-gray-600 dark:text-gray-400 text-sm text-center hover:brightness-90;
+}
 
 .menu-float-btn {
   @apply w-13 h-13 scale-90 sm:scale-100 dark:brightness-95 dark:hover:brightness-105 hover:brightness-75 xl:hidden fixed p-3 text-xl bg-white shadow cursor-pointer top-2 sm:top-3 right-5 sm:right-6 z-990 rounded-circle text-slate-700;
