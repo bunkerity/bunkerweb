@@ -49,8 +49,7 @@ def check_cert(cert_path: str, key_path: str, first_server: str) -> bool:
             "cache",
             "bunkerweb",
             "customcert",
-            first_server,
-            "cert.pem",
+            f"{first_server}.cert.pem",
         )
         cert_cache_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -68,8 +67,7 @@ def check_cert(cert_path: str, key_path: str, first_server: str) -> bool:
             "cache",
             "bunkerweb",
             "customcert",
-            first_server,
-            "key.pem",
+            f"{first_server}.key.pem",
         )
         key_cache_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -105,7 +103,7 @@ try:
         key_data = b64decode(getenv("CUSTOM_SSL_KEY_DATA", ""))
         for file, data in (("cert.pem", cert_data), ("key.pem", key_data)):
             if data != b"":
-                file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", first_server, file)
+                file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", f"{first_server}.{file}")
                 file_path.parent.mkdir(parents=True, exist_ok=True)
                 file_path.write_bytes(data)
                 if file == "cert.pem":
@@ -142,7 +140,7 @@ try:
             key_data = b64decode(getenv(f"{first_server}_CUSTOM_SSL_KEY_DATA", ""))
             for file, data in (("cert.pem", cert_data), ("key.pem", key_data)):
                 if data != b"":
-                    file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", first_server, file)
+                    file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", f"{first_server}.{file}")
                     file_path.parent.mkdir(parents=True, exist_ok=True)
                     file_path.write_bytes(data)
                     if file == "cert.pem":
