@@ -32,12 +32,7 @@ try:
     bunkernet_activated = False
     # Multisite case
     if getenv("MULTISITE", "no") == "yes":
-        servers = getenv("SERVER_NAME") or []
-
-        if isinstance(servers, str):
-            servers = servers.split(" ")
-
-        for first_server in servers:
+        for first_server in getenv("SERVER_NAME", "").split(" "):
             if getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes")) == "yes":
                 bunkernet_activated = True
                 break
