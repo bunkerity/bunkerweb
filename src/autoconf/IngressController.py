@@ -229,18 +229,18 @@ class IngressController(Controller):
         return configs
 
     def __process_event(self, event):
-        object = event.object
-        metadata = object.metadata if object else None
+        obj = event["object"]
+        metadata = obj.metadata if obj else None
         annotations = metadata.annotations if metadata else None
-        if not object:
+        if not obj:
             return False
-        if object.kind == "Pod":
+        if obj.kind == "Pod":
             return annotations and "bunkerweb.io/INSTANCE" in annotations
-        if object.kind == "Ingress":
+        if obj.kind == "Ingress":
             return True
-        if object.kind == "ConfigMap":
+        if obj.kind == "ConfigMap":
             return annotations and "bunkerweb.io/CONFIG_TYPE" in annotations
-        if object.kind == "Service":
+        if obj.kind == "Service":
             return True
         return False
 
