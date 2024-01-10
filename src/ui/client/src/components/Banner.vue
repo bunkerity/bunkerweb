@@ -1,22 +1,4 @@
 <script setup>
-const items = [
-  {
-    id: 0,
-    text: "Need premium support ? Check BunkerWeb Panel",
-    link: "https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui",
-  },
-  {
-    id: 1,
-    text: "Try BunkerWeb on our demo wep app !",
-    link: "https://demo.bunkerweb.io/link/?utm_campaign=self&utm_source=ui",
-  },
-  {
-    id: 2,
-    text: "All informations about BunkerWeb on our website !",
-    link: "https://www.bunkerweb.io/?utm_campaign=self&utm_source=ui",
-  },
-];
-
 class Banner {
   constructor() {
     this.bannerEl = document.getElementById("banner");
@@ -120,19 +102,19 @@ onMounted(() => {
     <div class="banner-bg"></div>
 
     <div
-      v-for="item in items"
+      v-for="index in 3"
       role="listitem"
       aria-hidden="false"
-      :id="`banner-item-${item.id}`"
+      :id="`banner-item-${index}`"
       class="banner-item"
     >
       <p class="banner-item-text">
-        {{ item.text }}
+        {{ $t(`dashboard_banner_title_${index}`) }}
         <a
           class="banner-item-link"
           href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui"
         >
-          {{ item.link }}
+          {{ $t(`dashboard_banner_link_text_${index}`) }}
         </a>
       </p>
     </div>
