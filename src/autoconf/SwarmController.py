@@ -114,7 +114,9 @@ class SwarmController(Controller):
         )
 
     def __process_event(self, event):
-        return "Actor" in event and "Attributes" in event["Actor"] and "Spec" in event["Actor"]["Attributes"] and "Labels" in event["Actor"]["Attributes"]["Spec"] and ("bunkerweb.INSTANCE" in event["Actor"]["Attributes"]["Spec"]["Labels"] or "bunkerweb.CONFIG_TYPE" in event["Actor"]["Attributes"]["Spec"]["Labels"])
+        # TODO : dynamicaly retrieve labels from object ID
+        return True
+        #return "Actor" in event and "Attributes" in event["Actor"] and "Spec" in event["Actor"]["Attributes"] and "Labels" in event["Actor"]["Attributes"]["Spec"] and ("bunkerweb.INSTANCE" in event["Actor"]["Attributes"]["Spec"]["Labels"] or "bunkerweb.CONFIG_TYPE" in event["Actor"]["Attributes"]["Spec"]["Labels"])
 
     def __event(self, event_type):
         while True:
