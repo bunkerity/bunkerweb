@@ -69,7 +69,7 @@ async function updatePw() {
       />
     </SettingsLayout>
     <SettingsLayout
-      :label="$t('account_password')"
+      :label="$t('account_password_new')"
       :name="`edit-pw-new-password`"
     >
       <SettingsInput

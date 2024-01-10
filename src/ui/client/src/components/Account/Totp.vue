@@ -72,7 +72,7 @@ async function updateTotp() {
   if (!totp.codeValue || !totp.pwValue) return;
 
   await fetchAPI(
-    "/api/database/account/totp",
+    `/api/account/totp?method=ui&action=${props.isTotp ? "disable" : "enable"}`,
     "POST",
     { code: totp.code, password: totp.password },
     totp,
@@ -90,48 +90,65 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="props.isTotp" class="col-span-12 grid grid-cols-12">
+  <div class="col-span-12 grid grid-cols-12">
     <SettingsLayout
-      :label="$t('account_username')"
-      :name="`edit-username-username`"
+      v-if="!props.isTotp"
+      :label="$t('account_totp_qr_code')"
+      :name="`edit-totp-qr-code`"
+    >
+    </SettingsLayout>
+    <SettingsLayout
+      v-if="!props.isTotp"
+      :label="$t('account_totp_secret')"
+      :name="`edit-totp-secret`"
     >
       <SettingsInput
-        @inp="(v) => (username.userValue = v)"
         :settings="{
-          id: `edit-username-username`,
-          type: 'text',
-          value: username.userValue,
-          placeholder: 'username',
+          id: `edit-totp-secret`,
+          type: 'password',
+          value: secretkey.setup.secret,
+          placeholder: 'secret key',
           disabled: true,
         }"
       />
     </SettingsLayout>
+    <SettingsLayout :label="$t('account_totp_code')" :name="`edit-totp-code`">
+      <SettingsInput
+        @inp="(v) => (totp.code = v)"
+        :settings="{
+          id: `edit-totp-code`,
+          type: 'text',
+          value: totp.codeValue,
+          placeholder: 'code',
+        }"
+      />
+    </SettingsLayout>
+
     <SettingsLayout
       :label="$t('account_password')"
-      :name="`edit-username-password`"
+      :name="`edit-totp-password`"
     >
       <SettingsInput
-        @inp="(v) => (username.pwValue = v)"
+        @inp="(v) => (totp.pwValue = v)"
         :settings="{
-          id: `edit-username-password`,
+          id: `edit-totp-password`,
           type: 'password',
-          value: username.pwValue,
+          value: totp.pwValue,
           placeholder: 'P@ssw0rd',
-          disabled: true,
         }"
       />
     </SettingsLayout>
 
     <div class="col-span-12 flex justify-center mt-4">
       <ButtonBase
-        @click="updateUsername()"
-        :aria-description="$t('account_edit_username_desc')"
+        @click="updateTotp()"
+        :aria-description="$t('account_edit_totp_desc')"
         color="edit"
         size="normal"
         class="text-sm ml-4"
-        :disabled="username.userValue && username.pwValue ? false : true"
+        :disabled="totp.codeValue && totp.pwValue ? false : true"
       >
-        {{ $t("action_edit") }}
+        {{ props.isTotp ? $t("action_disable") : $t("action_enable") }}
       </ButtonBase>
     </div>
   </div>
