@@ -113,14 +113,21 @@ class SwarmController(Controller):
             first=not self._loaded,
         )
 
+    def __process_event(self, event):
+        return "Actor" in event and "Attributes" in event["Actor"] and "Spec" in event["Actor"]["Attributes"] and "Labels" in event["Actor"]["Attributes"]["Spec"] and ("bunkerweb.INSTANCE" in event["Actor"]["Attributes"]["Spec"]["Labels"] or "bunkerweb.CONFIG_TYPE" in event["Actor"]["Attributes"]["Spec"]["Labels"])
+
     def __event(self, event_type):
         while True:
             locked = False
             error = False
             try:
-                for _ in self.__client.events(decode=True, filters={"type": event_type}):
+                for event in self.__client.events(decode=True, filters={"type": event_type}):
                     self.__internal_lock.acquire()
                     locked = True
+                    if not self.__process_event(event):
+                        self.__internal_lock.release()
+                        locked = False
+                        continue
                     try:
                         self._update_settings()
                         self._instances = self.get_instances()
@@ -137,6 +144,7 @@ class SwarmController(Controller):
                             self._logger.info(
                                 "Successfully deployed new configuration 🚀",
                             )
+                            self._set_autoconf_load_db()
                     except:
                         self._logger.error(f"Exception while processing Swarm event ({event_type}) :\n{format_exc()}")
                     self.__internal_lock.release()

@@ -228,6 +228,22 @@ class IngressController(Controller):
                 configs[config_type][f"{config_site}{config_name}"] = config_data
         return configs
 
+    def __process_event(self, event):
+        object = event.object
+        metadata = object.metadata if object else None
+        annotations = metadata.annotations if metadata else None
+        if not object:
+            return False
+        if object.kind == "Pod":
+            return annotations and "bunkerweb.io/INSTANCE" in annotations
+        if object.kind == "Ingress":
+            return True
+        if object.kind == "ConfigMap":
+            return annotations and "bunkerweb.io/CONFIG_TYPE" in annotations
+        if object.kind == "Service":
+            return True
+        return False
+
     def __watch(self, watch_type):
         w = watch.Watch()
         what = None
@@ -246,9 +262,13 @@ class IngressController(Controller):
             locked = False
             error = False
             try:
-                for _ in w.stream(what):
+                for event in w.stream(what):
                     self.__internal_lock.acquire()
                     locked = True
+                    if not self.__process_event(event):
+                        self.__internal_lock.release()
+                        locked = False
+                        continue
                     self._update_settings()
                     self._instances = self.get_instances()
                     self._services = self.get_services()
