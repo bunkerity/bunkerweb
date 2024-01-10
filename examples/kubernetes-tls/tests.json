@@ -3,6 +3,7 @@
   "kinds": ["kubernetes"],
   "timeout": 60,
   "delay": 120,
+  "tls_edit": false,
   "tests": [
     {
       "type": "string",

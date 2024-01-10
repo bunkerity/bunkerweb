@@ -143,9 +143,13 @@ class Test(ABC):
                 ok = test["status"] == r.status_code
             if ok and "tls" in test:
                 ex_tls = test["tls"]
-                for ex_domain, test_domain in self._domains.items():
-                    if search(ex_domain, ex_tls):
-                        ex_tls = sub(ex_domain, test_domain, ex_tls)
+                tls_edit = True
+                if "tls_edit" in test:
+                    tls_edit = test["tls_edit"]
+                if tls_edit:
+                    for ex_domain, test_domain in self._domains.items():
+                        if search(ex_domain, ex_tls):
+                            ex_tls = sub(ex_domain, test_domain, ex_tls)
                 connection = create_connection((urlparse(ex_url).netloc, 443))
                 context = SSLContext()
                 sock = context.wrap_socket(connection, server_hostname=urlparse(ex_url).netloc)
@@ -154,7 +158,7 @@ class Test(ABC):
                 x509 = crypto.load_certificate(crypto.FILETYPE_ASN1, cert)
                 if x509.get_subject().CN != ex_tls:
                     ok = False
-                    log("TEST", "⚠️", f"wrong cert CN : {x509.get_subject().CN}")
+                    log("TEST", "⚠️", f"wrong cert CN : {x509.get_subject().CN} != {ex_tls}")
             return ok
         except:
             return False
