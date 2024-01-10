@@ -87,15 +87,14 @@ function customcert:ssl_certificate()
 	if not server_name then
 		return self:ret(false, "can't get server_name : " .. err)
 	end
-	if self.variables["USE_CUSTOM_SSL"] == "yes" then
-		local data
-		data, err = self.datastore:get("plugin_customcert_" .. server_name, true)
-		if not data then
-			return self:ret(
-				false,
-				"error while getting plugin_customcert_" .. server_name .. " from datastore : " .. err
-			)
-		end
+	local data
+	data, err = self.datastore:get("plugin_customcert_" .. server_name, true)
+	if not data and err ~= "not found" then
+		return self:ret(
+			false,
+			"error while getting plugin_customcert_" .. server_name .. " from datastore : " .. err
+		)
+	elseif data then
 		return self:ret(true, "certificate/key data found", data)
 	end
 	return self:ret(true, "custom certificate is not used")

@@ -57,6 +57,19 @@ utils.get_variable = function(variable, site_search, ctx)
 		end
 		if variables[server_name] then
 			value = variables[server_name][variable]
+		else
+			for first_server, server_variables in pairs(variables) do
+				if first_server ~= "global" then
+					all_server_name = server_variables["SERVER_NAME"]
+					if all_server_name then
+						for single_server_name in all_server_name:gmatch("%S+") do
+							if single_server_name == server_name then
+								return server_variables[variable], "success"
+							end
+						end
+					end
+				end
+			end
 		end
 	end
 	return value, "success"

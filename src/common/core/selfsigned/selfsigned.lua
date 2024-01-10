@@ -87,18 +87,17 @@ function selfsigned:ssl_certificate()
 	if not server_name then
 		return self:ret(false, "can't get server_name : " .. err)
 	end
-	if self.variables["GENERATE_SELF_SIGNED_SSL"] == "yes" then
-		local data
-		data, err = self.datastore:get("plugin_selfsigned_" .. server_name, true)
-		if not data then
-			return self:ret(
-				false,
-				"error while getting plugin_selfsigned_" .. server_name .. " from datastore : " .. err
-			)
-		end
+	local data
+	data, err = self.datastore:get("plugin_selfsigned_" .. server_name, true)
+	if not data and err ~= "not found" then
+		return self:ret(
+			false,
+			"error while getting plugin_selfsigned_" .. server_name .. " from datastore : " .. err
+		)
+	elseif data then
 		return self:ret(true, "certificate/key data found", data)
 	end
-	return self:ret(true, "selfsigned is not used")
+	return self:ret(true, "self signed is not used")
 end
 
 function selfsigned:load_data(data, server_name)
