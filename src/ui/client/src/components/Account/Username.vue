@@ -69,7 +69,7 @@ async function updateUsername() {
           id: `edit-username-username`,
           type: 'text',
           value: username.userValue,
-          placeholder: 'username',
+          placeholder: $t('account_username_placeholder'),
           disabled: true,
         }"
       />
@@ -84,7 +84,7 @@ async function updateUsername() {
           id: `edit-username-password`,
           type: 'password',
           value: username.pwValue,
-          placeholder: 'P@ssw0rd',
+          placeholder: $t('account_password_placeholder'),
           disabled: true,
         }"
       />

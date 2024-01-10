@@ -107,7 +107,7 @@ onMounted(() => {
           id: `edit-totp-secret`,
           type: 'password',
           value: secretkey.setup.secret,
-          placeholder: 'secret key',
+          placeholder: $t('account_totp_secret_placeholder'),
           disabled: true,
         }"
       />
@@ -119,7 +119,7 @@ onMounted(() => {
           id: `edit-totp-code`,
           type: 'text',
           value: totp.codeValue,
-          placeholder: 'code',
+          placeholder: $t('account_totp_code_placeholder'),
         }"
       />
     </SettingsLayout>
@@ -134,7 +134,7 @@ onMounted(() => {
           id: `edit-totp-password`,
           type: 'password',
           value: totp.pwValue,
-          placeholder: 'P@ssw0rd',
+          placeholder: $t('account_password_placeholder'),
         }"
       />
     </SettingsLayout>

@@ -63,7 +63,7 @@ async function updatePw() {
           id: `edit-pw-password`,
           type: 'password',
           value: pw.currPwValue,
-          placeholder: 'P@ssw0rd',
+          placeholder: $t('account_password_placeholder'),
           disabled: true,
         }"
       />
@@ -78,7 +78,7 @@ async function updatePw() {
           id: `edit-pw-new-password`,
           type: 'password',
           value: pw.newPwValue,
-          placeholder: 'P@ssw0rd',
+          placeholder: $t('account_password_placeholder'),
           disabled: true,
         }"
       />
@@ -94,7 +94,7 @@ async function updatePw() {
           id: `edit-pw-confirm-password`,
           type: 'password',
           value: pw.confirmPwValue,
-          placeholder: 'P@ssw0rd',
+          placeholder: $t('account_password_placeholder'),
           disabled: true,
         }"
       />

@@ -39,6 +39,38 @@
   @apply bg-gray-50 rounded px-12 py-16 w-full max-w-[400px];
 }
 
+.login-title-desktop {
+  @apply hidden capitalize-first lg:block text-center font-bold  mb-8;
+}
+
+.login-particle-container {
+  @apply -z-10 fixed lg:relative lg:col-span-1 bg-primary;
+}
+
+/* TOTP */
+
+.totp-main {
+  @apply grid grid-cols-2 align-middle items-center min-h-screen;
+}
+
+.totp-container {
+  @apply mx-4 col-span-2 bg-none h-full flex flex-col items-center justify-center;
+}
+
+.totp-logo-container {
+  @apply bg-gray-50 rounded px-12 py-16 w-full max-w-[400px];
+}
+
+.totp-title {
+  @apply hidden capitalize-first text-center font-bold  mb-8;
+}
+
+.totp-particle-container {
+  @apply -z-10 fixed  bg-primary;
+}
+
+/* OUTSIDE DASHBOARD */
+
 .logout-input-group {
   @apply flex flex-col relative col-span-12 my-3 mx-2 max-w-[400px] w-full;
 }
@@ -59,13 +91,7 @@
   @apply my-4 dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-primary hover:bg-primary/80 focus:bg-primary/80 leading-normal text-sm ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md;
 }
 
-.login-title-desktop {
-  @apply hidden capitalize-first lg:block text-center font-bold dark:text-white mb-8;
-}
-
-.login-particle-container {
-  @apply -z-10 fixed lg:relative lg:col-span-1 bg-primary;
-}
+/* ACCOUNT */
 
 .account-alert-container {
   @apply fixed bottom-4 right-0 min-w-[340px];

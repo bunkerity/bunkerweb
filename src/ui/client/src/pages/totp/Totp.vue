@@ -88,57 +88,39 @@ onMounted(() => {
       id="logout-error"
       type="error"
       status="403"
-      :message="$t('login_error')"
+      :message="$t('totp_error')"
       v-if="data.isErr"
     />
   </div>
-  <main class="login-main">
+  <main class="totp-main">
     <!--form -->
-    <div class="login-container">
-      <div class="login-logo-container">
+    <div class="totp-container">
+      <div class="totp-logo-container">
         <div class="flex justify-center">
           <img
-            class="lg:hidden max-w-60 max-h-30 mb-6"
+            class="max-w-60 max-h-30 mb-6"
             src="/images/BUNKERWEB-print-hd.png"
-            :alt="$t('login_logo_alt')"
+            :alt="$t('totp_logo_alt')"
           />
         </div>
-        <h1 class="login-title-desktop">
-          {{ $t("login_title") }}
+        <h1 class="totp-title">
+          {{ $t("totp_title") }}
         </h1>
-        <form action="/login" method="POST" autocomplete="off">
-          <!-- username inpt-->
+        <form @submit.prevent action="/login" method="POST" autocomplete="off">
           <LogoutInpGroup>
             <LogoutInput
-              :label="$t('login_username')"
-              name="username"
+              :label="$t('totp_code')"
+              name="totp-code"
               pattern="(.*?)"
-              :placeholder="$t('login_username_placeholder')"
+              :placeholder="$t('totp_code_placeholder')"
               type="text"
               :required="true"
             />
           </LogoutInpGroup>
-          <!-- end username inpt-->
-          <!-- password inpt-->
-          <LogoutInpGroup>
-            <LogoutInput
-              :label="$t('login_password')"
-              name="password"
-              pattern="(.*?)"
-              :placeholder="$t('login_password_placeholder')"
-              type="password"
-              :required="true"
-            />
-          </LogoutInpGroup>
-          <!-- end password inpt-->
+
           <div class="flex justify-center">
-            <button
-              type="submit"
-              id="login"
-              name="login"
-              class="logout-submit-btn"
-            >
-              {{ $t("login_log_button") }}
+            <button type="submit" id="totp" class="logout-submit-btn">
+              {{ $t("totp_button") }}
             </button>
           </div>
         </form>
@@ -146,15 +128,8 @@ onMounted(() => {
     </div>
     <!-- end form -->
     <!-- particles -->
-    <div class="login-particle-container">
-      <div id="particles-js" class="login-img [&>*]:bg-primary"></div>
-      <div class="hidden lg:flex justify-center">
-        <img
-          class="max-w-60 max-h-30"
-          src="/images/BUNKERWEB-print-hd-blanc.png"
-          :alt="$t('login_logo_alt')"
-        />
-      </div>
+    <div class="totp-particle-container">
+      <div id="particles-js" class="totp-img [&>*]:bg-primary"></div>
     </div>
   </main>
 </template>
