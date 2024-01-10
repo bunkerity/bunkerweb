@@ -1,7 +1,7 @@
 {
   "name": "autoconf-configs",
   "kinds": ["autoconf"],
-  "delay": 120,
+  "delay": 180,
   "timeout": 60,
   "tests": [
     {
