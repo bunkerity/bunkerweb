@@ -3,6 +3,8 @@
 # shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
+RESTART_INTERVAL_S=10
+
 shopt -s nullglob
 ascii_array=(/usr/share/bunkerweb/misc/*.ascii)
 shopt -u nullglob
@@ -48,14 +50,17 @@ echo -e "IS_LOADING=yes\nUSE_BUNKERNET=no\nSERVER_NAME=\nAPI_HTTP_PORT=${API_HTT
 python3 /usr/share/bunkerweb/gen/main.py --variables /tmp/variables.env
 
 # start nginx
-log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
-nginx -g "daemon off;" &
-pid="$!"
-
-# wait while nginx is running
-wait "$pid"
-while [ -f "/var/run/bunkerweb/nginx.pid" ] ; do
+while : ; do
+	log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
+	nginx -g "daemon off;" &
+	pid="$!"
+	# wait while nginx is running
 	wait "$pid"
+	# if we arrive here and the pid file still exists, it was not cleaned up and indicates a dirty exit (crash)
+	[[ -f "/var/run/bunkerweb/nginx.pid" ]] || break
+	rm -f "/var/run/bunkerweb/nginx.pid"
+	log "ENTRYPOINT" "❌" "Main nginx process unexpectedly died! Trying restart in ${RESTART_INTERVAL_S}s"
+	sleep ${RESTART_INTERVAL_S}
 done
 
 log "ENTRYPOINT" "ℹ️" "BunkerWeb stopped"
