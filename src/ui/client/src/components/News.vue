@@ -1,5 +1,8 @@
 <script setup>
-import { onMounted, reactive } from "vue";
+import { reactive } from "vue";
+import { useBannerStore } from "@store/global.js";
+// Use to update position when banner is visible or not
+const bannerStore = useBannerStore();
 
 // DATA
 const news = reactive({

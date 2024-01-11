@@ -19,7 +19,7 @@ export const useFeedbackStore = defineStore("feedback", () => {
   function removeFeedback(id) {
     data.value.splice(
       data.value.findIndex((item) => item["id"] === id),
-      1,
+      1
     );
   }
 
@@ -34,4 +34,14 @@ export const useRefreshStore = defineStore("refresh", () => {
   }
 
   return { count, refresh };
+});
+
+export const useBannerStore = defineStore("banner", () => {
+  const isBanner = ref(true);
+
+  async function isBannerVisible(bool) {
+    isBanner.value = bool;
+  }
+
+  return { isBanner, isBannerVisible };
 });

@@ -330,7 +330,7 @@ body {
 /* BANNER */
 
 .banner-container {
-  @apply relative flex justify-center gap-8 px-4 w-full h-[4rem] z-100 overflow-hidden;
+  @apply relative flex justify-center gap-8 px-4 w-full h-[4rem] z-10 overflow-hidden;
 }
 
 .banner-bg {
@@ -352,7 +352,7 @@ body {
 /* MENU */
 
 .menu-account-title {
-  @apply mb-0.5 tracking-normal text-primary text-center text-lg break-word whitespace-normal dark:text-gray-300;
+  @apply mb-0.5 tracking-normal text-primary text-center text-lg break-words whitespace-normal dark:text-gray-300;
 }
 
 .menu-account-link {
@@ -392,7 +392,7 @@ body {
 }
 
 .menu-nav-list-container {
-  @apply items-center block w-auto max-h-screen overflow-auto h-sidenav grow basis-full;
+  @apply items-center block w-auto max-h-screen overflow-auto h-[400px]  grow basis-full;
 }
 
 .menu-nav-list {

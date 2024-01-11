@@ -7,6 +7,7 @@ import TablistBase from "@components/Tablist/Base.vue";
 import { getLogsByFilter } from "@utils/logs.js";
 import { fetchAPI } from "@utils/api.js";
 import { useLogsStore } from "@store/logs.js";
+import { useBannerStore } from "@store/global.js";
 
 // Handle feedback history panel
 const dropdown = reactive({
@@ -16,6 +17,9 @@ const dropdown = reactive({
 // Share feedback store
 // Get changes from another component and display alert
 const feedback = useFeedbackStore();
+
+// Use to update position when banner is visible or not
+const bannerStore = useBannerStore();
 
 // Delay new last alert should be display
 const showDelay = 4000;

@@ -8,6 +8,7 @@ import FeedbackStructure from "@components/Feedback/Structure.vue";
 import News from "@components/News.vue";
 import Header from "@components/Header.vue";
 import Refresh from "@components/Refresh.vue";
+import Banner from "@components/Banner.vue";
 </script>
 
 <template>
@@ -16,6 +17,7 @@ import Refresh from "@components/Refresh.vue";
   >
   <Loader />
   <LangSwitch />
+  <Banner />
   <!-- info -->
   <main class="content-container">
     <Menu />

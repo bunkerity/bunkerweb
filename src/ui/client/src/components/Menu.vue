@@ -15,6 +15,10 @@ import MenuSvgActions from "@components/Menu/Svg/Actions.vue";
 import { reactive, onMounted } from "vue";
 import { getDarkMode } from "@utils/global.js";
 import { getCookie } from "@utils/api";
+import { useBannerStore } from "@store/global.js";
+
+// Use to update position when banner is visible or not
+const bannerStore = useBannerStore();
 
 async function getlogout() {
   fetch("/logout", {
@@ -234,7 +238,7 @@ function toggleMenu() {
       <!-- end logo version -->
 
       <!-- list items -->
-      <div class="menu-nav-list-container h-full">
+      <div class="menu-nav-list-container">
         <ul class="menu-nav-list">
           <!-- item -->
           <li v-for="(item, id) in navList" :key="id" class="mt-0.5 w-full">

@@ -1,99 +1,68 @@
 <script setup>
-class Banner {
-  constructor() {
-    this.bannerEl = document.getElementById("banner");
-    this.bannerItems = this.bannerEl.querySelectorAll('[role="listitem"]');
-    this.nextDelay = 9000;
-    this.transDuration = 700;
-    this.menuBtn = document.querySelector("[data-sidebar-menu-toggle]");
-    this.menuEl = document.querySelector("[data-sidebar-menu]");
-    this.newsBtn = document.querySelector("[data-sidebar-info-open]");
-    this.flashBtn = document.querySelector("[data-flash-group]");
-    this.init();
-  }
+import { onMounted, watch } from "vue";
+import { useBannerStore } from "@store/global.js";
 
-  init() {
-    this.changeMenu();
-    setInterval(() => {
-      // Get current visible
-      let visibleEl;
-      this.bannerItems.forEach((item) => {
-        if (item.getAttribute("aria-hidden") === "false") {
-          visibleEl = item;
-        }
-      });
+const bannerStore = useBannerStore();
 
-      // Get next one to show (next index or first one)
-      let nextEl =
-        this.bannerEl.querySelector(
-          `[role="listitem"][data-id="${
-            +visibleEl.getAttribute("data-id") + 1
-          }"]`
-        ) || this.bannerEl.querySelector(`[role="listitem"][data-id="0"]`);
+const banner = reactive({
+  nextDelay: 9000,
+  transDuration: 700,
+  visibleId: "1",
+});
 
-      // Hide current one
-      visibleEl.classList.add("-left-full");
-      visibleEl.classList.remove("left-0");
-      visibleEl.setAttribute("aria-hidden", "true");
-      setTimeout(() => {
-        visibleEl.classList.remove("transition-all");
-      }, this.transDuration + 10);
-      setTimeout(() => {
-        visibleEl.classList.add("opacity-0");
-      }, this.transDuration + 20);
-      setTimeout(() => {
-        visibleEl.classList.remove("-left-full");
-        visibleEl.classList.add("left-full");
-      }, this.transDuration * 2);
+watch(bannerStore.visibleId, (newVal, oldVal) => {
+  banner.visibleId = newVal;
 
-      // Show next one
-      nextEl.classList.remove("opacity-0");
-      nextEl.classList.add("transition-all");
-      nextEl.classList.add("left-0");
-      nextEl.classList.remove("left-full");
-      nextEl.setAttribute("aria-hidden", "false");
-    }, this.nextDelay);
-  }
+  // Hide previous one
+  const oldItem = document.getElementById(`banner-item-${oldVal}`);
+  oldItem.classList.add("-left-full");
+  oldItem.classList.remove("left-0");
+  setTimeout(() => {
+    oldItem.classList.remove("transition-all");
+  }, banner.transDuration + 10);
+  setTimeout(() => {
+    oldItem.classList.add("opacity-0");
+  }, banner.transDuration + 20);
+  setTimeout(() => {
+    oldItem.classList.remove("-left-full");
+    oldItem.classList.add("left-full");
+  }, banner.transDuration * 2);
 
-  changeMenu() {
-    let options = {
-      root: null,
-      rootMargin: "0px",
-      threshold: 0.35,
-    };
+  // Show new one
+  const newItem = document.getElementById(`banner-item-${newVal}`);
+  newItem.classList.remove("opacity-0");
+  newItem.classList.add("transition-all");
+  newItem.classList.add("left-0");
+  newItem.classList.remove("left-full");
+});
 
-    let observer = new IntersectionObserver((entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          this.menuEl.classList.add("mt-[4.5rem]");
-          this.menuBtn.classList.add("top-[8.2rem]", "sm:top-[4.5rem]");
-          this.newsBtn.classList.add("top-[4.5rem]");
-          this.flashBtn.classList.add("top-[4.5rem]");
-          this.menuBtn.classList.remove("top-16", "sm:top-2");
-          this.newsBtn.classList.remove("top-2");
-          this.flashBtn.classList.remove("top-2");
-          this.menuEl.classList.remove("mt-2");
-        }
+function setupBanner() {
+  // Switch item every interval and
+  setInterval(() => {
+    banner.isVisible =
+      banner.isVisibleId === "3" ? "1" : `${banner.isVisibleId + 1}`;
+  }, banner.nextDelay);
 
-        if (!entry.isIntersecting) {
-          this.menuEl.classList.add("mt-2");
-          this.menuBtn.classList.add("top-16", "sm:top-2");
-          this.newsBtn.classList.add("top-2");
-          this.flashBtn.classList.add("top-2");
-          this.menuBtn.classList.remove("top-[8.2rem]", "sm:top-[4.5rem]");
-          this.newsBtn.classList.remove("top-[4.5rem]");
-          this.flashBtn.classList.remove("top-[4.5rem]");
-          this.menuEl.classList.remove("mt-[4.5rem]");
-        }
-      });
-    }, options);
+  // Observe banner and set is visible or not to
+  // Update float button and menu position
+  let options = {
+    root: null,
+    rootMargin: "0px",
+    threshold: 0.35,
+  };
 
-    observer.observe(this.bannerEl);
-  }
+  let observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) bannerStore.setBannerVisible(true);
+      if (!entry.isIntersecting) bannerStore.setBannerVisible(false);
+    });
+  }, options);
+
+  observer.observe(ocument.getElementById("banner"));
 }
 
 onMounted(() => {
-  new Banner();
+  setupBanner();
 });
 </script>
 
@@ -104,7 +73,7 @@ onMounted(() => {
     <div
       v-for="index in 3"
       role="listitem"
-      aria-hidden="false"
+      :aria-hidden="banner.visibleId === index ? 'false' : 'true'"
       :id="`banner-item-${index}`"
       class="banner-item"
     >
