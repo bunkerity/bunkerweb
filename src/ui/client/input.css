@@ -239,12 +239,48 @@ body {
   @apply pointer-events-none fill-primary brightness-150 dark:brightness-200;
 }
 
-.input-pw-svg-visible {
-  @apply h-5 w-5 flex items-center align-middle;
+.input-pw-button {
+  @apply transition-all rounded-full h-5 w-5 flex items-center align-middle hover:brightness-90;
+}
+
+.enabled.input-pw-button {
+  @apply bg-white dark:bg-slate-700;
+}
+
+.disabled.input-pw-button {
+  @apply bg-gray-400 dark:bg-gray-800;
 }
 
 .input-pw-svg-invisible {
   @apply flex scale-110 h-5 w-5 items-center align-middle;
+}
+
+.input-clipboard-container {
+  @apply rounded-full  absolute flex h-5 w-5;
+}
+
+.pw-input.input-clipboard-container {
+  @apply right-[2.25rem];
+}
+
+.no-pw-input.input-clipboard-container {
+  @apply right-2;
+}
+
+.input-clipboard-button {
+  @apply transition-all rounded-full h-5 w-5 flex items-center align-middle hover:brightness-90;
+}
+
+.enabled.input-clipboard-button {
+  @apply bg-white dark:bg-slate-700;
+}
+
+.disabled.input-clipboard-button {
+  @apply bg-gray-400 dark:bg-gray-800;
+}
+
+.input-clipboard-svg {
+  @apply stroke-gray-800 dark:stroke-gray-300 h-full w-full;
 }
 
 /* POPOVER */
@@ -396,7 +432,7 @@ body {
 }
 
 .banner.menu-container {
-  @apply mt-[4.5rem];
+  @apply delay-100 mt-[4.5rem];
 }
 
 .active.menu-container {
@@ -420,7 +456,15 @@ body {
 }
 
 .menu-nav-list-container {
-  @apply items-center block w-auto max-h-screen overflow-auto h-[300px]  grow basis-full;
+  @apply transition-all items-center block w-auto max-h-screen overflow-auto h-[45vh] grow basis-full;
+}
+
+.no-banner.menu-nav-list-container {
+  @apply h-[50vh];
+}
+
+.banner.menu-nav-list-container {
+  @apply h-[45vh];
 }
 
 .menu-nav-list {
@@ -592,7 +636,7 @@ body {
 /* FOOTER */
 
 .footer-container {
-  @apply -z-10 relative mt-4 w-full h-max  mb-1;
+  @apply -z-10 relative mt-4 w-full h-max mb-1;
 }
 
 .footer-wrap {
@@ -604,7 +648,7 @@ body {
 }
 
 .footer-item-right-container {
-  @apply order-2 lg:order-1 px-0 mt-2 sm:mt-1 lg:mt-0;
+  @apply order-2 lg:order-1 px-0 mt-2 lg:mt-0;
 }
 
 .footer-item-right {

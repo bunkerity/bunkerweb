@@ -27,10 +27,7 @@ function refreshBtn() {
   <!-- float button-->
   <button
     @click="refreshBtn()"
-    :class="[
-      'refresh-float-btn',
-      bannerStore.isBanner ? 'banner' : 'no-banner',
-    ]"
+    :class="['refresh-float-btn', bannerStore.bannerClass]"
   >
     <span class="sr-only">{{ $t("dashboard_refresh_button") }}</span>
     <svg

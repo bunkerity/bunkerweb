@@ -1,7 +1,28 @@
 <script setup>
 import { useConfigStore } from "@store/settings.js";
 import { getDefaultMethod } from "@utils/settings.js";
-import { reactive, defineProps, KeepAlive, computed } from "vue";
+import { reactive, ref, defineProps, onMounted } from "vue";
+
+/* PROPS ARGUMENTS
+  * 
+  *
+settings = {
+  id: string,
+  type: htmlType<string>,
+  disabled: boolean,
+  required: boolean,
+  value: string,
+  placeholder: string,
+  pattern: string,
+  clipboard: boolean,
+  readonly: boolean,
+  context: string,
+  default : string,
+  method: string,  
+};
+  * 
+  *
+*/
 
 const props = defineProps({
   setting: {
@@ -17,6 +38,8 @@ const props = defineProps({
 
 const config = useConfigStore();
 
+const inputEl = ref(null);
+
 const input = reactive({
   id: props.setting.id,
   context: props.setting.context,
@@ -29,7 +52,38 @@ const input = reactive({
   pattern: props.setting.regex,
   placeholder: props.setting.placeholder || "",
   required: props.setting.required || false,
+  clipboard: props.setting.clipboard || false,
+  isClipAllow: true,
   showInp: false,
+});
+
+function copyClipboard() {
+  if (!input.clipboard || !input.isClipAllow) return;
+
+  navigator.permissions.query({ name: "clipboard-write" }).then((result) => {
+    if (result.state === "granted" || result.state === "prompt") {
+      /* write to the clipboard now */
+
+      inputEl.select();
+      inputEl.setSelectionRange(0, 99999); // For mobile devices
+
+      // Copy the text inside the text field
+      return navigator.clipboard.writeText(inputEl.value);
+    }
+  });
+}
+
+onMounted(() => {
+  // Clipboard not allowed on http
+  if (!window.location.href.startsWith("https://")) return;
+
+  // Check clipboard permission
+  navigator.permissions.query({ name: "clipboard-write" }).then((result) => {
+    if (result.state === "granted" || result.state === "prompt") {
+      input.isClipAllow = true;
+      return;
+    }
+  });
 });
 </script>
 
@@ -37,16 +91,16 @@ const input = reactive({
   <div class="relative flex items-center">
     <label class="sr-only" :for="input.id">{{ input.id }}</label>
     <input
+      ref="inputEl"
       v-model="input.value"
       @input="
         () => {
           // Case is same value as store on core
-          console.log(input.value, input.valueStatic);
           if (input.value === input.valueStatic)
             return config.removeConf(
               props.serviceName || input.context,
               input.id,
-              input.value,
+              input.value
             );
 
           // Case not same value as store on core
@@ -54,7 +108,7 @@ const input = reactive({
             props.serviceName || input.context,
             input.id,
             input.value,
-            props.setting.regex,
+            props.setting.regex
           );
         }
       "
@@ -82,12 +136,48 @@ const input = reactive({
       :name="input.id"
       :value="input.value"
     />
+    <div
+      v-if="input.clipboard && input.isClipAllow"
+      :class="[input.type === 'password' ? 'pw-input' : 'no-pw-input']"
+      class="input-clipboard-container"
+    >
+      <button
+        :aria-description="$t('inp_input_clipboard_desc')"
+        @click="copyClipboard()"
+        :class="[
+          input.method !== 'ui' && input.method !== 'default'
+            ? 'disabled'
+            : 'enabled',
+        ]"
+        class="input-clipboard-button"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="input-clipboard-svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
+          />
+        </svg>
+      </button>
+    </div>
     <div v-if="input.type === 'password'" class="input-pw-container">
       <button
         :aria-description="$t('inp_input_password_desc')"
         :aria-controls="input.id"
         @click="input.showInp = input.showInp ? false : true"
-        class="input-pw-svg-visible"
+        :class="[
+          input.method !== 'ui' && input.method !== 'default'
+            ? 'disabled'
+            : 'enabled',
+        ]"
+        class="input-pw-button"
       >
         <svg
           v-if="!input.showInp"

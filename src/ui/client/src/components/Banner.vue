@@ -16,8 +16,7 @@ function setupBanner() {
     const prev = banner.visibleId;
     banner.visibleId = banner.visibleId === 3 ? 1 : banner.visibleId + 1;
     const next = banner.visibleId;
-    console.log("prev", prev);
-    console.log("next", next);
+
     // Hide previous one
     const oldItem = document.getElementById(`banner-item-${prev}`);
     oldItem.classList.add("-left-full");

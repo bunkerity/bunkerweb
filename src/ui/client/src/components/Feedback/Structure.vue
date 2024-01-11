@@ -130,7 +130,7 @@ onMounted(() => {
 
   <!-- float button-->
   <div
-    :class="[bannerStore.isBanner ? 'banner' : 'no-banner']"
+    :class="[bannerStore.bannerClass]"
     class="feedback-float-btn-container group group-hover"
   >
     <button

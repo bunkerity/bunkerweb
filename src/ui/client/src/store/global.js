@@ -38,10 +38,12 @@ export const useRefreshStore = defineStore("refresh", () => {
 
 export const useBannerStore = defineStore("banner", () => {
   const isBanner = ref(true);
+  const bannerClass = ref("banner");
 
   async function setBannerVisible(bool) {
     isBanner.value = bool;
+    bannerClass.value = bool ? "banner" : "no-banner";
   }
 
-  return { isBanner, setBannerVisible };
+  return { isBanner, bannerClass, setBannerVisible };
 });

@@ -311,6 +311,7 @@
   "inp_select_option_desc": "Option custom.",
   "inp_select_label_empty": "Vide",
   "inp_input_password_desc": "Toggle l'input pour montrer/cacher une donnée de type mot de passe.",
+  "inp_input_clipboard_desc": "Copie la valeur dans le presse-papier.",
   "inp_checkbox_svg_desc": "Montre visuellement l'état de la checkbox custom.",
   "inp_upload_add": "cliquez ou glissez-déposez",
   "inp_upload_warning": "Les fichiers upload sont exécutés directement.",

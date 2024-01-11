@@ -161,7 +161,7 @@ function toggleMenu() {
     aria-controls="sidebar-menu"
     :aria-expanded="menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'"
     @click="toggleMenu()"
-    :class="['menu-float-btn', bannerStore.isBanner ? 'banner' : 'no-banner']"
+    :class="['menu-float-btn', bannerStore.bannerClass]"
   >
     <svg
       fill="#0D6EFD"
@@ -182,7 +182,7 @@ function toggleMenu() {
     data-sidebar-menu
     :class="[
       'menu-container xl:translate-x-0',
-      bannerStore.isBanner ? 'banner' : 'no-banner',
+      bannerStore.bannerClass,
       menu.isDesktop ? true : menu.isActive ? '' : 'active',
     ]"
     :aria-hidden="menu.isDesktop ? 'false' : menu.isActive ? 'false' : 'true'"
@@ -242,7 +242,7 @@ function toggleMenu() {
       <!-- end logo version -->
 
       <!-- list items -->
-      <div class="menu-nav-list-container">
+      <div class="menu-nav-list-container" :class="[bannerStore.bannerClass]">
         <ul class="menu-nav-list">
           <!-- item -->
           <li v-for="(item, id) in navList" :key="id" class="mt-0.5 w-full">
