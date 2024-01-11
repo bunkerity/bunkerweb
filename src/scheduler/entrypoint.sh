@@ -3,6 +3,8 @@
 # shellcheck disable=SC1091
 . /usr/share/bunkerweb/helpers/utils.sh
 
+RESTART_INTERVAL_S=10
+
 # trap SIGTERM and SIGINT
 function trap_exit() {
 	# shellcheck disable=SC2317
@@ -56,8 +58,8 @@ while : ; do
 		rm -f "/var/run/bunkerweb/scheduler.pid"
 	fi
 	[[ ! -f /var/tmp/bunkerweb/scheduler.healthy ]] || break
-	log "ENTRYPOINT" "❌" "Scheduler exited unexpectedly; restarting scheduler after 10s..."
-	sleep 10
+	log "ENTRYPOINT" "❌" "Scheduler exited unexpectedly; restarting scheduler after ${RESTART_INTERVAL_S}s..."
+	sleep ${RESTART_INTERVAL_S}
 done
 
 if [ -f /var/tmp/bunkerweb/scheduler.healthy ] ; then
