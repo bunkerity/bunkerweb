@@ -94,7 +94,7 @@ class ApiCaller:
 
                 self.__apis.append(
                     API(
-                        f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                        f"http://{getenv("API_HTTP_HOST", instance.name)}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
                         host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
                     )
                 )

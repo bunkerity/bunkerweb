@@ -58,7 +58,7 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
 
     apis.append(
         API(
-            f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+            f"http://{getenv("API_HTTP_HOST", instance.name)}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
             host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
         )
     )
@@ -251,7 +251,7 @@ if __name__ == "__main__":
 
                 apis.append(
                     API(
-                        f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                        f"http://{getenv("API_HTTP_HOST", instance.name)}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
                         host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
                     )
                 )
