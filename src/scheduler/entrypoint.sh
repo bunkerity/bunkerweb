@@ -46,12 +46,18 @@ if ! grep -q "Docker" /usr/share/bunkerweb/INTEGRATION ; then
 fi
 
 # execute jobs
-log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
-/usr/share/bunkerweb/scheduler/main.py &
-pid="$!"
-wait "$pid"
-while [ -f /var/run/bunkerweb/scheduler.pid ] ; do
-    wait "$pid"
+while : ; do
+	log "ENTRYPOINT" "ℹ️ " "Executing scheduler ..."
+	/usr/share/bunkerweb/scheduler/main.py &
+	pid="$!"
+	wait "$pid"
+	if [ -f "/var/run/bunkerweb/scheduler.pid" ]; then
+		log "ENTRYPOINT" "❌" "Scheduler died unexpectedly!"
+		rm -f "/var/run/bunkerweb/scheduler.pid"
+	fi
+	[[ ! -f /var/tmp/bunkerweb/scheduler.healthy ]] || break
+	log "ENTRYPOINT" "❌" "Scheduler exited unexpectedly; restarting scheduler after 10s..."
+	sleep 10
 done
 
 if [ -f /var/tmp/bunkerweb/scheduler.healthy ] ; then
