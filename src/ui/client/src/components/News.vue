@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from "vue";
+import { reactive, onMounted } from "vue";
 import { useBannerStore } from "@store/global.js";
 // Use to update position when banner is visible or not
 const bannerStore = useBannerStore();
@@ -17,10 +17,11 @@ const news = reactive({
     aria-controls="sidebar-news"
     :aria-expanded="news.isActive ? 'true' : 'false'"
     @click="news.isActive = news.isActive ? false : true"
+    :class="['news-float-btn', bannerStore.isBanner ? 'banner' : 'no-banner']"
     class="news-float-btn"
   >
     <svg
-      class="fill-sky-500 h-6 w-6"
+      class="news-float-btn-svg"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"
     >
@@ -39,12 +40,14 @@ const news = reactive({
   >
     <!-- close btn-->
     <button
+      class="news-close-btn"
       aria-controls="sidebar-news"
       :aria-expanded="news.isActive ? 'true' : 'false'"
       @click="news.isActive = false"
     >
       <svg
-        class="news-close-btn"
+        @click="news.isActive = false"
+        class="news-close-btn-svg"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 320 512"
       >

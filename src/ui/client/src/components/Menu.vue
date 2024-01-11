@@ -161,11 +161,11 @@ function toggleMenu() {
     aria-controls="sidebar-menu"
     :aria-expanded="menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'"
     @click="toggleMenu()"
-    class="menu-float-btn"
+    :class="['menu-float-btn', bannerStore.isBanner ? 'banner' : 'no-banner']"
   >
     <svg
       fill="#0D6EFD"
-      class="h-6 w-6 translate-x-0.5"
+      class="menu-float-btn-svg"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"
     >
@@ -180,8 +180,11 @@ function toggleMenu() {
   <aside
     id="sidebar-menu"
     data-sidebar-menu
-    :class="[menu.isDesktop ? true : menu.isActive ? '' : 'active']"
-    class="menu-container xl:translate-x-0"
+    :class="[
+      'menu-container xl:translate-x-0',
+      bannerStore.isBanner ? 'banner' : 'no-banner',
+      menu.isDesktop ? true : menu.isActive ? '' : 'active',
+    ]"
     :aria-hidden="menu.isDesktop ? 'false' : menu.isActive ? 'false' : 'true'"
   >
     <!-- close btn-->
@@ -190,12 +193,13 @@ function toggleMenu() {
       :aria-expanded="
         menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'
       "
-      data-sidebar-menu-close
       @click="closeMenu()"
+      class="menu-close-btn"
     >
       <span class="sr-only">{{ $t("action_delete") }}</span>
       <svg
-        class="menu-close-btn"
+        @click="closeMenu()"
+        class="menu-close-btn-svg"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 320 512"
       >

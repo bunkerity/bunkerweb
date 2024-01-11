@@ -130,17 +130,18 @@ onMounted(() => {
 
   <!-- float button-->
   <div
-    class="group group-hover hover:brightness-75 dark:hover:brightness-105 fixed top-2 sm:top-3 right-20 sm:right-24 xl:right-24 z-990"
+    :class="[bannerStore.isBanner ? 'banner' : 'no-banner']"
+    class="feedback-float-btn-container group group-hover"
   >
     <button
-      aria-controls="feedback-sidebar"
+      aria-controls="feedback-sidebar group group-hover"
       :aria-expanded="dropdown.isOpen ? 'true' : 'false'"
       @click="dropdown.isOpen = dropdown.isOpen ? false : true"
-      class="transition scale-90 sm:scale-100 dark:brightness-95 p-3 text-xl bg-white shadow-sm cursor-pointer rounded-circle text-slate-700"
+      class="feedback-float-btn"
     >
       <span class="sr-only">{{ $t("dashboard_open_sidebar") }}</span>
       <svg
-        class="pointer-events-none fill-yellow-500 -translate-y-0.4 h-6 w-6"
+        class="feedback-float-btn-svg"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 448 512"
       >
@@ -149,10 +150,8 @@ onMounted(() => {
         />
       </svg>
     </button>
-    <div
-      class="pointer-events-none dark:brightness-95 px-2 translate-x-2 bottom-0 right-0 absolute rounded-full bg-white"
-    >
-      <p class="mb-0 text-sm text-bold text-red-500">
+    <div class="feedback-float-btn-text-container">
+      <p class="feedback-float-btn-text">
         {{ feedback.data.length }}
       </p>
     </div>
@@ -164,18 +163,19 @@ onMounted(() => {
     id="feedback-sidebar"
     :aria-hidden="dropdown.isOpen ? 'false' : 'true'"
     :class="[dropdown.isOpen ? '' : 'translate-x-90']"
-    class="-right-0 transition z-sticky dark:bg-slate-850 dark:brightness-110 shadow-3xl max-w-full w-90 ease fixed top-0 left-auto flex h-full min-w-0 flex-col break-words rounded-none border-0 bg-white bg-clip-border px-0.5"
+    class="feedback-sidebar"
   >
     <!-- close btn-->
     <button
       aria-controls="feedback-sidebar"
       :aria-expanded="dropdown.isOpen ? 'true' : 'false'"
-      class="absolute h-5 w-5 top-4 right-4"
+      class="feedback-header-close-btn"
       @click="dropdown.isOpen = false"
     >
       <span class="sr-only">{{ $t("dashboard_close_sidebar") }}</span>
       <svg
-        class="cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80"
+        @click="dropdown.isOpen = false"
+        class="feedback-header-close-btn-svg"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 320 512"
       >
@@ -187,12 +187,12 @@ onMounted(() => {
     <!-- close btn-->
 
     <!-- header -->
-    <div class="px-6 pt-4 pb-0 mb-0 border-b-0 rounded-t-2xl">
+    <div class="feedback-header">
       <div class="float-left">
-        <h5 class="uppercase mt-4 mb-1 dark:text-white font-bold">
+        <h5 class="feedback-header-title">
           {{ $t("dashboard_actions_title") }}
         </h5>
-        <p class="capitalize-first dark:text-white dark:opacity-80 mb-0">
+        <p class="feedback-header-subtitle">
           {{ $t("dashboard_actions_subtitle") }}
         </p>
         <TablistBase
@@ -205,18 +205,6 @@ onMounted(() => {
           ]"
         />
       </div>
-      <!-- close button -->
-      <div class="float-right mt-6">
-        <button
-          data-flash-sidebar-close
-          class="inline-block p-0 mb-4 text-sm font-bold leading-normal text-center uppercase align-middle transition-all ease-in bg-transparent border-0 rounded-lg shadow-none cursor-pointer hover:-translate-y-px tracking-tight-rem bg-150 bg-x-25 active:opacity-85 dark:text-white text-slate-700"
-        >
-          <span class="sr-only">{{ $t("dashboard_close_sidebar") }}</span>
-
-          <i class="fa fa-close"></i>
-        </button>
-      </div>
-      <!-- end close button -->
     </div>
     <!-- end header -->
 
@@ -225,7 +213,7 @@ onMounted(() => {
       role="tabpanel"
       :aria-hidden="logs.current === 'ui' ? 'false' : 'true'"
       :class="[logs.current === 'ui' ? 'flex' : 'hidden']"
-      class="flex flex-col justify-start items-center h-full m-2 overflow-y-auto"
+      class="feedback-panel"
     >
       <FeedbackAlert
         v-for="(item, id) in feedback.data"
@@ -241,7 +229,7 @@ onMounted(() => {
       role="tabpanel"
       :aria-hidden="logs.current === 'core' ? 'false' : 'true'"
       :class="[logs.current === 'core' ? 'flex' : 'hidden']"
-      class="flex flex-col justify-start items-center h-full m-2 overflow-y-auto"
+      class="feedback-panel"
     >
       <FeedbackLogs
         v-for="(item, id) in logs.setup.core"
@@ -259,7 +247,7 @@ onMounted(() => {
       role="tabpanel"
       :aria-hidden="logs.current === 'global' ? 'false' : 'true'"
       :class="[logs.current === 'global' ? 'flex' : 'hidden']"
-      class="flex-col justify-start items-center h-full m-2 overflow-y-auto"
+      class="feedback-panel"
     >
       <FeedbackLogs
         v-for="(item, id) in logs.setup.global"

@@ -38,24 +38,22 @@ const props = defineProps({
     role="alert"
     :aria-description="$t('dashboard_feedback_logs_desc')"
     :class="[
-      props.status === 'error' ? 'bg-red-500' : '',
-      props.status === 'success' ? 'bg-green-500' : '',
       props.status !== 'success' && props.status !== 'error'
-        ? 'bg-sky-500'
-        : '',
+        ? 'default'
+        : props.status,
     ]"
-    class="my-1.5 border relative p-4 w-11/12 rounded-lg hover:scale-102 transition shadow-md break-words dark:brightness-90"
+    class="feedback-log-container"
   >
-    <div class="flex justify-between align-top items-start">
-      <h5 class="text-lg mb-0 text-white">
+    <div class="feedback-log-header">
+      <h5 class="feedback-log-title">
         {{ `${props.title}` }}
       </h5>
     </div>
-    <p class="text-white mt-2 mb-0 text-sm">{{ props.description }}</p>
-    <p class="text-white mt-2 mb-0 text-xs italic">
+    <p class="feedback-log-desc">{{ props.description }}</p>
+    <p class="feedback-log-meta">
       {{ props.method === `unknown` ? `` : `${props.method.toUpperCase()} |` }}
       {{ props.apiMethod }}
     </p>
-    <p class="text-white mt-2 mb-0 text-xs text-right">{{ props.date }}</p>
+    <p class="feedback-log-date">{{ props.date }}</p>
   </div>
 </template>

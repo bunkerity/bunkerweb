@@ -39,9 +39,9 @@ export const useRefreshStore = defineStore("refresh", () => {
 export const useBannerStore = defineStore("banner", () => {
   const isBanner = ref(true);
 
-  async function isBannerVisible(bool) {
+  async function setBannerVisible(bool) {
     isBanner.value = bool;
   }
 
-  return { isBanner, isBannerVisible };
+  return { isBanner, setBannerVisible };
 });

@@ -1,47 +1,45 @@
 <script setup>
-import { onMounted, watch } from "vue";
+import { onMounted, reactive } from "vue";
 import { useBannerStore } from "@store/global.js";
 
 const bannerStore = useBannerStore();
 
 const banner = reactive({
-  nextDelay: 9000,
-  transDuration: 700,
-  visibleId: "1",
-});
-
-watch(bannerStore.visibleId, (newVal, oldVal) => {
-  banner.visibleId = newVal;
-
-  // Hide previous one
-  const oldItem = document.getElementById(`banner-item-${oldVal}`);
-  oldItem.classList.add("-left-full");
-  oldItem.classList.remove("left-0");
-  setTimeout(() => {
-    oldItem.classList.remove("transition-all");
-  }, banner.transDuration + 10);
-  setTimeout(() => {
-    oldItem.classList.add("opacity-0");
-  }, banner.transDuration + 20);
-  setTimeout(() => {
-    oldItem.classList.remove("-left-full");
-    oldItem.classList.add("left-full");
-  }, banner.transDuration * 2);
-
-  // Show new one
-  const newItem = document.getElementById(`banner-item-${newVal}`);
-  newItem.classList.remove("opacity-0");
-  newItem.classList.add("transition-all");
-  newItem.classList.add("left-0");
-  newItem.classList.remove("left-full");
+  visibleId: 1,
 });
 
 function setupBanner() {
+  const nextDelay = 14000;
+  const transDuration = 10000;
   // Switch item every interval and
   setInterval(() => {
-    banner.isVisible =
-      banner.isVisibleId === "3" ? "1" : `${banner.isVisibleId + 1}`;
-  }, banner.nextDelay);
+    const prev = banner.visibleId;
+    banner.visibleId = banner.visibleId === 3 ? 1 : banner.visibleId + 1;
+    const next = banner.visibleId;
+    console.log("prev", prev);
+    console.log("next", next);
+    // Hide previous one
+    const oldItem = document.getElementById(`banner-item-${prev}`);
+    oldItem.classList.add("-left-full");
+    oldItem.classList.remove("left-0");
+    setTimeout(() => {
+      oldItem.classList.remove("transition-all");
+    }, transDuration + 10);
+    setTimeout(() => {
+      oldItem.classList.add("opacity-0");
+    }, transDuration + 30);
+    setTimeout(() => {
+      oldItem.classList.remove("-left-full");
+      oldItem.classList.add("left-full");
+    }, transDuration * 2);
+
+    // Show new one
+    const newItem = document.getElementById(`banner-item-${next}`);
+    newItem.classList.remove("opacity-0");
+    newItem.classList.add("transition-all");
+    newItem.classList.add("left-0");
+    newItem.classList.remove("left-full");
+  }, nextDelay);
 
   // Observe banner and set is visible or not to
   // Update float button and menu position
@@ -58,7 +56,7 @@ function setupBanner() {
     });
   }, options);
 
-  observer.observe(ocument.getElementById("banner"));
+  observer.observe(document.getElementById("banner"));
 }
 
 onMounted(() => {
@@ -68,7 +66,7 @@ onMounted(() => {
 
 <template>
   <div id="banner" tabindex="-1" role="list" class="banner-container">
-    <div class="banner-bg"></div>
+    <div role="" class="banner-bg"></div>
 
     <div
       v-for="index in 3"
@@ -76,6 +74,7 @@ onMounted(() => {
       :aria-hidden="banner.visibleId === index ? 'false' : 'true'"
       :id="`banner-item-${index}`"
       class="banner-item"
+      :class="[index === 1 ? 'left-0' : 'left-full opacity-0']"
     >
       <p class="banner-item-text">
         {{ $t(`dashboard_banner_title_${index}`) }}

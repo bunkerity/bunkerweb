@@ -42,15 +42,8 @@ onMounted(() => {
             <li class="header-breadcrumb-item first">
               {{ $t("dashboard_bw") }}
             </li>
-            <li
-              v-for="(item, id) in header.splitPath"
-              :class="[id === header.splitPath.length - 1 ? 'active' : 'prev']"
-              class="header-breadcrumb-item slash"
-              :aria-current="
-                id === header.splitPath.length - 1 ? 'page' : false
-              "
-            >
-              {{ item }}
+            <li class="header-breadcrumb-item slash mobile active">
+              {{ header.splitPath[header.splitPath.length - 1] }}
             </li>
           </ul>
         </nav>

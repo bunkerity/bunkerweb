@@ -25,7 +25,13 @@ function refreshBtn() {
 
 <template>
   <!-- float button-->
-  <button @click="refreshBtn()" class="refresh-float-btn">
+  <button
+    @click="refreshBtn()"
+    :class="[
+      'refresh-float-btn',
+      bannerStore.isBanner ? 'banner' : 'no-banner',
+    ]"
+  >
     <span class="sr-only">{{ $t("dashboard_refresh_button") }}</span>
     <svg
       :class="[refresh.isOn ? 'btn-spin' : '']"
@@ -34,7 +40,7 @@ function refreshBtn() {
       viewBox="0 0 24 24"
       stroke-width="1.5"
       stroke="currentColor"
-      class="stroke-sky-500 h-7 w-7 pointer-events-none"
+      class="refresh-float-btn-svg"
     >
       <path
         stroke-linecap="round"

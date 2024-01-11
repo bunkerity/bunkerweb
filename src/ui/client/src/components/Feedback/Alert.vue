@@ -28,24 +28,24 @@ const emits = defineEmits(["close"]);
     role="alert"
     :aria-description="$t('dashboard_feedback_alert_desc')"
     :class="[
-      props.type === 'error' ? 'bg-red-500' : '',
-      props.type === 'success' ? 'bg-green-500' : '',
-      props.type !== 'success' && props.type !== 'error' ? 'bg-sky-500' : '',
+      props.type !== 'success' && props.type !== 'error'
+        ? 'default'
+        : props.type,
     ]"
-    class="my-1.5 border relative p-4 w-11/12 rounded-lg hover:scale-102 transition shadow-md break-words dark:brightness-90"
+    class="feedback-alert-container"
   >
-    <div class="flex justify-between align-top items-start">
-      <h5 class="text-lg mb-0 text-white">
+    <div class="feedback-alert-header">
+      <h5 class="feedback-alert-title">
         {{ `${props.status} ${props.type}` }}
       </h5>
       <button
         @click="$emit('close', props.id)"
         data-close-flash-message
         type="button"
-        class="absolute right-8 top-2"
+        class="feedback-alert-btn"
       >
         <svg
-          class="cursor-pointer fill-white dark:opacity-80 absolute h-5 w-5"
+          class="feedback-alert-svg"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 320 512"
         >
@@ -55,6 +55,6 @@ const emits = defineEmits(["close"]);
         </svg>
       </button>
     </div>
-    <p class="text-white mt-2 mb-0 text-sm">{{ props.message }}</p>
+    <p class="feedback-alert-text">{{ props.message }}</p>
   </div>
 </template>
