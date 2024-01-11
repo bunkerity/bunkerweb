@@ -10,7 +10,7 @@ from yaml import safe_load, dump
 
 
 class AutoconfTest(Test):
-    def __init__(self, name, timeout, tests, no_copy_container=False, delay=0):
+    def __init__(self, name, timeout, tests, no_copy_container=False, delay=0, domains={}):
         super().__init__(
             name,
             "autoconf",
@@ -19,13 +19,7 @@ class AutoconfTest(Test):
             no_copy_container=no_copy_container,
             delay=delay,
         )
-        self._domains = {
-            r"www\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
-            r"auth\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
-            r"app1\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_1')}",
-            r"app2\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_2')}",
-            r"app3\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_3')}",
-        }
+        self._domains = domains
         self._check_domains()
 
     @staticmethod

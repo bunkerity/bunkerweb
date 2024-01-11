@@ -8,15 +8,9 @@ from logger import log
 
 
 class LinuxTest(Test):
-    def __init__(self, name, timeout, tests, distro):
+    def __init__(self, name, timeout, tests, distro, domains={}):
         super().__init__(name, "linux", timeout, tests, delay=20)
-        self._domains = {
-            r"www\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
-            r"auth\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
-            r"app1\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_1')}",
-            r"app2\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_2')}",
-            r"app3\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_3')}",
-        }
+        self._domains = domains
         if distro not in ("ubuntu", "debian", "fedora", "centos", "rhel"):
             raise Exception(f"unknown distro {distro}")
         self.__distro = distro
