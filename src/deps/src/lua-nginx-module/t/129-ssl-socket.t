@@ -1,18 +1,36 @@
 # vim:set ft= ts=4 sw=4 et fdm=marker:
 
-use Test::Nginx::Socket::Lua;
+our $SkipReason;
+BEGIN {
+    if (defined $ENV{TEST_NGINX_USE_HTTP3}) {
+        # FIXME: we still need to enable this test file for HTTP3.
+        $SkipReason = "the test cases are very unstable, skip for now.";
+    }
+}
+
+use Test::Nginx::Socket::Lua $SkipReason ? (skip_all => $SkipReason) : ();
+
 use Cwd qw(abs_path realpath);
 use File::Basename;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 7 - 3);
+sub resolve($$);
+
+plan tests => repeat_each() * (blocks() * 7 - 4);
 
 $ENV{TEST_NGINX_HTML_DIR} ||= html_dir();
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 $ENV{TEST_NGINX_RESOLVER} ||= '8.8.8.8';
 $ENV{TEST_NGINX_SERVER_SSL_PORT} ||= 12345;
 $ENV{TEST_NGINX_CERT_DIR} ||= dirname(realpath(abs_path(__FILE__)));
+$ENV{TEST_NGINX_OPENRESTY_ORG_IP} ||= resolve("openresty.org", $ENV{TEST_NGINX_RESOLVER});
+
+my $NginxBinary = $ENV{'TEST_NGINX_BINARY'} || 'nginx';
+my $openssl_version = eval { `$NginxBinary -V 2>&1` };
+if ($openssl_version =~ m/BoringSSL/) {
+    $ENV{TEST_NGINX_USE_BORINGSSL} = 1;
+}
 
 #log_level 'warn';
 log_level 'debug';
@@ -29,6 +47,19 @@ sub read_file {
     $cert;
 }
 
+sub resolve ($$) {
+    my ($domain, $resolver) = @_;
+    my $ips = qx/dig \@$resolver +short $domain/;
+
+    my $exit_code = $? >> 8;
+    if (!$ips || $exit_code != 0) {
+        die "failed to resolve '$domain' using '$resolver' as resolver";
+    }
+
+    my ($ip) = split /\n/, $ips;
+    return $ip;
+}
+
 our $DSTRootCertificate = read_file("t/cert/dst-ca.crt");
 our $EquifaxRootCertificate = read_file("t/cert/equifax.crt");
 our $TestCertificate = read_file("t/cert/test.crt");
@@ -39,7 +70,9 @@ run_tests();
 
 __DATA__
 
-=== TEST 1: www.bing.com
+=== TEST 1: www.google.com
+access the public network is unstable, need a bigger timeout value.
+--- quic_max_idle_timeout: 3
 --- config
     server_tokens off;
     resolver $TEST_NGINX_RESOLVER ipv6=off;
@@ -62,7 +95,7 @@ __DATA__
             do
                 local sock = ngx.socket.tcp()
                 sock:settimeout(2000)
-                local ok, err = sock:connect("www.bing.com", 443)
+                local ok, err = sock:connect("www.google.com", 443)
                 if not ok then
                     ngx.say("failed to connect: ", err)
                     return
@@ -78,7 +111,7 @@ __DATA__
 
                 ngx.say("ssl handshake: ", type(sess))
 
-                local req = "GET / HTTP/1.1\\r\\nHost: www.bing.com\\r\\nConnection: close\\r\\n\\r\\n"
+                local req = "GET / HTTP/1.1\\r\\nHost: www.google.com\\r\\nConnection: close\\r\\n\\r\\n"
                 local bytes, err = sock:send(req)
                 if not bytes then
                     ngx.say("failed to send http request: ", err)
@@ -107,7 +140,7 @@ GET /t
 --- response_body_like chop
 \Aconnected: 1
 ssl handshake: cdata
-sent http request: 57 bytes.
+sent http request: 59 bytes.
 received: HTTP/1.1 (?:200 OK|302 Found)
 close: 1 nil
 \z
@@ -293,6 +326,8 @@ SSL reused session
 
 
 === TEST 4: ssl session reuse
+access the public network is unstable, need a bigger timeout value.
+--- quic_max_idle_timeout: 3
 --- config
     server_tokens off;
     resolver $TEST_NGINX_RESOLVER ipv6=off;
@@ -1034,6 +1069,8 @@ SSL reused session
 --- config
     server_tokens off;
     resolver $TEST_NGINX_RESOLVER ipv6=off;
+    lua_ssl_protocols TLSv1 TLSv1.1 TLSV1.2;
+
     location /t {
         #set $port 5000;
         set $port $TEST_NGINX_MEMCACHED_PORT;
@@ -1376,6 +1413,7 @@ SSL reused session
     location /t {
         #set $port 5000;
         set $port $TEST_NGINX_MEMCACHED_PORT;
+        set $openresty_org_ip $TEST_NGINX_OPENRESTY_ORG_IP;
 
         content_by_lua '
             local sock = ngx.socket.tcp()
@@ -1385,7 +1423,8 @@ SSL reused session
 
             local session
             for i = 1, 3 do
-                local ok, err = sock:connect("openresty.org", 443)
+                -- Use the same IP to ensure that the connection can be reused
+                local ok, err = sock:connect(ngx.var.openresty_org_ip, 443)
                 if not ok then
                     ngx.say("failed to connect: ", err)
                     return
@@ -1452,6 +1491,7 @@ SSL reused session
     lua_ssl_verify_depth 2;
     location /t {
         #set $port 5000;
+        set $openresty_org_ip $TEST_NGINX_OPENRESTY_ORG_IP;
         set $port $TEST_NGINX_MEMCACHED_PORT;
 
         content_by_lua '
@@ -1461,7 +1501,8 @@ SSL reused session
             do
 
             for i = 1, 3 do
-                local ok, err = sock:connect("openresty.org", 443)
+                -- Use the same IP to ensure that the connection can be reused
+                local ok, err = sock:connect(ngx.var.openresty_org_ip, 443)
                 if not ok then
                     ngx.say("failed to connect: ", err)
                     return
@@ -1562,6 +1603,7 @@ attempt to call method 'sslhandshake' (a nil value)
 --- no_error_log
 [alert]
 --- timeout: 3
+--- skip_eval: 5:$ENV{TEST_NGINX_USE_HTTP3}
 
 
 
@@ -2099,8 +2141,6 @@ failed to do SSL handshake: timeout
 --- log_level: debug
 --- grep_error_log eval: qr/lua ssl (?:set|save|free) session: [0-9A-F]+/
 --- grep_error_log_out
---- error_log
-lua ssl server name: "openresty.org"
 --- no_error_log
 SSL reused session
 [error]
@@ -2561,6 +2601,8 @@ qr/\[error\] .* ngx.socket sslhandshake: expecting 1 ~ 5 arguments \(including t
 --- no_error_log
 [alert]
 --- timeout: 10
+--- curl_error eval
+qr#curl: \(52\) Empty reply from server|curl: \(95\) HTTP/3 stream 0 reset by server#
 
 
 
@@ -2658,6 +2700,7 @@ SSL reused session
 === TEST 33: explicit cipher configuration - TLSv1.3
 --- skip_openssl: 8: < 1.1.1
 --- skip_nginx: 8: < 1.19.4
+--- skip_eval: 8:$ENV{TEST_NGINX_USE_BORINGSSL}
 --- http_config
     server {
         listen              unix:$TEST_NGINX_HTML_DIR/nginx.sock ssl;
@@ -2751,6 +2794,7 @@ SSL reused session
 === TEST 34: explicit cipher configuration not in the default list - TLSv1.3
 --- skip_openssl: 8: < 1.1.1
 --- skip_nginx: 8: < 1.19.4
+--- skip_eval: 8:$ENV{TEST_NGINX_USE_BORINGSSL}
 --- http_config
     server {
         listen              unix:$TEST_NGINX_HTML_DIR/nginx.sock ssl;
