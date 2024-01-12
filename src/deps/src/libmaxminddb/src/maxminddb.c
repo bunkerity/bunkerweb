@@ -23,6 +23,10 @@
 #endif
 #include <windows.h>
 #include <ws2ipdef.h>
+#ifndef SSIZE_MAX
+#define SSIZE_MAX INTPTR_MAX
+#endif
+typedef ADDRESS_FAMILY sa_family_t;
 #else
 #include <arpa/inet.h>
 #include <sys/mman.h>
@@ -288,18 +292,29 @@ int MMDB_open(const char *const filename, uint32_t flags, MMDB_s *const mmdb) {
         goto cleanup;
     }
 
-    uint32_t search_tree_size =
-        mmdb->metadata.node_count * mmdb->full_record_byte_size;
-
-    mmdb->data_section =
-        mmdb->file_content + search_tree_size + MMDB_DATA_SECTION_SEPARATOR;
-    if (search_tree_size + MMDB_DATA_SECTION_SEPARATOR >
-        (uint32_t)mmdb->file_size) {
+    if (!can_multiply(SSIZE_MAX,
+                      mmdb->metadata.node_count,
+                      mmdb->full_record_byte_size)) {
         status = MMDB_INVALID_METADATA_ERROR;
         goto cleanup;
     }
-    mmdb->data_section_size = (uint32_t)mmdb->file_size - search_tree_size -
-                              MMDB_DATA_SECTION_SEPARATOR;
+    ssize_t search_tree_size = (ssize_t)mmdb->metadata.node_count *
+                               (ssize_t)mmdb->full_record_byte_size;
+
+    mmdb->data_section =
+        mmdb->file_content + search_tree_size + MMDB_DATA_SECTION_SEPARATOR;
+    if (mmdb->file_size < MMDB_DATA_SECTION_SEPARATOR ||
+        search_tree_size > mmdb->file_size - MMDB_DATA_SECTION_SEPARATOR) {
+        status = MMDB_INVALID_METADATA_ERROR;
+        goto cleanup;
+    }
+    ssize_t data_section_size =
+        mmdb->file_size - search_tree_size - MMDB_DATA_SECTION_SEPARATOR;
+    if (data_section_size > UINT32_MAX || data_section_size <= 0) {
+        status = MMDB_INVALID_METADATA_ERROR;
+        goto cleanup;
+    }
+    mmdb->data_section_size = (uint32_t)data_section_size;
 
     // Although it is likely not possible to construct a database with valid
     // valid metadata, as parsed above, and a data_section_size less than 3,

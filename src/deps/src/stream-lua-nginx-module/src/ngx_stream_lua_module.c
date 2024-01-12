@@ -56,6 +56,9 @@ static char *ngx_stream_lua_ssl_conf_command_check(ngx_conf_t *cf, void *post,
 #endif
 static char *ngx_stream_lua_malloc_trim(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
+#if (NGX_PCRE2)
+extern void ngx_stream_lua_regex_cleanup(void *data);
+#endif
 
 
 static ngx_conf_post_t  ngx_stream_lua_lowat_post =
@@ -422,6 +425,20 @@ static ngx_command_t ngx_stream_lua_cmds[] = {
       offsetof(ngx_stream_lua_srv_conf_t, ssl_verify_depth),
       NULL },
 
+    { ngx_string("lua_ssl_certificate"),
+      NGX_STREAM_MAIN_CONF|NGX_STREAM_SRV_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_str_array_slot,
+      NGX_STREAM_SRV_CONF_OFFSET,
+      offsetof(ngx_stream_lua_srv_conf_t, ssl_certificates),
+      NULL },
+
+    { ngx_string("lua_ssl_certificate_key"),
+      NGX_STREAM_MAIN_CONF|NGX_STREAM_SRV_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_str_array_slot,
+      NGX_STREAM_SRV_CONF_OFFSET,
+      offsetof(ngx_stream_lua_srv_conf_t, ssl_certificate_keys),
+      NULL },
+
     { ngx_string("lua_ssl_trusted_certificate"),
       NGX_STREAM_MAIN_CONF|NGX_STREAM_SRV_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
@@ -563,7 +580,16 @@ ngx_stream_lua_init(ngx_conf_t *cf)
     cln->data = lmcf;
     cln->handler = ngx_stream_lua_sema_mm_cleanup;
 
+#if (NGX_PCRE2)
+    /* add the cleanup of pcre2 regex */
+    cln = ngx_pool_cleanup_add(cf->pool, 0);
+    if (cln == NULL) {
+        return NGX_ERROR;
+    }
 
+    cln->data = lmcf;
+    cln->handler = ngx_stream_lua_regex_cleanup;
+#endif
 
     if (lmcf->lua == NULL) {
         dd("initializing lua vm");
@@ -579,6 +605,15 @@ ngx_stream_lua_init(ngx_conf_t *cf)
                           "the OpenResty releases from https://openresty.org/"
                           "en/download.html)");
         }
+#else
+#   if !defined(HAVE_LUA_EXDATA2)
+        ngx_log_error(NGX_LOG_ALERT, cf->log, 0,
+                      "detected an old version of OpenResty's LuaJIT missing "
+                      "the exdata2 API and thus the "
+                      "performance will be compromised; please upgrade to the "
+                      "latest version of OpenResty's LuaJIT: "
+                      "https://github.com/openresty/luajit2");
+#   endif
 #endif
 
 
@@ -814,6 +849,8 @@ ngx_stream_lua_create_srv_conf(ngx_conf_t *cf)
 
 #if (NGX_STREAM_SSL)
     conf->ssl_verify_depth = NGX_CONF_UNSET_UINT;
+    conf->ssl_certificates = NGX_CONF_UNSET_PTR;
+    conf->ssl_certificate_keys = NGX_CONF_UNSET_PTR;
 #endif
 
     return conf;
@@ -926,6 +963,10 @@ ngx_stream_lua_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
 
     ngx_conf_merge_uint_value(conf->ssl_verify_depth,
                               prev->ssl_verify_depth, 1);
+    ngx_conf_merge_ptr_value(conf->ssl_certificates,
+                             prev->ssl_certificates, NULL);
+    ngx_conf_merge_ptr_value(conf->ssl_certificate_keys,
+                             prev->ssl_certificate_keys, NULL);
     ngx_conf_merge_str_value(conf->ssl_trusted_certificate,
                              prev->ssl_trusted_certificate, "");
     ngx_conf_merge_str_value(conf->ssl_crl, prev->ssl_crl, "");
@@ -973,6 +1014,13 @@ ngx_stream_lua_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
         conf->preread_chunkname = prev->preread_chunkname;
     }
 
+    if (conf->log_src.value.len == 0) {
+        conf->log_src = prev->log_src;
+        conf->log_handler = prev->log_handler;
+        conf->log_src_key = prev->log_src_key;
+        conf->log_chunkname = prev->log_chunkname;
+    }
+
     return NGX_CONF_OK;
 }
 
@@ -993,6 +1041,20 @@ ngx_stream_lua_set_ssl(ngx_conf_t *cf, ngx_stream_lua_srv_conf_t *lscf)
 
     lscf->ssl->log = cf->log;
 
+    if (lscf->ssl_certificates) {
+        if (lscf->ssl_certificate_keys == NULL
+            || lscf->ssl_certificate_keys->nelts
+            < lscf->ssl_certificates->nelts)
+        {
+            ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
+                          "no \"lua_ssl_certificate_key\" is defined "
+                          "for certificate \"%V\"",
+                          ((ngx_str_t *) lscf->ssl_certificates->elts)
+                          + lscf->ssl_certificates->nelts - 1);
+            return NGX_ERROR;
+        }
+    }
+
     if (ngx_ssl_create(lscf->ssl, lscf->ssl_protocols, NULL) != NGX_OK) {
         return NGX_ERROR;
     }
@@ -1012,6 +1074,16 @@ ngx_stream_lua_set_ssl(ngx_conf_t *cf, ngx_stream_lua_srv_conf_t *lscf)
         ngx_ssl_error(NGX_LOG_EMERG, cf->log, 0,
                       "SSL_CTX_set_cipher_list(\"%V\") failed",
                       &lscf->ssl_ciphers);
+        return NGX_ERROR;
+    }
+
+    if (lscf->ssl_certificates
+        && ngx_ssl_certificates(cf, lscf->ssl,
+                                lscf->ssl_certificates,
+                                lscf->ssl_certificate_keys,
+                                NULL)
+        != NGX_OK)
+    {
         return NGX_ERROR;
     }
 

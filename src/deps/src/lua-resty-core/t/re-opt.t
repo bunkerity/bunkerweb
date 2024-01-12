@@ -39,8 +39,13 @@ __DATA__
     }
 --- request
     GET /re
---- response_body
-error: pcre_exec() failed: -27
+--- response_body eval
+# PCRE2_ERROR_JIT_STACKLIMIT (-46)
+# PCRE_ERROR_JIT_STACKLIMIT  (-27)
+$Test::Nginx::Util::PcreVersion == 2 ?
+"error: pcre_exec\(\) failed: -46\n"
+:
+"error: pcre_exec\(\) failed: -27\n"
 --- no_error_log
 [error]
 --- timeout: 10

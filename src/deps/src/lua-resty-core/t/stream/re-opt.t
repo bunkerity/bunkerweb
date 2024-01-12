@@ -36,8 +36,13 @@ __DATA__
             ngx.say("not matched!")
         end
     }
---- stream_response
-error: pcre_exec() failed: -27
+--- stream_response eval
+# PCRE2_ERROR_JIT_STACKLIMIT (-46)
+# PCRE_ERROR_JIT_STACKLIMIT  (-27)
+$Test::Nginx::Util::PcreVersion == 2 ?
+"error: pcre_exec\(\) failed: -46\n"
+:
+"error: pcre_exec\(\) failed: -27\n"
 --- no_error_log
 [error]
 --- timeout: 10
