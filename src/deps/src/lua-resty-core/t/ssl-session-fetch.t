@@ -51,7 +51,6 @@ __DATA__
     resolver $TEST_NGINX_RESOLVER;
     lua_ssl_trusted_certificate $TEST_NGINX_CERT_DIR/cert/test.crt;
     lua_ssl_verify_depth 3;
-    lua_ssl_protocols TLSv1.2;
 
     location /t {
         set $port $TEST_NGINX_MEMCACHED_PORT;
@@ -98,7 +97,7 @@ qr/ssl_session_fetch_by_lua\(nginx.conf:\d+\):\d+: session id: [a-fA-f\d]+/s
 
 --- grep_error_log_out eval
 [
-"",
+qr/ssl_session_fetch_by_lua\(nginx.conf:\d+\):4: session id: [a-fA-f\d]+/s,
 qr/ssl_session_fetch_by_lua\(nginx.conf:\d+\):4: session id: [a-fA-f\d]+/s,
 qr/ssl_session_fetch_by_lua\(nginx.conf:\d+\):4: session id: [a-fA-f\d]+/s,
 ]
@@ -139,7 +138,6 @@ qr/ssl_session_fetch_by_lua\(nginx.conf:\d+\):4: session id: [a-fA-f\d]+/s,
     resolver $TEST_NGINX_RESOLVER;
     lua_ssl_trusted_certificate $TEST_NGINX_CERT_DIR/cert/test.crt;
     lua_ssl_verify_depth 3;
-    lua_ssl_protocols TLSv1.2;
 
     location /t {
         set $port $TEST_NGINX_MEMCACHED_PORT;
@@ -186,7 +184,8 @@ qr/ssl_session_fetch_by_lua:\d: session size: [a-fA-f\d]+|get session error: bad
 
 --- grep_error_log_out eval
 [
-"",
+'get session error: bad session in lua context
+',
 'get session error: bad session in lua context
 ',
 'get session error: bad session in lua context
@@ -247,7 +246,6 @@ In practice, never store session in plaintext on persistent storage.
     resolver $TEST_NGINX_RESOLVER;
     lua_ssl_trusted_certificate $TEST_NGINX_CERT_DIR/cert/test.crt;
     lua_ssl_verify_depth 3;
-    lua_ssl_protocols TLSv1.2;
 
     location /t {
         set $port $TEST_NGINX_MEMCACHED_PORT;
@@ -344,7 +342,6 @@ able to carry on and negotiate a new session.
     resolver $TEST_NGINX_RESOLVER;
     lua_ssl_trusted_certificate $TEST_NGINX_CERT_DIR/cert/test.crt;
     lua_ssl_verify_depth 3;
-    lua_ssl_protocols TLSv1.2;
 
     location /t {
         set $port $TEST_NGINX_MEMCACHED_PORT;
@@ -391,7 +388,10 @@ qr/failed to resume session: failed to de-serialize session|ssl_session_(fetch|s
 
 --- grep_error_log_out eval
 [
-qr/^ssl_session_store_by_lua\(nginx.conf:\d+\):5: session id: [a-fA-F\d]+$/s,
+qr/^ssl_session_fetch_by_lua\(nginx.conf:\d+\):4: session id: [a-fA-F\d]+
+failed to resume session: failed to de-serialize session
+ssl_session_store_by_lua\(nginx.conf:\d+\):5: session id: [a-fA-F\d]+
+$/s,
 qr/^ssl_session_fetch_by_lua\(nginx.conf:\d+\):4: session id: [a-fA-F\d]+
 failed to resume session: failed to de-serialize session
 ssl_session_store_by_lua\(nginx.conf:\d+\):5: session id: [a-fA-F\d]+
@@ -440,7 +440,6 @@ $/s,
         ssl_session_tickets off;
         ssl_certificate $TEST_NGINX_CERT_DIR/cert/test.crt;
         ssl_certificate_key $TEST_NGINX_CERT_DIR/cert/test.key;
-        ssl_protocols TLSv1.2;
 
         location / {
             content_by_lua_block {
@@ -558,7 +557,6 @@ $/s,
 --- config
     lua_ssl_trusted_certificate $TEST_NGINX_CERT_DIR/cert/test.crt;
     lua_ssl_verify_depth 3;
-    lua_ssl_protocols TLSv1.2;
 
     location /t {
         set $port $TEST_NGINX_MEMCACHED_PORT;
