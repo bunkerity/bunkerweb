@@ -46,7 +46,7 @@ jobs:
           default-organization-id: ${{ secrets.SCW_DEFAULT_ORGANIZATION_ID }}
       - name: Extract ARM type
         run: |
-          TYPE=$(echo "$JSON" | jq '.servers | with_entries(select(.key | contains("COPARM1-"))) | with_entries(select(.value.availability != "shortage")) | keys[] | select(. | test("^COPARM1-[0-9]+C-[0-9]+G$")) | sub("COPARM1-"; "")' | cut -d '-' -f 2,3 | sort -g | tail -n 1 | xargs -I {} echo "COPARM1-{}")
+          TYPE=$(echo "$JSON" | jq '.servers | with_entries(select(.key | contains("COPARM1-"))) | with_entries(select(.value.availability != "shortage")) | keys[] | select(. | test("^COPARM1-[0-9]+C-[0-9]+G$"))' | sed 's/"//g' | cut -d '-' -f 2,3 | sort -g | tail -n 1 | xargs -I {} echo "COPARM1-{}")
           echo "Type is $TYPE"
           echo "TYPE=$TYPE" >> "$GITHUB_ENV"
         env:
