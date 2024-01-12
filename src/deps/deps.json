@@ -225,9 +225,9 @@
     },
     {
       "id": "stream-lua-nginx-module",
-      "name": "stream-lua-nginx-module v0.0.13",
+      "name": "stream-lua-nginx-module v0.0.14",
       "url": "https://github.com/openresty/stream-lua-nginx-module.git",
-      "commit": "309198abf26266f1a3e53c71388ed7bb9d1e5ea2"
+      "commit": "cafa6f55333541d1c78767a286fa434c97574a4c"
     },
     {
       "id": "zlib",
