@@ -346,7 +346,7 @@ class Database:
 
         return ret, (self._exceptions.get(getpid()) or [""]).pop()
 
-    def init_tables(self, default_plugins: List[dict], bunkerweb_version: str) -> Tuple[bool, str]:
+    def init_tables(self, default_plugins: List[dict], bunkerweb_version: str, *, init: bool = True) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
         inspector = inspect(self._sql_engine)
         db_version = None
@@ -700,31 +700,32 @@ class Database:
         if self._exceptions.get(getpid()):
             return False, self._exceptions[getpid()]
 
-        proc = subprocess_run(
-            ["python3", "-m", "alembic", "revision", "--autogenerate", "-m", '"init"'],
-            cwd=str(self.ALEMBIC_FILE_PATH.parent),
-            stdout=DEVNULL,
-            stderr=PIPE,
-            check=False,
-        )
-        if proc.returncode != 0:
-            return (
-                False,
-                f"Error when trying to generate the migration script: {proc.stderr.decode()}",
+        if init:
+            proc = subprocess_run(
+                ["python3", "-m", "alembic", "revision", "--autogenerate", "-m", '"init"'],
+                cwd=str(self.ALEMBIC_FILE_PATH.parent),
+                stdout=DEVNULL,
+                stderr=PIPE,
+                check=False,
             )
+            if proc.returncode != 0:
+                return (
+                    False,
+                    f"Error when trying to generate the migration script: {proc.stderr.decode()}",
+                )
 
-        proc = subprocess_run(
-            ["python3", "-m", "alembic", "upgrade", "head"],
-            cwd=str(self.ALEMBIC_FILE_PATH.parent),
-            stdout=DEVNULL,
-            stderr=PIPE,
-            check=False,
-        )
-        if proc.returncode != 0:
-            return (
-                False,
-                f"Error when trying to apply the migration script: {proc.stderr.decode()}",
+            proc = subprocess_run(
+                ["python3", "-m", "alembic", "upgrade", "head"],
+                cwd=str(self.ALEMBIC_FILE_PATH.parent),
+                stdout=DEVNULL,
+                stderr=PIPE,
+                check=False,
             )
+            if proc.returncode != 0:
+                return (
+                    False,
+                    f"Error when trying to apply the migration script: {proc.stderr.decode()}",
+                )
 
         return True, ""
 
