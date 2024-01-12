@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.9)
 
 project(maxminddb
   LANGUAGES C
-  VERSION 1.8.0
+  VERSION 1.9.1
 )
 set(MAXMINDDB_SOVERSION 0.0.7)
 set(CMAKE_C_STANDARD 99)
@@ -37,8 +37,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-configure_file(${PROJECT_SOURCE_DIR}/include/maxminddb_config.h.cmake.in 
-               ${PROJECT_SOURCE_DIR}/include/maxminddb_config.h)
+configure_file(${PROJECT_SOURCE_DIR}/include/maxminddb_config.h.cmake.in
+          ${CMAKE_CURRENT_BINARY_DIR}/generated/maxminddb_config.h)
 
 add_library(maxminddb
   src/maxminddb.c
@@ -79,12 +79,14 @@ endif()
 target_include_directories(maxminddb PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated/>
   $<INSTALL_INTERFACE:include>
+  $<INSTALL_INTERFACE:generated>
 )
 
 set(MAXMINDB_HEADERS
   include/maxminddb.h
-  include/maxminddb_config.h
+  ${CMAKE_CURRENT_BINARY_DIR}/generated/maxminddb_config.h
 )
 set_target_properties(maxminddb PROPERTIES PUBLIC_HEADER "${MAXMINDB_HEADERS}")
 
