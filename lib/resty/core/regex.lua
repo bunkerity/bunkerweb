@@ -82,7 +82,7 @@ if not pcall(function() pcre_ver = ffi_string(pcre_ver_fn()) end) then
 end
 
 
-local MAX_ERR_MSG_LEN = 128
+local MAX_ERR_MSG_LEN = 256
 
 
 local FLAG_COMPILE_ONCE  = 0x01
@@ -102,6 +102,7 @@ local PCRE_DUPNAMES          = 0x0080000
 local PCRE_JAVASCRIPT_COMPAT = 0x2000000
 
 
+-- PCRE2_ERROR_NOMATCH uses the same value
 local PCRE_ERROR_NOMATCH = -1
 
 
@@ -135,22 +136,44 @@ local ngx_lua_ffi_script_eval_data
 -- TODO: improve this workaround when PCRE allows for unspecifying the MAP_JIT
 -- option.
 local no_jit_in_init
+local pcre_ver_num
+
+local maj, min = string.match(pcre_ver, "^(%d+)%.(%d+)")
+if maj and min then
+    pcre_ver_num = tonumber(maj .. min)
+end
 
 if jit.os == "OSX" then
-    local maj, min = string.match(pcre_ver, "^(%d+)%.(%d+)")
-    if maj and min then
-        local pcre_ver_num = tonumber(maj .. min)
-
-        if pcre_ver_num >= 843 then
-            no_jit_in_init = true
-        end
-
-    else
+    if pcre_ver_num == nil then
         -- assume this version is faulty as well
+        no_jit_in_init = true
+
+    -- PCRE2 is also subject to this issue on macOS
+    elseif pcre_ver_num >= 843 then
         no_jit_in_init = true
     end
 end
 
+-- pcre2
+if pcre_ver_num > 845 then
+    -- option
+    PCRE_CASELESS          = 0x00000008
+    PCRE_MULTILINE         = 0x00000400
+    PCRE_DOTALL            = 0x00000020
+    PCRE_EXTENDED          = 0x00000080
+    PCRE_ANCHORED          = 0x80000000
+    PCRE_UTF8              = 0x00080000
+    PCRE_DUPNAMES          = 0x00000040
+    -- In the pcre2, The PCRE_JAVASCRIPT_COMPAT option has been split into
+    -- independent functional options PCRE2_ALT_BSUX, PCRE2_ALLOW_EMPTY_CLASS,
+    -- and PCRE2_MATCH_UNSET_BACKREF.
+    local PCRE2_ALT_BSUX            = 0x00000002
+    local PCRE2_ALLOW_EMPTY_CLASS   = 0x00000001
+    local PCRE2_MATCH_UNSET_BACKREF = 0x00000200
+    PCRE_JAVASCRIPT_COMPAT = bor(PCRE2_ALT_BSUX, PCRE2_ALLOW_EMPTY_CLASS)
+    PCRE_JAVASCRIPT_COMPAT = bor(PCRE2_MATCH_UNSET_BACKREF,
+                                 PCRE_JAVASCRIPT_COMPAT)
+end
 
 if subsystem == 'http' then
     ffi.cdef[[
