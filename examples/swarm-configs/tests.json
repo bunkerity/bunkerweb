@@ -1,7 +1,8 @@
 {
   "name": "swarm-configs",
   "kinds": ["swarm"],
-  "timeout": 120,
+  "timeout": 60,
+  "delay": 120,
   "tests": [
     {
       "type": "string",

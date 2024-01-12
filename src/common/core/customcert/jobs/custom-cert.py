@@ -28,6 +28,7 @@ db = None
 
 def check_cert(cert_path: str, key_path: str, first_server: str) -> bool:
     try:
+        ret = False
         if not cert_path or not key_path:
             logger.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates")
             return False
@@ -48,19 +49,17 @@ def check_cert(cert_path: str, key_path: str, first_server: str) -> bool:
             "cache",
             "bunkerweb",
             "customcert",
-            first_server,
-            "cert.pem",
+            f"{first_server}.cert.pem",
         )
         cert_cache_path.parent.mkdir(parents=True, exist_ok=True)
 
         cert_hash = file_hash(cert_path)
         old_hash = cache_hash(cert_cache_path, db)
-        if old_hash == cert_hash:
-            return False
-
-        cached, err = cache_file(cert_path, cert_cache_path, cert_hash, db, delete_file=False)
-        if not cached:
-            logger.error(f"Error while caching custom-cert cert.pem file : {err}")
+        if old_hash != cert_hash:
+            ret = True
+            cached, err = cache_file(cert_path, cert_cache_path, cert_hash, db, delete_file=False)
+            if not cached:
+                logger.error(f"Error while caching custom-cert cert.pem file : {err}")
 
         key_cache_path = Path(
             sep,
@@ -68,19 +67,19 @@ def check_cert(cert_path: str, key_path: str, first_server: str) -> bool:
             "cache",
             "bunkerweb",
             "customcert",
-            first_server,
-            "key.pem",
+            f"{first_server}.key.pem",
         )
         key_cache_path.parent.mkdir(parents=True, exist_ok=True)
 
         key_hash = file_hash(key_path)
         old_hash = cache_hash(key_cache_path, db)
         if old_hash != key_hash:
+            ret = True
             cached, err = cache_file(key_path, key_cache_path, key_hash, db, delete_file=False)
             if not cached:
                 logger.error(f"Error while caching custom-cert key.pem file : {err}")
 
-        return True
+        return ret
     except:
         logger.error(
             f"Exception while running custom-cert.py (check_cert) :\n{format_exc()}",
@@ -104,7 +103,7 @@ try:
         key_data = b64decode(getenv("CUSTOM_SSL_KEY_DATA", ""))
         for file, data in (("cert.pem", cert_data), ("key.pem", key_data)):
             if data != b"":
-                file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", first_server, file)
+                file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", f"{first_server}.{file}")
                 file_path.parent.mkdir(parents=True, exist_ok=True)
                 file_path.write_bytes(data)
                 if file == "cert.pem":
@@ -141,7 +140,7 @@ try:
             key_data = b64decode(getenv(f"{first_server}_CUSTOM_SSL_KEY_DATA", ""))
             for file, data in (("cert.pem", cert_data), ("key.pem", key_data)):
                 if data != b"":
-                    file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", first_server, file)
+                    file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", f"{first_server}.{file}")
                     file_path.parent.mkdir(parents=True, exist_ok=True)
                     file_path.write_bytes(data)
                     if file == "cert.pem":

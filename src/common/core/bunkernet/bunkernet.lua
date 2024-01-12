@@ -137,10 +137,6 @@ function bunkernet:access()
 	if not self:is_needed() then
 		return self:ret(true, "service doesn't use BunkerNet, skipping access")
 	end
-	-- Check id
-	if not self.bunkernet_id then
-		return self:ret(false, "missing instance ID")
-	end
 	-- Check if IP is global
 	if not self.ctx.bw.ip_is_global then
 		return self:ret(true, "IP is not global")
@@ -148,6 +144,10 @@ function bunkernet:access()
 	-- Check if whitelisted
 	if is_whitelisted(self.ctx) then
 		return self:ret(true, "client is whitelisted")
+	end
+	-- Check id
+	if not self.bunkernet_id then
+		return self:ret(false, "missing instance ID")
 	end
 	-- Extract DB
 	local db, err = self.datastore:get("plugin_bunkernet_db", true)
@@ -175,10 +175,6 @@ function bunkernet:log(bypass_checks)
 		if not self:is_needed() then
 			return self:ret(true, "service doesn't use BunkerNet, skipping log")
 		end
-		-- Check id
-		if not self.bunkernet_id then
-			return self:ret(false, "missing instance ID")
-		end
 	end
 	-- Check if IP has been blocked
 	local reason, reason_data = get_reason(self.ctx)
@@ -191,6 +187,10 @@ function bunkernet:log(bypass_checks)
 	-- Check if IP is global
 	if not self.ctx.bw.ip_is_global then
 		return self:ret(true, "IP is not global")
+	end
+	-- Check id
+	if not self.bunkernet_id then
+		return self:ret(false, "missing instance ID")
 	end
 	-- Check if IP has been reported recently
 	local ok, data = self.cachestore:get("plugin_bunkernet_" .. self.ctx.bw.remote_addr .. "_" .. reason)
@@ -238,10 +238,6 @@ function bunkernet:log_default()
 	-- Check if needed
 	if not self:is_needed() then
 		return self:ret(true, "no service uses BunkerNet, skipping log_default")
-	end
-	-- Check id
-	if not self.bunkernet_id then
-		return self:ret(false, "missing instance ID")
 	end
 	-- Check if default server is disabled
 	local check, err = get_variable("DISABLE_DEFAULT_SERVER", false)

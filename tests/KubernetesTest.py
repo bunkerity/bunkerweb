@@ -10,15 +10,9 @@ from yaml import safe_load_all, dump_all
 
 
 class KubernetesTest(Test):
-    def __init__(self, name, timeout, tests, delay=0):
+    def __init__(self, name, timeout, tests, delay=0, domains={}):
         super().__init__(name, "kubernetes", timeout, tests, delay=delay)
-        self._domains = {
-            r"www\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1_2')}",
-            r"auth\.example\.com": f"{Test.random_string(1)}.{getenv('TEST_DOMAIN1_2')}",
-            r"app1\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN1')}",
-            r"app2\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN2')}",
-            r"app3\.example\.com": f"{Test.random_string(6)}.{getenv('TEST_DOMAIN3')}",
-        }
+        self._domains = domains
 
     @staticmethod
     def init():
@@ -38,6 +32,7 @@ class KubernetesTest(Test):
                 "USE_PROXY_PROTOCOL": "yes",
                 "REAL_IP_FROM": "100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8",
                 "REAL_IP_HEADER": "proxy_protocol",
+                "LOG_LEVEL": "info"
             }
             replace_env = {"API_WHITELIST_IP": "127.0.0.1/8 100.64.0.0/10 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8"}
             for yaml in data:

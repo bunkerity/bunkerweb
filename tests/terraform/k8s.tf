@@ -12,7 +12,7 @@ resource "scaleway_vpc_private_network" "pn" {
 resource "scaleway_k8s_cluster" "cluster" {
   type = "kapsule"
   name = "bw_k8s"
-  version = "1.24.7"
+  version = "1.28.2"
   cni = "cilium"
   private_network_id = scaleway_vpc_private_network.pn.id
   delete_additional_resources = true

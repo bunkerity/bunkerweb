@@ -36,8 +36,8 @@ function customcert:init()
 			for server_name, multisite_vars in pairs(vars) do
 				if multisite_vars["USE_CUSTOM_SSL"] == "yes" and server_name ~= "global" then
 					local check, data = read_files({
-						"/var/cache/bunkerweb/customcert/" .. server_name .. "/cert.pem",
-						"/var/cache/bunkerweb/customcert/" .. server_name .. "/key.pem",
+						"/var/cache/bunkerweb/customcert/" .. server_name .. ".cert.pem",
+						"/var/cache/bunkerweb/customcert/" .. server_name .. ".key.pem",
 					})
 					if not check then
 						self.logger:log(ERR, "error while reading files : " .. data)
@@ -60,8 +60,8 @@ function customcert:init()
 				return self:ret(false, "can't get SERVER_NAME variable : " .. err)
 			end
 			local check, data = read_files({
-				"/var/cache/bunkerweb/customcert/" .. server_name:match("%S+") .. "/cert.pem",
-				"/var/cache/bunkerweb/customcert/" .. server_name:match("%S+") .. "/key.pem",
+				"/var/cache/bunkerweb/customcert/" .. server_name:match("%S+") .. ".cert.pem",
+				"/var/cache/bunkerweb/customcert/" .. server_name:match("%S+") .. ".key.pem",
 			})
 			if not check then
 				self.logger:log(ERR, "error while reading files : " .. data)
@@ -87,15 +87,14 @@ function customcert:ssl_certificate()
 	if not server_name then
 		return self:ret(false, "can't get server_name : " .. err)
 	end
-	if self.variables["USE_CUSTOM_SSL"] == "yes" then
-		local data
-		data, err = self.datastore:get("plugin_customcert_" .. server_name, true)
-		if not data then
-			return self:ret(
-				false,
-				"error while getting plugin_customcert_" .. server_name .. " from datastore : " .. err
-			)
-		end
+	local data
+	data, err = self.datastore:get("plugin_customcert_" .. server_name, true)
+	if not data and err ~= "not found" then
+		return self:ret(
+			false,
+			"error while getting plugin_customcert_" .. server_name .. " from datastore : " .. err
+		)
+	elseif data then
 		return self:ret(true, "certificate/key data found", data)
 	end
 	return self:ret(true, "custom certificate is not used")

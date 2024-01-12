@@ -15,9 +15,11 @@
 - [BUGFIX] Remove certbot renew delay causing errors on k8s
 - [BUGFIX] Fix missing custom modsec files when BW instances change
 - [BUGFIX] Fix inconsistency on config changes when using Redis
+- [BUGFIX] Fix web UI not working when using / URL
 - [FEATURE] Add Anonymous reporting feature
 - [FEATURE] Add support for fallback Referrer-Policies
-- [FEATURE] Add profile page to web ui and the possibility to activate the 2FA
+- [FEATURE] Add 2FA support to web UI
+- [FEATURE] Add username and password management to web UI
 - [FEATURE] Add setting REVERSE_PROXY_INCLUDES to manually add "include" directives in the reverse proxies
 - [FEATURE] Add support for Redis Sentinel
 - [FEATURE] Add support for tls in Ingress definition
