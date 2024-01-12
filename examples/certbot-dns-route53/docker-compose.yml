@@ -1,0 +1,95 @@
+version: "3"
+
+services:
+  mybunker:
+    image: bunkerity/bunkerweb:1.5.5
+    ports:
+      - 80:8080
+      - 443:8443
+    volumes:
+      - certs:/certs
+    environment:
+      - MULTISITE=yes
+      - SERVER_NAME=app1.example.com app2.example.com app3.example.com # replace with your domains
+      - API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24
+      - SERVE_FILES=no
+      - DISABLE_DEFAULT_SERVER=yes
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_REVERSE_PROXY=yes
+      - USE_CUSTOM_SSL=yes
+      - CUSTOM_SSL_CERT=/certs/live/example.com/fullchain.pem
+      - CUSTOM_SSL_KEY=/certs/live/example.com/privkey.pem
+      - app1.example.com_REVERSE_PROXY_URL=/
+      - app1.example.com_REVERSE_PROXY_HOST=http://app1
+      - app2.example.com_REVERSE_PROXY_URL=/
+      - app2.example.com_REVERSE_PROXY_HOST=http://app2
+      - app3.example.com_REVERSE_PROXY_URL=/
+      - app3.example.com_REVERSE_PROXY_HOST=http://app3
+    labels:
+      - "bunkerweb.INSTANCE=yes" # required for the scheduler to recognize the container
+    networks:
+      - bw-universe
+      - bw-services
+
+  bbw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.5.5
+    depends_on:
+      - mybunker
+    environment:
+      - DOCKER_HOST=tcp://bw-docker-proxy:2375
+    volumes:
+      - bw-data:/data
+      - certs:/certs
+    networks:
+      - bw-universe
+      - bw-docker
+
+  bw-docker-proxy:
+    image: tecnativa/docker-socket-proxy:nightly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+      - LOG_LEVEL=warning
+    networks:
+      - bw-docker
+
+  mycertbot:
+    image: certbot/dns-google:v2.0.0
+    environment:
+      - DOMAINS=*.example.com,example.com
+      - EMAIL=contact@example.com
+    volumes:
+      - certs:/etc/letsencrypt
+      - ./aws.ini:/opt/aws.ini
+      - ./entrypoint.sh:/opt/entrypoint.sh
+    entrypoint: /bin/sh /opt/entrypoint.sh
+
+  app1:
+    image: tutum/hello-world
+    networks:
+      - bw-services
+
+  app2:
+    image: tutum/hello-world
+    networks:
+      - bw-services
+
+  app3:
+    image: tutum/hello-world
+    networks:
+      - bw-services
+
+volumes:
+  bw-data:
+  certs:
+
+networks:
+  bw-universe:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-docker:
+  bw-services:

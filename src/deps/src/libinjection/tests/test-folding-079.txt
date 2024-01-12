@@ -1,0 +1,12 @@
+--TEST--
+automatic detection of 'collation types'
+--INPUT--
+SELECT 1 COLLATE papers;
+--EXPECTED--
+E SELECT
+1 1
+A COLLATE
+n papers
+; ;
+
+

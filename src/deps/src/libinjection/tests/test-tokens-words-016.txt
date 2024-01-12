@@ -1,0 +1,12 @@
+--TEST--
+For keywords only, no space between keyword and unary operator
+--INPUT--
+SELECT UTL_INADDR.GET_HOST_ADDRESS(1)
+
+--EXPECTED--
+E SELECT
+f UTL_INADDR.GET_HOST_ADDRESS
+( (
+1 1
+) )
+

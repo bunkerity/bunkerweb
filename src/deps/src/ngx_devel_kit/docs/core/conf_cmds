@@ -1,0 +1,62 @@
+
+Conf command macros
+-------------------
+
+The build script generates a large number of macros for reducing the code required for command
+definitions.
+
+There are basically three types of macros :
+
+- combination bitmasks
+
+    e.g. NDK_HTTP_MAIN_SRV_CONF  =  (NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF)
+
+- base command structures
+
+    e.g. NDK_HTTP_MAIN_CONF_TAKE1
+
+- conf-set command structures
+
+    e.g. NDK_HTTP_CONF_STR
+
+
+Combination bitmasks
+--------------------
+
+Basically combinations of existing bitmasks for locations, with general > specific order
+
+NDK_HTTP_CONF = (NGX_HTTP_MAIN_CONF | NGX_HTTP_SVR_CONF | NGX_HTTP_SIF_CONF | NGX_HTTP_LOC_CONF | NGX_HTTP_LIF_CONF)
+
+
+Base command structures
+-----------------------
+
+These macros are basically there as wrappers for the conf-set command structures, and but incorporate 
+the bitmask element into the name of the macro.
+
+
+Conf-set command structures
+---------------------------
+
+These macros simplify creating commands that use any of the build-in conf-set functions or any of those
+added by the NDK.
+
+e.g.  NGX_HTTP_MAIN_SRV_STR ("name", prop, NULL)
+
+where prop is the name of the property that is a ngx_str_t.  Whether this is in the loc conf, main conf
+or svr conf is generated automatically in by the macro.
+
+NOTE : you need to set the following if they will be used (using macro definitions) :
+
+ndk_module_main_conf_t
+ndk_module_srv_conf_t
+ndk_module_loc_conf_t
+
+e.g
+
+#define     ndk_module_loc_conf_t       ngx_http_my_module_loc_conf_t
+
+
+TODO
+----
+Much better documentation for this

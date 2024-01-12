@@ -1,0 +1,10 @@
+--TEST--
+Not really sql but testing folding
+--INPUT--
+select 1 / (2,3,4);
+--EXPECTED--
+E select
+1 1
+o /
+( (
+1 2

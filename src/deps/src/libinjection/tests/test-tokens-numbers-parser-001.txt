@@ -1,0 +1,10 @@
+--TEST--
+test to see that parser works correctly at the end of a numbers
+--INPUT--
+SELECT 123UNION
+--EXPECTED--
+E SELECT
+1 123
+U UNION
+
+

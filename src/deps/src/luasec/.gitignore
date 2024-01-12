@@ -1,0 +1,3 @@
+/src/*.o
+/src/luasocket/*.o
+/*.dll

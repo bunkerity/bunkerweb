@@ -1,0 +1,14 @@
+{
+  "name": "prestashop",
+  "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
+  "timeout": 240,
+  "delay": 240,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com/administration",
+      "string": "prestashop",
+      "tls": "www.example.com"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+--TEST--
+NULL is treated as a 'variable' type so it doens't get folded away
+--INPUT--
+SELECT NULL;
+--EXPECTED--
+E SELECT
+v NULL
+; ;
+

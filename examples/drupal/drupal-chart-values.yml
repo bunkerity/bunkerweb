@@ -1,0 +1,6 @@
+drupalUsername: "user"
+drupalPassword: "changeme42"
+drupalEmail: "contact@example.com"
+mariadb:
+  auth:
+    password: "changeme1337"

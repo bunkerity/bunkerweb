@@ -1,0 +1,126 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing expirevar action (1/x) - ip, expire later",
+    "expected":{
+      "debug_log": "Saving msg: mycount1 is 100"
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecAction \"initcol:ip='127.0.0.1',id:5000,phase:1\"",
+      "SecRule ARGS \"@rx value\" \"id:'5001',phase:2,setvar:ip.mycount1=100,expirevar:ip.mycount1=60,pass\"",
+      "SecRule &IP:mycount1 \"@eq 1\" \"id:'5002',phase:2,pass,log,msg:'mycount1 is %{ip.mycount1}'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing expirevar action (2/x) - ip, expire immediately",
+    "expected":{
+      "debug_log": "Saving msg: mycount1 is "
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecAction \"initcol:ip='127.0.0.1',id:5010,phase:1\"",
+      "SecRule ARGS \"@rx value\" \"id:'5011',phase:2,setvar:ip.mycount1=100,expirevar:ip.mycount1=0,pass\"",
+      "SecRule &IP:mycount1 \"@eq 0\" \"id:'5012',phase:2,pass,log,msg:'mycount1 is %{ip.mycount1}'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing expirevar action (3/x) session, expire later",
+    "expected":{
+      "debug_log": "Saving msg: mycount1 is 12"
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS \"@rx .\" \"id:5150,phase:2,pass,setsid:sess1234\"",
+      "SecRule ARGS \"@rx value\" \"id:5151,phase:2,pass,setvar:session.mycount1=12,expirevar:session.mycount1=30\"",
+      "SecRule &SESSION:mycount1 \"@eq 1\" \"id:'5152',phase:2,pass,log,msg:'mycount1 is %{session.mycount1}'\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing expirevar action (4/x) session, expire immediately",
+    "expected":{
+      "debug_log": "Saving msg: mycount1 is"
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule ARGS \"@rx .\" \"id:5150,phase:2,pass,setsid:sess1234\"",
+      "SecRule ARGS \"@rx value\" \"id:5151,phase:2,pass,setvar:session.mycount1=12,expirevar:session.mycount1=0\"",
+      "SecRule &SESSION:mycount1 \"@eq 0\" \"id:'5152',phase:2,pass,log,msg:'mycount1 is %{session.mycount1}'\""
+    ]
+  }
+]

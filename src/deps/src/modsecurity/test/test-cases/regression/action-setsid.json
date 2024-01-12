@@ -1,0 +1,36 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing setsid action",
+    "expected":{
+      "debug_log": "Saving variable: SESSION:score with value: "
+    },
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "User-Agent":"My sweet little browser",
+        "Cookie": "PHPSESSID=rAAAAAAA2t5uvjq435r4q7ib3vtdjq120"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET"
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_HEADERS:User-Agent \"^(.*)$\" \"id:'900018',phase:1,t:none,t:sha1,t:hexEncode,setsid:%{REQUEST_COOKIES:PHPSESSID}%,nolog,pass\"",
+      "SecRule REQUEST_HEADERS \".*\" \"id:'900021',phase:1,setvar:SESSION.score=+10\"",
+      "SecRule REQUEST_HEADERS:User-Agent \"^(.*)$\" \"id:'900068',phase:1,t:none,t:sha1,t:hexEncode,setsid:%{REQUEST_COOKIES:PHPSESSID}2,nolog,pass\"",
+      "SecRule REQUEST_HEADERS \".*\" \"id:'900022',phase:1,setvar:SESSION.score=+5\""
+    ]
+  }
+]

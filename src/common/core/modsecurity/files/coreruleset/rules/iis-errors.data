@@ -1,0 +1,13 @@
+<h2 style="font:8pt/11pt verdana; color:000000">HTTP 403.6 - Forbidden: IP address rejected<br>
+<TITLE>500 Internal Server Error</TITLE>
+Microsoft VBScript runtime (0x8
+error '800
+Application uses a value of the wrong type for the current operation
+Microsoft VBScript compilation (0x8
+Microsoft VBScript compilation error
+Microsoft .NET Framework Version:
+A trappable error occurred in an external object. The script cannot continue running
+Microsoft VBScript runtime Error
+>Syntax error in string in query expression
+ADODB.Command
+Object required: '

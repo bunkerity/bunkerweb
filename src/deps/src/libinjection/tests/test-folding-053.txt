@@ -1,0 +1,9 @@
+--TEST--
+pgsql type intents, postfix
+--INPUT--
+SELECT float @@version;
+--EXPECTED--
+E SELECT
+v @@version
+; ;
+
