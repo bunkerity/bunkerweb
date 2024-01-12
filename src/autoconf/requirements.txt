@@ -114,17 +114,17 @@ docker==7.0.0 \
     --hash=sha256:12ba681f2777a0ad28ffbcc846a69c31b4dfd9752b47eb425a274ee269c5e14b \
     --hash=sha256:323736fb92cd9418fc5e7133bc953e11a9da04f4483f828b527db553f1e7e5a3
     # via -r requirements.in
-google-auth==2.25.2 \
-    --hash=sha256:42f707937feb4f5e5a39e6c4f343a17300a459aaf03141457ba505812841cc40 \
-    --hash=sha256:473a8dfd0135f75bb79d878436e568f2695dce456764bf3a02b6f8c540b1d256
+google-auth==2.26.2 \
+    --hash=sha256:3f445c8ce9b61ed6459aad86d8ccdba4a9afed841b2d1451a11ef4db08957424 \
+    --hash=sha256:97327dbbf58cccb58fc5a1712bba403ae76668e64814eb30f7316f7e27126b81
     # via kubernetes
 idna==3.6 \
     --hash=sha256:9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca \
     --hash=sha256:c05567e9c24a6b9faaa835c4821bad0590fbb9d5779e7caa6e1cc4978e7eb24f
     # via requests
-kubernetes==28.1.0 \
-    --hash=sha256:10f56f8160dcb73647f15fafda268e7f60cf7dbc9f8e46d52fcd46d3beb0c18d \
-    --hash=sha256:1468069a573430fb1cb5ad22876868f57977930f80a6749405da31cd6086a7e9
+kubernetes==29.0.0 \
+    --hash=sha256:ab8cb0e0576ccdfb71886366efb102c6a20f268d817be065ce7f9909c631e43e \
+    --hash=sha256:c4812e227ae74d07d53c88293e564e54b850452715a59a927e7e1bc6b9a60459
     # via -r requirements.in
 oauthlib==3.2.2 \
     --hash=sha256:8139f29aac13e25d502680e9e19963e83f16838d48a0d71c287fe40e7067fbca \
@@ -354,9 +354,9 @@ typing-extensions==4.9.0 \
     # via
     #   pydantic
     #   pydantic-core
-urllib3==1.26.18 \
-    --hash=sha256:34b97092d7e0a3a8cf7cd10e386f401b3737364026c45e622aa02903dffe0f07 \
-    --hash=sha256:f8ecc1bba5667413457c529ab955bf8c67b45db799d159066261719e328580a0
+urllib3==2.1.0 \
+    --hash=sha256:55901e917a5896a349ff771be919f8bd99aff50b79fe58fec595eb37bbc56bb3 \
+    --hash=sha256:df7aa8afb0148fa78488e7899b2c59b5f4ffcfa82e6c54ccb9dd37c1d7b52d54
     # via
     #   docker
     #   kubernetes

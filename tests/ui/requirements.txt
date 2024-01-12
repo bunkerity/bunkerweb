@@ -153,9 +153,9 @@ sortedcontainers==2.4.0 \
     --hash=sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88 \
     --hash=sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0
     # via trio
-trio==0.23.2 \
-    --hash=sha256:5a0b566fa5d50cf231cfd6b08f3b03aa4179ff004b8f3144059587039e2b26d3 \
-    --hash=sha256:da1d35b9a2b17eb32cae2e763b16551f9aa6703634735024e32f325c9285069e
+trio==0.24.0 \
+    --hash=sha256:c3bd3a4e3e3025cd9a2241eae75637c43fe0b9e88b4c97b9161a55b9e54cd72c \
+    --hash=sha256:ffa09a74a6bf81b84f8613909fb0beaee84757450183a7a2e0b47b455c0cac5d
     # via
     #   selenium
     #   trio-websocket
