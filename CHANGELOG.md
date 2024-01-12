@@ -1,6 +1,10 @@
 # Changelog
 
-## v1.5.5 - YYYY/MM/DD
+## v1.5.6 - YYYY/MM/DD
+
+
+
+## v1.5.5 - 2024/01/12
 
 - [BUGFIX] Fix issues with the database when upgrading from one version to a newer one
 - [BUGFIX] Fix ModSecurity-nginx to make it work with brotli
