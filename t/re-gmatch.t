@@ -446,13 +446,9 @@ matched: nil
     }
 --- request
 GET /re
---- response_body eval
-# PCRE2_ERROR_UTF8_ERR2 (-4)
-# PCRE_ERROR_BADUTF8 (-10)
-$Test::Nginx::Util::PcreVersion == 2 ?
-"error: pcre_exec\(\) failed: -4\nnot matched\n"
-:
-"error: pcre_exec\(\) failed: -10\nnot matched\n"
+--- response_body
+error: pcre_exec() failed: -10
+not matched
 --- no_error_log
 [error]
 

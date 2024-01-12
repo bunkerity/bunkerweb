@@ -394,13 +394,9 @@ matched: nil
             ngx.say("not matched")
         end
     }
---- stream_response eval
-# PCRE2_ERROR_UTF8_ERR2 (-4)
-# PCRE_ERROR_BADUTF8 (-10)
-$Test::Nginx::Util::PcreVersion == 2 ?
-"error: pcre_exec\(\) failed: -4\nnot matched\n"
-:
-"error: pcre_exec\(\) failed: -10\nnot matched\n"
+--- stream_response
+error: pcre_exec() failed: -10
+not matched
 --- no_error_log
 [error]
 

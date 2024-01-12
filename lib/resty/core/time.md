@@ -57,7 +57,7 @@ monotonic_msec
 
 **syntax:** *monotonic_msec()*
 
-Returns the elapsed time in milliseconds from the machine boot for the current time stamp from the Nginx cached time (no syscall involved unlike Lua's date library).
+Returns the elapsed time in microseconds from the machine boot for the current time stamp from the Nginx cached time (no syscall involved unlike Lua's date library).
 
 ```lua
 local cur_msec = require "resty.core.time".monotonic_msec

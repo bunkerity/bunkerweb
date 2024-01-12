@@ -29,7 +29,7 @@ Table of Contents
 Status
 ======
 
-This Lua module is production ready.
+This Lua module is currently considered experimental.
 
 Synopsis
 ========
