@@ -1,6 +1,48 @@
 # Changelog
 
-## v1.5.3 -
+## v1.5.6 - YYYY/MM/DD
+
+- [MISC] Updated Linux base images in Dockerfiles
+- [DEPS] Updated stream-lua-nginx-module to v0.0.14
+- [DEPS] Updated lua-nginx-module version to v0.10.26
+- [DEPS] Updated libmaxminddb version to v1.9.1
+- [DEPS] Updated lua-resty-core to v0.1.28
+
+## v1.5.5 - 2024/01/12
+
+- [BUGFIX] Fix issues with the database when upgrading from one version to a newer one
+- [BUGFIX] Fix ModSecurity-nginx to make it work with brotli
+- [BUGFIX] Remove certbot renew delay causing errors on k8s
+- [BUGFIX] Fix missing custom modsec files when BW instances change
+- [BUGFIX] Fix inconsistency on config changes when using Redis
+- [BUGFIX] Fix web UI not working when using / URL
+- [FEATURE] Add Anonymous reporting feature
+- [FEATURE] Add support for fallback Referrer-Policies
+- [FEATURE] Add 2FA support to web UI
+- [FEATURE] Add username and password management to web UI
+- [FEATURE] Add setting REVERSE_PROXY_INCLUDES to manually add "include" directives in the reverse proxies
+- [FEATURE] Add support for Redis Sentinel
+- [FEATURE] Add support for tls in Ingress definition
+- [MISC] Fallback to default HTTPS certificate to prevent errors
+- [MISC] Various internal improvements in LUA code
+- [MISC] Check nginx configuration before reload
+- [MISC] Updated Python Docker image to 3.12.1-alpine3.18 in Dockerfiles
+- [DEPS] Updated ModSecurity to v3.0.11
+
+## v1.5.4 - 2023/12/04
+
+- [UI] Add an optional setup wizard for the web UI
+- [BUGFIX] Fix issues with the Linux integration and external databases
+- [BUGFIX] Fix scheduler trying to connect to Docker socket in k8s and swarm
+- [LINUX] Support Debian 12, Fedora 39 and RHEL 8.9
+- [DOCKER] Handle start and stop event of BunkerWeb with the scheduler
+- [MISC] Refactor database session handling to make it more stable with SQLite
+- [MISC] Add conditional block for open file cache in nginx config
+- [MISC] Updated core dependencies
+- [MISC] Updated python dependencies
+- [MISC] Updated Python Docker image to 3.12.0-alpine3.18 in Dockerfiles
+
+## v1.5.3 - 2023/10/31
 
 - [BUGFIX] Fix BunkerWeb not loading his own settings after a docker restart
 - [BUGFIX] Fix Custom configs not following the service name after an update on the UI

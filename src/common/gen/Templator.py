@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from glob import glob
@@ -104,6 +104,8 @@ class Templator:
             for root_conf in (
                 "server.conf",
                 "access-lua.conf",
+                "ssl-certificate-lua.conf",
+                "header-lua.conf",
                 "init-lua.conf",
                 "log-lua.conf",
                 "set-lua.conf",

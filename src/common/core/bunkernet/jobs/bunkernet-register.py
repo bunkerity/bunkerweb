@@ -1,8 +1,9 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from os import _exit, getenv, sep
 from os.path import join
+from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from time import sleep
 from traceback import format_exc
@@ -29,7 +30,7 @@ try:
         servers = getenv("SERVER_NAME") or []
 
         if isinstance(servers, str):
-            servers = servers.split()
+            servers = servers.split(" ")
 
         for first_server in servers:
             if getenv(f"{first_server}_USE_BUNKERNET", getenv("USE_BUNKERNET", "yes")) == "yes":
@@ -43,11 +44,16 @@ try:
         LOGGER.info("BunkerNet is not activated, skipping registration...")
         _exit(0)
 
+    # Create directory if it doesn't exist
+    bunkernet_path = Path(sep, "var", "cache", "bunkerweb", "bunkernet")
+    bunkernet_path.mkdir(parents=True, exist_ok=True)
+
     # Get ID from cache
     bunkernet_id: Optional[bytes] = JOB.get_cache("instance.id")  # type: ignore
     if bunkernet_id:
+        assert isinstance(bunkernet_id, bytes), f"Invalid bunkernet ID in db cache : {bunkernet_id}"
+        bunkernet_path.joinpath("instance.id").write_bytes(bunkernet_id)
         LOGGER.info("Successfully retrieved BunkerNet ID from db cache")
-        assert isinstance(bunkernet_id, bytes)
     else:
         LOGGER.info("No BunkerNet ID found in db cache")
 

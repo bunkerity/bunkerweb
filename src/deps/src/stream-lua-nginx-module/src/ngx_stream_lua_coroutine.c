@@ -152,6 +152,7 @@ ngx_stream_lua_coroutine_create_helper(lua_State *L,
 
 #ifdef OPENRESTY_LUAJIT
     ngx_stream_lua_set_req(co, r);
+    ngx_stream_lua_attach_co_ctx_to_L(co, coctx);
 #else
     /* make new coroutine share globals of the parent coroutine.
      * NOTE: globals don't have to be separated! */

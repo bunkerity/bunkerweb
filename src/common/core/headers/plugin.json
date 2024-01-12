@@ -145,19 +145,8 @@
         "en": "Referrer-Policy",
         "fr": "Referrer-Policy"
       },
-      "regex": "^(no-referrer|no-referrer-when-downgrade|origin|origin-when-cross-origin|same-origin|strict-origin|strict-origin-when-cross-origin|unsafe-url)?$",
-      "type": "select",
-      "select": [
-        "",
-        "no-referrer",
-        "no-referrer-when-downgrade",
-        "origin",
-        "origin-when-cross-origin",
-        "same-origin",
-        "strict-origin",
-        "strict-origin-when-cross-origin",
-        "unsafe-url"
-      ]
+      "regex": "^(?!^(,| ))((, )?(no-referrer-when-downgrade|no-referrer|origin-when-cross-origin|same-origin|strict-origin-when-cross-origin|strict-origin|origin|unsafe-url)(?!\\b.*, \\4\\b))*$",
+      "type": "text"
     },
     "PERMISSIONS_POLICY": {
       "context": "multisite",

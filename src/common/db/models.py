@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, LargeBinary, PrimaryKeyConstraint, Sequence, String, func
@@ -308,3 +308,14 @@ class Tags(Base):
     id = Column(String(64), primary_key=True)
 
     actions = relationship("Actions_tags", back_populates="tag")
+
+
+class Users(Base):
+    __tablename__ = "bw_ui_users"
+
+    id = Column(Integer, primary_key=True, default=1)
+    username = Column(String(256), nullable=False, unique=True)
+    password = Column(String(60), nullable=False)
+    is_two_factor_enabled = Column(Boolean, nullable=False, default=False)
+    secret_token = Column(String(32), nullable=True, unique=True, default=None)
+    method = Column(String(32), nullable=False, default="manual")

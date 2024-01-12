@@ -15,8 +15,8 @@
       "context": "multisite",
       "default": "",
       "help": {
-        "en": "Deny access if the country of the client is in the list (2 letters code).",
-        "fr": "Bloquer l'accès si le pays du client est dans la liste (code à 2 lettres)."
+        "en": "Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).",
+        "fr": "Bloquer l'accès si le pays du client est dans la liste (format ISO 3166-1 alpha-2 séparé par des espaces)."
       },
       "id": "country-blacklist",
       "label": {
@@ -30,8 +30,8 @@
       "context": "multisite",
       "default": "",
       "help": {
-        "en": "Deny access if the country of the client is not in the list (2 letters code).",
-        "fr": "Bloquer l'accès si le pays du client n'est pas dans la liste (code à 2 lettres)."
+        "en": "Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).",
+        "fr": "Bloquer l'accès si le pays du client n'est pas dans la liste (format ISO 3166-1 alpha-2 séparé par des espaces)."
       },
       "id": "country-whitelist",
       "label": {

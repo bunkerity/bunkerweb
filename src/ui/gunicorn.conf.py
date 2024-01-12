@@ -2,6 +2,12 @@
 from os import cpu_count, getenv, sep
 from os.path import join
 
+from sys import path as sys_path
+
+deps_path = join(sep, "usr", "share", "bunkerweb", "deps", "python")
+if deps_path not in sys_path:
+    sys_path.append(deps_path)
+
 MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
 MODE = getenv("MODE")
 LOG_LEVEL = getenv("LOG_LEVEL", "info")
@@ -25,7 +31,7 @@ pythonpath = join(sep, "usr", "share", "bunkerweb", "deps", "python")
 proxy_allow_ips = "*"
 bind = f"{LISTEN_ADDR}:{LISTEN_PORT}"
 workers = MAX_WORKERS
-worker_class = "gevent"
+worker_class = "gthread"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
 max_requests_jitter = min(8, MAX_WORKERS)
 graceful_timeout = 0

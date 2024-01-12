@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -83,7 +83,7 @@ std::string operator+(const std::string &a, Variable *v) {
 
 std::string operator+(const std::string &a, Variables *v) {
     std::string test;
-    for (auto &b : *v) {
+    for (const auto &b : *v) {
         if (test.empty()) {
             test = std::string("") + b;
         } else {

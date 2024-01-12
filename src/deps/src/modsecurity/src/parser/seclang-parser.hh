@@ -83,6 +83,7 @@ class Driver;
 #include "src/actions/disruptive/redirect.h"
 #include "src/actions/init_col.h"
 #include "src/actions/exec.h"
+#include "src/actions/expire_var.h"
 #include "src/actions/log_data.h"
 #include "src/actions/log.h"
 #include "src/actions/maturity.h"
@@ -354,7 +355,7 @@ using namespace modsecurity::operators;
     a = std::move(c);
 
 
-#line 358 "seclang-parser.hh"
+#line 359 "seclang-parser.hh"
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -494,7 +495,7 @@ using namespace modsecurity::operators;
 #endif
 
 namespace yy {
-#line 498 "seclang-parser.hh"
+#line 499 "seclang-parser.hh"
 
 
 
@@ -8069,7 +8070,7 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 3372,     ///< Last index in yytable_.
+      yylast_ = 3373,     ///< Last index in yytable_.
       yynnts_ = 16,  ///< Number of nonterminal symbols.
       yyfinal_ = 341 ///< Termination state number.
     };
@@ -8731,7 +8732,7 @@ switch (yykind)
 
 
 } // yy
-#line 8735 "seclang-parser.hh"
+#line 8736 "seclang-parser.hh"
 
 
 

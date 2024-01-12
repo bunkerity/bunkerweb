@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from time import sleep
@@ -138,10 +138,6 @@ class IngressController(Controller):
                 location += 1
             services.append(service)
 
-        # parse tls
-        if controller_service.spec.tls:  # TODO: support tls
-            self._logger.warning("Ignoring unsupported tls.")
-
         # parse annotations
         if controller_service.metadata.annotations:
             for service in services:
@@ -159,6 +155,37 @@ class IngressController(Controller):
                     variable = variable.replace(f"{server_name}_", "", 1)
                     if self._is_setting_context(variable, "multisite"):
                         service[variable] = value
+
+        # parse tls
+        if controller_service.spec.tls:
+            for tls in controller_service.spec.tls:
+                if tls.hosts and tls.secret_name:
+                    for host in tls.hosts:
+                        for service in services:
+                            if host in service["SERVER_NAME"].split(" "):
+                                secrets_tls = self.__corev1.list_secret_for_all_namespaces(
+                                    watch=False,
+                                    field_selector=f"metadata.name={tls.secret_name},metadata.namespace={namespace}",
+                                ).items
+                                if len(secrets_tls) == 0:
+                                    self._logger.warning(
+                                        f"Ignoring tls setting for {host} : secret {tls.secret_name} not found.",
+                                    )
+                                    break
+                                secret_tls = secrets_tls[0]
+                                if not secret_tls.data:
+                                    self._logger.warning(
+                                        f"Ignoring tls setting for {host} : secret {tls.secret_name} contains no data.",
+                                    )
+                                    break
+                                if "tls.crt" not in secret_tls.data or "tls.key" not in secret_tls.data:
+                                    self._logger.warning(
+                                        f"Ignoring tls setting for {host} : secret {tls.secret_name} is missing tls data.",
+                                    )
+                                    break
+                                service["USE_CUSTOM_SSL"] = "yes"
+                                service["CUSTOM_SSL_CERT_DATA"] = secret_tls.data["tls.crt"]
+                                service["CUSTOM_SSL_KEY_DATA"] = secret_tls.data["tls.key"]
         return services
 
     def _get_static_services(self) -> List[dict]:
@@ -218,6 +245,22 @@ class IngressController(Controller):
                 configs[config_type][f"{config_site}{config_name}"] = config_data
         return configs
 
+    def __process_event(self, event):
+        obj = event["object"]
+        metadata = obj.metadata if obj else None
+        annotations = metadata.annotations if metadata else None
+        if not obj:
+            return False
+        if obj.kind == "Pod":
+            return annotations and "bunkerweb.io/INSTANCE" in annotations
+        if obj.kind == "Ingress":
+            return True
+        if obj.kind == "ConfigMap":
+            return annotations and "bunkerweb.io/CONFIG_TYPE" in annotations
+        if obj.kind == "Service":
+            return True
+        return False
+
     def __watch(self, watch_type):
         w = watch.Watch()
         what = None
@@ -236,9 +279,14 @@ class IngressController(Controller):
             locked = False
             error = False
             try:
-                for _ in w.stream(what):
+                for event in w.stream(what):
                     self.__internal_lock.acquire()
                     locked = True
+                    if not self.__process_event(event):
+                        self.__internal_lock.release()
+                        locked = False
+                        continue
+                    self._update_settings()
                     self._instances = self.get_instances()
                     self._services = self.get_services()
                     self._configs = self.get_configs()
@@ -291,7 +339,6 @@ class IngressController(Controller):
             self._instances,
             self._services,
             configs=self._configs,
-            first=not self._loaded,
         )
 
     def process_events(self):

@@ -36,15 +36,18 @@
 
 
 #if (NGX_PCRE)
+#   if (NGX_PCRE2)
+#      define LUA_HAVE_PCRE_JIT 1
+#   else
 
 #include <pcre.h>
 
-#if (PCRE_MAJOR > 8) || (PCRE_MAJOR == 8 && PCRE_MINOR >= 21)
-#   define LUA_HAVE_PCRE_JIT 1
-#else
-#   define LUA_HAVE_PCRE_JIT 0
-#endif
-
+#       if (PCRE_MAJOR > 8) || (PCRE_MAJOR == 8 && PCRE_MINOR >= 21)
+#           define LUA_HAVE_PCRE_JIT 1
+#       else
+#           define LUA_HAVE_PCRE_JIT 0
+#       endif
+#   endif
 #endif
 
 
@@ -193,11 +196,14 @@ struct ngx_stream_lua_main_conf_s {
     ngx_int_t            regex_cache_entries;
     ngx_int_t            regex_cache_max_entries;
     ngx_int_t            regex_match_limit;
-
-#if (LUA_HAVE_PCRE_JIT)
-    pcre_jit_stack      *jit_stack;
 #endif
 
+#if (LUA_HAVE_PCRE_JIT)
+#if (NGX_PCRE2)
+    pcre2_jit_stack     *jit_stack;
+#else
+    pcre_jit_stack      *jit_stack;
+#endif
 #endif
 
     ngx_array_t         *shm_zones;  /* of ngx_shm_zone_t* */
@@ -245,6 +251,8 @@ struct ngx_stream_lua_main_conf_s {
 struct ngx_stream_lua_srv_conf_s {
 #if (NGX_STREAM_SSL)
     ngx_ssl_t              *ssl;  /* shared by SSL cosockets */
+    ngx_array_t            *ssl_certificates;
+    ngx_array_t            *ssl_certificate_keys;
     ngx_uint_t              ssl_protocols;
     ngx_str_t               ssl_ciphers;
     ngx_uint_t              ssl_verify_depth;

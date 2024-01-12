@@ -3,8 +3,8 @@
 --license agpl3
 --version %VERSION%
 --architecture %ARCH%
---depends bash --depends python3 --depends 'nginx = 1:1.24.0-1.fc38' --depends libcurl-devel --depends libxml2 --depends yajl --depends lmdb-libs --depends geoip-devel --depends gd --depends procps --depends lsof --depends nginx-mod-stream --depends pcre --depends grep --depends python3-magic --depends libpq --depends logrotate
---description "BunkerWeb %VERSION% for Fedora 38"
+--depends bash --depends python3 --depends 'nginx >= 1:1.24.0' --depends 'nginx < 1:1.25.0' --depends libcurl-devel --depends libxml2 --depends yajl --depends lmdb-libs --depends geoip-devel --depends gd --depends procps --depends lsof --depends nginx-mod-stream --depends pcre --depends grep --depends python3-magic --depends libpq --depends logrotate --depends libcap --depends openssl
+--description "BunkerWeb %VERSION% for Fedora 39"
 --url "https://www.bunkerweb.io"
 --maintainer "Bunkerity <contact at bunkerity dot com>"
 --before-install /usr/share/bunkerweb/scripts/beforeInstall.sh

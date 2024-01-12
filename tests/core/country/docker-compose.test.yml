@@ -1,17 +1,17 @@
 version: "3.5"
 
 services:
-  tests-fr:
+  tests-gb:
     build: .
     environment:
       PYTHONUNBUFFERED: "1"
-      COUNTRY: "FR"
+      COUNTRY: "GB"
       BLACKLIST_COUNTRY: ""
       WHITELIST_COUNTRY: ""
     extra_hosts:
       - "www.example.com:2.0.0.2"
     networks:
-      bw-fr-network:
+      bw-gb-network:
         ipv4_address: 2.0.0.3
 
   tests-us:
@@ -28,7 +28,7 @@ services:
         ipv4_address: 8.0.0.3
 
 networks:
-  bw-fr-network:
+  bw-gb-network:
     external: true
   bw-us-network:
     external: true

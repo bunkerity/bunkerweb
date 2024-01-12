@@ -25,8 +25,7 @@ Table of Contents
 Status
 ======
 
-This Lua module is currently considered experimental.
-The API is still in flux and may change in the future without notice.
+This Lua module is production ready.
 
 Synopsis
 ========

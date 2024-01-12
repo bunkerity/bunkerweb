@@ -1,5 +1,10 @@
+examples/kubernetes-tls/app1app2.key:private-key:1
+examples/kubernetes-tls/app3.key:private-key:1
 misc/config.yml.example:hashicorp-tf-password:24
+src/deps/src/lua-nginx-module/t/cert/http3/http3.key:private-key:1
+src/deps/src/lua-nginx-module/t/cert/test.key:private-key:1
 src/deps/src/lua-resty-openssl/lib/resty/openssl/x509/init.lua:generic-api-key:47
 src/deps/src/lua-resty-openssl/lib/resty/openssl/x509/init.lua:generic-api-key:48
 src/deps/src/lua-resty-openssl/lib/resty/openssl/x509/init.lua:generic-api-key:49
 src/deps/src/lua-resty-openssl/lib/resty/openssl/x509/init.lua:generic-api-key:50
+src/deps/src/lua-resty-redis-connector/README.md:hashicorp-tf-password:123

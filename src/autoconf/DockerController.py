@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from time import sleep
@@ -119,9 +119,15 @@ class DockerController(Controller):
             configs=self._configs,
         )
 
+    def __process_event(self, event):
+        return "Actor" in event and "Attributes" in event["Actor"] and ("bunkerweb.INSTANCE" in event["Actor"]["Attributes"] or "bunkerweb.SERVER_NAME" in event["Actor"]["Attributes"])
+
     def process_events(self):
-        for _ in self.__client.events(decode=True, filters={"type": "container"}):
+        for event in self.__client.events(decode=True, filters={"type": "container"}):
             try:
+                if not self.__process_event(event):
+                    continue
+                self._update_settings()
                 self._instances = self.get_instances()
                 self._services = self.get_services()
                 self._configs = self.get_configs()

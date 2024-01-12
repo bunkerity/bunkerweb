@@ -5,3 +5,4 @@ env
 node_modules
 .mypy_cache
 src/ui/static
+.cache/

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from contextlib import contextmanager, suppress
@@ -37,6 +37,7 @@ from models import (
     Settings,
     Settings_translations,
     Tags,
+    Users,
 )
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",))]:
@@ -276,16 +277,30 @@ class Database:
     def initialize_db(self, version: str, integration: str = "Unknown") -> str:
         """Initialize the database"""
         with suppress(BaseException), self._db_session() as session:
-            session.add(
-                Metadata(
-                    is_initialized=True,
-                    version=version,
-                    integration=integration,
+            if session.query(Metadata).get(1):
+                session.query(Metadata).filter_by(id=1).update({Metadata.version: version, Metadata.integration: integration})
+            else:
+                session.add(
+                    Metadata(
+                        is_initialized=True,
+                        version=version,
+                        integration=integration,
+                    )
                 )
-            )
             session.commit()
 
         return (self._exceptions.get(getpid()) or [""]).pop()
+
+    def get_metadata(self) -> Dict[str, str]:
+        """Get the metadata from the database"""
+        data = {"version": "1.5.4", "integration": "unknown"}
+        with suppress(BaseException), self._db_session() as session:
+            with suppress(ProgrammingError, OperationalError):
+                metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration).filter_by(id=1).first()
+                if metadata:
+                    data = {"version": metadata.version, "integration": metadata.integration}
+
+        return (self._exceptions.get(getpid()) or [data]).pop()
 
     def update_db_schema(self, version: str) -> Tuple[bool, str]:
         ret = True
@@ -331,148 +346,354 @@ class Database:
 
         return ret, (self._exceptions.get(getpid()) or [""]).pop()
 
-    def init_tables(self, default_plugins: List[dict]) -> Tuple[bool, str]:
+    def init_tables(self, default_plugins: List[dict], bunkerweb_version: str) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
         inspector = inspect(self._sql_engine)
+        db_version = None
+        has_all_tables = True
+        if inspector and len(inspector.get_table_names()):
+            db_version = self.get_metadata()["version"]
 
-        if inspector is None:
-            self._logger.error("The database inspector is not initialized")
-            _exit(1)
+            if db_version != bunkerweb_version:
+                self._logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), checking if it needs to be updated")
+                for table in Base.metadata.tables:
+                    if not inspector.has_table(table):
+                        has_all_tables = False
+                    else:
+                        missing_columns = []
 
-        if len(Base.metadata.tables.keys()) <= len(inspector.get_table_names()):
-            has_all_tables = True
+                        db_columns = inspector.get_columns(table)
+                        for column in Base.metadata.tables[table].columns:
+                            if not any(db_column["name"] == column.name for db_column in db_columns):
+                                missing_columns.append(column)
 
-            for table in Base.metadata.tables:
-                if not inspector.has_table(table):
-                    has_all_tables = False
-                    break
+                        with suppress(BaseException), self._db_session() as session:
+                            if missing_columns:
+                                for column in missing_columns:
+                                    session.execute(text(f"ALTER TABLE {table} ADD COLUMN {column.name} {column.type}"))
+                            session.commit()
 
-            if has_all_tables:
-                return False, ""
+                        if self._exceptions.get(getpid()):
+                            return False, self._exceptions[getpid()]
 
-        Base.metadata.create_all(self._sql_engine, checkfirst=True)
+        if has_all_tables and db_version and db_version == bunkerweb_version:
+            return False, ""
+
+        try:
+            Base.metadata.create_all(self._sql_engine, checkfirst=True)
+        except BaseException:
+            return False, format_exc()
 
         to_put = []
-        for plugins in default_plugins:
-            if not isinstance(plugins, list):
-                plugins = [plugins]
+        with suppress(BaseException), self._db_session() as session:
+            for plugins in default_plugins:
+                if not isinstance(plugins, list):
+                    plugins = [plugins]
 
-            for plugin in plugins:
-                settings = {}
-                jobs = []
-                page = False
-                if "id" not in plugin:
-                    settings = plugin
-                    plugin = {
-                        "id": "general",
-                        "name": {
-                            "en": "General",
-                            "fr": "Général",
-                        },
-                        "description": {"en": "The general settings for the server", "fr": "Les paramètres généraux du serveur"},
-                        "version": Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip() or "0.1",
-                        "stream": "partial",
-                        "external": False,
-                    }
-                else:
-                    settings = plugin.pop("settings", {})
-                    jobs = plugin.pop("jobs", [])
-                    page = plugin.pop("page", False)
-
-                if isinstance(plugin["name"], str):
-                    plugin["name"] = {"en": plugin["name"]}
-                if isinstance(plugin["description"], str):
-                    plugin["description"] = {"en": plugin["description"]}
-
-                translations = set(plugin["name"].keys()).union(plugin["description"].keys())
-
-                if "en" not in translations:
-                    self._logger.error(f"Plugin {plugin['id']} doesn't have an english translation, skipping it")
-                    continue
-
-                to_put.append(
-                    Plugins(
-                        id=plugin["id"],
-                        version=plugin["version"],
-                        stream=plugin["stream"],
-                        external=plugin.get("external", False),
-                        method=plugin.get("method"),
-                        data=plugin.get("data"),
-                        checksum=plugin.get("checksum"),
-                    )
-                )
-
-                for translation in translations:
-                    to_put.append(
-                        Plugins_translations(
-                            plugin_id=plugin["id"],
-                            language=translation,
-                            name=plugin["name"].get(translation, plugin["name"]["en"]),
-                            description=plugin["description"].get(translation, plugin["description"]["en"]),
-                        )
-                    )
-
-                for setting, value in settings.items():
-                    if isinstance(value["help"], str):
-                        value["help"] = {"en": value["help"]}
-                    if isinstance(value["label"], str):
-                        value["label"] = {"en": value["label"]}
-                    translations = set(value["help"].keys()).union(value["label"].keys())
-
-                    if "en" not in translations:
-                        self._logger.error(f"Setting {setting} doesn't have an english translation, skipping it")
-                        continue
-
-                    value.update(
-                        {
-                            "plugin_id": plugin["id"],
-                            "name": value["id"],
-                            "id": setting,
+                for plugin in plugins:
+                    settings = {}
+                    jobs = []
+                    page = False
+                    if "id" not in plugin:
+                        settings = plugin
+                        plugin = {
+                            "id": "general",
+                            "name": {
+                                "en": "General",
+                                "fr": "Général",
+                            },
+                            "description": {
+                                "en": "The general settings for the server",
+                                "fr": "Les paramètres généraux du serveur",
+                            },
+                            "version": bunkerweb_version,
+                            "stream": "partial",
+                            "external": False,
                         }
-                    )
+                    else:
+                        settings = plugin.pop("settings", {})
+                        jobs = plugin.pop("jobs", [])
+                        page = plugin.pop("page", False)
 
-                    for select in value.pop("select", []):
-                        to_put.append(Selects(setting_id=value["id"], value=select))
+                    if isinstance(plugin["name"], str):
+                        plugin["name"] = {"en": plugin["name"]}
+                    if isinstance(plugin["description"], str):
+                        plugin["description"] = {"en": plugin["description"]}
 
-                    for translation in translations:
+                    plugin_translations = set(plugin["name"].keys()).union(plugin["description"].keys())
+                    if "en" not in plugin_translations:
+                        self._logger.error(f"Plugin {plugin['id']} doesn't have an english translation, defaulting them")
+                        plugin["name"]["en"] = f"No english translation for {plugin['id']}'s name"
+                        plugin["description"]["en"] = f"No english translation for {plugin['id']}'s description"
+                        plugin_translations = set(plugin["name"].keys()).union(plugin["description"].keys())
+
+                    db_plugin = session.query(Plugins).filter_by(id=plugin["id"]).first()
+                    if db_plugin:
+                        updates = {}
+
+                        if plugin["version"] != db_plugin.version:
+                            updates[Plugins.version] = plugin["version"]
+
+                        if plugin["stream"] != db_plugin.stream:
+                            updates[Plugins.stream] = plugin["stream"]
+
+                        if plugin.get("external", False) != db_plugin.external:
+                            updates[Plugins.external] = plugin.get("external", False)
+
+                        if plugin.get("method", "manual") != db_plugin.method:
+                            updates[Plugins.method] = plugin.get("method", "manual")
+
+                        if plugin.get("data") != db_plugin.data:
+                            updates[Plugins.data] = plugin.get("data")
+
+                        if plugin.get("checksum") != db_plugin.checksum:
+                            updates[Plugins.checksum] = plugin.get("checksum")
+
+                        if updates:
+                            self._logger.warning(f'Plugin "{plugin["id"]}" already exists, updating it with the new values')
+                            session.query(Plugins).filter(Plugins.id == plugin["id"]).update(updates)
+
+                        db_plugin_translations = session.query(Plugins_translations).with_entities(Plugins_translations.name, Plugins_translations.description).filter_by(plugin_id=plugin["id"]).all()
+                        db_names = {translation.language: translation.name for translation in db_plugin_translations}
+                        db_descriptions = {translation.language: translation.description for translation in db_plugin_translations}
+
+                        if plugin["name"] != db_names or plugin["description"] != db_descriptions:
+                            self._logger.warning(f'Plugin "{plugin["id"]}" translations changed, updating them with the new values')
+                            session.query(Plugins_translations).filter(Plugins_translations.plugin_id == plugin["id"]).delete()
+                            for language in plugin_translations:
+                                to_put.append(
+                                    Plugins_translations(
+                                        plugin_id=plugin["id"],
+                                        language=language,
+                                        name=plugin["name"].get(language, plugin["name"]["en"]),
+                                        description=plugin["description"].get(language, plugin["description"]["en"]),
+                                    )
+                                )
+                    else:
                         to_put.append(
-                            Settings_translations(
-                                setting_id=setting,
-                                language=translation,
-                                label=value["label"].get(translation, value["label"]["en"]),
-                                help=value["help"].get(translation, value["help"]["en"]),
+                            Plugins(
+                                id=plugin["id"],
+                                version=plugin["version"],
+                                stream=plugin["stream"],
+                                external=plugin.get("external", False),
+                                method=plugin.get("method"),
+                                data=plugin.get("data"),
+                                checksum=plugin.get("checksum"),
                             )
                         )
 
-                    del value["label"]
-                    del value["help"]
-
-                    to_put.append(Settings(**value))
-
-                for job in jobs:
-                    job["file_name"] = job.pop("file")
-                    to_put.append(Jobs(plugin_id=plugin["id"], **job))
-
-                if page:
-                    core_ui_path = Path(sep, "usr", "share", "bunkerweb", "core", plugin["id"], "ui")
-                    path_ui = core_ui_path if core_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
-
-                    if path_ui.exists():
-                        if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
-                            template = path_ui.joinpath("template.html").read_bytes()
-                            actions = path_ui.joinpath("actions.py").read_bytes()
-
+                        for translation in plugin_translations:
                             to_put.append(
-                                Plugin_pages(
+                                Plugins_translations(
                                     plugin_id=plugin["id"],
-                                    template_file=template,
-                                    template_checksum=bytes_hash(template),
-                                    actions_file=actions,
-                                    actions_checksum=bytes_hash(actions),
+                                    language=translation,
+                                    name=plugin["name"].get(translation, plugin["name"]["en"]),
+                                    description=plugin["description"].get(translation, plugin["description"]["en"]),
                                 )
                             )
 
-        with suppress(BaseException), self._db_session() as session:
+                    for setting, value in settings.items():
+                        if isinstance(value["help"], str):
+                            value["help"] = {"en": value["help"]}
+                        if isinstance(value["label"], str):
+                            value["label"] = {"en": value["label"]}
+                        setting_translations = set(value["help"].keys()).union(value["label"].keys())
+
+                        if "en" not in setting_translations:
+                            self._logger.warning(f"Setting {setting} doesn't have an english translation, defaulting them")
+                            value["help"]["en"] = f"No english translation for {setting}'s help"
+                            value["label"]["en"] = f"No english translation for {setting}'s label"
+                            setting_translations = set(value["help"].keys()).union(value["label"].keys())
+
+                        value.update(
+                            {
+                                "plugin_id": plugin["id"],
+                                "name": value["id"],
+                                "id": setting,
+                            }
+                        )
+                        db_setting = session.query(Settings).filter_by(id=setting).first()
+                        select_values = value.pop("select", [])
+
+                        if db_setting:
+                            updates = {}
+
+                            if value["name"] != db_setting.name:
+                                updates[Settings.name] = value["name"]
+
+                            if value["context"] != db_setting.context:
+                                updates[Settings.context] = value["context"]
+
+                            if value["default"] != db_setting.default:
+                                updates[Settings.default] = value["default"]
+
+                            if value["regex"] != db_setting.regex:
+                                updates[Settings.regex] = value["regex"]
+
+                            if value["type"] != db_setting.type:
+                                updates[Settings.type] = value["type"]
+
+                            if value.get("multiple") != db_setting.multiple:
+                                updates[Settings.multiple] = value.get("multiple")
+
+                            if updates:
+                                self._logger.warning(f'Setting "{setting}" already exists, updating it with the new values')
+                                session.query(Settings).filter(Settings.id == setting).update(updates)
+
+                            db_setting_translations = (
+                                session.query(Settings_translations)
+                                .with_entities(
+                                    Settings_translations.help,
+                                    Settings_translations.label,
+                                )
+                                .filter_by(setting_id=setting)
+                                .all()
+                            )
+                            db_help = {translation.language: translation.help for translation in db_setting_translations}
+                            db_label = {translation.language: translation.label for translation in db_setting_translations}
+
+                            if value["help"] != db_help or value["label"] != db_label:
+                                self._logger.warning(f'Setting "{setting}" translations changed, updating them with the new values')
+                                session.query(Settings_translations).filter(Settings_translations.setting_id == setting).delete()
+                                for translation in setting_translations:
+                                    to_put.append(
+                                        Settings_translations(
+                                            setting_id=setting,
+                                            language=translation,
+                                            label=value["label"].get(translation, value["label"]["en"]),
+                                            help=value["help"].get(translation, value["help"]["en"]),
+                                        )
+                                    )
+                        else:
+                            if db_plugin:
+                                self._logger.warning(f'Setting "{setting}" does not exist, creating it')
+
+                            for translation in setting_translations:
+                                to_put.append(
+                                    Settings_translations(
+                                        setting_id=setting,
+                                        language=translation,
+                                        label=value["label"].get(translation, value["label"]["en"]),
+                                        help=value["help"].get(translation, value["help"]["en"]),
+                                    )
+                                )
+
+                            del value["label"]
+                            del value["help"]
+
+                            to_put.append(Settings(**value))
+
+                        db_selects = session.query(Selects).with_entities(Selects.value).filter_by(setting_id=value["id"]).all()
+                        db_values = [select.value for select in db_selects]
+                        missing_values = [select for select in db_values if select not in select_values]
+
+                        if select_values:
+                            if missing_values:
+                                # Remove selects that are no longer in the list
+                                self._logger.warning(f'Removing {len(missing_values)} selects from setting "{setting}" as they are no longer in the list')
+                                session.query(Selects).filter(Selects.value.in_(missing_values)).delete()
+
+                            for select in select_values:
+                                if select not in db_values:
+                                    to_put.append(Selects(setting_id=value["id"], value=select))
+                        else:
+                            if missing_values:
+                                self._logger.warning(f'Removing all selects from setting "{setting}" as there are no longer any in the list')
+                            session.query(Selects).filter_by(setting_id=value["id"]).delete()
+
+                    db_jobs = session.query(Jobs).with_entities(Jobs.name).filter_by(plugin_id=plugin["id"]).all()
+                    db_names = [job.name for job in db_jobs]
+                    job_names = [job["name"] for job in jobs]
+                    missing_names = [job for job in db_names if job not in job_names]
+
+                    if missing_names:
+                        # Remove jobs that are no longer in the list
+                        self._logger.warning(f'Removing {len(missing_names)} jobs from plugin "{plugin["id"]}" as they are no longer in the list')
+                        session.query(Jobs).filter(Jobs.name.in_(missing_names)).delete()
+
+                    for job in jobs:
+                        db_job = session.query(Jobs).with_entities(Jobs.file_name, Jobs.every, Jobs.reload).filter_by(name=job["name"], plugin_id=plugin["id"]).first()
+
+                        if job["name"] not in db_names or not db_job:
+                            job["file_name"] = job.pop("file")
+                            job["reload"] = job.get("reload", False)
+                            if db_plugin:
+                                self._logger.warning(f'Job "{job["name"]}" does not exist, creating it')
+                            to_put.append(Jobs(plugin_id=plugin["id"], **job))
+                        else:
+                            updates = {}
+
+                            if job["file"] != db_job.file_name:
+                                updates[Jobs.file_name] = job["file"]
+
+                            if job["every"] != db_job.every:
+                                updates[Jobs.every] = job["every"]
+
+                            if job.get("reload", None) != db_job.reload:
+                                updates[Jobs.reload] = job.get("reload", False)
+
+                            if updates:
+                                self._logger.warning(f'Job "{job["name"]}" already exists, updating it with the new values')
+                                updates[Jobs.last_run] = None
+                                session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
+                                session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)
+
+                    if page:
+                        core_ui_path = Path(sep, "usr", "share", "bunkerweb", "core", plugin["id"], "ui")
+                        path_ui = core_ui_path if core_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
+
+                        if path_ui.exists():
+                            if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
+                                template_file = path_ui.joinpath("template.html").read_bytes()
+                                actions_file = path_ui.joinpath("actions.py").read_bytes()
+                                template_checksum = bytes_hash(template_file)
+                                actions_checksum = bytes_hash(actions_file)
+
+                                db_plugin_page = (
+                                    session.query(Plugin_pages)
+                                    .with_entities(
+                                        Plugin_pages.template_checksum,
+                                        Plugin_pages.actions_checksum,
+                                    )
+                                    .filter_by(plugin_id=plugin["id"])
+                                    .first()
+                                )
+
+                                if not db_plugin_page:
+                                    to_put.append(
+                                        Plugin_pages(
+                                            plugin_id=plugin["id"],
+                                            template_file=template_file,
+                                            template_checksum=template_checksum,
+                                            actions_file=actions_file,
+                                            actions_checksum=actions_checksum,
+                                        )
+                                    )
+                                else:
+                                    updates = {}
+
+                                    if template_checksum != db_plugin_page.template_checksum:
+                                        updates.update(
+                                            {
+                                                Plugin_pages.template_file: template_file,
+                                                Plugin_pages.template_checksum: template_checksum,
+                                            }
+                                        )
+
+                                    if actions_checksum != db_plugin_page.actions_checksum:
+                                        updates.update(
+                                            {
+                                                Plugin_pages.actions_file: actions_file,
+                                                Plugin_pages.actions_checksum: actions_checksum,
+                                            }
+                                        )
+
+                                    if updates:
+                                        session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(updates)
+                        else:
+                            self._logger.warning(f'Page for plugin "{plugin["id"]}" does not exist, deleting existing one')
+                            session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).delete()
+
             session.add_all(to_put)
             session.commit()
 
@@ -648,7 +869,7 @@ class Database:
                                     }
                                 )
                 else:
-                    if "SERVER_NAME" in config and config.get("SERVER_NAME", "") != "" and not (session.query(Services).with_entities(Services.id).filter_by(id=config["SERVER_NAME"].split()[0]).first()):
+                    if config.get("SERVER_NAME", "www.example.com") and not session.query(Services).with_entities(Services.id).filter_by(id=config.get("SERVER_NAME", "www.example.com").split(" ")[0]).first():
                         to_put.append(Services(id=config["SERVER_NAME"].split()[0], method=method))
 
                     config.pop("SERVER_NAME", None)
@@ -901,9 +1122,8 @@ class Database:
                                     else (service_setting.value or "")
                                 )
 
-            if is_multisite:
-                servers = " ".join(set(sorted(str(service.id) for service in session.query(Services).all())))
-                global_config["SERVER_NAME"] = {"value": servers, "method": "default"} | ({"global": True} if not new_format else {}) if methods else servers
+            servers = " ".join(set(sorted(str(service.id) for service in session.query(Services).all())))
+            global_config["SERVER_NAME"] = {"value": servers, "method": "default"} | ({"global": True} if not new_format else {}) if methods else servers
 
         return (self._exceptions.get(getpid()) or [config]).pop()
 
@@ -2036,3 +2256,54 @@ class Database:
         if self._exceptions.get(getpid()):
             self._logger.error(self._exceptions[getpid()].pop())
         return []
+
+    def get_ui_user(self) -> Optional[dict]:
+        """Get ui user."""
+        with suppress(BaseException), self._db_session() as session:
+            user = session.query(Users).with_entities(Users.username, Users.password, Users.is_two_factor_enabled, Users.secret_token, Users.method).filter_by(id=1).first()
+            if not user:
+                return None
+            return {
+                "username": user.username,
+                "password_hash": user.password.encode("utf-8"),
+                "is_two_factor_enabled": user.is_two_factor_enabled,
+                "secret_token": user.secret_token,
+                "method": user.method,
+            }
+
+        return (self._exceptions.get(getpid()) or [{}]).pop()
+
+    def create_ui_user(self, username: str, password: bytes, *, secret_token: Optional[str] = None, method: str = "manual") -> str:
+        """Create ui user."""
+        with suppress(BaseException), self._db_session() as session:
+            if self.get_ui_user():
+                return "User already exists"
+
+            session.add(Users(id=1, username=username, password=password.decode("utf-8"), secret_token=secret_token, method=method))
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return (self._exceptions.get(getpid()) or [""]).pop()
+
+    def update_ui_user(self, username: str, password: bytes, is_two_factor_enabled: bool = False, secret_token: Optional[str] = None, method: str = "ui") -> str:
+        """Update ui user."""
+        with suppress(BaseException), self._db_session() as session:
+            user = session.query(Users).filter_by(id=1).first()
+            if not user:
+                return "User not found"
+
+            user.username = username
+            user.password = password.decode("utf-8")
+            user.is_two_factor_enabled = is_two_factor_enabled
+            user.secret_token = secret_token
+            user.method = method
+
+            try:
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return (self._exceptions.get(getpid()) or [""]).pop()

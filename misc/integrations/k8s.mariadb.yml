@@ -1,10 +1,21 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-bunkerweb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: cr-bunkerweb
 rules:
   - apiGroups: [""]
-    resources: ["services", "pods", "configmaps"]
+    resources: ["services", "pods", "configmaps", "secrets"]
     verbs: ["get", "watch", "list"]
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses"]
@@ -48,7 +59,7 @@ spec:
       containers:
         # using bunkerweb as name is mandatory
         - name: bunkerweb
-          image: bunkerity/bunkerweb:1.5.3
+          image: bunkerity/bunkerweb:1.5.5
           imagePullPolicy: Always
           securityContext:
             runAsUser: 101
@@ -118,7 +129,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-controller
-          image: bunkerity/bunkerweb-autoconf:1.5.3
+          image: bunkerity/bunkerweb-autoconf:1.5.5
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -145,7 +156,7 @@ spec:
       serviceAccountName: sa-bunkerweb
       containers:
         - name: bunkerweb-scheduler
-          image: bunkerity/bunkerweb-scheduler:1.5.3
+          image: bunkerity/bunkerweb-scheduler:1.5.5
           imagePullPolicy: Always
           env:
             - name: KUBERNETES_MODE
@@ -247,14 +258,3 @@ spec:
       protocol: TCP
       port: 6379
       targetPort: 6379
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: pvc-bunkerweb
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi

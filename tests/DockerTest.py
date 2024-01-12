@@ -8,7 +8,7 @@ from logger import log
 
 
 class DockerTest(Test):
-    def __init__(self, name, timeout, tests, no_copy_container=False, delay=0):
+    def __init__(self, name, timeout, tests, no_copy_container=False, delay=0, domains={}):
         super().__init__(
             name,
             "docker",
@@ -17,13 +17,7 @@ class DockerTest(Test):
             no_copy_container=no_copy_container,
             delay=delay,
         )
-        self._domains = {
-            r"www\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-            r"auth\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
-            r"app1\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
-            r"app2\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
-            r"app3\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_3"),
-        }
+        self._domains = domains
         self._check_domains()
 
     @staticmethod
@@ -61,7 +55,7 @@ class DockerTest(Test):
             Test.replace_in_file(
                 compose,
                 r"AUTO_LETS_ENCRYPT=yes",
-                "AUTO_LETS_ENCRYPT=yes\n      - USE_LETS_ENCRYPT_STAGING=yes",
+                "AUTO_LETS_ENCRYPT=yes\n      - USE_LETS_ENCRYPT_STAGING=yes\n      - LOG_LEVEL=info",
             )
             Test.replace_in_file(compose, r"DISABLE_DEFAULT_SERVER=yes", "DISABLE_DEFAULT_SERVER=no")
             for ex_domain, test_domain in self._domains.items():

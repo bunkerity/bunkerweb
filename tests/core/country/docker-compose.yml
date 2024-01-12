@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.3
+    image: bunkerity/bunkerweb:1.5.5
     pull_policy: never
     labels:
       - "bunkerweb.INSTANCE=yes"
@@ -13,6 +13,7 @@ services:
       HTTP_PORT: "80"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
       LOG_LEVEL: "info"
 
       # ? COUNTRY settings
@@ -31,11 +32,11 @@ services:
       bw-universe:
       bw-us-network:
         ipv4_address: 8.0.0.2
-      bw-fr-network:
+      bw-gb-network:
         ipv4_address: 2.0.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.3
+    image: bunkerity/bunkerweb-scheduler:1.5.5
     pull_policy: never
     depends_on:
       - bw
@@ -69,8 +70,8 @@ networks:
       driver: default
       config:
         - subnet: 8.0.0.0/8
-  bw-fr-network:
-    name: bw-fr-network
+  bw-gb-network:
+    name: bw-gb-network
     ipam:
       driver: default
       config:

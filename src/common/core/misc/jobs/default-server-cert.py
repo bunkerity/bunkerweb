@@ -1,7 +1,7 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from os import _exit, getenv, sep
+from os import getenv, sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, run
@@ -21,47 +21,29 @@ JOB = Job()
 status = 0
 
 try:
-    # Check if we need to generate a self-signed default cert for non-SNI "clients"
-    need_default_cert = False
-    if getenv("MULTISITE", "yes") == "yes":
-        for first_server in getenv("SERVER_NAME", "").split():
-            for check_var in ("USE_CUSTOM_SSL", "AUTO_LETS_ENCRYPT", "GENERATE_SELF_SIGNED_SSL"):
-                if getenv(f"{first_server}_{check_var}", getenv(check_var, "no")) == "yes":
-                    need_default_cert = True
-                    break
-            if need_default_cert:
-                break
-    elif getenv("DISABLE_DEFAULT_SERVER", "no") == "yes" and ("yes" in (getenv("USE_CUSTOM_SSL", "no"), getenv("AUTO_LETS_ENCRYPT", "no"), getenv("GENERATE_SELF_SIGNED_SSL", "no"))):
-        need_default_cert = True
-
-    # Generate the self-signed certificate
-    if not need_default_cert:
-        LOGGER.info("Skipping generation of self-signed certificate for default server (not needed)")
-        _exit(0)
-
-    job_path = Path(sep, "var", "cache", "bunkerweb", "default-server-cert")
-    job_path.mkdir(parents=True, exist_ok=True)
-
-    cert_path = job_path.joinpath("cert.pem")
-    if not cert_path.is_file():
-        cached_pem = JOB.get_cache("cert.pem")
-
-        if cached_pem:
-            cert_path.write_bytes(cached_pem["data"])
-
-    key_path = job_path.joinpath("cert.key")
-    if not key_path.is_file():
-        cached_key = JOB.get_cache("cert.key")
-
-        if cached_key:
-            key_path.write_bytes(cached_key["data"])
-
-    if not cert_path.is_file():
+    cert_path = Path(sep, "var", "cache", "bunkerweb", "default-server-cert")
+    cert_path.mkdir(parents=True, exist_ok=True)
+    if not cert_path.joinpath("cert.pem").is_file():
         LOGGER.info("Generating self-signed certificate for default server")
 
         if (
             run(
-                ["openssl", "req", "-nodes", "-x509", "-newkey", "rsa:4096", "-keyout", str(key_path), "-out", str(cert_path), "-days", "3650", "-subj", "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/"],
+                [
+                    "openssl",
+                    "req",
+                    "-nodes",
+                    "-x509",
+                    "-newkey",
+                    "rsa:4096",
+                    "-keyout",
+                    str(cert_path.joinpath("cert.key")),
+                    "-out",
+                    str(cert_path.joinpath("cert.pem")),
+                    "-days",
+                    "3650",
+                    "-subj",
+                    "/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=www.example.org/",
+                ],
                 stdin=DEVNULL,
                 stderr=DEVNULL,
                 check=False,
@@ -74,13 +56,13 @@ try:
             status = 1
             LOGGER.info("Successfully generated self-signed certificate for default server")
 
-        cached, err = JOB.cache_file("cert.pem", cert_path.read_bytes(), file_exists=True)
+        cached, err = JOB.cache_file("cert.pem", cert_path.joinpath("cert.pem").read_bytes(), file_exists=True)
         if not cached:
             LOGGER.error(f"Error while saving default-server-cert cert.pem file to db cache : {err}")
         else:
             LOGGER.info("Successfully saved default-server-cert cert.pem file to db cache")
 
-        cached, err = JOB.cache_file("cert.key", key_path.read_bytes(), file_exists=True)
+        cached, err = JOB.cache_file("cert.key", cert_path.joinpath("cert.key").read_bytes(), file_exists=True)
         if not cached:
             LOGGER.error(f"Error while saving default-server-cert cert.key file to db cache : {err}")
         else:

@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -13,7 +13,6 @@
  *
  */
 
-#include <iostream>
 #include <list>
 #include <memory>
 #include <string>
@@ -104,6 +103,13 @@ class Resource_DynamicElement : public Variable {
             t->m_collections.m_resource_collection_key,
             t->m_rules->m_secWebAppId.m_value);
     }
+
+    static void setExpiry(Transaction *t, const std::string &k, int32_t expiry_seconds) {
+        t->m_collections.m_resource_collection->setExpiry(k,
+            t->m_collections.m_resource_collection_key,
+            t->m_rules->m_secWebAppId.m_value, expiry_seconds);
+    }
+
 
     static void storeOrUpdateFirst(Transaction *t, const std::string &var,
         const std::string &value) {

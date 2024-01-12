@@ -6,12 +6,14 @@
     {
       "type": "string",
       "url": "https://app1.example.com",
-      "string": "app1"
+      "string": "app1",
+      "tls": "app1.example.com"
     },
     {
       "type": "string",
       "url": "https://app2.example.com",
-      "string": "app2"
+      "string": "app2",
+      "tls": "app2.example.com"
     }
   ]
 }

@@ -92,7 +92,7 @@ jobs:
       # Build testing package image
       - name: Build package image
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
-        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
         with:
           context: .
           load: true
@@ -104,7 +104,7 @@ jobs:
       # Build non-testing package image
       - name: Build package image
         if: inputs.RELEASE != 'testing' && inputs.RELEASE != 'dev'
-        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
         with:
           context: .
           load: true
@@ -127,7 +127,7 @@ jobs:
           scp -r root@arm:/root/package-${{ inputs.LINUX }} ./package-${{ inputs.LINUX }}
         env:
           LARCH: ${{ env.LARCH }}
-      - uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+      - uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
         with:
           name: package-${{ inputs.LINUX }}-${{ env.LARCH }}
           path: package-${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
@@ -135,12 +135,12 @@ jobs:
       - name: Extract metadata
         if: inputs.TEST == true
         id: meta
-        uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
+        uses: docker/metadata-action@dbef88086f6cef02e264edb7dbf63250c17cef6c # v5.5.0
         with:
           images: ghcr.io/bunkerity/${{ inputs.LINUX }}-tests:${{ inputs.RELEASE }}
       - name: Build test image
         if: inputs.TEST == true
-        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
         with:
           context: .
           file: tests/linux/Dockerfile-${{ inputs.LINUX }}

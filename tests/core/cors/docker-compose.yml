@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.3
+    image: bunkerity/bunkerweb:1.5.5
     pull_policy: never
     labels:
       - "bunkerweb.INSTANCE=yes"
@@ -16,6 +16,7 @@ services:
       HTTPS_PORT: "443"
       USE_BUNKERNET: "no"
       USE_BLACKLIST: "no"
+      SEND_ANONYMOUS_REPORT: "no"
       REMOTE_PHP: "app1"
       REMOTE_PHP_PATH: "/app"
       LOG_LEVEL: "info"
@@ -45,7 +46,7 @@ services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.3
+    image: bunkerity/bunkerweb-scheduler:1.5.5
     pull_policy: never
     depends_on:
       - bw

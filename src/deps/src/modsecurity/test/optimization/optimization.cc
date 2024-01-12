@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -114,8 +114,8 @@ int main(int argc, char **argv) {
         }
 
         std::cout << " Operators" << std::endl;
-        for (auto &z : operators) {
-            auto &s = z.second;
+        for (const auto &z : operators) {
+            const auto &s = z.second;
             std::cout << "   " << std::left << std::setw(20) << z.first;
             std::cout << std::right << std::setw(4) << s;
             std::cout << std::endl;

@@ -20,12 +20,27 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Set up Python 3.9
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        if: matrix.language == 'python'
+        with:
+          python-version: "3.9"
+      - name: Install python dependencies
+        if: matrix.language == 'python'
+        run: |
+          python -m pip install --no-cache-dir --ignore-installed --require-hashes -r src/deps/requirements.txt
+          python -m pip install --no-cache-dir --require-hashes -r src/scheduler/requirements.txt
+          python -m pip install --no-cache-dir --require-hashes -r src/ui/requirements.txt
+          python -m pip install --no-cache-dir --require-hashes -r src/common/gen/requirements.txt
+          python -m pip install --no-cache-dir --require-hashes -r src/common/db/requirements.txt
+          echo "CODEQL_PYTHON=$(which python)" >> $GITHUB_ENV
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@66b90a5db151a8042fa97405c6cf843bbe433f7b # v2.22.7
+        uses: github/codeql-action/init@e5f05b81d5b6ff8cfa111c80c22c5fd02a384118 # v3.23.0
         with:
           languages: ${{ matrix.language }}
           config-file: ./.github/codeql.yml
+          setup-python-dependencies: false
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@66b90a5db151a8042fa97405c6cf843bbe433f7b # v2.22.7
+        uses: github/codeql-action/analyze@e5f05b81d5b6ff8cfa111c80c22c5fd02a384118 # v3.23.0
         with:
           category: "/language:${{matrix.language}}"

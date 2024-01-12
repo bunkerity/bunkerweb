@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -130,6 +130,7 @@ std::list<std::string> expandEnv(const std::string& var, int flags) {
             for (char** exp = p.gl_pathv; *exp; ++exp) {
 #else
     wordexp_t p;
+    flags = flags | WRDE_NOCMD;
     if (wordexp(var.c_str(), &p, flags) == false) {
         if (p.we_wordc) {
             for (char** exp = p.we_wordv; *exp; ++exp) {

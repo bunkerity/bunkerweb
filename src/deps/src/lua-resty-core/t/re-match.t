@@ -306,8 +306,11 @@ NYI
     }
 --- request
     GET /re
---- response_body_like chop
-error: pcre_compile\(\) failed: two named subpatterns have the same name
+--- response_body eval
+$Test::Nginx::Util::PcreVersion == 2 ?
+"error: pcre2_compile\(\) failed: two named subpatterns have the same name \(PCRE2_DUPNAMES not set\) in \"\(\?<first>[a-z])\(\?<first>[a-z]+\), [0-9]+\" at \"[a-z]+\), [0-9]+\"\n"
+:
+"error: pcre_compile\(\) failed: two named subpatterns have the same name in \"\(\?<first>[a-z])\(\?<first>[a-z]+\), [0-9]+\" at \">[a-z]+\), [0-9]+\"\n"
 
 --- error_log eval
 qr/\[TRACE\s+\d+/

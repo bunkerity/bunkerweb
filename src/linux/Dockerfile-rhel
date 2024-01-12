@@ -1,4 +1,4 @@
-FROM redhat/ubi8:8.9@sha256:449da7f8f2ef6285a8445a1e31af57a97b9dae5dcf009b1629c59742c89c68c3 as builder
+FROM redhat/ubi8:8.9@sha256:1fdb97f2d2a44fdef3feaa69100f154631bae65130105ac685d0e34eb1d8c3d0
 
 ENV OS=rhel
 ENV NGINX_VERSION 1.24.0

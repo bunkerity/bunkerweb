@@ -3,4 +3,4 @@ cryptography==41.0.7
 oracledb==1.4.2
 psycopg[binary,pool]==3.1.12
 PyMySQL==1.1.0
-sqlalchemy==2.0.23
+sqlalchemy==2.0.25

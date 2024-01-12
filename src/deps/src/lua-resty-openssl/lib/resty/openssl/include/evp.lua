@@ -44,14 +44,23 @@ local _M = {
   EVP_PKEY_X448 = C.OBJ_txt2nid("X448"),
   EVP_PKEY_ED448 = C.OBJ_txt2nid("ED448"),
 
-  EVP_PKEY_OP_PARAMGEN = bit.lshift(1, 1),
-  EVP_PKEY_OP_KEYGEN = bit.lshift(1, 2),
-  EVP_PKEY_OP_SIGN = bit.lshift(1, 3),
-  EVP_PKEY_OP_VERIFY = bit.lshift(1, 4),
-  EVP_PKEY_OP_DERIVE = OPENSSL_3X and bit.lshift(1, 12) or bit.lshift(1, 10),
+  EVP_CTRL_AEAD_SET_IVLEN = 0x9,
+  EVP_CTRL_AEAD_GET_TAG = 0x10,
+  EVP_CTRL_AEAD_SET_TAG = 0x11,
+
+  -- remove EVP_PKEY_OP_* and EVP_PKEY_CTRL_* after openssl 1.1.1 support is dropped
+  EVP_PKEY_OP_PARAMGEN =  not OPENSSL_3X      and bit.lshift(1, 1)  or nil,
+  EVP_PKEY_OP_KEYGEN =  not OPENSSL_3X        and bit.lshift(1, 2)  or nil,
+  EVP_PKEY_OP_SIGN = not OPENSSL_3X           and bit.lshift(1, 3)  or nil,
+  EVP_PKEY_OP_VERIFY = not OPENSSL_3X         and bit.lshift(1, 4)  or nil,
+  EVP_PKEY_OP_VERIFYRECOVER = not OPENSSL_3X  and bit.lshift(1, 5)  or nil,
+  EVP_PKEY_OP_SIGNCTX = not OPENSSL_3X        and bit.lshift(1, 6)  or nil,
+  EVP_PKEY_OP_VERIFYCTX = not OPENSSL_3X      and bit.lshift(1, 7)  or nil,
+  EVP_PKEY_OP_ENCRYPT = not OPENSSL_3X        and bit.lshift(1, 8)  or nil,
+  EVP_PKEY_OP_DECRYPT = not OPENSSL_3X        and bit.lshift(1, 9)  or nil,
+  EVP_PKEY_OP_DERIVE = not OPENSSL_3X         and bit.lshift(1, 10) or nil,
 
   EVP_PKEY_ALG_CTRL = EVP_PKEY_ALG_CTRL,
-
 
   EVP_PKEY_CTRL_DH_PARAMGEN_PRIME_LEN = EVP_PKEY_ALG_CTRL + 1,
   EVP_PKEY_CTRL_EC_PARAMGEN_CURVE_NID = EVP_PKEY_ALG_CTRL + 1,
@@ -60,10 +69,8 @@ local _M = {
   EVP_PKEY_CTRL_RSA_KEYGEN_PUBEXP     = EVP_PKEY_ALG_CTRL + 4,
   EVP_PKEY_CTRL_RSA_PADDING           = EVP_PKEY_ALG_CTRL + 1,
   EVP_PKEY_CTRL_RSA_PSS_SALTLEN       = EVP_PKEY_ALG_CTRL + 2,
-
-  EVP_CTRL_AEAD_SET_IVLEN = 0x9,
-  EVP_CTRL_AEAD_GET_TAG = 0x10,
-  EVP_CTRL_AEAD_SET_TAG = 0x11,
+  EVP_PKEY_CTRL_RSA_MGF1_MD           = EVP_PKEY_ALG_CTRL + 5,
+  EVP_PKEY_CTRL_RSA_OAEP_MD           = EVP_PKEY_ALG_CTRL + 9,
 
   EVP_PKEY_CTRL_TLS_MD              = EVP_PKEY_ALG_CTRL,
   EVP_PKEY_CTRL_TLS_SECRET          = EVP_PKEY_ALG_CTRL + 1,
@@ -80,6 +87,12 @@ local _M = {
   EVP_PKEY_CTRL_SCRYPT_P            = EVP_PKEY_ALG_CTRL + 12,
   EVP_PKEY_CTRL_SCRYPT_MAXMEM_BYTES = EVP_PKEY_ALG_CTRL + 13,
 }
+
+if not OPENSSL_3X then
+  _M.EVP_PKEY_OP_CRYPT = _M.EVP_PKEY_OP_ENCRYPT + _M.EVP_PKEY_OP_DECRYPT
+  _M.EVP_PKEY_OP_SIG = _M.EVP_PKEY_OP_SIGN + _M.EVP_PKEY_OP_VERIFY + _M.EVP_PKEY_OP_VERIFYRECOVER +
+                      _M.EVP_PKEY_OP_SIGNCTX + _M.EVP_PKEY_OP_VERIFYCTX
+end
 
 -- clean up error occurs during OBJ_txt2*
 C.ERR_clear_error()

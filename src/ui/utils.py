@@ -29,6 +29,8 @@ UI_CONFIG = UiConfig("ui", **os.environ)
 PREFIX = "/admin/"
 CORE_API = UI_CONFIG.CORE_ADDR
 
+# from qrcode.main import QRCode
+
 
 def get_req_data(req, queries=[]):
     # get body json or fallback

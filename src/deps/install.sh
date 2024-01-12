@@ -183,6 +183,12 @@ export CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-signal"
 do_and_check_cmd make PREFIX=/usr/share/bunkerweb/deps -j "$NTASK"
 do_and_check_cmd make PREFIX=/usr/share/bunkerweb/deps LUA_LIB_DIR=/usr/share/bunkerweb/deps/lib/lua install
 
+# Installing lua-resty-redis-connector
+echo "ℹ️ Installing lua-resty-redis-connector"
+export CHANGE_DIR="/tmp/bunkerweb/deps/src/lua-resty-redis-connector"
+do_and_check_cmd make PREFIX=/usr/share/bunkerweb/deps LUA_LIB_DIR=/usr/share/bunkerweb/deps/lib/lua install
+
+# Patch modsec module
 export CHANGE_DIR="/tmp/bunkerweb/deps/misc"
 do_and_check_cmd bash -c "mv ngx_http_modsecurity_access.c /tmp/bunkerweb/deps/src/modsecurity-nginx/src/"
 

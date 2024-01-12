@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from os import _exit, environ, getenv, sep
@@ -61,6 +61,7 @@ try:
             [
                 join(sep, "usr", "share", "bunkerweb", "deps", "python", "bin", "certbot"),
                 "renew",
+                "--no-random-sleep-on-renew",
                 "--config-dir",
                 str(letsencrypt_path.joinpath("etc")),
                 "--work-dir",

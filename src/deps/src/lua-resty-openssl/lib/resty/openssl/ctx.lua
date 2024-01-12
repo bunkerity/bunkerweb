@@ -26,7 +26,7 @@ local function new(request_context_only, conf_file)
     return false, format_error("ctx.new")
   end
 
-  if request_context_only then
+  if request_context_only and ngx then
     ngx.ctx.ossl_lib_ctx = ctx
   else
     ossl_lib_ctx = ctx
@@ -40,7 +40,7 @@ local function free(request_context_only)
     return false, "ctx is only supported from OpenSSL 3.0"
   end
 
-  if request_context_only then
+  if request_context_only and ngx then
     ngx.ctx.ossl_lib_ctx = nil
   else
     ossl_lib_ctx = nil

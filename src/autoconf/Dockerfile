@@ -56,7 +56,9 @@ RUN apk add --no-cache bash && \
   chmod 750 /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/autoconf/*.py /usr/share/bunkerweb/autoconf/entrypoint.sh /usr/share/bunkerweb/deps/python/bin/*
 
 # Fix CVEs
-# There are no CVEs to fix in this image
+RUN apk add --no-cache "libcrypto3>=3.1.4-r3" "libssl3>=3.1.4-r3"
+
+VOLUME /data /etc/nginx
 
 WORKDIR /usr/share/bunkerweb/autoconf
 

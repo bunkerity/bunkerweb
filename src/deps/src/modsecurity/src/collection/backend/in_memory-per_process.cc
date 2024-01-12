@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 
 #include "src/collection/backend/in_memory-per_process.h"
+#include "src/collection/backend/collection_data.h"
 
 #ifdef __cplusplus
 #include <string>
@@ -69,7 +70,7 @@ bool InMemoryPerProcess::updateFirst(const std::string &key,
     auto range = this->equal_range(key);
 
     for (auto it = range.first; it != range.second; ++it) {
-        it->second = value;
+        it->second.setValue(value);
         pthread_mutex_unlock(&m_lock);
         return true;
     }
@@ -84,13 +85,49 @@ void InMemoryPerProcess::del(const std::string& key) {
     pthread_mutex_unlock(&m_lock);
 }
 
+void InMemoryPerProcess::delIfExpired(const std::string& key) {
+    pthread_mutex_lock(&m_lock);
+    // Double check the status while within the mutex
+    auto iter = this->find(key);
+    if ((iter != this->end()) && (iter->second.isExpired())) {
+        this->erase(key);
+    }
+    pthread_mutex_unlock(&m_lock);
+}
+
+void InMemoryPerProcess::setExpiry(const std::string& key, int32_t expiry_seconds) {
+    pthread_mutex_lock(&m_lock);
+    auto range = this->equal_range(key);
+    for (auto it = range.first; it != range.second; ++it) {
+        it->second.setExpiry(expiry_seconds);
+        pthread_mutex_unlock(&m_lock);
+	return;
+    }
+
+    // We allow an expiry value to be set for a key that has not (yet) had a value set.
+    auto iter = this->emplace(key, CollectionData());
+    iter->second.setExpiry(expiry_seconds);
+
+    pthread_mutex_unlock(&m_lock);
+}
+
 
 void InMemoryPerProcess::resolveSingleMatch(const std::string& var,
     std::vector<const VariableValue *> *l) {
+    std::list<std::string> expiredVars;
     auto range = this->equal_range(var);
 
     for (auto it = range.first; it != range.second; ++it) {
-        l->push_back(new VariableValue(&m_name, &it->first, &it->second));
+        if (it->second.isExpired()) {
+            expiredVars.push_back(it->first);
+	} else if (it->second.hasValue() == false) {
+            // No-op. A non-expired expiry exists for the key but there is no actual value
+	} else {
+            l->push_back(new VariableValue(&m_name, &it->first, &it->second.getValue()));
+	}
+    }
+    for (const auto& expiredVar : expiredVars) {
+        delIfExpired(expiredVar);
     }
 }
 
@@ -99,14 +136,21 @@ void InMemoryPerProcess::resolveMultiMatches(const std::string& var,
     std::vector<const VariableValue *> *l, variables::KeyExclusions &ke) {
     size_t keySize = var.size();
     l->reserve(15);
+    std::list<std::string> expiredVars;
 
     if (keySize == 0) {
         for (auto &i : *this) {
             if (ke.toOmit(i.first)) {
                 continue;
             }
-            l->insert(l->begin(), new VariableValue(&m_name, &i.first,
-                &i.second));
+            if (i.second.isExpired()) {
+                expiredVars.push_back(i.first);
+	    } else if (i.second.hasValue() == false) {
+                // No-op. A non-expired expiry exists for the key but there is no actual value
+	    } else {
+                l->insert(l->begin(), new VariableValue(&m_name, &i.first,
+                    &i.second.getValue()));
+	    }
         }
     } else {
         auto range = this->equal_range(var);
@@ -114,9 +158,18 @@ void InMemoryPerProcess::resolveMultiMatches(const std::string& var,
             if (ke.toOmit(var)) {
                 continue;
             }
-            l->insert(l->begin(), new VariableValue(&m_name, &var,
-                &it->second));
+            if (it->second.isExpired()) {
+                expiredVars.push_back(it->first);
+	    } else if (it->second.hasValue() == false) {
+                // No-op. A non-expired expiry exists for the key but there is no actual value
+	    } else {
+                l->insert(l->begin(), new VariableValue(&m_name, &var,
+                    &it->second.getValue()));
+	    }
         }
+    }
+    for (const auto& expiredVar : expiredVars) {
+        delIfExpired(expiredVar);
     }
 }
 
@@ -135,6 +188,7 @@ void InMemoryPerProcess::resolveRegularExpression(const std::string& var,
     //    var.size() - var.find(":") - 3);
     //size_t keySize = col.size();
     Utils::Regex r(var, true);
+    std::list<std::string> expiredVars;
 
     for (const auto& x : *this) {
         //if (x.first.size() <= keySize + 1) {
@@ -155,7 +209,16 @@ void InMemoryPerProcess::resolveRegularExpression(const std::string& var,
         if (ke.toOmit(x.first)) {
             continue;
         }
-        l->insert(l->begin(), new VariableValue(&m_name, &x.first, &x.second));
+        if (x.second.isExpired()) {
+            expiredVars.push_back(x.first);
+	} else if (x.second.hasValue() == false) {
+            // No-op. A non-expired expiry exists for the key but there is no actual value
+	} else {
+            l->insert(l->begin(), new VariableValue(&m_name, &x.first, &x.second.getValue()));
+	}
+    }
+    for (const auto& expiredVar : expiredVars) {
+        delIfExpired(expiredVar);
     }
 }
 
@@ -164,7 +227,13 @@ std::unique_ptr<std::string> InMemoryPerProcess::resolveFirst(
     const std::string& var) {
     auto range = equal_range(var);
     for (auto it = range.first; it != range.second; ++it) {
-        return std::unique_ptr<std::string>(new std::string(it->second));
+        if (it->second.isExpired()) {
+            delIfExpired(it->second.getValue());
+	} else if (it->second.hasValue() == false) {
+            // No-op. A non-expired expiry exists for the key but there is no actual value
+	} else {
+            return std::unique_ptr<std::string>(new std::string(it->second.getValue()));
+	}
     }
 
     return NULL;

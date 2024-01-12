@@ -1,4 +1,4 @@
-FROM quay.io/centos/centos:stream8@sha256:5917fa6bdbced823c488264ba03f1cfab852c15b5e47714fc8c9a074adc7cfdd as builder
+FROM quay.io/centos/centos:stream8@sha256:a8692b39e546eed9177d495db1edfd97bb6de70b9527f58aeb72f90b687c3426
 
 ENV OS=centos
 ENV NGINX_VERSION 1.24.0

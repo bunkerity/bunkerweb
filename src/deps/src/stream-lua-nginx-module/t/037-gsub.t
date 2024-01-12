@@ -327,8 +327,11 @@ n: 1
             ngx.say("error: ", err)
         end
     }
---- stream_response_like chop
-error: pcre_exec\(\) failed: -10
+--- stream_response eval
+$Test::Nginx::Util::PcreVersion == 2 ?
+"error: pcre_exec\(\) failed: -4\n"
+:
+"error: pcre_exec\(\) failed: -10\n"
 
 --- no_error_log
 [error]
@@ -423,8 +426,14 @@ if err then
 end
 ngx.say("gsub: ", cnt)
 
---- stream_response
-error: pcre_exec() failed: -8
+--- stream_response eval
+# lua_regex_match_limit uses pcre_extra->match_limit in the PCRE,
+# but PCRE2 replaces this with pcre2_set_match_limit interface,
+# which has different effects.
+$Test::Nginx::Util::PcreVersion == 2 ?
+"gsub: 0\n"
+:
+"error: pcre_exec() failed: -8\n"
 
 
 

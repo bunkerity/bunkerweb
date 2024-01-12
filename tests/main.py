@@ -4,10 +4,10 @@
 from pathlib import Path
 from sys import path, argv, exit
 from glob import glob
-from os import _exit
+from os import _exit, getenv
 from os.path import isfile
 from traceback import format_exc
-from json import loads
+from json import loads, dumps
 from subprocess import run
 
 path.extend((f"{Path.cwd()}/utils", f"{Path.cwd()}/tests"))
@@ -17,6 +17,7 @@ from AutoconfTest import AutoconfTest
 from SwarmTest import SwarmTest
 from KubernetesTest import KubernetesTest
 from LinuxTest import LinuxTest
+from Test import Test
 from logger import log
 
 if len(argv) <= 1:
@@ -53,6 +54,32 @@ if not ret:
     log("TESTS", "❌", "Test.init() failed")
     exit(1)
 
+domains = {}
+if test_type in ["docker", "autoconf", "linux"]:
+    domains = {
+        r"www\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+        r"auth\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+        r"app1\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
+        r"app2\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
+        r"app3\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_3"),
+    }
+elif test_type == "kubernetes":
+    domains = {
+        r"www\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
+        r"auth\.example\.com": Test.random_string(1) + "." + getenv("TEST_DOMAIN1_2"),
+        r"app1\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+        r"app2\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN2"),
+        r"app3\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN3"),
+    }
+elif test_type == "swarm":
+    domains = {
+        r"www\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_1"),
+        r"auth\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1_2"),
+        r"app1\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN1"),
+        r"app2\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN2"),
+        r"app3\.example\.com": Test.random_string(6) + "." + getenv("TEST_DOMAIN3"),
+    }
+
 for example in glob("./examples/*"):
     if isfile(f"{example}/tests.json"):
         try:
@@ -65,6 +92,7 @@ for example in glob("./examples/*"):
                     "Skipping tests for " + tests["name"] + " (not in kinds)",
                 )
                 continue
+            log("TESTS", "ℹ️", f"JSON test = {dumps(tests)}")
             test_obj = None
             no_copy_container = False
             delay = 0
@@ -79,6 +107,7 @@ for example in glob("./examples/*"):
                     tests["tests"],
                     no_copy_container=no_copy_container,
                     delay=delay,
+                    domains=domains,
                 )
             elif test_type == "autoconf":
                 test_obj = AutoconfTest(
@@ -87,13 +116,14 @@ for example in glob("./examples/*"):
                     tests["tests"],
                     no_copy_container=no_copy_container,
                     delay=delay,
+                    domains=domains,
                 )
             elif test_type == "swarm":
-                test_obj = SwarmTest(tests["name"], tests["timeout"], tests["tests"], delay=delay)
+                test_obj = SwarmTest(tests["name"], tests["timeout"], tests["tests"], delay=delay, domains=domains)
             elif test_type == "kubernetes":
-                test_obj = KubernetesTest(tests["name"], tests["timeout"], tests["tests"], delay=delay)
+                test_obj = KubernetesTest(tests["name"], tests["timeout"], tests["tests"], delay=delay, domains=domains)
             elif test_type == "linux":
-                test_obj = LinuxTest(tests["name"], tests["timeout"], tests["tests"], distro)
+                test_obj = LinuxTest(tests["name"], tests["timeout"], tests["tests"], distro, domains=domains)
             if not test_obj.run_tests():
                 log("TESTS", "❌", "Tests failed for " + tests["name"])
                 if test_type == "linux":

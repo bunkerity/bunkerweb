@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from contextlib import suppress
@@ -418,7 +418,7 @@ def send_config_to_instances(api_caller: ApiCaller):  # , *, old_config: bool = 
     if len(failed_apis) == len(api_caller.apis):
         message = "An error occurred while sending the config to all instances, check your actions,"
         # if old_config:
-        CORE_CONFIG.logger.debug(f"{responses}")
+        CORE_CONFIG.logger.debug(responses)
         CORE_CONFIG.logger.error(f"{message} configuration will not work as expected...")
         DB.add_action(
             {
@@ -458,7 +458,7 @@ def send_config_to_instances(api_caller: ApiCaller):  # , *, old_config: bool = 
     for failed_api in failed_apis:
         CORE_CONFIG.logger.error(f"Can't send config to instance {failed_api.endpoint}, configuration will not work as expected...")
         response = responses[failed_api.endpoint.split("://", 1).pop().split(":")[0]]
-        CORE_CONFIG.logger.debug(f"{response}")
+        CORE_CONFIG.logger.debug(response)
         DB.add_action(
             {
                 "date": datetime.now(),

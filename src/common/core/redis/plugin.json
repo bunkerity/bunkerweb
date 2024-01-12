@@ -130,6 +130,60 @@
       },
       "regex": "^[0-9]+$",
       "type": "text"
+    },
+    "REDIS_USERNAME": {
+      "context": "global",
+      "default": "",
+      "help": "Redis username used in AUTH command.",
+      "id": "redis-username",
+      "label": "Redis username",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "REDIS_PASSWORD": {
+      "context": "global",
+      "default": "",
+      "help": "Redis password used in AUTH command.",
+      "id": "redis-password",
+      "label": "Redis password",
+      "regex": "^.*$",
+      "type": "password"
+    },
+    "REDIS_SENTINEL_HOSTS": {
+      "context": "global",
+      "default": "",
+      "help": "Redis sentinel hosts with format host:[port] separated with spaces.",
+      "id": "redis-sentinel-hosts",
+      "label": "Redis sentinel hosts",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "REDIS_SENTINEL_USERNAME": {
+      "context": "global",
+      "default": "",
+      "help": "Redis sentinel username.",
+      "id": "redis-sentinel-username",
+      "label": "Redis sentinel username",
+      "regex": "^.*$",
+      "type": "text"
+    },
+    "REDIS_SENTINEL_PASSWORD": {
+      "context": "global",
+      "default": "",
+      "help": "Redis sentinel password.",
+      "id": "redis-sentinel-password",
+      "label": "Redis sentinel password",
+      "regex": "^.*$",
+      "type": "password"
+    },
+    "REDIS_SENTINEL_MASTER": {
+      "context": "global",
+      "default": "",
+      "help": "Redis sentinel master name.",
+      "id": "redis-sentinel-master",
+      "label": "Redis sentinel master",
+      "regex": "^.*$",
+      "type": "text"
     }
   }
 }

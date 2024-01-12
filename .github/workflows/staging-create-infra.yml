@@ -31,16 +31,16 @@ jobs:
         if: inputs.TYPE == 'k8s'
         with:
           version: "v1.28.2"
-      - name: Set up Python 3.11
-        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+      - name: Set up Python 3.12
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         if: inputs.TYPE != 'k8s'
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Install ansible
         run: pip install --no-cache-dir --require-hashes -r misc/requirements-ansible.txt
         if: inputs.TYPE != 'k8s'
       - name: Install ansible libs
-        run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner,1.18.1 && ansible-galaxy collection install --timeout 120 community.general
+        run: ansible-galaxy install --timeout 120 monolithprojects.github_actions_runner,1.18.1 && ansible-galaxy collection install --timeout 120 community.general && ansible-galaxy collection install --timeout 120 community.docker
         if: inputs.TYPE != 'k8s'
       # Create infra
       - run: ./tests/create.sh ${{ inputs.TYPE }}
@@ -55,7 +55,7 @@ jobs:
         if: always()
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      - uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+      - uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
         if: always()
         with:
           name: tf-${{ inputs.TYPE }}

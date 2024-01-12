@@ -7,12 +7,14 @@
     {
       "type": "string",
       "url": "https://app1.example.com",
-      "string": "authelia"
+      "string": "authelia",
+      "tls": "app1.example.com"
     },
     {
       "type": "string",
       "url": "https://app2.example.com",
-      "string": "authelia"
+      "string": "authelia",
+      "tls": "app2.example.com"
     }
   ]
 }

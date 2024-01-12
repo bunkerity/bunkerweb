@@ -3,6 +3,9 @@ local plugin = require "bunkerweb.plugin"
 
 local redis = class("redis", plugin)
 
+local ngx = ngx
+local NOTICE = ngx.NOTICE
+
 function redis:initialize(ctx)
 	-- Call parent initialize
 	plugin.initialize(self, "redis", ctx)
@@ -14,7 +17,7 @@ function redis:init_worker()
 		return self:ret(true, "init_worker not needed")
 	end
 	-- Check redis connection
-	local ok, err = self.clusterstore:connect()
+	local ok, err = self.clusterstore:connect(true)
 	if not ok then
 		return self:ret(false, "redis connect error : " .. err)
 	end
@@ -27,7 +30,7 @@ function redis:init_worker()
 	if not ok then
 		return self:ret(false, "redis ping command failed")
 	end
-	self.logger:log(ngx.NOTICE, "connectivity with redis server " .. self.variables["REDIS_HOST"] .. " is successful")
+	self.logger:log(NOTICE, "connectivity with redis server " .. self.variables["REDIS_HOST"] .. " is successful")
 	return self:ret(true, "success")
 end
 

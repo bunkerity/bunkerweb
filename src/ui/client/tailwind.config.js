@@ -11,6 +11,9 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      data: {
+        checked: "checked=true",
+      },
       aria: {
         checked: 'checked="true"',
       },
@@ -39,10 +42,10 @@ export default {
       black: colors.black,
       white: colors.white,
       primary: {
-        DEFAULT: "#085577",
+        DEFAULT: "#0b5577",
       },
       secondary: {
-        DEFAULT: "#40bb6b",
+        DEFAULT: "#2eac68",
       },
       slate: {
         DEFAULT: colors.slate,
@@ -924,7 +927,7 @@ export default {
       "5/6": "83.333333%",
       full: "100%",
       // sidenav: "calc(100vh - 310px)",
-      sidenav: "calc(100vh - 360px)", // for pro btn
+      sidenav: "calc(100vh - 450px)", // for pro btn
       screen: "100vh",
       min: "min-content",
       max: "max-content",

@@ -8,7 +8,8 @@
     {
       "type": "status",
       "url": "https://www.example.com",
-      "status": 401
+      "status": 401,
+      "tls": "www.example.com"
     }
   ]
 }

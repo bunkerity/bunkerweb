@@ -24,30 +24,8 @@ try_require_modules()
 
 
 local _M = {
-  _VERSION = '1.0.1',
+  _VERSION = '1.2.0',
 }
-
-local libcrypto_name
-local lib_patterns = {
-  "%s", "%s.so.3", "%s.so.1.1", "%s.so.1.0"
-}
-
-function _M.load_library()
-  for _, pattern in ipairs(lib_patterns) do
-    -- true: load to global namespae
-    local pok, _ = pcall(ffi.load, string.format(pattern, "crypto"), true)
-    if pok then
-      libcrypto_name = string.format(pattern, "crypto")
-      ffi.load(string.format(pattern, "ssl"), true)
-
-      try_require_modules()
-
-      return libcrypto_name
-    end
-  end
-
-  return false, "unable to load crypto library"
-end
 
 function _M.load_modules()
   _M.bn = require("resty.openssl.bn")
@@ -345,7 +323,7 @@ local function list_legacy(typ, get_nid_cf)
   return ret
 end
 
-local function list_provided(typ)
+local function list_provided(typ, hide_provider)
   local typ_lower = string.lower(typ:sub(5)) -- cut off EVP_
   local typ_ptr = typ .. "*"
   require("resty.openssl.include.evp." .. typ_lower)
@@ -357,9 +335,13 @@ local function list_provided(typ)
     function(elem, _)
       elem = ffi_cast(typ_ptr, elem)
       local name = ffi_str(C[typ .. "_get0_name"](elem))
-      -- alternate names are ignored, retrieve use TYPE_names_do_all
-      local prov = ffi_str(C.OSSL_PROVIDER_get0_name(C[typ .. "_get0_provider"](elem)))
-      table.insert(ret, name .. " @ " .. prov)
+      if hide_provider then
+        table.insert(ret, name)
+      else
+        -- alternate names are ignored, retrieve use TYPE_names_do_all
+        local prov = ffi_str(C.OSSL_PROVIDER_get0_name(C[typ .. "_get0_provider"](elem)))
+        table.insert(ret, name .. " @ " .. prov)
+      end
     end)
 
   C[typ .. "_do_all_provided"](ctx_lib.get_libctx(), fn, nil)
@@ -369,50 +351,40 @@ local function list_provided(typ)
   return ret
 end
 
-function _M.list_cipher_algorithms()
+function _M.list_cipher_algorithms(hide_provider)
   require "resty.openssl.include.evp.cipher"
-  local ret = list_legacy("EVP_CIPHER",
-    OPENSSL_3X and C.EVP_CIPHER_get_nid or C.EVP_CIPHER_nid)
 
   if OPENSSL_3X then
-    local ret_provided = list_provided("EVP_CIPHER")
-    for _, r in ipairs(ret_provided) do
-      table.insert(ret, r)
-    end
+    return list_provided("EVP_CIPHER", hide_provider)
+  else
+    return list_legacy("EVP_CIPHER", C.EVP_CIPHER_nid)
   end
-
-  return ret
 end
 
-function _M.list_digest_algorithms()
+function _M.list_digest_algorithms(hide_provider)
   require "resty.openssl.include.evp.md"
-  local ret = list_legacy("EVP_MD",
-    OPENSSL_3X and C.EVP_MD_get_type or C.EVP_MD_type)
 
   if OPENSSL_3X then
-    local ret_provided = list_provided("EVP_MD")
-    for _, r in ipairs(ret_provided) do
-      table.insert(ret, r)
-    end
+    return list_provided("EVP_MD", hide_provider)
+  else
+    return list_legacy("EVP_MD", C.EVP_MD_type)
   end
-
-  return ret
 end
 
-function _M.list_mac_algorithms()
+function _M.list_mac_algorithms(hide_provider)
   if not OPENSSL_3X then
     return nil, "openssl.list_mac_algorithms is only supported from OpenSSL 3.0"
   end
 
-  return list_provided("EVP_MAC")
+  return list_provided("EVP_MAC", hide_provider)
 end
 
-function _M.list_kdf_algorithms()
+function _M.list_kdf_algorithms(hide_provider)
   if not OPENSSL_3X then
     return nil, "openssl.list_kdf_algorithms is only supported from OpenSSL 3.0"
   end
 
-  return list_provided("EVP_KDF")
+  return list_provided("EVP_KDF", hide_provider)
 end
 
 local valid_ssl_protocols = {

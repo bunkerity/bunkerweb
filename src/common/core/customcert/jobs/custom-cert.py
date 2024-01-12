@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from os import getenv, sep
@@ -6,6 +6,7 @@ from os.path import join
 from pathlib import Path
 from sys import exit as sys_exit, path as sys_path
 from traceback import format_exc
+from base64 import b64decode
 from typing import Optional
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("api",), ("utils",))]:
@@ -23,6 +24,7 @@ JOB = Job()
 
 def check_cert(cert_path: str, key_path: str, first_server: Optional[str] = None) -> bool:  # type: ignore
     try:
+        ret = False
         if not cert_path or not key_path:
             LOGGER.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates")
             return False
@@ -53,7 +55,7 @@ def check_cert(cert_path: str, key_path: str, first_server: Optional[str] = None
             if not cached:
                 LOGGER.error(f"Error while caching custom-cert key.pem file : {err}")
 
-        return True
+        return ret
     except:
         LOGGER.error(
             f"Exception while running custom-cert.py (check_cert) :\n{format_exc()}",
@@ -64,13 +66,26 @@ def check_cert(cert_path: str, key_path: str, first_server: Optional[str] = None
 status = 0
 
 try:
-    if getenv("USE_CUSTOM_SSL", "no") == "yes" and getenv("SERVER_NAME", "") != "":
+    if getenv("MULTISITE", "yes") == "no" and getenv("USE_CUSTOM_SSL", "no") == "yes" and getenv("SERVER_NAME", "") != "":
         cert_path = getenv("CUSTOM_SSL_CERT", "")
         key_path = getenv("CUSTOM_SSL_KEY", "")
+        first_server = getenv("SERVER_NAME", "").split(" ")[0]
+
+        cert_data = b64decode(getenv("CUSTOM_SSL_CERT_DATA", ""))
+        key_data = b64decode(getenv("CUSTOM_SSL_KEY_DATA", ""))
+        for file, data in (("cert.pem", cert_data), ("key.pem", key_data)):
+            if data != b"":
+                file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", f"{first_server}.{file}")
+                file_path.parent.mkdir(parents=True, exist_ok=True)
+                file_path.write_bytes(data)
+                if file == "cert.pem":
+                    cert_path = str(file_path)
+                else:
+                    key_path = str(file_path)
 
         if cert_path and key_path:
             LOGGER.info(f"Checking certificate {cert_path} ...")
-            need_reload = check_cert(cert_path, key_path)
+            need_reload = check_cert(cert_path, key_path, first_server)
             if need_reload:
                 LOGGER.info(f"Detected change for certificate {cert_path}")
                 status = 1
@@ -91,6 +106,18 @@ try:
 
             cert_path = getenv(f"{first_server}_CUSTOM_SSL_CERT", "")
             key_path = getenv(f"{first_server}_CUSTOM_SSL_KEY", "")
+
+            cert_data = b64decode(getenv(f"{first_server}_CUSTOM_SSL_CERT_DATA", ""))
+            key_data = b64decode(getenv(f"{first_server}_CUSTOM_SSL_KEY_DATA", ""))
+            for file, data in (("cert.pem", cert_data), ("key.pem", key_data)):
+                if data != b"":
+                    file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", f"{first_server}.{file}")
+                    file_path.parent.mkdir(parents=True, exist_ok=True)
+                    file_path.write_bytes(data)
+                    if file == "cert.pem":
+                        cert_path = str(file_path)
+                    else:
+                        key_path = str(file_path)
 
             if cert_path and key_path:
                 LOGGER.info(

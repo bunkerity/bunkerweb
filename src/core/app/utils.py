@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from contextlib import suppress
@@ -207,7 +207,7 @@ def update_custom_configs(db_config: dict):
             path_exploded = root.split("/")
             for file in files:
                 content = Path(join(root, file)).read_text(encoding="utf-8")
-                custom_conf = {"value": content, "exploded": (f"{path_exploded.pop()}" if path_exploded[-1] not in root_dirs else None, path_exploded[-1], file.replace(".conf", ""))}
+                custom_conf = {"value": content, "exploded": (path_exploded.pop() if path_exploded[-1] not in root_dirs else None, path_exploded[-1], file.replace(".conf", ""))}
                 saving = True
 
                 for db_conf in db_configs:

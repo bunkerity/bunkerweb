@@ -7,7 +7,8 @@
     {
       "type": "string",
       "url": "https://www.example.com",
-      "string": "radarr"
+      "string": "radarr",
+      "tls": "www.example.com"
     }
   ]
 }

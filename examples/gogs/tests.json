@@ -8,7 +8,8 @@
     {
       "type": "string",
       "url": "https://www.example.com",
-      "string": "gogs"
+      "string": "gogs",
+      "tls": "www.example.com"
     }
   ]
 }

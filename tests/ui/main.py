@@ -2,12 +2,13 @@
 from contextlib import suppress
 from datetime import datetime, timedelta
 from functools import partial
-from os import getenv, listdir
+from os import getenv, listdir, sep
 from os.path import join
 from pathlib import Path
 from time import sleep
 from traceback import format_exc
 from typing import List, Union
+from pyotp import TOTP
 from requests import get
 from requests.exceptions import RequestException
 from selenium import webdriver
@@ -21,11 +22,17 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException, WebDriverException
 from subprocess import run, PIPE
 
+default_server = "127.0.0.1"
+
+os_release_path = Path(sep, "etc", "os-release")
+if os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
+    default_server = "192.168.0.2"
+
 ready = False
 retries = 0
 while not ready:
     with suppress(RequestException):
-        status_code = get("http://www.example.com/admin").status_code
+        status_code = get(f"http://{default_server}/setup").status_code
 
         if status_code > 500 and status_code != 502:
             print("An error occurred with the server, exiting ...", flush=True)
@@ -118,7 +125,7 @@ def assert_alert_message(driver, message: str):
 
     print(f'Message "{message}" found in one of the messages in the list', flush=True)
 
-    assert_button_click(driver, "//aside[@data-flash-sidebar='']/*[local-name() = 'svg']")
+    assert_button_click(driver, "//button[@data-flash-sidebar-close='']/*[local-name() = 'svg']")
 
 
 def access_page(
@@ -180,9 +187,41 @@ with driver_func() as driver:
         driver.maximize_window()
         driver_wait = WebDriverWait(driver, 60)
 
-        print("Navigating to http://www.example.com/admin ...", flush=True)
+        print(f"Navigating to http://{default_server}/setup ...", flush=True)
 
-        driver.get("http://www.example.com/admin")
+        driver.get(f"http://{default_server}/setup")
+
+        ### WIZARD PAGE
+
+        try:
+            title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/main/div/div/h1")))
+
+            if title.text != "Setup Wizard":
+                print("Didn't get redirected to setup page, exiting ...", flush=True)
+                exit(1)
+        except TimeoutException:
+            print("Didn't get redirected to setup page, exiting ...", flush=True)
+            exit(1)
+
+        print("Setup page loaded successfully, filling the form ...", flush=True)
+
+        admin_username_input = safe_get_element(driver, By.ID, "admin_username")
+        password_input = safe_get_element(driver, By.ID, "admin_password")
+        password_check_input = safe_get_element(driver, By.ID, "admin_password_check")
+        ui_url = safe_get_element(driver, By.ID, "ui_url").get_attribute("value")
+
+        admin_username_input.send_keys("admin")
+        password_input.send_keys("S$cr3tP@ssw0rd")
+        password_check_input.send_keys("S$cr3tP@ssw0rd")
+
+        assert_button_click(driver, "//button[@id='setup-button']")
+
+        print("Submitted the form, waiting for the wizard to finish ...", flush=True)
+
+        current_time = datetime.now()
+
+        while current_time + timedelta(minutes=5) > datetime.now() and not driver.current_url.endswith("/login"):
+            sleep(1)
 
         ### LOGIN PAGE
 
@@ -199,7 +238,7 @@ with driver_func() as driver:
             flush=True,
         )
 
-        driver.get("http://www.example.com/admin/home")
+        driver.get(f"http://www.example.com{ui_url}/home")
 
         print("Waiting for toast ...", flush=True)
 
@@ -262,7 +301,7 @@ with driver_func() as driver:
         access_page(
             driver,
             driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[2]/a",
+            "/html/body/aside[1]/div[1]/div[3]/ul/li[2]/a",
             "instances",
         )
 
@@ -350,7 +389,7 @@ with driver_func() as driver:
         access_page(
             driver,
             driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[3]/a",
+            "/html/body/aside[1]/div[1]/div[3]/ul/li[3]/a",
             "global config",
         )
 
@@ -510,7 +549,7 @@ with driver_func() as driver:
         access_page(
             driver,
             driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[4]/a",
+            "/html/body/aside[1]/div[1]/div[3]/ul/li[4]/a",
             "services",
         )
 
@@ -528,9 +567,9 @@ with driver_func() as driver:
             print("The service is not present, exiting ...", flush=True)
             exit(1)
 
-        if service.find_element(By.TAG_NAME, "h6").text.strip() != "scheduler":
+        if service.find_element(By.TAG_NAME, "h6").text.strip() != "ui":
             print(
-                "The service should have been created by the scheduler, exiting ...",
+                "The service should have been created by the ui, exiting ...",
                 flush=True,
             )
             exit(1)
@@ -872,7 +911,7 @@ with driver_func() as driver:
         access_page(
             driver,
             driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[5]/a",
+            "/html/body/aside[1]/div[1]/div[3]/ul/li[5]/a",
             "configs",
         )
 
@@ -1001,7 +1040,7 @@ location /hello {
         access_page(
             driver,
             driver_wait,
-            "/html/body/aside[1]/div[1]/div[2]/ul/li[6]/a",
+            "/html/body/aside[1]/div[1]/div[3]/ul/li[6]/a",
             "plugins",
         )
 
@@ -1144,7 +1183,7 @@ location /hello {
 
         print("The plugin has been deleted, trying cache page ...", flush=True)
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[7]/a", "cache")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[7]/a", "cache")
 
         ### CACHE PAGE
 
@@ -1169,7 +1208,7 @@ location /hello {
 
         print("The cache file content is correct, trying logs page ...", flush=True)
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[8]/a", "logs")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[8]/a", "logs")
 
         ### LOGS PAGE
 
@@ -1191,7 +1230,7 @@ location /hello {
             exit(1)
 
         assert_button_click(driver, instances[0])
-        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-settings"))
+        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-data"))
 
         sleep(3)
 
@@ -1204,7 +1243,7 @@ location /hello {
         print("Logs found, trying auto refresh ...", flush=True)
 
         assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
-        assert_button_click(driver, "//button[@id='submit-settings' and contains(text(), 'Go Live')]")
+        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-live"))
 
         sleep(3)
 
@@ -1222,7 +1261,7 @@ location /hello {
         print("Auto refresh is working, deactivating it ...", flush=True)
 
         assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
-        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-settings"))
+        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-data"))
 
         sleep(3)
 
@@ -1280,8 +1319,8 @@ location /hello {
 
         current_date = datetime.now()
         resp = get(
-            f"http://www.example.com/admin/logs/{first_instance}?from_date={int(current_date.timestamp() - 86400000)}&to_date={int((current_date - timedelta(days=1)).timestamp())}",
-            headers={"Host": "www.example.com"},
+            f"http://www.example.com{ui_url}/logs/{first_instance}?from_date={int(current_date.timestamp() - 86400000)}&to_date={int((current_date - timedelta(days=1)).timestamp())}",
+            headers={"Host": "www.example.com", "User-Agent": driver.execute_script("return navigator.userAgent;")},
             cookies={"session": driver.get_cookies()[0]["value"]},
         )
 
@@ -1291,7 +1330,7 @@ location /hello {
 
         print("Date filter is working, trying jobs page ...", flush=True)
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/ul/li[9]/a", "jobs")
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[9]/a", "jobs")
 
         ### JOBS PAGE
 
@@ -1416,13 +1455,164 @@ location /hello {
 
         sleep(0.3)
 
-        resp = get("http://www.example.com/admin/jobs/download?job_name=mmdb-country&file_name=country.mmdb")
+        resp = get(f"http://www.example.com{ui_url}/jobs/download?job_name=mmdb-country&file_name=country.mmdb")
 
         if resp.status_code != 200:
             print("The cache download is not working, exiting ...", flush=True)
             exit(1)
 
-        print("Cache download is working, trying to log out ...", flush=True)
+        print("Cache download is working, trying account page ...", flush=True)
+
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
+
+        ### ACCOUNT PAGE
+
+        username_input = safe_get_element(driver, By.ID, "admin_username")
+
+        if username_input.get_attribute("value") != "admin":
+            print("The username is not correct, exiting ...", flush=True)
+            exit(1)
+
+        username_input.clear()
+        username_input.send_keys("admin2")
+
+        password_input = safe_get_element(driver, By.ID, "curr_password")
+
+        if password_input.get_attribute("value") != "":
+            print("The current password is not empty, exiting ...", flush=True)
+            exit(1)
+
+        password_input.send_keys("S$cr3tP@ssw0rd")
+
+        assert_button_click(driver, "//button[@id='username-button' and @class='edit-btn']")
+
+        try:
+            title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/main/div[1]/div/h1")))
+
+            if title.text != "Log in":
+                print("Didn't get redirected to login page, exiting ...", flush=True)
+                exit(1)
+        except TimeoutException:
+            print("Login page didn't load in time, exiting ...", flush=True)
+            exit(1)
+
+        print("Successfully changed username, trying to log in with new username ...", flush=True)
+
+        username_input = safe_get_element(driver, By.ID, "username")
+        password_input = safe_get_element(driver, By.ID, "password")
+        username_input.send_keys("admin2")
+        password_input.send_keys("S$cr3tP@ssw0rd")
+
+        access_page(driver, driver_wait, "//button[@value='login']", "home")
+
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
+
+        username_input = safe_get_element(driver, By.ID, "admin_username")
+
+        if username_input.get_attribute("value") != "admin2":
+            print("The username is not correct, exiting ...", flush=True)
+            exit(1)
+
+        print("Successfully logged in with new username, trying to change password ...", flush=True)
+
+        assert_button_click(driver, "//button[@data-tab-handler='password']")
+
+        password_input = safe_get_element(driver, By.XPATH, "//form[@data-plugin-item='password']//input[@id='curr_password']")
+
+        if password_input.get_attribute("value") != "":
+            print("The current password is not empty, exiting ...", flush=True)
+            exit(1)
+
+        password_input.send_keys("S$cr3tP@ssw0rd")
+
+        new_password_input = safe_get_element(driver, By.ID, "admin_password")
+
+        if new_password_input.get_attribute("value") != "":
+            print("The new password is not empty, exiting ...", flush=True)
+            exit(1)
+
+        new_password_input.send_keys("P@ssw0rd")
+
+        new_password_check_input = safe_get_element(driver, By.ID, "admin_password_check")
+
+        if new_password_check_input.get_attribute("value") != "":
+            print("The new password check is not empty, exiting ...", flush=True)
+            exit(1)
+
+        new_password_check_input.send_keys("P@ssw0rd")
+
+        assert_button_click(driver, "//button[@id='pw-button' and @class='edit-btn']")
+
+        try:
+            title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/main/div[1]/div/h1")))
+
+            if title.text != "Log in":
+                print("Didn't get redirected to login page, exiting ...", flush=True)
+                exit(1)
+        except TimeoutException:
+            print("Login page didn't load in time, exiting ...", flush=True)
+            exit(1)
+
+        print("Successfully changed username, trying to log in with new password ...", flush=True)
+
+        username_input = safe_get_element(driver, By.ID, "username")
+        password_input = safe_get_element(driver, By.ID, "password")
+        username_input.send_keys("admin2")
+        password_input.send_keys("P@ssw0rd")
+
+        access_page(driver, driver_wait, "//button[@value='login']", "home")
+
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
+
+        print("Successfully logged in with new password, trying 2FA ...", flush=True)
+
+        assert_button_click(driver, "//button[@data-tab-handler='totp']")
+
+        secret_token_input = safe_get_element(driver, By.ID, "secret_token")
+        secret_token = secret_token_input.get_attribute("value")
+
+        driver.refresh()
+
+        driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div/header/div/nav/h6")))
+
+        assert_button_click(driver, "//button[@data-tab-handler='totp']")
+
+        secret_token_input = safe_get_element(driver, By.ID, "secret_token")
+        new_secret_token = secret_token_input.get_attribute("value")
+
+        if new_secret_token == secret_token:
+            print("The secret token hasn't been changed, exiting ...", flush=True)
+            exit(1)
+
+        print("The secret token has been changed, trying to activate 2FA ...", flush=True)
+
+        totp = TOTP(new_secret_token)
+        totp_input = safe_get_element(driver, By.ID, "totp_token")
+        totp_input.send_keys(totp.now())
+
+        password_input = safe_get_element(driver, By.XPATH, "//form[@data-plugin-item='totp']//input[@id='curr_password']")
+
+        if password_input.get_attribute("value") != "":
+            print("The new password check is not empty, exiting ...", flush=True)
+            exit(1)
+
+        password_input.send_keys("P@ssw0rd")
+
+        access_page(driver, driver_wait, "//button[@id='totp-button' and @class='valid-btn']", "account")
+
+        assert_button_click(driver, "//button[@data-tab-handler='totp']")
+
+        try:
+            totp_state = safe_get_element(driver, By.XPATH, "/html/body/main/div/div/form[2]/h5")
+
+            if totp_state.text != "TOTP IS CURRENTLY ON":
+                print("TOTP is not activated, exiting ...", flush=True)
+                exit(1)
+        except TimeoutException:
+            print("TOTP has not been activated, exiting ...", flush=True)
+            exit(1)
+
+        print("2FA has been activated, trying to log out ...", flush=True)
 
         assert_button_click(driver, "//a[@href='logout']")
 
@@ -1436,7 +1626,100 @@ location /hello {
             print("Login page didn't load in time, exiting ...", flush=True)
             exit(1)
 
-        print("Successfully logged out, tests are done", flush=True)
+        print("Successfully logged out, trying to log in with 2FA ...", flush=True)
+
+        username_input = safe_get_element(driver, By.ID, "username")
+        password_input = safe_get_element(driver, By.ID, "password")
+        username_input.send_keys("admin2")
+        password_input.send_keys("P@ssw0rd")
+
+        assert_button_click(driver, "//button[@value='login']")
+
+        try:
+            totp_input = safe_get_element(driver, By.ID, "totp_token")
+        except TimeoutException:
+            print("Didn't get redirected to 2FA page, exiting ...", flush=True)
+            exit(1)
+
+        totp_input.send_keys("0000000")
+        assert_button_click(driver, "//button[@value='login']")
+
+        sleep(5)
+
+        if not driver.current_url.endswith("/totp"):
+            print("Didn't get redirected back to 2FA page, exiting ...", flush=True)
+            exit(1)
+
+        totp_input = safe_get_element(driver, By.ID, "totp_token")
+        totp_input.send_keys(totp.now())
+
+        access_page(
+            driver,
+            driver_wait,
+            "//button[@value='login']",
+            "home",
+        )
+
+        print("Successfully logged in with 2FA, trying to deactivate 2FA ...", flush=True)
+
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
+
+        assert_button_click(driver, "//button[@data-tab-handler='totp']")
+
+        totp_input = safe_get_element(driver, By.ID, "totp_token")
+        totp_input.send_keys(totp.now())
+
+        password_input = safe_get_element(driver, By.XPATH, "//form[@data-plugin-item='totp']//input[@id='curr_password']")
+        password_input.send_keys("P@ssw0rd")
+
+        access_page(
+            driver,
+            driver_wait,
+            "//button[@id='totp-button' and @class='delete-btn']",
+            "account",
+        )
+
+        assert_button_click(driver, "//button[@data-tab-handler='totp']")
+
+        try:
+            totp_state = safe_get_element(driver, By.XPATH, "/html/body/main/div/div/form[2]/h5")
+
+            if totp_state.text != "TOTP IS CURRENTLY OFF":
+                print("TOTP is not deactivated, exiting ...", flush=True)
+                exit(1)
+        except TimeoutException:
+            print("TOTP has not been deactivated, exiting ...", flush=True)
+            exit(1)
+
+        print("2FA has been deactivated, trying to log out ...", flush=True)
+
+        assert_button_click(driver, "//a[@href='logout']")
+
+        try:
+            title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/main/div[1]/div/h1")))
+
+            if title.text != "Log in":
+                print("Didn't get redirected to login page, exiting ...", flush=True)
+                exit(1)
+        except TimeoutException:
+            print("Login page didn't load in time, exiting ...", flush=True)
+            exit(1)
+
+        print("Successfully logged out, trying to log in without 2FA ...", flush=True)
+
+        username_input = safe_get_element(driver, By.ID, "username")
+        password_input = safe_get_element(driver, By.ID, "password")
+        username_input.send_keys("admin2")
+        password_input.send_keys("P@ssw0rd")
+
+        access_page(
+            driver,
+            driver_wait,
+            "//button[@value='login']",
+            "home",
+        )
+
+        print("Successfully logged in without 2FA, tests are done, exiting ...", flush=True)
     except SystemExit:
         exit(1)
     except:

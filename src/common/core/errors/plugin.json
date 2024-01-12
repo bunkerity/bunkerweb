@@ -30,7 +30,7 @@
       "context": "multisite",
       "default": "400 401 403 404 405 413 429 500 501 502 503 504",
       "help": {
-        "en": "List of HTTP error code intercepted by Bunkerweb",
+        "en": "List of HTTP error code intercepted by BunkerWeb",
         "fr": "Liste des codes d'erreur HTTP interceptés par Bunkerweb"
       },
       "id": "intercepted-error-codes",

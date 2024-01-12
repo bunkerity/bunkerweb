@@ -578,7 +578,7 @@ elif distro == "debian":
             "/sys/fs/cgroup:/sys/fs/cgroup",
             "-v",
             "deb:/data",
-            "jrei/systemd-debian:11",
+            "jrei/systemd-debian:12",
         ]
     )
 
@@ -587,11 +587,11 @@ elif distro == "debian":
     bash_script = """
     apt update && apt install -y sudo && \
     apt-get install gnupg2 ca-certificates lsb-release wget curl -y && \
-    echo "deb https://nginx.org/packages/debian/ bullseye nginx" > /etc/apt/sources.list.d/nginx.list && \
-    echo "deb-src https://nginx.org/packages/debian/ bullseye nginx" >> /etc/apt/sources.list.d/nginx.list && \
+    echo "deb https://nginx.org/packages/debian/ bookworm nginx" > /etc/apt/sources.list.d/nginx.list && \
+    echo "deb-src https://nginx.org/packages/debian/ bookworm nginx" >> /etc/apt/sources.list.d/nginx.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ABF5BD827BD9BF62 && \
     apt-get update && \
-    apt-get install -y --no-install-recommends nginx=1.22.1-1~bullseye
+    apt-get install -y --no-install-recommends nginx=1.24.0-1~bookworm
     apt install /data/bunkerweb.deb -y
     """
 
@@ -938,7 +938,7 @@ elif distro == "debian":
     echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
     http://nginx.org/packages/debian `lsb_release -cs` nginx" \
     | sudo tee /etc/apt/sources.list.d/nginx.list
-    sudo apt update && sudo apt install -y nginx=1.20.2-1~bullseye
+    sudo apt update && sudo apt install -y nginx=1.24.0-1~bookworm
     curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.deb.sh | sudo bash && \
     sudo apt update && \
     sudo apt install -y bunkerweb=1.4.5
@@ -1629,7 +1629,7 @@ elif distro == "rhel":
             "--privileged",
             "-v",
             "/sys/fs/cgroup:/sys/fs/cgroup",
-            "registry.access.redhat.com/ubi8/ubi-init:8.7-10",
+            "registry.access.redhat.com/ubi8/ubi-init:8.9-1",
         ]
     )
 
@@ -1637,8 +1637,8 @@ elif distro == "rhel":
     print("Installing bunkerweb...")
     bash_script = """
     dnf install yum-utils wget sudo -y
-    wget https://nginx.org/packages/rhel/8/x86_64/RPMS/nginx-1.22.1-1.el8.ngx.x86_64.rpm
-    dnf install nginx-1.22.1-1.el8.ngx.x86_64.rpm -y
+    wget https://nginx.org/packages/rhel/8/x86_64/RPMS/nginx-1.24.0-1.el8.ngx.x86_64.rpm
+    dnf install nginx-1.24.0-1.el8.ngx.x86_64.rpm -y
     dnf install /data/bunkerweb.rpm -y
     """
 

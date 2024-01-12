@@ -2,11 +2,12 @@ local path = debug.getinfo(1, "S").source:sub(2):match("(.*/)")
 package.path = path .. "/?.lua;" .. package.path
 
 local test = require "framework".test
+local write_seperator = require "framework".write_seperator
 local pkey = require "resty.openssl.pkey"
 local example_pkey = assert(pkey.new())
 
-for _, op in ipairs({"load", "export"}) do 
-    for _, t in ipairs({"PEM", "DER", "JWK"}) do
+for _, t in ipairs({"PEM", "DER", "JWK"}) do
+    for _, op in ipairs({"load", "export"}) do 
         for _, p in ipairs({"public", "private"}) do
             
             if op == "load" then
@@ -30,4 +31,6 @@ for _, op in ipairs({"load", "export"}) do
 
        end
     end
+
+    write_seperator()
 end

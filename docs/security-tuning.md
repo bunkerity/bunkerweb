@@ -459,10 +459,10 @@ The country security feature allows you to apply policy based on the country of 
 
 Here is the list of related settings :
 
-|       Setting       | Default | Description                                  |
-| :-----------------: | :-----: | :------------------------------------------- |
-| `BLACKLIST_COUNTRY` |         | List of 2 letters country code to blacklist. |
-| `WHITELIST_COUNTRY` |         | List of 2 letters country code to whitelist. |
+|      Setting      |Default| Context |Multiple|                                                 Description                                                  |
+|-------------------|-------|---------|--------|--------------------------------------------------------------------------------------------------------------|
+|`BLACKLIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is in the list (ISO 3166-1 alpha-2 format separated with spaces).    |
+|`WHITELIST_COUNTRY`|       |multisite|no      |Deny access if the country of the client is not in the list (ISO 3166-1 alpha-2 format separated with spaces).|
 
 Using both country blacklist and whitelist at the same time makes no sense. If you do, please note that only the whitelist will be executed.
 
@@ -484,7 +484,7 @@ You can quickly protect sensitive resources like the admin area for example, by 
 
 ### Auth request
 
-You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.3/examples).
+You can deploy complex authentication (e.g. SSO), by using the auth request settings (see [here](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/) for more information on the feature). Please note that you will find [Authelia](https://www.authelia.com/) and [Authentik](https://goauthentik.io/) examples in the [repository](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/examples).
 
 **Auth request settings are related to reverse proxy rules.**
 

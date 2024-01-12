@@ -17,8 +17,6 @@ extern "C" {
 #include <ws2tcpip.h>
 /* libmaxminddb package version from configure */
 
-typedef ADDRESS_FAMILY sa_family_t;
-
 #if defined(_MSC_VER)
 /* MSVC doesn't define signed size_t, copy it from configure */
 #define ssize_t SSIZE_T

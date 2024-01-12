@@ -1,6 +1,6 @@
 /*
  * ModSecurity, http://www.modsecurity.org/
- * Copyright (c) 2015 - 2021 Trustwave Holdings, Inc. (http://www.trustwave.com/)
+ * Copyright (c) 2015 - 2023 Trustwave Holdings, Inc. (http://www.trustwave.com/)
  *
  * You may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
@@ -540,7 +540,7 @@ int main(int argc, char **argv) {
     }
 
     ModSecurityTestResults<RegressionTestResult> res;
-    for (std::string &a : keyList) {
+    for (const std::string &a : keyList) {
         test_number++;
         if ((test.m_test_number == 0)
             || (test_number == test.m_test_number)) {

@@ -7,8 +7,16 @@
     "bunkernet",
     "limit"
   ],
-  "init_worker": ["redis", "bunkernet", "dnsbl"],
+  "init_worker": [
+    "redis",
+    "bunkernet",
+    "dnsbl",
+    "customcert",
+    "letsencrypt",
+    "selfsigned"
+  ],
   "set": ["sessions", "whitelist"],
+  "ssl_certificate": ["customcert", "letsencrypt", "selfsigned"],
   "access": [
     "whitelist",
     "letsencrypt",
@@ -24,7 +32,7 @@
     "antibot"
   ],
   "headers": ["headers", "cors", "reverseproxy", "clientcache", "antibot"],
-  "log": ["badbheavior", "bunkernet"],
+  "log": ["badbehavior", "bunkernet"],
   "preread": [
     "whitelist",
     "blacklist",
@@ -34,5 +42,5 @@
     "reversescan"
   ],
   "log_stream": ["badbehavior", "bunkernet"],
-  "log_default": ["badbheavior", "bunkernet"]
+  "log_default": ["badbehavior", "bunkernet"]
 }

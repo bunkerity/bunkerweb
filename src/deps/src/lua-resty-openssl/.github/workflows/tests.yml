@@ -60,7 +60,7 @@ jobs:
           lua_resty_core: "v0.1.27"
           nginx_cc_opts: "-Wno-error"
         - nginx: "1.21.4"
-          openssl: "3.2.0-alpha1"
+          openssl: "3.2.0"
           openssl_fips: "3.0.8"
           extras: "valgrind perf"
           lua_nginx_module: "v0.10.25"
@@ -117,7 +117,6 @@ jobs:
         popd
         git clone https://github.com/openresty/lua-resty-core.git ../lua-resty-core -b ${{ matrix.lua_resty_core }}
         git clone https://github.com/openresty/lua-resty-lrucache.git ../lua-resty-lrucache
-        git clone https://github.com/jkeys089/lua-resty-hmac ../lua-resty-hmac && pushd ../lua-resty-hmac && git checkout 79a4929 && popd
         git clone https://github.com/openresty/lua-resty-string ../lua-resty-string
     
     - name: Build OpenSSL
@@ -181,20 +180,6 @@ jobs:
         nginx -V
         ldd `which nginx`|grep -E 'luajit|ssl|pcre'
 
-    - name: Run performance test
-      if: contains(matrix.extras, 'perf')
-      run: |
-        wget https://github.com/openresty/resty-cli/raw/master/bin/resty
-        chmod +x resty
-
-        export LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
-        export PATH=$BASE_PATH/work/nginx/sbin:$PATH
-
-        for f in $(find examples/perf -type f -name "test_*" | sort); do
-          ./resty --no-stream -I lib $f
-          echo '================================================================'
-        done 
-
     - name: Run Test
       run: |
         export LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
@@ -242,4 +227,39 @@ jobs:
         else
           echo "FIPS tests are skipped"
         fi
-        
+
+    - name: Prepare other libraries
+      if: contains(matrix.extras, 'perf')
+      run: |
+        git clone https://github.com/spacewander/lua-resty-rsa ../lua-resty-rsa
+
+        wget https://luarocks.org/releases/luarocks-3.9.2.tar.gz
+        tar zxf luarocks-*.tar.gz
+        pushd luarocks-*/
+        ./configure --with-lua=$LUAJIT_PREFIX \
+                --lua-suffix=jit \
+                --with-lua-include=$LUAJIT_PREFIX/include/luajit-2.1
+        make -j$(nproc) build
+        sudo make install
+        popd
+
+        luarocks install --local lua_pack
+        luarocks install --local openssl OPENSSL_DIR=$OPENSSL_PREFIX
+        luarocks install --local luaossl CRYPTO_DIR=$OPENSSL_PREFIX OPENSSL_DIR=$OPENSSL_PREFIX
+        cp ~/.luarocks/lib/lua/5.1/openssl_*-openssl.so ~/.luarocks/lib/lua/5.1/lua-openssl.so
+
+    - name: Run performance test
+      if: contains(matrix.extras, 'perf')
+      run: |
+        wget https://github.com/openresty/resty-cli/raw/master/bin/resty
+        chmod +x resty
+
+        export LD_LIBRARY_PATH=$LUAJIT_LIB:$LD_LIBRARY_PATH
+        export PATH=$BASE_PATH/work/nginx/sbin:$PATH
+
+        for f in $(find examples/perf -type f -name "test_*" | sort); do
+          ./resty --no-stream -I lib -I ../lua-resty-string/lib -I ../lua-resty-rsa/lib -I ~/.luarocks/lib/lua/5.1 $f
+          echo '================================================================'
+        done 
+
+

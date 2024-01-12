@@ -1,3 +1,4 @@
+local ngx = ngx
 local cdatastore = require "bunkerweb.datastore"
 local clogger = require "bunkerweb.logger"
 local mmdb = require "bunkerweb.mmdb"
@@ -10,11 +11,32 @@ local session = require "resty.session"
 local logger = clogger:new("UTILS")
 local datastore = cdatastore:new()
 
+local var = ngx.var
+local ERR = ngx.ERR
+local INFO = ngx.INFO
+local WARN = ngx.WARN
+local null = ngx.null
+local re_match = ngx.re.match
+local subsystem = ngx.config.subsystem
+local get_phase = ngx.get_phase
+local kill = ngx.thread.kill
+local ipmatcher_new = ipmatcher.new
+local parse_ipv4 = ipmatcher.parse_ipv4
+local parse_ipv6 = ipmatcher.parse_ipv6
+local open = io.open
+local encode = cjson.encode
+local decode = cjson.decode
+local char = string.char
+local random = math.random
+local session_start = session.start
+local session_open = session.open
+local tonumber = tonumber
+
 local utils = {}
 
 math.randomseed(os.time())
 
-utils.get_variable = function(var, site_search)
+utils.get_variable = function(variable, site_search, ctx)
 	-- Default site search to true
 	if site_search == nil then
 		site_search = true
@@ -24,20 +46,27 @@ utils.get_variable = function(var, site_search)
 	if not variables then
 		return nil, "can't access variables from datastore : " .. err
 	end
-	local value = variables["global"][var]
+	local value = variables["global"][variable]
 	-- Site search case
-	local multisite = site_search and variables["global"]["MULTISITE"] == "yes" and ngx.var.server_name ~= "_"
-	if multisite then
-		value = variables[ngx.var.server_name][var]
+	if site_search and variables["global"]["MULTISITE"] == "yes" then
+		local server_name
+		if ctx and ctx.bw then
+			server_name = ctx.bw.server_name
+		else
+			server_name = var.server_name
+		end
+		if variables[server_name] then
+			value = variables[server_name][variable]
+		end
 	end
 	return value, "success"
 end
 
-utils.has_variable = function(var, value)
+utils.has_variable = function(variable, value)
 	-- Get global variable
 	local variables, err = datastore:get("variables", true)
 	if not variables then
-		return nil, "can't access variables " .. var .. " from datastore : " .. err
+		return nil, "can't access variables " .. variable .. " from datastore : " .. err
 	end
 	-- Multisite case
 	local multisite = variables["global"]["MULTISITE"] == "yes"
@@ -45,7 +74,7 @@ utils.has_variable = function(var, value)
 		local servers = variables["global"]["SERVER_NAME"]
 		-- Check each server
 		for server in servers:gmatch("%S+") do
-			if variables[server][var] == value then
+			if variables[server][variable] == value then
 				return true, "success"
 			end
 		end
@@ -53,14 +82,14 @@ utils.has_variable = function(var, value)
 			return false, "success"
 		end
 	end
-	return variables["global"][var] == value, "success"
+	return variables["global"][variable] == value, "success"
 end
 
-utils.has_not_variable = function(var, value)
+utils.has_not_variable = function(variable, value)
 	-- Get global variable
 	local variables, err = datastore:get("variables", true)
 	if not variables then
-		return nil, "can't access variables " .. var .. " from datastore : " .. err
+		return nil, "can't access variables " .. variable .. " from datastore : " .. err
 	end
 	-- Multisite case
 	local multisite = variables["global"]["MULTISITE"] == "yes"
@@ -68,7 +97,7 @@ utils.has_not_variable = function(var, value)
 		local servers = variables["global"]["SERVER_NAME"]
 		-- Check each server
 		for server in servers:gmatch("%S+") do
-			if variables[server][var] ~= "value" then
+			if variables[server][variable] ~= "value" then
 				return true, "success"
 			end
 		end
@@ -76,7 +105,7 @@ utils.has_not_variable = function(var, value)
 			return false, "success"
 		end
 	end
-	return variables["global"][var] ~= value, "success"
+	return variables["global"][variable] ~= value, "success"
 end
 
 utils.get_multiple_variables = function(vars)
@@ -90,8 +119,8 @@ utils.get_multiple_variables = function(vars)
 		result[scope] = {}
 		-- Loop on vars
 		for variable, value in pairs(scoped_vars) do
-			for _, var in ipairs(vars) do
-				if variable:find("^" .. var .. "_?[0-9]*$") then
+			for _, tvar in ipairs(vars) do
+				if variable:find("^" .. tvar .. "_?[0-9]*$") then
 					result[scope][variable] = value
 				end
 			end
@@ -102,7 +131,7 @@ end
 
 utils.is_ip_in_networks = function(ip, networks)
 	-- Instantiate ipmatcher
-	local ipm, err = ipmatcher.new(networks)
+	local ipm, err = ipmatcher_new(networks)
 	if not ipm then
 		return nil, "can't instantiate ipmatcher : " .. err
 	end
@@ -115,11 +144,11 @@ utils.is_ip_in_networks = function(ip, networks)
 end
 
 utils.is_ipv4 = function(ip)
-	return ipmatcher.parse_ipv4(ip)
+	return parse_ipv4(ip)
 end
 
 utils.is_ipv6 = function(ip)
-	return ipmatcher.parse_ipv6(ip)
+	return parse_ipv6(ip)
 end
 
 utils.ip_is_global = function(ip)
@@ -157,7 +186,7 @@ utils.ip_is_global = function(ip)
 		"ff00::/8",
 	}
 	-- Instantiate ipmatcher
-	local ipm, err = ipmatcher.new(reserved_ips)
+	local ipm, err = ipmatcher_new(reserved_ips)
 	if not ipm then
 		return nil, "can't instantiate ipmatcher : " .. err
 	end
@@ -169,7 +198,11 @@ utils.ip_is_global = function(ip)
 	return not matched, "success"
 end
 
-utils.get_integration = function()
+utils.get_integration = function(ctx)
+	-- Check if already in ctx
+	if ctx and ctx.bw.integration then
+		return ctx.bw.integration
+	end
 	-- Check if already in datastore
 	local integration, _ = datastore:get("misc_integration", true)
 	if integration then
@@ -177,7 +210,7 @@ utils.get_integration = function()
 	end
 	local variables, err = datastore:get("variables", true)
 	if not variables then
-		logger:log(ngx.ERR, "can't get variables from datastore : " .. err)
+		logger:log(ERR, "can't get variables from datastore : " .. err)
 		return "unknown"
 	end
 	-- Swarm
@@ -193,12 +226,12 @@ utils.get_integration = function()
 				integration = "autoconf"
 			else
 				-- Already present (e.g. : linux)
-				local f, _ = io.open("/usr/share/bunkerweb/INTEGRATION", "r")
+				local f, _ = open("/usr/share/bunkerweb/INTEGRATION", "r")
 				if f then
 					integration = f:read("*a"):gsub("[\n\r]", "")
 					f:close()
 				else
-					f, _ = io.open("/etc/os-release", "r")
+					f, _ = open("/etc/os-release", "r")
 					if f then
 						local data = f:read("*a")
 						f:close()
@@ -217,56 +250,106 @@ utils.get_integration = function()
 	-- Save integration
 	local ok, err = datastore:set("misc_integration", integration, nil, true)
 	if not ok then
-		logger:log(ngx.ERR, "can't cache integration to datastore : " .. err)
+		logger:log(ERR, "can't cache integration to datastore : " .. err)
+	end
+	if ctx then
+		ctx.bw.integration = integration
 	end
 	return integration
 end
 
-utils.get_version = function()
+utils.get_version = function(ctx)
+	-- Check if already in ctx
+	if ctx and ctx.bw.version then
+		return ctx.bw.version
+	end
 	-- Check if already in datastore
 	local version, _ = datastore:get("misc_version", true)
 	if version then
 		return version
 	end
 	-- Read VERSION file
-	local f, err = io.open("/usr/share/bunkerweb/VERSION", "r")
+	local f, err = open("/usr/share/bunkerweb/VERSION", "r")
 	if not f then
-		logger:log(ngx.ERR, "can't read VERSION file : " .. err)
+		logger:log(ERR, "can't read VERSION file : " .. err)
 		return nil
 	end
 	version = f:read("*a"):gsub("[\n\r]", "")
 	f:close()
-	-- Save it to datastore
+	-- Save version
 	local ok, err = datastore:set("misc_version", version, nil, true)
 	if not ok then
-		logger:log(ngx.ERR, "can't cache version to datastore : " .. err)
+		logger:log(ERR, "can't cache version to datastore : " .. err)
+	end
+	if ctx then
+		ctx.bw.version = version
 	end
 	return version
 end
 
 utils.get_reason = function(ctx)
 	-- ngx.ctx
-	if ctx.bw.reason then
-		return ctx.bw.reason
+	if ctx and ctx.bw and ctx.bw.reason then
+		return ctx.bw.reason, ctx.bw.reason_data or {}
 	end
 	-- ngx.var
-	if ngx.var.reason and ngx.var.reason ~= "" then
-		return ngx.var.reason
+	local var_reason = var.reason
+	if var_reason and var_reason ~= "" then
+		local reason_data = {}
+		local var_reason_data = var.reason_data
+		if var_reason_data and reason_data ~= "" then
+			local ok, data = pcall(decode, var_reason_data)
+			if ok then
+				reason_data = data
+			end
+		end
+		return var_reason, reason_data
 	end
 	-- os.getenv
 	if os.getenv("REASON") == "modsecurity" then
-		return "modsecurity"
+		return "modsecurity", {}
 	end
 	-- datastore ban
-	local banned, _ = datastore:get("bans_ip_" .. ngx.var.remote_addr)
+	local ip
+	if ctx and ctx.bw then
+		ip = ctx.bw.remote_addr
+	else
+		ip = var.remote_addr
+	end
+	local banned, _ = datastore:get("bans_ip_" .. ip)
 	if banned then
-		return banned
+		return banned, {}
 	end
 	-- unknown
-	if ngx.status == utils.get_deny_status(ctx) then
-		return "unknown"
+	if ngx.status == utils.get_deny_status() then
+		return "unknown", {}
 	end
 	return nil
+end
+
+utils.set_reason = function(reason, reason_data, ctx)
+	if ctx and ctx.bw then
+		ctx.bw.reason = reason or "unknown"
+		ctx.bw.reason_data = reason_data or {}
+	end
+	if var.reason then
+		var.reason = reason
+		if var.reason_data then
+			var.reason_data = encode(reason_data or {})
+		end
+	end
+end
+
+utils.is_whitelisted = function(ctx)
+	-- ngx.ctx
+	if ctx and ctx.bw and ctx.bw.is_whitelisted then
+		return ctx.bw.is_whitelisted == "yes"
+	end
+	-- ngx.var
+	if var.is_whitelisted and var.is_whitelisted == "yes" then
+		return true
+	end
+	return false
 end
 
 utils.get_resolvers = function()
@@ -278,7 +361,7 @@ utils.get_resolvers = function()
 	-- Otherwise extract DNS_RESOLVERS variable
 	local variables, err = datastore:get("variables", true)
 	if not variables then
-		logger:log(ngx.ERR, "can't get variables from datastore : " .. err)
+		logger:log(ERR, "can't get variables from datastore : " .. err)
 		return "unknown"
 	end
 	-- Make table for resolver1 resolver2 ... string
@@ -289,19 +372,19 @@ utils.get_resolvers = function()
 	-- Add it to the datastore
 	local ok, err = datastore:set("misc_resolvers", resolvers, nil, true)
 	if not ok then
-		logger:log(ngx.ERR, "can't save misc_resolvers to datastore : " .. err)
+		logger:log(ERR, "can't save misc_resolvers to datastore : " .. err)
 	end
 	return resolvers
 end
 
-utils.get_rdns = function(ip)
+utils.get_rdns = function(ip, ctx, pool)
 	-- Check cache
-	local cachestore = utils.new_cachestore()
+	local cachestore = utils.new_cachestore(ctx, pool)
 	local ok, value = cachestore:get("rdns_" .. ip)
 	if not ok then
-		logger:log(ngx.ERR, "can't get rdns from cachestore : " .. value)
+		logger:log(ERR, "can't get rdns from cachestore : " .. value)
 	elseif value then
-		return cjson.decode(value), "success"
+		return decode(value), "success"
 	end
 	-- Get resolvers
 	local resolvers, err = utils.get_resolvers()
@@ -323,7 +406,7 @@ utils.get_rdns = function(ip)
 	-- Do rDNS query
 	local answers, err = rdns:reverse_query(ip)
 	if not answers then
-		logger:log(ngx.ERR, "error while doing reverse DNS query for " .. ip .. " : " .. err)
+		logger:log(ERR, "error while doing reverse DNS query for " .. ip .. " : " .. err)
 		ret_err = err
 	else
 		if answers.errcode then
@@ -337,21 +420,21 @@ utils.get_rdns = function(ip)
 		end
 	end
 	-- Save to cache
-	ok, err = cachestore:set("rdns_" .. ip, cjson.encode(ptrs), 3600)
+	ok, err = cachestore:set("rdns_" .. ip, encode(ptrs), 3600)
 	if not ok then
-		logger:log(ngx.ERR, "can't set rdns into cachestore : " .. err)
+		logger:log(ERR, "can't set rdns into cachestore : " .. err)
 	end
 	return ptrs, ret_err
 end
 
-utils.get_ips = function(fqdn, ipv6)
+utils.get_ips = function(fqdn, ipv6, ctx, pool)
 	-- Check cache
-	local cachestore = utils.new_cachestore()
+	local cachestore = utils.new_cachestore(ctx, pool)
 	local ok, value = cachestore:get("dns_" .. fqdn)
 	if not ok then
-		logger:log(ngx.ERR, "can't get dns from cachestore : " .. value)
+		logger:log(ERR, "can't get dns from cachestore : " .. value)
 	elseif value then
-		return cjson.decode(value), "success"
+		return decode(value), "success"
 	end
 	-- By default perform ipv6 lookups (only if USE_IPV6=yes)
 	if ipv6 == nil then
@@ -377,7 +460,7 @@ utils.get_ips = function(fqdn, ipv6)
 		-- luacheck: ignore 421
 		local use_ipv6, err = utils.get_variable("USE_IPV6", false)
 		if not use_ipv6 then
-			logger:log(ngx.ERR, "can't get USE_IPV6 variable " .. err)
+			logger:log(ERR, "can't get USE_IPV6 variable " .. err)
 		elseif use_ipv6 == "yes" then
 			table.insert(qtypes, res.TYPE_AAAA)
 		end
@@ -401,7 +484,7 @@ utils.get_ips = function(fqdn, ipv6)
 		end
 	end
 	for qtype, error in pairs(res_errors) do
-		logger:log(ngx.ERR, "error while doing " .. qtype .. " DNS query for " .. fqdn .. " : " .. error)
+		logger:log(ERR, "error while doing " .. qtype .. " DNS query for " .. fqdn .. " : " .. error)
 	end
 	-- Extract all IPs
 	local ips = {}
@@ -414,11 +497,11 @@ utils.get_ips = function(fqdn, ipv6)
 		end
 	end
 	-- Save to cache
-	ok, err = cachestore:set("dns_" .. fqdn, cjson.encode(ips), 3600)
+	ok, err = cachestore:set("dns_" .. fqdn, encode(ips), 3600)
 	if not ok then
-		logger:log(ngx.ERR, "can't set dns into cachestore : " .. err)
+		logger:log(ERR, "can't set dns into cachestore : " .. err)
 	end
-	return ips, cjson.encode(res_errors) .. " " .. cjson.encode(ans_errors)
+	return ips, encode(res_errors) .. " " .. encode(ans_errors)
 end
 
 utils.get_country = function(ip)
@@ -458,38 +541,36 @@ utils.rand = function(nb, no_numbers)
 	-- lowers, uppers and numbers
 	if not no_numbers then
 		for i = 48, 57 do
-			table.insert(charset, string.char(i))
+			table.insert(charset, char(i))
 		end
 	end
 	for i = 65, 90 do
-		table.insert(charset, string.char(i))
+		table.insert(charset, char(i))
 	end
 	for i = 97, 122 do
-		table.insert(charset, string.char(i))
+		table.insert(charset, char(i))
 	end
 	local result = ""
 	for _ = 1, nb do
-		result = result .. charset[math.random(1, #charset)]
+		result = result .. charset[random(1, #charset)]
 	end
 	return result
 end
 
-utils.get_deny_status = function(ctx)
-	-- Stream case
-	if ctx.bw and ctx.bw.kind == "stream" then
-		return 444
+utils.get_deny_status = function()
+	if subsystem == "http" then
+		local variables, err = datastore:get("variables", true)
+		if not variables then
+			logger:log(ERR, "can't get variables from datastore : " .. err)
+			return 403
+		end
+		return tonumber(variables["global"]["DENY_HTTP_STATUS"])
 	end
-	-- http case
-	local variables, err = datastore:get("variables", true)
-	if not variables then
-		logger:log(ngx.ERR, "can't get variables from datastore : " .. err)
-		return 403
-	end
-	return tonumber(variables["global"]["DENY_HTTP_STATUS"])
+	return 444
 end
 
 utils.check_session = function(ctx)
-	local _session, _, exists, _ = session.start({ audience = "metadata" })
+	local _session, _, exists, _ = session_start({ audience = "metadata" })
 	if exists then
 		for _, check in ipairs(ctx.bw.sessions_checks) do
 			local key = check[1]
@@ -500,7 +581,7 @@ utils.check_session = function(ctx)
 				if not ok then
 					return false, "session:destroy() error : " .. err
 				end
-				logger:log(ngx.WARN, "session check " .. key .. " failed, destroying session")
+				logger:log(WARN, "session check " .. key .. " failed, destroying session")
 				return utils.check_session(ctx)
 			end
 		end
@@ -527,9 +608,9 @@ utils.get_session = function(audience, ctx)
 		end
 	end
 	-- Open session with specific audience
-	local _session, err, _ = session.open({ audience = audience })
+	local _session, err, _ = session_open({ audience = audience })
 	if err then
-		logger:log(ngx.INFO, "session:open() error : " .. err)
+		logger:log(INFO, "session:open() error : " .. err)
 	end
 	return _session
 end
@@ -578,7 +659,7 @@ utils.is_banned = function(ip)
 	end
 	-- Connect
 	local clusterstore = require "bunkerweb.clusterstore":new()
-	local ok, err = clusterstore:connect()
+	local ok, err = clusterstore:connect(true)
 	if not ok then
 		return nil, "can't connect to redis server : " .. err
 	end
@@ -607,7 +688,7 @@ utils.is_banned = function(ip)
 	elseif data.err then
 		clusterstore:close()
 		return nil, "redis script error : " .. data.err
-	elseif data[1] ~= ngx.null then
+	elseif data[1] ~= null then
 		clusterstore:close()
 		-- Update local cache
 		ok, err = datastore:set("bans_ip_" .. ip, data[1], data[2])
@@ -649,16 +730,17 @@ utils.add_ban = function(ip, reason, ttl)
 	return true, "success"
 end
 
-utils.new_cachestore = function()
+utils.new_cachestore = function(ctx, pool)
 	-- Check if redis is used
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
 	if not use_redis then
-		logger:log(ngx.ERR, "can't get USE_REDIS variable : " .. err)
+		logger:log(ERR, "can't get USE_REDIS variable : " .. err)
+		use_redis = false
 	else
 		use_redis = use_redis == "yes"
 	end
 	-- Instantiate
-	return require "bunkerweb.cachestore":new(use_redis, true)
+	return require "bunkerweb.cachestore":new(use_redis, ctx, pool == nil or pool)
 end
 
 utils.regex_match = function(str, regex, options)
@@ -666,9 +748,9 @@ utils.regex_match = function(str, regex, options)
 	if options then
 		all_options = all_options .. options
 	end
-	local match, err = ngx.re.match(str, regex, all_options)
+	local match, err = re_match(str, regex, all_options)
 	if err then
-		logger:log(ngx.ERR, "error while matching regex " .. regex .. "with string " .. str)
+		logger:log(ERR, "error while matching regex " .. regex .. "with string " .. str)
 		return nil
 	end
 	return match
@@ -679,7 +761,10 @@ utils.get_phases = function()
 		"init",
 		"init_worker",
 		"set",
+		"rewrite",
 		"access",
+		"content",
+		"ssl_certificate",
 		"header",
 		"log",
 		"preread",
@@ -691,10 +776,13 @@ end
 utils.is_cosocket_available = function()
 	local phases = {
 		"timer",
+		"rewrite",
 		"access",
+		"content",
+		"ssl_certificate",
 		"preread",
 	}
-	local current_phase = ngx.get_phase()
+	local current_phase = get_phase()
 	for _, phase in ipairs(phases) do
 		if current_phase == phase then
 			return true
@@ -705,18 +793,32 @@ end
 
 utils.kill_all_threads = function(threads)
 	for _, thread in ipairs(threads) do
-		local ok, err = ngx.thread.kill(thread)
+		local ok, err = kill(thread)
 		if not ok then
-			logger:log(ngx.ERR, "error while killing thread : " .. err)
+			logger:log(ERR, "error while killing thread : " .. err)
 		end
 	end
 end
 
-utils.get_ctx_obj = function(obj)
-	if ngx.ctx and ngx.ctx.bw then
-		return ngx.ctx.bw[obj]
+utils.get_ctx_obj = function(obj, ctx)
+	local vctx = ctx or ngx.ctx
+	if vctx and vctx.bw then
+		return vctx.bw[obj]
 	end
 	return nil
+end
+
+utils.read_files = function(files)
+	local data = {}
+	for _, file in ipairs(files) do
+		local f, err = open(file, "r")
+		if not f then
+			return false, file .. " = " .. err
+		end
+		table.insert(data, f:read("*a"))
+		f:close()
+	end
+	return true, data
 end
 
 return utils

@@ -1,7 +1,6 @@
 local ffi = require "ffi"
 
 require "resty.openssl.include.ossl_typ"
-local OPENSSL_3X = require("resty.openssl.version").OPENSSL_3X
 
 local BN_ULONG
 if ffi.abi('64bit') then
@@ -33,6 +32,9 @@ ffi.cdef(
   char *BN_bn2hex(const BIGNUM *a);
   char *BN_bn2dec(const BIGNUM *a);
 
+  int BN_bn2mpi(const BIGNUM *a, unsigned char *to);
+  BIGNUM *BN_mpi2bn(const unsigned char *s, int len, BIGNUM *ret);
+
   void BN_set_negative(BIGNUM *a, int n);
   int  BN_is_negative(const BIGNUM *a);
 
@@ -60,7 +62,6 @@ ffi.cdef(
   int BN_cmp(BIGNUM *a, BIGNUM *b);
   int BN_ucmp(BIGNUM *a, BIGNUM *b);
 
-  // openssl >= 1.1 only
   int BN_is_zero(BIGNUM *a);
   int BN_is_one(BIGNUM *a);
   int BN_is_word(BIGNUM *a, ]] .. BN_ULONG ..[[ w);
@@ -71,9 +72,3 @@ ffi.cdef(
                             const BIGNUM *rem, BN_GENCB *cb);
 ]]
 )
-
-if OPENSSL_3X then
-  ffi.cdef [[
-    int BN_check_prime(const BIGNUM *p, BN_CTX *ctx, BN_GENCB *cb);
-  ]]
-end
