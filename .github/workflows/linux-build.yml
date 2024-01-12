@@ -135,7 +135,7 @@ jobs:
       - name: Extract metadata
         if: inputs.TEST == true
         id: meta
-        uses: docker/metadata-action@9dc751fe249ad99385a2583ee0d084c400eee04e # v5.4.0
+        uses: docker/metadata-action@dbef88086f6cef02e264edb7dbf63250c17cef6c # v5.5.0
         with:
           images: ghcr.io/bunkerity/${{ inputs.LINUX }}-tests:${{ inputs.RELEASE }}
       - name: Build test image
