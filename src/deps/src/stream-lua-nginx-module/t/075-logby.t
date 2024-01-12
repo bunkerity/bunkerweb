@@ -363,3 +363,17 @@ log handler
 ok
 --- no_error_log
 [error]
+
+
+
+=== TEST 21: log_by_lua in stream level
+--- stream_config
+    log_by_lua_block { ngx.log(ngx.ERR, "Hello from log_by_lua stream level: ", ngx.var.protocol) }
+--- stream_server_config
+    content_by_lua_block {
+        ngx.say('hello')
+    }
+--- stream_response
+hello
+--- error_log
+Hello from log_by_lua stream level: TCP

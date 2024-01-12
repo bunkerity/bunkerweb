@@ -191,6 +191,16 @@ ngx_int_t ngx_stream_lua_open_and_stat_file(u_char *name,
 ngx_chain_t *ngx_stream_lua_chain_get_free_buf(ngx_log_t *log, ngx_pool_t *p,
     ngx_chain_t **free, size_t len);
 
+
+static ngx_inline void
+ngx_stream_lua_attach_co_ctx_to_L(lua_State *L, ngx_stream_lua_co_ctx_t *coctx)
+{
+#ifdef HAVE_LUA_EXDATA2
+    lua_setexdata2(L, (void *) coctx);
+#endif
+}
+
+
 #ifndef OPENRESTY_LUAJIT
 void ngx_stream_lua_create_new_globals_table(lua_State *L, int narr, int nrec);
 #endif

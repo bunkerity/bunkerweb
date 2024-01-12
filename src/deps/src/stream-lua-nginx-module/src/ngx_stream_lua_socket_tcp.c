@@ -3185,6 +3185,25 @@ ngx_stream_lua_socket_tcp_shutdown(lua_State *L)
         return luaL_error(L, "no request found");
     }
 
+    if (u == NULL
+        || u->peer.connection == NULL
+        || (u->read_closed && u->write_closed))
+    {
+        lua_pushnil(L);
+        lua_pushliteral(L, "closed");
+        return 2;
+    }
+
+    if (u->write_closed) {
+        lua_pushnil(L);
+        lua_pushliteral(L, "already shutdown");
+        return 2;
+    }
+
+    if (u->request != r) {
+        return luaL_error(L, "bad request");
+    }
+
     ctx = ngx_stream_lua_get_module_ctx(r, ngx_stream_lua_module);
     if (ctx == NULL) {
         ngx_stream_lua_socket_handle_write_error(r, u,
@@ -3210,25 +3229,6 @@ ngx_stream_lua_socket_tcp_shutdown(lua_State *L)
 
         /* prevent all further output attempt */
         ctx->eof = 1;
-    }
-
-    if (u == NULL
-        || u->peer.connection == NULL
-        || (u->read_closed && u->write_closed))
-    {
-        lua_pushnil(L);
-        lua_pushliteral(L, "closed");
-        return 2;
-    }
-
-    if (u->write_closed) {
-        lua_pushnil(L);
-        lua_pushliteral(L, "already shutdown");
-        return 2;
-    }
-
-    if (u->request != r) {
-        return luaL_error(L, "bad request");
     }
 
     ngx_stream_lua_socket_check_busy_connecting(r, u, L);

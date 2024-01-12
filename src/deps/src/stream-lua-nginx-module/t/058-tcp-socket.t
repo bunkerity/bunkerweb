@@ -4,7 +4,7 @@ use Test::Nginx::Socket::Lua::Stream;
 
 repeat_each(2);
 
-plan tests => repeat_each() * 219;
+plan tests => repeat_each() * 221;
 
 our $HtmlDir = html_dir;
 
@@ -3526,3 +3526,22 @@ orld
 [error]
 --- error_log
 lua tcp socket calling receiveany() method to read at most 7 bytes
+
+
+
+=== TEST 67: shutdown on a not connected socket correctly throws error
+--- stream_server_config
+    lua_socket_connect_timeout 1s;
+    resolver $TEST_NGINX_RESOLVER ipv6=off;
+    resolver_timeout 3s;
+
+    content_by_lua_block {
+        local sock = ngx.socket.tcp()
+
+        local ok, err = sock:shutdown('send')
+        ngx.log(ngx.ERR, 'shutdown on a not connected socket: ', err)
+
+    }
+
+--- error_log
+shutdown on a not connected socket: closed
