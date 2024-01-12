@@ -2590,6 +2590,9 @@ ngx_stream_lua_traceback(lua_State *L)
 ngx_stream_lua_co_ctx_t *
 ngx_stream_lua_get_co_ctx(lua_State *L, ngx_stream_lua_ctx_t *ctx)
 {
+#ifdef HAVE_LUA_EXDATA2
+    return (ngx_stream_lua_co_ctx_t *) lua_getexdata2(L);
+#else
     ngx_uint_t                   i;
     ngx_list_part_t             *part;
 
@@ -2626,6 +2629,7 @@ ngx_stream_lua_get_co_ctx(lua_State *L, ngx_stream_lua_ctx_t *ctx)
     }
 
     return NULL;
+#endif
 }
 
 

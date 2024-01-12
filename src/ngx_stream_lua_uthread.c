@@ -105,6 +105,8 @@ ngx_stream_lua_uthread_spawn(lua_State *L)
     coctx->parent_co_ctx = ctx->cur_co_ctx;
     ctx->cur_co_ctx = coctx;
 
+    ngx_stream_lua_attach_co_ctx_to_L(coctx->co, coctx);
+
     ngx_stream_lua_probe_user_thread_spawn(r, L, coctx->co);
 
     dd("yielding with arg %s, top=%d, index-1:%s", luaL_typename(L, -1),
@@ -282,7 +284,7 @@ ngx_stream_lua_uthread_kill(lua_State *L)
         return 1;
     }
 
-    /* not reacheable */
+    /* not reachable */
 }
 
 /* vi:set ft=c ts=4 sw=4 et fdm=marker: */

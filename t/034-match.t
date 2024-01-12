@@ -287,8 +287,11 @@ he
             end
         end
     }
---- stream_response
-error: pcre_compile() failed: missing ) in "(abc"
+--- stream_response eval
+$Test::Nginx::Util::PcreVersion == 2 ?
+"error: pcre2_compile() failed: missing closing parenthesis in \"(abc\"\n"
+:
+"error: pcre_compile() failed: missing ) in \"(abc\"\n"
 --- no_error_log
 [error]
 
@@ -505,8 +508,11 @@ regex: (?:>[\w\s]*</?\w{2,}>)
             end
         end
     }
---- stream_response
-error: pcre_compile() failed: missing ) in "([0-9]+"
+--- stream_response eval
+$Test::Nginx::Util::PcreVersion == 2 ?
+"error: pcre2_compile\(\) failed: missing closing parenthesis in \"\([0-9]+\"\n"
+:
+"error: pcre_compile\(\) failed: missing \) in \"\([0-9]+\"\n"
 
 --- no_error_log
 [error]
@@ -745,8 +751,11 @@ nil
             ngx.say("not matched")
         end
     }
---- stream_response_like chop
-^error: pcre_exec\(\) failed: -10$
+--- stream_response eval
+$Test::Nginx::Util::PcreVersion == 2 ?
+"error: pcre_exec\(\) failed: -4\n"
+:
+"error: pcre_exec\(\) failed: -10\n"
 
 --- no_error_log
 [error]
@@ -844,8 +853,14 @@ if not res then
     return
 end
 
---- stream_response
-error: pcre_exec() failed: -8
+--- stream_response eval
+# lua_regex_match_limit uses pcre_extra->match_limit in the PCRE,
+# but PCRE2 replaces this with pcre2_set_match_limit interface,
+# which has different effects.
+$Test::Nginx::Util::PcreVersion == 2 ?
+"failed to match\n"
+:
+"error: pcre_exec() failed: -8\n"
 
 
 
