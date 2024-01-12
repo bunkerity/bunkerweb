@@ -57,6 +57,8 @@ do
       echo "ℹ️ Updating ${name} from $url at commit/version $commit"
       do_and_check_cmd git subtree pull --prefix "src/deps/src/$id" "$url" "$commit" --squash
       post="yes"
+    else
+      echo "⚠️ Skipping update of $url because commit/version $commit is already the latest"
     fi
 	fi
 
