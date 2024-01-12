@@ -102,9 +102,9 @@
     },
     {
       "id": "lua-resty-core",
-      "name": "lua-resty-core v0.1.28",
+      "name": "lua-resty-core v0.1.27",
       "url": "https://github.com/openresty/lua-resty-core.git",
-      "commit": "812b2d3871eb0d8da8f0198759ad9164f0eccac6"
+      "commit": "31fae862a1ed64033591f991fadb0dd80358ba0b"
     },
     {
       "id": "lua-resty-dns",
