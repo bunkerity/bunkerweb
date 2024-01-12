@@ -281,7 +281,7 @@ def startup():
 
     if not db_initialized:
         CORE_CONFIG.logger.info("Database not initialized, initializing ...")
-        ret, err = DB.init_tables([config.settings, config.get_plugins("core"), external_plugins])
+        ret, err = DB.init_tables([config.settings, config.get_plugins("core"), external_plugins], BUNKERWEB_VERSION)
 
         # Initialize database tables
         if err:
@@ -308,6 +308,17 @@ def startup():
             CORE_CONFIG.logger.info("✅ Database schema updated to latest version successfully")
         else:
             CORE_CONFIG.logger.info(resp)
+
+        ret, err = DB.init_tables([config.settings, config.get_plugins("core"), external_plugins], BUNKERWEB_VERSION)
+
+        # Initialize database tables
+        if err:
+            CORE_CONFIG.logger.error(f"Exception while checking database : {err}")
+            stop(1)
+        elif not ret:
+            CORE_CONFIG.logger.info("Database tables didn't change, skipping update ...")
+        else:
+            CORE_CONFIG.logger.info("Database tables successfully updated")
 
     if config_files != db_config:
         err = DB.save_config(config_files, "core")
