@@ -1,6 +1,0 @@
-.git
-.idea/
-.vscode/
-__pycache__
-env
-node_modules

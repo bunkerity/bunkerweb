@@ -1,8 +1,0 @@
---TEST--
-keyword unary-operator [1vsnf]
---INPUT--
-select - foobar;
---EXPECTED--
-E select
-n foobar
-; ;
