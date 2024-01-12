@@ -2,7 +2,12 @@
 
 ## v1.5.6 - YYYY/MM/DD
 
-
+- [MISC] Updated Linux base images in Dockerfiles
+- [DEPS] Updated lua-resty-core to v0.1.28
+- [DEPS] Updated stream-lua-nginx-module to v0.0.14
+- [DEPS] Updated lua-nginx-module version to v0.10.26
+- [DEPS] Updated libmaxminddb version to v1.9.1
+- [DEPS] Updated lua-resty-core to v0.1.28
 
 ## v1.5.5 - 2024/01/12
 
