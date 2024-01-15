@@ -4,7 +4,7 @@ import JobsSvgState from "@components/Jobs/Svg/State.vue";
 import JobsSvgHistory from "@components/Jobs/Svg/History.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
-import { defineProps, defineEmits, reactive } from "vue";
+import { defineProps, defineEmits, reactive, onMounted } from "vue";
 import { useFeedbackStore } from "@store/global.js";
 import { fetchAPI } from "@utils/api.js";
 import { getJobsCacheNames, getServId } from "@utils/jobs.js";
@@ -22,6 +22,10 @@ const props = defineProps({
   },
 });
 
+onMounted(() => {
+  console.log(props.items);
+});
+
 const run = reactive({
   isPend: false,
   isErr: false,
@@ -34,7 +38,7 @@ async function runJob(jobName) {
     "POST",
     null,
     run,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -66,7 +70,7 @@ async function downloadFile(jobName, cacheName) {
     "GET",
     null,
     download,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       return res.json();
@@ -88,59 +92,55 @@ const emits = defineEmits(["history"]);
     v-for="(item, id) in props.items"
     :class="[id === props.items.length - 1 ? '' : 'border-b', 'py-2']"
   >
-    <div role="row" class="list-content-item-wrap" v-for="(data, key) in item">
-      <span role="cell" class="pl-4" :class="[props.positions[0]]">{{
-        key
-      }}</span>
-      <span role="cell" :class="[props.positions[1]]">{{ data["every"] }}</span>
-      <div role="cell" :class="[props.positions[2], 'ml-2']">
-        <button @click="$emit('history', { jobName: key })">
-          <span class="sr-only">
-            {{ $t("jobs_actions_show_history") }}
-          </span>
-          <JobsSvgHistory />
-        </button>
-      </div>
-      <div role="cell" class="translate-x-3" :class="[props.positions[3]]">
-        <span class="sr-only"
-          >{{
-            data["reload"]
-              ? $t("jobs_state_reload_succeed")
-              : $t("jobs_state_reload_failed")
-          }}
-        </span>
-        <JobsSvgState :success="data['reload']" />
-      </div>
-      <div role="cell" class="translate-x-4" :class="[props.positions[4]]">
+    <td class="pl-4" :class="[props.positions[0]]">{{ item }}</td>
+    <td :class="[props.positions[1]]">{{ item["every"] }}</td>
+    <td :class="[props.positions[2], 'ml-2']">
+      <button @click="$emit('history', { jobName: item })">
         <span class="sr-only">
-          {{
-            data["history"][0]["success"]
-              ? $t("jobs_state_success_succeed")
-              : $t("jobs_state_success_failed")
-          }}
+          {{ $t("jobs_actions_show_history") }}
         </span>
-        <JobsSvgState :success="data['history'][0]['success']" />
-      </div>
-      <div role="cell" :class="[props.positions[5]]">
-        <span>{{ data["history"][0]["end_date"] }}</span>
-      </div>
-      <div role="cell" class="mr-2" :class="[props.positions[6]]">
-        <SettingsSelect
-          v-if="data['cache'].length > 0"
-          :settings="{
-            id: `cache-${key}-${id}`,
-            value: $t('jobs_actions_cache_download'),
-            values: getJobsCacheNames(data['cache']),
-          }"
-          @inp="(v) => downloadFile(key, v)"
-        >
-        </SettingsSelect>
-      </div>
-      <div role="cell" :class="[props.positions[7], 'flex justify-center']">
-        <ButtonBase class="py-1.5" color="valid" size="lg" @click="runJob(key)">
-          {{ $t("jobs_actions_run") }}
-        </ButtonBase>
-      </div>
-    </div>
+        <JobsSvgHistory />
+      </button>
+    </td>
+    <td class="translate-x-3" :class="[props.positions[3]]">
+      <span class="sr-only"
+        >{{
+          item["reload"]
+            ? $t("jobs_state_reload_succeed")
+            : $t("jobs_state_reload_failed")
+        }}
+      </span>
+      <JobsSvgState :success="item['reload']" />
+    </td>
+    <td class="translate-x-4" :class="[props.positions[4]]">
+      <span class="sr-only">
+        {{
+          item["history"][0]["success"]
+            ? $t("jobs_state_success_succeed")
+            : $t("jobs_state_success_failed")
+        }}
+      </span>
+      <JobsSvgState :success="item['history'][0]['success']" />
+    </td>
+    <td :class="[props.positions[5]]">
+      <span>{{ item["history"][0]["end_date"] }}</span>
+    </td>
+    <td class="mr-2" :class="[props.positions[6]]">
+      <SettingsSelect
+        v-if="item['cache'].length > 0"
+        :settings="{
+          id: `cache-${item}-${id}`,
+          value: $t('jobs_actions_cache_download'),
+          values: getJobsCacheNames(item['cache']),
+        }"
+        @inp="(v) => downloadFile(item, v)"
+      >
+      </SettingsSelect>
+    </td>
+    <td :class="[props.positions[7], 'flex justify-center']">
+      <ButtonBase class="py-1.5" color="valid" size="lg" @click="runJob(item)">
+        {{ $t("jobs_actions_run") }}
+      </ButtonBase>
+    </td>
   </ListItem>
 </template>

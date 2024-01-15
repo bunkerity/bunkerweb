@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
+
+from middleware.jwt import jwt_additionnal_checks
 from flask_jwt_extended import jwt_required
 
 from hook import hooks
@@ -18,6 +20,7 @@ misc = Blueprint("misc", __name__)
 
 @misc.route(f"{PREFIX}/version", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def get_version():
     """Get BunkerWeb version used"""

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
+
+from middleware.jwt import jwt_additionnal_checks
 from flask_jwt_extended import jwt_required
 
 from hook import hooks
@@ -19,6 +21,7 @@ logs = Blueprint("logs", __name__)
 
 @logs.route(f"{PREFIX}/ui", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def get_logs_ui():
     """Get logs ui"""
@@ -27,6 +30,7 @@ def get_logs_ui():
 
 @logs.route(f"{PREFIX}/core", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def get_logs_core():
     """Get logs core"""

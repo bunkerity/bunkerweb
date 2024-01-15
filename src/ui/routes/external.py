@@ -5,6 +5,7 @@ from flask import request
 from flask_jwt_extended import jwt_required
 from flask import render_template_string
 
+from middleware.jwt import jwt_additionnal_checks
 from middleware.validator import model_validator
 
 from hook import hooks
@@ -32,6 +33,7 @@ external = Blueprint("external", __name__)
 
 @external.route(f"{PREFIX}/page/<string:plugin_id>/<string:plugin_page_name>", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(params={"plugin_id": "PluginId", "plugin_page_name": "PluginPageName"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def get_custom_page(plugin_id, plugin_page_name):
@@ -68,6 +70,7 @@ def get_custom_page(plugin_id, plugin_page_name):
 # Communicate with CORE retrieving ui api file and executing a specific function (action name)
 @external.route(f"{PREFIX}/<string:plugin_id>/action", methods=["GET", "POST", "PUT", "DELETE"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(params={"plugin_id": "PluginId"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def exec_ext_plugin_action(plugin_id):

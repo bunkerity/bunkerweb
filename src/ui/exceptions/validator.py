@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from werkzeug.exceptions import HTTPException
 from hook import hooks
-from utils import format_exception
+from utils import log_exception
 
 
 # Missing a data to execute validator
@@ -11,7 +11,7 @@ class ValidatorFormatException(HTTPException):
 
 
 @hooks(hooks=["ValidatorException"])
-@format_exception()
+@log_exception(ValidatorFormatException)
 def validator_format_exception(e):
     return e
 
@@ -23,7 +23,7 @@ class ValidatorBodyException(HTTPException):
 
 
 @hooks(hooks=["ValidatorException"])
-@format_exception()
+@log_exception(ValidatorBodyException)
 def validator_body_exception(e):
     return e
 
@@ -35,7 +35,7 @@ class ValidatorQueryException(HTTPException):
 
 
 @hooks(hooks=["ValidatorException"])
-@format_exception()
+@log_exception(ValidatorQueryException)
 def validator_query_exception(e):
     return e
 

@@ -4,6 +4,7 @@ from flask import request
 from flask_jwt_extended import jwt_required
 
 from middleware.validator import model_validator
+from middleware.jwt import jwt_additionnal_checks
 
 from hook import hooks
 

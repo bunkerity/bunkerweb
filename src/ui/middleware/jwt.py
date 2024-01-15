@@ -36,8 +36,25 @@ if deps_path not in sys_path:
 
 from logger import setup_logger  # type: ignore
 
+PREFIX = "/admin/"
 LOGGER: Logger = setup_logger("UI")
 UI_CONFIG = UiConfig("ui", **environ)
+
+
+def jwt_additionnal_checks():
+    # Case user is not logged in
+    if verify_jwt_in_request(True) is None:
+        return redirect(f"{PREFIX}/login", 302)
+
+    # Case user is logged in, look for security check
+    try:
+        jwt = get_jwt()
+
+        if jwt["ip"] != request.remote_addr or jwt["user_agent"] != request.headers.get("User-Agent"):
+            raise NoAuthorizationError("fail.")
+
+    except:
+        raise NoAuthorizationError("Some security check failed after checking JWT data.")
 
 
 # Register to main
@@ -49,25 +66,6 @@ def setup_jwt(app):
     app.config["JWT_COOKIE_CSRF_PROTECT"] = True  # Add CSRF TOKEN check
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
     JWTManager(app)
-
-    @app.before_request
-    def jwt_additionnal_checks():
-        """Security middleware for login users."""
-        # Case user is not logged in
-        if verify_jwt_in_request(True) is None:
-            return
-
-        LOGGER.info(log_format("info", "", "", f"Find jwt {get_jwt()}"))
-
-        # Case user is logged in, look for security check
-        try:
-            jwt = get_jwt()
-
-            if jwt["ip"] != request.remote_addr or jwt["user_agent"] != request.headers.get("User-Agent"):
-                raise NoAuthorizationError("fail.")
-
-        except:
-            raise NoAuthorizationError("Some security check failed after checking JWT data.")
 
     @app.after_request
     @hooks(hooks=["BeforeRefreshToken", "AfterRefreshToken"])

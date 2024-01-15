@@ -5,6 +5,7 @@ from flask import redirect
 from flask import request
 from flask import render_template
 
+from middleware.jwt import jwt_additionnal_checks
 from middleware.validator import model_validator
 
 from flask_jwt_extended import jwt_required
@@ -64,6 +65,7 @@ def login():
 
 @dashboard.route(f"{PREFIX}/home", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def home():
     return render_template("home.html")
@@ -71,6 +73,7 @@ def home():
 
 @dashboard.route(f"{PREFIX}/bans", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def bans():
     return render_template("bans.html")
@@ -78,6 +81,7 @@ def bans():
 
 @dashboard.route(f"{PREFIX}/configs", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def configs():
     return render_template("configs.html")
@@ -85,6 +89,7 @@ def configs():
 
 @dashboard.route(f"{PREFIX}/global-config", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def global_config():
     return render_template("global-config.html")
@@ -92,6 +97,7 @@ def global_config():
 
 @dashboard.route(f"{PREFIX}/instances", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def instances():
     return render_template("instances.html")
@@ -99,6 +105,7 @@ def instances():
 
 @dashboard.route(f"{PREFIX}/jobs", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def jobs():
     return render_template("jobs.html")
@@ -106,6 +113,7 @@ def jobs():
 
 @dashboard.route(f"{PREFIX}/services", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def services():
     return render_template("services.html")
@@ -113,6 +121,7 @@ def services():
 
 @dashboard.route(f"{PREFIX}/actions", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def actions():
     return render_template("actions.html")
@@ -120,6 +129,7 @@ def actions():
 
 @dashboard.route(f"{PREFIX}/plugins", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def plugins():
     return render_template("plugins.html")
@@ -127,6 +137,7 @@ def plugins():
 
 @dashboard.route(f"{PREFIX}/account", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def account():
     return render_template("account.html")
@@ -134,6 +145,7 @@ def account():
 
 @dashboard.route(f"{PREFIX}/<string:page>", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def not_found(page):
     raise NotFound(code=404, description=f"Page {page} Not found")

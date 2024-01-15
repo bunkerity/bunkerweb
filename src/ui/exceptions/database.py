@@ -2,6 +2,7 @@
 
 from werkzeug.exceptions import HTTPException
 from hook import hooks
+from utils import log_exception
 from utils import format_exception
 
 
@@ -12,9 +13,9 @@ class AccessDBException(HTTPException):
 
 
 @hooks(hooks=["DBException"])
-@format_exception()
+@log_exception(AccessDBException)
 def access_db_exception(e):
-    return e
+    return format_exception(e)
 
 
 # Get data from DB succeed but error while proceeding data retrieved
@@ -24,9 +25,9 @@ class ProceedDataDBException(HTTPException):
 
 
 @hooks(hooks=["DBException"])
-@format_exception()
+@log_exception(ProceedDataDBException)
 def proceed_db_data_exception(e):
-    return e
+    return format_exception(e)
 
 
 # Export on main app to register

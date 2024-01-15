@@ -183,33 +183,28 @@ def default_error_handler(code="500", path="", desc="Internal server error.", ta
         return res_format("error", "500", "", "Internal server error.")
 
 
-def format_exception(_redirect=False):
+def log_exception(ExceptionClass):
     def decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
-            # Run main error function to get possible override data (code, desc)
-            error = str(f(*args, **kwargs))
-
-            # Split message and prepare data
-            code = error.split(" ")[0]
-            title = error.split(":")[0].replace(code, "")
-            desc = error.split(":")[-1]
-            path = request.path
-
-            # Store info
-            LOGGER.error(log_format("error", code, path, desc))
-            create_action_format("error", code, f"UI exception {'path : ' + path or ''}", f"{title} : {desc}", ["ui", "exception"])
-
-            # Case we have to redirect
-            if _redirect and verify_jwt_in_request(True) is None:
-                return redirect(f"{PREFIX}/login", 302)
-
-            if _redirect and verify_jwt_in_request(True) is not None:
-                return redirect(f"{PREFIX}/home", 302)
+            LOGGER.error(log_format("error", ExceptionClass.code, request.path, ExceptionClass.description))
+            create_action_format("error", ExceptionClass.code, f"UI exception {'path : ' + request.path or ''}", f"{ExceptionClass.__name__} : {ExceptionClass.description}", ["ui", "exception"])
 
             # By default, we send JSON format response
-            return res_format("error", code, path, f"{title} : {desc}")
+            return f(*args, **kwargs)
 
         return wrapped
 
     return decorator
+
+
+def redirect_page():
+    if verify_jwt_in_request(True) is None:
+        return redirect(f"{PREFIX}/login", 302)
+
+    if verify_jwt_in_request(True) is not None:
+        return redirect(f"{PREFIX}/home", 302)
+
+
+def format_exception(e):
+    return res_format("error", e.code, request.path, e.description)

@@ -2,6 +2,7 @@
 
 from werkzeug.exceptions import HTTPException
 from hook import hooks
+from utils import log_exception
 from utils import format_exception
 
 
@@ -12,9 +13,9 @@ class ProceedCoreException(HTTPException):
 
 
 @hooks(hooks=["APIException"])
-@format_exception()
+@log_exception(ProceedCoreException)
 def proceed_core_exception(e):
-    return e
+    return format_exception(e)
 
 
 # Error while sending request to CORE
@@ -24,9 +25,9 @@ class CoreReqException(HTTPException):
 
 
 @hooks(hooks=["APIException"])
-@format_exception()
+@log_exception(CoreReqException)
 def core_req_exception(e):
-    return e
+    return format_exception(e)
 
 
 # Export on main app to register

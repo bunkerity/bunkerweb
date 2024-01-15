@@ -3,6 +3,7 @@ from flask import Blueprint
 from flask import request
 from flask_jwt_extended import jwt_required
 
+from middleware.jwt import jwt_additionnal_checks
 from middleware.validator import model_validator
 
 from hook import hooks
@@ -21,6 +22,7 @@ config = Blueprint("config", __name__)
 
 @config.route(f"{PREFIX}", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(queries={"methods": "ConfigMethod", "new_format": "NewFormat"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def get_config():
@@ -31,6 +33,7 @@ def get_config():
 
 @config.route(f"{PREFIX}", methods=["PUT"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(body={"Config": "config"}, queries={"method": "Method"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def update_config():
@@ -41,6 +44,7 @@ def update_config():
 
 @config.route(f"{PREFIX}/global", methods=["PUT"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(body={"Config": "config"}, queries={"method": "Method"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def update_global_config():
@@ -51,6 +55,7 @@ def update_global_config():
 
 @config.route(f"{PREFIX}/service/<string:service_name>", methods=["PUT"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(body={"Config": "config"}, queries={"method": "Method"}, params={"service_name": "ServiceName"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def update_service_config(service_name):
@@ -61,6 +66,7 @@ def update_service_config(service_name):
 
 @config.route(f"{PREFIX}/service/<string:service_name>", methods=["DELETE"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(queries={"method": "Method"}, params={"service_name": "ServiceName"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def delete_service_config(service_name):

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint
 from flask import request
+
+from middleware.jwt import jwt_additionnal_checks
 from flask_jwt_extended import jwt_required
 
 from middleware.validator import model_validator
@@ -21,6 +23,7 @@ plugins = Blueprint("plugins", __name__)
 
 @plugins.route(f"{PREFIX}", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def get_plugins():
     """Get all plugins"""
@@ -29,6 +32,7 @@ def get_plugins():
 
 @plugins.route(f"{PREFIX}", methods=["POST"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(is_body_json=False)
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def add_plugin():
@@ -39,6 +43,7 @@ def add_plugin():
 
 @plugins.route(f"{PREFIX}/<string:plugin_id>", methods=["PATCH"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(is_body_json=False, params={"plugin_id": "PluginId"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def update_plugin(plugin_id):
@@ -49,6 +54,7 @@ def update_plugin(plugin_id):
 
 @plugins.route(f"{PREFIX}/<string:plugin_id>", methods=["DELETE"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(params={"plugin_id": "PluginId"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def delete_plugin(plugin_id):
@@ -58,6 +64,7 @@ def delete_plugin(plugin_id):
 
 @plugins.route(f"{PREFIX}/external/files", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def external_files_plugin():

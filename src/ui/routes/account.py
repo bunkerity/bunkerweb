@@ -2,9 +2,9 @@
 from flask import Blueprint
 from flask import request
 from flask_jwt_extended import jwt_required
-
 from utils import get_core_format_res, get_req_data
 
+from middleware.jwt import jwt_additionnal_checks
 from middleware.validator import model_validator
 
 from hook import hooks
@@ -22,6 +22,7 @@ account = Blueprint("account", __name__)
 
 @account.route(f"{PREFIX}/account", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(queries={"method": "Method"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def get_account():

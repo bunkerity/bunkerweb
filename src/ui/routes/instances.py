@@ -3,6 +3,7 @@ from flask import Blueprint
 from flask import request
 from flask_jwt_extended import jwt_required
 
+from middleware.jwt import jwt_additionnal_checks
 from middleware.validator import model_validator
 
 from hook import hooks
@@ -22,6 +23,7 @@ instances = Blueprint("instances", __name__)
 
 @instances.route(f"{PREFIX}", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def get_instances():
     """Get BunkerWeb instances"""
@@ -30,6 +32,7 @@ def get_instances():
 
 @instances.route(f"{PREFIX}", methods=["PUT"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(queries={"method": "Method", "reload": "ReloadInstance"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def upsert_instance():
@@ -40,6 +43,7 @@ def upsert_instance():
 
 @instances.route(f"{PREFIX}/<string:instance_hostname>", methods=["DELETE"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(queries={"method": "Method"}, params={"instance_hostname": "InstanceHostname"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def delete_instance(instance_hostname):
@@ -50,6 +54,7 @@ def delete_instance(instance_hostname):
 
 @instances.route(f"{PREFIX}/<string:instance_hostname>/<string:instance_action>", methods=["POST"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(queries={"method": "Method"}, params={"instance_hostname": "InstanceHostname", "instance_action": "InstanceAction"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def action_instance(instance_hostname, instance_action):
@@ -60,6 +65,7 @@ def action_instance(instance_hostname, instance_action):
 
 @instances.route(f"{PREFIX}/ban", methods=["POST"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(body={"BanAdd": "ban_add"}, queries={"method": "Method"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def add_bans():
@@ -70,6 +76,7 @@ def add_bans():
 
 @instances.route(f"{PREFIX}/ban", methods=["DELETE"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(body={"BanDelete": "ban_delete"}, queries={"method": "Method"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def delete_bans():

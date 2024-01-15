@@ -3,6 +3,7 @@ from flask import Blueprint
 from flask import request
 from flask_jwt_extended import jwt_required
 
+from middleware.jwt import jwt_additionnal_checks
 from middleware.validator import model_validator
 
 from hook import hooks
@@ -21,6 +22,7 @@ custom_configs = Blueprint("custom_configs", __name__)
 
 @custom_configs.route(f"{PREFIX}", methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def get_custom_configs():
     """Get complete custom configs"""
@@ -29,6 +31,7 @@ def get_custom_configs():
 
 @custom_configs.route(f"{PREFIX}", methods=["PUT"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(body={"UpsertCustomConfigDataModel": ""}, queries={"method": "Method"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def update_custom_configs():
@@ -39,6 +42,7 @@ def update_custom_configs():
 
 @custom_configs.route(f"{PREFIX}/<string:custom_config_name>", methods=["DELETE"])
 @jwt_required()
+@jwt_additionnal_checks()
 @model_validator(queries={"method": "Method", "custom_config_name": "CustomConfigName", "config_type": "CustomConfigType", "service_id": "CustomConfigServiceId"}, params={"custom_config_name": "CustomConfigName"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def delete_custom_configs(custom_config_name):
