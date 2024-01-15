@@ -86,14 +86,10 @@ def instances_healthcheck() -> None:
         if not sent:
             CORE_CONFIG.logger.warning(f"instances_healthcheck - Can't send API request to {instance_api.endpoint}ping : {err}, healthcheck will be retried in 30 seconds ...")
             continue
-        else:
-            if status != 200:
-                CORE_CONFIG.logger.warning(f"instances_healthcheck - Error while sending API request to {instance_api.endpoint}ping : status = {resp['status']}, msg = {resp['msg']}, healthcheck will be retried in 30 seconds ...")
-                continue
-            else:
-                CORE_CONFIG.logger.info(f"instances_healthcheck - Successfully sent API request to {instance_api.endpoint}ping, marking instance as seen ...")
-
-                Thread(target=seen_instance, args=(instance["hostname"],)).start()
+        if status != 200:
+            CORE_CONFIG.logger.warning(f"instances_healthcheck - Error while sending API request to {instance_api.endpoint}ping : status = {resp['status']}, msg = {resp['msg']}, healthcheck will be retried in 30 seconds ...")
+            continue
+        Thread(target=seen_instance, args=(instance["hostname"],)).start()
 
 
 @app.middleware("http")
