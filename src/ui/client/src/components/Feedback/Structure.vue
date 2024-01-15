@@ -141,6 +141,8 @@ onMounted(() => {
     >
       <span class="sr-only">{{ $t("dashboard_open_sidebar") }}</span>
       <svg
+        aria-hidden="true"
+        role="img"
         class="feedback-float-btn-svg"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 448 512"
@@ -174,6 +176,8 @@ onMounted(() => {
     >
       <span class="sr-only">{{ $t("dashboard_close_sidebar") }}</span>
       <svg
+        aria-hidden="true"
+        role="img"
         @click="dropdown.isOpen = false"
         class="feedback-header-close-btn-svg"
         xmlns="http://www.w3.org/2000/svg"

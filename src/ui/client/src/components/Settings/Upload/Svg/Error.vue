@@ -1,7 +1,7 @@
 <template>
   <svg
     role="img"
-    aria-label="error image"
+    aria-hidden="true"
     class="fill-red-500 h-5 w-5 mr-4"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 512 512"

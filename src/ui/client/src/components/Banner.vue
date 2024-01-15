@@ -65,7 +65,7 @@ onMounted(() => {
 
 <template>
   <div id="banner" tabindex="-1" role="list" class="banner-container">
-    <div role="" class="banner-bg"></div>
+    <div role="img" aria-hidden="true" class="banner-bg"></div>
 
     <div
       v-for="index in 3"

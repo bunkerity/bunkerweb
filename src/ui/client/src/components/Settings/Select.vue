@@ -121,6 +121,8 @@ const emits = defineEmits(["inp"]);
       </span>
       <!-- chevron -->
       <svg
+        role="img"
+        aria-hidden="true"
         :class="[select.isOpen ? '-rotate-180' : '']"
         class="select-btn-svg"
         xmlns="http://www.w3.org/2000/svg"

@@ -48,7 +48,7 @@ function getClickPath(id) {
       <button @click="$emit('updatePath', getPrevPath())">
         <svg
           role="img"
-          :aria-label="$t('custom_conf_svg_back_desc')"
+          aria-hidden="true"
           class="file-manager-breadcrumb-back-svg"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

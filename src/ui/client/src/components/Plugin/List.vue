@@ -33,6 +33,8 @@ const emits = defineEmits(["delete"]);
         <a v-if="plugin.page" class="hover:-translate-y-px" :href="plugin.page">
           <span class="sr-only">{{ $t("action_link") }}</span>
           <svg
+            role="img"
+            aria-hidden="true"
             class="h-6 w-6 fill-sky-500 dark dark:brightness-90"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 448 512"
@@ -58,6 +60,8 @@ const emits = defineEmits(["delete"]);
         >
           <span class="sr-only">{{ $t("action_delete") }}</span>
           <svg
+            role="img"
+            aria-hidden="true"
             class="h-5 w-5 fill-red-500 dark:brightness-90"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 448 512"

@@ -68,8 +68,10 @@ function hidePopover() {
       class="cursor-pointer flex justify-start w-full"
       ref="popoverIcon"
     >
-      <div class="popover-background"></div>
+      <div role="img" aria-hidden="true" class="popover-background"></div>
       <svg
+        role="img"
+        aria-hidden="true"
         class="popover-tab-svg"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 512 512"

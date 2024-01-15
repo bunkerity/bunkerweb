@@ -2,7 +2,7 @@
 <template>
   <svg
     role="img"
-    :aria-label="$t('dashboard_svg_linkedin_desc')"
+    aria-hidden="true"
     fill="#0A63BC"
     class="hover:opacity-80 dark:brightness-110"
     xmlns="http://www.w3.org/2000/svg"

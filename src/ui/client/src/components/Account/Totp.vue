@@ -108,7 +108,8 @@ onMounted(() => {
           type: 'password',
           value: secretkey.setup.secret,
           placeholder: $t('account_totp_secret_placeholder'),
-          disabled: true,
+          readonly: true,
+          clipboard: true,
         }"
       />
     </SettingsLayout>

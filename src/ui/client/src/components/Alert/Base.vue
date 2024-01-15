@@ -34,6 +34,8 @@ const emits = defineEmits(["close"]);
       <button @click="$emit('close')" class="absolute right-8 top-3">
         <span class="sr-only">{{ $t("dashboard_alert_close_desc") }}</span>
         <svg
+          aria-hidden="true"
+          role="img"
           class="cursor-pointer fill-white dark:opacity-80 absolute h-5 w-5"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 320 512"

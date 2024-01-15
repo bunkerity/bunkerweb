@@ -80,7 +80,7 @@ async function addBansFromList() {
     "POST",
     getValidBans(),
     addBans,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     // Case succeed, delete items from UI
     // And emit add event to refetch ban list
@@ -106,6 +106,8 @@ async function addBansFromList() {
         class="text-sm mb-2 sm:mb-0"
       >
         <svg
+          aria-hidden="true"
+          role="img"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -132,6 +134,8 @@ async function addBansFromList() {
         class="text-sm ml-4"
       >
         <svg
+          aria-hidden="true"
+          role="img"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -259,6 +263,8 @@ async function addBansFromList() {
                   {{ $t("bans_add_remove_ban") }}
                 </span>
                 <svg
+                  role="img"
+                  aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"

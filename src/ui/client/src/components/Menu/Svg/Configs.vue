@@ -2,7 +2,7 @@
 <template>
   <svg
     role="img"
-    :aria-label="$t('dashboard_svg_configs_desc')"
+    aria-hidden="true"
     class="stroke-blue-500 h-6 w-6 relative"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"

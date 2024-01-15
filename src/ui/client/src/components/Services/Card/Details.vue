@@ -31,6 +31,8 @@ const props = defineProps({
           }}</span
         >
         <svg
+          role="img"
+          aria-hidden="true"
           v-if="detail.isActive"
           class="h-4 w-4 fill-green-500"
           xmlns="http://www.w3.org/2000/svg"
@@ -41,6 +43,8 @@ const props = defineProps({
           />
         </svg>
         <svg
+          role="img"
+          aria-hidden="true"
           v-if="!detail.isActive"
           class="h-4 w-4 fill-red-500"
           xmlns="http://www.w3.org/2000/svg"

@@ -2,7 +2,7 @@
 <template>
   <div
     role="img"
-    :aria-label="$t('home_svg_instances_desc')"
+    aria-hidden="true"
     class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-red-500"
   >
     <svg

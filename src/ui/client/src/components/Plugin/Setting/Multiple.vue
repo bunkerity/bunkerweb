@@ -23,7 +23,7 @@ const multiple = reactive({
   isShow: true,
   groups: computed(() => {
     const filter = getSettingsMultipleList(
-      JSON.parse(JSON.stringify(props.settings)),
+      JSON.parse(JSON.stringify(props.settings))
     );
     // Remove delete item
     Object.entries(multiple.delete).forEach(
@@ -31,7 +31,7 @@ const multiple = reactive({
         settingsGroupList.forEach((settingsGroup) => {
           delete filter[multGroupName][settingsGroup];
         });
-      },
+      }
     );
 
     // Add new multiple groups
@@ -52,7 +52,7 @@ function toggle() {
 function addMultToGroup(groupName) {
   // Get base to add
   const baseMult = JSON.parse(
-    JSON.stringify(multiple.groups[groupName]["base"]),
+    JSON.stringify(multiple.groups[groupName]["base"])
   );
   // Get a valid new group number
   // We need to get all already taken nums
@@ -124,6 +124,8 @@ function deleteMultToGroup(multGroupName, settingsGroupName) {
           class="ml-3"
         >
           <svg
+            role="img"
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -140,6 +142,8 @@ function deleteMultToGroup(multGroupName, settingsGroupName) {
         </ButtonBase>
         <ButtonBase @click="toggle()" color="info" size="sm" class="ml-2">
           <svg
+            role="img"
+            aria-hidden="true"
             v-if="multiple.isShow"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -160,6 +164,8 @@ function deleteMultToGroup(multGroupName, settingsGroupName) {
             />
           </svg>
           <svg
+            role="img"
+            aria-hidden="true"
             v-if="!multiple.isShow"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -209,7 +215,10 @@ function deleteMultToGroup(multGroupName, settingsGroupName) {
                 @click="deleteMultToGroup(multGroupName, settingsGroupName)"
                 color="delete"
                 size="sm"
-                ><svg
+              >
+                <svg
+                  role="img"
+                  aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"

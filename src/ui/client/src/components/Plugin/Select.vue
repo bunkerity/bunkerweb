@@ -68,7 +68,7 @@ function updateTop() {
   selectTop.value = `${
     Math.abs(
       selectBtn.value.closest(".plugin-structure").scrollTop -
-        selectBtn.value.offsetTop,
+        selectBtn.value.offsetTop
     ) + selectBtn.value.clientHeight
   }px`;
 }
@@ -134,6 +134,8 @@ onMounted(() => {
   >
     <span class="select-btn-name">{{ select.value }}</span>
     <svg
+      role="img"
+      aria-hidden="true"
       :class="[select.isOpen ? '-rotate-180' : '']"
       class="select-btn-svg"
       xmlns="http://www.w3.org/2000/svg"
@@ -166,7 +168,7 @@ onMounted(() => {
               props.serviceName || select.context,
               select.id,
               select.value,
-              props.setting.regex,
+              props.setting.regex
             );
 
           // Case not same value as store on core
@@ -174,7 +176,7 @@ onMounted(() => {
             props.serviceName || select.context,
             select.id,
             select.value,
-            props.setting.regex,
+            props.setting.regex
           );
         }
       "

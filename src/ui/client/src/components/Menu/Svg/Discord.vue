@@ -2,7 +2,7 @@
 <template>
   <svg
     role="img"
-    :aria-label="$t('dashboard_svg_discord_desc')"
+    aria-hidden="true"
     class="translate-y-1 hover:opacity-80"
     fill="#5562EA"
     xmlns="http://www.w3.org/2000/svg"

@@ -17,7 +17,7 @@ const path = reactive({
   <!-- service root folder -->
   <svg
     role="img"
-    :aria-label="$t('custom_conf_svg_root_desc')"
+    aria-hidden="true"
     v-if="path.isRoot"
     class="file-manager-item-svg"
     xmlns="http://www.w3.org/2000/svg"
@@ -36,7 +36,7 @@ const path = reactive({
   <!-- services folder -->
   <svg
     role="img"
-    :aria-label="$t('custom_conf_svg_folder_desc')"
+    aria-hidden="true"
     v-if="!path.isRoot"
     class="file-manager-item-svg"
     xmlns="http://www.w3.org/2000/svg"

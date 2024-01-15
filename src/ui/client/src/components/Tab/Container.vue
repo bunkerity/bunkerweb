@@ -66,6 +66,8 @@ function closeOutside(e) {
       <span class="select">{{ props.active }}</span>
       <!-- chevron -->
       <svg
+        role="img"
+        aria-hidden="true"
         :class="[tabCtnr.isOpen ? '-rotate-180' : '']"
         class="select-btn-svg"
         xmlns="http://www.w3.org/2000/svg"

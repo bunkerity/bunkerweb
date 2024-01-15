@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from "vue";
+import { onMounted, reactive } from "vue";
 import { useBannerStore } from "@store/global.js";
 // Use to update position when banner is visible or not
 const bannerStore = useBannerStore();
@@ -8,6 +8,18 @@ const bannerStore = useBannerStore();
 const news = reactive({
   isActive: false,
   posts: [],
+});
+
+onMounted(() => {
+  try {
+    fetch("https://www.bunkerweb.io/api/posts/0/2")
+      .then((res) => {
+        return res.json();
+      })
+      .then((res) => {
+        news.posts = res.data;
+      });
+  } catch (err) {}
 });
 </script>
 
@@ -21,6 +33,8 @@ const news = reactive({
     class="news-float-btn"
   >
     <svg
+      role="img"
+      aria-hidden="true"
       class="news-float-btn-svg"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"
@@ -46,6 +60,8 @@ const news = reactive({
       @click="news.isActive = false"
     >
       <svg
+        role="img"
+        aria-hidden="true"
         @click="news.isActive = false"
         class="news-close-btn-svg"
         xmlns="http://www.w3.org/2000/svg"
@@ -67,9 +83,10 @@ const news = reactive({
     </div>
     <hr class="line-separator" />
     <!-- end header -->
+    {{ news.posts }}
     <!-- news-->
-    <div v-if="news.posts.length === 0" class="flex-auto overflow-auto">
-      <p class="news-sidebar-no-posts-content">
+    <div class="flex-auto overflow-auto">
+      <p v-if="news.posts.length === 0" class="news-sidebar-no-posts-content">
         {{ $t("dashboard_news_fetch_error") }}
       </p>
     </div>
@@ -113,6 +130,8 @@ const news = reactive({
               required
             />
             <svg
+              role="img"
+              aria-hidden="true"
               data-checkbox-handler="newsletter-check"
               class="news-newsletter-checkbox-svg"
               xmlns="http://www.w3.org/2000/svg"

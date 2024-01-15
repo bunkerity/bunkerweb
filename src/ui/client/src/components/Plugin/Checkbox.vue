@@ -47,14 +47,14 @@ function updateCheckbox() {
             return config.removeConf(
               props.serviceName || checkbox.context,
               checkbox.id,
-              checkbox.value,
+              checkbox.value
             );
 
           // Case not same value as store on core
           return config.updateConf(
             props.serviceName || checkbox.context,
             checkbox.id,
-            checkbox.value,
+            checkbox.value
           );
         }
       "
@@ -78,8 +78,8 @@ function updateCheckbox() {
     />
 
     <svg
-      :aria-hidden="checkbox.value === 'yes' ? 'false' : 'true'"
-      :aria-description="$t('inp_checkbox_svg_desc')"
+      role="img"
+      aria-hidden="true"
       v-show="checkbox.value === 'yes'"
       class="checkbox-svg"
       xmlns="http://www.w3.org/2000/svg"

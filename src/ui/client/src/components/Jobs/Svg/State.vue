@@ -15,7 +15,7 @@ const props = defineProps({
   ></div>
   <svg
     role="img"
-    :aria-label="$t('jobs_svg_success_desc')"
+    aria-hidden="true"
     v-if="props.success"
     class="fill-green-500 h-5 w-5 z-10"
     xmlns="http://www.w3.org/2000/svg"
@@ -27,7 +27,7 @@ const props = defineProps({
   </svg>
   <svg
     role="img"
-    :aria-label="$t('jobs_svg_fail_desc')"
+    aria-hidden="true"
     v-if="!props.success"
     class="fill-red-500 h-5 w-5 z-10"
     xmlns="http://www.w3.org/2000/svg"

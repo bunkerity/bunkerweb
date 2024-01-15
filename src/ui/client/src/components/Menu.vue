@@ -164,6 +164,8 @@ function toggleMenu() {
     :class="['menu-float-btn', bannerStore.bannerClass]"
   >
     <svg
+      role="img"
+      aria-hidden="true"
       fill="#0D6EFD"
       class="menu-float-btn-svg"
       xmlns="http://www.w3.org/2000/svg"
@@ -198,6 +200,8 @@ function toggleMenu() {
     >
       <span class="sr-only">{{ $t("action_delete") }}</span>
       <svg
+        role="img"
+        aria-hidden="true"
         @click="closeMenu()"
         class="menu-close-btn-svg"
         xmlns="http://www.w3.org/2000/svg"
@@ -298,6 +302,8 @@ function toggleMenu() {
               >
                 <div class="menu-page-plugin-svg-container">
                   <svg
+                    role="img"
+                    aria-hidden="true"
                     class="fill-amber-500 h-5 w-5 relative"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 384 512"

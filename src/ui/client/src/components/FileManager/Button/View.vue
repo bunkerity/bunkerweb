@@ -15,6 +15,8 @@ const props = defineProps({
   >
     <span class="flex justify-start items-center">
       <svg
+        aria-hidden="true"
+        role="img"
         class="h-5.5 w-5.5 stroke-green-700 dark:brightness-125"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

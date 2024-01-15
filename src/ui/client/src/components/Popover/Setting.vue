@@ -64,6 +64,8 @@ function hidePopover() {
     <span class="sr-only"> {{ $t("dashboard_popover_button") }}</span>
     <div class="popover-background"></div>
     <svg
+      role="img"
+      aria-hidden="true"
       class="popover-settings-svg"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"

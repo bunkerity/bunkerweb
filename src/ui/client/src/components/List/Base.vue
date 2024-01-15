@@ -15,7 +15,7 @@ const props = defineProps({
   <div role="table" class="list-container">
     <div role="row" class="list-header-container">
       <span
-        role="rowheader"
+        role="columnheader"
         class="list-header-item"
         v-for="(item, id) in props.header"
         :class="[

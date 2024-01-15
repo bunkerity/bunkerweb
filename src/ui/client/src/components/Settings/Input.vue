@@ -110,6 +110,8 @@ onMounted(() => {
         class="input-clipboard-button"
       >
         <svg
+          role="img"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -134,6 +136,8 @@ onMounted(() => {
         class="input-pw-button"
       >
         <svg
+          role="img"
+          aria-hidden="true"
           v-if="!inp.showInp"
           class="input-pw-svg"
           xmlns="http://www.w3.org/2000/svg"
@@ -144,6 +148,8 @@ onMounted(() => {
           />
         </svg>
         <svg
+          role="img"
+          aria-hidden="true"
           v-if="inp.showInp"
           class="input-pw-svg scale-110"
           xmlns="http://www.w3.org/2000/svg"

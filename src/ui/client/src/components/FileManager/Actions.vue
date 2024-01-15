@@ -29,7 +29,7 @@ const emits = defineEmits(["createFile", "createFolder"]);
         >
           <svg
             role="img"
-            :aria-label="$t('custom_conf_svg_file_desc')"
+            aria-hidden="true"
             :class="[
               props.canCreateFile ? 'active' : 'disabled',
               ,

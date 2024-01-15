@@ -57,7 +57,7 @@ const list = reactive({
 function toggleAllCheck() {
   list.checkAll = list.checkAll ? false : true;
   const banItemsChekbox = document.querySelectorAll(
-    '#banlist-container input[type="checkbox"]',
+    '#banlist-container input[type="checkbox"]'
   );
   banItemsChekbox.forEach((item) => {
     // Check current state to update
@@ -80,7 +80,7 @@ async function sendUnban() {
     "DELETE",
     unbanList,
     delBans,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "success") {
       // Case succeed, delete items from UI
@@ -103,6 +103,8 @@ async function sendUnban() {
         {{ $t("bans_list_no_bans") }}
       </p>
       <svg
+        aria-hidden="true"
+        role="img"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -128,6 +130,8 @@ async function sendUnban() {
         class="text-sm mb-2 sm:mb-0"
       >
         <svg
+          aria-hidden="true"
+          role="img"
           class="w-6 h-6 -translate-y-[1px]"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -276,6 +280,8 @@ async function sendUnban() {
         :disabled="selectIPStore.data.size > 0 ? false : true"
       >
         <svg
+          aria-hidden="true"
+          role="img"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"

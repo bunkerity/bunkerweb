@@ -42,6 +42,8 @@ const emits = defineEmits(["tab"]);
           :aria-current="tabs.current === item ? 'page' : false"
         >
           <svg
+            aria-hidden="true"
+            role="img"
             v-if="item === 'list'"
             :class="[
               tabs.current === item
@@ -62,6 +64,8 @@ const emits = defineEmits(["tab"]);
             />
           </svg>
           <svg
+            role="img"
+            aria-hidden="true"
             v-if="item === 'add'"
             :class="[
               tabs.current === item

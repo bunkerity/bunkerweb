@@ -2,7 +2,7 @@
 <template>
   <svg
     role="img"
-    :aria-label="$t('dashboard_svg_github_desc')"
+    aria-hidden="true"
     class="hover:opacity-80 dark:fill-gray-600"
     fill="#171A1F"
     xmlns="http://www.w3.org/2000/svg"

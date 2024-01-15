@@ -67,7 +67,7 @@ const emits = defineEmits(["action"]);
     class="file-manager-item-dropdown-btn"
   >
     <svg
-      :aria-label="$t('custom_conf_svg_burger_desc')"
+      aria-hidden="true"
       role="img"
       class="pointer-events-none h-8 w-8 fill-white"
       xmlns="http://www.w3.org/2000/svg"

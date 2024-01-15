@@ -58,7 +58,7 @@ function updateValue() {
     <svg
       role="img"
       :aria-hidden="checkbox.value === 'yes' ? 'false' : 'true'"
-      :aria-description="$t('logout_checkbox_svg_desc')"
+      aria-hidden="true"
       v-show="checkbox.value === 'yes'"
       class="checkbox-svg"
       xmlns="http://www.w3.org/2000/svg"

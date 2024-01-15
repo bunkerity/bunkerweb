@@ -10,6 +10,8 @@ const emits = defineEmits(["delete"]);
     class="dark:brightness-90 z-20 mx-1 bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 active:opacity-85 hover:shadow-md"
   >
     <svg
+      role="img"
+      aria-hidden="true"
       class="h-6 w-6 fill-white"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 448 512"

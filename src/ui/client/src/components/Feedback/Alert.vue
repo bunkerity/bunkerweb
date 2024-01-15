@@ -45,6 +45,8 @@ const emits = defineEmits(["close"]);
         class="feedback-alert-btn"
       >
         <svg
+          aria-hidden="true"
+          role="img"
           class="feedback-alert-svg"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 320 512"
