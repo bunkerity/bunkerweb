@@ -2,7 +2,7 @@
 import { reactive, ref, defineEmits, onMounted, defineProps } from "vue";
 
 /* PROPS ARGUMENTS
-  * 
+  *
   *
 settings = {
   id: string,
@@ -15,7 +15,7 @@ settings = {
   clipboard: boolean,
   readonly: boolean,
 };
-  * 
+  *
   *
 */
 

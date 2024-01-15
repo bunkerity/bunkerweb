@@ -21,7 +21,7 @@ PREFIX = "/api/instances"
 instances = Blueprint("instances", __name__)
 
 
-@instances.route(f"{PREFIX}", methods=["GET"])
+@instances.route(PREFIX, methods=["GET"])
 @jwt_required()
 @jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
@@ -30,7 +30,7 @@ def get_instances():
     return get_core_format_res(f"{CORE_API}/instances", "GET", "", "Retrieve instances")
 
 
-@instances.route(f"{PREFIX}", methods=["PUT"])
+@instances.route(PREFIX, methods=["PUT"])
 @jwt_required()
 @jwt_additionnal_checks()
 @model_validator(queries={"method": "Method", "reload": "ReloadInstance"})

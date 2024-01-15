@@ -20,7 +20,7 @@ PREFIX = "/api/jobs"
 jobs = Blueprint("jobs", __name__)
 
 
-@jobs.route(f"{PREFIX}", methods=["GET"])
+@jobs.route(PREFIX, methods=["GET"])
 @jwt_required()
 @jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])

@@ -21,7 +21,7 @@ PREFIX = "/api/plugins"
 plugins = Blueprint("plugins", __name__)
 
 
-@plugins.route(f"{PREFIX}", methods=["GET"])
+@plugins.route(PREFIX, methods=["GET"])
 @jwt_required()
 @jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
@@ -30,7 +30,7 @@ def get_plugins():
     return get_core_format_res(f"{CORE_API}/plugins", "GET", "", "Retrieve plugins")
 
 
-@plugins.route(f"{PREFIX}", methods=["POST"])
+@plugins.route(PREFIX, methods=["POST"])
 @jwt_required()
 @jwt_additionnal_checks()
 @model_validator(is_body_json=False)

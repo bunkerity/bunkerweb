@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from functools import wraps
+
 from flask import request
 from flask import make_response
 from flask import redirect
@@ -39,22 +41,6 @@ from logger import setup_logger  # type: ignore
 PREFIX = "/admin/"
 LOGGER: Logger = setup_logger("UI")
 UI_CONFIG = UiConfig("ui", **environ)
-
-
-def jwt_additionnal_checks():
-    # Case user is not logged in
-    if verify_jwt_in_request(True) is None:
-        return redirect(f"{PREFIX}/login", 302)
-
-    # Case user is logged in, look for security check
-    try:
-        jwt = get_jwt()
-
-        if jwt["ip"] != request.remote_addr or jwt["user_agent"] != request.headers.get("User-Agent"):
-            raise NoAuthorizationError("fail.")
-
-    except:
-        raise NoAuthorizationError("Some security check failed after checking JWT data.")
 
 
 # Register to main
@@ -126,3 +112,29 @@ def setup_jwt(app):
             return resp
         except:
             raise LogoutFailedException("Try to logout user {identity} but failed.")
+
+
+def jwt_additionnal_checks():
+    def decorator(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            # Case user is not logged in
+            if verify_jwt_in_request(True) is None:
+                return redirect(f"{PREFIX}/login", 302)
+
+            # Case user is logged in, look for security check
+            try:
+                jwt = get_jwt()
+
+                if jwt["ip"] != request.remote_addr or jwt["user_agent"] != request.headers.get("User-Agent"):
+                    raise NoAuthorizationError("fail.")
+
+            except:
+                raise NoAuthorizationError("Some security check failed after checking JWT data.")
+
+            # By default, we send JSON format response
+            return f(*args, **kwargs)
+
+        return wrapped
+
+    return decorator

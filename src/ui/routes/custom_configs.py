@@ -20,7 +20,7 @@ PREFIX = "/api/custom_configs"
 custom_configs = Blueprint("custom_configs", __name__)
 
 
-@custom_configs.route(f"{PREFIX}", methods=["GET"])
+@custom_configs.route(PREFIX, methods=["GET"])
 @jwt_required()
 @jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
@@ -29,7 +29,7 @@ def get_custom_configs():
     return get_core_format_res(f"{CORE_API}/custom_configs", "GET", "", "Retrieve custom configs")
 
 
-@custom_configs.route(f"{PREFIX}", methods=["PUT"])
+@custom_configs.route(PREFIX, methods=["PUT"])
 @jwt_required()
 @jwt_additionnal_checks()
 @model_validator(body={"UpsertCustomConfigDataModel": ""}, queries={"method": "Method"})

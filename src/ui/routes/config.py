@@ -20,7 +20,7 @@ PREFIX = "/api/config"
 config = Blueprint("config", __name__)
 
 
-@config.route(f"{PREFIX}", methods=["GET"])
+@config.route(PREFIX, methods=["GET"])
 @jwt_required()
 @jwt_additionnal_checks()
 @model_validator(queries={"methods": "ConfigMethod", "new_format": "NewFormat"})
@@ -31,7 +31,7 @@ def get_config():
     return get_core_format_res(f"{CORE_API}/config?methods={methods or '1'}&new_format={new_format or '1'}", "GET", "", "Retrieve config")
 
 
-@config.route(f"{PREFIX}", methods=["PUT"])
+@config.route(PREFIX, methods=["PUT"])
 @jwt_required()
 @jwt_additionnal_checks()
 @model_validator(body={"Config": "config"}, queries={"method": "Method"})

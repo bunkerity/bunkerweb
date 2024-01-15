@@ -44,7 +44,7 @@ async function generateSecretKey() {
     "GET",
     null,
     totp,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.status === 200) {
       refresh(false);
@@ -76,7 +76,7 @@ async function updateTotp() {
     "POST",
     { code: totp.code, password: totp.password },
     totp,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.status === 200) {
       refresh(false);

@@ -21,7 +21,7 @@ PREFIX = "/api/actions"
 actions = Blueprint("actions", __name__)
 
 
-@actions.route(f"{PREFIX}", methods=["GET"])
+@actions.route(PREFIX, methods=["GET"])
 @jwt_required()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def get_actions():
@@ -29,8 +29,9 @@ def get_actions():
     return get_core_format_res(f"{CORE_API}/actions", "GET", "", "Retrieve actions")
 
 
-@actions.route(f"{PREFIX}", methods=["POST"])
+@actions.route(PREFIX, methods=["POST"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 @model_validator(body="Action")
 def create_action():

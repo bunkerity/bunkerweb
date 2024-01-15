@@ -4,7 +4,7 @@ import { getDefaultMethod } from "@utils/settings.js";
 import { reactive, ref, defineProps, onMounted } from "vue";
 
 /* PROPS ARGUMENTS
-  * 
+  *
   *
 settings = {
   id: string,
@@ -18,9 +18,9 @@ settings = {
   readonly: boolean,
   context: string,
   default : string,
-  method: string,  
+  method: string,
 };
-  * 
+  *
   *
 */
 
@@ -100,7 +100,7 @@ onMounted(() => {
             return config.removeConf(
               props.serviceName || input.context,
               input.id,
-              input.value
+              input.value,
             );
 
           // Case not same value as store on core
@@ -108,7 +108,7 @@ onMounted(() => {
             props.serviceName || input.context,
             input.id,
             input.value,
-            props.setting.regex
+            props.setting.regex,
           );
         }
       "

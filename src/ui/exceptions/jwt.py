@@ -138,37 +138,37 @@ def setup_jwt_exceptions(app):
     @app.errorhandler(DecodeErrorJWT)
     @hooks(hooks=["TokenException"])
     @log_exception(DecodeError)
-    def no_authorization_exception(e):
+    def decode_error_exception(e):
         return redirect_page()
 
     @app.errorhandler(ExpiredSignatureErrorJWT)
     @hooks(hooks=["TokenException"])
     @log_exception(ExpiredSignatureError)
-    def no_authorization_exception(e):
+    def expired_signature_exception(e):
         return redirect_page()
 
     @app.errorhandler(InvalidAudienceErrorJWT)
     @hooks(hooks=["TokenException"])
     @log_exception(InvalidAudienceError)
-    def no_authorization_exception(e):
+    def invalid_audience_exception(e):
         return redirect_page()
 
     @app.errorhandler(InvalidIssuerErrorJWT)
     @hooks(hooks=["TokenException"])
     @log_exception(InvalidIssuerError)
-    def no_authorization_exception(e):
+    def invalid_issuer_exception(e):
         return redirect_page()
 
     @app.errorhandler(InvalidTokenErrorJWT)
     @hooks(hooks=["TokenException"])
     @log_exception(InvalidTokenError)
-    def no_authorization_exception(e):
+    def invalid_token_exception(e):
         return redirect_page()
 
     @app.errorhandler(MissingRequiredClaimErrorJWT)
     @hooks(hooks=["TokenException"])
     @log_exception(MissingRequiredClaimError)
-    def no_authorization_exception(e):
+    def missing_required_claim_exception(e):
         return redirect_page()
 
     # JWT EXTENEDED DEFAULT EXCEPTIONS

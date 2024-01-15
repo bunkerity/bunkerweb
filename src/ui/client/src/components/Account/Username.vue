@@ -48,7 +48,7 @@ async function updateUsername() {
     "POST",
     { username: username.value, password: username.pwValue },
     username,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.status === 200) {
       refresh(false);

@@ -45,7 +45,7 @@ async function updatePw() {
       confirm_password: pw.confirmPwValue,
     },
     pw,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.status === 200) {
       refresh(false);

@@ -47,14 +47,14 @@ function updateCheckbox() {
             return config.removeConf(
               props.serviceName || checkbox.context,
               checkbox.id,
-              checkbox.value
+              checkbox.value,
             );
 
           // Case not same value as store on core
           return config.updateConf(
             props.serviceName || checkbox.context,
             checkbox.id,
-            checkbox.value
+            checkbox.value,
           );
         }
       "

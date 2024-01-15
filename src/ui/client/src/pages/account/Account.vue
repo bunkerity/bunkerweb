@@ -47,7 +47,7 @@ async function getAccount() {
     "GET",
     null,
     account,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 

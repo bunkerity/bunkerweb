@@ -68,7 +68,7 @@ function updateTop() {
   selectTop.value = `${
     Math.abs(
       selectBtn.value.closest(".plugin-structure").scrollTop -
-        selectBtn.value.offsetTop
+        selectBtn.value.offsetTop,
     ) + selectBtn.value.clientHeight
   }px`;
 }
@@ -168,7 +168,7 @@ onMounted(() => {
               props.serviceName || select.context,
               select.id,
               select.value,
-              props.setting.regex
+              props.setting.regex,
             );
 
           // Case not same value as store on core
@@ -176,7 +176,7 @@ onMounted(() => {
             props.serviceName || select.context,
             select.id,
             select.value,
-            props.setting.regex
+            props.setting.regex,
           );
         }
       "

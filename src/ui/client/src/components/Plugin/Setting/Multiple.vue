@@ -23,7 +23,7 @@ const multiple = reactive({
   isShow: true,
   groups: computed(() => {
     const filter = getSettingsMultipleList(
-      JSON.parse(JSON.stringify(props.settings))
+      JSON.parse(JSON.stringify(props.settings)),
     );
     // Remove delete item
     Object.entries(multiple.delete).forEach(
@@ -31,7 +31,7 @@ const multiple = reactive({
         settingsGroupList.forEach((settingsGroup) => {
           delete filter[multGroupName][settingsGroup];
         });
-      }
+      },
     );
 
     // Add new multiple groups
@@ -52,7 +52,7 @@ function toggle() {
 function addMultToGroup(groupName) {
   // Get base to add
   const baseMult = JSON.parse(
-    JSON.stringify(multiple.groups[groupName]["base"])
+    JSON.stringify(multiple.groups[groupName]["base"]),
   );
   // Get a valid new group number
   // We need to get all already taken nums
