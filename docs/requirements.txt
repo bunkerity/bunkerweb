@@ -311,9 +311,9 @@ mkdocs==1.5.3 \
     #   -r requirements.in
     #   mike
     #   mkdocs-material
-mkdocs-material==9.5.3 \
-    --hash=sha256:5899219f422f0a6de784232d9d40374416302ffae3c160cacc72969fcc1ee372 \
-    --hash=sha256:76c93a8525cceb0b395b9cedab3428bf518cf6439adef2b940f1c1574b775d89
+mkdocs-material==9.5.4 \
+    --hash=sha256:3d196ee67fad16b2df1a458d650a8ac1890294eaae368d26cee71bc24ad41c40 \
+    --hash=sha256:efd7cc8ae03296d728da9bd38f4db8b07ab61f9738a0cbd0dfaf2a15a50e7343
     # via
     #   -r requirements.in
     #   mkdocs-material
