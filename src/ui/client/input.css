@@ -940,19 +940,15 @@ body {
 
 /* LIST */
 .list-container {
-  @apply w-full grid grid-cols-12;
+  @apply w-full grid grid-cols-12 block;
 }
 
 .list-content-container {
-  @apply w-full grid grid-cols-12 rounded px-2 col-span-12 overflow-x-hidden overflow-y-auto;
-}
-
-.list-content-wrap {
-  @apply col-span-12 w-full;
+  @apply block w-full grid grid-cols-12 rounded px-2 col-span-12 overflow-x-hidden overflow-y-auto max-h-[300px];
 }
 
 .list-content-item {
-  @apply border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5;
+  @apply col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5;
 }
 
 .list-content {
@@ -964,11 +960,11 @@ body {
 }
 
 .list-header-container {
-  @apply w-full col-span-12 grid grid-cols-12 pl-2;
+  @apply block w-full col-span-12 grid grid-cols-12 pl-2;
 }
 
 .list-header-item {
-  @apply dark:text-gray-300 pb-1 text-sm font-bold m-0 border-b border-gray-400;
+  @apply block dark:text-gray-300 pb-1 text-sm font-bold m-0 border-b border-gray-400;
 }
 
 .first.list-header-item {

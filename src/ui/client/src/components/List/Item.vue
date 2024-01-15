@@ -1,3 +1,5 @@
 <template>
-  <div role="rowgroup" class="list-content-item"><slot></slot></div>
+  <tr class="list-content-item">
+    <slot></slot>
+  </tr>
 </template>
