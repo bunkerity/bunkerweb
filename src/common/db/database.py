@@ -6,7 +6,7 @@ from copy import deepcopy
 from datetime import datetime
 from logging import Logger
 from os import _exit, getenv, getpid, listdir, sep
-from os.path import normpath, join
+from os.path import join
 from pathlib import Path
 from re import compile as re_compile
 from subprocess import DEVNULL, PIPE, STDOUT, run as subprocess_run
@@ -60,9 +60,19 @@ from sqlalchemy.pool import SingletonThreadPool
 
 
 class Database:
-    DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?|oracle(\+oracledb)?):/+(?P<path>/[^\s]+)")
+    SQLITE_STRING_RX = re_compile(r"^(?P<database>sqlite)(\+(?P<dialect>\w+))?://(?P<path>/[^\s]+)?")
+    DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)|postgresql|oracle)(\+(?P<dialect>\w+))?://(?P<user>[^:]+):(?P<password>[^@]+)@(?P<host>[^:]+)(:(?P<port>\d+))?/(?P<database_name>[^\s]+)")
     ALEMBIC_FILE_PATH = Path(sep, "var", "lib", "bunkerweb", "alembic.ini")
     ALEMBIC_DIR = Path(sep, "var", "lib", "bunkerweb", "alembic")
+
+    SUPPORTED_dialects = {
+        "mysql": "pymysql",
+        "mariadb": "pymysql",
+        "sqlite": "pysqlite",
+        "postgresql": "psycopg",
+        "oracle": "oracledb",
+        # TODO add support for MSSQL
+    }
 
     def __init__(self, logger: Logger, sqlalchemy_string: Optional[str] = None) -> None:
         """Initialize the database"""
@@ -76,49 +86,24 @@ class Database:
         if not sqlalchemy_string:
             sqlalchemy_string = getenv("DATABASE_URI", "sqlite:////var/lib/bunkerweb/db.sqlite3")
 
-        match = self.DB_STRING_RX.search(sqlalchemy_string)
+        sqlite_match = self.SQLITE_STRING_RX.search(sqlalchemy_string)
+        match = sqlite_match or self.DB_STRING_RX.search(sqlalchemy_string)
+
         if not match:
             self._logger.error(f"Invalid database string provided: {sqlalchemy_string}, exiting...")
             _exit(1)
 
-        if match.group("database").startswith("sqlite"):
-            Path(normpath(match.group("path"))).parent.mkdir(parents=True, exist_ok=True)
-        elif match.group("database").startswith("m") and not match.group("database").endswith("+pymysql"):
-            sqlalchemy_string = sqlalchemy_string.replace(match.group("database"), f"{match.group('database')}+pymysql")  # ? This is mandatory for alemic to work with mariadb and mysql
-        elif match.group("database").startswith("postgresql") and not match.group("database").endswith("+psycopg"):
-            sqlalchemy_string = sqlalchemy_string.replace(match.group("database"), f"{match.group('database')}+psycopg")  # ? This is strongly recommended as psycopg is the new way to connect to postgresql
-        elif match.group("database").startswith("oracle") and not match.group("database").endswith("+oracledb"):
-            sqlalchemy_string = sqlalchemy_string.replace(match.group("database"), f"{match.group('database')}+oracledb")  # ? This is mandatory as cx_oracle is deprecated and oracledb is the new way to connect to oracle
+        if match.group("dialect"):
+            if match.group("dialect") not in self.SUPPORTED_dialects.values():
+                self._logger.warning(f"Unsupported dialect {match.group('dialect')} for database {match.group('database')}, defaulting to {self.SUPPORTED_dialects[match.group('database')]}")
+                sqlalchemy_string = sqlalchemy_string.replace(match.group("dialect"), self.SUPPORTED_dialects[match.group("database")], 1)
+        else:
+            sqlalchemy_string = sqlalchemy_string.replace(match.group("database"), f"{match.group('database')}+{self.SUPPORTED_dialects[match.group('database')]}", 1)
 
-        if not self.ALEMBIC_DIR.exists():
-            self.ALEMBIC_DIR.mkdir(parents=True, exist_ok=True)
+        self._logger.info(f"Using database URI: {sqlalchemy_string}")
 
-        if not Path(self.ALEMBIC_FILE_PATH).is_file():
-            proc = subprocess_run(
-                ["python3", "-m", "alembic", "init", str(self.ALEMBIC_DIR)],
-                cwd=str(self.ALEMBIC_FILE_PATH.parent),
-                stdout=DEVNULL,
-                stderr=STDOUT,
-                check=False,
-            )
-            if proc.returncode != 0:
-                self._logger.error(f"Error when trying to initialize alembic: {proc.stdout.decode()}")
-                _exit(1)
-
-            # Update the alembic.ini file to use the correct database URI
-            config = self.ALEMBIC_FILE_PATH.read_text()
-            line_to_replace = next(line for line in config.splitlines() if line.startswith("sqlalchemy.url"))
-            config = config.replace(line_to_replace, f"sqlalchemy.url = {sqlalchemy_string}")
-            self.ALEMBIC_FILE_PATH.write_text(config)
-
-            # Update the alembic/env.py file to use the correct database model
-            env_file = self.ALEMBIC_DIR.joinpath("env.py").read_text()
-            line_to_replace = next(line for line in env_file.splitlines() if line.startswith("target_metadata"))
-            env_file = env_file.replace(
-                line_to_replace,
-                f"from sys import path as sys_path\nfrom os.path import join\n\nsys_path.append(join('{sep}', 'usr', 'share', 'bunkerweb', 'db'))\n\nfrom models import Base\n\ntarget_metadata = Base.metadata",
-            )
-            self.ALEMBIC_DIR.joinpath("env.py").write_text(env_file)
+        if sqlite_match:
+            Path(sqlite_match.group("path")).parent.mkdir(parents=True, exist_ok=True)
 
         self.database_uri = sqlalchemy_string
         error = False
@@ -187,6 +172,36 @@ class Database:
                 session.execute(text("PRAGMA journal_mode=WAL"))
                 session.commit()
 
+        if not self.ALEMBIC_DIR.exists():
+            self.ALEMBIC_DIR.mkdir(parents=True, exist_ok=True)
+
+        if not self.ALEMBIC_FILE_PATH.is_file():
+            proc = subprocess_run(
+                ["python3", "-m", "alembic", "init", str(self.ALEMBIC_DIR)],
+                cwd=str(self.ALEMBIC_FILE_PATH.parent),
+                stdout=DEVNULL,
+                stderr=STDOUT,
+                check=False,
+            )
+            if proc.returncode != 0:
+                self._logger.error(f"Error when trying to initialize alembic: {proc.stdout.decode()}")
+                _exit(1)
+
+            # Update the alembic.ini file to use the correct database URI
+            config = self.ALEMBIC_FILE_PATH.read_text()
+            line_to_replace = next(line for line in config.splitlines() if line.startswith("sqlalchemy.url"))
+            config = config.replace(line_to_replace, f"sqlalchemy.url = {sqlalchemy_string}")
+            self.ALEMBIC_FILE_PATH.write_text(config)
+
+            # Update the alembic/env.py file to use the correct database model
+            env_file = self.ALEMBIC_DIR.joinpath("env.py").read_text()
+            line_to_replace = next(line for line in env_file.splitlines() if line.startswith("target_metadata"))
+            env_file = env_file.replace(
+                line_to_replace,
+                "from sys import path as sys_path\nfrom os.path import join, sep\n\nsys_path.append(join(sep, 'usr', 'share', 'bunkerweb', 'db'))\n\nfrom models import Base\n\ntarget_metadata = Base.metadata",
+            )
+            self.ALEMBIC_DIR.joinpath("env.py").write_text(env_file)
+
     def __del__(self) -> None:
         """Close the database"""
         if self._session_factory:
@@ -220,6 +235,7 @@ class Database:
                     "database is locked",
                     "file is not a database",
                     "Cannot operate on a closed database",
+                    "sqlite3.DatabaseError",
                     "Lost connection",  # ? Mysql and MariaDB potential errors
                     "Command Out of Sync",
                     "can't change 'autocommit' now",  # ? Postgresql potential errors
