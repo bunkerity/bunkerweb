@@ -2,7 +2,6 @@ local ngx = ngx
 local class = require "middleclass"
 local clogger = require "bunkerweb.logger"
 local rc = require "resty.redis.connector"
-local rs = require("resty.redis.sentinel")
 local utils = require "bunkerweb.utils"
 
 local clusterstore = class("clusterstore")
@@ -15,7 +14,6 @@ local ERR = ngx.ERR
 local INFO = ngx.INFO
 local tonumber = tonumber
 local tostring = tostring
-local random = math.random
 
 function clusterstore:initialize(pool)
 	-- Get variables
@@ -73,7 +71,6 @@ function clusterstore:initialize(pool)
 	}
 	self.pool = pool == nil or pool
 	if self.pool then
-		options.connection_options.pool = "bw-redis"
 		options.connection_options.pool_size = tonumber(self.variables["REDIS_KEEPALIVE_POOL"])
 	end
 	if self.variables["REDIS_SENTINEL_HOSTS"] ~= "" then
@@ -84,7 +81,7 @@ function clusterstore:initialize(pool)
 			else
 				sport = tonumber(sport)
 			end
-			table.insert(options.sentinel, { host = shost, port = sport })
+			table.insert(options.sentinels, { host = shost, port = sport })
 		end
 	end
 	self.options = options
@@ -110,23 +107,8 @@ function clusterstore:connect(readonly)
 	end
 	-- Connect to sentinels if needed
 	local redis_client, err
-	if #self.options.sentinels > 0 then
-		local redis_sentinel
-		redis_sentinel, err = self.redis_connector:connect()
-		if not redis_sentinel then
-			return false, "error while connecting to sentinels : " .. err
-		end
-		if readonly then
-			local redis_clients, _ = rs.get_slaves(redis_sentinel, self.options.master_name)
-			if redis_clients then
-				redis_client = redis_clients[random(#redis_clients)]
-			else
-				redis_client = nil
-			end
-		else
-			redis_client, err = rs.get_master(redis_sentinel, self.options.master_name)
-		end
-		-- Classic connection
+	if #self.options.sentinels > 0 and readonly then
+		redis_client, err = self.redis_connector:connect({ role = "slave" })
 	else
 		redis_client, err = self.redis_connector:connect()
 	end
@@ -135,7 +117,8 @@ function clusterstore:connect(readonly)
 		return false, "error while getting redis client : " .. err
 	end
 	-- Everything went well
-	local times, err = self.redis_client:get_reused_times()
+	local times
+	times, err = self.redis_client:get_reused_times()
 	if times == nil then
 		self:close()
 		return false, "error while getting reused times : " .. err
