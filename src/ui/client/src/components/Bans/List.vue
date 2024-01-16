@@ -167,6 +167,7 @@ async function sendUnban() {
           $t('bans_list_header_remain'),
         ]"
         :positions="listPositions"
+        :summary="$t('bans_list_table_summary')"
       >
         <ListItem
           v-for="(item, id) in props.items"
@@ -176,93 +177,91 @@ async function sendUnban() {
             'py-1.5',
           ]"
         >
-          <div role="row" class="list-content-item-wrap">
-            <div role="cell" :class="[listPositions[0], 'ml-2 mb-2 mr-2']">
-              <SettingsLayout
-                :showLabel="false"
-                :label="$t('bans_list_header_check')"
-                :name="`check-${id}`"
-              >
-                <SettingsCheckbox
-                  :aria-description="$t('bans_list_select_desc')"
-                  @inp="(v) => updateCheck(v, item.ip)"
-                  :settings="{
-                    id: `check-${id}`,
-                    value: 'no',
-                  }"
-                />
-              </SettingsLayout>
-            </div>
-            <div role="cell" :class="[listPositions[1], 'mr-2']">
-              <SettingsLayout
-                :showLabel="false"
-                :label="$t('bans_list_header_ip')"
-                :name="`ip-${id}`"
-              >
-                <SettingsInput
-                  :settings="{
-                    id: `ip-${id}`,
-                    type: 'text',
-                    value: item.ip,
-                    placeholder: '127.0.0.1',
-                    disabled: true,
-                  }"
-                />
-              </SettingsLayout>
-            </div>
-            <div role="cell" :class="[listPositions[2], 'mr-2']">
-              <SettingsLayout
-                :showLabel="false"
-                :label="$t('bans_list_header_reason')"
-                :name="`ip-reason-${id}`"
-              >
-                <SettingsInput
-                  :settings="{
-                    id: `ip-reason-${id}`,
-                    type: 'text',
-                    value: item.reason,
-                    placeholder: '127.0.0.1',
-                    disabled: true,
-                  }"
-                />
-              </SettingsLayout>
-            </div>
-            <div role="cell" :class="[listPositions[3], 'mr-2']">
-              <SettingsLayout
-                :showLabel="false"
-                :label="$t('bans_list_header_ban_start')"
-                :name="`ban-deb-${id}`"
-              >
-                <SettingsDatepicker
-                  :settings="{
-                    id: `ban-deb-${id}`,
-                    disabled: true,
-                  }"
-                  :defaultDate="new Date(+`${item.date}000`)"
-                />
-              </SettingsLayout>
-            </div>
-            <div role="cell" :class="[listPositions[4], 'mr-2']">
-              <SettingsLayout
-                :showLabel="false"
-                :label="$t('bans_list_header_ban_end')"
-                :name="`ban-end-${id}`"
-              >
-                <SettingsDatepicker
-                  :settings="{
-                    id: `ban-end-${id}`,
-                    disabled: true,
-                  }"
-                  :defaultDate="Date.now() + `${item.exp}000`"
-                />
-              </SettingsLayout>
-            </div>
-            <div role="cell" :class="[listPositions[5], 'ml-4']">
-              <p class="text-sm mb-0">
-                {{ getRemain(+`${item.exp}000`) }}
-              </p>
-            </div>
-          </div>
+          <td :class="[listPositions[0], 'ml-2 mb-2 mr-2']">
+            <SettingsLayout
+              :showLabel="false"
+              :label="$t('bans_list_header_check')"
+              :name="`check-${id}`"
+            >
+              <SettingsCheckbox
+                :aria-description="$t('bans_list_select_desc')"
+                @inp="(v) => updateCheck(v, item.ip)"
+                :settings="{
+                  id: `check-${id}`,
+                  value: 'no',
+                }"
+              />
+            </SettingsLayout>
+          </td>
+          <td :class="[listPositions[1], 'mr-2']">
+            <SettingsLayout
+              :showLabel="false"
+              :label="$t('bans_list_header_ip')"
+              :name="`ip-${id}`"
+            >
+              <SettingsInput
+                :settings="{
+                  id: `ip-${id}`,
+                  type: 'text',
+                  value: item.ip,
+                  placeholder: '127.0.0.1',
+                  disabled: true,
+                }"
+              />
+            </SettingsLayout>
+          </td>
+          <td :class="[listPositions[2], 'mr-2']">
+            <SettingsLayout
+              :showLabel="false"
+              :label="$t('bans_list_header_reason')"
+              :name="`ip-reason-${id}`"
+            >
+              <SettingsInput
+                :settings="{
+                  id: `ip-reason-${id}`,
+                  type: 'text',
+                  value: item.reason,
+                  placeholder: '127.0.0.1',
+                  disabled: true,
+                }"
+              />
+            </SettingsLayout>
+          </td>
+          <td :class="[listPositions[3], 'mr-2']">
+            <SettingsLayout
+              :showLabel="false"
+              :label="$t('bans_list_header_ban_start')"
+              :name="`ban-deb-${id}`"
+            >
+              <SettingsDatepicker
+                :settings="{
+                  id: `ban-deb-${id}`,
+                  disabled: true,
+                }"
+                :defaultDate="new Date(+`${item.date}000`)"
+              />
+            </SettingsLayout>
+          </td>
+          <td :class="[listPositions[4], 'mr-2']">
+            <SettingsLayout
+              :showLabel="false"
+              :label="$t('bans_list_header_ban_end')"
+              :name="`ban-end-${id}`"
+            >
+              <SettingsDatepicker
+                :settings="{
+                  id: `ban-end-${id}`,
+                  disabled: true,
+                }"
+                :defaultDate="Date.now() + `${item.exp}000`"
+              />
+            </SettingsLayout>
+          </td>
+          <td :class="[listPositions[5], 'ml-4']">
+            <p class="text-sm mb-0">
+              {{ getRemain(+`${item.exp}000`) }}
+            </p>
+          </td>
         </ListItem>
       </ListBase>
     </div>

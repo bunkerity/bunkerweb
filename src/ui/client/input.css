@@ -944,11 +944,11 @@ body {
 }
 
 .list-content-container {
-  @apply block w-full grid grid-cols-12 rounded px-2 col-span-12 overflow-x-hidden overflow-y-auto max-h-[300px];
+  @apply block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[300px];
 }
 
 .list-content-item {
-  @apply col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5;
+  @apply col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5 px-1;
 }
 
 .list-content {

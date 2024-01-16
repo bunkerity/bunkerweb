@@ -196,7 +196,11 @@ onMounted(() => {
         ]"
         :positions="positions"
       >
-        <ActionsItems :positions="positions" :items="actions.setup">
+        <ActionsItems
+          :summary="$t('actions_table_summary')"
+          :positions="positions"
+          :items="actions.setup"
+        >
         </ActionsItems>
       </ListBase>
     </CardBase>

@@ -8,11 +8,15 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  summary: {
+    type: String,
+    required: true,
+  },
 });
 </script>
 
 <template>
-  <table class="list-container">
+  <table :summary="props.summary" class="list-container">
     <thead class="list-header-container">
       <tr
         class="list-header-item"

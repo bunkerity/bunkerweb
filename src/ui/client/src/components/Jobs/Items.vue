@@ -15,15 +15,12 @@ const props = defineProps({
   items: {
     type: Array,
     required: true,
+    default: [],
   },
   positions: {
     type: Array,
     required: true,
   },
-});
-
-onMounted(() => {
-  console.log(props.items);
 });
 
 const run = reactive({
@@ -92,10 +89,16 @@ const emits = defineEmits(["history"]);
     v-for="(item, id) in props.items"
     :class="[id === props.items.length - 1 ? '' : 'border-b', 'py-2']"
   >
-    <td class="pl-4" :class="[props.positions[0]]">{{ item }}</td>
-    <td :class="[props.positions[1]]">{{ item["every"] }}</td>
+    <td class="pl-4" :class="[props.positions[0]]">
+      {{ Object.keys(item)[0] }}
+    </td>
+    <td :class="[props.positions[1]]">
+      {{ item[Object.keys(item)[0]]["every"] }}
+    </td>
     <td :class="[props.positions[2], 'ml-2']">
-      <button @click="$emit('history', { jobName: item })">
+      <button
+        @click="$emit('history', { jobName: item[Object.keys(item)[0]] })"
+      >
         <span class="sr-only">
           {{ $t("jobs_actions_show_history") }}
         </span>
@@ -105,40 +108,47 @@ const emits = defineEmits(["history"]);
     <td class="translate-x-3" :class="[props.positions[3]]">
       <span class="sr-only"
         >{{
-          item["reload"]
+          item[Object.keys(item)[0]]["reload"]
             ? $t("jobs_state_reload_succeed")
             : $t("jobs_state_reload_failed")
         }}
       </span>
-      <JobsSvgState :success="item['reload']" />
+      <JobsSvgState :success="item[Object.keys(item)[0]]['reload']" />
     </td>
     <td class="translate-x-4" :class="[props.positions[4]]">
       <span class="sr-only">
         {{
-          item["history"][0]["success"]
+          item[Object.keys(item)[0]]["history"][0]["success"]
             ? $t("jobs_state_success_succeed")
             : $t("jobs_state_success_failed")
         }}
       </span>
-      <JobsSvgState :success="item['history'][0]['success']" />
+      <JobsSvgState
+        :success="item[Object.keys(item)[0]]['history'][0]['success']"
+      />
     </td>
     <td :class="[props.positions[5]]">
-      <span>{{ item["history"][0]["end_date"] }}</span>
+      <span>{{ item[Object.keys(item)[0]]["history"][0]["end_date"] }}</span>
     </td>
-    <td class="mr-2" :class="[props.positions[6]]">
+    <td class="mr-4" :class="[props.positions[6]]">
       <SettingsSelect
-        v-if="item['cache'].length > 0"
+        v-if="item[Object.keys(item)[0]]['cache'].length > 0"
         :settings="{
-          id: `cache-${item}-${id}`,
+          id: `cache-${Object.keys(item)[0]}-${id}`,
           value: $t('jobs_actions_cache_download'),
-          values: getJobsCacheNames(item['cache']),
+          values: getJobsCacheNames(item[Object.keys(item)[0]]['cache']),
         }"
-        @inp="(v) => downloadFile(item, v)"
+        @inp="(v) => downloadFile(Object.keys(item)[0], v)"
       >
       </SettingsSelect>
     </td>
     <td :class="[props.positions[7], 'flex justify-center']">
-      <ButtonBase class="py-1.5" color="valid" size="lg" @click="runJob(item)">
+      <ButtonBase
+        class="py-1.5"
+        color="valid"
+        size="lg"
+        @click="runJob(Object.keys(item)[0])"
+      >
         {{ $t("jobs_actions_run") }}
       </ButtonBase>
     </td>
