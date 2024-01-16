@@ -30,6 +30,12 @@ services:
       REDIS_PORT: "6379"
       REDIS_DATABASE: "0"
       REDIS_SSL: "no"
+      REDIS_USERNAME: ""
+      REDIS_PASSWORD: ""
+      REDIS_SENTINEL_HOSTS: ""
+      REDIS_SENTINEL_USERNAME: ""
+      REDIS_SENTINEL_PASSWORD: ""
+      REDIS_SENTINEL_MASTER: "bw-master"
       CUSTOM_CONF_SERVER_HTTP_ready: |
         location /ready {
           default_type 'text/plain';
@@ -42,7 +48,7 @@ services:
     networks:
       bw-universe:
       bw-services:
-        ipv4_address: 1.0.0.2
+        ipv4_address: 1.0.0.254
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.5.5
@@ -67,15 +73,128 @@ services:
       - bw-docker
 
   bw-redis:
-    build:
-      context: .
-      dockerfile: Dockerfile.redis
+    image: bitnami/redis:7.2
+    volumes:
+      - ./acl:/acl
+      - ./tls:/tls
     environment:
-      REDIS_PORT: "6379"
-      REDIS_SSL: "no"
+      REDIS_PORT_NUMBER: "6379"
+      REDIS_TLS_PORT_NUMBER: "6379"
+      REDIS_ACLFILE: "/acl/redis.acl"
+      REDIS_TLS_ENABLED: "no"
+      REDIS_TLS_CERT_FILE: "/tls/redis.pem"
+      REDIS_TLS_KEY_FILE: "/tls/redis.key"
+      REDIS_TLS_CA_FILE: "/tls/ca.crt"
+      REDIS_TLS_AUTH_CLIENTS: "yes"
+      REDIS_REPLICATION_MODE: "master"
+      REDIS_MASTER_SET: "bw-master"
+      ALLOW_EMPTY_PASSWORD: "yes"
     networks:
-      bw-services:
-        ipv4_address: 1.0.0.4
+      - bw-services
+
+  bw-redis-slave:
+    image: bitnami/redis:7.2
+    volumes:
+      - ./acl:/acl
+      - ./tls:/tls
+    environment:
+      REDIS_PORT_NUMBER: "6379"
+      REDIS_TLS_PORT_NUMBER: "6379"
+      REDIS_ACLFILE: "/acl/redis.acl"
+      REDIS_TLS_ENABLED: "no"
+      REDIS_TLS_CERT_FILE: "/tls/redis.pem"
+      REDIS_TLS_KEY_FILE: "/tls/redis.key"
+      REDIS_TLS_CA_FILE: "/tls/ca.crt"
+      REDIS_TLS_AUTH_CLIENTS: "yes"
+      REDIS_REPLICATION_MODE: "slave"
+      REDIS_MASTER_HOST: "bw-redis"
+      REDIS_MASTER_SET: "bw-master"
+      REDIS_MASTER_PORT_NUMBER: "6379"
+      REDIS_MASTER_PASSWORD: ""
+      ALLOW_EMPTY_PASSWORD: "yes"
+    depends_on:
+      - bw-redis
+    networks:
+      - bw-services
+    deploy:
+      replicas: 2
+
+  bw-redis-sentinel-1:
+    image: bitnami/redis-sentinel:7.2
+    command: /opt/bitnami/scripts/redis-sentinel/run.sh --aclfile /acl/sentinel.acl
+    volumes:
+      - ./acl:/acl
+      - ./tls:/tls
+    environment:
+      REDIS_SENTINEL_PORT_NUMBER: "26379"
+      REDIS_SENTINEL_TLS_PORT_NUMBER: "26379"
+      REDIS_SENTINEL_TLS_ENABLED: "no"
+      REDIS_SENTINEL_TLS_CERT_FILE: "/tls/sentinel.pem"
+      REDIS_SENTINEL_TLS_KEY_FILE: "/tls/sentinel.key"
+      REDIS_SENTINEL_TLS_CA_FILE: "/tls/sentinel_ca.crt"
+      REDIS_SENTINEL_TLS_AUTH_CLIENTS: "no"
+      REDIS_MASTER_HOST: "bw-redis"
+      REDIS_MASTER_SET: "bw-master"
+      REDIS_MASTER_PORT_NUMBER: "6379"
+      REDIS_MASTER_PASSWORD: ""
+      ALLOW_EMPTY_PASSWORD: "yes"
+    depends_on:
+      - bw-redis
+      - bw-redis-slave
+    networks:
+      - bw-services
+
+  bw-redis-sentinel-2:
+    image: bitnami/redis-sentinel:7.2
+    command: /opt/bitnami/scripts/redis-sentinel/run.sh --aclfile /acl/sentinel.acl
+    volumes:
+      - ./acl:/acl
+      - ./tls:/tls
+    environment:
+      REDIS_SENTINEL_PORT_NUMBER: "26379"
+      REDIS_SENTINEL_TLS_PORT_NUMBER: "26379"
+      REDIS_SENTINEL_ACLFILE: "/acl/sentinel.acl"
+      REDIS_SENTINEL_TLS_ENABLED: "no"
+      REDIS_SENTINEL_TLS_CERT_FILE: "/tls/sentinel.pem"
+      REDIS_SENTINEL_TLS_KEY_FILE: "/tls/sentinel.key"
+      REDIS_SENTINEL_TLS_CA_FILE: "/tls/sentinel_ca.crt"
+      REDIS_SENTINEL_TLS_AUTH_CLIENTS: "no"
+      REDIS_MASTER_HOST: "bw-redis"
+      REDIS_MASTER_SET: "bw-master"
+      REDIS_MASTER_PORT_NUMBER: "6379"
+      REDIS_MASTER_PASSWORD: ""
+      ALLOW_EMPTY_PASSWORD: "yes"
+    depends_on:
+      - bw-redis
+      - bw-redis-slave
+    networks:
+      - bw-services
+
+  bw-redis-sentinel-3:
+    image: bitnami/redis-sentinel:7.2
+    command: /opt/bitnami/scripts/redis-sentinel/run.sh --aclfile /acl/sentinel.acl
+    volumes:
+      - ./acl:/acl
+      - ./tls:/tls
+    environment:
+      REDIS_SENTINEL_PORT_NUMBER: "26379"
+      REDIS_SENTINEL_TLS_PORT_NUMBER: "26379"
+      REDIS_SENTINEL_ACLFILE: "/acl/sentinel.acl"
+      REDIS_SENTINEL_TLS_ENABLED: "no"
+      REDIS_SENTINEL_TLS_CERT_FILE: "/tls/sentinel.pem"
+      REDIS_SENTINEL_TLS_KEY_FILE: "/tls/sentinel.key"
+      REDIS_SENTINEL_TLS_CA_FILE: "/tls/sentinel_ca.crt"
+      REDIS_SENTINEL_TLS_AUTH_CLIENTS: "no"
+      REDIS_MASTER_HOST: "bw-redis"
+      REDIS_MASTER_SET: "bw-master"
+      REDIS_MASTER_PORT_NUMBER: "6379"
+      REDIS_MASTER_PASSWORD: ""
+      ALLOW_EMPTY_PASSWORD: "yes"
+    depends_on:
+      - bw-redis
+      - bw-redis-slave
+    networks:
+      - bw-services
 
 networks:
   bw-universe:
