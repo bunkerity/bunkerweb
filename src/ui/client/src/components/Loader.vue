@@ -37,9 +37,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div role="alert" data-loader class="loader-container">
-    <p class="sr-only">{{ $t("dashboard_loader_label") }}</p>
+  <div
+    role="progressbar"
+    aria-labelledby="loader-text"
+    data-loader
+    class="loader-container"
+  >
+    <p id="loader-text" class="sr-only">{{ $t("dashboard_loader_label") }}</p>
     <img
+      role="img"
+      aria-hidden="true"
       data-loader-img
       src="/images/logo-menu-2.png"
       class="loader-container-img"

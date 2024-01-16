@@ -15,7 +15,6 @@ function updateLangStorage(lang) {
   <div class="fixed bottom-0 left-1 z-[800]">
     <ul
       id="switch-lang"
-      :aria-hidden="lang.isOpen ? 'false' : 'true'"
       role="radiogroup"
       v-show="lang.isOpen"
       class="max-h-[300px] overflow-auto"
@@ -24,8 +23,8 @@ function updateLangStorage(lang) {
         v-for="(locale, id) in $i18n.availableLocales"
         role="radio"
         :tabindex="id"
-        :aria-checked="$i18n.locale === locale ? 'true' : 'false'"
         :key="`locale-${locale}`"
+        :aria-checked="$i18n.locale === locale ? 'true' : 'false'"
       >
         <button
           @click="
@@ -34,20 +33,30 @@ function updateLangStorage(lang) {
               updateLangStorage(locale);
             }
           "
+          aria-controls="switch-lang-text"
+          :aria-selected="$i18n.locale === locale ? 'true' : 'false'"
         >
-          <span class="sr-only">{{ locale }}</span>
-          <span :class="[`fi fi-${locale}`]"></span>
+          <span :id="`${locale}-${id}`" class="sr-only">{{ locale }}</span>
+          <span
+            :aria-labelledby="`${locale}-${id}`"
+            :class="[`fi fi-${locale}`]"
+          ></span>
         </button>
       </li>
     </ul>
     <!-- current -->
     <button
       aria-controls="switch-lang"
+      :aria-expanded="lang.isOpen ? 'true' : 'false'"
       :aria-description="$t('dashboard_lang_dropdown_button_desc')"
       @click="lang.isOpen = lang.isOpen ? false : true"
     >
-      <span class="sr-only">{{ $i18n.locale }}</span>
-      <span :class="[`fi fi-${$i18n.locale}`]"></span>
+      <span id="current-lang" class="sr-only">{{ $i18n.locale }}</span>
+      <span
+        :aria-labelledby="`current-lang`"
+        id="switch-lang-text"
+        :class="[`fi fi-${$i18n.locale}`]"
+      ></span>
     </button>
     <!-- end current -->
   </div>

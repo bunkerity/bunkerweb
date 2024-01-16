@@ -92,11 +92,11 @@ async function updateUsername() {
 
     <div class="col-span-12 flex justify-center mt-4">
       <ButtonBase
-        @click="updateUsername()"
-        :aria-description="$t('account_edit_username_desc')"
+        @click.prevent="updateUsername()"
         color="edit"
         size="normal"
         class="text-sm ml-4"
+        type="submit"
         :disabled="username.userValue && username.pwValue ? false : true"
       >
         {{ $t("action_edit") }}

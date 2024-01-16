@@ -57,7 +57,6 @@ function updateValue() {
 
     <svg
       role="img"
-      :aria-hidden="checkbox.value === 'yes' ? 'false' : 'true'"
       aria-hidden="true"
       v-show="checkbox.value === 'yes'"
       class="checkbox-svg"

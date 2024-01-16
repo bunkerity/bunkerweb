@@ -100,7 +100,6 @@ async function addBansFromList() {
     >
       <ButtonBase
         @click="addItem()"
-        :aria-description="$t('bans_add_desc')"
         color="valid"
         size="normal"
         class="text-sm mb-2 sm:mb-0"
@@ -128,7 +127,6 @@ async function addBansFromList() {
       <ButtonBase
         :disabled="bans.items.length <= 0 ? true : false"
         @click="deleteAllItems()"
-        :aria-description="$t('bans_add_remove_bans_desc')"
         color="delete"
         size="normal"
         class="text-sm ml-4"
@@ -252,14 +250,14 @@ async function addBansFromList() {
             class="w-full flex justify-center items-center"
           >
             <ButtonBase
-              :aria-description="$t('bans_add_remove_ban_desc')"
+              :aria-describedby="`remove-ban-field-${id}`"
               @click="deleteItem(item.id)"
               color="delete"
               size="normal"
               class="text-sm mx-4 py-1.5"
             >
-              <span class="sr-only">
-                {{ $t("bans_add_remove_ban") }}
+              <span :id="`remove-ban-field-${id}`" class="sr-only">
+                {{ $t("bans_add_remove_ban_desc") }}
               </span>
               <svg
                 role="img"
@@ -288,8 +286,8 @@ async function addBansFromList() {
       class="col-span-12 flex flex-col items-center justify-center mt-4"
     >
       <ButtonBase
-        :aria-description="$t('bans_add_save_bans_desc')"
-        @click="addBansFromList()"
+        type="submit"
+        @click.prevent="addBansFromList()"
         :disabled="bans.isInvalidAdd"
         color="valid"
         size="normal"

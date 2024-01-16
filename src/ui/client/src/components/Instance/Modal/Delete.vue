@@ -46,9 +46,10 @@ const emits = defineEmits(["close", "delete"]);
           {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
+          type="submit"
           color="delete"
           size="lg"
-          @click="
+          @click.prevent="
             () => {
               $emit('close');
               $emit('delete', { hostname: props.hostname });

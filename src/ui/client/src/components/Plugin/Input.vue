@@ -89,7 +89,6 @@ onMounted(() => {
 
 <template>
   <div class="relative flex items-center">
-    <label class="sr-only" :for="input.id">{{ input.id }}</label>
     <input
       ref="inputEl"
       v-model="input.value"
@@ -127,9 +126,6 @@ onMounted(() => {
       "
       :placeholder="input.placeholder"
       :pattern="input.pattern"
-      :aria-hidden="
-        input.type === 'password' ? (input.showInp ? 'true' : 'false') : 'false'
-      "
       :data-default-value="input.defaultValue"
       :data-default-method="input.defaultMethod"
       :data-value="input.value"
@@ -142,7 +138,6 @@ onMounted(() => {
       class="input-clipboard-container"
     >
       <button
-        :aria-description="$t('inp_input_clipboard_desc')"
         @click="copyClipboard()"
         :class="[
           input.method !== 'ui' && input.method !== 'default'
@@ -150,7 +145,11 @@ onMounted(() => {
             : 'enabled',
         ]"
         class="input-clipboard-button"
+        :aria-describedby="`${input.id}-clipboard-text`"
       >
+        <span :id="`${input.id}-clipboard-text`" class="sr-only"
+          >{{ $t("inp_input_clipboard_desc") }}
+        </span>
         <svg
           role="img"
           aria-hidden="true"

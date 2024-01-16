@@ -94,9 +94,6 @@ onMounted(() => {
             : 'password'
           : props.settings.type
       "
-      :aria-hidden="
-        inp.type === 'password' ? (inp.showInp ? 'true' : 'false') : 'false'
-      "
     />
     <div
       v-if="props.settings.clipboard && inp.isClipAllow"
@@ -104,11 +101,14 @@ onMounted(() => {
       class="input-clipboard-container"
     >
       <button
-        :aria-description="$t('inp_input_clipboard_desc')"
         @click="copyClipboard()"
         :class="[props.settings.disabled ? 'disabled' : 'enabled']"
         class="input-clipboard-button"
+        :aria-describedby="`${props.settings.id}-clipboard-text`"
       >
+        <span :id="`${props.settings.id}-clipboard-text`" class="sr-only"
+          >{{ $t("inp_input_clipboard_desc") }}
+        </span>
         <svg
           role="img"
           aria-hidden="true"

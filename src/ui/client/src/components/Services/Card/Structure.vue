@@ -37,12 +37,12 @@ const props = defineProps({
   >
     <ServicesCardHeader :name="props.name" :method="props.method" />
 
-    <ServicesDetails :details="props.details" />
+    <ServicesDetails :name="props.name" :details="props.details" />
 
     <ServicesButtonContainer>
-      <ServicesButtonRedirect :redirect="props.redirect" />
-      <ServicesButtonEdit />
-      <ServicesButtonDelete v-if="props.method === 'ui'" />
+      <ServicesButtonRedirect :name="props.name" :redirect="props.redirect" />
+      <ServicesButtonEdit :name="props.name" />
+      <ServicesButtonDelete :name="props.name" v-if="props.method === 'ui'" />
     </ServicesButtonContainer>
   </div>
 </template>

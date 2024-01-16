@@ -66,11 +66,9 @@ onMounted(() => {
 <template>
   <div id="banner" tabindex="-1" role="list" class="banner-container">
     <div role="img" aria-hidden="true" class="banner-bg"></div>
-
     <div
       v-for="index in 3"
       role="listitem"
-      :aria-hidden="banner.visibleId === index ? 'false' : 'true'"
       :id="`banner-item-${index}`"
       class="banner-item"
       :class="[index === 1 ? 'left-0' : 'left-full opacity-0']"

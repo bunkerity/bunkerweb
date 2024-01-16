@@ -1,4 +1,3 @@
-<script setup></script>
 <template>
   <div
     role="img"

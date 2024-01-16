@@ -142,8 +142,8 @@ onMounted(() => {
 
     <div class="col-span-12 flex justify-center mt-4">
       <ButtonBase
-        @click="updateTotp()"
-        :aria-description="$t('account_edit_totp_desc')"
+        type="submit"
+        @click.prevent="updateTotp()"
         color="edit"
         size="normal"
         class="text-sm ml-4"

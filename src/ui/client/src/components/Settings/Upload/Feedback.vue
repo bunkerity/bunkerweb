@@ -32,13 +32,9 @@ const emits = defineEmits(["close"]);
 <template>
   <div
     :id="`feedback-${props.name}-${date}`"
-    :aria-hidden="'false'"
     class="mt-2 rounded p-2 w-full bg-gray-100 dark:bg-gray-800"
   >
     <div class="flex items-center justify-between">
-      <span class="sr-only">
-        {{ $t(`inp_upload_state_${props.state}`) }}
-      </span>
       <SettingsUploadSvgUpload v-if="props.state === 'upload'" />
       <SettingsUploadSvgError v-if="props.state === 'fail'" />
       <SettingsUploadSvgSuccess v-if="props.state === 'success'" />
@@ -53,6 +49,7 @@ const emits = defineEmits(["close"]);
 
       <button
         class="pl-1 -translate-y-0.5"
+        :aria-describedby="`${props.name}-${date}-close-text`"
         v-if="props.state === 'fail' || props.state === 'success'"
         @click="
           $emit('close', {
@@ -65,7 +62,7 @@ const emits = defineEmits(["close"]);
         :aria-controls="`feedback-${props.name}-${date}`"
         :aria-expanded="'true'"
       >
-        <span class="sr-only">
+        <span :id="`${props.name}-${date}-close-text`" class="sr-only">
           {{ $t(`action_close`) }}
         </span>
         <SettingsUploadSvgCross />

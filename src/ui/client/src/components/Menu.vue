@@ -162,7 +162,11 @@ function toggleMenu() {
     :aria-expanded="menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'"
     @click="toggleMenu()"
     :class="['menu-float-btn', bannerStore.bannerClass]"
+    aria-describedby="sidebar-menu-toggle"
   >
+    <span class="sr-only" id="sidebar-menu-toggle">
+      {{ $t("dashboard_menu_toggle_sidebar") }}
+    </span>
     <svg
       role="img"
       aria-hidden="true"
@@ -182,12 +186,12 @@ function toggleMenu() {
   <aside
     id="sidebar-menu"
     data-sidebar-menu
+    :aria-hidden="menu.isDesktop ? 'false' : menu.isActive ? 'false' : 'true'"
     :class="[
       'menu-container xl:translate-x-0',
       bannerStore.bannerClass,
       menu.isDesktop ? true : menu.isActive ? '' : 'active',
     ]"
-    :aria-hidden="menu.isDesktop ? 'false' : menu.isActive ? 'false' : 'true'"
   >
     <!-- close btn-->
     <button
@@ -197,8 +201,11 @@ function toggleMenu() {
       "
       @click="closeMenu()"
       class="menu-close-btn"
+      aria-describedby="sidebar-menu-close"
     >
-      <span class="sr-only">{{ $t("action_delete") }}</span>
+      <span class="sr-only" id="sidebar-menu-close">
+        {{ $t("dashboard_menu_close_sidebar") }}
+      </span>
       <svg
         role="img"
         aria-hidden="true"
@@ -219,21 +226,22 @@ function toggleMenu() {
       <!-- logo and version -->
       <div class="h-19">
         <a
-          :aria-label="$t('dashboard_logo_link_label')"
+          aria-labelledby="logo-link-label"
           class="menu-logo-container"
           :href="menu.currPath === '/home' ? '#' : '/home'"
         >
+          <span id="logo-link-label" class="sr-only">
+            {{ $t("dashboard_logo_link_label") }}
+          </span>
           <img
-            :aria-hidden="menu.darkMode ? 'false' : 'true'"
+            :aria-hidden="'true'"
             src="/images/logo-menu-2.png"
             class="menu-logo-dark"
-            :alt="$t('dashboard_logo_alt')"
           />
           <img
-            :aria-hidden="menu.darkMode ? 'true' : 'false'"
+            :aria-hidden="'true'"
             src="/images/logo-menu.png"
             class="menu-logo-light"
-            :alt="$t('dashboard_logo_alt')"
           />
         </a>
       </div>
@@ -353,12 +361,11 @@ function toggleMenu() {
 
       <!-- social-->
       <ul class="menu-social-list">
-        <li v-for="item in socialList" class="mx-2 w-6">
-          <a
-            :href="item.href"
-            target="_blank"
-            :aria-label="$t(`dashboard_menu_${item.tag}_label`)"
-          >
+        <li v-for="(item, id) in socialList" class="mx-2 w-6">
+          <a :href="item.href" target="_blank" :aria-labelledby="`${item}-id`">
+            <span :id="`${item}-id`" class="sr-only">
+              {{ $t(`dashboard_menu_${item.tag}_label`) }}
+            </span>
             <component :is="item.svg"></component>
           </a>
         </li>

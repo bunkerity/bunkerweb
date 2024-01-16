@@ -46,28 +46,11 @@ const emits = defineEmits(["close"]);
         :positions="positions"
       >
         <ListItem v-for="(item, id) in props.history">
-          <div role="row" class="list-content-item-wrap">
-            <div
-              role="cell"
-              class="translate-x-3 col-span-2"
-              :class="[positions[0]]"
-            >
-              <span class="sr-only">
-                {{
-                  item["success"]
-                    ? $t("jobs_state_success_succeed")
-                    : $t("jobs_state_success_failed")
-                }}
-              </span>
-              <JobsSvgState :success="item['success']" />
-            </div>
-            <span role="cell" :class="[positions[1]]">{{
-              item["start_date"]
-            }}</span>
-            <span role="cell" :class="[positions[2]]">{{
-              item["end_date"]
-            }}</span>
-          </div>
+          <td class="translate-x-3 col-span-2" :class="[positions[0]]">
+            <JobsSvgState :success="item['success']" />
+          </td>
+          <td :class="[positions[1]]">{{ item["start_date"] }}</td>
+          <td :class="[positions[2]]">{{ item["end_date"] }}</td>
         </ListItem>
       </ListBase>
     </div>

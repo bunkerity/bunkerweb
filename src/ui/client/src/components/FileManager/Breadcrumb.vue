@@ -41,11 +41,18 @@ function getClickPath(id) {
 
 <template>
   <ul
+    role="tablist"
     :aria-description="$t('custom_conf_breadcrumb')"
     class="file-manager-breadcrumb"
   >
-    <li class="file-manager-breadcrumb-back-btn">
-      <button @click="$emit('updatePath', getPrevPath())">
+    <li role="tab" class="file-manager-breadcrumb-back-btn">
+      <button
+        aria-describedby="file-manager-breadcrumb-back-btn-text"
+        @click="$emit('updatePath', getPrevPath())"
+      >
+        <span id="file-manager-breadcrumb-back-btn-text" class="sr-only">
+          {{ $t("custom_conf_breadcrumb_back_desc") }}
+        </span>
         <svg
           role="img"
           aria-hidden="true"
@@ -65,6 +72,7 @@ function getClickPath(id) {
       </button>
     </li>
     <li
+      role="tab"
       v-for="(item, id) in pathSplit"
       class="file-manager-breadcrumb-item"
       :aria-current="id === pathSplit.length - 1 ? 'true' : 'false'"

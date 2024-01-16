@@ -31,7 +31,11 @@ onMounted(() => {
     @click="news.isActive = news.isActive ? false : true"
     :class="['news-float-btn', bannerStore.bannerClass]"
     class="news-float-btn"
+    aria-describedby="sidebar-news-toggle"
   >
+    <span class="sr-only" id="sidebar-news-toggle">
+      {{ $t("dashboard_news_toggle_sidebar") }}
+    </span>
     <svg
       role="img"
       aria-hidden="true"
@@ -48,8 +52,8 @@ onMounted(() => {
 
   <!-- right sidebar -->
   <aside
-    id="sidebar-news"
     :aria-hidden="news.isActive ? 'false' : 'true'"
+    id="sidebar-news"
     :class="[news.isActive ? '' : 'translate-x-[22.5rem]', 'news-sidebar']"
   >
     <!-- close btn-->
@@ -58,7 +62,11 @@ onMounted(() => {
       aria-controls="sidebar-news"
       :aria-expanded="news.isActive ? 'true' : 'false'"
       @click="news.isActive = false"
+      aria-describedby="sidebar-news-close"
     >
+      <span class="sr-only" id="sidebar-news-close">
+        {{ $t("dashboard_news_close_sidebar") }}
+      </span>
       <svg
         role="img"
         aria-hidden="true"

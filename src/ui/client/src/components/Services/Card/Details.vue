@@ -6,12 +6,16 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  name: {
+    type: String,
+    required: true,
+  },
 });
 </script>
 
 <template>
   <div
-    v-for="detail in props.details"
+    v-for="(detail, id) in props.details"
     class="w-full grid grid-cols-12 justify-items-center sm:justify-items-start gap-2 mt-4 mb-6 ml-3 sm:ml-1"
   >
     <div class="flex items-center col-span-12 sm:col-span-6 2xl:col-span-4">
@@ -23,16 +27,16 @@ const props = defineProps({
       <p
         class="transition duration-300 ease-in-out dark:opacity-90 pl-2 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-500"
       >
-        <span class="sr-only">
+        <span :id="`${props.name}-${detail}-${id}`" class="sr-only">
           {{
             detail.isActive
               ? $t("services_detail_active")
               : $t("services_detail_inactive")
-          }}</span
-        >
+          }}
+        </span>
         <svg
           role="img"
-          aria-hidden="true"
+          :aria-describedby="`${props.name}-${detail}-${id}`"
           v-if="detail.isActive"
           class="h-4 w-4 fill-green-500"
           xmlns="http://www.w3.org/2000/svg"
@@ -44,7 +48,7 @@ const props = defineProps({
         </svg>
         <svg
           role="img"
-          aria-hidden="true"
+          :aria-describedby="`${props.name}-${detail}-${id}`"
           v-if="!detail.isActive"
           class="h-4 w-4 fill-red-500"
           xmlns="http://www.w3.org/2000/svg"

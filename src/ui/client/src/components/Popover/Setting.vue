@@ -58,11 +58,13 @@ function hidePopover() {
     role="button"
     @pointerover="showPopover()"
     @pointerleave="hidePopover()"
-    :aria-description="$t('dashboard_popover_button_desc')"
+    :aria-describedby="`${tab.label}-popover-${tab.id}-text`"
     class="cursor-pointer flex justify-start w-full"
   >
-    <span class="sr-only"> {{ $t("dashboard_popover_button") }}</span>
-    <div class="popover-background"></div>
+    <span :id="`${tab.label}-popover-${tab.id}-text`" class="sr-only">
+      {{ $t("dashboard_popover_button_desc") }}
+    </span>
+    <div role="img" aria-hidden="true" class="popover-background"></div>
     <svg
       role="img"
       aria-hidden="true"

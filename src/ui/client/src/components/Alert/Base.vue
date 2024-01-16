@@ -31,8 +31,20 @@ const emits = defineEmits(["close"]);
       <p role="alertdialog" class="text-white mb-0 mr-8 text-sm">
         {{ props.message }}
       </p>
-      <button @click="$emit('close')" class="absolute right-8 top-3">
-        <span class="sr-only">{{ $t("dashboard_alert_close_desc") }}</span>
+      <button
+        :aria-describedby="`${props.type}-${props.message.substring(
+          0,
+          10,
+        )}-close`"
+        @click="$emit('close')"
+        class="absolute right-8 top-3"
+      >
+        <span
+          :id="`${props.type}-${props.message.substring(0, 10)}-close`"
+          class="sr-only"
+        >
+          {{ $t("dashboard_alert_close_desc") }}
+        </span>
         <svg
           aria-hidden="true"
           role="img"

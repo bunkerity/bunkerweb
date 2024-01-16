@@ -304,8 +304,9 @@ async function sendData() {
           {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
+          type="submit"
           :disabled="!data.name || !data.value ? true : false"
-          @click="sendData()"
+          @click.prevent="sendData()"
           size="lg"
           v-if="props.action !== 'view'"
           :class="[

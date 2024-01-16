@@ -26,10 +26,14 @@ function refreshBtn() {
 <template>
   <!-- float button-->
   <button
-    @click="refreshBtn()"
+    type="submit"
+    @click.prevent="refreshBtn()"
     :class="['refresh-float-btn', bannerStore.bannerClass]"
-    :aria-label="$t('dashboard_refresh_label')"
+    aria-describedby="refresh-btn-desc"
   >
+    <span class="sr-only" id="refresh-btn-desc">
+      {{ $t("dashboard_refresh_desc") }}
+    </span>
     <svg
       role="img"
       aria-hidden="true"

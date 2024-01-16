@@ -11,11 +11,13 @@ const props = defineProps({
 
 <template>
   <div
+    aria-hidden="true"
+    role="img"
     class="bg-white w-3 h-3 rounded -z-10 translate-x-1 translate-y-1.5 absolute"
   ></div>
   <svg
     role="img"
-    aria-hidden="true"
+    :aria-description="$t('jobs_state_success_succeed')"
     v-if="props.success"
     class="fill-green-500 h-5 w-5 z-10"
     xmlns="http://www.w3.org/2000/svg"
@@ -27,7 +29,7 @@ const props = defineProps({
   </svg>
   <svg
     role="img"
-    aria-hidden="true"
+    :aria-description="$t('jobs_state_success_succeed')"
     v-if="!props.success"
     class="fill-red-500 h-5 w-5 z-10"
     xmlns="http://www.w3.org/2000/svg"

@@ -6,6 +6,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  name: {
+    type: String,
+    required: true,
+  },
 });
 
 const emits = defineEmits(["redirect"]);
@@ -15,10 +19,13 @@ const emits = defineEmits(["redirect"]);
   <a
     @click="$emit('redirect')"
     :href="props.redirect"
-    :aria-label="$t('services_redirect_link_label')"
     target="_blank"
     class="dark:brightness-90 z-20 mx-1 bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 active:opacity-85 hover:shadow-md"
+    :aria-describedby="`${props.name}-redirect-text`"
   >
+    <span :id="`${props.name}-redirect-text`" class="sr-only">
+      {{ $t("services_redirect_link_desc") }}
+    </span>
     <svg
       role="img"
       aria-hidden="true"

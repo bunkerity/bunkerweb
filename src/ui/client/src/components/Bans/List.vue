@@ -271,8 +271,8 @@ async function sendUnban() {
       class="col-span-12 flex justify-center mt-4"
     >
       <ButtonBase
-        @click="sendUnban()"
-        :aria-description="$t('bans_list_unban_desc')"
+        type="submit"
+        @click.prevent="sendUnban()"
         color="delete"
         size="normal"
         class="text-sm ml-4"

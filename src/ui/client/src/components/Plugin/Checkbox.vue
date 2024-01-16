@@ -37,7 +37,6 @@ function updateCheckbox() {
 
 <template>
   <div class="relative mb-7 md:mb-0 z-10">
-    <label class="sr-only" :for="checkbox.id">{{ checkbox.id }}</label>
     <input
       @click="
         () => {

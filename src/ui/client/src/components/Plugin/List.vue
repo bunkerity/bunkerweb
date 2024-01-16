@@ -18,7 +18,7 @@ const emits = defineEmits(["delete"]);
 <template>
   <ul class="col-span-12 grid grid-cols-12 gap-3 mt-3">
     <li
-      v-for="plugin in props.items"
+      v-for="(plugin, id) in props.items"
       class="py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-3 p-1 flex justify-between items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
     >
       <p
@@ -34,9 +34,11 @@ const emits = defineEmits(["delete"]);
           v-if="plugin.page"
           class="hover:-translate-y-px"
           :href="plugin.page"
-          :aria-label="$t('plugins_page_label')"
+          :aria-describedby="`${plugin.name}-${id}-text`"
         >
-          <span class="sr-only">{{ $t("action_link") }}</span>
+          <span :id="`${plugin.name}-${id}-text`" class="sr-only">
+            {{ $t("plugins_page_label") }}
+          </span>
           <svg
             role="img"
             aria-hidden="true"
@@ -50,8 +52,6 @@ const emits = defineEmits(["delete"]);
           </svg>
         </a>
         <button
-          aria-controls="plugin-delete-modal"
-          :aria-expanded="props.isModalOpen ? 'true' : 'false'"
           v-if="plugin.method.toLowerCase() !== 'static'"
           @click="
             $emit('delete', {
@@ -61,9 +61,14 @@ const emits = defineEmits(["delete"]);
             })
           "
           type="button"
+          aria-controls="plugin-delete-modal"
+          :aria-expanded="props.isModalOpen ? 'true' : 'false'"
+          :aria-describedby="`${plugin.name}-${id}-delete-text`"
           class="z-20 mx-2 inline-block font-bold text-left text-white uppercase align-middle transition-all cursor-pointer text-xs ease-in tracking-tight-rem hover:-translate-y-px"
         >
-          <span class="sr-only">{{ $t("action_delete") }}</span>
+          <span :id="`${plugin.name}-${id}-delete-text`" class="sr-only">
+            {{ $t("action_delete") }}
+          </span>
           <svg
             role="img"
             aria-hidden="true"

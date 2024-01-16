@@ -97,32 +97,22 @@ const emits = defineEmits(["history"]);
     </td>
     <td :class="[props.positions[2], 'ml-2']">
       <button
+        :aria-describedby="`${Object.keys(item)[0]}-history-text-${id}`"
         @click="$emit('history', { jobName: item[Object.keys(item)[0]] })"
       >
-        <span class="sr-only">
+        <span
+          :id="`${Object.keys(item)[0]}-history-text-${id}`"
+          class="sr-only"
+        >
           {{ $t("jobs_actions_show_history") }}
         </span>
         <JobsSvgHistory />
       </button>
     </td>
     <td class="translate-x-3" :class="[props.positions[3]]">
-      <span class="sr-only"
-        >{{
-          item[Object.keys(item)[0]]["reload"]
-            ? $t("jobs_state_reload_succeed")
-            : $t("jobs_state_reload_failed")
-        }}
-      </span>
       <JobsSvgState :success="item[Object.keys(item)[0]]['reload']" />
     </td>
     <td class="translate-x-4" :class="[props.positions[4]]">
-      <span class="sr-only">
-        {{
-          item[Object.keys(item)[0]]["history"][0]["success"]
-            ? $t("jobs_state_success_succeed")
-            : $t("jobs_state_success_failed")
-        }}
-      </span>
       <JobsSvgState
         :success="item[Object.keys(item)[0]]['history'][0]['success']"
       />
@@ -144,10 +134,11 @@ const emits = defineEmits(["history"]);
     </td>
     <td :class="[props.positions[7], 'flex justify-center']">
       <ButtonBase
+        type="submit"
         class="py-1.5"
         color="valid"
         size="lg"
-        @click="runJob(Object.keys(item)[0])"
+        @click.prevent="runJob(Object.keys(item)[0])"
       >
         {{ $t("jobs_actions_run") }}
       </ButtonBase>

@@ -84,17 +84,18 @@ const emits = defineEmits(["action", "delete"]);
       <div class="grid grid-cols-12 items-center">
         <div class="col-span-10 flex items-center">
           <div
+            role="img"
+            :aria-describedby="`${props.serverName}-instance-status`"
             :class="[props.status === 'up' ? 'bg-green-500' : 'bg-red-500']"
             class="h-4 w-4 rounded-full"
-          >
-            <p class="sr-only">
-              {{
-                props.status === "up"
-                  ? $t(`instances_active`)
-                  : $t(`instances_inactive`)
-              }}
-            </p>
-          </div>
+          ></div>
+          <p :id="`${props.serverName}-instance-status`" class="sr-only">
+            {{
+              props.status === "up"
+                ? $t(`instances_active`)
+                : $t(`instances_inactive`)
+            }}
+          </p>
           <h5 class="card-instance-title">
             {{ props.serverName }}
           </h5>

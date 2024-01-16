@@ -98,7 +98,6 @@ onMounted(() => {
 </script>
 
 <template>
-  <label class="sr-only" :for="select.id">{{ select.id }}</label>
   <!-- default hidden-->
   <select
     :data-default-method="select.defaultMethod"
@@ -107,13 +106,14 @@ onMounted(() => {
     :name="select.id"
     :aria-description="$t('inp_select_default_desc')"
     class="hidden"
+    aria-hidden="true"
   >
     <option
+      aria-hidden="true"
       v-for="(value, id) in select.values"
       :value="value"
       :label="value ? value : $t('inp_select_label_empty')"
       :selected="value === select.value ? true : false"
-      :id="`${select.id}-option-${id}`"
     >
       {{ value }}
     </option>
@@ -132,7 +132,9 @@ onMounted(() => {
     @click="toggleSelect()"
     class="select-btn"
   >
-    <span class="select-btn-name">{{ select.value }}</span>
+    <span :id="`${select.id}-text`" class="select-btn-name">{{
+      select.value
+    }}</span>
     <svg
       role="img"
       aria-hidden="true"
@@ -148,16 +150,14 @@ onMounted(() => {
   </button>
   <div
     :id="`${select.id}-dropdown`"
-    role="listbox"
+    role="radiogroup"
     :style="{ width: selectWidth, top: selectTop }"
-    :aria-hidden="select.isOpen ? 'false' : 'true'"
     :class="[select.isOpen ? 'flex' : 'hidden']"
     class="select-dropdown-container"
     :aria-description="$t('inp_select_dropdown_desc')"
   >
     <button
-      role="option"
-      :aria-controls="`${select.id}-option-${id}`"
+      role="radio"
       v-for="(value, id) in select.values"
       @click="
         () => {
@@ -186,8 +186,8 @@ onMounted(() => {
         value === select.value ? 'active' : '',
         'select-dropdown-btn',
       ]"
-      :aria-description="$t('inp_select_option_desc')"
-      :aria-selected="value === select.value ? 'true' : 'false'"
+      :aria-controls="`${select.id}-text`"
+      :aria-checked="value === select.value ? 'true' : 'false'"
     >
       {{ value }}
     </button>

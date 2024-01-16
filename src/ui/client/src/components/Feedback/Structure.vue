@@ -138,8 +138,11 @@ onMounted(() => {
       :aria-expanded="dropdown.isOpen ? 'true' : 'false'"
       @click="dropdown.isOpen = dropdown.isOpen ? false : true"
       class="feedback-float-btn"
+      :aria-describedby="`feedback-sidebar-toggle-btn-text`"
     >
-      <span class="sr-only">{{ $t("dashboard_open_sidebar") }}</span>
+      <span id="feedback-sidebar-toggle-btn-text">
+        {{ $t("dashboard_feedback_toggle_sidebar") }}
+      </span>
       <svg
         aria-hidden="true"
         role="img"
@@ -173,8 +176,11 @@ onMounted(() => {
       :aria-expanded="dropdown.isOpen ? 'true' : 'false'"
       class="feedback-header-close-btn"
       @click="dropdown.isOpen = false"
+      :aria-describedby="`feedback-sidebar-close-btn-text`"
     >
-      <span class="sr-only">{{ $t("dashboard_close_sidebar") }}</span>
+      <span id="feedback-sidebar-close-btn-text">
+        {{ $t("dashboard_feedback_close_sidebar") }}
+      </span>
       <svg
         aria-hidden="true"
         role="img"

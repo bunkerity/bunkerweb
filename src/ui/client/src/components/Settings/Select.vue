@@ -91,10 +91,11 @@ const emits = defineEmits(["inp"]);
     :name="props.settings.id"
     :aria-description="$t('inp_select_default_desc')"
     class="hidden"
+    aria-hidden="true"
   >
     <option
+      aria-hidden="true"
       v-for="(value, id) in props.settings.values"
-      :id="`${props.settings.id}-option-${id}`"
       :label="value ? value : $t('inp_select_label_empty')"
       :value="value"
       :selected="value === props.settings.value ? true : false"
@@ -116,7 +117,7 @@ const emits = defineEmits(["inp"]);
       @click="toggleSelect()"
       :class="['select-btn', props.inpClass]"
     >
-      <span class="select-btn-name">
+      <span :id="`${props.settings.id}-text`" class="select-btn-name">
         {{ select.value || props.settings.value }}
       </span>
       <!-- chevron -->
@@ -136,9 +137,8 @@ const emits = defineEmits(["inp"]);
     </button>
     <!-- dropdown-->
     <div
-      role="listbox"
+      role="radiogroup"
       :style="{ width: selectWidth }"
-      :aria-hidden="select.isOpen ? 'false' : 'true'"
       :id="`${props.settings.id}-custom`"
       :class="[select.isOpen ? 'flex' : 'hidden']"
       class="select-dropdown-container"
@@ -146,8 +146,7 @@ const emits = defineEmits(["inp"]);
     >
       <button
         v-for="(value, id) in props.settings.values"
-        role="option"
-        :aria-controls="`${props.settings.id}-option-${id}`"
+        role="radio"
         @click="$emit('inp', changeValue(value))"
         :class="[
           id === 0 ? 'first' : '',
@@ -155,8 +154,8 @@ const emits = defineEmits(["inp"]);
           value === props.settings.value ? 'active' : '',
           'select-dropdown-btn',
         ]"
-        :aria-description="$t('inp_select_option_desc')"
-        :aria-selected="value === props.settings.value ? 'true' : 'false'"
+        :aria-controls="`${props.settings.id}-text`"
+        :aria-checked="value === props.settings.value ? 'true' : 'false'"
       >
         {{ value }}
       </button>

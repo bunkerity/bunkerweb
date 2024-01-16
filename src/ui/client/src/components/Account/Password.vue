@@ -102,8 +102,8 @@ async function updatePw() {
 
     <div class="col-span-12 flex justify-center mt-4">
       <ButtonBase
-        @click="updatePw()"
-        :aria-description="$t('account_edit_password_desc')"
+        type="submit"
+        @click.prevent="updatePw()"
         color="edit"
         size="normal"
         class="text-sm ml-4"

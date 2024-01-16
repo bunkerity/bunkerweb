@@ -1,6 +1,13 @@
 <script setup>
 import { defineEmits } from "vue";
 
+const props = defineProps({
+  name: {
+    type: String,
+    required: true,
+  },
+});
+
 const emits = defineEmits(["edit"]);
 </script>
 
@@ -8,7 +15,11 @@ const emits = defineEmits(["edit"]);
   <button
     @click="$emit('edit')"
     class="dark:brightness-90 z-20 mx-1 bg-yellow-500 hover:bg-yellow-500/80 focus:bg-yellow-500/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 active:opacity-85 hover:shadow-md"
+    :aria-describedby="`${props.name}-edit-text`"
   >
+    <span :id="`${props.name}-edit-text`" class="sr-only">
+      {{ $t("services_edit_link_desc") }}
+    </span>
     <svg
       role="img"
       aria-hidden="true"

@@ -82,10 +82,10 @@ const emits = defineEmits(["pluginDelete", "close"]);
           {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
+          type="submit"
           color="delete"
           size="lg"
-          @click="pluginDelete()"
-          type="button"
+          @click.prevent="pluginDelete()"
           class="text-xs"
         >
           {{ $t("action_delete") }}
