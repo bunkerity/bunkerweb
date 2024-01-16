@@ -81,7 +81,14 @@ function clusterstore:initialize(pool)
 			else
 				sport = tonumber(sport)
 			end
-			table.insert(options.sentinels, { host = shost, port = sport })
+			local data = { host = shost, port = sport }
+			if options.sentinel_username ~= "" then
+				data.username = options.sentinel_username
+			end
+			if options.sentinel_password ~= "" then
+				data.password = options.sentinel_password
+			end
+			table.insert(options.sentinels, data)
 		end
 	end
 	self.options = options
@@ -106,14 +113,21 @@ function clusterstore:connect(readonly)
 		self:close()
 	end
 	-- Connect to sentinels if needed
-	local redis_client, err
+	local redis_client, err, previous_errors
 	if #self.options.sentinels > 0 and readonly then
-		redis_client, err = self.redis_connector:connect({ role = "slave" })
+		redis_client, err, previous_errors = self.redis_connector:connect({ role = "slave" })
 	else
-		redis_client, err = self.redis_connector:connect()
+		redis_client, err, previous_errors = self.redis_connector:connect()
 	end
 	self.redis_client = redis_client
 	if not self.redis_client then
+		if previous_errors then
+			err = err .. " ( previous errors : "
+			for _, e in ipairs(previous_errors) do
+				err = err .. e .. ", "
+			end
+			err = err:sub(1, -3) .. " )"
+		end
 		return false, "error while getting redis client : " .. err
 	end
 	-- Everything went well
