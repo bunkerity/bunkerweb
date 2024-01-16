@@ -219,15 +219,18 @@ function toggleMenu() {
       <!-- logo and version -->
       <div class="h-19">
         <a
+          :aria-label="$t('dashboard_logo_link_label')"
           class="menu-logo-container"
           :href="menu.currPath === '/home' ? '#' : '/home'"
         >
           <img
+            :aria-hidden="menu.darkMode ? 'false' : 'true'"
             src="/images/logo-menu-2.png"
             class="menu-logo-dark"
             :alt="$t('dashboard_logo_alt')"
           />
           <img
+            :aria-hidden="menu.darkMode ? 'true' : 'false'"
             src="/images/logo-menu.png"
             class="menu-logo-light"
             :alt="$t('dashboard_logo_alt')"
@@ -239,7 +242,7 @@ function toggleMenu() {
         <h2 class="menu-account-title">
           {{ username }}
         </h2>
-        <a class="menu-account-link" href="/account">manage account </a>
+        <a class="menu-account-link" href="/account">manage account</a>
       </div>
 
       <hr class="menu-separator" />
@@ -351,10 +354,11 @@ function toggleMenu() {
       <!-- social-->
       <ul class="menu-social-list">
         <li v-for="item in socialList" class="mx-2 w-6">
-          <a :href="item.href" target="_blank">
-            <span class="sr-only">
-              {{ $t(`dashboard_link_${item.tag}`) }}
-            </span>
+          <a
+            :href="item.href"
+            target="_blank"
+            :aria-label="$t(`dashboard_menu_${item.tag}_label`)"
+          >
             <component :is="item.svg"></component>
           </a>
         </li>

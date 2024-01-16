@@ -24,12 +24,15 @@ const props = defineProps({
 </script>
 
 <template>
-  <a :href="props.href ? props.href : '#'" class="card-stat">
+  <a
+    :aria-label="$t('home_card_link_label')"
+    :href="props.href ? props.href : '#'"
+    class="card-stat"
+  >
     <div>
       <HomeCardHeader :name="props.name" :count="props.count" />
       <HomeCardDetails :detailArr="props.detailArr" />
     </div>
-
     <slot></slot>
   </a>
 </template>

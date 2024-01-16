@@ -28,14 +28,13 @@ const emits = defineEmits(["tab"]);
         :aria-selected="tabs.current === item ? 'true' : 'false'"
         class="mr-2 uppercase font-bold"
       >
-        <a
+        <button
           @click="
             () => {
               tabs.current = item;
               $emit('tab', item);
             }
           "
-          href="#"
           :class="[
             tabs.current === item ? tabs.activeTabClass : tabs.inactiveTabClass,
           ]"
@@ -86,7 +85,7 @@ const emits = defineEmits(["tab"]);
             />
           </svg>
           {{ $t(`bans_tabs_${item}`) }}
-        </a>
+        </button>
       </li>
     </ul>
   </div>

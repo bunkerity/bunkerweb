@@ -42,7 +42,7 @@ const emits = defineEmits(["tab"]);
         :aria-selected="tabs.current === item.tag ? 'true' : 'false'"
         class="mr-2 uppercase font-bold"
       >
-        <a
+        <button
           class="min-w-[60px]"
           @click="
             () => {
@@ -50,7 +50,6 @@ const emits = defineEmits(["tab"]);
               $emit('tab', item.tag);
             }
           "
-          href="#"
           :class="[
             tabs.current === item.tag
               ? tabs.activeTabClass
@@ -59,7 +58,7 @@ const emits = defineEmits(["tab"]);
           :aria-current="tabs.current === item.tag ? 'page' : false"
         >
           {{ item.text }}
-        </a>
+        </button>
       </li>
     </ul>
   </div>

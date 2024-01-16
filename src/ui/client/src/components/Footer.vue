@@ -47,8 +47,8 @@ onMounted(() => {
         <ul class="footer-list-container">
           <li v-for="item in items">
             <a :href="item.href" class="footer-list-item" target="_blank">
-              {{ item.title }}</a
-            >
+              {{ item.title }}
+            </a>
           </li>
         </ul>
       </div>

@@ -30,7 +30,12 @@ const emits = defineEmits(["delete"]);
         {{ plugin.name }}
       </p>
       <div v-if="plugin.external" class="flex items-center">
-        <a v-if="plugin.page" class="hover:-translate-y-px" :href="plugin.page">
+        <a
+          v-if="plugin.page"
+          class="hover:-translate-y-px"
+          :href="plugin.page"
+          :aria-label="$t('plugins_page_label')"
+        >
           <span class="sr-only">{{ $t("action_link") }}</span>
           <svg
             role="img"

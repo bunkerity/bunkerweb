@@ -79,7 +79,7 @@ onMounted(() => {
         {{ $t(`dashboard_banner_title_${index}`) }}
         <a
           class="banner-item-link"
-          href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=ui"
+          :href="$t(`dashboard_banner_link_${index}`)"
         >
           {{ $t(`dashboard_banner_link_text_${index}`) }}
         </a>

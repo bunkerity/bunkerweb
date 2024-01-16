@@ -28,8 +28,8 @@ function refreshBtn() {
   <button
     @click="refreshBtn()"
     :class="['refresh-float-btn', bannerStore.bannerClass]"
+    :aria-label="$t('dashboard_refresh_label')"
   >
-    <span class="sr-only">{{ $t("dashboard_refresh_button") }}</span>
     <svg
       role="img"
       aria-hidden="true"
