@@ -25,6 +25,7 @@ function clusterstore:initialize(pool)
 		["REDIS_PORT"] = "",
 		["REDIS_DATABASE"] = "",
 		["REDIS_SSL"] = "",
+		["REDIS_SSL_VERIFY"] = "",
 		["REDIS_TIMEOUT"] = "",
 		["REDIS_KEEPALIVE_IDLE"] = "",
 		["REDIS_KEEPALIVE_POOL"] = "",
@@ -57,6 +58,7 @@ function clusterstore:initialize(pool)
 		keepalive_poolsize = tonumber(self.variables["REDIS_KEEPALIVE_POOL"]),
 		connection_options = {
 			ssl = self.variables["REDIS_SSL"] == "yes",
+			ssl_verify = self.variables["REDIS_SSL_VERIFY"] == "yes",
 		},
 		host = self.variables["REDIS_HOST"],
 		port = tonumber(self.variables["REDIS_PORT"]),
