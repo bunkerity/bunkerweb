@@ -11,6 +11,7 @@ local logger = clogger:new("CLUSTERSTORE")
 local get_variable = utils.get_variable
 local is_cosocket_available = utils.is_cosocket_available
 local ERR = ngx.ERR
+local WARN = ngx.WARN
 local INFO = ngx.INFO
 local tonumber = tonumber
 local tostring = tostring
@@ -116,6 +117,17 @@ function clusterstore:connect(readonly)
 	local redis_client, err, previous_errors
 	if #self.options.sentinels > 0 and readonly then
 		redis_client, err, previous_errors = self.redis_connector:connect({ role = "slave" })
+		if not redis_client then
+			if previous_errors then
+				err = err .. " ( previous errors : "
+				for _, e in ipairs(previous_errors) do
+					err = err .. e .. ", "
+				end
+				err = err:sub(1, -3) .. " )"
+			end
+			logger:log(WARN, "error while getting redis slave client : " .. err .. ", fallback to master")
+			redis_client, err, previous_errors = self.redis_connector:connect()
+		end
 	else
 		redis_client, err, previous_errors = self.redis_connector:connect()
 	end
