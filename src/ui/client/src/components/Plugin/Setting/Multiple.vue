@@ -6,6 +6,7 @@ import PluginSelect from "@components/Plugin/Select.vue";
 import PluginCheckbox from "@components/Plugin/Checkbox.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import { getSettingsMultipleList } from "@utils/settings.js";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   settings: {
@@ -118,6 +119,7 @@ function deleteMultToGroup(multGroupName, settingsGroupName) {
           {{ multGroupName.replace("-", " ") }}
         </p>
         <ButtonBase
+          :tabindex="contentIndex"
           color="valid"
           size="sm"
           @click="addMultToGroup(multGroupName)"
@@ -140,7 +142,13 @@ function deleteMultToGroup(multGroupName, settingsGroupName) {
             />
           </svg>
         </ButtonBase>
-        <ButtonBase @click="toggle()" color="info" size="sm" class="ml-2">
+        <ButtonBase
+          :tabindex="contentIndex"
+          @click="toggle()"
+          color="info"
+          size="sm"
+          class="ml-2"
+        >
           <svg
             role="img"
             aria-hidden="true"
@@ -193,7 +201,11 @@ function deleteMultToGroup(multGroupName, settingsGroupName) {
               :class="[setting.isMatchFilter ? '' : 'hidden']"
               class="ml-2 mr-4 md:ml-3 md:mr-6 xl:ml-4 xl:mr-8 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4"
             >
-              <PluginSettingHeader :label="settingName" :help="setting.help" />
+              <PluginSettingHeader
+                :id="setting.id"
+                :label="settingName"
+                :help="setting.help"
+              />
               <PluginInput
                 v-if="setting.type === 'text' || setting.type === 'password'"
                 :serviceName="props.serviceName"

@@ -2,6 +2,7 @@
 import { useConfigStore } from "@store/settings.js";
 import { getDefaultMethod } from "@utils/settings.js";
 import { reactive, ref, defineProps, onMounted } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 /* PROPS ARGUMENTS
   *
@@ -90,6 +91,7 @@ onMounted(() => {
 <template>
   <div class="relative flex items-center">
     <input
+      :tabindex="contentIndex"
       ref="inputEl"
       v-model="input.value"
       @input="
@@ -138,6 +140,7 @@ onMounted(() => {
       class="input-clipboard-container"
     >
       <button
+        :tabindex="contentIndex"
         @click="copyClipboard()"
         :class="[
           input.method !== 'ui' && input.method !== 'default'
@@ -170,6 +173,7 @@ onMounted(() => {
     </div>
     <div v-if="input.type === 'password'" class="input-pw-container">
       <button
+        :tabindex="contentIndex"
         :aria-description="$t('inp_input_password_desc')"
         :aria-controls="input.id"
         @click="input.showInp = input.showInp ? false : true"

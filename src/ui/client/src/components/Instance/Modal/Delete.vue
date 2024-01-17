@@ -2,6 +2,8 @@
 import { defineProps, defineEmits } from "vue";
 import ButtonBase from "@components/Button/Base.vue";
 import ModalBase from "@components/Modal/Base.vue";
+import { contentIndex } from "@utils/tabindex.js";
+
 // Open after instance delete action is fired
 const props = defineProps({
   // File or folder
@@ -35,6 +37,7 @@ const emits = defineEmits(["close", "delete"]);
       </div>
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase
+          :tabindex="props.isOpen ? contentIndex : -1"
           color="close"
           size="lg"
           @click="$emit('close')"
@@ -46,6 +49,7 @@ const emits = defineEmits(["close", "delete"]);
           {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
+          :tabindex="props.isOpen ? contentIndex : -1"
           type="submit"
           color="delete"
           size="lg"

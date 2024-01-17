@@ -1104,11 +1104,11 @@ body {
 }
 
 .feedback-alert-btn {
-  @apply absolute right-8 top-2;
+  @apply absolute right-2 top-1 h-5 w-5;
 }
 
 .feedback-alert-svg {
-  @apply cursor-pointer fill-white dark:opacity-80 absolute h-5 w-5;
+  @apply cursor-pointer fill-white dark:opacity-80 w-full h-full;
 }
 
 .feedback-alert-text {

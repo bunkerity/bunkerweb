@@ -2,6 +2,7 @@
 import HomeCardHeader from "@components/Home/Card/Header.vue";
 import HomeCardDetails from "@components/Home/Card/Details.vue";
 import { defineProps } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   href: {
@@ -25,6 +26,7 @@ const props = defineProps({
 
 <template>
   <a
+    :tabindex="contentIndex"
     :aria-label="$t('home_card_link_label')"
     :href="props.href ? props.href : '#'"
     class="card-stat"

@@ -1,5 +1,6 @@
 <script setup>
 import { defineProps } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   items: {
@@ -31,6 +32,7 @@ const emits = defineEmits(["delete"]);
       </p>
       <div v-if="plugin.external" class="flex items-center">
         <a
+          :tabindex="contentIndex"
           v-if="plugin.page"
           class="hover:-translate-y-px"
           :href="plugin.page"
@@ -52,6 +54,7 @@ const emits = defineEmits(["delete"]);
           </svg>
         </a>
         <button
+          :tabindex="contentIndex"
           v-if="plugin.method.toLowerCase() !== 'static'"
           @click="
             $emit('delete', {

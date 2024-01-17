@@ -71,6 +71,7 @@
   "dashboard_privacy": "privacy",
   "dashboard_license": "license",
   "dashboard_sitemap": "sitemap",
+  "dashboard_default": "default",
   "dashboard_info": "info",
   "dashboard_filter": "filters",
   "dashboard_loader": "loading",

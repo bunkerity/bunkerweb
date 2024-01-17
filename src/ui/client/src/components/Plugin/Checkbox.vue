@@ -1,7 +1,8 @@
 <script setup>
+import { reactive, defineProps } from "vue";
 import { useConfigStore } from "@store/settings.js";
 import { getModes, getDefaultMethod } from "@utils/settings.js";
-import { reactive, defineProps } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   setting: {
@@ -32,31 +33,29 @@ const config = useConfigStore();
 
 function updateCheckbox() {
   checkbox.value = checkbox.value === "yes" ? "no" : "yes";
+  // Case is same value as store on core
+  if (checkbox.value === checkbox.valueStatic)
+    return config.removeConf(
+      props.serviceName || checkbox.context,
+      checkbox.id,
+      checkbox.value,
+    );
+
+  // Case not same value as store on core
+  return config.updateConf(
+    props.serviceName || checkbox.context,
+    checkbox.id,
+    checkbox.value,
+  );
 }
 </script>
 
 <template>
   <div class="relative mb-7 md:mb-0 z-10">
     <input
-      @click="
-        () => {
-          updateCheckbox();
-          // Case is same value as store on core
-          if (checkbox.value === checkbox.valueStatic)
-            return config.removeConf(
-              props.serviceName || checkbox.context,
-              checkbox.id,
-              checkbox.value,
-            );
-
-          // Case not same value as store on core
-          return config.updateConf(
-            props.serviceName || checkbox.context,
-            checkbox.id,
-            checkbox.value,
-          );
-        }
-      "
+      :tabindex="contentIndex"
+      @keyup.enter="updateCheckbox()"
+      @click="updateCheckbox()"
       :id="checkbox.id"
       :name="checkbox.id"
       :data-default-method="

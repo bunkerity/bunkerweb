@@ -1,6 +1,6 @@
 <script setup>
 import { reactive } from "vue";
-
+import { langIndex } from "@utils/tabindex.js";
 const lang = reactive({
   isOpen: false,
 });
@@ -22,11 +22,11 @@ function updateLangStorage(lang) {
       <li
         v-for="(locale, id) in $i18n.availableLocales"
         role="radio"
-        :tabindex="id"
         :key="`locale-${locale}`"
         :aria-checked="$i18n.locale === locale ? 'true' : 'false'"
       >
         <button
+          :tabindex="lang.isOpen ? langIndex : -1"
           @click="
             () => {
               lang.isOpen = false;
@@ -46,6 +46,7 @@ function updateLangStorage(lang) {
     </ul>
     <!-- current -->
     <button
+      :tabindex="langIndex"
       aria-controls="switch-lang"
       :aria-expanded="lang.isOpen ? 'true' : 'false'"
       :aria-description="$t('dashboard_lang_dropdown_button_desc')"

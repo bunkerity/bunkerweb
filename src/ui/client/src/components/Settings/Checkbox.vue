@@ -1,5 +1,6 @@
 <script setup>
 import { reactive, defineProps } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   // id && value && method
@@ -28,6 +29,8 @@ function updateValue() {
 <template>
   <div class="relative z-10">
     <input
+      :tabindex="contentIndex"
+      @keyup.enter="$emit('inp', updateValue())"
       @click="$emit('inp', updateValue())"
       :id="props.settings.id"
       :name="props.settings.id"

@@ -143,9 +143,17 @@ def account():
     return render_template("account.html")
 
 
+@dashboard.route(f"{PREFIX}/sitemap", methods=["GET"])
+@jwt_required()
+@jwt_additionnal_checks()
+@hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
+def sitemap():
+    return render_template("sitemap.html")
+
+
 @dashboard.route(f"{PREFIX}/<string:page>", methods=["GET"])
 @jwt_required()
 @jwt_additionnal_checks()
 @hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
 def not_found(page):
-    raise NotFound(code=404, description=f"Page {page} Not found")
+    raise NotFound(f"Page {page} Not found")

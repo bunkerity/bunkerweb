@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, reactive } from "vue";
 import { useBannerStore } from "@store/global.js";
-
+import { bannerIndex } from "@utils/tabindex.js";
 const bannerStore = useBannerStore();
 
 const banner = reactive({
@@ -76,6 +76,7 @@ onMounted(() => {
       <p class="banner-item-text">
         {{ $t(`dashboard_banner_title_${index}`) }}
         <a
+          :tabindex="bannerIndex"
           class="banner-item-link"
           :href="$t(`dashboard_banner_link_${index}`)"
         >

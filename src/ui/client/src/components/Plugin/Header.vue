@@ -23,12 +23,12 @@ const props = defineProps({
 
 <template>
   <div class="col-span-12" data-setting-header>
-    <label
+    <h2
       :for="props.id"
-      class="transition duration-300 ease-in-out ml-2 font-bold uppercase dark:text-white/90 mb-0"
+      class="text-base transition duration-300 ease-in-out ml-2 font-bold uppercase dark:text-white/90 mb-0"
     >
       {{ props.name }} <span>{{ props.version }}</span>
-    </label>
+    </h2>
     <div
       class="transition duration-300 ease-in-out dark:opacity-90 ml-2 text-sm mb-2 dark:text-gray-400"
     >

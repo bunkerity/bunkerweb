@@ -11,6 +11,10 @@ const props = defineProps({
     required: true,
     // [{text: "Ban list", tag: "list"}]
   },
+  tabId: {
+    type: [String, Number],
+    required: true,
+  },
 });
 
 const tabs = reactive({
@@ -38,11 +42,11 @@ const emits = defineEmits(["tab"]);
       <li
         v-for="(item, id) in tabs.items"
         role="tab"
-        :tabindex="id"
         :aria-selected="tabs.current === item.tag ? 'true' : 'false'"
         class="mr-2 uppercase font-bold"
       >
         <button
+          :tabindex="props.tabId"
           class="min-w-[60px]"
           @click="
             () => {

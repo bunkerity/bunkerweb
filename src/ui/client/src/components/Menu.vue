@@ -14,7 +14,8 @@ import MenuSvgBans from "@components/Menu/Svg/Bans.vue";
 import MenuSvgActions from "@components/Menu/Svg/Actions.vue";
 import { reactive, onMounted } from "vue";
 import { getDarkMode } from "@utils/global.js";
-import { getCookie } from "@utils/api";
+import { getCookie } from "@utils/api.js";
+import { menuIndex } from "@/utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
 
 // Use to update position when banner is visible or not
@@ -159,6 +160,7 @@ function toggleMenu() {
   <!-- float button-->
   <button
     aria-controls="sidebar-menu"
+    :tabindex="menu.isDesktop ? '-1' : menuIndex"
     :aria-expanded="menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'"
     @click="toggleMenu()"
     :class="['menu-float-btn', bannerStore.bannerClass]"
@@ -199,8 +201,10 @@ function toggleMenu() {
       :aria-expanded="
         menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'
       "
+      :tabindex="menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'"
       @click="closeMenu()"
       class="menu-close-btn"
+      :class="[menu.isDesktop ? 'hidden' : '']"
       aria-describedby="sidebar-menu-close"
     >
       <span class="sr-only" id="sidebar-menu-close">
@@ -226,6 +230,9 @@ function toggleMenu() {
       <!-- logo and version -->
       <div class="h-19">
         <a
+          :tabindex="
+            menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
+          "
           aria-labelledby="logo-link-label"
           class="menu-logo-container"
           :href="menu.currPath === '/home' ? '#' : '/home'"
@@ -250,7 +257,15 @@ function toggleMenu() {
         <h2 class="menu-account-title">
           {{ username }}
         </h2>
-        <a class="menu-account-link" href="/account">manage account</a>
+        <a
+          :tabindex="
+            menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
+          "
+          class="menu-account-link"
+          href="/account"
+        >
+          manage account
+        </a>
       </div>
 
       <hr class="menu-separator" />
@@ -262,6 +277,9 @@ function toggleMenu() {
           <!-- item -->
           <li v-for="(item, id) in navList" :key="id" class="mt-0.5 w-full">
             <a
+              :tabindex="
+                menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
+              "
               :class="[
                 item.path.toLowerCase().includes(menu.currPath) ? 'active' : '',
                 'menu-nav-item-anchor',
@@ -296,6 +314,13 @@ function toggleMenu() {
               <div class="menu-page-plugin-empty-title">
                 {{ $t("dashboard_menu_plugins_none") }} <br />
                 <a
+                  :tabindex="
+                    menu.isDesktop
+                      ? menuIndex
+                      : menu.isActive
+                        ? menuIndex
+                        : '-1'
+                  "
                   class="menu-page-plugin-empty-anchor"
                   target="_blank"
                   href="https://docs.bunkerweb.io/latest/plugins?utm_campaign=self&utm_source=ui"
@@ -307,11 +332,14 @@ function toggleMenu() {
 
             <li v-for="plugin in menu.pagePlugins" class="mt-0.5 w-full">
               <a
+                :tabindex="
+                  menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
+                "
                 target="_blank"
                 class="menu-page-plugin-anchor"
                 :href="`/plugins?plugin_id=${plugin.id}`"
               >
-                <div class="menu-page-plugin-svg-container">
+                <div aria-hidden="true" class="menu-page-plugin-svg-container">
                   <svg
                     role="img"
                     aria-hidden="true"
@@ -342,6 +370,9 @@ function toggleMenu() {
       <!-- dark/light mode -->
       <div class="menu-mode-container">
         <input
+          :tabindex="
+            menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
+          "
           :checked="menu.darkMode"
           @click="switchMode()"
           id="darkMode"
@@ -362,7 +393,14 @@ function toggleMenu() {
       <!-- social-->
       <ul class="menu-social-list">
         <li v-for="(item, id) in socialList" class="mx-2 w-6">
-          <a :href="item.href" target="_blank" :aria-labelledby="`${item}-id`">
+          <a
+            :tabindex="
+              menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
+            "
+            :href="item.href"
+            target="_blank"
+            :aria-labelledby="`${item}-id`"
+          >
             <span :id="`${item}-id`" class="sr-only">
               {{ $t(`dashboard_menu_${item.tag}_label`) }}
             </span>
@@ -374,7 +412,13 @@ function toggleMenu() {
 
       <!-- logout-->
       <div class="w-full">
-        <button @click="getlogout()" class="menu-logout">
+        <button
+          :tabindex="
+            menu.isDesktop ? menuIndex : menu.isActive ? menuIndex : '-1'
+          "
+          @click="getlogout()"
+          class="menu-logout"
+        >
           {{ $t("dashboard_menu_log_out") }}
         </button>
       </div>

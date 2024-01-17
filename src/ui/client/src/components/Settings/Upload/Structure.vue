@@ -1,7 +1,8 @@
 <script setup>
+import { ref, reactive } from "vue";
 import SettingsUploadSvgSuccess from "@components/Settings/Upload/Svg/Success.vue";
 import SettingsUploadFeedback from "@components/Settings/Upload/Feedback.vue";
-import { ref, reactive } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 const dropzone = reactive({
   isDragOn: false,
@@ -105,6 +106,7 @@ function uploadFile(file) {
       class="hover:bg-gray-100 dark:hover:bg-slate-700/50 cursor-pointer col-span-12 border-2 rounded-lg p-2 border-primary dark:brightness-125 drop-zone"
     >
       <input
+        :tabindex="contentIndex"
         @change="uploadFiles(fileInp.files)"
         ref="fileInp"
         type="file"

@@ -1,5 +1,6 @@
 <script setup>
 import { reactive } from "vue";
+import { refreshIndex } from "@utils/tabindex";
 import { useRefreshStore } from "@store/global.js";
 import { useBannerStore } from "@store/global.js";
 
@@ -26,6 +27,7 @@ function refreshBtn() {
 <template>
   <!-- float button-->
   <button
+    :tabindex="refreshIndex"
     type="submit"
     @click.prevent="refreshBtn()"
     :class="['refresh-float-btn', bannerStore.bannerClass]"

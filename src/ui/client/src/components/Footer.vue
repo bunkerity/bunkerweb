@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, reactive } from "vue";
+import { footerIndex } from "@utils/tabindex";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
@@ -50,7 +51,12 @@ onMounted(() => {
         </div>
         <ul class="footer-list-container">
           <li v-for="item in items">
-            <a :href="item.href" class="footer-list-item" target="_blank">
+            <a
+              :tabindex="footerIndex"
+              :href="item.href"
+              class="footer-list-item"
+              target="_blank"
+            >
               {{ item.title }}
             </a>
           </li>

@@ -1,10 +1,11 @@
 <script setup>
+import { reactive } from "vue";
 import { defineProps, defineEmits } from "vue";
 import ButtonBase from "@components/Button/Base.vue";
 import ModalBase from "@components/Modal/Base.vue";
 import { fetchAPI } from "@utils/api.js";
+import { contentIndex } from "@utils/tabindex.js";
 import { useFeedbackStore } from "@store/global.js";
-import { reactive } from "vue";
 
 const feedbackStore = useFeedbackStore();
 
@@ -71,6 +72,7 @@ const emits = defineEmits(["pluginDelete", "close"]);
     <div class="w-full mt-2">
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase
+          :tabindex="contentIndex"
           color="close"
           size="lg"
           @click="$emit('close')"
@@ -82,6 +84,7 @@ const emits = defineEmits(["pluginDelete", "close"]);
           {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
+          :tabindex="contentIndex"
           type="submit"
           color="delete"
           size="lg"

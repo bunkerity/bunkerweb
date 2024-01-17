@@ -1,4 +1,5 @@
 <script setup>
+import { reactive, computed, onMounted, watch } from "vue";
 import Dashboard from "@layouts/Dashboard.vue";
 import HomeCardStructure from "@components/Home/Card/Structure.vue";
 import HomeCardSvgVersion from "@components/Home/Card/Svg/Version.vue";
@@ -6,7 +7,6 @@ import HomeCardSvgInstances from "@components/Home/Card/Svg/Instances.vue";
 import HomeCardSvgServices from "@components/Home/Card/Svg/Services.vue";
 import HomeCardSvgPlugins from "@components/Home/Card/Svg/Plugins.vue";
 import ApiState from "@components/Api/State.vue";
-import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { useLogsStore } from "@store/logs.js";

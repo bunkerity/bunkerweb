@@ -1,5 +1,6 @@
 <script setup>
 import { reactive, ref, defineEmits, onMounted, defineProps } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 /* PROPS ARGUMENTS
   *
@@ -75,6 +76,7 @@ onMounted(() => {
 <template>
   <div class="relative flex items-center">
     <input
+      :tabindex="contentIndex"
       ref="inputEl"
       v-model="inp.value"
       @input="$emit('inp', inp.value)"
@@ -101,6 +103,7 @@ onMounted(() => {
       class="input-clipboard-container"
     >
       <button
+        :tabindex="contentIndex"
         @click="copyClipboard()"
         :class="[props.settings.disabled ? 'disabled' : 'enabled']"
         class="input-clipboard-button"
@@ -129,6 +132,7 @@ onMounted(() => {
     </div>
     <div v-if="props.settings.type === 'password'" class="input-pw-container">
       <button
+        :tabindex="contentIndex"
         :aria-description="$t('inp_input_password_desc')"
         :aria-controls="props.settings.id"
         @click="inp.showInp = inp.showInp ? false : true"

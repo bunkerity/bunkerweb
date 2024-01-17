@@ -1,10 +1,11 @@
 <script setup>
+import { defineEmits, defineProps } from "vue";
 import SettingsUploadSvgUpload from "@components/Settings/Upload/Svg/Upload.vue";
 import SettingsUploadSvgError from "@components/Settings/Upload/Svg/Error.vue";
 import SettingsUploadSvgSuccess from "@components/Settings/Upload/Svg/Success.vue";
 import SettingsUploadSvgDot from "@components/Settings/Upload/Svg/Dot.vue";
 import SettingsUploadSvgCross from "@components/Settings/Upload/Svg/Cross.vue";
-import { defineEmits, defineProps } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   name: {
@@ -48,6 +49,7 @@ const emits = defineEmits(["close"]);
       <SettingsUploadSvgDot v-if="props.state === 'upload'" />
 
       <button
+        :tabindex="contentIndex"
         class="pl-1 -translate-y-0.5"
         :aria-describedby="`${props.name}-${date}-close-text`"
         v-if="props.state === 'fail' || props.state === 'success'"

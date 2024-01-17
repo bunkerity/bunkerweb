@@ -1,8 +1,9 @@
 <script setup>
-import ButtonBase from "@components/Button/Base.vue";
 import { reactive, defineProps, defineEmits, markRaw, computed } from "vue";
+import ButtonBase from "@components/Button/Base.vue";
 import InstanceSvgPing from "@components/Instance/Svg/Ping.vue";
 import InstanceSvgDelete from "@components/Instance/Svg/Delete.vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   id: {
@@ -103,6 +104,7 @@ const emits = defineEmits(["action", "delete"]);
       </div>
       <div class="absolute flex flex-col justify-end items-end right-0 top-0">
         <button
+          :tabindex="contentIndex"
           v-for="action in instance.checks"
           :color="action.color"
           @click="
@@ -140,6 +142,7 @@ const emits = defineEmits(["action", "delete"]);
       </div>
       <div class="card-instance-actions-container">
         <ButtonBase
+          :tabindex="contentIndex"
           v-for="action in instance.actions"
           :color="action.color"
           @click="

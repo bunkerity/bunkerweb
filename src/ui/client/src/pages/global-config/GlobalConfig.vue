@@ -1,4 +1,5 @@
 <script setup>
+import { reactive, computed, onMounted, watch } from "vue";
 import Dashboard from "@layouts/Dashboard.vue";
 import ApiState from "@components/Api/State.vue";
 import ButtonBase from "@components/Button/Base.vue";
@@ -8,7 +9,6 @@ import PluginStructure from "@components/Plugin/Structure.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
-import { reactive, computed, onMounted, watch } from "vue";
 import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
 import {
   setPluginsData,
@@ -18,6 +18,7 @@ import {
   getRemainFromFilter,
 } from "@utils/plugins.js";
 import { fetchAPI } from "@utils/api.js";
+import { contentIndex } from "@utils/tabindex.js";
 import { useFeedbackStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
@@ -243,6 +244,7 @@ onMounted(() => {
         />
         <div class="col-span-12 flex w-full justify-center mt-8 mb-2">
           <ButtonBase
+            :tabindex="contentIndex"
             :disabled="
               Object.keys(config.data['global']).length === 0 ? true : false
             "

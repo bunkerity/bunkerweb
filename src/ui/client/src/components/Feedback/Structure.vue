@@ -1,11 +1,12 @@
 <script setup>
+import { reactive, watch, onMounted, computed } from "vue";
 import FeedbackAlert from "@components/Feedback/Alert.vue";
 import FeedbackLogs from "@components/Feedback/Logs.vue";
-import { useFeedbackStore } from "@store/global.js";
-import { reactive, watch, onMounted, computed } from "vue";
 import TablistBase from "@components/Tablist/Base.vue";
 import { getLogsByFilter } from "@utils/logs.js";
+import { feedbackIndex } from "@utils/tabindex.js";
 import { fetchAPI } from "@utils/api.js";
+import { useFeedbackStore } from "@store/global.js";
 import { useLogsStore } from "@store/logs.js";
 import { useBannerStore } from "@store/global.js";
 
@@ -134,13 +135,14 @@ onMounted(() => {
     class="feedback-float-btn-container group group-hover"
   >
     <button
+      :tabindex="feedbackIndex"
       aria-controls="feedback-sidebar group group-hover"
       :aria-expanded="dropdown.isOpen ? 'true' : 'false'"
       @click="dropdown.isOpen = dropdown.isOpen ? false : true"
       class="feedback-float-btn"
       :aria-describedby="`feedback-sidebar-toggle-btn-text`"
     >
-      <span id="feedback-sidebar-toggle-btn-text">
+      <span class="sr-only" id="feedback-sidebar-toggle-btn-text">
         {{ $t("dashboard_feedback_toggle_sidebar") }}
       </span>
       <svg
@@ -172,13 +174,14 @@ onMounted(() => {
   >
     <!-- close btn-->
     <button
+      :tabindex="dropdown.isOpen ? feedbackIndex : '-1'"
       aria-controls="feedback-sidebar"
       :aria-expanded="dropdown.isOpen ? 'true' : 'false'"
       class="feedback-header-close-btn"
       @click="dropdown.isOpen = false"
       :aria-describedby="`feedback-sidebar-close-btn-text`"
     >
-      <span id="feedback-sidebar-close-btn-text">
+      <span class="sr-only" id="feedback-sidebar-close-btn-text">
         {{ $t("dashboard_feedback_close_sidebar") }}
       </span>
       <svg
@@ -208,6 +211,7 @@ onMounted(() => {
         <TablistBase
           @tab="(v) => (logs.current = v)"
           :current="logs.current"
+          :tabId="dropdown.isOpen ? feedbackIndex : '-1'"
           :items="[
             { text: $t('dashboard_ui'), tag: 'ui' },
             { text: $t('dashboard_core'), tag: 'core' },
@@ -231,6 +235,13 @@ onMounted(() => {
         :id="item.id"
         :status="item.status"
         :message="item.message"
+        :tabId="
+          dropdown.isOpen
+            ? logs.current === 'ui'
+              ? feedbackIndex
+              : '-1'
+            : '-1'
+        "
         @close="feedback.removeFeedback(item.id)"
       />
     </div>

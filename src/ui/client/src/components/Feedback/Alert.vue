@@ -18,6 +18,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  tabId: {
+    type: [String, Number],
+    required: true,
+  },
 });
 
 const emits = defineEmits(["close"]);
@@ -25,7 +29,7 @@ const emits = defineEmits(["close"]);
 
 <template>
   <div
-    role="alert"
+    :role="props.type === 'success' ? 'status' : 'alert'"
     :aria-description="$t('dashboard_feedback_alert_desc')"
     :class="[
       props.type !== 'success' && props.type !== 'error'
@@ -39,6 +43,7 @@ const emits = defineEmits(["close"]);
         {{ `${props.status} ${props.type}` }}
       </h5>
       <button
+        :tabindex="props.tabId"
         @click="$emit('close', props.id)"
         data-close-flash-message
         type="button"

@@ -16,6 +16,7 @@ import ApiState from "@components/Api/State.vue";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
 import { useI18n } from "vue-i18n";
+
 const { locale, fallbackLocale } = useI18n();
 // Refresh when related btn is clicked
 const refreshStore = useRefreshStore();

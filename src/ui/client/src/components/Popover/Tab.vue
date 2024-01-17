@@ -1,5 +1,6 @@
 <script setup>
 import { ref, reactive, onMounted, defineProps } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   // Sometimes we can't have a button tag (like popover on another btn)
@@ -67,6 +68,7 @@ function hidePopover() {
       @pointerleave="hidePopover()"
       class="cursor-pointer flex justify-start w-full"
       ref="popoverIcon"
+      :tabindex="contentIndex"
     >
       <div role="img" aria-hidden="true" class="popover-background"></div>
       <svg

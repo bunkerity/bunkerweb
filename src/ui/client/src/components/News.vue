@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, reactive } from "vue";
+import { newsIndex } from "@utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
 // Use to update position when banner is visible or not
 const bannerStore = useBannerStore();
@@ -26,6 +27,7 @@ onMounted(() => {
 <template>
   <!-- float button-->
   <button
+    :tabindex="newsIndex"
     aria-controls="sidebar-news"
     :aria-expanded="news.isActive ? 'true' : 'false'"
     @click="news.isActive = news.isActive ? false : true"
@@ -58,6 +60,7 @@ onMounted(() => {
   >
     <!-- close btn-->
     <button
+      :tabindex="news.isActive ? newsIndex : '-1'"
       class="news-close-btn"
       aria-controls="sidebar-news"
       :aria-expanded="news.isActive ? 'true' : 'false'"
@@ -114,6 +117,7 @@ onMounted(() => {
       </h5>
       <div class="flex">
         <input
+          :tabindex="news.isActive ? newsIndex : '-1'"
           type="text"
           id="newsletter-email"
           name="EMAIL"
@@ -130,6 +134,7 @@ onMounted(() => {
             class="relative mb-7 md:mb-0"
           >
             <input
+              :tabindex="news.isActive ? newsIndex : '-1'"
               id="newsletter-check"
               class="news-newsletter-checkbox"
               type="checkbox"
@@ -154,6 +159,7 @@ onMounted(() => {
         <label class="news-newsletter-checkbox-content" for="newsletter-check">
           {{ $t("dashboard_newsletter_privacy_text") }}
           <a
+            :tabindex="news.isActive ? newsIndex : '-1'"
             class="italic"
             href="https://www.bunkerity.com/privacy-policy?utm_campaign=self&utm_source=ui"
             target="_blank"
@@ -163,6 +169,7 @@ onMounted(() => {
         </label>
       </div>
       <button
+        :tabindex="news.isActive ? newsIndex : '-1'"
         type="submit"
         formtarget="_blank"
         class="news-newsletter-confirm-btn"

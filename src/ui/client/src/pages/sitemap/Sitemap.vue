@@ -1,13 +1,15 @@
 <script setup>
 import Dashboard from "@layouts/Dashboard.vue";
 import ApiState from "@components/Api/State.vue";
+import CardBase from "@components/Card/Base.vue";
 import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { useFeedbackStore } from "@store/global.js";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
-import { getPluginsByFilter, pluginI18n } from "@utils/plugins.js";
-
+import { pluginI18n } from "@utils/plugins.js";
+import { useI18n } from "vue-i18n";
+const { locale, fallbackLocale } = useI18n();
 // Refresh when related btn is clicked
 const refreshStore = useRefreshStore();
 
@@ -23,6 +25,7 @@ logsStore.setTags(["all"]);
 const feedbackStore = useFeedbackStore();
 
 const basePages = [
+  { name: "account", path: "/account" },
   { name: "home", path: "/home" },
   {
     name: "instances",
@@ -88,7 +91,7 @@ async function getPlugins() {
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -99,24 +102,39 @@ onMounted(() => {
 
 <template>
   <Dashboard>
-    <ul>
-      <li v-for="page in basePages">
-        <a :href="page.path">{{ $t(`dashboard_${page.name}`) }}</a>
-      </li>
-    </ul>
     <ApiState
       class="col-span-12 md:col-span-6 2xl:col-span-4"
-      :isErr="version.isErr"
-      :isPend="version.isPend"
+      :isErr="plugins.isErr"
+      :isPend="plugins.isPend"
       :textState="{
         isPend: $t('api_pending', { name: $t('dashboard_plugins') }),
         isErr: $t('api_error', { name: $t('dashboard_plugins') }),
       }"
     />
-    <ul v-if="plugins.setup.length !== 0">
-      <li v-for="page in plugins.setup">
-        <a :href="page.path">{{ page.name }}</a>
-      </li>
-    </ul>
+    <CardBase
+      class="h-fit col-span-12 max-w-[800px]"
+      :label="$t('dashboard_sitemap')"
+    >
+      <div class="col-span-12">
+        <h2>{{ $t("dashboard_default") }}</h2>
+        <ul>
+          <li v-for="(page, id) in basePages">
+            <a :tabindex="id + 1" :href="page.path">
+              {{ $t(`dashboard_${page.name}`) }}
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="col-span-12" v-if="plugins.setup.length !== 0">
+        <h2>{{ $t("dashboard_plugins") }}</h2>
+        <ul>
+          <li v-for="(page, id) in plugins.setup">
+            <a :tabindex="basePages.length + id" :href="page.path">
+              {{ page.name }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </CardBase>
   </Dashboard>
 </template>

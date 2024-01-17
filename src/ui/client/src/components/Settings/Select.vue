@@ -1,5 +1,6 @@
 <script setup>
 import { ref, reactive, watch, onMounted, defineEmits, defineProps } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   // id && value && values && disabled
@@ -108,6 +109,7 @@ const emits = defineEmits(["inp"]);
   <!--custom-->
   <div class="relative">
     <button
+      :tabindex="contentIndex"
       ref="selectBtn"
       :aria-controls="`${props.settings.id}-custom`"
       :aria-expanded="select.isOpen ? 'true' : 'false'"
@@ -145,6 +147,7 @@ const emits = defineEmits(["inp"]);
       :aria-description="$t('inp_select_dropdown_desc')"
     >
       <button
+        :tabindex="contentIndex"
         v-for="(value, id) in props.settings.values"
         role="radio"
         @click="$emit('inp', changeValue(value))"

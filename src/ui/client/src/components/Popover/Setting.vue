@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, onMounted, defineProps } from "vue";
 import { v4 as uuidv4 } from "uuid";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   // Sometimes we can't have a button tag (like popover on another btn)
@@ -53,12 +54,16 @@ function hidePopover() {
 
 <template>
   <component
+    :tabindex="contentIndex"
     :aria-controls="`${tab.label}-popover-${tab.id}`"
+    :aria-expanded="popover.isOpen ? 'true' : 'false'"
+    :aria-describedby="`${tab.label}-popover-${tab.id}-text`"
     :is="props.tag"
     role="button"
+    @focusin="showPopover()"
+    @focusout="hidePopover()"
     @pointerover="showPopover()"
     @pointerleave="hidePopover()"
-    :aria-describedby="`${tab.label}-popover-${tab.id}-text`"
     class="cursor-pointer flex justify-start w-full"
   >
     <span :id="`${tab.label}-popover-${tab.id}-text`" class="sr-only">

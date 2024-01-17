@@ -1,6 +1,4 @@
 <script setup>
-import { useConfigStore } from "@store/settings.js";
-import { getDefaultMethod } from "@utils/settings.js";
 import {
   ref,
   reactive,
@@ -9,6 +7,9 @@ import {
   onBeforeUpdate,
   defineProps,
 } from "vue";
+import { useConfigStore } from "@store/settings.js";
+import { getDefaultMethod } from "@utils/settings.js";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   setting: {
@@ -121,6 +122,7 @@ onMounted(() => {
   <!-- end default hidden-->
 
   <button
+    :tabindex="contentIndex"
     :aria-controls="`${select.id}-dropdown`"
     :aria-expanded="select.isOpen ? 'true' : 'false'"
     ref="selectBtn"
@@ -157,6 +159,7 @@ onMounted(() => {
     :aria-description="$t('inp_select_dropdown_desc')"
   >
     <button
+      :tabindex="contentIndex"
       role="radio"
       v-for="(value, id) in select.values"
       @click="

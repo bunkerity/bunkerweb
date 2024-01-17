@@ -11,13 +11,17 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  id: {
+    type: String,
+    required: true,
+  },
 });
 </script>
 <template>
-  <div role="group" class="flex items-center my-1 relative">
-    <h5 class="input-title">
+  <div class="flex items-center my-1 relative">
+    <label :for="props.id" class="input-title">
       {{ props.label }}
-    </h5>
+    </label>
     <!-- popover -->
     <div class="relative">
       <PopoverSetting :label="props.label" tag="div">

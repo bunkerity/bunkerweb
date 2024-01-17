@@ -1,5 +1,6 @@
 <script setup>
 import { reactive, defineEmits, defineProps, onMounted } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 import flatpickr from "flatpickr";
 
 import "@assets/css/datepicker-foundation.css";
@@ -110,6 +111,7 @@ const emits = defineEmits(["inp"]);
 <template>
   <div class="relative flex items-center">
     <input
+      :tabindex="contentIndex"
       :aria-controls="props.settings.id"
       :aria-selected="picker.isOpen ? 'true' : 'false'"
       @change="(v) => $emit('inp', checkToSend(v.target.value))"
