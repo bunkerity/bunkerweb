@@ -35,7 +35,7 @@ const props = defineProps({
 
 <template>
   <div
-    role="alert"
+    :role="props.status === 'success' ? 'status' : 'alert'"
     :aria-description="$t('dashboard_feedback_logs_desc')"
     :class="[
       props.status !== 'success' && props.status !== 'error'

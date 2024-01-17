@@ -1,3 +1,4 @@
+<script setup></script>
 <template>
   <svg
     role="img"

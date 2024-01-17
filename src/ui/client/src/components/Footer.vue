@@ -24,6 +24,10 @@ const items = [
     href: "https://github.com/bunkerity/bunkerweb/blob/master/LICENSE",
     title: t("dashboard_license"),
   },
+  {
+    href: "/sitemap",
+    title: t("dashboard_sitemap"),
+  },
 ];
 
 const footer = reactive({

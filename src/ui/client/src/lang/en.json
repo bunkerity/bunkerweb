@@ -70,6 +70,7 @@
   "dashboard_blog": "blog",
   "dashboard_privacy": "privacy",
   "dashboard_license": "license",
+  "dashboard_sitemap": "sitemap",
   "dashboard_info": "info",
   "dashboard_filter": "filters",
   "dashboard_loader": "loading",
