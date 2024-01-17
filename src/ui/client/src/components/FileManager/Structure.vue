@@ -6,6 +6,9 @@ import FileManagerContainer from "@components/FileManager/Container.vue";
 import FileManagerItemBase from "@components/FileManager/Item/Base.vue";
 import CardBase from "@components/Card/Base.vue";
 import { reactive, watch } from "vue";
+import { useModalStore } from "@store/configs.js";
+
+const modalStore = useModalStore();
 
 const props = defineProps({
   config: {
@@ -22,28 +25,6 @@ const path = reactive({
   current: "root", // when mount or render, always be on root
   canCreateFile: props.config[0]["canCreateFile"],
 });
-
-// Data needed for modal element, setup when an action is clicked on item (emit)
-const modal = reactive({
-  isOpen: false,
-  type: "",
-  action: "",
-  path: "",
-  value: "",
-  method: "",
-});
-
-// When dropdown action is clicked on item (view, delete...)
-// Action emit with the clicked action value
-// We update data for the current item and display modal
-function updateModal(type, action, path, value, method) {
-  modal.type = type;
-  modal.action = action;
-  modal.path = path;
-  modal.value = value;
-  modal.method = method;
-  modal.isOpen = true;
-}
 
 // Fire when current path changed
 // Get item that match current path to check values using config variable
@@ -79,7 +60,6 @@ watch(path, () => {
             :key="childID"
           >
             <FileManagerItemBase
-              :isModalOpen="modal.isOpen"
               :type="child.type"
               :path="child.path"
               :pathLevel="child.pathLevel"
@@ -90,36 +70,39 @@ watch(path, () => {
               :canDownload="child.canDownload || false"
               @updatePath="(v) => (path.current = v)"
               @action="
-                (v) =>
-                  updateModal(
-                    child.type,
-                    v,
-                    child.path,
-                    child.data,
-                    child.method || 'ui',
-                  )
+                (v) => {
+                  modalStore.setData({
+                    type: child.type,
+                    action: v,
+                    path: child.path,
+                    data: child.data,
+                    method: child.method || 'ui',
+                  });
+                  modalStore.setOpen(true);
+                }
               "
             />
           </div>
         </FileManagerContainer>
         <FileManagerActions
-          :isModalOpen="modal.isOpen"
           @createFile="
-            () => updateModal('file', 'create', `${path.current}/`, '', 'ui')
+            () => {
+              modalStore.setData({
+                type: 'file',
+                action: 'create',
+                path: `${path.current}/`,
+                data: '',
+                method: 'ui',
+              });
+              modalStore.setOpen(true);
+            }
           "
           :canCreateFile="path.canCreateFile"
         />
       </div>
     </CardBase>
     <FileManagerModal
-      :aria-hidden="modal.isOpen ? 'false' : 'true'"
-      :isOpen="modal.isOpen"
-      :type="modal.type"
-      :action="modal.action"
-      :path="modal.path"
-      :value="modal.value"
-      :method="modal.method"
-      @close="modal.isOpen = false"
+      :aria-hidden="modalStore.isOpen ? 'false' : 'true'"
       @updateFile="
         () => {
           emits('updateFile');

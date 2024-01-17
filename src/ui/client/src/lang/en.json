@@ -204,6 +204,8 @@
   "custom_conf_modal_path_desc": "Show complete path with input to set or update conf file.",
   "custom_conf_modal_editor_desc": "Fill with script that will be executed for this conf file.",
   "custom_conf_dot_conf": ".conf",
+  "custom_conf_path": "Access folder path and show children files.",
+  "custom_conf_dropdown_action": "Show possible actions on element.",
   "global_conf_select_plugin": "select plugin",
   "global_conf_select_plugin_placeholder": "search",
   "global_conf_filter_search": "search",

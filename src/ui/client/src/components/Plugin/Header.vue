@@ -25,7 +25,7 @@ const props = defineProps({
   <div class="col-span-12" data-setting-header>
     <h2
       :for="props.id"
-      class="text-base transition duration-300 ease-in-out ml-2 font-bold uppercase dark:text-white/90 mb-0"
+      class="text-xl transition duration-300 ease-in-out ml-2 font-bold uppercase dark:text-white/90 mb-0"
     >
       {{ props.name }} <span>{{ props.version }}</span>
     </h2>

@@ -202,6 +202,8 @@
   "custom_conf_modal_path_desc": "Montre le chemin entier avec un input avec le nom du fichier conf.",
   "custom_conf_modal_editor_desc": "Remplir avec le script qui doit s'exécuter pour ce fichier.",
   "custom_conf_dot_conf": ".conf",
+  "custom_conf_path": "Accéder à l'intérieur du dossier pour voir les fichiers enfants.",
+  "custom_conf_dropdown_action": "Affiche les actions possibles sur l'élément.",
   "global_conf_select_plugin": "Sélectionner un plugin",
   "global_conf_select_plugin_placeholder": "rechercher",
   "global_conf_filter_search": "rechercher",

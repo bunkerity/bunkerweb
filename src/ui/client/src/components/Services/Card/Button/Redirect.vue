@@ -1,5 +1,6 @@
 <script setup>
 import { defineEmits, defineProps } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   redirect: {
@@ -17,6 +18,7 @@ const emits = defineEmits(["redirect"]);
 
 <template>
   <a
+    :tabindex="contentIndex"
     @click="$emit('redirect')"
     :href="props.redirect"
     target="_blank"

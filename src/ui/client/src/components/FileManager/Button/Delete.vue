@@ -1,15 +1,12 @@
 <script setup>
-const props = defineProps({
-  isModalOpen: {
-    type: Boolean,
-    required: true,
-  },
-});
+import { useModalStore } from "@store/configs.js";
+
+const modalStore = useModalStore();
 </script>
 
 <template>
   <button
-    :aria-expanded="props.isModalOpen ? 'true' : 'false'"
+    :aria-expanded="modalStore.isOpen ? 'true' : 'false'"
     aria-controls="file-manager-modal"
     class="file-manager-item-btn"
   >

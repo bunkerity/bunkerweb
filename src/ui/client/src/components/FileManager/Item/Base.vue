@@ -1,17 +1,17 @@
 <script setup>
+import { reactive, computed, defineProps, defineEmits } from "vue";
 import FileManagerItemDropdown from "@components/FileManager/Item/Dropdown.vue";
 import FileManagerItemSvgFolder from "@components/FileManager/Item/Svg/Folder.vue";
 import FileManagerItemSvgFile from "@components/FileManager/Item/Svg/File.vue";
-import { reactive, defineProps, defineEmits } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
+import { useModalStore } from "@store/configs.js";
+
+const modalStore = useModalStore();
 
 // FileManagerBase can be a folder or file
 // Case folder, emit the folder path on click to update display
 // Emit on filemanager layout the value of buttons list @action
 const props = defineProps({
-  isModalOpen: {
-    type: Boolean,
-    required: true,
-  },
   type: {
     type: String,
     required: true,
@@ -51,23 +51,33 @@ const path = reactive({
   name: props.path.substring(props.path.lastIndexOf("/") + 1),
 });
 
+const itemID = computed(() => {
+  return `${props.path}-${props.pathLevel}-${path.name.replaceAll("_", "-")}`;
+});
+
 const emits = defineEmits(["updatePath", "action"]);
 </script>
 
 <template>
   <div class="file-manager-item-container">
     <button
+      :tabindex="modalStore.isOpen ? '-1' : contentIndex"
       class="file-manager-item-nav"
       @click="
         props.type === 'folder'
           ? $emit('updatePath', props.path)
           : $emit('action', 'view')
       "
+      :aria-describedby="`${itemID}-text`"
     >
+      <span class="sr-only" :id="`${itemID}-text`">
+        {{ $t("custom_conf_path") }}
+      </span>
       <FileManagerItemSvgFolder
         v-if="props.type === 'folder'"
         :path="props.path"
       />
+
       <FileManagerItemSvgFile v-if="props.type === 'file'" />
 
       <span
@@ -80,7 +90,7 @@ const emits = defineEmits(["updatePath", "action"]);
       </span>
     </button>
     <FileManagerItemDropdown
-      :isModalOpen="props.isModalOpen"
+      :id="itemID"
       @action="(v) => $emit('action', v)"
       :canEdit="props.canEdit"
       :canDelete="props.canDelete"

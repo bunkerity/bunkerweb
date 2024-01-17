@@ -1,18 +1,18 @@
 <script setup>
 import { defineProps, defineEmits } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
+import { useModalStore } from "@store/configs.js";
+
+const modalStore = useModalStore();
 
 const props = defineProps({
   canCreateFile: {
     type: Boolean,
     required: true,
   },
-  isModalOpen: {
-    type: Boolean,
-    required: true,
-  },
 });
 
-const emits = defineEmits(["createFile", "createFolder"]);
+const emits = defineEmits(["createFile"]);
 </script>
 
 <template>
@@ -20,11 +20,12 @@ const emits = defineEmits(["createFile", "createFolder"]);
     <ul class="file-manager-actions-list">
       <li class="file-manager-actions-item">
         <button
+          :tabindex="contentIndex"
           @click="$emit('createFile')"
           :disabled="props.canCreateFile ? false : true"
           :aria-disabled="props.canCreateFile ? false : true"
           aria-controls="file-manager-modal"
-          :aria-expanded="props.isModalOpen ? 'true' : 'false'"
+          :aria-expanded="modalStore.isOpen ? 'true' : 'false'"
           class="file-manager-actions-item-btn"
         >
           <svg

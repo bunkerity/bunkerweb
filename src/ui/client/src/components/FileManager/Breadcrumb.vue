@@ -1,5 +1,6 @@
 <script setup>
 import { computed, defineProps, defineEmits } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   // Active path
@@ -47,6 +48,7 @@ function getClickPath(id) {
   >
     <li role="tab" class="file-manager-breadcrumb-back-btn">
       <button
+        :tabindex="contentIndex"
         aria-describedby="file-manager-breadcrumb-back-btn-text"
         @click="$emit('updatePath', getPrevPath())"
       >
@@ -78,11 +80,12 @@ function getClickPath(id) {
       :aria-current="id === pathSplit.length - 1 ? 'true' : 'false'"
     >
       <button
+        :tabindex="contentIndex"
         :aria-description="$t('custom_conf_breadcrumb_item_desc')"
         @click="$emit('updatePath', getClickPath(id))"
         class="file-manager-breadcrumb-item-btn"
       >
-        {{ item === "root" ? "" : item.replaceAll("_", "-") }}
+        {{ item === "root" ? "root" : item.replaceAll("_", "-") }}
       </button>
     </li>
   </ul>

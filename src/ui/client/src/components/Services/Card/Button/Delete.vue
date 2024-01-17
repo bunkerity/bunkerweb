@@ -1,5 +1,6 @@
 <script setup>
 import { defineEmits } from "vue";
+import { contentIndex } from "@utils/tabindex.js";
 
 const props = defineProps({
   name: {
@@ -13,6 +14,7 @@ const emits = defineEmits(["delete"]);
 
 <template>
   <button
+    :tabindex="contentIndex"
     @click="$emit('delete')"
     class="dark:brightness-90 z-20 mx-1 bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 active:opacity-85 hover:shadow-md"
     :aria-describedby="`${props.name}-delete-text`"

@@ -5,12 +5,16 @@ import FileManagerButtonDownload from "@components/FileManager/Button/Download.v
 import FileManagerButtonDelete from "@components/FileManager/Button/Delete.vue";
 import { reactive, watch, defineEmits, ref } from "vue";
 import { v4 as uuidv4 } from "uuid";
+import { contentIndex } from "@utils/tabindex.js";
+import { useModalStore } from "@store/configs.js";
+
+const modalStore = useModalStore();
 
 // Dropdown toggle logic and buttons list with @action emit value on click
 // The value of the clicked button will be emit itself to be retrieved by FileManagerBase
 const props = defineProps({
-  isModalOpen: {
-    type: Boolean,
+  id: {
+    type: String,
     required: true,
   },
   canEdit: {
@@ -59,13 +63,18 @@ const emits = defineEmits(["action"]);
 
 <template>
   <button
+    :tabindex="modalStore.isOpen ? '-1' : contentIndex"
     ref="dropdownBtn"
     @click="dropdown.isOpen = dropdown.isOpen ? false : true"
     data-action-dropdown
     :aria-expanded="dropdown.isOpen ? 'true' : 'false'"
     :aria-controls="`file-manager-${dropdown.id}-dropdown`"
     class="file-manager-item-dropdown-btn"
+    :aria-describedby="`${props.id}-dropdown-text`"
   >
+    <span :id="`${props.id}-dropdown-text`" class="sr-only">
+      {{ $t("custom_conf_dropdown_action") }}
+    </span>
     <svg
       aria-hidden="true"
       role="img"
@@ -93,7 +102,9 @@ const emits = defineEmits(["action"]);
   >
     <FileManagerButtonView
       role="tab"
-      :isModalOpen="props.isModalOpen"
+      :tabindex="
+        dropdown.isOpen ? (modalStore.isOpen ? '-1' : contentIndex) : '-1'
+      "
       class="first"
       :class="[
         props.canDelete || props.canDownload || props.canEdit ? '' : 'last',
@@ -102,21 +113,27 @@ const emits = defineEmits(["action"]);
     />
     <FileManagerButtonEdit
       role="tab"
-      :isModalOpen="props.isModalOpen"
+      :tabindex="
+        dropdown.isOpen ? (modalStore.isOpen ? '-1' : contentIndex) : '-1'
+      "
       @click="$emit('action', 'edit')"
       v-if="props.canEdit"
       :class="[props.canDelete || props.canDownload ? '' : 'last']"
     />
     <FileManagerButtonDownload
       role="tab"
-      :isModalOpen="props.isModalOpen"
+      :tabindex="
+        dropdown.isOpen ? (modalStore.isOpen ? '-1' : contentIndex) : '-1'
+      "
       @click="$emit('action', 'download')"
       v-if="props.canDownload"
       :class="[props.canDelete ? '' : 'last']"
     />
     <FileManagerButtonDelete
       role="tab"
-      :isModalOpen="props.isModalOpen"
+      :tabindex="
+        dropdown.isOpen ? (modalStore.isOpen ? '-1' : contentIndex) : '-1'
+      "
       @click="$emit('action', 'delete')"
       v-if="props.canDelete"
       class="last"

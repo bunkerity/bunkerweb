@@ -1,7 +1,6 @@
 <script setup>
 import {
   computed,
-  defineProps,
   defineEmits,
   reactive,
   onMounted,
@@ -15,66 +14,33 @@ import "@assets/script/editor/ace.js";
 import "@assets/script/editor/theme-dracula.js";
 import "@assets/script/editor/theme-dawn.js";
 import { fetchAPI } from "@utils/api.js";
+import { contentIndex } from "@utils/tabindex.js";
 import { useFeedbackStore } from "@store/global.js";
+import { useModalStore } from "@store/configs.js";
 
+const modalStore = useModalStore();
 const feedbackStore = useFeedbackStore();
 
-// Open after a file manager item (folder / file) action is clicked
-// With the current folder / file data
-// Update name or content file if wanted
-const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    required: true,
-  },
-  // File or folder
-  type: {
-    type: String,
-    required: true,
-  },
-  // view || edit || download || delete
-  action: {
-    type: String,
-    required: true,
-  },
-  // Current item path
-  path: {
-    type: String,
-    required: true,
-  },
-  // File value is shown with an editor
-  value: {
-    type: String,
-    required: true,
-    default: "",
-  },
-  // Method to avoid override static ones
-  method: {
-    type: String,
-    required: true,
-    default: "",
-  },
-});
-
-const emits = defineEmits(["close", "updateFile"]);
+const emits = defineEmits(["updateFile"]);
 
 // Filter data from path
 
 const data = reactive({
   name: "",
-  oldName: props.path.split("/")[props.path.split("/").length - 1],
-  value: props.value,
-  method: props.method,
+  oldName:
+    modalStore.data.path.split("/")[modalStore.data.path.split("/").length - 1],
+  value: modalStore.data.value,
+  method: modalStore.data.method,
   prefix: computed(() => {
-    const arr = props.path.split("/");
+    const arr = modalStore.data.path.split("/");
     arr.pop();
     return `${arr.join("/")}/`;
   }),
   isReadOnly: computed(() => {
-    if (props.type !== "file") return true;
+    if (modalStore.data.type !== "file") return true;
     if (
-      props.action.toLowerCase() === "view" ||
-      props.action.toLowerCase() === "delete"
+      modalStore.data.action.toLowerCase() === "view" ||
+      modalStore.data.action.toLowerCase() === "delete"
     )
       return true;
     return false;
@@ -141,9 +107,9 @@ let editor = null;
 onMounted(() => {
   // default value
   data.name = data.oldName;
-  if (props.type !== "file") return;
+  if (modalStore.data.type !== "file") return;
   editor = new FileEditor();
-  editor.setValue(props.value);
+  editor.setValue(modalStore.data.value);
   editor.readOnlyBool(data.isReadOnly);
   editor.editor.on("change", () => {
     data.value = editor.getValue();
@@ -151,22 +117,23 @@ onMounted(() => {
 });
 
 onBeforeUpdate(() => {
-  data.oldName = props.path.split("/")[props.path.split("/").length - 1];
+  data.oldName =
+    modalStore.data.path.split("/")[modalStore.data.path.split("/").length - 1];
   data.name = data.oldName;
-  data.value = props.value;
-  data.method = props.method;
+  data.value = modalStore.data.value;
+  data.method = modalStore.data.method;
   try {
     editor.destroy();
   } catch (err) {}
 });
 
 onUpdated(() => {
-  if (props.type === "file") {
+  if (modalStore.data.type === "file") {
     // default value
     data.name = data.oldName;
-    if (props.type !== "file") return;
+    if (modalStore.data.type !== "file") return;
     editor = new FileEditor();
-    editor.setValue(props.value);
+    editor.setValue(modalStore.data.value);
     editor.readOnlyBool(data.isReadOnly);
     editor.editor.on("change", () => {
       data.value = editor.getValue();
@@ -189,7 +156,7 @@ const updateConf = reactive({
 function formatData() {
   // Format data, we need to remove root that is only functional
   // And the current file name to keep only type/service?
-  const splitPath = props.path
+  const splitPath = modalStore.data.path
     .replaceAll("-", "_")
     .replace("root/", "")
     .replace(`${data.oldName}`, "")
@@ -215,12 +182,13 @@ async function sendData() {
 
   // Case all needed data
   const conf = formatData();
-  const method = props.action.toLowerCase() === "delete" ? "DELETE" : "PUT";
+  const method =
+    modalStore.data.action.toLowerCase() === "delete" ? "DELETE" : "PUT";
   const baseURL = `/api/custom_configs${
     method === "DELETE" ? `/${conf.old_name}` : ``
   }`;
   const queries =
-    props.action.toLowerCase() === "delete"
+    modalStore.data.action.toLowerCase() === "delete"
       ? `?method=ui&custom_config_name=${conf.old_name}&config_type=${conf.type}&service_id=${conf.service_id}`
       : `?method=ui`;
   const api = `${baseURL}${queries}`;
@@ -228,9 +196,9 @@ async function sendData() {
   await fetchAPI(
     api,
     method,
-    props.action.toLowerCase() === "delete" ? null : conf,
+    modalStore.data.action.toLowerCase() === "delete" ? null : conf,
     updateConf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       // Case not save
@@ -246,12 +214,14 @@ async function sendData() {
 </script>
 <template>
   <ModalBase
-    v-show="props.isOpen"
-    :aria-hidden="props.isOpen ? 'false' : 'true'"
+    v-show="modalStore.isOpen"
+    :aria-hidden="modalStore.isOpen ? 'false' : 'true'"
     id="file-manager-modal"
     @backdrop="$emit('close')"
     :title="
-      $t('custom_conf_modal_title', { action: $t(`action_${props.action}`) })
+      $t('custom_conf_modal_title', {
+        action: $t(`action_${modalStore.data.action}`),
+      })
     "
   >
     <div class="w-full">
@@ -264,6 +234,7 @@ async function sendData() {
           {{ data.prefix.replaceAll("/", " / ") }}
         </p>
         <input
+          :tabindex="modalStore.isOpen ? contentIndex : '-1'"
           @input="data.name = $event.target.value"
           type="text"
           name="name"
@@ -280,7 +251,7 @@ async function sendData() {
       </div>
 
       <!-- editor-->
-      <div v-if="props.type === 'file'" class="relative">
+      <div v-if="modalStore.data.type === 'file'" class="relative">
         <div
           v-if="!data.value"
           class="absolute w-full h-full border-2 border-red-500 z-100 pointer-events-none outline-red-500"
@@ -295,30 +266,31 @@ async function sendData() {
       <!-- editor-->
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase
+          :tabindex="modalStore.isOpen ? contentIndex : '-1'"
           aria-controls="file-manager-modal"
-          :aria-expanded="props.isOpen ? 'true' : 'false'"
+          :aria-expanded="modalStore.isOpen ? 'true' : 'false'"
           size="lg"
-          @click="$emit('close')"
+          @click="modalStore.setOpen(false)"
           class="btn-close text-xs"
         >
           {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
-          type="submit"
+          :tabindex="modalStore.isOpen ? contentIndex : '-1'"
           :disabled="!data.name || !data.value ? true : false"
-          @click.prevent="sendData()"
+          @click="sendData()"
           size="lg"
-          v-if="props.action !== 'view'"
+          v-if="modalStore.data.action !== 'view'"
           :class="[
-            props.action === 'create'
+            modalStore.data.action === 'create'
               ? 'btn-valid'
-              : props.action
-                ? `btn-${props.action}`
-                : '',
+              : modalStore.data.action
+              ? `btn-${modalStore.data.action}`
+              : '',
           ]"
           class="text-xs ml-2"
         >
-          {{ $t(`action_${props.action}`) }}
+          {{ $t(`action_${modalStore.data.action}`) }}
         </ButtonBase>
       </div>
     </div>

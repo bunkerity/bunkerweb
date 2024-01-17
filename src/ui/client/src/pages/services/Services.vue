@@ -1,4 +1,5 @@
 <script setup>
+import { reactive, computed, onMounted, watch } from "vue";
 import Dashboard from "@layouts/Dashboard.vue";
 import ApiState from "@components/Api/State.vue";
 import ButtonBase from "@components/Button/Base.vue";
@@ -11,7 +12,6 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import SettingsUploadSvgWarning from "@components/Settings/Upload/Svg/Warning.vue";
 import ServicesModalDelete from "@components/Services/Modal/Delete.vue";
-import { reactive, computed, onMounted, watch } from "vue";
 import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
 import {
   setPluginsData,
@@ -21,6 +21,7 @@ import {
   getRemainFromFilter,
 } from "@utils/plugins.js";
 import { fetchAPI } from "@utils/api.js";
+import { contentIndex } from "@utils/tabindex.js";
 import { useFeedbackStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
@@ -61,7 +62,7 @@ watch(config, () => {
       !config.data.services[services.activeService]["SERVER_NAME"] ||
       (config.data.services[services.activeService]["SERVER_NAME"] &&
         services.servicesName.includes(
-          config.data.services[services.activeService]["SERVER_NAME"],
+          config.data.services[services.activeService]["SERVER_NAME"]
         ))
     ) {
       return (saveBtn.disabled = true);
@@ -145,8 +146,8 @@ const services = reactive({
     const cloneMultisitePlugin = setPluginsData(
       getPluginsByContext(
         JSON.parse(JSON.stringify(services.data)),
-        "multisite",
-      ),
+        "multisite"
+      )
     );
 
     // translate
@@ -242,14 +243,14 @@ async function getGlobalConf(isFeedback = true) {
     "GET",
     null,
     conf,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     services,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 
@@ -289,8 +290,8 @@ async function sendServConf() {
           "PUT",
           services[key],
           null,
-          feedbackStore.addFeedback,
-        ),
+          feedbackStore.addFeedback
+        )
       );
     }
 
@@ -343,6 +344,7 @@ onMounted(() => {
     >
       <div class="col-span-12 flex justify-center mt-2">
         <ButtonBase
+          :tabindex="contentIndex"
           @click="changeServ('new')"
           color="valid"
           size="normal"
@@ -389,7 +391,7 @@ onMounted(() => {
               value:
                 services.activeService === 'new' ? '' : services.activeService,
               values: Object.keys(services.setup).filter(
-                (item) => item !== 'new',
+                (item) => item !== 'new'
               ),
             }"
           />
@@ -505,6 +507,7 @@ onMounted(() => {
           class="col-span-12 flex flex-col items-center w-full justify-center mt-8 mb-2"
         >
           <ButtonBase
+            :tabindex="contentIndex"
             :disabled="saveBtn.disabled"
             :aria-disabled="saveBtn.disabled ? 'true' : 'false'"
             @click="sendServConf()"

@@ -3,6 +3,7 @@ import { defineProps, defineEmits, reactive } from "vue";
 import ModalBase from "@components/Modal/Base.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import { fetchAPI } from "@utils/api.js";
+import { contentIndex } from "@utils/tabindex.js";
 import { useFeedbackStore } from "@store/global.js";
 
 const feedbackStore = useFeedbackStore();
@@ -37,7 +38,7 @@ async function delServ() {
     "DELETE",
     null,
     deleteServ,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       // Case saved
@@ -70,6 +71,7 @@ const emits = defineEmits(["close", "delete"]);
       </div>
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase
+          :tabindex="props.isOpen ? contentIndex : -1"
           color="close"
           size="lg"
           @click="$emit('close')"
@@ -81,6 +83,7 @@ const emits = defineEmits(["close", "delete"]);
           {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
+          :tabindex="props.isOpen ? contentIndex : -1"
           type="submit"
           color="delete"
           size="lg"
