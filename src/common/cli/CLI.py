@@ -4,9 +4,9 @@ from dotenv import dotenv_values
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
-from redis import StrictRedis
+from redis import StrictRedis, Sentinel
 from sys import path as sys_path
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
@@ -49,6 +49,8 @@ class CLI(ApiCaller):
         if Path(sep, "usr", "share", "bunkerweb", "db").exists():
             from Database import Database  # type: ignore
 
+            self.__logger.info("Getting variables from database")
+
             db = Database(self.__logger, sqlalchemy_string=self.__get_variable("DATABASE_URI", None))
             self.__variables = db.get_config()
 
@@ -58,6 +60,7 @@ class CLI(ApiCaller):
         self.__use_redis = self.__get_variable("USE_REDIS", "no") == "yes"
         self.__redis = None
         if self.__use_redis:
+            self.__logger.info("Fetching redis configuration")
             redis_host = self.__get_variable("REDIS_HOST")
             if redis_host:
                 redis_port = self.__get_variable("REDIS_PORT", "6379")
@@ -89,16 +92,71 @@ class CLI(ApiCaller):
                     redis_keepalive_pool = "10"
                 redis_keepalive_pool = int(redis_keepalive_pool)
 
-                self.__redis = StrictRedis(
-                    host=redis_host,
-                    port=redis_port,
-                    db=redis_db,
-                    socket_timeout=redis_timeout,
-                    socket_connect_timeout=redis_timeout,
-                    socket_keepalive=True,
-                    max_connections=redis_keepalive_pool,
-                    ssl=self.__get_variable("REDIS_SSL", "no") == "yes",
-                )
+                self.__logger.info("Redis configuration is valid")
+
+                redis_ssl = self.__get_variable("REDIS_SSL", "no") == "yes"
+                username = self.__get_variable("REDIS_USERNAME", None) or None
+                password = self.__get_variable("REDIS_PASSWORD", None) or None
+                sentinel_hosts = self.__get_variable("REDIS_SENTINEL_HOSTS", [])
+
+                if isinstance(sentinel_hosts, str):
+                    sentinel_hosts = [host.split(":") if ":" in host else host for host in sentinel_hosts.split(" ") if host]
+
+                if sentinel_hosts:
+                    sentinel_username = self.__get_variable("REDIS_SENTINEL_USERNAME", None) or None
+                    sentinel_password = self.__get_variable("REDIS_SENTINEL_PASSWORD", None) or None
+                    sentinel_master = self.__get_variable("REDIS_SENTINEL_MASTER", "")
+
+                    self.__logger.info(
+                        f"Connecting to redis sentinel cluster with the following parameters:\n{sentinel_hosts=}\n{sentinel_username=}\n{sentinel_password=}\n{sentinel_master=}\n{redis_timeout=}\nmax_connections={redis_keepalive_pool}\n{redis_ssl=}"
+                    )
+                    sentinel = Sentinel(
+                        sentinel_hosts,
+                        username=sentinel_username,
+                        password=sentinel_password,
+                        ssl=redis_ssl,
+                        socket_timeout=redis_timeout,
+                        socket_connect_timeout=redis_timeout,
+                        socket_keepalive=True,
+                        max_connections=redis_keepalive_pool,
+                    )
+                    try:
+                        sentinel.discover_master(sentinel_master)
+                    except Exception as e:
+                        self.__logger.error(f"Failed to connect to redis sentinel cluster: {e}, disabling redis")
+                        self.__use_redis = False
+
+                    if self.__use_redis:
+                        self.__logger.info(f"Connected to redis sentinel cluster, getting master with the following parameters:\n{sentinel_master=}\n{redis_db=}\n{username=}\n{password=}")
+                        self.__redis = sentinel.master_for(
+                            sentinel_master,
+                            db=redis_db,
+                            username=username,
+                            password=password,
+                        )
+                else:
+                    self.__logger.info(f"Connecting to redis with the following parameters:\n{redis_host=}\n{redis_port=}\n{redis_db=}\n{username=}\n{password=}\n{redis_timeout=}\nmax_connections={redis_keepalive_pool}\n{redis_ssl=}")
+                    self.__redis = StrictRedis(
+                        host=redis_host,
+                        port=redis_port,
+                        db=redis_db,
+                        username=username,
+                        password=password,
+                        socket_timeout=redis_timeout,
+                        socket_connect_timeout=redis_timeout,
+                        socket_keepalive=True,
+                        max_connections=redis_keepalive_pool,
+                        ssl=redis_ssl,
+                    )
+
+                try:
+                    if self.__use_redis:
+                        assert self.__redis, "Redis connection is None"
+                        self.__redis.ping()
+                except Exception as e:
+                    self.__logger.error(f"Failed to connect to redis: {e}, disabling redis")
+                    self.__use_redis = False
+                self.__logger.info("Connected to redis")
             else:
                 self.__logger.error("USE_REDIS is set to yes but REDIS_HOST is not set, disabling redis")
                 self.__use_redis = False
@@ -116,7 +174,7 @@ class CLI(ApiCaller):
             super().__init__()
             self.auto_setup(self.__integration)
 
-    def __get_variable(self, variable: str, default: Optional[str] = None) -> Optional[str]:
+    def __get_variable(self, variable: str, default: Optional[Any] = None) -> Optional[str]:
         return getenv(variable, self.__variables.get(variable, default))
 
     def __detect_integration(self) -> str:
