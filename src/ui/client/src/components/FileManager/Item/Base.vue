@@ -12,50 +12,36 @@ const modalStore = useModalStore();
 // Case folder, emit the folder path on click to update display
 // Emit on filemanager layout the value of buttons list @action
 const props = defineProps({
-  type: {
-    type: String,
+  data: {
+    type: Object,
     required: true,
   },
-  path: {
-    type: String,
-    required: false,
-  },
-  pathLevel: {
-    type: Number,
-    required: false,
-  },
-  value: {
-    type: String,
-    required: true,
-  },
-  canCreateFile: {
-    type: Boolean,
-    required: true,
-  },
-  canDelete: {
-    type: Boolean,
-    required: true,
-  },
-  canEdit: {
-    type: Boolean,
-    required: true,
-  },
-  canDownload: {
-    type: Boolean,
+  rights: {
+    type: Object,
     required: true,
   },
 });
 
 // Check if root path (not same svg) by slash numbers
 const path = reactive({
-  name: props.path.substring(props.path.lastIndexOf("/") + 1),
+  name: props.data.path.substring(props.data.path.lastIndexOf("/") + 1),
 });
 
 const itemID = computed(() => {
-  return `${props.path}-${props.pathLevel}-${path.name.replaceAll("_", "-")}`;
+  return `${props.data.path}-${props.data.pathLevel}-${path.name.replaceAll(
+    "_",
+    "-"
+  )}`;
 });
 
-const emits = defineEmits(["updatePath", "action"]);
+function runAction(action) {
+  const data = props.data;
+  data.action = action;
+  modalStore.setData(data);
+  modalStore.setOpen(true);
+}
+
+const emits = defineEmits(["updatePath"]);
 </script>
 
 <template>
@@ -64,9 +50,9 @@ const emits = defineEmits(["updatePath", "action"]);
       :tabindex="modalStore.isOpen ? '-1' : contentIndex"
       class="file-manager-item-nav"
       @click="
-        props.type === 'folder'
-          ? $emit('updatePath', props.path)
-          : $emit('action', 'view')
+        props.data.type === 'folder'
+          ? $emit('updatePath', props.data.path)
+          : runAction('view')
       "
       :aria-describedby="`${itemID}-text`"
     >
@@ -74,11 +60,11 @@ const emits = defineEmits(["updatePath", "action"]);
         {{ $t("custom_conf_path") }}
       </span>
       <FileManagerItemSvgFolder
-        v-if="props.type === 'folder'"
-        :path="props.path"
+        v-if="props.data.type === 'folder'"
+        :path="props.data.path"
       />
 
-      <FileManagerItemSvgFile v-if="props.type === 'file'" />
+      <FileManagerItemSvgFile v-if="props.data.type === 'file'" />
 
       <span
         :class="[
@@ -86,15 +72,17 @@ const emits = defineEmits(["updatePath", "action"]);
         ]"
         class="file-manager-item-name"
       >
-        {{ props.pathLevel === 1 ? path.name.replaceAll("_", "-") : path.name }}
+        {{
+          props.data.pathLevel === 1
+            ? path.name.replaceAll("_", "-")
+            : path.name
+        }}
       </span>
     </button>
     <FileManagerItemDropdown
       :id="itemID"
-      @action="(v) => $emit('action', v)"
-      :canEdit="props.canEdit"
-      :canDelete="props.canDelete"
-      :canDownload="props.canDownload"
+      :rights="props.rights"
+      :data="props.data"
     />
   </div>
 </template>

@@ -17,16 +17,12 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  canEdit: {
-    type: Boolean,
+  data: {
+    type: Object,
     required: true,
   },
-  canDownload: {
-    type: Boolean,
-    required: true,
-  },
-  canDelete: {
-    type: Boolean,
+  rights: {
+    type: Object,
     required: true,
   },
 });
@@ -58,7 +54,12 @@ function closeOutside(e) {
   }
 }
 
-const emits = defineEmits(["action"]);
+function runAction(action) {
+  const data = props.data;
+  data.action = action;
+  modalStore.setData(data);
+  modalStore.setOpen(true);
+}
 </script>
 
 <template>
@@ -107,35 +108,41 @@ const emits = defineEmits(["action"]);
       "
       class="first"
       :class="[
-        props.canDelete || props.canDownload || props.canEdit ? '' : 'last',
+        props.rights.canDelete ||
+        props.rights.canDownload ||
+        props.rights.canEdit
+          ? ''
+          : 'last',
       ]"
-      @click="$emit('action', 'view')"
+      @click="runAction('view')"
     />
     <FileManagerButtonEdit
       role="tab"
       :tabindex="
         dropdown.isOpen ? (modalStore.isOpen ? '-1' : contentIndex) : '-1'
       "
-      @click="$emit('action', 'edit')"
-      v-if="props.canEdit"
-      :class="[props.canDelete || props.canDownload ? '' : 'last']"
+      @click="runAction('edit')"
+      v-if="props.rights.canEdit"
+      :class="[
+        props.rights.canDelete || props.rights.canDownload ? '' : 'last',
+      ]"
     />
     <FileManagerButtonDownload
       role="tab"
       :tabindex="
         dropdown.isOpen ? (modalStore.isOpen ? '-1' : contentIndex) : '-1'
       "
-      @click="$emit('action', 'download')"
-      v-if="props.canDownload"
-      :class="[props.canDelete ? '' : 'last']"
+      @click="runAction('download')"
+      v-if="props.rights.canDownload"
+      :class="[props.rights.canDelete ? '' : 'last']"
     />
     <FileManagerButtonDelete
       role="tab"
       :tabindex="
         dropdown.isOpen ? (modalStore.isOpen ? '-1' : contentIndex) : '-1'
       "
-      @click="$emit('action', 'delete')"
-      v-if="props.canDelete"
+      @click="runAction('delete')"
+      v-if="props.rights.canDelete"
       class="last"
     />
   </div>

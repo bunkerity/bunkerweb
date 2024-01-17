@@ -60,27 +60,19 @@ watch(path, () => {
             :key="childID"
           >
             <FileManagerItemBase
-              :type="child.type"
-              :path="child.path"
-              :pathLevel="child.pathLevel"
-              :value="child.value || ''"
-              :canDelete="child.canDelete"
-              :canEdit="child.canEdit"
-              :canCreateFile="child.canCreateFile || false"
-              :canDownload="child.canDownload || false"
+              :data="{
+                type: child.type,
+                path: child.path,
+                pathLevel: child.pathLevel,
+                value: child.value || '',
+              }"
+              :rights="{
+                canDelete: child.canDelete,
+                canEdit: child.canEdit,
+                canCreateFile: child.canCreateFile || false,
+                canDownload: child.canDownload || false,
+              }"
               @updatePath="(v) => (path.current = v)"
-              @action="
-                (v) => {
-                  modalStore.setData({
-                    type: child.type,
-                    action: v,
-                    path: child.path,
-                    data: child.data,
-                    method: child.method || 'ui',
-                  });
-                  modalStore.setOpen(true);
-                }
-              "
             />
           </div>
         </FileManagerContainer>
