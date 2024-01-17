@@ -84,7 +84,6 @@ jobs:
 
   # Core tests
   prepare-tests-core:
-    needs: [build-containers, build-packages]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -96,7 +95,7 @@ jobs:
     outputs:
       tests: ${{ steps.set-matrix.outputs.tests }}
   tests-core:
-    needs: prepare-tests-core
+    needs: [build-containers, prepare-tests-core]
     strategy:
       fail-fast: false
       matrix:
@@ -106,7 +105,7 @@ jobs:
       TEST: ${{ matrix.test }}
       RELEASE: dev
   tests-core-linux:
-    needs: prepare-tests-core
+    needs: [build-packages, prepare-tests-core]
     strategy:
       fail-fast: false
       matrix:
