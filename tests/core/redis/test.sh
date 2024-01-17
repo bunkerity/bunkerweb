@@ -137,7 +137,6 @@ cleanup_stack () {
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_ENABLED: "yes"@REDIS_TLS_ENABLED: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_TLS_ENABLED: "yes"@REDIS_SENTINEL_TLS_ENABLED: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_PORT_NUMBER: "[0-9]*"@REDIS_TLS_PORT_NUMBER: "6379"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_TLS_PORT_NUMBER: "[0-9]*"@REDIS_SENTINEL_TLS_PORT_NUMBER: "26379"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_AUTH_CLIENTS: "no"@REDIS_TLS_AUTH_CLIENTS: "yes"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PASSWORD: ".*"@REDIS_PASSWORD: ""@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_PASSWORD: ".*"@REDIS_SENTINEL_PASSWORD: ""@' {} \;
@@ -304,7 +303,7 @@ do
         find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_PORT_NUMBER: "[0-9]*"@REDIS_TLS_PORT_NUMBER: "6379"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_AUTH_CLIENTS: "no"@REDIS_TLS_AUTH_CLIENTS: "yes"@' {} \;
 
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_HOSTS: ".*"@REDIS_SENTINEL_HOSTS: "bw-redis-sentinel-1:26379 bw-redis-sentinel-2:26379 bw-redis-sentinel-3:26379"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_HOSTS: ".*"@REDIS_SENTINEL_HOSTS: "redis-bw-redis-sentinel-1:26379 redis-bw-redis-sentinel-2:26379 redis-bw-redis-sentinel-3:26379"@' {} \;
     elif [ "$test" = "sentinel_tweaked" ] ; then
         echo "🧰 Running tests with redis' in sentinel mode with tweaked settings ..."
         find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT: "[0-9]*"@REDIS_PORT: "6380"@' {} \;
@@ -316,24 +315,25 @@ do
         find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_PASSWORD: ".*"@REDIS_SENTINEL_PASSWORD: "sentinel_secret"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_USERNAME: ".*"@REDIS_USERNAME: "bunkerweb"@' {} \;
         find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_USERNAME: ".*"@REDIS_SENTINEL_USERNAME: "bunkerweb_sentinel"@' {} \;
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_HOSTS: ".*"@REDIS_SENTINEL_HOSTS: "bw-redis-sentinel-1:26380 bw-redis-sentinel-2:26380 bw-redis-sentinel-3:26380"@' {} \;
-    # elif [ "$test" = "sentinel_ssl" ] ; then # TODO
-    #     echo "🧰 Running tests with redis' in sentinel mode with ssl activated ..."
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT: "[0-9]*"@REDIS_PORT: "6379"@' {} \;
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT_NUMBER: "[0-9]*"@REDIS_PORT_NUMBER: "6379"@' {} \;
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_MASTER_PORT_NUMBER: "[0-9]*"@REDIS_MASTER_PORT_NUMBER: "6379"@' {} \;
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SSL: "no"@REDIS_SSL: "yes"@' {} \;
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_DATABASE: "1"@REDIS_DATABASE: "0"@' {} \;
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PASSWORD: ".*"@REDIS_PASSWORD: ""@' {} \;
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_USERNAME: ".*"@REDIS_USERNAME: ""@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_HOSTS: ".*"@REDIS_SENTINEL_HOSTS: "redis-bw-redis-sentinel-1:26380 redis-bw-redis-sentinel-2:26380 redis-bw-redis-sentinel-3:26380"@' {} \;
+    elif [ "$test" = "sentinel_ssl" ] ; then
+        echo "🧰 Running tests with redis' in sentinel mode with ssl activated ..."
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT: "[0-9]*"@REDIS_PORT: "6379"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT_NUMBER: "[0-9]*"@REDIS_PORT_NUMBER: "6379"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_MASTER_PORT_NUMBER: "[0-9]*"@REDIS_MASTER_PORT_NUMBER: "6379"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SSL: "no"@REDIS_SSL: "yes"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_DATABASE: "1"@REDIS_DATABASE: "0"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PASSWORD: ".*"@REDIS_PASSWORD: ""@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_USERNAME: ".*"@REDIS_USERNAME: ""@' {} \;
 
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SSL: "no"@REDIS_SSL: "yes"@' {} \;
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_ENABLED: "no"@REDIS_TLS_ENABLED: "yes"@' {} \;
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_TLS_ENABLED: "no"@REDIS_SENTINEL_TLS_ENABLED: "yes"@' {} \;
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_PORT_NUMBER: "[0-9]*"@REDIS_TLS_PORT_NUMBER: "6380"@' {} \;
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_TLS_PORT_NUMBER: "[0-9]*"@REDIS_SENTINEL_TLS_PORT_NUMBER: "26380"@' {} \;
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_AUTH_CLIENTS: "yes"@REDIS_TLS_AUTH_CLIENTS: "no"@' {} \;
-    #     find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_TLS_AUTH_CLIENTS: "yes"@REDIS_SENTINEL_TLS_AUTH_CLIENTS: "no"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SSL: "no"@REDIS_SSL: "yes"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_ENABLED: "no"@REDIS_TLS_ENABLED: "yes"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_PORT_NUMBER: "[0-9]*"@REDIS_TLS_PORT_NUMBER: "6380"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_TLS_ENABLED: "no"@REDIS_SENTINEL_TLS_ENABLED: "yes"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_PORT_NUMBER: "[0-9]*"@REDIS_SENTINEL_PORT_NUMBER: "26379"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_AUTH_CLIENTS: "yes"@REDIS_TLS_AUTH_CLIENTS: "no"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_TLS_AUTH_CLIENTS: "yes"@REDIS_SENTINEL_TLS_AUTH_CLIENTS: "no"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_HOSTS: ".*"@REDIS_SENTINEL_HOSTS: "redis-bw-redis-sentinel-1:26379 redis-bw-redis-sentinel-2:26379 redis-bw-redis-sentinel-3:26379"@' {} \;
     fi
 
     echo "🧰 Starting stack ..."

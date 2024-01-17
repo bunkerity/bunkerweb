@@ -76,8 +76,7 @@ try:
             f"ℹ️ Trying to connect to Redis Sentinel with the following parameters:\nhosts: {sentinel_hosts}\nmaster: {sentinel_master}\nssl: {redis_ssl}\nusername: {sentinel_username}\npassword: {sentinel_password}",
             flush=True,
         )
-        sentinel = Sentinel(sentinel_hosts, username=sentinel_username, password=sentinel_password, ssl=redis_ssl, socket_timeout=1)
-        sentinel.discover_slaves(sentinel_master)
+        sentinel = Sentinel(sentinel_hosts, username=sentinel_username, password=sentinel_password, ssl=redis_ssl, socket_timeout=1, ssl_cert_reqs="none")
 
         print(
             f"ℹ️ Trying to get a Redis Sentinel slave for master {sentinel_master} with the following parameters:\n"
@@ -89,7 +88,6 @@ try:
             db=redis_db,
             username=getenv("REDIS_USERNAME", None) or None,
             password=getenv("REDIS_PASSWORD", None) or None,
-            socket_timeout=1,
         )
     else:
         print(
@@ -106,7 +104,6 @@ try:
             password=getenv("REDIS_PASSWORD", None) or None,
             ssl=redis_ssl,
             socket_timeout=1,
-            ssl_cert_reqs="none",
         )
 
     if not redis_client.ping():
