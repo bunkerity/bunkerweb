@@ -240,7 +240,7 @@ do
             fi
             echo "🧰 Redis stopped ✅"
             echo "🧰 Starting redis with tweaked settings ..."
-            redis-server --port 6380 --requirepass secret --aclfile /acl/redis.acl --daemonize yes
+            redis-server --port 6380 --requirepass secret --aclfile acl/redis.acl --daemonize yes
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 echo "🧰 Redis start failed ❌"
