@@ -12,16 +12,6 @@ fi
 
 echo "🧰 Building redis stack for integration \"$integration\" ..."
 
-echo "🧰 Generating redis acl files ..."
-sudo rm -rf acl
-mkdir acl
-echo "user default on nopass +@all ~* &* +@all -@all +@all" > acl/redis.acl
-echo "user bunkerweb on >secret +@all ~* +@all -@all +@all" >> acl/redis.acl
-echo "user default on nopass +@all ~* &* +@all -@all +@all" > acl/sentinel.acl
-echo "user bunkerweb_sentinel on >sentinel_secret +@all ~* +@all -@all +@all" >> acl/sentinel.acl
-sudo chmod -R 777 acl
-echo "🧰 Redis acl files generated ✅"
-
 echo "🧰 Generating redis certs ..."
 sudo rm -rf tls
 mkdir tls
@@ -58,8 +48,19 @@ openssl req \
 sudo chmod -R 777 tls
 echo "🧰 Certs generated ✅"
 
+echo "🧰 Generating redis acl files ..."
+mkdir acl
+sudo rm -rf acl
+
 # Starting stack
 if [ "$integration" == "docker" ] ; then
+    echo "user default on nopass +@all ~* &* +@all -@all +@all" > acl/redis.acl
+    echo "user bunkerweb on >secret +@all ~* +@all -@all +@all" >> acl/redis.acl
+    echo "user default on nopass +@all ~* &* +@all -@all +@all" > acl/sentinel.acl
+    echo "user bunkerweb_sentinel on >sentinel_secret +@all ~* +@all -@all +@all" >> acl/sentinel.acl
+    sudo chmod -R 777 acl
+    echo "🧰 Redis acl files generated ✅"
+
     docker compose pull bw-docker
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
@@ -83,6 +84,11 @@ if [ "$integration" == "docker" ] ; then
         exit 1
     fi
 else
+    echo "user default on nopass +@all ~* +@all -@all +@all" > acl/redis.acl
+    echo "user bunkerweb on >secret +@all ~* +@all -@all +@all" >> acl/redis.acl
+    sudo chmod -R 777 acl
+    echo "🧰 Redis acl files generated ✅"
+
     sudo systemctl stop bunkerweb
     sudo sed -i "/^USE_BLACKLIST=/d" /etc/bunkerweb/variables.env
     echo "BLACKLIST_IP_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
