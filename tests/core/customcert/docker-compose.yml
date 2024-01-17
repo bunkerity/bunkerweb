@@ -2,13 +2,17 @@ version: "3.5"
 
 services:
   bw:
-    image: bunkerity/bunkerweb:1.5.5
-    pull_policy: never
+    # image: bunkerity/bunkerweb:1.5.5
+    # pull_policy: never
+    build:
+      context: ../../..
+      dockerfile: src/bw/Dockerfile
     labels:
       - "bunkerweb.INSTANCE=yes"
     volumes:
       - ./index.html:/var/www/html/index.html
     environment:
+      SERVER_NAME: "app1.example.com"
       API_WHITELIST_IP: "127.0.0.0/8 10.20.30.0/24 192.168.0.3"
       HTTP_PORT: "80"
       HTTPS_PORT: "443"
@@ -36,8 +40,11 @@ services:
         ipv4_address: 192.168.0.2
 
   bw-scheduler:
-    image: bunkerity/bunkerweb-scheduler:1.5.5
-    pull_policy: never
+    # image: bunkerity/bunkerweb-scheduler:1.5.5
+    # pull_policy: never
+    build:
+      context: ../../..
+      dockerfile: src/scheduler/Dockerfile
     depends_on:
       - bw
       - bw-docker

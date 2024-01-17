@@ -31,6 +31,8 @@ else
     echo "USE_CUSTOM_SSL=no" | sudo tee -a /etc/bunkerweb/variables.env
     echo "CUSTOM_SSL_CERT=/tmp/certificate.pem" | sudo tee -a /etc/bunkerweb/variables.env
     echo "CUSTOM_SSL_KEY=/tmp/privatekey.key" | sudo tee -a /etc/bunkerweb/variables.env
+    export CUSTOM_SSL_CERT="/tmp/certificate.pem"
+    export CUSTOM_SSL_KEY="/tmp/privatekey.key"
     sudo touch /var/www/html/index.html
     sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
@@ -43,12 +45,14 @@ cleanup_stack () {
         if [ "$integration" == "docker" ] ; then
             rm -rf init/certs
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_CUSTOM_SSL: "yes"@USE_CUSTOM_SSL: "no"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@CUSTOM_SSL_CERT: ".*"@CUSTOM_SSL_CERT: "/certs/certificate.pem"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@CUSTOM_SSL_KEY: ".*"@CUSTOM_SSL_KEY: "/certs/privatekey.key"@' {} \;
         else
             sudo rm -f /tmp/certificate.pem /tmp/privatekey.key
             sudo sed -i 's@USE_CUSTOM_SSL=.*$@USE_CUSTOM_SSL=no@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CUSTOM_SSL_CERT=.*$@CUSTOM_SSL_CERT=/tmp/certificate.pem@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CUSTOM_SSL_KEY=.*$@CUSTOM_SSL_KEY=/tmp/privatekey.key@' /etc/bunkerweb/variables.env
             unset USE_CUSTOM_SSL
-            unset CUSTOM_SSL_CERT
-            unset CUSTOM_SSL_KEY
         fi
         if [[ $end -eq 1 && $exit_code = 0 ]] ; then
             return
@@ -103,7 +107,7 @@ else
     sudo chmod 777 /tmp/privatekey.key /tmp/certificate.pem
 fi
 
-for test in "deactivated" "activated"
+for test in "deactivated" "activated" "fallback"
 do
     if [ "$test" = "deactivated" ] ; then
         echo "🔏 Running tests without the custom cert ..."
@@ -113,6 +117,20 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_CUSTOM_SSL: "no"@USE_CUSTOM_SSL: "yes"@' {} \;
         else
             sudo sed -i 's@USE_CUSTOM_SSL=.*$@USE_CUSTOM_SSL=yes@' /etc/bunkerweb/variables.env
+            export USE_CUSTOM_SSL="yes"
+        fi
+    elif [ "$test" = "fallback" ] ; then
+        echo "🔏 Running tests with the custom cert activated and fallback to default cert ..."
+        echo "ℹ Keeping the USE_CUSTOM_SSL variable to yes"
+        if [ "$integration" == "docker" ] ; then
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@CUSTOM_SSL_CERT: ".*"@CUSTOM_SSL_CERT: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@CUSTOM_SSL_KEY: ".*"@CUSTOM_SSL_KEY: ""@' {} \;
+        else
+            sudo sed -i 's@USE_CUSTOM_SSL=.*$@USE_CUSTOM_SSL=yes@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CUSTOM_SSL_CERT=.*$@CUSTOM_SSL_CERT=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@CUSTOM_SSL_KEY=.*$@CUSTOM_SSL_KEY=@' /etc/bunkerweb/variables.env
+            unset CUSTOM_SSL_CERT
+            unset CUSTOM_SSL_KEY
             export USE_CUSTOM_SSL="yes"
         fi
     fi
