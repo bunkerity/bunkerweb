@@ -49,8 +49,8 @@ sudo chmod -R 777 tls
 echo "🧰 Certs generated ✅"
 
 echo "🧰 Generating redis acl files ..."
-mkdir acl
 sudo rm -rf acl
+mkdir acl
 
 # Starting stack
 if [ "$integration" == "docker" ] ; then
