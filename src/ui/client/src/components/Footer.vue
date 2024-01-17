@@ -40,7 +40,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <footer class="footer-container">
+  <footer role="contentinfo" class="footer-container">
     <div class="footer-wrap">
       <div class="footer-items-container">
         <div class="footer-item-right-container">

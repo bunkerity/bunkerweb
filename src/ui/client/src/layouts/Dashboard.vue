@@ -19,7 +19,7 @@ import Banner from "@components/Banner.vue";
   <LangSwitch />
   <Banner />
   <!-- info -->
-  <main class="content-container">
+  <main role="main" class="content-container">
     <Menu />
     <FeedbackStructure />
     <News />
