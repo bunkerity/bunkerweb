@@ -66,8 +66,6 @@ jobs:
       - name: Fix version without a starting number
         if: inputs.RELEASE == 'testing' || inputs.RELEASE == 'dev' || inputs.RELEASE == 'ui'
         run: echo "force-bad-version" | sudo tee -a /etc/dpkg/dpkg.cfg
-      - name: Install BunkerWeb
-        run: sudo apt install -fy /tmp/bunkerweb.deb
       - name: Edit configuration files
         run: |
           # Misc
@@ -92,6 +90,8 @@ jobs:
 
           sudo chown nginx:nginx /etc/bunkerweb/variables.env /etc/bunkerweb/ui.env
           sudo chmod 777 /etc/bunkerweb/variables.env /etc/bunkerweb/ui.env
+      - name: Install BunkerWeb
+        run: sudo apt install -fy /tmp/bunkerweb.deb
       - name: Run tests
         run: |
           export MAKEFLAGS="-j $(nproc)"
