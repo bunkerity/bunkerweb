@@ -304,8 +304,8 @@
         <!-- item -->
         <li class="mt-0.5 w-full">
           <a
-            class="{% if current_endpoint == 'bans' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-            href="{% if current_endpoint == 'bans' %}#{% else %}loading?next={{ url_for('bans') }}{% endif %}"
+            class="{% if current_endpoint == 'block_requests' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
+            href="{% if current_endpoint == 'block_requests' %}#{% else %}loading?next={{ url_for('block_requests') }}{% endif %}"
           >
             <div
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
