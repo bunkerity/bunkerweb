@@ -1599,12 +1599,14 @@ def logs_container(container_id):
 @login_required
 def block_requests():
     # TODO : Get block requests from database to send it
+    # Dummy value : [{"url": "/test", "date": "12/51/9851", "reason": "antibot", "method": "GET", "status": 403, "data": "{fesfmk fesfsf sfesfes}"}]
     return render_template(
         "block_requests.html",
         block_requests=[],
         username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
     )
+
 
 @app.route("/bans", methods=["GET"])
 @login_required
