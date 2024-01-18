@@ -1606,6 +1606,17 @@ def block_requests():
         dark_mode=app.config["DARK_MODE"],
     )
 
+@app.route("/bans", methods=["GET"])
+@login_required
+def bans():
+    # TODO : Get bans list from database and send it
+    return render_template(
+        "bans.html",
+        bans=[],
+        username=current_user.get_id(),
+        dark_mode=app.config["DARK_MODE"],
+    )
+
 
 @app.route("/jobs", methods=["GET"])
 @login_required
