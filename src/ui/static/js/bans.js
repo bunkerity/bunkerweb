@@ -414,12 +414,10 @@ class AddBanModal {
 
     // Check that all inputs have a value to submit
     this.listEl.addEventListener("input", (e) => {
-      console.log(e.target);
       this.checkInpValidity();
     });
 
     this.listEl.addEventListener("change", (e) => {
-      console.log(e.target);
       this.checkInpValidity();
     });
 
@@ -429,17 +427,19 @@ class AddBanModal {
       const data = [];
       this.listEl.querySelectorAll("li").forEach((item) => {
         const ip = item.querySelector("input[data-bans-add-ip]").value;
-        const banEnd = item.querySelector("input[data-bans-add-ban-end]").value;
+        const banEnd = item
+          .querySelector("input[data-bans-add-ban-end]")
+          .getAttribute("data-timestamp");
         data.push({
           ip: ip,
-          ban_end: banEnd,
+          ban_end: +banEnd,
           ban_start: +Date.now().toString().substring(0, 10),
           reason: "ui",
         });
       });
       console.log(data);
       this.addBanInp.setAttribute("value", data);
-      // this.formEl.submit();
+      this.formEl.submit();
     });
   }
 
@@ -458,7 +458,7 @@ class AddBanModal {
     let isAllValid = true;
     for (let i = 0; i < inps.length; i++) {
       const inpEl = inps[i];
-      if (!inpEl.checkValidity()) {
+      if (!inpEl.checkValidity() || !inpEl.value) {
         isAllValid = false;
         break;
       }
@@ -497,7 +497,7 @@ class AddBanModal {
         name="ip-${this.itemCount}"
         class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
         placeholder="127.0.0.1"
-        pattern="(.*?)"
+        pattern="((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])))$"
         required
       />
     </div>
@@ -546,7 +546,31 @@ class AddBanModal {
     // instanciate datepicker
     const dateOptions = {
       locale: "en",
-      dateFormat: "m/d/Y",
+      dateFormat: "m/d/Y H:i:S",
+      defaultDate: false,
+      enableTime: true,
+      enableSeconds: true,
+      time_24hr: true,
+      minuteIncrement: 1,
+      onChange(selectedDates, dateStr, instance) {
+        const inpEl = document.querySelector(`input#ban-end-${id}`);
+
+        // Get date to timestamp
+        const pickStamp = +Date.parse(new Date(dateStr).toString());
+        const nowStamp = +Date.now();
+
+        // Case pick is before current date
+        if (pickStamp < nowStamp) {
+          inpEl.setAttribute("data-timestamp", Date.now());
+          return instance.setDate(nowStamp);
+        }
+
+        // Case right value
+        // Set timestamp in seconds in the related input
+        const convertToS = +pickStamp.toString().substring(0, 10);
+
+        inpEl.setAttribute("data-timestamp", convertToS);
+      },
     };
 
     flatpickr(`input#ban-end-${id}`, dateOptions);
