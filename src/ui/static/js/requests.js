@@ -5,7 +5,7 @@ class Filter {
     this.keyInp = document.querySelector("input#keyword");
     this.methodValue = "all";
     this.statusValue = "all";
-
+    this.reasonValue = "all";
     this.initHandler();
   }
 
@@ -56,6 +56,29 @@ class Filter {
         }
       } catch (err) {}
     });
+    // REASON HANDLER
+    +this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
+          "reason"
+        ) {
+          setTimeout(() => {
+            const value = document
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="reason"]`
+              )
+              .textContent.trim();
+
+            this.reasonValue = value;
+            //run filter
+            this.filter();
+          }, 10);
+        }
+      } catch (err) {}
+    });
     //KEYWORD HANDLER
     this.keyInp.addEventListener("input", (e) => {
       this.filter();
@@ -76,6 +99,7 @@ class Filter {
     this.setFilterMethod(requests);
     this.setFilterKeyword(requests);
     this.setFilterStatus(requests);
+    this.setFilterReason(requests);
   }
 
   setFilterMethod(requests) {
@@ -95,13 +119,13 @@ class Filter {
 
       const url = this.getElAttribut(el, "url");
       const date = this.getElAttribut(el, "date");
-      const reason = this.getElAttribut(el, "reason");
+      const ip = this.getElAttribut(el, "ip");
       const data = this.getElAttribut(el, "data");
 
       if (
         !url.includes(keyword) &&
         !date.includes(keyword) &&
-        !reason.includes(keyword) &&
+        !ip.includes(keyword) &&
         !data.includes(keyword)
       )
         el.classList.add("hidden");
@@ -114,6 +138,15 @@ class Filter {
       const el = requests[i];
       const type = this.getElAttribut(el, "status");
       if (type !== this.statusValue) el.classList.add("hidden");
+    }
+  }
+
+  setFilterReason(requests) {
+    if (this.reasonValue === "all") return;
+    for (let i = 0; i < requests.length; i++) {
+      const el = requests[i];
+      const type = this.getElAttribut(el, "reason");
+      if (type !== this.reasonValue) el.classList.add("hidden");
     }
   }
 
@@ -174,7 +207,9 @@ class Dropdown {
           //close dropdown and change style
           this.hideDropdown(btnSetting);
 
-          if (!e.target.closest("button").hasAttribute(`data-${prefix}-file`)) {
+          if (
+            !e.target.closest("button").hasAttribute(`data-${this.prefix}-file`)
+          ) {
             this.changeDropBtnStyle(btnSetting, btn);
           }
           //show / hide filter

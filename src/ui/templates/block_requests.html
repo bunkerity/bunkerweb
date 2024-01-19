@@ -3,6 +3,8 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
 
 {% set methods = [] %}
 {% set codes = [] %}
+{% set reasons = [] %}
+
 
 {% for request in block_requests %}
   {% if request["method"] not in methods %}
@@ -10,6 +12,9 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
   {% endif %}
   {% if request["status"] not in codes %}
     {% set codes = codes.append(request["status"]) %}
+  {% endif %}
+  {% if request["reason"] not in reasons %}
+    {% set reasons = reasons.append(request["reason"]) %}
   {% endif %}
 {% endfor %}
 
@@ -28,6 +33,30 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-80"
     >
       {{block_requests|length}}
+    </p>
+  </div>
+  <div class="mx-1 flex items-center my-4">
+    <p
+      class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 dark:opacity-80"
+    >
+      TOP REASON
+    </p>
+    <p
+      class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-80"
+    >
+      {{top_reason}}
+    </p>
+  </div>
+  <div class="mx-1 flex items-center my-4">
+    <p
+      class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 dark:opacity-80"
+    >
+      TOP STATUS CODE
+    </p>
+    <p
+      class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-80"
+    >
+      {{top_code}}
     </p>
   </div>
 </div>
@@ -53,7 +82,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         id="keyword"
         name="keyword"
         class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-        placeholder="url, date, reason, data"
+        placeholder="ip, url, date, data"
         pattern="(.*?)"
         required
       />
@@ -182,7 +211,69 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       </div>
       <!-- end dropdown-->
     </div>
-    <!-- end select method  -->
+    <!-- end select status  -->
+
+    <!-- select reason -->
+    <div class="flex flex-col relative col-span-12 md:col-span-6">
+      <h5
+        class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300"
+      >
+        Reason
+      </h5>
+      <button
+        aria-controls="filter-state"
+        data-{{current_endpoint}}-setting-select="reason"
+        class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+      >
+        <span
+          aria-description="current filter state value"
+          id="{{current_endpoint}}-reason"
+          data-name="{{current_endpoint}}-reason"
+          data-{{current_endpoint}}-setting-select-text="reason"
+          >all</span
+        >
+        <!-- chevron -->
+        <svg
+          data-{{current_endpoint}}-setting-select="reason"
+          class="transition-transform h-4 w-4 fill-gray-500"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 512 512"
+        >
+          <path
+            d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"
+          />
+        </svg>
+      </button>
+      <!-- end chevron -->
+      <!-- dropdown-->
+      <div
+        id="filter-state"
+        role="listbox"
+        data-{{current_endpoint}}-setting-select-dropdown="reason"
+        class="hidden z-100 absolute h-full flex-col w-full translate-y-16"
+      >
+        <button
+          role="option"
+          data-{{current_endpoint}}-setting-select-dropdown-btn="reason"
+          value="all"
+          class="border-t rounded-t border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300 dark:bg-primary bg-primary text-gray-300"
+        >
+          all
+        </button>
+        {% for reason in reasons %}
+        <button
+          role="option"
+          data-{{current_endpoint}}-setting-select-dropdown-btn="reason"
+          value="{{reason}}"
+          class="{% if loop.last %}rounded-b{%endif%} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 bg-white text-gray-700 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300"
+        >
+        {{reason}}
+        </button>
+        {% endfor %}
+      </div>
+      <!-- end dropdown-->
+    </div>
+    <!-- end select reason  -->
   </div>
 </div>
 <!-- end filter -->
@@ -192,10 +283,15 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
 >
   <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">BLOCK REQUESTS</h5>
   <!-- list container-->
-  <div class="min-w-[900px] w-full grid grid-cols-12 rounded p-2">
+  <div class="min-w-[1024px] w-full grid grid-cols-12 rounded p-2">
     <!-- header-->
     <p
-      class="dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400"
+    class="dark:text-gray-300 h-8 text-sm font-bold col-span-2 m-0 pb-2 border-b border-gray-400"
+  >
+    IP
+  </p>
+    <p
+      class="dark:text-gray-300 h-8 text-sm font-bold col-span-2 m-0 pb-2 border-b border-gray-400"
     >
       Url
     </p>
@@ -220,7 +316,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     Reason
   </p>
     <p
-      class="dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400"
+      class="dark:text-gray-300 h-8 text-sm font-bold col-span-2 m-0 pb-2 border-b border-gray-400"
     >
       Data
     </p>
@@ -232,9 +328,16 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
 
         class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5"
       >
+      <p
+
+        class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0 my-1"
+        data-{{current_endpoint}}-ip="{{request['ip']}}"
+      >
+        {{request['ip']}}
+      </p>
         <p
 
-          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0 my-1"
+          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0 my-1"
           data-{{current_endpoint}}-url="{{request['url']}}"
         >
           {{request['url']}}
@@ -269,7 +372,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         </p>
         <p
 
-          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0 my-1"
+          class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0 my-1"
           data-{{current_endpoint}}-data="{{request['data']}}"
         >
           {{request["data"]}}
