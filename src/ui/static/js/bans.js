@@ -364,68 +364,82 @@ class AddBanModal {
     this.addBanInp = document.querySelector("input[data-ban-add-inp]");
     this.addFieldBtn = document.querySelector("button[data-ban-add-new]");
     this.listEl = document.querySelector(`[data-bans-add-ban-list]`);
+    this.submitBtn = document.querySelector(`button[data-bans-modal-submit]`);
     this.removeAllFieldBtn = document.querySelector(
-      "button[data-ban-add-delete-all]",
+      "button[data-add-ban-delete-all-item]",
     );
     this.formEl = document.querySelector("form[data-ban-add-form]");
+    this.itemCount = 1;
+    this.setDatepicker("0"); // for default field
     this.init();
   }
 
   init() {
+    // delete item
+    this.modal.addEventListener("click", (e) => {
+      try {
+        if (e.target.hasAttribute("data-add-ban-delete-item")) {
+          e.target.closest("li").remove();
+          this.updateActionBtns();
+        }
+      } catch (e) {}
+
+      try {
+        if (e.target.hasAttribute("data-add-ban-delete-all-item")) {
+          this.listEl.querySelectorAll("li").forEach((item) => {
+            item.remove();
+          });
+        }
+      } catch (e) {}
+
+      try {
+        if (e.target.closest("button").hasAttribute("data-bans-modal-close")) {
+          this.closeModal();
+        }
+      } catch (e) {}
+
+      this.updateActionBtns();
+    });
+
     //open modal
     this.openBtn.addEventListener("click", (e) => {
       this.openModal();
     });
 
-    this.modal.addEventListener("click", (e) => {
-      //close
-      try {
-        if (e.target.closest("button").hasAttribute("data-bans-modal-close")) {
-          this.closeModal();
-        }
-      } catch (err) {}
-    });
-
     // add field
     this.addFieldBtn.addEventListener("click", (e) => {
-      const field = document.createElement("div");
-      field.classList.add("flex", "items-center", "mb-2");
-      field.innerHTML = `
-        <input
-          type="text"
-          name="ban_add"
-          class="w-full px-2 py-1 border rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300"
-          placeholder="IP"
-          required
-        />
-        <button
-          type="button"
-          class="ml-2 px-2 py-1 border rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300"
-          data-ban-add-delete
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-      `;
-      this.formEl.insertBefore(field, this.removeAllFieldBtn);
+      this.addItem();
+      this.updateActionBtns();
+    });
+
+    // Check that all inputs have a value to submit
+    this.listEl.addEventListener("input", (e) => {
+      console.log(e.target);
+      this.checkInpValidity();
+    });
+
+    this.listEl.addEventListener("change", (e) => {
+      console.log(e.target);
+      this.checkInpValidity();
     });
 
     this.formEl.addEventListener("submit", (e) => {
       e.preventDefault();
-      this.addBanInp.setAttribute("value", this.addBanInp.value);
-      this.formEl.submit();
+      // prepare data
+      const data = [];
+      this.listEl.querySelectorAll("li").forEach((item) => {
+        const ip = item.querySelector("input[data-bans-add-ip]").value;
+        const banEnd = item.querySelector("input[data-bans-add-ban-end]").value;
+        data.push({
+          ip: ip,
+          ban_end: banEnd,
+          ban_start: +Date.now().toString().substring(0, 10),
+          reason: "ui",
+        });
+      });
+      console.log(data);
+      this.addBanInp.setAttribute("value", data);
+      // this.formEl.submit();
     });
   }
 
@@ -437,6 +451,105 @@ class AddBanModal {
   closeModal() {
     this.modal.classList.add("hidden");
     this.modal.classList.remove("flex");
+  }
+
+  checkInpValidity() {
+    const inps = this.listEl.querySelectorAll("input");
+    let isAllValid = true;
+    for (let i = 0; i < inps.length; i++) {
+      const inpEl = inps[i];
+      if (!inpEl.checkValidity()) {
+        isAllValid = false;
+        break;
+      }
+    }
+
+    isAllValid
+      ? this.submitBtn.removeAttribute("disabled")
+      : this.submitBtn.setAttribute("disabled", "");
+  }
+
+  // Check if items and update button disabled/enabled states
+  updateActionBtns() {
+    const items = this.listEl.querySelectorAll("li");
+    const itemsCount = items.length;
+
+    itemsCount
+      ? this.removeAllFieldBtn.removeAttribute("disabled")
+      : this.removeAllFieldBtn.setAttribute("disabled", "");
+
+    itemsCount ? null : this.submitBtn.setAttribute("disabled", "");
+  }
+
+  addItem() {
+    // add item
+    this.itemCount++;
+    let item = `<li
+    data-bans-add-ban-list
+    class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5"
+  >
+    <div class="mx-1.5 col-span-5">
+      <label for="ip-${this.itemCount}" class="sr-only">ip</label>
+      <input
+        data-bans-add-ip
+        type="text"
+        id="ip-${this.itemCount}"
+        name="ip-${this.itemCount}"
+        class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+        placeholder="127.0.0.1"
+        pattern="(.*?)"
+        required
+      />
+    </div>
+    <div class="mx-1.5 col-span-5">
+      <label for="ban-end-${this.itemCount}" class="sr-only">Ban end</label>
+      <input
+        data-bans-add-ban-end
+        type="text"
+        id="ban-end-${this.itemCount}"
+        name="ban-end-${this.itemCount}"
+        class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+        placeholder="01/01/2021 00:00:00"
+        pattern="(.*?)"
+        required
+      />
+    </div>
+    <div class="mx-1.5 col-span-2 flex justify-center items-center">
+      <button
+        data-add-ban-delete-item
+        type="button"
+        class="dark:bg-red-500/90 duration-300 dark:opacity-90 flex justify-center items-center p-2 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-6 h-6 pointer-events-none"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+          />
+        </svg>
+      </button>
+    </div>
+  </li>`;
+    let cleanHTML = DOMPurify.sanitize(item);
+    this.listEl.insertAdjacentHTML("beforeend", cleanHTML);
+    this.setDatepicker(this.itemCount);
+  }
+
+  setDatepicker(id) {
+    // instanciate datepicker
+    const dateOptions = {
+      locale: "en",
+      dateFormat: "m/d/Y",
+    };
+
+    flatpickr(`input#ban-end-${id}`, dateOptions);
   }
 }
 

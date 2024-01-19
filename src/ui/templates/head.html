@@ -48,6 +48,9 @@
   {% elif current_endpoint == "block_requests" %}
   <script type="module" src="./js/requests.js"></script>
   {% elif current_endpoint == "bans" %}
+  <link rel="stylesheet" type="text/css" href="./css/flatpickr.css" />
+  <link rel="stylesheet" type="text/css" href="./css/flatpickr.dark.css" />
+  <script defer src="./js/utils/flatpickr.js"></script>
   <script type="module" src="./js/bans.js"></script>
   {% endif %}
 </head>
