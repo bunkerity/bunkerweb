@@ -356,6 +356,91 @@ class Unban {
   }
 }
 
+class AddBanModal {
+  constructor() {
+    //modal elements
+    this.modal = document.querySelector("[data-bans-modal]");
+    this.openBtn = document.querySelector("button[data-add-ban]");
+    this.addBanInp = document.querySelector("input[data-ban-add-inp]");
+    this.addFieldBtn = document.querySelector("button[data-ban-add-new]");
+    this.listEl = document.querySelector(`[data-bans-add-ban-list]`);
+    this.removeAllFieldBtn = document.querySelector(
+      "button[data-ban-add-delete-all]",
+    );
+    this.formEl = document.querySelector("form[data-ban-add-form]");
+    this.init();
+  }
+
+  init() {
+    //open modal
+    this.openBtn.addEventListener("click", (e) => {
+      this.openModal();
+    });
+
+    this.modal.addEventListener("click", (e) => {
+      //close
+      try {
+        if (e.target.closest("button").hasAttribute("data-bans-modal-close")) {
+          this.closeModal();
+        }
+      } catch (err) {}
+    });
+
+    // add field
+    this.addFieldBtn.addEventListener("click", (e) => {
+      const field = document.createElement("div");
+      field.classList.add("flex", "items-center", "mb-2");
+      field.innerHTML = `
+        <input
+          type="text"
+          name="ban_add"
+          class="w-full px-2 py-1 border rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300"
+          placeholder="IP"
+          required
+        />
+        <button
+          type="button"
+          class="ml-2 px-2 py-1 border rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300"
+          data-ban-add-delete
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      `;
+      this.formEl.insertBefore(field, this.removeAllFieldBtn);
+    });
+
+    this.formEl.addEventListener("submit", (e) => {
+      e.preventDefault();
+      this.addBanInp.setAttribute("value", this.addBanInp.value);
+      this.formEl.submit();
+    });
+  }
+
+  openModal() {
+    this.modal.classList.remove("hidden");
+    this.modal.classList.add("flex");
+  }
+
+  closeModal() {
+    this.modal.classList.add("hidden");
+    this.modal.classList.remove("flex");
+  }
+}
+
 const setDropdown = new Dropdown();
 const setFilter = new Filter();
 const setUnban = new Unban();
+const setModal = new AddBanModal();
