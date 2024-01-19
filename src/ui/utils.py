@@ -7,6 +7,76 @@ from typing import List, Optional
 
 from qrcode.main import QRCode
 
+import math
+
+
+def get_remain(stamp):
+    # Convert to milliseconds if not
+    time = str(stamp)
+    length = len(time)
+
+    if length < 13:
+        missing = 13 - length
+        print(missing)
+        for i in range(missing):
+            time = time + "0"
+
+    # Get remain
+    ms = int(time)
+
+    seconds = math.floor(ms / 1000)
+    minutes = math.floor(seconds / 60)
+    hours = math.floor(minutes / 60)
+    days = math.floor(hours / 24)
+    months = math.floor(days / 30)
+    years = math.floor(days / 365)
+    seconds %= 60
+    minutes %= 60
+    hours %= 24
+    days %= 30
+    months %= 12
+    return f"{years}y {months}m {days}d {hours}h {minutes}min {seconds}s"
+
+
+def get_period_from_remain(remain):
+    # Data, need format <n>y <n>m <n>d <n>h <n>min <n>s
+    periods = remain.split(" ")
+    period = "unknown"
+    formats = ["years", "months", "days", "hours", "minutes", "seconds"]
+    chars = ["y", "min", "m", "d", "h", "s"]
+
+    # Case not right format
+    if len(periods) != 6:
+        return period
+
+    # start from seconds to years, stop when first 0 occurence
+    # The remain period is first 0 occurence - 1
+    for i in range(len(periods)):
+        # remove letter
+        num = periods[len(periods) - 1 - i]
+        for char in chars:
+            num = num.replace(char, "")
+            num = "0" if not num else num
+
+        num = int(num)
+
+        # Case seconds or less
+        if not num and i == 0:
+            period = formats[len(formats) - 1]
+            break
+
+        # Case years period
+        if num and i == (len(periods) - 1):
+            period = formats[0]
+            break
+
+        # Case between seconds and years
+        if not num:
+            period = formats[len(formats) - i]
+            break
+
+    return period
+
 
 def path_to_dict(
     path: str,

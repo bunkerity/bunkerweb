@@ -48,7 +48,7 @@ from src.Config import Config
 from src.ReverseProxied import ReverseProxied
 from src.User import AnonymousUser, User
 
-from utils import check_settings, get_b64encoded_qr_image, path_to_dict
+from utils import check_settings, get_b64encoded_qr_image, path_to_dict, get_remain, get_period_from_remain
 from Database import Database  # type: ignore
 from logging import getLogger
 
@@ -1605,25 +1605,21 @@ def block_requests():
         {"ip": "124.0.0.3", "url": "/test", "date": "12/51/9851", "reason": "antibot", "method": "GET", "status": 403, "data": "{fesfmk fesfsf sfesfes}"},
     ]
 
-    # Get top reasons
+    # Prepare data
     reasons = {}
+    codes = {}
     for request in requests:
+        # Get top reasons
         if not request["reason"] in reasons:
             reasons[request["reason"]] = 0
         reasons[request["reason"]] = reasons[request["reason"]] + 1
-
-    top_reason = [k for k, v in reasons.items() if v == max(reasons.values())][0]
-
-    # Get top status code
-    codes = {}
-    for request in requests:
+        # Get top status code
         if not request["status"] in codes:
             codes[request["status"]] = 0
         codes[request["status"]] = codes[request["status"]] + 1
 
+    top_reason = [k for k, v in reasons.items() if v == max(reasons.values())][0]
     top_code = [k for k, v in codes.items() if v == max(codes.values())][0]
-
-    # Get top reason and status
 
     return render_template(
         "block_requests.html",
@@ -1643,9 +1639,34 @@ def block_requests():
 @login_required
 def bans():
     # TODO : Get bans list from database and send it
+    bans = [
+        {"ip": "124.0.0.1", "ban_start": 1705663430, "ban_end": 1705675421, "reason": "antibot"},
+        {"ip": "124.0.0.2", "ban_start": 1705663430, "ban_end": 1705685421, "reason": "test"},
+        {"ip": "124.0.0.3", "ban_start": 1705663430, "ban_end": 1705664748, "reason": "unknown"},
+    ]
+
+    # Prepare data
+    reasons = {}
+    now_stamp = int(time())
+
+    for ban in bans:
+        # Add remain
+        ban["remain"] = "unknown" if ban["ban_end"] - now_stamp < 0 else get_remain(ban["ban_end"] - now_stamp)
+        ban["period"] = get_period_from_remain(ban["remain"])
+        # Convert stamp to date
+        ban["ban_start"] = datetime.fromtimestamp(ban["ban_start"])
+        ban["ban_end"] = datetime.fromtimestamp(ban["ban_end"])
+        # Get top reason
+        if not ban["reason"] in reasons:
+            reasons[ban["reason"]] = 0
+        reasons[ban["reason"]] = reasons[ban["reason"]] + 1
+
+    top_reason = [k for k, v in reasons.items() if v == max(reasons.values())][0]
+
     return render_template(
         "bans.html",
-        bans=[],
+        bans=bans,
+        top_reason=top_reason,
         username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
     )
