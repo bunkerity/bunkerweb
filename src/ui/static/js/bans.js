@@ -1,18 +1,16 @@
-import { Checkbox } from "./utils/form";
-
 class Filter {
   constructor(prefix = "bans") {
     this.prefix = prefix;
     this.container = document.querySelector(`[data-${this.prefix}-filter]`);
     this.keyInp = document.querySelector("input#keyword");
-    this.periodValue = "all";
+    this.termValue = "all";
     this.reasonValue = "all";
     this.initHandler();
   }
 
   initHandler() {
     // REASON HANDLER
-    +this.container.addEventListener("click", (e) => {
+    this.container.addEventListener("click", (e) => {
       try {
         if (
           e.target
@@ -34,23 +32,21 @@ class Filter {
         }
       } catch (err) {}
     });
-    // PERIOD HANDLER
-    +this.container.addEventListener("click", (e) => {
+    // TERM HANDLER
+    this.container.addEventListener("click", (e) => {
       try {
         if (
           e.target
             .closest("button")
             .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "period"
+          "term"
         ) {
           setTimeout(() => {
             const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="period"]`,
-              )
+              .querySelector(`[data-${this.prefix}-setting-select-text="term"]`)
               .textContent.trim();
 
-            this.periodValue = value;
+            this.termValue = value;
             //run filter
             this.filter();
           }, 10);
@@ -74,7 +70,7 @@ class Filter {
     //filter type
     this.setFilterKeyword(bans);
     this.setFilterReason(bans);
-    this.setFilterPeriod(bans);
+    this.setFilterTerm(bans);
   }
 
   setFilterKeyword(bans) {
@@ -98,12 +94,12 @@ class Filter {
     }
   }
 
-  setFilterPeriod(bans) {
-    if (this.periodValue === "all") return;
+  setFilterTerm(bans) {
+    if (this.termValue === "all") return;
     for (let i = 0; i < bans.length; i++) {
       const el = bans[i];
-      const type = this.getElAttribut(el, "period");
-      if (type !== this.periodValue) el.classList.add("hidden");
+      const type = this.getElAttribut(el, "term");
+      if (type !== this.termValue) el.classList.add("hidden");
     }
   }
 
@@ -300,6 +296,66 @@ class Dropdown {
   }
 }
 
+class Unban {
+  constructor(prefix = "bans") {
+    this.prefix = prefix;
+    this.container = document.querySelector("main");
+    this.listEl = document.querySelector(`[data-${this.prefix}-list]`);
+    this.unbanForm = document.querySelector("#unban-items");
+    this.unbanBtn = document.querySelector(`button[data-unban-btn]`);
+    this.unbanInp = document.querySelector(`input[data-unban-inp]`);
+    this.init();
+  }
+
+  init() {
+    //  Look if an item is select to enable unban button
+    this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target.closest("div").hasAttribute(`data-${this.prefix}-ban-select`)
+        ) {
+          // timeout to wait for select value to change
+          setTimeout(() => {
+            // Check if at least one item is selected
+            const selected = this.listEl.querySelectorAll(
+              `input[data-checked="true"]`,
+            );
+
+            // Case true, enable unban button
+            if (selected.length > 0) {
+              this.unbanBtn.removeAttribute("disabled");
+            }
+
+            // Case false, disable unban button
+            if (selected.length === 0) {
+              this.unbanBtn.setAttribute("disabled", "");
+            }
+          }, 100);
+        }
+      } catch (err) {}
+    });
+    // unban button
+    this.unbanForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (this.unbanBtn.hasAttribute("disabled")) return;
+      // Get all selected items
+      const selected = this.listEl.querySelectorAll(
+        `input[data-checked="true"]`,
+      );
+      const getDatas = [];
+      selected.forEach((el) => {
+        const data = el
+          .closest(`li[data-${this.prefix}-list-item]`)
+          .getAttribute(`data-${this.prefix}-list-item`);
+        getDatas.push(data);
+      });
+      this.unbanInp.value = JSON.stringify(getDatas);
+      this.unbanInp.setAttribute("value", JSON.stringify(getDatas));
+      this.unbanForm.submit();
+    });
+  }
+}
+
 const setDropdown = new Dropdown();
 const setFilter = new Filter();
-new Checkbox();
+const setUnban = new Unban();

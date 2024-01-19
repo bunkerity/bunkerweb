@@ -10,19 +10,9 @@ from qrcode.main import QRCode
 import math
 
 
-def get_remain(stamp):
-    # Convert to milliseconds if not
-    time = str(stamp)
-    length = len(time)
-
-    if length < 13:
-        missing = 13 - length
-        print(missing)
-        for i in range(missing):
-            time = time + "0"
-
-    # Get remain
-    ms = int(time)
+def get_remain(remain_time):
+    # Convert s to ms
+    ms = int(str(remain_time) + "000")
 
     seconds = math.floor(ms / 1000)
     minutes = math.floor(seconds / 60)
@@ -35,25 +25,25 @@ def get_remain(stamp):
     hours %= 24
     days %= 30
     months %= 12
-    return f"{years}y {months}m {days}d {hours}h {minutes}min {seconds}s"
+    return f"{f'{years}y' if years else ''} {f'{months}m' if months else ''} {f'{days}d' if days else ''} {f'{hours}h' if hours else ''} {f'{minutes}min' if minutes else ''} {f'{seconds}s' if seconds else ''}"
 
 
-def get_period_from_remain(remain):
+def get_term_from_remain(remain):
     # Data, need format <n>y <n>m <n>d <n>h <n>min <n>s
-    periods = remain.split(" ")
-    period = "unknown"
+    terms = remain.split(" ")
+    term = ""
     formats = ["years", "months", "days", "hours", "minutes", "seconds"]
     chars = ["y", "min", "m", "d", "h", "s"]
 
-    # Case not right format
-    if len(periods) != 6:
-        return period
+    # Not handle
+    if remain == "unknown":
+        return remain
 
     # start from seconds to years, stop when first 0 occurence
-    # The remain period is first 0 occurence - 1
-    for i in range(len(periods)):
+    # The remain term is first 0 occurence - 1
+    for i in range(len(terms)):
         # remove letter
-        num = periods[len(periods) - 1 - i]
+        num = terms[len(terms) - 1 - i]
         for char in chars:
             num = num.replace(char, "")
             num = "0" if not num else num
@@ -62,20 +52,20 @@ def get_period_from_remain(remain):
 
         # Case seconds or less
         if not num and i == 0:
-            period = formats[len(formats) - 1]
+            term = formats[len(formats) - 1]
             break
 
-        # Case years period
-        if num and i == (len(periods) - 1):
-            period = formats[0]
+        # Case last element
+        if num and i == (len(terms) - 1):
+            term = formats[len(formats) - 1 - i]
             break
 
         # Case between seconds and years
         if not num:
-            period = formats[len(formats) - i]
+            term = formats[len(formats) - i]
             break
 
-    return period
+    return term
 
 
 def path_to_dict(
