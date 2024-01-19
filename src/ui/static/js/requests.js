@@ -22,7 +22,7 @@ class Filter {
           setTimeout(() => {
             const value = document
               .querySelector(
-                `[data-${this.prefix}-setting-select-text="method"]`
+                `[data-${this.prefix}-setting-select-text="method"]`,
               )
               .textContent.trim();
 
@@ -45,7 +45,7 @@ class Filter {
           setTimeout(() => {
             const value = document
               .querySelector(
-                `[data-${this.prefix}-setting-select-text="status"]`
+                `[data-${this.prefix}-setting-select-text="status"]`,
               )
               .textContent.trim();
 
@@ -68,7 +68,7 @@ class Filter {
           setTimeout(() => {
             const value = document
               .querySelector(
-                `[data-${this.prefix}-setting-select-text="reason"]`
+                `[data-${this.prefix}-setting-select-text="reason"]`,
               )
               .textContent.trim();
 
@@ -87,7 +87,7 @@ class Filter {
 
   filter() {
     const requests = document.querySelector(
-      `[data-${this.prefix}-list]`
+      `[data-${this.prefix}-list]`,
     ).children;
     if (requests.length === 0) return;
     //reset
@@ -197,7 +197,7 @@ class Dropdown {
           const btn = e.target.closest("button");
           const btnValue = btn.getAttribute("value");
           const btnSetting = btn.getAttribute(
-            `data-${this.prefix}-setting-select-dropdown-btn`
+            `data-${this.prefix}-setting-select-dropdown-btn`,
           );
           //stop if same value to avoid new fetching
           const isSameVal = this.isSameValue(btnSetting, btnValue);
@@ -223,7 +223,7 @@ class Dropdown {
 
   closeAllDrop() {
     const drops = document.querySelectorAll(
-      `[data-${this.prefix}-setting-select-dropdown]`
+      `[data-${this.prefix}-setting-select-dropdown]`,
     );
     drops.forEach((drop) => {
       drop.classList.add("hidden");
@@ -231,8 +231,8 @@ class Dropdown {
       document
         .querySelector(
           `svg[data-${this.prefix}-setting-select="${drop.getAttribute(
-            `data-${this.prefix}-setting-select-dropdown`
-          )}"]`
+            `data-${this.prefix}-setting-select-dropdown`,
+          )}"]`,
         )
         .classList.remove("rotate-180");
     });
@@ -240,7 +240,7 @@ class Dropdown {
 
   isSameValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`,
     );
     const currVal = selectCustom.textContent;
     return currVal === value ? true : false;
@@ -248,30 +248,30 @@ class Dropdown {
 
   setSelectNewValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[data-${this.prefix}-setting-select="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select="${btnSetting}"]`,
     );
     selectCustom.querySelector(
-      `[data-${this.prefix}-setting-select-text]`
+      `[data-${this.prefix}-setting-select-text]`,
     ).textContent = value;
   }
 
   hideDropdown(btnSetting) {
     //hide dropdown
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
     );
     dropdownEl.classList.add("hidden");
     dropdownEl.classList.remove("flex");
     //svg effect
     const dropdownChevron = document.querySelector(
-      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`
+      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`,
     );
     dropdownChevron.classList.remove("rotate-180");
   }
 
   changeDropBtnStyle(btnSetting, selectedBtn) {
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
     );
     //reset dropdown btns
     const btnEls = dropdownEl.querySelectorAll("button");
@@ -281,7 +281,7 @@ class Dropdown {
         "bg-primary",
         "dark:bg-primary",
         "text-gray-300",
-        "text-gray-300"
+        "text-gray-300",
       );
       btn.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
     });
@@ -289,7 +289,7 @@ class Dropdown {
     selectedBtn.classList.remove(
       "bg-white",
       "dark:bg-slate-700",
-      "text-gray-700"
+      "text-gray-700",
     );
     selectedBtn.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
   }
@@ -300,10 +300,10 @@ class Dropdown {
       .getAttribute(`data-${this.prefix}-setting-select`);
     //toggle dropdown
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${attribute}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${attribute}"]`,
     );
     const dropdownChevron = document.querySelector(
-      `svg[data-${this.prefix}-setting-select="${attribute}"]`
+      `svg[data-${this.prefix}-setting-select="${attribute}"]`,
     );
     dropdownEl.classList.toggle("hidden");
     dropdownEl.classList.toggle("flex");

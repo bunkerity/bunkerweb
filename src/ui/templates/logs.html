@@ -172,7 +172,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- filter -->
 <div
   data-{{current_endpoint}}-filter
-  class="col-span-12 md:col-span-6 lg:col-span-4 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class="h-fit col-span-12 md:col-span-6 lg:col-span-4 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <h5 class="mb-2 font-bold dark:text-white/90">FILTERS</h5>
   <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
@@ -279,31 +279,42 @@ url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 </div>
 <!-- end filter -->
 
-<div
-  class="min-h-50-screen col-span-12 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+
+<div   class="w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
-  <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">LOGS</h5>
-  <!-- list container-->
-  <div class="w-full grid grid-cols-12 rounded p-2">
-    <!-- header-->
-    <p
-      class="dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400"
-    >
-      Type
-    </p>
-    <p
-      class="dark:text-gray-300 h-8 text-sm font-bold col-span-9 m-0 pb-2 border-b border-gray-400"
-    >
-      Description
-    </p>
-    <!-- end header-->
-    <!-- list -->
-    <ul
-      class="col-span-12 w-full max-h-100 overflow-y-auto"
-      data-{{current_endpoint}}-list
-    ></ul>
-    <!-- end list-->
+  <div class="col-span-12">
+    <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">LOGS</h5>
   </div>
-  <!-- end list container-->
+
+
+  <div
+    class="col-span-12 overflow-y-auto overflow-x-auto"
+  >
+    <div data-{{current_endpoint}}-bans-list>
+      <!-- list container-->
+      <div class="overflow-hidden min-w-[800px] w-full grid grid-cols-12 rounded p-2">
+        <!-- header-->
+        <p
+          class="dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400"
+        >
+          Type
+        </p>
+        <p
+          class="dark:text-gray-300 h-8 text-sm font-bold col-span-9 m-0 pb-2 border-b border-gray-400"
+        >
+          Description
+        </p>
+
+        <!-- end header-->
+        <!-- list -->
+        <ul
+        class="col-span-12 w-full"
+        data-{{current_endpoint}}-list
+      ></ul>
+        <!-- end list-->
+      </div>
+      <!-- end list container-->
+    </div>
+  </div>
 </div>
 {% endblock %}
