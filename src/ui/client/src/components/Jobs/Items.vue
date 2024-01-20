@@ -4,11 +4,13 @@ import JobsSvgState from "@components/Jobs/Svg/State.vue";
 import JobsSvgHistory from "@components/Jobs/Svg/History.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
-import { defineProps, defineEmits, reactive, onMounted } from "vue";
-import { useFeedbackStore } from "@store/global.js";
+import { defineProps, defineEmits, reactive } from "vue";
 import { fetchAPI } from "@utils/api.js";
 import { getJobsCacheNames, getServId } from "@utils/jobs.js";
+import { useFeedbackStore } from "@store/global.js";
+import { useModalStore } from "@store/jobs.js";
 
+const modalStore = useModalStore();
 const feedbackStore = useFeedbackStore();
 
 const props = defineProps({
@@ -79,9 +81,10 @@ async function downloadFile(jobName, cacheName) {
     });
 }
 
-// cache => return cache file name to download
-// run => return the job name that need to be run/rerun
-const emits = defineEmits(["history"]);
+function showHistory(name, history) {
+  modalStore.data = { name: name, history: history };
+  modalStore.isOpen = true;
+}
 </script>
 
 <template>
@@ -98,7 +101,12 @@ const emits = defineEmits(["history"]);
     <td :class="[props.positions[2], 'ml-2']">
       <button
         :aria-describedby="`${Object.keys(item)[0]}-history-text-${id}`"
-        @click="$emit('history', { jobName: item[Object.keys(item)[0]] })"
+        @click="
+          showHistory(
+            Object.keys(item)[0],
+            item[Object.keys(item)[0]]['history'],
+          )
+        "
       >
         <span
           :id="`${Object.keys(item)[0]}-history-text-${id}`"

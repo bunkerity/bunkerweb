@@ -21,13 +21,9 @@ const props = defineProps({
       <tr
         class="list-header-item"
         v-for="(item, id) in props.header"
-        :class="[
-          props.positions[id],
-          id === header.length - 1 ? 'last' : '',
-          id === 0 ? 'first' : '',
-        ]"
+        :class="[props.positions[id]]"
       >
-        <th class="block" role="columnheader">
+        <th role="columnheader">
           {{ item }}
         </th>
       </tr>

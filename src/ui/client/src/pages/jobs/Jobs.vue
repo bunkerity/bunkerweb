@@ -82,279 +82,9 @@ async function getJobs() {
   await fetchAPI("/api/jobs", "GET", null, jobs, feedbackStore.addFeedback);
 }
 
-const history = reactive({
-  isOpen: false,
-  jobName: "",
-  data: [],
-});
-
-function showHistory(data) {
-  history.jobName = data.jobName;
-  history.data = jobs.data[data.jobName]["history"];
-  history.isOpen = true;
-}
-
 onMounted(() => {
   getJobs();
 });
-
-const test = [
-  {
-    "whitelist-download": {
-      every: "hour",
-      reload: true,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:01 PM",
-          end_date: "2024/01/16, 01:52:08 PM",
-          success: true,
-        },
-      ],
-      cache: [],
-    },
-  },
-  {
-    "greylist-download": {
-      every: "hour",
-      reload: true,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:01 PM",
-          end_date: "2024/01/16, 01:52:05 PM",
-          success: true,
-        },
-      ],
-      cache: [],
-    },
-  },
-  {
-    "cleanup-excess": {
-      every: "hour",
-      reload: false,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:01 PM",
-          end_date: "2024/01/16, 01:52:06 PM",
-          success: true,
-        },
-      ],
-      cache: [],
-    },
-  },
-  {
-    "blacklist-download": {
-      every: "hour",
-      reload: true,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:01 PM",
-          end_date: "2024/01/16, 01:52:06 PM",
-          success: true,
-        },
-      ],
-      cache: [],
-    },
-  },
-  {
-    "certbot-new": {
-      every: "once",
-      reload: false,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:01 PM",
-          end_date: "2024/01/16, 01:52:05 PM",
-          success: true,
-        },
-      ],
-      cache: [],
-    },
-  },
-  {
-    "certbot-renew": {
-      every: "day",
-      reload: true,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:05 PM",
-          end_date: "2024/01/16, 01:52:09 PM",
-          success: true,
-        },
-      ],
-      cache: [],
-    },
-  },
-  {
-    "self-signed": {
-      every: "day",
-      reload: true,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:01 PM",
-          end_date: "2024/01/16, 01:52:07 PM",
-          success: true,
-        },
-      ],
-      cache: [],
-    },
-  },
-  {
-    "realip-download": {
-      every: "hour",
-      reload: true,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:01 PM",
-          end_date: "2024/01/16, 01:52:05 PM",
-          success: true,
-        },
-      ],
-      cache: [],
-    },
-  },
-  {
-    "custom-cert": {
-      every: "day",
-      reload: true,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:01 PM",
-          end_date: "2024/01/16, 01:52:08 PM",
-          success: true,
-        },
-      ],
-      cache: [],
-    },
-  },
-  {
-    "mmdb-country": {
-      every: "week",
-      reload: true,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:05 PM",
-          end_date: "2024/01/16, 01:52:11 PM",
-          success: true,
-        },
-      ],
-      cache: [
-        {
-          service_id: null,
-          file_name: "country.mmdb",
-          last_update: "2024/01/16, 01:52:11 PM",
-          checksum:
-            "dc357de406b18b8a2b0651504c65ab9766b7ad535b63902c951e9c6c1f620f1a68af71462238cc6b80e8a1212f4fbf6e75bf833b0a4991185c2e5286c50c9c08",
-        },
-      ],
-    },
-  },
-  {
-    "mmdb-asn": {
-      every: "week",
-      reload: true,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:11 PM",
-          end_date: "2024/01/16, 01:52:13 PM",
-          success: true,
-        },
-      ],
-      cache: [
-        {
-          service_id: null,
-          file_name: "asn.mmdb",
-          last_update: "2024/01/16, 01:52:13 PM",
-          checksum:
-            "f52cad8fddc4abf939c5a72b178507e3b1f4cb729929e1d4d20ab8255b7c84d68b3dd938c953e062778733c3a91e801874b5a7de157bfe1c29e4e4d060531d6e",
-        },
-      ],
-    },
-  },
-  {
-    "default-server-cert": {
-      every: "once",
-      reload: false,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:13 PM",
-          end_date: "2024/01/16, 01:52:19 PM",
-          success: true,
-        },
-      ],
-      cache: [
-        {
-          service_id: null,
-          file_name: "cert.key",
-          last_update: "2024/01/16, 01:52:19 PM",
-          checksum:
-            "fc9e59a51ab66c70cd8f50daba58584423a72e89779c8659f274334654e26897bdaadaac3ea4d172ef53dd0b744d111ff4ccec7fc614a16ff877ac3ebc332198",
-        },
-        {
-          service_id: null,
-          file_name: "cert.pem",
-          last_update: "2024/01/16, 01:52:18 PM",
-          checksum:
-            "7cefa04c04703fc6384871997c022891cca2f0349f4bfd7a871c34c8f2ca93d5e19a06fb923f89cf35abff37a645d4b4b98a5da86ab401da6206d46f315b79e7",
-        },
-      ],
-    },
-  },
-  {
-    "update-check": {
-      every: "day",
-      reload: false,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:19 PM",
-          end_date: "2024/01/16, 01:52:22 PM",
-          success: true,
-        },
-      ],
-      cache: [],
-    },
-  },
-  {
-    "anonymous-report": {
-      every: "day",
-      reload: false,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:22 PM",
-          end_date: "2024/01/16, 01:52:32 PM",
-          success: false,
-        },
-      ],
-      cache: [],
-    },
-  },
-  {
-    "bunkernet-register": {
-      every: "hour",
-      reload: true,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:05 PM",
-          end_date: "2024/01/16, 01:52:09 PM",
-          success: true,
-        },
-      ],
-      cache: [],
-    },
-  },
-  {
-    "bunkernet-data": {
-      every: "day",
-      reload: true,
-      history: [
-        {
-          start_date: "2024/01/16, 01:52:09 PM",
-          end_date: "2024/01/16, 01:52:11 PM",
-          success: true,
-        },
-      ],
-      cache: [],
-    },
-  },
-];
 </script>
 
 <template>
@@ -457,34 +187,26 @@ const test = [
       class="col-span-12 overflow-x-auto overflow-y-hidden"
       :label="$t('dashboard_jobs')"
     >
-      <ListBase
-        class="min-w-[1100px] col-span-12"
-        :header="[
-          $t('jobs_headers_name'),
-          $t('jobs_headers_every'),
-          $t('jobs_headers_history'),
-          $t('jobs_headers_reload'),
-          $t('jobs_headers_success'),
-          $t('jobs_headers_last_run'),
-          $t('jobs_headers_cache'),
-          $t('jobs_headers_action'),
-        ]"
-        :positions="positions"
-        :summary="$t('jobs_table_summary')"
-      >
-        <JobsItems
-          @history="(v) => showHistory(v)"
+      <div class="col-span-12 overflow-x-auto grid grid-cols-12">
+        <ListBase
+          class="min-w-[1100px] col-span-12"
+          :header="[
+            $t('jobs_headers_name'),
+            $t('jobs_headers_every'),
+            $t('jobs_headers_history'),
+            $t('jobs_headers_reload'),
+            $t('jobs_headers_success'),
+            $t('jobs_headers_last_run'),
+            $t('jobs_headers_cache'),
+            $t('jobs_headers_action'),
+          ]"
           :positions="positions"
-          :items="jobs.setup"
+          :summary="$t('jobs_table_summary')"
         >
-        </JobsItems>
-      </ListBase>
+          <JobsItems :positions="positions" :items="jobs.setup"> </JobsItems>
+        </ListBase>
+      </div>
     </CardBase>
-    <JobsModalHistory
-      :history="history.data"
-      :jobName="history.jobName"
-      :isOpen="history.isOpen"
-      @close="history.isOpen = false"
-    />
+    <JobsModalHistory />
   </Dashboard>
 </template>

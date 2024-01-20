@@ -155,7 +155,7 @@ async function addBansFromList() {
     <div class="overflow-x-auto col-span-12 grid grid-cols-12">
       <ListBase
         v-if="bans.items.length > 0"
-        class="min-w-[110px] h-full col-span-12"
+        class="min-w-[1100px] h-full col-span-12"
         :header="[
           $t('bans_add_header_ip'),
           $t('bans_add_header_ban_start'),
@@ -283,7 +283,7 @@ async function addBansFromList() {
 
     <div
       v-if="bans.items.length > 0"
-      class="col-span-12 flex flex-col items-center justify-center mt-4"
+      class="col-span-12 flex flex-col items-center justify-center mt-6"
     >
       <ButtonBase
         type="submit"

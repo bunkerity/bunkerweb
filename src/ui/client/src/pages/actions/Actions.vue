@@ -185,24 +185,26 @@ onMounted(() => {
       class="col-span-12 overflow-x-auto overflow-y-hidden"
       :label="$t('dashboard_actions')"
     >
-      <ListBase
-        class="min-w-[1100px] col-span-12"
-        :header="[
-          $t('actions_header_method'),
-          $t('actions_header_title'),
-          $t('actions_header_description'),
-          $t('actions_header_date'),
-          $t('actions_header_action'),
-        ]"
-        :positions="positions"
-      >
-        <ActionsItems
-          :summary="$t('actions_table_summary')"
+      <div class="col-span-12 overflow-x-auto grid grid-cols-12">
+        <ListBase
+          class="min-w-[1100px] col-span-12"
+          :header="[
+            $t('actions_header_method'),
+            $t('actions_header_title'),
+            $t('actions_header_description'),
+            $t('actions_header_date'),
+            $t('actions_header_action'),
+          ]"
           :positions="positions"
-          :items="actions.setup"
         >
-        </ActionsItems>
-      </ListBase>
+          <ActionsItems
+            :summary="$t('actions_table_summary')"
+            :positions="positions"
+            :items="actions.setup"
+          >
+          </ActionsItems>
+        </ListBase>
+      </div>
     </CardBase>
   </Dashboard>
 </template>

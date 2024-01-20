@@ -944,7 +944,7 @@ body {
 }
 
 .list-content-container {
-  @apply block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[300px];
+  @apply dark:text-gray-400 block w-full rounded col-span-12 overflow-x-hidden overflow-y-auto max-h-[300px];
 }
 
 .list-content-item {
@@ -966,15 +966,6 @@ body {
 .list-header-item {
   @apply block dark:text-gray-300 pb-1 text-sm font-bold m-0 border-b border-gray-400;
 }
-
-.first.list-header-item {
-  @apply pl-3;
-}
-
-.last.list-header-item {
-  @apply pl-3 mr-2;
-}
-
 /** MISC **/
 
 .line-separator {

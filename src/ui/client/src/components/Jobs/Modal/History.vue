@@ -5,23 +5,9 @@ import ModalBase from "@components/Modal/Base.vue";
 import JobsSvgState from "@components/Jobs/Svg/State.vue";
 import ListBase from "@components/List/Base.vue";
 import ListItem from "@components/List/Item.vue";
+import { useModalStore } from "@store/jobs.js";
 
-// Open after instance delete action is fired
-const props = defineProps({
-  // File or folder
-  history: {
-    type: Array,
-    required: true,
-  },
-  jobName: {
-    type: String,
-    required: true,
-  },
-  isOpen: {
-    type: Boolean,
-    required: true,
-  },
-});
+const modalStore = useModalStore();
 
 const positions = ["col-span-2", "col-span-5", "col-span-5"];
 
@@ -29,11 +15,11 @@ const emits = defineEmits(["close"]);
 </script>
 <template>
   <ModalBase
-    :id="`history-modal-${props.jobName}`"
-    :aria-hidden="props.isOpen ? 'false' : 'true'"
     @backdrop="$emit('close')"
-    :title="`${$t('jobs_history_title')} ${props.jobName}`"
-    v-show="props.isOpen"
+    :id="`history-modal-${modalStore.name}`"
+    :aria-hidden="modalStore.isOpen ? 'false' : 'true'"
+    :title="`${$t('jobs_history_title')} ${modalStore.name}`"
+    v-show="modalStore.isOpen"
   >
     <div class="col-span-12 overflow-x-auto overflow-y-hidden">
       <ListBase
@@ -45,7 +31,7 @@ const emits = defineEmits(["close"]);
         ]"
         :positions="positions"
       >
-        <ListItem v-for="(item, id) in props.history">
+        <ListItem v-for="(item, id) in modalStore.data.history">
           <td class="translate-x-3 col-span-2" :class="[positions[0]]">
             <JobsSvgState :success="item['success']" />
           </td>
@@ -60,11 +46,11 @@ const emits = defineEmits(["close"]);
         <ButtonBase
           color="close"
           size="lg"
-          @click="$emit('close')"
+          @click="modalStore.isOpen = false"
           type="button"
           class="text-xs"
-          :aria-controls="`history-modal-${props.jobName}`"
-          :aria-expanded="props.isOpen ? 'true' : 'false'"
+          :aria-controls="`history-modal-${modalStore.name}`"
+          :aria-expanded="modalStore.isOpen ? 'true' : 'false'"
         >
           {{ $t("action_close") }}
         </ButtonBase>

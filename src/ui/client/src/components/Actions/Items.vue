@@ -22,7 +22,7 @@ const props = defineProps({
     :class="[
       id === props.items.length - 1 ? '' : 'border-b',
       item.isMatchFilter ? '' : 'hidden',
-      'py-1',
+      'py-1 ',
     ]"
   >
     <td class="pl-2" :class="[props.positions[0]]">
@@ -47,6 +47,6 @@ const props = defineProps({
         />
       </SettingsLayout>
     </td>
-    <td class="ml-9" :class="[props.positions[4]]">{{ item["api_method"] }}</td>
+    <td class="ml-4" :class="[props.positions[4]]">{{ item["api_method"] }}</td>
   </ListItem>
 </template>
