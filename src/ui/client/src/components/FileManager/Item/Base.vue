@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, defineProps, defineEmits } from "vue";
+import { reactive, computed, defineProps, defineEmits, onMounted } from "vue";
 import FileManagerItemDropdown from "@components/FileManager/Item/Dropdown.vue";
 import FileManagerItemSvgFolder from "@components/FileManager/Item/Svg/Folder.vue";
 import FileManagerItemSvgFile from "@components/FileManager/Item/Svg/File.vue";
@@ -22,26 +22,21 @@ const props = defineProps({
   },
 });
 
-// Check if root path (not same svg) by slash numbers
-const path = reactive({
-  name: props.data.path.substring(props.data.path.lastIndexOf("/") + 1),
-});
-
 const itemID = computed(() => {
-  return `${props.data.path}-${props.data.pathLevel}-${path.name.replaceAll(
-    "_",
-    "-"
-  )}`;
+  return `${props.data.path}-${
+    props.data.pathLevel
+  }-${props.data.name.replaceAll("_", "-")}`;
 });
 
 function runAction(action) {
+  // keep current path when action open a modal
+  // set current action
   const data = props.data;
   data.action = action;
-  modalStore.setData(data);
-  modalStore.setOpen(true);
+  data.path = modalStore.data.path;
+  modalStore.data = data;
+  modalStore.isOpen = true;
 }
-
-const emits = defineEmits(["updatePath"]);
 </script>
 
 <template>
@@ -50,9 +45,12 @@ const emits = defineEmits(["updatePath"]);
       :tabindex="modalStore.isOpen ? '-1' : contentIndex"
       class="file-manager-item-nav"
       @click="
-        props.data.type === 'folder'
-          ? $emit('updatePath', props.data.path)
-          : runAction('view')
+        () => {
+          if (props.data.type === 'folder') {
+            return (modalStore.data.path = props.data.path);
+          }
+          return runAction('view');
+        }
       "
       :aria-describedby="`${itemID}-text`"
     >
@@ -68,15 +66,15 @@ const emits = defineEmits(["updatePath"]);
 
       <span
         :class="[
-          path.name.length > 50 ? 'xs' : path.name.length > 50 ? 'sm' : 'base',
+          props.data.path.length > 50
+            ? 'xs'
+            : props.data.path.length > 50
+              ? 'sm'
+              : 'base',
         ]"
         class="file-manager-item-name"
       >
-        {{
-          props.data.pathLevel === 1
-            ? path.name.replaceAll("_", "-")
-            : path.name
-        }}
+        {{ props.data.name.replaceAll("_", "-") }}
       </span>
     </button>
     <FileManagerItemDropdown

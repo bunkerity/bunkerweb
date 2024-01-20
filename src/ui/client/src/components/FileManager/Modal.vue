@@ -1,7 +1,6 @@
 <script setup>
 import {
   computed,
-  defineEmits,
   reactive,
   onMounted,
   onUnmounted,
@@ -17,25 +16,21 @@ import { fetchAPI } from "@utils/api.js";
 import { contentIndex } from "@utils/tabindex.js";
 import { useFeedbackStore } from "@store/global.js";
 import { useModalStore } from "@store/configs.js";
+import { useRefreshStore } from "@store/global.js";
+
+// Refresh when related btn is clicked
+const refreshStore = useRefreshStore();
 
 const modalStore = useModalStore();
 const feedbackStore = useFeedbackStore();
 
-const emits = defineEmits(["updateFile"]);
-
 // Filter data from path
 
 const data = reactive({
+  oldName: "",
   name: "",
-  oldName:
-    modalStore.data.path.split("/")[modalStore.data.path.split("/").length - 1],
-  value: modalStore.data.value,
-  method: modalStore.data.method,
-  prefix: computed(() => {
-    const arr = modalStore.data.path.split("/");
-    arr.pop();
-    return `${arr.join("/")}/`;
-  }),
+  value: "",
+  path: "",
   isReadOnly: computed(() => {
     if (modalStore.data.type !== "file") return true;
     if (
@@ -101,15 +96,22 @@ class FileEditor {
   }
 }
 
+function setDataFromStore() {
+  data.oldName = modalStore.data.name;
+  data.name = modalStore.data.name;
+  data.value = modalStore.data.value;
+  data.path = modalStore.data.path;
+}
+
 let editor = null;
 
 // Use ace editor
 onMounted(() => {
+  setDataFromStore();
   // default value
-  data.name = data.oldName;
   if (modalStore.data.type !== "file") return;
   editor = new FileEditor();
-  editor.setValue(modalStore.data.value);
+  editor.setValue(data.value);
   editor.readOnlyBool(data.isReadOnly);
   editor.editor.on("change", () => {
     data.value = editor.getValue();
@@ -117,28 +119,21 @@ onMounted(() => {
 });
 
 onBeforeUpdate(() => {
-  data.oldName =
-    modalStore.data.path.split("/")[modalStore.data.path.split("/").length - 1];
-  data.name = data.oldName;
-  data.value = modalStore.data.value;
-  data.method = modalStore.data.method;
+  setDataFromStore();
   try {
     editor.destroy();
   } catch (err) {}
 });
 
 onUpdated(() => {
-  if (modalStore.data.type === "file") {
-    // default value
-    data.name = data.oldName;
-    if (modalStore.data.type !== "file") return;
-    editor = new FileEditor();
-    editor.setValue(modalStore.data.value);
-    editor.readOnlyBool(data.isReadOnly);
-    editor.editor.on("change", () => {
-      data.value = editor.getValue();
-    });
-  }
+  // default value
+  if (modalStore.data.type !== "file") return;
+  editor = new FileEditor();
+  editor.setValue(modalStore.data.value);
+  editor.readOnlyBool(data.isReadOnly);
+  editor.editor.on("change", () => {
+    data.value = editor.getValue();
+  });
 });
 
 onUnmounted(() => {
@@ -170,7 +165,7 @@ function formatData() {
     name: data.name,
     old_name: data.oldName,
     data: data.value,
-    method: data.method,
+    method: "ui",
   };
 
   return conf;
@@ -198,19 +193,21 @@ async function sendData() {
     method,
     modalStore.data.action.toLowerCase() === "delete" ? null : conf,
     updateConf,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   )
     .then((res) => {
-      // Case not save
+      // Case saved, close modal, go to root path and refresh
       if (res.type === "success") {
-        // Case saved
-        emits("close");
-        emits("updateFile");
+        modalStore.$reset();
+        modalStore.isOpen = false;
+        refreshStore.refresh();
         return;
       }
     })
     .catch((err) => {});
 }
+
+const emits = defineEmits(["close"]);
 </script>
 <template>
   <ModalBase
@@ -231,7 +228,7 @@ async function sendData() {
         class="modal-path"
       >
         <p class="modal-path-text mr-1">
-          {{ data.prefix.replaceAll("/", " / ") }}
+          {{ modalStore.data.path.replaceAll("/", " / ") + " /" }}
         </p>
         <input
           :tabindex="modalStore.isOpen ? contentIndex : '-1'"
@@ -270,7 +267,7 @@ async function sendData() {
           aria-controls="file-manager-modal"
           :aria-expanded="modalStore.isOpen ? 'true' : 'false'"
           size="lg"
-          @click="modalStore.setOpen(false)"
+          @click="modalStore.isOpen = false"
           class="btn-close text-xs"
         >
           {{ $t("action_close") }}
@@ -285,8 +282,8 @@ async function sendData() {
             modalStore.data.action === 'create'
               ? 'btn-valid'
               : modalStore.data.action
-              ? `btn-${modalStore.data.action}`
-              : '',
+                ? `btn-${modalStore.data.action}`
+                : '',
           ]"
           class="text-xs ml-2"
         >

@@ -62,7 +62,7 @@ watch(config, () => {
       !config.data.services[services.activeService]["SERVER_NAME"] ||
       (config.data.services[services.activeService]["SERVER_NAME"] &&
         services.servicesName.includes(
-          config.data.services[services.activeService]["SERVER_NAME"]
+          config.data.services[services.activeService]["SERVER_NAME"],
         ))
     ) {
       return (saveBtn.disabled = true);
@@ -146,8 +146,8 @@ const services = reactive({
     const cloneMultisitePlugin = setPluginsData(
       getPluginsByContext(
         JSON.parse(JSON.stringify(services.data)),
-        "multisite"
-      )
+        "multisite",
+      ),
     );
 
     // translate
@@ -243,14 +243,14 @@ async function getGlobalConf(isFeedback = true) {
     "GET",
     null,
     conf,
-    isFeedback ? feedbackStore.addFeedback : null
+    isFeedback ? feedbackStore.addFeedback : null,
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     services,
-    isFeedback ? feedbackStore.addFeedback : null
+    isFeedback ? feedbackStore.addFeedback : null,
   );
 }
 
@@ -290,8 +290,8 @@ async function sendServConf() {
           "PUT",
           services[key],
           null,
-          feedbackStore.addFeedback
-        )
+          feedbackStore.addFeedback,
+        ),
       );
     }
 
@@ -391,7 +391,7 @@ onMounted(() => {
               value:
                 services.activeService === 'new' ? '' : services.activeService,
               values: Object.keys(services.setup).filter(
-                (item) => item !== 'new'
+                (item) => item !== 'new',
               ),
             }"
           />

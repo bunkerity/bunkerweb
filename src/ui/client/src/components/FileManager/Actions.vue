@@ -12,7 +12,17 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(["createFile"]);
+function createFile() {
+  modalStore.data = {
+    type: "file",
+    action: "create",
+    path: modalStore.data.path,
+    pathLevel: 0,
+    value: "",
+    name: "",
+  };
+  modalStore.isOpen = true;
+}
 </script>
 
 <template>
@@ -21,7 +31,7 @@ const emits = defineEmits(["createFile"]);
       <li class="file-manager-actions-item">
         <button
           :tabindex="contentIndex"
-          @click="$emit('createFile')"
+          @click="createFile()"
           :disabled="props.canCreateFile ? false : true"
           :aria-disabled="props.canCreateFile ? false : true"
           aria-controls="file-manager-modal"

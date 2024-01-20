@@ -55,10 +55,13 @@ function closeOutside(e) {
 }
 
 function runAction(action) {
+  // keep current path when action open a modal
+  // set current action
   const data = props.data;
   data.action = action;
-  modalStore.setData(data);
-  modalStore.setOpen(true);
+  data.path = modalStore.data.path;
+  modalStore.data = data;
+  modalStore.isOpen = true;
 }
 </script>
 

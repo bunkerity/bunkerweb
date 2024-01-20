@@ -1,28 +1,21 @@
 <script setup>
-import { computed, defineProps, defineEmits } from "vue";
+import { computed } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
+import { useModalStore } from "@store/configs.js";
 
-const props = defineProps({
-  // Active path
-  currPath: {
-    type: String,
-    required: true,
-  },
-});
+const modalStore = useModalStore();
 
 // Get each part of a path
 const pathSplit = computed(() => {
-  return props.currPath.split("/").filter(String);
+  return modalStore.data.path.split("/").filter(String);
 });
-
-const emits = defineEmits(["updatePath"]);
 
 // All paths are separated by slashes
 // Split and pop the last one to get the prev path
 function getPrevPath() {
-  const split = props.currPath.split("/");
+  const split = modalStore.data.path.split("/");
   // Case no prev path
-  if (split.length < 2) return props.currPath;
+  if (split.length < 2) return modalStore.data.path;
   // Send prev path
   split.pop();
   return split.join("/");
@@ -32,7 +25,7 @@ function getPrevPath() {
 // For example root/test => <id = 0>/<id = 1>
 // Get click path by removing path with id > clickId
 function getClickPath(id) {
-  const split = props.currPath.split("/");
+  const split = modalStore.data.path.split("/");
   for (let i = 0; split.length - 1 > id; i++) {
     split.pop();
   }
@@ -50,7 +43,7 @@ function getClickPath(id) {
       <button
         :tabindex="contentIndex"
         aria-describedby="file-manager-breadcrumb-back-btn-text"
-        @click="$emit('updatePath', getPrevPath())"
+        @click="modalStore.data.path = getPrevPath()"
       >
         <span id="file-manager-breadcrumb-back-btn-text" class="sr-only">
           {{ $t("custom_conf_breadcrumb_back_desc") }}
@@ -82,7 +75,7 @@ function getClickPath(id) {
       <button
         :tabindex="contentIndex"
         :aria-description="$t('custom_conf_breadcrumb_item_desc')"
-        @click="$emit('updatePath', getClickPath(id))"
+        @click="modalStore.data.path = getClickPath(id)"
         class="file-manager-breadcrumb-item-btn"
       >
         {{ item === "root" ? "root" : item.replaceAll("_", "-") }}

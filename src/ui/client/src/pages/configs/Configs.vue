@@ -143,7 +143,7 @@ onMounted(() => {
         !customConf.isPend && !customConf.isErr && !conf.isPend && !conf.isErr
       "
       :label="$t('dashboard_filter')"
-      class="z-[100] col-span-12 md:col-span-8 lg:col-span-6 2xl:col-span-5 3xl:col-span-4 grid grid-cols-12 relative"
+      class="z-[100] col-span-12 md:col-span-8 2xl:col-span-6 3xl:col-span-5 grid grid-cols-12 relative"
     >
       <SettingsLayout
         class="flex w-full col-span-12 md:col-span-6"
@@ -203,7 +203,6 @@ onMounted(() => {
       </SettingsLayout>
     </CardBase>
     <FileManagerStructure
-      @updateFile="getData()"
       v-if="
         !customConf.isPend &&
         !customConf.isErr &&
