@@ -38,7 +38,7 @@ async function runJob(jobName) {
     "POST",
     null,
     run,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       return res.json();
@@ -78,7 +78,7 @@ async function downloadFile(jobName, cacheName) {
     "GET",
     null,
     download,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       return res.json();
@@ -101,13 +101,13 @@ function showHistory(name, history) {
     v-for="(item, id) in props.items"
     :class="[id === props.items.length - 1 ? '' : 'border-b', 'py-2']"
   >
-    <td class="pl-4" :class="[props.positions[0]]">
+    <td class="ml-2" :class="[props.positions[0]]">
       {{ Object.keys(item)[0] }}
     </td>
-    <td :class="[props.positions[1]]">
+    <td class="ml-2" :class="[props.positions[1]]">
       {{ item[Object.keys(item)[0]]["every"] }}
     </td>
-    <td :class="[props.positions[2], 'ml-2']">
+    <td class="ml-4" :class="[props.positions[2]]">
       <button
         :aria-describedby="`${Object.keys(item)[0]}-history-text-${id}`"
         :aria-controls="`history-modal`"
@@ -115,7 +115,7 @@ function showHistory(name, history) {
         @click="
           showHistory(
             Object.keys(item)[0],
-            item[Object.keys(item)[0]]['history'],
+            item[Object.keys(item)[0]]['history']
           )
         "
       >
@@ -128,18 +128,18 @@ function showHistory(name, history) {
         <JobsSvgHistory />
       </button>
     </td>
-    <td class="translate-x-3" :class="[props.positions[3]]">
+    <td class="translate-x-3 ml-2.5" :class="[props.positions[3]]">
       <JobsSvgState :success="item[Object.keys(item)[0]]['reload']" />
     </td>
-    <td class="translate-x-4" :class="[props.positions[4]]">
+    <td class="translate-x-4 ml-2.5" :class="[props.positions[4]]">
       <JobsSvgState
         :success="item[Object.keys(item)[0]]['history'][0]['success']"
       />
     </td>
-    <td :class="[props.positions[5]]">
+    <td class="ml-3" :class="[props.positions[5]]">
       <span>{{ item[Object.keys(item)[0]]["history"][0]["end_date"] }}</span>
     </td>
-    <td class="mr-4" :class="[props.positions[6]]">
+    <td class="mx-4" :class="[props.positions[6]]">
       <SettingsSelect
         v-if="item[Object.keys(item)[0]]['cache'].length > 0"
         :settings="{

@@ -948,7 +948,7 @@ body {
 }
 
 .list-content-item {
-  @apply col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5 px-1;
+  @apply text-sm col-span-12 block border-b hover:bg-gray-100 dark:hover:bg-slate-700 items-center grid grid-cols-12 border-gray-300 py-2.5 px-1;
 }
 
 .list-content {

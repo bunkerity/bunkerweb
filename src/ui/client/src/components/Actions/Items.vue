@@ -29,7 +29,7 @@ const props = defineProps({
       {{ item["method"].toUpperCase() }}
     </td>
     <td class="ml-2" :class="[props.positions[1]]">{{ item["title"] }}</td>
-    <td class="ml-3" :class="[props.positions[2]]">
+    <td class="ml-4" :class="[props.positions[2]]">
       {{ item["description"] }}
     </td>
     <td :class="[props.positions[3], 'ml-2']">
@@ -47,6 +47,6 @@ const props = defineProps({
         />
       </SettingsLayout>
     </td>
-    <td class="ml-4" :class="[props.positions[4]]">{{ item["api_method"] }}</td>
+    <td class="ml-6" :class="[props.positions[4]]">{{ item["api_method"] }}</td>
   </ListItem>
 </template>
