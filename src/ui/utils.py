@@ -25,19 +25,33 @@ def get_remain(remain_time):
     hours %= 24
     days %= 30
     months %= 12
-    return f"{f'{years}y' if years else ''} {f'{months}m' if months else ''} {f'{days}d' if days else ''} {f'{hours}h' if hours else ''} {f'{minutes}min' if minutes else ''} {f'{seconds}s' if seconds else ''}"
+
+    remain = f'{format_remain(years, "year")} {format_remain(months, "month")} {format_remain(days, "day")} {format_remain(hours, "hour")} {format_remain(minutes, "minute")} {format_remain(seconds, "second")}'
+    return remain
 
 
-def get_term_from_remain(remain):
-    # Data, need format <n>y <n>m <n>d <n>h <n>min <n>s
-    terms = remain.split(" ")
-    term = ""
-    formats = ["years", "months", "days", "hours", "minutes", "seconds"]
-    chars = ["y", "min", "m", "d", "h", "s"]
+def format_remain(num, singular):
+    if not num:
+        return ""
 
+    if num == 1:
+        return f"{num} {singular}"
+
+    if num > 1:
+        return f"{num} {singular}s"
+
+
+def get_range_from_remain(remain):
     # Not handle
     if remain == "unknown":
         return remain
+
+    # Data, need format <n>y <n>m <n>d <n>h <n>min <n>s
+    split_remain = remain.split(" ")
+    terms = [num for num in split_remain if num.isdigit()]
+    term = ""
+    formats = ["year(s)", "month(s)", "day(s)", "hour(s)", "minute(s)", "second(s)"]
+    chars = ["year", "month", "day", "hour", "second", "s"]
 
     # start from seconds to years, stop when first 0 occurence
     # The remain term is first 0 occurence - 1

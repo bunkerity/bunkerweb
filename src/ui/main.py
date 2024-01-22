@@ -48,7 +48,7 @@ from src.Config import Config
 from src.ReverseProxied import ReverseProxied
 from src.User import AnonymousUser, User
 
-from utils import check_settings, get_b64encoded_qr_image, path_to_dict, get_remain, get_term_from_remain
+from utils import check_settings, get_b64encoded_qr_image, path_to_dict, get_remain, get_range_from_remain
 from Database import Database  # type: ignore
 from logging import getLogger
 
@@ -1718,7 +1718,7 @@ def bans():
         # Add remain
         remain = "unknown" if ban["ban_end"] - now_stamp < 0 else get_remain(ban["ban_end"] - now_stamp)
         ban["remain"] = remain
-        ban["term"] = get_term_from_remain(remain)
+        ban["term"] = get_range_from_remain(remain)
         # Convert stamp to date
         ban["ban_start"] = datetime.fromtimestamp(ban["ban_start"])
         ban["ban_end"] = datetime.fromtimestamp(ban["ban_end"])
