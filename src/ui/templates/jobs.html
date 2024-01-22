@@ -2,7 +2,7 @@
 url_for(request.endpoint)[1:].split("/")[-1].strip() %}
 <!-- info-->
 <div
-  class="col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class="h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
   <div class="mx-1 flex items-center my-4">
@@ -209,27 +209,27 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     <div class="min-w-[900px] w-full grid grid-cols-12 rounded p-2">
       <!-- header-->
       <p
-        class="dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400"
+        class=" dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400"
       >
         Name
       </p>
       <p
-        class="dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400"
+        class=" dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400"
       >
         Last run
       </p>
       <p
-        class="dark:text-gray-300 h-8 text-sm font-bold col-span-1 m-0 pb-2 border-b border-gray-400"
+        class="flex justify-center dark:text-gray-300 h-8 text-sm font-bold col-span-1 m-0 pb-2 border-b border-gray-400"
       >
         Every
       </p>
       <p
-        class="dark:text-gray-300 h-8 text-sm font-bold col-span-1 m-0 pb-2 border-b border-gray-400"
+        class="flex justify-center dark:text-gray-300 h-8 text-sm font-bold col-span-1 m-0 pb-2 border-b border-gray-400"
       >
         Reload
       </p>
       <p
-        class="dark:text-gray-300 h-8 text-sm font-bold col-span-1 m-0 pb-2 border-b border-gray-400"
+        class="flex justify-center dark:text-gray-300 h-8 text-sm font-bold col-span-1 m-0 pb-2 border-b border-gray-400"
       >
         Success
       </p>
@@ -249,21 +249,21 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
         >
           <p
 
-            class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0 my-1"
+            class=" dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0 my-1"
             data-{{current_endpoint}}-name
           >
             {{job_name}}
           </p>
           <p
 
-            class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0 my-1"
+            class=" dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0 my-1"
             data-{{current_endpoint}}-last_run
           >
             {{value['last_run']}}
           </p>
           <p
 
-            class="dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
+            class="flex justify-center dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
             data-{{current_endpoint}}-every
           >
             {{value["every"]}}
@@ -271,7 +271,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
           {% if value["reload"] %}
           <p
 
-            class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
+            class="flex justify-center dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
             data-{{current_endpoint}}-reload="true"
           >
             <svg
@@ -288,7 +288,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
           {%endif %} {% if not value["reload"] %}
           <p
 
-            class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
+            class="flex justify-center dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
             data-{{current_endpoint}}-reload="false"
           >
             <svg
@@ -304,7 +304,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
           {% endif %} {% if value["success"] %}
           <p
 
-            class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
+            class="flex justify-center dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
             data-{{current_endpoint}}-success="true"
           >
             <svg
@@ -320,7 +320,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
           {% elif not value["success"] %}
           <p
 
-            class="ml-6 dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
+            class="flex justify-center dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
             data-{{current_endpoint}}-success="false"
           >
             <svg
@@ -336,7 +336,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
           {% endif %}
           <div
 
-            class="relative dark:text-gray-400 text-sm col-span-3 m-0 my-1"
+            class="relative  dark:text-gray-400 text-sm col-span-3 m-0 my-1"
             data-{{current_endpoint}}-files
           >
             {% if value['cache']%}

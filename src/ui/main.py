@@ -1595,35 +1595,65 @@ def logs_container(container_id):
     return jsonify({"logs": logs, "last_update": int(time() * 1000)})
 
 
-@app.route("/block_requests", methods=["GET"])
+@app.route("/reports", methods=["GET"])
 @login_required
-def block_requests():
+def reports():
     # TODO : Get block requests from database to send it
-    block_requests = [
-        {"ip": "124.0.0.1", "url": "/test", "date": "12/51/9851", "reason": "antibot", "method": "GET", "status": 403, "data": "{fesfmk fesfsf sfesfes}"},
-        {"ip": "124.0.0.2", "url": "/test", "date": "12/51/9851", "reason": "test", "method": "GET", "status": 403, "data": "{fesfmk fesfsf sfesfes}"},
-        {"ip": "124.0.0.3", "url": "/test", "date": "12/51/9851", "reason": "antibot", "method": "GET", "status": 403, "data": "{fesfmk fesfsf sfesfes}"},
+    reports = [
+        {
+            "user_agent": "Version 0.6.1 - Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.5a) Gecko/20030728 Mozilla Firebird/0.6.1",
+            "ip": "124.0.0.1",
+            "country": "FR",
+            "url": "/test",
+            "date": "12/51/9851",
+            "reason": "antibot",
+            "method": "GET",
+            "status": 403,
+            "data": "{fesfmk fesfsf sfesfes}",
+        },
+        {
+            "user_agent": "Version 0.6.1 - Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.5a) Gecko/20030728 Mozilla Firebird/0.6.1",
+            "ip": "124.0.0.2",
+            "country": "EN",
+            "url": "/test",
+            "date": "12/51/9851",
+            "reason": "test",
+            "method": "GET",
+            "status": 403,
+            "data": "{fesfmk fesfsf sfesfes}",
+        },
+        {
+            "user_agent": "Version 0.6.1 - Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.5a) Gecko/20030728 Mozilla Firebird/0.6.1",
+            "ip": "124.0.0.3",
+            "country": "ES",
+            "url": "/test",
+            "date": "12/51/9851",
+            "reason": "antibot",
+            "method": "GET",
+            "status": 403,
+            "data": "{fesfmk fesfsf sfesfes}",
+        },
     ]
 
     # Prepare data
     reasons = {}
     codes = {}
-    for request in block_requests:
+    for report in reports:
         # Get top reasons
-        if not request["reason"] in reasons:
-            reasons[request["reason"]] = 0
-        reasons[request["reason"]] = reasons[request["reason"]] + 1
+        if not report["reason"] in reasons:
+            reasons[report["reason"]] = 0
+        reasons[report["reason"]] = reasons[report["reason"]] + 1
         # Get top status code
-        if not request["status"] in codes:
-            codes[request["status"]] = 0
-        codes[request["status"]] = codes[request["status"]] + 1
+        if not report["status"] in codes:
+            codes[report["status"]] = 0
+        codes[report["status"]] = codes[report["status"]] + 1
 
     top_reason = [k for k, v in reasons.items() if v == max(reasons.values())][0]
     top_code = [k for k, v in codes.items() if v == max(codes.values())][0]
 
     return render_template(
-        "block_requests.html",
-        block_requests=block_requests,
+        "reports.html",
+        reports=reports,
         top_code=top_code,
         top_reason=top_reason,
         username=current_user.get_id(),
