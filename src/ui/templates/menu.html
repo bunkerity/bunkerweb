@@ -133,20 +133,12 @@
             <div
               class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
             >
-              <svg
-                class="stroke-red-500 h-5.5 w-5.5 relative"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M5.636 5.636a9 9 0 1012.728 0M12 3v9"
-                />
-              </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+            class="stroke-stone-500 h-5.5 w-5.5 relative"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+            </svg>
+
             </div>
             <span class="ml-1 duration-300 opacity-100 pointer-events-none ease"
               >Instances</span
@@ -312,6 +304,56 @@
         <!-- item -->
         <li class="mt-0.5 w-full">
           <a
+            class="{% if current_endpoint == 'block_requests' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
+            href="{% if current_endpoint == 'block_requests' %}#{% else %}loading?next={{ url_for('block_requests') }}{% endif %}"
+          >
+            <div
+              class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
+            >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+            class="stroke-amber-500 dark:stroke-amber-500 h-6 w-6 relative"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.05 4.575a1.575 1.575 0 1 0-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 0 1 3.15 0v1.5m-3.15 0 .075 5.925m3.075.75V4.575m0 0a1.575 1.575 0 0 1 3.15 0V15M6.9 7.575a1.575 1.575 0 1 0-3.15 0v8.175a6.75 6.75 0 0 0 6.75 6.75h2.018a5.25 5.25 0 0 0 3.712-1.538l1.732-1.732a5.25 5.25 0 0 0 1.538-3.712l.003-2.024a.668.668 0 0 1 .198-.471 1.575 1.575 0 1 0-2.228-2.228 3.818 3.818 0 0 0-1.12 2.687M6.9 7.575V12m6.27 4.318A4.49 4.49 0 0 1 16.35 15m.002 0h-.002" />
+            </svg>
+
+            </div>
+            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease"
+              >
+              Block requests
+              </span
+            >
+          </a>
+        </li>
+        <!-- end item -->
+        <!-- item -->
+        <li class="mt-0.5 w-full">
+          <a
+            class="{% if current_endpoint == 'bans' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
+            href="{% if current_endpoint == 'bans' %}#{% else %}loading?next={{ url_for('bans') }}{% endif %}"
+          >
+            <div
+              class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5"
+            >
+
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+            class="stroke-red-500 dark:stroke-red-500 h-6 w-6 relative"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+
+
+            </div>
+            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease"
+              >
+              Bans
+              </span
+            >
+          </a>
+        </li>
+        <!-- end item -->
+        <!-- item -->
+        <li class="mt-0.5 w-full">
+          <a
             class="{% if current_endpoint == 'logs' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
             href="{% if current_endpoint == 'logs' %}#{% else %}loading?next={{ url_for('logs') }}{% endif %}"
           >
@@ -334,7 +376,8 @@
               </svg>
             </div>
             <span class="ml-1 duration-300 opacity-100 pointer-events-none ease"
-              >Logs</span
+              >Logs
+              </span
             >
           </a>
         </li>

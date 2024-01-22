@@ -83,6 +83,37 @@ class ServiceModal {
           this.openModal();
         }
       } catch (err) {}
+      // clone action
+      try {
+        if (
+          e.target.closest("button").getAttribute("data-services-action") ===
+          "clone"
+        ) {
+          //set form info and right form
+          const [action, serviceName] = this.getActionAndServName(e.target);
+          this.setForm(action, serviceName, serviceName, this.formNewEdit);
+          //set default value with method default
+          //get service data and parse it
+          //multiple type logic is launch at same time on relate class
+          const servicesSettings = e.target
+            .closest("[data-services-service]")
+            .querySelector("[data-services-settings]")
+            .getAttribute("data-value");
+          const obj = JSON.parse(servicesSettings);
+          this.updateModalData(obj, true);
+          // server name is unset
+          const inpServName = document.querySelector("input#SERVER_NAME");
+          inpServName.getAttribute("value", "");
+          inpServName.removeAttribute("disabled", "");
+          inpServName.value = "";
+          // clone is UI creation, so no setting should be disabled
+
+          //show modal
+          this.resetFilterInp();
+          this.changeSubmitBtn("CREATE", "valid-btn");
+          this.openModal(); //server name is unset
+        }
+      } catch (err) {}
       //new action
       try {
         if (
@@ -219,16 +250,24 @@ class ServiceModal {
 
   setForm(action, serviceName, oldServName, formEl) {
     this.modalTitle.textContent = `${action} ${serviceName}`;
-    formEl.setAttribute("id", `form-${action}-${serviceName}`);
+    const operation = action === "clone" ? "new" : action;
+    formEl.setAttribute("id", `form-${operation}-${serviceName}`);
     const opeInp = formEl.querySelector(`input[name="operation"]`);
-    opeInp.setAttribute("value", action);
-    opeInp.value = action;
+    opeInp.setAttribute("value", operation);
+    opeInp.value = operation;
 
     if (action === "edit" || action === "new") {
       this.showNewEditForm();
       const oldNameInp = formEl.querySelector(`input[name="OLD_SERVER_NAME"]`);
       oldNameInp.setAttribute("value", oldServName);
       oldNameInp.value = oldServName;
+    }
+
+    if (action === "clone") {
+      this.showNewEditForm();
+      const oldNameInp = formEl.querySelector(`input[name="OLD_SERVER_NAME"]`);
+      oldNameInp.setAttribute("value", "");
+      oldNameInp.value = "";
     }
 
     if (action === "delete") {
@@ -286,7 +325,7 @@ class ServiceModal {
     this.modalTabsHeader.classList.remove("hidden");
   }
 
-  updateModalData(settings) {
+  updateModalData(settings, forceEnabled = false) {
     //use this to select inputEl and change value
     for (const [key, data] of Object.entries(settings)) {
       //change format to match id
@@ -350,14 +389,14 @@ class ServiceModal {
             inp.setAttribute("data-method", method);
           }
 
-          //check disabled/enabled after setting values and methods
-          this.setDisabledServ(inp, method, global);
+          if (!forceEnabled) this.setDisabledState(inp, method, global);
+          if (forceEnabled) inp.removeAttribute("disabled");
         });
       } catch (err) {}
     }
   }
 
-  setDisabledServ(inp, method, global) {
+  setDisabledState(inp, method, global) {
     if (global) return inp.removeAttribute("disabled");
 
     if (method === "ui" || method === "default") {

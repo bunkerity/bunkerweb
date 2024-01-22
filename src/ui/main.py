@@ -48,7 +48,7 @@ from src.Config import Config
 from src.ReverseProxied import ReverseProxied
 from src.User import AnonymousUser, User
 
-from utils import check_settings, get_b64encoded_qr_image, path_to_dict
+from utils import check_settings, get_b64encoded_qr_image, path_to_dict, get_remain, get_term_from_remain
 from Database import Database  # type: ignore
 from logging import getLogger
 
@@ -1593,6 +1593,119 @@ def logs_container(container_id):
         )
 
     return jsonify({"logs": logs, "last_update": int(time() * 1000)})
+
+
+@app.route("/block_requests", methods=["GET"])
+@login_required
+def block_requests():
+    # TODO : Get block requests from database to send it
+    block_requests = [
+        {"ip": "124.0.0.1", "url": "/test", "date": "12/51/9851", "reason": "antibot", "method": "GET", "status": 403, "data": "{fesfmk fesfsf sfesfes}"},
+        {"ip": "124.0.0.2", "url": "/test", "date": "12/51/9851", "reason": "test", "method": "GET", "status": 403, "data": "{fesfmk fesfsf sfesfes}"},
+        {"ip": "124.0.0.3", "url": "/test", "date": "12/51/9851", "reason": "antibot", "method": "GET", "status": 403, "data": "{fesfmk fesfsf sfesfes}"},
+    ]
+
+    # Prepare data
+    reasons = {}
+    codes = {}
+    for request in block_requests:
+        # Get top reasons
+        if not request["reason"] in reasons:
+            reasons[request["reason"]] = 0
+        reasons[request["reason"]] = reasons[request["reason"]] + 1
+        # Get top status code
+        if not request["status"] in codes:
+            codes[request["status"]] = 0
+        codes[request["status"]] = codes[request["status"]] + 1
+
+    top_reason = [k for k, v in reasons.items() if v == max(reasons.values())][0]
+    top_code = [k for k, v in codes.items() if v == max(codes.values())][0]
+
+    return render_template(
+        "block_requests.html",
+        block_requests=block_requests,
+        top_code=top_code,
+        top_reason=top_reason,
+        username=current_user.get_id(),
+        dark_mode=app.config["DARK_MODE"],
+    )
+
+
+@app.route("/bans", methods=["GET", "POST"])
+@login_required
+def bans():
+    if request.method == "POST":
+        # Check variables
+        if not request.form:
+            flash("Missing form data.", "error")
+            return redirect(url_for("bans"))
+
+        if "operation" not in request.form:
+            flash("Operation unknown", "error")
+            return redirect(url_for("bans"))
+
+        if "data" not in request.form:
+            flash("No data to proceed", "error")
+            return redirect(url_for("bans"))
+
+        # Multiple operations : add ban or unban
+        operation = request.form["operation"]
+        # data = request.form["data"]
+
+        # TODO : unban logic
+        # data format for unban is the same as bans send on client
+        if operation == "unban":
+            pass
+
+        # TODO : add ban logic
+        # data format : [{"ip": string, "ban_start": timestamp, "ban_end": timestamp, "reason": string}]
+        # "ban_start" is optional : default is time.time()
+        # "ban_end" is optional : default is one month
+        if operation == "ban":
+            pass
+
+        return redirect(
+            url_for(
+                "loading",
+                next=url_for("bans"),
+                message="Update bans",
+            )
+        )
+
+    # TODO : Get bans list from database and send it
+    # Need to limit the number of bans around 100 last ones
+    bans = [
+        {"ip": "124.0.0.1", "ban_start": 1705663430, "ban_end": 1705758948, "reason": "antibot"},
+        {"ip": "124.0.0.2", "ban_start": 1705663430, "ban_end": 1708437348, "reason": "test"},
+        {"ip": "124.0.0.3", "ban_start": 1705663430, "ban_end": 1740059748, "reason": "unknown"},
+    ]
+
+    # Prepare data
+    reasons = {}
+    now_stamp = int(time())  # in seconds
+
+    for ban in bans:
+        # Add remain
+        remain = "unknown" if ban["ban_end"] - now_stamp < 0 else get_remain(ban["ban_end"] - now_stamp)
+        ban["remain"] = remain
+        ban["term"] = get_term_from_remain(remain)
+        # Convert stamp to date
+        ban["ban_start"] = datetime.fromtimestamp(ban["ban_start"])
+        ban["ban_end"] = datetime.fromtimestamp(ban["ban_end"])
+        # Get top reason
+        if not ban["reason"] in reasons:
+            reasons[ban["reason"]] = 0
+        reasons[ban["reason"]] = reasons[ban["reason"]] + 1
+
+    top_reason = [k for k, v in reasons.items() if v == max(reasons.values())][0]
+
+    return render_template(
+        "bans.html",
+        bans=bans,
+        top_reason=top_reason,
+        username=current_user.get_id(),
+        dark_mode=app.config["DARK_MODE"],
+    )
 
 
 @app.route("/jobs", methods=["GET"])

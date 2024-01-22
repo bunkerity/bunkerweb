@@ -7,6 +7,66 @@ from typing import List, Optional
 
 from qrcode.main import QRCode
 
+import math
+
+
+def get_remain(remain_time):
+    # Convert s to ms
+    ms = int(str(remain_time) + "000")
+
+    seconds = math.floor(ms / 1000)
+    minutes = math.floor(seconds / 60)
+    hours = math.floor(minutes / 60)
+    days = math.floor(hours / 24)
+    months = math.floor(days / 30)
+    years = math.floor(days / 365)
+    seconds %= 60
+    minutes %= 60
+    hours %= 24
+    days %= 30
+    months %= 12
+    return f"{f'{years}y' if years else ''} {f'{months}m' if months else ''} {f'{days}d' if days else ''} {f'{hours}h' if hours else ''} {f'{minutes}min' if minutes else ''} {f'{seconds}s' if seconds else ''}"
+
+
+def get_term_from_remain(remain):
+    # Data, need format <n>y <n>m <n>d <n>h <n>min <n>s
+    terms = remain.split(" ")
+    term = ""
+    formats = ["years", "months", "days", "hours", "minutes", "seconds"]
+    chars = ["y", "min", "m", "d", "h", "s"]
+
+    # Not handle
+    if remain == "unknown":
+        return remain
+
+    # start from seconds to years, stop when first 0 occurence
+    # The remain term is first 0 occurence - 1
+    for i in range(len(terms)):
+        # remove letter
+        num = terms[len(terms) - 1 - i]
+        for char in chars:
+            num = num.replace(char, "")
+            num = "0" if not num else num
+
+        num = int(num)
+
+        # Case seconds or less
+        if not num and i == 0:
+            term = formats[len(formats) - 1]
+            break
+
+        # Case last element
+        if num and i == (len(terms) - 1):
+            term = formats[len(formats) - 1 - i]
+            break
+
+        # Case between seconds and years
+        if not num:
+            term = formats[len(formats) - i]
+            break
+
+    return term
+
 
 def path_to_dict(
     path: str,

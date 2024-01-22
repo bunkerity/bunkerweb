@@ -1,5 +1,165 @@
+class Filter {
+  constructor(prefix = "block_requests") {
+    this.prefix = prefix;
+    this.container = document.querySelector(`[data-${this.prefix}-filter]`);
+    this.keyInp = document.querySelector("input#keyword");
+    this.methodValue = "all";
+    this.statusValue = "all";
+    this.reasonValue = "all";
+    this.initHandler();
+  }
+
+  initHandler() {
+    //METHOD HANDLER
+    this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
+          "method"
+        ) {
+          setTimeout(() => {
+            const value = document
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="method"]`,
+              )
+              .textContent.trim();
+
+            this.methodValue = value;
+            //run filter
+            this.filter();
+          }, 10);
+        }
+      } catch (err) {}
+    });
+    //STATUS HANDLER
+    this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
+          "status"
+        ) {
+          setTimeout(() => {
+            const value = document
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="status"]`,
+              )
+              .textContent.trim();
+
+            this.statusValue = value;
+            //run filter
+            this.filter();
+          }, 10);
+        }
+      } catch (err) {}
+    });
+    // REASON HANDLER
+    +this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
+          "reason"
+        ) {
+          setTimeout(() => {
+            const value = document
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="reason"]`,
+              )
+              .textContent.trim();
+
+            this.reasonValue = value;
+            //run filter
+            this.filter();
+          }, 10);
+        }
+      } catch (err) {}
+    });
+    //KEYWORD HANDLER
+    this.keyInp.addEventListener("input", (e) => {
+      this.filter();
+    });
+  }
+
+  filter() {
+    const requests = document.querySelector(
+      `[data-${this.prefix}-list]`,
+    ).children;
+    if (requests.length === 0) return;
+    //reset
+    for (let i = 0; i < requests.length; i++) {
+      const el = requests[i];
+      el.classList.remove("hidden");
+    }
+    //filter type
+    this.setFilterMethod(requests);
+    this.setFilterKeyword(requests);
+    this.setFilterStatus(requests);
+    this.setFilterReason(requests);
+  }
+
+  setFilterMethod(requests) {
+    if (this.methodValue === "all") return;
+    for (let i = 0; i < requests.length; i++) {
+      const el = requests[i];
+      const type = this.getElAttribut(el, "method");
+      if (type !== this.methodValue) el.classList.add("hidden");
+    }
+  }
+
+  setFilterKeyword(requests) {
+    const keyword = this.keyInp.value.trim().toLowerCase();
+    if (!keyword) return;
+    for (let i = 0; i < requests.length; i++) {
+      const el = requests[i];
+
+      const url = this.getElAttribut(el, "url");
+      const date = this.getElAttribut(el, "date");
+      const ip = this.getElAttribut(el, "ip");
+      const data = this.getElAttribut(el, "data");
+
+      if (
+        !url.includes(keyword) &&
+        !date.includes(keyword) &&
+        !ip.includes(keyword) &&
+        !data.includes(keyword)
+      )
+        el.classList.add("hidden");
+    }
+  }
+
+  setFilterStatus(requests) {
+    if (this.statusValue === "all") return;
+    for (let i = 0; i < requests.length; i++) {
+      const el = requests[i];
+      const type = this.getElAttribut(el, "status");
+      if (type !== this.statusValue) el.classList.add("hidden");
+    }
+  }
+
+  setFilterReason(requests) {
+    if (this.reasonValue === "all") return;
+    for (let i = 0; i < requests.length; i++) {
+      const el = requests[i];
+      const type = this.getElAttribut(el, "reason");
+      if (type !== this.reasonValue) el.classList.add("hidden");
+    }
+  }
+
+  getElAttribut(el, attr) {
+    return el
+      .querySelector(`[data-${this.prefix}-${attr}]`)
+      .getAttribute(`data-${this.prefix}-${attr}`)
+      .trim();
+  }
+}
+
 class Dropdown {
-  constructor(prefix = "jobs") {
+  constructor(prefix = "block_requests") {
     this.prefix = prefix;
     this.container = document.querySelector("main");
     this.lastDrop = "";
@@ -174,168 +334,5 @@ class Dropdown {
   }
 }
 
-class Filter {
-  constructor(prefix = "jobs") {
-    this.prefix = prefix;
-    this.container = document.querySelector(`[data-${this.prefix}-filter]`);
-    this.keyInp = document.querySelector("input#keyword");
-    this.successValue = "all";
-    this.reloadValue = "all";
-    this.sortValue = "name";
-
-    this.initHandler();
-  }
-
-  initHandler() {
-    //SUCCESS HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "success"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="success"]`,
-              )
-              .textContent.trim();
-
-            this.successValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    //RELOAD HANDLER
-    this.container.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
-          "reload"
-        ) {
-          setTimeout(() => {
-            const value = document
-              .querySelector(
-                `[data-${this.prefix}-setting-select-text="reload"]`,
-              )
-              .textContent.trim();
-
-            this.reloadValue = value;
-            //run filter
-            this.filter();
-          }, 10);
-        }
-      } catch (err) {}
-    });
-    //KEYWORD HANDLER
-    this.keyInp.addEventListener("input", (e) => {
-      this.filter();
-    });
-  }
-
-  filter() {
-    const jobs = document.querySelector(`[data-${this.prefix}-list]`).children;
-    if (jobs.length === 0) return;
-    //reset
-    for (let i = 0; i < jobs.length; i++) {
-      const el = jobs[i];
-      el.classList.remove("hidden");
-    }
-    //filter type
-    this.setFilterSuccess(jobs);
-    this.setFilterReload(jobs);
-    this.setFilterKeyword(jobs);
-  }
-
-  setFilterSuccess(jobs) {
-    if (this.successValue === "all") return;
-    for (let i = 0; i < jobs.length; i++) {
-      const el = jobs[i];
-      const type = el
-        .querySelector(`[data-${this.prefix}-success]`)
-        .getAttribute(`data-${this.prefix}-success`)
-        .trim();
-      if (type !== this.successValue) el.classList.add("hidden");
-    }
-  }
-
-  setFilterReload(jobs) {
-    if (this.reloadValue === "all") return;
-    for (let i = 0; i < jobs.length; i++) {
-      const el = jobs[i];
-      const type = el
-        .querySelector(`[data-${this.prefix}-reload]`)
-        .getAttribute(`data-${this.prefix}-reload`)
-        .trim();
-      if (type !== this.reloadValue) el.classList.add("hidden");
-    }
-  }
-
-  setFilterKeyword(jobs) {
-    const keyword = this.keyInp.value.trim().toLowerCase();
-    if (!keyword) return;
-    for (let i = 0; i < jobs.length; i++) {
-      const el = jobs[i];
-      const name = el
-        .querySelector(`[data-${this.prefix}-name]`)
-        .textContent.trim()
-        .toLowerCase();
-      const date = el
-        .querySelector(`[data-${this.prefix}-last_run]`)
-        .textContent.trim()
-        .toLowerCase();
-      const every = el
-        .querySelector(`[data-${this.prefix}-every]`)
-        .textContent.trim()
-        .toLowerCase();
-
-      if (
-        !name.includes(keyword) &&
-        !date.includes(keyword) &&
-        !every.includes(keyword)
-      )
-        el.classList.add("hidden");
-    }
-  }
-}
-
-class Download {
-  constructor(prefix = "jobs") {
-    this.prefix = prefix;
-    this.listContainer = document.querySelector(`[data-${this.prefix}-list]`);
-    this.init();
-  }
-
-  init() {
-    this.listContainer.addEventListener("click", (e) => {
-      try {
-        if (
-          e.target
-            .closest("button")
-            .hasAttribute(`data-${this.prefix}-download`)
-        ) {
-          const btnEl = e.target.closest("button");
-          const jobName = btnEl.getAttribute("data-jobs-download");
-          const fileName = btnEl.getAttribute("data-jobs-file");
-          this.sendFileToDL(jobName, fileName);
-        }
-      } catch (err) {}
-    });
-  }
-
-  async sendFileToDL(jobName, fileName) {
-    window.open(
-      `${location.href}/download?job_name=${jobName}&file_name=${fileName}`,
-    );
-  }
-}
-
-const setDropdown = new Dropdown("jobs");
-const setFilter = new Filter("jobs");
-const setDownload = new Download();
+const setDropdown = new Dropdown();
+const setFilter = new Filter();
