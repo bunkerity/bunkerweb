@@ -1,4 +1,4 @@
-FROM python:3.12.1-alpine3.18@sha256:af0d8da43677e3000ebdf4045508d891a87e7bd2d3ec87bc6e40403be97291b8 AS builder
+FROM python:3.12.1-alpine3.18@sha256:28b825667534d432c2ec234b334de5f829624698adfa6a3fef38c4fe165922d0 AS builder
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
@@ -34,7 +34,7 @@ COPY src/common/helpers helpers
 COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 
-FROM python:3.12.1-alpine3.18@sha256:af0d8da43677e3000ebdf4045508d891a87e7bd2d3ec87bc6e40403be97291b8
+FROM python:3.12.1-alpine3.18@sha256:28b825667534d432c2ec234b334de5f829624698adfa6a3fef38c4fe165922d0
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
