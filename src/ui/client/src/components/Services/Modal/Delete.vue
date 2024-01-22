@@ -1,28 +1,23 @@
 <script setup>
-import { defineProps, defineEmits, reactive } from "vue";
+import { defineProps, defineEmits, reactive, watch } from "vue";
 import ModalBase from "@components/Modal/Base.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import { fetchAPI } from "@utils/api.js";
 import { contentIndex } from "@utils/tabindex.js";
-import { useFeedbackStore } from "@store/global.js";
+import {
+  useFeedbackStore,
+  useBackdropStore,
+  useRefreshStore,
+} from "@store/global.js";
+import { useDelModalStore } from "@store/services.js";
 
+const backdropStore = useBackdropStore();
+const delModalStore = useDelModalStore();
 const feedbackStore = useFeedbackStore();
-
-// Open after a file manager item (folder / file) action is clicked
-// With the current folder / file data
-// Update name or content file if wanted
-const props = defineProps({
-  // File value is shown with an editor
-  serviceName: {
-    type: String,
-    required: true,
-    default: "",
-  },
-  isOpen: {
-    type: Boolean,
-    required: true,
-    default: false,
-  },
+const refreshStore = useRefreshStore();
+// close modal on backdrop click
+watch(backdropStore, () => {
+  delModalStore.isOpen = false;
 });
 
 const deleteServ = reactive({
@@ -34,56 +29,53 @@ const deleteServ = reactive({
 
 async function delServ() {
   await fetchAPI(
-    `/api/config/service/${props.serviceName}?method=ui`,
+    `/api/config/service/${delModalStore.serviceName}?method=ui`,
     "DELETE",
     null,
     deleteServ,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       // Case saved
       if (res.type === "success") {
-        emits("delete");
-        emits("close");
+        delModalStore.isOpen = false;
+        refreshStore.refresh();
         return;
       }
     })
     .catch((err) => {});
 }
-
-const emits = defineEmits(["close", "delete"]);
 </script>
 <template>
   <ModalBase
     id="service-delete-modal"
-    :aria-hidden="props.isOpen ? 'false' : 'true'"
-    @backdrop="$emit('close')"
+    :aria-hidden="delModalStore.isOpen ? 'false' : 'true'"
     :title="$t('services_delete_title')"
-    v-if="props.isOpen"
+    v-if="delModalStore.isOpen"
   >
     <div class="w-full">
       <div class="flex justify-center">
         <div class="modal-path">
           <p class="modal-path-text">
-            {{ $t("services_delete_msg", { name: props.serviceName }) }}
+            {{ $t("services_delete_msg", { name: delModalStore.serviceName }) }}
           </p>
         </div>
       </div>
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase
-          :tabindex="props.isOpen ? contentIndex : -1"
+          :tabindex="delModalStore.isOpen ? contentIndex : -1"
           color="close"
           size="lg"
-          @click="$emit('close')"
+          @click="delModalStore.isOpen = false"
           type="button"
           class="text-xs"
           aria-controls="service-delete-modal"
-          :aria-expanded="props.isOpen ? 'true' : 'false'"
+          :aria-expanded="delModalStore.isOpen ? 'true' : 'false'"
         >
           {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
-          :tabindex="props.isOpen ? contentIndex : -1"
+          :tabindex="delModalStore.isOpen ? contentIndex : -1"
           type="submit"
           color="delete"
           size="lg"
