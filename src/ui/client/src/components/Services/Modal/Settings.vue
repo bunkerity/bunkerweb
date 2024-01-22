@@ -5,6 +5,7 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import SettingsUploadSvgWarning from "@components/Settings/Upload/Svg/Warning.vue";
 import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
+import { getRemainFromFilter } from "@utils/plugins.js";
 import ModalBase from "@components/Modal/Base.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import { contentIndex } from "@utils/tabindex.js";
@@ -17,6 +18,7 @@ import {
 import { useModalStore } from "@store/services.js";
 import { useConfigStore } from "@store/settings.js";
 import { computed } from "vue";
+import { onMounted } from "vue";
 
 const backdropStore = useBackdropStore();
 const modalStore = useModalStore();
@@ -36,39 +38,38 @@ const filters = reactive({
 });
 
 const settings = reactive({
+  service: {},
+  serviceName: "",
   plugins: [],
   activePlugin: "",
+  methods: getMethodList(),
   setup: computed(() => {
-    if (!modalStore.data.service) return {};
+    if (!settings.service || Object.keys(settings.service).length === 0)
+      return {};
     // Filter data to display
-    const filterSettings = getSettingsByFilter(
-      modalStore.data.service,
-      filters
-    );
+    const filterSettings = getSettingsByFilter(settings.service, filters);
 
     // Get remain plugins
-    const remainPlugins = getRemainFromFilter(cloneMultisitePlugin);
-    settings.plugins = remainPlugins.length > 0 ? remainPlugins : [];
+    const remainPlugins = getRemainFromFilter(filterSettings);
 
-    // Set active plugin
-    let pluginName = "";
-    // Set first plugin as active if none
-    if (!settings.activePlugin) return;
-    pluginName = remainPlugins.length > 0 ? remainPlugins[0] : "";
+    // Only update active plugin if no one active or previous active one
+    // is no longer available with filter
+    const isPrevPlugin = remainPlugins.includes(settings.activePlugin);
 
     // Case active plugin before update, need some check
-    if (pluginName) {
-      // Case prev active plugin passed filter
-      const isPlugin = remainPlugins.indexOf(pluginName) !== -1 ? true : false;
-
-      // Case not, set first passed one or empty
-      if (!isPlugin) {
-        pluginName = remainPlugins.length > 0 ? remainPlugins[0] : "";
-      }
+    if (!isPrevPlugin || !settings.activePlugin) {
+      settings.activePlugin = remainPlugins.length > 0 ? remainPlugins[0] : "";
     }
+
+    settings.plugins = remainPlugins.length > 0 ? remainPlugins : [];
 
     return filterSettings;
   }),
+});
+
+watch(modalStore, (newVal, oldVal) => {
+  settings.service = newVal.data.service;
+  settings.serviceName = newVal.data.serviceName;
 });
 
 const sendConf = reactive({
@@ -94,15 +95,21 @@ const saveBtn = reactive({
 </script>
 <template>
   <ModalBase
+    cardSize="large"
     id="service-delete-modal"
     :aria-hidden="modalStore.isOpen ? 'false' : 'true'"
-    :title="$t('services_delete_title')"
+    :title="
+      settings.serviceName === 'new'
+        ? $t('services_active_new')
+        : $t('services_active_base', {
+            name: settings.serviceName,
+          })
+    "
     v-show="modalStore.isOpen"
-    class="z-10 col-span-12 grid grid-cols-12 relative"
   >
-    <div>
+    <div class="grid grid-cols-12">
       <SettingsLayout
-        class="flex w-full col-span-12"
+        class="flex w-full col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3"
         :label="$t('services_list_select_plugin')"
         name="plugins"
       >
@@ -113,12 +120,11 @@ const saveBtn = reactive({
             value: settings.activePlugin,
             values: settings.plugins,
           }"
+          :key="settings.serviceName"
         />
       </SettingsLayout>
-    </div>
-    <div>
       <SettingsLayout
-        class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
+        class="flex w-full col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3"
         :label="$t('services_filter_search_setting')"
         name="keyword"
       >
@@ -132,10 +138,8 @@ const saveBtn = reactive({
           }"
         />
       </SettingsLayout>
-    </div>
-    <div>
       <SettingsLayout
-        class="flex w-full col-span-12 md:col-span-6 lg:col-span-12"
+        class="flex w-full col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3"
         :label="$t('services_filter_method_setting')"
         name="method"
       >
@@ -144,21 +148,24 @@ const saveBtn = reactive({
           :settings="{
             id: 'method',
             value: filters.method,
-            values: getMethodList(),
+            values: settings.methods,
           }"
+          :key="settings.serviceName"
         />
       </SettingsLayout>
     </div>
+
     <hr class="col-span-12 line-separator z-10 w-full mb-6" />
 
     <div class="col-span-12">
       <PluginStructure
-        :serviceName="modalStore.serviceName"
+        :serviceName="modalStore.data.serviceName"
         :plugins="settings.setup"
+        :active="settings.activePlugin"
       />
     </div>
     <div
-      class="col-span-12 flex flex-col items-center w-full justify-center mt-8 mb-2"
+      class="col-span-12 flex flex-col items-center w-full justify-center mt-8 mb-0"
     >
       <ButtonBase
         :tabindex="contentIndex"
@@ -172,11 +179,13 @@ const saveBtn = reactive({
         {{ $t("action_save") }}
       </ButtonBase>
       <hr class="line-separator z-10 w-1/2" />
-      <p class="dark:text-gray-500 text-xs text-center mt-1 mb-2">
+      <p class="dark:text-gray-500 text-xs text-center mb-0">
         <span class="mx-0.5">
           <SettingsUploadSvgWarning class="scale-90" />
         </span>
-        {{ $t("services_actions_warning") }}
+        <span>
+          {{ $t("services_actions_warning") }}
+        </span>
       </p>
     </div>
   </ModalBase>

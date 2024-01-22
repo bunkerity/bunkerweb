@@ -861,7 +861,7 @@ body {
 }
 
 .modal-container {
-  @apply w-full h-screen fixed bg-gray-600/50 z-[10000] top-0 left-0 justify-center items-center;
+  @apply w-full h-screen fixed bg-gray-600/50 z-[10000] top-0 left-0 flex justify-center items-center;
 }
 
 .modal-wrap {
@@ -869,7 +869,15 @@ body {
 }
 
 .modal-card {
-  @apply z-10 overflow-hidden px-4 py-3 w-full max-w-180 max-h-[70vh] flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply z-10 overflow-hidden px-4 py-3 flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.regular.modal-card {
+  @apply w-full max-w-180 max-h-[70vh];
+}
+
+.large.modal-card {
+  @apply w-[90vw] max-w-[1200px] max-h-[70vh];
 }
 
 .modal-card-title {

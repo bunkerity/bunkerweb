@@ -38,7 +38,7 @@ async function runJob(jobName) {
     "POST",
     null,
     run,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   )
     .then((res) => {
       return res.json();
@@ -78,7 +78,7 @@ async function downloadFile(jobName, cacheName) {
     "GET",
     null,
     download,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   )
     .then((res) => {
       return res.json();
@@ -115,7 +115,7 @@ function showHistory(name, history) {
         @click="
           showHistory(
             Object.keys(item)[0],
-            item[Object.keys(item)[0]]['history']
+            item[Object.keys(item)[0]]['history'],
           )
         "
       >

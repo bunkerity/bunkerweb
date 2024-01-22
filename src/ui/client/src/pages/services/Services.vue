@@ -8,6 +8,10 @@ import CardItemList from "@components/Card/Item/List.vue";
 import ServicesModalDelete from "@components/Services/Modal/Delete.vue";
 import ServicesCard from "@components/Services/Card.vue";
 import ServicesModalSettings from "@components/Services/Modal/Settings.vue";
+import SettingsLayout from "@components/Settings/Layout.vue";
+import SettingsInput from "@components/Settings/Input.vue";
+import SettingsSelect from "@components/Settings/Select.vue";
+import { getMethodList } from "@utils/settings.js";
 import {
   setPluginsData,
   addConfToPlugins,
@@ -16,6 +20,7 @@ import {
 } from "@utils/plugins.js";
 import { fetchAPI } from "@utils/api.js";
 import { contentIndex } from "@utils/tabindex.js";
+import { useModalStore } from "@store/services.js";
 import { useFeedbackStore, useRefreshStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
@@ -23,6 +28,7 @@ import { useI18n } from "vue-i18n";
 
 const { locale, fallbackLocale } = useI18n();
 
+const modalStore = useModalStore();
 const feedbackStore = useFeedbackStore();
 const refreshStore = useRefreshStore();
 const config = useConfigStore();
@@ -34,6 +40,12 @@ watch(refreshStore, () => {
 
 const logsStore = useLogsStore();
 logsStore.setTags(["plugin", "config"]);
+
+// Hide / Show settings and plugin base on that filters
+const filters = reactive({
+  servName: "",
+  servMethod: "all",
+});
 
 // Plugins data to render components
 const services = reactive({
@@ -118,7 +130,7 @@ const services = reactive({
 function getI18nMultisitePlugin() {
   // Get format multisite data
   const cloneMultisitePlugin = setPluginsData(
-    getPluginsByContext(JSON.parse(JSON.stringify(services.data)), "multisite")
+    getPluginsByContext(JSON.parse(JSON.stringify(services.data)), "multisite"),
   );
 
   // translate
@@ -143,14 +155,14 @@ async function getGlobalConf(isFeedback = true) {
     "GET",
     null,
     conf,
-    isFeedback ? feedbackStore.addFeedback : null
+    isFeedback ? feedbackStore.addFeedback : null,
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     services,
-    isFeedback ? feedbackStore.addFeedback : null
+    isFeedback ? feedbackStore.addFeedback : null,
   );
 }
 
@@ -158,11 +170,18 @@ async function getGlobalConf(isFeedback = true) {
 onMounted(() => {
   getGlobalConf();
 });
+
+function setModal(modal, action, serviceName, service) {
+  modal.data.operation = action;
+  modal.data.service = service;
+  // Case clone, SERVER_NAME need to be empty
+  modal.data.serviceName = serviceName;
+  modal.isOpen = true;
+}
 </script>
 
 <template>
   <Dashboard>
-    <ServicesButtonAdd />
     <ApiState
       class="col-span-12 md:col-start-4 md:col-span-6"
       :isErr="conf.isErr || services.isErr"
@@ -172,16 +191,20 @@ onMounted(() => {
         isErr: $t('api_error', { name: $t('dashboard_services') }),
       }"
     />
-    <ServicesCard
-      v-if="!services.isErr && !services.isPend && services.services"
-      :services="services.services"
-    />
+
+    <ServicesModalDelete v-if="!services.isErr && !services.isPend" />
+    <ServicesModalSettings v-if="!services.isErr && !services.isPend" />
+
     <div
       v-if="!services.isErr && !services.isPend"
       class="col-span-12 content-wrap"
     >
+      <ServicesButtonAdd
+        v-if="!services.isErr && !services.isPend"
+        @click="setModal(modalStore, 'create', 'new', services.new)"
+      />
       <CardBase
-        class="z-[102] h-fit col-span-12 md:col-span-4 lg:col-span-3 3xl:col-span-2"
+        class="h-fit col-span-12 md:col-span-4 lg:col-span-3 3xl:col-span-2"
         :label="$t('dashboard_info')"
       >
         <CardItemList
@@ -201,6 +224,44 @@ onMounted(() => {
           ]"
         />
       </CardBase>
+      <CardBase
+        class="h-fit col-span-12 md:col-span-4 lg:col-span-3 3xl:col-span-2"
+        :label="$t('dashboard_filter')"
+      >
+        <SettingsLayout
+          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3"
+          :label="$t('services_filter_search_setting')"
+          name="Search service"
+        >
+          <SettingsInput
+            @inp="(v) => (filters.servName = v)"
+            :settings="{
+              id: 'servName',
+              type: 'text',
+              value: '',
+              placeholder: $t('services_filter_search_setting_placeholder'),
+            }"
+          />
+        </SettingsLayout>
+        <SettingsLayout
+          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3"
+          :label="$t('services_list_select_plugin')"
+          name="Methods"
+        >
+          <SettingsSelect
+            @inp="(v) => (filters.servMethod = v)"
+            :settings="{
+              id: 'servMethods',
+              value: 'all',
+              values: getMethodList(),
+            }"
+          />
+        </SettingsLayout>
+      </CardBase>
+      <ServicesCard
+        v-if="!services.isErr && !services.isPend && services.services"
+        :services="services.services"
+      />
     </div>
   </Dashboard>
 </template>

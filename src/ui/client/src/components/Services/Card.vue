@@ -46,20 +46,24 @@ const services = reactive({
     if (!props.services) return [];
 
     // create object entries loop
-    const detail = {};
+    const data = {};
     for (const [name, plugins] of Object.entries(props.services)) {
-      if (!(name in detail)) detail[name] = {};
+      plugins.forEach((plugin) => {
+        if (!(name in data)) data[name] = {};
+        if (plugin.id === "general") {
+          data[name]["method"] = plugin.settings.SERVER_NAME.method;
+        }
 
-      plugins.forEach((plugin) => {});
+        for (let i = 0; i < details.length; i++) {
+          if (details[i]["id"] !== plugin.id) continue;
+          data[name][details[i]["id"]] =
+            plugin.settings[details[i].setting].value ||
+            plugin.settings[details[i].setting].default;
+        }
+      });
     }
-    return detail;
+    return data;
   }),
-});
-
-onMounted(() => {
-  setInterval(() => {
-    console.log(services.details);
-  }, 1000);
 });
 
 function setModal(modal, action, serviceName, service) {
@@ -68,31 +72,6 @@ function setModal(modal, action, serviceName, service) {
   // Case clone, SERVER_NAME need to be empty
   modal.data.serviceName = serviceName;
   modal.isOpen = true;
-}
-
-function getMethod(plugins) {
-  let method = "";
-  for (const [key, plugin] of Object.entries(plugins)) {
-    if (plugin.id !== "general") continue;
-    method = plugin.settings["SERVER_NAME"].method;
-  }
-  console.log("method", method);
-  return method;
-}
-
-function getDetailBool(plugins, id, setting) {
-  let value = null;
-  for (const [key, plugin] of Object.entries(plugins)) {
-    if (plugin.id !== id) continue;
-    try {
-      value = plugin.settings[setting].value === "yes" ? true : false;
-    } catch (e) {
-      try {
-        value = plugin.settings[setting].default === "yes" ? true : false;
-      } catch (e) {}
-    }
-    return value;
-  }
 }
 </script>
 
@@ -109,35 +88,41 @@ function getDetailBool(plugins, id, setting) {
     <h3
       class="text-lg text-center sm:text-left mb-2 font-semibold text-gray-600 dark:text-white/80"
     >
-      {{ getMethod(plugins) }}
+      {{ services.details[name]["method"] }}
     </h3>
 
     <div class="grid grid-cols-12">
-      <p
-        class="text-sm col-span-12 sm:col-span-6 flex justify-start items-center"
+      <div
+        class="mb-1.5 text-sm col-span-12 sm:col-span-6 flex justify-center sm:justify-start items-center"
         v-for="detail in details"
       >
-        <span class="mr-2">{{ $t(`services_detail_${detail.lang}`) }}</span>
-        <ServicesSvgState
-          :success="getDetailBool(plugins, detail.id, detail.setting)"
-        />
-      </p>
+        <p class="mb-0 mr-2 text-black dark:text-white dark:opacity-80">
+          {{ $t(`services_detail_${detail.lang}`) }}
+        </p>
+        <div class="relative">
+          <ServicesSvgState
+            :success="
+              services.details[name][detail.id] === 'yes' ? true : false
+            "
+          />
+        </div>
+      </div>
     </div>
 
-    <div class="relative w-full flex justify-center sm:justify-end">
+    <div class="mt-3.5 relative w-full flex justify-center sm:justify-end">
       <ServicesButtonClone
-        @click="setModal(modalStore, 'clone', name, props.services[name])"
+        @click="setModal(modalStore, 'clone', name, plugins)"
         :hostname="name"
       />
       <ServicesButtonEdit
-        @click="setModal(modalStore, 'edit', name, props.services[name])"
+        @click="setModal(modalStore, 'edit', name, plugins)"
         :hostname="name"
       />
       <ServicesButtonRedirect :hostname="name" />
       <ServicesButtonDelete
-        @click="setModal(delModalStore, 'delete', name, props.services[name])"
+        @click="setModal(delModalStore, 'delete', name, plugins)"
         :hostname="name"
-        :method="getMethod(plugins)"
+        :method="services.details[name]['method']"
       />
     </div>
   </div>
