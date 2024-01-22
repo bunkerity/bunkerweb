@@ -1,24 +1,28 @@
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { watch } from "vue";
 import ButtonBase from "@components/Button/Base.vue";
 import ModalBase from "@components/Modal/Base.vue";
 import JobsSvgState from "@components/Jobs/Svg/State.vue";
 import ListBase from "@components/List/Base.vue";
 import ListItem from "@components/List/Item.vue";
 import { useModalStore } from "@store/jobs.js";
+import { useBackdropStore } from "@store/global.js";
 
+const backdropStore = useBackdropStore();
 const modalStore = useModalStore();
 
-const positions = ["col-span-2", "col-span-5", "col-span-5"];
+// close modal on backdrop click
+watch(backdropStore, () => {
+  modalStore.isOpen = false;
+});
 
-const emits = defineEmits(["close"]);
+const positions = ["col-span-2", "col-span-5", "col-span-5"];
 </script>
 <template>
   <ModalBase
-    @backdrop="$emit('close')"
-    :id="`history-modal-${modalStore.name}`"
+    :id="`history-modal`"
     :aria-hidden="modalStore.isOpen ? 'false' : 'true'"
-    :title="`${$t('jobs_history_title')} ${modalStore.name}`"
+    :title="`${$t('jobs_history_title')} ${modalStore.data.name}`"
     v-show="modalStore.isOpen"
   >
     <div class="col-span-12 overflow-x-auto overflow-y-hidden">
@@ -49,7 +53,7 @@ const emits = defineEmits(["close"]);
           @click="modalStore.isOpen = false"
           type="button"
           class="text-xs"
-          :aria-controls="`history-modal-${modalStore.name}`"
+          :aria-controls="`history-modal`"
           :aria-expanded="modalStore.isOpen ? 'true' : 'false'"
         >
           {{ $t("action_close") }}

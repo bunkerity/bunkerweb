@@ -11,6 +11,7 @@ import { useRefreshStore } from "@store/global.js";
 
 // Refresh when related btn is clicked
 const refreshStore = useRefreshStore();
+const feedbackStore = useFeedbackStore();
 
 watch(refreshStore, () => {
   getInstances();
@@ -18,8 +19,6 @@ watch(refreshStore, () => {
 
 const logsStore = useLogsStore();
 logsStore.setTags(["instance"]);
-
-const feedbackStore = useFeedbackStore();
 
 const instances = reactive({
   isPend: false,
@@ -36,54 +35,6 @@ async function getInstances(isFeedback = true) {
     instances,
     isFeedback ? feedbackStore.addFeedback : null,
   );
-}
-
-const instActions = reactive({
-  isPend: false,
-  isErr: false,
-  data: [],
-});
-
-async function actionInstance(data) {
-  //Try action and refetch instances only if succeed
-  await fetchAPI(
-    `/api/instances/${data.hostname}/${data.operation}?method=ui`,
-    "POST",
-    null,
-    instActions,
-    feedbackStore.addFeedback,
-  ).then((res) => {
-    if (res.type === "success") {
-      getInstances(false);
-      return;
-    }
-  });
-}
-
-async function deleteInstance(data) {
-  //Try action and refetch instances only if succeed
-  await fetchAPI(
-    `/api/instances/${data.hostname}?method=ui`,
-    "DELETE",
-    null,
-    instances,
-    feedbackStore.addFeedback,
-  ).then((res) => {
-    if (res.type === "success") {
-      getInstances(false);
-      return;
-    }
-  });
-}
-
-const modal = reactive({
-  delIsOpen: false,
-  hostname: "",
-});
-
-function openDelModal(hostname) {
-  modal.hostname = hostname;
-  modal.delIsOpen = true;
 }
 
 onMounted(() => {
@@ -110,14 +61,7 @@ onMounted(() => {
       :port="instance.port"
       :method="instance.method"
       :status="instance.status"
-      @action="(v) => actionInstance(v)"
-      @delete="(hostname) => openDelModal(hostname)"
     />
-    <InstanceModalDelete
-      @delete="(v) => deleteInstance(v)"
-      @close="modal.delIsOpen = false"
-      :isOpen="modal.delIsOpen"
-      :hostname="modal.hostname"
-    />
+    <InstanceModalDelete />
   </Dashboard>
 </template>

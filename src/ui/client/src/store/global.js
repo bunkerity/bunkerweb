@@ -47,3 +47,9 @@ export const useBannerStore = defineStore("banner", () => {
 
   return { isBanner, bannerClass, setBannerVisible };
 });
+
+export const useBackdropStore = defineStore("backdrop", () => {
+  const clickCount = ref(0);
+
+  return { clickCount };
+});

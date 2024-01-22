@@ -1,9 +1,17 @@
 <script setup>
-import { reactive, defineProps, defineEmits, markRaw, computed } from "vue";
+import { reactive, defineProps, markRaw, computed } from "vue";
 import ButtonBase from "@components/Button/Base.vue";
 import InstanceSvgPing from "@components/Instance/Svg/Ping.vue";
 import InstanceSvgDelete from "@components/Instance/Svg/Delete.vue";
 import { contentIndex } from "@utils/tabindex.js";
+import { useModalStore } from "@store/instances.js";
+import { useRefreshStore, useFeedbackStore } from "@store/global.js";
+import { fetchAPI } from "@utils/api.js";
+
+// Refresh when related btn is clicked
+const refreshStore = useRefreshStore();
+const feedbackStore = useFeedbackStore();
+const modalStore = useModalStore();
 
 const props = defineProps({
   id: {
@@ -65,6 +73,7 @@ const instance = reactive({
   actions: computed(() =>
     props.status === "up" ? [actions.stop, actions.reload] : [],
   ),
+
   checks: computed(() =>
     props.status === "up"
       ? props.method === "static"
@@ -74,9 +83,33 @@ const instance = reactive({
   ),
 });
 
-// action => return action to execute with instance name
-// delete => return instance name to delete
-const emits = defineEmits(["action", "delete"]);
+const instActions = reactive({
+  isPend: false,
+  isErr: false,
+  data: [],
+});
+
+async function actionInstance(operation) {
+  // Case delete, open confirm modal
+  if (operation === "delete") {
+    modalStore.data = {
+      hostname: props.hostname,
+    };
+    return (modalStore.isOpen = true);
+  }
+  // Else directly send action
+  await fetchAPI(
+    `/api/instances/${props.hostname}/${operation}?method=ui`,
+    "POST",
+    null,
+    instActions,
+    feedbackStore.addFeedback,
+  ).then((res) => {
+    if (res.type === "success") {
+      refreshStore.refresh();
+    }
+  });
+}
 </script>
 
 <template>
@@ -107,17 +140,7 @@ const emits = defineEmits(["action", "delete"]);
           :tabindex="contentIndex"
           v-for="action in instance.checks"
           :color="action.color"
-          @click="
-            $emit(
-              action.emit,
-              action.emit === 'action'
-                ? {
-                    hostname: props.hostname,
-                    operation: action.name,
-                  }
-                : props.hostname,
-            )
-          "
+          @click="actionInstance(action.name)"
           @pointerover="action.popup = true"
           @pointerleave="action.popup = false"
           :class="[action.popup ? 'pl-2 p-1' : 'w-10 p-1', `${action.class}`]"
@@ -145,12 +168,7 @@ const emits = defineEmits(["action", "delete"]);
           :tabindex="contentIndex"
           v-for="action in instance.actions"
           :color="action.color"
-          @click="
-            $emit('action', {
-              hostname: props.hostname,
-              operation: action.name,
-            })
-          "
+          @click="actionInstance(action.name)"
           size="normal"
           class="text-sm mx-1 my-1 w-full xs:w-fit max-w-[200px]"
         >

@@ -6,6 +6,7 @@ import {
   onUnmounted,
   onBeforeUpdate,
   onUpdated,
+  watch,
 } from "vue";
 import ModalBase from "@components/Modal/Base.vue";
 import ButtonBase from "@components/Button/Base.vue";
@@ -14,18 +15,24 @@ import "@assets/script/editor/theme-dracula.js";
 import "@assets/script/editor/theme-dawn.js";
 import { fetchAPI } from "@utils/api.js";
 import { contentIndex } from "@utils/tabindex.js";
-import { useFeedbackStore } from "@store/global.js";
 import { useModalStore } from "@store/configs.js";
-import { useRefreshStore } from "@store/global.js";
+import {
+  useRefreshStore,
+  useBackdropStore,
+  useFeedbackStore,
+} from "@store/global.js";
 
-// Refresh when related btn is clicked
 const refreshStore = useRefreshStore();
-
+const backdropStore = useBackdropStore();
 const modalStore = useModalStore();
 const feedbackStore = useFeedbackStore();
 
-// Filter data from path
+// close modal on backdrop click
+watch(backdropStore, () => {
+  modalStore.isOpen = false;
+});
 
+// Filter data from path
 const data = reactive({
   oldName: "",
   name: "",
