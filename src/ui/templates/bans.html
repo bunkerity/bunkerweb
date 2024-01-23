@@ -349,7 +349,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     </div>
   </div>
 
-  <form  id="unban-items" action="/bans" method="post" class="w-full col-span-12 justify-center flex mt-6 mb-3">
+  <form  id="unban-items" action="bans" method="post" class="w-full col-span-12 justify-center flex mt-6 mb-3">
     <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
     <input type="hidden" name="operation" value="unban">
     <input data-unban-inp type="hidden" name="data" value="">

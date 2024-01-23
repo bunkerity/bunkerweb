@@ -7,79 +7,40 @@ from typing import List, Optional
 
 from qrcode.main import QRCode
 
-import math
 
+def get_remain(seconds):
+    term = "minute(s)"
+    years, seconds = divmod(seconds, 60 * 60 * 24 * 365)
+    months, seconds = divmod(seconds, 60 * 60 * 24 * 30)
+    while months >= 12:
+        years += 1
+        months -= 12
+    days, seconds = divmod(seconds, 60 * 60 * 24)
+    hours, seconds = divmod(seconds, 60 * 60)
+    minutes, seconds = divmod(seconds, 60)
+    time_parts = []
+    if years > 0:
+        term = "year(s)"
+        time_parts.append(f"{int(years)} year{'' if years == 1 else 's'}")
+    if months > 0:
+        if term == "minute(s)":
+            term = "month(s)"
+        time_parts.append(f"{int(months)} month{'' if months == 1 else 's'}")
+    if days > 0:
+        if term == "minute(s)":
+            term = "day(s)"
+        time_parts.append(f"{int(days)} day{'' if days == 1 else 's'}")
+    if hours > 0:
+        if term == "minute(s)":
+            term = "hour(s)"
+        time_parts.append(f"{int(hours)} hour{'' if hours == 1 else 's'}")
+    if minutes > 0:
+        time_parts.append(f"{int(minutes)} minute{'' if minutes == 1 else 's'}")
 
-def get_remain(remain_time):
-    # Convert s to ms
-    ms = int(str(remain_time) + "000")
+    if len(time_parts) > 1:
+        time_parts[-1] = f"and {time_parts[-1]}"
 
-    seconds = math.floor(ms / 1000)
-    minutes = math.floor(seconds / 60)
-    hours = math.floor(minutes / 60)
-    days = math.floor(hours / 24)
-    months = math.floor(days / 30)
-    years = math.floor(days / 365)
-    seconds %= 60
-    minutes %= 60
-    hours %= 24
-    days %= 30
-    months %= 12
-
-    remain = f'{format_remain(years, "year")} {format_remain(months, "month")} {format_remain(days, "day")} {format_remain(hours, "hour")} {format_remain(minutes, "minute")} {format_remain(seconds, "second")}'
-    return remain
-
-
-def format_remain(num, singular):
-    if not num:
-        return ""
-
-    if num == 1:
-        return f"{num} {singular}"
-
-    if num > 1:
-        return f"{num} {singular}s"
-
-
-def get_range_from_remain(remain):
-    # Not handle
-    if remain == "unknown":
-        return remain
-
-    # Data, need format <n>y <n>m <n>d <n>h <n>min <n>s
-    split_remain = remain.split(" ")
-    terms = [num for num in split_remain if num.isdigit()]
-    term = ""
-    formats = ["year(s)", "month(s)", "day(s)", "hour(s)", "minute(s)", "second(s)"]
-    chars = ["year", "month", "day", "hour", "second", "s"]
-
-    # start from seconds to years, stop when first 0 occurrence
-    # The remain term is first 0 occurrence - 1
-    for i in range(len(terms)):
-        # remove letter
-        num = terms[len(terms) - 1 - i]
-        for char in chars:
-            num = num.replace(char, "")
-            num = "0" if not num else num
-
-        num = int(num)
-
-        # Case seconds or less
-        if not num and i == 0:
-            term = formats[len(formats) - 1]
-            break
-
-        # Case last element
-        if num and i == (len(terms) - 1):
-            term = formats[len(formats) - 1 - i]
-            break
-
-        # Case between seconds and years
-        if not num:
-            term = formats[len(formats) - i]
-            break
-
-    return term
+    return " ".join(time_parts), term
 
 
 def path_to_dict(
