@@ -869,15 +869,15 @@ body {
 }
 
 .modal-card {
-  @apply z-10 overflow-hidden px-4 py-3 flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply z-10 overflow-y-auto px-4 py-3 flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .regular.modal-card {
-  @apply w-full max-w-180 max-h-[70vh];
+  @apply w-full max-w-180 max-h-[90vh];
 }
 
 .large.modal-card {
-  @apply w-[90vw] max-w-[1200px] max-h-[70vh];
+  @apply w-[90vw] max-w-[1200px] max-h-[90vh];
 }
 
 .modal-card-title {

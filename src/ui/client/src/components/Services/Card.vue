@@ -16,6 +16,11 @@ const props = defineProps({
     required: true,
     default: {},
   },
+  filters: {
+    type: Object,
+    required: true,
+    default: {},
+  },
 });
 
 const details = [
@@ -66,10 +71,31 @@ const services = reactive({
   }),
 });
 
-function setModal(modal, action, serviceName, service) {
-  modal.data.operation = action;
-  modal.data.service = service;
-  // Case clone, SERVER_NAME need to be empty
+function setModal(modal, operation, serviceName, service) {
+  modal.data.operation = operation;
+  // Case clone
+  if (operation === "clone") {
+    const serviceClone = JSON.parse(JSON.stringify(service));
+    // change methods by ui
+    for (let i = 0; i < service.length; i++) {
+      const plugin = service[i];
+      const settings = plugin.settings;
+      for (const [key, value] of Object.entries(settings)) {
+        value["method"] = "ui";
+        // no name for clone
+        if (key === "SERVER_NAME") {
+          value["value"] = "";
+          value["default"] = "";
+        }
+      }
+      modal.data.serviceName = "clone";
+      modal.data.service = serviceClone;
+      return (modal.isOpen = true);
+    }
+  }
+
+  // Others cases
+  modal.data.service = JSON.parse(JSON.stringify(service));
   modal.data.serviceName = serviceName;
   modal.isOpen = true;
 }
@@ -78,6 +104,7 @@ function setModal(modal, action, serviceName, service) {
 <template>
   <div
     v-for="(plugins, name) in props.services"
+    :class="[filters[name] ? '' : 'hidden']"
     class="my-2 dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 lg:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
     <h2

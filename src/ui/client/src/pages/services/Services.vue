@@ -11,7 +11,7 @@ import ServicesModalSettings from "@components/Services/Modal/Settings.vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
-import { getMethodList } from "@utils/settings.js";
+import { getServicesByFilter, getServicesMethods } from "@utils/services.js";
 import {
   setPluginsData,
   addConfToPlugins,
@@ -35,6 +35,8 @@ const config = useConfigStore();
 
 watch(refreshStore, () => {
   config.$reset();
+  services.methods = [];
+  services.filters = {};
   refresh();
 });
 
@@ -53,6 +55,8 @@ const services = reactive({
   isErr: false,
   // Data from fetch
   data: [],
+  filters: {},
+  methods: [],
   // Get new service
   new: computed(() => {
     if (
@@ -123,6 +127,16 @@ const services = reactive({
       cloneServConf[key] = addConfToPlugins(currServPlugin, currServConf);
     }
 
+    // Get all services names
+    modalStore.data.servicesName = Object.keys(cloneServConf);
+
+    // Get methods only on page rendering or refresh services data
+    if (services.methods.length === 0)
+      services.methods = ["all"].concat(getServicesMethods(cloneServConf));
+
+    // Add filtering
+    services.filters = getServicesByFilter(cloneServConf, filters);
+
     return cloneServConf;
   }),
 });
@@ -166,18 +180,17 @@ async function getGlobalConf(isFeedback = true) {
   );
 }
 
+function setModal(modal, operation, serviceName, service) {
+  modal.data.operation = operation;
+  modal.data.service = service;
+  modal.data.serviceName = serviceName;
+  modal.isOpen = true;
+}
+
 // Show service data logic
 onMounted(() => {
   getGlobalConf();
 });
-
-function setModal(modal, action, serviceName, service) {
-  modal.data.operation = action;
-  modal.data.service = service;
-  // Case clone, SERVER_NAME need to be empty
-  modal.data.serviceName = serviceName;
-  modal.isOpen = true;
-}
 </script>
 
 <template>
@@ -194,7 +207,6 @@ function setModal(modal, action, serviceName, service) {
 
     <ServicesModalDelete v-if="!services.isErr && !services.isPend" />
     <ServicesModalSettings v-if="!services.isErr && !services.isPend" />
-
     <div
       v-if="!services.isErr && !services.isPend"
       class="col-span-12 content-wrap"
@@ -204,7 +216,7 @@ function setModal(modal, action, serviceName, service) {
         @click="setModal(modalStore, 'create', 'new', services.new)"
       />
       <CardBase
-        class="h-fit col-span-12 md:col-span-4 lg:col-span-3 3xl:col-span-2"
+        class="h-fit col-span-12 md:col-span-4 lg:col-span-3"
         :label="$t('dashboard_info')"
       >
         <CardItemList
@@ -225,13 +237,12 @@ function setModal(modal, action, serviceName, service) {
         />
       </CardBase>
       <CardBase
-        class="h-fit col-span-12 md:col-span-4 lg:col-span-3 3xl:col-span-2"
+        class="h-fit col-span-12 md:col-span-6"
         :label="$t('dashboard_filter')"
       >
         <SettingsLayout
-          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3"
-          :label="$t('services_filter_search_setting')"
-          name="Search service"
+          class="flex w-full col-span-12 sm:col-span-6"
+          :label="$t('services_service_search')"
         >
           <SettingsInput
             @inp="(v) => (filters.servName = v)"
@@ -239,28 +250,33 @@ function setModal(modal, action, serviceName, service) {
               id: 'servName',
               type: 'text',
               value: '',
-              placeholder: $t('services_filter_search_setting_placeholder'),
+              placeholder: $t('services_service_search_placeholder'),
             }"
           />
         </SettingsLayout>
         <SettingsLayout
-          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3"
-          :label="$t('services_list_select_plugin')"
-          name="Methods"
+          class="flex w-full col-span-12 sm:col-span-6"
+          :label="$t('services_service_select_method')"
         >
           <SettingsSelect
             @inp="(v) => (filters.servMethod = v)"
             :settings="{
               id: 'servMethods',
               value: 'all',
-              values: getMethodList(),
+              values: services.methods,
             }"
           />
         </SettingsLayout>
       </CardBase>
+    </div>
+    <div
+      v-if="!services.isErr && !services.isPend"
+      class="col-span-12 content-wrap"
+    >
       <ServicesCard
         v-if="!services.isErr && !services.isPend && services.services"
         :services="services.services"
+        :filters="services.filters"
       />
     </div>
   </Dashboard>

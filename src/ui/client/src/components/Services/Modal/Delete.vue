@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits, reactive, watch } from "vue";
+import { reactive, watch } from "vue";
 import ModalBase from "@components/Modal/Base.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import { fetchAPI } from "@utils/api.js";
@@ -15,6 +15,7 @@ const backdropStore = useBackdropStore();
 const delModalStore = useDelModalStore();
 const feedbackStore = useFeedbackStore();
 const refreshStore = useRefreshStore();
+
 // close modal on backdrop click
 watch(backdropStore, () => {
   delModalStore.isOpen = false;
@@ -29,7 +30,7 @@ const deleteServ = reactive({
 
 async function delServ() {
   await fetchAPI(
-    `/api/config/service/${delModalStore.serviceName}?method=ui`,
+    `/api/config/service/${delModalStore.data.serviceName}?method=ui`,
     "DELETE",
     null,
     deleteServ,

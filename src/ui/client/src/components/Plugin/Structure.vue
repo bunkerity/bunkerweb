@@ -23,7 +23,7 @@ const props = defineProps({
 
 <template>
   <div
-    class="plugin-structure col-span-12 max-h-[65vh] overflow-y-auto overflow-x-hidden"
+    class="plugin-structure col-span-12 max-h-[50vh] overflow-y-auto overflow-x-hidden"
     v-for="plugin in props.plugins"
   >
     <PluginContainer :id="plugin.id" v-show="plugin.name === props.active">

@@ -4,13 +4,19 @@ import { ref } from "vue";
 export const useModalStore = defineStore("ServiceModal", () => {
   const isOpen = ref(false);
   const data = ref({
+    services: [],
     service: "",
     serviceName: "",
     operation: "",
   });
 
   function $reset() {
-    data.value = {};
+    data.value = {
+      services: [],
+      service: "",
+      serviceName: "",
+      operation: "",
+    };
   }
 
   return {
@@ -29,7 +35,11 @@ export const useDelModalStore = defineStore("ServiceDelModal", () => {
   });
 
   function $reset() {
-    data.value = {};
+    data.value = {
+      service: "",
+      serviceName: "",
+      operation: "",
+    };
   }
 
   return {

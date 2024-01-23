@@ -26,11 +26,6 @@ const feedbackStore = useFeedbackStore();
 const refreshStore = useRefreshStore();
 const config = useConfigStore();
 
-// close modal on backdrop click
-watch(backdropStore, () => {
-  modalStore.isOpen = false;
-});
-
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
   keyword: "",
@@ -38,19 +33,42 @@ const filters = reactive({
 });
 
 const settings = reactive({
-  service: {},
-  serviceName: "",
-  plugins: [],
-  activePlugin: "",
-  methods: getMethodList(),
-  setup: computed(() => {
-    if (!settings.service || Object.keys(settings.service).length === 0)
+  // State of save button, check config and modalStore watchers
+  save: false,
+  // Get current services by name
+  // Compare with current service name on config watcher to disable / enable save button
+  servicesName: computed(() => {
+    return Object.keys(modalStore.data.services);
+  }),
+  // Current service settings
+  service: computed(() => {
+    if (
+      !modalStore.data.service ||
+      Object.keys(modalStore.data.service).length === 0
+    ) {
       return {};
-    // Filter data to display
-    const filterSettings = getSettingsByFilter(settings.service, filters);
-
+    }
+    return getSettingsByFilter(modalStore.data.service, filters);
+  }),
+  // Current service name or "new"
+  serviceName: computed(() => modalStore.data.serviceName),
+  // Current plugin selected or remaining after filtering
+  activePlugin: "",
+  // Base methods that can be seen on BunkerWeb
+  methods: computed(() => getMethodList()),
+  operation: computed(() => modalStore.data.operation),
+  plugins: computed(() => {
+    // When opening modal, useModalStore will store data about service or action (like new)
+    // useModalStore is watch to update settings keys and trigger setup
+    if (
+      !modalStore.data.service ||
+      Object.keys(modalStore.data.service).length === 0
+    )
+      return {};
     // Get remain plugins
-    const remainPlugins = getRemainFromFilter(filterSettings);
+    const remainPlugins = getRemainFromFilter(
+      getSettingsByFilter(modalStore.data.service, filters),
+    );
 
     // Only update active plugin if no one active or previous active one
     // is no longer available with filter
@@ -61,15 +79,70 @@ const settings = reactive({
       settings.activePlugin = remainPlugins.length > 0 ? remainPlugins[0] : "";
     }
 
-    settings.plugins = remainPlugins.length > 0 ? remainPlugins : [];
-
-    return filterSettings;
+    return remainPlugins.length > 0 ? remainPlugins : [];
   }),
 });
 
+// close modal on backdrop click
+watch(backdropStore, () => {
+  modalStore.isOpen = false;
+});
+
+// When modalStore is update, check if another operation or service match previous one
+// If not, reset config store (settings to be send on back end)
 watch(modalStore, (newVal, oldVal) => {
-  settings.service = newVal.data.service;
-  settings.serviceName = newVal.data.serviceName;
+  if (
+    oldVal.data.serviceName !== newVal.data.serviceName ||
+    oldVal.data.operation !== newVal.data.operation
+  ) {
+    // Reset config store
+    config.$reset();
+    config.data.services[newVal.data.serviceName] = {};
+    // By default, we consider impossible to save or edit when opening modal (because no new data)
+    settings.save = false;
+  }
+});
+
+// Every time a setting is change, add some check to enable / disable save button
+watch(config, () => {
+  // Case new service without name, impossible to save
+  if (
+    ["new", "clone"].includes(settings.operation) &&
+    !("SERVER_NAME" in config.data.services[settings.serviceName])
+  ) {
+    return (settings.save = false);
+  }
+
+  // Case name setting is on config but empty, impossible to save
+  if (
+    !!("SERVER_NAME" in config.data.services[settings.serviceName]) &&
+    !config.data.services[settings.serviceName]["SERVER_NAME"]
+  ) {
+    return (settings.save = false);
+  }
+
+  // Case name already taken by another service, impossible to save
+  if (
+    !!("SERVER_NAME" in config.data.services[settings.serviceName]) &&
+    config.data.services[settings.serviceName]["SERVER_NAME"]
+  ) {
+    if (
+      settings.servicesName.includes(
+        config.data.services[settings.serviceName]["SERVER_NAME"],
+      )
+    ) {
+      return (settings.save = false);
+    }
+  }
+
+  // We can save service if at least one setting is different from default
+  // At least SERVER_NAME needed
+  if (Object.keys(config.data.services[settings.serviceName]).length === 0) {
+    return (settings.save = false);
+  }
+
+  // Passed all check, enable save button
+  return (settings.save = true);
 });
 
 const sendConf = reactive({
@@ -80,18 +153,10 @@ const sendConf = reactive({
 });
 
 async function sendServConf() {
-  // Case nothing to send
+  // Case no service to send
   console.log(config.data.services);
   if (Object.keys(config.data.services).length === 0) return;
-
-  const promises = [];
-  // Send services
-  const services = config.data.services;
 }
-
-const saveBtn = reactive({
-  disabled: true,
-});
 </script>
 <template>
   <ModalBase
@@ -99,11 +164,13 @@ const saveBtn = reactive({
     id="service-delete-modal"
     :aria-hidden="modalStore.isOpen ? 'false' : 'true'"
     :title="
-      settings.serviceName === 'new'
-        ? $t('services_active_new')
-        : $t('services_active_base', {
-            name: settings.serviceName,
-          })
+      settings.operation === 'clone'
+        ? $t('services_active_clone', { service: settings.serviceName })
+        : settings.operation === 'new'
+          ? $t('services_active_new')
+          : $t('services_active_base', {
+              name: settings.serviceName,
+            })
     "
     v-show="modalStore.isOpen"
   >
@@ -155,13 +222,14 @@ const saveBtn = reactive({
       </SettingsLayout>
     </div>
 
-    <hr class="col-span-12 line-separator z-10 w-full mb-6" />
+    <hr class="col-span-12 line-separator z-10 w-full mb-1" />
 
     <div class="col-span-12">
       <PluginStructure
-        :serviceName="modalStore.data.serviceName"
-        :plugins="settings.setup"
+        :serviceName="settings.serviceName"
+        :plugins="settings.service"
         :active="settings.activePlugin"
+        :key="settings.serviceName"
       />
     </div>
     <div
@@ -169,14 +237,16 @@ const saveBtn = reactive({
     >
       <ButtonBase
         :tabindex="contentIndex"
-        :disabled="saveBtn.disabled"
-        :aria-disabled="saveBtn.disabled ? 'true' : 'false'"
+        :aria-disabled="settings.save ? 'true' : 'false'"
+        :disabled="settings.save ? false : true"
         @click="sendServConf()"
-        color="valid"
+        :color="settings.operation === 'edit' ? 'edit' : 'valid'"
         size="lg"
         class="w-fit"
       >
-        {{ $t("action_save") }}
+        {{
+          settings.operation === "edit" ? $t("action_edit") : $t("action_add")
+        }}
       </ButtonBase>
       <hr class="line-separator z-10 w-1/2" />
       <p class="dark:text-gray-500 text-xs text-center mb-0">
