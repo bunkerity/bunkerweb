@@ -125,7 +125,7 @@ class SwarmController(Controller):
     def __process_event(self, event):
         if "Actor" not in event or "ID" not in event["Actor"] or "Type" not in event:
             return False
-        if event["Type"] not in ["service", "config"]:
+        if event["Type"] not in ("service", "config"):
             return False
         if event["Type"] == "service":
             if event["Actor"]["ID"] in self.__swarm_instances or event["Actor"]["ID"] in self.__swarm_services:

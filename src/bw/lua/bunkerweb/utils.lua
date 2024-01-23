@@ -29,7 +29,6 @@ local decode = cjson.decode
 local char = string.char
 local random = math.random
 local session_start = session.start
-local session_open = session.open
 local tonumber = tonumber
 
 local utils = {}
@@ -575,7 +574,8 @@ utils.get_session = function(ctx)
 		return ctx.bw.sessions_session
 	end
 	-- Open/create and do an optional refresh
-	local session, err, exists, refreshed = session_start()
+	local err, exists, refreshed
+	session, err, exists, refreshed = session_start()
 	if not session then
 		return nil, err
 	end

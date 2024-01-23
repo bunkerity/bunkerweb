@@ -543,7 +543,7 @@ class AddBanModal {
   }
 
   setDatepicker(id) {
-    // instanciate datepicker
+    // instantiate datepicker
     const dateOptions = {
       locale: "en",
       dateFormat: "m/d/Y H:i:S",

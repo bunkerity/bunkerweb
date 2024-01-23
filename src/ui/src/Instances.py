@@ -214,10 +214,7 @@ class Instances:
                         )
                     )
 
-        instances = sorted(
-            instances,
-            key=lambda x: x.name,
-        )
+        instances.sort(key=lambda x: x.name)
 
         # Local instance
         if Path(sep, "usr", "sbin", "nginx").exists():

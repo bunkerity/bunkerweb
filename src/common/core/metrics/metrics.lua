@@ -1,8 +1,8 @@
+local cjson = require "cjson"
 local class = require "middleclass"
+local datastore = require "datastore"
 local plugin = require "bunkerweb.plugin"
 local utils = require "bunkerweb.utils"
-local cjson = require "cjson"
-local datastore = require "datastore"
 
 local metrics = class("metrics", plugin)
 
@@ -58,7 +58,7 @@ function metrics:log()
 			code = ngx.status,
 			["user-agent"] = self.ctx.bw.http_user_agent or "",
 			reason = reason,
-			data = data
+			data = data,
 		}
 		local ok
 		ok, err = self.metrics_datastore:safe_rpush("metrics_requests", encode(request))
@@ -74,7 +74,6 @@ function metrics:log_default()
 end
 
 function metrics:api()
-
 	-- Match request
 	if not match(self.ctx.bw.uri, "^/metrics/requests$") or self.ctx.bw.request_method ~= "GET" then
 		return self:ret(false, "success")
@@ -100,7 +99,7 @@ function metrics:api()
 		if not ok then
 			self.logger:log(ERR, "can't save request to datastore : " .. err)
 		end
-		i = i + 1 
+		i = i + 1
 	end
 	return self:ret(true, data, HTTP_OK)
 end

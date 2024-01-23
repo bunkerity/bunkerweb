@@ -53,8 +53,8 @@ def get_range_from_remain(remain):
     formats = ["year(s)", "month(s)", "day(s)", "hour(s)", "minute(s)", "second(s)"]
     chars = ["year", "month", "day", "hour", "second", "s"]
 
-    # start from seconds to years, stop when first 0 occurence
-    # The remain term is first 0 occurence - 1
+    # start from seconds to years, stop when first 0 occurrence
+    # The remain term is first 0 occurrence - 1
     for i in range(len(terms)):
         # remove letter
         num = terms[len(terms) - 1 - i]
