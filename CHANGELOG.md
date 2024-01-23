@@ -7,6 +7,7 @@
 - [DEPS] Updated lua-nginx-module version to v0.10.26
 - [DEPS] Updated libmaxminddb version to v1.9.1
 - [DEPS] Updated lua-resty-core to v0.1.28
+- [DEPS] Updated zlib version to v1.3.1
 
 ## v1.5.5 - 2024/01/12
 
