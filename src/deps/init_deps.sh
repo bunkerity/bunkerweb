@@ -52,8 +52,8 @@ do
     post="yes"
   else
 		echo "⚠️ Skipping clone of $url because target directory is already present"
-    # echo "ℹ️ Updating ${name} from $url at commit/version $commit"
-    # do_and_check_cmd git subtree pull --prefix "src/deps/src/$id" "$url" "$commit" --squash
+    echo "ℹ️ Updating ${name} from $url at commit/version $commit"
+    do_and_check_cmd git subtree pull --prefix "src/deps/src/$id" "$url" "$commit" --squash
 	fi
 
   if [ -d "src/deps/src/$id/.git" ] ; then

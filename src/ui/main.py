@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from contextlib import suppress
+from math import floor
 from os import _exit, getenv, listdir, sep, urandom
 from os.path import basename, dirname, join
 from secrets import choice
@@ -48,7 +49,7 @@ from src.Config import Config
 from src.ReverseProxied import ReverseProxied
 from src.User import AnonymousUser, User
 
-from utils import check_settings, get_b64encoded_qr_image, path_to_dict
+from utils import check_settings, get_b64encoded_qr_image, path_to_dict, get_remain
 from Database import Database  # type: ignore
 from logging import getLogger
 
@@ -1593,6 +1594,161 @@ def logs_container(container_id):
         )
 
     return jsonify({"logs": logs, "last_update": int(time() * 1000)})
+
+
+@app.route("/reports", methods=["GET"])
+@login_required
+def reports():
+    # TODO : Get block requests from database to send it
+    reports = [
+        {
+            "user_agent": "Version 0.6.1 - Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.5a) Gecko/20030728 Mozilla Firebird/0.6.1",
+            "ip": "124.0.0.1",
+            "country": "FR",
+            "url": "/test",
+            "date": "12/51/9851",
+            "reason": "antibot",
+            "method": "GET",
+            "status": 403,
+            "data": "{fesfmk fesfsf sfesfes}",
+        },
+        {
+            "user_agent": "Version 0.6.1 - Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.5a) Gecko/20030728 Mozilla Firebird/0.6.1",
+            "ip": "124.0.0.2",
+            "country": "EN",
+            "url": "/test",
+            "date": "12/51/9851",
+            "reason": "test",
+            "method": "GET",
+            "status": 403,
+            "data": "{fesfmk fesfsf sfesfes}",
+        },
+        {
+            "user_agent": "Version 0.6.1 - Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.5a) Gecko/20030728 Mozilla Firebird/0.6.1",
+            "ip": "124.0.0.3",
+            "country": "ES",
+            "url": "/test",
+            "date": "12/51/9851",
+            "reason": "antibot",
+            "method": "GET",
+            "status": 403,
+            "data": "{fesfmk fesfsf sfesfes}",
+        },
+    ]
+
+    # Prepare data
+    reasons = {}
+    codes = {}
+    for report in reports:
+        # Get top reasons
+        if not report["reason"] in reasons:
+            reasons[report["reason"]] = 0
+        reasons[report["reason"]] = reasons[report["reason"]] + 1
+        # Get top status code
+        if not report["status"] in codes:
+            codes[report["status"]] = 0
+        codes[report["status"]] = codes[report["status"]] + 1
+
+    top_reason = [k for k, v in reasons.items() if v == max(reasons.values())][0]
+    top_code = [k for k, v in codes.items() if v == max(codes.values())][0]
+
+    return render_template(
+        "reports.html",
+        reports=reports,
+        top_code=top_code,
+        top_reason=top_reason,
+        username=current_user.get_id(),
+        dark_mode=app.config["DARK_MODE"],
+    )
+
+
+@app.route("/bans", methods=["GET", "POST"])
+@login_required
+def bans():
+    if request.method == "POST":
+        # Check variables
+        if not request.form:
+            flash("Missing form data.", "error")
+            return redirect(url_for("bans"))
+
+        if "operation" not in request.form:
+            flash("Operation unknown", "error")
+            return redirect(url_for("bans"))
+
+        if "data" not in request.form:
+            flash("No data to proceed", "error")
+            return redirect(url_for("bans"))
+
+        try:
+            data = json_loads(request.form["data"])
+            assert isinstance(data, list)
+        except BaseException:
+            flash("Data must be a list of dict", "error")
+            return redirect(url_for("bans"))
+
+        if request.form["operation"] == "unban":
+            for unban in data:
+                try:
+                    unban = json_loads(unban.replace('"', '"').replace("'", '"'))
+                except BaseException:
+                    continue
+                if "ip" not in unban:
+                    continue
+                resp = app.config["INSTANCES"].unban(unban["ip"])
+                if resp:
+                    flash(f"Couldn't unban {unban['ip']} on the following instances: {', '.join(resp)}", "error")
+                else:
+                    flash(f"Successfully unbanned {unban['ip']}")
+        elif request.form["operation"] == "ban":
+            for ban in data:
+                try:
+                    ban = json_loads(ban.replace('"', '"').replace("'", '"'))
+                except BaseException:
+                    continue
+                if "ip" not in ban:
+                    continue
+                try:
+                    ban_end = float(ban.get("ban_end", 86400))
+                except BaseException:
+                    continue
+                resp = app.config["INSTANCES"].ban(ban["ip"], ban_end, ban.get("reason", "manual"))
+                if resp:
+                    flash(f"Couldn't ban {ban['ip']} on the following instances: {', '.join(resp)}", "error")
+                else:
+                    flash(f"Successfully banned {ban['ip']}")
+        else:
+            flash("Operation unknown", "error")
+            return redirect(url_for("bans"))
+
+        return redirect(url_for("loading", next=url_for("bans"), message="Update bans"))
+
+    bans = app.config["INSTANCES"].get_bans()[:100]
+
+    # Prepare data
+    reasons = {}
+    timestamp_now = time()
+
+    for ban in bans:
+        exp = ban.pop("exp")
+        # Add remain
+        ban["remain"], ban["term"] = ("unknown", "unknown") if exp <= 0 else get_remain(exp)
+        # Convert stamp to date
+        ban["ban_start"] = datetime.fromtimestamp(floor(ban["date"])).strftime("%d/%m/%Y %H:%M:%S")
+        ban["ban_end"] = datetime.fromtimestamp(floor(timestamp_now + exp)).strftime("%d/%m/%Y %H:%M:%S")
+        # Get top reason
+        if not ban["reason"] in reasons:
+            reasons[ban["reason"]] = 0
+        reasons[ban["reason"]] = reasons[ban["reason"]] + 1
+
+    top_reason = ([k for k, v in reasons.items() if v == max(reasons.values())] or [""])[0]
+
+    return render_template(
+        "bans.html",
+        bans=bans,
+        top_reason=top_reason,
+        username=current_user.get_id(),
+        dark_mode=app.config["DARK_MODE"],
+    )
 
 
 @app.route("/jobs", methods=["GET"])

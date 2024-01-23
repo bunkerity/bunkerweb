@@ -301,8 +301,11 @@ matched: he
             end
         end
     }
---- stream_response
-error: pcre_compile() failed: missing ) in "(abc"
+--- stream_response eval
+$Test::Nginx::Util::PcreVersion == 2 ?
+"error: pcre2_compile() failed: missing closing parenthesis in \"(abc\"\n"
+:
+"error: pcre_compile() failed: missing ) in \"(abc\"\n"
 --- no_error_log
 [error]
 
@@ -480,8 +483,11 @@ matched: hello, 1234
             ngx.say("not matched")
         end
     }
---- stream_response_like chop
-^error: pcre_exec\(\) failed: -10$
+--- stream_response eval
+$Test::Nginx::Util::PcreVersion == 2 ?
+"error: pcre_exec\(\) failed: -4\n"
+:
+"error: pcre_exec\(\) failed: -10\n"
 
 --- no_error_log
 [error]

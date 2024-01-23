@@ -15,8 +15,10 @@ if not lru then
 	logger:log(ERR, "failed to instantiate LRU cache : " .. err_lru)
 end
 
-function datastore:initialize()
-	if subsystem == "http" then
+function datastore:initialize(dict)
+	if dict then
+		self.dict = dict
+	elseif subsystem == "http" then
 		self.dict = shared.datastore
 	else
 		self.dict = shared.datastore_stream
@@ -110,6 +112,34 @@ function datastore:flush_lru()
 		return false, "lru is not instantiated"
 	end
 	lru:flush_all()
+end
+
+function datastore:safe_rpush(key, value)
+	local length, err = self.dict:rpush(key, value)
+	if not length and err == "no memory" then
+		local i = 0
+		while i < 5 do
+			local val
+			val, err = self.dict:lpop(key)
+			if not val then
+				return val, err
+			end
+			length, err = self.dict:rpush(key, value)
+			if not length and err ~= "no memory" then
+				return length, err
+			end
+			i = i + 1
+		end
+	end
+	return length, err
+end
+
+function datastore:lpop(key)
+	return self.dict:lpop(key)
+end
+
+function datastore:llen(key)
+	return self.dict:llen(key)
 end
 
 return datastore

@@ -6,7 +6,7 @@ from hashlib import sha512
 from inspect import getsourcefile
 from io import BufferedReader
 from json import dumps, loads
-from os.path import basename, normpath
+from os.path import basename
 from pathlib import Path
 from sys import _getframe
 from threading import Lock
@@ -28,17 +28,19 @@ def is_cached_file(
     expire: Union[Literal["hour"], Literal["day"], Literal["week"], Literal["month"]],
     db=None,
 ) -> bool:
+    if not isinstance(file, Path):
+        file = Path(file)
+
     is_cached = False
     cached_file = None
     try:
-        file = normpath(file)
         file_path = Path(f"{file}.md")
         if not file_path.is_file():
             if not db:
                 return False
             cached_file = db.get_job_cache_file(
                 basename(getsourcefile(_getframe(1))).replace(".py", ""),
-                basename(file),
+                file.name,
                 with_info=True,
             )
 
@@ -65,16 +67,13 @@ def is_cached_file(
         is_cached = False
 
     if is_cached and cached_file:
-        Path(file).write_bytes(cached_file.data)
+        file.write_bytes(cached_file.data)
 
     return is_cached and cached_file
 
 
 def get_file_in_db(file: Union[str, Path], db, *, job_name: Optional[str] = None) -> Optional[bytes]:
-    cached_file = db.get_job_cache_file(
-        job_name or basename(getsourcefile(_getframe(1))).replace(".py", ""),
-        normpath(file),
-    )
+    cached_file = db.get_job_cache_file(job_name or basename(getsourcefile(_getframe(1))).replace(".py", ""), file)
     if not cached_file:
         return None
     return cached_file.data
@@ -107,10 +106,10 @@ def set_file_in_db(
     return ret, err
 
 
-def del_file_in_db(name: str, db) -> Tuple[bool, str]:
+def del_file_in_db(name: str, db, *, service_id: Optional[str] = None) -> Tuple[bool, str]:
     ret, err = True, "success"
     try:
-        db.delete_job_cache(name, job_name=basename(getsourcefile(_getframe(1))).replace(".py", ""))
+        db.delete_job_cache(name, job_name=basename(getsourcefile(_getframe(1))).replace(".py", ""), service_id=service_id)
     except:
         return False, f"exception :\n{format_exc()}"
     return ret, err
@@ -118,7 +117,10 @@ def del_file_in_db(name: str, db) -> Tuple[bool, str]:
 
 def file_hash(file: Union[str, Path]) -> str:
     _sha512 = sha512()
-    with open(normpath(file), "rb") as f:
+    if not isinstance(file, Path):
+        file = Path(file)
+
+    with file.open("rb") as f:
         while True:
             data = f.read(1024)
             if not data:
@@ -139,18 +141,24 @@ def bytes_hash(bio: BufferedReader) -> str:
 
 
 def cache_hash(cache: Union[str, Path], db=None) -> Optional[str]:
+    checksum = None
     with suppress(BaseException):
-        return loads(Path(normpath(f"{cache}.md")).read_text(encoding="utf-8")).get("checksum", None)
-    if db:
+        checksum = loads(Path(f"{cache}.md").read_text(encoding="utf-8")).get("checksum", None)
+
+    if not checksum and db:
+        if not isinstance(cache, Path):
+            cache = Path(cache)
+
         cached_file = db.get_job_cache_file(
             basename(getsourcefile(_getframe(1))).replace(".py", ""),
-            basename(normpath(cache)),
+            cache.name,
             with_info=True,
             with_data=False,
         )
+        checksum = cached_file.checksum if cached_file else None
 
-        if cached_file:
-            return cached_file.checksum
+    if checksum:
+        return checksum
     return None
 
 
@@ -166,9 +174,9 @@ def cache_file(
     ret, err = True, "success"
     try:
         if not isinstance(file, Path):
-            file = Path(normpath(file))
+            file = Path(file)
         if not isinstance(cache, Path):
-            cache = Path(normpath(cache))
+            cache = Path(cache)
 
         content = file.read_bytes()
         cache.write_bytes(content)
@@ -181,7 +189,7 @@ def cache_file(
 
         if db:
             return set_file_in_db(
-                basename(str(cache)),
+                cache.name,
                 content,
                 db,
                 job_name=basename(getsourcefile(_getframe(1))).replace(".py", ""),

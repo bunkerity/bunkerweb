@@ -1,15 +1,26 @@
 # Changelog
 
-## v1.5.5 - YYYY/MM/DD
+## v1.5.6 - YYYY/MM/DD
 
-- [BUGFIX] Fix issues with the database when upgrading from version 1.5.3 and 1.5.4 to the most recent version
+- [MISC] Updated Linux base images in Dockerfiles
+- [DEPS] Updated stream-lua-nginx-module to v0.0.14
+- [DEPS] Updated lua-nginx-module version to v0.10.26
+- [DEPS] Updated libmaxminddb version to v1.9.1
+- [DEPS] Updated lua-resty-core to v0.1.28
+- [DEPS] Updated zlib version to v1.3.1
+
+## v1.5.5 - 2024/01/12
+
+- [BUGFIX] Fix issues with the database when upgrading from one version to a newer one
 - [BUGFIX] Fix ModSecurity-nginx to make it work with brotli
 - [BUGFIX] Remove certbot renew delay causing errors on k8s
 - [BUGFIX] Fix missing custom modsec files when BW instances change
 - [BUGFIX] Fix inconsistency on config changes when using Redis
+- [BUGFIX] Fix web UI not working when using / URL
 - [FEATURE] Add Anonymous reporting feature
 - [FEATURE] Add support for fallback Referrer-Policies
-- [FEATURE] Add profile page to web ui and the possibility to activate the 2FA
+- [FEATURE] Add 2FA support to web UI
+- [FEATURE] Add username and password management to web UI
 - [FEATURE] Add setting REVERSE_PROXY_INCLUDES to manually add "include" directives in the reverse proxies
 - [FEATURE] Add support for Redis Sentinel
 - [FEATURE] Add support for tls in Ingress definition
@@ -17,7 +28,6 @@
 - [MISC] Various internal improvements in LUA code
 - [MISC] Check nginx configuration before reload
 - [MISC] Updated Python Docker image to 3.12.1-alpine3.18 in Dockerfiles
-- [MISC] Switch gunicorn worker_class back to gevent in web UI
 - [DEPS] Updated ModSecurity to v3.0.11
 
 ## v1.5.4 - 2023/12/04

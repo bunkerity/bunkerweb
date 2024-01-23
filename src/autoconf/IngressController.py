@@ -146,15 +146,16 @@ class IngressController(Controller):
                     for host in tls.hosts:
                         for service in services:
                             if host in service["SERVER_NAME"].split(" "):
-                                secret_tls = self.__corev1.list_secret_for_all_namespaces(
+                                secrets_tls = self.__corev1.list_secret_for_all_namespaces(
                                     watch=False,
                                     field_selector=f"metadata.name={tls.secret_name},metadata.namespace={namespace}",
                                 ).items
-                                if not secret_tls:
+                                if len(secrets_tls) == 0:
                                     self._logger.warning(
                                         f"Ignoring tls setting for {host} : secret {tls.secret_name} not found.",
                                     )
                                     break
+                                secret_tls = secrets_tls[0]
                                 if not secret_tls.data:
                                     self._logger.warning(
                                         f"Ignoring tls setting for {host} : secret {tls.secret_name} contains no data.",
@@ -227,6 +228,22 @@ class IngressController(Controller):
                 configs[config_type][f"{config_site}{config_name}"] = config_data
         return configs
 
+    def __process_event(self, event):
+        obj = event["object"]
+        metadata = obj.metadata if obj else None
+        annotations = metadata.annotations if metadata else None
+        if not obj:
+            return False
+        if obj.kind == "Pod":
+            return annotations and "bunkerweb.io/INSTANCE" in annotations
+        if obj.kind == "Ingress":
+            return True
+        if obj.kind == "ConfigMap":
+            return annotations and "bunkerweb.io/CONFIG_TYPE" in annotations
+        if obj.kind == "Service":
+            return True
+        return False
+
     def __watch(self, watch_type):
         w = watch.Watch()
         what = None
@@ -245,9 +262,13 @@ class IngressController(Controller):
             locked = False
             error = False
             try:
-                for _ in w.stream(what):
+                for event in w.stream(what):
                     self.__internal_lock.acquire()
                     locked = True
+                    if not self.__process_event(event):
+                        self.__internal_lock.release()
+                        locked = False
+                        continue
                     self._update_settings()
                     self._instances = self.get_instances()
                     self._services = self.get_services()

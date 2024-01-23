@@ -6,8 +6,9 @@ services:
     environment:
       PYTHONUNBUFFERED: "1"
       USE_CUSTOM_SSL: "no"
+      CUSTOM_SSL_CERT: "/certs/certificate.pem"
     extra_hosts:
-      - "www.example.com:192.168.0.2"
+      - "app1.example.com:192.168.0.2"
     networks:
       bw-services:
         ipv4_address: 192.168.0.3

@@ -71,9 +71,9 @@
     },
     {
       "id": "libmaxminddb",
-      "name": "libmaxminddb v1.8.0",
+      "name": "libmaxminddb v1.9.1",
       "url": "https://github.com/maxmind/libmaxminddb.git",
-      "commit": "93a7e0e5627686deb82aa636376f53b1c7af3d9a"
+      "commit": "e26013e1d2b57eff0ed22b7364270358adb72205"
     },
     {
       "id": "lua-cjson",
@@ -96,15 +96,15 @@
     },
     {
       "id": "lua-nginx-module",
-      "name": "lua-nginx-module v0.10.25",
+      "name": "lua-nginx-module v0.10.26",
       "url": "https://github.com/openresty/lua-nginx-module.git",
-      "commit": "c47084b5d719ce507d2419d8660f39544a9d1fea"
+      "commit": "0e769b76432df91e5f10aa56a56858e8a190faf7"
     },
     {
       "id": "lua-resty-core",
-      "name": "lua-resty-core v0.1.27",
+      "name": "lua-resty-core v0.1.28",
       "url": "https://github.com/openresty/lua-resty-core.git",
-      "commit": "31fae862a1ed64033591f991fadb0dd80358ba0b"
+      "commit": "812b2d3871eb0d8da8f0198759ad9164f0eccac6"
     },
     {
       "id": "lua-resty-dns",
@@ -225,15 +225,15 @@
     },
     {
       "id": "stream-lua-nginx-module",
-      "name": "stream-lua-nginx-module v0.0.13",
+      "name": "stream-lua-nginx-module v0.0.14",
       "url": "https://github.com/openresty/stream-lua-nginx-module.git",
-      "commit": "309198abf26266f1a3e53c71388ed7bb9d1e5ea2"
+      "commit": "cafa6f55333541d1c78767a286fa434c97574a4c"
     },
     {
       "id": "zlib",
-      "name": "zlib v1.3",
+      "name": "zlib v1.3.1",
       "url": "https://github.com/madler/zlib.git",
-      "commit": "09155eaa2f9270dc4ed1fa13e2b4b2613e6e4851"
+      "commit": "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf"
     },
     {
       "id": "lua-resty-redis-connector",

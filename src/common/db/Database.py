@@ -54,7 +54,7 @@ install_as_MySQLdb()
 
 
 class Database:
-    DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql):/+(?P<path>/[^\s]+)")
+    DB_STRING_RX = re_compile(r"^(?P<database>(mariadb|mysql)(\+pymysql)?|sqlite(\+pysqlite)?|postgresql(\+psycopg)?):/+(?P<path>/[^\s]+)")
 
     def __init__(
         self,
@@ -85,6 +85,10 @@ class Database:
                     sleep(1)
             else:
                 db_path.parent.mkdir(parents=True, exist_ok=True)
+        elif match.group("database").startswith("m") and not match.group("database").endswith("+pymysql"):
+            sqlalchemy_string = sqlalchemy_string.replace(match.group("database"), f"{match.group('database')}+pymysql")  # ? This is mandatory for alemic to work with mariadb and mysql
+        elif match.group("database").startswith("postgresql") and not match.group("database").endswith("+psycopg"):
+            sqlalchemy_string = sqlalchemy_string.replace(match.group("database"), f"{match.group('database')}+psycopg")  # ? This is strongly recommended as psycopg is the new way to connect to postgresql
 
         self.database_uri = sqlalchemy_string
         error = False
@@ -1039,10 +1043,10 @@ class Database:
 
         return ""
 
-    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None):
+    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None):
         job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
         with self.__db_session() as session:
-            session.query(Jobs_cache).filter_by(job_name=job_name, file_name=file_name).delete()
+            session.query(Jobs_cache).filter_by(job_name=job_name, file_name=file_name, service_id=service_id).delete()
 
     def update_job_cache(
         self,

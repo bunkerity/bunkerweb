@@ -40,6 +40,12 @@ if __name__ == "__main__":
             help=f"banning time in seconds (default : {ban_time})",
             default=ban_time,
         )
+        parser_ban.add_argument(
+            "-reason",
+            type=str,
+            help="reason for ban (default : manual)",
+            default="manual",
+        )
 
         # Bans subparser
         parser_bans = subparsers.add_parser("bans", help="list current bans")
@@ -55,7 +61,7 @@ if __name__ == "__main__":
         if args.command == "unban":
             ret, err = cli.unban(args.ip)
         elif args.command == "ban":
-            ret, err = cli.ban(args.ip, args.exp)
+            ret, err = cli.ban(args.ip, args.exp, args.reason)
         elif args.command == "bans":
             ret, err = cli.bans()
 

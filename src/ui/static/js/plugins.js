@@ -111,13 +111,7 @@ class Dropdown {
     const btnEls = dropdownEl.querySelectorAll("button");
 
     btnEls.forEach((btn) => {
-      btn.classList.remove(
-        "dark:bg-primary",
-        "bg-primary",
-        "bg-primary",
-        "text-gray-300",
-        "text-gray-300",
-      );
+      btn.classList.remove("dark:bg-primary", "bg-primary", "text-gray-300");
       btn.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
     });
     //highlight clicked btn

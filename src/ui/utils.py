@@ -8,6 +8,41 @@ from typing import List, Optional
 from qrcode.main import QRCode
 
 
+def get_remain(seconds):
+    term = "minute(s)"
+    years, seconds = divmod(seconds, 60 * 60 * 24 * 365)
+    months, seconds = divmod(seconds, 60 * 60 * 24 * 30)
+    while months >= 12:
+        years += 1
+        months -= 12
+    days, seconds = divmod(seconds, 60 * 60 * 24)
+    hours, seconds = divmod(seconds, 60 * 60)
+    minutes, seconds = divmod(seconds, 60)
+    time_parts = []
+    if years > 0:
+        term = "year(s)"
+        time_parts.append(f"{int(years)} year{'' if years == 1 else 's'}")
+    if months > 0:
+        if term == "minute(s)":
+            term = "month(s)"
+        time_parts.append(f"{int(months)} month{'' if months == 1 else 's'}")
+    if days > 0:
+        if term == "minute(s)":
+            term = "day(s)"
+        time_parts.append(f"{int(days)} day{'' if days == 1 else 's'}")
+    if hours > 0:
+        if term == "minute(s)":
+            term = "hour(s)"
+        time_parts.append(f"{int(hours)} hour{'' if hours == 1 else 's'}")
+    if minutes > 0:
+        time_parts.append(f"{int(minutes)} minute{'' if minutes == 1 else 's'}")
+
+    if len(time_parts) > 1:
+        time_parts[-1] = f"and {time_parts[-1]}"
+
+    return " ".join(time_parts), term
+
+
 def path_to_dict(
     path: str,
     *,

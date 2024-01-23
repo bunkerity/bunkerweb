@@ -50,6 +50,15 @@
       "regex": "^(yes|no)$",
       "type": "check"
     },
+    "REDIS_SSL_VERIFY": {
+      "context": "global",
+      "default": "no",
+      "help": "Verify the certificate of Redis server.",
+      "id": "redis-ssl-verify",
+      "label": "Redis SSL/TLS verify",
+      "regex": "^(yes|no)$",
+      "type": "check"
+    },
     "REDIS_TIMEOUT": {
       "context": "global",
       "default": "1000",

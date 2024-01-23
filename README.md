@@ -1,5 +1,5 @@
 <p align="center">
-	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.5/misc/logo.png" />
+	<img alt="BunkerWeb logo" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.5/misc/logo.png" height=100 width=350 />
 </p>
 
 <p align="center">
