@@ -104,6 +104,7 @@ try:
             password=getenv("REDIS_PASSWORD", None) or None,
             ssl=redis_ssl,
             socket_timeout=1,
+            ssl_cert_reqs="none",
         )
 
     if not redis_client.ping():
