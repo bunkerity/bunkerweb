@@ -312,7 +312,7 @@ do
     elif [ "$test" = "postgres" ] ; then
         echo "💾 Running tests with PostgreSQL database ..."
         echo "ℹ️ Keeping the MULTISITE variable to yes and multisite settings ..."
-        find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "postgresql://bunkerweb:secret\@bw-db:5432/db"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "postgresql+psycopg://bunkerweb:secret\@bw-db:5432/db"@' {} \;
 
         echo "💾 Starting postgres ..."
         docker compose -f docker-compose.postgres.yml up -d

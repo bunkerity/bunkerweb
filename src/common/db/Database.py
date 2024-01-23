@@ -1043,10 +1043,10 @@ class Database:
 
         return ""
 
-    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None):
+    def delete_job_cache(self, file_name: str, *, job_name: Optional[str] = None, service_id: Optional[str] = None):
         job_name = job_name or basename(getsourcefile(_getframe(1))).replace(".py", "")
         with self.__db_session() as session:
-            session.query(Jobs_cache).filter_by(job_name=job_name, file_name=file_name).delete()
+            session.query(Jobs_cache).filter_by(job_name=job_name, file_name=file_name, service_id=service_id).delete()
 
     def update_job_cache(
         self,
