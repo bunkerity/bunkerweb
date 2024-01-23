@@ -185,6 +185,7 @@ helpers.fill_ctx = function(no_ref)
 			end
 			data.remote_addr = var.remote_addr
 			data.server_name = var.server_name
+			data.local_time = var.local_time
 			if data.kind == "http" then
 				data.uri = var.uri
 				data.request_uri = var.request_uri
