@@ -437,8 +437,8 @@ class AddBanModal {
           reason: "ui",
         });
       });
-      console.log(data);
-      this.addBanInp.setAttribute("value", data);
+      this.addBanInp.setAttribute("value", JSON.stringify(data));
+      this.addBanInp.value = JSON.stringify(data);
       this.formEl.submit();
     });
   }
