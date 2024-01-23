@@ -638,15 +638,16 @@ end
 
 utils.is_banned = function(ip)
 	-- Check on local datastore
-	local reason, err = datastore:get("bans_ip_" .. ip)
-	if not reason and err ~= "not found" then
-		return nil, "datastore:get() error : " .. reason
-	elseif reason and err ~= "not found" then
+	local result, err = datastore:get("bans_ip_" .. ip)
+	if not result and err ~= "not found" then
+		return nil, "datastore:get() error : " .. result
+	elseif result and err ~= "not found" then
 		local ok, ttl = datastore:ttl("bans_ip_" .. ip)
+		local ban_data = decode(result)
 		if not ok then
-			return true, reason, -1
+			return true, ban_data, -1
 		end
-		return true, reason, ttl
+		return true, ban_data, ttl
 	end
 	-- Redis case
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
@@ -701,7 +702,11 @@ end
 
 utils.add_ban = function(ip, reason, ttl)
 	-- Set on local datastore
-	local ok, err = datastore:set("bans_ip_" .. ip, reason, ttl)
+	local ban_data = encode({
+		reason = reason,
+		date = os.time(),
+	})
+	local ok, err = datastore:set("bans_ip_" .. ip, ban_data, ttl)
 	if not ok then
 		return false, "datastore:set() error : " .. err
 	end
@@ -719,7 +724,7 @@ utils.add_ban = function(ip, reason, ttl)
 		return false, "can't connect to redis server : " .. err
 	end
 	-- SET call
-	ok, err = clusterstore:call("set", "bans_ip_" .. ip, reason, "EX", ttl)
+	ok, err = clusterstore:call("set", "bans_ip_" .. ip, ban_data, "EX", ttl)
 	if not ok then
 		clusterstore:close()
 		return false, "redis SET failed : " .. err

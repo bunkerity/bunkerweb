@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
+from json import dumps, loads
+from time import time
 from dotenv import dotenv_values
 from os import getenv, sep
 from os.path import join
@@ -19,10 +22,19 @@ from logger import setup_logger  # type: ignore
 
 
 def format_remaining_time(seconds):
-    days, seconds = divmod(seconds, 86400)
-    hours, seconds = divmod(seconds, 3600)
+    years, seconds = divmod(seconds, 60 * 60 * 24 * 365)
+    months, seconds = divmod(seconds, 60 * 60 * 24 * 30)
+    while months >= 12:
+        years += 1
+        months -= 12
+    days, seconds = divmod(seconds, 60 * 60 * 24)
+    hours, seconds = divmod(seconds, 60 * 60)
     minutes, seconds = divmod(seconds, 60)
     time_parts = []
+    if years > 0:
+        time_parts.append(f"{int(years)} year{'' if years == 1 else 's'}")
+    if months > 0:
+        time_parts.append(f"{int(months)} month{'' if months == 1 else 's'}")
     if days > 0:
         time_parts.append(f"{int(days)} day{'' if days == 1 else 's'}")
     if hours > 0:
@@ -206,14 +218,15 @@ class CLI(ApiCaller):
             return True, f"IP {ip} has been unbanned"
         return False, "error"
 
-    def ban(self, ip: str, exp: float) -> Tuple[bool, str]:
+    def ban(self, ip: str, exp: float, reason: str) -> Tuple[bool, str]:
         if self.__redis:
-            ok = self.__redis.set(f"bans_ip_{ip}", "manual", ex=exp)
+            ok = self.__redis.set(f"bans_ip_{ip}", dumps({"reason": reason, "date": time()}))
             if not ok:
                 self.__logger.error(f"Failed to ban {ip} in redis")
+            self.__redis.expire(f"bans_ip_{ip}", int(exp))
 
-        if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp}):
-            return (True, f"IP {ip} has been banned for {format_remaining_time(exp)}")
+        if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason}):
+            return (True, f"IP {ip} has been banned for {format_remaining_time(exp)} with reason {reason}")
         return False, "error"
 
     def bans(self) -> Tuple[bool, str]:
@@ -230,8 +243,13 @@ class CLI(ApiCaller):
             servers["redis"] = []
             for key in self.__redis.scan_iter("bans_ip_*"):
                 ip = key.decode("utf-8").replace("bans_ip_", "")
+                data = self.__redis.get(key)
+                if not data:
+                    continue
                 exp = self.__redis.ttl(key)
-                servers["redis"].append({"ip": ip, "exp": exp, "reason": "manual"})
+                servers["redis"].append({"ip": ip, "exp": exp} | loads(data))
+
+        servers = {k: sorted(v, key=lambda x: x["date"]) for k, v in servers.items()}
 
         cli_str = ""
         for server, bans in servers.items():
@@ -240,7 +258,7 @@ class CLI(ApiCaller):
                 cli_str += "No ban found\n"
 
             for ban in bans:
-                cli_str += f"- {ban['ip']} for {format_remaining_time(ban['exp'])} : {ban.get('reason', 'no reason given')}\n"
+                cli_str += f"- {ban['ip']} ; banned the {datetime.fromtimestamp(ban['date']).strftime('%d-%m-%Y at %H:%M:%S')} for {format_remaining_time(ban['exp'])} remaining with reason \"{ban.get('reason', 'no reason given')}\"\n"
             cli_str += "\n"
 
         return True, cli_str
