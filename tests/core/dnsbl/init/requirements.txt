@@ -37,9 +37,9 @@ pysocks==1.7.1 \
     --hash=sha256:2725bd0a9925919b9b51739eea5f9e2bae91e83288108a9ad338b2e3a4435ee5 \
     --hash=sha256:3f8804571ebe159c380ac6de37643bb4685970655d3bba243530d6558b799aa0
     # via urllib3
-selenium==4.17.0 \
-    --hash=sha256:577a4796e1b6a3d8e5da7fc5c34a8701a4a8c159fe9b80cb609edb5e0ab0ba32 \
-    --hash=sha256:59d976b697df37e11d757df1e6798f1467ec1981456ca7ff9a98494f508f6eba
+selenium==4.16.0 \
+    --hash=sha256:aec71f4e6ed6cb3ec25c9c1b5ed56ae31b6da0a7f17474c7566d303f84e6219f \
+    --hash=sha256:b2e987a445306151f7be0e6dfe2aa72a479c2ac6a91b9d5ef2d6dd4e49ad0435
     # via -r requirements.in
 sniffio==1.3.0 \
     --hash=sha256:e60305c5e5d314f5389259b7f22aaa33d8f7dee49763119234af3755c55b9101 \
