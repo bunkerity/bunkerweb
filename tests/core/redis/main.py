@@ -76,14 +76,19 @@ try:
             f"ℹ️ Trying to connect to Redis Sentinel with the following parameters:\nhosts: {sentinel_hosts}\nmaster: {sentinel_master}\nssl: {redis_ssl}\nusername: {sentinel_username}\npassword: {sentinel_password}",
             flush=True,
         )
-        sentinel = Sentinel(sentinel_hosts, username=sentinel_username, password=sentinel_password, ssl=redis_ssl, socket_timeout=1)
+        sentinel = Sentinel(sentinel_hosts, username=sentinel_username, password=sentinel_password, sentinel_kwargs=dict(ssl=redis_ssl), socket_timeout=1)  # type: ignore
 
         print(
             f"ℹ️ Trying to get a Redis Sentinel slave for master {sentinel_master} with the following parameters:\n"
             + f"host: {redis_host}\nport: {redis_port}\ndb: {redis_db}\nssl: {redis_ssl}\nusername: {getenv('REDIS_USERNAME', None) or None}\npassword: {getenv('REDIS_PASSWORD', None) or None}",
             flush=True,
         )
-        redis_client = sentinel.slave_for(sentinel_master, db=redis_db, username=getenv("REDIS_USERNAME", None) or None, password=getenv("REDIS_PASSWORD", None) or None, ssl_cert_reqs="none")
+        redis_client = sentinel.slave_for(
+            sentinel_master,
+            db=redis_db,
+            username=getenv("REDIS_USERNAME", None) or None,
+            password=getenv("REDIS_PASSWORD", None) or None,
+        )
     else:
         print(
             "ℹ️ Trying to connect to Redis with the following parameters:\n"
