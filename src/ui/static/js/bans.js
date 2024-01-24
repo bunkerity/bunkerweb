@@ -502,17 +502,33 @@ class AddBanModal {
       />
     </div>
     <div class="mx-1.5 col-span-5">
-      <label for="ban-end-${this.itemCount}" class="sr-only">Ban end</label>
-      <input
-        data-bans-add-ban-end
-        type="text"
-        id="ban-end-${this.itemCount}"
-        name="ban-end-${this.itemCount}"
-        class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-        placeholder="01/01/2021 00:00:00"
-        pattern="(.*?)"
-        required
-      />
+      <label for="ban-end-ban-end-${this.itemCount}" class="sr-only">Ban end</label>
+      <div class="relative">
+        <input
+          data-bans-add-ban-end
+          type="text"
+          id="ban-end-${this.itemCount}"
+          name="ban-end-${this.itemCount}"
+          class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+          placeholder="01/01/2021 00:00:00"
+          pattern="(.*?)"
+          required
+        />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="pointer-events-none absolute top-1 right-2 w-6 h-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
+          />
+        </svg>
+      </div>
     </div>
     <div class="mx-1.5 col-span-2 flex justify-center items-center">
       <button

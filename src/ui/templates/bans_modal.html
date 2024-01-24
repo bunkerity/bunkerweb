@@ -1,11 +1,11 @@
 <!-- modal -->
 <div
   data-bans-modal
-  class="dark:brightness-110 hidden w-screen h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center"
+  class="dark:brightness-110 hidden w-screen h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-start"
 >
   <div
     data-bans-modal-card
-    class="overflow-y-auto mx-0 sm:mx-6 lg:mx-8 my-3 px-4 pt-4 pb-8 w-full sm:min-w-[500px] max-w-[650px] flex flex-col justify-between break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="overflow-y-auto mx-0 sm:mx-6 lg:mx-8 my-3 px-4 pt-4 pb-8 w-full sm:min-w-[500px] max-w-[650px] mt-[15vh] max-h-[70vh] flex flex-col justify-between break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
     <div>
       <div class="w-full flex justify-between mb-2">
@@ -80,7 +80,7 @@
           </svg>
         </button>
       </div>
-      <div class="col-span-12 overflow-y-auto overflow-x-auto">
+      <div class="col-span-12 overflow-y-auto overflow-x-auto max-h-[250px]">
         <div data-{{current_endpoint}}-bans-list>
           <!-- list container-->
           <div
@@ -135,8 +135,19 @@
                       pattern="(.*?)"
                       required
                     />
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="pointer-events-none absolute top-1 right-2 w-6 h-6">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      class="pointer-events-none absolute top-1 right-2 w-6 h-6"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
+                      />
                     </svg>
                   </div>
                 </div>
