@@ -1600,47 +1600,15 @@ def logs_container(container_id):
 @app.route("/reports", methods=["GET"])
 @login_required
 def reports():
-    # TODO : Get block requests from database to send it
-    reports = [
-        {
-            "user_agent": "Version 0.6.1 - Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.5a) Gecko/20030728 Mozilla Firebird/0.6.1",
-            "ip": "124.0.0.1",
-            "country": "FR",
-            "url": "/test",
-            "date": "12/51/9851",
-            "reason": "antibot",
-            "method": "GET",
-            "status": 403,
-            "data": "{fesfmk fesfsf sfesfes}",
-        },
-        {
-            "user_agent": "Version 0.6.1 - Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.5a) Gecko/20030728 Mozilla Firebird/0.6.1",
-            "ip": "124.0.0.2",
-            "country": "EN",
-            "url": "/test",
-            "date": "12/51/9851",
-            "reason": "test",
-            "method": "GET",
-            "status": 403,
-            "data": "{fesfmk fesfsf sfesfes}",
-        },
-        {
-            "user_agent": "Version 0.6.1 - Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.5a) Gecko/20030728 Mozilla Firebird/0.6.1",
-            "ip": "124.0.0.3",
-            "country": "ES",
-            "url": "/test",
-            "date": "12/51/9851",
-            "reason": "antibot",
-            "method": "GET",
-            "status": 403,
-            "data": "{fesfmk fesfsf sfesfes}",
-        },
-    ]
+    reports = app.config["INSTANCES"].get_reports()
+    total_reports = len(reports)
+    reports = reports[:100]
 
     # Prepare data
     reasons = {}
     codes = {}
-    for report in reports:
+    for i, report in enumerate(deepcopy(reports)):
+        reports[i]["date"] = datetime.fromtimestamp(floor(reports[i]["date"])).strftime("%d/%m/%Y %H:%M:%S")
         # Get top reasons
         if not report["reason"] in reasons:
             reasons[report["reason"]] = 0
@@ -1650,12 +1618,13 @@ def reports():
             codes[report["status"]] = 0
         codes[report["status"]] = codes[report["status"]] + 1
 
-    top_reason = [k for k, v in reasons.items() if v == max(reasons.values())][0]
-    top_code = [k for k, v in codes.items() if v == max(codes.values())][0]
+    top_reason = ([k for k, v in reasons.items() if v == max(reasons.values())] or [""])[0]
+    top_code = ([k for k, v in codes.items() if v == max(codes.values())] or [""])[0]
 
     return render_template(
         "reports.html",
         reports=reports,
+        total_reports=total_reports,
         top_code=top_code,
         top_reason=top_reason,
         username=current_user.get_id(),
