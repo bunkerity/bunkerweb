@@ -1683,6 +1683,7 @@ def bans():
             data = json_loads(request.form["data"])
             assert isinstance(data, list)
         except BaseException:
+            app.logger.exception(f"Couldn't load data: {request.form['data']}")
             flash("Data must be a list of dict", "error")
             return redirect(url_for("bans"))
 
@@ -1691,8 +1692,11 @@ def bans():
                 try:
                     unban = json_loads(unban.replace('"', '"').replace("'", '"'))
                 except BaseException:
+                    flash(f"Invalid unban: {unban}, skipping it ...", "error")
+                    app.logger.exception(f"Couldn't unban {unban['ip']}")
                     continue
                 if "ip" not in unban:
+                    flash(f"Invalid unban: {unban}, skipping it ...", "error")
                     continue
                 resp = app.config["INSTANCES"].unban(unban["ip"])
                 if resp:
@@ -1701,17 +1705,17 @@ def bans():
                     flash(f"Successfully unbanned {unban['ip']}")
         elif request.form["operation"] == "ban":
             for ban in data:
-                try:
-                    ban = json_loads(ban.replace('"', '"').replace("'", '"'))
-                except BaseException:
+                if not isinstance(ban, dict) or "ip" not in ban:
+                    flash(f"Invalid ban: {ban}, skipping it ...", "error")
                     continue
-                if "ip" not in ban:
-                    continue
-                try:
-                    ban_end = float(ban.get("ban_end", 86400))
-                except BaseException:
-                    continue
-                resp = app.config["INSTANCES"].ban(ban["ip"], ban_end, ban.get("reason", "manual"))
+                ban_end = 86400.0
+                if "ban_end" in ban:
+                    try:
+                        ban_end = float(ban["ban_end"])
+                    except ValueError:
+                        continue
+                    ban_end = (datetime.fromtimestamp(ban_end) - datetime.now()).total_seconds()
+                resp = app.config["INSTANCES"].ban(ban["ip"], ban_end, ban.get("reason", "ui"))
                 if resp:
                     flash(f"Couldn't ban {ban['ip']} on the following instances: {', '.join(resp)}", "error")
                 else:
