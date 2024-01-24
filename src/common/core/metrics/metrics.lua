@@ -1,6 +1,6 @@
 local cjson = require "cjson"
 local class = require "middleclass"
-local datastore = require "datastore"
+local datastore = require "bunkerweb.datastore"
 local plugin = require "bunkerweb.plugin"
 local utils = require "bunkerweb.utils"
 
