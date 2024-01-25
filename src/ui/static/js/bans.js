@@ -559,11 +559,9 @@ class AddBanModal {
   }
 
   setDatepicker(id) {
-    const defaultDate = +(Date.now() + 3600000 * 24)
-      .toString()
-      .substring(0, 10);
+    const defaultDate = +(Date.now() + 3600000 * 24);
     const inpEl = document.querySelector(`input#ban-end-${id}`);
-    inpEl.setAttribute("data-timestamp", defaultDate);
+    inpEl.setAttribute("data-timestamp", defaultDate.toString().substring(0, 10));
 
     // instantiate datepicker
     const dateOptions = {
@@ -581,7 +579,7 @@ class AddBanModal {
 
         // Case pick is before current date
         if (pickStamp < nowStamp) {
-          inpEl.setAttribute("data-timestamp", defaultDate);
+          inpEl.setAttribute("data-timestamp", defaultDate.toString().substring(0, 10));
           return instance.setDate(defaultDate);
         }
 
