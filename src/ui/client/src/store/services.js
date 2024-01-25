@@ -8,6 +8,8 @@ export const useModalStore = defineStore("ServiceModal", () => {
     service: "",
     serviceName: "",
     operation: "",
+    servicesNames: [],
+    method: "",
   });
 
   function $reset() {
@@ -16,6 +18,8 @@ export const useModalStore = defineStore("ServiceModal", () => {
       service: "",
       serviceName: "",
       operation: "",
+      servicesNames: [],
+      method: "",
     };
   }
 

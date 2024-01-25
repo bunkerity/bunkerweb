@@ -147,7 +147,10 @@ onMounted(() => {
         color="edit"
         size="normal"
         class="text-sm ml-4"
-        :disabled="totp.codeValue && totp.pwValue ? false : true"
+        :isLoading="totp.isPend"
+        :disabled="
+          totp.codeValue && totp.pwValue && !totp.isPend ? false : true
+        "
       >
         {{ props.isTotp ? $t("action_disable") : $t("action_enable") }}
       </ButtonBase>

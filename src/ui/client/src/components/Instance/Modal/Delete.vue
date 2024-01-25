@@ -76,6 +76,8 @@ async function deleteInstance() {
           {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
+          :isLoading="updateConf.isPend"
+          :disabled="updateConf.isPend"
           type="submit"
           :tabindex="modalStore.isOpen ? contentIndex : -1"
           color="delete"

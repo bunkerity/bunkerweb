@@ -276,7 +276,10 @@ async function sendUnban() {
         color="delete"
         size="normal"
         class="text-sm ml-4"
-        :disabled="selectIPStore.data.size > 0 ? false : true"
+        :isLoading="delBans.isPend"
+        :disabled="
+          selectIPStore.data.size > 0 ? (delBans.isPend ? true : false) : true
+        "
       >
         <svg
           aria-hidden="true"

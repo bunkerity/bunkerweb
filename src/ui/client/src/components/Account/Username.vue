@@ -97,7 +97,12 @@ async function updateUsername() {
         size="normal"
         class="text-sm ml-4"
         type="submit"
-        :disabled="username.userValue && username.pwValue ? false : true"
+        :isLoading="username.isPend"
+        :disabled="
+          username.userValue && username.pwValue && !username.isPend
+            ? false
+            : true
+        "
       >
         {{ $t("action_edit") }}
       </ButtonBase>

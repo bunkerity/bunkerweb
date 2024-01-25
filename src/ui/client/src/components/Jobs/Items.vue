@@ -29,10 +29,12 @@ const props = defineProps({
 const run = reactive({
   isPend: false,
   isErr: false,
+  jobName: "",
   data: [],
 });
 
 async function runJob(jobName) {
+  run.jobName = jobName;
   await fetchAPI(
     `/api/jobs/run?method=ui&job_name=${jobName}`,
     "POST",
@@ -41,13 +43,12 @@ async function runJob(jobName) {
     feedbackStore.addFeedback,
   )
     .then((res) => {
-      return res.json();
-    })
-    .then((data) => {
-      if (data.type === "success") {
-        return refreshStore.refresh();
+      if (res.type === "success") {
+        run.jobName = "";
+        refreshStore.refresh();
       }
-    });
+    })
+    .catch((e) => {});
 }
 
 const download = reactive({
@@ -153,6 +154,8 @@ function showHistory(name, history) {
     </td>
     <td :class="[props.positions[7], 'flex justify-center']">
       <ButtonBase
+        :isLoading="run.isPend && run.jobName === Object.keys(item)[0]"
+        :disabled="run.isPend && run.jobName === Object.keys(item)[0]"
         type="submit"
         class="py-1.5"
         color="valid"

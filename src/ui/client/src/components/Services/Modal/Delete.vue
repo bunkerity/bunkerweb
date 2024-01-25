@@ -39,7 +39,7 @@ async function delServ() {
     "DELETE",
     null,
     deleteServ,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   )
     .then((res) => {
       // Case saved, close modal, go to root path and refresh
@@ -64,7 +64,7 @@ async function delServ() {
       <div class="flex justify-center">
         <div class="modal-path">
           <p class="modal-path-text">
-            {{ $t("services_delete_msg", { name: delServ.serviceName }) }}
+            {{ $t("services_delete_msg", { name: deleteServ.serviceName }) }}
           </p>
         </div>
       </div>
@@ -83,6 +83,8 @@ async function delServ() {
         </ButtonBase>
         <ButtonBase
           :tabindex="delModalStore.isOpen ? contentIndex : -1"
+          :isLoading="deleteServ.isPend"
+          :disabled="deleteServ.isPend ? true : false"
           type="submit"
           color="delete"
           size="lg"

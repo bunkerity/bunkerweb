@@ -877,7 +877,7 @@ body {
 }
 
 .large.modal-card {
-  @apply w-[90vw] max-w-[1200px] max-h-[90vh];
+  @apply w-[90vw] max-w-[1200px] h-[90vh] max-h-[1200px];
 }
 
 .modal-card-title {

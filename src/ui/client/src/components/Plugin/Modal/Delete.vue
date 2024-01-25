@@ -84,6 +84,8 @@ const emits = defineEmits(["pluginDelete", "close"]);
           {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
+          :isLoading="delPlugin.isPend"
+          :disabled="delPlugin.isPend"
           :tabindex="contentIndex"
           type="submit"
           color="delete"

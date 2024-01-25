@@ -5,10 +5,12 @@ import ServicesButtonRedirect from "@components/Services/Button/Redirect.vue";
 import ServicesButtonDelete from "@components/Services/Button/Delete.vue";
 import ServicesSvgState from "@components/Services/Svg/State.vue";
 import { useModalStore, useDelModalStore } from "@store/services.js";
-import { defineProps, reactive, computed, onMounted } from "vue";
+import { useConfigStore } from "@store/settings.js";
+import { defineProps, reactive, computed } from "vue";
 
 const modalStore = useModalStore();
 const delModalStore = useDelModalStore();
+const config = useConfigStore();
 
 const props = defineProps({
   services: {
@@ -54,6 +56,8 @@ const services = reactive({
 });
 
 function setModal(modal, operation, serviceName, service, method = "") {
+  config.$reset();
+
   // Case delete
   if (operation === "delete") {
     modal.data.serviceName = serviceName;
@@ -98,7 +102,7 @@ function setModal(modal, operation, serviceName, service, method = "") {
   <div
     v-for="(plugins, name) in props.services"
     :class="[filters[name] ? '' : 'hidden']"
-    class="my-2 dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 lg:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="my-2 dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 md:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
     <h2
       class="text-xl transition duration-300 ease-in-out text-center sm:text-left mb-1 font-bold dark:text-white/90"
@@ -113,7 +117,7 @@ function setModal(modal, operation, serviceName, service, method = "") {
 
     <div class="grid grid-cols-12">
       <div
-        class="mb-1.5 text-sm col-span-12 sm:col-span-6 flex justify-center sm:justify-start items-center"
+        class="mb-1.5 text-sm col-span-12 sm:col-span-6 md:col-span-12 lg:col-span-6 flex justify-center sm:justify-start md:justify-center lg:justify-start items-center"
         v-for="detail in props.details"
       >
         <p class="mb-0 mr-2 text-black dark:text-white dark:opacity-80">
@@ -146,7 +150,7 @@ function setModal(modal, operation, serviceName, service, method = "") {
             'delete',
             name,
             plugins,
-            services.details[name]['method']
+            services.details[name]['method'],
           )
         "
         :hostname="name"

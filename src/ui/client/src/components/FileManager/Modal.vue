@@ -281,7 +281,10 @@ const emits = defineEmits(["close"]);
         </ButtonBase>
         <ButtonBase
           :tabindex="modalStore.isOpen ? contentIndex : '-1'"
-          :disabled="!data.name || !data.value ? true : false"
+          :disabled="
+            !data.name || !data.value || updateConf.isPend ? true : false
+          "
+          :isLoading="updateConf.isPend"
           @click="sendData()"
           size="lg"
           v-if="modalStore.data.action !== 'view'"

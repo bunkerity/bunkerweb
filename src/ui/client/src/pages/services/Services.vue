@@ -179,7 +179,7 @@ const services = reactive({
 function getI18nMultisitePlugin() {
   // Get format multisite data
   const cloneMultisitePlugin = setPluginsData(
-    getPluginsByContext(JSON.parse(JSON.stringify(services.data)), "multisite")
+    getPluginsByContext(JSON.parse(JSON.stringify(services.data)), "multisite"),
   );
 
   // translate
@@ -204,14 +204,14 @@ async function getGlobalConf(isFeedback = true) {
     "GET",
     null,
     conf,
-    isFeedback ? feedbackStore.addFeedback : null
+    isFeedback ? feedbackStore.addFeedback : null,
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     services,
-    isFeedback ? feedbackStore.addFeedback : null
+    isFeedback ? feedbackStore.addFeedback : null,
   );
 }
 
@@ -246,10 +246,15 @@ onMounted(() => {
       v-if="!services.isErr && !services.isPend"
       class="col-span-12 content-wrap"
     >
-      <ServicesButtonAdd
-        v-if="!services.isErr && !services.isPend"
-        @click="setModal(modalStore, 'create', 'new', services.new)"
-      />
+      <div
+        class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border"
+      >
+        <ServicesButtonAdd
+          v-if="!services.isErr && !services.isPend"
+          @click="setModal(modalStore, 'create', 'new', services.new)"
+        />
+      </div>
+
       <CardBase
         class="h-fit col-span-12 md:col-span-4 lg:col-span-3"
         :label="$t('dashboard_info')"

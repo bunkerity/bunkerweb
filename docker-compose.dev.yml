@@ -26,42 +26,74 @@ services:
     volumes:
       - bw-data:/data
     environment:
-      - TOKEN=ChangeMe42!!!
-      - WHITELIST=0.0.0.0/0
       - BUNKERWEB_INSTANCES=192.168.64.42
       - API_WHITELIST_IP=127.0.0.0/8 192.168.64.0/24
       - CHECK_TOKEN=no
+      - CORE_TOKEN=ChangeMe42!!!
       - CHECK_WHITELIST=no
-      - SERVER_NAME=www.example.com
+      - WHITELIST=0.0.0.0/0
+      - SERVER_NAME=www.example.com app1.example.com
+      # - DATABASE_URI=mariadb+pymysql://bunkerweb:secret@bw-db/db
+      - LOG_LEVEL=debug
       - USE_BUNKERNET=no
       - USE_BLACKLIST=no
+      - SEND_ANONYMOUS_REPORT=no
       - USE_REVERSE_PROXY=yes
       - www.example.com_USE_UI=yes
       - www.example.com_REVERSE_PROXY_URL=/admin
       - www.example.com_REVERSE_PROXY_HOST=http://bw-ui:7000
       - www.example.com_INTERCEPTED_ERROR_CODES=404 405 413 429 500 501 502 503 504
+      - app1.example.com_REVERSE_PROXY_URL=/
+      - app1.example.com_REVERSE_PROXY_HOST=http://myapp1
     networks:
       - bw-universe
 
   bw-ui:
-    # On dev, Docker is looking for ui files in local machine (allow Vite hot reload and so on...)
-    # Need to npm i on .src/ui/client and .src/ui/setup
-    # Then run node build on .src/ui/
     build:
       context: .
       dockerfile: ./src/ui/Dockerfile.dev
+    command: python -m flask --app main:app run --host=0.0.0.0 --port=7000
     ports:
       - "7000:7000"
     volumes:
-      - ./src/ui/static:/usr/share/bunkerweb/ui/static
+      - ./src/ui/static:/usr/share/bunkerweb/ui/static:ro
+      - ./src/ui/exceptions:/usr/share/bunkerweb/ui/exceptions:ro
+      - ./src/ui/middleware:/usr/share/bunkerweb/ui/middleware:ro
+      - ./src/ui/routes:/usr/share/bunkerweb/ui/routes:ro
+      - ./src/ui/hook.py:/usr/share/bunkerweb/ui/hook.py:ro
+      - ./src/ui/main.py:/usr/share/bunkerweb/ui/main.py:ro
+      - ./src/ui/ui.py:/usr/share/bunkerweb/ui/ui.py:ro
+      - ./src/ui/utils.py:/usr/share/bunkerweb/ui/utils.py:ro
     environment:
       - CORE_ADDR=http://bw-core:1337
       - CORE_TOKEN=ChangeMe42!!!
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=P@ssw0rd
       - MODE=dev
+      - FLASK_APP=main.py
+      - FLASK_DEBUG=1
+      - FLASK_ENV=development
     networks:
       - bw-universe
+
+  # bw-db:
+  #   image: mariadb:10.10
+  #   environment:
+  #     - MYSQL_RANDOM_ROOT_PASSWORD=yes
+  #     - MYSQL_DATABASE=db
+  #     - MYSQL_USER=bunkerweb
+  #     - MYSQL_PASSWORD=secret
+  #   volumes:
+  #     - bw-data:/var/lib/mysql
+  #   networks:
+  #     - bw-db
+
+  myapp1:
+    image: tutum/hello-world
+    networks:
+      bw-services:
+        aliases:
+          - myapp1
 
 volumes:
   bw-data:

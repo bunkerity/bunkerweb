@@ -107,8 +107,11 @@ async function updatePw() {
         color="edit"
         size="normal"
         class="text-sm ml-4"
+        :isLoading="pw.isPend"
         :disabled="
-          pw.currPwValue && pw.newPwValue && pw.confirmPwValue ? false : true
+          pw.currPwValue && pw.newPwValue && pw.confirmPwValue && !pw.isPend
+            ? false
+            : true
         "
       >
         {{ $t("action_edit") }}

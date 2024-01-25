@@ -288,7 +288,8 @@ async function addBansFromList() {
       <ButtonBase
         type="submit"
         @click.prevent="addBansFromList()"
-        :disabled="bans.isInvalidAdd"
+        :disabled="bans.isInvalidAdd || bans.isPend"
+        :isLoading="bans.isPend"
         color="valid"
         size="normal"
         class="text-sm mb-2 sm:mb-0 w-fit"
