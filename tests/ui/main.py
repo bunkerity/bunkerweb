@@ -4,6 +4,7 @@ from functools import partial
 from os import getenv, listdir, sep
 from os.path import join
 from pathlib import Path
+from random import randint
 from time import sleep
 from traceback import format_exc
 from typing import List, Union
@@ -1267,14 +1268,14 @@ location /hello {
         assert_button_click(driver, add_entry_button)
 
         ip_input = safe_get_element(driver, By.ID, "ip-1")
-        ip_input.send_keys("127.0.0.1")
+        ip_input.send_keys(f"127.0.0.{randint(10, 122)}")
 
         sleep(3)
 
         assert_button_click(driver, add_entry_button)
 
         ip_input = safe_get_element(driver, By.ID, "ip-2")
-        ip_input.send_keys("8.8.8.8")
+        ip_input.send_keys(f"127.0.0.{randint(123, 255)}")
 
         access_page(driver, driver_wait, "//button[@data-bans-modal-submit='']", "bans")
 
