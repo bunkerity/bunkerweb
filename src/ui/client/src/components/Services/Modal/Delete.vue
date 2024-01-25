@@ -16,29 +16,35 @@ const delModalStore = useDelModalStore();
 const feedbackStore = useFeedbackStore();
 const refreshStore = useRefreshStore();
 
-// close modal on backdrop click
+// Close modal on backdrop click
 watch(backdropStore, () => {
   delModalStore.isOpen = false;
 });
 
 const deleteServ = reactive({
+  serviceName: "",
   isPend: false,
   isErr: false,
   // Data from fetch
   data: [],
 });
 
+watch(delModalStore, () => {
+  deleteServ.serviceName = delModalStore.data.serviceName;
+});
+
 async function delServ() {
   await fetchAPI(
-    `/api/config/service/${delModalStore.data.serviceName}?method=ui`,
+    `/api/config/service/${deleteServ.serviceName}?method=ui`,
     "DELETE",
     null,
     deleteServ,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
-      // Case saved
+      // Case saved, close modal, go to root path and refresh
       if (res.type === "success") {
+        delModalStore.$reset();
         delModalStore.isOpen = false;
         refreshStore.refresh();
         return;
@@ -52,13 +58,13 @@ async function delServ() {
     id="service-delete-modal"
     :aria-hidden="delModalStore.isOpen ? 'false' : 'true'"
     :title="$t('services_delete_title')"
-    v-if="delModalStore.isOpen"
+    v-show="delModalStore.isOpen"
   >
     <div class="w-full">
       <div class="flex justify-center">
         <div class="modal-path">
           <p class="modal-path-text">
-            {{ $t("services_delete_msg", { name: delModalStore.serviceName }) }}
+            {{ $t("services_delete_msg", { name: delServ.serviceName }) }}
           </p>
         </div>
       </div>

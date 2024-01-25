@@ -1,4 +1,8 @@
 <script setup>
+import { useModalStore } from "@store/services.js";
+
+const modalStore = useModalStore();
+
 const props = defineProps({
   hostname: {
     type: String,
@@ -11,6 +15,8 @@ const props = defineProps({
   <button
     v-if="props.hostname"
     :aria-describedby="`clone-${props.hostname}`"
+    aria-controls="service-settings-modal"
+    :aria-expanded="modalStore.isOpen ? 'true' : 'false'"
     class="dark:brightness-90 z-20 mx-1 bg-emerald-500 hover:bg-emerald-500/80 focus:bg-emerald-500/80 inline-block p-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer leading-normal text-xs ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 active:opacity-85 hover:shadow-md"
   >
     <span :id="`clone-${props.hostname}`" class="sr-only">

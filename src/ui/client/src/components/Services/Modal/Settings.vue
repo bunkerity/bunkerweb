@@ -1,15 +1,16 @@
 <script setup>
-import { reactive, watch } from "vue";
+import { reactive, watch, computed } from "vue";
 import SettingsLayout from "@components/Settings/Layout.vue";
 import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import SettingsUploadSvgWarning from "@components/Settings/Upload/Svg/Warning.vue";
-import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
-import { getRemainFromFilter } from "@utils/plugins.js";
 import ModalBase from "@components/Modal/Base.vue";
 import ButtonBase from "@components/Button/Base.vue";
-import { contentIndex } from "@utils/tabindex.js";
 import PluginStructure from "@components/Plugin/Structure.vue";
+import { fetchAPI } from "@utils/api.js";
+import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
+import { getRemainFromFilter } from "@utils/plugins.js";
+import { contentIndex } from "@utils/tabindex.js";
 import {
   useFeedbackStore,
   useBackdropStore,
@@ -17,8 +18,6 @@ import {
 } from "@store/global.js";
 import { useModalStore } from "@store/services.js";
 import { useConfigStore } from "@store/settings.js";
-import { computed } from "vue";
-import { onMounted } from "vue";
 
 const backdropStore = useBackdropStore();
 const modalStore = useModalStore();
@@ -37,26 +36,33 @@ const settings = reactive({
   save: false,
   // Get current services by name
   // Compare with current service name on config watcher to disable / enable save button
-  servicesName: computed(() => {
-    return Object.keys(modalStore.data.services);
-  }),
+  servicesName: [],
   // Current service settings
-  service: computed(() => {
-    if (
-      !modalStore.data.service ||
-      Object.keys(modalStore.data.service).length === 0
-    ) {
-      return {};
-    }
-    return getSettingsByFilter(modalStore.data.service, filters);
-  }),
+  service: {},
   // Current service name or "new"
-  serviceName: computed(() => modalStore.data.serviceName),
+  serviceName: "",
   // Current plugin selected or remaining after filtering
   activePlugin: "",
-  // Base methods that can be seen on BunkerWeb
-  methods: computed(() => getMethodList()),
-  operation: computed(() => modalStore.data.operation),
+  // Methods from current service
+  methods: computed(() => {
+    if (!settings.service || Object.keys(settings.service).length === 0)
+      return ["all", "default", "ui"];
+
+    const methods = ["all"];
+
+    settings.service.forEach((plugin) => {
+      // change methods by ui
+
+      for (const [key, value] of Object.entries(plugin.settings)) {
+        value.method = "ui";
+        if (!methods.includes(value.method)) methods.push(value.method);
+      }
+    });
+
+    console.log(methods);
+    return methods;
+  }),
+  operation: "",
   plugins: computed(() => {
     // When opening modal, useModalStore will store data about service or action (like new)
     // useModalStore is watch to update settings keys and trigger setup
@@ -67,7 +73,7 @@ const settings = reactive({
       return {};
     // Get remain plugins
     const remainPlugins = getRemainFromFilter(
-      getSettingsByFilter(modalStore.data.service, filters),
+      getSettingsByFilter(modalStore.data.service, filters)
     );
 
     // Only update active plugin if no one active or previous active one
@@ -88,19 +94,24 @@ watch(backdropStore, () => {
   modalStore.isOpen = false;
 });
 
-// When modalStore is update, check if another operation or service match previous one
-// If not, reset config store (settings to be send on back end)
+// When modalStore is update, reset prev config and update settings
 watch(modalStore, (newVal, oldVal) => {
-  if (
-    oldVal.data.serviceName !== newVal.data.serviceName ||
-    oldVal.data.operation !== newVal.data.operation
-  ) {
-    // Reset config store
-    config.$reset();
-    config.data.services[newVal.data.serviceName] = {};
-    // By default, we consider impossible to save or edit when opening modal (because no new data)
-    settings.save = false;
-  }
+  // Reset
+  config.$reset();
+  filters.keyword = "";
+  filters.method = "all";
+  settings.save = false;
+
+  // Update service settings and info
+  settings.operation = newVal.data.operation;
+  settings.serviceName = newVal.data.serviceName;
+  settings.servicesName = Object.keys(newVal.data.services);
+  config.data.services[newVal.data.serviceName] = {};
+
+  settings.service =
+    !newVal.data.service || Object.keys(newVal.data.service).length === 0
+      ? {}
+      : getSettingsByFilter(newVal.data.service, filters);
 });
 
 // Every time a setting is change, add some check to enable / disable save button
@@ -128,7 +139,7 @@ watch(config, () => {
   ) {
     if (
       settings.servicesName.includes(
-        config.data.services[settings.serviceName]["SERVER_NAME"],
+        config.data.services[settings.serviceName]["SERVER_NAME"]
       )
     ) {
       return (settings.save = false);
@@ -154,23 +165,45 @@ const sendConf = reactive({
 
 async function sendServConf() {
   // Case no service to send
-  console.log(config.data.services);
   if (Object.keys(config.data.services).length === 0) return;
+
+  // Case new service, name is empty, get it from setting
+  // Else get it from service name
+  const servName = ["new", "clone"].includes(settings.serviceName)
+    ? config.data.services[settings.serviceName]["SERVER_NAME"]
+    : settings.serviceName;
+
+  await fetchAPI(
+    `/api/config/service/${servName}?method=ui`,
+    "PUT",
+    config.data.services[settings.serviceName],
+    sendConf,
+    feedbackStore.addFeedback
+  )
+    .then((res) => {
+      // Case saved, close modal, go to root path and refresh
+      if (res.type === "success") {
+        modalStore.isOpen = false;
+        refreshStore.refresh();
+        return;
+      }
+    })
+    .catch((e) => {});
 }
 </script>
 <template>
   <ModalBase
     cardSize="large"
-    id="service-delete-modal"
+    id="service-settings-modal"
     :aria-hidden="modalStore.isOpen ? 'false' : 'true'"
     :title="
       settings.operation === 'clone'
-        ? $t('services_active_clone', { service: settings.serviceName })
+        ? $t('services_active_clone')
         : settings.operation === 'new'
-          ? $t('services_active_new')
-          : $t('services_active_base', {
-              name: settings.serviceName,
-            })
+        ? $t('services_active_new')
+        : $t('services_active_base', {
+            name: settings.serviceName,
+          })
     "
     v-show="modalStore.isOpen"
   >
@@ -217,12 +250,12 @@ async function sendServConf() {
             value: filters.method,
             values: settings.methods,
           }"
-          :key="settings.serviceName"
+          :key="settings.methods"
         />
       </SettingsLayout>
     </div>
 
-    <hr class="col-span-12 line-separator z-10 w-full mb-1" />
+    <hr class="col-span-12 line-separator z-10 w-full mb-3" />
 
     <div class="col-span-12">
       <PluginStructure

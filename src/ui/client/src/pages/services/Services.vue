@@ -35,9 +35,12 @@ const config = useConfigStore();
 
 watch(refreshStore, () => {
   config.$reset();
+  filters.servName = "";
+  filters.servMethod = "all";
+  filters.detailState = "all";
   services.methods = [];
   services.filters = {};
-  refresh();
+  getGlobalConf(false);
 });
 
 const logsStore = useLogsStore();
@@ -47,7 +50,39 @@ logsStore.setTags(["plugin", "config"]);
 const filters = reactive({
   servName: "",
   servMethod: "all",
+  // equal to details items
+  badbehavior: "all",
+  limit: "all",
+  reverseproxy: "all",
+  modsecurity: "all",
 });
+
+// Show some details on card, without opening settings modal
+// lang : id for i18n
+// setting : setting name on plugin
+// id : id for plugin
+const details = [
+  {
+    lang: "bad_behavior",
+    id: "badbehavior",
+    setting: "USE_BAD_BEHAVIOR",
+  },
+  {
+    lang: "modsecurity",
+    id: "modsecurity",
+    setting: "USE_MODSECURITY",
+  },
+  {
+    lang: "limit",
+    id: "limit",
+    setting: "USE_LIMIT_REQ",
+  },
+  {
+    lang: "reverse_proxy",
+    id: "reverseproxy",
+    setting: "USE_REVERSE_PROXY",
+  },
+];
 
 // Plugins data to render components
 const services = reactive({
@@ -135,7 +170,7 @@ const services = reactive({
       services.methods = ["all"].concat(getServicesMethods(cloneServConf));
 
     // Add filtering
-    services.filters = getServicesByFilter(cloneServConf, filters);
+    services.filters = getServicesByFilter(cloneServConf, filters, details);
 
     return cloneServConf;
   }),
@@ -144,7 +179,7 @@ const services = reactive({
 function getI18nMultisitePlugin() {
   // Get format multisite data
   const cloneMultisitePlugin = setPluginsData(
-    getPluginsByContext(JSON.parse(JSON.stringify(services.data)), "multisite"),
+    getPluginsByContext(JSON.parse(JSON.stringify(services.data)), "multisite")
   );
 
   // translate
@@ -169,14 +204,14 @@ async function getGlobalConf(isFeedback = true) {
     "GET",
     null,
     conf,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
   await fetchAPI(
     "/api/plugins",
     "GET",
     null,
     services,
-    isFeedback ? feedbackStore.addFeedback : null,
+    isFeedback ? feedbackStore.addFeedback : null
   );
 }
 
@@ -237,11 +272,11 @@ onMounted(() => {
         />
       </CardBase>
       <CardBase
-        class="h-fit col-span-12 md:col-span-6"
+        class="h-fit col-span-12 md:col-span-8 lg:col-span-9"
         :label="$t('dashboard_filter')"
       >
         <SettingsLayout
-          class="flex w-full col-span-12 sm:col-span-6"
+          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
           :label="$t('services_service_search')"
         >
           <SettingsInput
@@ -255,7 +290,7 @@ onMounted(() => {
           />
         </SettingsLayout>
         <SettingsLayout
-          class="flex w-full col-span-12 sm:col-span-6"
+          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
           :label="$t('services_service_select_method')"
         >
           <SettingsSelect
@@ -264,6 +299,58 @@ onMounted(() => {
               id: 'servMethods',
               value: 'all',
               values: services.methods,
+            }"
+          />
+        </SettingsLayout>
+        <SettingsLayout
+          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+          :label="$t('services_service_select_bad_behavior')"
+        >
+          <SettingsSelect
+            @inp="(v) => (filters.badbehavior = v)"
+            :settings="{
+              id: 'bad-behavior-filter',
+              value: 'all',
+              values: ['all', 'true', 'false'],
+            }"
+          />
+        </SettingsLayout>
+        <SettingsLayout
+          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+          :label="$t('services_service_select_limit')"
+        >
+          <SettingsSelect
+            @inp="(v) => (filters.limit = v)"
+            :settings="{
+              id: 'limit-filter',
+              value: 'all',
+              values: ['all', 'true', 'false'],
+            }"
+          />
+        </SettingsLayout>
+        <SettingsLayout
+          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+          :label="$t('services_service_select_reverse_proxy')"
+        >
+          <SettingsSelect
+            @inp="(v) => (filters.reverseproxy = v)"
+            :settings="{
+              id: 'reverse-proxy-filter',
+              value: 'all',
+              values: ['all', 'true', 'false'],
+            }"
+          />
+        </SettingsLayout>
+        <SettingsLayout
+          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+          :label="$t('services_service_select_modsecurity')"
+        >
+          <SettingsSelect
+            @inp="(v) => (filters.modsecurity = v)"
+            :settings="{
+              id: 'modsecurity-filter',
+              value: 'all',
+              values: ['all', 'true', 'false'],
             }"
           />
         </SettingsLayout>
@@ -277,6 +364,7 @@ onMounted(() => {
         v-if="!services.isErr && !services.isPend && services.services"
         :services="services.services"
         :filters="services.filters"
+        :details="details"
       />
     </div>
   </Dashboard>

@@ -1,5 +1,5 @@
 // Filter services
-export function getServicesByFilter(services, filters) {
+export function getServicesByFilter(services, filters, details) {
   const result = {};
   for (const [key, plugins] of Object.entries(services)) {
     let isMatch = true;
@@ -18,8 +18,27 @@ export function getServicesByFilter(services, filters) {
       });
     }
 
+    // Remove details with "all" filter
+    const filteredDetails = details.filter(
+      (detail) => filters[detail.id] !== "all"
+    );
+
+    console.log("filteredDetails", filteredDetails);
+
+    filteredDetails.forEach((detail) => {
+      plugins.forEach((plugin) => {
+        if (plugin.id !== detail.id) return;
+        console.log(plugin.settings[detail.setting].value, filters[detail.id]);
+        const isSetting =
+          plugin.settings[detail.setting].value === "yes" ? "true" : "false";
+        if (isSetting !== filters[detail.id]) isMatch = false;
+      });
+    });
+
     result[key] = isMatch;
   }
+
+  console.log(result);
 
   return result;
 }

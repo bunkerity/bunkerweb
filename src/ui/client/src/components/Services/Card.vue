@@ -21,34 +21,16 @@ const props = defineProps({
     required: true,
     default: {},
   },
+  details: {
+    type: Array,
+    required: true,
+    default: [],
+  },
 });
-
-const details = [
-  {
-    lang: "bad_behavior",
-    id: "badbehavior",
-    setting: "USE_BAD_BEHAVIOR",
-  },
-  {
-    lang: "modsecurity",
-    id: "modsecurity",
-    setting: "USE_MODSECURITY",
-  },
-  {
-    lang: "limit",
-    id: "limit",
-    setting: "USE_LIMIT_REQ",
-  },
-  {
-    lang: "reverse_proxy",
-    id: "reverseproxy",
-    setting: "USE_REVERSE_PROXY",
-  },
-];
 
 const services = reactive({
   details: computed(() => {
-    if (!props.services) return [];
+    if (!props.services || props.details.length === 0) return [];
 
     // create object entries loop
     const data = {};
@@ -59,11 +41,11 @@ const services = reactive({
           data[name]["method"] = plugin.settings.SERVER_NAME.method;
         }
 
-        for (let i = 0; i < details.length; i++) {
-          if (details[i]["id"] !== plugin.id) continue;
-          data[name][details[i]["id"]] =
-            plugin.settings[details[i].setting].value ||
-            plugin.settings[details[i].setting].default;
+        for (let i = 0; i < props.details.length; i++) {
+          if (props.details[i]["id"] !== plugin.id) continue;
+          data[name][props.details[i]["id"]] =
+            plugin.settings[props.details[i].setting].value ||
+            plugin.settings[props.details[i].setting].default;
         }
       });
     }
@@ -71,27 +53,38 @@ const services = reactive({
   }),
 });
 
-function setModal(modal, operation, serviceName, service) {
+function setModal(modal, operation, serviceName, service, method = "") {
+  // Case delete
+  if (operation === "delete") {
+    modal.data.serviceName = serviceName;
+    modal.data.method = method;
+    return (modal.isOpen = true);
+  }
+
   modal.data.operation = operation;
+
   // Case clone
   if (operation === "clone") {
+    modal.data.serviceName = "clone";
+
     const serviceClone = JSON.parse(JSON.stringify(service));
-    // change methods by ui
-    for (let i = 0; i < service.length; i++) {
-      const plugin = service[i];
-      const settings = plugin.settings;
-      for (const [key, value] of Object.entries(settings)) {
-        value["method"] = "ui";
-        // no name for clone
-        if (key === "SERVER_NAME") {
-          value["value"] = "";
-          value["default"] = "";
-        }
+    serviceClone.forEach((plugin) => {
+      // change methods by ui
+      plugin.method = "ui";
+
+      for (const [key, value] of Object.entries(plugin.settings)) {
+        value.method = "ui";
       }
-      modal.data.serviceName = "clone";
-      modal.data.service = serviceClone;
-      return (modal.isOpen = true);
-    }
+
+      // change default server_name by empty
+      if (plugin.id.toLowerCase() !== "general") return;
+      plugin.settings.SERVER_NAME.value = "";
+      plugin.settings.SERVER_NAME.default = "";
+    });
+
+    modal.data.service = serviceClone;
+
+    return (modal.isOpen = true);
   }
 
   // Others cases
@@ -121,7 +114,7 @@ function setModal(modal, operation, serviceName, service) {
     <div class="grid grid-cols-12">
       <div
         class="mb-1.5 text-sm col-span-12 sm:col-span-6 flex justify-center sm:justify-start items-center"
-        v-for="detail in details"
+        v-for="detail in props.details"
       >
         <p class="mb-0 mr-2 text-black dark:text-white dark:opacity-80">
           {{ $t(`services_detail_${detail.lang}`) }}
@@ -147,7 +140,15 @@ function setModal(modal, operation, serviceName, service) {
       />
       <ServicesButtonRedirect :hostname="name" />
       <ServicesButtonDelete
-        @click="setModal(delModalStore, 'delete', name, plugins)"
+        @click="
+          setModal(
+            delModalStore,
+            'delete',
+            name,
+            plugins,
+            services.details[name]['method']
+          )
+        "
         :hostname="name"
         :method="services.details[name]['method']"
       />

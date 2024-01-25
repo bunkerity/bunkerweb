@@ -30,15 +30,13 @@ export const useDelModalStore = defineStore("ServiceDelModal", () => {
   const isOpen = ref(false);
   const data = ref({
     service: "",
-    serviceName: "",
-    operation: "",
+    method: "",
   });
 
   function $reset() {
     data.value = {
       service: "",
-      serviceName: "",
-      operation: "",
+      method: "",
     };
   }
 
