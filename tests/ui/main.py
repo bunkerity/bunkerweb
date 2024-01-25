@@ -555,30 +555,7 @@ with driver_func() as driver:
             )
             exit(1)
 
-        print("Service www.example.com is present, trying to delete it ...", flush=True)
-
-        delete_button = None
-        with suppress(TimeoutException):
-            delete_button = WebDriverWait(driver, 2).until(
-                EC.presence_of_element_located(
-                    (
-                        By.XPATH,
-                        "//button[@data-services-action='delete' and @services-name='www.example.com']",
-                    )
-                )
-            )
-
-        if delete_button is not None:
-            print(
-                "Delete button has been found, even though it shouldn't be, exiting ...",
-                flush=True,
-            )
-            exit(1)
-
-        print(
-            "Delete button is not present, as expected, trying to edit it ...",
-            flush=True,
-        )
+        print("Service www.example.com is present, trying to edit it ...", flush=True)
 
         assert_button_click(
             driver,
@@ -721,7 +698,7 @@ with driver_func() as driver:
             retries = 0
             while not ready:
                 with suppress(RequestException):
-                    resp = get("http://www.example.com/ready", headers={"Host": "www.example.com"}, verify=False)
+                    resp = get("http://app1.example.com/ready", headers={"Host": "app1.example.com"}, verify=False)
                     status_code = resp.status_code
                     text = resp.text
 
@@ -774,7 +751,7 @@ with driver_func() as driver:
             safe_get_element(
                 driver,
                 By.XPATH,
-                "//button[@data-services-action='edit' and @data-services-name='www.example.com']//ancestor::div//a",
+                "//button[@data-services-action='edit' and @data-services-name='app1.example.com']//ancestor::div//a",
                 error=True,
             )
         except TimeoutException:
@@ -807,13 +784,139 @@ with driver_func() as driver:
                 )
                 sleep(5)
 
+        print("The service is working, trying to clone it ...", flush=True)
+
+        try:
+            clone_button = safe_get_element(
+                driver,
+                By.XPATH,
+                "//button[@data-services-action='clone' and @data-services-name='app1.example.com']",
+                error=True,
+            )
+        except TimeoutException:
+            print(
+                "Clone button hasn't been found, even though it should be, exiting ...",
+                flush=True,
+            )
+            exit(1)
+
+        assert_button_click(driver, clone_button)
+
+        server_name_input: WebElement = safe_get_element(driver, By.ID, "SERVER_NAME")  # type: ignore
+
+        if server_name_input.get_attribute("value"):
+            print("The cloned service input is not empty, exiting ...", flush=True)
+            exit(1)
+
+        server_name_input.clear()
+        server_name_input.send_keys("app2.example.com")
+
+        access_page(
+            driver,
+            driver_wait,
+            "//button[@data-services-modal-submit='']",
+            "services",
+            False,
+        )
+
+        if TEST_TYPE == "linux":
+            ready = False
+            retries = 0
+            while not ready:
+                with suppress(RequestException):
+                    resp = get("http://app2.example.com/ready", headers={"Host": "app2.example.com"}, verify=False)
+                    status_code = resp.status_code
+                    text = resp.text
+
+                    if resp.status_code >= 500:
+                        print("❌ An error occurred with the server, exiting ...", flush=True)
+                        exit(1)
+
+                    ready = status_code < 400 and text == "ready"
+
+                if retries > 10:
+                    print("❌ BunkerWeb took too long to be ready, exiting ...", flush=True)
+                    exit(1)
+                elif not ready:
+                    retries += 1
+                    print("⚠️ Waiting for BunkerWeb to be ready, retrying in 5s ...", flush=True)
+                    sleep(5)
+
+        try:
+            services = safe_get_element(
+                driver,
+                By.XPATH,
+                "//div[@data-services-service='']",
+                multiple=True,
+                error=True,
+            )
+        except TimeoutException:
+            print("Services not found, exiting ...", flush=True)
+            exit(1)
+
+        if len(services) < 3:
+            print("The service hasn't been created, exiting ...", flush=True)
+            exit(1)
+
+        service = services[1]
+
+        if service.find_element(By.TAG_NAME, "h5").text.strip() != "app2.example.com":
+            print('The service "app2.example.com" is not present, exiting ...', flush=True)
+            exit(1)
+
+        if service.find_element(By.TAG_NAME, "h6").text.strip() != "ui":
+            print(
+                "The service should have been created by the ui, exiting ...",
+                flush=True,
+            )
+            exit(1)
+
+        print("Service app2.example.com is present, trying it ...", flush=True)
+
+        try:
+            safe_get_element(
+                driver,
+                By.XPATH,
+                "//button[@data-services-action='edit' and @data-services-name='app2.example.com']//ancestor::div//a",
+                error=True,
+            )
+        except TimeoutException:
+            print(
+                "Delete button hasn't been found, even though it should be, exiting ...",
+                flush=True,
+            )
+            exit(1)
+
+        ready = False
+        retries = 0
+        while not ready:
+            with suppress(RequestException):
+                status_code = get("http://app2.example.com/").status_code
+
+                if status_code > 500:
+                    print("The service is not working, exiting ...", flush=True)
+                    exit(1)
+
+                ready = status_code < 400
+
+            if retries > 20:
+                print("The service took too long to be ready, exiting ...", flush=True)
+                exit(1)
+            elif not ready:
+                retries += 1
+                print(
+                    "Waiting for the service to be ready, retrying in 5s ...",
+                    flush=True,
+                )
+                sleep(5)
+
         print("The service is working, trying to delete it ...", flush=True)
 
         try:
             delete_button = safe_get_element(
                 driver,
                 By.XPATH,
-                "//button[@data-services-action='delete' and @data-services-name='app1.example.com']",
+                "//button[@data-services-action='delete' and @data-services-name='app2.example.com']",
                 error=True,
             )
         except TimeoutException:
@@ -864,7 +967,7 @@ with driver_func() as driver:
         assert_alert_message(driver, "has been deleted.")
 
         print(
-            "Service app1.example.com has been deleted, checking if it's still present ...",
+            "Service app2.example.com has been deleted, checking if it's still present ...",
             flush=True,
         )
 
@@ -880,7 +983,7 @@ with driver_func() as driver:
             print("Services not found, exiting ...", flush=True)
             exit(1)
 
-        if len(services) > 1:
+        if len(services) > 2:
             print("The service hasn't been deleted, exiting ...", flush=True)
             exit(1)
 
@@ -1270,14 +1373,12 @@ location /hello {
         ip_input = safe_get_element(driver, By.ID, "ip-1")
         ip_input.send_keys(f"127.0.0.{randint(10, 122)}")
 
-        sleep(3)
-
         assert_button_click(driver, add_entry_button)
 
         ip_input = safe_get_element(driver, By.ID, "ip-2")
         ip_input.send_keys(f"127.0.0.{randint(123, 255)}")
 
-        access_page(driver, driver_wait, "//button[@data-bans-modal-submit='']", "bans")
+        access_page(driver, driver_wait, "//button[@data-bans-modal-submit='']", "bans", False)
 
         try:
             entries = safe_get_element(driver, By.XPATH, "//ul[@data-bans-list='']/li", multiple=True, error=True)
@@ -1293,7 +1394,7 @@ location /hello {
 
         assert_button_click(driver, "//input[@id='ban-item-2']")
 
-        access_page(driver, driver_wait, "//button[@data-unban-btn='']", "bans")
+        access_page(driver, driver_wait, "//button[@data-unban-btn='']", "bans", False)
 
         try:
             entries = safe_get_element(driver, By.XPATH, "//ul[@data-bans-list='']/li", multiple=True, error=True)
