@@ -629,16 +629,18 @@
                   setTimeout(() => {
                     window.open(`${api}/login`, "_self");
                   }, 60000);
-                  setInterval(() => {
-                    fetch(`${api}/check`, {
-                      cache: "no-cache",
-                    })
-                      .then((res) => {
-                        if (res.status === 200) {
-                          window.open(`${api}/login`, "_self");
-                        }
+                  setTimeout(() => {
+                    setInterval(() => {
+                      fetch(`${api}/check`, {
+                        cache: "no-cache",
                       })
-                      .catch((err) => {});
+                        .then((res) => {
+                          if (res.status === 200) {
+                            window.open(`${api}/login`, "_self");
+                          }
+                        })
+                        .catch((err) => {});
+                    }, 1000);
                   }, 5000);
                 }
               })
