@@ -313,14 +313,14 @@ class Instances:
             resp, instance_bans = instance.bans()
             if not resp:
                 return []
-            return instance_bans[instance.name].get("data", [])
+            return instance_bans[instance.name if instance.name != "local" else "127.0.0.1"].get("data", [])
 
         bans: List[dict[str, Any]] = []
         for instance in self.get_instances():
             resp, instance_bans = instance.bans()
             if not resp:
                 continue
-            bans.extend(instance_bans[instance.name].get("data", []))
+            bans.extend(instance_bans[instance.name if instance.name != "local" else "127.0.0.1"].get("data", []))
 
         bans.sort(key=lambda x: x["exp"])
 
@@ -352,14 +352,14 @@ class Instances:
             resp, instance_reports = instance.reports()
             if not resp:
                 return []
-            return instance_reports[instance.name].get("msg", [])
+            return instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", [])
 
         reports: List[dict[str, Any]] = []
         for instance in self.get_instances():
             resp, instance_reports = instance.reports()
             if not resp:
                 continue
-            reports.extend(instance_reports[instance.name].get("msg", []))
+            reports.extend(instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", []))
 
         reports.sort(key=lambda x: x["date"], reverse=True)
 
