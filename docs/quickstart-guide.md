@@ -1,10 +1,12 @@
 # Quickstart guide
 
 !!! info "Prerequisites"
+
     We assume that you're already familiar with the [core concepts](concepts.md) and you have followed the [integrations instructions](integrations.md) for your environment.
 
 !!! tip "Going further"
-		To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/examples) of the repository to get real-world examples.
+
+	To demonstrate the use of BunkerWeb, we will deploy a dummy "Hello World" web application as an example. See the [examples folder](https://github.com/bunkerity/bunkerweb/tree/v1.5.5/examples) of the repository to get real-world examples.
 
 ## Protect HTTP applications
 
@@ -1117,7 +1119,8 @@ REAL_IP_HEADER=proxy_protocol
 ## Protect UDP/TCP applications
 
 !!! warning "Feature is in beta"
-		This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
+
+	This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
 
 BunkerWeb offers the capability to function as a **generic UDP/TCP reverse proxy**, allowing you to protect any network-based applications operating at least on layer 4 of the OSI model. Instead of utilizing the "classical" HTTP module, BunkerWeb leverages the [stream module](https://nginx.org/en/docs/stream/ngx_stream_core_module.html) of NGINX.
 
@@ -2329,7 +2332,8 @@ BunkerWeb supports PHP using external or remote [PHP-FPM](https://www.php.net/ma
 ## IPv6
 
 !!! warning "Feature is in beta"
-		This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
+
+    This feature is not production-ready. Feel free to test it and report us any bug using [issues](https://github.com/bunkerity/bunkerweb/issues) in the GitHub repository.
 
 By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for network communications. If you want to enable IPv6 support, you need to set `USE_IPV6=yes`. Please note that IPv6 configuration of your network and environment is out-of-the-scope of this documentation.
 
