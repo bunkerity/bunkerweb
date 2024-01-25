@@ -31,6 +31,7 @@ from jinja2 import Template
 from kubernetes import client as kube_client
 from kubernetes import config as kube_config
 from kubernetes.client.exceptions import ApiException as kube_ApiException
+from redis import Redis, Sentinel
 from regex import compile as re_compile, match as regex_match
 from requests import get
 from shutil import move, rmtree
@@ -1599,47 +1600,15 @@ def logs_container(container_id):
 @app.route("/reports", methods=["GET"])
 @login_required
 def reports():
-    # TODO : Get block requests from database to send it
-    reports = [
-        {
-            "user_agent": "Version 0.6.1 - Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.5a) Gecko/20030728 Mozilla Firebird/0.6.1",
-            "ip": "124.0.0.1",
-            "country": "FR",
-            "url": "/test",
-            "date": "12/51/9851",
-            "reason": "antibot",
-            "method": "GET",
-            "status": 403,
-            "data": "{fesfmk fesfsf sfesfes}",
-        },
-        {
-            "user_agent": "Version 0.6.1 - Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.5a) Gecko/20030728 Mozilla Firebird/0.6.1",
-            "ip": "124.0.0.2",
-            "country": "EN",
-            "url": "/test",
-            "date": "12/51/9851",
-            "reason": "test",
-            "method": "GET",
-            "status": 403,
-            "data": "{fesfmk fesfsf sfesfes}",
-        },
-        {
-            "user_agent": "Version 0.6.1 - Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.5a) Gecko/20030728 Mozilla Firebird/0.6.1",
-            "ip": "124.0.0.3",
-            "country": "ES",
-            "url": "/test",
-            "date": "12/51/9851",
-            "reason": "antibot",
-            "method": "GET",
-            "status": 403,
-            "data": "{fesfmk fesfsf sfesfes}",
-        },
-    ]
+    reports = app.config["INSTANCES"].get_reports()
+    total_reports = len(reports)
+    reports = reports[:100]
 
     # Prepare data
     reasons = {}
     codes = {}
-    for report in reports:
+    for i, report in enumerate(deepcopy(reports)):
+        reports[i]["date"] = datetime.fromtimestamp(floor(reports[i]["date"])).strftime("%d/%m/%Y %H:%M:%S")
         # Get top reasons
         if not report["reason"] in reasons:
             reasons[report["reason"]] = 0
@@ -1649,12 +1618,13 @@ def reports():
             codes[report["status"]] = 0
         codes[report["status"]] = codes[report["status"]] + 1
 
-    top_reason = [k for k, v in reasons.items() if v == max(reasons.values())][0]
-    top_code = [k for k, v in codes.items() if v == max(codes.values())][0]
+    top_reason = ([k for k, v in reasons.items() if v == max(reasons.values())] or [""])[0]
+    top_code = ([k for k, v in codes.items() if v == max(codes.values())] or [""])[0]
 
     return render_template(
         "reports.html",
         reports=reports,
+        total_reports=total_reports,
         top_code=top_code,
         top_reason=top_reason,
         username=current_user.get_id(),
@@ -1665,6 +1635,76 @@ def reports():
 @app.route("/bans", methods=["GET", "POST"])
 @login_required
 def bans():
+    redis_client = None
+    db_config = app.config["CONFIG"].get_config(methods=False)
+    use_redis = db_config.get("USE_REDIS", "no") == "yes"
+    redis_host = db_config.get("REDIS_HOST")
+    if use_redis and redis_host:
+        redis_port = db_config.get("REDIS_PORT", "6379")
+        if not redis_port.isdigit():
+            redis_port = "6379"
+        redis_port = int(redis_port)
+
+        redis_db = db_config.get("REDIS_DB", "0")
+        if not redis_db.isdigit():
+            redis_db = "0"
+        redis_db = int(redis_db)
+
+        redis_timeout = db_config.get("REDIS_TIMEOUT", "1000.0")
+        try:
+            redis_timeout = float(redis_timeout)
+        except ValueError:
+            redis_timeout = 1000.0
+
+        redis_keepalive_pool = db_config.get("REDIS_KEEPALIVE_POOL", "10")
+        if not redis_keepalive_pool.isdigit():
+            redis_keepalive_pool = "10"
+        redis_keepalive_pool = int(redis_keepalive_pool)
+
+        redis_ssl = db_config.get("REDIS_SSL", "no") == "yes"
+        username = db_config.get("REDIS_USERNAME", None) or None
+        password = db_config.get("REDIS_PASSWORD", None) or None
+        sentinel_hosts = db_config.get("REDIS_SENTINEL_HOSTS", [])
+
+        if isinstance(sentinel_hosts, str):
+            sentinel_hosts = [host.split(":") if ":" in host else host for host in sentinel_hosts.split(" ") if host]
+
+        if sentinel_hosts:
+            sentinel_username = db_config.get("REDIS_SENTINEL_USERNAME", None) or None
+            sentinel_password = db_config.get("REDIS_SENTINEL_PASSWORD", None) or None
+            sentinel_master = db_config.get("REDIS_SENTINEL_MASTER", "")
+
+            sentinel = Sentinel(
+                sentinel_hosts,
+                username=sentinel_username,
+                password=sentinel_password,
+                ssl=redis_ssl,
+                socket_timeout=redis_timeout,
+                socket_connect_timeout=redis_timeout,
+                socket_keepalive=True,
+                max_connections=redis_keepalive_pool,
+            )
+            redis_client = sentinel.slave_for(sentinel_master, db=redis_db, username=username, password=password)
+        else:
+            redis_client = Redis(
+                host=redis_host,
+                port=redis_port,
+                db=redis_db,
+                username=username,
+                password=password,
+                socket_timeout=redis_timeout,
+                socket_connect_timeout=redis_timeout,
+                socket_keepalive=True,
+                max_connections=redis_keepalive_pool,
+                ssl=redis_ssl,
+            )
+
+        try:
+            redis_client.ping()
+        except BaseException:
+            redis_client = None
+            flash("Couldn't connect to redis, ban list might be incomplete", "error")
+
     if request.method == "POST":
         # Check variables
         if not request.form:
@@ -1683,6 +1723,7 @@ def bans():
             data = json_loads(request.form["data"])
             assert isinstance(data, list)
         except BaseException:
+            app.logger.exception(f"Couldn't load data: {request.form['data']}")
             flash("Data must be a list of dict", "error")
             return redirect(url_for("bans"))
 
@@ -1691,9 +1732,18 @@ def bans():
                 try:
                     unban = json_loads(unban.replace('"', '"').replace("'", '"'))
                 except BaseException:
+                    flash(f"Invalid unban: {unban}, skipping it ...", "error")
+                    app.logger.exception(f"Couldn't unban {unban['ip']}")
                     continue
+
                 if "ip" not in unban:
+                    flash(f"Invalid unban: {unban}, skipping it ...", "error")
                     continue
+
+                if redis_client:
+                    if not redis_client.delete(f"bans_ip_{unban['ip']}"):
+                        flash(f"Couldn't unban {unban['ip']} on redis", "error")
+
                 resp = app.config["INSTANCES"].unban(unban["ip"])
                 if resp:
                     flash(f"Couldn't unban {unban['ip']} on the following instances: {', '.join(resp)}", "error")
@@ -1701,17 +1751,26 @@ def bans():
                     flash(f"Successfully unbanned {unban['ip']}")
         elif request.form["operation"] == "ban":
             for ban in data:
-                try:
-                    ban = json_loads(ban.replace('"', '"').replace("'", '"'))
-                except BaseException:
+                if not isinstance(ban, dict) or "ip" not in ban:
+                    flash(f"Invalid ban: {ban}, skipping it ...", "error")
                     continue
-                if "ip" not in ban:
-                    continue
-                try:
-                    ban_end = float(ban.get("ban_end", 86400))
-                except BaseException:
-                    continue
-                resp = app.config["INSTANCES"].ban(ban["ip"], ban_end, ban.get("reason", "manual"))
+
+                reason = ban.get("reason", "ui")
+                ban_end = 86400.0
+                if "ban_end" in ban:
+                    try:
+                        ban_end = float(ban["ban_end"])
+                    except ValueError:
+                        continue
+                    ban_end = (datetime.fromtimestamp(ban_end) - datetime.now()).total_seconds()
+
+                if redis_client:
+                    ok = redis_client.set(f"bans_ip_{ban['ip']}", dumps({"reason": reason, "date": time()}))
+                    if not ok:
+                        flash(f"Couldn't ban {ban['ip']} on redis", "error")
+                    redis_client.expire(f"bans_ip_{ban['ip']}", int(ban_end))
+
+                resp = app.config["INSTANCES"].ban(ban["ip"], ban_end, reason)
                 if resp:
                     flash(f"Couldn't ban {ban['ip']} on the following instances: {', '.join(resp)}", "error")
                 else:
@@ -1722,11 +1781,26 @@ def bans():
 
         return redirect(url_for("loading", next=url_for("bans"), message="Update bans"))
 
-    bans = app.config["INSTANCES"].get_bans()[:100]
+    bans = []
+    if redis_client:
+        for key in redis_client.scan_iter("bans_ip_*"):
+            ip = key.decode("utf-8").replace("bans_ip_", "")
+            data = redis_client.get(key)
+            if not data:
+                continue
+            exp = redis_client.ttl(key)
+            bans.append({"ip": ip, "exp": exp} | json_loads(data))  # type: ignore
+    instance_bans = app.config["INSTANCES"].get_bans()
 
     # Prepare data
     reasons = {}
     timestamp_now = time()
+
+    for ban in instance_bans:
+        if not any(b["ip"] == ban["ip"] for b in bans):
+            bans.append(ban)
+
+    bans = bans[:100]
 
     for ban in bans:
         exp = ban.pop("exp")

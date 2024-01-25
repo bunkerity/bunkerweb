@@ -32,9 +32,17 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
 </div>
 <!-- end actions -->
 
+<div   class=" {% if bans|length == 0 %}w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words{%else%}hidden{% endif%} "
+>  <div class="col-span-12 flex flex-col justify-center items-center h-fit">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mb-2 w-8 h-8 stroke-white">
+    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
+  </svg>
+  <h5 class="font-bold dark:text-white/90 mx-2 text-white">No bans found</h5>
+</div></div>
+
 <!-- info-->
 <div
-  class="h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class="{% if bans|length == 0 %}hidden{% endif%} h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
   <div class="mx-1 flex items-center my-4">
@@ -49,7 +57,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
       {{bans|length}}
     </p>
   </div>
-  <div class="mx-1 flex items-center my-4">
+  <div  class="{% if bans|length == 0 %}hidden{% endif%} mx-1 flex items-center my-4">
     <p
       class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 dark:opacity-80"
     >
@@ -67,7 +75,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
 <!-- filter -->
 <div
   data-{{current_endpoint}}-filter
-  class="h-fit col-span-12 md:col-span-8 2xl:col-span-6 3xl:col-span-5 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class="{% if bans|length == 0 %}hidden{% endif%} h-fit col-span-12 md:col-span-8 2xl:col-span-6 3xl:col-span-5 p-4 relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <h5 class="mb-2 font-bold dark:text-white/90">FILTER</h5>
   <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
@@ -218,7 +226,9 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
 </div>
 <!-- end filter -->
 
-<div   class="w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+
+
+<div   class=" {% if bans|length == 0 %}hidden{% endif%} w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <div class="col-span-12">
     <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">BANS LIST</h5>

@@ -30,12 +30,14 @@ basicConfig(
     level=default_level,
 )
 
-getLogger("sqlalchemy.orm.mapper.Mapper").setLevel(default_level if default_level != INFO else WARNING)
-getLogger("sqlalchemy.orm.relationships.RelationshipProperty").setLevel(default_level if default_level != INFO else WARNING)
-getLogger("sqlalchemy.orm.strategies.LazyLoader").setLevel(default_level if default_level != INFO else WARNING)
-getLogger("sqlalchemy.pool.impl.QueuePool").setLevel(default_level if default_level != INFO else WARNING)
-getLogger("sqlalchemy.pool.impl.SingletonThreadPool").setLevel(default_level if default_level != INFO else WARNING)
-getLogger("sqlalchemy.engine.Engine").setLevel(default_level if default_level != INFO else WARNING)
+database_default_level = _nameToLevel.get(getenv("DATABASE_LOG_LEVEL", "WARNING").upper(), WARNING)
+
+getLogger("sqlalchemy.orm.mapper.Mapper").setLevel(database_default_level)
+getLogger("sqlalchemy.orm.relationships.RelationshipProperty").setLevel(database_default_level)
+getLogger("sqlalchemy.orm.strategies.LazyLoader").setLevel(database_default_level)
+getLogger("sqlalchemy.pool.impl.QueuePool").setLevel(database_default_level)
+getLogger("sqlalchemy.pool.impl.SingletonThreadPool").setLevel(database_default_level)
+getLogger("sqlalchemy.engine.Engine").setLevel(database_default_level)
 
 # Edit the default levels of the logging module
 addLevelName(CRITICAL, "🚨")

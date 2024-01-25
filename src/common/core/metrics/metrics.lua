@@ -1,6 +1,6 @@
 local cjson = require "cjson"
 local class = require "middleclass"
-local datastore = require "datastore"
+local datastore = require "bunkerweb.datastore"
 local plugin = require "bunkerweb.plugin"
 local utils = require "bunkerweb.utils"
 
@@ -50,12 +50,12 @@ function metrics:log()
 			end
 		end
 		local request = {
-			date = self.ctx.bw.local_time,
+			date = os.time(),
 			ip = self.ctx.bw.remote_addr,
 			country = country,
 			method = self.ctx.bw.request_method,
 			url = self.ctx.bw.request_uri,
-			code = ngx.status,
+			status = ngx.status,
 			["user-agent"] = self.ctx.bw.http_user_agent or "",
 			reason = reason,
 			data = data,

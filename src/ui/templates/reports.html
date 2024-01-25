@@ -22,9 +22,18 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
   {% endif %}
 {% endfor %}
 
+<div   class=" {% if reports|length == 0 %}w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words{%else%}hidden{% endif%} "
+>  <div class="col-span-12 flex flex-col justify-center items-center h-fit">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mb-2 w-8 h-8 stroke-white">
+    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
+  </svg>
+  <h5 class="font-bold dark:text-white/90 mx-2 text-white">No reports found</h5>
+</div></div>
+
 <!-- info-->
+{% if reports|length != 0 %}
 <div
-  class="h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  class=" h-fit col-span-12 md:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
 >
   <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
   <div class="mx-1 flex items-center my-4">
@@ -36,7 +45,7 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
     <p
       class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-80"
     >
-      {{reports|length}}
+      {{ total_reports }}
     </p>
   </div>
   <div class="mx-1 flex items-center my-4">
@@ -479,5 +488,6 @@ url_for(request.endpoint)[1:].split("/")[-1].strip() %}
   </div>
   <!-- end list container--></div>
 </div>
+{%endif%}
 
 {% endblock %}

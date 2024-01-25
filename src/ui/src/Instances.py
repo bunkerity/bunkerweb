@@ -115,6 +115,9 @@ class Instance:
     def unban(self, ip: str) -> bool:
         return self.apiCaller.send_to_apis("POST", "/unban", data={"ip": ip})
 
+    def reports(self) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("GET", "/metrics/requests", response=True)
+
 
 class Instances:
     def __init__(self, docker_client, kubernetes_client, integration: str):
@@ -342,3 +345,22 @@ class Instances:
             return f"Can't unban {ip} on {instance.name}"
 
         return [instance.name for instance in self.get_instances() if not instance.unban(ip)]
+
+    def get_reports(self, _id: Optional[int] = None) -> List[dict[str, Any]]:
+        if _id:
+            instance = self.__instance_from_id(_id)
+            resp, instance_reports = instance.reports()
+            if not resp:
+                return []
+            return instance_reports[instance.name].get("msg", [])
+
+        reports: List[dict[str, Any]] = []
+        for instance in self.get_instances():
+            resp, instance_reports = instance.reports()
+            if not resp:
+                continue
+            reports.extend(instance_reports[instance.name].get("msg", []))
+
+        reports.sort(key=lambda x: x["date"], reverse=True)
+
+        return reports

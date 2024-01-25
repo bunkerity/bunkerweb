@@ -21,7 +21,7 @@ class Filter {
           setTimeout(() => {
             const value = document
               .querySelector(
-                `[data-${this.prefix}-setting-select-text="reason"]`,
+                `[data-${this.prefix}-setting-select-text="reason"]`
               )
               .textContent.trim();
 
@@ -159,7 +159,7 @@ class Dropdown {
           const btn = e.target.closest("button");
           const btnValue = btn.getAttribute("value");
           const btnSetting = btn.getAttribute(
-            `data-${this.prefix}-setting-select-dropdown-btn`,
+            `data-${this.prefix}-setting-select-dropdown-btn`
           );
           //stop if same value to avoid new fetching
           const isSameVal = this.isSameValue(btnSetting, btnValue);
@@ -185,7 +185,7 @@ class Dropdown {
 
   closeAllDrop() {
     const drops = document.querySelectorAll(
-      `[data-${this.prefix}-setting-select-dropdown]`,
+      `[data-${this.prefix}-setting-select-dropdown]`
     );
     drops.forEach((drop) => {
       drop.classList.add("hidden");
@@ -193,8 +193,8 @@ class Dropdown {
       document
         .querySelector(
           `svg[data-${this.prefix}-setting-select="${drop.getAttribute(
-            `data-${this.prefix}-setting-select-dropdown`,
-          )}"]`,
+            `data-${this.prefix}-setting-select-dropdown`
+          )}"]`
         )
         .classList.remove("rotate-180");
     });
@@ -202,7 +202,7 @@ class Dropdown {
 
   isSameValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`,
+      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`
     );
     const currVal = selectCustom.textContent;
     return currVal === value ? true : false;
@@ -210,30 +210,30 @@ class Dropdown {
 
   setSelectNewValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[data-${this.prefix}-setting-select="${btnSetting}"]`,
+      `[data-${this.prefix}-setting-select="${btnSetting}"]`
     );
     selectCustom.querySelector(
-      `[data-${this.prefix}-setting-select-text]`,
+      `[data-${this.prefix}-setting-select-text]`
     ).textContent = value;
   }
 
   hideDropdown(btnSetting) {
     //hide dropdown
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
     );
     dropdownEl.classList.add("hidden");
     dropdownEl.classList.remove("flex");
     //svg effect
     const dropdownChevron = document.querySelector(
-      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`,
+      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`
     );
     dropdownChevron.classList.remove("rotate-180");
   }
 
   changeDropBtnStyle(btnSetting, selectedBtn) {
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
     );
     //reset dropdown btns
     const btnEls = dropdownEl.querySelectorAll("button");
@@ -243,7 +243,7 @@ class Dropdown {
         "bg-primary",
         "dark:bg-primary",
         "text-gray-300",
-        "text-gray-300",
+        "text-gray-300"
       );
       btn.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
     });
@@ -251,7 +251,7 @@ class Dropdown {
     selectedBtn.classList.remove(
       "bg-white",
       "dark:bg-slate-700",
-      "text-gray-700",
+      "text-gray-700"
     );
     selectedBtn.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
   }
@@ -262,10 +262,10 @@ class Dropdown {
       .getAttribute(`data-${this.prefix}-setting-select`);
     //toggle dropdown
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${attribute}"]`,
+      `[data-${this.prefix}-setting-select-dropdown="${attribute}"]`
     );
     const dropdownChevron = document.querySelector(
-      `svg[data-${this.prefix}-setting-select="${attribute}"]`,
+      `svg[data-${this.prefix}-setting-select="${attribute}"]`
     );
     dropdownEl.classList.toggle("hidden");
     dropdownEl.classList.toggle("flex");
@@ -318,7 +318,7 @@ class Unban {
           setTimeout(() => {
             // Check if at least one item is selected
             const selected = this.listEl.querySelectorAll(
-              `input[data-checked="true"]`,
+              `input[data-checked="true"]`
             );
 
             // Case true, enable unban button
@@ -340,7 +340,7 @@ class Unban {
       if (this.unbanBtn.hasAttribute("disabled")) return;
       // Get all selected items
       const selected = this.listEl.querySelectorAll(
-        `input[data-checked="true"]`,
+        `input[data-checked="true"]`
       );
       const getDatas = [];
       selected.forEach((el) => {
@@ -366,10 +366,10 @@ class AddBanModal {
     this.listEl = document.querySelector(`[data-bans-add-ban-list]`);
     this.submitBtn = document.querySelector(`button[data-bans-modal-submit]`);
     this.removeAllFieldBtn = document.querySelector(
-      "button[data-add-ban-delete-all-item]",
+      "button[data-add-ban-delete-all-item]"
     );
     this.formEl = document.querySelector("form[data-ban-add-form]");
-    this.itemCount = 1;
+    this.itemCount = 0;
     this.setDatepicker("0"); // for default field
     this.init();
   }
@@ -437,8 +437,8 @@ class AddBanModal {
           reason: "ui",
         });
       });
-      console.log(data);
-      this.addBanInp.setAttribute("value", data);
+      this.addBanInp.setAttribute("value", JSON.stringify(data));
+      this.addBanInp.value = JSON.stringify(data);
       this.formEl.submit();
     });
   }
@@ -502,17 +502,33 @@ class AddBanModal {
       />
     </div>
     <div class="mx-1.5 col-span-5">
-      <label for="ban-end-${this.itemCount}" class="sr-only">Ban end</label>
-      <input
-        data-bans-add-ban-end
-        type="text"
-        id="ban-end-${this.itemCount}"
-        name="ban-end-${this.itemCount}"
-        class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-        placeholder="01/01/2021 00:00:00"
-        pattern="(.*?)"
-        required
-      />
+      <label for="ban-end-ban-end-${this.itemCount}" class="sr-only">Ban end</label>
+      <div class="relative">
+        <input
+          data-bans-add-ban-end
+          type="text"
+          id="ban-end-${this.itemCount}"
+          name="ban-end-${this.itemCount}"
+          class="dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+          placeholder="01/01/2021 00:00:00"
+          pattern="(.*?)"
+          required
+        />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="pointer-events-none absolute top-1 right-2 w-6 h-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
+          />
+        </svg>
+      </div>
     </div>
     <div class="mx-1.5 col-span-2 flex justify-center items-center">
       <button
@@ -543,26 +559,30 @@ class AddBanModal {
   }
 
   setDatepicker(id) {
+    const defaultDate = +(Date.now() + 3600000 * 24)
+      .toString()
+      .substring(0, 10);
+    const inpEl = document.querySelector(`input#ban-end-${id}`);
+    inpEl.setAttribute("data-timestamp", defaultDate);
+
     // instantiate datepicker
     const dateOptions = {
       locale: "en",
       dateFormat: "m/d/Y H:i:S",
-      defaultDate: false,
+      defaultDate: defaultDate,
       enableTime: true,
       enableSeconds: true,
       time_24hr: true,
       minuteIncrement: 1,
       onChange(selectedDates, dateStr, instance) {
-        const inpEl = document.querySelector(`input#ban-end-${id}`);
-
         // Get date to timestamp
         const pickStamp = +Date.parse(new Date(dateStr).toString());
         const nowStamp = +Date.now();
 
         // Case pick is before current date
         if (pickStamp < nowStamp) {
-          inpEl.setAttribute("data-timestamp", Date.now());
-          return instance.setDate(nowStamp);
+          inpEl.setAttribute("data-timestamp", defaultDate);
+          return instance.setDate(defaultDate);
         }
 
         // Case right value

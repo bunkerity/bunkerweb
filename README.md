@@ -170,6 +170,10 @@ Another core component of BunkerWeb is the ModSecurity Web Application Firewall 
 
 ## Database
 
+<p align="center">
+	<img alt="Database model" src="https://github.com/bunkerity/bunkerweb/raw/v1.5.5/docs/assets/img/bunkerweb_db.svg" />
+</p>
+
 State of the current configuration of BunkerWeb is stored in a backend database which contains the following data :
 
 - Settings defined for all the services

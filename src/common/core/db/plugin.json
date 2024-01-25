@@ -13,6 +13,16 @@
       "label": "The database URI",
       "regex": "^(postgresql|mysql|mariadb|sqlite|oracle)(\\+[\\w\\-]+)?:.+$",
       "type": "text"
+    },
+    "DATABASE_LOG_LEVEL": {
+      "context": "global",
+      "default": "warning",
+      "help": "The level to use for database logs.",
+      "id": "database-log-level",
+      "label": "Database log level",
+      "regex": "^(debug|info|warn|warning|error)$",
+      "type": "select",
+      "select": ["debug", "info", "warn", "warning", "error"]
     }
   }
 }

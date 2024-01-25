@@ -317,7 +317,7 @@ utils.get_reason = function(ctx)
 	end
 	local banned, _ = datastore:get("bans_ip_" .. ip)
 	if banned then
-		return banned, {}
+		return decode(banned)["reason"], {}
 	end
 	-- unknown
 	if ngx.status == utils.get_deny_status() then
@@ -645,9 +645,9 @@ utils.is_banned = function(ip)
 		local ok, ttl = datastore:ttl("bans_ip_" .. ip)
 		local ban_data = decode(result)
 		if not ok then
-			return true, ban_data, -1
+			return true, ban_data["reason"], -1
 		end
-		return true, ban_data, ttl
+		return true, ban_data["reason"], ttl
 	end
 	-- Redis case
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
@@ -694,7 +694,7 @@ utils.is_banned = function(ip)
 		if not ok then
 			return nil, "datastore:set() error : " .. err
 		end
-		return true, data[1], data[2]
+		return true, decode(data[1])["reason"], data[2]
 	end
 	clusterstore:close()
 	return false, "not banned"
