@@ -239,7 +239,6 @@ do
 
             echo "🧰 Stopping redis ..."
             sudo systemctl stop redis
-            sudo killall redis-server
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 echo "🧰 Redis stop failed ❌"
@@ -281,7 +280,6 @@ do
             export REDIS_SSL="yes"
 
             echo "🧰 Stopping redis ..."
-            sudo systemctl stop redis
             sudo killall redis-server
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
