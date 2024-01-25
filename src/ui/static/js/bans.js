@@ -563,7 +563,7 @@ class AddBanModal {
     const dateOptions = {
       locale: "en",
       dateFormat: "m/d/Y H:i:S",
-      defaultDate: false,
+      defaultDate: Date.now() + 3600000 * 24,
       enableTime: true,
       enableSeconds: true,
       time_24hr: true,
@@ -577,7 +577,7 @@ class AddBanModal {
 
         // Case pick is before current date
         if (pickStamp < nowStamp) {
-          inpEl.setAttribute("data-timestamp", Date.now());
+          inpEl.setAttribute("data-timestamp", Date.now() + 3600000 * 24);
           return instance.setDate(nowStamp);
         }
 
