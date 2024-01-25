@@ -39,7 +39,7 @@ async function delServ() {
     "DELETE",
     null,
     deleteServ,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       // Case saved, close modal, go to root path and refresh
@@ -75,7 +75,8 @@ async function delServ() {
           size="lg"
           @click="delModalStore.isOpen = false"
           type="button"
-          class="text-xs"
+          class="text-sm"
+          :disabled="deleteServ.isPend"
           aria-controls="service-delete-modal"
           :aria-expanded="delModalStore.isOpen ? 'true' : 'false'"
         >
@@ -84,12 +85,12 @@ async function delServ() {
         <ButtonBase
           :tabindex="delModalStore.isOpen ? contentIndex : -1"
           :isLoading="deleteServ.isPend"
-          :disabled="deleteServ.isPend ? true : false"
+          :disabled="deleteServ.isPend"
           type="submit"
           color="delete"
           size="lg"
           @click.prevent="delServ()"
-          class="text-xs ml-2"
+          class="text-sm ml-2"
         >
           {{ $t("action_delete") }}
         </ButtonBase>

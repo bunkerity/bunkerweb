@@ -5,8 +5,7 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import CardBase from "@components/Card/Base.vue";
 import CardItemList from "@components/Card/Item/List.vue";
-import BansTabs from "@components/Bans/Tabs.vue";
-import BansAdd from "@components/Bans/Add.vue";
+import BansModalAdd from "@components/Bans/Modal/Add.vue";
 import BansList from "@components/Bans/List.vue";
 import ApiState from "@components/Api/State.vue";
 import { reactive, computed, onMounted, watch } from "vue";
@@ -83,7 +82,7 @@ async function getData() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   const hostnames = await getHostFromInst();
 
@@ -135,7 +134,7 @@ async function getHostBan(hostname) {
     "POST",
     null,
     data,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -220,20 +219,8 @@ const tab = reactive({
       class="max-w-[1200px] col-span-12 overflow-y-hidden min-h-[400px]"
       :label="$t('dashboard_bans')"
     >
-      <BansTabs @tab="(v) => (tab.current = v)" />
-      <BansList
-        role="tabpanel"
-        @unban="getData()"
-        :items="bans.setup"
-        :class="[tab.current === 'list' ? true : 'hidden']"
-        :aria-hidden="tab.current === 'list' ? 'false' : 'true'"
-      />
-      <BansAdd
-        role="tabpanel"
-        @addBans="getData()"
-        :class="[tab.current === 'add' ? true : 'hidden']"
-        :aria-hidden="tab.current === 'add' ? 'false' : 'true'"
-      />
+      <BansList :items="bans.setup" />
     </CardBase>
+    <BansModalAdd />
   </Dashboard>
 </template>

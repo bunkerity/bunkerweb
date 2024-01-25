@@ -52,7 +52,7 @@ const positions = ["col-span-2", "col-span-5", "col-span-5"];
           size="lg"
           @click="modalStore.isOpen = false"
           type="button"
-          class="text-xs"
+          class="text-sm"
           :aria-controls="`history-modal`"
           :aria-expanded="modalStore.isOpen ? 'true' : 'false'"
         >

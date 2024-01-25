@@ -18,6 +18,7 @@ const backdropStore = useBackdropStore();
 
 // close modal on backdrop click
 watch(backdropStore, () => {
+  if (instDel.isPend) return;
   modalStore.isOpen = false;
 });
 
@@ -34,7 +35,7 @@ async function deleteInstance() {
     "DELETE",
     null,
     instDel,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "success") {
       refreshStore.refresh();
@@ -69,21 +70,22 @@ async function deleteInstance() {
           size="lg"
           @click="modalStore.isOpen = false"
           type="button"
-          class="text-xs"
+          class="text-sm"
+          :disabled="instDel.isPend"
           aria-controls="instance-modal"
           :aria-expanded="modalStore.isOpen ? 'true' : 'false'"
         >
           {{ $t("action_close") }}
         </ButtonBase>
         <ButtonBase
-          :isLoading="updateConf.isPend"
-          :disabled="updateConf.isPend"
+          :isLoading="instDel.isPend"
+          :disabled="instDel.isPend"
           type="submit"
           :tabindex="modalStore.isOpen ? contentIndex : -1"
           color="delete"
           size="lg"
           @click.prevent="deleteInstance()"
-          class="text-xs ml-2"
+          class="text-sm ml-2"
         >
           {{ $t("action_delete") }}
         </ButtonBase>

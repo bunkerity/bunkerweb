@@ -1,33 +1,25 @@
 <script setup>
 import { reactive } from "vue";
-import { defineProps, defineEmits } from "vue";
 import ButtonBase from "@components/Button/Base.vue";
 import ModalBase from "@components/Modal/Base.vue";
 import { fetchAPI } from "@utils/api.js";
 import { contentIndex } from "@utils/tabindex.js";
-import { useFeedbackStore } from "@store/global.js";
+import {
+  useFeedbackStore,
+  useBackdropStore,
+  useRefreshStore,
+} from "@store/global.js";
+import { useDelModalStore } from "@store/plugins.js";
 
+const backdropStore = useBackdropStore();
 const feedbackStore = useFeedbackStore();
+const delModalStore = useDelModalStore();
+const refreshStore = useRefreshStore();
 
-// Open after instance delete action is fired
-const props = defineProps({
-  // File or folder
-  pluginId: {
-    type: String,
-    required: true,
-  },
-  pluginName: {
-    type: String,
-    required: true,
-  },
-  pluginDesc: {
-    type: String,
-    required: true,
-  },
-  isOpen: {
-    type: Boolean,
-    required: true,
-  },
+// close modal on backdrop click
+watch(backdropStore, () => {
+  if (delPlugin.isPend) return;
+  delModalStore.isOpen = false;
 });
 
 const delPlugin = reactive({
@@ -38,35 +30,31 @@ const delPlugin = reactive({
 
 async function pluginDelete() {
   await fetchAPI(
-    `/api/plugins/${props.pluginId}?method=ui`,
+    `/api/plugins/${delModalStore.data.id}?method=ui`,
     "DELETE",
     null,
     delPlugin,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
-    if (res.type === "error") return;
-    // Case succeed, delete items from UI
-    // And emit add event to refetch ban list
-    emits("pluginDelete");
-    emits("close");
+    if (res.type === "success") {
+      delModalStore.isOpen = false;
+      refreshStore.refresh();
+    }
   });
 }
-
-const emits = defineEmits(["pluginDelete", "close"]);
 </script>
 <template>
   <ModalBase
     id="plugin-delete-modal"
-    :aria-hidden="props.isOpen ? 'false' : 'true'"
-    @backdrop="$emit('close')"
-    :title="$t('plugins_delete_modal_title', { name: props.pluginName })"
-    v-show="props.isOpen"
+    :aria-hidden="delModalStore.isOpen ? 'false' : 'true'"
+    :title="$t('plugins_delete_modal_title', { name: delModalStore.data.name })"
+    v-show="delModalStore.isOpen"
   >
     <div class="col-span-12 overflow-x-auto overflow-y-hidden">
       <p>
-        {{ $t("plugins_delete_modal_text", { name: props.pluginName }) }}
+        {{ $t("plugins_delete_modal_text", { name: delModalStore.data.name }) }}
       </p>
-      <p>{{ props.pluginDesc }}</p>
+      <p>{{ delModalStore.data.description }}</p>
     </div>
 
     <div class="w-full mt-2">
@@ -75,11 +63,12 @@ const emits = defineEmits(["pluginDelete", "close"]);
           :tabindex="contentIndex"
           color="close"
           size="lg"
-          @click="$emit('close')"
+          @click="delModalStore.isOpen = false"
           type="button"
-          class="text-xs"
+          class="text-sm"
+          :disabled="delPlugin.isPend"
           aria-controls="plugin-delete-modal"
-          :aria-expanded="props.isOpen ? 'true' : 'false'"
+          :aria-expanded="delModalStore.isOpen ? 'true' : 'false'"
         >
           {{ $t("action_close") }}
         </ButtonBase>
@@ -91,7 +80,7 @@ const emits = defineEmits(["pluginDelete", "close"]);
           color="delete"
           size="lg"
           @click.prevent="pluginDelete()"
-          class="text-xs"
+          class="text-sm"
         >
           {{ $t("action_delete") }}
         </ButtonBase>

@@ -10,16 +10,17 @@ import PluginList from "@components/Plugin/List.vue";
 import PluginModalDelete from "@components/Plugin/Modal/Delete.vue";
 import { reactive, computed, onMounted, watch } from "vue";
 import { fetchAPI } from "@utils/api.js";
-import { useFeedbackStore } from "@store/global.js";
+import { useFeedbackStore, useRefreshStore } from "@store/global.js";
 import { getPluginsByFilter, pluginI18n } from "@utils/plugins.js";
 import ApiState from "@components/Api/State.vue";
 import { useLogsStore } from "@store/logs.js";
-import { useRefreshStore } from "@store/global.js";
 import { useI18n } from "vue-i18n";
+
+const refreshStore = useRefreshStore();
+const feedbackStore = useFeedbackStore();
 
 const { locale, fallbackLocale } = useI18n();
 // Refresh when related btn is clicked
-const refreshStore = useRefreshStore();
 
 watch(refreshStore, () => {
   getPlugins();
@@ -27,8 +28,6 @@ watch(refreshStore, () => {
 
 const logsStore = useLogsStore();
 logsStore.setTags(["plugin"]);
-
-const feedbackStore = useFeedbackStore();
 
 // Hide / Show settings and plugin base on that filters
 const filters = reactive({
@@ -44,10 +43,10 @@ const plugins = reactive({
   data: [],
   total: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.data.filter((item) => item["external"] === false).length,
+    () => plugins.data.filter((item) => item["external"] === false).length
   ),
   external: computed(
-    () => plugins.data.filter((item) => item["external"] === true).length,
+    () => plugins.data.filter((item) => item["external"] === true).length
   ),
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
@@ -69,22 +68,8 @@ async function getPlugins() {
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
-}
-
-const modalDel = reactive({
-  isOpen: false,
-  pluginId: "",
-  pluginName: "",
-  pluginDesc: "",
-});
-
-function openDelModal(v) {
-  modalDel.pluginId = v.id;
-  modalDel.pluginName = v.name;
-  modalDel.pluginDesc = v.description;
-  modalDel.isOpen = true;
 }
 
 onMounted(() => {
@@ -176,19 +161,8 @@ onMounted(() => {
       class="h-fit col-span-12"
       :label="$t('dashboard_plugins')"
     >
-      <PluginList
-        :isModalOpen="modalDel.isOpen"
-        @delete="(v) => openDelModal(v)"
-        :items="plugins.setup"
-      />
+      <PluginList :items="plugins.setup" />
     </CardBase>
-    <PluginModalDelete
-      @close="modalDel.isOpen = false"
-      @pluginDelete="useRefreshStore.refresh()"
-      :isOpen="modalDel.isOpen"
-      :pluginId="modalDel.pluginId"
-      :pluginName="modalDel.pluginName"
-      :pluginDesc="modalDel.pluginDesc"
-    />
+    <PluginModalDelete />
   </Dashboard>
 </template>

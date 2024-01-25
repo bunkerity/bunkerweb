@@ -29,6 +29,7 @@ const feedbackStore = useFeedbackStore();
 
 // close modal on backdrop click
 watch(backdropStore, () => {
+  if (updateConf.isPend) return;
   modalStore.isOpen = false;
 });
 
@@ -200,7 +201,7 @@ async function sendData() {
     method,
     modalStore.data.action.toLowerCase() === "delete" ? null : conf,
     updateConf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       // Case saved, close modal, go to root path and refresh
@@ -275,7 +276,8 @@ const emits = defineEmits(["close"]);
           :aria-expanded="modalStore.isOpen ? 'true' : 'false'"
           size="lg"
           @click="modalStore.isOpen = false"
-          class="btn-close text-xs"
+          :disabled="updateConf.isPend"
+          class="btn-close text-sm"
         >
           {{ $t("action_close") }}
         </ButtonBase>
@@ -292,10 +294,10 @@ const emits = defineEmits(["close"]);
             modalStore.data.action === 'create'
               ? 'btn-valid'
               : modalStore.data.action
-                ? `btn-${modalStore.data.action}`
-                : '',
+              ? `btn-${modalStore.data.action}`
+              : '',
           ]"
-          class="text-xs ml-2"
+          class="text-sm ml-2"
         >
           {{ $t(`action_${modalStore.data.action}`) }}
         </ButtonBase>

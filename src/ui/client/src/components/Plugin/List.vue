@@ -1,19 +1,25 @@
 <script setup>
 import { defineProps } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
+import { useDelModalStore } from "@store/plugins.js";
+
+const delModalStore = useDelModalStore();
 
 const props = defineProps({
   items: {
     type: Array,
     required: true,
   },
-  isModalOpen: {
-    type: Boolean,
-    required: true,
-  },
 });
 
-const emits = defineEmits(["delete"]);
+function updateDelModal(id, name, description) {
+  delModalStore.data = {
+    id: id,
+    name: name,
+    description: description,
+  };
+  delModalStore.isOpen = true;
+}
 </script>
 
 <template>
@@ -56,16 +62,10 @@ const emits = defineEmits(["delete"]);
         <button
           :tabindex="contentIndex"
           v-if="plugin.method.toLowerCase() !== 'static'"
-          @click="
-            $emit('delete', {
-              id: plugin.id,
-              name: plugin.name,
-              description: plugin.description,
-            })
-          "
+          @click="updateDelModal(plugin.id, plugin.name, plugin.description)"
           type="button"
           aria-controls="plugin-delete-modal"
-          :aria-expanded="props.isModalOpen ? 'true' : 'false'"
+          :aria-expanded="delModalStore.isOpen ? 'true' : 'false'"
           :aria-describedby="`${plugin.name}-${id}-delete-text`"
           class="z-20 mx-2 inline-block font-bold text-left text-white uppercase align-middle transition-all cursor-pointer text-xs ease-in tracking-tight-rem hover:-translate-y-px"
         >
