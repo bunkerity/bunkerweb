@@ -636,6 +636,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           labels:
             app: bunkerweb-ui
         spec:
+          serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-ui
               image: bunkerity/bunkerweb-ui:1.5.5
@@ -1475,6 +1476,7 @@ After a successful login/password combination, you will be prompted to enter you
           labels:
             app: bunkerweb-ui
         spec:
+          serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-ui
               image: bunkerity/bunkerweb-ui:1.5.5
