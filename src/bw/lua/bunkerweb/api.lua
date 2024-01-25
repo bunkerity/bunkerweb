@@ -33,7 +33,6 @@ local get_body_data = ngx_req.get_body_data
 local get_body_file = ngx_req.get_body_file
 local decode = cjson.decode
 local encode = cjson.encode
-local floor = math.floor
 local match = string.match
 local require_plugin = helpers.require_plugin
 local new_plugin = helpers.new_plugin
@@ -216,7 +215,26 @@ api.global.POST["^/ban$"] = function(self)
 	if not ok then
 		return self:response(HTTP_INTERNAL_SERVER_ERROR, "error", "can't decode JSON : " .. ip)
 	end
-	datastore:set("bans_ip_" .. ip["ip"], "manual", ip["exp"])
+	local ban = {
+		ip = "",
+		exp = 86400,
+		reason = "manual",
+	}
+	ban.ip = ip["ip"]
+	if ip["exp"] then
+		ban.exp = ip["exp"]
+	end
+	if ip["reason"] then
+		ban.reason = ip["reason"]
+	end
+	datastore:set(
+		"bans_ip_" .. ban["ip"],
+		encode({
+			reason = ban["reason"],
+			date = os.time(),
+		}),
+		ban["exp"]
+	)
 	return self:response(HTTP_OK, "success", "ip " .. ip["ip"] .. " banned")
 end
 
@@ -224,12 +242,12 @@ api.global.GET["^/bans$"] = function(self)
 	local data = {}
 	for _, k in ipairs(datastore:keys()) do
 		if k:find("^bans_ip_") then
-			local reason, err = datastore:get(k)
+			local result, err = datastore:get(k)
 			if err then
 				return self:response(
 					HTTP_INTERNAL_SERVER_ERROR,
 					"error",
-					"can't access " .. k .. " from datastore : " .. reason
+					"can't access " .. k .. " from datastore : " .. result
 				)
 			end
 			local ok, ttl = datastore:ttl(k)
@@ -240,7 +258,9 @@ api.global.GET["^/bans$"] = function(self)
 					"can't access ttl " .. k .. " from datastore : " .. ttl
 				)
 			end
-			local ban = { ip = k:sub(9, #k), reason = reason, exp = floor(ttl) }
+			local ban_data = decode(result)
+			local ban =
+				{ ip = k:sub(9, #k), reason = ban_data["reason"], date = ban_data["date"], exp = math.floor(ttl) }
 			table.insert(data, ban)
 		end
 	end

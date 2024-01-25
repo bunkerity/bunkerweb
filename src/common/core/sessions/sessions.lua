@@ -58,6 +58,7 @@ function sessions:init()
 		["REDIS_PORT"] = "",
 		["REDIS_DATABASE"] = "",
 		["REDIS_SSL"] = "",
+		["REDIS_SSL_VERIFY"] = "",
 		["REDIS_TIMEOUT"] = "",
 		["REDIS_KEEPALIVE_IDLE"] = "",
 		["REDIS_KEEPALIVE_POOL"] = "",
@@ -121,9 +122,9 @@ function sessions:init()
 			send_timeout = tonumber(redis_vars["REDIS_TIMEOUT"]),
 			read_timeout = tonumber(redis_vars["REDIS_TIMEOUT"]),
 			keepalive_timeout = tonumber(redis_vars["REDIS_KEEPALIVE_IDLE"]),
-			pool = "bw-redis",
 			pool_size = tonumber(redis_vars["REDIS_KEEPALIVE_POOL"]),
 			ssl = redis_vars["REDIS_SSL"] == "yes",
+			ssl_verify = redis_vars["REDIS_SSL_VERIFY"] == "yes",
 			database = tonumber(redis_vars["REDIS_DATABASE"]),
 		}
 		if redis_vars["REDIS_SENTINEL_HOSTS"] ~= nil then

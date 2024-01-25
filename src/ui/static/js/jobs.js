@@ -47,7 +47,9 @@ class Dropdown {
           //close dropdown and change style
           this.hideDropdown(btnSetting);
 
-          if (!e.target.closest("button").hasAttribute(`data-${prefix}-file`)) {
+          if (
+            !e.target.closest("button").hasAttribute(`data-${this.prefix}-file`)
+          ) {
             this.changeDropBtnStyle(btnSetting, btn);
           }
           //show / hide filter

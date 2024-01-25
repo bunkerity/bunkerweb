@@ -4,7 +4,7 @@ from os import sep
 from os.path import join
 from pathlib import Path
 from subprocess import DEVNULL, STDOUT, run
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Tuple, Union
 
 from API import API  # type: ignore
 from ApiCaller import ApiCaller  # type: ignore
@@ -105,6 +105,18 @@ class Instance:
             )
 
         return self.apiCaller.send_to_apis("POST", "/restart")
+
+    def bans(self) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("GET", "/bans", response=True)
+
+    def ban(self, ip: str, exp: float, reason: str) -> bool:
+        return self.apiCaller.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason})
+
+    def unban(self, ip: str) -> bool:
+        return self.apiCaller.send_to_apis("POST", "/unban", data={"ip": ip})
+
+    def reports(self) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("GET", "/metrics/requests", response=True)
 
 
 class Instances:
@@ -214,10 +226,7 @@ class Instances:
                         )
                     )
 
-        instances = sorted(
-            instances,
-            key=lambda x: x.name,
-        )
+        instances.sort(key=lambda x: x.name)
 
         # Local instance
         if Path(sep, "usr", "sbin", "nginx").exists():
@@ -258,7 +267,7 @@ class Instances:
         return not_reloaded or "Successfully reloaded instances"
 
     def reload_instance(self, _id: Optional[int] = None, instance: Optional[Instance] = None) -> str:
-        if instance is None:
+        if not instance:
             instance = self.__instance_from_id(_id)
 
         result = instance.reload()
@@ -297,3 +306,61 @@ class Instances:
             return f"Instance {instance.name} has been restarted."
 
         return f"Can't restart {instance.name}"
+
+    def get_bans(self, _id: Optional[int] = None) -> List[dict[str, Any]]:
+        if _id:
+            instance = self.__instance_from_id(_id)
+            resp, instance_bans = instance.bans()
+            if not resp:
+                return []
+            return instance_bans[instance.name if instance.name != "local" else "127.0.0.1"].get("data", [])
+
+        bans: List[dict[str, Any]] = []
+        for instance in self.get_instances():
+            resp, instance_bans = instance.bans()
+            if not resp:
+                continue
+            bans.extend(instance_bans[instance.name if instance.name != "local" else "127.0.0.1"].get("data", []))
+
+        bans.sort(key=lambda x: x["exp"])
+
+        unique_bans = {}
+
+        return [unique_bans.setdefault(item["ip"], item) for item in bans if item["ip"] not in unique_bans]
+
+    def ban(self, ip: str, exp: float, reason: str, _id: Optional[int] = None) -> Union[str, list[str]]:
+        if _id:
+            instance = self.__instance_from_id(_id)
+            if instance.ban(ip, exp, reason):
+                return ""
+            return f"Can't ban {ip} on {instance.name}"
+
+        return [instance.name for instance in self.get_instances() if not instance.ban(ip, exp, reason)]
+
+    def unban(self, ip: str, _id: Optional[int] = None) -> Union[str, list[str]]:
+        if _id:
+            instance = self.__instance_from_id(_id)
+            if instance.unban(ip):
+                return ""
+            return f"Can't unban {ip} on {instance.name}"
+
+        return [instance.name for instance in self.get_instances() if not instance.unban(ip)]
+
+    def get_reports(self, _id: Optional[int] = None) -> List[dict[str, Any]]:
+        if _id:
+            instance = self.__instance_from_id(_id)
+            resp, instance_reports = instance.reports()
+            if not resp:
+                return []
+            return instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", [])
+
+        reports: List[dict[str, Any]] = []
+        for instance in self.get_instances():
+            resp, instance_reports = instance.reports()
+            if not resp:
+                continue
+            reports.extend(instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", []))
+
+        reports.sort(key=lambda x: x["date"], reverse=True)
+
+        return reports

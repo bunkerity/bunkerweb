@@ -4,6 +4,7 @@ from functools import partial
 from os import getenv, listdir, sep
 from os.path import join
 from pathlib import Path
+from random import randint
 from time import sleep
 from traceback import format_exc
 from typing import List, Union
@@ -1186,131 +1187,127 @@ location /hello {
 
         sleep(3)
 
-        print("The cache file content is correct, trying logs page ...", flush=True)
+        print("The cache file content is correct, trying reporting page ...", flush=True)
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[8]/a", "logs")
+        get(f"http://www.example.com{ui_url}/home?id=/etc/passwd")
 
-        ### LOGS PAGE
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[8]/a", "reports")
 
-        print("Selecting correct instance ...", flush=True)
+        ### REPORTS PAGE
 
-        assert_button_click(driver, "//button[@data-logs-setting-select='instances']")
+        print("Trying to filter the reports ...", flush=True)
 
-        instances = safe_get_element(
-            driver,
-            By.XPATH,
-            "//div[@data-logs-setting-select-dropdown='instances']/button",
-            multiple=True,
-        )
+        reports_list = safe_get_element(driver, By.XPATH, "//ul[@data-reports-list='']/li", multiple=True)
 
-        first_instance = instances[0].text
-
-        if len(instances) == 0:
-            print("No instances found, exiting ...", flush=True)
+        if not reports_list:
+            print("No reports found, exiting ...", flush=True)
             exit(1)
-
-        assert_button_click(driver, instances[0])
-        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-data"))
-
-        sleep(3)
-
-        logs_list = safe_get_element(driver, By.XPATH, "//ul[@data-logs-list='']/li", multiple=True)
-
-        if len(logs_list) == 0:
-            print("No logs found, exiting ...", flush=True)
-            exit(1)
-
-        print("Logs found, trying auto refresh ...", flush=True)
-
-        assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
-        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-live"))
-
-        sleep(3)
-
-        if len(logs_list) == len(
-            safe_get_element(
-                driver,
-                By.XPATH,
-                "//ul[@data-logs-list='']/li[not(contains(@class, 'hidden'))]",
-                multiple=True,
-            )
-        ):
-            print("Auto refresh is not working, exiting ...", flush=True)
-            exit(1)
-
-        print("Auto refresh is working, deactivating it ...", flush=True)
-
-        assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
-        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-data"))
-
-        sleep(3)
-
-        logs_list = safe_get_element(driver, By.XPATH, "//ul[@data-logs-list='']/li", multiple=True)
-
-        print("Trying filters ...", flush=True)
 
         filter_input = safe_get_element(driver, By.ID, "keyword")
+        filter_input.send_keys("abcde")
 
-        filter_input.send_keys("gen")
+        with suppress(TimeoutException):
+            WebDriverWait(driver, 2).until(
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        "//ul[@data-reports-list='']/li[not(contains(@class, 'hidden'))]",
+                    )
+                )
+            )
+            print("The keyword filter is not working, exiting ...", flush=True)
+            exit(1)
+
+        print("The reports have been filtered, trying bans page ...", flush=True)
+
+        ### BANS PAGE
+
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[9]/a", "bans")
+
+        try:
+            safe_get_element(driver, By.XPATH, "/html/body/main/div/div[2]/div/h5", error=True)
+        except TimeoutException:
+            print("Bans present even though they shouldn't be, exiting ...", flush=True)
+            exit(1)
+
+        print("No bans found, as expected, trying to add a ban ...", flush=True)
+
+        assert_button_click(driver, "//button[@data-add-ban='']")
+
+        try:
+            WebDriverWait(driver, 2).until(
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        "//ul[@data-bans-add-ban-list='']/li",
+                    )
+                )
+            )
+        except TimeoutException:
+            print("No bans found, exiting ...", flush=True)
+            exit(1)
+
+        assert_button_click(driver, "//button[@data-add-ban-delete-all-item='']")
+
+        with suppress(TimeoutException):
+            WebDriverWait(driver, 2).until(
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        "//ul[@data-bans-add-ban-list='']/li",
+                    )
+                )
+            )
+            print("Bans present even though they shouldn't be, exiting ...", flush=True)
+            exit(1)
+
+        print("No bans found, as expected, trying to add multiple bans ...", flush=True)
+
+        add_entry_button = safe_get_element(driver, By.XPATH, "//button[@data-ban-add-new='']")
+
+        assert_button_click(driver, add_entry_button)
+
+        ip_input = safe_get_element(driver, By.ID, "ip-1")
+        ip_input.send_keys(f"127.0.0.{randint(10, 122)}")
 
         sleep(3)
 
-        if len(logs_list) == len(
-            safe_get_element(
-                driver,
-                By.XPATH,
-                "//ul[@data-logs-list='']/li[not(contains(@class, 'hidden'))]",
-                multiple=True,
-            )
-        ):
-            print("The keyword filter is not working, exiting ...", flush=True)
+        assert_button_click(driver, add_entry_button)
+
+        ip_input = safe_get_element(driver, By.ID, "ip-2")
+        ip_input.send_keys(f"127.0.0.{randint(123, 255)}")
+
+        access_page(driver, driver_wait, "//button[@data-bans-modal-submit='']", "bans")
+
+        try:
+            entries = safe_get_element(driver, By.XPATH, "//ul[@data-bans-list='']/li", multiple=True, error=True)
+        except TimeoutException:
+            print("No ban found, exiting ...", flush=True)
             exit(1)
 
-        filter_input.clear()
-
-        print("Keyword filter is working, trying type filter ...", flush=True)
-
-        assert_button_click(driver, "//button[@data-logs-setting-select='types']")
-
-        assert_button_click(
-            driver,
-            "//div[@data-logs-setting-select-dropdown='types']/button[@value='warn']",
-        )
-
-        if len(logs_list) == len(
-            safe_get_element(
-                driver,
-                By.XPATH,
-                "//ul[@data-logs-list='']/li[not(contains(@class, 'hidden'))]",
-                multiple=True,
-            )
-        ):
-            print("The keyword filter is not working, exiting ...", flush=True)
+        if len(entries) != 2:
+            print("The bans are present but there should be 2, exiting ...", flush=True)
             exit(1)
 
-        assert_button_click(driver, "//button[@data-logs-setting-select='types']")
+        print("Bans found, trying to delete them ...", flush=True)
 
-        assert_button_click(
-            driver,
-            "//div[@data-logs-setting-select-dropdown='types']/button[@value='all']",
-        )
+        assert_button_click(driver, "//input[@id='ban-item-2']")
 
-        print("Type filter is working, trying to filter by date ...", flush=True)
+        access_page(driver, driver_wait, "//button[@data-unban-btn='']", "bans")
 
-        current_date = datetime.now()
-        resp = get(
-            f"http://www.example.com{ui_url}/logs/{first_instance}?from_date={int(current_date.timestamp() - 86400000)}&to_date={int((current_date - timedelta(days=1)).timestamp())}",
-            headers={"Host": "www.example.com", "User-Agent": driver.execute_script("return navigator.userAgent;")},
-            cookies={"session": driver.get_cookies()[0]["value"]},
-        )
-
-        if len(resp.json()["logs"]) != 0:
-            print("The date filter is not working, exiting ...", flush=True)
+        try:
+            entries = safe_get_element(driver, By.XPATH, "//ul[@data-bans-list='']/li", multiple=True, error=True)
+        except TimeoutException:
+            print("No bans found, exiting ...", flush=True)
             exit(1)
 
-        print("Date filter is working, trying jobs page ...", flush=True)
+        if len(entries) != 1:
+            print("The bans are present but there should be 1, exiting ...", flush=True)
+            exit(1)
 
-        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[9]/a", "jobs")
+        print("Ban deleted successfully, trying jobs page ...", flush=True)
+
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[10]/a", "jobs")
 
         ### JOBS PAGE
 
@@ -1441,7 +1438,129 @@ location /hello {
             print("The cache download is not working, exiting ...", flush=True)
             exit(1)
 
-        print("Cache download is working, trying account page ...", flush=True)
+        print("Jobs cache download is working, trying logs page ...", flush=True)
+
+        access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[11]/a", "logs")
+
+        ### LOGS PAGE
+
+        print("Selecting correct instance ...", flush=True)
+
+        assert_button_click(driver, "//button[@data-logs-setting-select='instances']")
+
+        instances = safe_get_element(
+            driver,
+            By.XPATH,
+            "//div[@data-logs-setting-select-dropdown='instances']/button",
+            multiple=True,
+        )
+
+        first_instance = instances[0].text
+
+        if len(instances) == 0:
+            print("No instances found, exiting ...", flush=True)
+            exit(1)
+
+        assert_button_click(driver, instances[0])
+        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-data"))
+
+        sleep(3)
+
+        logs_list = safe_get_element(driver, By.XPATH, "//ul[@data-logs-list='']/li", multiple=True)
+
+        if len(logs_list) == 0:
+            print("No logs found, exiting ...", flush=True)
+            exit(1)
+
+        print("Logs found, trying auto refresh ...", flush=True)
+
+        assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
+        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-live"))
+
+        sleep(3)
+
+        if len(logs_list) == len(
+            safe_get_element(
+                driver,
+                By.XPATH,
+                "//ul[@data-logs-list='']/li[not(contains(@class, 'hidden'))]",
+                multiple=True,
+            )
+        ):
+            print("Auto refresh is not working, exiting ...", flush=True)
+            exit(1)
+
+        print("Auto refresh is working, deactivating it ...", flush=True)
+
+        assert_button_click(driver, safe_get_element(driver, By.ID, "live-update"))
+        assert_button_click(driver, safe_get_element(driver, By.ID, "submit-data"))
+
+        sleep(3)
+
+        logs_list = safe_get_element(driver, By.XPATH, "//ul[@data-logs-list='']/li", multiple=True)
+
+        print("Trying filters ...", flush=True)
+
+        filter_input = safe_get_element(driver, By.ID, "keyword")
+
+        filter_input.send_keys("gen")
+
+        sleep(3)
+
+        if len(logs_list) == len(
+            safe_get_element(
+                driver,
+                By.XPATH,
+                "//ul[@data-logs-list='']/li[not(contains(@class, 'hidden'))]",
+                multiple=True,
+            )
+        ):
+            print("The keyword filter is not working, exiting ...", flush=True)
+            exit(1)
+
+        filter_input.clear()
+
+        print("Keyword filter is working, trying type filter ...", flush=True)
+
+        assert_button_click(driver, "//button[@data-logs-setting-select='types']")
+
+        assert_button_click(
+            driver,
+            "//div[@data-logs-setting-select-dropdown='types']/button[@value='warn']",
+        )
+
+        if len(logs_list) == len(
+            safe_get_element(
+                driver,
+                By.XPATH,
+                "//ul[@data-logs-list='']/li[not(contains(@class, 'hidden'))]",
+                multiple=True,
+            )
+        ):
+            print("The keyword filter is not working, exiting ...", flush=True)
+            exit(1)
+
+        assert_button_click(driver, "//button[@data-logs-setting-select='types']")
+
+        assert_button_click(
+            driver,
+            "//div[@data-logs-setting-select-dropdown='types']/button[@value='all']",
+        )
+
+        print("Type filter is working, trying to filter by date ...", flush=True)
+
+        current_date = datetime.now()
+        resp = get(
+            f"http://www.example.com{ui_url}/logs/{first_instance}?from_date={int((current_date - timedelta(weeks=1)).timestamp())}&to_date={int((current_date - timedelta(days=1)).timestamp())}",
+            headers={"Host": "www.example.com", "User-Agent": driver.execute_script("return navigator.userAgent;")},
+            cookies={"session": driver.get_cookies()[0]["value"]},
+        )
+
+        if len(resp.json()["logs"]) != 0:
+            print("The date filter is not working, exiting ...", flush=True)
+            exit(1)
+
+        print("Date filter is working, trying jobs page ...", flush=True)
 
         access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
@@ -1700,6 +1819,8 @@ location /hello {
         )
 
         print("Successfully logged in without 2FA, tests are done, exiting ...", flush=True)
+    except KeyboardInterrupt:
+        pass
     except SystemExit:
         exit(1)
     except:

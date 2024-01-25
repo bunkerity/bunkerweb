@@ -1,2 +1,3 @@
+cryptography==42.0.0
 requests==2.31.0
-selenium==4.16.0
+selenium<4.17.0

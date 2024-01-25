@@ -32,8 +32,8 @@ jobs:
       - uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
           python-version: "3.10"
-      - name: Install doc requirements
-        run: pip install --no-cache-dir --require-hashes -r docs/requirements.txt
+      - name: Install doc dependencies
+        run: pip install --no-cache-dir --require-hashes -r docs/requirements.txt && sudo apt install -y libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
       - name: Push doc
         run: mike deploy --update-aliases --push --alias-type=copy ${{ inputs.VERSION }} ${{ inputs.ALIAS }}
       - name: Set default doc

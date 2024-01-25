@@ -12,8 +12,8 @@ class BackLogin {
           "href",
           window.location.href.replace(
             `/${this.currEndpoint}`,
-            `/${this.backEndpoint}`
-          )
+            `/${this.backEndpoint}`,
+          ),
         );
       });
     });

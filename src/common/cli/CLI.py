@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
+from json import dumps, loads
+from time import time
 from dotenv import dotenv_values
 from os import getenv, sep
 from os.path import join
 from pathlib import Path
-from redis import StrictRedis
+from redis import StrictRedis, Sentinel
 from sys import path as sys_path
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("utils",), ("db",))]:
@@ -19,10 +22,19 @@ from logger import setup_logger  # type: ignore
 
 
 def format_remaining_time(seconds):
-    days, seconds = divmod(seconds, 86400)
-    hours, seconds = divmod(seconds, 3600)
+    years, seconds = divmod(seconds, 60 * 60 * 24 * 365)
+    months, seconds = divmod(seconds, 60 * 60 * 24 * 30)
+    while months >= 12:
+        years += 1
+        months -= 12
+    days, seconds = divmod(seconds, 60 * 60 * 24)
+    hours, seconds = divmod(seconds, 60 * 60)
     minutes, seconds = divmod(seconds, 60)
     time_parts = []
+    if years > 0:
+        time_parts.append(f"{int(years)} year{'' if years == 1 else 's'}")
+    if months > 0:
+        time_parts.append(f"{int(months)} month{'' if months == 1 else 's'}")
     if days > 0:
         time_parts.append(f"{int(days)} day{'' if days == 1 else 's'}")
     if hours > 0:
@@ -49,6 +61,8 @@ class CLI(ApiCaller):
         if Path(sep, "usr", "share", "bunkerweb", "db").exists():
             from Database import Database  # type: ignore
 
+            self.__logger.info("Getting variables from database")
+
             db = Database(self.__logger, sqlalchemy_string=self.__get_variable("DATABASE_URI", None))
             self.__variables = db.get_config()
 
@@ -58,6 +72,7 @@ class CLI(ApiCaller):
         self.__use_redis = self.__get_variable("USE_REDIS", "no") == "yes"
         self.__redis = None
         if self.__use_redis:
+            self.__logger.info("Fetching redis configuration")
             redis_host = self.__get_variable("REDIS_HOST")
             if redis_host:
                 redis_port = self.__get_variable("REDIS_PORT", "6379")
@@ -89,16 +104,71 @@ class CLI(ApiCaller):
                     redis_keepalive_pool = "10"
                 redis_keepalive_pool = int(redis_keepalive_pool)
 
-                self.__redis = StrictRedis(
-                    host=redis_host,
-                    port=redis_port,
-                    db=redis_db,
-                    socket_timeout=redis_timeout,
-                    socket_connect_timeout=redis_timeout,
-                    socket_keepalive=True,
-                    max_connections=redis_keepalive_pool,
-                    ssl=self.__get_variable("REDIS_SSL", "no") == "yes",
-                )
+                self.__logger.info("Redis configuration is valid")
+
+                redis_ssl = self.__get_variable("REDIS_SSL", "no") == "yes"
+                username = self.__get_variable("REDIS_USERNAME", None) or None
+                password = self.__get_variable("REDIS_PASSWORD", None) or None
+                sentinel_hosts = self.__get_variable("REDIS_SENTINEL_HOSTS", [])
+
+                if isinstance(sentinel_hosts, str):
+                    sentinel_hosts = [host.split(":") if ":" in host else host for host in sentinel_hosts.split(" ") if host]
+
+                if sentinel_hosts:
+                    sentinel_username = self.__get_variable("REDIS_SENTINEL_USERNAME", None) or None
+                    sentinel_password = self.__get_variable("REDIS_SENTINEL_PASSWORD", None) or None
+                    sentinel_master = self.__get_variable("REDIS_SENTINEL_MASTER", "")
+
+                    self.__logger.info(
+                        f"Connecting to redis sentinel cluster with the following parameters:\n{sentinel_hosts=}\n{sentinel_username=}\n{sentinel_password=}\n{sentinel_master=}\n{redis_timeout=}\nmax_connections={redis_keepalive_pool}\n{redis_ssl=}"
+                    )
+                    sentinel = Sentinel(
+                        sentinel_hosts,
+                        username=sentinel_username,
+                        password=sentinel_password,
+                        ssl=redis_ssl,
+                        socket_timeout=redis_timeout,
+                        socket_connect_timeout=redis_timeout,
+                        socket_keepalive=True,
+                        max_connections=redis_keepalive_pool,
+                    )
+                    try:
+                        sentinel.discover_master(sentinel_master)
+                    except Exception as e:
+                        self.__logger.error(f"Failed to connect to redis sentinel cluster: {e}, disabling redis")
+                        self.__use_redis = False
+
+                    if self.__use_redis:
+                        self.__logger.info(f"Connected to redis sentinel cluster, getting master with the following parameters:\n{sentinel_master=}\n{redis_db=}\n{username=}\n{password=}")
+                        self.__redis = sentinel.master_for(
+                            sentinel_master,
+                            db=redis_db,
+                            username=username,
+                            password=password,
+                        )
+                else:
+                    self.__logger.info(f"Connecting to redis with the following parameters:\n{redis_host=}\n{redis_port=}\n{redis_db=}\n{username=}\n{password=}\n{redis_timeout=}\nmax_connections={redis_keepalive_pool}\n{redis_ssl=}")
+                    self.__redis = StrictRedis(
+                        host=redis_host,
+                        port=redis_port,
+                        db=redis_db,
+                        username=username,
+                        password=password,
+                        socket_timeout=redis_timeout,
+                        socket_connect_timeout=redis_timeout,
+                        socket_keepalive=True,
+                        max_connections=redis_keepalive_pool,
+                        ssl=redis_ssl,
+                    )
+
+                try:
+                    if self.__use_redis:
+                        assert self.__redis, "Redis connection is None"
+                        self.__redis.ping()
+                except Exception as e:
+                    self.__logger.error(f"Failed to connect to redis: {e}, disabling redis")
+                    self.__use_redis = False
+                self.__logger.info("Connected to redis")
             else:
                 self.__logger.error("USE_REDIS is set to yes but REDIS_HOST is not set, disabling redis")
                 self.__use_redis = False
@@ -116,7 +186,7 @@ class CLI(ApiCaller):
             super().__init__()
             self.auto_setup(self.__integration)
 
-    def __get_variable(self, variable: str, default: Optional[str] = None) -> Optional[str]:
+    def __get_variable(self, variable: str, default: Optional[Any] = None) -> Optional[str]:
         return getenv(variable, self.__variables.get(variable, default))
 
     def __detect_integration(self) -> str:
@@ -148,14 +218,15 @@ class CLI(ApiCaller):
             return True, f"IP {ip} has been unbanned"
         return False, "error"
 
-    def ban(self, ip: str, exp: float) -> Tuple[bool, str]:
+    def ban(self, ip: str, exp: float, reason: str) -> Tuple[bool, str]:
         if self.__redis:
-            ok = self.__redis.set(f"bans_ip_{ip}", "manual", ex=exp)
+            ok = self.__redis.set(f"bans_ip_{ip}", dumps({"reason": reason, "date": time()}))
             if not ok:
                 self.__logger.error(f"Failed to ban {ip} in redis")
+            self.__redis.expire(f"bans_ip_{ip}", int(exp))
 
-        if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp}):
-            return (True, f"IP {ip} has been banned for {format_remaining_time(exp)}")
+        if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason}):
+            return (True, f"IP {ip} has been banned for {format_remaining_time(exp)} with reason {reason}")
         return False, "error"
 
     def bans(self) -> Tuple[bool, str]:
@@ -172,8 +243,13 @@ class CLI(ApiCaller):
             servers["redis"] = []
             for key in self.__redis.scan_iter("bans_ip_*"):
                 ip = key.decode("utf-8").replace("bans_ip_", "")
+                data = self.__redis.get(key)
+                if not data:
+                    continue
                 exp = self.__redis.ttl(key)
-                servers["redis"].append({"ip": ip, "exp": exp, "reason": "manual"})
+                servers["redis"].append({"ip": ip, "exp": exp} | loads(data))
+
+        servers = {k: sorted(v, key=lambda x: x["date"]) for k, v in servers.items()}
 
         cli_str = ""
         for server, bans in servers.items():
@@ -182,7 +258,7 @@ class CLI(ApiCaller):
                 cli_str += "No ban found\n"
 
             for ban in bans:
-                cli_str += f"- {ban['ip']} for {format_remaining_time(ban['exp'])} : {ban.get('reason', 'no reason given')}\n"
+                cli_str += f"- {ban['ip']} ; banned the {datetime.fromtimestamp(ban['date']).strftime('%d-%m-%Y at %H:%M:%S')} for {format_remaining_time(ban['exp'])} remaining with reason \"{ban.get('reason', 'no reason given')}\"\n"
             cli_str += "\n"
 
         return True, cli_str

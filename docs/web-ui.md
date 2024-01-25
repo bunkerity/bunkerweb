@@ -37,7 +37,9 @@ Because the web UI is a web application, the recommended installation procedure 
 
 ## Setup wizard
 
-The setup wizard is a feature that helps you to **configure** and **install the web UI** using a **user-friendly interface**. You will need to set the `UI_HOST` setting (`http://hostname-of-web-ui:7000`) and browse the `/setup` URI of your server to access the setup wizard.
+!!! info "Wizard"
+
+    The setup wizard is a feature that helps you to **configure** and **install the web UI** using a **user-friendly interface**. You will need to set the `UI_HOST` setting (`http://hostname-of-web-ui:7000`) and browse the `/setup` URI of your server to access the setup wizard.
 
 <figure markdown>
   ![Overview](assets/img/ui-wizard-account.webp){ align=center, width="350" }
@@ -65,6 +67,11 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 === "Docker"
 
     If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named `bw-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://bw-ui:7000`.
+
+    !!! tip "Accessing the setup wizard"
+
+        You can access the setup wizard by browsing the `http://your-ip-address/setup` URI of your server.
+
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -152,6 +159,10 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 === "Docker autoconf"
 
     If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named `bw-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://bw-ui:7000`.
+
+    !!! tip "Accessing the setup wizard"
+
+        You can access the setup wizard by browsing the `http://your-ip-address/setup` URI of your server.
 
     Here is the docker-compose boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -255,6 +266,10 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 === "Swarm"
 
     If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI container. For example, if your web UI container is named `bw-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://bw-ui:7000`.
+
+    !!! tip "Accessing the setup wizard"
+
+        You can access the setup wizard by browsing the `http://your-ip-address/setup` URI of your server.
 
     Here is the stack boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -381,6 +396,10 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 === "Kubernetes"
 
     If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI SERVICE. For example, if your web UI service is named `svc-bunkerweb-ui` and is listening on the `7000` port, you will need to set the `UI_HOST` setting to `http://svc-bunkerweb-ui:7000`.
+
+    !!! tip "Accessing the setup wizard"
+
+        You can access the setup wizard by browsing the `http://your-ip-address/setup` URI of your server.
 
     Here is the yaml boilerplate that you can use (don't forget to edit the `changeme` data) :
 
@@ -617,6 +636,7 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
           labels:
             app: bunkerweb-ui
         spec:
+          serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-ui
               image: bunkerity/bunkerweb-ui:1.5.5
@@ -695,6 +715,10 @@ Review your final BunkerWeb UI URL and then click on the `Setup` button. Once th
 
     If you want to use the setup wizard, you will need to set the `UI_HOST` setting to the HTTP endpoint of your web UI SERVICE. Since the web UI is listening on the same machine as BunkerWeb, you will need to set the `UI_HOST` setting `http://127.0.0.1:7000`.
 
+    !!! tip "Accessing the setup wizard"
+
+        You can access the setup wizard by browsing the `http://your-ip-address/setup` URI of your server.
+
     Here is the `/etc/bunkerweb/variables.env` boilerplate you can use :
 
     ```conf
@@ -772,7 +796,7 @@ The following steps are needed to enable the TOTP feature from the web UI :
 - Enter your current password
 
 !!! info "Secret key refresh"
-    A new secret key is **generated each time** you visit the page or submit the form. In case something went wrong (e.g. : expired TOTP code), you will need to copy the new secret key to your authenticator app until 2FA is successfuly enabled.
+    A new secret key is **generated each time** you visit the page or submit the form. In case something went wrong (e.g. : expired TOTP code), you will need to copy the new secret key to your authenticator app until 2FA is successfully enabled.
 
 Once enabled, 2FA authentication can be disabled at the same place.
 
@@ -1452,6 +1476,7 @@ After a successful login/password combination, you will be prompted to enter you
           labels:
             app: bunkerweb-ui
         spec:
+          serviceAccountName: sa-bunkerweb
           containers:
             - name: bunkerweb-ui
               image: bunkerity/bunkerweb-ui:1.5.5
