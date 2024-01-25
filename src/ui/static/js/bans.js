@@ -369,7 +369,7 @@ class AddBanModal {
       "button[data-add-ban-delete-all-item]",
     );
     this.formEl = document.querySelector("form[data-ban-add-form]");
-    this.itemCount = 1;
+    this.itemCount = 0;
     this.setDatepicker("0"); // for default field
     this.init();
   }
