@@ -275,4 +275,4 @@ class Metadata(Base):
     config_changed = Column(Boolean, default=False, nullable=True)
     instances_changed = Column(Boolean, default=False, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)
-    version = Column(String(32), default="1.5.5", nullable=False)
+    version = Column(String(32), default="1.5.6", nullable=False)
