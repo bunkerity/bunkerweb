@@ -368,13 +368,13 @@ try:
 
     if not all([core_plugins[plugin]["checked"] for plugin in core_plugins]):
         print(
-            f"❌ Not all core plugins are in the database, exiting ...\nmissing plugins: {', '.join([plugin for plugin in core_plugins if not core_plugins[plugin]])}",
+            f"❌ Not all core plugins are in the database, exiting ...\nmissing plugins: {', '.join([plugin for plugin in core_plugins if not core_plugins[plugin]['checked']])}",
             flush=True,
         )
         exit(1)
     elif not all([external_plugins[plugin]["checked"] for plugin in external_plugins]):
         print(
-            f"❌ Not all external plugins are in the database, exiting ...\nmissing plugins: {', '.join([plugin for plugin in external_plugins if not external_plugins[plugin]])}",
+            f"❌ Not all external plugins are in the database, exiting ...\nmissing plugins: {', '.join([plugin for plugin in external_plugins if not external_plugins[plugin]['checked']])}",
             flush=True,
         )
         exit(1)
