@@ -12,11 +12,10 @@ local ngx = ngx
 local subsystem = ngx.config.subsystem
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local OK = ngx.OK
+local INFO = ngx.INFO
 local tonumber = tonumber
 local tostring = tostring
 local get_session = utils.get_session
-local get_session_data = utils.get_session_data
-local set_session_data = utils.set_session_data
 local get_deny_status = utils.get_deny_status
 local rand = utils.rand
 local now = ngx.now
@@ -47,36 +46,25 @@ function antibot:header()
 	end
 	-- Check if antibot uri
 	if self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
-		return self:ret(true, "Not antibot uri")
-	end
-
-	-- Get session data
-	local session, err = get_session("antibot", self.ctx)
-	if not session then
-		return self:ret(false, "can't get session : " .. err, HTTP_INTERNAL_SERVER_ERROR)
-	end
-	self.session = session
-	self.session_data = get_session_data(self.session, true, self.ctx)
-	-- Check if session is valid
-	self:check_session()
-
-	-- Don't go further if client resolved the challenge
-	if self.session_data.resolved then
-		if self.ctx.bw.uri == self.variables["ANTIBOT_URI"] then
-			return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
-		end
-		return self:ret(true, "client already resolved the challenge")
-	end
-
-	if self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
 		return self:ret(true, "not antibot uri")
 	end
 
+	-- Get session data
+	self.session_data = self.ctx.bw.antibot_session_data
+	if not self.session_data then
+		return self:ret(false, "can't get session data", HTTP_INTERNAL_SERVER_ERROR)
+	end
+
+	-- Don't go further if client resolved the challenge
+	if self.session_data.resolved then
+		return self:ret(true, "client already resolved the challenge", nil, self.session_data.original_uri)
+	end
+
+	-- Override headers
 	local header = "Content-Security-Policy"
 	if self.variables["CONTENT_SECURITY_POLICY_REPORT_ONLY"] == "yes" then
 		header = header .. "-Report-Only"
 	end
-
 	if self.session_data.type == "recaptcha" then
 		ngx.header[header] = "default-src 'none'; form-action 'self'; script-src 'strict-dynamic' 'nonce-"
 			.. self.session_data.nonce_script
@@ -108,7 +96,7 @@ function antibot:header()
 			.. self.session_data.nonce_style
 			.. "'; font-src 'self' data:; base-uri 'self';"
 	end
-	return self:ret(true, "Successfully overridden CSP header")
+	return self:ret(true, "successfully overridden CSP header")
 end
 
 function antibot:access()
@@ -118,14 +106,17 @@ function antibot:access()
 	end
 
 	-- Get session data
-	local session, err = get_session("antibot", self.ctx)
+	local session, err = get_session(self.ctx)
 	if not session then
-		return self:ret(false, "can't get session : " .. err, HTTP_INTERNAL_SERVER_ERROR)
+		return self:ret(false, "can't get session : " .. err)
 	end
 	self.session = session
-	self.session_data = get_session_data(self.session, true, self.ctx)
+	self.session_data = session:get("antibot") or {}
+	self.ctx.bw.antibot_session_data = self.session_data
+
 	-- Check if session is valid
-	self:check_session()
+	local msg = self:check_session()
+	self.logger:log(INFO, "check_session returned : " .. msg)
 
 	-- Don't go further if client resolved the challenge
 	if self.session_data.resolved then
@@ -137,10 +128,6 @@ function antibot:access()
 
 	-- Prepare challenge if needed
 	self:prepare_challenge()
-	local ok, err = self:set_session_data()
-	if not ok then
-		return self:ret(false, "can't save session : " .. err, HTTP_INTERNAL_SERVER_ERROR)
-	end
 
 	-- Redirect to challenge page
 	if self.ctx.bw.uri ~= self.variables["ANTIBOT_URI"] then
@@ -162,10 +149,6 @@ function antibot:access()
 	if self.ctx.bw.request_method == "POST" then
 		-- luacheck: ignore 421
 		local ok, err, redirect = self:check_challenge()
-		local set_ok, set_err = self:set_session_data()
-		if not set_ok then
-			return self:ret(false, "can't save session : " .. set_err, HTTP_INTERNAL_SERVER_ERROR)
-		end
 		if ok == nil then
 			return self:ret(false, "check challenge error : " .. err, HTTP_INTERNAL_SERVER_ERROR)
 		elseif not ok then
@@ -175,10 +158,6 @@ function antibot:access()
 			return self:ret(true, "check challenge redirect : " .. redirect, nil, redirect)
 		end
 		self:prepare_challenge()
-		ok, err = self:set_session_data()
-		if not ok then
-			return self:ret(false, "can't save session : " .. err, HTTP_INTERNAL_SERVER_ERROR)
-		end
 		self.ctx.bw.antibot_display_content = true
 		return self:ret(true, "displaying challenge to client", OK)
 	end
@@ -202,12 +181,10 @@ function antibot:content()
 	end
 
 	-- Get session data
-	local session, err = get_session("antibot", self.ctx)
-	if not session then
-		return self:ret(false, "can't get session : " .. err, HTTP_INTERNAL_SERVER_ERROR)
+	self.session_data = self.ctx.bw.antibot_session_data
+	if not self.session_data then
+		return self:ret(false, "missing session data", HTTP_INTERNAL_SERVER_ERROR)
 	end
-	self.session = session
-	self.session_data = get_session_data(self.session, true, self.ctx)
 
 	-- Direct access without session
 	if not self.session_data.prepared then
@@ -229,42 +206,36 @@ function antibot:check_session()
 	-- Not resolved and not prepared
 	if not time_resolve and not time_valid then
 		self.session_data = {}
-		self.session_updated = true
-		return
+		self:set_session_data()
+		return "not prepared"
 	end
 	-- Check if still valid
-	local time = ngx.now()
+	local time = now()
 	local resolved = self.session_data.resolved
 	if resolved and (time_valid > time or time - time_valid > tonumber(self.variables["ANTIBOT_TIME_VALID"])) then
 		self.session_data = {}
-		self.session_updated = true
-		return
+		self:set_session_data()
+		return "need new resolve"
 	end
 	-- Check if new prepare is needed
 	if
 		not resolved and (time_resolve > time or time - time_resolve > tonumber(self.variables["ANTIBOT_TIME_RESOLVE"]))
 	then
 		self.session_data = {}
-		self.session_updated = true
-		return
+		self:set_session_data()
+		return "need new prepare"
 	end
+	return "valid"
 end
 
 function antibot:set_session_data()
-	if self.session_updated then
-		local ok, err = set_session_data(self.session, self.session_data, true, self.ctx)
-		if not ok then
-			return false, err
-		end
-		self.session_updated = false
-		return true, "updated"
-	end
-	return true, "no update"
+	self.session:set("antibot", self.session_data)
+	self.ctx.bw.antibot_session_data = self.session_data
+	self.ctx.bw.sessions_updated = true
 end
 
 function antibot:prepare_challenge()
 	if not self.session_data.prepared then
-		self.session_updated = true
 		self.session_data.prepared = true
 		self.session_data.time_resolve = ngx.now()
 		self.session_data.type = self.variables["USE_ANTIBOT"]
@@ -283,6 +254,7 @@ function antibot:prepare_challenge()
 		elseif self.session_data.type == "captcha" then
 			self.session_data.captcha = rand(6, true)
 		end
+		self:set_session_data()
 	end
 end
 
@@ -363,6 +335,7 @@ function antibot:check_challenge()
 		end
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
+		self:set_session_data()
 		return true, "resolved", self.session_data.original_uri
 	end
 
@@ -374,10 +347,11 @@ function antibot:check_challenge()
 			return nil, "missing challenge arg", nil
 		end
 		if self.session_data.captcha ~= args["captcha"] then
-			return false, "wrong value", nil
+			return false, "wrong value, expected " .. self.session_data.captcha, nil
 		end
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
+		self:set_session_data()
 		return true, "resolved", self.session_data.original_uri
 	end
 
@@ -417,6 +391,7 @@ function antibot:check_challenge()
 		end
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
+		self:set_session_data()
 		return true, "resolved", self.session_data.original_uri
 	end
 
@@ -456,6 +431,7 @@ function antibot:check_challenge()
 		end
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
+		self:set_session_data()
 		return true, "resolved", self.session_data.original_uri
 	end
 
@@ -495,6 +471,7 @@ function antibot:check_challenge()
 		end
 		self.session_data.resolved = true
 		self.session_data.time_valid = now()
+		self:set_session_data()
 		return true, "resolved", self.session_data.original_uri
 	end
 

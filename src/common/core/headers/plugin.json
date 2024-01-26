@@ -23,7 +23,7 @@
         "en": "Custom header (HeaderName: HeaderValue)",
         "fr": "Entête personnalisée (NomEntête: ValeurEntête)"
       },
-      "regex": "^([\\w\\-]+: [^,]+)?$",
+      "regex": "^([\\w\\-]+: .+)?$",
       "type": "text",
       "multiple": "custom-headers"
     },

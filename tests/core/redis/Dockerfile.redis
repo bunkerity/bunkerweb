@@ -1,9 +1,0 @@
-FROM redis:7-alpine@sha256:3ce533b2b057f74b235d1d8697ae08b1b6ff0a5e16827ea6a377b6365693c7ed
-
-RUN apk add --no-cache bash openssl
-
-COPY entrypoint.sh .
-
-RUN chmod +x entrypoint.sh
-
-ENTRYPOINT [ "./entrypoint.sh" ]

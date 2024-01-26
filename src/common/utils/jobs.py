@@ -6,7 +6,7 @@ from hashlib import sha512
 from inspect import getsourcefile
 from io import BytesIO
 from os import getenv
-from os.path import normpath, sep
+from os.path import sep
 from pathlib import Path
 from re import IGNORECASE, compile as re_compile
 from sys import _getframe
@@ -43,7 +43,10 @@ CRON_RX = re_compile(cron_rx, IGNORECASE)
 
 def file_hash(file: Union[str, Path]) -> str:
     _sha512 = sha512()
-    with open(normpath(file), "rb") as f:
+    if not isinstance(file, Path):
+        file = Path(file)
+
+    with file.open("rb") as f:
         while True:
             data = f.read(1024)
             if not data:

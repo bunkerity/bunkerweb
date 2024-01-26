@@ -29,7 +29,6 @@ local decode = cjson.decode
 local char = string.char
 local random = math.random
 local session_start = session.start
-local session_open = session.open
 local tonumber = tonumber
 
 local utils = {}
@@ -318,7 +317,7 @@ utils.get_reason = function(ctx)
 	end
 	local banned, _ = datastore:get("bans_ip_" .. ip)
 	if banned then
-		return banned, {}
+		return decode(banned)["reason"], {}
 	end
 	-- unknown
 	if ngx.status == utils.get_deny_status() then
@@ -569,86 +568,86 @@ utils.get_deny_status = function()
 	return 444
 end
 
-utils.check_session = function(ctx)
-	local _session, _, exists, _ = session_start({ audience = "metadata" })
+utils.get_session = function(ctx)
+	-- Return session from ctx if already there
+	if ctx.bw.sessions_session then
+		return ctx.bw.sessions_session
+	end
+	-- Open/create and do an optional refresh
+	local err, exists, refreshed
+	session, err, exists, refreshed = session_start()
+	if not session then
+		return nil, err
+	end
+	if err then
+		logger:log(WARN, "can't open session : " .. err)
+	end
+	local checks = {
+		["IP"] = ctx.bw.remote_addr,
+		["USER_AGENT"] = ctx.bw.http_user_agent or "",
+	}
 	if exists then
-		for _, check in ipairs(ctx.bw.sessions_checks) do
-			local key = check[1]
-			local value = check[2]
-			if _session:get(key) ~= value then
-				_session:clear_request_cookie()
-				local ok, err = _session:destroy()
-				if not ok then
-					return false, "session:destroy() error : " .. err
+		logger:log(INFO, "opening an existing session")
+		if refreshed then
+			logger:log(INFO, "existing session refreshed")
+		end
+		-- Get metadata
+		local metadata = session:get("metadata")
+		if metadata then
+			-- Check if session passes the checks
+			for check, value in pairs(checks) do
+				local check_value
+				check_value, err = utils.get_variable("SESSIONS_CHECK_" .. check, false, nil)
+				if not check_value then
+					logger:log(ERR, "error while getting variable SESSIONS_CHECK_" .. check .. " : " .. err)
+				elseif check_value == "yes" and value ~= metadata[check] then
+					logger:log(WARN, "session check failed : " .. check .. "!=" .. metadata[check])
+					local ok
+					ok, err = session:destroy()
+					if not ok then
+						return nil, err
+					end
+					return utils.get_session(ctx)
 				end
-				logger:log(WARN, "session check " .. key .. " failed, destroying session")
-				return utils.check_session(ctx)
 			end
 		end
 	else
-		for _, check in ipairs(ctx.bw.sessions_checks) do
-			_session:set(check[1], check[2])
-		end
-		local ok, err = _session:save()
-		if not ok then
-			_session:close()
-			return false, "session:save() error : " .. err
-		end
+		logger:log(INFO, "creating a new session")
+		session:set("metadata", checks)
+		ctx.bw.sessions_updated = true
 	end
-	ctx.bw.sessions_is_checked = true
-	return true, exists
+	ctx.bw.sessions_session = session
+	return session
 end
 
-utils.get_session = function(audience, ctx)
-	-- Check session
-	if not ctx.bw.sessions_is_checked then
-		local ok, err = utils.check_session(ctx)
-		if not ok then
-			return false, "error while checking session, " .. err
+utils.save_session = function(ctx)
+	if ctx.bw.sessions_session then
+		if ctx.bw.sessions_updated then
+			local ok, err = ctx.bw.sessions_session:save()
+			if not err then
+				err = "session saved"
+			end
+			return ok, err
+		else
+			return true, "session not updated"
 		end
+	else
+		return true, "no session"
 	end
-	-- Open session with specific audience
-	local _session, err, _ = session_open({ audience = audience })
-	if err then
-		logger:log(INFO, "session:open() error : " .. err)
-	end
-	return _session
-end
-
--- luacheck: ignore 214
-utils.get_session_data = function(_session, site, ctx)
-	local site_only = site == nil or site
-	local data = _session:get_data()
-	if site_only then
-		return data[ctx.bw.server_name] or {}
-	end
-	return data
-end
-
--- luacheck: ignore 214
-utils.set_session_data = function(_session, data, site, ctx)
-	local site_only = site == nil or site
-	if site_only then
-		local all_data = _session:get_data()
-		all_data[ctx.bw.server_name] = data
-		_session:set_data(all_data)
-		return _session:save()
-	end
-	_session:set_data(data)
-	return _session:save()
 end
 
 utils.is_banned = function(ip)
 	-- Check on local datastore
-	local reason, err = datastore:get("bans_ip_" .. ip)
-	if not reason and err ~= "not found" then
-		return nil, "datastore:get() error : " .. reason
-	elseif reason and err ~= "not found" then
+	local result, err = datastore:get("bans_ip_" .. ip)
+	if not result and err ~= "not found" then
+		return nil, "datastore:get() error : " .. result
+	elseif result and err ~= "not found" then
 		local ok, ttl = datastore:ttl("bans_ip_" .. ip)
+		local ban_data = decode(result)
 		if not ok then
-			return true, reason, -1
+			return true, ban_data["reason"], -1
 		end
-		return true, reason, ttl
+		return true, ban_data["reason"], ttl
 	end
 	-- Redis case
 	local use_redis, err = utils.get_variable("USE_REDIS", false)
@@ -695,7 +694,7 @@ utils.is_banned = function(ip)
 		if not ok then
 			return nil, "datastore:set() error : " .. err
 		end
-		return true, data[1], data[2]
+		return true, decode(data[1])["reason"], data[2]
 	end
 	clusterstore:close()
 	return false, "not banned"
@@ -703,7 +702,11 @@ end
 
 utils.add_ban = function(ip, reason, ttl)
 	-- Set on local datastore
-	local ok, err = datastore:set("bans_ip_" .. ip, reason, ttl)
+	local ban_data = encode({
+		reason = reason,
+		date = os.time(),
+	})
+	local ok, err = datastore:set("bans_ip_" .. ip, ban_data, ttl)
 	if not ok then
 		return false, "datastore:set() error : " .. err
 	end
@@ -721,7 +724,7 @@ utils.add_ban = function(ip, reason, ttl)
 		return false, "can't connect to redis server : " .. err
 	end
 	-- SET call
-	ok, err = clusterstore:call("set", "bans_ip_" .. ip, reason, "EX", ttl)
+	ok, err = clusterstore:call("set", "bans_ip_" .. ip, ban_data, "EX", ttl)
 	if not ok then
 		clusterstore:close()
 		return false, "redis SET failed : " .. err

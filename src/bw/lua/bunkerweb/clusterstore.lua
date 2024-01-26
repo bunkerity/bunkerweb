@@ -2,7 +2,6 @@ local ngx = ngx
 local class = require "middleclass"
 local clogger = require "bunkerweb.logger"
 local rc = require "resty.redis.connector"
-local rs = require("resty.redis.sentinel")
 local utils = require "bunkerweb.utils"
 
 local clusterstore = class("clusterstore")
@@ -12,10 +11,10 @@ local logger = clogger:new("CLUSTERSTORE")
 local get_variable = utils.get_variable
 local is_cosocket_available = utils.is_cosocket_available
 local ERR = ngx.ERR
+local WARN = ngx.WARN
 local INFO = ngx.INFO
 local tonumber = tonumber
 local tostring = tostring
-local random = math.random
 
 function clusterstore:initialize(pool)
 	-- Get variables
@@ -25,6 +24,7 @@ function clusterstore:initialize(pool)
 		["REDIS_PORT"] = "",
 		["REDIS_DATABASE"] = "",
 		["REDIS_SSL"] = "",
+		["REDIS_SSL_VERIFY"] = "",
 		["REDIS_TIMEOUT"] = "",
 		["REDIS_KEEPALIVE_IDLE"] = "",
 		["REDIS_KEEPALIVE_POOL"] = "",
@@ -57,6 +57,7 @@ function clusterstore:initialize(pool)
 		keepalive_poolsize = tonumber(self.variables["REDIS_KEEPALIVE_POOL"]),
 		connection_options = {
 			ssl = self.variables["REDIS_SSL"] == "yes",
+			ssl_verify = self.variables["REDIS_SSL_VERIFY"] == "yes",
 		},
 		host = self.variables["REDIS_HOST"],
 		port = tonumber(self.variables["REDIS_PORT"]),
@@ -71,7 +72,6 @@ function clusterstore:initialize(pool)
 	}
 	self.pool = pool == nil or pool
 	if self.pool then
-		options.connection_options.pool = "bw-redis"
 		options.connection_options.pool_size = tonumber(self.variables["REDIS_KEEPALIVE_POOL"])
 	end
 	if self.variables["REDIS_SENTINEL_HOSTS"] ~= "" then
@@ -82,7 +82,14 @@ function clusterstore:initialize(pool)
 			else
 				sport = tonumber(sport)
 			end
-			table.insert(options.sentinel, { host = shost, port = sport })
+			local data = { host = shost, port = sport }
+			if options.sentinel_username ~= "" then
+				data.username = options.sentinel_username
+			end
+			if options.sentinel_password ~= "" then
+				data.password = options.sentinel_password
+			end
+			table.insert(options.sentinels, data)
 		end
 	end
 	self.options = options
@@ -107,33 +114,37 @@ function clusterstore:connect(readonly)
 		self:close()
 	end
 	-- Connect to sentinels if needed
-	local redis_client, err
-	if #self.options.sentinels > 0 then
-		local redis_sentinel
-		redis_sentinel, err = self.redis_connector:connect()
-		if not redis_sentinel then
-			return false, "error while connecting to sentinels : " .. err
-		end
-		if readonly then
-			local redis_clients, _ = rs.get_slaves(redis_sentinel, self.options.master_name)
-			if redis_clients then
-				redis_client = redis_clients[random(#redis_clients)]
-			else
-				redis_client = nil
+	local redis_client, err, previous_errors
+	if #self.options.sentinels > 0 and readonly then
+		redis_client, err, previous_errors = self.redis_connector:connect({ role = "slave" })
+		if not redis_client then
+			if previous_errors then
+				err = err .. " ( previous errors : "
+				for _, e in ipairs(previous_errors) do
+					err = err .. e .. ", "
+				end
+				err = err:sub(1, -3) .. " )"
 			end
-		else
-			redis_client, err = rs.get_master(redis_sentinel, self.options.master_name)
+			logger:log(WARN, "error while getting redis slave client : " .. err .. ", fallback to master")
+			redis_client, err, previous_errors = self.redis_connector:connect()
 		end
-		-- Classic connection
 	else
-		redis_client, err = self.redis_connector:connect()
+		redis_client, err, previous_errors = self.redis_connector:connect()
 	end
 	self.redis_client = redis_client
 	if not self.redis_client then
+		if previous_errors then
+			err = err .. " ( previous errors : "
+			for _, e in ipairs(previous_errors) do
+				err = err .. e .. ", "
+			end
+			err = err:sub(1, -3) .. " )"
+		end
 		return false, "error while getting redis client : " .. err
 	end
 	-- Everything went well
-	local times, err = self.redis_client:get_reused_times()
+	local times
+	times, err = self.redis_client:get_reused_times()
 	if times == nil then
 		self:close()
 		return false, "error while getting reused times : " .. err

@@ -1,4 +1,4 @@
-FROM python:3.12.1-alpine3.18@sha256:af0d8da43677e3000ebdf4045508d891a87e7bd2d3ec87bc6e40403be97291b8 AS builder
+FROM python:3.12.1-alpine3.18@sha256:fb759579d60cfe1f70b110a27be95aaa7cf758d2fa21cf54fffb71c2ba3f8034 AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache g++ gcc build-base linux-headers
@@ -26,7 +26,7 @@ COPY src/VERSION VERSION
 
 COPY src/ui ui
 
-FROM python:3.12.1-alpine3.18@sha256:af0d8da43677e3000ebdf4045508d891a87e7bd2d3ec87bc6e40403be97291b8
+FROM python:3.12.1-alpine3.18@sha256:fb759579d60cfe1f70b110a27be95aaa7cf758d2fa21cf54fffb71c2ba3f8034
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -63,7 +63,7 @@ RUN apk add --no-cache bash nodejs npm && \
   ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.1.4-r3" "libssl3>=3.1.4-r3"
+RUN apk add --no-cache "libcrypto3>=3.1.4-r3" "libssl3>=3.1.4-r3" "sqlite-libs>=3.41.2-r3"
 
 # Change working directory
 WORKDIR /usr/share/bunkerweb/ui

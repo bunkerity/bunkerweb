@@ -263,7 +263,7 @@ api.global.GET["^/bans$"] = function(self)
 					"can't access ttl " .. k .. " from datastore : " .. ttl
 				)
 			end
-			local ban_data = cjson.decode(result)
+			local ban_data = decode(result)
 			local ban = { ip = k:sub(9, #k), reason = ban_data["reason"], date = ban_data["date"], exp = floor(ttl) }
 			table.insert(data, ban)
 		end
