@@ -3,7 +3,9 @@ import { reactive, computed, onMounted, watch } from "vue";
 import Dashboard from "@layouts/Dashboard.vue";
 import ApiState from "@components/Api/State.vue";
 import ServicesButtonAdd from "@components/Services/Button/Add.vue";
+import ServicesButtonFilter from "@components/Services/Button/Filter.vue";
 import CardBase from "@components/Card/Base.vue";
+import CardLabel from "@components/Card/Label.vue";
 import CardItemList from "@components/Card/Item/List.vue";
 import ServicesModalDelete from "@components/Services/Modal/Delete.vue";
 import ServicesCard from "@components/Services/Card.vue";
@@ -20,7 +22,7 @@ import {
 } from "@utils/plugins.js";
 import { fetchAPI } from "@utils/api.js";
 import { contentIndex } from "@utils/tabindex.js";
-import { useModalStore } from "@store/services.js";
+import { useModalStore, useFilterStore } from "@store/services.js";
 import { useFeedbackStore, useRefreshStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
@@ -28,6 +30,7 @@ import { useI18n } from "vue-i18n";
 
 const { locale, fallbackLocale } = useI18n();
 
+const filterStore = useFilterStore();
 const modalStore = useModalStore();
 const feedbackStore = useFeedbackStore();
 const refreshStore = useRefreshStore();
@@ -37,10 +40,20 @@ watch(refreshStore, () => {
   config.$reset();
   filters.servName = "";
   filters.servMethod = "all";
-  filters.detailState = "all";
   services.methods = [];
   services.filters = {};
   getGlobalConf(false);
+});
+
+watch(filterStore, () => {
+  if (!filterStore.isOpen) {
+    filters.badbehavior = "all";
+    filters.limit = "all";
+    filters.reverseproxy = "all";
+    filters.modsecurity = "all";
+    filters.cors = "all";
+    filters.dnsbl = "all";
+  }
 });
 
 const logsStore = useLogsStore();
@@ -55,6 +68,8 @@ const filters = reactive({
   limit: "all",
   reverseproxy: "all",
   modsecurity: "all",
+  cors: "all",
+  dnsbl: "all",
 });
 
 // Show some details on card, without opening settings modal
@@ -82,6 +97,16 @@ const details = [
     id: "reverseproxy",
     setting: "USE_REVERSE_PROXY",
   },
+  {
+    lang: "cors",
+    id: "cors",
+    setting: "USE_CORS",
+  },
+  {
+    lang: "dnsbl",
+    id: "dnsbl",
+    setting: "USE_DNSBL",
+  },
 ];
 
 // Plugins data to render components
@@ -92,6 +117,8 @@ const services = reactive({
   data: [],
   filters: {},
   methods: [],
+  methodsCount: 0,
+  servicesCount: 0,
   // Get new service
   new: computed(() => {
     if (
@@ -164,10 +191,12 @@ const services = reactive({
 
     // Get all services names
     modalStore.data.servicesName = Object.keys(cloneServConf);
+    services.servicesCount = Object.keys(cloneServConf).length;
 
     // Get methods only on page rendering or refresh services data
     if (services.methods.length === 0)
       services.methods = ["all"].concat(getServicesMethods(cloneServConf));
+    services.methodsCount = getServicesMethods(cloneServConf).length;
 
     // Add filtering
     services.filters = getServicesByFilter(cloneServConf, filters, details);
@@ -263,23 +292,20 @@ onMounted(() => {
           :items="[
             {
               label: $t('services_total'),
-              value: '',
+              value: services.servicesCount,
             },
             {
-              label: $t('dashboard_scheduler'),
-              value: '',
-            },
-            {
-              label: $t('dashboard_ui'),
-              value: '',
+              label: $t('services_methods_count'),
+              value: services.methodsCount,
             },
           ]"
         />
       </CardBase>
-      <CardBase
-        class="h-fit col-span-12 md:col-span-8 lg:col-span-9"
-        :label="$t('dashboard_filter')"
-      >
+      <CardBase class="h-fit col-span-12 md:col-span-8 lg:col-span-9">
+        <div class="col-span-12 flex justify-start items-start">
+          <CardLabel :label="$t('dashboard_filter')" />
+          <ServicesButtonFilter />
+        </div>
         <SettingsLayout
           class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
           :label="$t('services_service_search')"
@@ -305,60 +331,108 @@ onMounted(() => {
               value: 'all',
               values: services.methods,
             }"
+            :key="services.methods"
           />
         </SettingsLayout>
-        <SettingsLayout
-          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
-          :label="$t('services_service_select_bad_behavior')"
+        <div
+          :class="[filterStore.isOpen ? '' : 'hidden']"
+          class="col-span-12 grid grid-cols-12"
+          id="service-card-filter-more"
+          :aria-hidden="filterStore.isOpen ? 'true' : 'false'"
         >
-          <SettingsSelect
-            @inp="(v) => (filters.badbehavior = v)"
-            :settings="{
-              id: 'bad-behavior-filter',
-              value: 'all',
-              values: ['all', 'true', 'false'],
-            }"
-          />
-        </SettingsLayout>
-        <SettingsLayout
-          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
-          :label="$t('services_service_select_limit')"
-        >
-          <SettingsSelect
-            @inp="(v) => (filters.limit = v)"
-            :settings="{
-              id: 'limit-filter',
-              value: 'all',
-              values: ['all', 'true', 'false'],
-            }"
-          />
-        </SettingsLayout>
-        <SettingsLayout
-          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
-          :label="$t('services_service_select_reverse_proxy')"
-        >
-          <SettingsSelect
-            @inp="(v) => (filters.reverseproxy = v)"
-            :settings="{
-              id: 'reverse-proxy-filter',
-              value: 'all',
-              values: ['all', 'true', 'false'],
-            }"
-          />
-        </SettingsLayout>
-        <SettingsLayout
-          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
-          :label="$t('services_service_select_modsecurity')"
-        >
-          <SettingsSelect
-            @inp="(v) => (filters.modsecurity = v)"
-            :settings="{
-              id: 'modsecurity-filter',
-              value: 'all',
-              values: ['all', 'true', 'false'],
-            }"
-          />
-        </SettingsLayout>
+          <div class="col-span-12">
+            <h3
+              class="mx-2 my-2 text-base uppercase font-bold dark:text-white/90 mb-0"
+            >
+              {{ $t("dashboard_advanced") }}
+            </h3>
+          </div>
+
+          <SettingsLayout
+            :key="filterStore.isOpen"
+            class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+            :label="$t('services_service_select_bad_behavior')"
+          >
+            <SettingsSelect
+              @inp="(v) => (filters.badbehavior = v)"
+              :settings="{
+                id: 'bad-behavior-filter',
+                value: 'all',
+                values: ['all', 'true', 'false'],
+              }"
+            />
+          </SettingsLayout>
+          <SettingsLayout
+            :key="filterStore.isOpen"
+            class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+            :label="$t('services_service_select_limit')"
+          >
+            <SettingsSelect
+              @inp="(v) => (filters.limit = v)"
+              :settings="{
+                id: 'limit-filter',
+                value: 'all',
+                values: ['all', 'true', 'false'],
+              }"
+            />
+          </SettingsLayout>
+          <SettingsLayout
+            :key="filterStore.isOpen"
+            class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+            :label="$t('services_service_select_reverse_proxy')"
+          >
+            <SettingsSelect
+              @inp="(v) => (filters.reverseproxy = v)"
+              :settings="{
+                id: 'reverse-proxy-filter',
+                value: 'all',
+                values: ['all', 'true', 'false'],
+              }"
+            />
+          </SettingsLayout>
+          <SettingsLayout
+            :key="filterStore.isOpen"
+            class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+            :label="$t('services_service_select_modsecurity')"
+          >
+            <SettingsSelect
+              @inp="(v) => (filters.modsecurity = v)"
+              :settings="{
+                id: 'modsecurity-filter',
+                value: 'all',
+                values: ['all', 'true', 'false'],
+              }"
+            />
+          </SettingsLayout>
+          <SettingsLayout
+            :key="filterStore.isOpen"
+            class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+            :label="$t('services_service_select_cors')"
+          >
+            <SettingsSelect
+              @inp="(v) => (filters.cors = v)"
+              :settings="{
+                id: 'cors-filter',
+                value: 'all',
+                values: ['all', 'true', 'false'],
+              }"
+            />
+          </SettingsLayout>
+          <SettingsLayout
+            :key="filterStore.isOpen"
+            class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+            :label="$t('services_service_select_dnsbl')"
+          >
+            <SettingsSelect
+              @inp="(v) => (filters.dnsbl = v)"
+              :settings="{
+                id: 'dnsbl-filter',
+                value: 'all',
+                values: ['all', 'true', 'false'],
+              }"
+            />
+          </SettingsLayout>
+        </div>
       </CardBase>
     </div>
     <div

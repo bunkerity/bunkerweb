@@ -35,7 +35,7 @@ async function deleteInstance() {
     "DELETE",
     null,
     instDel,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "success") {
       refreshStore.refresh();

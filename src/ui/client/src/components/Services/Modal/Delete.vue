@@ -18,6 +18,7 @@ const refreshStore = useRefreshStore();
 
 // Close modal on backdrop click
 watch(backdropStore, () => {
+  if (delModalStore.isPend) return;
   delModalStore.isOpen = false;
 });
 
@@ -39,7 +40,7 @@ async function delServ() {
     "DELETE",
     null,
     deleteServ,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   )
     .then((res) => {
       // Case saved, close modal, go to root path and refresh

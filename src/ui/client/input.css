@@ -881,7 +881,7 @@ body {
 }
 
 .modal-card-title {
-  @apply dark:text-white mb-2 font-sans font-semibold leading-normal uppercase text-sm;
+  @apply dark:text-white mb-2 font-sans font-semibold leading-normal uppercase text-base;
 }
 
 .modal-path {

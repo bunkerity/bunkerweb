@@ -201,7 +201,7 @@ async function sendData() {
     method,
     modalStore.data.action.toLowerCase() === "delete" ? null : conf,
     updateConf,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   )
     .then((res) => {
       // Case saved, close modal, go to root path and refresh
@@ -294,8 +294,8 @@ const emits = defineEmits(["close"]);
             modalStore.data.action === 'create'
               ? 'btn-valid'
               : modalStore.data.action
-              ? `btn-${modalStore.data.action}`
-              : '',
+                ? `btn-${modalStore.data.action}`
+                : '',
           ]"
           class="text-sm ml-2"
         >

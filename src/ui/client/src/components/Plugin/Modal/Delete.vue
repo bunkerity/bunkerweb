@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from "vue";
+import { reactive, watch } from "vue";
 import ButtonBase from "@components/Button/Base.vue";
 import ModalBase from "@components/Modal/Base.vue";
 import { fetchAPI } from "@utils/api.js";
@@ -34,7 +34,7 @@ async function pluginDelete() {
     "DELETE",
     null,
     delPlugin,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "success") {
       delModalStore.isOpen = false;
@@ -51,7 +51,7 @@ async function pluginDelete() {
     v-show="delModalStore.isOpen"
   >
     <div class="col-span-12 overflow-x-auto overflow-y-hidden">
-      <p>
+      <p class="text-base">
         {{ $t("plugins_delete_modal_text", { name: delModalStore.data.name }) }}
       </p>
       <p>{{ delModalStore.data.description }}</p>

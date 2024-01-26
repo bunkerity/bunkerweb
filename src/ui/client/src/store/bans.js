@@ -19,7 +19,7 @@ export const useSelectIPStore = defineStore("selectIP", () => {
   return { data, $reset, addIP, deleteIP };
 });
 
-export const useModalStore = defineStore("addBanModal", () => {
+export const useAddModalStore = defineStore("addBanModal", () => {
   const isOpen = ref(false);
 
   return {

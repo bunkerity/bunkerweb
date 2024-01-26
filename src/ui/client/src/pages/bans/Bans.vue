@@ -6,6 +6,7 @@ import SettingsSelect from "@components/Settings/Select.vue";
 import CardBase from "@components/Card/Base.vue";
 import CardItemList from "@components/Card/Item/List.vue";
 import BansModalAdd from "@components/Bans/Modal/Add.vue";
+import BansButtonAdd from "@components/Bans/Button/Add.vue";
 import BansList from "@components/Bans/List.vue";
 import ApiState from "@components/Api/State.vue";
 import { reactive, computed, onMounted, watch } from "vue";
@@ -14,8 +15,10 @@ import { useFeedbackStore } from "@store/global.js";
 import { getBansByFilter } from "@utils/bans.js";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
+import { useAddModalStore } from "@store/bans.js";
 
 // Refresh when related btn is clicked
+const addModalStore = useAddModalStore();
 const refreshStore = useRefreshStore();
 
 watch(refreshStore, () => {
@@ -82,7 +85,7 @@ async function getData() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
   const hostnames = await getHostFromInst();
 
@@ -134,16 +137,12 @@ async function getHostBan(hostname) {
     "POST",
     null,
     data,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
 onMounted(() => {
   getData();
-});
-
-const tab = reactive({
-  current: "list",
 });
 </script>
 
@@ -157,6 +156,12 @@ const tab = reactive({
         isPend: $t('api_pending', { name: $t('dashboard_bans') }),
         isErr: $t('api_error', { name: $t('dashboard_bans') }),
       }"
+    />
+
+    <BansButtonAdd
+      v-if="
+        !instances.isErr && !instances.isPend && !bans.isPend && !bans.isErr
+      "
     />
     <CardBase
       v-if="
@@ -178,6 +183,7 @@ const tab = reactive({
         ]"
       />
     </CardBase>
+
     <CardBase
       v-if="
         !instances.isErr && !instances.isPend && !bans.isPend && !bans.isErr

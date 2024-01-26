@@ -50,3 +50,11 @@ export const useDelModalStore = defineStore("ServiceDelModal", () => {
     $reset,
   };
 });
+
+export const useFilterStore = defineStore("serviceCardFilter", () => {
+  const isOpen = ref(false);
+
+  return {
+    isOpen,
+  };
+});
