@@ -85,7 +85,6 @@ jobs:
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       K8S_IP: ${{ secrets.K8S_IP }}
   prepare-tests-core:
-    needs: [codeql, build-containers, build-packages]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -130,7 +129,7 @@ jobs:
       RUNS_ON: ${{ matrix.runs_on }}
     secrets: inherit
   tests-core:
-    needs: prepare-tests-core
+    needs: [build-containers, prepare-tests-core]
     strategy:
       fail-fast: false
       matrix:
@@ -140,7 +139,7 @@ jobs:
       TEST: ${{ matrix.test }}
       RELEASE: testing
   tests-core-linux:
-    needs: prepare-tests-core
+    needs: [build-packages, prepare-tests-core]
     strategy:
       fail-fast: false
       matrix:

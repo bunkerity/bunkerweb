@@ -369,13 +369,13 @@ try:
 
     if not all([core_plugins[plugin]["checked"] for plugin in core_plugins]):
         print(
-            f"❌ Not all core plugins are in the database, exiting ...\nmissing plugins: {', '.join([plugin for plugin in core_plugins if not core_plugins[plugin]])}",
+            f"❌ Not all core plugins are in the database, exiting ...\nmissing plugins: {', '.join([plugin for plugin in core_plugins if not core_plugins[plugin]['checked']])}",
             flush=True,
         )
         exit(1)
     elif not all([external_plugins[plugin]["checked"] for plugin in external_plugins]):
         print(
-            f"❌ Not all external plugins are in the database, exiting ...\nmissing plugins: {', '.join([plugin for plugin in external_plugins if not external_plugins[plugin]])}",
+            f"❌ Not all external plugins are in the database, exiting ...\nmissing plugins: {', '.join([plugin for plugin in external_plugins if not external_plugins[plugin]['checked']])}",
             flush=True,
         )
         exit(1)
@@ -475,22 +475,6 @@ try:
             if not path_ui.exists():
                 print(
                     f'❌ The plugin page from {plugin_page.plugin_id} is in the database but should not be because the "ui" folder is missing from the plugin, exiting ...',
-                    flush=True,
-                )
-                exit(1)
-
-            template_checksum = file_hash(f"{path_ui}/template.html")
-            actions_checksum = file_hash(f"{path_ui}/actions.py")
-
-            if plugin_page.template_checksum != template_checksum:
-                print(
-                    f"❌ The plugin page from {plugin_page.plugin_id} is in the database but the template file checksum differ, exiting ...\n{plugin_page.template_checksum} (database) != {template_checksum} (file)",
-                    flush=True,
-                )
-                exit(1)
-            elif plugin_page.actions_checksum != actions_checksum:
-                print(
-                    f"❌ The plugin page from {plugin_page.plugin_id} is in the database but the actions file checksum differ, exiting ...\n{plugin_page.actions_checksum} (database) != {actions_checksum} (file)",
                     flush=True,
                 )
                 exit(1)

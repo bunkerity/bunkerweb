@@ -74,9 +74,8 @@ try:
         cert_data = b64decode(getenv("CUSTOM_SSL_CERT_DATA", ""))
         key_data = b64decode(getenv("CUSTOM_SSL_KEY_DATA", ""))
         for file, data in (("cert.pem", cert_data), ("key.pem", key_data)):
-            if data != b"":
+            if data:
                 file_path = Path(sep, "var", "tmp", "bunkerweb", "customcert", f"{first_server}.{file}")
-                file_path.parent.mkdir(parents=True, exist_ok=True)
                 file_path.write_bytes(data)
                 if file == "cert.pem":
                     cert_path = str(file_path)
@@ -91,9 +90,28 @@ try:
                 status = 1
             else:
                 LOGGER.info(f"No change for certificate {cert_path}")
-        else:
-            LOGGER.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates")
-
+        elif not cert_path or not key_path:
+            LOGGER.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY (or CUSTOM_SSL_CERT_DATA and CUSTOM_SSL_KEY_DATA) have to be set to use custom certificates, clearing cache ...")
+            cert_cache_path = Path(
+                sep,
+                "var",
+                "cache",
+                "bunkerweb",
+                "customcert",
+                f"{first_server}.cert.pem",
+            )
+            cert_cache_path.unlink(missing_ok=True)
+            JOB.del_cache(f"{first_server}.cert.pem", service_id=first_server)
+            key_cache_path = Path(
+                sep,
+                "var",
+                "cache",
+                "bunkerweb",
+                "customcert",
+                f"{first_server}.key.pem",
+            )
+            key_cache_path.unlink(missing_ok=True)
+            JOB.del_cache(f"{first_server}.key.pem", service_id=first_server)
     if getenv("MULTISITE", "yes") == "yes":
         servers = getenv("SERVER_NAME") or []
 
@@ -129,8 +147,28 @@ try:
                     status = 1
                 else:
                     LOGGER.info(f"No change for certificate {cert_path}")
-            else:
-                LOGGER.warning(f"Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY have to be set to use custom certificates with service {first_server}")
+            elif not cert_path or not key_path:
+                LOGGER.warning("Both variables CUSTOM_SSL_CERT and CUSTOM_SSL_KEY (or CUSTOM_SSL_CERT_DATA and CUSTOM_SSL_KEY_DATA) have to be set to use custom certificates, clearing cache ...")
+                cert_cache_path = Path(
+                    sep,
+                    "var",
+                    "cache",
+                    "bunkerweb",
+                    "customcert",
+                    f"{first_server}.cert.pem",
+                )
+                cert_cache_path.unlink(missing_ok=True)
+                JOB.del_cache(f"{first_server}.cert.pem")
+                key_cache_path = Path(
+                    sep,
+                    "var",
+                    "cache",
+                    "bunkerweb",
+                    "customcert",
+                    f"{first_server}.key.pem",
+                )
+                key_cache_path.unlink(missing_ok=True)
+                JOB.del_cache(f"{first_server}.key.pem")
 except:
     status = 2
     LOGGER.error(f"Exception while running custom-cert.py :\n{format_exc()}")

@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from multiprocessing import Process
 from os import getenv
-from redis import Redis
+from redis import Redis, Sentinel
 from requests import get
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
@@ -15,7 +15,7 @@ from uvicorn import run
 
 fastapi_proc = None
 
-ip_to_check = "1.0.0.3" if getenv("TEST_TYPE", "docker") == "docker" else "127.0.0.1"
+ip_to_check = "1.0.0.253" if getenv("TEST_TYPE", "docker") == "docker" else "127.0.0.1"
 
 try:
     ready = False
@@ -63,20 +63,50 @@ try:
     redis_db = int(redis_db)
 
     redis_ssl = getenv("REDIS_SSL", "no") == "yes"
+    sentinel_hosts = getenv("REDIS_SENTINEL_HOSTS", [])
 
-    print(
-        f"ℹ️ Trying to connect to Redis with the following parameters:\nhost: {redis_host}\nport: {redis_port}\ndb: {redis_db}\nssl: {redis_ssl}",
-        flush=True,
-    )
+    if isinstance(sentinel_hosts, str):
+        sentinel_hosts = [host.split(":") if ":" in host else host for host in sentinel_hosts.split(" ") if host]
 
-    redis_client = Redis(
-        host=redis_host,
-        port=redis_port,
-        db=redis_db,
-        ssl=redis_ssl,
-        socket_timeout=1,
-        ssl_cert_reqs=None,
-    )
+    if sentinel_hosts:
+        sentinel_username = getenv("REDIS_SENTINEL_USERNAME", None) or None
+        sentinel_password = getenv("REDIS_SENTINEL_PASSWORD", None) or None
+        sentinel_master = getenv("REDIS_SENTINEL_MASTER", "bw-master")
+
+        print(
+            f"ℹ️ Trying to connect to Redis Sentinel with the following parameters:\nhosts: {sentinel_hosts}\nmaster: {sentinel_master}\nssl: {redis_ssl}\nusername: {sentinel_username}\npassword: {sentinel_password}",
+            flush=True,
+        )
+        sentinel = Sentinel(sentinel_hosts, username=sentinel_username, password=sentinel_password, sentinel_kwargs=dict(ssl=redis_ssl), socket_timeout=1)  # type: ignore
+
+        print(
+            f"ℹ️ Trying to get a Redis Sentinel slave for master {sentinel_master} with the following parameters:\n"
+            + f"host: {redis_host}\nport: {redis_port}\ndb: {redis_db}\nssl: {redis_ssl}\nusername: {getenv('REDIS_USERNAME', None) or None}\npassword: {getenv('REDIS_PASSWORD', None) or None}",
+            flush=True,
+        )
+        redis_client = sentinel.slave_for(
+            sentinel_master,
+            db=redis_db,
+            username=getenv("REDIS_USERNAME", None) or None,
+            password=getenv("REDIS_PASSWORD", None) or None,
+        )
+    else:
+        print(
+            "ℹ️ Trying to connect to Redis with the following parameters:\n"
+            + f"host: {redis_host}\nport: {redis_port}\ndb: {redis_db}\nssl: {redis_ssl}\nusername: {getenv('REDIS_USERNAME', None) or None}\npassword: {getenv('REDIS_PASSWORD', None) or None}",
+            flush=True,
+        )
+
+        redis_client = Redis(
+            host=redis_host,
+            port=redis_port,
+            db=redis_db,
+            username=getenv("REDIS_USERNAME", None) or None,
+            password=getenv("REDIS_PASSWORD", None) or None,
+            ssl=redis_ssl,
+            socket_timeout=1,
+            ssl_cert_reqs="none",
+        )
 
     if not redis_client.ping():
         print("❌ Redis is not reachable, exiting ...", flush=True)
@@ -85,7 +115,7 @@ try:
     use_reverse_scan = getenv("USE_REVERSE_SCAN", "no") == "yes"
 
     if use_reverse_scan:
-        if ip_to_check == "1.0.0.3":
+        if ip_to_check == "1.0.0.253":
             print("ℹ️ Testing Reverse Scan, starting FastAPI ...", flush=True)
             app = FastAPI()
             fastapi_proc = Process(target=run, args=(app,), kwargs=dict(host="0.0.0.0", port=8080))
@@ -113,7 +143,7 @@ try:
 
         print("ℹ️ The request was blocked, checking Redis ...", flush=True)
 
-        port_to_check = "8080" if ip_to_check == "1.0.0.3" else "80"
+        port_to_check = "8080" if ip_to_check == "1.0.0.253" else "80"
 
         key_value = redis_client.get(f"plugin_reverse_scan_{ip_to_check}:{port_to_check}")
 
@@ -369,7 +399,7 @@ try:
     #     flush=True,
     # )
 
-    # if ip_to_check == "1.0.0.3":
+    # if ip_to_check == "1.0.0.253":
     #     print(
     #         "ℹ️ Checking if the dnsbl keys were created ...",
     #         flush=True,

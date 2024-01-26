@@ -103,10 +103,7 @@ function letsencrypt:ssl_certificate()
 	local data
 	data, err = self.datastore:get("plugin_letsencrypt_" .. server_name, true)
 	if not data and err ~= "not found" then
-		return self:ret(
-			false,
-			"error while getting plugin_letsencrypt_" .. server_name .. " from datastore : " .. err
-		)
+		return self:ret(false, "error while getting plugin_letsencrypt_" .. server_name .. " from datastore : " .. err)
 	elseif data then
 		return self:ret(true, "certificate/key data found", data)
 	end

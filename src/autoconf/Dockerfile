@@ -56,7 +56,7 @@ RUN apk add --no-cache bash && \
   chmod 750 /usr/share/bunkerweb/helpers/*.sh /usr/share/bunkerweb/autoconf/*.py /usr/share/bunkerweb/autoconf/entrypoint.sh /usr/share/bunkerweb/deps/python/bin/*
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.1.4-r3" "libssl3>=3.1.4-r3"
+RUN apk add --no-cache "libcrypto3>=3.1.4-r3" "libssl3>=3.1.4-r3" "sqlite-libs>=3.41.2-r3"
 
 VOLUME /data /etc/nginx
 

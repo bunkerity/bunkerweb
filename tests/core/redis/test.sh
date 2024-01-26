@@ -12,8 +12,55 @@ fi
 
 echo "🧰 Building redis stack for integration \"$integration\" ..."
 
+echo "🧰 Generating redis certs ..."
+sudo rm -rf tls
+mkdir tls
+openssl genrsa -out tls/ca.key 4096
+openssl req \
+    -x509 -new -nodes -sha256 \
+    -key tls/ca.key \
+    -days 365 \
+    -subj /CN=bw-redis/ \
+    -out tls/ca.crt
+
+openssl req \
+    -x509 -nodes -newkey rsa:4096 \
+    -keyout tls/redis.key \
+    -out tls/redis.pem \
+    -days 365 \
+    -subj /CN=bw-redis/
+
+openssl genrsa -out tls/sentinel_ca.key 4096
+openssl req \
+    -x509 -new -nodes -sha256 \
+    -key tls/sentinel_ca.key \
+    -days 365 \
+    -subj /CN=bw-redis-sentinel/ \
+    -out tls/sentinel_ca.crt
+
+openssl req \
+    -x509 -nodes -newkey rsa:4096 \
+    -keyout tls/sentinel.key \
+    -out tls/sentinel.pem \
+    -days 365 \
+    -subj /CN=bw-redis-sentinel/
+
+sudo chmod -R 777 tls
+echo "🧰 Certs generated ✅"
+
+echo "🧰 Generating redis acl files ..."
+sudo rm -rf acl
+mkdir acl
+
 # Starting stack
 if [ "$integration" == "docker" ] ; then
+    echo "user default on nopass +@all ~* &* +@all -@all +@all" > acl/redis.acl
+    echo "user bunkerweb on >secret +@all ~* +@all -@all +@all" >> acl/redis.acl
+    echo "user default on nopass +@all ~* &* +@all -@all +@all" > acl/sentinel.acl
+    echo "user bunkerweb_sentinel on >sentinel_secret +@all ~* +@all -@all +@all" >> acl/sentinel.acl
+    sudo chmod -R 777 acl
+    echo "🧰 Redis acl files generated ✅"
+
     docker compose pull bw-docker
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
@@ -37,6 +84,11 @@ if [ "$integration" == "docker" ] ; then
         exit 1
     fi
 else
+    echo "user default on nopass +@all ~* +@all -@all +@all" > acl/redis.acl
+    echo "user bunkerweb on >secret +@all ~* +@all -@all +@all" >> acl/redis.acl
+    sudo chmod -R 777 acl
+    echo "🧰 Redis acl files generated ✅"
+
     sudo systemctl stop bunkerweb
     sudo sed -i "/^USE_BLACKLIST=/d" /etc/bunkerweb/variables.env
     echo "BLACKLIST_IP_URLS=" | sudo tee -a /etc/bunkerweb/variables.env
@@ -58,24 +110,6 @@ else
     fi
     echo "🧰 Redis installed ✅"
 
-    echo "🧰 Generating redis certs ..."
-    mkdir tls
-    openssl genrsa -out tls/ca.key 4096
-    openssl req \
-        -x509 -new -nodes -sha256 \
-        -key tls/ca.key \
-        -days 365 \
-        -subj /CN=bw-redis/ \
-        -out tls/ca.crt
-    openssl req \
-        -x509 -nodes -newkey rsa:4096 \
-        -keyout tls/redis.key \
-        -out tls/redis.pem \
-        -days 365 \
-        -subj /CN=bw-redis/
-    sudo chmod -R 777 tls
-    echo "🧰 Certs generated ✅"
-
     echo "USE_REDIS=yes" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REDIS_HOST=127.0.0.1" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REDIS_PORT=6379" | sudo tee -a /etc/bunkerweb/variables.env
@@ -95,10 +129,21 @@ cleanup_stack () {
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_REVERSE_SCAN: "yes"@USE_REVERSE_SCAN: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_ANTIBOT: "cookie"@USE_ANTIBOT: "no"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT: "[0-9]*"@REDIS_PORT: "6379"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT_NUMBER: "[0-9]*"@REDIS_PORT_NUMBER: "6379"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_MASTER_PORT_NUMBER: "[0-9]*"@REDIS_MASTER_PORT_NUMBER: "6379"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_PORT_NUMBER: "[0-9]*"@REDIS_SENTINEL_PORT_NUMBER: "26379"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_DATABASE: "1"@REDIS_DATABASE: "0"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SSL: "yes"@REDIS_SSL: "no"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_ENABLED: "yes"@REDIS_TLS_ENABLED: "no"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_TLS_ENABLED: "yes"@REDIS_SENTINEL_TLS_ENABLED: "no"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_PORT_NUMBER: "[0-9]*"@REDIS_TLS_PORT_NUMBER: "6379"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_AUTH_CLIENTS: "no"@REDIS_TLS_AUTH_CLIENTS: "yes"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PASSWORD: ".*"@REDIS_PASSWORD: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_PASSWORD: ".*"@REDIS_SENTINEL_PASSWORD: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_USERNAME: ".*"@REDIS_USERNAME: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_USERNAME: ".*"@REDIS_SENTINEL_USERNAME: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_HOSTS: ".*"@REDIS_SENTINEL_HOSTS: ""@' {} \;
         else
-            sudo rm -rf tls
             sudo sed -i 's@USE_REVERSE_SCAN=.*$@USE_REVERSE_SCAN=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@USE_ANTIBOT=.*$@USE_ANTIBOT=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REDIS_PORT=.*$@REDIS_PORT=6379@' /etc/bunkerweb/variables.env
@@ -109,8 +154,10 @@ cleanup_stack () {
             unset REDIS_PORT
             unset REDIS_DATABASE
             unset REDIS_SSL
+            sudo systemctl stop redis
             sudo killall redis-server
         fi
+        sudo rm -rf acl tls
         if [[ $end -eq 1 && $exit_code = 0 ]] ; then
             return
         fi
@@ -137,7 +184,13 @@ cleanup_stack () {
 # Cleanup stack on exit
 trap cleanup_stack EXIT
 
-for test in "activated" "reverse_scan" "antibot" "tweaked"
+tests="activated reverse_scan antibot tweaked ssl"
+
+if [ "$integration" == "docker" ] ; then
+    tests="$tests sentinel sentinel_tweaked" # TODO sentinel_ssl
+fi
+
+for test in $tests
 do
     if [ "$test" = "activated" ] ; then
         echo "🧰 Running tests with redis with default values ..."
@@ -153,6 +206,7 @@ do
         echo "🧰 Running tests with redis with antibot cookie activated ..."
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_REVERSE_SCAN: "yes"@USE_REVERSE_SCAN: "no"@' {} \;
+
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_ANTIBOT: "no"@USE_ANTIBOT: "cookie"@' {} \;
         else
             sudo sed -i 's@USE_REVERSE_SCAN=.*$@USE_REVERSE_SCAN=no@' /etc/bunkerweb/variables.env
@@ -164,17 +218,65 @@ do
         echo "🧰 Running tests with redis' settings tweaked ..."
         if [ "$integration" == "docker" ] ; then
             find . -type f -name 'docker-compose.*' -exec sed -i 's@USE_ANTIBOT: "cookie"@USE_ANTIBOT: "no"@' {} \;
+
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT: "[0-9]*"@REDIS_PORT: "6380"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT_NUMBER: "[0-9]*"@REDIS_PORT_NUMBER: "6380"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_MASTER_PORT_NUMBER: "[0-9]*"@REDIS_MASTER_PORT_NUMBER: "6380"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_DATABASE: "0"@REDIS_DATABASE: "1"@' {} \;
-            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SSL: "no"@REDIS_SSL: "yes"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PASSWORD: ".*"@REDIS_PASSWORD: "secret"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_USERNAME: ".*"@REDIS_USERNAME: "bunkerweb"@' {} \;
         else
             sudo sed -i 's@USE_ANTIBOT=.*$@USE_ANTIBOT=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REDIS_PORT=.*$@REDIS_PORT=6380@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REDIS_DATABASE=.*$@REDIS_DATABASE=1@' /etc/bunkerweb/variables.env
-            sudo sed -i 's@REDIS_SSL=.*$@REDIS_SSL=yes@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@REDIS_PASSWORD=.*$@REDIS_PASSWORD=secret@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@REDIS_USERNAME=.*$@REDIS_USERNAME=bunkerweb@' /etc/bunkerweb/variables.env
             unset USE_ANTIBOT
             export REDIS_PORT="6380"
             export REDIS_DATABASE="1"
+            export REDIS_PASSWORD="secret"
+            export REDIS_USERNAME="bunkerweb"
+
+            echo "🧰 Stopping redis ..."
+            sudo systemctl stop redis
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                echo "🧰 Redis stop failed ❌"
+                exit 1
+            fi
+            echo "🧰 Redis stopped ✅"
+            echo "🧰 Starting redis with tweaked settings ..."
+            redis-server --port 6380 --requirepass secret --aclfile acl/redis.acl --daemonize yes
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                echo "🧰 Redis start failed ❌"
+                exit 1
+            fi
+            echo "🧰 Redis started ✅"
+        fi
+    elif [ "$test" = "ssl" ] ; then
+        echo "🧰 Running tests with redis' ssl activated ..."
+        if [ "$integration" == "docker" ] ; then
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT_NUMBER: "[0-9]*"@REDIS_PORT_NUMBER: "6379"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_MASTER_PORT_NUMBER: "[0-9]*"@REDIS_MASTER_PORT_NUMBER: "6379"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_DATABASE: "1"@REDIS_DATABASE: "0"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PASSWORD: ".*"@REDIS_PASSWORD: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_USERNAME: ".*"@REDIS_USERNAME: ""@' {} \;
+
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SSL: "no"@REDIS_SSL: "yes"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_ENABLED: "no"@REDIS_TLS_ENABLED: "yes"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_PORT_NUMBER: "[0-9]*"@REDIS_TLS_PORT_NUMBER: "6380"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_AUTH_CLIENTS: "yes"@REDIS_TLS_AUTH_CLIENTS: "no"@' {} \;
+        else
+            sudo sed -i 's@REDIS_PORT=.*$@REDIS_PORT=6379@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@REDIS_DATABASE=.*$@REDIS_DATABASE=0@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@REDIS_PASSWORD=.*$@REDIS_PASSWORD=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@REDIS_USERNAME=.*$@REDIS_USERNAME=@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@REDIS_SSL=.*$@REDIS_SSL=yes@' /etc/bunkerweb/variables.env
+            unset REDIS_PORT
+            unset REDIS_DATABASE
+            unset REDIS_PASSWORD
+            unset REDIS_USERNAME
             export REDIS_SSL="yes"
 
             echo "🧰 Stopping redis ..."
@@ -186,7 +288,7 @@ do
             fi
             echo "🧰 Redis stopped ✅"
             echo "🧰 Starting redis with tweaked settings ..."
-            redis-server --tls-port 6380 --port 0 --tls-cert-file tls/redis.pem --tls-key-file tls/redis.key --tls-ca-cert-file tls/ca.crt --tls-auth-clients no --daemonize yes
+            redis-server --tls-port 6379 --port 0 --tls-cert-file tls/redis.pem --tls-key-file tls/redis.key --tls-ca-cert-file tls/ca.crt --tls-auth-clients no --daemonize yes
             # shellcheck disable=SC2181
             if [ $? -ne 0 ] ; then
                 echo "🧰 Redis start failed ❌"
@@ -194,6 +296,45 @@ do
             fi
             echo "🧰 Redis started ✅"
         fi
+    elif [ "$test" = "sentinel" ] ; then
+        echo "🧰 Running tests with redis' in sentinel mode ..."
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT: "[0-9]*"@REDIS_PORT: "6379"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SSL: "yes"@REDIS_SSL: "no"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_ENABLED: "yes"@REDIS_TLS_ENABLED: "no"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_PORT_NUMBER: "[0-9]*"@REDIS_TLS_PORT_NUMBER: "6379"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_AUTH_CLIENTS: "no"@REDIS_TLS_AUTH_CLIENTS: "yes"@' {} \;
+
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_HOSTS: ".*"@REDIS_SENTINEL_HOSTS: "redis-bw-redis-sentinel-1:26379 redis-bw-redis-sentinel-2:26379 redis-bw-redis-sentinel-3:26379"@' {} \;
+    elif [ "$test" = "sentinel_tweaked" ] ; then
+        echo "🧰 Running tests with redis' in sentinel mode with tweaked settings ..."
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT: "[0-9]*"@REDIS_PORT: "6380"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT_NUMBER: "[0-9]*"@REDIS_PORT_NUMBER: "6380"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_MASTER_PORT_NUMBER: "[0-9]*"@REDIS_MASTER_PORT_NUMBER: "6380"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_PORT_NUMBER: "[0-9]*"@REDIS_SENTINEL_PORT_NUMBER: "26380"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_DATABASE: "0"@REDIS_DATABASE: "1"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PASSWORD: ".*"@REDIS_PASSWORD: "secret"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_PASSWORD: ".*"@REDIS_SENTINEL_PASSWORD: "sentinel_secret"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_USERNAME: ".*"@REDIS_USERNAME: "bunkerweb"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_USERNAME: ".*"@REDIS_SENTINEL_USERNAME: "bunkerweb_sentinel"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_HOSTS: ".*"@REDIS_SENTINEL_HOSTS: "redis-bw-redis-sentinel-1:26380 redis-bw-redis-sentinel-2:26380 redis-bw-redis-sentinel-3:26380"@' {} \;
+    elif [ "$test" = "sentinel_ssl" ] ; then
+        echo "🧰 Running tests with redis' in sentinel mode with ssl activated ..."
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT: "[0-9]*"@REDIS_PORT: "6379"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PORT_NUMBER: "[0-9]*"@REDIS_PORT_NUMBER: "6379"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_MASTER_PORT_NUMBER: "[0-9]*"@REDIS_MASTER_PORT_NUMBER: "6379"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SSL: "no"@REDIS_SSL: "yes"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_DATABASE: "1"@REDIS_DATABASE: "0"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_PASSWORD: ".*"@REDIS_PASSWORD: ""@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_USERNAME: ".*"@REDIS_USERNAME: ""@' {} \;
+
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SSL: "no"@REDIS_SSL: "yes"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_ENABLED: "no"@REDIS_TLS_ENABLED: "yes"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_PORT_NUMBER: "[0-9]*"@REDIS_TLS_PORT_NUMBER: "6380"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_TLS_ENABLED: "no"@REDIS_SENTINEL_TLS_ENABLED: "yes"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_PORT_NUMBER: "[0-9]*"@REDIS_SENTINEL_PORT_NUMBER: "26379"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_TLS_AUTH_CLIENTS: "yes"@REDIS_TLS_AUTH_CLIENTS: "no"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_TLS_AUTH_CLIENTS: "yes"@REDIS_SENTINEL_TLS_AUTH_CLIENTS: "no"@' {} \;
+        find . -type f -name 'docker-compose.*' -exec sed -i 's@REDIS_SENTINEL_HOSTS: ".*"@REDIS_SENTINEL_HOSTS: "redis-bw-redis-sentinel-1:26379 redis-bw-redis-sentinel-2:26379 redis-bw-redis-sentinel-3:26379"@' {} \;
     fi
 
     echo "🧰 Starting stack ..."
