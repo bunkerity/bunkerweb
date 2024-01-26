@@ -3,15 +3,22 @@ import { reactive, defineProps, markRaw, computed } from "vue";
 import ButtonBase from "@components/Button/Base.vue";
 import InstanceSvgPing from "@components/Instance/Svg/Ping.vue";
 import InstanceSvgDelete from "@components/Instance/Svg/Delete.vue";
+import InstanceButtonEdit from "@components/Instance/Button/Edit.vue";
 import { contentIndex } from "@utils/tabindex.js";
-import { useModalStore } from "@store/instances.js";
+import {
+  useDelModalStore,
+  useAddModalStore,
+  useEditModalStore,
+} from "@store/instances.js";
 import { useRefreshStore, useFeedbackStore } from "@store/global.js";
 import { fetchAPI } from "@utils/api.js";
 
 // Refresh when related btn is clicked
 const refreshStore = useRefreshStore();
 const feedbackStore = useFeedbackStore();
-const modalStore = useModalStore();
+const delModalStore = useDelModalStore();
+const addModalStore = useAddModalStore();
+const editModalStore = useEditModalStore();
 
 const props = defineProps({
   id: {
@@ -71,7 +78,7 @@ const instance = reactive({
   ],
 
   actions: computed(() =>
-    props.status === "up" ? [actions.stop, actions.reload] : [],
+    props.status === "up" ? [actions.stop, actions.reload] : []
   ),
 
   checks: computed(() =>
@@ -79,7 +86,7 @@ const instance = reactive({
       ? props.method === "static"
         ? [topActions.ping]
         : [topActions.delete, topActions.ping]
-      : [],
+      : []
   ),
 });
 
@@ -90,12 +97,23 @@ const instActions = reactive({
 });
 
 async function actionInstance(operation) {
+  // Case edit
+  if (operation === "edit") {
+    editModalStore.data = {
+      old_hostname: props.hostname,
+      hostname: props.hostname,
+      serverName: props.serverName,
+      port: props.port,
+    };
+    return (editModalStore.isOpen = true);
+  }
+
   // Case delete, open confirm modal
   if (operation === "delete") {
-    modalStore.data = {
+    delModalStore.data = {
       hostname: props.hostname,
     };
-    return (modalStore.isOpen = true);
+    return (delModalStore.isOpen = true);
   }
   // Else directly send action
   await fetchAPI(
@@ -103,7 +121,7 @@ async function actionInstance(operation) {
     "POST",
     null,
     instActions,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "success") {
       refreshStore.refresh();
@@ -113,7 +131,7 @@ async function actionInstance(operation) {
 </script>
 
 <template>
-  <div class="card-instance-container h-max">
+  <div class="card-instance-container">
     <div class="w-full relative">
       <div class="grid grid-cols-12 items-center">
         <div class="col-span-10 flex items-center">
@@ -133,11 +151,29 @@ async function actionInstance(operation) {
           <h5 class="card-instance-title">
             {{ props.serverName }}
           </h5>
+          <InstanceButtonEdit
+            :tabindex="
+              addModalStore.isOpen ||
+              delModalStore.isOpen ||
+              editModalStore.isOpen
+                ? -1
+                : contentIndex
+            "
+            @click="actionInstance('edit')"
+            v-if="props.method.toLowerCase() === 'ui'"
+            :hostname="props.hostname"
+          />
         </div>
       </div>
       <div class="absolute flex flex-col justify-end items-end right-0 top-0">
         <button
-          :tabindex="contentIndex"
+          :tabindex="
+            addModalStore.isOpen ||
+            delModalStore.isOpen ||
+            editModalStore.isOpen
+              ? -1
+              : contentIndex
+          "
           v-for="action in instance.checks"
           :color="action.color"
           @click="actionInstance(action.name)"
@@ -165,7 +201,13 @@ async function actionInstance(operation) {
       </div>
       <div class="card-instance-actions-container">
         <ButtonBase
-          :tabindex="contentIndex"
+          :tabindex="
+            addModalStore.isOpen ||
+            delModalStore.isOpen ||
+            editModalStore.isOpen
+              ? -1
+              : contentIndex
+          "
           v-for="action in instance.actions"
           :color="action.color"
           @click="actionInstance(action.name)"

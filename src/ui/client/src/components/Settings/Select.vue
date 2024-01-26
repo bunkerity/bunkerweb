@@ -12,6 +12,10 @@ const props = defineProps({
     type: String,
     required: false,
   },
+  tabId: {
+    type: [String, Number],
+    required: false,
+  },
 });
 
 // When mounted or when props changed, we want select to display new props values
@@ -109,7 +113,7 @@ const emits = defineEmits(["inp"]);
   <!--custom-->
   <div class="relative">
     <button
-      :tabindex="contentIndex"
+      :tabindex="props.tabId || contentIndex"
       ref="selectBtn"
       :aria-controls="`${props.settings.id}-custom`"
       :aria-expanded="select.isOpen ? 'true' : 'false'"

@@ -34,7 +34,7 @@ def get_actions():
 @jwt_required()
 @jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
-@model_validator(body="Action")
+@model_validator(body={"Action": ""})
 def create_action():
     """Create new action"""
     args, data = [get_req_data(request)[k] for k in ("args", "data")]

@@ -31,6 +31,12 @@ const deleteServ = reactive({
 });
 
 watch(delModalStore, () => {
+  // Force tabindex
+  if (delModalStore.isOpen) {
+    setTimeout(() => {
+      document.querySelector("#service-settings-modal button").focus();
+    }, 100);
+  }
   deleteServ.serviceName = delModalStore.data.serviceName;
 });
 

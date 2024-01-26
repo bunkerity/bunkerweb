@@ -12,6 +12,10 @@ const props = defineProps({
     type: String,
     required: false,
   },
+  tabId: {
+    type: [String, Number],
+    required: false,
+  },
 });
 
 const checkbox = reactive({
@@ -29,7 +33,7 @@ function updateValue() {
 <template>
   <div class="relative z-10">
     <input
-      :tabindex="contentIndex"
+      :tabindex="props.tabId || contentIndex"
       @keyup.enter="$emit('inp', updateValue())"
       @click="$emit('inp', updateValue())"
       :id="props.settings.id"

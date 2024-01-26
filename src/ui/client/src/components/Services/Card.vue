@@ -102,7 +102,7 @@ function setModal(modal, operation, serviceName, service, method = "") {
   <div
     v-for="(plugins, name) in props.services"
     :class="[filters[name] ? '' : 'hidden']"
-    class="my-2 dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 md:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 md:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
     <h2
       class="text-xl transition duration-300 ease-in-out text-center sm:text-left mb-1 font-bold dark:text-white/90"
@@ -135,15 +135,29 @@ function setModal(modal, operation, serviceName, service, method = "") {
 
     <div class="mt-3.5 relative w-full flex justify-center sm:justify-end">
       <ServicesButtonClone
+        :tabindex="
+          modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+        "
         @click="setModal(modalStore, 'clone', name, plugins)"
         :hostname="name"
       />
       <ServicesButtonEdit
+        :tabindex="
+          modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+        "
         @click="setModal(modalStore, 'edit', name, plugins)"
         :hostname="name"
       />
-      <ServicesButtonRedirect :hostname="name" />
+      <ServicesButtonRedirect
+        :tabindex="
+          modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+        "
+        :hostname="name"
+      />
       <ServicesButtonDelete
+        :tabindex="
+          modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+        "
         @click="
           setModal(
             delModalStore,

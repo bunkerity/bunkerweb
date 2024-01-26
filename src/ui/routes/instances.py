@@ -33,7 +33,7 @@ def get_instances():
 @instances.route(PREFIX, methods=["PUT"])
 @jwt_required()
 @jwt_additionnal_checks()
-@model_validator(queries={"method": "Method", "reload": "ReloadInstance"})
+@model_validator(body={"UpsertInstance": ""}, queries={"method": "Method", "reload": "ReloadInstance"})
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def upsert_instance():
     """Upsert one or more BunkerWeb instances"""

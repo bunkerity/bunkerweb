@@ -89,7 +89,7 @@ async function getReports() {
     "GET",
     null,
     reports,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 

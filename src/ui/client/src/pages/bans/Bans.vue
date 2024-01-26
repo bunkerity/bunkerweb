@@ -15,10 +15,8 @@ import { useFeedbackStore } from "@store/global.js";
 import { getBansByFilter } from "@utils/bans.js";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
-import { useAddModalStore } from "@store/bans.js";
 
 // Refresh when related btn is clicked
-const addModalStore = useAddModalStore();
 const refreshStore = useRefreshStore();
 
 watch(refreshStore, () => {

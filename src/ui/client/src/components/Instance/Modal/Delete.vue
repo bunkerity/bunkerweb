@@ -8,18 +8,27 @@ import {
   useRefreshStore,
   useFeedbackStore,
 } from "@store/global.js";
-import { useModalStore } from "@store/instances.js";
+import { useDelModalStore } from "@store/instances.js";
 import { fetchAPI } from "@utils/api.js";
 
 const feedbackStore = useFeedbackStore();
 const refreshStore = useRefreshStore();
-const modalStore = useModalStore();
+const delModalStore = useDelModalStore();
 const backdropStore = useBackdropStore();
 
 // close modal on backdrop click
 watch(backdropStore, () => {
   if (instDel.isPend) return;
-  modalStore.isOpen = false;
+  delModalStore.isOpen = false;
+});
+
+watch(delModalStore, () => {
+  // Force tabindex
+  if (delModalStore.isOpen) {
+    setTimeout(() => {
+      document.querySelector("#delete-instance-modal button").focus();
+    }, 100);
+  }
 });
 
 const instDel = reactive({
@@ -31,13 +40,14 @@ const instDel = reactive({
 async function deleteInstance() {
   //Try action and refetch instances only if succeed
   await fetchAPI(
-    `/api/instances/${modalStore.data.hostname}?method=ui`,
+    `/api/instances/${delModalStore.data.hostname}?method=ui`,
     "DELETE",
     null,
     instDel,
     feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "success") {
+      delModalStore.isOpen = false;
       refreshStore.refresh();
       return;
     }
@@ -47,9 +57,9 @@ async function deleteInstance() {
 <template>
   <ModalBase
     :title="$t('instances_modal_delete_title')"
-    id="instance-modal"
-    :aria-hidden="modalStore.isOpen ? 'false' : 'true'"
-    v-if="modalStore.isOpen"
+    id="delete-instance-modal"
+    :aria-hidden="delModalStore.isOpen ? 'false' : 'true'"
+    v-show="delModalStore.isOpen"
   >
     <div class="w-full">
       <div class="flex justify-center">
@@ -57,7 +67,7 @@ async function deleteInstance() {
           <p class="modal-path-text">
             {{
               $t("instances_modal_delete_msg", {
-                hostname: modalStore.data.hostname,
+                hostname: delModalStore.data.hostname,
               })
             }}
           </p>
@@ -65,15 +75,15 @@ async function deleteInstance() {
       </div>
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase
-          :tabindex="modalStore.isOpen ? contentIndex : -1"
+          :tabindex="delModalStore.isOpen ? contentIndex : -1"
           color="close"
           size="lg"
-          @click="modalStore.isOpen = false"
+          @click="delModalStore.isOpen = false"
           type="button"
           class="text-sm"
           :disabled="instDel.isPend"
-          aria-controls="instance-modal"
-          :aria-expanded="modalStore.isOpen ? 'true' : 'false'"
+          aria-controls="delete-instance-modal"
+          :aria-expanded="delModalStore.isOpen ? 'true' : 'false'"
         >
           {{ $t("action_close") }}
         </ButtonBase>
@@ -81,7 +91,7 @@ async function deleteInstance() {
           :isLoading="instDel.isPend"
           :disabled="instDel.isPend"
           type="submit"
-          :tabindex="modalStore.isOpen ? contentIndex : -1"
+          :tabindex="delModalStore.isOpen ? contentIndex : -1"
           color="delete"
           size="lg"
           @click.prevent="deleteInstance()"

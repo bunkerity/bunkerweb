@@ -22,7 +22,11 @@ import {
 } from "@utils/plugins.js";
 import { fetchAPI } from "@utils/api.js";
 import { contentIndex } from "@utils/tabindex.js";
-import { useModalStore, useFilterStore } from "@store/services.js";
+import {
+  useModalStore,
+  useDelModalStore,
+  useFilterStore,
+} from "@store/services.js";
 import { useFeedbackStore, useRefreshStore } from "@store/global.js";
 import { useConfigStore } from "@store/settings.js";
 import { useLogsStore } from "@store/logs.js";
@@ -32,6 +36,7 @@ const { locale, fallbackLocale } = useI18n();
 
 const filterStore = useFilterStore();
 const modalStore = useModalStore();
+const delModalStore = useDelModalStore();
 const feedbackStore = useFeedbackStore();
 const refreshStore = useRefreshStore();
 const config = useConfigStore();
@@ -269,8 +274,6 @@ onMounted(() => {
       }"
     />
 
-    <ServicesModalDelete v-if="!services.isErr && !services.isPend" />
-    <ServicesModalSettings v-if="!services.isErr && !services.isPend" />
     <div
       v-if="!services.isErr && !services.isPend"
       class="col-span-12 content-wrap"
@@ -279,6 +282,9 @@ onMounted(() => {
         class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border"
       >
         <ServicesButtonAdd
+          :tabindex="
+            modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+          "
           v-if="!services.isErr && !services.isPend"
           @click="setModal(modalStore, 'create', 'new', services.new)"
         />
@@ -301,17 +307,26 @@ onMounted(() => {
           ]"
         />
       </CardBase>
-      <CardBase class="h-fit col-span-12 md:col-span-8 lg:col-span-9">
+      <CardBase
+        class="h-fit col-span-12 md:col-span-8 lg:col-span-6 2xl:col-span-5"
+      >
         <div class="col-span-12 flex justify-start items-start">
           <CardLabel :label="$t('dashboard_filter')" />
-          <ServicesButtonFilter />
+          <ServicesButtonFilter
+            :tabindex="
+              modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+            "
+          />
         </div>
         <SettingsLayout
-          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+          class="flex w-full col-span-12 sm:col-span-6"
           :label="$t('services_service_search')"
         >
           <SettingsInput
             @inp="(v) => (filters.servName = v)"
+            :tabId="
+              modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+            "
             :settings="{
               id: 'servName',
               type: 'text',
@@ -321,11 +336,14 @@ onMounted(() => {
           />
         </SettingsLayout>
         <SettingsLayout
-          class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+          class="flex w-full col-span-12 sm:col-span-6"
           :label="$t('services_service_select_method')"
         >
           <SettingsSelect
             @inp="(v) => (filters.servMethod = v)"
+            :tabId="
+              modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+            "
             :settings="{
               id: 'servMethods',
               value: 'all',
@@ -350,11 +368,14 @@ onMounted(() => {
 
           <SettingsLayout
             :key="filterStore.isOpen"
-            class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+            class="flex w-full col-span-12 sm:col-span-6"
             :label="$t('services_service_select_bad_behavior')"
           >
             <SettingsSelect
               @inp="(v) => (filters.badbehavior = v)"
+              :tabId="
+                modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+              "
               :settings="{
                 id: 'bad-behavior-filter',
                 value: 'all',
@@ -364,11 +385,14 @@ onMounted(() => {
           </SettingsLayout>
           <SettingsLayout
             :key="filterStore.isOpen"
-            class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+            class="flex w-full col-span-12 sm:col-span-6"
             :label="$t('services_service_select_limit')"
           >
             <SettingsSelect
               @inp="(v) => (filters.limit = v)"
+              :tabId="
+                modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+              "
               :settings="{
                 id: 'limit-filter',
                 value: 'all',
@@ -378,11 +402,14 @@ onMounted(() => {
           </SettingsLayout>
           <SettingsLayout
             :key="filterStore.isOpen"
-            class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+            class="flex w-full col-span-12 sm:col-span-6"
             :label="$t('services_service_select_reverse_proxy')"
           >
             <SettingsSelect
               @inp="(v) => (filters.reverseproxy = v)"
+              :tabId="
+                modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+              "
               :settings="{
                 id: 'reverse-proxy-filter',
                 value: 'all',
@@ -392,11 +419,14 @@ onMounted(() => {
           </SettingsLayout>
           <SettingsLayout
             :key="filterStore.isOpen"
-            class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+            class="flex w-full col-span-12 sm:col-span-6"
             :label="$t('services_service_select_modsecurity')"
           >
             <SettingsSelect
               @inp="(v) => (filters.modsecurity = v)"
+              :tabId="
+                modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+              "
               :settings="{
                 id: 'modsecurity-filter',
                 value: 'all',
@@ -406,11 +436,14 @@ onMounted(() => {
           </SettingsLayout>
           <SettingsLayout
             :key="filterStore.isOpen"
-            class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+            class="flex w-full col-span-12 sm:col-span-6"
             :label="$t('services_service_select_cors')"
           >
             <SettingsSelect
               @inp="(v) => (filters.cors = v)"
+              :tabId="
+                modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+              "
               :settings="{
                 id: 'cors-filter',
                 value: 'all',
@@ -420,11 +453,14 @@ onMounted(() => {
           </SettingsLayout>
           <SettingsLayout
             :key="filterStore.isOpen"
-            class="flex w-full col-span-12 sm:col-span-6 md:col-span-4"
+            class="flex w-full col-span-12 sm:col-span-6"
             :label="$t('services_service_select_dnsbl')"
           >
             <SettingsSelect
               @inp="(v) => (filters.dnsbl = v)"
+              :tabId="
+                modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
+              "
               :settings="{
                 id: 'dnsbl-filter',
                 value: 'all',
@@ -435,6 +471,10 @@ onMounted(() => {
         </div>
       </CardBase>
     </div>
+
+    <ServicesModalSettings v-if="!services.isErr && !services.isPend" />
+    <ServicesModalDelete v-if="!services.isErr && !services.isPend" />
+
     <div
       v-if="!services.isErr && !services.isPend"
       class="col-span-12 content-wrap"

@@ -30,6 +30,10 @@ const props = defineProps({
     type: String,
     required: false,
   },
+  tabId: {
+    type: [String, Number],
+    required: false,
+  },
 });
 
 const inputEl = ref(null);
@@ -76,7 +80,7 @@ onMounted(() => {
 <template>
   <div class="relative flex items-center">
     <input
-      :tabindex="contentIndex"
+      :tabindex="props.tabId || contentIndex"
       ref="inputEl"
       v-model="inp.value"
       @input="$emit('inp', inp.value)"

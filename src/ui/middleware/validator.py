@@ -25,8 +25,8 @@ LOGGER: Logger = setup_logger("UI")
 # Add decorator to routes in order to validate model
 
 
-# body = dict[modelName, modelKeyword || ""]: modelKeyword if we want to check data structure itself (for example, if we have a tuple, a dict...)
-# in case  modelKeyword =  "", we want to check kwargs
+# body = dict[modelName : modelKeyword || ""]: modelKeyword if we want to check data structure itself (for example, if we have a tuple, a dict...)
+# in case  modelKeyword is a string, we want to check kwargs
 # queries = dict[queryName, modelName] :  query and model name to check
 @hooks(hooks=["BeforeValidator", "AfterValidator"])
 def model_validator(body={}, queries={}, params={}, is_body_json=True):

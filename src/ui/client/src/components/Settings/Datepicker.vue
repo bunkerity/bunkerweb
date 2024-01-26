@@ -32,6 +32,10 @@ const props = defineProps({
     type: String,
     required: false,
   },
+  tabId: {
+    type: [String, Number],
+    required: false,
+  },
 });
 
 const date = reactive({
@@ -111,7 +115,7 @@ const emits = defineEmits(["inp"]);
 <template>
   <div class="relative flex items-center">
     <input
-      :tabindex="contentIndex"
+      :tabindex="props.tabId || contentIndex"
       :aria-controls="props.settings.id"
       :aria-selected="picker.isOpen ? 'true' : 'false'"
       @change="(v) => $emit('inp', checkToSend(v.target.value))"

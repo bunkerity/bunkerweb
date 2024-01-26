@@ -8,7 +8,7 @@ import ModalBase from "@components/Modal/Base.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import PluginStructure from "@components/Plugin/Structure.vue";
 import { fetchAPI } from "@utils/api.js";
-import { getMethodList, getSettingsByFilter } from "@utils/settings.js";
+import { getSettingsByFilter } from "@utils/settings.js";
 import { getRemainFromFilter } from "@utils/plugins.js";
 import { contentIndex } from "@utils/tabindex.js";
 import {
@@ -80,6 +80,13 @@ watch(backdropStore, () => {
 
 // When modalStore is update, reset prev config and update settings
 watch(modalStore, (newVal, oldVal) => {
+  // Force tabindex
+  if (newVal.isOpen) {
+    setTimeout(() => {
+      document.querySelector("#service-settings-modal button").focus();
+    }, 100);
+  }
+
   // Reset
   if (!newVal.isOpen) {
     filters.method = "all";
