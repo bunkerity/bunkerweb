@@ -40,6 +40,7 @@ export default defineConfig({
         services: resolve(__dirname, "./src/pages/services/index.html"),
         actions: resolve(__dirname, "./src/pages/actions/index.html"),
         account: resolve(__dirname, "./src/pages/account/index.html"),
+        reporting: resolve(__dirname, "./src/pages/reporting/index.html"),
         sitemap: resolve(__dirname, "./src/pages/sitemap/index.html"),
       },
     },

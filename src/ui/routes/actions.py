@@ -23,6 +23,7 @@ actions = Blueprint("actions", __name__)
 
 @actions.route(PREFIX, methods=["GET"])
 @jwt_required()
+@jwt_additionnal_checks()
 @hooks(hooks=["BeforeReqAPI", "AfterReqAPI"])
 def get_actions():
     """Get all actions"""

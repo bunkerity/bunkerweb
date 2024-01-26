@@ -12,6 +12,7 @@ import MenuSvgServices from "@components/Menu/Svg/Services.vue";
 import MenuSvgGithub from "@components/Menu/Svg/Github.vue";
 import MenuSvgBans from "@components/Menu/Svg/Bans.vue";
 import MenuSvgActions from "@components/Menu/Svg/Actions.vue";
+import MenuSvgReporting from "@components/Menu/Svg/Reporting.vue";
 import { reactive, onMounted } from "vue";
 import { getDarkMode } from "@utils/global.js";
 import { getCookie } from "@utils/api.js";
@@ -75,6 +76,11 @@ const navList = [
     tag: "actions",
     svg: MenuSvgActions,
     path: "/actions",
+  },
+  {
+    tag: "reporting",
+    svg: MenuSvgReporting,
+    path: "/reporting",
   },
 ];
 

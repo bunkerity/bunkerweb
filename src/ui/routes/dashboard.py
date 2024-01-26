@@ -143,6 +143,14 @@ def account():
     return render_template("account.html")
 
 
+@dashboard.route(f"{PREFIX}/reporting", methods=["GET"])
+@jwt_required()
+@jwt_additionnal_checks()
+@hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
+def reporting():
+    return render_template("reporting.html")
+
+
 @dashboard.route(f"{PREFIX}/sitemap", methods=["GET"])
 @jwt_required()
 @jwt_additionnal_checks()
