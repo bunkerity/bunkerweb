@@ -11,7 +11,7 @@
       "help": "Custom header to add (HeaderName: HeaderValue).",
       "id": "custom-header",
       "label": "Custom header (HeaderName: HeaderValue)",
-      "regex": "^([\\w\\-]+: [^,]+)?$",
+      "regex": "^([\\w\\-]+: .+)?$",
       "type": "text",
       "multiple": "custom-headers"
     },

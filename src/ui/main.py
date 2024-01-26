@@ -21,13 +21,13 @@ from docker import DockerClient
 from docker.errors import NotFound as docker_NotFound, APIError as docker_APIError, DockerException
 from flask import Flask, Response, flash, jsonify, redirect, render_template, request, send_file, session, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
-from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
+from flask_wtf.csrf import CSRFProtect, CSRFError
 from glob import glob
 from hashlib import sha256
 from importlib.machinery import SourceFileLoader
 from io import BytesIO
 from json import JSONDecodeError, dumps, loads as json_loads
-from jinja2 import Template
+from jinja2 import Environment, FileSystemLoader
 from kubernetes import client as kube_client
 from kubernetes import config as kube_config
 from kubernetes.client.exceptions import ApiException as kube_ApiException
@@ -1195,20 +1195,14 @@ def plugins():
 
     if request.args.get("plugin_id", False):
         plugin_id = request.args.get("plugin_id")
-        template = None
-
         page = db.get_plugin_template(plugin_id)
 
-        if page is not None:
-            template = Template(page.decode("utf-8"))
-
-        if template is not None:
-            return template.render(
-                csrf_token=generate_csrf,
-                url_for=url_for,
-                username=current_user.get_id(),
+        if page:
+            return render_template(
+                Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
                 dark_mode=app.config["DARK_MODE"],
-                **(plugin_args["args"] if plugin_args.get("plugin", None) == plugin_id else {}),
+                username=current_user.get_id(),
+                **(app.jinja_env.globals | (plugin_args["args"] if plugin_args.get("plugin", None) == plugin_id else {})),
             )
 
     plugins = app.config["CONFIG"].get_plugins()

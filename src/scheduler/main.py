@@ -580,7 +580,7 @@ if __name__ == "__main__":
                             logger.info("Running config saver to save potential ignored external plugins settings ...")
                             proc = subprocess_run(
                                 [
-                                    "python",
+                                    "python3",
                                     join(
                                         sep,
                                         "usr",

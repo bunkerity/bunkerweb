@@ -35,19 +35,35 @@ from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 
 
+EXTERNAL_PLUGINS_DIR = Path(sep, "etc", "bunkerweb", "plugins")
 logger = setup_logger("Jobs.download-plugins", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
 
-def install_plugin(plugin_dir) -> bool:
+def install_plugin(plugin_dir, db) -> bool:
+    plugin_path = Path(plugin_dir)
     # Load plugin.json
-    metadata = loads(Path(plugin_dir, "plugin.json").read_text(encoding="utf-8"))
+    metadata = loads(plugin_path.joinpath("plugin.json").read_text(encoding="utf-8"))
     # Don't go further if plugin is already installed
-    if Path("etc", "bunkerweb", "plugins", metadata["id"], "plugin.json").is_file():
+    if EXTERNAL_PLUGINS_DIR.joinpath(metadata["id"], "plugin.json").is_file():
+        old_version = None
+
+        for plugin in db.get_plugins(external=True):
+            if plugin["id"] == metadata["id"]:
+                old_version = plugin["version"]
+                break
+
+        if old_version == metadata["version"]:
+            logger.warning(
+                f"Skipping installation of plugin {metadata['id']} (version {metadata['version']} already installed)",
+            )
+            return False
+
         logger.warning(
-            f"Skipping installation of plugin {metadata['id']} (already installed)",
+            f"Plugin {metadata['id']} is already installed but version {metadata['version']} is different from database ({old_version}), updating it...",
         )
-        return False
+        rmtree(EXTERNAL_PLUGINS_DIR.joinpath(metadata["id"]), ignore_errors=True)
+
     # Copy the plugin
     copytree(plugin_dir, join(sep, "etc", "bunkerweb", "plugins", metadata["id"]))
     # Add u+x permissions to jobs files
@@ -65,6 +81,7 @@ try:
         logger.info("No external plugins to download")
         _exit(0)
 
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
     plugin_nbr = 0
 
     # Loop on URLs
@@ -127,7 +144,7 @@ try:
         try:
             for plugin_dir in glob(join(temp_dir, "**", "plugin.json"), recursive=True):
                 try:
-                    if install_plugin(dirname(plugin_dir)):
+                    if install_plugin(dirname(plugin_dir), db):
                         plugin_nbr += 1
                 except FileExistsError:
                     logger.warning(
@@ -145,21 +162,20 @@ try:
 
     external_plugins = []
     external_plugins_ids = []
-    plugins_dir = join(sep, "etc", "bunkerweb", "plugins")
-    for plugin in listdir(plugins_dir):
-        path = join(plugins_dir, plugin)
-        if not Path(path, "plugin.json").is_file():
+    for plugin in listdir(EXTERNAL_PLUGINS_DIR):
+        path = EXTERNAL_PLUGINS_DIR.joinpath(plugin)
+        if not path.joinpath("plugin.json").is_file():
             logger.warning(f"Plugin {plugin} is not valid, deleting it...")
             rmtree(path, ignore_errors=True)
             continue
 
-        plugin_file = loads(Path(path, "plugin.json").read_text(encoding="utf-8"))
+        plugin_file = loads(path.joinpath("plugin.json").read_text(encoding="utf-8"))
 
-        plugin_content = BytesIO()
-        with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-            tar.add(path, arcname=basename(path))
-        plugin_content.seek(0)
-        value = plugin_content.getvalue()
+        with BytesIO() as plugin_content:
+            with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
+                tar.add(path, arcname=path.name)
+            plugin_content.seek(0)
+            value = plugin_content.getvalue()
 
         plugin_file.update(
             {
@@ -177,7 +193,6 @@ try:
         external_plugins.append(plugin_file)
         external_plugins_ids.append(plugin_file["id"])
 
-    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
     lock = Lock()
 
     for plugin in db.get_plugins(external=True, with_data=True):

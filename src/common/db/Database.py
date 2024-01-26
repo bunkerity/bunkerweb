@@ -1455,33 +1455,10 @@ class Database:
         """Get all plugins from the database."""
         plugins = []
         with self.__db_session() as session:
-            for plugin in (
-                session.query(Plugins)
-                .with_entities(
-                    Plugins.id,
-                    Plugins.stream,
-                    Plugins.name,
-                    Plugins.description,
-                    Plugins.version,
-                    Plugins.external,
-                    Plugins.method,
-                    Plugins.data,
-                    Plugins.checksum,
-                )
-                .all()
-                if with_data
-                else session.query(Plugins)
-                .with_entities(
-                    Plugins.id,
-                    Plugins.stream,
-                    Plugins.name,
-                    Plugins.description,
-                    Plugins.version,
-                    Plugins.external,
-                    Plugins.method,
-                )
-                .all()
-            ):
+            entities = [Plugins.id, Plugins.stream, Plugins.name, Plugins.description, Plugins.version, Plugins.external, Plugins.method, Plugins.checksum]
+            if with_data:
+                entities.append(Plugins.data)
+            for plugin in session.query(Plugins).with_entities(*entities).all():
                 if external and not plugin.external:
                     continue
 
@@ -1496,7 +1473,8 @@ class Database:
                     "method": plugin.method,
                     "page": page is not None,
                     "settings": {},
-                } | ({"data": plugin.data, "checksum": plugin.checksum} if with_data else {})
+                    "checksum": plugin.checksum,
+                } | ({"data": plugin.data} if with_data else {})
 
                 for setting in (
                     session.query(Settings)

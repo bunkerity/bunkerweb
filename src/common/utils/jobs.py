@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from contextlib import suppress
 from datetime import datetime
 from hashlib import sha512
 from inspect import getsourcefile
@@ -142,8 +141,9 @@ def bytes_hash(bio: BufferedReader) -> str:
 
 def cache_hash(cache: Union[str, Path], db=None) -> Optional[str]:
     checksum = None
-    with suppress(BaseException):
-        checksum = loads(Path(f"{cache}.md").read_text(encoding="utf-8")).get("checksum", None)
+    cache_file = Path(f"{cache}.md")
+    if cache_file.is_file():
+        checksum = loads(cache_file.read_text(encoding="utf-8")).get("checksum", None)
 
     if not checksum and db:
         if not isinstance(cache, Path):
