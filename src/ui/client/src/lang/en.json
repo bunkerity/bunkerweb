@@ -199,6 +199,8 @@
   "bans_add_header_ban_end": "end ban",
   "bans_add_header_reason": "reason",
   "bans_add_table_summary": "List of bans to add (ip, reason and date).",
+  "bans_add_ip_placeholder": "127.0.0.1",
+  "bans_add_reason_placeholder": "Manual",
   "custom_conf_total": "Configs total",
   "custom_conf_global": "Configs globals",
   "custom_conf_services": "Configs services",

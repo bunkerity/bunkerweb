@@ -40,7 +40,7 @@ async function runJob(jobName) {
     "POST",
     null,
     run,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       if (res.type === "success") {
@@ -79,7 +79,7 @@ async function downloadFile(jobName, cacheName) {
     "GET",
     null,
     download,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       return res.json();
@@ -110,13 +110,14 @@ function showHistory(name, history) {
     </td>
     <td class="ml-4" :class="[props.positions[2]]">
       <button
+        :tabindex="modalStore.isOpen ? '-1' : contentIndex"
         :aria-describedby="`${Object.keys(item)[0]}-history-text-${id}`"
         :aria-controls="`history-modal`"
         :aria-expanded="modalStore.isOpen ? 'true' : 'false'"
         @click="
           showHistory(
             Object.keys(item)[0],
-            item[Object.keys(item)[0]]['history'],
+            item[Object.keys(item)[0]]['history']
           )
         "
       >
@@ -142,6 +143,7 @@ function showHistory(name, history) {
     </td>
     <td class="mx-4" :class="[props.positions[6]]">
       <SettingsSelect
+        :tabId="modalStore.isOpen ? '-1' : contentIndex"
         v-if="item[Object.keys(item)[0]]['cache'].length > 0"
         :settings="{
           id: `cache-${Object.keys(item)[0]}-${id}`,
@@ -154,6 +156,7 @@ function showHistory(name, history) {
     </td>
     <td :class="[props.positions[7], 'flex justify-center']">
       <ButtonBase
+        :tabindex="modalStore.isOpen ? '-1' : contentIndex"
         :isLoading="run.isPend && run.jobName === Object.keys(item)[0]"
         :disabled="run.isPend && run.jobName === Object.keys(item)[0]"
         type="submit"

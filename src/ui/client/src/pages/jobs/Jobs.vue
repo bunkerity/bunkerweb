@@ -15,8 +15,10 @@ import { reactive, computed, onMounted, watch } from "vue";
 import { getJobsByFilter, getJobsIntervalList } from "@utils/jobs.js";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
+import { contentIndex } from "@utils/tabindex.js";
+import { useModalStore } from "@store/jobs.js";
 
-// Refresh when related btn is clicked
+const modalStore = useModalStore();
 const refreshStore = useRefreshStore();
 
 watch(refreshStore, () => {
@@ -60,7 +62,7 @@ const jobs = reactive({
   }),
   success: computed(() => {
     return Object.values(jobs.data).filter(
-      (item) => item["history"][0]["success"] !== false,
+      (item) => item["history"][0]["success"] !== false
     ).length;
   }),
   setup: computed(() => {
@@ -123,6 +125,7 @@ onMounted(() => {
       >
         <SettingsInput
           @inp="(v) => (filters.name = v)"
+          :tabId="modalStore.isOpen ? '-1' : contentIndex"
           :settings="{
             id: 'keyword',
             type: 'text',
@@ -142,6 +145,7 @@ onMounted(() => {
               (filters.success =
                 v === 'all' ? 'all' : v === 'true' ? true : false)
           "
+          :tabId="modalStore.isOpen ? '-1' : contentIndex"
           :settings="{
             id: 'success-state',
             value: 'all',
@@ -160,6 +164,7 @@ onMounted(() => {
               (filters.reload =
                 v === 'all' ? 'all' : v === 'true' ? true : false)
           "
+          :tabId="modalStore.isOpen ? '-1' : contentIndex"
           :settings="{
             id: 'reload-state',
             value: 'all',
@@ -174,6 +179,7 @@ onMounted(() => {
       >
         <SettingsSelect
           @inp="(v) => (filters.every = v)"
+          :tabId="modalStore.isOpen ? '-1' : contentIndex"
           :settings="{
             id: 'every',
             value: 'all',
@@ -182,12 +188,13 @@ onMounted(() => {
         />
       </SettingsLayout>
     </CardBase>
+    <JobsModalHistory />
     <CardBase
       v-if="!jobs.isErr && !jobs.isPend"
       class="col-span-12 overflow-x-auto overflow-y-hidden"
       :label="$t('dashboard_jobs')"
     >
-      <div class="col-span-12 overflow-x-auto grid grid-cols-12">
+      <div tabindex="-1" class="col-span-12 overflow-x-auto grid grid-cols-12">
         <ListBase
           class="min-w-[1100px] col-span-12"
           :header="[
@@ -207,6 +214,5 @@ onMounted(() => {
         </ListBase>
       </div>
     </CardBase>
-    <JobsModalHistory />
   </Dashboard>
 </template>

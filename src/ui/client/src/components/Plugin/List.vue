@@ -38,7 +38,7 @@ function updateDelModal(id, name, description) {
       </p>
       <div v-if="plugin.external" class="flex items-center">
         <a
-          :tabindex="contentIndex"
+          :tabindex="delModalStore.isOpen ? '-1' : contentIndex"
           v-if="plugin.page"
           class="hover:-translate-y-px"
           :href="plugin.page"
@@ -60,7 +60,7 @@ function updateDelModal(id, name, description) {
           </svg>
         </a>
         <button
-          :tabindex="contentIndex"
+          :tabindex="delModalStore.isOpen ? '-1' : contentIndex"
           v-if="plugin.method.toLowerCase() !== 'static'"
           @click="updateDelModal(plugin.id, plugin.name, plugin.description)"
           type="button"

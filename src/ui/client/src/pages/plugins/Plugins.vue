@@ -15,7 +15,10 @@ import { getPluginsByFilter, pluginI18n } from "@utils/plugins.js";
 import ApiState from "@components/Api/State.vue";
 import { useLogsStore } from "@store/logs.js";
 import { useI18n } from "vue-i18n";
+import { useDelModalStore } from "@store/plugins.js";
+import { contentIndex } from "@utils/tabindex.js";
 
+const delModalStore = useDelModalStore();
 const refreshStore = useRefreshStore();
 const feedbackStore = useFeedbackStore();
 
@@ -43,10 +46,10 @@ const plugins = reactive({
   data: [],
   total: computed(() => plugins.data.length),
   internal: computed(
-    () => plugins.data.filter((item) => item["external"] === false).length,
+    () => plugins.data.filter((item) => item["external"] === false).length
   ),
   external: computed(
-    () => plugins.data.filter((item) => item["external"] === true).length,
+    () => plugins.data.filter((item) => item["external"] === true).length
   ),
   // This run every time reactive data changed (plugin.base or filters)
   setup: computed(() => {
@@ -68,7 +71,7 @@ async function getPlugins() {
     "GET",
     null,
     plugins,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -115,7 +118,9 @@ onMounted(() => {
       :label="$t('action_upload')"
       class="h-fit col-span-12 md:col-span-8 2xl:col-span-4 3xl:col-span-3"
     >
-      <SettingsUploadStructure />
+      <SettingsUploadStructure
+        :tabId="delModalStore.isOpen ? '-1' : contentIndex"
+      />
     </CardBase>
     <CardBase
       v-if="!plugins.isErr && !plugins.isPend"
@@ -129,6 +134,7 @@ onMounted(() => {
       >
         <SettingsInput
           @inp="(v) => (filters.name = v)"
+          :tabindex="delModalStore.isOpen ? '-1' : contentIndex"
           :settings="{
             id: 'keyword',
             type: 'text',
@@ -148,6 +154,7 @@ onMounted(() => {
               (filters.external =
                 v === 'all' ? 'all' : v === 'external' ? true : false)
           "
+          :tabindex="delModalStore.isOpen ? '-1' : contentIndex"
           :settings="{
             id: 'state',
             value: 'all',

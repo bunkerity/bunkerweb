@@ -10,7 +10,10 @@ import { useSelectIPStore } from "@store/bans.js";
 import { reactive } from "vue";
 import { useFeedbackStore } from "@store/global.js";
 import { fetchAPI } from "@utils/api.js";
+import { useAddModalStore } from "@store/bans.js";
+import { contentIndex } from "@utils/tabindex.js";
 
+const addModalStore = useAddModalStore();
 const feedbackStore = useFeedbackStore();
 const selectIPStore = useSelectIPStore();
 const emits = defineEmits(["unban"]);
@@ -57,7 +60,7 @@ const list = reactive({
 function toggleAllCheck() {
   list.checkAll = list.checkAll ? false : true;
   const banItemsChekbox = document.querySelectorAll(
-    '#banlist-container input[type="checkbox"]',
+    '#banlist-container input[type="checkbox"]'
   );
   banItemsChekbox.forEach((item) => {
     // Check current state to update
@@ -80,7 +83,7 @@ async function sendUnban() {
     "DELETE",
     unbanList,
     delBans,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "success") {
       // Case succeed, delete items from UI
@@ -108,6 +111,7 @@ async function sendUnban() {
       class="col-span-12 flex flex-col sm:flex-row justify-left items-center mt-2 mb-6 mx-2"
     >
       <ButtonBase
+        :tabindex="addModalStore.isOpen ? '-1' : contentIndex"
         @click="toggleAllCheck()"
         color="info"
         size="normal"
@@ -168,6 +172,7 @@ async function sendUnban() {
               :name="`check-${id}`"
             >
               <SettingsCheckbox
+                :tabId="addModalStore.isOpen ? '-1' : contentIndex"
                 :aria-description="$t('bans_list_select_desc')"
                 @inp="(v) => updateCheck(v, item.ip)"
                 :settings="{
@@ -184,11 +189,12 @@ async function sendUnban() {
               :name="`ip-${id}`"
             >
               <SettingsInput
+                :tabId="addModalStore.isOpen ? '-1' : contentIndex"
                 :settings="{
                   id: `ip-${id}`,
                   type: 'text',
                   value: item.ip,
-                  placeholder: '127.0.0.1',
+                  placeholder: $t('bans_add_ip_placeholder'),
                   disabled: true,
                 }"
               />
@@ -201,11 +207,12 @@ async function sendUnban() {
               :name="`ip-reason-${id}`"
             >
               <SettingsInput
+                :tabId="addModalStore.isOpen ? '-1' : contentIndex"
                 :settings="{
                   id: `ip-reason-${id}`,
                   type: 'text',
                   value: item.reason,
-                  placeholder: '127.0.0.1',
+                  placeholder: $t('bans_add_ip_placeholder'),
                   disabled: true,
                 }"
               />
@@ -218,6 +225,7 @@ async function sendUnban() {
               :name="`ban-deb-${id}`"
             >
               <SettingsDatepicker
+                :tabId="addModalStore.isOpen ? '-1' : contentIndex"
                 :settings="{
                   id: `ban-deb-${id}`,
                   disabled: true,
@@ -233,6 +241,7 @@ async function sendUnban() {
               :name="`ban-end-${id}`"
             >
               <SettingsDatepicker
+                :tabId="addModalStore.isOpen ? '-1' : contentIndex"
                 :settings="{
                   id: `ban-end-${id}`,
                   disabled: true,
@@ -255,6 +264,7 @@ async function sendUnban() {
       class="col-span-12 flex justify-center mt-4"
     >
       <ButtonBase
+        :tabindex="addModalStore.isOpen ? '-1' : contentIndex"
         type="submit"
         @click.prevent="sendUnban()"
         color="delete"

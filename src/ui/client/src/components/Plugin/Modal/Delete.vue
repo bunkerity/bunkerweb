@@ -22,19 +22,36 @@ watch(backdropStore, () => {
   delModalStore.isOpen = false;
 });
 
+watch(delModalStore, (newVal, oldVal) => {
+  delPlugin.id = newVal.data.id;
+  delPlugin.name = newVal.data.name;
+  delPlugin.description = newVal.data.description;
+
+  if (newVal.isOpen) {
+    // Force tabindex
+    setTimeout(() => {
+      document.querySelector("#plugin-delete-modal button").focus();
+    }, 100);
+    return;
+  }
+});
+
 const delPlugin = reactive({
   isErr: false,
   isPend: false,
   data: [],
+  id: "",
+  name: "",
+  description: "",
 });
 
 async function pluginDelete() {
   await fetchAPI(
-    `/api/plugins/${delModalStore.data.id}?method=ui`,
+    `/api/plugins/${delPlugin.id}?method=ui`,
     "DELETE",
     null,
     delPlugin,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     if (res.type === "success") {
       delModalStore.isOpen = false;
@@ -47,20 +64,20 @@ async function pluginDelete() {
   <ModalBase
     id="plugin-delete-modal"
     :aria-hidden="delModalStore.isOpen ? 'false' : 'true'"
-    :title="$t('plugins_delete_modal_title', { name: delModalStore.data.name })"
+    :title="$t('plugins_delete_modal_title', { name: delPlugin.name })"
     v-show="delModalStore.isOpen"
   >
     <div class="col-span-12 overflow-x-auto overflow-y-hidden">
       <p class="text-base">
-        {{ $t("plugins_delete_modal_text", { name: delModalStore.data.name }) }}
+        {{ $t("plugins_delete_modal_text", { name: delPlugin.name }) }}
       </p>
-      <p>{{ delModalStore.data.description }}</p>
+      <p>{{ delPlugin.description }}</p>
     </div>
 
     <div class="w-full mt-2">
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase
-          :tabindex="contentIndex"
+          :tabindex="delModalStore.isOpen ? contentIndex : '-1'"
           color="close"
           size="lg"
           @click="delModalStore.isOpen = false"
@@ -75,7 +92,7 @@ async function pluginDelete() {
         <ButtonBase
           :isLoading="delPlugin.isPend"
           :disabled="delPlugin.isPend"
-          :tabindex="contentIndex"
+          :tabindex="delModalStore.isOpen ? contentIndex : '-1'"
           type="submit"
           color="delete"
           size="lg"

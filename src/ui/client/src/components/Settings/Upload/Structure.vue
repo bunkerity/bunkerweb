@@ -4,6 +4,13 @@ import SettingsUploadSvgSuccess from "@components/Settings/Upload/Svg/Success.vu
 import SettingsUploadFeedback from "@components/Settings/Upload/Feedback.vue";
 import { contentIndex } from "@utils/tabindex.js";
 
+const props = defineProps({
+  tabId: {
+    type: [String, Number],
+    required: false,
+  },
+});
+
 const dropzone = reactive({
   isDragOn: false,
   files: [],
@@ -70,7 +77,7 @@ function uploadFile(file) {
           item.name === name &&
           item.fileSize === fileSize &&
           item.state === "upload" &&
-          item.date === date,
+          item.date === date
       );
 
       if (xhr.status == 201) {
@@ -90,7 +97,8 @@ function uploadFile(file) {
 <template>
   <div class="m-2 mt-6 p-0 col-span-12 grid grid-cols-12">
     <!-- dropzone -->
-    <form
+    <button
+      :tabindex="props.tabId || contentIndex"
       id="dropzone-form"
       method="POST"
       @click="fileInp.click()"
@@ -106,19 +114,19 @@ function uploadFile(file) {
       class="hover:bg-gray-100 dark:hover:bg-slate-700/50 cursor-pointer col-span-12 border-2 rounded-lg p-2 border-primary dark:brightness-125 drop-zone"
     >
       <input
-        :tabindex="contentIndex"
+        tabindex="-1"
         @change="uploadFiles(fileInp.files)"
         ref="fileInp"
         type="file"
         name="file"
         multiple="multiple"
-        hidden
+        class="hidden"
       />
       <i class="fa-solid fa-cloud-upload-alt"></i>
       <p class="dark:text-gray-500 text-sm text-center my-3">
         {{ $t("inp_upload_add") }}
       </p>
-    </form>
+    </button>
     <div class="col-span-12">
       <SettingsUploadFeedback
         v-for="item in dropzone.files"

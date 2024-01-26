@@ -48,6 +48,7 @@ const positions = ["col-span-2", "col-span-5", "col-span-5"];
     <div class="w-full mt-2">
       <div class="mt-2 w-full justify-end flex">
         <ButtonBase
+          :tabIndex="modalStore.isOpen ? contentIndex : '-1'"
           color="close"
           size="lg"
           @click="modalStore.isOpen = false"

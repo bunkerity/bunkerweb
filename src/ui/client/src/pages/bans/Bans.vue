@@ -15,8 +15,10 @@ import { useFeedbackStore } from "@store/global.js";
 import { getBansByFilter } from "@utils/bans.js";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
+import { useAddModalStore } from "@store/bans.js";
+import { contentIndex } from "@utils/tabindex.js";
 
-// Refresh when related btn is clicked
+const addModalStore = useAddModalStore();
 const refreshStore = useRefreshStore();
 
 watch(refreshStore, () => {
@@ -83,7 +85,7 @@ async function getData() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
   const hostnames = await getHostFromInst();
 
@@ -135,7 +137,7 @@ async function getHostBan(hostname) {
     "POST",
     null,
     data,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   );
 }
 
@@ -156,11 +158,17 @@ onMounted(() => {
       }"
     />
 
-    <BansButtonAdd
-      v-if="
-        !instances.isErr && !instances.isPend && !bans.isPend && !bans.isErr
-      "
-    />
+    <div
+      class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border"
+    >
+      <BansButtonAdd
+        :tabindex="addModalStore.isOpen ? '-1' : contentIndex"
+        v-if="
+          !instances.isErr && !instances.isPend && !bans.isPend && !bans.isErr
+        "
+      />
+    </div>
+
     <CardBase
       v-if="
         !instances.isErr && !instances.isPend && !bans.isPend && !bans.isErr
@@ -196,11 +204,12 @@ onMounted(() => {
       >
         <SettingsInput
           @inp="(v) => (filters.search = v)"
+          :tabId="addModalStore.isOpen ? '-1' : contentIndex"
           :settings="{
             id: 'ipName',
             type: 'text',
             value: '',
-            placeholder: '127.0.0.1',
+            placeholder: $t('bans_add_ip_placeholder'),
           }"
         />
       </SettingsLayout>
@@ -211,6 +220,7 @@ onMounted(() => {
       >
         <SettingsSelect
           @inp="(v) => (filters.reason = v)"
+          :tabId="addModalStore.isOpen ? '-1' : contentIndex"
           :settings="{
             id: 'reason',
             value: filters.reason,

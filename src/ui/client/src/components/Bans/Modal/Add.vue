@@ -95,7 +95,7 @@ async function addBansFromList() {
     "POST",
     getValidBans(),
     addBans,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   ).then((res) => {
     // Case succeed, delete items from UI
     // And emit add event to refetch ban list
@@ -123,6 +123,7 @@ async function addBansFromList() {
           class="col-span-12 flex flex-col sm:flex-row justify-left items-center mt-2 mb-6 mx-2"
         >
           <ButtonBase
+            :tabindex="addModalStore.isOpen ? contentIndex : '-1'"
             @click="addItem()"
             color="valid"
             size="normal"
@@ -145,10 +146,11 @@ async function addBansFromList() {
               />
             </svg>
             <span class="ml-1 -translate-y-1">
-              {{ $t("bans_add") }}
+              {{ $t("bans_add_entry") }}
             </span>
           </ButtonBase>
           <ButtonBase
+            :tabindex="addModalStore.isOpen ? contentIndex : '-1'"
             :disabled="bans.items.length <= 0 ? true : false"
             @click="deleteAllItems()"
             color="delete"
@@ -176,7 +178,10 @@ async function addBansFromList() {
             </span>
           </ButtonBase>
         </div>
-        <div class="h-full overflow-x-auto col-span-12 grid grid-cols-12">
+        <div
+          tabindex="-1"
+          class="h-full overflow-x-auto col-span-12 grid grid-cols-12"
+        >
           <ListBase
             v-if="bans.items.length > 0"
             class="min-w-[1100px] h-full col-span-12"
@@ -205,12 +210,13 @@ async function addBansFromList() {
                   :name="`add-ip-${id}`"
                 >
                   <SettingsInput
+                    :tabId="addModalStore.isOpen ? contentIndex : '-1'"
                     @inp="(v) => (item.ip = v)"
                     :settings="{
                       id: `add-ip-${id}`,
                       type: 'text',
                       value: '',
-                      placeholder: '127.0.0.1',
+                      placeholder: $t('bans_add_ip_placeholder'),
                     }"
                     :inpClass="item.ip ? '' : 'invalid'"
                   />
@@ -224,6 +230,7 @@ async function addBansFromList() {
                   :name="`add-ban-date-deb-${id}`"
                 >
                   <SettingsDatepicker
+                    :tabId="addModalStore.isOpen ? contentIndex : '-1'"
                     @inp="(v) => (item.ip = v)"
                     :settings="{
                       id: `add-ban-date-deb-${id}`,
@@ -243,6 +250,7 @@ async function addBansFromList() {
                   :name="`add-ban-date-end-${id}`"
                 >
                   <SettingsDatepicker
+                    :tabId="addModalStore.isOpen ? contentIndex : '-1'"
                     :settings="{
                       id: `add-ban-date-end-${id}`,
                     }"
@@ -260,12 +268,13 @@ async function addBansFromList() {
                   :name="`add-reason-${id}`"
                 >
                   <SettingsInput
+                    :tabId="addModalStore.isOpen ? contentIndex : '-1'"
                     @inp="(v) => (item.reason = v)"
                     :settings="{
                       id: `add-reason-${id}`,
                       type: 'text',
                       value: item.reason,
-                      placeholder: 'Manual',
+                      placeholder: $t('bans_add_reason_placeholder'),
                     }"
                     :inpClass="item.reason ? '' : 'invalid'"
                   />
@@ -277,6 +286,7 @@ async function addBansFromList() {
                 class="w-full flex justify-center items-center"
               >
                 <ButtonBase
+                  :tabindex="addModalStore.isOpen ? contentIndex : '-1'"
                   :aria-describedby="`remove-ban-field-${id}`"
                   @click="deleteItem(item.id)"
                   color="delete"
@@ -312,7 +322,7 @@ async function addBansFromList() {
       <div class="col-span-12 flex flex-col items-center justify-center mt-6">
         <div class="flex justify-center items-center">
           <ButtonBase
-            :tabindex="addModalStore.isOpen ? contentIndex : -1"
+            :tabindex="addModalStore.isOpen ? contentIndex : '-1'"
             color="close"
             size="lg"
             @click="addModalStore.isOpen = false"
@@ -325,7 +335,7 @@ async function addBansFromList() {
             {{ $t("action_close") }}
           </ButtonBase>
           <ButtonBase
-            :tabindex="contentIndex"
+            :tabindex="addModalStore.isOpen ? contentIndex : '-1'"
             :disabled="
               bans.items.length > 0 && !bans.isInvalidAdd && !addBans.isPend
                 ? false

@@ -28,7 +28,7 @@ const props = defineProps({
         </th>
       </tr>
     </thead>
-    <tbody class="list-content-container">
+    <tbody tabindex="-1" class="list-content-container">
       <slot></slot>
     </tbody>
   </table>
