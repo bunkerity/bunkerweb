@@ -1,5 +1,4 @@
 <script setup>
-import FileManagerModal from "@components/FileManager/Modal.vue";
 import FileManagerActions from "@components/FileManager/Actions.vue";
 import FileManagerBreadcrumb from "@components/FileManager/Breadcrumb.vue";
 import FileManagerContainer from "@components/FileManager/Container.vue";
@@ -73,6 +72,5 @@ watch(modalStore, () => {
         <FileManagerActions :canCreateFile="path.canCreateFile" />
       </div>
     </CardBase>
-    <FileManagerModal :aria-hidden="modalStore.isOpen ? 'false' : 'true'" />
   </div>
 </template>

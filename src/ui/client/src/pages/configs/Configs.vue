@@ -14,10 +14,14 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsCheckbox from "@components/Settings/Checkbox.vue";
 import { useFeedbackStore } from "@store/global.js";
 import FileManagerStructure from "@components/FileManager/Structure.vue";
+import FileManagerModal from "@components/FileManager/Modal.vue";
 import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
+import { useModalStore } from "@store/configs.js";
+import { contentIndex } from "@utils/tabindex.js";
 
 // Refresh when related btn is clicked
+const modalStore = useModalStore();
 const refreshStore = useRefreshStore();
 
 watch(refreshStore, () => {
@@ -152,6 +156,7 @@ onMounted(() => {
       >
         <SettingsInput
           @inp="(v) => (filters.pathKeyword = v)"
+          :tabId="modalStore.isOpen ? '-1' : contentIndex"
           :settings="{
             id: 'pathKeyword',
             type: 'text',
@@ -167,6 +172,7 @@ onMounted(() => {
       >
         <SettingsInput
           @inp="(v) => (filters.nameKeyword = v)"
+          :tabId="modalStore.isOpen ? '-1' : contentIndex"
           :settings="{
             id: 'nameKeyword',
             type: 'text',
@@ -182,6 +188,7 @@ onMounted(() => {
       >
         <SettingsCheckbox
           @inp="(v) => (filters.showServices = v)"
+          :tabId="modalStore.isOpen ? '-1' : contentIndex"
           :settings="{
             id: 'show-service',
             value: 'yes',
@@ -195,6 +202,7 @@ onMounted(() => {
       >
         <SettingsCheckbox
           @inp="(v) => (filters.showOnlyCaseConf = v)"
+          :tabId="modalStore.isOpen ? '-1' : contentIndex"
           :settings="{
             id: 'show-only-conf',
             value: 'no',
@@ -202,6 +210,8 @@ onMounted(() => {
         />
       </SettingsLayout>
     </CardBase>
+    <FileManagerModal :aria-hidden="modalStore.isOpen ? 'false' : 'true'" />
+
     <FileManagerStructure
       v-if="
         !customConf.isPend &&

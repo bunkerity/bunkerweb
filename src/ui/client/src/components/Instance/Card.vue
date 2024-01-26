@@ -78,7 +78,7 @@ const instance = reactive({
   ],
 
   actions: computed(() =>
-    props.status === "up" ? [actions.stop, actions.reload] : []
+    props.status === "up" ? [actions.stop, actions.reload] : [],
   ),
 
   checks: computed(() =>
@@ -86,7 +86,7 @@ const instance = reactive({
       ? props.method === "static"
         ? [topActions.ping]
         : [topActions.delete, topActions.ping]
-      : []
+      : [],
   ),
 });
 
@@ -121,7 +121,7 @@ async function actionInstance(operation) {
     "POST",
     null,
     instActions,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "success") {
       refreshStore.refresh();

@@ -41,7 +41,7 @@ function getClickPath(id) {
   >
     <li role="tab" class="file-manager-breadcrumb-back-btn">
       <button
-        :tabindex="contentIndex"
+        :tabindex="modalStore.isOpen ? -1 : contentIndex"
         aria-describedby="file-manager-breadcrumb-back-btn-text"
         @click="modalStore.data.path = getPrevPath()"
       >
@@ -73,7 +73,7 @@ function getClickPath(id) {
       :aria-current="id === pathSplit.length - 1 ? 'true' : 'false'"
     >
       <button
-        :tabindex="contentIndex"
+        :tabindex="modalStore.isOpen ? -1 : contentIndex"
         :aria-description="$t('custom_conf_breadcrumb_item_desc')"
         @click="modalStore.data.path = getClickPath(id)"
         class="file-manager-breadcrumb-item-btn"

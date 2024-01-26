@@ -27,6 +27,19 @@ const backdropStore = useBackdropStore();
 const modalStore = useModalStore();
 const feedbackStore = useFeedbackStore();
 
+watch(modalStore, () => {
+  if (modalStore.isOpen) {
+    // Force tabindex
+    setTimeout(() => {
+      const item = document.querySelector("#file-manager-modal input").disabled
+        ? document.querySelector("#file-manager-modal button")
+        : document.querySelector("#file-manager-modal input");
+      item.focus();
+    }, 100);
+    return;
+  }
+});
+
 // close modal on backdrop click
 watch(backdropStore, () => {
   if (updateConf.isPend) return;
@@ -60,7 +73,33 @@ class FileEditor {
   }
 
   initEditor() {
-    //editor options
+    // handle tabindex
+    this.editor.commands.addCommand({
+      name: "prevTabIndex",
+      bindKey: { win: "Shift-Tab", mac: "Shift-Tab" },
+      exec: function (editor) {
+        try {
+          document.querySelector("#file-manager-modal input").disabled
+            ? document.querySelector("#file-manager-modal button").focus()
+            : document.querySelector("#file-manager-modal input").focus();
+        } catch (err) {}
+      },
+      readOnly: true,
+    });
+
+    this.editor.commands.addCommand({
+      name: "NextTabIndex",
+      bindKey: { win: "Tab", mac: "Tab" },
+      exec: function (editor) {
+        try {
+          document.querySelector("#file-manager-modal button").disabled
+            ? document.querySelector("#file-manager-modal input").focus()
+            : document.querySelector("#file-manager-modal button").focus();
+        } catch (err) {}
+      },
+      readOnly: true,
+    });
+
     this.editor.setShowPrintMargin(false);
     this.setDarkMode();
   }
@@ -124,6 +163,10 @@ onMounted(() => {
   editor.editor.on("change", () => {
     data.value = editor.getValue();
   });
+  // add tabindex to editor
+  try {
+    document.querySelector("textarea.ace_text-input").tabIndex = contentIndex;
+  } catch (e) {}
 });
 
 onBeforeUpdate(() => {
@@ -142,6 +185,10 @@ onUpdated(() => {
   editor.editor.on("change", () => {
     data.value = editor.getValue();
   });
+  // add tabindex to editor
+  try {
+    document.querySelector("textarea.ace_text-input").tabIndex = contentIndex;
+  } catch (e) {}
 });
 
 onUnmounted(() => {
@@ -214,15 +261,12 @@ async function sendData() {
     })
     .catch((err) => {});
 }
-
-const emits = defineEmits(["close"]);
 </script>
 <template>
   <ModalBase
     v-show="modalStore.isOpen"
     :aria-hidden="modalStore.isOpen ? 'false' : 'true'"
     id="file-manager-modal"
-    @backdrop="$emit('close')"
     :title="
       $t('custom_conf_modal_title', {
         action: $t(`action_${modalStore.data.action}`),

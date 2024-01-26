@@ -107,7 +107,7 @@ function runAction(action) {
     <FileManagerButtonView
       role="tab"
       :tabindex="
-        dropdown.isOpen ? (modalStore.isOpen ? '-1' : contentIndex) : '-1'
+        modalStore.isOpen ? contentIndex : dropdown.isOpen ? contentIndex : '-1'
       "
       class="first"
       :class="[
@@ -122,7 +122,7 @@ function runAction(action) {
     <FileManagerButtonEdit
       role="tab"
       :tabindex="
-        dropdown.isOpen ? (modalStore.isOpen ? '-1' : contentIndex) : '-1'
+        modalStore.isOpen ? contentIndex : dropdown.isOpen ? contentIndex : '-1'
       "
       @click="runAction('edit')"
       v-if="props.rights.canEdit"
@@ -133,7 +133,7 @@ function runAction(action) {
     <FileManagerButtonDownload
       role="tab"
       :tabindex="
-        dropdown.isOpen ? (modalStore.isOpen ? '-1' : contentIndex) : '-1'
+        modalStore.isOpen ? contentIndex : dropdown.isOpen ? contentIndex : '-1'
       "
       @click="runAction('download')"
       v-if="props.rights.canDownload"
@@ -142,7 +142,7 @@ function runAction(action) {
     <FileManagerButtonDelete
       role="tab"
       :tabindex="
-        dropdown.isOpen ? (modalStore.isOpen ? '-1' : contentIndex) : '-1'
+        modalStore.isOpen ? contentIndex : dropdown.isOpen ? contentIndex : '-1'
       "
       @click="runAction('delete')"
       v-if="props.rights.canDelete"

@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { defineProps } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
 import { useModalStore } from "@store/configs.js";
 
@@ -30,7 +30,7 @@ function createFile() {
     <ul class="file-manager-actions-list">
       <li class="file-manager-actions-item">
         <button
-          :tabindex="contentIndex"
+          :tabindex="modalStore.isOpen ? -1 : contentIndex"
           @click="createFile()"
           :disabled="props.canCreateFile ? false : true"
           :aria-disabled="props.canCreateFile ? false : true"

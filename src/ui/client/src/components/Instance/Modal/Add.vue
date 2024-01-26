@@ -59,7 +59,7 @@ async function addInstance() {
     "PUT",
     data,
     instAdd,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "success") {
       addModalStore.isOpen = false;

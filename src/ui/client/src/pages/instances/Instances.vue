@@ -44,7 +44,7 @@ async function getInstances(isFeedback = true) {
     "GET",
     null,
     instances,
-    isFeedback ? feedbackStore.addFeedback : null
+    isFeedback ? feedbackStore.addFeedback : null,
   );
 }
 

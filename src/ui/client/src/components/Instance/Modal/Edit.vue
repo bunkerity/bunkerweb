@@ -69,7 +69,7 @@ async function editInstance() {
     "PUT",
     data,
     instEdit,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "success") {
       editModalStore.isOpen = false;

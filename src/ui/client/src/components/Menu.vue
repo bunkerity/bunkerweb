@@ -278,7 +278,11 @@ function toggleMenu() {
       <!-- end logo version -->
 
       <!-- list items -->
-      <div class="menu-nav-list-container" :class="[bannerStore.bannerClass]">
+      <div
+        tabindex="-1"
+        class="menu-nav-list-container"
+        :class="[bannerStore.bannerClass]"
+      >
         <ul role="navigation" class="menu-nav-list">
           <!-- item -->
           <li v-for="(item, id) in navList" :key="id" class="mt-0.5 w-full">
