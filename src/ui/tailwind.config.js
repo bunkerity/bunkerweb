@@ -5,6 +5,7 @@ module.exports = {
     "./templates/*.{html,js}",
     "./static/js/*.js",
     "./static/js/utils/*.js",
+    "../common/core/***/**/*.{html,js}",
   ],
 
   presets: [],
