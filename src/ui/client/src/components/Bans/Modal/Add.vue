@@ -28,6 +28,15 @@ watch(backdropStore, () => {
   addModalStore.isOpen = false;
 });
 
+watch(addModalStore, () => {
+  if (addModalStore.isOpen) {
+    // Force tabindex
+    setTimeout(() => {
+      document.querySelector("#bans-modal-add button").focus();
+    }, 100);
+  }
+});
+
 const bans = reactive({
   count: 0,
   items: [],
@@ -95,7 +104,7 @@ async function addBansFromList() {
     "POST",
     getValidBans(),
     addBans,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     // Case succeed, delete items from UI
     // And emit add event to refetch ban list

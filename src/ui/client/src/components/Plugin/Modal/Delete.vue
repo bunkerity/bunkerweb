@@ -51,7 +51,7 @@ async function pluginDelete() {
     "DELETE",
     null,
     delPlugin,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   ).then((res) => {
     if (res.type === "success") {
       delModalStore.isOpen = false;

@@ -505,9 +505,9 @@
               ? ((t = this.compare(r.row, r.column)),
                 t == 1 ? 2 : t == 0 ? 1 : 0)
               : t == -1
-              ? -2
-              : ((t = this.compare(r.row, r.column)),
-                t == -1 ? -1 : t == 1 ? 42 : 0)
+                ? -2
+                : ((t = this.compare(r.row, r.column)),
+                  t == -1 ? -1 : t == 1 ? 42 : 0)
           );
         }),
         (this.comparePoint = function (e) {
@@ -556,21 +556,21 @@
             ? t < this.start.column
               ? -1
               : t > this.end.column
-              ? 1
-              : 0
+                ? 1
+                : 0
             : e < this.start.row
-            ? -1
-            : e > this.end.row
-            ? 1
-            : this.start.row === e
-            ? t >= this.start.column
-              ? 0
-              : -1
-            : this.end.row === e
-            ? t <= this.end.column
-              ? 0
-              : 1
-            : 0;
+              ? -1
+              : e > this.end.row
+                ? 1
+                : this.start.row === e
+                  ? t >= this.start.column
+                    ? 0
+                    : -1
+                  : this.end.row === e
+                    ? t <= this.end.column
+                      ? 0
+                      : 1
+                    : 0;
         }),
         (this.compareStart = function (e, t) {
           return this.start.row == e && this.start.column == t
@@ -586,8 +586,8 @@
           return this.end.row == e && this.end.column == t
             ? 1
             : this.start.row == e && this.start.column == t
-            ? -1
-            : this.compare(e, t);
+              ? -1
+              : this.compare(e, t);
         }),
         (this.clipRows = function (e, t) {
           if (this.end.row > t) var n = { row: t + 1, column: 0 };
@@ -671,8 +671,8 @@
         return e(n, u, r)
           ? { row: n.row, column: n.column }
           : e(a, n, !r)
-          ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
-          : { row: u.row, column: u.column };
+            ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
+            : { row: u.row, column: u.column };
       }
       r.implement(this, i),
         (this.getPosition = function () {
@@ -717,12 +717,12 @@
               ? ((n.row = Math.max(0, this.document.getLength() - 1)),
                 (n.column = this.document.getLine(n.row).length))
               : e < 0
-              ? ((n.row = 0), (n.column = 0))
-              : ((n.row = e),
-                (n.column = Math.min(
-                  this.document.getLine(n.row).length,
-                  Math.max(0, t),
-                ))),
+                ? ((n.row = 0), (n.column = 0))
+                : ((n.row = e),
+                  (n.column = Math.min(
+                    this.document.getLine(n.row).length,
+                    Math.max(0, t),
+                  ))),
             t < 0 && (n.column = 0),
             n
           );
@@ -741,8 +741,8 @@
           e.length === 0
             ? (this.$lines = [""])
             : Array.isArray(e)
-            ? this.insertMergedLines({ row: 0, column: 0 }, e)
-            : this.insert({ row: 0, column: 0 }, e);
+              ? this.insertMergedLines({ row: 0, column: 0 }, e)
+              : this.insert({ row: 0, column: 0 }, e);
       };
     (function () {
       r.implement(this, s),
@@ -867,8 +867,8 @@
           e === undefined
             ? (e = n)
             : e < 0
-            ? (e = 0)
-            : e >= n && ((e = n - 1), (t = undefined));
+              ? (e = 0)
+              : e >= n && ((e = n - 1), (t = undefined));
           var r = this.getLine(e);
           return (
             t == undefined && (t = r.length),
@@ -2025,30 +2025,30 @@
                         }),
                         t.setState(q))
                       : i === "/" && r
-                      ? ((t._currentToken = {
-                          type: "EndTag",
-                          name: this._temporaryBuffer,
-                          data: [],
-                          selfClosing: !1,
-                        }),
-                        t.setState(K))
-                      : i === ">" && r
-                      ? ((t._currentToken = {
-                          type: "EndTag",
-                          name: this._temporaryBuffer,
-                          data: [],
-                          selfClosing: !1,
-                        }),
-                        t._emitCurrentToken(),
-                        t.setState(n))
-                      : o(i)
-                      ? ((this._temporaryBuffer += i), e.commit())
-                      : (t._emitToken({
-                          type: "Characters",
-                          data: "</" + this._temporaryBuffer,
-                        }),
-                        e.unget(i),
-                        t.setState(f)),
+                        ? ((t._currentToken = {
+                            type: "EndTag",
+                            name: this._temporaryBuffer,
+                            data: [],
+                            selfClosing: !1,
+                          }),
+                          t.setState(K))
+                        : i === ">" && r
+                          ? ((t._currentToken = {
+                              type: "EndTag",
+                              name: this._temporaryBuffer,
+                              data: [],
+                              selfClosing: !1,
+                            }),
+                            t._emitCurrentToken(),
+                            t.setState(n))
+                          : o(i)
+                            ? ((this._temporaryBuffer += i), e.commit())
+                            : (t._emitToken({
+                                type: "Characters",
+                                data: "</" + this._temporaryBuffer,
+                              }),
+                              e.unget(i),
+                              t.setState(f)),
                     !0
                   );
                 }
@@ -2090,30 +2090,30 @@
                         }),
                         t.setState(q))
                       : i === "/" && r
-                      ? ((t._currentToken = {
-                          type: "EndTag",
-                          name: this._temporaryBuffer,
-                          data: [],
-                          selfClosing: !1,
-                        }),
-                        t.setState(K))
-                      : i === ">" && r
-                      ? ((t._currentToken = {
-                          type: "EndTag",
-                          name: this._temporaryBuffer,
-                          data: [],
-                          selfClosing: !1,
-                        }),
-                        t._emitCurrentToken(),
-                        t.setState(n))
-                      : o(i)
-                      ? ((this._temporaryBuffer += i), e.commit())
-                      : (t._emitToken({
-                          type: "Characters",
-                          data: "</" + this._temporaryBuffer,
-                        }),
-                        e.unget(i),
-                        t.setState(c)),
+                        ? ((t._currentToken = {
+                            type: "EndTag",
+                            name: this._temporaryBuffer,
+                            data: [],
+                            selfClosing: !1,
+                          }),
+                          t.setState(K))
+                        : i === ">" && r
+                          ? ((t._currentToken = {
+                              type: "EndTag",
+                              name: this._temporaryBuffer,
+                              data: [],
+                              selfClosing: !1,
+                            }),
+                            t._emitCurrentToken(),
+                            t.setState(n))
+                          : o(i)
+                            ? ((this._temporaryBuffer += i), e.commit())
+                            : (t._emitToken({
+                                type: "Characters",
+                                data: "</" + this._temporaryBuffer,
+                              }),
+                              e.unget(i),
+                              t.setState(c)),
                     !0
                   );
                 }
@@ -2123,11 +2123,11 @@
                     n === "/"
                       ? ((this._temporaryBuffer = ""), t.setState(E))
                       : n === "!"
-                      ? (t._emitToken({ type: "Characters", data: "<!" }),
-                        t.setState(x))
-                      : (t._emitToken({ type: "Characters", data: "<" }),
-                        e.unget(n),
-                        t.setState(p)),
+                        ? (t._emitToken({ type: "Characters", data: "<!" }),
+                          t.setState(x))
+                        : (t._emitToken({ type: "Characters", data: "<" }),
+                          e.unget(n),
+                          t.setState(p)),
                     !0
                   );
                 }
@@ -2158,29 +2158,29 @@
                         }),
                         t.setState(q))
                       : r === "/" && n
-                      ? ((t._currentToken = {
-                          type: "EndTag",
-                          name: "script",
-                          data: [],
-                          selfClosing: !1,
-                        }),
-                        t.setState(K))
-                      : r === ">" && n
-                      ? ((t._currentToken = {
-                          type: "EndTag",
-                          name: "script",
-                          data: [],
-                          selfClosing: !1,
-                        }),
-                        t._emitCurrentToken())
-                      : o(r)
-                      ? ((this._temporaryBuffer += r), e.commit())
-                      : (t._emitToken({
-                          type: "Characters",
-                          data: "</" + this._temporaryBuffer,
-                        }),
-                        e.unget(r),
-                        t.setState(p)),
+                        ? ((t._currentToken = {
+                            type: "EndTag",
+                            name: "script",
+                            data: [],
+                            selfClosing: !1,
+                          }),
+                          t.setState(K))
+                        : r === ">" && n
+                          ? ((t._currentToken = {
+                              type: "EndTag",
+                              name: "script",
+                              data: [],
+                              selfClosing: !1,
+                            }),
+                            t._emitCurrentToken())
+                          : o(r)
+                            ? ((this._temporaryBuffer += r), e.commit())
+                            : (t._emitToken({
+                                type: "Characters",
+                                data: "</" + this._temporaryBuffer,
+                              }),
+                              e.unget(r),
+                              t.setState(p)),
                     !0
                   );
                 }
@@ -2227,16 +2227,19 @@
                     i === r.EOF
                       ? (e.unget(i), t.setState(n))
                       : i === "-"
-                      ? (t._emitToken({ type: "Characters", data: "-" }),
-                        t.setState(k))
-                      : i === "<"
-                      ? t.setState(L)
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        t._emitToken({ type: "Characters", data: "\ufffd" }),
-                        t.setState(N))
-                      : (t._emitToken({ type: "Characters", data: i }),
-                        t.setState(N)),
+                        ? (t._emitToken({ type: "Characters", data: "-" }),
+                          t.setState(k))
+                        : i === "<"
+                          ? t.setState(L)
+                          : i === "\0"
+                            ? (t._parseError("invalid-codepoint"),
+                              t._emitToken({
+                                type: "Characters",
+                                data: "\ufffd",
+                              }),
+                              t.setState(N))
+                            : (t._emitToken({ type: "Characters", data: i }),
+                              t.setState(N)),
                     !0
                   );
                 }
@@ -2248,16 +2251,19 @@
                         e.unget(i),
                         t.setState(n))
                       : i === "<"
-                      ? t.setState(L)
-                      : i === ">"
-                      ? (t._emitToken({ type: "Characters", data: ">" }),
-                        t.setState(p))
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        t._emitToken({ type: "Characters", data: "\ufffd" }),
-                        t.setState(N))
-                      : (t._emitToken({ type: "Characters", data: i }),
-                        t.setState(N)),
+                        ? t.setState(L)
+                        : i === ">"
+                          ? (t._emitToken({ type: "Characters", data: ">" }),
+                            t.setState(p))
+                          : i === "\0"
+                            ? (t._parseError("invalid-codepoint"),
+                              t._emitToken({
+                                type: "Characters",
+                                data: "\ufffd",
+                              }),
+                              t.setState(N))
+                            : (t._emitToken({ type: "Characters", data: i }),
+                              t.setState(N)),
                     !0
                   );
                 }
@@ -2267,12 +2273,12 @@
                     n === "/"
                       ? ((this._temporaryBuffer = ""), t.setState(A))
                       : o(n)
-                      ? (t._emitToken({ type: "Characters", data: "<" + n }),
-                        (this._temporaryBuffer = n),
-                        t.setState(M))
-                      : (t._emitToken({ type: "Characters", data: "<" }),
-                        e.unget(n),
-                        t.setState(N)),
+                        ? (t._emitToken({ type: "Characters", data: "<" + n }),
+                          (this._temporaryBuffer = n),
+                          t.setState(M))
+                        : (t._emitToken({ type: "Characters", data: "<" }),
+                          e.unget(n),
+                          t.setState(N)),
                     !0
                   );
                 }
@@ -2303,30 +2309,30 @@
                         }),
                         t.setState(q))
                       : i === "/" && r
-                      ? ((t._currentToken = {
-                          type: "EndTag",
-                          name: "script",
-                          data: [],
-                          selfClosing: !1,
-                        }),
-                        t.setState(K))
-                      : i === ">" && r
-                      ? ((t._currentToken = {
-                          type: "EndTag",
-                          name: "script",
-                          data: [],
-                          selfClosing: !1,
-                        }),
-                        t.setState(n),
-                        t._emitCurrentToken())
-                      : o(i)
-                      ? ((this._temporaryBuffer += i), e.commit())
-                      : (t._emitToken({
-                          type: "Characters",
-                          data: "</" + this._temporaryBuffer,
-                        }),
-                        e.unget(i),
-                        t.setState(N)),
+                        ? ((t._currentToken = {
+                            type: "EndTag",
+                            name: "script",
+                            data: [],
+                            selfClosing: !1,
+                          }),
+                          t.setState(K))
+                        : i === ">" && r
+                          ? ((t._currentToken = {
+                              type: "EndTag",
+                              name: "script",
+                              data: [],
+                              selfClosing: !1,
+                            }),
+                            t.setState(n),
+                            t._emitCurrentToken())
+                          : o(i)
+                            ? ((this._temporaryBuffer += i), e.commit())
+                            : (t._emitToken({
+                                type: "Characters",
+                                data: "</" + this._temporaryBuffer,
+                              }),
+                              e.unget(i),
+                              t.setState(N)),
                     !0
                   );
                 }
@@ -2339,10 +2345,10 @@
                           ? t.setState(_)
                           : t.setState(N))
                       : o(n)
-                      ? (t._emitToken({ type: "Characters", data: n }),
-                        (this._temporaryBuffer += n),
-                        e.commit())
-                      : (e.unget(n), t.setState(N)),
+                        ? (t._emitToken({ type: "Characters", data: n }),
+                          (this._temporaryBuffer += n),
+                          e.commit())
+                        : (e.unget(n), t.setState(N)),
                     !0
                   );
                 }
@@ -2354,17 +2360,20 @@
                         e.unget(i),
                         t.setState(n))
                       : i === "-"
-                      ? (t._emitToken({ type: "Characters", data: "-" }),
-                        t.setState(D))
-                      : i === "<"
-                      ? (t._emitToken({ type: "Characters", data: "<" }),
-                        t.setState(H))
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        t._emitToken({ type: "Characters", data: "\ufffd" }),
-                        e.commit())
-                      : (t._emitToken({ type: "Characters", data: i }),
-                        e.commit()),
+                        ? (t._emitToken({ type: "Characters", data: "-" }),
+                          t.setState(D))
+                        : i === "<"
+                          ? (t._emitToken({ type: "Characters", data: "<" }),
+                            t.setState(H))
+                          : i === "\0"
+                            ? (t._parseError("invalid-codepoint"),
+                              t._emitToken({
+                                type: "Characters",
+                                data: "\ufffd",
+                              }),
+                              e.commit())
+                            : (t._emitToken({ type: "Characters", data: i }),
+                              e.commit()),
                     !0
                   );
                 }
@@ -2376,17 +2385,20 @@
                         e.unget(i),
                         t.setState(n))
                       : i === "-"
-                      ? (t._emitToken({ type: "Characters", data: "-" }),
-                        t.setState(P))
-                      : i === "<"
-                      ? (t._emitToken({ type: "Characters", data: "<" }),
-                        t.setState(H))
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        t._emitToken({ type: "Characters", data: "\ufffd" }),
-                        t.setState(_))
-                      : (t._emitToken({ type: "Characters", data: i }),
-                        t.setState(_)),
+                        ? (t._emitToken({ type: "Characters", data: "-" }),
+                          t.setState(P))
+                        : i === "<"
+                          ? (t._emitToken({ type: "Characters", data: "<" }),
+                            t.setState(H))
+                          : i === "\0"
+                            ? (t._parseError("invalid-codepoint"),
+                              t._emitToken({
+                                type: "Characters",
+                                data: "\ufffd",
+                              }),
+                              t.setState(_))
+                            : (t._emitToken({ type: "Characters", data: i }),
+                              t.setState(_)),
                     !0
                   );
                 }
@@ -2398,20 +2410,23 @@
                         e.unget(i),
                         t.setState(n))
                       : i === "-"
-                      ? (t._emitToken({ type: "Characters", data: "-" }),
-                        e.commit())
-                      : i === "<"
-                      ? (t._emitToken({ type: "Characters", data: "<" }),
-                        t.setState(H))
-                      : i === ">"
-                      ? (t._emitToken({ type: "Characters", data: ">" }),
-                        t.setState(p))
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        t._emitToken({ type: "Characters", data: "\ufffd" }),
-                        t.setState(_))
-                      : (t._emitToken({ type: "Characters", data: i }),
-                        t.setState(_)),
+                        ? (t._emitToken({ type: "Characters", data: "-" }),
+                          e.commit())
+                        : i === "<"
+                          ? (t._emitToken({ type: "Characters", data: "<" }),
+                            t.setState(H))
+                          : i === ">"
+                            ? (t._emitToken({ type: "Characters", data: ">" }),
+                              t.setState(p))
+                            : i === "\0"
+                              ? (t._parseError("invalid-codepoint"),
+                                t._emitToken({
+                                  type: "Characters",
+                                  data: "\ufffd",
+                                }),
+                                t.setState(_))
+                              : (t._emitToken({ type: "Characters", data: i }),
+                                t.setState(_)),
                     !0
                   );
                 }
@@ -2435,10 +2450,10 @@
                           ? t.setState(N)
                           : t.setState(_))
                       : o(n)
-                      ? (t._emitToken({ type: "Characters", data: n }),
-                        (this._temporaryBuffer += n),
-                        e.commit())
-                      : (e.unget(n), t.setState(_)),
+                        ? (t._emitToken({ type: "Characters", data: n }),
+                          (this._temporaryBuffer += n),
+                          e.commit())
+                        : (e.unget(n), t.setState(_)),
                     !0
                   );
                 }
@@ -2451,32 +2466,38 @@
                         e.unget(i),
                         t.setState(n))
                       : o(i)
-                      ? ((t._currentToken = {
-                          type: "StartTag",
-                          name: i.toLowerCase(),
-                          data: [],
-                        }),
-                        t.setState(I))
-                      : i === "!"
-                      ? t.setState(G)
-                      : i === "/"
-                      ? t.setState(F)
-                      : i === ">"
-                      ? (t._parseError(
-                          "expected-tag-name-but-got-right-bracket",
-                        ),
-                        t._emitToken({ type: "Characters", data: "<>" }),
-                        t.setState(n))
-                      : i === "?"
-                      ? (t._parseError(
-                          "expected-tag-name-but-got-question-mark",
-                        ),
-                        e.unget(i),
-                        t.setState(Q))
-                      : (t._parseError("expected-tag-name"),
-                        t._emitToken({ type: "Characters", data: "<" }),
-                        e.unget(i),
-                        t.setState(n)),
+                        ? ((t._currentToken = {
+                            type: "StartTag",
+                            name: i.toLowerCase(),
+                            data: [],
+                          }),
+                          t.setState(I))
+                        : i === "!"
+                          ? t.setState(G)
+                          : i === "/"
+                            ? t.setState(F)
+                            : i === ">"
+                              ? (t._parseError(
+                                  "expected-tag-name-but-got-right-bracket",
+                                ),
+                                t._emitToken({
+                                  type: "Characters",
+                                  data: "<>",
+                                }),
+                                t.setState(n))
+                              : i === "?"
+                                ? (t._parseError(
+                                    "expected-tag-name-but-got-question-mark",
+                                  ),
+                                  e.unget(i),
+                                  t.setState(Q))
+                                : (t._parseError("expected-tag-name"),
+                                  t._emitToken({
+                                    type: "Characters",
+                                    data: "<",
+                                  }),
+                                  e.unget(i),
+                                  t.setState(n)),
                     !0
                   );
                 }
@@ -2489,22 +2510,25 @@
                         e.unget(i),
                         t.setState(n))
                       : o(i)
-                      ? ((t._currentToken = {
-                          type: "EndTag",
-                          name: i.toLowerCase(),
-                          data: [],
-                        }),
-                        t.setState(I))
-                      : i === ">"
-                      ? (t._parseError(
-                          "expected-closing-tag-but-got-right-bracket",
-                        ),
-                        t.setState(n))
-                      : (t._parseError("expected-closing-tag-but-got-char", {
-                          data: i,
-                        }),
-                        e.unget(i),
-                        t.setState(Q)),
+                        ? ((t._currentToken = {
+                            type: "EndTag",
+                            name: i.toLowerCase(),
+                            data: [],
+                          }),
+                          t.setState(I))
+                        : i === ">"
+                          ? (t._parseError(
+                              "expected-closing-tag-but-got-right-bracket",
+                            ),
+                            t.setState(n))
+                          : (t._parseError(
+                              "expected-closing-tag-but-got-char",
+                              {
+                                data: i,
+                              },
+                            ),
+                            e.unget(i),
+                            t.setState(Q)),
                     !0
                   );
                 }
@@ -2516,17 +2540,17 @@
                         e.unget(i),
                         t.setState(n))
                       : s(i)
-                      ? t.setState(q)
-                      : o(i)
-                      ? (t._currentToken.name += i.toLowerCase())
-                      : i === ">"
-                      ? t._emitCurrentToken()
-                      : i === "/"
-                      ? t.setState(K)
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        (t._currentToken.name += "\ufffd"))
-                      : (t._currentToken.name += i),
+                        ? t.setState(q)
+                        : o(i)
+                          ? (t._currentToken.name += i.toLowerCase())
+                          : i === ">"
+                            ? t._emitCurrentToken()
+                            : i === "/"
+                              ? t.setState(K)
+                              : i === "\0"
+                                ? (t._parseError("invalid-codepoint"),
+                                  (t._currentToken.name += "\ufffd"))
+                                : (t._currentToken.name += i),
                     e.commit(),
                     !0
                   );
@@ -2546,27 +2570,29 @@
                         }),
                         t.setState(R))
                       : i === ">"
-                      ? t._emitCurrentToken()
-                      : i === "/"
-                      ? t.setState(K)
-                      : i === "'" || i === '"' || i === "=" || i === "<"
-                      ? (t._parseError("invalid-character-in-attribute-name"),
-                        t._currentToken.data.push({
-                          nodeName: i,
-                          nodeValue: "",
-                        }),
-                        t.setState(R))
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        t._currentToken.data.push({
-                          nodeName: "\ufffd",
-                          nodeValue: "",
-                        }))
-                      : (t._currentToken.data.push({
-                          nodeName: i,
-                          nodeValue: "",
-                        }),
-                        t.setState(R));
+                        ? t._emitCurrentToken()
+                        : i === "/"
+                          ? t.setState(K)
+                          : i === "'" || i === '"' || i === "=" || i === "<"
+                            ? (t._parseError(
+                                "invalid-character-in-attribute-name",
+                              ),
+                              t._currentToken.data.push({
+                                nodeName: i,
+                                nodeValue: "",
+                              }),
+                              t.setState(R))
+                            : i === "\0"
+                              ? (t._parseError("invalid-codepoint"),
+                                t._currentToken.data.push({
+                                  nodeName: "\ufffd",
+                                  nodeValue: "",
+                                }))
+                              : (t._currentToken.data.push({
+                                  nodeName: i,
+                                  nodeValue: "",
+                                }),
+                                t.setState(R));
                   }
                   return !0;
                 }
@@ -2580,24 +2606,28 @@
                       t.setState(n),
                       (a = !0))
                     : i === "="
-                    ? t.setState(z)
-                    : o(i)
-                    ? ((t._currentAttribute().nodeName += i.toLowerCase()),
-                      (u = !1))
-                    : i === ">"
-                    ? (a = !0)
-                    : s(i)
-                    ? t.setState(U)
-                    : i === "/"
-                    ? t.setState(K)
-                    : i === "'" || i === '"'
-                    ? (t._parseError("invalid-character-in-attribute-name"),
-                      (t._currentAttribute().nodeName += i),
-                      (u = !1))
-                    : i === "\0"
-                    ? (t._parseError("invalid-codepoint"),
-                      (t._currentAttribute().nodeName += "\ufffd"))
-                    : ((t._currentAttribute().nodeName += i), (u = !1));
+                      ? t.setState(z)
+                      : o(i)
+                        ? ((t._currentAttribute().nodeName += i.toLowerCase()),
+                          (u = !1))
+                        : i === ">"
+                          ? (a = !0)
+                          : s(i)
+                            ? t.setState(U)
+                            : i === "/"
+                              ? t.setState(K)
+                              : i === "'" || i === '"'
+                                ? (t._parseError(
+                                    "invalid-character-in-attribute-name",
+                                  ),
+                                  (t._currentAttribute().nodeName += i),
+                                  (u = !1))
+                                : i === "\0"
+                                  ? (t._parseError("invalid-codepoint"),
+                                    (t._currentAttribute().nodeName +=
+                                      "\ufffd"))
+                                  : ((t._currentAttribute().nodeName += i),
+                                    (u = !1));
                   if (u) {
                     var f = t._currentToken.data,
                       l = f[f.length - 1];
@@ -2624,35 +2654,35 @@
                     i === "="
                       ? t.setState(z)
                       : i === ">"
-                      ? t._emitCurrentToken()
-                      : o(i)
-                      ? (t._currentToken.data.push({
-                          nodeName: i,
-                          nodeValue: "",
-                        }),
-                        t.setState(R))
-                      : i === "/"
-                      ? t.setState(K)
-                      : i === "'" || i === '"' || i === "<"
-                      ? (t._parseError(
-                          "invalid-character-after-attribute-name",
-                        ),
-                        t._currentToken.data.push({
-                          nodeName: i,
-                          nodeValue: "",
-                        }),
-                        t.setState(R))
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        t._currentToken.data.push({
-                          nodeName: "\ufffd",
-                          nodeValue: "",
-                        }))
-                      : (t._currentToken.data.push({
-                          nodeName: i,
-                          nodeValue: "",
-                        }),
-                        t.setState(R));
+                        ? t._emitCurrentToken()
+                        : o(i)
+                          ? (t._currentToken.data.push({
+                              nodeName: i,
+                              nodeValue: "",
+                            }),
+                            t.setState(R))
+                          : i === "/"
+                            ? t.setState(K)
+                            : i === "'" || i === '"' || i === "<"
+                              ? (t._parseError(
+                                  "invalid-character-after-attribute-name",
+                                ),
+                                t._currentToken.data.push({
+                                  nodeName: i,
+                                  nodeValue: "",
+                                }),
+                                t.setState(R))
+                              : i === "\0"
+                                ? (t._parseError("invalid-codepoint"),
+                                  t._currentToken.data.push({
+                                    nodeName: "\ufffd",
+                                    nodeValue: "",
+                                  }))
+                                : (t._currentToken.data.push({
+                                    nodeName: i,
+                                    nodeValue: "",
+                                  }),
+                                  t.setState(R));
                   }
                   return !0;
                 }
@@ -2667,24 +2697,25 @@
                     i === '"'
                       ? t.setState(W)
                       : i === "&"
-                      ? (t.setState(V), e.unget(i))
-                      : i === "'"
-                      ? t.setState(X)
-                      : i === ">"
-                      ? (t._parseError(
-                          "expected-attribute-value-but-got-right-bracket",
-                        ),
-                        t._emitCurrentToken())
-                      : i === "=" || i === "<" || i === "`"
-                      ? (t._parseError(
-                          "unexpected-character-in-unquoted-attribute-value",
-                        ),
-                        (t._currentAttribute().nodeValue += i),
-                        t.setState(V))
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        (t._currentAttribute().nodeValue += "\ufffd"))
-                      : ((t._currentAttribute().nodeValue += i), t.setState(V));
+                        ? (t.setState(V), e.unget(i))
+                        : i === "'"
+                          ? t.setState(X)
+                          : i === ">"
+                            ? (t._parseError(
+                                "expected-attribute-value-but-got-right-bracket",
+                              ),
+                              t._emitCurrentToken())
+                            : i === "=" || i === "<" || i === "`"
+                              ? (t._parseError(
+                                  "unexpected-character-in-unquoted-attribute-value",
+                                ),
+                                (t._currentAttribute().nodeValue += i),
+                                t.setState(V))
+                              : i === "\0"
+                                ? (t._parseError("invalid-codepoint"),
+                                  (t._currentAttribute().nodeValue += "\ufffd"))
+                                : ((t._currentAttribute().nodeValue += i),
+                                  t.setState(V));
                   }
                   return !0;
                 }
@@ -2714,15 +2745,15 @@
                         e.unget(i),
                         t.setState(n))
                       : i === "'"
-                      ? t.setState(J)
-                      : i === "&"
-                      ? ((this._additionalAllowedCharacter = "'"),
-                        t.setState($))
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        (t._currentAttribute().nodeValue += "\ufffd"))
-                      : (t._currentAttribute().nodeValue +=
-                          i + e.matchUntil("\0|['&]")),
+                        ? t.setState(J)
+                        : i === "&"
+                          ? ((this._additionalAllowedCharacter = "'"),
+                            t.setState($))
+                          : i === "\0"
+                            ? (t._parseError("invalid-codepoint"),
+                              (t._currentAttribute().nodeValue += "\ufffd"))
+                            : (t._currentAttribute().nodeValue +=
+                                i + e.matchUntil("\0|['&]")),
                     !0
                   );
                 }
@@ -2772,9 +2803,9 @@
                     this._additionalAllowedCharacter === '"'
                       ? t.setState(W)
                       : this._additionalAllowedCharacter === "'"
-                      ? t.setState(X)
-                      : this._additionalAllowedCharacter === ">" &&
-                        t.setState(V),
+                        ? t.setState(X)
+                        : this._additionalAllowedCharacter === ">" &&
+                          t.setState(V),
                     !0
                   );
                 }
@@ -2786,16 +2817,16 @@
                         e.unget(i),
                         t.setState(n))
                       : s(i)
-                      ? t.setState(q)
-                      : i === ">"
-                      ? (t.setState(n), t._emitCurrentToken())
-                      : i === "/"
-                      ? t.setState(K)
-                      : (t._parseError(
-                          "unexpected-character-after-attribute-value",
-                        ),
-                        e.unget(i),
-                        t.setState(q)),
+                        ? t.setState(q)
+                        : i === ">"
+                          ? (t.setState(n), t._emitCurrentToken())
+                          : i === "/"
+                            ? t.setState(K)
+                            : (t._parseError(
+                                "unexpected-character-after-attribute-value",
+                              ),
+                              e.unget(i),
+                              t.setState(q)),
                     !0
                   );
                 }
@@ -2807,14 +2838,14 @@
                         e.unget(i),
                         t.setState(n))
                       : i === ">"
-                      ? ((t._currentToken.selfClosing = !0),
-                        t.setState(n),
-                        t._emitCurrentToken())
-                      : (t._parseError(
-                          "unexpected-character-after-solidus-in-tag",
-                        ),
-                        e.unget(i),
-                        t.setState(q)),
+                        ? ((t._currentToken.selfClosing = !0),
+                          t.setState(n),
+                          t._emitCurrentToken())
+                        : (t._parseError(
+                            "unexpected-character-after-solidus-in-tag",
+                          ),
+                          e.unget(i),
+                          t.setState(q)),
                     !0
                   );
                 }
@@ -2853,11 +2884,11 @@
                           }),
                           t.setState(st))
                         : t._tokenHandler.isCdataSectionAllowed() &&
-                          n === "[CDATA["
-                        ? t.setState(Y)
-                        : (t._parseError("expected-dashes-or-doctype"),
-                          e.unget(n),
-                          t.setState(Q));
+                            n === "[CDATA["
+                          ? t.setState(Y)
+                          : (t._parseError("expected-dashes-or-doctype"),
+                            e.unget(n),
+                            t.setState(Q));
                   }
                   return !0;
                 }
@@ -2879,15 +2910,15 @@
                         e.unget(i),
                         t.setState(n))
                       : i === "-"
-                      ? t.setState(et)
-                      : i === ">"
-                      ? (t._parseError("incorrect-comment"),
-                        t._emitToken(t._currentToken),
-                        t.setState(n))
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        (t._currentToken.data += "\ufffd"))
-                      : ((t._currentToken.data += i), t.setState(tt)),
+                        ? t.setState(et)
+                        : i === ">"
+                          ? (t._parseError("incorrect-comment"),
+                            t._emitToken(t._currentToken),
+                            t.setState(n))
+                          : i === "\0"
+                            ? (t._parseError("invalid-codepoint"),
+                              (t._currentToken.data += "\ufffd"))
+                            : ((t._currentToken.data += i), t.setState(tt)),
                     !0
                   );
                 }
@@ -2900,15 +2931,16 @@
                         e.unget(i),
                         t.setState(n))
                       : i === "-"
-                      ? t.setState(rt)
-                      : i === ">"
-                      ? (t._parseError("incorrect-comment"),
-                        t._emitToken(t._currentToken),
-                        t.setState(n))
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        (t._currentToken.data += "\ufffd"))
-                      : ((t._currentToken.data += "-" + i), t.setState(tt)),
+                        ? t.setState(rt)
+                        : i === ">"
+                          ? (t._parseError("incorrect-comment"),
+                            t._emitToken(t._currentToken),
+                            t.setState(n))
+                          : i === "\0"
+                            ? (t._parseError("invalid-codepoint"),
+                              (t._currentToken.data += "\ufffd"))
+                            : ((t._currentToken.data += "-" + i),
+                              t.setState(tt)),
                     !0
                   );
                 }
@@ -2921,11 +2953,11 @@
                         e.unget(i),
                         t.setState(n))
                       : i === "-"
-                      ? t.setState(nt)
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        (t._currentToken.data += "\ufffd"))
-                      : ((t._currentToken.data += i), e.commit()),
+                        ? t.setState(nt)
+                        : i === "\0"
+                          ? (t._parseError("invalid-codepoint"),
+                            (t._currentToken.data += "\ufffd"))
+                          : ((t._currentToken.data += i), e.commit()),
                     !0
                   );
                 }
@@ -2938,14 +2970,14 @@
                         e.unget(i),
                         t.setState(n))
                       : i === "-"
-                      ? t.setState(rt)
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        (t._currentToken.data += "-\ufffd"),
-                        t.setState(tt))
-                      : ((t._currentToken.data +=
-                          "-" + i + e.matchUntil("\0|-")),
-                        e.char()),
+                        ? t.setState(rt)
+                        : i === "\0"
+                          ? (t._parseError("invalid-codepoint"),
+                            (t._currentToken.data += "-\ufffd"),
+                            t.setState(tt))
+                          : ((t._currentToken.data +=
+                              "-" + i + e.matchUntil("\0|-")),
+                            e.char()),
                     !0
                   );
                 }
@@ -2958,24 +2990,24 @@
                         e.unget(i),
                         t.setState(n))
                       : i === ">"
-                      ? (t._emitToken(t._currentToken), t.setState(n))
-                      : i === "!"
-                      ? (t._parseError(
-                          "unexpected-bang-after-double-dash-in-comment",
-                        ),
-                        t.setState(it))
-                      : i === "-"
-                      ? (t._parseError(
-                          "unexpected-dash-after-double-dash-in-comment",
-                        ),
-                        (t._currentToken.data += i))
-                      : i === "\0"
-                      ? (t._parseError("invalid-codepoint"),
-                        (t._currentToken.data += "--\ufffd"),
-                        t.setState(tt))
-                      : (t._parseError("unexpected-char-in-comment"),
-                        (t._currentToken.data += "--" + i),
-                        t.setState(tt)),
+                        ? (t._emitToken(t._currentToken), t.setState(n))
+                        : i === "!"
+                          ? (t._parseError(
+                              "unexpected-bang-after-double-dash-in-comment",
+                            ),
+                            t.setState(it))
+                          : i === "-"
+                            ? (t._parseError(
+                                "unexpected-dash-after-double-dash-in-comment",
+                              ),
+                              (t._currentToken.data += i))
+                            : i === "\0"
+                              ? (t._parseError("invalid-codepoint"),
+                                (t._currentToken.data += "--\ufffd"),
+                                t.setState(tt))
+                              : (t._parseError("unexpected-char-in-comment"),
+                                (t._currentToken.data += "--" + i),
+                                t.setState(tt)),
                     !0
                   );
                 }
@@ -2988,10 +3020,11 @@
                         e.unget(i),
                         t.setState(n))
                       : i === ">"
-                      ? (t._emitToken(t._currentToken), t.setState(n))
-                      : i === "-"
-                      ? ((t._currentToken.data += "--!"), t.setState(nt))
-                      : ((t._currentToken.data += "--!" + i), t.setState(tt)),
+                        ? (t._emitToken(t._currentToken), t.setState(n))
+                        : i === "-"
+                          ? ((t._currentToken.data += "--!"), t.setState(nt))
+                          : ((t._currentToken.data += "--!" + i),
+                            t.setState(tt)),
                     !0
                   );
                 }
@@ -3005,10 +3038,10 @@
                         t.setState(n),
                         t._emitCurrentToken())
                       : s(i)
-                      ? t.setState(ot)
-                      : (t._parseError("need-space-after-doctype"),
-                        e.unget(i),
-                        t.setState(ot)),
+                        ? t.setState(ot)
+                        : (t._parseError("need-space-after-doctype"),
+                          e.unget(i),
+                          t.setState(ot)),
                     !0
                   );
                 }
@@ -3045,12 +3078,12 @@
                         t.setState(n),
                         t._emitCurrentToken())
                       : s(i)
-                      ? t.setState(at)
-                      : i === ">"
-                      ? (t.setState(n), t._emitCurrentToken())
-                      : (o(i) && (i = i.toLowerCase()),
-                        (t._currentToken.name += i),
-                        e.commit()),
+                        ? t.setState(at)
+                        : i === ">"
+                          ? (t.setState(n), t._emitCurrentToken())
+                          : (o(i) && (i = i.toLowerCase()),
+                            (t._currentToken.name += i),
+                            e.commit()),
                     !0
                   );
                 }
@@ -3115,12 +3148,12 @@
                         t.setState(n),
                         t._emitCurrentToken())
                       : s(i)
-                      ? t.setState(lt)
-                      : i === "'" || i === '"'
-                      ? (t._parseError("unexpected-char-in-doctype"),
-                        e.unget(i),
-                        t.setState(lt))
-                      : (e.unget(i), t.setState(lt)),
+                        ? t.setState(lt)
+                        : i === "'" || i === '"'
+                          ? (t._parseError("unexpected-char-in-doctype"),
+                            e.unget(i),
+                            t.setState(lt))
+                          : (e.unget(i), t.setState(lt)),
                     !0
                   );
                 }
@@ -3137,15 +3170,15 @@
                         (i === '"'
                           ? ((t._currentToken.publicId = ""), t.setState(ct))
                           : i === "'"
-                          ? ((t._currentToken.publicId = ""), t.setState(ht))
-                          : i === ">"
-                          ? (t._parseError("unexpected-end-of-doctype"),
-                            (t._currentToken.forceQuirks = !0),
-                            t.setState(n),
-                            t._emitCurrentToken())
-                          : (t._parseError("unexpected-char-in-doctype"),
-                            (t._currentToken.forceQuirks = !0),
-                            t.setState(wt))),
+                            ? ((t._currentToken.publicId = ""), t.setState(ht))
+                            : i === ">"
+                              ? (t._parseError("unexpected-end-of-doctype"),
+                                (t._currentToken.forceQuirks = !0),
+                                t.setState(n),
+                                t._emitCurrentToken())
+                              : (t._parseError("unexpected-char-in-doctype"),
+                                (t._currentToken.forceQuirks = !0),
+                                t.setState(wt))),
                     !0
                   );
                 }
@@ -3159,13 +3192,13 @@
                         t.setState(n),
                         t._emitCurrentToken())
                       : i === '"'
-                      ? t.setState(pt)
-                      : i === ">"
-                      ? (t._parseError("unexpected-end-of-doctype"),
-                        (t._currentToken.forceQuirks = !0),
-                        t.setState(n),
-                        t._emitCurrentToken())
-                      : (t._currentToken.publicId += i),
+                        ? t.setState(pt)
+                        : i === ">"
+                          ? (t._parseError("unexpected-end-of-doctype"),
+                            (t._currentToken.forceQuirks = !0),
+                            t.setState(n),
+                            t._emitCurrentToken())
+                          : (t._currentToken.publicId += i),
                     !0
                   );
                 }
@@ -3179,13 +3212,13 @@
                         t.setState(n),
                         t._emitCurrentToken())
                       : i === "'"
-                      ? t.setState(pt)
-                      : i === ">"
-                      ? (t._parseError("unexpected-end-of-doctype"),
-                        (t._currentToken.forceQuirks = !0),
-                        t.setState(n),
-                        t._emitCurrentToken())
-                      : (t._currentToken.publicId += i),
+                        ? t.setState(pt)
+                        : i === ">"
+                          ? (t._parseError("unexpected-end-of-doctype"),
+                            (t._currentToken.forceQuirks = !0),
+                            t.setState(n),
+                            t._emitCurrentToken())
+                          : (t._currentToken.publicId += i),
                     !0
                   );
                 }
@@ -3199,20 +3232,20 @@
                         e.unget(i),
                         t.setState(n))
                       : s(i)
-                      ? t.setState(dt)
-                      : i === ">"
-                      ? (t.setState(n), t._emitCurrentToken())
-                      : i === '"'
-                      ? (t._parseError("unexpected-char-in-doctype"),
-                        (t._currentToken.systemId = ""),
-                        t.setState(gt))
-                      : i === "'"
-                      ? (t._parseError("unexpected-char-in-doctype"),
-                        (t._currentToken.systemId = ""),
-                        t.setState(yt))
-                      : (t._parseError("unexpected-char-in-doctype"),
-                        (t._currentToken.forceQuirks = !0),
-                        t.setState(wt)),
+                        ? t.setState(dt)
+                        : i === ">"
+                          ? (t.setState(n), t._emitCurrentToken())
+                          : i === '"'
+                            ? (t._parseError("unexpected-char-in-doctype"),
+                              (t._currentToken.systemId = ""),
+                              t.setState(gt))
+                            : i === "'"
+                              ? (t._parseError("unexpected-char-in-doctype"),
+                                (t._currentToken.systemId = ""),
+                                t.setState(yt))
+                              : (t._parseError("unexpected-char-in-doctype"),
+                                (t._currentToken.forceQuirks = !0),
+                                t.setState(wt)),
                     !0
                   );
                 }
@@ -3229,12 +3262,13 @@
                         (i === ">"
                           ? (t._emitCurrentToken(), t.setState(n))
                           : i === '"'
-                          ? ((t._currentToken.systemId = ""), t.setState(gt))
-                          : i === "'"
-                          ? ((t._currentToken.systemId = ""), t.setState(yt))
-                          : (t._parseError("unexpected-char-in-doctype"),
-                            (t._currentToken.forceQuirks = !0),
-                            t.setState(wt))),
+                            ? ((t._currentToken.systemId = ""), t.setState(gt))
+                            : i === "'"
+                              ? ((t._currentToken.systemId = ""),
+                                t.setState(yt))
+                              : (t._parseError("unexpected-char-in-doctype"),
+                                (t._currentToken.forceQuirks = !0),
+                                t.setState(wt))),
                     !0
                   );
                 }
@@ -3248,12 +3282,12 @@
                         e.unget(i),
                         t.setState(n))
                       : s(i)
-                      ? t.setState(mt)
-                      : i === "'" || i === '"'
-                      ? (t._parseError("unexpected-char-in-doctype"),
-                        e.unget(i),
-                        t.setState(mt))
-                      : (e.unget(i), t.setState(mt)),
+                        ? t.setState(mt)
+                        : i === "'" || i === '"'
+                          ? (t._parseError("unexpected-char-in-doctype"),
+                            e.unget(i),
+                            t.setState(mt))
+                          : (e.unget(i), t.setState(mt)),
                     !0
                   );
                 }
@@ -3270,15 +3304,15 @@
                         (i === '"'
                           ? ((t._currentToken.systemId = ""), t.setState(gt))
                           : i === "'"
-                          ? ((t._currentToken.systemId = ""), t.setState(yt))
-                          : i === ">"
-                          ? (t._parseError("unexpected-end-of-doctype"),
-                            (t._currentToken.forceQuirks = !0),
-                            t._emitCurrentToken(),
-                            t.setState(n))
-                          : (t._parseError("unexpected-char-in-doctype"),
-                            (t._currentToken.forceQuirks = !0),
-                            t.setState(wt))),
+                            ? ((t._currentToken.systemId = ""), t.setState(yt))
+                            : i === ">"
+                              ? (t._parseError("unexpected-end-of-doctype"),
+                                (t._currentToken.forceQuirks = !0),
+                                t._emitCurrentToken(),
+                                t.setState(n))
+                              : (t._parseError("unexpected-char-in-doctype"),
+                                (t._currentToken.forceQuirks = !0),
+                                t.setState(wt))),
                     !0
                   );
                 }
@@ -3292,13 +3326,13 @@
                         e.unget(i),
                         t.setState(n))
                       : i === '"'
-                      ? t.setState(bt)
-                      : i === ">"
-                      ? (t._parseError("unexpected-end-of-doctype"),
-                        (t._currentToken.forceQuirks = !0),
-                        t._emitCurrentToken(),
-                        t.setState(n))
-                      : (t._currentToken.systemId += i),
+                        ? t.setState(bt)
+                        : i === ">"
+                          ? (t._parseError("unexpected-end-of-doctype"),
+                            (t._currentToken.forceQuirks = !0),
+                            t._emitCurrentToken(),
+                            t.setState(n))
+                          : (t._currentToken.systemId += i),
                     !0
                   );
                 }
@@ -3312,13 +3346,13 @@
                         e.unget(i),
                         t.setState(n))
                       : i === "'"
-                      ? t.setState(bt)
-                      : i === ">"
-                      ? (t._parseError("unexpected-end-of-doctype"),
-                        (t._currentToken.forceQuirks = !0),
-                        t._emitCurrentToken(),
-                        t.setState(n))
-                      : (t._currentToken.systemId += i),
+                        ? t.setState(bt)
+                        : i === ">"
+                          ? (t._parseError("unexpected-end-of-doctype"),
+                            (t._currentToken.forceQuirks = !0),
+                            t._emitCurrentToken(),
+                            t.setState(n))
+                          : (t._currentToken.systemId += i),
                     !0
                   );
                 }
@@ -3440,9 +3474,9 @@
                     e.openElements.length > 2
                       ? e.parseError("expected-closing-tag-but-got-eof")
                       : e.openElements.length == 2 &&
-                        e.openElements.item(1).localName != "body"
-                      ? e.parseError("expected-closing-tag-but-got-eof")
-                      : e.context && e.openElements.length > 1;
+                          e.openElements.item(1).localName != "body"
+                        ? e.parseError("expected-closing-tag-but-got-eof")
+                        : e.context && e.openElements.length > 1;
                 },
                 processComment: function (t) {
                   e.insertComment(t, e.currentStackItem().node);
@@ -3573,33 +3607,33 @@
                       ? ((e.compatMode = "quirks"),
                         e.parseError("quirky-doctype"))
                       : n != null &&
-                        ([
-                          "-//w3c//dtd xhtml 1.0 transitional//",
-                          "-//w3c//dtd xhtml 1.0 frameset//",
-                        ].some(s) ||
-                          (r != null &&
-                            [
-                              "-//w3c//dtd html 4.01 transitional//",
-                              "-//w3c//dtd html 4.01 frameset//",
-                            ].indexOf(n.toLowerCase()) > -1))
-                      ? ((e.compatMode = "limited quirks"),
-                        e.parseError("almost-standards-doctype"))
-                      : (n == "-//W3C//DTD HTML 4.0//EN" &&
-                          (r == null ||
+                          ([
+                            "-//w3c//dtd xhtml 1.0 transitional//",
+                            "-//w3c//dtd xhtml 1.0 frameset//",
+                          ].some(s) ||
+                            (r != null &&
+                              [
+                                "-//w3c//dtd html 4.01 transitional//",
+                                "-//w3c//dtd html 4.01 frameset//",
+                              ].indexOf(n.toLowerCase()) > -1))
+                        ? ((e.compatMode = "limited quirks"),
+                          e.parseError("almost-standards-doctype"))
+                        : (n == "-//W3C//DTD HTML 4.0//EN" &&
+                            (r == null ||
+                              r ==
+                                "http://www.w3.org/TR/REC-html40/strict.dtd")) ||
+                          (n == "-//W3C//DTD HTML 4.01//EN" &&
+                            (r == null ||
+                              r == "http://www.w3.org/TR/html4/strict.dtd")) ||
+                          (n == "-//W3C//DTD XHTML 1.0 Strict//EN" &&
                             r ==
-                              "http://www.w3.org/TR/REC-html40/strict.dtd")) ||
-                        (n == "-//W3C//DTD HTML 4.01//EN" &&
-                          (r == null ||
-                            r == "http://www.w3.org/TR/html4/strict.dtd")) ||
-                        (n == "-//W3C//DTD XHTML 1.0 Strict//EN" &&
-                          r ==
-                            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd") ||
-                        (n == "-//W3C//DTD XHTML 1.1//EN" &&
-                          r ==
-                            "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd") ||
-                        (((r != null && r != "about:legacy-compat") ||
-                          n != null) &&
-                          e.parseError("unknown-doctype")),
+                              "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd") ||
+                          (n == "-//W3C//DTD XHTML 1.1//EN" &&
+                            r ==
+                              "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd") ||
+                          (((r != null && r != "about:legacy-compat") ||
+                            n != null) &&
+                            e.parseError("unknown-doctype")),
                     e.setInsertionMode("beforeHTML");
                 }),
                 (t.initial.processCharacters = function (t) {
@@ -9156,10 +9190,10 @@
               return r.isUndefined(t)
                 ? "" + t
                 : r.isNumber(t) && (isNaN(t) || !isFinite(t))
-                ? t.toString()
-                : r.isFunction(t) || r.isRegExp(t)
-                ? t.toString()
-                : t;
+                  ? t.toString()
+                  : r.isFunction(t) || r.isRegExp(t)
+                    ? t.toString()
+                    : t;
             }
             function a(e, t) {
               return r.isString(e) ? (e.length < t ? e : e.slice(0, t)) : e;
@@ -9195,14 +9229,14 @@
               return r.isDate(e) && r.isDate(t)
                 ? e.getTime() === t.getTime()
                 : r.isRegExp(e) && r.isRegExp(t)
-                ? e.source === t.source &&
-                  e.global === t.global &&
-                  e.multiline === t.multiline &&
-                  e.lastIndex === t.lastIndex &&
-                  e.ignoreCase === t.ignoreCase
-                : !r.isObject(e) && !r.isObject(t)
-                ? e == t
-                : d(e, t);
+                  ? e.source === t.source &&
+                    e.global === t.global &&
+                    e.multiline === t.multiline &&
+                    e.lastIndex === t.lastIndex &&
+                    e.ignoreCase === t.ignoreCase
+                  : !r.isObject(e) && !r.isObject(t)
+                    ? e == t
+                    : d(e, t);
             }
             function p(e) {
               return Object.prototype.toString.call(e) == "[object Arguments]";
@@ -9233,12 +9267,12 @@
               return !e || !t
                 ? !1
                 : Object.prototype.toString.call(t) == "[object RegExp]"
-                ? t.test(e)
-                : e instanceof t
-                ? !0
-                : t.call({}, e) === !0
-                ? !0
-                : !1;
+                  ? t.test(e)
+                  : e instanceof t
+                    ? !0
+                    : t.call({}, e) === !0
+                      ? !0
+                      : !1;
             }
             function m(e, t, n, i) {
               var s;
@@ -9740,8 +9774,8 @@
               typeof self != "undefined"
                 ? self
                 : typeof window != "undefined"
-                ? window
-                : {},
+                  ? window
+                  : {},
             );
           },
           {
@@ -9912,8 +9946,8 @@
                   !this._events || !this._events[e]
                     ? (t = [])
                     : i(this._events[e])
-                    ? (t = [this._events[e]])
-                    : (t = this._events[e].slice()),
+                      ? (t = [this._events[e]])
+                      : (t = this._events[e].slice()),
                   t
                 );
               }),
@@ -9923,8 +9957,8 @@
                   !e._events || !e._events[t]
                     ? (n = 0)
                     : i(e._events[t])
-                    ? (n = 1)
-                    : (n = e._events[t].length),
+                      ? (n = 1)
+                      : (n = e._events[t].length),
                   n
                 );
               });

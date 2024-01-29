@@ -11,12 +11,12 @@ define("ace/keyboard/sublime", [
         ? /\s/.test(e)
           ? "s"
           : e == "_"
-          ? "_"
-          : e.toUpperCase() == e && e.toLowerCase() != e
-          ? "W"
-          : e.toUpperCase() != e && e.toLowerCase() == e
-          ? "w"
-          : "o"
+            ? "_"
+            : e.toUpperCase() == e && e.toLowerCase() != e
+              ? "W"
+              : e.toUpperCase() != e && e.toLowerCase() == e
+                ? "w"
+                : "o"
         : "-";
     }
     var r = e.selection,

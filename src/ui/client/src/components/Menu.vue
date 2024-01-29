@@ -16,7 +16,7 @@ import MenuSvgReporting from "@components/Menu/Svg/Reporting.vue";
 import { reactive, onMounted } from "vue";
 import { getDarkMode } from "@utils/global.js";
 import { getCookie } from "@utils/api.js";
-import { menuIndex } from "@/utils/tabindex.js";
+import { menuIndex, menuFloatIndex } from "@/utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
 
 // Use to update position when banner is visible or not
@@ -166,7 +166,7 @@ function toggleMenu() {
   <!-- float button-->
   <button
     aria-controls="sidebar-menu"
-    :tabindex="menu.isDesktop ? '-1' : menuIndex"
+    :tabindex="menu.isDesktop ? '-1' : menuFloatIndex"
     :aria-expanded="menu.isDesktop ? 'true' : menu.isActive ? 'true' : 'false'"
     @click="toggleMenu()"
     :class="['menu-float-btn', bannerStore.bannerClass]"

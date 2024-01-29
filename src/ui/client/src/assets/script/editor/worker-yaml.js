@@ -372,9 +372,9 @@
               ? ((t = this.compare(r.row, r.column)),
                 t == 1 ? 2 : t == 0 ? 1 : 0)
               : t == -1
-              ? -2
-              : ((t = this.compare(r.row, r.column)),
-                t == -1 ? -1 : t == 1 ? 42 : 0)
+                ? -2
+                : ((t = this.compare(r.row, r.column)),
+                  t == -1 ? -1 : t == 1 ? 42 : 0)
           );
         }),
         (this.comparePoint = function (e) {
@@ -423,21 +423,21 @@
             ? t < this.start.column
               ? -1
               : t > this.end.column
-              ? 1
-              : 0
+                ? 1
+                : 0
             : e < this.start.row
-            ? -1
-            : e > this.end.row
-            ? 1
-            : this.start.row === e
-            ? t >= this.start.column
-              ? 0
-              : -1
-            : this.end.row === e
-            ? t <= this.end.column
-              ? 0
-              : 1
-            : 0;
+              ? -1
+              : e > this.end.row
+                ? 1
+                : this.start.row === e
+                  ? t >= this.start.column
+                    ? 0
+                    : -1
+                  : this.end.row === e
+                    ? t <= this.end.column
+                      ? 0
+                      : 1
+                    : 0;
         }),
         (this.compareStart = function (e, t) {
           return this.start.row == e && this.start.column == t
@@ -453,8 +453,8 @@
           return this.end.row == e && this.end.column == t
             ? 1
             : this.start.row == e && this.start.column == t
-            ? -1
-            : this.compare(e, t);
+              ? -1
+              : this.compare(e, t);
         }),
         (this.clipRows = function (e, t) {
           if (this.end.row > t) var n = { row: t + 1, column: 0 };
@@ -538,8 +538,8 @@
         return e(n, u, r)
           ? { row: n.row, column: n.column }
           : e(a, n, !r)
-          ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
-          : { row: u.row, column: u.column };
+            ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
+            : { row: u.row, column: u.column };
       }
       r.implement(this, i),
         (this.getPosition = function () {
@@ -584,12 +584,12 @@
               ? ((n.row = Math.max(0, this.document.getLength() - 1)),
                 (n.column = this.document.getLine(n.row).length))
               : e < 0
-              ? ((n.row = 0), (n.column = 0))
-              : ((n.row = e),
-                (n.column = Math.min(
-                  this.document.getLine(n.row).length,
-                  Math.max(0, t),
-                ))),
+                ? ((n.row = 0), (n.column = 0))
+                : ((n.row = e),
+                  (n.column = Math.min(
+                    this.document.getLine(n.row).length,
+                    Math.max(0, t),
+                  ))),
             t < 0 && (n.column = 0),
             n
           );
@@ -608,8 +608,8 @@
           e.length === 0
             ? (this.$lines = [""])
             : Array.isArray(e)
-            ? this.insertMergedLines({ row: 0, column: 0 }, e)
-            : this.insert({ row: 0, column: 0 }, e);
+              ? this.insertMergedLines({ row: 0, column: 0 }, e)
+              : this.insert({ row: 0, column: 0 }, e);
       };
     (function () {
       r.implement(this, s),
@@ -734,8 +734,8 @@
           e === undefined
             ? (e = n)
             : e < 0
-            ? (e = 0)
-            : e >= n && ((e = n - 1), (t = undefined));
+              ? (e = 0)
+              : e >= n && ((e = n - 1), (t = undefined));
           var r = this.getLine(e);
           return (
             t == undefined && (t = r.length),
@@ -1142,10 +1142,10 @@
           typeof window != "undefined"
             ? (r = window)
             : typeof global != "undefined"
-            ? (r = global)
-            : typeof self != "undefined"
-            ? (r = self)
-            : (r = this),
+              ? (r = global)
+              : typeof self != "undefined"
+                ? (r = self)
+                : (r = this),
             (r.lint = e());
         }
       })(function () {
@@ -1469,10 +1469,10 @@
                       ? W
                       : X
                     : n > 9 && z(e)
-                    ? J
-                    : a
-                    ? $
-                    : V;
+                      ? J
+                      : a
+                        ? $
+                        : V;
                 }
                 function Q(e, t, n, r) {
                   e.dump = (function () {
@@ -1928,40 +1928,40 @@
                   return e === 48
                     ? "\0"
                     : e === 97
-                    ? "\x07"
-                    : e === 98
-                    ? "\b"
-                    : e === 116
-                    ? "	"
-                    : e === 9
-                    ? "	"
-                    : e === 110
-                    ? "\n"
-                    : e === 118
-                    ? "\x0b"
-                    : e === 102
-                    ? "\f"
-                    : e === 114
-                    ? "\r"
-                    : e === 101
-                    ? ""
-                    : e === 32
-                    ? " "
-                    : e === 34
-                    ? '"'
-                    : e === 47
-                    ? "/"
-                    : e === 92
-                    ? "\\"
-                    : e === 78
-                    ? "\u0085"
-                    : e === 95
-                    ? "\u00a0"
-                    : e === 76
-                    ? "\u2028"
-                    : e === 80
-                    ? "\u2029"
-                    : "";
+                      ? "\x07"
+                      : e === 98
+                        ? "\b"
+                        : e === 116
+                          ? "	"
+                          : e === 9
+                            ? "	"
+                            : e === 110
+                              ? "\n"
+                              : e === 118
+                                ? "\x0b"
+                                : e === 102
+                                  ? "\f"
+                                  : e === 114
+                                    ? "\r"
+                                    : e === 101
+                                      ? ""
+                                      : e === 32
+                                        ? " "
+                                        : e === 34
+                                          ? '"'
+                                          : e === 47
+                                            ? "/"
+                                            : e === 92
+                                              ? "\\"
+                                              : e === 78
+                                                ? "\u0085"
+                                                : e === 95
+                                                  ? "\u00a0"
+                                                  : e === 76
+                                                    ? "\u2028"
+                                                    : e === 80
+                                                      ? "\u2029"
+                                                      : "";
                 }
                 function A(e) {
                   return e <= 65535
@@ -2057,9 +2057,9 @@
                     t === 10
                       ? e.position++
                       : t === 13
-                      ? (e.position++,
-                        e.input.charCodeAt(e.position) === 10 && e.position++)
-                      : H(e, "a line break is expected"),
+                        ? (e.position++,
+                          e.input.charCodeAt(e.position) === 10 && e.position++)
+                        : H(e, "a line break is expected"),
                     (e.line += 1),
                     (e.lineStart = e.position);
                 }
@@ -2202,11 +2202,11 @@
                           W(e, U(e, !1, t)),
                           (r = i = e.position))
                         : e.position === e.lineStart && z(e)
-                        ? H(
-                            e,
-                            "unexpected end of the document within a single quoted scalar",
-                          )
-                        : (e.position++, (i = e.position));
+                          ? H(
+                              e,
+                              "unexpected end of the document within a single quoted scalar",
+                            )
+                          : (e.position++, (i = e.position));
                   H(
                     e,
                     "unexpected end of the stream within a single quoted scalar",
@@ -2245,11 +2245,11 @@
                           W(e, U(e, !1, t)),
                           (n = r = e.position))
                         : e.position === e.lineStart && z(e)
-                        ? H(
-                            e,
-                            "unexpected end of the document within a double quoted scalar",
-                          )
-                        : (e.position++, (r = e.position));
+                          ? H(
+                              e,
+                              "unexpected end of the document within a double quoted scalar",
+                            )
+                          : (e.position++, (r = e.position));
                   }
                   H(
                     e,
@@ -2313,8 +2313,8 @@
                       h
                         ? q(e, s, p, v, d, m)
                         : l
-                        ? s.push(q(e, null, p, v, d, m))
-                        : s.push(d),
+                          ? s.push(q(e, null, p, v, d, m))
+                          : s.push(d),
                       U(e, !0, t),
                       (g = e.input.charCodeAt(e.position)),
                       g === 44
@@ -2355,8 +2355,8 @@
                             "bad explicit indentation width of a block scalar; it cannot be less than one",
                           )
                         : u
-                        ? H(e, "repeat of an indentation width identifier")
-                        : ((a = t + c - 1), (u = !0));
+                          ? H(e, "repeat of an indentation width identifier")
+                          : ((a = t + c - 1), (u = !0));
                     }
                   }
                   if (S(h)) {
@@ -2388,10 +2388,10 @@
                         ? ((l = !0),
                           (e.result += r.repeat("\n", o ? 1 + f : f)))
                         : l
-                        ? ((l = !1), (e.result += r.repeat("\n", f + 1)))
-                        : f === 0
-                        ? o && (e.result += " ")
-                        : (e.result += r.repeat("\n", f))
+                          ? ((l = !1), (e.result += r.repeat("\n", f + 1)))
+                          : f === 0
+                            ? o && (e.result += " ")
+                            : (e.result += r.repeat("\n", f))
                       : (e.result += r.repeat("\n", o ? 1 + f : f)),
                       (o = !0),
                       (u = !0),
@@ -2499,11 +2499,11 @@
                           (m = !0),
                           (i = !0))
                         : m
-                        ? ((m = !1), (i = !0))
-                        : H(
-                            e,
-                            "incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line",
-                          ),
+                          ? ((m = !1), (i = !0))
+                          : H(
+                              e,
+                              "incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line",
+                            ),
                         (e.position += 1),
                         (y = r);
                     if (e.line === s || e.lineIndent > t)
@@ -2540,10 +2540,10 @@
                     o === 60
                       ? ((n = !0), (o = e.input.charCodeAt(++e.position)))
                       : o === 33
-                      ? ((r = !0),
-                        (i = "!!"),
-                        (o = e.input.charCodeAt(++e.position)))
-                      : (i = "!"),
+                        ? ((r = !0),
+                          (i = "!!"),
+                          (o = e.input.charCodeAt(++e.position)))
+                        : (i = "!"),
                     (t = e.position);
                   if (n) {
                     do o = e.input.charCodeAt(++e.position);
@@ -2583,12 +2583,12 @@
                     n
                       ? (e.tag = s)
                       : a.call(e.tagMap, i)
-                      ? (e.tag = e.tagMap[i] + s)
-                      : i === "!"
-                      ? (e.tag = "!" + s)
-                      : i === "!!"
-                      ? (e.tag = "tag:yaml.org,2002:" + s)
-                      : H(e, 'undeclared tag handle "' + i + '"'),
+                        ? (e.tag = e.tagMap[i] + s)
+                        : i === "!"
+                          ? (e.tag = "!" + s)
+                          : i === "!!"
+                            ? (e.tag = "tag:yaml.org,2002:" + s)
+                            : H(e, 'undeclared tag handle "' + i + '"'),
                     !0
                   );
                 }
@@ -2657,8 +2657,8 @@
                       e.lineIndent > t
                         ? (p = 1)
                         : e.lineIndent === t
-                        ? (p = 0)
-                        : e.lineIndent < t && (p = -1));
+                          ? (p = 0)
+                          : e.lineIndent < t && (p = -1));
                   if (p === 1)
                     while (Y(e) || Z(e))
                       U(e, !0, -1)
@@ -2667,8 +2667,8 @@
                           e.lineIndent > t
                             ? (p = 1)
                             : e.lineIndent === t
-                            ? (p = 0)
-                            : e.lineIndent < t && (p = -1))
+                              ? (p = 0)
+                              : e.lineIndent < t && (p = -1))
                         : (u = !1);
                   u && (u = d || i);
                   if (p === 1 || h === n)
@@ -2680,14 +2680,14 @@
                           : ((o && K(e, b)) || V(e, b) || $(e, b)
                               ? (v = !0)
                               : et(e)
-                              ? ((v = !0),
-                                (e.tag !== null || e.anchor !== null) &&
-                                  H(
-                                    e,
-                                    "alias node should not have any properties",
-                                  ))
-                              : X(e, b, f === n) &&
-                                ((v = !0), e.tag === null && (e.tag = "?")),
+                                ? ((v = !0),
+                                  (e.tag !== null || e.anchor !== null) &&
+                                    H(
+                                      e,
+                                      "alias node should not have any properties",
+                                    ))
+                                : X(e, b, f === n) &&
+                                  ((v = !0), e.tag === null && (e.tag = "?")),
                             e.anchor !== null &&
                               (e.anchorMap[e.anchor] = e.result))
                         : p === 0 && (v = u && Q(e, w));
@@ -3289,8 +3289,8 @@
                         f.push((a >> 8) & 255),
                         f.push(a & 255))
                       : n === 18
-                      ? (f.push((a >> 10) & 255), f.push((a >> 2) & 255))
-                      : n === 12 && f.push((a >> 4) & 255),
+                        ? (f.push((a >> 10) & 255), f.push((a >> 2) & 255))
+                        : n === 12 && f.push((a >> 4) & 255),
                     r ? (r.from ? r.from(f) : new r(f)) : f
                   );
                 }
@@ -3317,15 +3317,15 @@
                         (t += o[(n >> 6) & 63]),
                         (t += o[n & 63]))
                       : i === 2
-                      ? ((t += o[(n >> 10) & 63]),
-                        (t += o[(n >> 4) & 63]),
-                        (t += o[(n << 2) & 63]),
-                        (t += o[64]))
-                      : i === 1 &&
-                        ((t += o[(n >> 2) & 63]),
-                        (t += o[(n << 4) & 63]),
-                        (t += o[64]),
-                        (t += o[64])),
+                        ? ((t += o[(n >> 10) & 63]),
+                          (t += o[(n >> 4) & 63]),
+                          (t += o[(n << 2) & 63]),
+                          (t += o[64]))
+                        : i === 1 &&
+                          ((t += o[(n >> 2) & 63]),
+                          (t += o[(n << 4) & 63]),
+                          (t += o[64]),
+                          (t += o[64])),
                     t
                   );
                 }
@@ -3400,8 +3400,8 @@
                   return e === null
                     ? !1
                     : !s.test(e) || e[e.length - 1] === "_"
-                    ? !1
-                    : !0;
+                      ? !1
+                      : !0;
                 }
                 function u(e) {
                   var t, n, r, i;
@@ -3415,18 +3415,18 @@
                         ? Number.POSITIVE_INFINITY
                         : Number.NEGATIVE_INFINITY
                       : t === ".nan"
-                      ? NaN
-                      : t.indexOf(":") >= 0
-                      ? (t.split(":").forEach(function (e) {
-                          i.unshift(parseFloat(e, 10));
-                        }),
-                        (t = 0),
-                        (r = 1),
-                        i.forEach(function (e) {
-                          (t += e * r), (r *= 60);
-                        }),
-                        n * t)
-                      : n * parseFloat(t, 10)
+                        ? NaN
+                        : t.indexOf(":") >= 0
+                          ? (t.split(":").forEach(function (e) {
+                              i.unshift(parseFloat(e, 10));
+                            }),
+                            (t = 0),
+                            (r = 1),
+                            i.forEach(function (e) {
+                              (t += e * r), (r *= 60);
+                            }),
+                            n * t)
+                          : n * parseFloat(t, 10)
                   );
                 }
                 function f(e, t) {
@@ -3553,8 +3553,8 @@
                   return !r || i === "_"
                     ? !1
                     : i !== ":"
-                    ? !0
-                    : /^(:[0-5]?[0-9])+$/.test(e.slice(n));
+                      ? !0
+                      : /^(:[0-5]?[0-9])+$/.test(e.slice(n));
                 }
                 function f(e) {
                   var t = e,
@@ -3569,22 +3569,22 @@
                   return t === "0"
                     ? 0
                     : r === "0"
-                    ? t[1] === "b"
-                      ? n * parseInt(t.slice(2), 2)
-                      : t[1] === "x"
-                      ? n * parseInt(t, 16)
-                      : n * parseInt(t, 8)
-                    : t.indexOf(":") !== -1
-                    ? (t.split(":").forEach(function (e) {
-                        s.unshift(parseInt(e, 10));
-                      }),
-                      (t = 0),
-                      (i = 1),
-                      s.forEach(function (e) {
-                        (t += e * i), (i *= 60);
-                      }),
-                      n * t)
-                    : n * parseInt(t, 10);
+                      ? t[1] === "b"
+                        ? n * parseInt(t.slice(2), 2)
+                        : t[1] === "x"
+                          ? n * parseInt(t, 16)
+                          : n * parseInt(t, 8)
+                      : t.indexOf(":") !== -1
+                        ? (t.split(":").forEach(function (e) {
+                            s.unshift(parseInt(e, 10));
+                          }),
+                          (t = 0),
+                          (i = 1),
+                          s.forEach(function (e) {
+                            (t += e * i), (i *= 60);
+                          }),
+                          n * t)
+                        : n * parseInt(t, 10);
                 }
                 function l(e) {
                   return (
@@ -3987,10 +3987,10 @@
                   return e === null
                     ? !1
                     : i.exec(e) !== null
-                    ? !0
-                    : s.exec(e) !== null
-                    ? !0
-                    : !1;
+                      ? !0
+                      : s.exec(e) !== null
+                        ? !0
+                        : !1;
                 }
                 function u(e) {
                   var t,
@@ -4273,8 +4273,8 @@
                         ? T
                         : y
                       : wt && wt in Object(e)
-                      ? xn(e)
-                      : Mn(e);
+                        ? xn(e)
+                        : Mn(e);
                   }
                   function on(e) {
                     return Xn(e) && sn(e) == a;
@@ -4332,12 +4332,12 @@
                         Fn(u)
                           ? (l = u)
                           : qn(u)
-                          ? (l = gn(u))
-                          : p
-                          ? ((c = !1), (l = dn(a, !0)))
-                          : d
-                          ? ((c = !1), (l = mn(a, !0)))
-                          : (l = []);
+                            ? (l = gn(u))
+                            : p
+                              ? ((c = !1), (l = dn(a, !0)))
+                              : d
+                                ? ((c = !1), (l = mn(a, !0)))
+                                : (l = []);
                       else if (Vn(a) || jn(a)) {
                         l = u;
                         if (jn(u)) l = Jn(u);
@@ -4777,10 +4777,10 @@
                   typeof global != "undefined"
                     ? global
                     : typeof self != "undefined"
-                    ? self
-                    : typeof window != "undefined"
-                    ? window
-                    : {},
+                      ? self
+                      : typeof window != "undefined"
+                        ? window
+                        : {},
                 );
               },
               {},

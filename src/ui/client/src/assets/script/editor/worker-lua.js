@@ -372,9 +372,9 @@
               ? ((t = this.compare(r.row, r.column)),
                 t == 1 ? 2 : t == 0 ? 1 : 0)
               : t == -1
-              ? -2
-              : ((t = this.compare(r.row, r.column)),
-                t == -1 ? -1 : t == 1 ? 42 : 0)
+                ? -2
+                : ((t = this.compare(r.row, r.column)),
+                  t == -1 ? -1 : t == 1 ? 42 : 0)
           );
         }),
         (this.comparePoint = function (e) {
@@ -423,21 +423,21 @@
             ? t < this.start.column
               ? -1
               : t > this.end.column
-              ? 1
-              : 0
+                ? 1
+                : 0
             : e < this.start.row
-            ? -1
-            : e > this.end.row
-            ? 1
-            : this.start.row === e
-            ? t >= this.start.column
-              ? 0
-              : -1
-            : this.end.row === e
-            ? t <= this.end.column
-              ? 0
-              : 1
-            : 0;
+              ? -1
+              : e > this.end.row
+                ? 1
+                : this.start.row === e
+                  ? t >= this.start.column
+                    ? 0
+                    : -1
+                  : this.end.row === e
+                    ? t <= this.end.column
+                      ? 0
+                      : 1
+                    : 0;
         }),
         (this.compareStart = function (e, t) {
           return this.start.row == e && this.start.column == t
@@ -453,8 +453,8 @@
           return this.end.row == e && this.end.column == t
             ? 1
             : this.start.row == e && this.start.column == t
-            ? -1
-            : this.compare(e, t);
+              ? -1
+              : this.compare(e, t);
         }),
         (this.clipRows = function (e, t) {
           if (this.end.row > t) var n = { row: t + 1, column: 0 };
@@ -538,8 +538,8 @@
         return e(n, u, r)
           ? { row: n.row, column: n.column }
           : e(a, n, !r)
-          ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
-          : { row: u.row, column: u.column };
+            ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
+            : { row: u.row, column: u.column };
       }
       r.implement(this, i),
         (this.getPosition = function () {
@@ -584,12 +584,12 @@
               ? ((n.row = Math.max(0, this.document.getLength() - 1)),
                 (n.column = this.document.getLine(n.row).length))
               : e < 0
-              ? ((n.row = 0), (n.column = 0))
-              : ((n.row = e),
-                (n.column = Math.min(
-                  this.document.getLine(n.row).length,
-                  Math.max(0, t),
-                ))),
+                ? ((n.row = 0), (n.column = 0))
+                : ((n.row = e),
+                  (n.column = Math.min(
+                    this.document.getLine(n.row).length,
+                    Math.max(0, t),
+                  ))),
             t < 0 && (n.column = 0),
             n
           );
@@ -608,8 +608,8 @@
           e.length === 0
             ? (this.$lines = [""])
             : Array.isArray(e)
-            ? this.insertMergedLines({ row: 0, column: 0 }, e)
-            : this.insert({ row: 0, column: 0 }, e);
+              ? this.insertMergedLines({ row: 0, column: 0 }, e)
+              : this.insert({ row: 0, column: 0 }, e);
       };
     (function () {
       r.implement(this, s),
@@ -734,8 +734,8 @@
           e === undefined
             ? (e = n)
             : e < 0
-            ? (e = 0)
-            : e >= n && ((e = n - 1), (t = undefined));
+              ? (e = 0)
+              : e >= n && ((e = n - 1), (t = undefined));
           var r = this.getLine(e);
           return (
             t == undefined && (t = r.length),
@@ -1124,21 +1124,21 @@
           e < 128
             ? String.fromCharCode(e)
             : e < 2048
-            ? String.fromCharCode(t | 192 | (e >> 6), t | 128 | (e & 63))
-            : e < 65536
-            ? String.fromCharCode(
-                t | 224 | (e >> 12),
-                t | 128 | ((e >> 6) & 63),
-                t | 128 | (e & 63),
-              )
-            : e < 1114112
-            ? String.fromCharCode(
-                t | 240 | (e >> 18),
-                t | 128 | ((e >> 12) & 63),
-                t | 128 | ((e >> 6) & 63),
-                t | 128 | (e & 63),
-              )
-            : null
+              ? String.fromCharCode(t | 192 | (e >> 6), t | 128 | (e & 63))
+              : e < 65536
+                ? String.fromCharCode(
+                    t | 224 | (e >> 12),
+                    t | 128 | ((e >> 6) & 63),
+                    t | 128 | (e & 63),
+                  )
+                : e < 1114112
+                  ? String.fromCharCode(
+                      t | 240 | (e >> 18),
+                      t | 128 | ((e >> 12) & 63),
+                      t | 128 | ((e >> 6) & 63),
+                      t | 128 | (e & 63),
+                    )
+                  : null
         );
       }
       function a(e, t) {
@@ -1344,10 +1344,10 @@
           dt(e)
             ? (n = p)
             : "true" === e || "false" === e
-            ? ((n = g), (e = "true" === e))
-            : "nil" === e
-            ? ((n = y), (e = null))
-            : (n = d),
+              ? ((n = g), (e = "true" === e))
+              : "nil" === e
+                ? ((n = y), (e = null))
+                : (n = d),
           { type: n, value: e, line: q, lineStart: R, range: [I, P] }
         );
       }
@@ -1667,8 +1667,8 @@
         return (e >= 65 && e <= 90) || (e >= 97 && e <= 122) || 95 === e
           ? !0
           : i.extendedIdentifiers && e >= 128
-          ? !0
-          : !1;
+            ? !0
+            : !1;
       }
       function pt(e) {
         return (e >= 65 && e <= 90) ||
@@ -1677,8 +1677,8 @@
           (e >= 48 && e <= 57)
           ? !0
           : i.extendedIdentifiers && e >= 128
-          ? !0
-          : !1;
+            ? !0
+            : !1;
       }
       function dt(e) {
         switch (e.length) {
@@ -1705,8 +1705,8 @@
         return m === e.type
           ? "#-~".indexOf(e.value) >= 0
           : p === e.type
-          ? "not" === e.value
-          : !1;
+            ? "not" === e.value
+            : !1;
       }
       function mt(e) {
         if (c === e.type) return !0;
@@ -2354,8 +2354,8 @@
               return e === null
                 ? ""
                 : e >= 128
-                ? String.fromCharCode(e | 63232)
-                : String.fromCharCode(e);
+                  ? String.fromCharCode(e | 63232)
+                  : String.fromCharCode(e);
             },
             encodeUTF8: function (e) {
               return u(e, 63232);
@@ -2503,12 +2503,12 @@
                 e === h
                   ? "StringLiteral"
                   : e === v
-                  ? "NumericLiteral"
-                  : e === g
-                  ? "BooleanLiteral"
-                  : e === y
-                  ? "NilLiteral"
-                  : "VarargLiteral"),
+                    ? "NumericLiteral"
+                    : e === g
+                      ? "BooleanLiteral"
+                      : e === y
+                        ? "NilLiteral"
+                        : "VarargLiteral"),
               { type: e, value: t, raw: n }
             );
           },

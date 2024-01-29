@@ -372,9 +372,9 @@
               ? ((t = this.compare(r.row, r.column)),
                 t == 1 ? 2 : t == 0 ? 1 : 0)
               : t == -1
-              ? -2
-              : ((t = this.compare(r.row, r.column)),
-                t == -1 ? -1 : t == 1 ? 42 : 0)
+                ? -2
+                : ((t = this.compare(r.row, r.column)),
+                  t == -1 ? -1 : t == 1 ? 42 : 0)
           );
         }),
         (this.comparePoint = function (e) {
@@ -423,21 +423,21 @@
             ? t < this.start.column
               ? -1
               : t > this.end.column
-              ? 1
-              : 0
+                ? 1
+                : 0
             : e < this.start.row
-            ? -1
-            : e > this.end.row
-            ? 1
-            : this.start.row === e
-            ? t >= this.start.column
-              ? 0
-              : -1
-            : this.end.row === e
-            ? t <= this.end.column
-              ? 0
-              : 1
-            : 0;
+              ? -1
+              : e > this.end.row
+                ? 1
+                : this.start.row === e
+                  ? t >= this.start.column
+                    ? 0
+                    : -1
+                  : this.end.row === e
+                    ? t <= this.end.column
+                      ? 0
+                      : 1
+                    : 0;
         }),
         (this.compareStart = function (e, t) {
           return this.start.row == e && this.start.column == t
@@ -453,8 +453,8 @@
           return this.end.row == e && this.end.column == t
             ? 1
             : this.start.row == e && this.start.column == t
-            ? -1
-            : this.compare(e, t);
+              ? -1
+              : this.compare(e, t);
         }),
         (this.clipRows = function (e, t) {
           if (this.end.row > t) var n = { row: t + 1, column: 0 };
@@ -538,8 +538,8 @@
         return e(n, u, r)
           ? { row: n.row, column: n.column }
           : e(a, n, !r)
-          ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
-          : { row: u.row, column: u.column };
+            ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
+            : { row: u.row, column: u.column };
       }
       r.implement(this, i),
         (this.getPosition = function () {
@@ -584,12 +584,12 @@
               ? ((n.row = Math.max(0, this.document.getLength() - 1)),
                 (n.column = this.document.getLine(n.row).length))
               : e < 0
-              ? ((n.row = 0), (n.column = 0))
-              : ((n.row = e),
-                (n.column = Math.min(
-                  this.document.getLine(n.row).length,
-                  Math.max(0, t),
-                ))),
+                ? ((n.row = 0), (n.column = 0))
+                : ((n.row = e),
+                  (n.column = Math.min(
+                    this.document.getLine(n.row).length,
+                    Math.max(0, t),
+                  ))),
             t < 0 && (n.column = 0),
             n
           );
@@ -608,8 +608,8 @@
           e.length === 0
             ? (this.$lines = [""])
             : Array.isArray(e)
-            ? this.insertMergedLines({ row: 0, column: 0 }, e)
-            : this.insert({ row: 0, column: 0 }, e);
+              ? this.insertMergedLines({ row: 0, column: 0 }, e)
+              : this.insert({ row: 0, column: 0 }, e);
       };
     (function () {
       r.implement(this, s),
@@ -734,8 +734,8 @@
           e === undefined
             ? (e = n)
             : e < 0
-            ? (e = 0)
-            : e >= n && ((e = n - 1), (t = undefined));
+              ? (e = 0)
+              : e >= n && ((e = n - 1), (t = undefined));
           var r = this.getLine(e);
           return (
             t == undefined && (t = r.length),
@@ -2301,12 +2301,12 @@
                         ? ((s.occurrence = 0),
                           (s.type = s.type.substring(0, s.type.length - 1)))
                         : u === "*"
-                        ? ((s.occurrence = -1),
-                          (s.type = s.type.substring(0, s.type.length - 1)))
-                        : u === "+"
-                        ? ((s.occurrence = 2),
-                          (s.type = s.type.substring(0, s.type.length - 1)))
-                        : (s.occurrence = 1);
+                          ? ((s.occurrence = -1),
+                            (s.type = s.type.substring(0, s.type.length - 1)))
+                          : u === "+"
+                            ? ((s.occurrence = 2),
+                              (s.type = s.type.substring(0, s.type.length - 1)))
+                            : (s.occurrence = 1);
                     }
                   } catch (a) {}
                   return (
@@ -2821,10 +2821,10 @@
                 return o
                   ? g(r, t, n)
                   : r !== ""
-                  ? m(r, t, n).concat(v(r, t, n))
-                  : g(r, t, n)
-                      .concat(m(r, t, n))
-                      .concat(v(r, t, n));
+                    ? m(r, t, n).concat(v(r, t, n))
+                    : g(r, t, n)
+                        .concat(m(r, t, n))
+                        .concat(v(r, t, n));
               },
               b = function (e, t, n) {
                 var r = s(e, t.col, u),
@@ -14414,8 +14414,8 @@
                           l === null
                             ? "text"
                             : typeof l.token == "function"
-                            ? l.token(c.value)
-                            : l.token,
+                              ? l.token(c.value)
+                              : l.token,
                         value: c.value,
                       }),
                         l && l.next && l.next(s);
@@ -67128,12 +67128,12 @@
                         ? e
                         : ui(e, t, n)
                       : e == null
-                      ? qa
-                      : i == "object"
-                      ? qr(e)
-                      : t === r
-                      ? Ja(e)
-                      : Rr(e, t);
+                        ? qa
+                        : i == "object"
+                          ? qr(e)
+                          : t === r
+                            ? Ja(e)
+                            : Rr(e, t);
                   }
                   function gr(e, t, n, i, s, o, u) {
                     var a;
@@ -67285,8 +67285,8 @@
                     return e === t
                       ? !0
                       : e == null || t == null || (!Nu(e) && !Kt(t))
-                      ? e !== e && t !== t
-                      : jr(e, t, Br, n, r, i, s);
+                        ? e !== e && t !== t
+                        : jr(e, t, Br, n, r, i, s);
                   }
                   function jr(e, t, n, r, i, s, o) {
                     var u = mu(e),
@@ -67435,8 +67435,8 @@
                       es(f) && (mu(f) || Pu(f))
                         ? (c = mu(l) ? l : es(l) ? Yn(l) : [])
                         : Mu(f) || vu(f)
-                        ? (c = vu(l) ? Iu(l) : Mu(l) ? l : {})
-                        : (h = !1)),
+                          ? (c = vu(l) ? Iu(l) : Mu(l) ? l : {})
+                          : (h = !1)),
                       o.push(f),
                       u.push(c);
                     if (h) e[n] = i(c, f, s, o, u);
@@ -67610,10 +67610,10 @@
                         a
                           ? (d = p && h && (i || c != null))
                           : f
-                          ? (d = p && (i || h))
-                          : c == null
-                          ? (d = !1)
-                          : (d = i ? c <= t : c < t);
+                            ? (d = p && (i || h))
+                            : c == null
+                              ? (d = !1)
+                              : (d = i ? c <= t : c < t);
                       d ? (s = l + 1) : (o = l);
                     }
                     return xn(o, On);
@@ -68931,9 +68931,9 @@
                     return e == null
                       ? !0
                       : es(e) &&
-                        (mu(e) || Du(e) || vu(e) || (Kt(e) && Tu(e.splice)))
-                      ? !e.length
-                      : !ta(e).length;
+                          (mu(e) || Du(e) || vu(e) || (Kt(e) && Tu(e.splice)))
+                        ? !e.length
+                        : !ta(e).length;
                   }
                   function Eu(e, t, n, i) {
                     n = typeof n == "function" ? ui(n, i, 3) : r;
@@ -68968,8 +68968,8 @@
                     return e == null
                       ? !1
                       : Tu(e)
-                      ? sn.test(Ot.call(e))
-                      : Kt(e) && ht.test(e);
+                        ? sn.test(Ot.call(e))
+                        : Kt(e) && ht.test(e);
                   }
                   function Au(e) {
                     return e === null;
@@ -69785,8 +69785,8 @@
                             (typeof e != "function" && es(e))
                             ? ps(e)
                             : Nu(e)
-                            ? En(e)
-                            : [];
+                              ? En(e)
+                              : [];
                         }
                       : ps,
                     ra = Ai(!0),
@@ -69806,8 +69806,8 @@
                       return e == null
                         ? {}
                         : typeof t[0] == "function"
-                        ? ls(e, ui(t[0], t[1], 3))
-                        : fs(e, Lr(t));
+                          ? ls(e, ui(t[0], t[1], 3))
+                          : fs(e, Lr(t));
                     }),
                     va = gi(function (e, t, n) {
                       return (
@@ -70596,20 +70596,20 @@
                       return rn;
                     }))
                   : Lt && At
-                  ? Dt
-                    ? ((At.exports = rn)._ = rn)
-                    : (Lt._ = rn)
-                  : (Pt._ = rn);
+                    ? Dt
+                      ? ((At.exports = rn)._ = rn)
+                      : (Lt._ = rn)
+                    : (Pt._ = rn);
               }).call(this);
             }).call(
               this,
               typeof global != "undefined"
                 ? global
                 : typeof self != "undefined"
-                ? self
-                : typeof window != "undefined"
-                ? window
-                : {},
+                  ? self
+                  : typeof window != "undefined"
+                    ? window
+                    : {},
             );
           },
           {},

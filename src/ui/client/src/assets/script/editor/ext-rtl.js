@@ -15,8 +15,8 @@ define("ace/ext/rtl", [
             .getSelection()
             .moveCursorTo(n.row - 1, t.session.getLine(n.row - 1).length)
         : t.getSelection().isEmpty()
-        ? (n.column += 1)
-        : n.setPosition(n.row, n.column + 1));
+          ? (n.column += 1)
+          : n.setPosition(n.row, n.column + 1));
   }
   function o(e) {
     e.editor.session.$bidiHandler.isMoveLeftOperation =

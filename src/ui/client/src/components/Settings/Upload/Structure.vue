@@ -77,7 +77,7 @@ function uploadFile(file) {
           item.name === name &&
           item.fileSize === fileSize &&
           item.state === "upload" &&
-          item.date === date
+          item.date === date,
       );
 
       if (xhr.status == 201) {

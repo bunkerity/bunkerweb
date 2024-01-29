@@ -103,16 +103,16 @@ define(
           return typeof e != "object"
             ? e + ""
             : "line" in e
-            ? e.line + ":" + e.ch
-            : "anchor" in e
-            ? t(e.anchor) + "->" + t(e.head)
-            : Array.isArray(e)
-            ? "[" +
-              e.map(function (e) {
-                return t(e);
-              }) +
-              "]"
-            : JSON.stringify(e);
+              ? e.line + ":" + e.ch
+              : "anchor" in e
+                ? t(e.anchor) + "->" + t(e.head)
+                : Array.isArray(e)
+                  ? "[" +
+                    e.map(function (e) {
+                      return t(e);
+                    }) +
+                    "]"
+                  : JSON.stringify(e);
         }
         var e = "";
         for (var n = 0; n < arguments.length; n++) {
@@ -438,8 +438,8 @@ define(
           return r == i && e.length > n
             ? "full"
             : i.indexOf(r) == 0
-            ? "partial"
-            : !1;
+              ? "partial"
+              : !1;
         }
         return e == t ? "full" : t.indexOf(e) == 0 ? "partial" : !1;
       }
@@ -526,8 +526,8 @@ define(
         m > 0 && g <= 0
           ? (d++, s || v--)
           : m < 0 && g >= 0
-          ? (d--, a || v++)
-          : m < 0 && g == -1 && (d--, v++);
+            ? (d--, a || v++)
+            : m < 0 && g == -1 && (d--, v++);
         for (var y = h; y <= p; y++) {
           var b = { anchor: new w(y, d), head: new w(y, v) };
           n.push(b);
@@ -733,8 +733,8 @@ define(
         return !i || !i.open || !i.close
           ? { start: r, end: r }
           : n
-          ? { start: i.open.from, end: i.close.to }
-          : { start: i.open.to, end: i.close.from };
+            ? { start: i.open.from, end: i.close.to }
+            : { start: i.open.to, end: i.close.from };
       }
       function sn(e, t, n) {
         Pt(t, n) || at.jumpList.add(e, t, n);
@@ -846,11 +846,11 @@ define(
           ? (!h && (p.from != o.ch || p.line != o.line) && (d = u.pop()),
             new w(d.line, d.from))
           : r && i
-          ? new w(d.line, d.to - 1)
-          : !r && i
-          ? (!h && (p.to != o.ch || p.line != o.line) && (d = u.pop()),
-            new w(d.line, d.to))
-          : new w(d.line, d.from);
+            ? new w(d.line, d.to - 1)
+            : !r && i
+              ? (!h && (p.to != o.ch || p.line != o.line) && (d = u.pop()),
+                new w(d.line, d.to))
+              : new w(d.line, d.from);
       }
       function hn(e, t, n, r, i) {
         var s = t,
@@ -1163,10 +1163,10 @@ define(
           r
             ? ((o !== "\\" || !a) && i.push(o), (r = !1))
             : o === "\\"
-            ? ((r = !0),
-              u && n.indexOf(u) != -1 && (a = !0),
-              (!a || u === "\\") && i.push(o))
-            : (i.push(o), a && u !== "\\" && i.push("\\"));
+              ? ((r = !0),
+                u && n.indexOf(u) != -1 && (a = !0),
+                (!a || u === "\\") && i.push(o))
+              : (i.push(o), a && u !== "\\" && i.push("\\"));
         }
         return i.join("");
       }
@@ -1179,13 +1179,15 @@ define(
           An[i + s]
             ? (n.push(An[i + s]), r++)
             : t
-            ? (n.push(i), (t = !1))
-            : i === "\\"
-            ? ((t = !0),
-              K(s) || s === "$"
-                ? n.push("$")
-                : s !== "/" && s !== "\\" && n.push("\\"))
-            : (i === "$" && n.push("$"), n.push(i), s === "/" && n.push("\\"));
+              ? (n.push(i), (t = !1))
+              : i === "\\"
+                ? ((t = !0),
+                  K(s) || s === "$"
+                    ? n.push("$")
+                    : s !== "/" && s !== "\\" && n.push("\\"))
+                : (i === "$" && n.push("$"),
+                  n.push(i),
+                  s === "/" && n.push("\\"));
         }
         return n.join("");
       }
@@ -1407,8 +1409,8 @@ define(
           t instanceof Array
             ? Z(e, t)
             : typeof n == "number"
-            ? e >= t && e <= n
-            : e == t
+              ? e >= t && e <= n
+              : e == t
         );
       }
       function $n(e) {
@@ -1990,8 +1992,8 @@ define(
                       ? t.lead
                       : t.anchor
                     : e == "head" || !e
-                    ? t.lead
-                    : t.getRange()[e];
+                      ? t.lead
+                      : t.getRange()[e];
               return y(n);
             }),
             (this.listSelections = function (e) {
@@ -3775,13 +3777,13 @@ define(
               return f.type == "none"
                 ? (pt(e), !1)
                 : f.type == "partial"
-                ? !0
-                : f.type == "clear"
-                ? (pt(e), !0)
-                : ((r.inputState.keyBuffer = ""),
-                  (o = /^(\d*)(.*)$/.exec(n)),
-                  o[1] && o[1] != "0" && r.inputState.pushRepeatDigit(o[1]),
-                  f.command);
+                  ? !0
+                  : f.type == "clear"
+                    ? (pt(e), !0)
+                    : ((r.inputState.keyBuffer = ""),
+                      (o = /^(\d*)(.*)$/.exec(n)),
+                      o[1] && o[1] != "0" && r.inputState.pushRepeatDigit(o[1]),
+                      f.command);
             }
             var r = ut(e),
               f;
@@ -3790,29 +3792,29 @@ define(
               f === !1
                 ? undefined
                 : f === !0
-                ? function () {
-                    return !0;
-                  }
-                : function () {
-                    if ((f.operator || f.isEdit) && e.getOption("readOnly"))
-                      return;
-                    return e.operation(function () {
-                      e.curOp.isVimOp = !0;
-                      try {
-                        f.type == "keyToKey"
-                          ? o(f.toKeys)
-                          : yt.processCommand(e, r, f);
-                      } catch (t) {
-                        throw (
-                          ((e.state.vim = undefined),
-                          ut(e),
-                          ct.suppressErrorLogging || console.log(t),
-                          t)
-                        );
-                      }
+                  ? function () {
                       return !0;
-                    });
-                  }
+                    }
+                  : function () {
+                      if ((f.operator || f.isEdit) && e.getOption("readOnly"))
+                        return;
+                      return e.operation(function () {
+                        e.curOp.isVimOp = !0;
+                        try {
+                          f.type == "keyToKey"
+                            ? o(f.toKeys)
+                            : yt.processCommand(e, r, f);
+                        } catch (t) {
+                          throw (
+                            ((e.state.vim = undefined),
+                            ut(e),
+                            ct.suppressErrorLogging || console.log(t),
+                            t)
+                          );
+                        }
+                        return !0;
+                      });
+                    }
             );
           },
           handleEx: function (e, t) {
@@ -4090,8 +4092,8 @@ define(
                   r(),
                   e.focus())
                 : i == "Up" || i == "Down"
-                ? m.e_stop(t)
-                : i == "Ctrl-U" && (m.e_stop(t), r(""));
+                  ? m.e_stop(t)
+                  : i == "Ctrl-U" && (m.e_stop(t), r(""));
             }
             if (!e.getSearchCursor) return;
             var r = n.searchArgs.forward,
@@ -4161,25 +4163,25 @@ define(
                     (t.target.selectionEnd = t.target.selectionStart =
                       Math.min(o, t.target.value.length)))
                 : i == "Ctrl-U"
-                ? (m.e_stop(t), r(""))
-                : i != "Left" &&
-                  i != "Right" &&
-                  i != "Ctrl" &&
-                  i != "Alt" &&
-                  i != "Shift" &&
-                  at.exCommandHistoryController.reset();
+                  ? (m.e_stop(t), r(""))
+                  : i != "Left" &&
+                    i != "Right" &&
+                    i != "Ctrl" &&
+                    i != "Alt" &&
+                    i != "Shift" &&
+                    at.exCommandHistoryController.reset();
             }
             n.type == "keyToEx"
               ? Yn.processCommand(e, n.exArgs.input)
               : t.visualMode
-              ? jn(e, {
-                  onClose: r,
-                  prefix: ":",
-                  value: "'<,'>",
-                  onKeyDown: i,
-                  selectValueOnOpen: !1,
-                })
-              : jn(e, { onClose: r, prefix: ":", onKeyDown: i });
+                ? jn(e, {
+                    onClose: r,
+                    prefix: ":",
+                    value: "'<,'>",
+                    onKeyDown: i,
+                    selectValueOnOpen: !1,
+                  })
+                : jn(e, { onClose: r, prefix: ":", onKeyDown: i });
           },
           evalInput: function (e, t) {
             var n = t.inputState,
@@ -4241,10 +4243,10 @@ define(
                 b.visualLine
                   ? (p = new w(h.line + E, h.ch))
                   : b.visualBlock
-                  ? (p = new w(h.line + E, h.ch + x))
-                  : b.head.line == b.anchor.line
-                  ? (p = new w(h.line, h.ch + x))
-                  : (p = new w(h.line + E, h.ch)),
+                    ? (p = new w(h.line + E, h.ch + x))
+                    : b.head.line == b.anchor.line
+                      ? (p = new w(h.line, h.ch + x))
+                      : (p = new w(h.line + E, h.ch)),
                   (t.visualMode = !0),
                   (t.visualLine = b.visualLine),
                   (t.visualBlock = b.visualBlock),
@@ -4361,8 +4363,8 @@ define(
                     ? [c, f]
                     : [c, l]
                   : n.forward
-                  ? [c, l]
-                  : [c, f];
+                    ? [c, l]
+                    : [c, f];
             } else
               (r.visualMode = !0),
                 (r.visualLine = !1),
@@ -4743,12 +4745,12 @@ define(
               t.shouldMoveCursor
                 ? i
                 : !e.state.vim.visualMode &&
-                  t.linewise &&
-                  n[0].anchor.line + 1 == n[0].head.line
-                ? bt.moveToFirstNonWhiteSpaceCharacter(e, r)
-                : t.linewise
-                ? r
-                : Bt(n[0].anchor, n[0].head)
+                    t.linewise &&
+                    n[0].anchor.line + 1 == n[0].head.line
+                  ? bt.moveToFirstNonWhiteSpaceCharacter(e, r)
+                  : t.linewise
+                    ? r
+                    : Bt(n[0].anchor, n[0].head)
             );
           },
           yank: function (e, t, n, r) {
@@ -4872,8 +4874,8 @@ define(
                   )),
                   (o = Math.abs(i.head.line - i.anchor.line) + 1))
                 : i.head.line < i.anchor.line
-                ? (s = i.head)
-                : (s = new w(i.anchor.line, 0));
+                  ? (s = i.head)
+                  : (s = new w(i.anchor.line, 0));
             } else if (r == "endOfSelectedArea") {
               if (!n.visualMode) return;
               n.visualBlock
@@ -4883,8 +4885,8 @@ define(
                   )),
                   (o = Math.abs(i.head.line - i.anchor.line) + 1))
                 : i.head.line >= i.anchor.line
-                ? (s = Lt(i.head, 0, 1))
-                : (s = new w(i.anchor.line, 0));
+                  ? (s = Lt(i.head, 0, 1))
+                  : (s = new w(i.anchor.line, 0));
             } else if (r == "inplace") {
               if (n.visualMode) return;
             } else r == "lastEdit" && (s = Kn(e) || s);
@@ -4917,8 +4919,8 @@ define(
                   subMode: n.visualLine
                     ? "linewise"
                     : n.visualBlock
-                    ? "blockwise"
-                    : "",
+                      ? "blockwise"
+                      : "",
                 }),
                 Kt(e),
                 vn(e, n, "<", Bt(i, s)),
@@ -4932,8 +4934,8 @@ define(
                     subMode: n.visualLine
                       ? "linewise"
                       : n.visualBlock
-                      ? "blockwise"
-                      : "",
+                        ? "blockwise"
+                        : "",
                   }),
                   Kt(e))
                 : Yt(e);
@@ -4957,8 +4959,8 @@ define(
                   subMode: n.visualLine
                     ? "linewise"
                     : n.visualBlock
-                    ? "blockwise"
-                    : "",
+                      ? "blockwise"
+                      : "",
                 });
             }
           },
@@ -5058,9 +5060,9 @@ define(
                       ? r.slice(0, -1)
                       : "\n" + r.slice(0, r.length - 1) + "\n")
                   : t.after
-                  ? ((r = "\n" + r.slice(0, r.length - 1)),
-                    (s.ch = It(e, s.line)))
-                  : (s.ch = 0)
+                    ? ((r = "\n" + r.slice(0, r.length - 1)),
+                      (s.ch = It(e, s.line)))
+                    : (s.ch = 0)
                 : (s.ch += t.after ? 1 : 0);
             var m, g;
             if (n.visualMode) {
@@ -5082,12 +5084,12 @@ define(
                     e.replaceSelections(r),
                     (m = E))
                   : n.visualBlock
-                  ? (e.replaceSelections(N),
-                    e.setCursor(E),
-                    e.replaceRange(r, E, E),
-                    (m = E))
-                  : (e.replaceRange(r, E, S),
-                    (m = e.posFromIndex(e.indexFromPos(E) + r.length - 1))),
+                    ? (e.replaceSelections(N),
+                      e.setCursor(E),
+                      e.replaceRange(r, E, E),
+                      (m = E))
+                    : (e.replaceRange(r, E, S),
+                      (m = e.posFromIndex(e.indexFromPos(E) + r.length - 1))),
                 y && (n.lastSelection.headMark = e.setBookmark(y)),
                 p && (m.ch = 0);
             } else if (d) {
@@ -5107,12 +5109,12 @@ define(
                 p && t.after
                   ? (m = new w(s.line + 1, tn(e.getLine(s.line + 1))))
                   : p && !t.after
-                  ? (m = new w(s.line, tn(e.getLine(s.line))))
-                  : !p && t.after
-                  ? ((g = e.indexFromPos(s)),
-                    (m = e.posFromIndex(g + r.length - 1)))
-                  : ((g = e.indexFromPos(s)),
-                    (m = e.posFromIndex(g + r.length)));
+                    ? (m = new w(s.line, tn(e.getLine(s.line))))
+                    : !p && t.after
+                      ? ((g = e.indexFromPos(s)),
+                        (m = e.posFromIndex(g + r.length - 1)))
+                      : ((g = e.indexFromPos(s)),
+                        (m = e.posFromIndex(g + r.length)));
             n.visualMode && Yt(e, !1), e.setCursor(m);
           },
           undo: function (e, t) {
@@ -5548,8 +5550,8 @@ define(
               f instanceof Error
                 ? Hn(e, f.message)
                 : f === !0 || f === !1
-                ? Hn(e, " " + (f ? "" : "no") + s)
-                : Hn(e, "  " + s + "=" + f);
+                  ? Hn(e, " " + (f ? "" : "no") + s)
+                  : Hn(e, "  " + s + "=" + f);
             } else {
               var l = nt(s, o, e, r);
               l instanceof Error && Hn(e, l.message);
@@ -5620,8 +5622,8 @@ define(
                   (u = parseInt((u[1] + u[2]).toLowerCase(), v)),
                   o - u)
                 : e < t
-                ? -1
-                : 1;
+                  ? -1
+                  : 1;
             }
             function x(e, t) {
               if (n) {
@@ -5652,12 +5654,12 @@ define(
               d = o
                 ? o
                 : s == "decimal"
-                ? /(-?)([\d]+)/
-                : s == "hex"
-                ? /(-?)(?:0x)?([0-9a-f]+)/i
-                : s == "octal"
-                ? /([0-7]+)/
-                : null,
+                  ? /(-?)([\d]+)/
+                  : s == "hex"
+                    ? /(-?)(?:0x)?([0-9a-f]+)/i
+                    : s == "octal"
+                      ? /([0-7]+)/
+                      : null,
               v =
                 s == "decimal" ? 10 : s == "hex" ? 16 : s == "octal" ? 8 : null,
               g = [],
@@ -5668,8 +5670,8 @@ define(
                 E && E[0] != ""
                   ? g.push(E)
                   : !o && d.exec(p[b])
-                  ? g.push(p[b])
-                  : y.push(p[b]);
+                    ? g.push(p[b])
+                    : y.push(p[b]);
               }
             else y = p;
             g.sort(o ? x : S);
@@ -5930,10 +5932,10 @@ define(
                   n && e.inputHash == 4 && (n = n.toUpperCase())),
                 (e.inputChar = n))
               : t == 4 || t == 0
-              ? e.inputKey == n && e.inputHash == t && e.inputChar
-                ? ((n = e.inputChar), (t = -1))
-                : ((e.inputChar = null), (e.inputKey = n), (e.inputHash = t))
-              : (e.inputChar = e.inputKey = null));
+                ? e.inputKey == n && e.inputHash == t && e.inputChar
+                  ? ((n = e.inputChar), (t = -1))
+                  : ((e.inputChar = null), (e.inputKey = n), (e.inputHash = t))
+                : (e.inputChar = e.inputKey = null));
           if (o.state.overwrite && u.insertMode && n == "backspace" && t == 0)
             return { command: "gotoleft" };
           if (n == "c" && t == 1 && !c.isMac && s.getCopyText())

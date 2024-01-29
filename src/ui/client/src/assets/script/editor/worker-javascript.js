@@ -372,9 +372,9 @@
               ? ((t = this.compare(r.row, r.column)),
                 t == 1 ? 2 : t == 0 ? 1 : 0)
               : t == -1
-              ? -2
-              : ((t = this.compare(r.row, r.column)),
-                t == -1 ? -1 : t == 1 ? 42 : 0)
+                ? -2
+                : ((t = this.compare(r.row, r.column)),
+                  t == -1 ? -1 : t == 1 ? 42 : 0)
           );
         }),
         (this.comparePoint = function (e) {
@@ -423,21 +423,21 @@
             ? t < this.start.column
               ? -1
               : t > this.end.column
-              ? 1
-              : 0
+                ? 1
+                : 0
             : e < this.start.row
-            ? -1
-            : e > this.end.row
-            ? 1
-            : this.start.row === e
-            ? t >= this.start.column
-              ? 0
-              : -1
-            : this.end.row === e
-            ? t <= this.end.column
-              ? 0
-              : 1
-            : 0;
+              ? -1
+              : e > this.end.row
+                ? 1
+                : this.start.row === e
+                  ? t >= this.start.column
+                    ? 0
+                    : -1
+                  : this.end.row === e
+                    ? t <= this.end.column
+                      ? 0
+                      : 1
+                    : 0;
         }),
         (this.compareStart = function (e, t) {
           return this.start.row == e && this.start.column == t
@@ -453,8 +453,8 @@
           return this.end.row == e && this.end.column == t
             ? 1
             : this.start.row == e && this.start.column == t
-            ? -1
-            : this.compare(e, t);
+              ? -1
+              : this.compare(e, t);
         }),
         (this.clipRows = function (e, t) {
           if (this.end.row > t) var n = { row: t + 1, column: 0 };
@@ -538,8 +538,8 @@
         return e(n, u, r)
           ? { row: n.row, column: n.column }
           : e(a, n, !r)
-          ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
-          : { row: u.row, column: u.column };
+            ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
+            : { row: u.row, column: u.column };
       }
       r.implement(this, i),
         (this.getPosition = function () {
@@ -584,12 +584,12 @@
               ? ((n.row = Math.max(0, this.document.getLength() - 1)),
                 (n.column = this.document.getLine(n.row).length))
               : e < 0
-              ? ((n.row = 0), (n.column = 0))
-              : ((n.row = e),
-                (n.column = Math.min(
-                  this.document.getLine(n.row).length,
-                  Math.max(0, t),
-                ))),
+                ? ((n.row = 0), (n.column = 0))
+                : ((n.row = e),
+                  (n.column = Math.min(
+                    this.document.getLine(n.row).length,
+                    Math.max(0, t),
+                  ))),
             t < 0 && (n.column = 0),
             n
           );
@@ -608,8 +608,8 @@
           e.length === 0
             ? (this.$lines = [""])
             : Array.isArray(e)
-            ? this.insertMergedLines({ row: 0, column: 0 }, e)
-            : this.insert({ row: 0, column: 0 }, e);
+              ? this.insertMergedLines({ row: 0, column: 0 }, e)
+              : this.insert({ row: 0, column: 0 }, e);
       };
     (function () {
       r.implement(this, s),
@@ -734,8 +734,8 @@
           e === undefined
             ? (e = n)
             : e < 0
-            ? (e = 0)
-            : e >= n && ((e = n - 1), (t = undefined));
+              ? (e = 0)
+              : e >= n && ((e = n - 1), (t = undefined));
           var r = this.getLine(e);
           return (
             t == undefined && (t = r.length),
@@ -1239,8 +1239,8 @@
               typeof n != "undefined" && n.console
                 ? (u = n.console)
                 : typeof window != "undefined" && window.console
-                ? (u = window.console)
-                : (u = {});
+                  ? (u = window.console)
+                  : (u = {});
               var f = [
                 [d, "log"],
                 [v, "info"],
@@ -1264,10 +1264,10 @@
               typeof global != "undefined"
                 ? global
                 : typeof self != "undefined"
-                ? self
-                : typeof window != "undefined"
-                ? window
-                : {},
+                  ? self
+                  : typeof window != "undefined"
+                    ? window
+                    : {},
             );
           },
           {
@@ -1922,10 +1922,10 @@
               typeof global != "undefined"
                 ? global
                 : typeof self != "undefined"
-                ? self
-                : typeof window != "undefined"
-                ? window
-                : {},
+                  ? self
+                  : typeof window != "undefined"
+                    ? window
+                    : {},
             );
           },
           {},
@@ -2023,8 +2023,8 @@
               return n || p.test(e)
                 ? v(e.slice(2), n ? 2 : 8)
                 : c.test(e)
-                ? o
-                : +e;
+                  ? o
+                  : +e;
             }
             var r = 1 / 0,
               i = 9007199254740991,
@@ -2052,18 +2052,18 @@
                 typeof n == "object" && typeof t != "undefined"
                   ? (t.exports = r())
                   : typeof define == "function" && define.amd
-                  ? define("underscore", r)
-                  : ((e =
-                      typeof globalThis != "undefined"
-                        ? globalThis
-                        : e || self),
-                    (function () {
-                      var t = e._,
-                        n = (e._ = r());
-                      n.noConflict = function () {
-                        return (e._ = t), n;
-                      };
-                    })());
+                    ? define("underscore", r)
+                    : ((e =
+                        typeof globalThis != "undefined"
+                          ? globalThis
+                          : e || self),
+                      (function () {
+                        var t = e._,
+                          n = (e._ = r());
+                        n.noConflict = function () {
+                          return (e._ = t), n;
+                        };
+                      })());
               })(this, function () {
                 function E(e, t) {
                   return (
@@ -2427,10 +2427,10 @@
                   return e == null
                     ? $t
                     : j(e)
-                    ? Qt(e, t, n)
-                    : S(e) && !W(e)
-                    ? Jt(e)
-                    : Kt(e);
+                      ? Qt(e, t, n)
+                      : S(e) && !W(e)
+                        ? Jt(e)
+                        : Kt(e);
                 }
                 function Yt(e, t) {
                   return Gt(e, t, Infinity);
@@ -2508,8 +2508,8 @@
                             n +
                             "))==null?'':_.escape(__t))+\n'")
                         : r
-                        ? (s += "'+\n((__t=(" + r + "))==null?'':__t)+\n'")
-                        : o && (s += "';\n" + o + "\n__p+='"),
+                          ? (s += "'+\n((__t=(" + r + "))==null?'':__t)+\n'")
+                          : o && (s += "';\n" + o + "\n__p+='"),
                       t
                     );
                   }),
@@ -2876,10 +2876,10 @@
                     ? W(e)
                       ? u.call(e)
                       : L(e)
-                      ? e.match(cr)
-                      : Cn(e)
-                      ? Gn(e, $t)
-                      : At(e)
+                        ? e.match(cr)
+                        : Cn(e)
+                          ? Gn(e, $t)
+                          : At(e)
                     : [];
                 }
                 function pr(e, t, n) {
@@ -2951,8 +2951,8 @@
                       ? void 0
                       : []
                     : t == null || n
-                    ? e[0]
-                    : Nr(e, e.length - t);
+                      ? e[0]
+                      : Nr(e, e.length - t);
                 }
                 function kr(e, t, n) {
                   return u.call(e, t == null || n ? 1 : t);
@@ -2963,8 +2963,8 @@
                       ? void 0
                       : []
                     : t == null || n
-                    ? e[e.length - 1]
-                    : kr(e, Math.max(0, e.length - t));
+                      ? e[e.length - 1]
+                      : kr(e, Math.max(0, e.length - t));
                 }
                 function Ar(e) {
                   return tr(e, Boolean);
@@ -2983,8 +2983,8 @@
                     t && !n
                       ? ((!o || s !== f) && i.push(a), (s = f))
                       : n
-                      ? sr(s, f) || (s.push(f), i.push(a))
-                      : sr(i, a) || i.push(a);
+                        ? sr(s, f) || (s.push(f), i.push(a))
+                        : sr(i, a) || i.push(a);
                   }
                   return i;
                 }
@@ -3481,10 +3481,10 @@
               typeof global != "undefined"
                 ? global
                 : typeof self != "undefined"
-                ? self
-                : typeof window != "undefined"
-                ? window
-                : {},
+                  ? self
+                  : typeof window != "undefined"
+                    ? window
+                    : {},
             );
           },
           {},
@@ -3516,10 +3516,10 @@
                     /^[+-]W\d{3}$/g.test(e)
                       ? !0
                       : s.indexOf(e) === -1 &&
-                        n.type !== "jslint" &&
-                        !r.has(c.removed, e)
-                      ? (F("E001", n, i, e), !1)
-                      : !0
+                          n.type !== "jslint" &&
+                          !r.has(c.removed, e)
+                        ? (F("E001", n, i, e), !1)
+                        : !0
                   );
                 }
                 function C(e) {
@@ -3546,10 +3546,10 @@
                     !f.isStrict()
                     ? !1
                     : t.id === "await" && !(e & p.async) && !f.option.module
-                    ? !1
-                    : t.id === "yield" && !(e & p.yield)
-                    ? f.isStrict()
-                    : !0;
+                      ? !1
+                      : t.id === "yield" && !(e & p.yield)
+                        ? f.isStrict()
+                        : !0;
                 }
                 function A(e, t) {
                   return e.replace(/\{([^{}]*)\}/g, function (e, n) {
@@ -3904,8 +3904,8 @@
                             c.inverted[a] !== undefined &&
                               (f.option[a] = !f.option[a]))
                           : e.type === "jshint.unstable"
-                          ? (f.option.unstable[r] = i === "true")
-                          : (f.option[r] = i === "true");
+                            ? (f.option.unstable[r] = i === "true")
+                            : (f.option[r] = i === "true");
                         return;
                       }
                       F("E002", e);
@@ -3973,11 +3973,11 @@
                     n.id === "in" && e & p.noin
                       ? !0
                       : n.id === ";" || n.id === "}" || n.id === ":"
-                      ? !0
-                      : n.infix === t.infix ||
-                        (t.id === "yield" && t.rbp < n.rbp)
-                      ? !J(t, n)
-                      : !1
+                        ? !0
+                        : n.infix === t.infix ||
+                            (t.id === "yield" && t.rbp < n.rbp)
+                          ? !J(t, n)
+                          : !1
                   );
                 }
                 function $(e, t) {
@@ -4205,15 +4205,15 @@
                   return n.option.notypeof
                     ? !1
                     : !e || !t
-                    ? !1
-                    : ((i = n.inES6() ? ct.es6 : ct.es3),
-                      t.type === "(identifier)" &&
-                      t.value === "typeof" &&
-                      e.type === "(string)"
-                        ? e.value === "bigint"
-                          ? (n.inES11() || B("W119", e, "BigInt", "11"), !1)
-                          : !r.includes(i, e.value)
-                        : !1);
+                      ? !1
+                      : ((i = n.inES6() ? ct.es6 : ct.es3),
+                        t.type === "(identifier)" &&
+                        t.value === "typeof" &&
+                        e.type === "(string)"
+                          ? e.value === "bigint"
+                            ? (n.inES11() || B("W119", e, "BigInt", "11"), !1)
+                            : !r.includes(i, e.value)
+                          : !1);
                 }
                 function pt(e, t) {
                   var n = !1;
@@ -4719,8 +4719,8 @@
                           : (u || t & p.preAsync
                               ? F("E024", s, s.value)
                               : a
-                              ? F("E024", s, s.value)
-                              : (a = !i && !o),
+                                ? F("E024", s, s.value)
+                                : (a = !i && !o),
                             W(),
                             Pt(e, t, f.nameStack.infer()));
                         break;
@@ -5354,14 +5354,14 @@
                   return e === "call" && t["(async)"]
                     ? !1
                     : e === "property" && t["(method)"]
-                    ? !0
-                    : e === "call" &&
-                      t["(statement)"] &&
-                      t["(statement)"].id === "class"
-                    ? !0
-                    : t["(arrow)"]
-                    ? un(e, t["(context)"])
-                    : !1;
+                      ? !0
+                      : e === "call" &&
+                          t["(statement)"] &&
+                          t["(statement)"].id === "class"
+                        ? !0
+                        : t["(arrow)"]
+                          ? un(e, t["(context)"])
+                          : !1;
                 }
                 function ln(e, t, n, r, i, s) {
                   n.identifier && (t = n.value);
@@ -5444,11 +5444,11 @@
                         e[f.tokens.next.value] === !0
                           ? B("W075", f.tokens.next, "key", f.tokens.next.value)
                           : (f.tokens.next.value === "__proto__" &&
-                              !f.option.proto) ||
-                            (f.tokens.next.value === "__iterator__" &&
-                              !f.option.iterator)
-                          ? B("W096", f.tokens.next, f.tokens.next.value)
-                          : (e[f.tokens.next.value] = !0),
+                                !f.option.proto) ||
+                              (f.tokens.next.value === "__iterator__" &&
+                                !f.option.iterator)
+                            ? B("W096", f.tokens.next, f.tokens.next.value)
+                            : (e[f.tokens.next.value] = !0),
                           W(),
                           W(":"),
                           gn();
@@ -5792,8 +5792,8 @@
                         ? ((this.from = this.character),
                           B("W116", this, "!==", "!="))
                         : ht(n, t, f)
-                        ? B("W122", this, n.value)
-                        : ht(t, n, f) && B("W122", this, t.value),
+                          ? B("W122", this, n.value)
+                          : ht(t, n, f) && B("W122", this, t.value),
                       this
                     );
                   }),
@@ -6076,8 +6076,8 @@
                             (r === "write" || r === "writeln") &&
                             B("W060", t)
                           : f.option.noarg
-                          ? B("W059", t, r)
-                          : f.isStrict() && F("E008"),
+                            ? B("W059", t, r)
+                            : f.isStrict() && F("E008"),
                         !f.option.evil &&
                           (r === "eval" || r === "execScript") &&
                           pt(t, f) &&
@@ -6099,11 +6099,11 @@
                             W(),
                             (n.right = f.tokens.curr.led(e, t)))
                           : dn(f.tokens.next, "(")
-                          ? ((n.left = t),
-                            W(),
-                            (n.right = f.tokens.curr.led(e, t)),
-                            (n.exps = !0))
-                          : f.syntax["."].led.call(n, e, t),
+                            ? ((n.left = t),
+                              W(),
+                              (n.right = f.tokens.curr.led(e, t)),
+                              (n.exps = !0))
+                            : f.syntax["."].led.call(n, e, t),
                         f.tokens.next.type === "(template)" &&
                           F("E024", f.tokens.next, "`"),
                         n
@@ -6175,17 +6175,17 @@
                             t.value === "execScript"
                               ? B("W061", t)
                               : !i[0] ||
-                                i[0].id !== "(string)" ||
-                                (t.value !== "setTimeout" &&
-                                  t.value !== "setInterval")
-                              ? i[0] &&
-                                i[0].id === "(string)" &&
-                                t.value === "." &&
-                                t.left.value === "window" &&
-                                (t.right === "setTimeout" ||
-                                  t.right === "setInterval") &&
-                                (B("W066", t), q(t, i[0]))
-                              : (B("W066", t), q(t, i[0]))),
+                                  i[0].id !== "(string)" ||
+                                  (t.value !== "setTimeout" &&
+                                    t.value !== "setInterval")
+                                ? i[0] &&
+                                  i[0].id === "(string)" &&
+                                  t.value === "." &&
+                                  t.left.value === "window" &&
+                                  (t.right === "setTimeout" ||
+                                    t.right === "setInterval") &&
+                                  (B("W066", t), q(t, i[0]))
+                                : (B("W066", t), q(t, i[0]))),
                           Ht(t) || B("W067", n)),
                         (n.left = t),
                         n
@@ -7144,12 +7144,12 @@
                         return this.line !== e.line
                           ? !1
                           : e.id === "function"
-                          ? !0
-                          : e.id === "("
-                          ? ((t = Bt(0)), t.id === "=>")
-                          : e.identifier
-                          ? U().id === "=>"
-                          : !1;
+                            ? !0
+                            : e.id === "("
+                              ? ((t = Bt(0)), t.id === "=>")
+                              : e.identifier
+                                ? U().id === "=>"
+                                : !1;
                       }),
                       (e.useFud = e.isFunc),
                       (e.fud = function (e) {
@@ -7255,13 +7255,13 @@
                     return t
                       ? t
                       : dn(f.tokens.next, "(")
-                      ? (f.inES11() ||
-                          B("W119", f.tokens.curr, "dynamic import", "11"),
-                        W("("),
-                        $(e, 10),
-                        W(")"),
-                        this)
-                      : f.syntax["(identifier)"].nud.call(this, e);
+                        ? (f.inES11() ||
+                            B("W119", f.tokens.curr, "dynamic import", "11"),
+                          W("("),
+                          $(e, 10),
+                          W(")"),
+                          this)
+                        : f.syntax["(identifier)"].nud.call(this, e);
                   });
                 var on = et("import", function (e) {
                   f.funct["(scope)"].block.isGlobal() ||
@@ -7364,17 +7364,18 @@
                             (n = f.syntax["function"].fud(e)),
                             f.funct["(scope)"].setExported(n.name, i))
                           : s === "async" && U().id === "function"
-                          ? ((this.block = !0),
-                            W("async"),
-                            W("function"),
-                            (n = f.syntax["function"].fud(e | p.preAsync)),
-                            f.funct["(scope)"].setExported(n.name, i))
-                          : s === "class"
-                          ? ((this.block = !0),
-                            W("class"),
-                            (n = f.syntax["class"].fud(e)),
-                            f.funct["(scope)"].setExported(n.name, i))
-                          : ($(e, 10), f.funct["(scope)"].setExported(null, i)),
+                            ? ((this.block = !0),
+                              W("async"),
+                              W("function"),
+                              (n = f.syntax["function"].fud(e | p.preAsync)),
+                              f.funct["(scope)"].setExported(n.name, i))
+                            : s === "class"
+                              ? ((this.block = !0),
+                                W("class"),
+                                (n = f.syntax["class"].fud(e)),
+                                f.funct["(scope)"].setExported(n.name, i))
+                              : ($(e, 10),
+                                f.funct["(scope)"].setExported(null, i)),
                         this
                       );
                     }
@@ -7422,34 +7423,47 @@
                             f.funct["(scope)"].setExported(e, e);
                           }))
                         : f.tokens.next.id === "let"
-                        ? (W("let"),
-                          (n = f.tokens.curr.fud(e)),
-                          n.first.forEach(function (e) {
-                            f.funct["(scope)"].setExported(e, e);
-                          }))
-                        : f.tokens.next.id === "const"
-                        ? (W("const"),
-                          (n = f.tokens.curr.fud(e)),
-                          n.first.forEach(function (e) {
-                            f.funct["(scope)"].setExported(e, e);
-                          }))
-                        : f.tokens.next.id === "function"
-                        ? ((this.block = !0),
-                          W("function"),
-                          (n = f.syntax["function"].fud(e)),
-                          f.funct["(scope)"].setExported(n.name, n.name))
-                        : f.tokens.next.id === "async" && U().id === "function"
-                        ? ((this.block = !0),
-                          W("async"),
-                          W("function"),
-                          (n = f.syntax["function"].fud(e | p.preAsync)),
-                          f.funct["(scope)"].setExported(n.name, n.name))
-                        : f.tokens.next.id === "class"
-                        ? ((this.block = !0),
-                          W("class"),
-                          (n = f.syntax["class"].fud(e)),
-                          f.funct["(scope)"].setExported(n.name, n.name))
-                        : F("E024", f.tokens.next, f.tokens.next.value),
+                          ? (W("let"),
+                            (n = f.tokens.curr.fud(e)),
+                            n.first.forEach(function (e) {
+                              f.funct["(scope)"].setExported(e, e);
+                            }))
+                          : f.tokens.next.id === "const"
+                            ? (W("const"),
+                              (n = f.tokens.curr.fud(e)),
+                              n.first.forEach(function (e) {
+                                f.funct["(scope)"].setExported(e, e);
+                              }))
+                            : f.tokens.next.id === "function"
+                              ? ((this.block = !0),
+                                W("function"),
+                                (n = f.syntax["function"].fud(e)),
+                                f.funct["(scope)"].setExported(n.name, n.name))
+                              : f.tokens.next.id === "async" &&
+                                  U().id === "function"
+                                ? ((this.block = !0),
+                                  W("async"),
+                                  W("function"),
+                                  (n = f.syntax["function"].fud(
+                                    e | p.preAsync,
+                                  )),
+                                  f.funct["(scope)"].setExported(
+                                    n.name,
+                                    n.name,
+                                  ))
+                                : f.tokens.next.id === "class"
+                                  ? ((this.block = !0),
+                                    W("class"),
+                                    (n = f.syntax["class"].fud(e)),
+                                    f.funct["(scope)"].setExported(
+                                      n.name,
+                                      n.name,
+                                    ))
+                                  : F(
+                                      "E024",
+                                      f.tokens.next,
+                                      f.tokens.next.value,
+                                    ),
                       this
                     );
                   }).exps = !0);
@@ -7459,8 +7473,8 @@
                     pn(e, ["[", "."])
                       ? un("property", f.funct) || F("E063", this)
                       : dn(e, "(")
-                      ? un("call", f.funct) || F("E064", this)
-                      : F("E024", e, e.value || e.id),
+                        ? un("call", f.funct) || F("E064", this)
+                        : F("E024", e, e.value || e.id),
                     this
                   );
                 };
@@ -7579,21 +7593,25 @@
                               }),
                             !0)
                           : n && n.mode === "define"
-                          ? (i(e) ||
-                              n.variables.push({
-                                token: f.tokens.curr,
-                                value: e,
-                                undef: !1,
-                                unused: !0,
-                              }),
-                            !0)
-                          : n && n.mode === "generate"
-                          ? (f.funct["(scope)"].block.use(e, f.tokens.curr), !0)
-                          : n && n.mode === "filter"
-                          ? (s(e) &&
-                              f.funct["(scope)"].block.use(e, f.tokens.curr),
-                            !0)
-                          : !1;
+                            ? (i(e) ||
+                                n.variables.push({
+                                  token: f.tokens.curr,
+                                  value: e,
+                                  undef: !1,
+                                  unused: !0,
+                                }),
+                              !0)
+                            : n && n.mode === "generate"
+                              ? (f.funct["(scope)"].block.use(e, f.tokens.curr),
+                                !0)
+                              : n && n.mode === "filter"
+                                ? (s(e) &&
+                                    f.funct["(scope)"].block.use(
+                                      e,
+                                      f.tokens.curr,
+                                    ),
+                                  !0)
+                                : !1;
                       },
                     };
                   },
@@ -8012,26 +8030,29 @@
                       e === ">" && t === ">" && n === ">" && r === "="
                         ? { type: p.Punctuator, value: ">>>=" }
                         : e === "=" && t === "=" && n === "="
-                        ? { type: p.Punctuator, value: "===" }
-                        : e === "!" && t === "=" && n === "="
-                        ? { type: p.Punctuator, value: "!==" }
-                        : e === ">" && t === ">" && n === ">"
-                        ? { type: p.Punctuator, value: ">>>" }
-                        : e === "<" && t === "<" && n === "="
-                        ? { type: p.Punctuator, value: "<<=" }
-                        : e === ">" && t === ">" && n === "="
-                        ? { type: p.Punctuator, value: ">>=" }
-                        : e === "=" && t === ">"
-                        ? { type: p.Punctuator, value: e + t }
-                        : e === t && "+-<>&|*".indexOf(e) >= 0
-                        ? e === "*" && n === "="
-                          ? { type: p.Punctuator, value: e + t + n }
-                          : { type: p.Punctuator, value: e + t }
-                        : "<>=!+-*%&|^/".indexOf(e) >= 0
-                        ? t === "="
-                          ? { type: p.Punctuator, value: e + t }
-                          : { type: p.Punctuator, value: e }
-                        : null)
+                          ? { type: p.Punctuator, value: "===" }
+                          : e === "!" && t === "=" && n === "="
+                            ? { type: p.Punctuator, value: "!==" }
+                            : e === ">" && t === ">" && n === ">"
+                              ? { type: p.Punctuator, value: ">>>" }
+                              : e === "<" && t === "<" && n === "="
+                                ? { type: p.Punctuator, value: "<<=" }
+                                : e === ">" && t === ">" && n === "="
+                                  ? { type: p.Punctuator, value: ">>=" }
+                                  : e === "=" && t === ">"
+                                    ? { type: p.Punctuator, value: e + t }
+                                    : e === t && "+-<>&|*".indexOf(e) >= 0
+                                      ? e === "*" && n === "="
+                                        ? {
+                                            type: p.Punctuator,
+                                            value: e + t + n,
+                                          }
+                                        : { type: p.Punctuator, value: e + t }
+                                      : "<>=!+-*%&|^/".indexOf(e) >= 0
+                                        ? t === "="
+                                          ? { type: p.Punctuator, value: e + t }
+                                          : { type: p.Punctuator, value: e }
+                                        : null)
                 );
               },
               scanComments: function (e) {
@@ -8241,12 +8262,12 @@
                     return t === 92
                       ? m()
                       : t < 128
-                      ? a[t]
-                        ? ((r += 1), e)
-                        : null
-                      : u(t)
-                      ? ((r += 1), e)
-                      : null;
+                        ? a[t]
+                          ? ((r += 1), e)
+                          : null
+                        : u(t)
+                          ? ((r += 1), e)
+                          : null;
                   }.bind(this),
                   y = function () {
                     var e = this.peek(r),
@@ -8254,12 +8275,12 @@
                     return t === 92
                       ? m()
                       : t < 128
-                      ? f[t]
-                        ? ((r += 1), e)
-                        : null
-                      : d(t)
-                      ? ((r += 1), e)
-                      : null;
+                        ? f[t]
+                          ? ((r += 1), e)
+                          : null
+                        : d(t)
+                          ? ((r += 1), e)
+                          : null;
                   }.bind(this);
                 i = g();
                 if (i === null) return null;
@@ -8970,8 +8991,8 @@
                             s.regexpSyntaxChars.test(u)
                               ? e
                               : o <= 65535
-                              ? String.fromCharCode(o)
-                              : t
+                                ? String.fromCharCode(o)
+                                : t
                           );
                         }.bind(this),
                       )
@@ -9314,8 +9335,8 @@
                     return this.nextLine(e)
                       ? n("(endline)", "")
                       : this.exhausted
-                      ? null
-                      : ((this.exhausted = !0), n("(end)", ""));
+                        ? null
+                        : ((this.exhausted = !0), n("(end)", ""));
                   t = this.next(e);
                   if (!t) {
                     this.input.length &&
@@ -10542,10 +10563,10 @@
                   return this.option.strict === "global"
                     ? !0
                     : this.option.strict === !1
-                    ? !1
-                    : this.option.globalstrict
-                    ? !0
-                    : !1;
+                      ? !1
+                      : this.option.globalstrict
+                        ? !0
+                        : !1;
                 },
                 allowsGlobalUsd: function () {
                   return (
@@ -10594,8 +10615,8 @@
                     this.option.es3
                       ? (e = "es3")
                       : this.option.es5
-                      ? (e = "es5")
-                      : this.option.esnext && (e = "esnext");
+                        ? (e = "es5")
+                        : this.option.esnext && (e = "esnext");
                     if (e) return e;
                     this.option.esversion === 2015
                       ? (this.esVersion = 6)
@@ -10713,11 +10734,11 @@
               return s === "General_Category" || s === "gc"
                 ? o in i.general
                 : s === "Script" ||
-                  s === "sc" ||
-                  s === "Script_Extensions" ||
-                  s === "scx"
-                ? o in i.script
-                : !1;
+                    s === "sc" ||
+                    s === "Script_Extensions" ||
+                    s === "scx"
+                  ? o in i.script
+                  : !1;
             };
             var r = {
                 nonBinary: Object.create(null),
@@ -11978,10 +11999,10 @@
               return r.isUndefined(t)
                 ? "" + t
                 : r.isNumber(t) && !isFinite(t)
-                ? t.toString()
-                : r.isFunction(t) || r.isRegExp(t)
-                ? t.toString()
-                : t;
+                  ? t.toString()
+                  : r.isFunction(t) || r.isRegExp(t)
+                    ? t.toString()
+                    : t;
             }
             function a(e, t) {
               return r.isString(e) ? (e.length < t ? e : e.slice(0, t)) : e;
@@ -12017,14 +12038,14 @@
               return r.isDate(e) && r.isDate(t)
                 ? e.getTime() === t.getTime()
                 : r.isRegExp(e) && r.isRegExp(t)
-                ? e.source === t.source &&
-                  e.global === t.global &&
-                  e.multiline === t.multiline &&
-                  e.lastIndex === t.lastIndex &&
-                  e.ignoreCase === t.ignoreCase
-                : !r.isObject(e) && !r.isObject(t)
-                ? e == t
-                : d(e, t);
+                  ? e.source === t.source &&
+                    e.global === t.global &&
+                    e.multiline === t.multiline &&
+                    e.lastIndex === t.lastIndex &&
+                    e.ignoreCase === t.ignoreCase
+                  : !r.isObject(e) && !r.isObject(t)
+                    ? e == t
+                    : d(e, t);
             }
             function p(e) {
               return Object.prototype.toString.call(e) == "[object Arguments]";
@@ -12054,12 +12075,12 @@
               return !e || !t
                 ? !1
                 : Object.prototype.toString.call(t) == "[object RegExp]"
-                ? t.test(e)
-                : e instanceof t
-                ? !0
-                : t.call({}, e) === !0
-                ? !0
-                : !1;
+                  ? t.test(e)
+                  : e instanceof t
+                    ? !0
+                    : t.call({}, e) === !0
+                      ? !0
+                      : !1;
             }
             function m(e, t, n, i) {
               var s;
@@ -12583,10 +12604,10 @@
               typeof global != "undefined"
                 ? global
                 : typeof self != "undefined"
-                ? self
-                : typeof window != "undefined"
-                ? window
-                : {},
+                  ? self
+                  : typeof window != "undefined"
+                    ? window
+                    : {},
             );
           },
           {
@@ -12759,8 +12780,8 @@
                   !this._events || !this._events[e]
                     ? (t = [])
                     : i(this._events[e])
-                    ? (t = [this._events[e]])
-                    : (t = this._events[e].slice()),
+                      ? (t = [this._events[e]])
+                      : (t = this._events[e].slice()),
                   t
                 );
               }),
@@ -12770,8 +12791,8 @@
                   !e._events || !e._events[t]
                     ? (n = 0)
                     : i(e._events[t])
-                    ? (n = 1)
-                    : (n = e._events[t].length),
+                      ? (n = 1)
+                      : (n = e._events[t].length),
                   n
                 );
               });
@@ -13019,10 +13040,10 @@
                 f.test(l)
                   ? (c = "info")
                   : a.test(l)
-                  ? ((r = !0), (c = "error"))
-                  : l == "'{a}' is not defined."
-                  ? (c = "warning")
-                  : l == "'{a}' is defined but never used." && (c = "info");
+                    ? ((r = !0), (c = "error"))
+                    : l == "'{a}' is not defined."
+                      ? (c = "warning")
+                      : l == "'{a}' is defined but never used." && (c = "info");
               }
               t.push({
                 row: o.line - 1,

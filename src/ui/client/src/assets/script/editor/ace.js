@@ -448,12 +448,12 @@
               e === "class"
                 ? (u.className = Array.isArray(t) ? t.join(" ") : t)
                 : typeof t == "function" || e == "value" || e[0] == "$"
-                ? (u[e] = t)
-                : e === "ref"
-                ? n && (n[t] = u)
-                : e === "style"
-                ? typeof t == "string" && (u.style.cssText = t)
-                : t != null && u.setAttribute(e, t);
+                  ? (u[e] = t)
+                  : e === "ref"
+                    ? n && (n[t] = u)
+                    : e === "style"
+                      ? typeof t == "string" && (u.style.cssText = t)
+                      : t != null && u.setAttribute(e, t);
             }),
           t && t.appendChild(u),
           u
@@ -777,8 +777,8 @@
               ? t.forwardTo
                 ? this[t.forwardTo] && this[t.forwardTo].getOption(e)
                 : t && t.get
-                ? t.get.call(this)
-                : this["$" + e]
+                  ? t.get.call(this)
+                  : this["$" + e]
               : o('misspelled option "' + e + '"');
           },
         },
@@ -1282,9 +1282,9 @@
           return e.type == "dblclick"
             ? 0
             : e.type == "contextmenu" ||
-              (i.isMac && e.ctrlKey && !e.altKey && !e.shiftKey)
-            ? 2
-            : e.button;
+                (i.isMac && e.ctrlKey && !e.altKey && !e.shiftKey)
+              ? 2
+              : e.button;
         }),
         (t.capture = function (e, t, n) {
           function i(e) {
@@ -1329,8 +1329,8 @@
             t.getButton(e) !== 0
               ? (u = 0)
               : e.detail > 1
-              ? (u++, u > 4 && (u = 1))
-              : (u = 1);
+                ? (u++, u > 4 && (u = 1))
+                : (u = 1);
             if (i.isIE) {
               var o =
                 Math.abs(e.clientX - a) > 5 || Math.abs(e.clientY - f) > 5;
@@ -1505,9 +1505,9 @@
               ? ((t = this.compare(r.row, r.column)),
                 t == 1 ? 2 : t == 0 ? 1 : 0)
               : t == -1
-              ? -2
-              : ((t = this.compare(r.row, r.column)),
-                t == -1 ? -1 : t == 1 ? 42 : 0)
+                ? -2
+                : ((t = this.compare(r.row, r.column)),
+                  t == -1 ? -1 : t == 1 ? 42 : 0)
           );
         }),
         (this.comparePoint = function (e) {
@@ -1556,21 +1556,21 @@
             ? t < this.start.column
               ? -1
               : t > this.end.column
-              ? 1
-              : 0
+                ? 1
+                : 0
             : e < this.start.row
-            ? -1
-            : e > this.end.row
-            ? 1
-            : this.start.row === e
-            ? t >= this.start.column
-              ? 0
-              : -1
-            : this.end.row === e
-            ? t <= this.end.column
-              ? 0
-              : 1
-            : 0;
+              ? -1
+              : e > this.end.row
+                ? 1
+                : this.start.row === e
+                  ? t >= this.start.column
+                    ? 0
+                    : -1
+                  : this.end.row === e
+                    ? t <= this.end.column
+                      ? 0
+                      : 1
+                    : 0;
         }),
         (this.compareStart = function (e, t) {
           return this.start.row == e && this.start.column == t
@@ -1586,8 +1586,8 @@
           return this.end.row == e && this.end.column == t
             ? 1
             : this.start.row == e && this.start.column == t
-            ? -1
-            : this.compare(e, t);
+              ? -1
+              : this.compare(e, t);
         }),
         (this.clipRows = function (e, t) {
           if (this.end.row > t) var n = { row: t + 1, column: 0 };
@@ -1916,8 +1916,8 @@
               g
                 ? (g = !1)
                 : M(n)
-                ? (t.selectAll(), O())
-                : m && n.selectionStart != N && O();
+                  ? (t.selectAll(), O())
+                  : m && n.selectionStart != N && O();
             },
             D = null;
           (this.setInputHandler = function (e) {
@@ -2750,8 +2750,8 @@
             r && t.indexOf(i) >= 0
               ? (o = "copy")
               : n.indexOf(i) >= 0
-              ? (o = "move")
-              : t.indexOf(i) >= 0 && (o = "copy"),
+                ? (o = "move")
+                : t.indexOf(i) >= 0 && (o = "copy"),
             o
           );
         }
@@ -3201,8 +3201,8 @@
                   P < 3.5
                     ? (n = "anchor")
                     : D < 3.5
-                    ? (n = "cursor")
-                    : (n = "scroll"),
+                      ? (n = "cursor")
+                      : (n = "scroll"),
                   (l = setTimeout(S, 450));
               }
               a = y;
@@ -3218,10 +3218,10 @@
                 n == "zoom"
                   ? ((n = ""), (h = 0))
                   : l
-                  ? (t.selection.moveToPosition(p), (h = 0), w())
-                  : n == "scroll"
-                  ? (T(), E())
-                  : w(),
+                    ? (t.selection.moveToPosition(p), (h = 0), w())
+                    : n == "scroll"
+                      ? (T(), E())
+                      : w(),
                 clearTimeout(l),
                 (l = null);
             },
@@ -3779,26 +3779,26 @@
             ? g
             : B[t]
           : n == 5
-          ? /[\u0591-\u05f4]/.test(e)
-            ? y
-            : g
-          : n == 6
-          ? /[\u0610-\u061a\u064b-\u065f\u06d6-\u06e4\u06e7-\u06ed]/.test(e)
-            ? A
-            : /[\u0660-\u0669\u066b-\u066c]/.test(e)
-            ? w
-            : t == 1642
-            ? L
-            : /[\u06f0-\u06f9]/.test(e)
-            ? b
-            : T
-          : n == 32 && t <= 8287
-          ? j[t & 255]
-          : n == 254
-          ? t >= 65136
-            ? T
-            : E
-          : E;
+            ? /[\u0591-\u05f4]/.test(e)
+              ? y
+              : g
+            : n == 6
+              ? /[\u0610-\u061a\u064b-\u065f\u06d6-\u06e4\u06e7-\u06ed]/.test(e)
+                ? A
+                : /[\u0660-\u0669\u066b-\u066c]/.test(e)
+                  ? w
+                  : t == 1642
+                    ? L
+                    : /[\u06f0-\u06f9]/.test(e)
+                      ? b
+                      : T
+              : n == 32 && t <= 8287
+                ? j[t & 255]
+                : n == 254
+                  ? t >= 65136
+                    ? T
+                    : E
+                  : E;
       }
       function U(e) {
         return e >= "\u064b" && e <= "\u0655";
@@ -4162,12 +4162,12 @@
             n[f] === w
               ? (a[f] = t.AN)
               : a[f] === y &&
-                ((n[f] > T && n[f] < O) || n[f] === E || n[f] === H)
-              ? (a[f] = t.ON_R)
-              : f > 0 &&
-                i[f - 1] === "\u0644" &&
-                /\u0622|\u0623|\u0625|\u0627/.test(i[f]) &&
-                ((a[f - 1] = a[f] = t.R_H), f++);
+                  ((n[f] > T && n[f] < O) || n[f] === E || n[f] === H)
+                ? (a[f] = t.ON_R)
+                : f > 0 &&
+                  i[f - 1] === "\u0644" &&
+                  /\u0622|\u0623|\u0625|\u0627/.test(i[f]) &&
+                  ((a[f - 1] = a[f] = t.R_H), f++);
           i[i.length - 1] === t.DOT && (a[i.length - 1] = t.B),
             i[0] === "\u202b" && (a[0] = t.RLE);
           for (var f = 0; f < o.length; f++) u[f] = a[o[f]];
@@ -4336,8 +4336,8 @@
             return this.$isRtl
               ? !0
               : e != undefined
-              ? this.session.getLine(e).charAt(0) == this.RLE
-              : this.isRtlDir;
+                ? this.session.getLine(e).charAt(0) == this.RLE
+                : this.isRtlDir;
           }),
           (this.setRtlDirection = function (e, t) {
             var n = e.getCursorPosition();
@@ -4423,19 +4423,19 @@
               r > 0 && i[r - 1] % 2 !== 0 && i[r] % 2 === 0
                 ? (e < n && r--, (t = this.bidiMap.logicalFromVisual[r]))
                 : r > 0 && i[r - 1] % 2 === 0 && i[r] % 2 !== 0
-                ? (t =
-                    1 +
-                    (e > n
-                      ? this.bidiMap.logicalFromVisual[r]
-                      : this.bidiMap.logicalFromVisual[r - 1]))
-                : (this.isRtlDir &&
-                    r === i.length - 1 &&
-                    s === 0 &&
-                    i[r - 1] % 2 === 0) ||
-                  (!this.isRtlDir && r === 0 && i[r] % 2 !== 0)
-                ? (t = 1 + this.bidiMap.logicalFromVisual[r])
-                : (r > 0 && i[r - 1] % 2 !== 0 && s !== 0 && r--,
-                  (t = this.bidiMap.logicalFromVisual[r])),
+                  ? (t =
+                      1 +
+                      (e > n
+                        ? this.bidiMap.logicalFromVisual[r]
+                        : this.bidiMap.logicalFromVisual[r - 1]))
+                  : (this.isRtlDir &&
+                        r === i.length - 1 &&
+                        s === 0 &&
+                        i[r - 1] % 2 === 0) ||
+                      (!this.isRtlDir && r === 0 && i[r] % 2 !== 0)
+                    ? (t = 1 + this.bidiMap.logicalFromVisual[r])
+                    : (r > 0 && i[r - 1] % 2 !== 0 && s !== 0 && r--,
+                      (t = this.bidiMap.logicalFromVisual[r])),
               t === 0 && this.isRtlDir && t++,
               t + this.wrapIndent
             );
@@ -4520,8 +4520,8 @@
             return this.$isEmpty
               ? o.fromPoints(t, t)
               : this.isBackwards()
-              ? o.fromPoints(t, e)
-              : o.fromPoints(e, t);
+                ? o.fromPoints(t, e)
+                : o.fromPoints(e, t);
           }),
           (this.clearSelection = function () {
             this.$isEmpty ||
@@ -5005,14 +5005,14 @@
                 ? f.token.length == 1 || c == 1
                   ? (f.token = f.token[0])
                   : c - 1 != f.token.length
-                  ? (this.reportError(
-                      "number of classes and regexp groups doesn't match",
-                      { rule: f, groupCount: c - 1 },
-                    ),
-                    (f.token = f.token[0]))
-                  : ((f.tokenArray = f.token),
-                    (f.token = null),
-                    (f.onMatch = this.$arrayTokens))
+                    ? (this.reportError(
+                        "number of classes and regexp groups doesn't match",
+                        { rule: f, groupCount: c - 1 },
+                      ),
+                      (f.token = f.token[0]))
+                    : ((f.tokenArray = f.token),
+                      (f.token = null),
+                      (f.onMatch = this.$arrayTokens))
                 : typeof f.token == "function" &&
                   !f.onMatch &&
                   (c > 1
@@ -5081,11 +5081,13 @@
                     r
                       ? (r = u != "]")
                       : u
-                      ? (r = !0)
-                      : o
-                      ? (n == i.stack && ((i.end = a + 1), (i.stack = -1)), n--)
-                      : s &&
-                        (n++, s.length != 1 && ((i.stack = n), (i.start = a))),
+                        ? (r = !0)
+                        : o
+                          ? (n == i.stack && ((i.end = a + 1), (i.stack = -1)),
+                            n--)
+                          : s &&
+                            (n++,
+                            s.length != 1 && ((i.stack = n), (i.start = a))),
                     e
                   );
                 },
@@ -6204,8 +6206,8 @@
           return e(n, u, r)
             ? { row: n.row, column: n.column }
             : e(a, n, !r)
-            ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
-            : { row: u.row, column: u.column };
+              ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
+              : { row: u.row, column: u.column };
         }
         r.implement(this, i),
           (this.getPosition = function () {
@@ -6250,12 +6252,12 @@
                 ? ((n.row = Math.max(0, this.document.getLength() - 1)),
                   (n.column = this.document.getLine(n.row).length))
                 : e < 0
-                ? ((n.row = 0), (n.column = 0))
-                : ((n.row = e),
-                  (n.column = Math.min(
-                    this.document.getLine(n.row).length,
-                    Math.max(0, t),
-                  ))),
+                  ? ((n.row = 0), (n.column = 0))
+                  : ((n.row = e),
+                    (n.column = Math.min(
+                      this.document.getLine(n.row).length,
+                      Math.max(0, t),
+                    ))),
               t < 0 && (n.column = 0),
               n
             );
@@ -6287,8 +6289,8 @@
             e.length === 0
               ? (this.$lines = [""])
               : Array.isArray(e)
-              ? this.insertMergedLines({ row: 0, column: 0 }, e)
-              : this.insert({ row: 0, column: 0 }, e);
+                ? this.insertMergedLines({ row: 0, column: 0 }, e)
+                : this.insert({ row: 0, column: 0 }, e);
         };
       (function () {
         r.implement(this, s),
@@ -6416,8 +6418,8 @@
             e === undefined
               ? (e = n)
               : e < 0
-              ? (e = 0)
-              : e >= n && ((e = n - 1), (t = undefined));
+                ? (e = 0)
+                : e >= n && ((e = n - 1), (t = undefined));
             var r = this.getLine(e);
             return (
               t == undefined && (t = r.length),
@@ -6970,8 +6972,8 @@
                   ? -s - 2
                   : s
                 : a > 0 || (a === 0 && !t)
-                ? s
-                : -s - 1;
+                  ? s
+                  : -s - 1;
             }
             return -s - 1;
           }),
@@ -7293,8 +7295,8 @@
               n == -1
                 ? s.substring(0, t - i.end.column)
                 : n == 1
-                ? s.substring(t - i.end.column)
-                : s
+                  ? s.substring(t - i.end.column)
+                  : s
             );
           }),
           (this.getFoldLine = function (e, t) {
@@ -7558,12 +7560,12 @@
                   ? (n.end = i)
                   : ((n.start = i), n.start.column++, n.end.column--)
                 : (i = this.findMatchingBracket({
-                    row: s.row,
-                    column: s.column + 1,
-                  }))
-                ? (n.comparePoint(i) == 1 ? (n.end = i) : (n.start = i),
-                  n.start.column++)
-                : (n = this.getCommentFoldRange(s.row, s.column) || n);
+                      row: s.row,
+                      column: s.column + 1,
+                    }))
+                  ? (n.comparePoint(i) == 1 ? (n.end = i) : (n.start = i),
+                    n.start.column++)
+                  : (n = this.getCommentFoldRange(s.row, s.column) || n);
             } else {
               var o = this.getFoldsInRange(n);
               if (e && o.length) {
@@ -9186,10 +9188,10 @@
                   u == 32
                     ? i.push(c)
                     : (u > 39 && u < 48) || (u > 57 && u < 64)
-                    ? i.push(a)
-                    : u >= 4352 && v(u)
-                    ? i.push(e, t)
-                    : i.push(e);
+                      ? i.push(a)
+                      : u >= 4352 && v(u)
+                        ? i.push(e, t)
+                        : i.push(e);
               }
               return i;
             }),
@@ -9202,8 +9204,8 @@
                   r == 9
                     ? (n += this.getScreenTabSize(n))
                     : r >= 4352 && v(r)
-                    ? (n += 2)
-                    : (n += 1);
+                      ? (n += 2)
+                      : (n += 1);
                 if (n > t) break;
               }
               return [n, i];
@@ -9442,10 +9444,10 @@
               !e || e == "off"
                 ? (e = !1)
                 : e == "free"
-                ? (e = !0)
-                : e == "printMargin"
-                ? (e = -1)
-                : typeof e == "string" && (e = parseInt(e, 10) || !1);
+                  ? (e = !0)
+                  : e == "printMargin"
+                    ? (e = -1)
+                    : typeof e == "string" && (e = parseInt(e, 10) || !1);
               if (this.$wrap == e) return;
               this.$wrap = e;
               if (!e) this.setUseWrapMode(!1);
@@ -9459,8 +9461,8 @@
                 ? this.$wrap == -1
                   ? "printMargin"
                   : this.getWrapLimitRange().min
-                  ? this.$wrap
-                  : "free"
+                    ? this.$wrap
+                    : "free"
                 : "off";
             },
             handlesSet: !0,
@@ -12177,8 +12179,8 @@
                 return e.toLowerCase() < t.toLowerCase()
                   ? -1
                   : e.toLowerCase() > t.toLowerCase()
-                  ? 1
-                  : 0;
+                    ? 1
+                    : 0;
               });
               var i = new d(0, 0, 0, 0);
               for (var r = e.first; r <= e.last; r++) {
@@ -12665,8 +12667,8 @@
                     ? p && t
                       ? this.selection.setRange(p)
                       : p && p.isEqual(this.getSelectionRange())
-                      ? this.clearSelection()
-                      : this.selection.selectTo(v.row, v.column)
+                        ? this.clearSelection()
+                        : this.selection.selectTo(v.row, v.column)
                     : this.selection.moveTo(v.row, v.column));
             }),
             (this.gotoLine = function (e, t, n) {
@@ -12855,9 +12857,9 @@
                     s.top >= 0 && u + t.top < 0
                       ? (r = !0)
                       : s.top < o.height &&
-                        s.top + t.top + o.lineHeight > window.innerHeight
-                      ? (r = !1)
-                      : (r = null),
+                          s.top + t.top + o.lineHeight > window.innerHeight
+                        ? (r = !1)
+                        : (r = null),
                       r != null &&
                         ((i.style.top = u + "px"),
                         (i.style.left = s.left + "px"),
@@ -13225,14 +13227,14 @@
           o(e.start, t.end) >= 0
             ? m(e, t, -1)
             : o(e.start, t.start) <= 0
-            ? m(t, e, 1)
-            : (m(e, s.fromPoints(t.start, e.start), -1), m(t, e, 1));
+              ? m(t, e, 1)
+              : (m(e, s.fromPoints(t.start, e.start), -1), m(t, e, 1));
         else if (!n && r)
           o(t.start, e.end) >= 0
             ? m(t, e, -1)
             : o(t.start, e.start) <= 0
-            ? m(e, t, 1)
-            : (m(t, s.fromPoints(e.start, t.start), -1), m(e, t, 1));
+              ? m(e, t, 1)
+              : (m(t, s.fromPoints(e.start, t.start), -1), m(e, t, 1));
         else if (!n && !r)
           if (o(t.start, e.end) >= 0) m(t, e, -1);
           else {
@@ -13622,10 +13624,12 @@
               a
                 ? (i.className = a)
                 : u == "error"
-                ? (i.className = " ace_error")
-                : u == "warning" && i.className != " ace_error"
-                ? (i.className = " ace_warning")
-                : u == "info" && !i.className && (i.className = " ace_info");
+                  ? (i.className = " ace_error")
+                  : u == "warning" && i.className != " ace_error"
+                    ? (i.className = " ace_warning")
+                    : u == "info" &&
+                      !i.className &&
+                      (i.className = " ace_info");
             }
           }),
           (this.$updateAnnotations = function (e) {
@@ -13955,17 +13959,17 @@
                 r.type == "fullLine"
                   ? this.drawFullLineMarker(t, i, r.clazz, e)
                   : r.type == "screenLine"
-                  ? this.drawScreenLineMarker(t, i, r.clazz, e)
-                  : i.isMultiLine()
-                  ? r.type == "text"
-                    ? this.drawTextMarker(t, i, r.clazz, e)
-                    : this.drawMultiLineMarker(t, i, r.clazz, e)
-                  : this.drawSingleLineMarker(
-                      t,
-                      i,
-                      r.clazz + " ace_start" + " ace_br15",
-                      e,
-                    );
+                    ? this.drawScreenLineMarker(t, i, r.clazz, e)
+                    : i.isMultiLine()
+                      ? r.type == "text"
+                        ? this.drawTextMarker(t, i, r.clazz, e)
+                        : this.drawMultiLineMarker(t, i, r.clazz, e)
+                      : this.drawSingleLineMarker(
+                          t,
+                          i,
+                          r.clazz + " ace_start" + " ace_br15",
+                          e,
+                        );
             }
             if (this.i != -1)
               while (this.i < this.element.childElementCount)
@@ -13994,8 +13998,8 @@
                   l + 1 < f
                     ? u.getScreenLastRowColumn(l + 1)
                     : l == f
-                    ? 0
-                    : n.end.column),
+                      ? 0
+                      : n.end.column),
                 this.drawSingleLineMarker(
                   t,
                   d,
@@ -14946,11 +14950,11 @@
               this.drawCursor
                 ? this.drawCursor(u, o, e, t[n], this.session)
                 : this.isCursorInView(o, e)
-                ? (r.setStyle(a, "display", "block"),
-                  r.translate(u, o.left, o.top),
-                  r.setStyle(a, "width", Math.round(e.characterWidth) + "px"),
-                  r.setStyle(a, "height", e.lineHeight + "px"))
-                : r.setStyle(a, "display", "none");
+                  ? (r.setStyle(a, "display", "block"),
+                    r.translate(u, o.left, o.top),
+                    r.setStyle(a, "width", Math.round(e.characterWidth) + "px"),
+                    r.setStyle(a, "height", e.lineHeight + "px"))
+                  : r.setStyle(a, "display", "none");
             }
             while (this.cursors.length > i) this.removeCursor();
             var f = this.session.getOverwrite();
@@ -15629,8 +15633,8 @@
               return e.priority < t.priority
                 ? -1
                 : e.priority > t.priority
-                ? 1
-                : 0;
+                  ? 1
+                  : 0;
             }
             var t =
               this.renderer.theme.isDark === !0
@@ -16016,8 +16020,8 @@
               this.session.getUseWrapMode() && this.adjustWrapLimit()
                 ? this.$loop.schedule(this.CHANGE_FULL)
                 : this.$size.$dirty
-                ? this.$loop.schedule(this.CHANGE_FULL)
-                : this.$computeLayerConfig();
+                  ? this.$loop.schedule(this.CHANGE_FULL)
+                  : this.$computeLayerConfig();
           }),
           (this.adjustWrapLimit = function () {
             var e = this.$size.scrollerWidth - this.$padding * 2,
@@ -16348,20 +16352,20 @@
                 this.$customScrollbar &&
                   this.$scrollDecorator.$updateDecorators(n))
               : e & this.CHANGE_LINES
-              ? ((this.$updateLines() ||
-                  (e & this.CHANGE_GUTTER && this.$showGutter)) &&
-                  this.$gutterLayer.update(n),
-                this.$customScrollbar &&
-                  this.$scrollDecorator.$updateDecorators(n))
-              : e & this.CHANGE_TEXT || e & this.CHANGE_GUTTER
-              ? (this.$showGutter && this.$gutterLayer.update(n),
-                this.$customScrollbar &&
-                  this.$scrollDecorator.$updateDecorators(n))
-              : e & this.CHANGE_CURSOR &&
-                (this.$highlightGutterLine &&
-                  this.$gutterLayer.updateLineHighlight(n),
-                this.$customScrollbar &&
-                  this.$scrollDecorator.$updateDecorators(n)),
+                ? ((this.$updateLines() ||
+                    (e & this.CHANGE_GUTTER && this.$showGutter)) &&
+                    this.$gutterLayer.update(n),
+                  this.$customScrollbar &&
+                    this.$scrollDecorator.$updateDecorators(n))
+                : e & this.CHANGE_TEXT || e & this.CHANGE_GUTTER
+                  ? (this.$showGutter && this.$gutterLayer.update(n),
+                    this.$customScrollbar &&
+                      this.$scrollDecorator.$updateDecorators(n))
+                  : e & this.CHANGE_CURSOR &&
+                    (this.$highlightGutterLine &&
+                      this.$gutterLayer.updateLineHighlight(n),
+                    this.$customScrollbar &&
+                      this.$scrollDecorator.$updateDecorators(n)),
               e & this.CHANGE_CURSOR &&
                 (this.$cursorLayer.update(n), this.$moveTextAreaToCursor()),
               e & (this.CHANGE_MARKER | this.CHANGE_MARKER_FRONT) &&
@@ -16588,14 +16592,14 @@
                   (i = -this.scrollMargin.left),
                 this.session.setScrollLeft(i))
               : f + this.$size.scrollerWidth < i + this.characterWidth
-              ? this.session.setScrollLeft(
-                  Math.round(
-                    i + this.characterWidth - this.$size.scrollerWidth,
-                  ),
-                )
-              : f <= this.$padding &&
-                i - f < this.characterWidth &&
-                this.session.setScrollLeft(0);
+                ? this.session.setScrollLeft(
+                    Math.round(
+                      i + this.characterWidth - this.$size.scrollerWidth,
+                    ),
+                  )
+                : f <= this.$padding &&
+                  i - f < this.characterWidth &&
+                  this.session.setScrollLeft(0);
           }),
           (this.getScrollTop = function () {
             return this.session.getScrollTop();
@@ -16666,12 +16670,12 @@
                   ? (r.session.setScrollTop(s.shift()),
                     (r.session.$scrollTop = n))
                   : n != null
-                  ? ((r.session.$scrollTop = -1),
-                    r.session.setScrollTop(n),
-                    (n = null))
-                  : ((r.$timer = clearInterval(r.$timer)),
-                    (r.$scrollAnimation = null),
-                    t && t());
+                    ? ((r.session.$scrollTop = -1),
+                      r.session.setScrollTop(n),
+                      (n = null))
+                    : ((r.$timer = clearInterval(r.$timer)),
+                      (r.$scrollAnimation = null),
+                      t && t());
               }, 10));
           }),
           (this.scrollToY = function (e) {
@@ -16837,8 +16841,8 @@
                 "padding" in r
                   ? r.padding
                   : "padding" in (n.theme || {})
-                  ? 4
-                  : n.$padding;
+                    ? 4
+                    : n.$padding;
               n.$padding && s != n.$padding && n.setPadding(s),
                 (n.$theme = r.cssClass),
                 (n.theme = r),
@@ -18026,10 +18030,10 @@
               t.multiSelectAction == "forEach"
                 ? (r = n.forEachSelection(t, e.args))
                 : t.multiSelectAction == "forEachLine"
-                ? (r = n.forEachSelection(t, e.args, !0))
-                : t.multiSelectAction == "single"
-                ? (n.exitMultiSelectMode(), (r = t.exec(n, e.args || {})))
-                : (r = t.multiSelectAction(n, e.args || {}));
+                  ? (r = n.forEachSelection(t, e.args, !0))
+                  : t.multiSelectAction == "single"
+                    ? (n.exitMultiSelectMode(), (r = t.exec(n, e.args || {})))
+                    : (r = t.multiSelectAction(n, e.args || {}));
             return r;
           }),
           (this.forEachSelection = function (e, t, n) {
@@ -18384,10 +18388,10 @@
             return this.foldingStartMarker.test(r)
               ? "start"
               : t == "markbeginend" &&
-                this.foldingStopMarker &&
-                this.foldingStopMarker.test(r)
-              ? "end"
-              : "";
+                  this.foldingStopMarker &&
+                  this.foldingStopMarker.test(r)
+                ? "end"
+                : "";
           }),
           (this.getFoldWidgetRange = function (e, t, n) {
             return null;

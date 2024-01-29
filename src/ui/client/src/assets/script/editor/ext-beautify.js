@@ -118,10 +118,10 @@ define("ace/ext/beautify", [
                 v === "</" &&
                   (D && !c && C < 1 && C++, _ && (C = 1), (E = 1), (D = !1)))
               : i(s, "tag-close")
-              ? (M = !1)
-              : i(s, "comment.start")
-              ? (D = !0)
-              : i(s, "comment.end") && (D = !1),
+                ? (M = !1)
+                : i(s, "comment.start")
+                  ? (D = !0)
+                  : i(s, "comment.end") && (D = !1),
             !M &&
               !C &&
               s.type === "paren.rparen" &&
@@ -146,59 +146,59 @@ define("ace/ext/beautify", [
                   d.match(/\}[\s]*$/) &&
                   (I(), (h = !0)))
               : s.type === "paren.lparen"
-              ? (j(),
-                v.substr(-1) === "{" && ((p = !0), (O = !1), M || (C = 1)),
-                v.substr(0, 1) === "{" &&
-                  ((h = !0),
-                  d.substr(-1) !== "[" && d.trimRight().substr(-1) === "["
-                    ? (I(), (h = !1))
-                    : d.trimRight().substr(-1) === ")"
-                    ? I()
-                    : F()))
-              : s.type === "paren.rparen"
-              ? ((E = 1),
-                v.substr(0, 1) === "}" &&
-                  (H[g - 1] === "case" && E++,
-                  d.trimRight().substr(-1) === "{"
-                    ? I()
-                    : ((h = !0), _ && (C += 2))),
-                v.substr(0, 1) === "]" &&
-                  d.substr(-1) !== "}" &&
-                  d.trimRight().substr(-1) === "}" &&
-                  ((h = !1), w++, I()),
-                v.substr(0, 1) === ")" &&
-                  d.substr(-1) !== "(" &&
-                  d.trimRight().substr(-1) === "(" &&
-                  ((h = !1), w++, I()),
-                F())
-              : (s.type !== "keyword.operator" && s.type !== "keyword") ||
-                !v.match(
-                  /^(=|==|===|!=|!==|&&|\|\||and|or|xor|\+=|.=|>|>=|<|<=|=>)$/,
-                )
-              ? s.type === "punctuation.operator" && v === ";"
-                ? (I(), j(), (p = !0), _ && C++)
-                : s.type === "punctuation.operator" && v.match(/^(:|,)$/)
-                ? (I(),
-                  j(),
-                  v.match(/^(,)$/) &&
-                  x > 0 &&
-                  S === 0 &&
-                  f.lineBreaksAfterCommasInCurlyBlock
-                    ? C++
-                    : ((p = !0), (c = !1)))
-                : s.type === "support.php_tag" && v === "?>" && !c
-                ? (I(), (h = !0))
-                : i(s, "attribute-name") && d.substr(-1).match(/^\s$/)
-                ? (h = !0)
-                : i(s, "attribute-equals")
-                ? (F(), j())
-                : i(s, "tag-close")
-                ? (F(), v === "/>" && (h = !0))
-                : s.type === "keyword" &&
-                  v.match(/^(case|default)$/) &&
-                  B &&
-                  (E = 1)
-              : (I(), j(), (h = !0), (p = !0));
+                ? (j(),
+                  v.substr(-1) === "{" && ((p = !0), (O = !1), M || (C = 1)),
+                  v.substr(0, 1) === "{" &&
+                    ((h = !0),
+                    d.substr(-1) !== "[" && d.trimRight().substr(-1) === "["
+                      ? (I(), (h = !1))
+                      : d.trimRight().substr(-1) === ")"
+                        ? I()
+                        : F()))
+                : s.type === "paren.rparen"
+                  ? ((E = 1),
+                    v.substr(0, 1) === "}" &&
+                      (H[g - 1] === "case" && E++,
+                      d.trimRight().substr(-1) === "{"
+                        ? I()
+                        : ((h = !0), _ && (C += 2))),
+                    v.substr(0, 1) === "]" &&
+                      d.substr(-1) !== "}" &&
+                      d.trimRight().substr(-1) === "}" &&
+                      ((h = !1), w++, I()),
+                    v.substr(0, 1) === ")" &&
+                      d.substr(-1) !== "(" &&
+                      d.trimRight().substr(-1) === "(" &&
+                      ((h = !1), w++, I()),
+                    F())
+                  : (s.type !== "keyword.operator" && s.type !== "keyword") ||
+                      !v.match(
+                        /^(=|==|===|!=|!==|&&|\|\||and|or|xor|\+=|.=|>|>=|<|<=|=>)$/,
+                      )
+                    ? s.type === "punctuation.operator" && v === ";"
+                      ? (I(), j(), (p = !0), _ && C++)
+                      : s.type === "punctuation.operator" && v.match(/^(:|,)$/)
+                        ? (I(),
+                          j(),
+                          v.match(/^(,)$/) &&
+                          x > 0 &&
+                          S === 0 &&
+                          f.lineBreaksAfterCommasInCurlyBlock
+                            ? C++
+                            : ((p = !0), (c = !1)))
+                        : s.type === "support.php_tag" && v === "?>" && !c
+                          ? (I(), (h = !0))
+                          : i(s, "attribute-name") && d.substr(-1).match(/^\s$/)
+                            ? (h = !0)
+                            : i(s, "attribute-equals")
+                              ? (F(), j())
+                              : i(s, "tag-close")
+                                ? (F(), v === "/>" && (h = !0))
+                                : s.type === "keyword" &&
+                                  v.match(/^(case|default)$/) &&
+                                  B &&
+                                  (E = 1)
+                    : (I(), j(), (h = !0), (p = !0));
             if (
               c &&
               (!s.type.match(/^(comment)$/) ||
@@ -250,8 +250,8 @@ define("ace/ext/beautify", [
               (i(s, "tag-open") && v === "</"
                 ? g--
                 : i(s, "tag-open") && v === "<"
-                ? g++
-                : i(s, "tag-close") && v === "/>" && g--),
+                  ? g++
+                  : i(s, "tag-close") && v === "/>" && g--),
               i(s, "tag-name") && (m = v),
               (T = N);
           }

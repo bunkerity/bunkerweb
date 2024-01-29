@@ -958,8 +958,8 @@ define(
             Math.abs(n.top - i) < 2
               ? (i = n.top - r)
               : Math.abs(n.top - i - r * 0.5) < 2
-              ? (i = n.top)
-              : (i = n.top - r * 0.5),
+                ? (i = n.top)
+                : (i = n.top - r * 0.5),
               e.session.setScrollTop(i);
           },
           selectRectangularRegion: function (e) {

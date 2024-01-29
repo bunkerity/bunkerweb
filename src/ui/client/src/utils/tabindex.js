@@ -3,10 +3,11 @@ const bannerIndex = "-1";
 const footerIndex = "0";
 const menuIndex = "1";
 const langIndex = "2";
-const refreshIndex = "3";
-const feedbackIndex = "4";
-const newsIndex = "5";
-const contentIndex = "6";
+const menuFloatIndex = "3";
+const refreshIndex = "4";
+const feedbackIndex = "5";
+const newsIndex = "6";
+const contentIndex = "7";
 
 export {
   bannerIndex,

@@ -85,7 +85,7 @@ async function getData() {
     "GET",
     null,
     instances,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
   const hostnames = await getHostFromInst();
 
@@ -137,7 +137,7 @@ async function getHostBan(hostname) {
     "POST",
     null,
     data,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 
@@ -157,6 +157,8 @@ onMounted(() => {
         isErr: $t('api_error', { name: $t('dashboard_bans') }),
       }"
     />
+
+    <BansModalAdd />
 
     <div
       class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border"
@@ -235,6 +237,5 @@ onMounted(() => {
     >
       <BansList :items="bans.setup" />
     </CardBase>
-    <BansModalAdd />
   </Dashboard>
 </template>

@@ -204,13 +204,13 @@ define(
                       r == "}" && n.length
                         ? (e = r)
                         : "`$\\".indexOf(r) != -1
-                        ? (e = r)
-                        : r == "n"
-                        ? (e = "\n")
-                        : r == "t"
-                        ? (e = "	")
-                        : "ulULE".indexOf(r) != -1 &&
-                          (e = { changeCase: r, local: r > "a" }),
+                          ? (e = r)
+                          : r == "n"
+                            ? (e = "\n")
+                            : r == "t"
+                              ? (e = "	")
+                              : "ulULE".indexOf(r) != -1 &&
+                                (e = { changeCase: r, local: r > "a" }),
                       [e]
                     );
                   },
@@ -342,8 +342,8 @@ define(
           return t.formatFunction == "upcase"
             ? e.toUpperCase()
             : t.formatFunction == "downcase"
-            ? e.toLowerCase()
-            : e;
+              ? e.toLowerCase()
+              : e;
         }),
         (this.resolveVariables = function (e, t) {
           function f(t) {
@@ -377,8 +377,8 @@ define(
               o.elseEnd
                 ? f(o.elseEnd)
                 : o.tabstopId != null
-                ? n.push(o)
-                : o.changeCase != null && n.push(o);
+                  ? n.push(o)
+                  : o.changeCase != null && n.push(o);
           }
           return n;
         }),
@@ -408,8 +408,8 @@ define(
               return e == "\n"
                 ? e + s
                 : typeof e == "string"
-                ? e.replace(/\t/g, i)
-                : e;
+                  ? e.replace(/\t/g, i)
+                  : e;
             }));
           var u = [];
           o.forEach(function (e, t) {
@@ -508,8 +508,8 @@ define(
                 (r.substring(0, 3) == "js-"
                   ? (t = "javascript")
                   : r.substring(0, 4) == "css-"
-                  ? (t = "css")
-                  : r.substring(0, 4) == "php-" && (t = "php"));
+                    ? (t = "css")
+                    : r.substring(0, 4) == "php-" && (t = "php"));
           }
           return t;
         }),

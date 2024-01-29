@@ -372,9 +372,9 @@
               ? ((t = this.compare(r.row, r.column)),
                 t == 1 ? 2 : t == 0 ? 1 : 0)
               : t == -1
-              ? -2
-              : ((t = this.compare(r.row, r.column)),
-                t == -1 ? -1 : t == 1 ? 42 : 0)
+                ? -2
+                : ((t = this.compare(r.row, r.column)),
+                  t == -1 ? -1 : t == 1 ? 42 : 0)
           );
         }),
         (this.comparePoint = function (e) {
@@ -423,21 +423,21 @@
             ? t < this.start.column
               ? -1
               : t > this.end.column
-              ? 1
-              : 0
+                ? 1
+                : 0
             : e < this.start.row
-            ? -1
-            : e > this.end.row
-            ? 1
-            : this.start.row === e
-            ? t >= this.start.column
-              ? 0
-              : -1
-            : this.end.row === e
-            ? t <= this.end.column
-              ? 0
-              : 1
-            : 0;
+              ? -1
+              : e > this.end.row
+                ? 1
+                : this.start.row === e
+                  ? t >= this.start.column
+                    ? 0
+                    : -1
+                  : this.end.row === e
+                    ? t <= this.end.column
+                      ? 0
+                      : 1
+                    : 0;
         }),
         (this.compareStart = function (e, t) {
           return this.start.row == e && this.start.column == t
@@ -453,8 +453,8 @@
           return this.end.row == e && this.end.column == t
             ? 1
             : this.start.row == e && this.start.column == t
-            ? -1
-            : this.compare(e, t);
+              ? -1
+              : this.compare(e, t);
         }),
         (this.clipRows = function (e, t) {
           if (this.end.row > t) var n = { row: t + 1, column: 0 };
@@ -538,8 +538,8 @@
         return e(n, u, r)
           ? { row: n.row, column: n.column }
           : e(a, n, !r)
-          ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
-          : { row: u.row, column: u.column };
+            ? { row: n.row + s, column: n.column + (n.row == a.row ? o : 0) }
+            : { row: u.row, column: u.column };
       }
       r.implement(this, i),
         (this.getPosition = function () {
@@ -584,12 +584,12 @@
               ? ((n.row = Math.max(0, this.document.getLength() - 1)),
                 (n.column = this.document.getLine(n.row).length))
               : e < 0
-              ? ((n.row = 0), (n.column = 0))
-              : ((n.row = e),
-                (n.column = Math.min(
-                  this.document.getLine(n.row).length,
-                  Math.max(0, t),
-                ))),
+                ? ((n.row = 0), (n.column = 0))
+                : ((n.row = e),
+                  (n.column = Math.min(
+                    this.document.getLine(n.row).length,
+                    Math.max(0, t),
+                  ))),
             t < 0 && (n.column = 0),
             n
           );
@@ -608,8 +608,8 @@
           e.length === 0
             ? (this.$lines = [""])
             : Array.isArray(e)
-            ? this.insertMergedLines({ row: 0, column: 0 }, e)
-            : this.insert({ row: 0, column: 0 }, e);
+              ? this.insertMergedLines({ row: 0, column: 0 }, e)
+              : this.insert({ row: 0, column: 0 }, e);
       };
     (function () {
       r.implement(this, s),
@@ -734,8 +734,8 @@
           e === undefined
             ? (e = n)
             : e < 0
-            ? (e = 0)
-            : e >= n && ((e = n - 1), (t = undefined));
+              ? (e = 0)
+              : e >= n && ((e = n - 1), (t = undefined));
           var r = this.getLine(e);
           return (
             t == undefined && (t = r.length),
@@ -1358,10 +1358,10 @@
                         t.test(o)
                           ? ((i = !1), a.push(o))
                           : i || u.test(o)
-                          ? ((i = !0), a.push("# " + o))
-                          : !i && r.test(o)
-                          ? a.push(o)
-                          : ((i = !0), a.push("# " + o));
+                            ? ((i = !0), a.push("# " + o))
+                            : !i && r.test(o)
+                              ? a.push(o)
+                              : ((i = !0), a.push("# " + o));
                     return a.join("\n");
                   }),
                   (n = function (e, t) {
@@ -1542,12 +1542,12 @@
                     return " " === e
                       ? "space"
                       : "\n" === e
-                      ? "newline"
-                      : "\r" === e
-                      ? "carriage return"
-                      : "	" === e
-                      ? "tab"
-                      : e;
+                        ? "newline"
+                        : "\r" === e
+                          ? "carriage return"
+                          : "	" === e
+                            ? "tab"
+                            : e;
                   });
               }.call(this),
               { exports: e }.exports
@@ -3258,70 +3258,72 @@
                                       ((k = this.tag()), 0 <= t.call(P, k))
                                         ? (B = "LEADING_WHEN")
                                         : "FOR" === B
-                                        ? (this.seenFor = !0)
-                                        : "UNLESS" === B
-                                        ? (B = "IF")
-                                        : "IMPORT" === B
-                                        ? (this.seenImport = !0)
-                                        : "EXPORT" === B
-                                        ? (this.seenExport = !0)
-                                        : 0 <= t.call(ot, B)
-                                        ? (B = "UNARY")
-                                        : 0 <= t.call($, B) &&
-                                          ("INSTANCEOF" !== B && this.seenFor
-                                            ? ((B = "FOR" + B),
-                                              (this.seenFor = !1))
-                                            : ((B = "RELATION"),
-                                              "!" === this.value() &&
-                                                ((m = this.tokens.pop()),
-                                                (u = "!" + u)))))
+                                          ? (this.seenFor = !0)
+                                          : "UNLESS" === B
+                                            ? (B = "IF")
+                                            : "IMPORT" === B
+                                              ? (this.seenImport = !0)
+                                              : "EXPORT" === B
+                                                ? (this.seenExport = !0)
+                                                : 0 <= t.call(ot, B)
+                                                  ? (B = "UNARY")
+                                                  : 0 <= t.call($, B) &&
+                                                    ("INSTANCEOF" !== B &&
+                                                    this.seenFor
+                                                      ? ((B = "FOR" + B),
+                                                        (this.seenFor = !1))
+                                                      : ((B = "RELATION"),
+                                                        "!" === this.value() &&
+                                                          ((m =
+                                                            this.tokens.pop()),
+                                                          (u = "!" + u)))))
                                     : "IDENTIFIER" === B &&
-                                      this.seenFor &&
-                                      "from" === u &&
-                                      mt(g)
-                                    ? ((B = "FORFROM"), (this.seenFor = !1))
-                                    : "PROPERTY" === B &&
-                                      g &&
-                                      (g.spaced &&
-                                      ((L = g[0]), 0 <= t.call(o, L)) &&
-                                      /^[gs]et$/.test(g[1]) &&
-                                      1 < this.tokens.length &&
-                                      "." !==
-                                        (A =
-                                          this.tokens[
-                                            this.tokens.length - 2
-                                          ][0]) &&
-                                      "?." !== A &&
-                                      "@" !== A
-                                        ? this.error(
-                                            "'" +
-                                              g[1] +
-                                              "' cannot be used as a keyword, or as a function call without parentheses",
-                                            g[2],
-                                          )
-                                        : 2 < this.tokens.length &&
-                                          ((y =
+                                        this.seenFor &&
+                                        "from" === u &&
+                                        mt(g)
+                                      ? ((B = "FORFROM"), (this.seenFor = !1))
+                                      : "PROPERTY" === B &&
+                                        g &&
+                                        (g.spaced &&
+                                        ((L = g[0]), 0 <= t.call(o, L)) &&
+                                        /^[gs]et$/.test(g[1]) &&
+                                        1 < this.tokens.length &&
+                                        "." !==
+                                          (A =
                                             this.tokens[
                                               this.tokens.length - 2
-                                            ]),
-                                          ("@" === (O = g[0]) ||
-                                            "THIS" === O) &&
-                                            y &&
-                                            y.spaced &&
-                                            /^[gs]et$/.test(y[1]) &&
-                                            "." !==
-                                              (E =
-                                                this.tokens[
-                                                  this.tokens.length - 3
-                                                ][0]) &&
-                                            "?." !== E &&
-                                            "@" !== E &&
-                                            this.error(
+                                            ][0]) &&
+                                        "?." !== A &&
+                                        "@" !== A
+                                          ? this.error(
                                               "'" +
-                                                y[1] +
+                                                g[1] +
                                                 "' cannot be used as a keyword, or as a function call without parentheses",
-                                              y[2],
-                                            ))),
+                                              g[2],
+                                            )
+                                          : 2 < this.tokens.length &&
+                                            ((y =
+                                              this.tokens[
+                                                this.tokens.length - 2
+                                              ]),
+                                            ("@" === (O = g[0]) ||
+                                              "THIS" === O) &&
+                                              y &&
+                                              y.spaced &&
+                                              /^[gs]et$/.test(y[1]) &&
+                                              "." !==
+                                                (E =
+                                                  this.tokens[
+                                                    this.tokens.length - 3
+                                                  ][0]) &&
+                                              "?." !== E &&
+                                              "@" !== E &&
+                                              this.error(
+                                                "'" +
+                                                  y[1] +
+                                                  "' cannot be used as a keyword, or as a function call without parentheses",
+                                                y[2],
+                                              ))),
                                   "IDENTIFIER" === B &&
                                     0 <= t.call(J, u) &&
                                     this.error("reserved word '" + u + "'", {
@@ -3334,16 +3336,16 @@
                                       return "!" === u
                                         ? "UNARY"
                                         : "==" === u || "!=" === u
-                                        ? "COMPARE"
-                                        : "true" === u || "false" === u
-                                        ? "BOOL"
-                                        : "break" === u ||
-                                          "continue" === u ||
-                                          "debugger" === u
-                                        ? "STATEMENT"
-                                        : "&&" === u || "||" === u
-                                        ? u
-                                        : B;
+                                          ? "COMPARE"
+                                          : "true" === u || "false" === u
+                                            ? "BOOL"
+                                            : "break" === u ||
+                                                "continue" === u ||
+                                                "debugger" === u
+                                              ? "STATEMENT"
+                                              : "&&" === u || "||" === u
+                                                ? u
+                                                : B;
                                     })())),
                                   (j = this.token(B, u, 0, c)),
                                   n && (j.origin = [B, n, j[2]]),
@@ -3461,12 +3463,12 @@
                                   return "'" === v
                                     ? nt
                                     : '"' === v
-                                    ? Z
-                                    : "'''" === v
-                                    ? S
-                                    : '"""' === v
-                                    ? w
-                                    : void 0;
+                                      ? Z
+                                      : "'''" === v
+                                        ? S
+                                        : '"""' === v
+                                          ? w
+                                          : void 0;
                                 })()),
                                 (f = 3 === v.length);
                               var x = this.matchWithInterpolations(g, v);
@@ -4139,13 +4141,13 @@
                                 ("{" === y && this.seenImport
                                   ? (this.importSpecifierList = !0)
                                   : this.importSpecifierList && "}" === y
-                                  ? (this.importSpecifierList = !1)
-                                  : "{" === y &&
-                                    "EXPORT" === (null == s ? void 0 : s[0])
-                                  ? (this.exportSpecifierList = !0)
-                                  : this.exportSpecifierList &&
-                                    "}" === y &&
-                                    (this.exportSpecifierList = !1),
+                                    ? (this.importSpecifierList = !1)
+                                    : "{" === y &&
+                                        "EXPORT" === (null == s ? void 0 : s[0])
+                                      ? (this.exportSpecifierList = !0)
+                                      : this.exportSpecifierList &&
+                                        "}" === y &&
+                                        (this.exportSpecifierList = !1),
                                 ";" === y)
                               )
                                 ((l = null == s ? void 0 : s[0]),
@@ -4198,8 +4200,8 @@
                                 "(" === y || "{" === y || "[" === y
                                   ? this.ends.push({ tag: O[y], origin: g })
                                   : ")" === y || "}" === y || "]" === y
-                                  ? this.pair(y)
-                                  : void 0,
+                                    ? this.pair(y)
+                                    : void 0,
                                 this.tokens.push(this.makeToken(m, y)),
                                 y.length
                               );
@@ -4614,8 +4616,8 @@
                                     ? void 0
                                     : o[1]
                                   : null == u
-                                  ? void 0
-                                  : u[1]
+                                    ? void 0
+                                    : u[1]
                               );
                             },
                           },
@@ -23952,12 +23954,13 @@
                           return this.shared && !r
                             ? this.parent.add(t, n, r)
                             : Object.prototype.hasOwnProperty.call(
-                                this.positions,
-                                t,
-                              )
-                            ? (this.variables[this.positions[t]].type = n)
-                            : (this.positions[t] =
-                                this.variables.push({ name: t, type: n }) - 1);
+                                  this.positions,
+                                  t,
+                                )
+                              ? (this.variables[this.positions[t]].type = n)
+                              : (this.positions[t] =
+                                  this.variables.push({ name: t, type: n }) -
+                                  1);
                         },
                       },
                       {
@@ -25275,8 +25278,8 @@
                                           1 === u && /^\s+$/.test(n[0].code)
                                             ? ""
                                             : N
-                                            ? " "
-                                            : "\n" + o,
+                                              ? " "
+                                              : "\n" + o,
                                           r += (function () {
                                             var e, t, n, r;
                                             for (
@@ -26237,23 +26240,23 @@
                                   (null == f || !f.shouldCache()))
                                   ? [this, this]
                                   : ((u = new t(
-                                      this.base,
-                                      this.properties.slice(0, -1),
-                                    )),
-                                    u.shouldCache() &&
-                                      ((a = new _(
-                                        n.scope.freeVariable("base"),
+                                        this.base,
+                                        this.properties.slice(0, -1),
                                       )),
-                                      (u = new t(new ft(new o(a, u))))),
-                                    !f)
-                                  ? [u, a]
-                                  : (f.shouldCache() &&
-                                      ((l = new _(
-                                        n.scope.freeVariable("name"),
-                                      )),
-                                      (f = new R(new o(l, f.index))),
-                                      (l = new R(l))),
-                                    [u.add(f), new t(a || u.base, [l || f])]);
+                                      u.shouldCache() &&
+                                        ((a = new _(
+                                          n.scope.freeVariable("base"),
+                                        )),
+                                        (u = new t(new ft(new o(a, u))))),
+                                      !f)
+                                    ? [u, a]
+                                    : (f.shouldCache() &&
+                                        ((l = new _(
+                                          n.scope.freeVariable("name"),
+                                        )),
+                                        (f = new R(new o(l, f.index))),
+                                        (l = new R(l))),
+                                      [u.add(f), new t(a || u.base, [l || f])]);
                               },
                             },
                             {
@@ -26344,10 +26347,10 @@
                                 return this.hasProperties()
                                   ? t(this)
                                   : this.base.isAssignable()
-                                  ? this.base.eachName(t)
-                                  : this.error(
-                                      "tried to assign to unassignable value",
-                                    );
+                                    ? this.base.eachName(t)
+                                    : this.error(
+                                        "tried to assign to unassignable value",
+                                      );
                               },
                             },
                           ]),
@@ -27227,16 +27230,16 @@
                                   (p = this.stepVar
                                     ? o + " += " + this.stepVar
                                     : a
-                                    ? c
-                                      ? i <= d
-                                        ? "++" + o
-                                        : "--" + o
-                                      : i <= d
-                                      ? o + "++"
-                                      : o + "--"
-                                    : c
-                                    ? n + " ? ++" + o + " : --" + o
-                                    : n + " ? " + o + "++ : " + o + "--"),
+                                      ? c
+                                        ? i <= d
+                                          ? "++" + o
+                                          : "--" + o
+                                        : i <= d
+                                          ? o + "++"
+                                          : o + "--"
+                                      : c
+                                        ? n + " ? ++" + o + " : --" + o
+                                        : n + " ? " + o + "++ : " + o + "--"),
                                   c && (m = u + " = " + m),
                                   c && (p = u + " = " + p),
                                   [this.makeCode(m + "; " + r + "; " + p)]
@@ -27396,9 +27399,9 @@
                                         (this.range.exclusive
                                           ? i
                                           : u.isNumber()
-                                          ? "" + (+i + 1)
-                                          : ((r = u.compileToFragments(t, W)),
-                                            "+" + Xt(r) + " + 1 || 9e9")))),
+                                            ? "" + (+i + 1)
+                                            : ((r = u.compileToFragments(t, W)),
+                                              "+" + Xt(r) + " + 1 || 9e9")))),
                                   [
                                     this.makeCode(
                                       ".slice(" + Xt(o) + (a || "") + ")",
@@ -27561,23 +27564,23 @@
                                       i === x.length - 1
                                         ? ""
                                         : f
-                                        ? ", "
-                                        : S === v
-                                        ? "\n"
-                                        : ",\n"),
+                                          ? ", "
+                                          : S === v
+                                            ? "\n"
+                                            : ",\n"),
                                     (a = f ? "" : u),
                                     (p =
                                       S instanceof o && "object" === S.context
                                         ? S.variable
                                         : S instanceof o
-                                        ? (this.lhs
-                                            ? void 0
-                                            : S.operatorToken.error(
-                                                "unexpected " +
-                                                  S.operatorToken.value,
-                                              ),
-                                          S.variable)
-                                        : S),
+                                          ? (this.lhs
+                                              ? void 0
+                                              : S.operatorToken.error(
+                                                  "unexpected " +
+                                                    S.operatorToken.value,
+                                                ),
+                                            S.variable)
+                                          : S),
                                     p instanceof Pt &&
                                       p.hasProperties() &&
                                       (("object" === S.context || !p.this) &&
@@ -28183,8 +28186,9 @@
                                             ),
                                           (this.ctor = g))
                                         : g.isStatic && g.bound
-                                        ? (g.context = this.name)
-                                        : g.bound && this.boundMethods.push(g));
+                                          ? (g.context = this.name)
+                                          : g.bound &&
+                                            this.boundMethods.push(g));
                                 if (l.length !== o.length)
                                   return (
                                     (this.body.expressions = (function () {
@@ -28207,8 +28211,8 @@
                                 return t.unwrapAll() instanceof lt
                                   ? t
                                   : this.validInitializerMethod(t)
-                                  ? this.addInitializerMethod(t)
-                                  : null;
+                                    ? this.addInitializerMethod(t)
+                                    : null;
                               },
                             },
                             {
@@ -28475,8 +28479,8 @@
                                     return e instanceof At
                                       ? (e.value = t.name)
                                       : e instanceof d && e.bound && e.isStatic
-                                      ? (e.context = t.name)
-                                      : void 0;
+                                        ? (e.context = t.name)
+                                        : void 0;
                                   },
                                 );
                               },
@@ -28506,14 +28510,14 @@
                                             (n = this.externalCtor =
                                               new o(new Pt(), f)))
                                           : n.variable.this
-                                          ? n.value instanceof d &&
-                                            (n.value.isStatic = !0)
-                                          : ((s = new (r.shouldCache() ? R : i)(
-                                              r,
-                                            )),
-                                            (u = new i(new ct("prototype"))),
-                                            (l = new Pt(new At(), [u, s])),
-                                            (n.variable = l)),
+                                            ? n.value instanceof d &&
+                                              (n.value.isStatic = !0)
+                                            : ((s = new (
+                                                r.shouldCache() ? R : i
+                                              )(r)),
+                                              (u = new i(new ct("prototype"))),
+                                              (l = new Pt(new At(), [u, s])),
+                                              (n.variable = l)),
                                         c.push(n);
                                     return c;
                                   }.call(this)),
@@ -29221,25 +29225,33 @@
                                               r.moduleDeclaration,
                                             )
                                           : r.param
-                                          ? t.scope.add(
-                                              e.value,
-                                              "alwaysDeclare" === r.param
-                                                ? "var"
-                                                : "param",
-                                            )
-                                          : (t.scope.find(e.value),
-                                            e.comments &&
-                                              !t.scope.comments[e.value] &&
-                                              !(r.value instanceof p) &&
-                                              e.comments.every(function (e) {
-                                                return e.here && !e.multiline;
-                                              }))
-                                          ? ((i = new _(e.value)),
-                                            (i.comments = e.comments),
-                                            (n = []),
-                                            r.compileCommentFragments(t, i, n),
-                                            (t.scope.comments[e.value] = n))
-                                          : void 0;
+                                            ? t.scope.add(
+                                                e.value,
+                                                "alwaysDeclare" === r.param
+                                                  ? "var"
+                                                  : "param",
+                                              )
+                                            : (t.scope.find(e.value),
+                                                e.comments &&
+                                                  !t.scope.comments[e.value] &&
+                                                  !(r.value instanceof p) &&
+                                                  e.comments.every(
+                                                    function (e) {
+                                                      return (
+                                                        e.here && !e.multiline
+                                                      );
+                                                    },
+                                                  ))
+                                              ? ((i = new _(e.value)),
+                                                (i.comments = e.comments),
+                                                (n = []),
+                                                r.compileCommentFragments(
+                                                  t,
+                                                  i,
+                                                  n,
+                                                ),
+                                                (t.scope.comments[e.value] = n))
+                                              : void 0;
                                     })),
                                   this.value instanceof d)
                                 )
@@ -30109,14 +30121,14 @@
                                           : ((j = O.shouldCache()
                                               ? O.asReference(n)
                                               : null == O.value ||
-                                                O.assignedInBody
-                                              ? O
-                                              : new o(
-                                                  new Pt(O.name),
-                                                  O.value,
-                                                  null,
-                                                  { param: !0 },
-                                                )),
+                                                  O.assignedInBody
+                                                ? O
+                                                : new o(
+                                                    new Pt(O.name),
+                                                    O.value,
+                                                    null,
+                                                    { param: !0 },
+                                                  )),
                                             O.name instanceof s ||
                                             O.name instanceof ot
                                               ? ((O.name.lhs = !0),
@@ -30360,8 +30372,8 @@
                                   this.isMethod
                                     ? $t(u, this)
                                     : this.front || n.level >= W
-                                    ? this.wrapInParentheses(u)
-                                    : u
+                                      ? this.wrapInParentheses(u)
+                                      : u
                                 );
                               },
                             },
@@ -30632,20 +30644,21 @@
                                             : l.value),
                                         this.eachName(t, l.unwrap()))
                                       : l instanceof bt
-                                      ? ((f = l.name.unwrap()),
-                                        t(f.value, f, this))
-                                      : l instanceof Pt
-                                      ? l.isArray() || l.isObject()
-                                        ? this.eachName(t, l.base)
-                                        : l.this
-                                        ? i(l, a)
-                                        : t(l.base.value, l.base, this)
-                                      : l instanceof g
-                                      ? l
-                                      : !(l instanceof w) &&
-                                        l.error(
-                                          "illegal parameter " + l.compile(),
-                                        );
+                                        ? ((f = l.name.unwrap()),
+                                          t(f.value, f, this))
+                                        : l instanceof Pt
+                                          ? l.isArray() || l.isObject()
+                                            ? this.eachName(t, l.base)
+                                            : l.this
+                                              ? i(l, a)
+                                              : t(l.base.value, l.base, this)
+                                          : l instanceof g
+                                            ? l
+                                            : !(l instanceof w) &&
+                                              l.error(
+                                                "illegal parameter " +
+                                                  l.compile(),
+                                              );
                               },
                             },
                             {
@@ -31069,14 +31082,15 @@
                                         this.first.invert(),
                                       this)
                                     : this.second
-                                    ? new ft(this).invert()
-                                    : "!" === this.operator &&
-                                      (i = this.first.unwrap()) instanceof s &&
-                                      ("!" === (u = i.operator) ||
-                                        "in" === u ||
-                                        "instanceof" === u)
-                                    ? i
-                                    : new s("!", this);
+                                      ? new ft(this).invert()
+                                      : "!" === this.operator &&
+                                          (i = this.first.unwrap()) instanceof
+                                            s &&
+                                          ("!" === (u = i.operator) ||
+                                            "in" === u ||
+                                            "instanceof" === u)
+                                        ? i
+                                        : new s("!", this);
                                 },
                               },
                               {
@@ -31230,24 +31244,24 @@
                                         !this.first.negated),
                                       this.first.compileToFragments(t))
                                     : t.level >= W
-                                    ? new ft(this).compileToFragments(t)
-                                    : ((i = "+" === n || "-" === n),
-                                      ("new" === n ||
-                                        "typeof" === n ||
-                                        "delete" === n ||
-                                        (i &&
-                                          this.first instanceof s &&
-                                          this.first.operator === n)) &&
-                                        r.push([this.makeCode(" ")]),
-                                      ((i && this.first instanceof s) ||
-                                        ("new" === n &&
-                                          this.first.isStatement(t))) &&
-                                        (this.first = new ft(this.first)),
-                                      r.push(
-                                        this.first.compileToFragments(t, $),
-                                      ),
-                                      this.flip && r.reverse(),
-                                      this.joinFragmentArrays(r, ""));
+                                      ? new ft(this).compileToFragments(t)
+                                      : ((i = "+" === n || "-" === n),
+                                        ("new" === n ||
+                                          "typeof" === n ||
+                                          "delete" === n ||
+                                          (i &&
+                                            this.first instanceof s &&
+                                            this.first.operator === n)) &&
+                                          r.push([this.makeCode(" ")]),
+                                        ((i && this.first instanceof s) ||
+                                          ("new" === n &&
+                                            this.first.isStatement(t))) &&
+                                          (this.first = new ft(this.first)),
+                                        r.push(
+                                          this.first.compileToFragments(t, $),
+                                        ),
+                                        this.flip && r.reverse(),
+                                        this.joinFragmentArrays(r, ""));
                                 },
                               },
                               {
@@ -31590,13 +31604,15 @@
                                         this.makeCode("\n" + this.tab + "}"),
                                       ))
                                     : this.ensure || this.recovery
-                                    ? []
-                                    : ((i = t.scope.freeVariable("error", {
-                                        reserve: !1,
-                                      })),
-                                      [
-                                        this.makeCode(" catch (" + i + ") {}"),
-                                      ])),
+                                      ? []
+                                      : ((i = t.scope.freeVariable("error", {
+                                          reserve: !1,
+                                        })),
+                                        [
+                                          this.makeCode(
+                                            " catch (" + i + ") {}",
+                                          ),
+                                        ])),
                                   (r = this.ensure
                                     ? [].concat(
                                         this.makeCode(" finally {\n"),
@@ -31751,8 +31767,8 @@
                                         ? "=="
                                         : "!="
                                       : this.negated
-                                      ? "==="
-                                      : "!=="),
+                                        ? "==="
+                                        : "!=="),
                                     (i =
                                       i +
                                       " " +
@@ -31834,8 +31850,8 @@
                                     this.csxAttribute
                                       ? this.wrapInBraces(i)
                                       : n
-                                      ? i
-                                      : this.wrapInParentheses(i));
+                                        ? i
+                                        : this.wrapInParentheses(i));
                               },
                             },
                           ]),
@@ -32051,13 +32067,13 @@
                             ((null == (u = r.index)
                               ? void 0
                               : "function" == typeof u.isArray
-                              ? u.isArray()
-                              : void 0) ||
+                                ? u.isArray()
+                                : void 0) ||
                               (null == (a = r.index)
                                 ? void 0
                                 : "function" == typeof a.isObject
-                                ? a.isObject()
-                                : void 0)) &&
+                                  ? a.isObject()
+                                  : void 0)) &&
                               r.index.error(
                                 "index cannot be a pattern matching expression",
                               ),
@@ -32633,40 +32649,44 @@
                                       { type: "if" },
                                     ).compileToFragments(n)
                                   : ((f = n.indent + Ct),
-                                    (o = this.condition.compileToFragments(
-                                      n,
-                                      J,
-                                    )),
-                                    (i = this.ensureBlock(
-                                      this.body,
-                                    ).compileToFragments(Yt(n, { indent: f }))),
-                                    (a = [].concat(
-                                      this.makeCode("if ("),
-                                      o,
-                                      this.makeCode(") {\n"),
-                                      i,
-                                      this.makeCode("\n" + this.tab + "}"),
-                                    )),
-                                    s || a.unshift(this.makeCode(this.tab)),
-                                    !this.elseBody)
-                                  ? a
-                                  : ((r = a.concat(this.makeCode(" else "))),
-                                    this.isChain
-                                      ? ((n.chainChild = !0),
-                                        (r = r.concat(
-                                          this.elseBody
-                                            .unwrap()
-                                            .compileToFragments(n, K),
-                                        )))
-                                      : (r = r.concat(
-                                          this.makeCode("{\n"),
-                                          this.elseBody.compileToFragments(
-                                            Yt(n, { indent: f }),
-                                            K,
-                                          ),
-                                          this.makeCode("\n" + this.tab + "}"),
-                                        )),
-                                    r);
+                                      (o = this.condition.compileToFragments(
+                                        n,
+                                        J,
+                                      )),
+                                      (i = this.ensureBlock(
+                                        this.body,
+                                      ).compileToFragments(
+                                        Yt(n, { indent: f }),
+                                      )),
+                                      (a = [].concat(
+                                        this.makeCode("if ("),
+                                        o,
+                                        this.makeCode(") {\n"),
+                                        i,
+                                        this.makeCode("\n" + this.tab + "}"),
+                                      )),
+                                      s || a.unshift(this.makeCode(this.tab)),
+                                      !this.elseBody)
+                                    ? a
+                                    : ((r = a.concat(this.makeCode(" else "))),
+                                      this.isChain
+                                        ? ((n.chainChild = !0),
+                                          (r = r.concat(
+                                            this.elseBody
+                                              .unwrap()
+                                              .compileToFragments(n, K),
+                                          )))
+                                        : (r = r.concat(
+                                            this.makeCode("{\n"),
+                                            this.elseBody.compileToFragments(
+                                              Yt(n, { indent: f }),
+                                              K,
+                                            ),
+                                            this.makeCode(
+                                              "\n" + this.tab + "}",
+                                            ),
+                                          )),
+                                      r);
                               },
                             },
                             {
@@ -32984,8 +33004,8 @@
                                   (g = t.sourceFiles
                                     ? t.sourceFiles
                                     : t.filename
-                                    ? [t.filename]
-                                    : ["<anonymous>"]),
+                                      ? [t.filename]
+                                      : ["<anonymous>"]),
                                   (y = {
                                     version: 3,
                                     file: t.generatedFile || "",
@@ -33359,10 +33379,10 @@
                               "" + h + o + n + " (" + i + ")")
                             : p + "." + (l || "<anonymous>") + " (" + i + ")")
                         : u
-                        ? "new " + (o || "<anonymous>") + " (" + i + ")"
-                        : o
-                        ? o + " (" + i + ")"
-                        : i
+                          ? "new " + (o || "<anonymous>") + " (" + i + ")"
+                          : o
+                            ? o + " (" + i + ")"
+                            : i
                     );
                   }),
                   (l = function (e, n, i) {
