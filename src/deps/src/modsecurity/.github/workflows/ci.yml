@@ -45,7 +45,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-11]
+        os: [macos-12]
         compiler: [clang]
         configure:
           - {label: "with parser generation", opt: "--enable-parser-generation" }

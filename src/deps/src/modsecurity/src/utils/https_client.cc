@@ -87,8 +87,8 @@ bool HttpsClient::download(const std::string &uri) {
         headers_chunk = curl_slist_append(headers_chunk, m_key.c_str());
     }
 
-    /* Make it TLS 1.x only. */
-    curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
+    /* Make it TLS 1.2 at least. */
+    curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
 
     /* those are the default options, but lets make sure */
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);

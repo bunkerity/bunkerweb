@@ -1,16 +1,16 @@
 
-<img src="https://github.com/SpiderLabs/ModSecurity/raw/v3/master/others/modsec.png" width="50%">
+<img src="https://github.com/owasp-modsecurity/ModSecurity/raw/v3/master/others/modsec.png" width="50%">
 
-![Quality Assurance](https://github.com/SpiderLabs/ModSecurity/workflows/Quality%20Assurance/badge.svg)
-[![Build Status](https://sonarcloud.io/api/project_badges/measure?project=USHvY32Uy62L&metric=alert_status)](https://sonarcloud.io/dashboard?id=USHvY32Uy62L)
-[![](https://sonarcloud.io/api/project_badges/measure?project=USHvY32Uy62L&metric=sqale_rating
-)](https://sonarcloud.io/dashboard?id=USHvY32Uy62L)
-[![](https://sonarcloud.io/api/project_badges/measure?project=USHvY32Uy62L&metric=reliability_rating
-)](https://sonarcloud.io/dashboard?id=USHvY32Uy62L)
-[![](https://sonarcloud.io/api/project_badges/measure?project=USHvY32Uy62L&metric=security_rating
-)](https://sonarcloud.io/dashboard?id=USHvY32Uy62L)
-[![](https://sonarcloud.io/api/project_badges/measure?project=USHvY32Uy62L&metric=vulnerabilities
-)](https://sonarcloud.io/dashboard?id=USHvY32Uy62L)
+![Quality Assurance](https://github.com/owasp-modsecurity/ModSecurity/workflows/Quality%20Assurance/badge.svg)
+[![Build Status](https://sonarcloud.io/api/project_badges/measure?project=owasp-modsecurity_ModSecurity&metric=alert_status)](https://sonarcloud.io/dashboard?id=owasp-modsecurity_ModSecurity)
+[![](https://sonarcloud.io/api/project_badges/measure?project=owasp-modsecurity_ModSecurity&metric=sqale_rating
+)](https://sonarcloud.io/dashboard?id=owasp-modsecurity_ModSecurity)
+[![](https://sonarcloud.io/api/project_badges/measure?project=owasp-modsecurity_ModSecurity&metric=reliability_rating
+)](https://sonarcloud.io/dashboard?id=owasp-modsecurity_ModSecurity)
+[![](https://sonarcloud.io/api/project_badges/measure?project=owasp-modsecurity_ModSecurity&metric=security_rating
+)](https://sonarcloud.io/dashboard?id=owasp-modsecurity_ModSecurity)
+[![](https://sonarcloud.io/api/project_badges/measure?project=owasp-modsecurity_ModSecurity&metric=vulnerabilities
+)](https://sonarcloud.io/dashboard?id=owasp-modsecurity_ModSecurity)
 
 
 
@@ -21,7 +21,7 @@ capability to load/interpret rules written in the ModSecurity SecRules format
 and apply them to HTTP content provided by your application via Connectors.
 
 If you are looking for ModSecurity for Apache (aka ModSecurity v2.x), it is still under maintenance and available:
-[here](https://github.com/SpiderLabs/ModSecurity/tree/v2/master).
+[here](https://github.com/owasp-modsecurity/ModSecurity/tree/v2/master).
 
 ### What is the difference between this project and the old ModSecurity (v2.x.x)?
 
@@ -37,7 +37,7 @@ As a result of this goal we have rearchitected Libmodsecurity such that it is no
 
 ### It is no longer just a module.
 
-The 'ModSecurity' branch no longer contains the traditional module logic (for Nginx, Apache, and IIS) that has traditionally been packaged all together. Instead, this branch only contains the library portion (libmodsecurity) for this project. This library is consumed by what we have termed 'Connectors' these connectors will interface with your webserver and provide the library with a common format that it understands. Each of these connectors is maintained as a separate GitHub project. For instance, the Nginx connector is supplied by the ModSecurity-nginx project (https://github.com/SpiderLabs/ModSecurity-nginx).
+The 'ModSecurity' branch no longer contains the traditional module logic (for Nginx, Apache, and IIS) that has traditionally been packaged all together. Instead, this branch only contains the library portion (libmodsecurity) for this project. This library is consumed by what we have termed 'Connectors' these connectors will interface with your webserver and provide the library with a common format that it understands. Each of these connectors is maintained as a separate GitHub project. For instance, the Nginx connector is supplied by the ModSecurity-nginx project (https://github.com/owasp-modsecurity/ModSecurity-nginx).
 
 Keeping these connectors separated allows each project to have different release cycles, issues and development trees. Additionally, it means that when you install ModSecurity v3 you only get exactly what you need, no extras you won't be using.
 
@@ -67,7 +67,7 @@ $ sudo make install
 ```
 
 Details on distribution specific builds can be found in our Wiki:
-[Compilation Recipes](https://github.com/SpiderLabs/ModSecurity/wiki/Compilation-recipes)
+[Compilation Recipes](https://github.com/owasp-modsecurity/ModSecurity/wiki/Compilation-recipes)
 
 ### Windows
 
@@ -251,7 +251,7 @@ is one.
 ### Security issue
 
 Please do not make public any security issue. Contact us at:
-security@modsecurity.org reporting the issue. Once the problem is fixed your
+modsecurity@owasp.org reporting the issue. Once the problem is fixed your
 credit will be given.
 
 ## Feature request
