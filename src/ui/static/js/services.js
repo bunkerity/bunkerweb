@@ -19,14 +19,15 @@ class ServiceModal {
     //modal forms
     this.formNewEdit = this.modal.querySelector("[data-services-modal-form]");
     this.formDelete = this.modal.querySelector(
-      "[data-services-modal-form-delete]",
+      "[data-services-modal-form-delete]"
     );
     this.submitBtn = document.querySelector(
-      "button[data-services-modal-submit]",
+      "button[data-services-modal-submit]"
     );
     //container
     this.container = document.querySelector("main");
     this.currAction = "";
+    this.currMethod = "";
     this.init();
   }
 
@@ -45,7 +46,16 @@ class ServiceModal {
         .closest("[data-services-service]")
         .querySelector("[data-is-draft]")
         .getAttribute("data-value") || "no";
-    return [action, serviceName, isDraft];
+
+    const method =
+      target
+        .closest("[data-services-service]")
+        .querySelector("[data-service-method]")
+        .getAttribute("data-value") || "no";
+
+    this.currMethod = method;
+
+    return [action, serviceName, isDraft, method];
   }
 
   init() {
@@ -59,7 +69,7 @@ class ServiceModal {
             .classList.contains("hidden")
             ? true
             : false;
-          this.setIsDraft(currModeIsDraft);
+          this.setIsDraft(currModeIsDraft, this.currMethod);
         }
       } catch (e) {}
 
@@ -81,7 +91,9 @@ class ServiceModal {
           "edit"
         ) {
           //set form info and right form
-          const [action, serviceName, isDraft] = this.getActionData(e.target);
+          const [action, serviceName, isDraft, method] = this.getActionData(
+            e.target
+          );
           const oldServName = e.target
             .closest("[data-services-service]")
             .querySelector("[data-old-service-name]")
@@ -92,6 +104,7 @@ class ServiceModal {
             oldServName,
             this.formNewEdit,
             isDraft,
+            method
           );
           //get service data and parse it
           //multiple type logic is launch at same time on relate class
@@ -114,13 +127,16 @@ class ServiceModal {
           "clone"
         ) {
           //set form info and right form
-          const [action, serviceName, isDraft] = this.getActionData(e.target);
+          const [action, serviceName, isDraft, method] = this.getActionData(
+            e.target
+          );
           this.setForm(
             action,
             serviceName,
             serviceName,
             this.formNewEdit,
             isDraft,
+            method
           );
           //set default value with method default
           //get service data and parse it
@@ -151,13 +167,16 @@ class ServiceModal {
           "new"
         ) {
           //set form info and right form
-          const [action, serviceName, isDraft] = this.getActionData(e.target);
+          const [action, serviceName, isDraft, method] = this.getActionData(
+            e.target
+          );
           this.setForm(
             action,
             serviceName,
             serviceName,
             this.formNewEdit,
             isDraft,
+            method
           );
           //set default value with method default
           this.setSettingsDefault();
@@ -180,13 +199,16 @@ class ServiceModal {
           "delete"
         ) {
           //set form info and right form
-          const [action, serviceName, isDraft] = this.getActionData(e.target);
+          const [action, serviceName, isDraft, method] = this.getActionData(
+            e.target
+          );
           this.setForm(
             action,
             serviceName,
             serviceName,
             this.formDelete,
             isDraft,
+            method
           );
           //show modal
           this.openModal();
@@ -207,7 +229,7 @@ class ServiceModal {
       "delete-btn",
       "valid-btn",
       "edit-btn",
-      "info-btn",
+      "info-btn"
     );
     this.submitBtn.classList.add(btnType);
   }
@@ -220,6 +242,7 @@ class ServiceModal {
       if (
         inpName === "csrf_token" ||
         inpName === "OLD_SERVER_NAME" ||
+        inpName === "is_draft" ||
         inpName === "operation" ||
         inpName === "settings-filter"
       )
@@ -267,15 +290,15 @@ class ServiceModal {
       //click the custom select dropdown to update select value
       select.parentElement
         .querySelector(
-          `button[data-setting-select-dropdown-btn][value='${defaultVal}']`,
+          `button[data-setting-select-dropdown-btn][value='${defaultVal}']`
         )
         .click();
 
       //set state to custom visible el
       const btnCustom = document.querySelector(
         `[data-setting-select=${select.getAttribute(
-          "data-setting-select-default",
-        )}]`,
+          "data-setting-select-default"
+        )}]`
       );
 
       this.setDisabledDefault(btnCustom, defaultMethod);
@@ -290,7 +313,7 @@ class ServiceModal {
     }
   }
 
-  setIsDraft(isDraft) {
+  setIsDraft(isDraft, method) {
     const draftVal = isDraft ? "yes" : "no";
     const draftInps = [
       this.formNewEdit.querySelector(`input[name="is_draft"]`),
@@ -302,6 +325,12 @@ class ServiceModal {
     });
     //Update draft button
     const btn = document.querySelector("button[data-toggle-draft-btn]");
+
+    if (!["ui", "default"].includes(method)) {
+      return btn.classList.add("hidden");
+    }
+    btn.classList.remove("hidden");
+
     const showEl = isDraft ? "true" : "false";
     btn.querySelectorAll("[data-toggle-draft]").forEach((item) => {
       if (item.getAttribute("data-toggle-draft") === showEl)
@@ -311,9 +340,9 @@ class ServiceModal {
     });
   }
 
-  setForm(action, serviceName, oldServName, formEl, isDraft) {
+  setForm(action, serviceName, oldServName, formEl, isDraft, method) {
     this.currAction = action;
-    this.setIsDraft(isDraft === "yes" ? true : false);
+    this.setIsDraft(isDraft === "yes" ? true : false, method);
 
     this.modalTitle.textContent = `${action} ${serviceName}`;
 
@@ -340,8 +369,9 @@ class ServiceModal {
 
     if (action === "delete") {
       this.showDeleteForm();
-      formEl.querySelector(`[data-services-modal-text]`).textContent =
-        `Are you sure you want to delete ${serviceName} ?`;
+      formEl.querySelector(
+        `[data-services-modal-text]`
+      ).textContent = `Are you sure you want to delete ${serviceName} ?`;
       const nameInp = formEl.querySelector(`input[name="SERVER_NAME"]`);
       nameInp.setAttribute("value", serviceName);
       nameInp.value = serviceName;
@@ -409,6 +439,7 @@ class ServiceModal {
           if (
             inpName === "csrf_token" ||
             inpName === "OLD_SERVER_NAME" ||
+            inpName === "is_draft" ||
             inpName === "operation" ||
             inpName === "settings-filter"
           )
@@ -451,7 +482,7 @@ class ServiceModal {
           if (inp.tagName === "SELECT") {
             inp.parentElement
               .querySelector(
-                `button[data-setting-select-dropdown-btn][value='${value}']`,
+                `button[data-setting-select-dropdown-btn][value='${value}']`
               )
               .click();
             inp.setAttribute("data-method", method);
@@ -556,7 +587,7 @@ class Multiple {
           const attName = btn.getAttribute(`data-${this.prefix}-multiple-add`);
           //get all multiple groups
           const multipleEls = document.querySelectorAll(
-            `[data-${this.prefix}-settings-multiple*="${attName}"]`,
+            `[data-${this.prefix}-settings-multiple*="${attName}"]`
           );
           //case no schema
           if (multipleEls.length <= 0) return;
@@ -568,7 +599,7 @@ class Multiple {
           //and keep the highest num
           multipleEls.forEach((container) => {
             const ctnrName = container.getAttribute(
-              "data-services-settings-multiple",
+              "data-services-settings-multiple"
             );
             const num = this.getSuffixNumOrFalse(ctnrName);
             if (!isNaN(num) && num > topNum) topNum = num;
@@ -579,7 +610,7 @@ class Multiple {
           const setNum = +currNum === 0 ? `` : `_${currNum}`;
           //the default (schema) group is the last group
           const schema = document.querySelector(
-            `[data-${this.prefix}-settings-multiple="${attName}_SCHEMA"]`,
+            `[data-${this.prefix}-settings-multiple="${attName}_SCHEMA"]`
           );
           //clone schema to create a group with new num
           const schemaClone = schema.cloneNode(true);
@@ -617,7 +648,7 @@ class Multiple {
             .hasAttribute(`data-${this.prefix}-multiple-delete`)
         ) {
           const multContainer = e.target.closest(
-            "[data-services-settings-multiple]",
+            "[data-services-settings-multiple]"
           );
           multContainer.remove();
         }
@@ -639,13 +670,13 @@ class Multiple {
         ? name.replace(`_${splitName[splitName.length - 1]}`, "").trim()
         : name.trim();
       const relateSetting = document.querySelector(
-        `[data-setting-container=${nameSuffixLess}_SCHEMA]`,
+        `[data-setting-container=${nameSuffixLess}_SCHEMA]`
       );
       const relateCtnr = relateSetting.closest(
-        "[data-services-settings-multiple]",
+        "[data-services-settings-multiple]"
       );
       const relateCtnrName = relateCtnr.getAttribute(
-        "data-services-settings-multiple",
+        "data-services-settings-multiple"
       );
       //then we sort the setting on the right container name by suffixe number
       if (!(relateCtnrName in sortMultiples)) {
@@ -663,7 +694,7 @@ class Multiple {
   addOneMultGroup() {
     const settings = document.querySelector("[data-services-modal-form]");
     const multAddBtns = settings.querySelectorAll(
-      "[data-services-multiple-add]",
+      "[data-services-multiple-add]"
     );
     multAddBtns.forEach((btn) => {
       //check if already one (SCHEMA exclude so length >= 2)
@@ -678,7 +709,7 @@ class Multiple {
 
   showMultByAtt(att) {
     const multContainers = document.querySelectorAll(
-      `[data-services-settings-multiple^=${att}]`,
+      `[data-services-settings-multiple^=${att}]`
     );
     multContainers.forEach((container) => {
       if (
@@ -692,7 +723,7 @@ class Multiple {
 
   toggleMultByAtt(att) {
     const multContainers = document.querySelectorAll(
-      `[data-services-settings-multiple^=${att}]`,
+      `[data-services-settings-multiple^=${att}]`
     );
     multContainers.forEach((container) => {
       if (
@@ -708,7 +739,7 @@ class Multiple {
     //get schema settings
     const multiples = {};
     const schemaSettings = document.querySelectorAll(
-      `[data-setting-container$="SCHEMA"]`,
+      `[data-setting-container$="SCHEMA"]`
     );
     // loop on every schema settings
     schemaSettings.forEach((schema) => {
@@ -734,11 +765,11 @@ class Multiple {
   setMultipleToDOM(sortMultObj) {
     //we loop on each multiple that contains values to render to DOM
     for (const [schemaCtnrName, multGroupBySuffix] of Object.entries(
-      sortMultObj,
+      sortMultObj
     )) {
       //we need to access the DOM schema container
       const schemaCtnr = document.querySelector(
-        `[data-services-settings-multiple="${schemaCtnrName}"]`,
+        `[data-services-settings-multiple="${schemaCtnrName}"]`
       );
       //now we have to loop on each multiple settings group
       for (const [suffix, settings] of Object.entries(multGroupBySuffix)) {
@@ -754,14 +785,14 @@ class Multiple {
         for (const [name, data] of Object.entries(settings)) {
           //get setting container of clone container
           const settingContainer = schemaCtnrClone.querySelector(
-            `[data-setting-container="${name}"]`,
+            `[data-setting-container="${name}"]`
           );
           //replace input info and disabled state
           this.setSetting(
             data["value"],
             data["method"],
             data["global"],
-            settingContainer,
+            settingContainer
           );
         }
         //send schema clone to DOM and show it
@@ -776,7 +807,7 @@ class Multiple {
       "data-services-settings-multiple",
       schemaCtnrClone
         .getAttribute("data-services-settings-multiple")
-        .replace("_SCHEMA", suffix),
+        .replace("_SCHEMA", suffix)
     );
 
     //rename title
@@ -790,18 +821,18 @@ class Multiple {
 
     //rename setting container
     const settingCtnrs = schemaCtnrClone.querySelectorAll(
-      "[data-setting-container]",
+      "[data-setting-container]"
     );
     settingCtnrs.forEach((settingCtnr) => {
       settingCtnr.setAttribute(
         "data-setting-container",
         settingCtnr
           .getAttribute("data-setting-container")
-          .replace("_SCHEMA", suffix),
+          .replace("_SCHEMA", suffix)
       );
       settingCtnr.setAttribute(
         "id",
-        settingCtnr.getAttribute("id").replace("_SCHEMA", suffix),
+        settingCtnr.getAttribute("id").replace("_SCHEMA", suffix)
       );
     });
 
@@ -836,6 +867,7 @@ class Multiple {
         if (
           inpName === "csrf_token" ||
           inpName === "OLD_SERVER_NAME" ||
+          inpName === "is_draft" ||
           inpName === "operation" ||
           inpName === "settings-filter"
         )
@@ -878,15 +910,15 @@ class Multiple {
       //click the custom select dropdown btn value to update select value
       select.parentElement
         .querySelector(
-          `button[data-setting-select-dropdown-btn][value='${defaultVal}']`,
+          `button[data-setting-select-dropdown-btn][value='${defaultVal}']`
         )
         .click();
 
       //set state to custom visible el
       const btnCustom = document.querySelector(
         `[data-setting-select=${select.getAttribute(
-          "data-setting-select-default",
-        )}]`,
+          "data-setting-select-default"
+        )}]`
       );
 
       this.setDisabledMultServ(btnCustom, method, global);
@@ -922,10 +954,10 @@ class Multiple {
         selects.forEach((select) => {
           const method = select.getAttribute("data-default-method");
           const name = select.getAttribute(
-            "data-services-setting-select-default",
+            "data-services-setting-select-default"
           );
           const selDOM = document.querySelector(
-            `button[data-services-setting-select='${name}']`,
+            `button[data-services-setting-select='${name}']`
           );
           if (method === "ui" || method === "default") {
             selDOM.removeAttribute("disabled", "");
@@ -960,7 +992,7 @@ class Multiple {
   hiddenIfNoMultiples() {
     //hide multiple btn if no multiple exist on a plugin
     const multiples = document.querySelectorAll(
-      `[data-${this.prefix}-settings-multiple]`,
+      `[data-${this.prefix}-settings-multiple]`
     );
     multiples.forEach((container) => {
       if (container.querySelectorAll(`[data-setting-container]`).length <= 0)
@@ -972,7 +1004,7 @@ class Multiple {
 
   removePrevMultiples() {
     const multiPlugins = document.querySelectorAll(
-      `[data-${this.prefix}-settings-multiple]`,
+      `[data-${this.prefix}-settings-multiple]`
     );
     multiPlugins.forEach((multiGrp) => {
       if (
@@ -1010,7 +1042,7 @@ const setModal = new ServiceModal();
 const format = new FormatValue();
 const setFilterGlobal = new FilterSettings(
   "settings-filter",
-  "[data-service-content='settings']",
+  "[data-service-content='settings']"
 );
 
 const setMultiple = new Multiple("services");
