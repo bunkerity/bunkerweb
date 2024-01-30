@@ -106,18 +106,6 @@ cleanup_stack () {
             if [[ $(sed '20!d' docker-compose.test.yml) = "      CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:10001,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" ]] ; then
                 sed -i '20d' docker-compose.test.yml
             fi
-
-            if [ $end -eq 0 ] ; then
-                echo "💾 Removing bw-docker network ..."
-
-                docker network rm bw-docker
-
-                # shellcheck disable=SC2181
-                if [ $? -ne 0 ] ; then
-                    echo "💾 Network removal failed ❌"
-                    exit 1
-                fi
-            fi
         else
             sudo rm -rf /etc/bunkerweb/plugins/*
             sudo sed -i 's@MULTISITE=.*$@MULTISITE=no@' /etc/bunkerweb/variables.env
@@ -151,6 +139,18 @@ cleanup_stack () {
             docker compose down
         else
             docker compose down -v --remove-orphans
+        fi
+
+        if [[ $end -eq 0 && $exit_code = 1 ]] && [ $manual = 0 ] ; then
+            echo "💾 Removing bw-docker network ..."
+
+            docker network rm bw-docker
+
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                echo "💾 Network removal failed ❌"
+                exit 1
+            fi
         fi
     else
         sudo systemctl stop bunkerweb
