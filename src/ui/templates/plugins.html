@@ -213,7 +213,7 @@ include "plugins_modal.html" %}
   <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">LIST</h5>
 
   <div data-{{current_endpoint}}-list class="grid grid-cols-12 gap-3">
-    {% for plugin in plugins %} {% if plugin['external'] %}
+    {% for plugin in plugins %}
     <div
       data-{{current_endpoint}}-external="{% if plugin['external'] %} external {% else %} internal {% endif %}"
       class="py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-4 3xl:col-span-3 p-1 flex justify-between items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
@@ -228,7 +228,7 @@ include "plugins_modal.html" %}
         {% if plugin['page']%}
         <a
           aria-label="plugin page link"
-          class="hover:-translate-y-px"
+          class="hover:-translate-y-px mx-1"
           href="{{request.url_root}}plugins?plugin_id={{plugin['id']}}"
         >
           <svg
@@ -242,6 +242,7 @@ include "plugins_modal.html" %}
           </svg>
         </a>
         {%endif%}
+        {% if plugin['external'] %}
         <button
           data-{{current_endpoint}}-action="delete"
           name="{{plugin['id']}}"
@@ -258,21 +259,10 @@ include "plugins_modal.html" %}
             />
           </svg>
         </button>
+        {%endif%}
       </div>
     </div>
-    {% else %}
-    <div
-      data-{{current_endpoint}}-external="{% if plugin['external'] %} external {%else%} internal {%endif%}"
-      class="py-3 min-h-12 relative col-span-12 sm:col-span-6 2xl:col-span-4 3xl:col-span-3 p-1 flex justify-between items-center transition rounded bg-gray-100 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-800"
-    >
-      <p
-        data-{{current_endpoint}}-content
-        class="ml-3 mr-2 break-words mb-0 mb-0 transition duration-300 ease-in-out dark:opacity-90 text-left text-sm md:text-base text-slate-700 dark:text-gray-200"
-      >
-        {{plugin['name']}}
-      </p>
-    </div>
-    {% endif %} {% endfor %}
+    {% endfor %}
   </div>
 </div>
 {% endblock %}

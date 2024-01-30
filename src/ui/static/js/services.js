@@ -26,25 +26,53 @@ class ServiceModal {
     );
     //container
     this.container = document.querySelector("main");
+    this.currAction = "";
+    this.currMethod = "";
     this.init();
   }
 
   //store default config data on DOM
   //to update modal data on new button click
 
-  getActionAndServName(target) {
+  getActionData(target) {
     const action = target
       .closest("button")
       .getAttribute("data-services-action");
     const serviceName = target
       .closest("button")
       .getAttribute("data-services-name");
+    const isDraft =
+      target
+        .closest("[data-services-service]")
+        .querySelector("[data-is-draft]")
+        .getAttribute("data-value") || "no";
 
-    return [action, serviceName];
+    const method =
+      target
+        .closest("[data-services-service]")
+        .querySelector("[data-service-method]")
+        .getAttribute("data-value") || "no";
+
+    this.currMethod = method;
+
+    return [action, serviceName, isDraft, method];
   }
 
   init() {
     this.modal.addEventListener("click", (e) => {
+      // update draft mode
+      try {
+        if (e.target.closest("button").hasAttribute("data-toggle-draft-btn")) {
+          // Get current state
+          const currModeIsDraft = e.target
+            .querySelector('[data-toggle-draft="true"]')
+            .classList.contains("hidden")
+            ? true
+            : false;
+          this.setIsDraft(currModeIsDraft, this.currMethod);
+        }
+      } catch (e) {}
+
       //close
       try {
         if (
@@ -63,12 +91,21 @@ class ServiceModal {
           "edit"
         ) {
           //set form info and right form
-          const [action, serviceName] = this.getActionAndServName(e.target);
+          const [action, serviceName, isDraft, method] = this.getActionData(
+            e.target
+          );
           const oldServName = e.target
             .closest("[data-services-service]")
             .querySelector("[data-old-service-name]")
             .getAttribute("data-value");
-          this.setForm(action, serviceName, oldServName, this.formNewEdit);
+          this.setForm(
+            action,
+            serviceName,
+            oldServName,
+            this.formNewEdit,
+            isDraft,
+            method
+          );
           //get service data and parse it
           //multiple type logic is launch at same time on relate class
           const servicesSettings = e.target
@@ -90,8 +127,17 @@ class ServiceModal {
           "clone"
         ) {
           //set form info and right form
-          const [action, serviceName] = this.getActionAndServName(e.target);
-          this.setForm(action, serviceName, serviceName, this.formNewEdit);
+          const [action, serviceName, isDraft, method] = this.getActionData(
+            e.target
+          );
+          this.setForm(
+            action,
+            serviceName,
+            serviceName,
+            this.formNewEdit,
+            isDraft,
+            method
+          );
           //set default value with method default
           //get service data and parse it
           //multiple type logic is launch at same time on relate class
@@ -100,7 +146,7 @@ class ServiceModal {
             .querySelector("[data-services-settings]")
             .getAttribute("data-value");
           const obj = JSON.parse(servicesSettings);
-          this.updateModalData(obj, true);
+          this.updateModalData(obj, true, true);
           // server name is unset
           const inpServName = document.querySelector("input#SERVER_NAME");
           inpServName.getAttribute("value", "");
@@ -121,8 +167,17 @@ class ServiceModal {
           "new"
         ) {
           //set form info and right form
-          const [action, serviceName] = this.getActionAndServName(e.target);
-          this.setForm(action, serviceName, serviceName, this.formNewEdit);
+          const [action, serviceName, isDraft, method] = this.getActionData(
+            e.target
+          );
+          this.setForm(
+            action,
+            serviceName,
+            serviceName,
+            this.formNewEdit,
+            isDraft,
+            method
+          );
           //set default value with method default
           this.setSettingsDefault();
           //server name is unset
@@ -144,8 +199,17 @@ class ServiceModal {
           "delete"
         ) {
           //set form info and right form
-          const [action, serviceName] = this.getActionAndServName(e.target);
-          this.setForm(action, serviceName, serviceName, this.formDelete);
+          const [action, serviceName, isDraft, method] = this.getActionData(
+            e.target
+          );
+          this.setForm(
+            action,
+            serviceName,
+            serviceName,
+            this.formDelete,
+            isDraft,
+            method
+          );
           //show modal
           this.openModal();
         }
@@ -178,6 +242,7 @@ class ServiceModal {
       if (
         inpName === "csrf_token" ||
         inpName === "OLD_SERVER_NAME" ||
+        inpName === "is_draft" ||
         inpName === "operation" ||
         inpName === "settings-filter"
       )
@@ -248,9 +313,46 @@ class ServiceModal {
     }
   }
 
-  setForm(action, serviceName, oldServName, formEl) {
+  setIsDraft(isDraft, method) {
+    console.log(isDraft, method);
+    const draftVal = isDraft ? "yes" : "no";
+
+    document.querySelectorAll('input[name="is_draft"]').forEach((inp) => {
+      inp.setAttribute("value", draftVal);
+      inp.value = draftVal;
+    });
+
+    console.log("f");
+
+    //Update draft button
+    const btn = document.querySelector("button[data-toggle-draft-btn]");
+
+    if (
+      (!["ui", "default"].includes(method) && this.currAction !== "clone") ||
+      this.currAction === "delete"
+    ) {
+      return btn.classList.add("hidden");
+    }
+
+    btn.classList.remove("hidden");
+
+    const showEl = isDraft ? "true" : "false";
+    btn.querySelectorAll("[data-toggle-draft]").forEach((item) => {
+      if (item.getAttribute("data-toggle-draft") === showEl)
+        item.classList.remove("hidden");
+      if (item.getAttribute("data-toggle-draft") !== showEl)
+        item.classList.add("hidden");
+    });
+  }
+
+  setForm(action, serviceName, oldServName, formEl, isDraft, method) {
+    this.currAction = action;
+    this.setIsDraft(isDraft === "yes" ? true : false, method);
+
     this.modalTitle.textContent = `${action} ${serviceName}`;
+
     const operation = action === "clone" ? "new" : action;
+
     formEl.setAttribute("id", `form-${operation}-${serviceName}`);
     const opeInp = formEl.querySelector(`input[name="operation"]`);
     opeInp.setAttribute("value", operation);
@@ -326,12 +428,12 @@ class ServiceModal {
     this.modalTabsHeader.classList.remove("hidden");
   }
 
-  updateModalData(settings, forceEnabled = false) {
+  updateModalData(settings, forceEnabled = false, setMethodUI = false) {
     //use this to select inputEl and change value
     for (const [key, data] of Object.entries(settings)) {
       //change format to match id
       const value = data["value"];
-      const method = data["method"];
+      const method = setMethodUI ? "ui" : data["method"];
       const global = data["global"];
       try {
         const inps = this.modal.querySelectorAll(`[name='${key}']`);
@@ -342,6 +444,7 @@ class ServiceModal {
           if (
             inpName === "csrf_token" ||
             inpName === "OLD_SERVER_NAME" ||
+            inpName === "is_draft" ||
             inpName === "operation" ||
             inpName === "settings-filter"
           )
@@ -461,7 +564,14 @@ class Multiple {
           const multipleSettings = this.getMultiplesOnly(obj);
           const sortMultiples =
             this.sortMultipleByContainerAndSuffixe(multipleSettings);
-          this.setMultipleToDOM(sortMultiples);
+          // Need to set method as ui if clone
+          const isClone =
+            e.target.closest("button").getAttribute("data-services-action") ===
+            "clone"
+              ? true
+              : false;
+
+          this.setMultipleToDOM(sortMultiples, isClone);
         }
       } catch (err) {}
       //new service button
@@ -664,7 +774,7 @@ class Multiple {
   }
 
   //put multiple on the right plugin, on schema container
-  setMultipleToDOM(sortMultObj) {
+  setMultipleToDOM(sortMultObj, setMethodUI = false) {
     //we loop on each multiple that contains values to render to DOM
     for (const [schemaCtnrName, multGroupBySuffix] of Object.entries(
       sortMultObj
@@ -692,7 +802,7 @@ class Multiple {
           //replace input info and disabled state
           this.setSetting(
             data["value"],
-            data["method"],
+            setMethodUI ? "ui" : data["method"],
             data["global"],
             settingContainer
           );
@@ -769,6 +879,7 @@ class Multiple {
         if (
           inpName === "csrf_token" ||
           inpName === "OLD_SERVER_NAME" ||
+          inpName === "is_draft" ||
           inpName === "operation" ||
           inpName === "settings-filter"
         )

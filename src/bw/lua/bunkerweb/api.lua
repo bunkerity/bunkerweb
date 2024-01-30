@@ -258,10 +258,15 @@ api.global.GET["^/bans$"] = function(self)
 					"can't access ttl " .. k .. " from datastore : " .. ttl
 				)
 			end
-			local ban_data = decode(result)
-			local ban =
+			local ban_data
+			ok, ban_data = pcall(decode, result)
+			if not ok then
+				ban_data = { reason = result, date = -1 }
+			end
+			table.insert(
+				data,
 				{ ip = k:sub(9, #k), reason = ban_data["reason"], date = ban_data["date"], exp = math.floor(ttl) }
-			table.insert(data, ban)
+			)
 		end
 	end
 	return self:response(HTTP_OK, "success", data)

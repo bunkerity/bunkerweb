@@ -21,7 +21,7 @@ class Filter {
           setTimeout(() => {
             const value = document
               .querySelector(
-                `[data-${this.prefix}-setting-select-text="reason"]`
+                `[data-${this.prefix}-setting-select-text="reason"]`,
               )
               .textContent.trim();
 
@@ -159,7 +159,7 @@ class Dropdown {
           const btn = e.target.closest("button");
           const btnValue = btn.getAttribute("value");
           const btnSetting = btn.getAttribute(
-            `data-${this.prefix}-setting-select-dropdown-btn`
+            `data-${this.prefix}-setting-select-dropdown-btn`,
           );
           //stop if same value to avoid new fetching
           const isSameVal = this.isSameValue(btnSetting, btnValue);
@@ -185,7 +185,7 @@ class Dropdown {
 
   closeAllDrop() {
     const drops = document.querySelectorAll(
-      `[data-${this.prefix}-setting-select-dropdown]`
+      `[data-${this.prefix}-setting-select-dropdown]`,
     );
     drops.forEach((drop) => {
       drop.classList.add("hidden");
@@ -193,8 +193,8 @@ class Dropdown {
       document
         .querySelector(
           `svg[data-${this.prefix}-setting-select="${drop.getAttribute(
-            `data-${this.prefix}-setting-select-dropdown`
-          )}"]`
+            `data-${this.prefix}-setting-select-dropdown`,
+          )}"]`,
         )
         .classList.remove("rotate-180");
     });
@@ -202,7 +202,7 @@ class Dropdown {
 
   isSameValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`,
     );
     const currVal = selectCustom.textContent;
     return currVal === value ? true : false;
@@ -210,30 +210,30 @@ class Dropdown {
 
   setSelectNewValue(btnSetting, value) {
     const selectCustom = document.querySelector(
-      `[data-${this.prefix}-setting-select="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select="${btnSetting}"]`,
     );
     selectCustom.querySelector(
-      `[data-${this.prefix}-setting-select-text]`
+      `[data-${this.prefix}-setting-select-text]`,
     ).textContent = value;
   }
 
   hideDropdown(btnSetting) {
     //hide dropdown
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
     );
     dropdownEl.classList.add("hidden");
     dropdownEl.classList.remove("flex");
     //svg effect
     const dropdownChevron = document.querySelector(
-      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`
+      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`,
     );
     dropdownChevron.classList.remove("rotate-180");
   }
 
   changeDropBtnStyle(btnSetting, selectedBtn) {
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
     );
     //reset dropdown btns
     const btnEls = dropdownEl.querySelectorAll("button");
@@ -243,7 +243,7 @@ class Dropdown {
         "bg-primary",
         "dark:bg-primary",
         "text-gray-300",
-        "text-gray-300"
+        "text-gray-300",
       );
       btn.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
     });
@@ -251,7 +251,7 @@ class Dropdown {
     selectedBtn.classList.remove(
       "bg-white",
       "dark:bg-slate-700",
-      "text-gray-700"
+      "text-gray-700",
     );
     selectedBtn.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
   }
@@ -262,10 +262,10 @@ class Dropdown {
       .getAttribute(`data-${this.prefix}-setting-select`);
     //toggle dropdown
     const dropdownEl = document.querySelector(
-      `[data-${this.prefix}-setting-select-dropdown="${attribute}"]`
+      `[data-${this.prefix}-setting-select-dropdown="${attribute}"]`,
     );
     const dropdownChevron = document.querySelector(
-      `svg[data-${this.prefix}-setting-select="${attribute}"]`
+      `svg[data-${this.prefix}-setting-select="${attribute}"]`,
     );
     dropdownEl.classList.toggle("hidden");
     dropdownEl.classList.toggle("flex");
@@ -318,7 +318,7 @@ class Unban {
           setTimeout(() => {
             // Check if at least one item is selected
             const selected = this.listEl.querySelectorAll(
-              `input[data-checked="true"]`
+              `input[data-checked="true"]`,
             );
 
             // Case true, enable unban button
@@ -340,7 +340,7 @@ class Unban {
       if (this.unbanBtn.hasAttribute("disabled")) return;
       // Get all selected items
       const selected = this.listEl.querySelectorAll(
-        `input[data-checked="true"]`
+        `input[data-checked="true"]`,
       );
       const getDatas = [];
       selected.forEach((el) => {
@@ -366,7 +366,7 @@ class AddBanModal {
     this.listEl = document.querySelector(`[data-bans-add-ban-list]`);
     this.submitBtn = document.querySelector(`button[data-bans-modal-submit]`);
     this.removeAllFieldBtn = document.querySelector(
-      "button[data-add-ban-delete-all-item]"
+      "button[data-add-ban-delete-all-item]",
     );
     this.formEl = document.querySelector("form[data-ban-add-form]");
     this.itemCount = 0;
@@ -561,7 +561,10 @@ class AddBanModal {
   setDatepicker(id) {
     const defaultDate = +(Date.now() + 3600000 * 24);
     const inpEl = document.querySelector(`input#ban-end-${id}`);
-    inpEl.setAttribute("data-timestamp", defaultDate.toString().substring(0, 10));
+    inpEl.setAttribute(
+      "data-timestamp",
+      defaultDate.toString().substring(0, 10),
+    );
 
     // instantiate datepicker
     const dateOptions = {
@@ -579,7 +582,10 @@ class AddBanModal {
 
         // Case pick is before current date
         if (pickStamp < nowStamp) {
-          inpEl.setAttribute("data-timestamp", defaultDate.toString().substring(0, 10));
+          inpEl.setAttribute(
+            "data-timestamp",
+            defaultDate.toString().substring(0, 10),
+          );
           return instance.setDate(defaultDate);
         }
 

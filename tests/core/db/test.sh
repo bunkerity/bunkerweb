@@ -106,18 +106,6 @@ cleanup_stack () {
             if [[ $(sed '20!d' docker-compose.test.yml) = "      CUSTOM_CONF_SERVICE_MODSEC_CRS_test_service_conf: 'SecRule REQUEST_FILENAME \"@rx ^/test\" \"id:10001,ctl:ruleRemoveByTag=attack-generic,ctl:ruleRemoveByTag=attack-protocol,nolog\"'" ]] ; then
                 sed -i '20d' docker-compose.test.yml
             fi
-
-            if [ $end -eq 0 ] ; then
-                echo "💾 Removing bw-docker network ..."
-
-                docker network rm bw-docker
-
-                # shellcheck disable=SC2181
-                if [ $? -ne 0 ] ; then
-                    echo "💾 Network removal failed ❌"
-                    exit 1
-                fi
-            fi
         else
             sudo rm -rf /etc/bunkerweb/plugins/*
             sudo sed -i 's@MULTISITE=.*$@MULTISITE=no@' /etc/bunkerweb/variables.env
@@ -151,6 +139,18 @@ cleanup_stack () {
             docker compose down
         else
             docker compose down -v --remove-orphans
+        fi
+
+        if [[ $end -eq 0 && $exit_code = 1 ]] && [ $manual = 0 ] ; then
+            echo "💾 Removing bw-docker network ..."
+
+            docker network rm bw-docker
+
+            # shellcheck disable=SC2181
+            if [ $? -ne 0 ] ; then
+                echo "💾 Network removal failed ❌"
+                exit 1
+            fi
         fi
     else
         sudo systemctl stop bunkerweb
@@ -475,6 +475,20 @@ do
         find . -type f -name 'docker-compose.*' -exec sed -i 's@DATABASE_URI: ".*"$@DATABASE_URI: "sqlite:////var/lib/bunkerweb/db.sqlite3"@' {} \;
         sed -i 's@bunkerity/bunkerweb:.*$@bunkerity/bunkerweb:'"$older_version"'@' docker-compose.yml
         sed -i 's@bunkerity/bunkerweb-scheduler:.*$@bunkerity/bunkerweb-scheduler:'"$older_version"'@' docker-compose.yml
+
+        docker pull bunkerity/bunkerweb:"$older_version"
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            echo "💾 Pull for bunkerweb:$older_version failed ❌"
+            exit 1
+        fi
+
+        docker pull bunkerity/bunkerweb-scheduler:"$older_version"
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            echo "💾 Pull for bunkerweb-scheduler:$older_version failed ❌"
+            exit 1
+        fi
 
         starting_stack
 
