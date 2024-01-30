@@ -47,8 +47,8 @@ data-plugin-item="{{plugin['id']}}"
   <!-- end title and desc -->
   <div data-plugin-settings class="w-full grid grid-cols-12">
     <!-- plugin settings not multiple -->
-    {% for setting, value in plugin["settings"].items() %}{% if setting != "IS_LOADING" and current_endpoint
-    == "global-config" and value['context'] == "global" and not value['multiple'] or current_endpoint ==
+    {% for setting, value in plugin["settings"].items() %}{% if setting not in ["IS_LOADING", "IS_DRAFT"] and current_endpoint
+    == "global-config" and value['context'] == "global" and not value['multiple'] or setting != "IS_DRAFT" and current_endpoint ==
     "services" and value['context'] == "multisite" and not value['multiple'] %}
 
     <div    data-setting-container
