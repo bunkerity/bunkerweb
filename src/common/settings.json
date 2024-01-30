@@ -50,7 +50,7 @@
     "help": "List of the virtual hosts served by bunkerweb.",
     "id": "server-name",
     "label": "Server name",
-    "regex": "^(?! )( ?((?=[^ ]{1,255}( |$))[^ ]+)(?!.* \\2))*$",
+    "regex": "^((\\S{1,255})(?!.*\\s\\2(\\s|$)))?(\\s(\\S{1,255})(?!.*\\s\\5(\\s|$)))*$",
     "type": "text"
   },
   "WORKER_PROCESSES": {
