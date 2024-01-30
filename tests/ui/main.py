@@ -147,7 +147,7 @@ def access_page(
 
         title = driver_wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div/header/div/nav/h6")))
 
-        if title.text != name.replace(" ", "_").title():
+        if title.text != name.title():
             print(f"Didn't get redirected to {name} page, exiting ...", flush=True)
             exit(1)
     except TimeoutException:
@@ -538,17 +538,11 @@ with driver_func() as driver:
 
         print("Checking the services page ...", flush=True)
 
-        try:
-            service = safe_get_element(driver, By.XPATH, "//div[@data-services-service='']", error=True)
-        except TimeoutException:
-            print("Services not found, exiting ...", flush=True)
-            exit(1)
-
-        if service.find_element(By.TAG_NAME, "h5").text.strip() != "www.example.com":
+        if safe_get_element(driver, By.XPATH, "//div[@data-services-service='www.example.com']//h5").text.strip() != "www.example.com":
             print("The service is not present, exiting ...", flush=True)
             exit(1)
 
-        if service.find_element(By.TAG_NAME, "h6").text.strip() != "ui":
+        if safe_get_element(driver, By.XPATH, "//div[@data-services-service='www.example.com']//h6").text.strip() != "ui":
             print(
                 "The service should have been created by the ui, exiting ...",
                 flush=True,
@@ -559,7 +553,7 @@ with driver_func() as driver:
 
         assert_button_click(
             driver,
-            service.find_element(By.XPATH, ".//button[@data-services-action='edit']"),
+            "//div[@data-services-service='www.example.com']//button[@data-services-action='edit']",
         )
 
         try:
@@ -637,15 +631,9 @@ with driver_func() as driver:
             flush=True,
         )
 
-        try:
-            service = safe_get_element(driver, By.XPATH, "//div[@data-services-service='']", error=True)
-        except TimeoutException:
-            print("Services not found, exiting ...", flush=True)
-            exit(1)
-
         assert_button_click(
             driver,
-            service.find_element(By.XPATH, ".//button[@data-services-action='edit']"),
+            "//div[@data-services-service='www.example.com']//button[@data-services-action='edit']",
         )
 
         modal = safe_get_element(driver, By.XPATH, "//div[@data-services-modal='']")
@@ -717,13 +705,7 @@ with driver_func() as driver:
                     sleep(5)
 
         try:
-            services = safe_get_element(
-                driver,
-                By.XPATH,
-                "//div[@data-services-service='']",
-                multiple=True,
-                error=True,
-            )
+            services = safe_get_element(driver, By.XPATH, "//div[@data-services-service]", multiple=True, error=True)
         except TimeoutException:
             print("Services not found, exiting ...", flush=True)
             exit(1)
@@ -732,13 +714,11 @@ with driver_func() as driver:
             print("The service hasn't been created, exiting ...", flush=True)
             exit(1)
 
-        service = services[0]
-
-        if service.find_element(By.TAG_NAME, "h5").text.strip() != "app1.example.com":
+        if safe_get_element(driver, By.XPATH, "//div[@data-services-service='app1.example.com']//h5").text.strip() != "app1.example.com":
             print('The service "app1.example.com" is not present, exiting ...', flush=True)
             exit(1)
 
-        if service.find_element(By.TAG_NAME, "h6").text.strip() != "ui":
+        if safe_get_element(driver, By.XPATH, "//div[@data-services-service='app1.example.com']//h6").text.strip() != "ui":
             print(
                 "The service should have been created by the ui, exiting ...",
                 flush=True,
@@ -843,13 +823,7 @@ with driver_func() as driver:
                     sleep(5)
 
         try:
-            services = safe_get_element(
-                driver,
-                By.XPATH,
-                "//div[@data-services-service='']",
-                multiple=True,
-                error=True,
-            )
+            services = safe_get_element(driver, By.XPATH, "//div[@data-services-service]", multiple=True, error=True)
         except TimeoutException:
             print("Services not found, exiting ...", flush=True)
             exit(1)
@@ -858,13 +832,11 @@ with driver_func() as driver:
             print("The service hasn't been created, exiting ...", flush=True)
             exit(1)
 
-        service = services[1]
-
-        if service.find_element(By.TAG_NAME, "h5").text.strip() != "app2.example.com":
+        if safe_get_element(driver, By.XPATH, "//div[@data-services-service='app2.example.com']//h5").text.strip() != "app2.example.com":
             print('The service "app2.example.com" is not present, exiting ...', flush=True)
             exit(1)
 
-        if service.find_element(By.TAG_NAME, "h6").text.strip() != "ui":
+        if safe_get_element(driver, By.XPATH, "//div[@data-services-service='app2.example.com']//h6").text.strip() != "ui":
             print(
                 "The service should have been created by the ui, exiting ...",
                 flush=True,
@@ -972,13 +944,7 @@ with driver_func() as driver:
         )
 
         try:
-            services = safe_get_element(
-                driver,
-                By.XPATH,
-                "//div[@data-services-service='']",
-                multiple=True,
-                error=True,
-            )
+            services = safe_get_element(driver, By.XPATH, "//div[@data-services-service='']", multiple=True, error=True)
         except TimeoutException:
             print("Services not found, exiting ...", flush=True)
             exit(1)
