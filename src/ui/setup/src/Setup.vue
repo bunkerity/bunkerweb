@@ -1,9 +1,9 @@
 <script setup>
 import LangSwitch from "@components/LangSwitch.vue";
-import LogoutInpGroup from "@components/Logout/InpGroup.vue";
-import LogoutInput from "@components/Logout/Input.vue";
-import LogoutCheckbox from "@components/Logout/Checkbox.vue";
-import LogoutSubtitle from "@components/Logout/Subtitle.vue";
+import LogInpGroup from "@components/Log/InpGroup.vue";
+import LogInput from "@components/Log/Input.vue";
+import LogCheckbox from "@components/Log/Checkbox.vue";
+import LogSubtitle from "@components/Log/Subtitle.vue";
 import FeedbackAlert from "@components/Feedback/Alert.vue";
 import { fetchAPI } from "@utils/api.js";
 import { computed, onMounted, reactive } from "vue";
@@ -197,10 +197,10 @@ onMounted(() => {
           method="POST"
           autocomplete="off"
         >
-          <LogoutSubtitle :title="$t('setup_account')" />
+          <LogSubtitle :title="$t('setup_account')" />
           <!-- username inpt-->
-          <LogoutInpGroup>
-            <LogoutInput
+          <LogInpGroup>
+            <LogInput
               @inp="(e) => (setup.username = e)"
               :label="$t('setup_username')"
               name="username"
@@ -209,11 +209,11 @@ onMounted(() => {
               type="text"
               :required="true"
             />
-          </LogoutInpGroup>
+          </LogInpGroup>
           <!-- end username inpt-->
           <!-- password inpt-->
-          <LogoutInpGroup>
-            <LogoutInput
+          <LogInpGroup>
+            <LogInput
               @inp="(e) => (setup.pw = e)"
               :label="$t('setup_password')"
               name="password"
@@ -222,11 +222,11 @@ onMounted(() => {
               type="password"
               :required="true"
             />
-          </LogoutInpGroup>
+          </LogInpGroup>
           <!-- end password inpt-->
           <!-- password inpt-->
-          <LogoutInpGroup>
-            <LogoutInput
+          <LogInpGroup>
+            <LogInput
               @inp="(e) => (setup.pwCheck = e)"
               :label="$t('setup_password_check')"
               name="password_check"
@@ -237,13 +237,13 @@ onMounted(() => {
               :isInvalid="setup.pw !== setup.pwCheck ? true : false"
               :invalidText="$t('setup_password_check_invalid')"
             />
-          </LogoutInpGroup>
+          </LogInpGroup>
           <!-- end password inpt-->
-          <LogoutSubtitle :title="$t('setup_settings')" />
+          <LogSubtitle :title="$t('setup_settings')" />
 
           <!-- ui host-->
-          <LogoutInpGroup>
-            <LogoutInput
+          <LogInpGroup>
+            <LogInput
               :label="$t('setup_ui_host')"
               @inp="(e) => (setup.hostInp = e)"
               name="ui_host"
@@ -252,11 +252,11 @@ onMounted(() => {
               type="text"
               :required="true"
             />
-          </LogoutInpGroup>
+          </LogInpGroup>
           <!-- end ui host-->
           <!-- ui url-->
-          <LogoutInpGroup>
-            <LogoutInput
+          <LogInpGroup>
+            <LogInput
               @inp="(e) => (setup.urlInp = e)"
               :label="$t('setup_ui_url')"
               name="ui_url"
@@ -265,11 +265,11 @@ onMounted(() => {
               type="text"
               :required="true"
             />
-          </LogoutInpGroup>
+          </LogInpGroup>
           <!-- end ui url-->
           <!-- server name-->
-          <LogoutInpGroup>
-            <LogoutInput
+          <LogInpGroup>
+            <LogInput
               @inp="
                 (e) => {
                   setup.servDNSIsOn = null;
@@ -284,21 +284,21 @@ onMounted(() => {
               :value="$t('setup_server_name_value')"
               :required="true"
             />
-          </LogoutInpGroup>
+          </LogInpGroup>
           <!-- end server name-->
 
           <!-- auto let's encrypt-->
-          <LogoutInpGroup>
-            <LogoutCheckbox
+          <LogInpGroup>
+            <LogCheckbox
               @inp="(e) => (setup.sslCheck = e === 'yes' ? true : false)"
               :label="$t('setup_lets_encrypt')"
               name="lets_encrypt"
               value="no"
               :required="true"
             />
-          </LogoutInpGroup>
+          </LogInpGroup>
           <!-- end auto let's encrypt-->
-          <LogoutInpGroup>
+          <LogInpGroup>
             <label id="check-dns" class="logout-label">
               {{ $t("setup_check_dns") }}
             </label>
@@ -338,7 +338,7 @@ onMounted(() => {
                 </span>
               </button>
             </div>
-          </LogoutInpGroup>
+          </LogInpGroup>
           <div
             class="p-2 col-span-12 bg-gray-200 mt-4 md:mt-6 mb-1 py-2 px-2 rounded flex flex-col justify-center items-center w-full max-w-[400px] overflow-hidden"
           >

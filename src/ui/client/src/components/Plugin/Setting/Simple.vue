@@ -25,7 +25,7 @@ const filterSettings = computed(() =>
   <div
     v-for="setting in filterSettings"
     :class="[setting.isMatchFilter ? '' : 'hidden']"
-    class="ml-2 mr-4 md:ml-3 md:mr-6 xl:ml-4 xl:mr-8 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4"
+    class="ml-2 mr-4 md:ml-3 md:mr-6 xl:ml-4 xl:mr-8 my-1.5 col-span-12 md:col-span-6 2xl:col-span-4"
   >
     <PluginSettingHeader
       :id="setting.id"

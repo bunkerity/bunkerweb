@@ -209,7 +209,7 @@ async function addBansFromList() {
               :key="bans.items.length"
               :class="[
                 id === bans.items.length - 1 ? '' : 'border-b',
-                'py-1.5',
+                'pb-1.5 pt-4.5',
               ]"
             >
               <td :class="[addPositions[0], 'mr-2']">
@@ -226,6 +226,7 @@ async function addBansFromList() {
                       type: 'text',
                       value: '',
                       placeholder: $t('bans_add_ip_placeholder'),
+                      required: true,
                     }"
                     :inpClass="item.ip ? '' : 'invalid'"
                   />
@@ -262,6 +263,7 @@ async function addBansFromList() {
                     :tabId="addModalStore.isOpen ? contentIndex : '-1'"
                     :settings="{
                       id: `add-ban-date-end-${id}`,
+                      required: true,
                     }"
                     @inp="(v) => (item.end_date = v.timestamp)"
                     :inpClass="item.end_date ? '' : 'invalid'"
@@ -284,6 +286,7 @@ async function addBansFromList() {
                       type: 'text',
                       value: item.reason,
                       placeholder: $t('bans_add_reason_placeholder'),
+                      required: true,
                     }"
                     :inpClass="item.reason ? '' : 'invalid'"
                   />

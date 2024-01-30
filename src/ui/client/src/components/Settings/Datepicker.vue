@@ -540,6 +540,11 @@ const emits = defineEmits(["inp"]);
 
 <template>
   <div class="relative flex items-center">
+    <span
+      v-if="props.settings.required"
+      class="font-bold text-red-500 absolute right-[5px] top-[-20px]"
+      >*
+    </span>
     <input
       :tabindex="props.tabId || contentIndex"
       :aria-controls="props.settings.id"
@@ -553,11 +558,7 @@ const emits = defineEmits(["inp"]);
         props.settings.disabled ? 'cursor-not-allowed' : 'cursor-pointer',
       ]"
       :id="props.settings.id"
-      :required="
-        props.settings.id === 'SERVER_NAME' || props.settings.required || false
-          ? true
-          : false
-      "
+      :required="props.settings.required || false"
       :disabled="props.settings.disabled || false"
       :name="props.settings.id"
       :placeholder="'mm/dd/yyyy h:m:s'"

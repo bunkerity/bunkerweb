@@ -12,6 +12,10 @@
   font-family: "Open Sans", sans-serif !important;
 }
 
+* {
+  @apply focus:outline-2 focus:outline-secondary;
+}
+
 .ace_editor,
 .ace_editor div,
 .ace_content {
@@ -162,7 +166,7 @@ body {
 /* INPUT */
 
 .checkbox {
-  @apply cursor-pointer disabled:cursor-default
+  @apply hover:border-gray-600 cursor-pointer disabled:cursor-default
     relative dark:border-slate-600 dark:bg-slate-700 z-10 w-5 h-5
     text-base rounded-1.4 duration-150 float-left
     mt-1 appearance-none border border-gray-300 bg-white bg-contain bg-center
@@ -181,7 +185,7 @@ body {
 }
 
 .select-btn {
-  @apply dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 hover:border-gray-600 focus:border-gray-600 flex justify-between align-middle items-center text-left text-sm leading-5.6 w-full rounded-lg border border-solid border-gray-400 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500;
+  @apply relative dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 hover:border-gray-600 focus:border-gray-600 flex justify-between align-middle items-center text-left text-sm leading-5.6 w-full rounded-lg border border-solid border-gray-400 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500;
 }
 
 .select-btn-name {
@@ -217,7 +221,7 @@ body {
 }
 
 .input-regular {
-  @apply outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
+  @apply hover:border-gray-600 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-gray-300/0 dark:focus:border-gray-600/0 focus:ring-1 focus:valid:ring-green-500 focus:invalid:ring-red-500 text-sm leading-5.6 ease-in block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-2.5 md:py-1.5 font-normal text-gray-700 transition-all placeholder:text-gray-500 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-800 dark:disabled:border-gray-800/0 dark:disabled:text-gray-300 disabled:text-gray-700;
 }
 
 .invalid.input-regular,
@@ -227,8 +231,40 @@ body {
   @apply border-gray-50/0 ring-1 ring-red-500;
 }
 
-.valid.input-regular {
+.valid.input-regular:focus,
+.valid.input-regular:active {
   @apply border-gray-50/0 ring-1 ring-green-500;
+}
+
+.invalid.checkbox,
+.invalid.checkbox:hover,
+.invalid.checkbox:focus,
+.invalid.checkbox:active {
+  @apply border-gray-50/0 ring-2 ring-red-500;
+}
+
+.valid.checkbox:focus,
+.valid.checkbox:active {
+  @apply border-gray-50/0 ring-2 ring-green-500;
+}
+
+.invalid.input-regular:disabled,
+.invalid.input-regular:disabled:hover,
+.invalid.input-regular:disabled:focus,
+.invalid.input-regular:disabled:active,
+.invalid.checkbox:disabled,
+.invalid.checkbox:disabled:hover,
+.invalid.checkbox:disabled:focus,
+.invalid.checkbox:disabled:active,
+.valid.input-regular:disabled,
+.valid.input-regular:disabled:hover,
+.valid.input-regular:disabled:focus,
+.valid.input-regular:disabled:active,
+.valid.checkbox:disabled,
+.valid.checkbox:disabled:hover,
+.valid.checkbox:disabled:focus,
+.valid.checkbox:disabled:active {
+  @apply border-gray-50/0 ring-0;
 }
 
 .input-pw-container {

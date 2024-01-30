@@ -52,10 +52,12 @@ const input = reactive({
   defaultMethod: getDefaultMethod(),
   pattern: props.setting.regex,
   placeholder: props.setting.placeholder || "",
-  required: props.setting.required || false,
+  required:
+    props.setting.id === "server-name" || props.setting.required || false,
   clipboard: props.setting.clipboard || false,
   isClipAllow: true,
   showInp: false,
+  isValid: false,
 });
 
 function copyClipboard() {
@@ -75,6 +77,7 @@ function copyClipboard() {
 }
 
 onMounted(() => {
+  input.isValid = inputEl.value.checkValidity();
   // Clipboard not allowed on http
   if (!window.location.href.startsWith("https://")) return;
 
@@ -89,13 +92,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="relative flex items-center">
+  <div class="relative flex flex-col items-start">
+    <span
+      v-if="input.required"
+      class="font-bold text-red-500 absolute right-[5px] top-[-20px]"
+      >*
+    </span>
     <input
       :tabindex="contentIndex"
       ref="inputEl"
       v-model="input.value"
       @input="
         () => {
+          input.isValid = inputEl.checkValidity();
           // Case is same value as store on core
           if (input.value === input.valueStatic)
             return config.removeConf(
@@ -121,8 +130,8 @@ onMounted(() => {
           : input.type
       "
       :id="input.id"
-      class="input-regular"
-      :required="input.id === 'SERVER_NAME' || input.required ? true : false"
+      :class="['input-regular', input.isValid ? 'valid' : 'invalid']"
+      :required="input.required"
       :disabled="
         input.method !== 'ui' && input.method !== 'default' ? true : false
       "
@@ -134,6 +143,7 @@ onMounted(() => {
       :name="input.id"
       :value="input.value"
     />
+
     <div
       v-if="input.clipboard && input.isClipAllow"
       :class="[input.type === 'password' ? 'pw-input' : 'no-pw-input']"
@@ -210,5 +220,19 @@ onMounted(() => {
         </svg>
       </button>
     </div>
+    <p
+      :aria-hidden="input.isValid ? 'true' : 'false'"
+      role="alert"
+      :class="[input.isValid ? 'invisible' : 'visible']"
+      class="text-red-500 text-[0.8rem] font-semibold mb-0"
+    >
+      {{
+        input.isValid
+          ? $t("inp_input_valid")
+          : !input.value
+            ? $t("inp_input_error_required")
+            : $t("inp_input_error_format")
+      }}
+    </p>
   </div>
 </template>

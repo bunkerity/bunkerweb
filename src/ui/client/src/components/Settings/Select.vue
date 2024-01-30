@@ -123,6 +123,11 @@ const emits = defineEmits(["inp"]);
       @click="toggleSelect()"
       :class="['select-btn', props.inpClass]"
     >
+      <span
+        v-if="props.settings.required"
+        class="font-bold text-red-500 absolute right-[5px] top-[-20px]"
+        >*
+      </span>
       <span :id="`${props.settings.id}-text`" class="select-btn-name">
         {{ select.value || props.settings.value }}
       </span>

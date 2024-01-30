@@ -1,8 +1,8 @@
 <script setup>
 import Loader from "@components/Loader.vue";
 import LangSwitch from "@components/LangSwitch.vue";
-import LogoutInpGroup from "@components/Logout/InpGroup.vue";
-import LogoutInput from "@components/Logout/Input.vue";
+import LogInpGroup from "@components/Log/InpGroup.vue";
+import LogInput from "@components/Log/Input.vue";
 import FeedbackAlert from "@components/Feedback/Alert.vue";
 import { onMounted, reactive } from "vue";
 
@@ -108,8 +108,8 @@ onMounted(() => {
         </h1>
         <form action="/login" method="POST" autocomplete="off">
           <!-- username inpt-->
-          <LogoutInpGroup>
-            <LogoutInput
+          <LogInpGroup>
+            <LogInput
               :label="$t('login_username')"
               name="username"
               pattern="(.*?)"
@@ -117,11 +117,11 @@ onMounted(() => {
               type="text"
               :required="true"
             />
-          </LogoutInpGroup>
+          </LogInpGroup>
           <!-- end username inpt-->
           <!-- password inpt-->
-          <LogoutInpGroup>
-            <LogoutInput
+          <LogInpGroup>
+            <LogInput
               :label="$t('login_password')"
               name="password"
               pattern="(.*?)"
@@ -129,7 +129,7 @@ onMounted(() => {
               type="password"
               :required="true"
             />
-          </LogoutInpGroup>
+          </LogInpGroup>
           <!-- end password inpt-->
           <div class="flex justify-center">
             <button

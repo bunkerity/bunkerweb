@@ -45,6 +45,7 @@ function updateValue() {
   </label>
   <div class="relative z-10">
     <input
+      tabindex="0"
       @click="$emit('inp', updateValue())"
       :id="props.name"
       :name="props.name"

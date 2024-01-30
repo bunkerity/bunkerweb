@@ -120,17 +120,14 @@ function setModal(modal, operation, serviceName, service, method = "") {
         class="mb-1.5 text-sm col-span-12 sm:col-span-6 md:col-span-12 lg:col-span-6 flex justify-center sm:justify-start md:justify-center lg:justify-start items-center"
         v-for="detail in props.details"
       >
-        <p class="mb-0 mr-2 text-black dark:text-white dark:opacity-80">
+        <ServicesSvgState
+          :success="services.details[name][detail.id] === 'yes' ? true : false"
+        />
+        <p class="mb-0 ml-2 text-black dark:text-white dark:opacity-80">
           {{ $t(`services_detail_${detail.lang}`) }}
         </p>
-        <div class="relative">
-          <ServicesSvgState
-            :success="
-              services.details[name][detail.id] === 'yes' ? true : false
-            "
-          />
-        </div>
       </div>
+      <div class="relative"></div>
     </div>
 
     <div class="mt-3.5 relative w-full flex justify-center sm:justify-end">

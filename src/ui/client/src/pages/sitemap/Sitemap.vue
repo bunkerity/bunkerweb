@@ -9,6 +9,8 @@ import { useLogsStore } from "@store/logs.js";
 import { useRefreshStore } from "@store/global.js";
 import { pluginI18n } from "@utils/plugins.js";
 import { useI18n } from "vue-i18n";
+import { contentIndex } from "@utils/tabindex.js";
+
 const { locale, fallbackLocale } = useI18n();
 // Refresh when related btn is clicked
 const refreshStore = useRefreshStore();
@@ -112,14 +114,20 @@ onMounted(() => {
       }"
     />
     <CardBase
-      class="h-fit col-span-12 max-w-[800px]"
+      class="h-fit col-span-12 max-w-[800px] gap-4"
       :label="$t('dashboard_sitemap')"
     >
       <div class="col-span-12">
-        <h2>{{ $t("dashboard_default") }}</h2>
-        <ul>
-          <li v-for="(page, id) in basePages">
-            <a :tabindex="id + 1" :href="page.path">
+        <ul class="grid grid-cols-12">
+          <li
+            class="col-span-12 sm:col-span-6 lg:col-span-4"
+            v-for="(page, id) in basePages"
+          >
+            <a
+              class="underline m-3 hover:brightness-90"
+              :tabindex="contentIndex"
+              :href="page.path"
+            >
               {{ $t(`dashboard_${page.name}`) }}
             </a>
           </li>
@@ -129,7 +137,11 @@ onMounted(() => {
         <h2>{{ $t("dashboard_plugins") }}</h2>
         <ul>
           <li v-for="(page, id) in plugins.setup">
-            <a :tabindex="basePages.length + id" :href="page.path">
+            <a
+              class="underline m-3 hover:brightness-90"
+              :tabindex="contentIndex"
+              :href="page.path"
+            >
               {{ page.name }}
             </a>
           </li>

@@ -12,6 +12,7 @@ const contentIndex = "7";
 export {
   bannerIndex,
   menuIndex,
+  menuFloatIndex,
   langIndex,
   refreshIndex,
   feedbackIndex,

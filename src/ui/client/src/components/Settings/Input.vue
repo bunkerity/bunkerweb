@@ -42,6 +42,7 @@ const inp = reactive({
   value: props.settings.value,
   showInp: false,
   isClipAllow: false,
+  isValid: false,
 });
 
 const emits = defineEmits(["inp"]);
@@ -63,12 +64,12 @@ function copyClipboard() {
 }
 
 onMounted(() => {
+  inp.isValid = inputEl.value.checkValidity();
   // Clipboard not allowed on http
   if (!window.location.href.startsWith("https://")) return;
 
   // Check clipboard permission
   navigator.permissions.query({ name: "clipboard-write" }).then((result) => {
-    console.log("try copy");
     if (result.state === "granted" || result.state === "prompt") {
       inp.isClipAllow = true;
       return;
@@ -78,14 +79,28 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="relative flex items-center">
+  <div class="relative flex flex-col items-start">
+    <span
+      v-if="props.settings.required"
+      class="font-bold text-red-500 absolute right-[5px] top-[-20px]"
+      >*
+    </span>
     <input
       :tabindex="props.tabId || contentIndex"
       ref="inputEl"
       v-model="inp.value"
-      @input="$emit('inp', inp.value)"
+      @input="
+        () => {
+          inp.isValid = inputEl.checkValidity();
+          $emit('inp', inp.value);
+        }
+      "
       :id="props.settings.id"
-      :class="['input-regular', props.inpClass]"
+      :class="[
+        'input-regular',
+        inp.isValid ? 'valid' : 'invalid',
+        props.inpClass,
+      ]"
       :required="props.settings.required || false"
       :readonly="props.settings.readonly || false"
       :disabled="props.settings.disabled || false"
@@ -169,5 +184,19 @@ onMounted(() => {
         </svg>
       </button>
     </div>
+    <p
+      :aria-hidden="inp.isValid ? 'true' : 'false'"
+      role="alert"
+      :class="[inp.isValid ? 'invisible' : 'visible']"
+      class="text-red-500 text-[0.8rem] font-semibold mb-0"
+    >
+      {{
+        inp.isValid
+          ? $t("inp_input_valid")
+          : !inp.value
+            ? $t("inp_input_error_required")
+            : $t("inp_input_error_format")
+      }}
+    </p>
   </div>
 </template>

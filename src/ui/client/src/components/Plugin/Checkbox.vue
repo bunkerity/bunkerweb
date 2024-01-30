@@ -3,6 +3,7 @@ import { reactive, defineProps } from "vue";
 import { useConfigStore } from "@store/settings.js";
 import { getModes, getDefaultMethod } from "@utils/settings.js";
 import { contentIndex } from "@utils/tabindex.js";
+import { onMounted, ref } from "vue";
 
 const props = defineProps({
   setting: {
@@ -16,14 +17,18 @@ const props = defineProps({
   },
 });
 
+const checkboxEl = ref(null);
+
 const checkbox = reactive({
   id: props.setting.id,
+  required: props.setting.required || false,
   context: props.setting.context,
   value: props.setting.value || props.setting.default, // Value onMount that can ben changed
   valueStatic: props.setting.value || props.setting.default, // Value onMount to compare to add config (don't touch)
   defaultValue: props.setting.default,
   method: props.setting.method.toLowerCase() || getDefaultMethod(),
   defaultMethod: getDefaultMethod(),
+  isValid: false,
 });
 
 // Modes with special method and logic
@@ -33,6 +38,7 @@ const config = useConfigStore();
 
 function updateCheckbox() {
   checkbox.value = checkbox.value === "yes" ? "no" : "yes";
+  checkbox.isValid = checkboxEl.value.checkValidity();
   // Case is same value as store on core
   if (checkbox.value === checkbox.valueStatic)
     return config.removeConf(
@@ -48,11 +54,21 @@ function updateCheckbox() {
     checkbox.value,
   );
 }
+
+onMounted(() => {
+  checkbox.isValid = checkboxEl.value.checkValidity();
+});
 </script>
 
 <template>
-  <div class="relative mb-7 md:mb-0 z-10">
+  <div class="relative mb-4 md:mb-0 z-10 flex flex-col items-start">
+    <span
+      v-if="checkbox.required"
+      class="font-bold text-red-500 absolute right-[5px] top-[-20px]"
+      >*
+    </span>
     <input
+      ref="checkboxEl"
       :tabindex="contentIndex"
       @keyup.enter="updateCheckbox()"
       @click="updateCheckbox()"
@@ -70,9 +86,14 @@ function updateCheckbox() {
           : false
       "
       :checked="checkbox.value === 'yes' ? true : false"
-      :class="[checkbox.value === 'yes' ? 'check' : '', 'checkbox']"
+      :class="[
+        checkbox.value === 'yes' ? 'check' : '',
+        'checkbox',
+        checkbox.isValid ? 'valid' : 'invalid',
+      ]"
       type="checkbox"
       :value="checkbox.value"
+      :required="checkbox.required || false"
     />
 
     <svg
@@ -88,5 +109,17 @@ function updateCheckbox() {
         d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"
       ></path>
     </svg>
+    <p
+      :aria-hidden="checkbox.isValid ? 'true' : 'false'"
+      role="alert"
+      :class="[checkbox.isValid ? 'invisible' : 'visible']"
+      class="text-red-500 text-[0.8rem] font-semibold mb-0 mt-0.5"
+    >
+      {{
+        checkbox.isValid
+          ? $t("inp_input_valid")
+          : $t("inp_input_error_required")
+      }}
+    </p>
   </div>
 </template>

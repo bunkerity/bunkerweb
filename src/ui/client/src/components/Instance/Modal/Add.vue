@@ -32,15 +32,21 @@ watch(addModalStore, () => {
     }, 100);
     return;
   }
-  instAdd.hostname = "";
-  instAdd.serverName = "";
-  instAdd.port = "";
+
+  if (!addModalStore.isOpen) {
+    // Reset values
+    instAdd.hostname = "";
+    instAdd.serverName = "";
+    instAdd.port = "";
+    instAdd.resetCount++;
+  }
 });
 
 const instAdd = reactive({
   isPend: false,
   isErr: false,
   data: [],
+  resetCount: 0,
   hostname: "",
   serverName: "",
   port: "",
@@ -82,7 +88,7 @@ async function addInstance() {
           class="flex w-full col-span-12"
           :label="$t('instances_hostname')"
           name="add-hostname"
-          :key="instAdd.hostname"
+          :key="instAdd.resetCount"
         >
           <SettingsInput
             @inp="(v) => (instAdd.hostname = v)"
@@ -99,7 +105,7 @@ async function addInstance() {
           class="flex w-full col-span-12"
           :label="$t('instances_server_name')"
           name="add-server-name"
-          :key="instAdd.serverName"
+          :key="instAdd.resetCount"
         >
           <SettingsInput
             @inp="(v) => (instAdd.serverName = v)"
@@ -116,7 +122,7 @@ async function addInstance() {
           class="flex w-full col-span-12"
           :label="$t('instances_port')"
           name="add-port"
-          :key="instAdd.port"
+          :key="instAdd.resetCount"
         >
           <SettingsInput
             @inp="(v) => (instAdd.port = v)"

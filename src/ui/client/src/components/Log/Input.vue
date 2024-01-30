@@ -73,6 +73,7 @@ onMounted(() => {
     {{ props.label }}
   </label>
   <input
+    tabindex="0"
     ref="inpEl"
     v-model="inp.value"
     @input="(e) => $emit('inp', inp.value)"
