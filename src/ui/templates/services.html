@@ -1,8 +1,9 @@
 {% extends "base.html" %} {% block content %}
 <!-- actions -->
-<div
+<div  data-services-service
   class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border"
 >
+<div data-is-draft class="hidden" data-value="no"></div>
   <button
   data-services-action="new"
   data-services-name="service"

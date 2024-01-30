@@ -3,6 +3,7 @@
 {% set global_config = config["CONFIG"].get_config() %}
 {% set plugins = config["CONFIG"].get_plugins() %}
 <!-- plugin item -->
+
 {% for plugin in plugins %}
 
 <div
@@ -12,11 +13,31 @@ data-plugin-item="{{plugin['id']}}"
 >
   <!-- title and desc -->
   <div class="col-span-12" data-setting-header>
-    <h5
-      class="transition duration-300 ease-in-out ml-2 font-bold text-md uppercase dark:text-white/90 mb-0"
-    >
-      {{plugin['name']}} <span>{{plugin['version']}}</span>
-    </h5>
+    <div class="flex justify-start items-center">
+      <h5
+        class="transition duration-300 ease-in-out ml-2 font-bold text-md uppercase dark:text-white/90 mb-0"
+      >
+        {{plugin['name']}} <span>{{plugin['version']}}</span>
+      </h5>
+      {% if plugin['page']%}
+      <a
+        target="_blank"
+        aria-label="plugin page link"
+        class="hover:-translate-y-px mx-2"
+        href="{{request.url_root}}plugins?plugin_id={{plugin['id']}}"
+      >
+        <svg
+          class="h-5 w-5 fill-sky-500 dark dark:brightness-90"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 448 512"
+        >
+          <path
+            d="M288 32c-17.7 0-32 14.3-32 32s14.3 32 32 32h50.7L169.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L384 141.3V192c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-17.7-14.3-32-32-32H288zM80 64C35.8 64 0 99.8 0 144V400c0 44.2 35.8 80 80 80H336c44.2 0 80-35.8 80-80V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v80c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16V144c0-8.8 7.2-16 16-16h80c17.7 0 32-14.3 32-32s-14.3-32-32-32H80z"
+          ></path>
+        </svg>
+      </a>
+      {%endif%}
+    </div>
     <div
       class="transition duration-300 ease-in-out dark:opacity-90 ml-2 text-sm mb-2 dark:text-gray-400"
     >
@@ -29,6 +50,7 @@ data-plugin-item="{{plugin['id']}}"
     {% for setting, value in plugin["settings"].items() %}{% if setting != "IS_LOADING" and current_endpoint
     == "global-config" and value['context'] == "global" and not value['multiple'] or current_endpoint ==
     "services" and value['context'] == "multisite" and not value['multiple'] %}
+
     <div    data-setting-container
       class="mx-0 sm:mx-4  my-2 col-span-12 md:mx-6 md:my-3 md:col-span-6 2xl:mx-6 2xl:my-3 2xl:col-span-4"
       id="form-edit-{{current_endpoint}}-{{ value["id"] }}">
