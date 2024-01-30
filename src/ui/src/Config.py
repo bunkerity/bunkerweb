@@ -36,6 +36,9 @@ class Config:
         plugins_settings = self.get_plugins_settings()
         for service in services_conf:
             server_name = service["SERVER_NAME"].split(" ")[0]
+            if not server_name:
+                continue
+
             for k in service:
                 key_without_server_name = k.replace(f"{server_name}_", "")
                 if plugins_settings[key_without_server_name]["context"] != "global" if key_without_server_name in plugins_settings else True:
