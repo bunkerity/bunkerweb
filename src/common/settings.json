@@ -3,8 +3,8 @@
     "context": "global",
     "default": "no",
     "help": "Internal use : set to yes when BW is loading.",
-    "id": "internal-use",
-    "label": "internal use",
+    "id": "internal-use-loading",
+    "label": "internal use loading",
     "regex": "^(yes|no)$",
     "type": "check"
   },
@@ -286,6 +286,15 @@
     "help": "Enable IPv6 connectivity.",
     "id": "use-ipv6",
     "label": "Use IPv6",
+    "regex": "^(yes|no)$",
+    "type": "check"
+  },
+  "IS_DRAFT": {
+    "context": "multisite",
+    "default": "no",
+    "help": "Internal use : set to yes when the service is in draft mode.",
+    "id": "internal-use-draft",
+    "label": "internal use draft",
     "regex": "^(yes|no)$",
     "type": "check"
   }

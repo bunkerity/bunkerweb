@@ -98,7 +98,7 @@ class Config:
     def get_settings(self) -> dict:
         return self.__settings
 
-    def get_config(self, methods: bool = True) -> dict:
+    def get_config(self, methods: bool = True, with_drafts: bool = False) -> dict:
         """Get the nginx variables env file and returns it as a dict
 
         Returns
@@ -106,9 +106,9 @@ class Config:
         dict
             The nginx variables env file as a dict
         """
-        return self.__db.get_config(methods=methods)
+        return self.__db.get_config(methods=methods, with_drafts=with_drafts)
 
-    def get_services(self, methods: bool = True) -> list[dict]:
+    def get_services(self, methods: bool = True, with_drafts: bool = False) -> list[dict]:
         """Get nginx's services
 
         Returns
@@ -116,7 +116,7 @@ class Config:
         list
             The services
         """
-        return self.__db.get_services_settings(methods=methods)
+        return self.__db.get_services_settings(methods=methods, with_drafts=with_drafts)
 
     def check_variables(self, variables: dict, _global: bool = False) -> int:
         """Testify that the variables passed are valid
@@ -163,7 +163,7 @@ class Config:
     def reload_config(self) -> None:
         self.__gen_conf(self.get_config(methods=False), self.get_services(methods=False))
 
-    def new_service(self, variables: dict) -> Tuple[str, int]:
+    def new_service(self, variables: dict, is_draft: bool = False) -> Tuple[str, int]:
         """Creates a new service from the given variables
 
         Parameters
@@ -181,23 +181,17 @@ class Config:
         Exception
             raise this if the service already exists
         """
-        services = self.get_services(methods=False)
+        services = self.get_services(methods=False, with_drafts=True)
         server_name_splitted = variables["SERVER_NAME"].split(" ")
         for service in services:
             if service["SERVER_NAME"] == variables["SERVER_NAME"] or service["SERVER_NAME"] in server_name_splitted:
-                return (
-                    f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
-                    1,
-                )
+                return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
 
-        services.append(variables)
-        self.__gen_conf(self.get_config(methods=False), services)
-        return (
-            f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.",
-            0,
-        )
+        services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
+        self.__gen_conf(self.get_config(methods=False), services, check_changes=not is_draft)
+        return f"Configuration for {variables['SERVER_NAME'].split(' ')[0]} has been generated.", 0
 
-    def edit_service(self, old_server_name: str, variables: dict, *, check_changes: bool = True) -> Tuple[str, int]:
+    def edit_service(self, old_server_name: str, variables: dict, *, check_changes: bool = True, is_draft: bool = False) -> Tuple[str, int]:
         """Edits a service
 
         Parameters
@@ -212,22 +206,19 @@ class Config:
         str
             the confirmation message
         """
-        services = self.get_services(methods=False)
+        services = self.get_services(methods=False, with_drafts=True)
         changed_server_name = old_server_name != variables["SERVER_NAME"]
         server_name_splitted = variables["SERVER_NAME"].split(" ")
         old_server_name_splitted = old_server_name.split(" ")
         for i, service in enumerate(deepcopy(services)):
             if service["SERVER_NAME"] == variables["SERVER_NAME"] or service["SERVER_NAME"] in server_name_splitted:
                 if changed_server_name and service["SERVER_NAME"].split(" ")[0] != old_server_name_splitted[0]:
-                    return (
-                        f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.",
-                        1,
-                    )
+                    return f"Service {service['SERVER_NAME'].split(' ')[0]} already exists.", 1
                 services.pop(i)
             elif changed_server_name and (service["SERVER_NAME"] == old_server_name or service["SERVER_NAME"] in old_server_name_splitted):
                 services.pop(i)
 
-        services.append(variables)
+        services.append(variables | {"IS_DRAFT": "yes" if is_draft else "no"})
         config = self.get_config(methods=False)
 
         if changed_server_name and server_name_splitted[0] != old_server_name_splitted[0]:
@@ -236,10 +227,7 @@ class Config:
                     config.pop(k)
 
         self.__gen_conf(config, services, check_changes=check_changes)
-        return (
-            f"Configuration for {old_server_name_splitted[0]} has been edited.",
-            0,
-        )
+        return f"Configuration for {old_server_name_splitted[0]} has been edited.", 0
 
     def edit_global_conf(self, variables: dict) -> str:
         """Edits the global conf
@@ -277,7 +265,7 @@ class Config:
         """
         service_name = service_name.split(" ")[0]
         full_env = self.get_config(methods=False)
-        services = self.get_services(methods=False)
+        services = self.get_services(methods=False, with_drafts=True)
         new_services = []
         found = False
 

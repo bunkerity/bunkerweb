@@ -621,23 +621,42 @@ class Database:
 
             if config:
                 config.pop("DATABASE_URI", None)
-                db_services = session.query(Services).with_entities(Services.id, Services.method).all()
-                db_ids = [service.id for service in db_services]
+                db_services = session.query(Services).with_entities(Services.id, Services.method, Services.is_draft).all()
+                db_ids: Dict[str, dict] = {service.id: {"method": service.method, "is_draft": service.is_draft} for service in db_services}
+                missing_ids = []
                 services = config.get("SERVER_NAME", [])
 
                 if isinstance(services, str):
                     services = services.split(" ")
 
                 if db_services:
-                    missing_ids = [service.id for service in db_services if (service.method == method) and service.id not in services]
+                    missing_ids = [service.id for service in db_services if service.method == method and service.id not in services]
 
                     if missing_ids:
                         # Remove services that are no longer in the list
                         session.query(Services).filter(Services.id.in_(missing_ids)).delete()
 
+                drafts = {service for service in services if config.pop(f"{service}_IS_DRAFT", "no") == "yes"}
+                db_drafts = {service.id for service in db_services if service.is_draft}
+
+                if db_drafts:
+                    missing_drafts = [service.id for service in db_services if service.method == method and service.id not in drafts and service.id not in missing_ids]
+
+                    if missing_drafts:
+                        # Remove drafts that are no longer in the list
+                        session.query(Services).filter(Services.id.in_(missing_drafts)).update({Services.is_draft: False})
+
+                for draft in drafts:
+                    if draft not in db_drafts:
+                        if draft not in db_ids:
+                            to_put.append(Services(id=draft, method=method, is_draft=True))
+                            db_ids[draft] = {"method": method, "is_draft": True}
+                        elif method == db_ids[draft]["method"]:
+                            session.query(Services).filter(Services.id == draft).update({Services.is_draft: True})
+
                 if config.get("MULTISITE", "no") == "yes":
                     global_values = []
-                    for key, value in deepcopy(config).items():
+                    for key, value in config.copy().items():
                         suffix = 0
                         original_key = deepcopy(key)
                         if self.suffix_rx.search(key):
@@ -653,8 +672,8 @@ class Database:
                                 continue
 
                             if server_name not in db_ids:
-                                to_put.append(Services(id=server_name, method=method))
-                                db_ids.append(server_name)
+                                to_put.append(Services(id=server_name, method=method, is_draft=server_name in drafts))
+                                db_ids[server_name] = {"method": method, "is_draft": server_name in drafts}
 
                             key = key.replace(f"{server_name}_", "")
                             setting = session.query(Settings).with_entities(Settings.default).filter_by(id=key).first()
@@ -886,7 +905,7 @@ class Database:
 
         return message
 
-    def get_config(self, methods: bool = False) -> Dict[str, Any]:
+    def get_config(self, methods: bool = False, with_drafts: bool = False) -> Dict[str, Any]:
         """Get the config from the database"""
         with self.__db_session() as session:
             config = {}
@@ -922,8 +941,14 @@ class Database:
 
             is_multisite = config.get("MULTISITE", {"value": "no"})["value"] == "yes" if methods else config.get("MULTISITE", "no") == "yes"
 
+            if with_drafts:
+                services = session.query(Services).with_entities(Services.id, Services.is_draft).all()
+            else:
+                services = session.query(Services).with_entities(Services.id, Services.is_draft).filter_by(is_draft=False).all()
+
             if is_multisite:
-                for service in session.query(Services).with_entities(Services.id).all():
+                for service in services:
+                    config[f"{service.id}_IS_DRAFT"] = "yes" if service.is_draft else "no"
                     checked_settings = []
                     for key, value in deepcopy(config).items():
                         original_key = key
@@ -962,7 +987,7 @@ class Database:
                                 }
                             )
 
-            servers = " ".join(service.id for service in session.query(Services).all())
+            servers = " ".join(service.id for service in services)
             config["SERVER_NAME"] = servers if not methods else {"value": servers, "global": True, "method": "default"}
 
             return config
@@ -991,35 +1016,26 @@ class Database:
                 )
             ]
 
-    def get_services_settings(self, methods: bool = False) -> List[Dict[str, Any]]:
+    def get_services_settings(self, methods: bool = False, with_drafts: bool = False) -> List[Dict[str, Any]]:
         """Get the services' configs from the database"""
         services = []
-        config = self.get_config(methods=methods)
-        with self.__db_session() as session:
-            service_names = [service.id for service in session.query(Services).with_entities(Services.id).all()]
-            for service in service_names:
-                service_settings = []
-                tmp_config = deepcopy(config)
+        config = self.get_config(methods=methods, with_drafts=with_drafts)
+        service_names = config["SERVER_NAME"]["value"].split(" ") if methods else config["SERVER_NAME"].split(" ")
+        for service in service_names:
+            service_settings = []
+            tmp_config = deepcopy(config)
 
-                for key, value in deepcopy(tmp_config).items():
-                    if key.startswith(f"{service}_"):
-                        setting = key.replace(f"{service}_", "")
-                        service_settings.append(setting)
-                        tmp_config[setting] = tmp_config.pop(key)
-                    elif any(key.startswith(f"{s}_") for s in service_names):
-                        tmp_config.pop(key)
-                    elif key not in service_settings:
-                        tmp_config[key] = (
-                            {
-                                "value": value["value"],
-                                "global": value["global"],
-                                "method": value["method"],
-                            }
-                            if methods
-                            else value
-                        )
+            for key, value in deepcopy(tmp_config).items():
+                if key.startswith(f"{service}_"):
+                    setting = key.replace(f"{service}_", "")
+                    service_settings.append(setting)
+                    tmp_config[setting] = tmp_config.pop(key)
+                elif any(key.startswith(f"{s}_") for s in service_names):
+                    tmp_config.pop(key)
+                elif key not in service_settings:
+                    tmp_config[key] = {"value": value["value"], "global": value["global"], "method": value["method"]} if methods else value
 
-                services.append(tmp_config)
+            services.append(tmp_config)
 
         return services
 
