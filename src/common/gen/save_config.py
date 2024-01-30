@@ -58,7 +58,7 @@ def get_instance_configs_and_apis(instance: Any, db, _type="Docker"):
 
     apis.append(
         API(
-            f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+            f"http://{getenv("API_HTTP_HOST", instance.name)}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
             host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
         )
     )
@@ -251,7 +251,7 @@ if __name__ == "__main__":
 
                 apis.append(
                     API(
-                        f"http://{instance.name}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
+                        f"http://{getenv("API_HTTP_HOST", instance.name)}:{api_http_port or getenv('API_HTTP_PORT', '5000')}",
                         host=api_server_name or getenv("API_SERVER_NAME", "bwapi"),
                     )
                 )
@@ -365,8 +365,9 @@ if __name__ == "__main__":
                             changes.append("instances")
                         logger.info(f"Instance {endpoint_data[0]} successfully saved to database")
             else:
+                apihost = getenv("API_HTTP_HOST", config_files.get("API_HTTP_HOST", "127.0.0.1"))
                 err = db.add_instance(
-                    "127.0.0.1",
+                    apihost,
                     config_files.get("API_HTTP_PORT", 5000),
                     config_files.get("API_SERVER_NAME", "bwapi"),
                     changed=False,
@@ -376,7 +377,7 @@ if __name__ == "__main__":
                     logger.warning(err)
                 else:
                     changes.append("instances")
-                    logger.info("Instance 127.0.0.1 successfully saved to database")
+                    logger.info(f"Instance {apihost} successfully saved to database")
 
         if not args.no_check_changes:
             # update changes in db
