@@ -386,7 +386,6 @@ class Database:
                 for plugin in plugins:
                     settings = {}
                     jobs = []
-                    page = False
                     if "id" not in plugin:
                         settings = plugin
                         plugin = {
@@ -400,7 +399,7 @@ class Database:
                     else:
                         settings = plugin.pop("settings", {})
                         jobs = plugin.pop("jobs", [])
-                        page = plugin.pop("page", False)
+                        plugin.pop("page", False)
 
                     db_plugin = session.query(Plugins).filter_by(id=plugin["id"]).first()
                     if db_plugin:
@@ -549,61 +548,60 @@ class Database:
                                 session.query(Jobs_cache).filter(Jobs_cache.job_name == job["name"]).delete()
                                 session.query(Jobs).filter(Jobs.name == job["name"]).update(updates)
 
-                    if page:
-                        core_ui_path = Path(sep, "usr", "share", "bunkerweb", "core", plugin["id"], "ui")
-                        path_ui = core_ui_path if core_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
+                    core_ui_path = Path(sep, "usr", "share", "bunkerweb", "core", plugin["id"], "ui")
+                    path_ui = core_ui_path if core_ui_path.exists() else Path(sep, "etc", "bunkerweb", "plugins", plugin["id"], "ui")
 
-                        if path_ui.exists():
-                            if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
-                                db_plugin_page = (
-                                    session.query(Plugin_pages)
-                                    .with_entities(
-                                        Plugin_pages.template_checksum,
-                                        Plugin_pages.actions_checksum,
-                                    )
-                                    .filter_by(plugin_id=plugin["id"])
-                                    .first()
+                    if path_ui.exists():
+                        if {"template.html", "actions.py"}.issubset(listdir(str(path_ui))):
+                            db_plugin_page = (
+                                session.query(Plugin_pages)
+                                .with_entities(
+                                    Plugin_pages.template_checksum,
+                                    Plugin_pages.actions_checksum,
                                 )
-                                template = path_ui.joinpath("template.html").read_bytes()
-                                actions = path_ui.joinpath("actions.py").read_bytes()
-                                template_checksum = sha256(template).hexdigest()
-                                actions_checksum = sha256(actions).hexdigest()
+                                .filter_by(plugin_id=plugin["id"])
+                                .first()
+                            )
+                            template = path_ui.joinpath("template.html").read_bytes()
+                            actions = path_ui.joinpath("actions.py").read_bytes()
+                            template_checksum = sha256(template).hexdigest()
+                            actions_checksum = sha256(actions).hexdigest()
 
-                                if db_plugin_page:
-                                    updates = {}
-                                    if template_checksum != db_plugin_page.template_checksum:
-                                        updates.update(
-                                            {
-                                                Plugin_pages.template_file: template,
-                                                Plugin_pages.template_checksum: template_checksum,
-                                            }
-                                        )
-
-                                    if actions_checksum != db_plugin_page.actions_checksum:
-                                        updates.update(
-                                            {
-                                                Plugin_pages.actions_file: actions,
-                                                Plugin_pages.actions_checksum: actions_checksum,
-                                            }
-                                        )
-
-                                    if updates:
-                                        self.__logger.warning(f'Page for plugin "{plugin["id"]}" already exists, updating it with the new values')
-                                        session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(updates)
-                                    continue
-
-                                if db_plugin:
-                                    self.__logger.warning(f'Page for plugin "{plugin["id"]}" does not exist, creating it')
-
-                                to_put.append(
-                                    Plugin_pages(
-                                        plugin_id=plugin["id"],
-                                        template_file=template,
-                                        template_checksum=template_checksum,
-                                        actions_file=actions,
-                                        actions_checksum=actions_checksum,
+                            if db_plugin_page:
+                                updates = {}
+                                if template_checksum != db_plugin_page.template_checksum:
+                                    updates.update(
+                                        {
+                                            Plugin_pages.template_file: template,
+                                            Plugin_pages.template_checksum: template_checksum,
+                                        }
                                     )
+
+                                if actions_checksum != db_plugin_page.actions_checksum:
+                                    updates.update(
+                                        {
+                                            Plugin_pages.actions_file: actions,
+                                            Plugin_pages.actions_checksum: actions_checksum,
+                                        }
+                                    )
+
+                                if updates:
+                                    self.__logger.warning(f'Page for plugin "{plugin["id"]}" already exists, updating it with the new values')
+                                    session.query(Plugin_pages).filter(Plugin_pages.plugin_id == plugin["id"]).update(updates)
+                                continue
+
+                            if db_plugin:
+                                self.__logger.warning(f'Page for plugin "{plugin["id"]}" does not exist, creating it')
+
+                            to_put.append(
+                                Plugin_pages(
+                                    plugin_id=plugin["id"],
+                                    template_file=template,
+                                    template_checksum=template_checksum,
+                                    actions_file=actions,
+                                    actions_checksum=actions_checksum,
                                 )
+                            )
 
             try:
                 session.add_all(to_put)
