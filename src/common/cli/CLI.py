@@ -258,7 +258,13 @@ class CLI(ApiCaller):
                 cli_str += "No ban found\n"
 
             for ban in bans:
-                cli_str += f"- {ban['ip']} ; banned the {datetime.fromtimestamp(ban['date']).strftime('%d-%m-%Y at %H:%M:%S')} for {format_remaining_time(ban['exp'])} remaining with reason \"{ban.get('reason', 'no reason given')}\"\n"
+                banned_date = ""
+                remaining = "for eternity"
+                if ban["date"] != -1:
+                    banned_date = f"the {datetime.fromtimestamp(ban['date']).strftime('%d-%m-%Y at %H:%M:%S')} "
+                if ban["exp"] != -1:
+                    remaining = f"for {format_remaining_time(ban['exp'])} remaining"
+                cli_str += f"- {ban['ip']} ; banned {banned_date}{remaining} with reason \"{ban.get('reason', 'no reason given')}\"\n"
             cli_str += "\n"
 
         return True, cli_str
