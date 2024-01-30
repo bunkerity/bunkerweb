@@ -476,6 +476,20 @@ do
         sed -i 's@bunkerity/bunkerweb:.*$@bunkerity/bunkerweb:'"$older_version"'@' docker-compose.yml
         sed -i 's@bunkerity/bunkerweb-scheduler:.*$@bunkerity/bunkerweb-scheduler:'"$older_version"'@' docker-compose.yml
 
+        docker pull bunkerity/bunkerweb:"$older_version"
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            echo "💾 Pull for bunkerweb:$older_version failed ❌"
+            exit 1
+        fi
+
+        docker pull bunkerity/bunkerweb-scheduler:"$older_version"
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ] ; then
+            echo "💾 Pull for bunkerweb-scheduler:$older_version failed ❌"
+            exit 1
+        fi
+
         starting_stack
 
         waiting_stack
