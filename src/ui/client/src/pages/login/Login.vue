@@ -3,6 +3,7 @@ import Loader from "@components/Loader.vue";
 import LangSwitch from "@components/LangSwitch.vue";
 import LogInpGroup from "@components/Log/InpGroup.vue";
 import LogInput from "@components/Log/Input.vue";
+import LogLabel from "@components/Log/Label.vue";
 import FeedbackAlert from "@components/Feedback/Alert.vue";
 import { onMounted, reactive } from "vue";
 
@@ -82,10 +83,10 @@ onMounted(() => {
 <template>
   <Loader />
   <LangSwitch />
-  <div class="logout-alert-container">
+  <div>
     <FeedbackAlert
       @close="data.isErr = false"
-      id="logout-error"
+      id="log-error"
       type="error"
       status="403"
       :message="$t('login_error')"
@@ -109,6 +110,7 @@ onMounted(() => {
         <form action="/login" method="POST" autocomplete="off">
           <!-- username inpt-->
           <LogInpGroup>
+            <LogLabel name="username" :label="$t('login_username')" />
             <LogInput
               :label="$t('login_username')"
               name="username"
@@ -121,6 +123,7 @@ onMounted(() => {
           <!-- end username inpt-->
           <!-- password inpt-->
           <LogInpGroup>
+            <LogLabel name="password" :label="$t('login_password')" />
             <LogInput
               :label="$t('login_password')"
               name="password"
@@ -136,7 +139,7 @@ onMounted(() => {
               type="submit"
               id="login"
               name="login"
-              class="logout-submit-btn"
+              class="log-submit-btn"
             >
               {{ $t("login_log_button") }}
             </button>

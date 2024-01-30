@@ -1,7 +1,6 @@
 <script setup>
-import { reactive, defineProps } from "vue";
+import { reactive, defineProps, onMounted, ref } from "vue";
 import { contentIndex } from "@utils/tabindex.js";
-import { onMounted, ref } from "vue";
 
 const props = defineProps({
   // id && value && method

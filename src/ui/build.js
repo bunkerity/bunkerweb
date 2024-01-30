@@ -4,6 +4,7 @@ const fs = require("fs");
 
 const clientBuildDir = "static";
 const setupBuildDir = "setup/output";
+const corePluginsPath = resolve("../common/core");
 
 // Run subprocess command on specific dir
 function runCommand(dir, command) {
@@ -19,7 +20,7 @@ function runCommand(dir, command) {
           isErr = true;
           console.log(`exec error: ${err}`);
         }
-      },
+      }
     );
   } catch (err) {
     isErr = true;
@@ -42,9 +43,9 @@ function buildVite(dir) {
 // CLIENT : Change dir structure
 function updateClientDir() {
   let isErr = false;
-  const srcDir = resolve(__dirname + `/${clientBuildDir}/src/pages`);
-  const destDir = resolve(__dirname + `/${clientBuildDir}/templates`);
-  const dirToRem = resolve(__dirname + `/${clientBuildDir}/src`);
+  const srcDir = resolve(`./${clientBuildDir}/src/pages`);
+  const destDir = resolve(`./${clientBuildDir}/templates`);
+  const dirToRem = resolve(`./${clientBuildDir}/src`);
 
   try {
     // Change dir position for html
@@ -56,20 +57,18 @@ function updateClientDir() {
     fs.rmSync(dirToRem, { recursive: true, force: true });
     // Change templates/page/index.html by templates/{page_name}.html
     // And move from static to templates
-    const templateDir = resolve(__dirname + `/${clientBuildDir}/templates`);
+    const templateDir = resolve(`./${clientBuildDir}/templates`);
 
     fs.readdir(templateDir, (err, subdirs) => {
       subdirs.forEach((subdir) => {
         // Get absolute path of current subdir
-        const currPath = resolve(
-          __dirname + `/${clientBuildDir}/templates/${subdir}`,
-        );
+        const currPath = resolve(`./${clientBuildDir}/templates/${subdir}`);
         // Rename index.html by subdir name
         fs.renameSync(`${currPath}/index.html`, `${currPath}/${subdir}.html`);
         // Copy file to move it from /template/page to /template
         fs.copyFileSync(
           `${currPath}/${subdir}.html`,
-          resolve(__dirname + `/static/${subdir}.html`),
+          resolve(`./static/${subdir}.html`)
         );
       });
       fs.rmSync(templateDir, { recursive: true, force: true });
@@ -81,10 +80,10 @@ function updateClientDir() {
 }
 
 // SETUP : rename and move to /static as html file
-function updateSetupDir() {
+function setSetup() {
   let isErr = false;
-  const srcDir = resolve(__dirname + `/${setupBuildDir}`);
-  const destDir = resolve(__dirname + `/${clientBuildDir}`);
+  const srcDir = resolve(`./${setupBuildDir}`);
+  const destDir = resolve(`./${clientBuildDir}`);
 
   try {
     // Copy file from src to dest
@@ -92,6 +91,30 @@ function updateSetupDir() {
   } catch (err) {
     isErr = true;
   }
+  return isErr;
+}
+
+// CORE PLUGINS TEMPLATES : rename and move to /static html file
+function setCorePlugins() {
+  let isErr = false;
+  const destDir = resolve(`./${clientBuildDir}`);
+
+  // Loop inside every core plugins
+  fs.readdirSync(corePluginsPath).forEach((coreDir) => {
+    const coreFolderName = coreDir; // need to be same as core plugin id
+    const corePath = resolve(corePluginsPath, `./${coreFolderName}`);
+    const coreTemplate = resolve(corePath, "./ui/index.html");
+
+    if (!fs.existsSync(coreTemplate)) return;
+
+    try {
+      // Copy file from src to dest
+      fs.copyFileSync(coreTemplate, `${destDir}/${coreFolderName}.html`);
+    } catch (err) {
+      isErr = true;
+    }
+  });
+
   return isErr;
 }
 
@@ -106,10 +129,14 @@ if (buildSetupErr)
 const isUpdateDirErr = updateClientDir();
 if (isUpdateDirErr)
   return console.log(
-    "Error while changing client dir structure. Impossible to continue.",
+    "Error while changing client dir structure. Impossible to continue."
   );
-const isUpdateSetupErr = updateSetupDir();
+const isUpdateSetupErr = setSetup();
 if (isUpdateSetupErr)
   return console.log(
-    "Error while changing setup dir structure. Impossible to continue.",
+    "Error while changing setup dir structure. Impossible to continue."
   );
+const setCore = setCorePlugins();
+if (setCore) {
+  return console.log("Error while getting core plugins templates.");
+}

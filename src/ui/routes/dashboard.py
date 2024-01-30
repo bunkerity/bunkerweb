@@ -159,6 +159,14 @@ def sitemap():
     return render_template("sitemap.html")
 
 
+@dashboard.route(f"{PREFIX}/plugins/<string:plugin_id>", methods=["GET"])
+@jwt_required()
+@jwt_additionnal_checks()
+@hooks(hooks=["BeforeAccessPage", "AfterAccessPage"])
+def plugin_page(plugin_id):
+    return render_template(f"{plugin_id}.html")
+
+
 @dashboard.route(f"{PREFIX}/<string:page>", methods=["GET"])
 @jwt_required()
 @jwt_additionnal_checks()
