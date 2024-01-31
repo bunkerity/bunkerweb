@@ -117,7 +117,7 @@
     init() {
       window.addEventListener("DOMContentLoaded", () => {
         // Set default values and fetch
-        updateDataDOM();
+        this.updateDataDOM();
         this.updateAlert("fetch");
 
         fetch("/antibot", {
@@ -182,11 +182,11 @@
         this.alertEl.classList.remove("bg-green-500");
         this.alertEl.classList.add("bg-red-500");
       }
-      // Hide alert after an amount of time
+
       this.alertEl.classList.remove("hidden");
-      setTimeout(() => {
-        this.alertEl.classList.add("hidden");
-      }, 5000);
+
+      if (type !== "fetch")
+        setTimeout(() => this.alertEl.classList.add("hidden"), 5000);
     }
   }
 
