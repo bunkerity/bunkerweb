@@ -66,13 +66,9 @@
   data-fetch
   class="bg-sky-500 p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border"
 >
-  <button
-    data-fetch-close
-    role="close alert message"
-    class="absolute right-7 top-1.5"
-  >
+  <button data-fetch-close class="absolute right-7 top-1.5">
     <svg
-      class="cursor-pointer fill-gray-300 dark:opacity-80 absolute h-5 w-5"
+      class="cursor-pointer fill-white dark:fill-gray-300 dark:opacity-80 absolute h-5 w-5"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 320 512"
     >
@@ -127,15 +123,18 @@
         this.updateDataDOM();
         this.updateAlert("fetch");
 
-        fetch("/antibot", {
+        fetch(location.href, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "X-CSRFToken": "{{ csrf_token() }}",
           },
         })
-          .then((response) => response.json())
+          .then((res) => res.json())
           .then((res) => {
+            console.log(res);
+            console.log(res.data);
+            console.log(res.data.data);
             // Update data and DOM
             this.getFetchDataByKey(res.data);
             this.updateDataDOM();
@@ -149,6 +148,7 @@
             this.updateAlert("success");
           })
           .catch((error) => {
+            console.log(error);
             this.updateAlert("error");
           });
       });

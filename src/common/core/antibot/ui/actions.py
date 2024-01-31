@@ -1,3 +1,5 @@
-# Spoofing an action file
+import json
+
+
 def antibot():
-    return {"message": "ok", "data": {"info": "test", "count": 24}}
+    return json.dumps({"message": "ok", "data": {"info": "test", "count": 24}})
