@@ -1,4 +1,4 @@
-{% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip()
+{% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip()
 %}
 
 <head>

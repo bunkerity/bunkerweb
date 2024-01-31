@@ -1260,7 +1260,7 @@ def upload_plugin():
 
 @app.route("/plugins/<plugin>", methods=["GET", "POST"])
 @login_required
-def custom_plugin(plugin):
+def custom_plugin(plugin: str):
     message = ""
     if not plugin_id_rx.match(plugin):
         message = f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'
@@ -1270,14 +1270,14 @@ def custom_plugin(plugin):
         return {"message": f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'}, 400
 
     if request.method == "GET":
-        plugin_id = request.args.get("plugin_id")
-        page = db.get_plugin_template(plugin_id)
+        page = db.get_plugin_template(plugin)
 
         if page:
             return render_template(
                 Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
                 dark_mode=app.config["DARK_MODE"],
                 username=current_user.get_id(),
+                current_endpoint=plugin,
                 **app.jinja_env.globals,
             )
 
