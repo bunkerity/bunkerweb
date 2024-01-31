@@ -1,53 +1,39 @@
 # vim:set ts=4 sts=4 sw=4 et ft=:
 
-use Test::Nginx::Socket::Lua;
-use Cwd qw(cwd);
+use strict;
 use lib '.';
-use t::Util;
+use t::TestMLCache;
 
-no_long_string();
+add_block_preprocessor(sub {
+    my $block = shift;
+
+    if (!defined $block->no_error_log) {
+        $block->set_value("no_error_log", qq{[error]
+[crit]
+[alert]
+[emerg]
+stub
+stub
+stub
+stub
+stub
+});
+    }
+});
 
 workers(2);
-
 #repeat_each(2);
 
-plan tests => repeat_each() * ((blocks() * 3) + 12 * 3); # n * 3 -> for debug error_log concurrency tests
 
-my $pwd = cwd();
-
-our $HttpConfig = qq{
-    lua_package_path "$pwd/lib/?.lua;;";
-    lua_shared_dict  cache_shm      1m;
-    #lua_shared_dict  cache_shm_miss 1m;
-
-    init_by_lua_block {
-        -- local verbose = true
-        local verbose = false
-        local outfile = "$Test::Nginx::Util::ErrLogFile"
-        -- local outfile = "/tmp/v.log"
-        if verbose then
-            local dump = require "jit.dump"
-            dump.on(nil, outfile)
-        else
-            local v = require "jit.v"
-            v.on(outfile)
-        end
-
-        require "resty.core"
-        -- jit.opt.start("hotloop=1")
-        -- jit.opt.start("loopunroll=1000000")
-        -- jit.off()
-    }
-};
+plan tests => repeat_each() * blocks() * 11;
 
 run_tests();
 
 __DATA__
 
 === TEST 1: get_bulk() validates bulk
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -58,19 +44,14 @@ __DATA__
             end
         }
     }
---- request
-GET /t
 --- response_body
 bulk must be a table
---- no_error_log
-[error]
 
 
 
 === TEST 2: get_bulk() ensures bulk has n field
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -84,19 +65,14 @@ bulk must be a table
             end
         }
     }
---- request
-GET /t
 --- response_body
 bulk must have n field
---- no_error_log
-[error]
 
 
 
 === TEST 3: get_bulk() validates operations keys
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -111,19 +87,14 @@ bulk must have n field
             end
         }
     }
---- request
-GET /t
 --- response_body
 key at index 5 must be a string for operation 2 (got boolean)
---- no_error_log
-[error]
 
 
 
 === TEST 4: get_bulk() validates operations callbacks
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -147,20 +118,15 @@ key at index 5 must be a string for operation 2 (got boolean)
             end
         }
     }
---- request
-GET /t
 --- response_body
 callback at index 3 must be a function for operation 1 (got nil)
 callback at index 7 must be a function for operation 2 (got boolean)
---- no_error_log
-[error]
 
 
 
 === TEST 5: get_bulk() validates opts argument
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -188,20 +154,15 @@ callback at index 7 must be a function for operation 2 (got boolean)
             ngx.say("ok")
         }
     }
---- request
-GET /t
 --- response_body
 opts must be a table
 ok
---- no_error_log
-[error]
 
 
 
 === TEST 6: get_bulk() validates opts.concurrency
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -247,22 +208,17 @@ ok
             ngx.say("ok")
         }
     }
---- request
-GET /t
 --- response_body
 opts.concurrency must be a number
 opts.concurrency must be > 0
 opts.concurrency must be > 0
 ok
---- no_error_log
-[error]
 
 
 
 === TEST 7: get_bulk() multiple fetch L3
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -285,21 +241,16 @@ ok
             end
         }
     }
---- request
-GET /t
 --- response_body
 1 nil 3
 2 nil 3
 3 nil 3
---- no_error_log
-[error]
 
 
 
 === TEST 8: get_bulk() multiple fetch L2
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -330,21 +281,16 @@ GET /t
             end
         }
     }
---- request
-GET /t
 --- response_body
 1 nil 2
 2 nil 2
 3 nil 2
---- no_error_log
-[error]
 
 
 
 === TEST 9: get_bulk() multiple fetch L1
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -371,21 +317,16 @@ GET /t
             end
         }
     }
---- request
-GET /t
 --- response_body
 1 nil 1
 2 nil 1
 3 nil 1
---- no_error_log
-[error]
 
 
 
 === TEST 10: get_bulk() multiple fetch L1/single fetch L3
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -411,21 +352,16 @@ GET /t
             end
         }
     }
---- request
-GET /t
 --- response_body
 1 nil 1
 2 nil 1
 3 nil 3
---- no_error_log
-[error]
 
 
 
 === TEST 11: get_bulk() multiple fetch L1/single fetch L3 (with nils)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -453,21 +389,16 @@ GET /t
             end
         }
     }
---- request
-GET /t
 --- response_body
 nil nil 1
 nil nil 1
 nil nil 3
---- no_error_log
-[error]
 
 
 
 === TEST 12: get_bulk() mixed fetch L1/L2/L3
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -496,21 +427,16 @@ nil nil 3
             end
         }
     }
---- request
-GET /t
 --- response_body
 1 nil 1
 2 nil 2
 3 nil 3
---- no_error_log
-[error]
 
 
 
 === TEST 13: get_bulk() mixed fetch L1/L2/L3 (with nils)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -541,21 +467,16 @@ GET /t
             end
         }
     }
---- request
-GET /t
 --- response_body
 nil nil 1
 nil nil 2
 nil nil 3
---- no_error_log
-[error]
 
 
 
 === TEST 14: get_bulk() returns callback-returned errors
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -578,21 +499,16 @@ nil nil 3
             end
         }
     }
---- request
-GET /t
 --- response_body
 1 nil 3
 2 nil 3
 nil some error nil
---- no_error_log
-[error]
 
 
 
 === TEST 15: get_bulk() returns callback runtime errors
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -615,23 +531,18 @@ nil some error nil
             end
         }
     }
---- request
-GET /t
 --- response_body_like
 1 nil 3
 2 nil 3
 nil callback threw an error: some error
 stack traceback:
 .*? nil
---- no_error_log
-[error]
 
 
 
 === TEST 16: get_bulk() runs L3 callback on expired keys
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -663,20 +574,15 @@ stack traceback:
             end
         }
     }
---- request
-GET /t
 --- response_body
 2 nil 3
 3 nil 3
---- no_error_log
-[error]
 
 
 
 === TEST 17: get_bulk() honors ttl and neg_ttl instance attributes
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -707,23 +613,18 @@ GET /t
             ngx.say("key_b: ", value, " (ttl: ", ttl, ")")
         }
     }
---- request
-GET /t
 --- response_body
 1 nil 3
 nil nil 3
 
 key_a: 1 (ttl: 0.2)
 key_b: nil (ttl: 0.3)
---- no_error_log
-[error]
 
 
 
 === TEST 18: get_bulk() validates operations ttl and neg_ttl
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -747,20 +648,15 @@ key_b: nil (ttl: 0.3)
             end
         }
     }
---- request
-GET /t
 --- response_body
 options at index 2 for operation 1 are invalid: opts.ttl must be a number
 options at index 6 for operation 2 are invalid: opts.neg_ttl must be a number
---- no_error_log
-[error]
 
 
 
 === TEST 19: get_bulk() accepts ttl and neg_ttl for each operation
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -791,23 +687,18 @@ options at index 6 for operation 2 are invalid: opts.neg_ttl must be a number
             ngx.say("key_b: ", value, " (ttl: ", ttl, ")")
         }
     }
---- request
-GET /t
 --- response_body
 1 nil 3
 nil nil 3
 
 key_a: 1 (ttl: 0.4)
 key_b: nil (ttl: 0.8)
---- no_error_log
-[error]
 
 
 
 === TEST 20: get_bulk() honors ttl from callback return values
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -837,23 +728,18 @@ key_b: nil (ttl: 0.8)
             ngx.say("key_b: ", value, " (ttl: ", ttl, ")")
         }
     }
---- request
-GET /t
 --- response_body
 1 nil 3
 2 nil 3
 
 key_a: 1 (ttl: 0.2)
 key_b: 2 (ttl: 1)
---- no_error_log
-[error]
 
 
 
 === TEST 21: get_bulk() honors resurrect_ttl instance attribute
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -899,23 +785,18 @@ key_b: 2 (ttl: 1)
             ngx.say(string.format("key_b: %d ttl: %.2f", value, ttl))
         }
     }
---- request
-GET /t
 --- response_body_like
 1 nil 4
 3 nil 3
 
 key_a: 1 ttl: 0\.(?:2|1)\d+
 key_b: 3 ttl: 0\.(?:1|0)\d+
---- no_error_log
-[error]
 
 
 
 === TEST 22: get_bulk() accepts resurrect_ttl for each operation
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -961,23 +842,18 @@ key_b: 3 ttl: 0\.(?:1|0)\d+
             ngx.say(string.format("key_b: %d ttl: %.2f", value, ttl))
         }
     }
---- request
-GET /t
 --- response_body_like
 1 nil 4
 3 nil 3
 
 key_a: 1 ttl: 0\.(?:2|1)\d+
 key_b: 3 ttl: 0\.(?:1|0)\d+
---- no_error_log
-[error]
 
 
 
 === TEST 23: get_bulk() honors l1_serializer instance attribute
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -1003,20 +879,15 @@ key_b: 3 ttl: 0\.(?:1|0)\d+
             end
         }
     }
---- request
-GET /t
 --- response_body
 hello nil 3
 world nil 3
---- no_error_log
-[error]
 
 
 
 === TEST 24: get_bulk() accepts l1_serializer for each operation
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -1045,20 +916,15 @@ world nil 3
             end
         }
     }
---- request
-GET /t
 --- response_body
 hello nil 3
 world nil 3
---- no_error_log
-[error]
 
 
 
 === TEST 25: get_bulk() honors shm_set_tries instance attribute
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local dict = ngx.shared.cache_shm
             dict:flush_all()
@@ -1102,20 +968,15 @@ world nil 3
             end
         }
     }
---- request
-GET /t
 --- ignore_response_body
---- no_error_log
-[error]
 --- error_log
 could not write to lua_shared_dict 'cache_shm' after 1 tries (no memory)
 
 
 
 === TEST 26: get_bulk() accepts shm_set_tries for each operation
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local dict = ngx.shared.cache_shm
             dict:flush_all()
@@ -1159,20 +1020,15 @@ could not write to lua_shared_dict 'cache_shm' after 1 tries (no memory)
             end
         }
     }
---- request
-GET /t
 --- ignore_response_body
---- no_error_log
-[error]
 --- error_log
 could not write to lua_shared_dict 'cache_shm' after 1 tries (no memory)
 
 
 
 === TEST 27: get_bulk() operations wait on lock if another thread is fetching the same key
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache_1 = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -1225,8 +1081,6 @@ could not write to lua_shared_dict 'cache_shm' after 1 tries (no memory)
             end
         }
     }
---- request
-GET /t
 --- response_body
 t1
 hello 3
@@ -1234,15 +1088,12 @@ hello 3
 t2
 hello nil 3
 hello nil 2
---- no_error_log
-[error]
 
 
 
 === TEST 28: get_bulk() operations reports timeout on lock if another thread is fetching the same key
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache_1 = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -1297,8 +1148,6 @@ hello nil 2
             end
         }
     }
---- request
-GET /t
 --- response_body
 t1
 hello 3
@@ -1306,16 +1155,13 @@ hello 3
 t2
 hello nil 3
 nil could not acquire callback lock: timeout nil
---- no_error_log
-[error]
 
 
 
 === TEST 29: get_bulk() opts.concurrency: default is 3 (with 3 ops)
---- http_config eval: $::HttpConfig
 --- log_level: debug
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -1334,24 +1180,26 @@ nil could not acquire callback lock: timeout nil
             })
         }
     }
---- request
-GET /t
---- no_response_body
+--- ignore_response_body
 --- error_log
 spawning 2 threads to run 3 callbacks
 thread 1 running callbacks 1 to 1
 thread 2 running callbacks 2 to 2
 main thread running callbacks 3 to 3
 --- no_error_log
+[warn]
 [error]
+[crit]
+[alert]
+[emerg]
+stub
 
 
 
 === TEST 30: get_bulk() opts.concurrency: default is 3 (with 6 ops)
---- http_config eval: $::HttpConfig
 --- log_level: debug
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -1373,24 +1221,26 @@ main thread running callbacks 3 to 3
             })
         }
     }
---- request
-GET /t
---- no_response_body
+--- ignore_response_body
 --- error_log
 spawning 2 threads to run 6 callbacks
 thread 1 running callbacks 1 to 2
 thread 2 running callbacks 3 to 4
 main thread running callbacks 5 to 6
 --- no_error_log
+[warn]
 [error]
+[crit]
+[alert]
+[emerg]
+stub
 
 
 
 === TEST 31: get_bulk() opts.concurrency: default is 3 (with 7 ops)
---- http_config eval: $::HttpConfig
 --- log_level: debug
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -1413,24 +1263,26 @@ main thread running callbacks 5 to 6
             })
         }
     }
---- request
-GET /t
---- no_response_body
+--- ignore_response_body
 --- error_log
 spawning 2 threads to run 7 callbacks
 thread 1 running callbacks 1 to 3
 thread 2 running callbacks 4 to 6
 main thread running callbacks 7 to 7
 --- no_error_log
+[warn]
 [error]
+[crit]
+[alert]
+[emerg]
+stub
 
 
 
 === TEST 32: get_bulk() opts.concurrency: default is 3 (with 1 op)
---- http_config eval: $::HttpConfig
 --- log_level: debug
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -1447,24 +1299,26 @@ main thread running callbacks 7 to 7
             })
         }
     }
---- request
-GET /t
---- no_response_body
+--- ignore_response_body
 --- error_log
 spawning 0 threads to run 1 callbacks
 main thread running callbacks 1 to 1
 --- no_error_log
 [warn]
 [error]
+[crit]
 [alert]
+[emerg]
+stub
+stub
+stub
 
 
 
 === TEST 33: get_bulk() opts.concurrency: 1 (with 3 ops)
---- http_config eval: $::HttpConfig
 --- log_level: debug
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -1483,24 +1337,26 @@ main thread running callbacks 1 to 1
             }, { concurrency = 1 })
         }
     }
---- request
-GET /t
---- no_response_body
+--- ignore_response_body
 --- error_log
 spawning 0 threads to run 3 callbacks
 main thread running callbacks 1 to 3
 --- no_error_log
 [warn]
 [error]
+[crit]
 [alert]
+[emerg]
+stub
+stub
+stub
 
 
 
 === TEST 34: get_bulk() opts.concurrency: 1 (with 6 ops)
---- http_config eval: $::HttpConfig
 --- log_level: debug
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -1522,24 +1378,26 @@ main thread running callbacks 1 to 3
             }, { concurrency = 1 })
         }
     }
---- request
-GET /t
---- no_response_body
+--- ignore_response_body
 --- error_log
 spawning 0 threads to run 6 callbacks
 main thread running callbacks 1 to 6
 --- no_error_log
 [warn]
 [error]
+[crit]
 [alert]
+[emerg]
+stub
+stub
+stub
 
 
 
 === TEST 35: get_bulk() opts.concurrency: 6 (with 3 ops)
---- http_config eval: $::HttpConfig
 --- log_level: debug
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -1558,9 +1416,7 @@ main thread running callbacks 1 to 6
             }, { concurrency = 6 })
         }
     }
---- request
-GET /t
---- no_response_body
+--- ignore_response_body
 --- error_log
 spawning 2 threads to run 3 callbacks
 thread 1 running callbacks 1 to 1
@@ -1568,14 +1424,18 @@ thread 2 running callbacks 2 to 2
 main thread running callbacks 3 to 3
 --- no_error_log
 [error]
+[crit]
+[alert]
+[emerg]
+stub
+stub
 
 
 
 === TEST 36: get_bulk() opts.concurrency: 6 (with 6 ops)
---- http_config eval: $::HttpConfig
 --- log_level: debug
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -1597,9 +1457,7 @@ main thread running callbacks 3 to 3
             }, { concurrency = 6 })
         }
     }
---- request
-GET /t
---- no_response_body
+--- ignore_response_body
 --- error_log
 spawning 5 threads to run 6 callbacks
 thread 1 running callbacks 1 to 1
@@ -1611,15 +1469,14 @@ main thread running callbacks 6 to 6
 --- no_error_log
 [warn]
 [error]
-[alert]
+[crit]
 
 
 
 === TEST 37: get_bulk() opts.concurrency: 6 (with 7 ops)
---- http_config eval: $::HttpConfig
 --- log_level: debug
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -1642,9 +1499,7 @@ main thread running callbacks 6 to 6
             }, { concurrency = 6 })
         }
     }
---- request
-GET /t
---- no_response_body
+--- ignore_response_body
 --- error_log
 spawning 5 threads to run 7 callbacks
 thread 1 running callbacks 1 to 2
@@ -1652,15 +1507,18 @@ thread 2 running callbacks 3 to 4
 thread 3 running callbacks 5 to 6
 thread 4 running callbacks 7 to 7
 --- no_error_log
+[warn]
 [error]
+[crit]
+[alert]
+[emerg]
 
 
 
 === TEST 38: get_bulk() opts.concurrency: 6 (with 1 op)
---- http_config eval: $::HttpConfig
 --- log_level: debug
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
@@ -1677,24 +1535,26 @@ thread 4 running callbacks 7 to 7
             }, { concurrency = 6 })
         }
     }
---- request
-GET /t
---- no_response_body
+--- ignore_response_body
 --- error_log
 spawning 0 threads to run 1 callbacks
 main thread running callbacks 1 to 1
 --- no_error_log
 [warn]
 [error]
+[crit]
 [alert]
+[emerg]
+stub
+stub
+stub
 
 
 
 === TEST 39: get_bulk() opts.concurrency: 6 (with 7 ops)
---- http_config eval: $::HttpConfig
 --- log_level: debug
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -1721,8 +1581,6 @@ main thread running callbacks 1 to 1
             end
         }
     }
---- request
-GET /t
 --- response_body
 1 nil 3
 2 nil 3
@@ -1731,5 +1589,3 @@ GET /t
 5 nil 3
 6 nil 3
 7 nil 3
---- no_error_log
-[error]

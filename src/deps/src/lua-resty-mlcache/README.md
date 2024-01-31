@@ -165,6 +165,8 @@ Tests matrix results:
 | `1.17.8.x`  | :heavy_check_mark:
 | `1.19.3.x`  | :heavy_check_mark:
 | `1.19.9.x`  | :heavy_check_mark:
+| `1.21.4.x`  | :heavy_check_mark:
+| `1.25.3.x`  | :heavy_check_mark:
 | >           | not tested
 
 [Back to TOC](#table-of-contents)
@@ -337,17 +339,18 @@ Perform a cache lookup. This is the primary and most efficient method of this
 module. A typical pattern is to *not* call [set()](#set), and let [get()](#get)
 perform all the work.
 
-When this method succeeds, it returns `value` and no error. **Because `nil`
-values from the L3 callback can be cached (i.e. "negative caching"), `value` can
-be nil albeit already cached. Hence, one must rely on the second return value
-`err` to determine if this method succeeded or not**.
+When this method succeeds, it returns `value` and `err` is set to `nil`.
+**Because `nil` values from the L3 callback can be cached (i.e. "negative
+caching"), `value` can be `nil` albeit already cached. Hence, one must note to
+check the second return value `err` to determine if this method succeeded or
+not**.
 
 The third return value is a number which is set if no error was encountered.
-It indicated the level at which the value was fetched: `1` for L1, `2` for L2,
+It indicates the level at which the value was fetched: `1` for L1, `2` for L2,
 and `3` for L3.
 
-If an error is encountered, this method returns `nil` plus a string describing
-the error.
+If, however, an error is encountered, then this method returns `nil` in `value`
+and a string describing the error in `err`.
 
 The first argument `key` is a string. Each value must be stored under a unique
 key.
@@ -442,14 +445,20 @@ in the cache **and** no callback is provided, `get()` will return `nil, nil,
 with return values such as `nil, nil, 1`, where 1 signifies a **negative cached
 item** found in L1 (cached `nil`).
 
+Not providing a `callback` function allows implementing cache lookup patterns
+that are guaranteed to be on-cpu for a more constant, smoother latency tail end
+(e.g. with values refreshed in background timers via `set()`).
+
 ```lua
 local value, err, hit_lvl = cache:get("key")
 if value == nil then
-    if hit_lvl == -1 then
+    if err ~= nil then
+        -- error
+    elseif hit_lvl == -1 then
         -- miss (no value)
+    else
+        -- negative hit (cached `nil` value)
     end
-
-    -- negative hit (cached `nil`)
 end
 ```
 
