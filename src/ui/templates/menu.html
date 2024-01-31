@@ -1,3 +1,5 @@
+{% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip()
+%}
 <!-- float button-->
 <button
   aria-controls="sidebar-menu"

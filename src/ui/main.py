@@ -1298,7 +1298,9 @@ def custom_plugin(plugin: str):
             loader = SourceFileLoader("actions", temp.name)
             actions = loader.load_module()
     except:
-        return {"message": f'An error occurred while importing the plugin "{plugin}":\n{format_exc()}'}, 500
+        message = f'An error occurred while importing the plugin "{plugin}", see logs for more details'
+        app.logger.exception(message)
+        return {"message": message}, 500
 
     error = None
     res = None
@@ -1326,7 +1328,9 @@ def custom_plugin(plugin: str):
             del actions
 
         if message or not res or isinstance(res, dict) is False:
-            return {"message": message or f'The plugin "{plugin}" did not return a valid response'}, error or 500
+            message = message or f'The plugin "{plugin}" did not return a valid response'
+            app.logger.error(message)
+            return {"message": message}, error or 500
 
     app.logger.info(f"Plugin {plugin} action executed successfully")
     return {"message": "ok", "data": res}, 200
