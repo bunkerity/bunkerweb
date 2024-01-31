@@ -1,0 +1,315 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRuleEngine (1)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"12",
+        "Content-Type":"plain/text",
+        "Expect":"100-continue"
+      },
+      "uri":"/test?test=test",
+      "method":"POST",
+      "body":[  ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Setting SecRuleEngine to Disabled as requested by a ctl:ruleEngine action",
+      "http_code": 200
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_URI \"@contains test\" \"id:1,phase:1,pass,t:trim,ctl:RuleEngine=Off\"",
+      "SecRule ARGS \"@contains test\" \"id:2,log,phase:3,block,deny,status:302\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRuleEngine (2)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"12",
+        "Content-Type":"plain/text",
+        "Expect":"100-continue"
+      },
+      "uri":"/test?test=test",
+      "method":"POST",
+      "body":[  ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Setting SecRuleEngine to DetectionOnly as requested by a ctl:ruleEngine action",
+      "http_code": 200
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRequestBodyAccess On",
+      "SecRule REQUEST_URI \"@contains test\" \"id:1,phase:1,pass,t:trim,ctl:RuleEngine=DetectionOnly\"",
+      "SecRule ARGS \"@contains test\" \"id:2,log,phase:3,block,deny,status:302\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRuleEngine (3)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"12",
+        "Content-Type":"plain/text",
+        "Expect":"100-continue"
+      },
+      "uri":"/test?test=test",
+      "method":"GET",
+      "body":[  ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Setting SecRuleEngine to Enabled as requested by a ctl:ruleEngine action",
+      "http_code": 302
+    },
+    "rules":[
+      "SecRuleEngine DetectionOnly",
+      "SecRule REQUEST_URI \"@contains test\" \"id:1,phase:1,pass,t:trim,ctl:RuleEngine=On\"",
+      "SecRule ARGS \"@contains test\" \"id:2,log,phase:3,block,deny,status:302\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRuleEngine (4)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"12",
+        "Content-Type":"plain/text",
+        "Expect":"100-continue"
+      },
+      "uri":"/test?test=test",
+      "method":"GET",
+      "body":[  ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Setting SecRuleEngine to Enabled as requested by a ctl:ruleEngine action",
+      "http_code": 302
+    },
+    "rules":[
+      "SecRuleEngine DetectionOnly",
+      "SecRule REQUEST_URI \"@contains test\" \"id:1,phase:1,pass,t:trim,ctl:RuleEngine=On,log,phase:3,block,deny,status:302\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRuleEngine (5)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"12",
+        "Content-Type":"plain/text",
+        "Expect":"100-continue"
+      },
+      "uri":"/test?test=test",
+      "method":"GET",
+      "body":[  ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Setting SecRuleEngine to Disabled as requested by a ctl:ruleEngine action",
+      "http_code": 200
+    },
+    "rules":[
+      "SecRuleEngine DetectionOnly",
+      "SecRule REQUEST_URI \"@contains test\" \"id:1,phase:1,pass,t:trim,ctl:RuleEngine=Off,log,phase:3,block,deny,status:302\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRuleEngine (6)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"12",
+        "Content-Type":"plain/text",
+        "Expect":"100-continue"
+      },
+      "uri":"/test?test=test",
+      "method":"GET",
+      "body":[  ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Setting SecRuleEngine to DetectionOnly as requested by a ctl:ruleEngine action",
+      "http_code": 200
+    },
+    "rules":[
+      "SecRuleEngine DetectionOnly",
+      "SecRule REQUEST_URI \"@contains test\" \"id:1,phase:1,pass,t:trim,ctl:RuleEngine=DetectionOnly,log,phase:3,block,deny,status:302\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing CtlRuleEngine (7)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"12",
+        "Content-Type":"plain/text",
+        "Expect":"100-continue"
+      },
+      "uri":"/test?test=test",
+      "method":"GET",
+      "body":[  ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Setting SecRuleEngine to DetectionOnly as requested by a ctl:ruleEngine action",
+      "http_code": 200
+    },
+    "rules":[
+      "SecRuleEngine DetectionOnly",
+      "SecRule REQUEST_URI \"@contains test\" \"id:1,phase:1,pass,t:trim,log,phase:3,block,deny,status:302,ctl:RuleEngine=DetectionOnly\""
+    ]
+  }
+]

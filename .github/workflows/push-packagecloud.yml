@@ -1,0 +1,79 @@
+name: Push packagecloud (REUSABLE)
+
+on:
+  workflow_call:
+    inputs:
+      SEPARATOR:
+        required: true
+        type: string
+      SUFFIX:
+        required: true
+        type: string
+      REPO:
+        required: true
+        type: string
+      LINUX:
+        required: true
+        type: string
+      VERSION:
+        required: true
+        type: string
+      PACKAGE:
+        required: true
+        type: string
+      BW_VERSION:
+        required: true
+        type: string
+      ARCH:
+        required: true
+        type: string
+      PACKAGE_ARCH:
+        required: true
+        type: string
+    secrets:
+      PACKAGECLOUD_TOKEN:
+        required: true
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      # Prepare
+      - name: Check out repository code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Install ruby
+        uses: ruby/setup-ruby@bd03e04863f52d169e18a2b190e8fa6b84938215 # v1.170.0
+        with:
+          ruby-version: "3.0"
+      - name: Install packagecloud
+        run: gem install package_cloud
+      # Download packages
+      - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        if: inputs.LINUX != 'el'
+        with:
+          name: package-${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
+          path: /tmp/${{ inputs.LINUX }}
+      - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        if: inputs.LINUX == 'el'
+        with:
+          name: package-rhel-${{ inputs.PACKAGE_ARCH }}
+          path: /tmp/${{ inputs.LINUX }}
+      # Remove existing packages
+      - name: Remove existing package
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/${{ inputs.LINUX }}/${{ inputs.VERSION }} bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      # Update name
+      # - name: Rename package
+      #   if: inputs.BW_VERSION == 'testing'
+      #   run: sudo apt install -y rename && rename 's/[0-9]\.[0-9]\.[0-9]/testing/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+      # Push package
+      - name: Push package to packagecloud
+        uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
+        with:
+          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
+          PACKAGECLOUD-DISTRIB: ${{ inputs.LINUX }}/${{ inputs.VERSION }}
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

@@ -1,0 +1,74 @@
+name: Quality Assurance
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-linux:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        platform: [x32, x64]
+        compiler: [gcc, clang]
+        configure:
+          - {label: "with parser generation", opt: "--enable-parser-generation" }
+          - {label: "wo curl",    opt: "--without-curl" }
+          - {label: "wo yajl",    opt: "--without-yajl" }
+          - {label: "wo geoip",   opt: "--without-geoip" }
+          - {label: "wo lmdb",    opt: "--without-lmdb" }
+          - {label: "with pcre2",  opt: "--with-pcre2" }
+          - {label: "wo lua",     opt: "--without-lua" }
+          - {label: "without maxmind", opt: "--without-maxmind" }
+    steps:
+      - name: Setup Dependencies
+        run: |
+          sudo apt-get update -y -qq
+          sudo apt-get install -y libfuzzy-dev libyajl-dev libgeoip-dev liblua5.2-dev liblmdb-dev cppcheck libmaxminddb-dev libcurl4-openssl-dev libpcre2-dev pcre2-utils
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: build.sh
+        run: ./build.sh
+      - name: configure ${{ matrix.configure.label }}
+        run: ./configure ${{ matrix.configure.opt }}
+      - uses: ammaraskar/gcc-problem-matcher@master
+      - name: make
+        run: make -j `nproc`
+      - name: check
+        run: make check
+      - name: check-static
+        run: make check-static
+
+  build-macos:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-12]
+        compiler: [clang]
+        configure:
+          - {label: "with parser generation", opt: "--enable-parser-generation" }
+          - {label: "wo curl",    opt: "--without-curl" }
+          - {label: "wo yajl",    opt: "--without-yajl" }
+          - {label: "wo geoip",   opt: "--without-geoip" }
+          - {label: "wo lmdb",    opt: "--without-lmdb" }
+          - {label: "wo ssdeep",  opt: "--without-ssdeep" }
+          - {label: "wo lua",     opt: "--without-lua" }
+          - {label: "wo maxmind", opt: "--without-maxmind" }
+    steps:
+      - name: Setup Dependencies
+        run: |
+          brew install autoconf automake cppcheck lmdb libyaml lua ssdeep libmaxminddb bison
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: build.sh
+        run: ./build.sh
+      - name: configure ${{ matrix.configure.label }}
+        run: ./configure ${{ matrix.configure.opt }}
+      - uses: ammaraskar/gcc-problem-matcher@master
+      - name: make
+        run: make -j `sysctl -n hw.logicalcpu`
+      - name: check
+        run: make check

@@ -1,0 +1,10 @@
+--TEST--
+SQLi, probably part of parameter splitting attack
+--INPUT--
+foo - (1) UNION SELECT 1
+--EXPECTED--
+nUE1
+
+
+
+

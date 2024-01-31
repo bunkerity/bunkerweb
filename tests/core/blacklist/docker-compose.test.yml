@@ -1,0 +1,72 @@
+version: "3.5"
+
+services:
+  tests:
+    build: .
+    environment:
+      PYTHONUNBUFFERED: "1"
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: ""
+      BLACKLIST_IP_URLS: ""
+      BLACKLIST_RDNS_GLOBAL: "yes"
+      BLACKLIST_RDNS: ""
+      BLACKLIST_RDNS_URLS: ""
+      BLACKLIST_ASN: ""
+      BLACKLIST_ASN_URLS: ""
+      BLACKLIST_USER_AGENT: ""
+      BLACKLIST_USER_AGENT_URLS: ""
+      BLACKLIST_URI: ""
+      BLACKLIST_URI_URLS: ""
+      BLACKLIST_IGNORE_IP: ""
+      BLACKLIST_IGNORE_IP_URLS: ""
+      BLACKLIST_IGNORE_RDNS: ""
+      BLACKLIST_IGNORE_RDNS_URLS: ""
+      BLACKLIST_IGNORE_ASN: ""
+      BLACKLIST_IGNORE_ASN_URLS: ""
+      BLACKLIST_IGNORE_USER_AGENT: ""
+      BLACKLIST_IGNORE_USER_AGENT_URLS: ""
+      BLACKLIST_IGNORE_URI: ""
+      BLACKLIST_IGNORE_URI_URLS: ""
+    extra_hosts:
+      - "www.example.com:192.168.0.2"
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.3
+
+  global-tests:
+    build: .
+    environment:
+      PYTHONUNBUFFERED: "1"
+      USE_BLACKLIST: "yes"
+      BLACKLIST_IP: ""
+      BLACKLIST_IP_URLS: ""
+      BLACKLIST_RDNS_GLOBAL: "yes"
+      BLACKLIST_RDNS: ""
+      BLACKLIST_RDNS_URLS: ""
+      BLACKLIST_ASN: ""
+      BLACKLIST_ASN_URLS: ""
+      BLACKLIST_USER_AGENT: ""
+      BLACKLIST_USER_AGENT_URLS: ""
+      BLACKLIST_URI: ""
+      BLACKLIST_URI_URLS: ""
+      BLACKLIST_IGNORE_IP: ""
+      BLACKLIST_IGNORE_IP_URLS: ""
+      BLACKLIST_IGNORE_RDNS: ""
+      BLACKLIST_IGNORE_RDNS_URLS: ""
+      BLACKLIST_IGNORE_ASN: ""
+      BLACKLIST_IGNORE_ASN_URLS: ""
+      BLACKLIST_IGNORE_USER_AGENT: ""
+      BLACKLIST_IGNORE_USER_AGENT_URLS: ""
+      BLACKLIST_IGNORE_URI: ""
+      BLACKLIST_IGNORE_URI_URLS: ""
+    extra_hosts:
+      - "www.example.com:1.0.0.2"
+    networks:
+      bw-global-network:
+        ipv4_address: 1.0.0.3
+
+networks:
+  bw-services:
+    external: true
+  bw-global-network:
+    external: true

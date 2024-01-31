@@ -1,0 +1,32 @@
+name: Lint
+
+on:
+  push:
+    paths:
+      - lib/**.lua
+  pull_request:
+    paths:
+      - lib/**.lua
+
+jobs:
+  tests:
+    name: Lint
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
+    - uses: Jayrgo/luacheck-action@v1
+      name: luacheck
+      with:
+        # List of files, directories and rockspecs to check.
+        # Default: .
+        files: 'lib'
+
+        # Path to configuration file.
+        # Default: .luacheckrc
+        config: '.luacheckrc'
+
+        # Arguments passed to luacheck.
+        # Default: -q
+        args: '-q'

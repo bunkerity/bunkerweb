@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}libinjection sqli diagnostic{% end %}
+{% block body %}
+<h1>libinjection {{ version }} diagnostics</h1>
+<p>Enter text to be analyzed in form below or directly modify the query string: </p>
+<form method="get">
+<textarea class="form-control" name="id" rows="5">{{ formvalue }}</textarea><br/>
+<input class="btn" type="submit" name="type" value="fingerprints"></input>
+<input class="btn" type="submit" name="type" value="tokens"></input>
+</form>
+{% if len(args) %}
+<div>
+<h2 style="float:left">SQLi Detected: {{ is_sqli }} </h2>
+<div style="float:right; font-size: large; margin: 10px; padding: 6px; border: 0px solid black; background-color: #eee">
+{% if is_sqli %}
+<a href="/doc-sqli-false-positive">Is this wrong?</a>
+{% else %}
+<a href="/doc-sqli-false-negative">Is this wrong?</a>
+{% end %}
+</div>
+</div>
+<br style="clear:both">
+<table class="table">
+<tr><th>name</th><th>value</th><th>sqli?</th><th>fingerprint</th></tr>
+{% for arg in args %}
+{% if arg[2] %}
+<tr class="danger">
+{% else %}
+<tr class="success">
+{% end %}
+<td>{{ arg[0] }}</td><td>{{ arg[1] }}</td><td>{{ arg[2] }}</td><td>{{ arg[3] }}</td></tr>
+{% end %}
+</table>
+{% end %}
+
+
+<hr/>
+<h2>Fingerprints in all contexts</h2>
+
+{% for name, v in allfp.iteritems() %}
+
+<div style="margin: 2px; border: 1px solid black">
+<h2>query string: "{{ name }}"</h2>
+<p><b><code>{{ v['value'] }}</code></b></p>
+
+<table class="table">
+<tr><th>quoting context</th><th>comment style</th><th>is sqli</th><th>fingerprint</th></tr>
+{% for arg in v['fingerprints'] %}
+{% if arg[2] %}
+<tr class="danger">
+{% else %}
+<tr class="success">
+{% end %}
+<td>{{ arg[0] }}</td>
+<td>{{ arg[1] }}</td>
+<td>{{ arg[2] }}</td>
+<td>{{ arg[3] }}</td>
+</tr>
+{% end %}
+</table>
+</div>
+{% end %}
+
+<h2>Notes:</h2>
+<ul>
+
+<li>The form is a convience for ad-hoc testing.  In addition, you can
+also enter any input by directly modifying the query string. There is
+no CSRF token.</li>
+
+<li>All query string <i>values</i> are analyzed. Query string
+parameter <i>names</i> are not.  This isn't a WAF but a diagnostic
+tool for libinjection.</li>
+
+<li>Input is URL-decoded <i>twice</i>, to help prevent cut-n-paste issues.</li>
+
+<li>No attempt at processing hex or base64 encoded input is done.</li>
+
+</ul>
+{% end %}

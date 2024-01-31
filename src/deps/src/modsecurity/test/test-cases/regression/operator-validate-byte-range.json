@@ -1,0 +1,40 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Operator :: @validateByteRange with bytes > 127",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length": "27",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "uri":"/%D0%A2%D0%B0%D1%80%D0%B0%D0%B1%D0%B0%D0%BD",
+      "method":"GET",
+      "body": [ ]
+    },
+    "response":{
+      "headers":{},
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "debug_log":"Rule returned 0."
+    },
+    "rules":[
+      "SecRuleEngine On",
+      "SecRule REQUEST_URI \"@validateByteRange 37-102, 127-255\" \"id:1,phase:2,pass,t:trim\""
+    ]
+  }
+]

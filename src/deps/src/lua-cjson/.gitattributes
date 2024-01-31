@@ -1,0 +1,5 @@
+.gitattributes export-ignore
+.gitignore export-ignore
+build-packages.sh export-ignore
+TODO export-ignore
+devel export-ignore

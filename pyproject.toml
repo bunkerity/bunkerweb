@@ -1,0 +1,20 @@
+[project]
+name = "BunkerWeb"
+description = "Make your web services secure by default !"
+version = "1.5.6"
+authors = [
+    { name = "Bunkerity", email = "contact@bunkerity.com" }
+]
+
+[tool.black]
+py39 = true
+line-length = 250
+include = '\.pyi?$'
+exclude = '''
+/(
+  | \.git
+  | src/deps/src
+  | src/common/core/modsecurity
+  | env
+)/
+'''

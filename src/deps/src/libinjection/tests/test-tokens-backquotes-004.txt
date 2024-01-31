@@ -1,0 +1,10 @@
+--TEST--
+name using backquotes
+--INPUT--
+SELECT `foo`.`bar`;
+--EXPECTED--
+E SELECT
+n foo
+. .
+n bar
+; ;

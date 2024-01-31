@@ -1,0 +1,15 @@
+{
+  "name": "magento",
+  "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
+  "timeout": 360,
+  "no_copy_container": true,
+  "delay": 300,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "magento",
+      "tls": "www.example.com"
+    }
+  ]
+}

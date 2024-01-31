@@ -1,0 +1,14 @@
+{
+  "name": "joomla",
+  "kinds": ["docker", "autoconf", "swarm", "kubernetes"],
+  "timeout": 60,
+  "delay": 60,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://www.example.com",
+      "string": "joomla",
+      "tls": "www.example.com"
+    }
+  ]
+}

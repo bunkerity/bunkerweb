@@ -1,0 +1,18 @@
+version: "3.5"
+
+services:
+  tests:
+    build: .
+    environment:
+      PYTHONUNBUFFERED: "1"
+      USE_CUSTOM_SSL: "no"
+      CUSTOM_SSL_CERT: "/certs/certificate.pem"
+    extra_hosts:
+      - "app1.example.com:192.168.0.2"
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.3
+
+networks:
+  bw-services:
+    external: true

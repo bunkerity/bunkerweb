@@ -1,0 +1,18 @@
+{
+  "id": "inject",
+  "name": "HTML injection",
+  "description": "Inject custom HTML code before the </body> tag.",
+  "version": "1.0",
+  "stream": "no",
+  "settings": {
+    "INJECT_BODY": {
+      "context": "multisite",
+      "default": "",
+      "help": "The HTML code to inject.",
+      "id": "inject-body",
+      "label": "HTML code",
+      "regex": "^.*$",
+      "type": "text"
+    }
+  }
+}

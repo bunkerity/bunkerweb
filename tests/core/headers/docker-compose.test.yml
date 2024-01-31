@@ -1,0 +1,29 @@
+version: "3.5"
+
+services:
+  tests:
+    build: .
+    environment:
+      PYTHONUNBUFFERED: "1"
+      GENERATE_SELF_SIGNED_SSL: "no"
+      CUSTOM_HEADER: ""
+      REMOVE_HEADERS: "Server X-Powered-By X-AspNet-Version X-AspNetMvc-Version"
+      STRICT_TRANSPORT_SECURITY: "max-age=31536000"
+      COOKIE_FLAGS: "* HttpOnly SameSite=Lax"
+      COOKIE_AUTO_SECURE_FLAG: "yes"
+      CONTENT_SECURITY_POLICY: "object-src 'none'; form-action 'self'; frame-ancestors 'self';"
+      REFERRER_POLICY: "strict-origin-when-cross-origin"
+      PERMISSIONS_POLICY: "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), web-share=(), xr-spatial-tracking=()"
+      FEATURE_POLICY: "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; battery 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; execution-while-not-rendered 'none'; execution-while-out-of-viewport 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; layout-animation 'none'; legacy-image-formats 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; navigation-override 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; speaker-selection 'none'; sync-xhr 'none'; unoptimized-images 'none'; unsized-media 'none'; usb 'none'; screen-wake-lock 'none'; web-share 'none'; xr-spatial-tracking 'none';"
+      X_FRAME_OPTIONS: "SAMEORIGIN"
+      X_CONTENT_TYPE_OPTIONS: "nosniff"
+      X_XSS_PROTECTION: "1; mode=block"
+    extra_hosts:
+      - "www.example.com:192.168.0.2"
+    networks:
+      bw-services:
+        ipv4_address: 192.168.0.3
+
+networks:
+  bw-services:
+    external: true

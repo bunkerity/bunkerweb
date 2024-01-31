@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "https://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>LuaLogging: A simple API to use logging features in Lua</title>
+    <link rel="stylesheet" href="doc.css" type="text/css"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+  <div id="product_logo">
+    <img alt="LuaLogging logo" src="images/lualogging-128.png"/>
+  </div>
+  <div id="product_name"><big><strong>LuaLogging</strong></big></div>
+  <div id="product_description">A simple API to use logging features in Lua.</div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+<h1>LuaLogging</h1>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="manual.html">Manual</a>
+      <ul>
+        <li><a href="manual.html#installation">Installation</a></li>
+        <li><a href="manual.html#logger">Logger objects</a></li>
+        <li><a href="manual.html#examples">Examples</a></li>
+      </ul>
+    </li>
+    <li><a href="manual.html#appenders">Appenders</a>
+      <ul>
+        <li><strong>Console</strong></li>
+        <li><a href="file.html">File</a></li>
+        <li><a href="rolling_file.html">Rolling File</a></li>
+        <li><a href="sql.html">SQL</a></li>
+        <li><a href="socket.html">Socket</a></li>
+        <li><a href="rsyslog.html">Rsyslog</a></li>
+        <li><a href="email.html">Email</a></li>
+        <li><a href="nginx.html">Nginx</a></li>
+      </ul>
+    </li>
+    <li><a href="https://github.com/lunarmodules/lualogging">Project</a></li>
+    <li><a href="license.html">License</a></li>
+  </ul>
+</div> <!-- id="navigation" -->
+
+<div id="content">
+
+<h2>Console appender</h2>
+
+<p>Console is the simplest appender. It just writes the log messages
+to <code>io.stdout</code> or <code>io.stderr</code>.</p>
+
+<pre class="example">
+function logging.console {
+    [destination = "stdout"|"stderr",]
+
+    [logPattern = <i>string</i>,]
+    [logPatterns = {
+      [logging.DEBUG = <i>string</i>,]
+      [logging.INFO  = <i>string</i>,]
+      [logging.WARN  = <i>string</i>,]
+      [logging.ERROR = <i>string</i>,]
+      [logging.FATAL = <i>string</i>,]
+    },]
+    [timestampPattern = <i>string</i>,]
+    [logLevel = <i>log-level-constant</i>,]
+}
+</pre>
+
+<ul>
+  <li><code>logPatterns</code>:<br />
+    A table with logPattern strings indexed by the log-levels.
+    A logPattern specifies how the message is written.<br />
+    If this parameter is omitted, a patterns table will be created with the
+    parameter <code>logPattern</code> as the default value for each log-level.
+    If <code>logPattern</code> also is omitted then each level will fall back to
+    the current default setting, see <code>logging.defaultLogPatterns</code>.
+  </li>
+
+    <li><code>logPattern</code>:<br />
+      This value will be used as the default value for each log-level that was
+      omitted in <code>logPatterns</code>.
+    </li>
+
+    <li><code>timestampPattern</code>:<br />
+    This is an optional parameter that can be used to specify a date/time formatting
+    in the log message.
+    See <code>logging.date</code> for the format.
+    The default is taken from <code>logging.defaultTimestampPattern()</code>.</li>
+
+    <li><code>destination</code>:<br />
+    The destination stream, optional. The value can be either <code>"stdout"</code>,
+    or <code>"stderr"</code>. The default is <code>stdout</code>.</li>
+
+    <li><code>logLevel</code>:<br />
+    The initial log-level to set for the created logger.</li>
+
+</ul>
+
+<h2>Examples</h2>
+
+<pre class="example">
+local ansicolors = require("ansicolors") -- https://github.com/kikito/ansicolors.lua
+local ll = require("logging")
+require "logging.console"
+
+-- set up the default logger to stderr + colorization
+ll.defaultLogger(ll.console {
+  logLevel = ll.DEBUG,
+  destination = "stderr",
+  timestampPattern = "%y-%m-%d %H:%M:%S",
+  logPatterns = {
+    [ll.DEBUG] = ansicolors("%date%{cyan} %level %message %{reset}(%source)\n"),
+    [ll.INFO] = ansicolors("%date %level %message\n"),
+    [ll.WARN] = ansicolors("%date%{yellow} %level %message\n"),
+    [ll.ERROR] = ansicolors("%date%{red bright} %level %message %{reset}(%source)\n"),
+    [ll.FATAL] = ansicolors("%date%{magenta bright} %level %message %{reset}(%source)\n"),
+  }
+})
+
+local log = ll.defaultLogger()
+
+log:info("logging.console test")
+log:debug("debugging...")
+log:error("error!")
+</pre>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+  <p><a href="https://validator.w3.org/check?uri=referer">
+    <img src="https://www.w3.org/Icons/valid-xhtml10" alt="XHTML 1.0 v&aacute;lido!" height="31" width="88" /></a></p>
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+
+</body>
+</html>

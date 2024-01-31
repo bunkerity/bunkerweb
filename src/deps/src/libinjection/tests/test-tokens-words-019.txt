@@ -1,0 +1,8 @@
+--TEST--
+not clear what right behavior is here, but this is how it works now
+--INPUT--
+FOO``BAR
+--EXPECTED--
+n FOO``BAR
+
+

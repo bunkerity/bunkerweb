@@ -1,0 +1,85 @@
+[  
+  {  
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: SERVER_NAME (1/2)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET",
+      "http_version":1.1
+    },
+    "response":{  
+      "protocol": "HTTP/1.1",
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Target value: \"localhost\" \\(Variable: SERVER_NAME\\)"
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule SERVER_NAME \"^HTTP\" \"id:1,phase:5,pass,t:trim\""
+    ]
+  },
+  {  
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: SERVER_NAME (2/2)",
+    "client":{  
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{  
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{  
+      "headers":{  
+        "Host":"www.zimmerle.org:4443",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*"
+      },
+      "uri":"/?key=value&key=other_value",
+      "method":"GET",
+      "http_version":1.1
+    },
+    "response":{  
+      "protocol": "HTTP/1.1",
+      "headers":{  
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[  
+        "no need."
+      ]
+    },
+    "expected":{  
+      "debug_log":"Target value: \"www.zimmerle.org\" \\(Variable: SERVER_NAME\\)"
+    },
+    "rules":[  
+      "SecRuleEngine On",
+      "SecRule SERVER_NAME \"^HTTP\" \"id:1,phase:5,pass,t:trim\""
+    ]
+  }
+]
+

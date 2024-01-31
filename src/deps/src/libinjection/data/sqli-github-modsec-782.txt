@@ -1,0 +1,3 @@
+# https://github.com/SpiderLabs/owasp-modsecurity-crs/issues/782
+
+.1or-UTC_DATE--

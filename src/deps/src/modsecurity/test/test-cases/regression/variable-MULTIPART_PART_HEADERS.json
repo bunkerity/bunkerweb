@@ -1,0 +1,218 @@
+[
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: MULTIPART_PART_HEADERS (all headers)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-------------------------------69343412719991675451336310646",
+                "Content-Disposition: form-data; name=parm1",
+                "Content-Type: image/jpeg",
+                "",
+                "1",
+                "-------------------------------69343412719991675451336310646",
+                "Content-Disposition: form-data; name=parm2",
+                "",
+                "2",
+                "-------------------------------69343412719991675451336310646--"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log":"Variable: MULTIPART_PART_HEADERS:parm1.*Rule returned 1"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_PART_HEADERS \"@rx content-type:.*jpeg\" \"phase:2,deny,status:403,id:500074,t:lowercase\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: MULTIPART_PART_HEADERS (specific header - match)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-------------------------------69343412719991675451336310646",
+                "Content-Disposition: form-data; name=parm1",
+                "Content-Type: image/jpeg",
+                "",
+                "1",
+                "-------------------------------69343412719991675451336310646",
+                "Content-Disposition: form-data; name=parm2",
+                "",
+                "2",
+                "-------------------------------69343412719991675451336310646--"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 403,
+      "debug_log":"Variable: MULTIPART_PART_HEADERS:parm1.*Rule returned 1"
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_PART_HEADERS:parm1 \"@rx content-type:.*jpeg\" \"phase:2,deny,status:403,id:500074,t:lowercase\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: MULTIPART_PART_HEADERS (specific header - no match)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"330",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-------------------------------69343412719991675451336310646",
+                "Content-Disposition: form-data; name=parm1",
+                "Content-Type: image/jpeg",
+                "",
+                "1",
+                "-------------------------------69343412719991675451336310646",
+                "Content-Disposition: form-data; name=parm2",
+                "",
+                "2",
+                "-------------------------------69343412719991675451336310646--"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 200
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_PART_HEADERS:parm2 \"@rx content-type:.*jpeg\" \"phase:2,deny,status:403,id:500074,t:lowercase\""
+    ]
+  },
+  {
+    "enabled":1,
+    "version_min":300000,
+    "title":"Testing Variables :: MULTIPART_PART_HEADERS (check EOL)",
+    "client":{
+      "ip":"200.249.12.31",
+      "port":123
+    },
+    "server":{
+      "ip":"200.249.12.31",
+      "port":80
+    },
+    "request":{
+      "headers":{
+        "Host":"localhost",
+        "User-Agent":"curl/7.38.0",
+        "Accept":"*/*",
+        "Content-Length":"249",
+        "Content-Type":"multipart/form-data; boundary=-----------------------------69343412719991675451336310646",
+        "Expect":"100-continue"
+      },
+      "uri":"/",
+      "method":"POST",
+      "body":[
+                "-------------------------------69343412719991675451336310646",
+                "Content-Disposition: form-data; name=\"file\"; filename=\"New Text Document.txt\"",
+                "Content-Type: text/plain; charset=utf-8\r\n",
+                "",
+                "1",
+                "-------------------------------69343412719991675451336310646--"
+      ]
+    },
+    "response":{
+      "headers":{
+        "Date":"Mon, 13 Jul 2015 20:02:41 GMT",
+        "Last-Modified":"Sun, 26 Oct 2014 22:33:37 GMT",
+        "Content-Type":"text/html"
+      },
+      "body":[
+        "no need."
+      ]
+    },
+    "expected":{
+      "http_code": 200
+    },
+    "rules":[
+        "SecRuleEngine On",
+        "SecRule MULTIPART_PART_HEADERS \"@rx ^content-type\\s*+:\\s*+(.*)$\" \"id:922110,phase:2,deny,capture,t:none,t:lowercase,chain\"",
+        "SecRule TX:1 \"!@rx ^text/plain; charset=(?:iso-8859-15?|windows-1252|utf-8)$\" \"t:lowercase\""
+    ]
+  }
+]
+

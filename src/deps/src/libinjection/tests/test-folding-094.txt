@@ -1,0 +1,12 @@
+--TEST--
+test of ODBC brace typing
+--INPUT--
+select {foo 1};
+--EXPECTED--
+E select
+1 1
+; ;
+
+
+
+

@@ -1,0 +1,6 @@
+joomlaUsername: "user"
+joomlaPassword: "changeme42"
+joomlaEmail: "contact@example.com"
+mariadb:
+  auth:
+    password: "changeme1337"

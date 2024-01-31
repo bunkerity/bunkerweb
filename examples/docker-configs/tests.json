@@ -1,0 +1,32 @@
+{
+  "name": "docker-configs",
+  "kinds": ["docker"],
+  "delay": 120,
+  "timeout": 60,
+  "tests": [
+    {
+      "type": "string",
+      "url": "https://app1.example.com/hello",
+      "string": "world",
+      "tls": "app1.example.com"
+    },
+    {
+      "type": "string",
+      "url": "https://app2.example.com/hello",
+      "string": "world",
+      "tls": "app2.example.com"
+    },
+    {
+      "type": "string",
+      "url": "https://app1.example.com/app1",
+      "string": "app1",
+      "tls": "app1.example.com"
+    },
+    {
+      "type": "string",
+      "url": "https://app2.example.com/app2",
+      "string": "app2",
+      "tls": "app2.example.com"
+    }
+  ]
+}

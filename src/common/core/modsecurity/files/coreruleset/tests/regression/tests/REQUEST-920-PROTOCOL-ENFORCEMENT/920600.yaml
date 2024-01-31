@@ -1,0 +1,150 @@
+---
+meta:
+  author: "karelorigin"
+  enabled: true
+  name: "920600.yaml"
+  description: "Accept header charset checks"
+tests:
+  - test_title: 920600-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset=CP1026,*/*;q=0.8
+          output:
+            log_contains: "id \"920600\""
+  - test_title: 920600-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset="CP1026",*/*;q=0.8
+          output:
+            log_contains: "id \"920600\""
+  - test_title: 920600-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset=UTF-8,*/*;q=0.8
+          output:
+            no_log_contains: "id \"920600\""
+  - test_title: 920600-4
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset="UTF-8",*/*;q=0.8
+          output:
+            no_log_contains: "id \"920600\""
+  - test_title: 920600-5
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset="iso-8859-1",*/*;q=0.8
+          output:
+            no_log_contains: "id \"920600\""
+  - test_title: 920600-6
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset="iso-8859-1",*/*;q=0.8;charset=utf-16
+          output:
+            log_contains: "id \"920600\""
+  - test_title: 920600-7
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset="iso-8859-1",*/*;q=0.8;charset=utf-8
+          output:
+            no_log_contains: "id \"920600\""
+  - test_title: 920600-8
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset="iso-8859-15",*/*;q=0.8
+          output:
+            no_log_contains: "id \"920600\""
+  - test_title: 920600-9
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset="windows-1252",*/*;q=0.8
+          output:
+            no_log_contains: "id \"920600\""
+  - test_title: 920600-10
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset="windows-1252",*/*;q=0.8;
+          output:
+            no_log_contains: "id \"920600\""
+  - test_title: 920600-11
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP ModSecurity Core Rule Set"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset="windows-1252";,*/*;q=0.8
+          output:
+            no_log_contains: "id \"920600\""

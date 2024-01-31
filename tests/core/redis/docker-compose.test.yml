@@ -1,0 +1,29 @@
+version: "3.5"
+
+services:
+  tests:
+    build: .
+    environment:
+      PYTHONUNBUFFERED: "1"
+      USE_REVERSE_SCAN: "no"
+      USE_ANTIBOT: "no"
+
+      REDIS_HOST: "bw-redis"
+      REDIS_PORT: "6379"
+      REDIS_DATABASE: "0"
+      REDIS_SSL: "no"
+      REDIS_USERNAME: ""
+      REDIS_PASSWORD: ""
+      REDIS_SENTINEL_HOSTS: ""
+      REDIS_SENTINEL_USERNAME: ""
+      REDIS_SENTINEL_PASSWORD: ""
+      REDIS_SENTINEL_MASTER: "bw-master"
+    extra_hosts:
+      - "www.example.com:1.0.0.254"
+    networks:
+      bw-services:
+        ipv4_address: 1.0.0.253
+
+networks:
+  bw-services:
+    external: true
