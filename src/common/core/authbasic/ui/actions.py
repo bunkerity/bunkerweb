@@ -1,1 +1,8 @@
-# Spoofing an action file
+def authbasic():
+    return {
+        "message": "ok",
+        "data": {
+            "info": "test",
+            "count": 3,
+        },
+    }

@@ -110,9 +110,26 @@
           value: "unknown",
           type: "text",
         },
+        /* EXAMPLE
+        items: {
+          el: document.querySelector("[data-item]"),
+          value: [],
+          type: "list",
+          listNames: ["server_name", "cn", "expire"],
+        },
+        // value : active / inactive / unknown
+        status: {
+          el: document.querySelector("[data-status]"),
+          value: "unknown",
+          type: "status",
+          textEl: document.querySelector("[data-status-text]"),
+        },
+        */
       };
       // Hidden elements that will be shown on success, like ping buttons or list rendering
-      this.showOnSuccess = [];
+      this.showOnSuccessEls = document.querySelectorAll(
+        "[data-fetch-success-show]",
+      );
 
       this.init();
     }
@@ -131,24 +148,15 @@
         })
           .then((res) => res.json())
           .then((res) => {
-            console.log(res);
-            console.log(JSON.stringify(res));
-            console.log(res.data);
-            console.log(res.data.data);
             // Update data and DOM
-            this.getFetchDataByKey(res.data);
+            this.getFetchDataByKey(res.data.data);
             this.updateDataDOM();
             // Show hidden elements
-            if (this.showOnSuccess.length > 0) {
-              this.showOnSuccess.forEach((el) => {
-                el.classList.remove("hidden");
-              });
-            }
+            this.showSuccessEls();
             // Feedback
             this.updateAlert("success");
           })
           .catch((error) => {
-            console.log(error);
             this.updateAlert("error");
           });
       });
@@ -158,25 +166,75 @@
       });
     }
 
+    showSuccessEls() {
+      this.showOnSuccessEls.forEach((el) => {
+        el.classList.remove("hidden");
+      });
+    }
+
     // Key of fetch data need to match key of this.data
     getFetchDataByKey(fetchDataObj) {
       for (const [key, value] of Object.entries(this.data)) {
-        this.data[key]["value"] =
-          fetchDataObj[key] || this.data[key]["value"] || "";
+        value["value"] = fetchDataObj[key] || value["value"] || "";
       }
     }
 
     updateDataDOM() {
-      for (const [key, value] of Object.entries(this.data)) {
+      for (const [key, val] of Object.entries(this.data)) {
+        const el = val["el"];
+        const type = val["type"];
+        const value = val["value"];
+
         // Case text
-        if (this.data[key]["type"] == "text") {
-          this.data[key]["el"].textContent = this.data[key]["value"] || "";
+        if (type === "text") {
+          el.textContent = value || "";
+          continue;
         }
+        // Case status
+        if (type === "status") {
+          const textEl = val["textEl"] || null;
+
+          if (value === "active")
+            this.setStatus(el, textEl, "fill-green-500", "Active");
+          if (value === "inactive")
+            this.setStatus(el, textEl, "fill-red-500", "Inactive");
+          if (value === "unknown")
+            this.setStatus(el, textEl, "fill-sky-500", "Unknown");
+          continue;
+        }
+
         // Case list, we will render elements after the selected elements
-        if (this.data[key]["type"] == "text") {
-          this.data[key]["el"].textContent = this.data[key]["value"] || "";
+        if (type === "list") {
+          // Case no list to render
+          if (!value || value.length <= 0) continue;
+
+          // Clone item element
+          const itemEl = el.cloneNode(true);
+          itemEl.classList.remove("hidden");
+          const parentEl = el.parentNode;
+          // Add item element after selected element
+          const items = value.forEach((item) => {
+            const newItemEl = itemEl.cloneNode(true);
+            // Update item element values
+            for (const [nameKey, nameValue] of Object.entries(item)) {
+              newItemEl.querySelector(`[data-name="${nameKey}"]`).textContent =
+                nameValue;
+            }
+            // Add item element after selected element
+            parentEl.appendChild(newItemEl);
+          });
+
+          // Delete schema
+          el.remove();
+          continue;
         }
       }
+    }
+
+    setStatus(el, textEl, colorClass, text) {
+      el.classList.remove("fill-green-500", "fill-red-500", "fill-sky-500");
+      el ? el.classList.add(colorClass) : null;
+      textEl ? (textEl.textContent = text) : null;
     }
 
     // Show fetch state alert
@@ -184,32 +242,26 @@
     updateAlert(type) {
       if (!type) return;
 
-      if (type == "fetch") {
-        this.alertStatusEl.textContent = "Fetching";
-        this.alertMsgEl.textContent = "Please wait...";
-        this.alertEl.classList.remove("bg-green-500");
-        this.alertEl.classList.remove("bg-red-500");
-        this.alertEl.classList.add("bg-sky-500");
-      }
-      if (type == "success") {
-        this.alertStatusEl.textContent = "Success";
-        this.alertMsgEl.textContent = "Data fetched successfully";
-        this.alertEl.classList.remove("bg-sky-500");
-        this.alertEl.classList.remove("bg-red-500");
-        this.alertEl.classList.add("bg-green-500");
-      }
-      if (type == "error") {
-        this.alertStatusEl.textContent = "Error";
-        this.alertMsgEl.textContent = "Something went wrong";
-        this.alertEl.classList.remove("bg-sky-500");
-        this.alertEl.classList.remove("bg-green-500");
-        this.alertEl.classList.add("bg-red-500");
-      }
+      const [status, msg, color] = this.getAlertType(type);
+
+      this.alertEl.classList.remove("bg-sky-500", "bg-green-500", "bg-red-500");
+
+      this.alertStatusEl.textContent = status;
+      this.alertMsgEl.textContent = msg;
+      this.alertEl.classList.add(color);
 
       this.alertEl.classList.remove("hidden");
 
       if (type !== "fetch")
         setTimeout(() => this.alertEl.classList.add("hidden"), 5000);
+    }
+
+    getAlertType(type) {
+      if (type === "fetch") return ["Fetching", "Please wait...", "bg-sky-500"];
+      if (type === "error")
+        return ["Error", "Something went wrong", "bg-red-500"];
+      if (type === "success")
+        return ["Success", "Data fetched successfully", "bg-green-500"];
     }
   }
 

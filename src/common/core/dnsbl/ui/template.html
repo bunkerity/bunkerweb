@@ -1,6 +1,4 @@
-{% extends "base.html" %} {% block content %} {% set items = [ {"server_name" :
-"www.example.com", "status" : "ok"}, {"server_name" : "app1.com", "status" :
-"ok"}, {"server_name" : "test.2.fr", "status" : "ko"} ]%}
+{% extends "base.html" %} {% block content %}
 
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- info-->
@@ -11,17 +9,16 @@
 
     <div class="mx-1 flex justify-start items-center my-4">
       <p
+        data-info
         class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-500 dark:opacity-80"
-      >
-        {{ dnsbl_info or "Deny access based on external DNSBL servers." }}
-      </p>
+      ></p>
     </div>
   </div>
   <!-- end info -->
 
-  {% if items|length != 0 %}
   <div
-    class="col-span-12 md:col-span-8 3xl:col-span-9 w-full xl:max-w-[600px] overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    data-fetch-success-show
+    class="hidden col-span-12 md:col-span-8 3xl:col-span-9 w-full xl:max-w-[600px] overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
     <div class="col-span-12">
       <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">DNSBL LIST</h5>
@@ -43,55 +40,230 @@
         <!-- end header-->
         <!-- list -->
         <ul class="col-span-12 w-full">
-          {% for item in items %}
           <li
+            data-item
             class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5"
           >
             <p
+              data-name="server_name"
               class="dark:text-gray-400 dark:opacity-80 text-sm col-span-8 m-0 my-1"
-            >
-              {{item['server_name']}}
-            </p>
-            {% if item['status'] == "ko"%}
-            <div class="col-span-4 ml-2 m-0 my-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                class="w-6 h-6 fill-red-500"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            {% else %}
-            <div class="col-span-4 ml-2 m-0 my-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                class="w-6 h-6 fill-green-500"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            {% endif %}
+            ></p>
+            <p
+              data-name="status"
+              class="dark:text-gray-400 dark:opacity-80 text-sm col-span-4 ml-2 m-0 my-1"
+            ></p>
           </li>
-          {% endfor %}
         </ul>
         <!-- end list-->
       </div>
       <!-- end list container-->
     </div>
   </div>
-  {% endif %}
+  <div
+    role="alert"
+    data-fetch
+    class="bg-sky-500 p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border"
+  >
+    <button data-fetch-close class="absolute right-7 top-1.5">
+      <svg
+        class="cursor-pointer fill-white dark:fill-gray-300 dark:opacity-80 absolute h-5 w-5"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 320 512"
+      >
+        <path
+          d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
+        ></path>
+      </svg>
+    </button>
+    <h5 data-fetch-status class="text-lg mb-0 text-white dark:text-gray-300">
+      Fetching
+    </h5>
+    <p data-fetch-msg class="text-white dark:text-gray-300 mb-0 text-sm">
+      Please wait...
+    </p>
+  </div>
+
+  <script>
+    class SetupPlugin {
+      constructor() {
+        // Alert elements
+        this.alertEl = document.querySelector("[data-fetch]");
+        this.alertCloseEl = document.querySelector("[data-fetch-close]");
+        this.alertStatusEl = document.querySelector("[data-fetch-status]");
+        this.alertMsgEl = document.querySelector("[data-fetch-msg]");
+        // Set data defaults elements and variables
+        // Key of this.data need to match key of fetch data json object to update values
+        // type<str> : text (target el), list (el need to be first element of list)
+        // listNames<arr> : list of names key on item, need to set data-name="nameKey" on el
+        this.data = {
+          info: {
+            el: document.querySelector("[data-info]"),
+            value: `Deny access based on external DNSBL servers.`,
+            type: "text",
+          },
+          items: {
+            el: document.querySelector("[data-item]"),
+            value: [],
+            type: "list",
+            listNames: ["server_name", "status"],
+          },
+          /* EXAMPLE
+          // value : active / inactive / unknown
+          status: {
+            el: document.querySelector("[data-status]"),
+            value: "unknown",
+            type: "status",
+            textEl: document.querySelector("[data-status-text]"),
+          },
+          */
+        };
+        // Hidden elements that will be shown on success, like ping buttons or list rendering
+        this.showOnSuccessEls = document.querySelectorAll(
+          "[data-fetch-success-show]",
+        );
+
+        this.init();
+      }
+
+      init() {
+        window.addEventListener("DOMContentLoaded", () => {
+          // Set default values and fetch
+          this.updateDataDOM();
+          this.updateAlert("fetch");
+
+          fetch(location.href, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": "{{ csrf_token() }}",
+            },
+          })
+            .then((res) => res.json())
+            .then((res) => {
+              // Update data and DOM
+              this.getFetchDataByKey(res.data.data);
+              this.updateDataDOM();
+              // Show hidden elements
+              this.showSuccessEls();
+              // Feedback
+              this.updateAlert("success");
+            })
+            .catch((error) => {
+              this.updateAlert("error");
+            });
+        });
+
+        this.alertCloseEl.addEventListener("click", () => {
+          this.alertEl.classList.add("hidden");
+        });
+      }
+
+      showSuccessEls() {
+        this.showOnSuccessEls.forEach((el) => {
+          el.classList.remove("hidden");
+        });
+      }
+
+      // Key of fetch data need to match key of this.data
+      getFetchDataByKey(fetchDataObj) {
+        for (const [key, value] of Object.entries(this.data)) {
+          value["value"] = fetchDataObj[key] || value["value"] || "";
+        }
+      }
+
+      updateDataDOM() {
+        for (const [key, val] of Object.entries(this.data)) {
+          const el = val["el"];
+          const type = val["type"];
+          const value = val["value"];
+
+          // Case text
+          if (type === "text") {
+            el.textContent = value || "";
+            continue;
+          }
+          // Case status
+          if (type === "status") {
+            const textEl = val["textEl"] || null;
+
+            if (value === "active")
+              this.setStatus(el, textEl, "fill-green-500", "Active");
+            if (value === "inactive")
+              this.setStatus(el, textEl, "fill-red-500", "Inactive");
+            if (value === "unknown")
+              this.setStatus(el, textEl, "fill-sky-500", "Unknown");
+            continue;
+          }
+
+          // Case list, we will render elements after the selected elements
+          if (type === "list") {
+            // Case no list to render
+            if (!value || value.length <= 0) continue;
+
+            // Clone item element
+            const itemEl = el.cloneNode(true);
+            itemEl.classList.remove("hidden");
+            const parentEl = el.parentNode;
+            // Add item element after selected element
+            const items = value.forEach((item) => {
+              const newItemEl = itemEl.cloneNode(true);
+              // Update item element values
+              for (const [nameKey, nameValue] of Object.entries(item)) {
+                newItemEl.querySelector(
+                  `[data-name="${nameKey}"]`,
+                ).textContent = nameValue;
+              }
+              // Add item element after selected element
+              parentEl.appendChild(newItemEl);
+            });
+
+            // Delete schema
+            el.remove();
+            continue;
+          }
+        }
+      }
+
+      setStatus(el, textEl, colorClass, text) {
+        el.classList.remove("fill-green-500", "fill-red-500", "fill-sky-500");
+        el ? el.classList.add(colorClass) : null;
+        textEl ? (textEl.textContent = text) : null;
+      }
+
+      // Show fetch state alert
+      // type<str> : fetch, success, error
+      updateAlert(type) {
+        if (!type) return;
+
+        const [status, msg, color] = this.getAlertType(type);
+
+        this.alertEl.classList.remove(
+          "bg-sky-500",
+          "bg-green-500",
+          "bg-red-500",
+        );
+
+        this.alertStatusEl.textContent = status;
+        this.alertMsgEl.textContent = msg;
+        this.alertEl.classList.add(color);
+
+        this.alertEl.classList.remove("hidden");
+
+        if (type !== "fetch")
+          setTimeout(() => this.alertEl.classList.add("hidden"), 5000);
+      }
+
+      getAlertType(type) {
+        if (type === "fetch")
+          return ["Fetching", "Please wait...", "bg-sky-500"];
+        if (type === "error")
+          return ["Error", "Something went wrong", "bg-red-500"];
+        if (type === "success")
+          return ["Success", "Data fetched successfully", "bg-green-500"];
+      }
+    }
+
+    new SetupPlugin();
+  </script>
 </div>
 
 {% endblock %}
