@@ -72,7 +72,7 @@
     class="absolute right-7 top-1.5"
   >
     <svg
-      class="cursor-pointer fill-gray-600 dark:fill-gray-300 dark:opacity-80 absolute h-5 w-5"
+      class="cursor-pointer fill-gray-300 dark:opacity-80 absolute h-5 w-5"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 320 512"
     >
@@ -90,7 +90,7 @@
 </div>
 
 <script>
-  class Plugin {
+  class SetupPlugin {
     constructor() {
       // Alert elements
       this.alertEl = document.querySelector("[data-fetch]");
@@ -98,18 +98,25 @@
       this.alertStatusEl = document.querySelector("[data-fetch-status]");
       this.alertMsgEl = document.querySelector("[data-fetch-msg]");
       // Set data defaults elements and variables
+      // Key of this.data need to match key of fetch data json object to update values
+      // type<str> : text (target el), list (el need to be first element of list)
+      // listNames<arr> : list of names key on item, need to set data-name="nameKey" on el
       this.data = {
         info: {
           el: document.querySelector("[data-info]"),
-          value: `"Anti-bot technology is designed to detect and mitigate suspicious or
+          value: `Anti-bot technology is designed to detect and mitigate suspicious or
             malicious bots, preventing them from reaching an organization's websites
-            or IT ecosystem."`,
+            or IT ecosystem.`,
+          type: "text",
         },
         count: {
           el: document.querySelector("[data-count]"),
           value: "unknown",
+          type: "text",
         },
       };
+      // Hidden elements that will be shown on success, like ping buttons or list rendering
+      this.showOnSuccess = [];
 
       this.init();
     }
@@ -129,8 +136,16 @@
         })
           .then((response) => response.json())
           .then((res) => {
+            // Update data and DOM
             this.getFetchDataByKey(res.data);
             this.updateDataDOM();
+            // Show hidden elements
+            if (this.showOnSuccess.length > 0) {
+              this.showOnSuccess.forEach((el) => {
+                el.classList.remove("hidden");
+              });
+            }
+            // Feedback
             this.updateAlert("success");
           })
           .catch((error) => {
@@ -153,10 +168,18 @@
 
     updateDataDOM() {
       for (const [key, value] of Object.entries(this.data)) {
-        this.data[key]["el"].textContent = this.data[key]["value"] || "";
+        // Case text
+        if (this.data[key]["type"] == "text") {
+          this.data[key]["el"].textContent = this.data[key]["value"] || "";
+        }
+        // Case list, we will render elements after the selected elements
+        if (this.data[key]["type"] == "text") {
+          this.data[key]["el"].textContent = this.data[key]["value"] || "";
+        }
       }
     }
 
+    // Show fetch state alert
     // type<str> : fetch, success, error
     updateAlert(type) {
       if (!type) return;
@@ -190,7 +213,7 @@
     }
   }
 
-  new Plugin();
+  new SetupPlugin();
 </script>
 
 {% endblock %}
