@@ -126,13 +126,13 @@
         fetch(location.href, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
             "X-CSRFToken": "{{ csrf_token() }}",
           },
         })
           .then((res) => res.json())
           .then((res) => {
             console.log(res);
+            console.log(JSON.stringify(res));
             console.log(res.data);
             console.log(res.data.data);
             // Update data and DOM
