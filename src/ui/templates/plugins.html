@@ -43,18 +43,6 @@ include "plugins_modal.html" %}
       {{plugins_external}}
     </p>
   </div>
-  <div class="mx-1 flex items-center my-4">
-    <p
-      class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 dark:opacity-80"
-    >
-      PLUGINS ERRORS
-    </p>
-    <p
-      class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-80"
-    >
-      {{plugins_errors}}
-    </p>
-  </div>
 </div>
 <!-- end info -->
 
@@ -229,7 +217,7 @@ include "plugins_modal.html" %}
         <a
           aria-label="plugin page link"
           class="hover:-translate-y-px mx-1"
-          href="{{request.url_root}}plugins?plugin_id={{plugin['id']}}"
+          href="{{request.url_root}}plugins/{{plugin['id']}}"
         >
           <svg
             class="h-6 w-6 fill-sky-500 dark dark:brightness-90"

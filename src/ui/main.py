@@ -1202,7 +1202,6 @@ def plugins():
         plugins=plugins,
         plugins_internal=plugins_internal,
         plugins_external=plugins_external,
-        plugins_errors=db.get_plugins_errors(),
         username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
     )
