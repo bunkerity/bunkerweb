@@ -41,7 +41,6 @@ from tarfile import CompressionError, HeaderError, ReadError, TarError, open as 
 from threading import Thread
 from tempfile import NamedTemporaryFile
 from time import sleep, time
-from traceback import format_exc
 from zipfile import BadZipFile, ZipFile
 
 from src.Instances import Instances
@@ -1310,15 +1309,15 @@ def custom_plugin(plugin: str):
         method = getattr(actions, plugin)
         if request.args:
             res = method(**request.args.to_dict())
-        elif request.json:
+        elif request.is_json:
             res = method(**request.json)
         else:
             res = method()
     except AttributeError:
-        message = f'The plugin "{plugin}" does not have a "{plugin}" method'
+        message = f'The plugin "{plugin}" does not have a "{plugin}" method, see logs for more details'
         error = 404
     except:
-        message = f'An error occurred while executing the plugin "{plugin}":\n{format_exc()}'
+        message = f'An error occurred while executing the plugin "{plugin}", see logs for more details'
         error = 500
     finally:
         if sbin_nginx_path.is_file():
@@ -1327,9 +1326,12 @@ def custom_plugin(plugin: str):
             sys_modules.pop("actions")
             del actions
 
-        if message or not res or isinstance(res, dict) is False:
+        if message or not res or not isinstance(res, dict):
             message = message or f'The plugin "{plugin}" did not return a valid response'
-            app.logger.error(message)
+            if error:
+                app.logger.exception(message)
+            else:
+                app.logger.error(message)
             return {"message": message}, error or 500
 
     app.logger.info(f"Plugin {plugin} action executed successfully")
