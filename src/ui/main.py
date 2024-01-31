@@ -1187,18 +1187,6 @@ def plugins():
 
         return redirect(url_for("loading", next=url_for("plugins"), message="Reloading plugins"))
 
-    if request.args.get("plugin_id", False):
-        plugin_id = request.args.get("plugin_id")
-        page = db.get_plugin_template(plugin_id)
-
-        if page:
-            return render_template(
-                Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
-                dark_mode=app.config["DARK_MODE"],
-                username=current_user.get_id(),
-                **app.jinja_env.globals,
-            )
-
     plugins = app.config["CONFIG"].get_plugins()
     plugins_internal = 0
     plugins_external = 0
@@ -1270,11 +1258,32 @@ def upload_plugin():
     return {"status": "ok"}, 201
 
 
-@app.route("/plugins/<plugin>", methods=["POST"])
+@app.route("/plugins/<plugin>", methods=["GET", "POST"])
 @login_required
 def custom_plugin(plugin):
+    message = ""
     if not plugin_id_rx.match(plugin):
+        message = f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'
+        app.logger.error(message)
+        if request.method == "GET":
+            return message, 400
         return {"message": f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'}, 400
+
+    if request.method == "GET":
+        plugin_id = request.args.get("plugin_id")
+        page = db.get_plugin_template(plugin_id)
+
+        if page:
+            return render_template(
+                Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
+                dark_mode=app.config["DARK_MODE"],
+                username=current_user.get_id(),
+                **app.jinja_env.globals,
+            )
+
+        message = f'The plugin "{plugin}" does not have a template'
+        app.logger.error(message)
+        return message, 404
 
     module = db.get_plugin_actions(plugin)
 
@@ -1294,7 +1303,6 @@ def custom_plugin(plugin):
 
     error = None
     res = None
-    message = ""
 
     try:
         # Try to get the custom plugin custom function and call it
