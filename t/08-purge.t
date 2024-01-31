@@ -1,31 +1,20 @@
 # vim:set ts=4 sts=4 sw=4 et ft=:
 
-use Test::Nginx::Socket::Lua;
-use Cwd qw(cwd);
+use strict;
 use lib '.';
-use t::Util;
+use t::TestMLCache;
 
 #repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 3);
-
-my $pwd = cwd();
-
-our $HttpConfig = qq{
-    lua_package_path "$pwd/lib/?.lua;;";
-    lua_shared_dict  cache_shm      1m;
-    lua_shared_dict  cache_shm_miss 1m;
-    lua_shared_dict  ipc_shm        1m;
-};
+plan tests => repeat_each() * blocks() * 3;
 
 run_tests();
 
 __DATA__
 
 === TEST 1: purge() errors if no ipc
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -35,8 +24,6 @@ __DATA__
             ngx.say(err)
         }
     }
---- request
-GET /t
 --- response_body
 no ipc to propagate purge, specify opts.ipc_shm or opts.ipc
 --- no_error_log
@@ -45,9 +32,8 @@ no ipc to propagate purge, specify opts.ipc_shm or opts.ipc
 
 
 === TEST 2: purge() deletes all items from L1 + L2 (sanity 1/2)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -80,8 +66,6 @@ no ipc to propagate purge, specify opts.ipc_shm or opts.ipc
             ngx.say("ok")
         }
     }
---- request
-GET /t
 --- response_body
 ok
 --- no_error_log
@@ -90,9 +74,8 @@ ok
 
 
 === TEST 3: purge() deletes all items from L1 (sanity 2/2)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -121,8 +104,6 @@ ok
             ngx.say("ok")
         }
     }
---- request
-GET /t
 --- response_body
 ok
 --- no_error_log
@@ -131,10 +112,9 @@ ok
 
 
 === TEST 4: purge() deletes all items from L1 with a custom LRU
---- skip_eval: 3: t::Util::skip_openresty('<', '1.13.6.2')
---- http_config eval: $::HttpConfig
+--- skip_eval: 3: t::TestMLCache::skip_openresty('<', '1.13.6.2')
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local lrucache = require "resty.lrucache"
@@ -168,8 +148,6 @@ ok
             ngx.say("lru instance is the same one: ", lru == cache.lru)
         }
     }
---- request
-GET /t
 --- response_body
 ok
 lru instance is the same one: true
@@ -179,10 +157,9 @@ lru instance is the same one: true
 
 
 === TEST 5: purge() is prevented if custom LRU does not support flush_all()
---- skip_eval: 3: t::Util::skip_openresty('>', '1.13.6.1')
---- http_config eval: $::HttpConfig
+--- skip_eval: 3: t::TestMLCache::skip_openresty('>', '1.13.6.1')
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local lrucache = require "resty.lrucache"
@@ -201,8 +178,6 @@ lru instance is the same one: true
             ngx.say("ok")
         }
     }
---- request
-GET /t
 --- response_body
 cannot purge when using custom LRU cache with OpenResty < 1.13.6.2
 --- no_error_log
@@ -211,9 +186,8 @@ cannot purge when using custom LRU cache with OpenResty < 1.13.6.2
 
 
 === TEST 6: purge() deletes all items from shm_miss is specified
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -249,8 +223,6 @@ cannot purge when using custom LRU cache with OpenResty < 1.13.6.2
             ngx.say("ok")
         }
     }
---- request
-GET /t
 --- response_body
 ok
 --- no_error_log
@@ -259,9 +231,8 @@ ok
 
 
 === TEST 7: purge() does not call shm:flush_expired() by default
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             do
                 local cache_shm = ngx.shared.cache_shm
@@ -284,8 +255,6 @@ ok
             assert(cache:purge())
         }
     }
---- request
-GET /t
 --- response_body_unlike
 flush_expired called with 'max_count'
 --- no_error_log
@@ -294,9 +263,8 @@ flush_expired called with 'max_count'
 
 
 === TEST 8: purge() calls shm:flush_expired() if argument specified
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             do
                 local cache_shm = ngx.shared.cache_shm
@@ -321,8 +289,6 @@ flush_expired called with 'max_count'
             assert(cache:purge(true))
         }
     }
---- request
-GET /t
 --- response_body
 flush_expired called with 'max_count': nil
 --- no_error_log
@@ -331,9 +297,8 @@ flush_expired called with 'max_count': nil
 
 
 === TEST 9: purge() calls shm:flush_expired() if shm_miss is specified
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             do
                 local cache_shm = ngx.shared.cache_shm
@@ -359,8 +324,6 @@ flush_expired called with 'max_count': nil
             assert(cache:purge(true))
         }
     }
---- request
-GET /t
 --- response_body
 flush_expired called with 'max_count': nil
 flush_expired called with 'max_count': nil
@@ -370,9 +333,8 @@ flush_expired called with 'max_count': nil
 
 
 === TEST 10: purge() calls broadcast() on purge channel
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -392,8 +354,6 @@ flush_expired called with 'max_count': nil
             assert(cache:purge())
         }
     }
---- request
-GET /t
 --- response_body
 channel: mlcache:purge:my_mlcache
 data:

@@ -1,18 +1,31 @@
 # Table of Contents
 
-- [2.6.0](#2.6.0)
-- [2.5.0](#2.5.0)
-- [2.4.1](#2.4.1)
-- [2.4.0](#2.4.0)
-- [2.3.0](#2.3.0)
-- [2.2.1](#2.2.1)
-- [2.2.0](#2.2.0)
-- [2.1.0](#2.1.0)
-- [2.0.2](#2.0.2)
-- [2.0.1](#2.0.1)
-- [2.0.0](#2.0.0)
-- [1.0.1](#1.0.1)
-- [1.0.0](#1.0.0)
+- [2.6.1](#261)
+- [2.6.0](#260)
+- [2.5.0](#250)
+- [2.4.1](#241)
+- [2.4.0](#240)
+- [2.3.0](#230)
+- [2.2.1](#221)
+- [2.2.0](#220)
+- [2.1.0](#210)
+- [2.0.2](#202)
+- [2.0.1](#201)
+- [2.0.0](#200)
+- [1.0.1](#101)
+- [1.0.0](#100)
+
+## [2.6.1]
+
+> Released on: 2024/01/30
+
+#### Fixed
+
+- Ensure the `l1_serializer` callback option is properly invoked in a couple of
+  `get()` edge-cases.
+  [#123](https://github.com/thibaultcha/lua-resty-mlcache/pull/123)
+
+[Back to TOC](#table-of-contents)
 
 ## [2.6.0]
 
@@ -255,6 +268,7 @@ Initial release.
 
 [Back to TOC](#table-of-contents)
 
+[2.6.1]: https://github.com/thibaultcha/lua-resty-mlcache/compare/2.6.0...2.6.1
 [2.6.0]: https://github.com/thibaultcha/lua-resty-mlcache/compare/2.5.0...2.6.0
 [2.5.0]: https://github.com/thibaultcha/lua-resty-mlcache/compare/2.4.1...2.5.0
 [2.4.1]: https://github.com/thibaultcha/lua-resty-mlcache/compare/2.4.0...2.4.1

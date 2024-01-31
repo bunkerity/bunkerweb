@@ -1,35 +1,26 @@
 # vim:set ts=4 sts=4 sw=4 et ft=:
 
-use Test::Nginx::Socket::Lua;
-use Cwd qw(cwd);
+use strict;
+use lib '.';
+use t::TestMLCache;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (blocks() * 3) + 4;
-
-my $pwd = cwd();
-
-our $HttpConfig = qq{
-    lua_package_path "$pwd/lib/?.lua;;";
-    lua_shared_dict  cache_shm 1m;
-};
+plan tests => repeat_each() * blocks() * 3;
 
 run_tests();
 
 __DATA__
 
 === TEST 1: module has version number
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
             ngx.say(mlcache._VERSION)
         }
     }
---- request
-GET /t
 --- response_body_like
 \d+\.\d+\.\d+
 --- no_error_log
@@ -38,119 +29,103 @@ GET /t
 
 
 === TEST 2: new() validates name
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
             local ok, err = pcall(mlcache.new)
             if not ok then
-                ngx.log(ngx.ERR, err)
+                ngx.say(err)
             end
         }
     }
---- request
-GET /t
 --- response_body
-
---- error_log
 name must be a string
+--- no_error_log
+[error]
 
 
 
 === TEST 3: new() validates shm
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
             local ok, err = pcall(mlcache.new, "name")
             if not ok then
-                ngx.log(ngx.ERR, err)
+                ngx.say(err)
             end
         }
     }
---- request
-GET /t
 --- response_body
-
---- error_log
 shm must be a string
+--- no_error_log
+[error]
 
 
 
 === TEST 4: new() validates opts
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
             local ok, err = pcall(mlcache.new, "name", "cache_shm", "foo")
             if not ok then
-                ngx.log(ngx.ERR, err)
+                ngx.say(err)
             end
         }
     }
---- request
-GET /t
 --- response_body
-
---- error_log
 opts must be a table
+--- no_error_log
+[error]
 
 
 
 === TEST 5: new() ensures shm exists
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
             local cache, err = mlcache.new("name", "foo")
             if not cache then
-                ngx.log(ngx.ERR, err)
+                ngx.say(err)
             end
         }
     }
---- request
-GET /t
 --- response_body
-
---- error_log
 no such lua_shared_dict: foo
+--- no_error_log
+[error]
 
 
 
 === TEST 6: new() supports ipc_shm option and validates it
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
             local ok, err = pcall(mlcache.new, "name", "cache_shm", { ipc_shm = 1 })
             if not ok then
-                ngx.log(ngx.ERR, err)
+                ngx.say(err)
             end
         }
     }
---- request
-GET /t
 --- response_body
-
---- error_log
-ipc_shm must be a string
+opts.ipc_shm must be a string
+--- no_error_log
+[error]
 
 
 
 === TEST 7: new() supports opts.ipc_shm and ensures it exists
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -160,8 +135,6 @@ ipc_shm must be a string
             end
         }
     }
---- request
-GET /t
 --- ignore_response_body
 --- error_log eval
 qr/\[error\] .*? no such lua_shared_dict: ipc/
@@ -171,9 +144,8 @@ qr/\[error\] .*? no such lua_shared_dict: ipc/
 
 
 === TEST 8: new() supports ipc options and validates it
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -183,8 +155,6 @@ qr/\[error\] .*? no such lua_shared_dict: ipc/
             end
         }
     }
---- request
-GET /t
 --- response_body
 opts.ipc must be a table
 --- no_error_log
@@ -193,9 +163,8 @@ opts.ipc must be a table
 
 
 === TEST 9: new() prevents both opts.ipc_shm and opts.ipc to be given
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -208,8 +177,6 @@ opts.ipc must be a table
             end
         }
     }
---- request
-GET /t
 --- response_body
 cannot specify both of opts.ipc_shm and opts.ipc
 --- no_error_log
@@ -218,9 +185,8 @@ cannot specify both of opts.ipc_shm and opts.ipc
 
 
 === TEST 10: new() validates ipc.register_listeners + ipc.broadcast + ipc.poll (type: custom)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -248,8 +214,6 @@ cannot specify both of opts.ipc_shm and opts.ipc
             end
         }
     }
---- request
-GET /t
 --- response_body
 opts.ipc.register_listeners must be a function
 opts.ipc.broadcast must be a function
@@ -260,9 +224,8 @@ opts.ipc.poll must be a function
 
 
 === TEST 11: new() ipc.register_listeners can return nil + err (type: custom)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -280,8 +243,6 @@ opts.ipc.poll must be a function
             end
         }
     }
---- request
-GET /t
 --- response_body_like
 failed to initialize custom IPC \(opts\.ipc\.register_listeners returned an error\): something happened
 --- no_error_log
@@ -290,9 +251,8 @@ failed to initialize custom IPC \(opts\.ipc\.register_listeners returned an erro
 
 
 === TEST 12: new() calls ipc.register_listeners with events array (type: custom)
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -320,8 +280,6 @@ failed to initialize custom IPC \(opts\.ipc\.register_listeners returned an erro
             end
         }
     }
---- request
-GET /t
 --- response_body
 invalidation | channel: mlcache:invalidations:name | handler: function
 purge | channel: mlcache:purge:name | handler: function
@@ -331,9 +289,8 @@ purge | channel: mlcache:purge:name | handler: function
 
 
 === TEST 13: new() ipc.poll is optional (some IPC libraries might not need it
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -351,8 +308,6 @@ purge | channel: mlcache:purge:name | handler: function
             ngx.say("ok")
         }
     }
---- request
-GET /t
 --- response_body
 ok
 --- no_error_log
@@ -361,9 +316,8 @@ ok
 
 
 === TEST 14: new() validates opts.lru_size
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -375,8 +329,6 @@ ok
             end
         }
     }
---- request
-GET /t
 --- response_body
 
 --- error_log
@@ -385,9 +337,8 @@ opts.lru_size must be a number
 
 
 === TEST 15: new() validates opts.ttl
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -395,31 +346,28 @@ opts.lru_size must be a number
                 ttl = ""
             })
             if not ok then
-                ngx.log(ngx.ERR, err)
+                ngx.say(err)
             end
 
             local ok, err = pcall(mlcache.new, "name", "cache_shm", {
                 ttl = -1
             })
             if not ok then
-                ngx.log(ngx.ERR, err)
+                ngx.say(err)
             end
         }
     }
---- request
-GET /t
 --- response_body
-
---- error_log
 opts.ttl must be a number
 opts.ttl must be >= 0
+--- no_error_log
+[error]
 
 
 
 === TEST 16: new() validates opts.neg_ttl
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -427,31 +375,28 @@ opts.ttl must be >= 0
                 neg_ttl = ""
             })
             if not ok then
-                ngx.log(ngx.ERR, err)
+                ngx.say(err)
             end
 
             local ok, err = pcall(mlcache.new, "name", "cache_shm", {
                 neg_ttl = -1
             })
             if not ok then
-                ngx.log(ngx.ERR, err)
+                ngx.say(err)
             end
         }
     }
---- request
-GET /t
 --- response_body
-
---- error_log
 opts.neg_ttl must be a number
 opts.neg_ttl must be >= 0
+--- no_error_log
+[error]
 
 
 
 === TEST 17: new() validates opts.resty_lock_opts
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -459,23 +404,20 @@ opts.neg_ttl must be >= 0
                 resty_lock_opts = false,
             })
             if not ok then
-                ngx.log(ngx.ERR, err)
+                ngx.say(err)
             end
         }
     }
---- request
-GET /t
 --- response_body
-
---- error_log
 opts.resty_lock_opts must be a table
+--- no_error_log
+[error]
 
 
 
 === TEST 18: new() validates opts.shm_set_tries
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -495,8 +437,6 @@ opts.resty_lock_opts must be a table
             end
         }
     }
---- request
-GET /t
 --- response_body
 opts.shm_set_tries must be a number
 opts.shm_set_tries must be >= 1
@@ -507,9 +447,8 @@ opts.shm_set_tries must be >= 1
 
 
 === TEST 19: new() validates opts.shm_miss
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -521,8 +460,6 @@ opts.shm_set_tries must be >= 1
             end
         }
     }
---- request
-GET /t
 --- response_body
 opts.shm_miss must be a string
 --- no_error_log
@@ -531,9 +468,8 @@ opts.shm_miss must be a string
 
 
 === TEST 20: new() ensures opts.shm_miss exists
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -545,8 +481,6 @@ opts.shm_miss must be a string
             end
         }
     }
---- request
-GET /t
 --- response_body
 no such lua_shared_dict for opts.shm_miss: foo
 --- no_error_log
@@ -555,9 +489,8 @@ no such lua_shared_dict for opts.shm_miss: foo
 
 
 === TEST 21: new() creates an mlcache object with default attributes
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -571,8 +504,6 @@ no such lua_shared_dict for opts.shm_miss: foo
             ngx.say(type(cache.neg_ttl))
         }
     }
---- request
-GET /t
 --- response_body
 table
 number
@@ -583,9 +514,8 @@ number
 
 
 === TEST 22: new() accepts user-provided LRU instances via opts.lru
---- http_config eval: $::HttpConfig
 --- config
-    location = /t {
+    location /t {
         content_by_lua_block {
             local mlcache          = require "resty.mlcache"
             local pureffi_lrucache = require "resty.lrucache.pureffi"
@@ -597,8 +527,6 @@ number
             ngx.say("lru is user-provided: ", cache.lru == my_lru)
         }
     }
---- request
-GET /t
 --- response_body
 lru is user-provided: true
 --- no_error_log
