@@ -1299,7 +1299,12 @@ def custom_plugin(plugin):
     try:
         # Try to get the custom plugin custom function and call it
         method = getattr(actions, plugin)
-        res = method()
+        if request.args:
+            res = method(**request.args.to_dict())
+        elif request.json:
+            res = method(**request.json)
+        else:
+            res = method()
     except AttributeError:
         message = f'The plugin "{plugin}" does not have a "{plugin}" method'
         error = 404
