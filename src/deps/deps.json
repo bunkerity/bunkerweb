@@ -145,9 +145,9 @@
     },
     {
       "id": "lua-resty-mlcache",
-      "name": "lua-resty-mlcache v2.6.1",
+      "name": "lua-resty-mlcache v2.6.0",
       "url": "https://github.com/thibaultcha/lua-resty-mlcache.git",
-      "commit": "ab418e4237b083aaa9b7c9c43782b1900aabbf5b"
+      "commit": "f140f56663cbdb9cdd247d29f75c299c702ff6b4"
     },
     {
       "id": "lua-resty-openssl",

@@ -1,20 +1,29 @@
 # vim:set ts=4 sts=4 sw=4 et ft=:
 
-use strict;
-use lib '.';
-use t::TestMLCache;
+use Test::Nginx::Socket::Lua;
+use Cwd qw(cwd);
 
 #repeat_each(2);
 
-plan tests => repeat_each() * blocks() * 4;
+plan tests => repeat_each() * (blocks() * 3) + 2;
+
+my $pwd = cwd();
+
+our $HttpConfig = qq{
+    lua_package_path "$pwd/lib/?.lua;;";
+    lua_shared_dict  cache_shm      1m;
+    lua_shared_dict  cache_shm_miss 1m;
+    lua_shared_dict  ipc_shm        1m;
+};
 
 run_tests();
 
 __DATA__
 
 === TEST 1: set() errors if no ipc
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -24,17 +33,19 @@ __DATA__
             ngx.say(err)
         }
     }
+--- request
+GET /t
 --- response_body
 no ipc to propagate update, specify opts.ipc_shm or opts.ipc
 --- no_error_log
 [error]
-[crit]
 
 
 
 === TEST 2: set() validates key
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -48,17 +59,19 @@ no ipc to propagate update, specify opts.ipc_shm or opts.ipc
             end
         }
     }
+--- request
+GET /t
 --- response_body
 key must be a string
 --- no_error_log
 [error]
-[crit]
 
 
 
 === TEST 3: set() puts a value directly in shm
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -89,18 +102,20 @@ key must be a string
             ngx.say("cache lru value after get(): ", value_lru)
         }
     }
+--- request
+GET /t
 --- response_body
 value from get(): 123
 cache lru value after get(): 123
 --- no_error_log
 [error]
-[crit]
 
 
 
 === TEST 4: set() puts a negative hit directly in shm_miss if specified
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -130,17 +145,19 @@ cache lru value after get(): 123
             ngx.say("value from get(): ", value)
         }
     }
+--- request
+GET /t
 --- response_body
 value from get(): nil
 --- no_error_log
 [error]
-[crit]
 
 
 
 === TEST 5: set() puts a value directly in its own LRU
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -159,17 +176,19 @@ value from get(): nil
             ngx.say("cache lru value after set(): ", value_lru)
         }
     }
+--- request
+GET /t
 --- response_body
 cache lru value after set(): 123
 --- no_error_log
 [error]
-[crit]
 
 
 
 === TEST 6: set() respects 'ttl' for non-nil values
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -210,6 +229,8 @@ cache lru value after set(): 123
             ngx.say("value from get(): ", value)
         }
     }
+--- request
+GET /t
 --- response_body
 calling get()
 value from get(): 123
@@ -220,13 +241,13 @@ callback called
 value from get(): 123
 --- no_error_log
 [error]
-[crit]
 
 
 
 === TEST 7: set() respects 'neg_ttl' for nil values
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -273,6 +294,8 @@ value from get(): 123
             ngx.say("value from get(): ", value)
         }
     }
+--- request
+GET /t
 --- response_body
 calling get()
 value from get(): nil
@@ -283,13 +306,13 @@ callback called
 value from get(): nil
 --- no_error_log
 [error]
-[crit]
 
 
 
 === TEST 8: set() respects 'set_shm_tries'
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local dict = ngx.shared.cache_shm
             dict:flush_all()
@@ -349,6 +372,8 @@ value from get(): nil
             ngx.say("callback was called: ", cb_called ~= nil)
         }
     }
+--- request
+GET /t
 --- response_body
 type of data in shm: string
 callback was called: false
@@ -359,8 +384,9 @@ callback was called: false
 
 
 === TEST 9: set() with shm_miss can set a nil where a value was
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -404,18 +430,20 @@ callback was called: false
             ngx.say("value from get() after set(): ", value)
         }
     }
+--- request
+GET /t
 --- response_body
 initial value from get(): 123
 value from get() after set(): nil
 --- no_error_log
 [error]
-[crit]
 
 
 
 === TEST 10: set() with shm_miss can set a value where a nil was
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -459,18 +487,20 @@ value from get() after set(): nil
             ngx.say("value from get() after set(): ", value)
         }
     }
+--- request
+GET /t
 --- response_body
 initial value from get(): nil
 value from get() after set(): 123
 --- no_error_log
 [error]
-[crit]
 
 
 
 === TEST 11: set() returns 'no memory' errors upon fragmentation in the shm
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -503,18 +533,21 @@ value from get() after set(): 123
             ngx.say(err)
         }
     }
+--- request
+GET /t
 --- response_body
 nil
 could not write to lua_shared_dict 'cache_shm': no memory
 --- no_error_log
-[warn]
 [error]
+[warn]
 
 
 
 === TEST 12: set() does not set LRU upon shm insertion error
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -549,17 +582,19 @@ could not write to lua_shared_dict 'cache_shm': no memory
             ngx.say(data)
         }
     }
+--- request
+GET /t
 --- response_body
 nil
 --- no_error_log
 [error]
-[crit]
 
 
 
 === TEST 13: set() calls broadcast() with invalidated key
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -579,10 +614,11 @@ nil
             assert(cache:set("my_key", nil, nil))
         }
     }
+--- request
+GET /t
 --- response_body
 channel: mlcache:invalidations:my_mlcache
 data: my_key
 other args:
 --- no_error_log
 [error]
-[crit]

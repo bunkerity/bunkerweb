@@ -174,7 +174,7 @@ end
 
 
 local _M     = {
-    _VERSION = "2.6.1",
+    _VERSION = "2.6.0",
     _AUTHOR  = "Thibault Charbonnier",
     _LICENSE = "MIT",
     _URL     = "https://github.com/thibaultcha/lua-resty-mlcache",
@@ -394,8 +394,12 @@ function _M.new(name, shm, opts)
 end
 
 
-local function l1_serialize(value, l1_serializer)
-    if value ~= nil and l1_serializer then
+local function set_lru(self, key, value, ttl, neg_ttl, l1_serializer)
+    if value == nil then
+        ttl = neg_ttl
+        value = CACHE_MISS_SENTINEL_LRU
+
+    elseif l1_serializer then
         local ok, err
         ok, value, err = pcall(l1_serializer, value)
         if not ok then
@@ -409,21 +413,6 @@ local function l1_serialize(value, l1_serializer)
         if value == nil then
             return nil, "l1_serializer returned a nil value"
         end
-    end
-
-    return value
-end
-
-
-local function set_lru(self, key, value, ttl, neg_ttl, l1_serializer)
-    local value, err = l1_serialize(value, l1_serializer)
-    if err then
-        return nil, err
-    end
-
-    if value == nil then
-        value = CACHE_MISS_SENTINEL_LRU
-        ttl = neg_ttl
     end
 
     if ttl == 0 then
@@ -566,11 +555,6 @@ local function get_shm_set_lru(self, key, shm_key, l1_serializer)
         end
 
         if went_stale then
-            value, err = l1_serialize(value, l1_serializer)
-            if err then
-                return nil, err
-            end
-
             return value, nil, went_stale
         end
 
@@ -590,11 +574,6 @@ local function get_shm_set_lru(self, key, shm_key, l1_serializer)
                 -- value has less than 1ms of lifetime in the shm, avoid
                 -- setting it in LRU which would be wasteful and could
                 -- indefinitely cache the value when ttl == 0
-                value, err = l1_serialize(value, l1_serializer)
-                if err then
-                    return nil, err
-                end
-
                 return value, nil, nil, is_stale
             end
         end
@@ -708,7 +687,6 @@ end
 
 local function run_callback(self, key, shm_key, data, ttl, neg_ttl,
     went_stale, l1_serializer, resurrect_ttl, shm_set_tries, cb, ...)
-
     local lock, err = resty_lock:new(self.shm_locks, self.resty_lock_opts)
     if not lock then
         return nil, "could not create lock: " .. err

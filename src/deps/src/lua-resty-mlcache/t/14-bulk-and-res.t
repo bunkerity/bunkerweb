@@ -1,21 +1,53 @@
 # vim:set ts=4 sts=4 sw=4 et ft=:
 
-use strict;
+use Test::Nginx::Socket::Lua;
+use Cwd qw(cwd);
 use lib '.';
-use t::TestMLCache;
+use t::Util;
+
+no_long_string();
 
 workers(2);
+
 #repeat_each(2);
 
 plan tests => repeat_each() * blocks() * 3;
+
+my $pwd = cwd();
+
+our $HttpConfig = qq{
+    lua_package_path "$pwd/lib/?.lua;;";
+    lua_shared_dict  cache_shm      1m;
+    #lua_shared_dict  cache_shm_miss 1m;
+
+    init_by_lua_block {
+        -- local verbose = true
+        local verbose = false
+        local outfile = "$Test::Nginx::Util::ErrLogFile"
+        -- local outfile = "/tmp/v.log"
+        if verbose then
+            local dump = require "jit.dump"
+            dump.on(nil, outfile)
+        else
+            local v = require "jit.v"
+            v.on(outfile)
+        end
+
+        require "resty.core"
+        -- jit.opt.start("hotloop=1")
+        -- jit.opt.start("loopunroll=1000000")
+        -- jit.off()
+    }
+};
 
 run_tests();
 
 __DATA__
 
 === TEST 1: new_bulk() creates a bulk
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -26,6 +58,8 @@ __DATA__
             ngx.say("bulk.n: ", bulk.n)
         }
     }
+--- request
+GET /t
 --- response_body
 type: table
 size: 0
@@ -36,8 +70,9 @@ bulk.n: 0
 
 
 === TEST 2: new_bulk() creates a bulk with narr in arg #1
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -48,6 +83,8 @@ bulk.n: 0
             ngx.say("bulk.n: ", bulk.n)
         }
     }
+--- request
+GET /t
 --- response_body
 type: table
 size: 0
@@ -58,8 +95,9 @@ bulk.n: 0
 
 
 === TEST 3: bulk:add() adds bulk operations
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -81,6 +119,8 @@ bulk.n: 0
             ngx.say("bulk.n: ", bulk.n)
         }
     }
+--- request
+GET /t
 --- response_body_like
 key_1 nil function: 0x[0-9a-fA-F]+ 1
 key_2 nil function: 0x[0-9a-fA-F]+ 2
@@ -92,8 +132,9 @@ bulk\.n: 3
 
 
 === TEST 4: bulk:add() can be given to get_bulk()
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -119,6 +160,8 @@ bulk\.n: 3
             end
         }
     }
+--- request
+GET /t
 --- response_body
 1 nil 3
 2 nil 3
@@ -129,8 +172,9 @@ bulk\.n: 3
 
 
 === TEST 5: each_bulk_res() iterates over get_bulk() results
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
             local cache = assert(mlcache.new("my_mlcache", "cache_shm"))
@@ -151,6 +195,8 @@ bulk\.n: 3
             end
         }
     }
+--- request
+GET /t
 --- response_body
 1 1 nil 3
 2 2 nil 3
@@ -161,8 +207,9 @@ bulk\.n: 3
 
 
 === TEST 6: each_bulk_res() throws an error on unrocognized res
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -172,6 +219,8 @@ bulk\.n: 3
             end
         }
     }
+--- request
+GET /t
 --- response_body
 res must have res.n field; is this a get_bulk() result?
 --- no_error_log

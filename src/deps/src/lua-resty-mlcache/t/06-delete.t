@@ -1,21 +1,31 @@
 # vim:set ts=4 sts=4 sw=4 et ft=:
 
-use strict;
-use lib '.';
-use t::TestMLCache;
+use Test::Nginx::Socket::Lua;
+use Cwd qw(cwd);
 
 workers(2);
+
 #repeat_each(2);
 
-plan tests => repeat_each() * blocks() * 3;
+plan tests => repeat_each() * (blocks() * 3);
+
+my $pwd = cwd();
+
+our $HttpConfig = qq{
+    lua_package_path "$pwd/lib/?.lua;;";
+    lua_shared_dict  cache_shm      1m;
+    lua_shared_dict  cache_shm_miss 1m;
+    lua_shared_dict  ipc_shm        1m;
+};
 
 run_tests();
 
 __DATA__
 
 === TEST 1: delete() errors if no ipc
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -25,6 +35,8 @@ __DATA__
             ngx.say(err)
         }
     }
+--- request
+GET /t
 --- response_body
 no ipc to propagate deletion, specify opts.ipc_shm or opts.ipc
 --- no_error_log
@@ -33,8 +45,9 @@ no ipc to propagate deletion, specify opts.ipc_shm or opts.ipc
 
 
 === TEST 2: delete() validates key
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -46,6 +59,8 @@ no ipc to propagate deletion, specify opts.ipc_shm or opts.ipc
             ngx.say(err)
         }
     }
+--- request
+GET /t
 --- response_body
 key must be a string
 --- no_error_log
@@ -54,8 +69,9 @@ key must be a string
 
 
 === TEST 3: delete() removes a cached value from LRU + shm
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -105,6 +121,8 @@ key must be a string
             ngx.say("from callback: ", data)
         }
     }
+--- request
+GET /t
 --- response_body
 in callback
 from callback: 123
@@ -120,8 +138,9 @@ from callback: 456
 
 
 === TEST 4: delete() removes a cached nil from shm_miss if specified
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -184,6 +203,8 @@ from callback: 456
             ngx.say("from callback again: ", data)
         }
     }
+--- request
+GET /t
 --- response_body
 in callback
 from callback: nil
@@ -199,8 +220,9 @@ from callback again: 456
 
 
 === TEST 5: delete() calls broadcast with invalidated key
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -220,6 +242,8 @@ from callback again: 456
             assert(cache:delete("my_key"))
         }
     }
+--- request
+GET /t
 --- response_body
 channel: mlcache:invalidations:my_mlcache
 data: my_key

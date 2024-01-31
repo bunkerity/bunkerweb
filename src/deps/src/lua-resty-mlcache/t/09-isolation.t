@@ -1,20 +1,28 @@
 # vim:set ts=4 sts=4 sw=4 et ft=:
 
-use strict;
-use lib '.';
-use t::TestMLCache;
+use Test::Nginx::Socket::Lua;
+use Cwd qw(cwd);
 
 repeat_each(2);
 
-plan tests => repeat_each() * blocks() * 3;
+plan tests => repeat_each() * (blocks() * 3);
+
+my $pwd = cwd();
+
+our $HttpConfig = qq{
+    lua_package_path "$pwd/lib/?.lua;;";
+    lua_shared_dict  cache_shm 1m;
+    lua_shared_dict  ipc_shm   1m;
+};
 
 run_tests();
 
 __DATA__
 
 === TEST 1: multiple instances with the same name have same lua-resty-lru instance
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -25,6 +33,8 @@ __DATA__
                     cache_1.lru == cache_2.lru)
         }
     }
+--- request
+GET /t
 --- response_body
 lua-resty-lru instances are the same: true
 --- no_error_log
@@ -33,8 +43,9 @@ lua-resty-lru instances are the same: true
 
 
 === TEST 2: multiple instances with different names have different lua-resty-lru instances
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -45,6 +56,8 @@ lua-resty-lru instances are the same: true
                     cache_1.lru == cache_2.lru)
         }
     }
+--- request
+GET /t
 --- response_body
 lua-resty-lru instances are the same: false
 --- no_error_log
@@ -53,8 +66,9 @@ lua-resty-lru instances are the same: false
 
 
 === TEST 3: garbage-collected instances also GC their lru instance
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -90,6 +104,8 @@ lua-resty-lru instances are the same: false
             ngx.say((cache_2.lru:get("key")))
         }
     }
+--- request
+GET /t
 --- response_body
 123
 nil
@@ -99,8 +115,9 @@ nil
 
 
 === TEST 4: multiple instances with different names get() of the same key are isolated
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -136,6 +153,8 @@ nil
             ngx.say("cache_2 shm has: ", shm_2_value)
         }
     }
+--- request
+GET /t
 --- response_body
 cache_1 lru has: value A
 cache_2 lru has: value B
@@ -147,8 +166,9 @@ cache_2 shm has: value B
 
 
 === TEST 5: multiple instances with different names delete() of the same key are isolated
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -195,6 +215,8 @@ cache_2 shm has: value B
             ngx.say("cache_2 lru has: ", lru_v_2)
         }
     }
+--- request
+GET /t
 --- response_body
 cache_1 shm has a value: true
 delete from cache_1
@@ -208,8 +230,9 @@ cache_2 lru has: value B
 
 
 === TEST 6: multiple instances with different names peek() of the same key are isolated
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             -- must reset the shm so that when repeated, this tests doesn't
             -- return unpredictible TTLs (0.9xxxs)
@@ -253,6 +276,8 @@ cache_2 lru has: value B
             ngx.say("cache_2 value: ", val)
         }
     }
+--- request
+GET /t
 --- response_body
 cache_1 ttl: 1
 cache_1 value: value A
@@ -264,8 +289,9 @@ cache_2 value: value B
 
 
 === TEST 7: non-namespaced instances use different delete() broadcast channel
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -296,6 +322,8 @@ cache_2 value: value B
             assert(cache_2:delete("my_key"))
         }
     }
+--- request
+GET /t
 --- response_body
 cache_1 channel: mlcache:invalidations:my_mlcache_1
 cache_2 channel: mlcache:invalidations:my_mlcache_2
@@ -305,8 +333,9 @@ cache_2 channel: mlcache:invalidations:my_mlcache_2
 
 
 === TEST 8: non-namespaced instances use different purge() broadcast channel
+--- http_config eval: $::HttpConfig
 --- config
-    location /t {
+    location = /t {
         content_by_lua_block {
             local mlcache = require "resty.mlcache"
 
@@ -337,6 +366,8 @@ cache_2 channel: mlcache:invalidations:my_mlcache_2
             assert(cache_2:purge())
         }
     }
+--- request
+GET /t
 --- response_body
 cache_1 channel: mlcache:purge:my_mlcache_1
 cache_2 channel: mlcache:purge:my_mlcache_2
