@@ -191,7 +191,6 @@ try:
         WTF_CSRF_SSL_STRICT=False,
         USER=USER,
         SEND_FILE_MAX_AGE_DEFAULT=86400,
-        PLUGIN_ARGS={},
         RELOADING=False,
         LAST_RELOAD=0,
         TO_FLASH=[],
@@ -1188,9 +1187,6 @@ def plugins():
 
         return redirect(url_for("loading", next=url_for("plugins"), message="Reloading plugins"))
 
-    plugin_args = app.config["PLUGIN_ARGS"]
-    app.config["PLUGIN_ARGS"] = {}
-
     if request.args.get("plugin_id", False):
         plugin_id = request.args.get("plugin_id")
         page = db.get_plugin_template(plugin_id)
@@ -1200,7 +1196,7 @@ def plugins():
                 Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
                 dark_mode=app.config["DARK_MODE"],
                 username=current_user.get_id(),
-                **(app.jinja_env.globals | (plugin_args["args"] if plugin_args.get("plugin", None) == plugin_id else {})),
+                **app.jinja_env.globals,
             )
 
     plugins = app.config["CONFIG"].get_plugins()
@@ -1274,24 +1270,16 @@ def upload_plugin():
     return {"status": "ok"}, 201
 
 
-@app.route("/plugins/<plugin>", methods=["GET", "POST"])
+@app.route("/plugins/<plugin>", methods=["POST"])
 @login_required
 def custom_plugin(plugin):
     if not plugin_id_rx.match(plugin):
-        flash(
-            f"Invalid plugin id, <b>{plugin}</b> (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)",
-            "error",
-        )
-        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
+        return {"message": f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'}, 400
 
     module = db.get_plugin_actions(plugin)
 
     if module is None:
-        flash(
-            f"The <i>actions.py</i> file for the plugin <b>{plugin}</b> does not exist",
-            "error",
-        )
-        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
+        return {"message": f'The actions.py file for the plugin "{plugin}" does not exist'}, 404
 
     try:
         # Try to import the custom plugin
@@ -1302,32 +1290,22 @@ def custom_plugin(plugin):
             loader = SourceFileLoader("actions", temp.name)
             actions = loader.load_module()
     except:
-        flash(
-            f"An error occurred while importing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
-            "error",
-        )
-        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
+        return {"message": f'An error occurred while importing the plugin "{plugin}":\n{format_exc()}'}, 500
 
-    error = False
+    error = None
     res = None
+    message = ""
 
     try:
         # Try to get the custom plugin custom function and call it
         method = getattr(actions, plugin)
         res = method()
     except AttributeError:
-        flash(
-            f"The plugin <b>{plugin}</b> does not have a <i>{plugin}</i> method",
-            "error",
-        )
-        error = True
-        return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
+        message = f'The plugin "{plugin}" does not have a "{plugin}" method'
+        error = 404
     except:
-        flash(
-            f"An error occurred while executing the plugin <b>{plugin}</b>:<br/>{format_exc()}",
-            "error",
-        )
-        error = True
+        message = f'An error occurred while executing the plugin "{plugin}":\n{format_exc()}'
+        error = 500
     finally:
         if sbin_nginx_path.is_file():
             # Remove the custom plugin from the shared library
@@ -1335,13 +1313,11 @@ def custom_plugin(plugin):
             sys_modules.pop("actions")
             del actions
 
-        if request.method != "POST" or error is True or res is None or isinstance(res, dict) is False:
-            return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
+        if message or not res or isinstance(res, dict) is False:
+            return {"message": message or f'The plugin "{plugin}" did not return a valid response'}, error or 500
 
-    app.config["PLUGIN_ARGS"] = {"plugin": plugin, "args": res}
-
-    flash(f"Your action <b>{plugin}</b> has been executed")
-    return redirect(url_for("loading", next=url_for("plugins", plugin_id=plugin)))
+    app.logger.info(f"Plugin {plugin} action executed successfully")
+    return {"message": "ok", "data": res}, 200
 
 
 @app.route("/cache", methods=["GET"])
