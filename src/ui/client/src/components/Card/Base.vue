@@ -18,7 +18,7 @@ const props = defineProps({
 
 <template>
   <div :class="[`${props.color}`]" class="card grid grid-cols-12">
-    <div class="col-span-12 grid grid-cols-12 justify-start">
+    <div class="col-span-12 grid grid-cols-12">
       <CardLabel v-if="props.label" :label="props.label" />
       <slot></slot>
     </div>

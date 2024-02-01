@@ -732,6 +732,38 @@ body {
   @apply dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle;
 }
 
+/* CARD COUNT */
+
+.card-count {
+  @apply dark:brightness-110 sm:max-h-28 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.card-count-title {
+  @apply mb-2 font-sans text-sm font-semibold leading-4 uppercase dark:text-gray-500 text-gray-700;
+}
+
+.card-count-count {
+  @apply ml-1 mb-1 font-bold dark:text-white/90;
+}
+
+.card-count-detail-container {
+  @apply mb-0 dark:text-gray-500;
+}
+
+.card-count-detail-container-item {
+  @apply ml-1 font-bold leading-normal text-sm text-gray-700 dark:text-gray-500 mx-0.5;
+}
+
+.card-count-svg-container {
+  @apply dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle;
+}
+
+/* CARD INFO */
+
+.card-info-text {
+  @apply col-span-12 mb-0 leading-normal text-sm text-gray-700 dark:text-gray-500 ml-2 mr-1.5;
+}
+
 /* CARD INSTANCE COMPONENT */
 
 .card-instance-container {

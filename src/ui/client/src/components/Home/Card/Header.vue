@@ -14,8 +14,8 @@ const props = defineProps({
 </script>
 
 <template>
-  <p class="card-stat-title">{{ props.name ? props.name : "none" }}</p>
-  <h5 class="card-stat-count">
+  <h2 class="card-stat-title">{{ props.name ? props.name : "none" }}</h2>
+  <p class="card-stat-count">
     {{ props.count ? props.count : "none" }}
-  </h5>
+  </p>
 </template>

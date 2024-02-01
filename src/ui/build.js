@@ -20,7 +20,7 @@ function runCommand(dir, command) {
           isErr = true;
           console.log(`exec error: ${err}`);
         }
-      }
+      },
     );
   } catch (err) {
     isErr = true;
@@ -68,7 +68,7 @@ function updateClientDir() {
         // Copy file to move it from /template/page to /template
         fs.copyFileSync(
           `${currPath}/${subdir}.html`,
-          resolve(`./static/${subdir}.html`)
+          resolve(`./static/${subdir}.html`),
         );
       });
       fs.rmSync(templateDir, { recursive: true, force: true });
@@ -129,12 +129,12 @@ if (buildSetupErr)
 const isUpdateDirErr = updateClientDir();
 if (isUpdateDirErr)
   return console.log(
-    "Error while changing client dir structure. Impossible to continue."
+    "Error while changing client dir structure. Impossible to continue.",
   );
 const isUpdateSetupErr = setSetup();
 if (isUpdateSetupErr)
   return console.log(
-    "Error while changing setup dir structure. Impossible to continue."
+    "Error while changing setup dir structure. Impossible to continue.",
   );
 const setCore = setCorePlugins();
 if (setCore) {

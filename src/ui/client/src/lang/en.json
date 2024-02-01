@@ -350,5 +350,10 @@
   "inp_upload_warning": "Uploaded files are directly executed.",
   "inp_upload_state_upload": "upload in progress",
   "inp_upload_state_fail": "upload failed",
-  "inp_upload_state_success": "upload success"
+  "inp_upload_state_success": "upload success",
+  "plugin_info": "Plugin info",
+  "plugin_test": "Test",
+  "antibot_info": "Antibot plugin is a service that protect your website against bots.",
+  "antibot_challenge": "Challenges",
+  "antibot_challenge_detail": "Total number"
 }
