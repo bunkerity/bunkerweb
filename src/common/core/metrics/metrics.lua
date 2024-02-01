@@ -113,6 +113,20 @@ function metrics:timer()
 	if not is_needed then
 		return self:ret(true, "metrics not used")
 	end
+	-- Purpose of following code is to populate the LRU cache.
+	-- In case of a reload, everything in LRU cache is removed
+	-- so we need to copy it from SHM cache if it exists.
+	local setup = lru:get("setup")
+	if not setup then
+		local requests, err = self.metrics_datastore:get("requests_" .. tostring(worker_id()))
+		if not requests and err ~= "not found" then
+			self.logger:log(ERR, "error while checking datastore : " .. err)
+		end
+		if requests then
+			lru:set("requests", decode(requests))
+		end
+		lru:set("setup", true)
+	end
 	-- Get worker requests
 	local requests = lru:get("requests")
 	if not requests then
