@@ -223,8 +223,8 @@ onMounted(() => {
     <p
       :aria-hidden="input.isValid ? 'true' : 'false'"
       role="alert"
-      :class="[input.isValid ? 'invisible' : 'visible']"
-      class="text-red-500 text-[0.8rem] font-semibold mb-0"
+      :class="[input.isValid ? 'hidden' : '']"
+      class="input-error-msg"
     >
       {{
         input.isValid

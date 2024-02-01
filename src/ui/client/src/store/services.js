@@ -10,6 +10,7 @@ export const useModalStore = defineStore("ServiceModal", () => {
     operation: "",
     servicesNames: [],
     method: "",
+    isDraft: false,
   });
 
   function $reset() {

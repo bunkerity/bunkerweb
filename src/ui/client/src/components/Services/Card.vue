@@ -4,6 +4,7 @@ import ServicesButtonEdit from "@components/Services/Button/Edit.vue";
 import ServicesButtonRedirect from "@components/Services/Button/Redirect.vue";
 import ServicesButtonDelete from "@components/Services/Button/Delete.vue";
 import ServicesSvgState from "@components/Services/Svg/State.vue";
+import ServicesButtonDraftInfo from "@components/Services/Button/DraftInfo.vue";
 import { useModalStore, useDelModalStore } from "@store/services.js";
 import { useConfigStore } from "@store/settings.js";
 import { defineProps, reactive, computed } from "vue";
@@ -55,7 +56,14 @@ const services = reactive({
   }),
 });
 
-function setModal(modal, operation, serviceName, service, method = "") {
+function setModal(
+  modal,
+  operation,
+  serviceName,
+  service,
+  method = "",
+  isDraft,
+) {
   config.$reset();
 
   // Case delete
@@ -66,6 +74,7 @@ function setModal(modal, operation, serviceName, service, method = "") {
   }
 
   modal.data.operation = operation;
+  modal.data.isDraft = isDraft;
 
   // Case clone
   if (operation === "clone") {
@@ -104,11 +113,17 @@ function setModal(modal, operation, serviceName, service, method = "") {
     :class="[filters[name] ? '' : 'hidden']"
     class="dark:brightness-110 overflow-hidden hover:scale-102 transition col-span-12 md:col-span-6 3xl:col-span-4 p-4 w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
-    <h2
-      class="text-xl transition duration-300 ease-in-out text-center sm:text-left mb-1 font-bold dark:text-white/90"
-    >
-      {{ name }}
-    </h2>
+    <div class="flex justify-between">
+      <h2
+        class="text-xl transition duration-300 ease-in-out text-center sm:text-left mb-1 font-bold dark:text-white/90"
+      >
+        {{ name }}
+      </h2>
+      <ServicesButtonDraftInfo
+        :isDraft="props.services[name]['is_draft'] || false"
+        :servName="name"
+      />
+    </div>
     <h3
       class="text-lg text-center sm:text-left mb-2 font-semibold text-gray-600 dark:text-white/80"
     >
@@ -135,14 +150,30 @@ function setModal(modal, operation, serviceName, service, method = "") {
         :tabindex="
           modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
         "
-        @click="setModal(modalStore, 'clone', name, plugins)"
+        @click="
+          setModal(
+            modalStore,
+            'clone',
+            name,
+            plugins,
+            props.services[name]['is_draft'] || false,
+          )
+        "
         :hostname="name"
       />
       <ServicesButtonEdit
         :tabindex="
           modalStore.isOpen || delModalStore.isOpen ? -1 : contentIndex
         "
-        @click="setModal(modalStore, 'edit', name, plugins)"
+        @click="
+          setModal(
+            modalStore,
+            'edit',
+            name,
+            plugins,
+            props.services[name]['is_draft'] || false,
+          )
+        "
         :hostname="name"
       />
       <ServicesButtonRedirect
@@ -162,6 +193,7 @@ function setModal(modal, operation, serviceName, service, method = "") {
             name,
             plugins,
             services.details[name]['method'],
+            props.services[name]['is_draft'] || false,
           )
         "
         :hostname="name"

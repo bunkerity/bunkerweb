@@ -539,7 +539,7 @@ const emits = defineEmits(["inp"]);
 </script>
 
 <template>
-  <div class="relative flex items-center">
+  <div class="relative flex flex-col items-start">
     <span
       v-if="props.settings.required"
       class="font-bold text-red-500 absolute right-[5px] top-[-20px]"
@@ -580,5 +580,15 @@ const emits = defineEmits(["inp"]);
         d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
       />
     </svg>
+    <p
+      :aria-hidden="date.isValid ? 'true' : 'false'"
+      role="alert"
+      :class="[date.isValid ? 'hidden' : '']"
+      class="input-error-msg"
+    >
+      {{
+        date.isValid ? $t("inp_input_valid") : $t("inp_input_error_required")
+      }}
+    </p>
   </div>
 </template>

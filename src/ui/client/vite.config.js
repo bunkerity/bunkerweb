@@ -19,6 +19,7 @@ export default defineConfig({
       "@components": resolve(__dirname, "./src/components"),
       "@assets": resolve(__dirname, "./src/assets"),
       "@lang": resolve(__dirname, "./src/lang"),
+      "@public": resolve(__dirname, "./public"),
     },
   },
   build: {

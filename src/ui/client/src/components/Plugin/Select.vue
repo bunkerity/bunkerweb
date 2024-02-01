@@ -99,28 +99,6 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- default hidden-->
-  <select
-    :data-default-method="select.defaultMethod"
-    :data-default-value="select.defaultValue"
-    :id="select.id"
-    :name="select.id"
-    :aria-description="$t('inp_select_default_desc')"
-    class="hidden"
-    aria-hidden="true"
-  >
-    <option
-      aria-hidden="true"
-      v-for="(value, id) in select.values"
-      :value="value"
-      :label="value ? value : $t('inp_select_label_empty')"
-      :selected="value === select.value ? true : false"
-    >
-      {{ value }}
-    </option>
-  </select>
-  <!-- end default hidden-->
-
   <button
     :tabindex="contentIndex"
     :aria-controls="`${select.id}-dropdown`"

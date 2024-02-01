@@ -5,6 +5,8 @@ import SettingsInput from "@components/Settings/Input.vue";
 import SettingsSelect from "@components/Settings/Select.vue";
 import SettingsUploadSvgWarning from "@components/Settings/Upload/Svg/Warning.vue";
 import ModalBase from "@components/Modal/Base.vue";
+import ModalTitle from "@components/Modal/Title.vue";
+import ServicesButtonDraft from "@components/Services/Button/Draft.vue";
 import ButtonBase from "@components/Button/Base.vue";
 import PluginStructure from "@components/Plugin/Structure.vue";
 import { fetchAPI } from "@utils/api.js";
@@ -50,6 +52,7 @@ const settings = reactive({
   activePlugin: "",
   // Methods from current service
   operation: "",
+  isDraft: false,
   plugins: computed(() => {
     // When opening modal, useModalStore will store data about service or action (like new)
     // We use the new data to determine plugins with filters
@@ -97,6 +100,8 @@ watch(modalStore, (newVal, oldVal) => {
 
   if (newVal.data.serviceName && newVal.isOpen) {
     config.data.services[newVal.data.serviceName] = {};
+    config.data.services[newVal.data.serviceName]["is_draft"] =
+      newVal.data.isDraft;
     settings.serviceName = newVal.data.serviceName;
   }
 
@@ -104,6 +109,7 @@ watch(modalStore, (newVal, oldVal) => {
   settings.operation = newVal.data.operation;
   settings.servicesName = newVal.data.servicesName;
   settings.data = newVal.data.service;
+  settings.isDraft = newVal.data.isDraft;
 });
 
 // Every time a setting is change, add some check to enable / disable save button
@@ -186,23 +192,38 @@ async function sendServConf() {
     })
     .catch((e) => {});
 }
+
+function updateDraftState() {
+  settings.isDraft = !settings.isDraft;
+  const currDraftState = settings.isDraft ? "yes" : "no";
+  config.data.services[settings.serviceName]["is_draft"] = currDraftState;
+}
 </script>
 <template>
   <ModalBase
     cardSize="large"
     id="service-settings-modal"
     :aria-hidden="modalStore.isOpen ? 'false' : 'true'"
-    :title="
-      settings.operation === 'clone'
-        ? $t('services_active_clone')
-        : settings.operation === 'new'
-        ? $t('services_active_new')
-        : $t('services_active_base', {
-            name: settings.serviceName,
-          })
-    "
     v-show="modalStore.isOpen"
   >
+    <ModalTitle
+      :title="
+        settings.operation === 'clone'
+          ? $t('services_active_clone')
+          : settings.operation === 'new'
+          ? $t('services_active_new')
+          : $t('services_active_base', {
+              name: settings.serviceName,
+            })
+      "
+      class="flex justify-start items-center"
+    >
+      <ServicesButtonDraft
+        :key="settings.isDraft"
+        :isDraft="settings.isDraft"
+        @click="updateDraftState()"
+      />
+    </ModalTitle>
     <div class="flex flex-col h-full justify-between">
       <div class="grid grid-cols-12 mb-1.5">
         <SettingsLayout
@@ -290,7 +311,7 @@ async function sendServConf() {
           >
             {{
               settings.operation === "edit"
-                ? $t("action__save")
+                ? $t("action_save")
                 : $t("action_add")
             }}
           </ButtonBase>

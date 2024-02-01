@@ -156,6 +156,10 @@ body {
 
 /* INPUT */
 
+.input-error-msg {
+  @apply text-red-500 dark:text-red-300 text-[0.75rem] font-semibold mb-0 mt-0.5;
+}
+
 .checkbox {
   @apply hover:border-gray-600 cursor-pointer disabled:cursor-default
     relative dark:border-slate-600 dark:bg-slate-700 z-10 w-5 h-5

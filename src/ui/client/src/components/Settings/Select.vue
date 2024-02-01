@@ -90,26 +90,6 @@ const emits = defineEmits(["inp"]);
 </script>
 
 <template>
-  <!-- default hidden-->
-  <select
-    :id="props.settings.id"
-    :name="props.settings.id"
-    :aria-description="$t('inp_select_default_desc')"
-    class="hidden"
-    aria-hidden="true"
-  >
-    <option
-      aria-hidden="true"
-      v-for="(value, id) in props.settings.values"
-      :label="value ? value : $t('inp_select_label_empty')"
-      :value="value"
-      :selected="value === props.settings.value ? true : false"
-    >
-      {{ value }}
-    </option>
-  </select>
-  <!-- end default hidden-->
-
   <!--custom-->
   <div class="relative">
     <button

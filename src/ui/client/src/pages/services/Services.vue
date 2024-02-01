@@ -68,6 +68,7 @@ logsStore.setTags(["plugin", "config"]);
 const filters = reactive({
   servName: "",
   servMethod: "all",
+  isDraft: "all",
   // equal to details items
   badbehavior: "all",
   limit: "all",
@@ -308,7 +309,7 @@ onMounted(() => {
         />
       </CardBase>
       <CardBase
-        class="h-fit col-span-12 md:col-span-8 lg:col-span-6 2xl:col-span-5"
+        class="z-10 h-fit col-span-12 md:col-span-8 lg:col-span-6 2xl:col-span-5"
       >
         <div class="col-span-12 flex justify-start items-start">
           <CardLabel :label="$t('dashboard_filter')" />

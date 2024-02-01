@@ -5,11 +5,19 @@ export function getServicesByFilter(services, filters, details) {
     let isMatch = true;
 
     // Check keyword
-    if (!filters.servName) isMatch = true;
     if (filters.servName && !key.includes(filters.servName)) {
       isMatch = false;
     }
 
+    // Check is draft
+    if (
+      filters.isDraft !== "all" &&
+      filters.isDraft !== services[key]["is_draft"]
+    ) {
+      isMatch = false;
+    }
+
+    // Check method
     if (filters.servMethod !== "all") {
       plugins.forEach((plugin) => {
         if (plugin.id !== "general") return;

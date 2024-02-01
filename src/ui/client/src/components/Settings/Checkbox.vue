@@ -81,8 +81,8 @@ onMounted(() => {
     <p
       :aria-hidden="checkbox.isValid ? 'true' : 'false'"
       role="alert"
-      :class="[checkbox.isValid ? 'invisible' : 'visible']"
-      class="text-red-500 text-[0.8rem] font-semibold mb-0 mt-0.5"
+      :class="[checkbox.isValid ? 'hidden' : '']"
+      class="input-error-msg"
     >
       {{
         checkbox.isValid
