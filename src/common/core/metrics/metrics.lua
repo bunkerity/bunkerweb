@@ -19,6 +19,7 @@ local encode = cjson.encode
 local decode = cjson.decode
 
 local match = string.match
+local time = os.time
 
 function metrics:initialize(ctx)
 	-- Call parent initialize
@@ -50,7 +51,7 @@ function metrics:log()
 			end
 		end
 		local request = {
-			date = os.time(),
+			date = self.ctx.bw.start_time or time(),
 			ip = self.ctx.bw.remote_addr,
 			country = country,
 			method = self.ctx.bw.request_method,
