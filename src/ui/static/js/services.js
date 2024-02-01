@@ -116,7 +116,7 @@ class ServiceModal {
           this.updateModalData(obj);
           //show modal
           this.resetFilterInp();
-          this.changeSubmitBtn("EDIT", "edit-btn");
+          this.changeSubmitBtn("SAVE", "valid-btn");
           this.openModal();
         }
       } catch (err) {}
