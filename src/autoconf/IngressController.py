@@ -232,6 +232,7 @@ class IngressController(Controller):
         obj = event["object"]
         metadata = obj.metadata if obj else None
         annotations = metadata.annotations if metadata else None
+        data = obj.data if obj else None
         if not obj:
             return False
         if obj.kind == "Pod":
@@ -242,6 +243,8 @@ class IngressController(Controller):
             return annotations and "bunkerweb.io/CONFIG_TYPE" in annotations
         if obj.kind == "Service":
             return True
+        if obj.kind == "Secret":
+            return data and "tls.crt" in data and "tls.key" in data
         return False
 
     def __watch(self, watch_type):
@@ -255,6 +258,8 @@ class IngressController(Controller):
             what = self.__corev1.list_config_map_for_all_namespaces
         elif watch_type == "service":
             what = self.__corev1.list_service_for_all_namespaces
+        elif watch_type == "secret":
+            what = self.__corev1.list_secret_for_all_namespaces
         else:
             raise Exception(f"Unsupported watch_type {watch_type}")
 
@@ -328,7 +333,7 @@ class IngressController(Controller):
 
     def process_events(self):
         self._set_autoconf_load_db()
-        watch_types = ("pod", "ingress", "configmap", "service")
+        watch_types = ("pod", "ingress", "configmap", "service", "secret")
         threads = [Thread(target=self.__watch, args=(watch_type,)) for watch_type in watch_types]
         for thread in threads:
             thread.start()
