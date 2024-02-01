@@ -56,7 +56,7 @@ const settings = reactive({
     if (!settings.data || Object.keys(settings.data).length === 0) return [];
     // Get remain plugins
     const remainPlugins = getRemainFromFilter(
-      getSettingsByFilter(settings.data, filters),
+      getSettingsByFilter(settings.data, filters)
     );
 
     // Only update active plugin if no one active or previous active one
@@ -135,7 +135,7 @@ watch(config, () => {
   ) {
     if (
       settings.servicesName.includes(
-        config.data.services[settings.serviceName]["SERVER_NAME"],
+        config.data.services[settings.serviceName]["SERVER_NAME"]
       )
     ) {
       return (settings.save = false);
@@ -174,7 +174,7 @@ async function sendServConf() {
     "PUT",
     config.data.services[settings.serviceName],
     sendConf,
-    feedbackStore.addFeedback,
+    feedbackStore.addFeedback
   )
     .then((res) => {
       // Case saved, close modal, go to root path and refresh
@@ -196,10 +196,10 @@ async function sendServConf() {
       settings.operation === 'clone'
         ? $t('services_active_clone')
         : settings.operation === 'new'
-          ? $t('services_active_new')
-          : $t('services_active_base', {
-              name: settings.serviceName,
-            })
+        ? $t('services_active_new')
+        : $t('services_active_base', {
+            name: settings.serviceName,
+          })
     "
     v-show="modalStore.isOpen"
   >
@@ -283,14 +283,14 @@ async function sendServConf() {
             :aria-disabled="settings.save ? 'true' : 'false'"
             :disabled="settings.save ? (sendConf.isPend ? true : false) : true"
             @click="sendServConf()"
-            :color="settings.operation === 'edit' ? 'edit' : 'valid'"
+            :color="'valid'"
             size="lg"
             class="w-fit text-sm ml-2"
             :isLoading="sendConf.isPend"
           >
             {{
               settings.operation === "edit"
-                ? $t("action_edit")
+                ? $t("action__save")
                 : $t("action_add")
             }}
           </ButtonBase>
