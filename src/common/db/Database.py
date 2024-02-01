@@ -274,7 +274,7 @@ class Database:
 
     def get_metadata(self) -> Dict[str, str]:
         """Get the metadata from the database"""
-        data = {"version": "1.5.4", "integration": "unknown"}
+        data = {"version": "1.5.6", "integration": "unknown"}
         with self.__db_session() as session:
             with suppress(ProgrammingError, OperationalError):
                 metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration).filter_by(id=1).first()

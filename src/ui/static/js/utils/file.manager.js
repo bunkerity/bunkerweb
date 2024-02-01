@@ -259,7 +259,13 @@ class FolderDropdown {
 
 class FolderEditor {
   constructor() {
-    this.editor = ace.edit("editor");
+    this.editor = ace.edit("editor", {
+      backwards: false,
+      wrap: false,
+      caseSensitive: false,
+      wholeWord: false,
+      regExp: false,
+    });
     this.darkMode = document.querySelector("[data-dark-toggle]");
     this.initEditor();
     this.listenDarkToggle();
@@ -268,6 +274,8 @@ class FolderEditor {
   initEditor() {
     //editor options
     this.editor.setShowPrintMargin(false);
+    this.editor.session.setUseSoftTabs(true);
+    this.editor.setOption("showInvisibles", true);
     this.setDarkMode();
   }
 

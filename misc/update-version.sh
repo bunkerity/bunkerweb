@@ -37,6 +37,7 @@ shopt -u globstar
 # linux
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/linux/scripts/*.sh
 # db
+sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/db/Database.py
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" src/common/db/model.py
 # github
 sed -i "s@${OLD_VERSION}@${NEW_VERSION}@g" .github/ISSUE_TEMPLATE/bug_report.yml

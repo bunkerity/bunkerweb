@@ -105,216 +105,27 @@
     </div>
   </div>
 
-  <div
-    role="alert"
-    data-fetch
-    class="bg-sky-500 p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border"
-  >
-    <button data-fetch-close class="absolute right-7 top-1.5">
-      <svg
-        class="cursor-pointer fill-white dark:fill-gray-300 dark:opacity-80 absolute h-5 w-5"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 320 512"
-      >
-        <path
-          d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
-        ></path>
-      </svg>
-    </button>
-    <h5 data-fetch-status class="text-lg mb-0 text-white dark:text-gray-300">
-      Fetching
-    </h5>
-    <p data-fetch-msg class="text-white dark:text-gray-300 mb-0 text-sm">
-      Please wait...
-    </p>
-  </div>
-
   <script>
-    class SetupPlugin {
-      constructor() {
-        // Hidden elements that will be shown on success, like ping buttons or list rendering
-        this.showOnSuccessEls = document.querySelectorAll(
-          "[data-fetch-success-show]",
-        );
-        // Alert elements
-        this.alertEl = document.querySelector("[data-fetch]");
-        this.alertCloseEl = document.querySelector("[data-fetch-close]");
-        this.alertStatusEl = document.querySelector("[data-fetch-status]");
-        this.alertMsgEl = document.querySelector("[data-fetch-msg]");
-        // Set data defaults elements and variables
-        // Key of this.data need to match key of fetch data json object to update values
-        // type<str> : text (target el), list (el need to be first element of list)
-        // listNames<arr> : list of names key on item, need to set data-name="nameKey" on el
-        this.data = {
-          info: {
-            el: document.querySelector("[data-info]"),
-            value: `Ban IP generating too much 'bad' HTTP status
+    // Use SetupPlugin class that is on static/js/plugins/setup.js
+    const setPlugin = new SetupPlugin({
+      info: {
+        el: document.querySelector("[data-info]"),
+        value: `Ban IP generating too much 'bad' HTTP status
             code in a period of time.`,
-            type: "text",
-          },
-          count: {
-            el: document.querySelector("[data-count]"),
-            value: "unknown",
-            type: "text",
-          },
-          items: {
-            el: document.querySelector("[data-item]"),
-            value: [],
-            type: "list",
-            listNames: ["code", "count"],
-          },
-          /* EXAMPLE
-        // value : active / inactive / unknown
-        status: {
-          el: document.querySelector("[data-status]"),
-          value: "unknown",
-          type: "status",
-          textEl: document.querySelector("[data-status-text]"),
-        },
-        */
-        };
-
-        this.init();
-      }
-
-      init() {
-        window.addEventListener("DOMContentLoaded", () => {
-          // Set default values and fetch
-          this.updateDataDOM();
-          this.updateAlert("fetch");
-
-          fetch(location.href, {
-            method: "POST",
-            headers: {
-              "X-CSRFToken": "{{ csrf_token() }}",
-            },
-          })
-            .then((res) => res.json())
-            .then((res) => {
-              // Update data and DOM
-              this.getFetchDataByKey(res.data.data);
-              this.updateDataDOM();
-              // Show hidden elements
-              this.showSuccessEls();
-              // Feedback
-              this.updateAlert("success");
-            })
-            .catch((error) => {
-              this.updateAlert("error");
-            });
-        });
-
-        this.alertCloseEl.addEventListener("click", () => {
-          this.alertEl.classList.add("hidden");
-        });
-      }
-
-      showSuccessEls() {
-        this.showOnSuccessEls.forEach((el) => {
-          el.classList.remove("hidden");
-        });
-      }
-
-      // Key of fetch data need to match key of this.data
-      getFetchDataByKey(fetchDataObj) {
-        for (const [key, value] of Object.entries(this.data)) {
-          value["value"] = fetchDataObj[key] || value["value"] || "";
-        }
-      }
-
-      updateDataDOM() {
-        for (const [key, val] of Object.entries(this.data)) {
-          const el = val["el"];
-          const type = val["type"];
-          const value = val["value"];
-
-          // Case text
-          if (type === "text") {
-            el.textContent = value || "";
-            continue;
-          }
-          // Case status
-          if (type === "status") {
-            const textEl = val["textEl"] || null;
-
-            if (value === "active")
-              this.setStatus(el, textEl, "fill-green-500", "Active");
-            if (value === "inactive")
-              this.setStatus(el, textEl, "fill-red-500", "Inactive");
-            if (value === "unknown")
-              this.setStatus(el, textEl, "fill-sky-500", "Unknown");
-            continue;
-          }
-
-          // Case list, we will render elements after the selected elements
-          if (type === "list") {
-            // Case no list to render
-            if (!value || value.length <= 0) continue;
-
-            // Clone item element
-            const itemEl = el.cloneNode(true);
-            itemEl.classList.remove("hidden");
-            const parentEl = el.parentNode;
-            // Add item element after selected element
-            const items = value.forEach((item) => {
-              const newItemEl = itemEl.cloneNode(true);
-              // Update item element values
-              for (const [nameKey, nameValue] of Object.entries(item)) {
-                newItemEl.querySelector(
-                  `[data-name="${nameKey}"]`,
-                ).textContent = nameValue;
-              }
-              // Add item element after selected element
-              parentEl.appendChild(newItemEl);
-            });
-
-            // Delete schema
-            el.remove();
-            continue;
-          }
-        }
-      }
-
-      setStatus(el, textEl, colorClass, text) {
-        el.classList.remove("fill-green-500", "fill-red-500", "fill-sky-500");
-        el ? el.classList.add(colorClass) : null;
-        textEl ? (textEl.textContent = text) : null;
-      }
-
-      // Show fetch state alert
-      // type<str> : fetch, success, error
-      updateAlert(type) {
-        if (!type) return;
-
-        const [status, msg, color] = this.getAlertType(type);
-
-        this.alertEl.classList.remove(
-          "bg-sky-500",
-          "bg-green-500",
-          "bg-red-500",
-        );
-
-        this.alertStatusEl.textContent = status;
-        this.alertMsgEl.textContent = msg;
-        this.alertEl.classList.add(color);
-
-        this.alertEl.classList.remove("hidden");
-
-        if (type !== "fetch")
-          setTimeout(() => this.alertEl.classList.add("hidden"), 5000);
-      }
-
-      getAlertType(type) {
-        if (type === "fetch")
-          return ["Fetching", "Please wait...", "bg-sky-500"];
-        if (type === "error")
-          return ["Error", "Something went wrong", "bg-red-500"];
-        if (type === "success")
-          return ["Success", "Data fetched successfully", "bg-green-500"];
-      }
-    }
-
-    new SetupPlugin();
+        type: "text",
+      },
+      count: {
+        el: document.querySelector("[data-count]"),
+        value: "unknown",
+        type: "text",
+      },
+      items: {
+        el: document.querySelector("[data-item]"),
+        value: [],
+        type: "list",
+        listNames: ["code", "count"],
+      },
+    });
   </script>
 
   {% endblock %}
