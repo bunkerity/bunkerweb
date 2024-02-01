@@ -16,6 +16,7 @@ export default defineConfig({
       "@assets": resolve(__dirname, "../../client/src/assets"),
       "@lang": resolve(__dirname, "../../client/src/lang"),
       "@public": resolve(__dirname, "../../client/public"),
+      "@pinia": resolve(__dirname, "../../client/node_modules/pinia"),
     },
   },
   build: {

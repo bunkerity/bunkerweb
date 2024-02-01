@@ -45,7 +45,7 @@ async function getData() {
     "POST",
     null,
     plugin,
-    feedbackStore.addFeedback
+    feedbackStore.addFeedback,
   );
 }
 

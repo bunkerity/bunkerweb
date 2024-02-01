@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted } from "vue";
+import logoMenu2 from "@public/images/logo-menu-2.png";
 
 onMounted(() => {
   class Loader {
@@ -48,7 +49,7 @@ onMounted(() => {
       role="img"
       aria-hidden="true"
       data-loader-img
-      src="/images/logo-menu-2.png"
+      :src="logoMenu2"
       class="loader-container-img"
       :alt="$t('dashboard_logo_alt')"
     />

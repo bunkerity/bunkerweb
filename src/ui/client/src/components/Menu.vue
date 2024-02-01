@@ -18,7 +18,8 @@ import { getDarkMode } from "@utils/global.js";
 import { getCookie } from "@utils/api.js";
 import { menuIndex, menuFloatIndex } from "@/utils/tabindex.js";
 import { useBannerStore } from "@store/global.js";
-
+import logoMenu2 from "@public/images/logo-menu-2.png";
+import logoMenu from "@public/images/logo-menu.png";
 // Use to update position when banner is visible or not
 const bannerStore = useBannerStore();
 
@@ -246,16 +247,8 @@ function toggleMenu() {
           <span id="logo-link-label" class="sr-only">
             {{ $t("dashboard_logo_link_label") }}
           </span>
-          <img
-            :aria-hidden="'true'"
-            src="/images/logo-menu-2.png"
-            class="menu-logo-dark"
-          />
-          <img
-            :aria-hidden="'true'"
-            src="/images/logo-menu.png"
-            class="menu-logo-light"
-          />
+          <img :aria-hidden="'true'" :src="logoMenu2" class="menu-logo-dark" />
+          <img :aria-hidden="'true'" :src="logoMenu" class="menu-logo-light" />
         </a>
       </div>
 

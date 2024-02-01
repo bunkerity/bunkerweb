@@ -1,6 +1,6 @@
 import { createApp } from "vue";
 import Plugin from "./Plugin.vue";
-import { createPinia } from "pinia";
+import { createPinia } from "@pinia";
 import { getI18n } from "@utils/lang.js";
 import "@public/css/style.css";
 import "@public/css/flag-icons.min.css";
