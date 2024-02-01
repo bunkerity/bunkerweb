@@ -42,5 +42,6 @@
     "reversescan"
   ],
   "log_stream": ["badbehavior", "bunkernet"],
-  "log_default": ["badbehavior", "bunkernet", "metrics"]
+  "log_default": ["badbehavior", "bunkernet", "metrics"],
+  "timer": ["metrics"]
 }
