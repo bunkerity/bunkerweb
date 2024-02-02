@@ -1,11 +1,11 @@
-def whitelist():
-    return {
-        "message": "ok",
-        "data": {
-            "count_url": 4,
-            "count_ip": 2,
-            "count_rdns": 1,
-            "count_asn": 10,
-            "count_user_agent": 10,
-        },
-    }
+def whitelist(**kwargs):
+    try:
+        data = kwargs["app"].config["INSTANCES"].get_metrics("whitelist")
+
+        if "counter_passed_whitelist" not in data:
+            data["counter_passed_whitelist"] = 0
+
+        return data
+
+    except:
+        return {"counter_passed_whitelist": 0}

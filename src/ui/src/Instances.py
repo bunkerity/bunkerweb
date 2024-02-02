@@ -375,7 +375,10 @@ class Instances:
         # Get metrics from all instances
         metrics = {}
         for instance in self.get_instances():
-            resp, instance_metrics = instance.metrics(plugin_id)
+            try:
+                resp, instance_metrics = instance.metrics(plugin_id)
+            except:
+                continue
 
             # filters
             if not resp:
@@ -419,5 +422,4 @@ class Instances:
                         if isinstance(v, str):
                             metrics[key][k] = v
                             continue
-
         return metrics

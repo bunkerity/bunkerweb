@@ -1,8 +1,11 @@
-def dnsbl():
-    return {
-        "message": "ok",
-        "data": {
-            "info": "test",
-            "items": [{"server_name": "www.example.com", "status": "ok"}, {"server_name": "app1.com", "status": "ok"}, {"server_name": "test.2.fr", "status": "ko"}],
-        },
-    }
+def dnsbl(**kwargs):
+    try:
+        data = kwargs["app"].config["INSTANCES"].get_metrics("dnsbl")
+
+        if data.get("counter_failed_dnsbl") is None:
+            data["counter_failed_dnsbl"] = 0
+
+        return data
+
+    except:
+        return {"counter_failed_dnsbl": 0}
