@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block content %} {{ plugin }}
+{% extends "base.html" %} {% block content %}
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- info-->
   <div
@@ -65,9 +65,7 @@
   const setPlugin = new SetupPlugin({
     info: {
       el: document.querySelector("[data-info]"),
-      value: `Anti-bot technology is designed to detect and mitigate suspicious or
-            malicious bots, preventing them from reaching an organization's websites
-            or IT ecosystem.`,
+      value: "{{ plugin['description'] or ''}}",
       type: "text",
     },
     count: {

@@ -110,7 +110,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `Miscellaneous settings (methods, servers...).`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       count_disabled_servers: {

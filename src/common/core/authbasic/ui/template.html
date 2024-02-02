@@ -61,9 +61,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `Basic Auth is a method for an HTTP user agent
-        (e.g. a web browser) to provide a user name and password when making a
-        request.`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       count: {

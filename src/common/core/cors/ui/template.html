@@ -63,8 +63,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `Cross-Origin Resource Sharing lets you manage how your
-        service can be contacted from different origins.`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       count: {

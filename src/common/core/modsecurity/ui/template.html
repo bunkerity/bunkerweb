@@ -65,12 +65,12 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `ModSecurity is an open source, cross platform web application firewall (WAF) engine for Apache, IIS and Nginx that is developed by Trustwave's SpiderLabs.`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       count: {
         el: document.querySelector("[data-count]"),
-        value: `ModSecurity is an open source, cross platform web application firewall (WAF) engine for Apache, IIS and Nginx that is developed by Trustwave's SpiderLabs.`,
+        value: 'unknown',
         type: "text",
       },
     });

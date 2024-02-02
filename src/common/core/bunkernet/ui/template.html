@@ -152,8 +152,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `BunkerNet is a crowdsourced database of malicious
-            requests shared between all BunkerWeb instances over the world. `,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       // value : active / inactive / unknown

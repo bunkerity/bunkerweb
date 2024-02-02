@@ -1259,6 +1259,13 @@ def upload_plugin():
 @app.route("/plugins/<plugin>", methods=["GET", "POST"])
 @login_required
 def custom_plugin(plugin: str):
+    plugins = app.config["CONFIG"].get_plugins()
+    curr_plugin = {}
+    for plug in plugins:
+        if plug["id"] == plugin:
+            curr_plugin = plug
+            break
+
     message = ""
     if not plugin_id_rx.match(plugin):
         message = f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'
@@ -1276,6 +1283,7 @@ def custom_plugin(plugin: str):
                 dark_mode=app.config["DARK_MODE"],
                 username=current_user.get_id(),
                 current_endpoint=plugin,
+                plugin=curr_plugin,
                 **app.jinja_env.globals,
             )
 
@@ -1574,9 +1582,11 @@ def logs_container(container_id):
         logs.append(
             {
                 "content": log,
-                "type": "error"
-                if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
-                else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message")),
+                "type": (
+                    "error"
+                    if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
+                    else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
+                ),
             }
         )
 

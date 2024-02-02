@@ -103,9 +103,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `BunkerWeb securely stores its current configuration in
-          a backend database, which contains essential data for smooth
-          operation.`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       driver: {

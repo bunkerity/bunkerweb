@@ -67,10 +67,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `Reverse scan is a feature designed to detect
-        open ports by establishing TCP connections with clients' IP addresses.
-        Consider adding this feature if you want to detect possible open proxies
-        or connections from servers.`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       items: {

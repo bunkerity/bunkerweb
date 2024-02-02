@@ -150,8 +150,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `Redis server configuration when using BunkerWeb in
-        cluster mode.`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       // value : active / inactive / unknown
