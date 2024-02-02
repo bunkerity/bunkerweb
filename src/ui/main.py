@@ -1260,6 +1260,7 @@ def upload_plugin():
 @login_required
 def custom_plugin(plugin: str):
     plugins = app.config["CONFIG"].get_plugins()
+
     curr_plugin = {}
     for plug in plugins:
         if plug["id"] == plugin:
@@ -1334,16 +1335,15 @@ def custom_plugin(plugin: str):
             sys_modules.pop("actions")
             del actions
 
-        if message or not res or not isinstance(res, dict):
+        if message or not isinstance(res, dict) and not res:
             message = message or f'The plugin "{plugin}" did not return a valid response'
             if error:
                 app.logger.exception(message)
             else:
                 app.logger.error(message)
-            return {"message": message}, error or 500
 
     app.logger.info(f"Plugin {plugin} action executed successfully")
-    return {"message": "ok", "data": res}, 200
+    return jsonify({"message": "ok", "data": res}), 200
 
 
 @app.route("/cache", methods=["GET"])

@@ -1,2 +1,2 @@
 def antibot():
-    return {"message": "ok", "data": {"info": "test", "count": 24}}
+    return {"counter_failed_challenges": 0}

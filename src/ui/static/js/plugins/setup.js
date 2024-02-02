@@ -54,7 +54,7 @@ class SetupPlugin {
         .then((res) => res.json())
         .then((res) => {
           // Update data and DOM
-          this.getFetchDataByKey(res.data.data);
+          this.getFetchDataByKey(res.data);
           this.updateDataDOM();
           // Show hidden elements
           this.showSuccessEls();
@@ -154,7 +154,10 @@ class SetupPlugin {
   // Key of fetch data need to match key of this.data
   getFetchDataByKey(fetchDataObj) {
     for (const [key, value] of Object.entries(this.data)) {
-      value["value"] = fetchDataObj[key] || value["value"] || "";
+      value["value"] =
+        fetchDataObj[key] == 0
+          ? "0"
+          : fetchDataObj[key] || value["value"] || "";
     }
   }
 
