@@ -260,9 +260,38 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 ## Writing a plugin
 
+### Structure
+
 !!! tip "Existing plugins"
 
     If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.5.6/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+
+What a plugin structure looks like :
+```
+plugin /
+        confs / conf_type.conf
+        ui / actions.py
+             template.html
+        plugin.lua
+        plugin.json
+```
+
+- **conf_type.conf** : add a [custom NGINX configurations.](/quickstart-guide/#custom-configurations)
+
+- **actions.py** : script to execute on flask server.
+This script is running on flask context, you have access to lib and utils like `jinja2`, `requests`, etc...
+
+- **template.html** : custom plugin page you can access from ui.
+
+- **plugin.lua** : code to execute on NGINX using [NGING LUA modile.](https://github.com/openresty/lua-nginx-module)
+
+- **plugin.json** : metadata, settings and jobs for your settings.
+
+!!! info "Optional files"
+
+    Files like `confs` and `ui` ones are optional. Add them only to fit your needs.
+
+### Getting started
 
 The first step is to create a folder that will contain the plugin :
 
