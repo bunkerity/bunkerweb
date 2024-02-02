@@ -1,4 +1,11 @@
 {% extends "base.html" %} {% block content %}
+<input
+  type="csrf_token"
+  name="csrf_token"
+  value="{{ csrf_token }}"
+  class="hidden"
+  hidden
+/>
 
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <div class="col-span-12 grid grid-cols-12 gap-4">
@@ -225,8 +232,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `Deny access based on internal and external
-          IP/network/rDNS/ASN blacklists.`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       count_url: {

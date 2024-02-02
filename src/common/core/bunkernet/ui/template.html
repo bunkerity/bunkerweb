@@ -1,4 +1,11 @@
 {% extends "base.html" %} {% block content %}
+<input
+  type="csrf_token"
+  name="csrf_token"
+  value="{{ csrf_token }}"
+  class="hidden"
+  hidden
+/>
 
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- status -->
@@ -152,8 +159,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `BunkerNet is a crowdsourced database of malicious
-            requests shared between all BunkerWeb instances over the world. `,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       // value : active / inactive / unknown

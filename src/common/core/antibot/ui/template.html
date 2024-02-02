@@ -1,4 +1,11 @@
 {% extends "base.html" %} {% block content %}
+<input
+  type="csrf_token"
+  name="csrf_token"
+  value="{{ csrf_token }}"
+  class="hidden"
+  hidden
+/>
 
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- info-->
@@ -66,9 +73,7 @@
   const setPlugin = new SetupPlugin({
     info: {
       el: document.querySelector("[data-info]"),
-      value: `Anti-bot technology is designed to detect and mitigate suspicious or
-            malicious bots, preventing them from reaching an organization's websites
-            or IT ecosystem.`,
+      value: "{{ plugin['description'] or ''}}",
       type: "text",
     },
     count: {

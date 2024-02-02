@@ -1,5 +1,13 @@
 {% extends "base.html" %} {% block content %}
 
+<input
+  type="csrf_token"
+  name="csrf_token"
+  value="{{ csrf_token }}"
+  class="hidden"
+  hidden
+/>
+
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- info-->
   <div
@@ -63,8 +71,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `Cross-Origin Resource Sharing lets you manage how your
-        service can be contacted from different origins.`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       count: {

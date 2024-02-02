@@ -260,9 +260,38 @@ The first step is to install the plugin by putting the plugin files inside the c
 
 ## Writing a plugin
 
+### Structure
+
 !!! tip "Existing plugins"
 
     If the documentation is not enough, you can have a look at the existing source code of [official plugins](https://github.com/bunkerity/bunkerweb-plugins) and the [core plugins](https://github.com/bunkerity/bunkerweb/tree/v1.5.6/src/common/core) (already included in BunkerWeb but they are plugins, technically speaking).
+
+What a plugin structure looks like :
+```
+plugin /
+        confs / conf_type.conf
+        ui / actions.py
+             template.html
+        plugin.lua
+        plugin.json
+```
+
+- **conf_type.conf** : add a [custom NGINX configurations.](/quickstart-guide/#custom-configurations)
+
+- **actions.py** : script to execute on flask server.
+This script is running on flask context, you have access to lib and utils like `jinja2`, `requests`, etc...
+
+- **template.html** : custom plugin page you can access from ui.
+
+- **plugin.lua** : code to execute on NGINX using [NGING LUA modile.](https://github.com/openresty/lua-nginx-module)
+
+- **plugin.json** : metadata, settings and jobs for your settings.
+
+!!! info "Optional files"
+
+    Files like `confs` and `ui` ones are optional. Add them only to fit your needs.
+
+### Getting started
 
 The first step is to create a folder that will contain the plugin :
 
@@ -515,9 +544,9 @@ BunkerWeb uses an internal job scheduler for periodic tasks like renewing certif
 
 ### Plugin page
 
-Plugin pages are used to display information about your plugin and interact with the user inside the plugins section of the [web UI](web-ui.md).
+Everything related to the web UI is located inside the subfolder **ui** as we seen in the [previous structure section.](#structure)
 
-Everything related to the web UI is located inside a subfolder named **ui** at the root directory of your plugin. A template file named **template.html** and located inside the **ui** subfolder contains the client code and logic to display your page. Another file named **actions.py** and also located inside the **ui** subfolder contains code that will be executed when the user is interacting with your page (filling a form for example).
+#### Basic example
 
 !!! info "Jinja 2 template"
     The **template.html** file is a Jinja2 template, please refer to the [Jinja2 documentation](https://jinja.palletsprojects.com) if needed.
@@ -555,3 +584,40 @@ def myplugin() :
 !!! info "Python libraries"
     You can use Python libraries that are already available like :
     `Flask`, `Flask-Login`, `Flask-WTF`, `beautifulsoup4`, `docker`, `Jinja2`, `python-magic` and `requests`. To see the full list, you can have a look at the Web UI [requirements.txt](https://github.com/bunkerity/bunkerweb/blobsrc/ui/requirements.txt). If you need external libraries, you can install them inside the **ui** folder of your plugin and then use the classical **import** directive.
+
+#### Utils
+
+To easily update the content of a template inside the UI with JSON, a **SetupPlugin class** is available in `src/ui/static/js/plugins/setup.js` and will be executed when the plugin template is load.
+
+For example, in case **actions.py** return this JSON :
+```python
+def plugin():
+    return {"message": "ok", "data": {"name": "test"}}
+```
+
+I need to add this on my **template.html** :
+```html
+<script>
+  new SetupPlugin({
+    name: {
+      el: document.querySelector('[data-name]'),
+      value: '',
+      type: 'text',
+    },
+  });
+</script>
+```
+
+!!! info "Check core plugins"
+
+    Core plugins are using this utils. Feel free to look at them in order to see in details how each `key` is working.
+
+
+|     key     | Type   | Description                                                                                  |
+| :--------:  | :----: | :------------------------------------------------------------------------------------------- |
+| `name   `   | string | Replace `name` by the JSON key to extract the related value.                                 |
+| `el`        | element| Select element you want the value to be updated.                                             |
+|   `value`   | any    | Default value on template load or in case retrieving JSON failed.                            |
+|    `type`   | string | Define the script behavior with the incoming value. Available : `text`, `list` and `status`. |
+|  `textEl`   | element| Optional additionnal text content when type is `status`.                                     |
+|  `listNames`| string | List of data keys when type is `list`.                                                       |

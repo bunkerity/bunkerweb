@@ -1,4 +1,11 @@
 {% extends "base.html" %} {% block content %}
+<input
+  type="csrf_token"
+  name="csrf_token"
+  value="{{ csrf_token }}"
+  class="hidden"
+  hidden
+/>
 
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- info-->
@@ -61,9 +68,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `Basic Auth is a method for an HTTP user agent
-        (e.g. a web browser) to provide a user name and password when making a
-        request.`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       count: {

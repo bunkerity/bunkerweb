@@ -1,4 +1,12 @@
 {% extends "base.html" %} {% block content %}
+<input
+  type="csrf_token"
+  name="csrf_token"
+  value="{{ csrf_token }}"
+  class="hidden"
+  hidden
+/>
+
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- info-->
   <div
@@ -76,7 +84,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `Let's encrypt certificates allow you to get HTTPS / SSL / TLS on your requests.`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       items: {

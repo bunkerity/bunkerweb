@@ -360,7 +360,7 @@ class Instances:
                 resp, instance_reports = instance.reports()["requests"]
             except :
                 continue
-            
+
             if not resp:
                 continue
             reports.extend(instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", []))

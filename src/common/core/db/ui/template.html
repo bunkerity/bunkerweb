@@ -1,4 +1,11 @@
 {% extends "base.html" %} {% block content %}
+<input
+  type="csrf_token"
+  name="csrf_token"
+  value="{{ csrf_token }}"
+  class="hidden"
+  hidden
+/>
 
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- info-->
@@ -103,9 +110,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `BunkerWeb securely stores its current configuration in
-          a backend database, which contains essential data for smooth
-          operation.`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       driver: {

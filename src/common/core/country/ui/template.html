@@ -1,4 +1,11 @@
 {% extends "base.html" %} {% block content %}
+<input
+  type="csrf_token"
+  name="csrf_token"
+  value="{{ csrf_token }}"
+  class="hidden"
+  hidden
+/>
 
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- info-->
@@ -105,9 +112,7 @@
     const setPlugin = new SetupPlugin({
       info: {
         el: document.querySelector("[data-info]"),
-        value: `The country security feature allows you to apply
-          policy based on the country of the IP address of clients (blacklist /
-          whitelist).`,
+        value: "{{ plugin['description'] or ''}}",
         type: "text",
       },
       blacklist_count: {
