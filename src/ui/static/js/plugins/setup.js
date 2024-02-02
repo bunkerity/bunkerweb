@@ -47,7 +47,8 @@ class SetupPlugin {
       fetch(location.href, {
         method: "POST",
         headers: {
-          "X-CSRFToken": "{{ csrf_token() }}",
+          "X-CSRFToken": document.querySelector('input[name="csrf_token"]')
+            .value,
         },
       })
         .then((res) => res.json())
