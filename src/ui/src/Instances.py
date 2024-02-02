@@ -118,6 +118,9 @@ class Instance:
     def reports(self) -> Tuple[bool, dict[str, Any]]:
         return self.apiCaller.send_to_apis("GET", "/metrics/requests", response=True)
 
+    def metrics(self, plugin_id, metric) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("GET", f"/metrics/{plugin_id}/{metric}", response=True)
+
 
 class Instances:
     def __init__(self, docker_client, kubernetes_client, integration: str):
@@ -358,7 +361,7 @@ class Instances:
         for instance in self.get_instances():
             try:
                 resp, instance_reports = instance.reports()["requests"]
-            except :
+            except:
                 continue
 
             if not resp:
@@ -368,3 +371,18 @@ class Instances:
         reports.sort(key=lambda x: x["date"], reverse=True)
 
         return reports
+
+    def get_metrics(self, plugin_id: str, metric: str):
+        metrics: List[dict[str, Any]] = []
+        for instance in self.get_instances():
+            try:
+                resp, instance_metrics = instance.metrics(plugin_id, metric)
+            except:
+                continue
+
+            if not resp:
+                continue
+
+            metrics.extend(instance_metrics[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", []))
+
+        return metrics
