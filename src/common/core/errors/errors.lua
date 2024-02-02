@@ -3,6 +3,7 @@ local plugin = require "bunkerweb.plugin"
 
 local ngx = ngx
 local subsystem = ngx.config.subsystem
+local tostring = tostring
 
 local template
 local render = nil
@@ -67,6 +68,11 @@ function errors:initialize(ctx)
 			text = "The gateway has timed out.",
 		},
 	}
+end
+
+function errors:log()
+	self:set_metric("counters", tostring(ngx.status), 1)
+	return self:ret(true, "success")
 end
 
 function errors:render_template(code)

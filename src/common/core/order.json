@@ -32,7 +32,7 @@
     "antibot"
   ],
   "headers": ["headers", "cors", "reverseproxy", "clientcache", "antibot"],
-  "log": ["badbehavior", "bunkernet", "metrics"],
+  "log": ["badbehavior", "bunkernet", "errors", "metrics"],
   "preread": [
     "whitelist",
     "blacklist",
@@ -42,6 +42,6 @@
     "reversescan"
   ],
   "log_stream": ["badbehavior", "bunkernet"],
-  "log_default": ["badbehavior", "bunkernet", "metrics"],
+  "log_default": ["badbehavior", "bunkernet", "errors", "misc", "metrics"],
   "timer": ["metrics"]
 }

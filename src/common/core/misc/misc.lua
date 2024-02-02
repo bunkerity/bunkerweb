@@ -23,10 +23,18 @@ function misc:access()
 	-- Check if method is allowed
 	for allowed_method in self.variables["ALLOWED_METHODS"]:gmatch("[^|]+") do
 		if method == allowed_method then
+			self:set_metric("counters", "failed_method", 1)
 			return self:ret(true, "method " .. method .. " is allowed")
 		end
 	end
 	return self:ret(true, "method " .. method .. " is not allowed", HTTP_NOT_ALLOWED)
+end
+
+function misc:log_default()
+	if self.variables["DISABLE_DEFAULT_SERVER"] == "yes" then
+		self:set_metric("counters", "failed_default", 1)
+	end
+	return self:ret(true, "success")
 end
 
 return misc

@@ -90,6 +90,29 @@ function metrics:log(bypass_checks)
 		-- Update worker cache
 		lru:set("requests", requests)
 	end
+	-- Get metrics from plugins
+	local all_metrics = self.ctx.bw.metrics
+	if all_metrics then
+		-- Loop on plugins
+		for plugin, plugin_metrics in pairs(all_metrics) do
+			-- Loop on kinds
+			for kind, kind_metrics in pairs(plugin_metrics) do
+				-- Increment counters
+				if kind == "counters" then
+					for metric_key, metric_value in pairs(kind_metrics) do
+						local lru_key = plugin .. "_counter_" .. metric_key
+						local metric_counter = lru:get(lru_key)
+						if not metric_counter then
+							metric_counter = metric_value
+						else
+							metric_counter = metric_counter + metric_value
+						end
+						lru:set(lru_key, metric_counter)
+					end
+				end
+			end
+		end
+	end
 	return self:ret(true, "success")
 end
 
@@ -113,53 +136,97 @@ function metrics:timer()
 	if not is_needed then
 		return self:ret(true, "metrics not used")
 	end
+
+	local ret = true
+	local ret_err = "metrics updated"
+	local wid = tostring(worker_id())
+
 	-- Purpose of following code is to populate the LRU cache.
 	-- In case of a reload, everything in LRU cache is removed
 	-- so we need to copy it from SHM cache if it exists.
 	local setup = lru:get("setup")
 	if not setup then
-		local requests, err = self.metrics_datastore:get("requests_" .. tostring(worker_id()))
-		if not requests and err ~= "not found" then
-			self.logger:log(ERR, "error while checking datastore : " .. err)
-		end
-		if requests then
-			lru:set("requests", decode(requests))
+		for _, key in ipairs(self.metrics_datastore:keys()) do
+			if key:match("_" .. wid .. "$") then
+				local value, err = self.metrics_datastore:get(key)
+				if not value and err ~= "not found" then
+					ret = false
+					ret_err = err
+					self.logger:log(ERR, "error while checking " .. key .. " : " .. err)
+				end
+				if value then
+					local ok, decoded = pcall(decode, value)
+					if ok then
+						value = decoded
+					end
+					lru:set(key:gsub("_" .. wid .. "$", ""), value)
+				end
+			end
 		end
 		lru:set("setup", true)
 	end
-	-- Get worker requests
-	local requests = lru:get("requests")
-	if not requests then
-		requests = {}
+	-- Loop on all keys
+	for _, key in ipairs(lru:get_keys()) do
+		-- Get LRU data
+		local value = lru:get(key)
+		if type(value) == "table" then
+			value = encode(value)
+		end
+		-- Push to dict
+		local ok, err = self.metrics_datastore:set(key .. "_" .. wid, value)
+		if not ok then
+			ret = false
+			ret_err = err
+			self.logger:log(ERR, "can't update " .. key .. "_" .. wid .. " : " .. err)
+		end
 	end
-	-- Push to dict
-	local ok, err = self.metrics_datastore:set("requests_" .. tostring(worker_id()), encode(requests))
-	if not ok then
-		return self:ret(false, "can't update requests : " .. err)
-	end
-	return self:ret(true, "metrics updated")
+	-- Done
+	return self:ret(ret, ret_err)
 end
 
 function metrics:api()
 	-- Match request
-	if not match(self.ctx.bw.uri, "^/metrics/requests$") or self.ctx.bw.request_method ~= "GET" then
+	if not match(self.ctx.bw.uri, "^/metrics/.+$") or self.ctx.bw.request_method ~= "GET" then
 		return self:ret(false, "success")
 	end
-	-- Get requests metrics
-	local keys = self.metrics_datastore:keys()
-	local requests = {}
-	for _, key in ipairs(keys) do
-		if key:match("^requests_") then
+	-- Extract filter parameter
+	local filter = self.ctx.bw.uri:gsub("^/metrics/", "")
+	-- Loop on keys
+	local metrics_data = {}
+	for _, key in ipairs(self.metrics_datastore:keys()) do
+		-- Check if key starts with our filter
+		if key:match("^" .. filter .. "_") then
+			-- Get the value
 			local data, err = self.metrics_datastore:get(key)
 			if not data then
 				return self:ret(true, "error while fetching requests : " .. err, HTTP_INTERNAL_SERVER_ERROR)
 			end
-			for _, request in ipairs(decode(data)) do
-				table_insert(requests, request)
+			local metric_key = key:gsub("_[0-9]+$", ""):gsub("^" .. filter .. "_", "")
+			if metric_key == "" then
+				metric_key = filter
+			end
+			-- Table case
+			local ok, decoded = pcall(decode, data)
+			if ok then
+				data = decoded
+			end
+			if type(data) == "table" then
+				if not metrics_data[metric_key] then
+					metrics_data[metric_key] = {}
+				end
+				for _, metric_value in ipairs(data) do
+					table_insert(metrics_data[metric_key], metric_value)
+				end
+			-- Counter case
+			else
+				if not metrics_data[metric_key] then
+					metrics_data[metric_key] = 0
+				end
+				metrics_data[metric_key] = metrics_data[metric_key] + data
 			end
 		end
 	end
-	return self:ret(true, requests, HTTP_OK)
+	return self:ret(true, metrics_data, HTTP_OK)
 end
 
 return metrics

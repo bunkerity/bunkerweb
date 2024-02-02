@@ -349,7 +349,7 @@ class Instances:
     def get_reports(self, _id: Optional[int] = None) -> List[dict[str, Any]]:
         if _id:
             instance = self.__instance_from_id(_id)
-            resp, instance_reports = instance.reports()
+            resp, instance_reports = instance.reports()["requests"]
             if not resp:
                 return []
             return instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", [])
@@ -357,7 +357,7 @@ class Instances:
         reports: List[dict[str, Any]] = []
         for instance in self.get_instances():
             try:
-                resp, instance_reports = instance.reports()
+                resp, instance_reports = instance.reports()["requests"]
             except :
                 continue
             
