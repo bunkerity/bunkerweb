@@ -1,4 +1,4 @@
-{% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-')
+{% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-')
 %}
 {% set global_config = config["CONFIG"].get_config() %}
 {% set plugins = config["CONFIG"].get_plugins() %}

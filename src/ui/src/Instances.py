@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 from os import sep
 from os.path import join
 from pathlib import Path
@@ -117,6 +116,9 @@ class Instance:
 
     def reports(self) -> Tuple[bool, dict[str, Any]]:
         return self.apiCaller.send_to_apis("GET", "/metrics/requests", response=True)
+
+    def metrics(self, plugin_id) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("GET", f"/metrics/{plugin_id}", response=True)
 
 
 class Instances:
@@ -352,15 +354,72 @@ class Instances:
             resp, instance_reports = instance.reports()
             if not resp:
                 return []
-            return instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", [])
+            return instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", {"requests": []})["requests"]
 
         reports: List[dict[str, Any]] = []
         for instance in self.get_instances():
-            resp, instance_reports = instance.reports()
+            try:
+                resp, instance_reports = instance.reports()
+            except:
+                continue
+
             if not resp:
                 continue
-            reports.extend(instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", []))
+            reports.extend(instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", {"requests": []})["requests"])
 
         reports.sort(key=lambda x: x["date"], reverse=True)
 
         return reports
+
+    def get_metrics(self, plugin_id: str):
+        # Get metrics from all instances
+        metrics = {}
+        for instance in self.get_instances():
+            try:
+                resp, instance_metrics = instance.metrics(plugin_id)
+            except:
+                continue
+
+            # filters
+            if not resp:
+                continue
+
+            if instance.name not in instance_metrics or instance_metrics[instance.name]["msg"] is None or instance_metrics[instance.name]["msg"] is not dict or instance_metrics[instance.name]["status"] != "success":
+                continue
+
+            metric_data = instance_metrics[instance.name]["msg"]
+
+            # Update metrics looking for value type
+            for key, value in metric_data.items():
+                if key not in metrics:
+                    metrics[key] = value
+                    continue
+
+                # Case value is number, add it to the existing value
+                if isinstance(value, (int, float)):
+                    metrics[key] += value
+                    continue
+                # Case value is string, replace the existing value
+                elif isinstance(value, str):
+                    metrics[key] = value
+                    continue
+                # Case value is list, extend it to the existing value
+                if isinstance(value, list):
+                    metrics[key].extend(value)
+                    continue
+                # Case value is a dict, loop on it and update the existing value
+                if isinstance(value, dict):
+                    for k, v in value.items():
+                        if k not in metrics[key]:
+                            metrics[key][k] = v
+                            continue
+                        if isinstance(v, (int, float)):
+                            metrics[key][k] += v
+                            continue
+                        if isinstance(v, list):
+                            metrics[key][k].extend(v)
+                            continue
+                        if isinstance(v, str):
+                            metrics[key][k] = v
+                            continue
+        return metrics

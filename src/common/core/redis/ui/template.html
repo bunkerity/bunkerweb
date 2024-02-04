@@ -1,60 +1,34 @@
 {% extends "base.html" %} {% block content %}
+<input
+  type="csrf_token"
+  name="csrf_token"
+  value="{{ csrf_token }}"
+  class="hidden"
+  hidden
+/>
 
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- status -->
   <div class="col-span-12 grid grid-cols-12 gap-4">
-    {% if redis_status %}
     <div
       class="col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 w-fit h-fit transition hover:scale-102 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
     >
       <div class="mx-1 flex justify-start items-center">
         <h5 class="mb-0 font-bold dark:text-white/90 mr-4">STATUS</h5>
         <svg
+          data-status-svg
+          class="w-6 h-6"
+          viewBox="0 0 100 100"
           xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          class="w-8 h-8 fill-green-500"
         >
-          <path
-            fill-rule="evenodd"
-            d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-            clip-rule="evenodd"
-          />
+          <circle cx="50" cy="50" r="50" />
         </svg>
       </div>
       <p
+        data-status-text
         class="mx-1 transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-500 dark:opacity-80"
-      >
-        Active
-      </p>
+      ></p>
     </div>
-    {% else %}
-    <div
-      class="col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 w-fit h-fit transition hover:scale-102 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-    >
-      <div class="mx-1 flex justify-start items-center">
-        <h5 class="mb-0 font-bold dark:text-white/90 mr-4">STATUS</h5>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          class="w-8 h-8 fill-red-500"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </div>
-      <p
-        class="mx-1 transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-500 dark:opacity-80"
-      >
-        Inactive
-      </p>
-    </div>
-    {% endif %}
-
     <!-- end status -->
   </div>
 
@@ -66,11 +40,9 @@
 
     <div class="mx-1 flex justify-start items-center my-4">
       <p
+        data-info
         class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-500 dark:opacity-80"
-      >
-        {{ redis_info or "Redis server configuration when using BunkerWeb in
-        cluster mode. " }}
-      </p>
+      ></p>
     </div>
   </div>
   <!-- end info -->
@@ -179,7 +151,25 @@
       </div>
     </div>
   </div>
-  <!-- end test -->
+
+  <script>
+    // Use SetupPlugin class that is on static/js/plugins/setup.js
+    const setPlugin = new SetupPlugin({
+      info: {
+        el: document.querySelector("[data-info]"),
+        value: "{{ plugin['description'] or ''}}",
+        type: "text",
+      },
+      // value : active / inactive / unknown
+      status: {
+        el: document.querySelector("[data-status-svg]"),
+        value: "unknown",
+        type: "status",
+        textEl: document.querySelector("[data-status-text]"),
+      },
+    });
+  </script>
+
   <script async>
     function ping() {
       let data = new FormData();

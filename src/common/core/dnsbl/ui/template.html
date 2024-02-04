@@ -1,6 +1,11 @@
-{% extends "base.html" %} {% block content %} {% set items = [ {"server_name" :
-"www.example.com", "status" : "ok"}, {"server_name" : "app1.com", "status" :
-"ok"}, {"server_name" : "test.2.fr", "status" : "ko"} ]%}
+{% extends "base.html" %} {% block content %}
+<input
+  type="csrf_token"
+  name="csrf_token"
+  value="{{ csrf_token }}"
+  class="hidden"
+  hidden
+/>
 
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- info-->
@@ -11,87 +16,70 @@
 
     <div class="mx-1 flex justify-start items-center my-4">
       <p
+        data-info
         class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-500 dark:opacity-80"
-      >
-        {{ dnsbl_info or "Deny access based on external DNSBL servers." }}
-      </p>
+      ></p>
     </div>
   </div>
   <!-- end info -->
 
-  {% if items|length != 0 %}
   <div
-    class="col-span-12 md:col-span-8 3xl:col-span-9 w-full xl:max-w-[600px] overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="h-fit dark:brightness-110 max-h-none sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
-    <div class="col-span-12">
-      <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">DNSBL LIST</h5>
-    </div>
-    <div class="col-span-12 overflow-y-auto overflow-x-auto">
-      <!-- list container-->
-      <div class="min-w-[400px] w-full grid grid-cols-12 rounded p-2">
-        <!-- header-->
-        <p
-          class="dark:text-gray-300 h-8 text-sm font-bold col-span-8 m-0 pb-2 border-b border-gray-400"
+    <!-- text -->
+    <div>
+      <p
+        class="mb-2 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60"
+      >
+        DNSBL
+      </p>
+      <h5 data-count class="mb-1 font-bold dark:text-white/90"></h5>
+
+      <p class="mb-0 dark:text-white dark:opacity-60">
+        <span class="font-bold leading-normal text-sm text-red-500 mx-0.5"
+          >request blocked</span
         >
-          Server name
-        </p>
-        <p
-          class="dark:text-gray-300 h-8 text-sm font-bold col-span-4 m-0 pb-2 border-b border-gray-400"
-        >
-          Status
-        </p>
-        <!-- end header-->
-        <!-- list -->
-        <ul class="col-span-12 w-full">
-          {% for item in items %}
-          <li
-            class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5"
-          >
-            <p
-              class="dark:text-gray-400 dark:opacity-80 text-sm col-span-8 m-0 my-1"
-            >
-              {{item['server_name']}}
-            </p>
-            {% if item['status'] == "ko"%}
-            <div class="col-span-4 ml-2 m-0 my-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                class="w-6 h-6 fill-red-500"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            {% else %}
-            <div class="col-span-4 ml-2 m-0 my-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                class="w-6 h-6 fill-green-500"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </div>
-            {% endif %}
-          </li>
-          {% endfor %}
-        </ul>
-        <!-- end list-->
-      </div>
-      <!-- end list container-->
+      </p>
     </div>
+    <!-- end text -->
+    <!-- icon -->
+    <div
+      role="img"
+      class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-red-700"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="scale-75 leading-none text-lg relative fill-red-700 stroke-white"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"
+        />
+      </svg>
+    </div>
+    <!-- end icon -->
   </div>
-  {% endif %}
+
+  <script>
+    // Use SetupPlugin class that is on static/js/plugins/setup.js
+    const setPlugin = new SetupPlugin({
+      info: {
+        el: document.querySelector("[data-info]"),
+        value: "{{ plugin['description'] or ''}}",
+        type: "text",
+      },
+      counter_failed_dnsbl: {
+        el: document.querySelector("[data-count]"),
+        value: "unknown",
+        type: "text",
+      },
+    });
+  </script>
 </div>
 
 {% endblock %}

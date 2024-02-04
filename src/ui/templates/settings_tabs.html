@@ -1,5 +1,4 @@
-
-{% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-')
+{% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-')
 %}
 {% set plugins = config["CONFIG"].get_plugins() %}
 <div data-{{current_endpoint}}-tabs class="col-span-12 grid grid-cols-12 {% if current_endpoint == 'services' %}mb-4{% endif %}">

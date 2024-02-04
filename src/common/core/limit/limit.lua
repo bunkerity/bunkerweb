@@ -158,6 +158,7 @@ function limit:access()
 	end
 	-- Limit reached
 	if limited then
+		self:set_metric("counters", "limited_uri_" .. self.ctx.bw.uri, 1)
 		return self:ret(
 			true,
 			"client IP "

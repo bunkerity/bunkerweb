@@ -1,6 +1,11 @@
-{% extends "base.html" %} {% block content %} {% set items = [ {"count" : 74,
-"code" : "403"}, {"count" : 82, "code" : "404"}, {"count" : "32", "code" :
-"400"} ]%}
+{% extends "base.html" %} {% block content %}
+<input
+  type="csrf_token"
+  name="csrf_token"
+  value="{{ csrf_token }}"
+  class="hidden"
+  hidden
+/>
 
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- info-->
@@ -11,17 +16,16 @@
 
     <div class="mx-1 flex justify-start items-center my-4">
       <p
+        data-info
         class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-500 dark:opacity-80"
-      >
-        {{ dnsbl_info or "Deny access based on external DNSBL servers." }}
-      </p>
+      ></p>
     </div>
   </div>
   <!-- end info -->
 
-  {% if items|length != 0 %}
   <div
-    class="col-span-12 md:col-span-8 3xl:col-span-9 w-full md:max-w-[400px] overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    data-fetch-success-show
+    class="hidden col-span-12 md:col-span-8 3xl:col-span-9 w-full md:max-w-[400px] overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
   >
     <div class="col-span-12">
       <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">ERRORS LIST</h5>
@@ -43,29 +47,42 @@
         <!-- end header-->
         <!-- list -->
         <ul class="col-span-12 w-full">
-          {% for item in items %}
           <li
+            data-item
             class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5"
           >
             <p
+              data-name="code"
               class="ml-1 dark:text-gray-400 dark:opacity-80 text-sm col-span-8 m-0 my-1"
-            >
-              {{item['code']}}
-            </p>
+            ></p>
             <p
+              data-name="count"
               class="ml-1 dark:text-gray-400 dark:opacity-80 text-sm col-span-4 m-0 my-1"
-            >
-              {{item['count']}}
-            </p>
+            ></p>
           </li>
-          {% endfor %}
         </ul>
         <!-- end list-->
       </div>
       <!-- end list container-->
     </div>
   </div>
-  {% endif %}
+
+  <script>
+    // Use SetupPlugin class that is on static/js/plugins/setup.js
+    const setPlugin = new SetupPlugin({
+      info: {
+        el: document.querySelector("[data-info]"),
+        value: "{{ plugin['description'] or ''}}",
+        type: "text",
+      },
+      items: {
+        el: document.querySelector("[data-item]"),
+        value: [],
+        type: "list",
+        listNames: ["code", "count"],
+      },
+    });
+  </script>
 </div>
 
 {% endblock %}

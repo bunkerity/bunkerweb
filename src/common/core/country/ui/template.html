@@ -1,22 +1,24 @@
 {% extends "base.html" %} {% block content %}
+<input
+  type="csrf_token"
+  name="csrf_token"
+  value="{{ csrf_token }}"
+  class="hidden"
+  hidden
+/>
 
 <div class="col-span-12 grid grid-cols-12 gap-4">
   <!-- info-->
-  <div class="col-span-12 grid grid-cols-12 gap-4">
-    <div
-      class="h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-    >
-      <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
+  <div
+    class="h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  >
+    <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
 
-      <div class="mx-1 flex justify-start items-center my-4">
-        <p
-          class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-500 dark:opacity-80"
-        >
-          {{ country_info or "The country security feature allows you to apply
-          policy based on the country of the IP address of clients (blacklist /
-          whitelist)." }}
-        </p>
-      </div>
+    <div class="mx-1 flex justify-start items-center my-4">
+      <p
+        data-info
+        class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-500 dark:opacity-80"
+      ></p>
     </div>
   </div>
   <!-- end info -->
@@ -31,13 +33,11 @@
       >
         Country
       </p>
-      <h5 class="mb-1 font-bold dark:text-white/90">
-        {{ country_blacklist_count or "unknown" }}
-      </h5>
+      <h5 data-count class="mb-1 font-bold dark:text-white/90"></h5>
 
       <p class="mb-0 dark:text-white dark:opacity-60">
         <span class="font-bold leading-normal text-sm text-red-500 mx-0.5"
-          >blacklist request blocked</span
+          >request blocked</span
         >
       </p>
     </div>
@@ -58,54 +58,27 @@
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
-          d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+          d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"
         />
       </svg>
     </div>
     <!-- end icon -->
   </div>
 
-  <div
-    class="h-fit dark:brightness-110 max-h-none sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
-  >
-    <!-- text -->
-    <div>
-      <p
-        class="mb-2 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60"
-      >
-        Country
-      </p>
-      <h5 class="mb-1 font-bold dark:text-white/90">
-        {{ country_blacklist_count or "unknown" }}
-      </h5>
-
-      <p class="mb-0 dark:text-white dark:opacity-60">
-        <span class="font-bold leading-normal text-sm text-green-500 mx-0.5"
-          >whitelist request passed</span
-        >
-      </p>
-    </div>
-    <!-- end text -->
-    <!-- icon -->
-    <div
-      role="img"
-      class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-green-700"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        class="scale-75 leading-none text-lg relative stroke-green-700 fill-white"
-      >
-        <path
-          fill-rule="evenodd"
-          d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-          clip-rule="evenodd"
-        />
-      </svg>
-    </div>
-    <!-- end icon -->
-  </div>
+  <script>
+    // Use SetupPlugin class that is on static/js/plugins/setup.js
+    const setPlugin = new SetupPlugin({
+      info: {
+        el: document.querySelector("[data-info]"),
+        value: "{{ plugin['description'] or ''}}",
+        type: "text",
+      },
+      counter_failed_country: {
+        el: document.querySelector("[data-count]"),
+        value: "",
+        type: "text",
+      },
+    });
+  </script>
 </div>
-
 {% endblock %}

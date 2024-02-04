@@ -132,12 +132,14 @@ function blacklist:access()
 		if not ok then
 			self.logger:log(ERR, "error while checking cache : " .. cached)
 		elseif cached and cached ~= "ok" then
+			local data = self:get_data(cached)
+			self:set_metric("counters", "failed_" .. data.id, 1)
 			return self:ret(
 				true,
 				k .. " is in cached blacklist (info : " .. cached .. ")",
 				get_deny_status(),
 				nil,
-				self:get_data(cached)
+				data
 			)
 		end
 		if ok and cached then
@@ -161,12 +163,14 @@ function blacklist:access()
 					self.logger:log(ERR, "error while adding element to cache : " .. err)
 				end
 				if blacklisted ~= "ok" then
+					local data = self:get_data(blacklisted)
+					self:set_metric("counters", "failed_" .. data.id, 1)
 					return self:ret(
 						true,
 						k .. " is blacklisted (info : " .. blacklisted .. ")",
 						get_deny_status(),
 						nil,
-						self:get_data(blacklisted)
+						data
 					)
 				end
 			end

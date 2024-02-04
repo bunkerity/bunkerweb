@@ -56,6 +56,7 @@ function cors:header()
 		and self.variables["CORS_ALLOW_ORIGIN"] ~= "*"
 		and not regex_match(self.ctx.bw.http_origin, self.variables["CORS_ALLOW_ORIGIN"])
 	then
+		self:set_metric("counters", "failed_cors", 1)
 		self.logger:log(WARN, "origin " .. self.ctx.bw.http_origin .. " is not allowed")
 		return self:ret(true, "origin " .. self.ctx.bw.http_origin .. " is not allowed")
 	end

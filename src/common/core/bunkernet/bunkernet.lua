@@ -10,6 +10,8 @@ local ngx = ngx
 local ERR = ngx.ERR
 local NOTICE = ngx.NOTICE
 local WARN = ngx.WARN
+local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
+local HTTP_OK = ngx.HTTP_OK
 local timer_at = ngx.timer.at
 local get_phase = ngx.get_phase
 local get_version = utils.get_version
@@ -28,6 +30,7 @@ local open = io.open
 local encode = cjson.encode
 local decode = cjson.decode
 local http_new = http.new
+local match = string.match
 
 function bunkernet:initialize(ctx)
 	-- Call parent initialize
@@ -306,6 +309,30 @@ function bunkernet:report(ip, reason, reason_data, method, url, headers)
 		headers = headers,
 	}
 	return self:request("POST", "/report", data)
+end
+
+function bunkernet:api()
+	-- Match request
+	if not match(self.ctx.bw.uri, "^/bunkernet/ping$") or self.ctx.bw.request_method ~= "POST" then
+		return self:ret(false, "success")
+	end
+	-- Check id
+	if not self.bunkernet_id then
+		return self:ret(true, "missing instance ID", HTTP_INTERNAL_SERVER_ERROR)
+	end
+	-- Send ping request
+	local ok, err, status, _ = self:ping()
+	if not ok then
+		return self:ret(true, "error while sending request to API : " .. err, HTTP_INTERNAL_SERVER_ERROR)
+	end
+	if status ~= 200 then
+		return self:ret(
+			true,
+			"received status " .. tostring(status) .. " from API using instance ID " .. self.bunkernet_id,
+			HTTP_INTERNAL_SERVER_ERROR
+		)
+	end
+	return self:ret(true, "connectivity with API using instance ID " .. self.bunkernet_id .. " is successful", HTTP_OK)
 end
 
 return bunkernet

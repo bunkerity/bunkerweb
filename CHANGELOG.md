@@ -2,12 +2,27 @@
 
 ## v1.5.6 - YYYY/MM/DD
 
+- [BUGFIX] Fix issues with the antibot feature ([#866](https://github.com/bunkerity/bunkerweb/issues/866), [#870](https://github.com/bunkerity/bunkerweb/issues/870))
+- [UI] Add bans management page in the web UI
+- [UI] Add blocked requests page in the web UI
+- [UI] Add the possibility to clone a service in the web UI
+- [UI] Add the possibility to set a service as draft in the web UI
+- [FEATURE] Add setting REDIS_SSL_VERIFY to activate/disable the SSL certificate verification when using Redis
+- [FEATURE] Add Redis Sentinel fallback to master automatically if no slaves are available
+- [FEATURE] Add Redis Sentinel support for bwcli
+- [FEATURE] Add new Metrics core plugin that will allow metrics collection and retrieval of internal metrics
+- [FEATURE] Add setting DATABASE_LOG_LEVEL to control SQLAlchemy loggers separately from the main one
+- [MISC] Add a better custom certificate cache handling
 - [MISC] Updated Linux base images in Dockerfiles
+- [MISC] Add recommended dialects to databases string
+- [DOCUMENTATION] Update web UI's setup wizard instructions in the documentation
 - [DEPS] Updated stream-lua-nginx-module to v0.0.14
 - [DEPS] Updated lua-nginx-module version to v0.10.26
 - [DEPS] Updated libmaxminddb version to v1.9.1
 - [DEPS] Updated lua-resty-core to v0.1.28
 - [DEPS] Updated zlib version to v1.3.1
+- [DEPS] Updated ModSecurity version to v3.0.12
+- [DEPS] Updated lua-resty-mlcache version to v2.6.1
 
 ## v1.5.5 - 2024/01/12
 

@@ -1,6 +1,5 @@
-{% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip()
+{% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip()
 %}
-
 <div class="navigation-wrap bg-custom start-header start-style">
   <div class="container">
     <div class="row">

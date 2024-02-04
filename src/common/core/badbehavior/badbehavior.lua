@@ -49,6 +49,7 @@ function badbehavior:log()
 	if not ok then
 		return self:ret(false, "can't create increase timer : " .. err)
 	end
+	self:set_metric("counters", tostring(ngx.status), 1)
 	return self:ret(true, "success")
 end
 

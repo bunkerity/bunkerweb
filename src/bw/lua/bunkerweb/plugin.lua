@@ -93,4 +93,19 @@ function plugin:ret(ret, msg, status, redirect, data)
 	return { ret = ret, msg = msg, status = status, redirect = redirect, data = data }
 end
 
+function plugin:set_metric(kind, key, value)
+	if self.ctx and self.ctx.bw then
+		if not self.ctx.bw.metrics then
+			self.ctx.bw.metrics = {}
+		end
+		if not self.ctx.bw.metrics[self.id] then
+			self.ctx.bw.metrics[self.id] = {}
+		end
+		if not self.ctx.bw.metrics[self.id][kind] then
+			self.ctx.bw.metrics[self.id][kind] = {}
+		end
+		self.ctx.bw.metrics[self.id][kind][key] = value
+	end
+end
+
 return plugin

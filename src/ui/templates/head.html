@@ -1,4 +1,4 @@
-{% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip()
+{% set current_endpoint = current_endpoint or url_for(request.endpoint)[1:].split("/")[-1].strip()
 %}
 
 <head>
@@ -18,6 +18,7 @@
   <link rel="stylesheet" type="text/css" href="./css/dashboard.css" />
 
   <script type="module" src="./js/global.js"></script>
+  <script src="./js/plugins/setup.js"></script>
 
   <script async src="./js/utils/purify/purify.min.js"></script>
   <script src="./js/editor/ace.js"></script>

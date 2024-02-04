@@ -6,7 +6,7 @@
   "stream": "partial",
   "settings": {
     "USE_METRICS": {
-      "context": "global",
+      "context": "multisite",
       "default": "yes",
       "help": "Enable collection and retrieval of internal metrics.",
       "id": "use-metrics",
@@ -21,6 +21,15 @@
       "id": "metrics-memory-size",
       "label": "Metrics memory size",
       "regex": "^\\d+[kKmMgG]?$",
+      "type": "text"
+    },
+    "METRICS_MAX_BLOCKED_REQUESTS": {
+      "context": "global",
+      "default": "100",
+      "help": "Maximum number of blocked requests to store (per worker).",
+      "id": "metrics-max-blocked-requests",
+      "label": "Metrics max blocked requests",
+      "regex": "^\\d+$",
       "type": "text"
     }
   }

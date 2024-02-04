@@ -91,6 +91,7 @@ function dnsbl:access()
 		if cached == "ok" then
 			return self:ret(true, "client IP " .. self.ctx.bw.remote_addr .. " is in DNSBL cache (not blacklisted)")
 		end
+		self:set_metric("counters", "failed_dnsbl", 1)
 		return self:ret(
 			true,
 			"client IP " .. self.ctx.bw.remote_addr .. " is in DNSBL cache (server = " .. cached .. ")",
