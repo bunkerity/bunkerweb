@@ -351,21 +351,21 @@ class Instances:
     def get_reports(self, _id: Optional[int] = None) -> List[dict[str, Any]]:
         if _id:
             instance = self.__instance_from_id(_id)
-            resp, instance_reports = instance.reports()["requests"]
+            resp, instance_reports = instance.reports()
             if not resp:
                 return []
-            return instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", [])
+            return instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", {"requests": []})["requests"]
 
         reports: List[dict[str, Any]] = []
         for instance in self.get_instances():
             try:
-                resp, instance_reports = instance.reports()["requests"]
+                resp, instance_reports = instance.reports()
             except:
                 continue
 
             if not resp:
                 continue
-            reports.extend(instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", []))
+            reports.extend(instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", {"requests": []})["requests"])
 
         reports.sort(key=lambda x: x["date"], reverse=True)
 
@@ -384,7 +384,7 @@ class Instances:
             if not resp:
                 continue
 
-            if not instance.name in instance_metrics or instance_metrics[instance.name]["msg"] is None or instance_metrics[instance.name]["msg"] is not dict or instance_metrics[instance.name]["status"] != "success":
+            if instance.name not in instance_metrics or instance_metrics[instance.name]["msg"] is None or instance_metrics[instance.name]["msg"] is not dict or instance_metrics[instance.name]["status"] != "success":
                 continue
 
             metric_data = instance_metrics[instance.name]["msg"]
