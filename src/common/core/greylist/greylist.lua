@@ -151,7 +151,7 @@ function greylist:access()
 	end
 
 	-- Return
-	self:set_metric("counters", "failed_greylist" .. data.id, 1)
+	self:set_metric("counters", "failed_greylist", 1)
 	return self:ret(true, "not in greylist", get_deny_status())
 end
 
