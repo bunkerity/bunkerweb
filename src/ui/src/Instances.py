@@ -354,7 +354,7 @@ class Instances:
             resp, instance_reports = instance.reports()
             if not resp:
                 return []
-            return instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", {"requests": []})["requests"]
+            return (instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg") or {"requests": []})["requests"]
 
         reports: List[dict[str, Any]] = []
         for instance in self.get_instances():
@@ -365,7 +365,7 @@ class Instances:
 
             if not resp:
                 continue
-            reports.extend(instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", {"requests": []})["requests"])
+            reports.extend((instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg") or {"requests": []})["requests"])
 
         reports.sort(key=lambda x: x["date"], reverse=True)
 
