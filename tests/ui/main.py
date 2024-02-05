@@ -222,7 +222,9 @@ with driver_func() as driver:
         while current_time + timedelta(minutes=5) > datetime.now() and not driver.current_url.endswith("/login"):
             sleep(1)
 
-        get(f"http://www.example.com{ui_url}/home?id=/etc/passwd")
+        for _ in range(5):
+            get(f"http://www.example.com{ui_url}/home?id=/etc/passwd")
+            sleep(0.5)
 
         ### LOGIN PAGE
 
