@@ -17,14 +17,14 @@ repos:
       - id: check-case-conflict
 
   - repo: https://github.com/psf/black
-    rev: ec91a2be3c44d88e1a3960a4937ad6ed3b63464e # frozen: 23.12.1
+    rev: e026c93888f91a47a9c9f4e029f3eb07d96375e6 # frozen: 24.1.1
     hooks:
       - id: black
         name: Black Python Formatter
         language_version: python3.9
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: ffb6a759a979008c0e6dff86e39f4745a2d9eac4 # frozen: v3.1.0
+    rev: f12edd9c7be1c20cfa42420fd0e6df71e42b51ea # frozen: v4.0.0-alpha.8
     hooks:
       - id: prettier
         name: Prettier Code Formatter
@@ -50,7 +50,7 @@ repos:
         args: ["--max-line-length=250", "--ignore=E266,E402,E722,W503"]
 
   - repo: https://github.com/dosisod/refurb
-    rev: a295cee6d188f5797aefe5d7cf77a353ed48ea93 # frozen: v1.27.0
+    rev: a9a4edd45687e664dee0905ba1c848bda227d1d6 # frozen: v1.28.0
     hooks:
       - id: refurb
         name: Refurb Python Refactoring Tool
@@ -67,7 +67,7 @@ repos:
         types: [text]
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: e815c559e3ac76227e8e7463cf3a6598b715687b # frozen: v8.18.1
+    rev: 145400593c178304246371bc45290588bc72f43e # frozen: v8.18.2
     hooks:
       - id: gitleaks
 
