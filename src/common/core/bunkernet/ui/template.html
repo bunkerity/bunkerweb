@@ -164,7 +164,7 @@
         type: "text",
       },
       // value : active / inactive / unknown
-      status: {
+      ping_status: {
         el: document.querySelector("[data-status-svg]"),
         value: "unknown",
         type: "status",
@@ -173,36 +173,6 @@
     });
   </script>
 
-  <!-- end test -->
-  <script async>
-    function ping() {
-      let data = new FormData();
-      data.set("csrf_token", "{{ csrf_token() }}");
-
-      let xhr = new XMLHttpRequest();
-      xhr.open("POST", "{{ url_for('plugins') }}/bunkernet", true);
-      xhr.send(data);
-
-      xhr.onload = function () {
-        document.getElementById("no-test").classList.add("hidden");
-        if (xhr.status == 200) {
-          document.getElementById("response-failed").classList.remove("hidden");
-          document.getElementById("response-none").classList.add("hidden");
-          document.getElementById("response-success").classList.add("hidden");
-        } else if (xhr.status == 403) {
-          document
-            .getElementById("response-success")
-            .classList.remove("hidden");
-          document.getElementById("response-none").classList.add("hidden");
-          document.getElementById("response-failed").classList.add("hidden");
-        } else {
-          document.getElementById("response-none").classList.remove("hidden");
-          document.getElementById("response-success").classList.add("hidden");
-          document.getElementById("response-failed").classList.add("hidden");
-        }
-      };
-    }
-  </script>
   {% else %}
   <div
     class="h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"

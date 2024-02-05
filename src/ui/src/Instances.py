@@ -120,6 +120,12 @@ class Instance:
     def metrics(self, plugin_id) -> Tuple[bool, dict[str, Any]]:
         return self.apiCaller.send_to_apis("GET", f"/metrics/{plugin_id}", response=True)
 
+    def metrics_redis(self) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("GET", "/redis/stats", response=True)
+
+    def ping(self, plugin_id, hostname: Optional[str] = "") -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("POST", f"/{plugin_id}/ping{'?host={hostname}' if hostname else ''}", response=True)
+
 
 class Instances:
     def __init__(self, docker_client, kubernetes_client, integration: str):
@@ -376,7 +382,10 @@ class Instances:
         metrics = {}
         for instance in self.get_instances():
             try:
-                resp, instance_metrics = instance.metrics(plugin_id)
+                if plugin_id == "redis":
+                    resp, instance_metrics = instance.metrics_redis()
+                else:
+                    resp, instance_metrics = instance.metrics(plugin_id)
             except:
                 continue
 
@@ -423,3 +432,30 @@ class Instances:
                             metrics[key][k] = v
                             continue
         return metrics
+
+    def get_ping(self, plugin_id: str):
+        # Need at least one instance to get a success ping to return success
+        ping = {"status": "error"}
+        for instance in self.get_instances():
+            try:
+                if plugin_id == "redis":
+                    resp, ping_data = instance.ping(plugin_id, instance["name"])
+                else:
+                    resp, ping_data = instance.ping(plugin_id)
+                print("res")
+                print(resp)
+                print(ping_data)
+            except:
+                continue
+
+            if not resp:
+                continue
+
+            if instance.name not in ping_data or ping_data[instance.name]["msg"] is None or ping_data[instance.name]["msg"] is not dict:
+                continue
+
+            if ping_data[instance.name]["status"] == "success":
+                ping["status"] = "success"
+                break
+
+        return ping
