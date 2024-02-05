@@ -283,7 +283,7 @@ This script is running on flask context, you have access to lib and utils like `
 
 - **template.html** : custom plugin page you can access from ui.
 
-- **plugin.lua** : code to execute on NGINX using [NGING LUA modile.](https://github.com/openresty/lua-nginx-module)
+- **plugin.lua** : code to execute on NGINX using [NGING LUA module.](https://github.com/openresty/lua-nginx-module)
 
 - **plugin.json** : metadata, settings and jobs for your settings.
 
@@ -619,5 +619,5 @@ I need to add this on my **template.html** :
 | `el`        | element| Select element you want the value to be updated.                                             |
 |   `value`   | any    | Default value on template load or in case retrieving JSON failed.                            |
 |    `type`   | string | Define the script behavior with the incoming value. Available : `text`, `list` and `status`. |
-|  `textEl`   | element| Optional additionnal text content when type is `status`.                                     |
+|  `textEl`   | element| Optional additional text content when type is `status`.                                     |
 |  `listNames`| string | List of data keys when type is `list`.                                                       |

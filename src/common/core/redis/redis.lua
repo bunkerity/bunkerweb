@@ -7,7 +7,6 @@ local ngx = ngx
 local NOTICE = ngx.NOTICE
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
-local match = string.match
 
 function redis:initialize(ctx)
 	-- Call parent initialize
@@ -48,7 +47,11 @@ function redis:api()
 		local ok, err = self.clusterstore:call("ping")
 		self.clusterstore:close()
 		if err then
-			return self:ret(true, "error while sending ping command to redis server : " .. err, HTTP_INTERNAL_SERVER_ERROR)
+			return self:ret(
+				true,
+				"error while sending ping command to redis server : " .. err,
+				HTTP_INTERNAL_SERVER_ERROR
+			)
 		end
 		if not ok then
 			return self:ret(true, "redis ping command failed", HTTP_INTERNAL_SERVER_ERROR)
@@ -65,14 +68,18 @@ function redis:api()
 		local nb_keys, err = self.clusterstore:call("dbsize")
 		self.clusterstore:close()
 		if err then
-			return self:ret(true, "error while sending dbsize command to redis server : " .. err, HTTP_INTERNAL_SERVER_ERROR)
+			return self:ret(
+				true,
+				"error while sending dbsize command to redis server : " .. err,
+				HTTP_INTERNAL_SERVER_ERROR
+			)
 		end
 		if not ok then
 			return self:ret(true, "redis dbsize command failed", HTTP_INTERNAL_SERVER_ERROR)
 		end
 		-- Return data
 		local data = {
-			redis_nb_keys = nb_keys
+			redis_nb_keys = nb_keys,
 		}
 		return self:ret(true, data, HTTP_OK)
 	end

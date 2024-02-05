@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from operator import itemgetter
 from os import sep
 from os.path import join
 from pathlib import Path
@@ -330,7 +331,7 @@ class Instances:
                 continue
             bans.extend(instance_bans[instance.name if instance.name != "local" else "127.0.0.1"].get("data", []))
 
-        bans.sort(key=lambda x: x["exp"])
+        bans.sort(key=itemgetter("exp"))
 
         unique_bans = {}
 
@@ -373,7 +374,7 @@ class Instances:
                 continue
             reports.extend((instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg") or {"requests": []})["requests"])
 
-        reports.sort(key=lambda x: x["date"], reverse=True)
+        reports.sort(key=itemgetter("date"), reverse=True)
 
         return reports
 

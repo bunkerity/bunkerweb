@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from copy import deepcopy
+from operator import itemgetter
 from os import sep
 from os.path import join
 from flask import flash
@@ -84,7 +85,7 @@ class Config:
 
     def get_plugins(self, *, external: bool = False, with_data: bool = False) -> List[dict]:
         plugins = self.__db.get_plugins(external=external, with_data=with_data)
-        plugins.sort(key=lambda x: x["name"])
+        plugins.sort(key=itemgetter("name"))
 
         general_plugin = None
         for plugin in plugins.copy():

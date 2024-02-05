@@ -7,7 +7,6 @@ authors = [
 ]
 
 [tool.black]
-py39 = true
 line-length = 250
 include = '\.pyi?$'
 exclude = '''
