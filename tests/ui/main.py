@@ -222,6 +222,8 @@ with driver_func() as driver:
         while current_time + timedelta(minutes=5) > datetime.now() and not driver.current_url.endswith("/login"):
             sleep(1)
 
+        sleep(10)
+
         for _ in range(5):
             get("http://127.0.0.1/?id=/etc/passwd")
             sleep(0.5)
