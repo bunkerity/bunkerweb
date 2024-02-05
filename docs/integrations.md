@@ -1055,50 +1055,7 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     sudo dnf versionlock add bunkerweb
     ```
 
-=== "RedHat"
-
-    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
-
-    ```conf
-    [nginx-stable]
-    name=nginx stable repo
-    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
-    gpgcheck=1
-    enabled=1
-    gpgkey=https://nginx.org/keys/nginx_signing.key
-    module_hotfixes=true
-
-    [nginx-mainline]
-    name=nginx mainline repo
-    baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
-    gpgcheck=1
-    enabled=0
-    gpgkey=https://nginx.org/keys/nginx_signing.key
-    module_hotfixes=true
-    ```
-
-    You should now be able to install NGINX 1.24.0 :
-
-    ```shell
-    sudo dnf install nginx-1.24.0
-    ```
-    And finally install BunkerWeb 1.5.6 :
-
-    ```shell
-	  dnf install -y epel-release && \
-    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
-    sudo dnf check-update && \
-    sudo dnf install -y bunkerweb-1.5.6
-    ```
-
-    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
-
-    ```shell
-    sudo dnf versionlock add nginx && \
-    sudo dnf versionlock add bunkerweb
-    ```
-
-=== "Rocky Linux"
+=== "RedHat / Rocky Linux"
 
     The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
 
