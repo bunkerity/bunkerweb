@@ -1271,23 +1271,28 @@ def custom_plugin(plugin: str):
     # Get USE_<NAME> if exists
     # Check if the plugin is used by one service
     config = app.config["CONFIG"].get_config(methods=False)
-    services = app.config["CONFIG"].get_services(with_drafts=True)
     use_key = False
     is_used = False
     for key, value in curr_plugin["settings"].items():
         if key.upper().startswith("USE_"):
             use_key = key
 
+    print("use key :", flush=True)
+    print(use_key, flush=True)
+
     # Case no USE_<NAME>, it means always show
     if not use_key:
-        is_used = True if config[use_key] == "yes" else False
+        is_used = True
 
     # Case USE_<NAME>, it means show only if used by one service
     if use_key and not is_used:
-        for service in services:
-            if service[use_key] == "yes":
-                is_used = True
-                break
+        if curr_plugin["settings"][use_key]["context"] == "global":
+            is_used = config.get(use_key, "no") == "yes"
+        else:
+            for service in config.get("SERVER_NAME", "").split(" "):
+                if config.get(f"{service}_{use_key}", "no") == "yes":
+                    is_used = True
+                    break
 
     message = ""
     if not plugin_id_rx.match(plugin):
@@ -1487,6 +1492,7 @@ def logs_linux():
             "error"
             if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
             else (("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message")))
+
         )
 
         logs.append(
