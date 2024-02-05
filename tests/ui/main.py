@@ -222,6 +222,8 @@ with driver_func() as driver:
         while current_time + timedelta(minutes=5) > datetime.now() and not driver.current_url.endswith("/login"):
             sleep(1)
 
+        get(f"http://www.example.com{ui_url}/home?id=/etc/passwd")
+
         ### LOGIN PAGE
 
         if not driver.current_url.endswith("/login"):
@@ -1257,8 +1259,6 @@ location /hello {
         sleep(3)
 
         print("The cache file content is correct, trying reporting page ...", flush=True)
-
-        get(f"http://www.example.com{ui_url}/home?id=/etc/passwd")
 
         access_page(driver, driver_wait, "/html/body/aside[1]/div[1]/div[3]/ul/li[8]/a", "reports")
 
