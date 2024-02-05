@@ -1268,7 +1268,8 @@ def custom_plugin(plugin: str):
             curr_plugin = plug
             break
 
-    # Get USE_<NAME> and check if the plugin is used by one service
+    # Get USE_<NAME> if exists
+    # Check if the plugin is used by one service
     config = app.config["CONFIG"].get_config(methods=False)
     services = app.config["CONFIG"].get_services(with_drafts=True)
     use_key = False
@@ -1277,8 +1278,11 @@ def custom_plugin(plugin: str):
         if key.upper().startswith("USE_"):
             use_key = key
 
-    is_used = True if config[use_key] == "yes" else False
+    # Case no USE_<NAME>, it means always show
+    if not use_key:
+        is_used = True if config[use_key] == "yes" else False
 
+    # Case USE_<NAME>, it means show only if used by one service
     if use_key and not is_used:
         for service in services:
             if service[use_key] == "yes":
