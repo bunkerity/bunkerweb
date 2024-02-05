@@ -8,7 +8,7 @@ def redis(**kwargs):
         ping = {"ping_status": "error"}
 
     try:
-        metrics = kwargs["app"].config["INSTANCES"].get_metrics("antibot")
+        metrics = kwargs["app"].config["INSTANCES"].get_metrics("redis")
 
         if metrics.get("redis_nb_keys") is None:
             metrics["redis_nb_keys"] = 0

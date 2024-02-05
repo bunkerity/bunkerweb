@@ -1277,9 +1277,6 @@ def custom_plugin(plugin: str):
         if key.upper().startswith("USE_"):
             use_key = key
 
-    print("use key :", flush=True)
-    print(use_key, flush=True)
-
     # Case no USE_<NAME>, it means always show
     if not use_key:
         is_used = True

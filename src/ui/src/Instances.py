@@ -440,17 +440,13 @@ class Instances:
         for instance in self.get_instances():
             try:
                 resp, ping_data = instance.ping(plugin_id)
-                print("res", flush=True)
-                print(resp, flush=True)
             except:
-                print("exception", flush=True)
-                print(format_exc(), flush=True)
                 continue
 
             if not resp:
                 continue
 
-            if instance.name not in ping_data or ping_data[instance.name]["msg"] is None or ping_data[instance.name]["msg"] is not dict:
+            if instance.name not in ping_data or ping_data[instance.name]["msg"] is None:
                 continue
 
             if ping_data[instance.name]["status"] == "success":
