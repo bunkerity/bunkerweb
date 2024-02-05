@@ -223,7 +223,7 @@ with driver_func() as driver:
             sleep(1)
 
         for _ in range(5):
-            get(f"http://www.example.com{ui_url}/home?id=/etc/passwd")
+            get("http://127.0.0.1/?id=/etc/passwd")
             sleep(0.5)
 
         ### LOGIN PAGE
