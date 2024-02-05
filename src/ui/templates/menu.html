@@ -447,7 +447,6 @@
           {% endif %} {% for plugin in plugins %} {% if plugin['page'] %}
           <li class="mt-0.5 w-full">
             <a
-              target="_blank"
               class="{% if current_endpoint == 'logs' %}font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/20 hover:bg-primary/30{% else %}dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
               href="{{request.url_root}}plugins/{{plugin['id']}}"
             >

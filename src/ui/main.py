@@ -1269,6 +1269,7 @@ def custom_plugin(plugin: str):
             break
 
     # Get USE_<NAME> and check if the plugin is used by one service
+    config = app.config["CONFIG"].get_config(methods=False)
     services = app.config["CONFIG"].get_services(with_drafts=True)
     use_key = False
     is_used = False
@@ -1276,7 +1277,9 @@ def custom_plugin(plugin: str):
         if key.upper().startswith("USE_"):
             use_key = key
 
-    if use_key:
+    is_used = True if config[use_key] == "yes" else False
+
+    if use_key and not is_used:
         for service in services:
             if service[use_key] == "yes":
                 is_used = True
@@ -1477,7 +1480,9 @@ def logs_linux():
 
         log_lower = log.lower()
         error_type = (
-            "error" if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
+            "error"
+            if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
+            else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
         )
 
         logs.append(

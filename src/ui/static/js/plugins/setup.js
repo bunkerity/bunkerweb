@@ -180,16 +180,35 @@ class SetupPlugin {
         el.textContent = value || "";
         continue;
       }
+
       // Case status
       if (type === "status") {
         const textEl = val["textEl"] || null;
 
-        if (value === "active")
+        if (
+          value === "active" ||
+          value === "up" ||
+          value === "yes" ||
+          value === "success" ||
+          value === "true"
+        ) {
           this.setStatus(el, textEl, "fill-green-500", "Active");
-        if (value === "inactive")
+          continue;
+        }
+
+        if (
+          value === "inactive" ||
+          value === "down" ||
+          value === "no" ||
+          value === "error" ||
+          value === "false"
+        ) {
           this.setStatus(el, textEl, "fill-red-500", "Inactive");
-        if (value === "unknown")
-          this.setStatus(el, textEl, "fill-sky-500", "Unknown");
+          continue;
+        }
+
+        //default
+        this.setStatus(el, textEl, "fill-sky-500", "Unknown");
         continue;
       }
 
