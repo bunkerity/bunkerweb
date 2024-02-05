@@ -1259,6 +1259,14 @@ def upload_plugin():
 @app.route("/plugins/<plugin>", methods=["GET", "POST"])
 @login_required
 def custom_plugin(plugin: str):
+    message = ""
+    if not plugin_id_rx.match(plugin):
+        message = f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'
+        app.logger.error(message)
+        if request.method == "GET":
+            return message, 400
+        return {"message": f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'}, 400
+
     # Get current plugin.json
     plugins = app.config["CONFIG"].get_plugins()
 
@@ -1273,9 +1281,11 @@ def custom_plugin(plugin: str):
     config = app.config["CONFIG"].get_config(methods=False)
     use_key = False
     is_used = False
-    for key, value in curr_plugin["settings"].items():
+    context = "multisite"
+    for key, data in curr_plugin["settings"].items():
         if key.upper().startswith("USE_"):
             use_key = key
+            context = data["context"]
 
     # Case no USE_<NAME>, it means always show
     if not use_key:
@@ -1283,21 +1293,13 @@ def custom_plugin(plugin: str):
 
     # Case USE_<NAME>, it means show only if used by one service
     if use_key and not is_used:
-        if curr_plugin["settings"][use_key]["context"] == "global":
-            is_used = config.get(use_key, "no") == "yes"
+        if context == "global":
+            is_used = config.get(use_key, "no") != "no"
         else:
             for service in config.get("SERVER_NAME", "").split(" "):
-                if config.get(f"{service}_{use_key}", "no") == "yes":
+                if config.get(f"{service}_{use_key}", "no") != "no":
                     is_used = True
                     break
-
-    message = ""
-    if not plugin_id_rx.match(plugin):
-        message = f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'
-        app.logger.error(message)
-        if request.method == "GET":
-            return message, 400
-        return {"message": f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'}, 400
 
     if request.method == "GET":
         page = db.get_plugin_template(plugin)
@@ -1489,7 +1491,6 @@ def logs_linux():
             "error"
             if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
             else (("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message")))
-
         )
 
         logs.append(
