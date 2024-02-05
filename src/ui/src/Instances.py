@@ -405,6 +405,11 @@ class Instances:
                     metrics[key] = value
                     continue
 
+                # Some value are the same for all instances, we don't need to update them
+                # Example redis_nb_keys count
+                if key in ["redis_nb_keys"]:
+                    continue
+
                 # Case value is number, add it to the existing value
                 if isinstance(value, (int, float)):
                     metrics[key] += value
