@@ -1,0 +1,10 @@
+FROM rockylinux:9.3@sha256:c944604c0c759f5d164ffbdf0bbab2fac582b739938937403c067ab634a0518a
+
+ENV NGINX_VERSION 1.24.0
+
+COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
+
+RUN dnf install epel-release php-fpm curl yum-utils -y && \
+    dnf install nginx-${NGINX_VERSION} -y
+
+COPY ./package-rockylinux/*.rpm /opt
