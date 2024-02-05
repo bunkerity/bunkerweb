@@ -2,6 +2,7 @@
 
 ## v1.5.6 - YYYY/MM/DD
 
+- [LINUX] Support Rocky Linux 9.3
 - [BUGFIX] Fix issues with the antibot feature ([#866](https://github.com/bunkerity/bunkerweb/issues/866), [#870](https://github.com/bunkerity/bunkerweb/issues/870))
 - [UI] Add bans management page in the web UI
 - [UI] Add blocked requests page in the web UI

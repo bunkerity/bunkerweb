@@ -118,7 +118,7 @@ else
   OS=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
 fi
 
-if ! [[ "$OS" =~ (centos|fedora|redhat) ]]; then
+if ! [[ "$OS" =~ (centos|fedora|redhat|rockylinux) ]]; then
     echo "❌ Unsupported Operating System"
     exit 1
 fi

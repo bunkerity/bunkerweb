@@ -950,6 +950,7 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Ubuntu 22.04 "Jammy"
 - Fedora 39
 - Red Hat Enterprise Linux (RHEL) 8.9
+- Rocky Linux 9.3
 
 Please ensure that you have **NGINX 1.24.0 installed before installing BunkerWeb**. For all distributions, except Fedora, it is mandatory to use prebuilt packages from the [official NGINX repository](https://nginx.org/en/linux_packages.html). Compiling NGINX from source or using packages from different repositories will not work with the official prebuilt packages of BunkerWeb. However, you have the option to build BunkerWeb from source.
 
@@ -1097,6 +1098,49 @@ To simplify the installation process, Linux package repositories for BunkerWeb a
     sudo dnf versionlock add bunkerweb
     ```
 
+=== "Rocky Linux"
+
+    The first step is to add NGINX official repository. Create the following file at `/etc/yum.repos.d/nginx.repo` :
+
+    ```conf
+    [nginx-stable]
+    name=nginx stable repo
+    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=1
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+
+    [nginx-mainline]
+    name=nginx mainline repo
+    baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=0
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+    ```
+
+    You should now be able to install NGINX 1.24.0 :
+
+    ```shell
+    sudo dnf install nginx-1.24.0
+    ```
+    And finally install BunkerWeb 1.5.6 :
+
+    ```shell
+	  dnf install -y epel-release && \
+    curl -s https://packagecloud.io/install/repositories/bunkerity/bunkerweb/script.rpm.sh | sudo bash && \
+    sudo dnf check-update && \
+    sudo dnf install -y bunkerweb-1.5.6
+    ```
+
+    To prevent upgrading NGINX and/or BunkerWeb packages when executing `dnf upgrade`, you can use the following command :
+
+    ```shell
+    sudo dnf versionlock add nginx && \
+    sudo dnf versionlock add bunkerweb
+    ```
+
 The configuration of BunkerWeb is done by editing the `/etc/bunkerweb/variables.env` file :
 
 ```conf
@@ -1125,6 +1169,7 @@ Supported Linux distributions for BunkerWeb (amd64/x86_64 and arm64/aarch64 arch
 - Ubuntu 22.04 "Jammy"
 - Fedora 39
 - Red Hat Enterprise Linux (RHEL) 8.9
+- Rocky Linux 9.3
 
 To simplify the deployment and configuration process, [Ansible](https://docs.ansible.com/ansible/latest/index.html) can be used as an IT automation tool. Ansible enables you to configure systems, deploy software, and perform advanced IT tasks such as continuous deployments or zero downtime rolling updates.
 
