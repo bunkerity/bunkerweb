@@ -1259,6 +1259,7 @@ def upload_plugin():
 @app.route("/plugins/<plugin>", methods=["GET", "POST"])
 @login_required
 def custom_plugin(plugin: str):
+    # Get current plugin.json
     plugins = app.config["CONFIG"].get_plugins()
 
     curr_plugin = {}
@@ -1266,6 +1267,20 @@ def custom_plugin(plugin: str):
         if plug["id"] == plugin:
             curr_plugin = plug
             break
+
+    # Get USE_<NAME> and check if the plugin is used by one service
+    services = app.config["CONFIG"].get_services(with_drafts=True)
+    use_key = False
+    is_used = False
+    for key, value in curr_plugin["settings"].items():
+        if key.upper().startswith("USE_"):
+            use_key = key
+
+    if use_key:
+        for service in services:
+            if service[use_key] == "yes":
+                is_used = True
+                break
 
     message = ""
     if not plugin_id_rx.match(plugin):
@@ -1285,6 +1300,7 @@ def custom_plugin(plugin: str):
                 username=current_user.get_id(),
                 current_endpoint=plugin,
                 plugin=curr_plugin,
+                is_used=is_used,
                 **app.jinja_env.globals,
             )
 
@@ -1461,9 +1477,7 @@ def logs_linux():
 
         log_lower = log.lower()
         error_type = (
-            "error"
-            if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower
-            else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
+            "error" if "[error]" in log_lower or "[crit]" in log_lower or "[alert]" in log_lower or "❌" in log_lower else ("warn" if "[warn]" in log_lower or "⚠️" in log_lower else ("info" if "[info]" in log_lower or "ℹ️" in log_lower else "message"))
         )
 
         logs.append(
