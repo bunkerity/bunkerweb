@@ -2,9 +2,28 @@ FROM rockylinux:9.3@sha256:c944604c0c759f5d164ffbdf0bbab2fac582b739938937403c067
 
 ENV NGINX_VERSION 1.24.0
 
+RUN dnf -y update \
+    && dnf -y install systemd \
+    && dnf clean all
+
+RUN cd /lib/systemd/system/sysinit.target.wants/; \
+    for i in *; do [ $i = systemd-tmpfiles-setup.service ] || rm -f $i; done
+
+RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
+    /etc/systemd/system/*.wants/* \
+    /lib/systemd/system/local-fs.target.wants/* \
+    /lib/systemd/system/sockets.target.wants/*udev* \
+    /lib/systemd/system/sockets.target.wants/*initctl* \
+    /lib/systemd/system/basic.target.wants/* \
+    /lib/systemd/system/anaconda.target.wants/*
+
 COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 
-RUN dnf install epel-release php-fpm curl yum-utils -y && \
+RUN dnf install epel-release php-fpm yum-utils -y && \
     dnf install nginx-${NGINX_VERSION} -y
 
 COPY ./package-rockylinux/*.rpm /opt
+
+VOLUME ["/sys/fs/cgroup"]
+
+CMD ["/usr/sbin/init"]
