@@ -185,40 +185,60 @@ jobs:
           - release: beta
             repo: bunkerweb
           - linux: ubuntu
-            arch: arm64
-            package_arch: arm64
             separator: _
             suffix: ""
             version: jammy
             package: deb
           - linux: debian
-            arch: arm64
-            package_arch: arm64
             separator: _
             suffix: ""
             version: bookworm
             package: deb
           - linux: fedora
-            arch: arm64
-            package_arch: aarch64
             separator: "-"
             suffix: "1."
             version: 39
             package: rpm
           - linux: el
-            arch: arm64
-            package_arch: aarch64
             separator: "-"
             suffix: "1."
             version: 8
             package: rpm
           - linux: rockylinux
-            arch: amd64
-            package_arch: x86_64
             separator: "-"
             suffix: "1."
             version: 9
             package: rpm
+          - linux: ubuntu
+            arch: amd64
+            package_arch: amd64
+          - linux: debian
+            arch: amd64
+            package_arch: amd64
+          - linux: fedora
+            arch: amd64
+            package_arch: x86_64
+          - linux: el
+            arch: amd64
+            package_arch: x86_64
+          - linux: rockylinux
+            arch: amd64
+            package_arch: x86_64
+          - linux: ubuntu
+            arch: arm64
+            package_arch: arm64
+          - linux: debian
+            arch: arm64
+            package_arch: arm64
+          - linux: fedora
+            arch: arm64
+            package_arch: aarch64
+          - linux: el
+            arch: arm64
+            package_arch: aarch64
+          - linux: rockylinux
+            arch: arm64
+            package_arch: aarch64
     uses: ./.github/workflows/push-packagecloud.yml
     with:
       SEPARATOR: ${{ matrix.separator }}

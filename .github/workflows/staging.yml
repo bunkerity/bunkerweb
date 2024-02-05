@@ -233,11 +233,11 @@ jobs:
             version: 8
             package: rpm
           - linux: rockylinux
-            arch: amd64
-            package_arch: x86_64
+            arch: arm64
+            package_arch: aarch64
             separator: "-"
             suffix: "1."
-            version: 9
+            version: 9.3
             package: rpm
     uses: ./.github/workflows/push-packagecloud.yml
     with:
