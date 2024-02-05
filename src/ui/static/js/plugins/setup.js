@@ -31,7 +31,7 @@ class SetupPlugin {
         */
     // Hidden elements that will be shown on success, like ping buttons or list rendering
     this.showOnSuccessEls = document.querySelectorAll(
-      "[data-fetch-success-show]"
+      "[data-fetch-success-show]",
     );
 
     this.init();
@@ -77,7 +77,7 @@ class SetupPlugin {
       ],
       "bg-sky-500 p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border",
       "",
-      ""
+      "",
     );
 
     this.alertCloseEl = this.createEl(
@@ -85,7 +85,7 @@ class SetupPlugin {
       [["data-fetch-close", ""]],
       "absolute right-7 top-1.5",
       "",
-      this.alertEl
+      this.alertEl,
     );
 
     this.alertCloseIconEl = this.createEl(
@@ -96,7 +96,7 @@ class SetupPlugin {
       ],
       "cursor-pointer fill-white dark:fill-gray-300 dark:opacity-80 absolute h-5 w-5",
       "",
-      this.alertCloseEl
+      this.alertCloseEl,
     );
 
     // Close icon paths
@@ -116,7 +116,7 @@ class SetupPlugin {
       [["data-fetch-status", ""]],
       "text-lg mb-0 text-white dark:text-gray-300",
       "Fetching",
-      this.alertEl
+      this.alertEl,
     );
 
     this.alertMsgEl = this.createEl(
@@ -124,7 +124,7 @@ class SetupPlugin {
       [["data-fetch-msg", ""]],
       "text-white dark:text-gray-300 mb-0 text-sm",
       "Please wait...",
-      this.alertEl
+      this.alertEl,
     );
 
     document.body.appendChild(this.alertEl);

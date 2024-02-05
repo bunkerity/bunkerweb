@@ -8,6 +8,7 @@
 />
 
 <div class="col-span-12 grid grid-cols-12 gap-4">
+  {% if plugin['settings']['USE_BUNKERNET'].get('value') == "yes" %}
   <!-- status -->
   <div class="col-span-12 grid grid-cols-12 gap-4">
     <div
@@ -202,6 +203,46 @@
       };
     }
   </script>
+  {% else %}
+  <div
+    class="h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+  >
+    <div class="flex justify-between">
+      <h5 class="mb-2 font-bold dark:text-white/90">Deactived</h5>
+      <!-- icon -->
+      <div
+        role="img"
+        class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-yellow-500"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="scale-75 leading-none text-lg relative fill-yellow-500 stroke-white"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+          />
+        </svg>
+      </div>
+      <!-- end icon -->
+    </div>
+
+    <div class="mx-1 flex justify-start items-center my-2">
+      <p
+        data-info
+        class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-500 dark:opacity-80"
+      >
+        This plugin need to be activated to get metrics.
+      </p>
+    </div>
+  </div>
+  <!-- end info -->
+  {% endif %}
 </div>
 
 {% endblock %}
