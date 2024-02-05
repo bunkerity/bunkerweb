@@ -207,7 +207,7 @@ jobs:
           - linux: rockylinux
             separator: "-"
             suffix: "1."
-            version: 9
+            version: 9.3
             package: rpm
           - linux: ubuntu
             arch: amd64

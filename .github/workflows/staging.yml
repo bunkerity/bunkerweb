@@ -205,36 +205,31 @@ jobs:
           - release: testing
             repo: bunkerweb
           - linux: ubuntu
-            arch: arm64
-            package_arch: arm64
+            package_arch: amd64
             separator: _
             suffix: ""
             version: jammy
             package: deb
           - linux: debian
-            arch: arm64
-            package_arch: arm64
+            package_arch: amd64
             separator: _
             suffix: ""
             version: bookworm
             package: deb
           - linux: fedora
-            arch: arm64
-            package_arch: aarch64
+            package_arch: x86_64
             separator: "-"
             suffix: "1."
             version: 39
             package: rpm
           - linux: el
-            arch: arm64
-            package_arch: aarch64
+            package_arch: x86_64
             separator: "-"
             suffix: "1."
             version: 8
             package: rpm
           - linux: rockylinux
-            arch: arm64
-            package_arch: aarch64
+            package_arch: x86_64
             separator: "-"
             suffix: "1."
             version: 9.3
