@@ -54,7 +54,12 @@ jobs:
           name: package-rhel-${{ inputs.PACKAGE_ARCH }}
           path: /tmp/${{ inputs.LINUX }}
       - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
-        if: inputs.LINUX == 'el' && inputs.VERSION == '9'
+        if: inputs.LINUX == 'el'
+        with:
+          name: package-rhel-${{ inputs.PACKAGE_ARCH }}
+          path: /tmp/${{ inputs.LINUX }}
+      - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        if: inputs.LINUX == 'el9'
         with:
           name: package-rhel9-${{ inputs.PACKAGE_ARCH }}
           path: /tmp/${{ inputs.LINUX }}
@@ -70,10 +75,20 @@ jobs:
       #   run: sudo apt install -y rename && rename 's/[0-9]\.[0-9]\.[0-9]/testing/' /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
       # Push package
       - name: Push package to packagecloud
+        if: inputs.LINUX != 'el9'
         uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
         with:
           PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
           PACKAGECLOUD-USERNAME: bunkerity
           PACKAGECLOUD-REPO: ${{ inputs.REPO }}
           PACKAGECLOUD-DISTRIB: ${{ inputs.LINUX }}/${{ inputs.VERSION }}
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Push package to packagecloud
+        if: inputs.LINUX == 'el9'
+        uses: danielmundi/upload-packagecloud@46cd0e61152bf952dbc0d1759e609d3d22649030 # v1
+        with:
+          PACKAGE-NAME: /tmp/${{ inputs.LINUX }}/*.${{ inputs.PACKAGE }}
+          PACKAGECLOUD-USERNAME: bunkerity
+          PACKAGECLOUD-REPO: ${{ inputs.REPO }}
+          PACKAGECLOUD-DISTRIB: el/9
           PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}

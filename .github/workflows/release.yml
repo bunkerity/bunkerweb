@@ -191,7 +191,7 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el]
+        linux: [ubuntu, debian, fedora, el, el9]
         arch: [amd64, arm64]
         include:
           - release: latest
@@ -216,7 +216,7 @@ jobs:
             suffix: "1."
             version: 8
             package: rpm
-          - linux: el
+          - linux: el9
             separator: "-"
             suffix: "1."
             version: 9
@@ -233,11 +233,9 @@ jobs:
           - linux: el
             arch: amd64
             package_arch: x86_64
-            version: 8
-          - linux: el
+          - linux: el9
             arch: amd64
             package_arch: x86_64
-            version: 9
           - linux: ubuntu
             arch: arm64
             package_arch: arm64
@@ -250,11 +248,9 @@ jobs:
           - linux: el
             arch: arm64
             package_arch: aarch64
-            version: 8
-          - linux: el
+          - linux: el9
             arch: arm64
             package_arch: aarch64
-            version: 9
     uses: ./.github/workflows/push-packagecloud.yml
     with:
       SEPARATOR: ${{ matrix.separator }}

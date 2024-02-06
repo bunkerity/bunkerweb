@@ -199,7 +199,7 @@ jobs:
     needs: [staging-tests, tests-ui-linux, tests-core-linux]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el]
+        linux: [ubuntu, debian, fedora, el, el9]
         arch: [amd64]
         include:
           - release: testing
@@ -228,7 +228,7 @@ jobs:
             suffix: "1."
             version: 8
             package: rpm
-          - linux: el
+          - linux: el9
             package_arch: x86_64
             separator: "-"
             suffix: "1."
