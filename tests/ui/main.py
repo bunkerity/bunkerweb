@@ -222,17 +222,18 @@ with driver_func() as driver:
         while current_time + timedelta(minutes=5) > datetime.now() and not driver.current_url.endswith("/login"):
             sleep(1)
 
-        sleep(10)
-
-        for _ in range(5):
-            get("http://127.0.0.1/?id=/etc/passwd")
-            sleep(0.5)
-
         ### LOGIN PAGE
 
         if not driver.current_url.endswith("/login"):
             print("Didn't get redirected to login page, exiting ...", flush=True)
             exit(1)
+
+        sleep(10)
+
+        for _ in range(5):
+            with suppress(RequestException):
+                get("http://127.0.0.1/?id=/etc/passwd")
+                sleep(0.5)
 
         print("Redirected to login page, waiting for login form ...", flush=True)
 
@@ -888,7 +889,11 @@ with driver_func() as driver:
                 )
                 sleep(5)
 
-        print("The service is working, trying to delete it ...", flush=True)
+        print("The service is working, trying to set it as draft ...", flush=True)
+
+        # TODO
+
+        print("Trying to delete the service ...", flush=True)
 
         try:
             delete_button = safe_get_element(
