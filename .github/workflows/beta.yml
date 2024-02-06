@@ -94,7 +94,7 @@ jobs:
     needs: [create-arm]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel, rockylinux]
+        linux: [ubuntu, debian, fedora, rhel, rhel9]
         platforms: [linux/amd64, linux/arm64]
         include:
           - release: beta
@@ -106,7 +106,7 @@ jobs:
             package: rpm
           - linux: rhel
             package: rpm
-          - linux: rockylinux
+          - linux: rhel9
             package: rpm
     uses: ./.github/workflows/linux-build.yml
     with:
@@ -179,7 +179,7 @@ jobs:
     needs: [wait-builds]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel, rockylinux]
+        linux: [ubuntu, debian, fedora, el]
         arch: [amd64, arm64]
         include:
           - release: beta
@@ -204,10 +204,10 @@ jobs:
             suffix: "1."
             version: 8
             package: rpm
-          - linux: rockylinux
+          - linux: el
             separator: "-"
             suffix: "1."
-            version: 9.3
+            version: 9
             package: rpm
           - linux: ubuntu
             arch: amd64
@@ -221,9 +221,11 @@ jobs:
           - linux: el
             arch: amd64
             package_arch: x86_64
-          - linux: rockylinux
+            version: 8
+          - linux: el
             arch: amd64
             package_arch: x86_64
+            version: 9
           - linux: ubuntu
             arch: arm64
             package_arch: arm64
@@ -236,9 +238,11 @@ jobs:
           - linux: el
             arch: arm64
             package_arch: aarch64
-          - linux: rockylinux
+            version: 8
+          - linux: el
             arch: arm64
             package_arch: aarch64
+            version: 9
     uses: ./.github/workflows/push-packagecloud.yml
     with:
       SEPARATOR: ${{ matrix.separator }}

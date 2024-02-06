@@ -309,7 +309,7 @@ In case you lost your UI credentials or have 2FA issues, you can connect to the 
         sudo apt install sqlite3
         ```
 
-        Install SQLite (Fedora/RedHat/Rocky Linux) :
+        Install SQLite (Fedora/RedHat) :
 
         ```shell
         sudo dnf install sqlite

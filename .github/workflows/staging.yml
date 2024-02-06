@@ -43,7 +43,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, rhel, rockylinux]
+        linux: [ubuntu, debian, fedora, rhel, rhel9]
         include:
           - linux: ubuntu
             package: deb
@@ -53,7 +53,7 @@ jobs:
             package: rpm
           - linux: rhel
             package: rpm
-          - linux: rockylinux
+          - linux: rhel9
             package: rpm
     uses: ./.github/workflows/linux-build.yml
     with:
@@ -199,7 +199,7 @@ jobs:
     needs: [staging-tests, tests-ui-linux, tests-core-linux]
     strategy:
       matrix:
-        linux: [ubuntu, debian, fedora, el, rockylinux]
+        linux: [ubuntu, debian, fedora, el]
         arch: [amd64]
         include:
           - release: testing
@@ -228,11 +228,11 @@ jobs:
             suffix: "1."
             version: 8
             package: rpm
-          - linux: rockylinux
+          - linux: el
             package_arch: x86_64
             separator: "-"
             suffix: "1."
-            version: 9.3
+            version: 9
             package: rpm
     uses: ./.github/workflows/push-packagecloud.yml
     with:

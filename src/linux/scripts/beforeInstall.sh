@@ -29,7 +29,7 @@ if [ -f /etc/os-release ]; then
             echo "ℹ️ Copy /var/tmp/ui.env to /etc/bunkerweb/ui.env"
             do_and_check_cmd cp -f /var/tmp/ui.env /etc/bunkerweb/ui.env
         fi
-    elif [[ "$OS" == "Red Hat Enterprise Linux" || "$OS" == "Fedora" || "$OS" == "Rocky Linux" ]]; then
+    elif [[ "$OS" == "Red Hat Enterprise Linux" || "$OS" == "Fedora" ]]; then
         # Get the version of the package
         VERSION=$(rpm -q --queryformat '%{VERSION}' bunkerweb)
         if [ "$(printf '%s\n' "$VERSION" "$(echo '1.5.6' | tr -d ' ')" | sort -V | head -n 1)" = "$VERSION" ] && [ -f /var/tmp/variables.env ] && [ -f /var/tmp/ui.env ]; then

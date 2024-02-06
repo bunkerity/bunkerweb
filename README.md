@@ -259,7 +259,7 @@ List of supported Linux distros :
 - Ubuntu 22.04 "Jammy"
 - Fedora 39
 - RHEL 8.9
-- Rocky Linux 9.3
+- RHEL 9.3
 
 Repositories of Linux packages for BunkerWeb are available on [PackageCloud](https://packagecloud.io/bunkerity/bunkerweb), they provide a bash script to automatically add and trust the repository (but you can also follow the [manual installation](https://packagecloud.io/bunkerity/bunkerweb/install) instructions if you prefer).
 
@@ -277,7 +277,7 @@ List of supported Linux distros :
 - Ubuntu 22.04 "Jammy"
 - Fedora 39
 - RHEL 8.9
-- Rocky Linux 9.3
+- RHEL 9.3
 
 [Ansible](https://www.ansible.com/) is an IT automation tool. It can configure systems, deploy software, and orchestrate more advanced IT tasks such as continuous deployments or zero downtime rolling updates.
 

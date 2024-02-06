@@ -34,8 +34,8 @@ function buildPackage() {
     if [ "$DISTRO" = "rhel" ]; then
       sudo docker build -t linux-rhel -f src/linux/Dockerfile-rhel .
     fi
-    if [ "$DISTRO" = "rockylinux" ]; then
-      sudo docker build -t linux-rockylinux -f src/linux/Dockerfile-rockylinux .
+    if [ "$DISTRO" = "rhel9" ]; then
+      sudo docker build -t linux-rhel9 -f src/linux/Dockerfile-rhel9 .
     fi
   fi
 }
@@ -59,8 +59,8 @@ function createContainer() {
     if [ "$DISTRO" = "rhel" ]; then
       sudo docker run -v /tmp/rhel:/data linux-rhel
     fi
-    if [ "$DISTRO" = "rockylinux" ]; then
-      sudo docker run -v /tmp/rockylinux:/data linux-rockylinux
+    if [ "$DISTRO" = "rhel9" ]; then
+      sudo docker run -v /tmp/rhel9:/data linux-rhel9
     fi
   fi
 }
@@ -68,7 +68,7 @@ function createContainer() {
 # Retrieve $DISTRO from the user
 
 function retrieveDistro() {
-  echo "Which distro do you want to use? (ubuntu, debian, centos, fedora, rhel, rockylinux)"
+  echo "Which distro do you want to use? (ubuntu, debian, centos, fedora, rhel, rhel9)"
   read -r DISTRO
 }
 

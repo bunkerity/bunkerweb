@@ -84,9 +84,9 @@ jobs:
       - name: Pull BW linux rhel test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/rhel-tests:testing && docker tag ghcr.io/bunkerity/rhel-tests:testing local/rhel:latest
-      - name: Pull BW linux rockylinux test image
-        if: inputs.TYPE == 'linux'
-        run: docker pull ghcr.io/bunkerity/rockylinux-tests:testing && docker tag ghcr.io/bunkerity/rockylinux-tests:testing local/rockylinux:latest
+      - name: Pull BW linux rhel9 test image
+        if: inputs.TYPE == 'rhel9'
+        run: docker pull ghcr.io/bunkerity/rhel9-tests:testing && docker tag ghcr.io/bunkerity/rhel9-tests:testing local/rhel9:latest
       # Do tests
       - name: Run tests
         if: inputs.TYPE == 'docker'
@@ -139,9 +139,9 @@ jobs:
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
-      - name: Run Linux rockylinux tests
+      - name: Run Linux rhel9 tests
         if: inputs.TYPE == 'linux'
-        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "rockylinux"
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "rhel9"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}

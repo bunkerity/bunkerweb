@@ -1,14 +1,26 @@
-FROM rockylinux:9.3@sha256:c944604c0c759f5d164ffbdf0bbab2fac582b739938937403c067ab634a0518a
+FROM redhat/ubi9:9.3@sha256:1fafb0905264413501df60d90a92ca32df8a2011cbfb4876ddff5ceb20c8f165
 
-ENV OS=rockylinux
+ENV OS=rhel
 ENV NGINX_VERSION 1.24.0
 
+# Copy centos repo
+COPY src/linux/centos-9.repo /etc/yum.repos.d/centos.repo
+RUN sed -i "s/%ARCH%/$(uname -m)/g" /etc/yum.repos.d/centos.repo
+
+# Copy RPM-GPG-KEY-CentOS-Official
+COPY src/linux/RPM-GPG-KEY-centosofficial /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
+# Import RPM-GPG-KEY-CentOS-Official
+RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
 # Install Nginx, fpm and dependencies
-RUN dnf install -y epel-release ruby ruby-devel make gcc redhat-rpm-config rpm-build wget \
+RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build wget \
   yum-utils && \
+  wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+  rpm -Uvh epel-release*rpm && \
   dnf module -y reset ruby && dnf module -y enable ruby:3.1 && dnf module -y install ruby:3.1/common && \
   gem install fpm && \
-  dnf install -y --skip-broken --setopt=install_weak_deps=False readline-devel python39 python39-devel python39-setuptools brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel && \
+  dnf install -y --skip-broken --setopt=install_weak_deps=False readline-devel python39 brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl libxslt bash gd gd-devel gcc-c++ znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel libmaxminddb && \
   wget https://nginx.org/packages/rhel/9/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm && \
   dnf install nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm -y && \
   rm -rf nginx-${NGINX_VERSION}-1.el9.ngx.$(uname -m).rpm
@@ -88,7 +100,7 @@ RUN cp helpers/bwcli /usr/bin/ && \
 COPY src/linux/scripts scripts
 COPY src/linux/fpm.sh /usr/share/fpm.sh
 RUN chmod +x scripts/*.sh /usr/share/fpm.sh
-COPY src/linux/fpm-rockylinux /usr/share/.fpm
+COPY src/linux/fpm-rhel9 /usr/share/.fpm
 COPY src/linux/*.service /lib/systemd/system/
 
 # Generate RPM at startup
