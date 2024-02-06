@@ -49,19 +49,14 @@ jobs:
         run: gem install package_cloud
       # Download packages
       - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
-        if: inputs.LINUX != 'el'
+        if: inputs.LINUX != 'el' && inputs.LINUX != 'el9'
         with:
-          name: package-rhel-${{ inputs.PACKAGE_ARCH }}
+          name: package-${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
           path: /tmp/${{ inputs.LINUX }}
       - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
-        if: inputs.LINUX == 'el'
+        if: inputs.LINUX == 'el' || inputs.LINUX == 'el9'
         with:
-          name: package-rhel-${{ inputs.PACKAGE_ARCH }}
-          path: /tmp/${{ inputs.LINUX }}
-      - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
-        if: inputs.LINUX == 'el9'
-        with:
-          name: package-rhel9-${{ inputs.PACKAGE_ARCH }}
+          name: package-rh${{ inputs.LINUX }}-${{ inputs.PACKAGE_ARCH }}
           path: /tmp/${{ inputs.LINUX }}
       # Remove existing packages
       - name: Remove existing package
