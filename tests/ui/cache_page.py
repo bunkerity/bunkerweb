@@ -20,7 +20,7 @@ try:
     file_content_elem = safe_get_element(DRIVER, By.XPATH, "//div[@data-cache-modal-editor='']/div[@class='ace_scroller']//div[@class='ace_line']")
     assert isinstance(file_content_elem, WebElement), "The file content element is not an instance of WebElement"
     if file_content_elem.text.strip() != "Download file to view content":
-        print("The cache file content is not correct, exiting ...", flush=True)
+        log_exception("The cache file content is not correct, exiting ...")
         exit(1)
 
     assert_button_click(DRIVER, "//button[@data-cache-modal-submit='']")

@@ -43,10 +43,10 @@ try:
 
     with suppress(TimeoutException):
         safe_get_element(DRIVER, By.XPATH, "//ul[@data-reports-list='']/li[not(contains(@class, 'hidden'))]", error=True)
-        print("The keyword filter is not working, exiting ...", flush=True)
+        log_error("The keyword filter is not working, exiting ...")
         exit(1)
 
-    print("The reports have been filtered", flush=True)
+    log_info("The reports have been filtered")
 
     log_info("✅ Reports page tests finished successfully")
 except SystemExit as e:

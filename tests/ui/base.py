@@ -1,6 +1,6 @@
 from contextlib import suppress
 from functools import partial
-from logging import DEBUG, INFO, _nameToLevel, basicConfig, info
+from logging import DEBUG, INFO, _nameToLevel, basicConfig, error as log_error, info as log_info, warning as log_warning
 from os import getenv, listdir, sep
 from pathlib import Path
 from time import sleep
@@ -35,17 +35,17 @@ while not ready:
         status_code = get(f"http://{DEFAULT_SERVER}/setup").status_code
 
         if status_code > 500 and status_code != 502:
-            print("An error occurred with the server, exiting ...", flush=True)
+            log_error("An error occurred with the server, exiting ...")
             exit(1)
 
         ready = status_code < 400
 
     if retries > 20:
-        print("UI took too long to be ready, exiting ...", flush=True)
+        log_error("UI took too long to be ready, exiting ...")
         exit(1)
     elif not ready:
         retries += 1
-        print("Waiting for UI to be ready, retrying in 5s ...", flush=True)
+        log_warning("Waiting for UI to be ready, retrying in 5s ...")
         sleep(5)
 
 driver_func = partial(webdriver.Firefox, service=Service(log_output="./geckodriver.log"), options=FIREFOX_OPTIONS)
@@ -58,6 +58,6 @@ if TEST_TYPE == "dev":
 
 DRIVER = driver_func()
 
-info("UI is ready, starting tests ...")
+log_info("UI is ready, starting tests ...")
 
 __all__ = ("DEFAULT_SERVER", "TEST_TYPE", "DRIVER")
