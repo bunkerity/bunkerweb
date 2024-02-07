@@ -118,7 +118,8 @@ jobs:
         test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
     uses: ./.github/workflows/tests-ui.yml
     with:
-      RELEASE: dev
+      TEST: ${{ matrix.test }}
+      RELEASE: testing
   tests-ui-linux:
     needs: [prepare-tests-ui, build-packages]
     strategy:
@@ -127,7 +128,8 @@ jobs:
         test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
     uses: ./.github/workflows/tests-ui-linux.yml
     with:
-      RELEASE: dev
+      TEST: ${{ matrix.test }}
+      RELEASE: testing
 
   staging-tests:
     needs: [create-infras]
