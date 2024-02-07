@@ -64,6 +64,12 @@ jobs:
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      - name: Remove existing package
+        if: inputs.LINUX == 'el9'
+        run: package_cloud yank bunkerity/${{ inputs.REPO }}/el/9 bunkerweb${{ inputs.SEPARATOR }}${{ inputs.BW_VERSION }}${{ inputs.SEPARATOR }}${{ inputs.SUFFIX }}${{ inputs.PACKAGE_ARCH }}.${{ inputs.PACKAGE }}
+        continue-on-error: true
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
       # Update name
       # - name: Rename package
       #   if: inputs.BW_VERSION == 'testing'
