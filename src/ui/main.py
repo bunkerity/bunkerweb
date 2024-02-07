@@ -213,7 +213,7 @@ LOG_RX = re_compile(r"^(?P<date>\d+/\d+/\d+\s\d+:\d+:\d+)\s\[(?P<level>[a-z]+)\]
 REVERSE_PROXY_PATH = re_compile(r"^(?P<host>https?://.{1,255}(:((6553[0-5])|(655[0-2]\d)|(65[0-4]\d{2})|(6[0-4]\d{3})|([1-5]\d{4})|([0-5]{0,5})|(\d{1,4})))?)$")
 
 
-def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False):
+def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: bool = False, was_draft: bool = False):
     # Do the operation
     error = False
     if method == "services":
@@ -229,20 +229,20 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
                     if listdir(service_custom_conf):
                         move(service_custom_conf, service_custom_conf.replace(f"{sep}{args[1].split(' ')[0]}", f"{sep}{args[2].split(' ')[0]}"))
                         moved = True
-            operation, error = app.config["CONFIG"].edit_service(args[1], args[0], check_changes=not is_draft and not moved, is_draft=is_draft)
+            operation, error = app.config["CONFIG"].edit_service(args[1], args[0], check_changes=(was_draft != is_draft or not is_draft) and not moved, is_draft=is_draft)
         elif operation == "delete":
             for service_custom_conf in glob(join(sep, "etc", "bunkerweb", "configs", "*", args[2].split(" ")[0])):
                 if listdir(service_custom_conf):
                     rmtree(service_custom_conf, ignore_errors=True)
                     deleted = True
-            operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=not is_draft and not deleted)
+            operation, error = app.config["CONFIG"].delete_service(args[2], check_changes=(was_draft != is_draft or not is_draft) and not deleted)
 
         if error:
             app.config["TO_FLASH"].append({"content": operation, "type": "error"})
         else:
             app.config["TO_FLASH"].append({"content": operation, "type": "success"})
 
-            if not is_draft and (moved or deleted):
+            if (was_draft != is_draft or not is_draft) and (moved or deleted):
                 changes = ["config", "custom_configs"]
                 error = app.config["CONFIGFILES"].save_configs(check_changes=False)
                 if error:
@@ -710,13 +710,15 @@ def services():
         if "SERVER_NAME" not in variables:
             variables["SERVER_NAME"] = variables["OLD_SERVER_NAME"]
 
+        config = app.config["CONFIG"].get_config(methods=False, with_drafts=True)
+        server_name = variables["SERVER_NAME"].split(" ")[0]
+        was_draft = config.get(f"{server_name}_IS_DRAFT", "no") == "yes"
+
         if request.form["operation"] in ("new", "edit"):
             del variables["operation"]
             del variables["OLD_SERVER_NAME"]
 
             # Edit check fields and remove already existing ones
-            config = app.config["CONFIG"].get_config(methods=False, with_drafts=True)
-            server_name = variables["SERVER_NAME"].split(" ")[0]
             for variable, value in deepcopy(variables).items():
                 if variable.endswith("SCHEMA"):
                     del variables[variable]
@@ -730,7 +732,7 @@ def services():
                 if variable in variables and variable != "SERVER_NAME" and value == config.get(f"{server_name}_{variable}" if request.form["operation"] == "edit" else variable, None):
                     del variables[variable]
 
-            if (config.get(f"{server_name}_IS_DRAFT", "no") == "yes") == is_draft and request.form["operation"] == "edit" and len(variables) == 1 and "SERVER_NAME" in variables and variables["SERVER_NAME"] == request.form.get("OLD_SERVER_NAME", ""):
+            if was_draft == is_draft and request.form["operation"] == "edit" and len(variables) == 1 and "SERVER_NAME" in variables and variables["SERVER_NAME"] == request.form.get("OLD_SERVER_NAME", ""):
                 flash("The service was not edited because no values were changed.", "error")
                 return redirect(url_for("loading", next=url_for("services")))
             elif request.form["operation"] == "new" and not variables:
@@ -762,7 +764,7 @@ def services():
             target=manage_bunkerweb,
             name="Reloading instances",
             args=("services", variables, request.form.get("OLD_SERVER_NAME", ""), variables.get("SERVER_NAME", "")),
-            kwargs={"operation": request.form["operation"], "is_draft": is_draft},
+            kwargs={"operation": request.form["operation"], "is_draft": is_draft, "was_draft": was_draft},
         ).start()
 
         message = ""
@@ -772,7 +774,7 @@ def services():
         elif request.form["operation"] == "edit":
             message = f"Saving configuration for {'draft ' if is_draft else ''}service {request.form.get('OLD_SERVER_NAME', '').split(' ')[0]}"
         elif request.form["operation"] == "delete":
-            message = f"Deleting {'draft ' if is_draft else ''}service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
+            message = f"Deleting {'draft ' if was_draft and is_draft else ''}service {request.form.get('SERVER_NAME', '').split(' ')[0]}"
 
         return redirect(url_for("loading", next=url_for("services"), message=message))
 
