@@ -36,7 +36,12 @@ RUN echo '{ \
 RUN apk del .build-deps && \
   rm -rf /var/cache/apk/*
 
-COPY main.py .
+ARG TEST_FILE=main.py
+
+COPY base.py .
+COPY wizard.py .
+COPY utils.py .
+COPY $TEST_FILE main.py
 
 ENV PYTHONUNBUFFERED=1
 

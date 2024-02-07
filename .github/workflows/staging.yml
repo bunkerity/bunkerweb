@@ -97,18 +97,38 @@ jobs:
           echo "tests=$tests" >> $GITHUB_OUTPUT
     outputs:
       tests: ${{ steps.set-matrix.outputs.tests }}
+  prepare-tests-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - id: set-matrix
+        run: |
+          tests=$(find ./tests/ui/ -name "*_page.py" -type f -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
+          echo "tests=$tests" >> $GITHUB_OUTPUT
+    outputs:
+      tests: ${{ steps.set-matrix.outputs.tests }}
 
   # Perform tests
   tests-ui:
-    needs: [codeql, build-containers]
+    needs: [prepare-tests-ui, build-containers]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
     uses: ./.github/workflows/tests-ui.yml
     with:
-      RELEASE: testing
+      RELEASE: dev
   tests-ui-linux:
-    needs: [codeql, build-packages]
+    needs: [prepare-tests-ui, build-packages]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
     uses: ./.github/workflows/tests-ui-linux.yml
     with:
-      RELEASE: testing
+      RELEASE: dev
+
   staging-tests:
     needs: [create-infras]
     strategy:
@@ -130,6 +150,7 @@ jobs:
       TYPE: ${{ matrix.type }}
       RUNS_ON: ${{ matrix.runs_on }}
     secrets: inherit
+
   tests-core:
     needs: [build-containers, prepare-tests-core]
     strategy:

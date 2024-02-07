@@ -1,16 +1,22 @@
 #!/bin/bash
 
 integration=$1
+test=$2
 
 if [ -z "$integration" ] ; then
     echo "Please provide an integration name as argument ❌"
+    exit 1
+elif [ -z "$test" ] ; then
+    echo "Please provide a test name as argument ❌"
     exit 1
 elif [ "$integration" != "docker" ] && [ "$integration" != "linux" ] ; then
     echo "Integration \"$integration\" is not supported ❌"
     exit 1
 fi
 
-echo "🌐 Building UI stack for integration \"$integration\" ..."
+test=$(basename "$test")
+
+echo "🌐 Building UI stack for integration \"$integration\", test: $test ..."
 
 cleanup_stack () {
     echo "🌐 Cleaning up current stack ..."
@@ -141,6 +147,7 @@ fi
 
 # Start tests
 if [ "$integration" == "docker" ] ; then
+    echo "TEST_FILE=$test" > .env
     docker-compose -f docker-compose.test.yml build
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] ; then
@@ -149,8 +156,9 @@ if [ "$integration" == "docker" ] ; then
     fi
 
     docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from ui-tests
+    rm -f .env
 else
-    python3 main.py
+    python3 "$test"
 fi
 
 # shellcheck disable=SC2181

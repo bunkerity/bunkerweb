@@ -74,13 +74,32 @@ jobs:
       security-events: write
 
   # UI tests
+  prepare-tests-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - id: set-matrix
+        run: |
+          tests=$(find ./tests/ui/ -name "*_page.py" -type f -printf "%f\n" | jq -c --raw-input --slurp 'split("\n")| .[0:-1]')
+          echo "tests=$tests" >> $GITHUB_OUTPUT
+    outputs:
+      tests: ${{ steps.set-matrix.outputs.tests }}
   tests-ui:
-    needs: [build-containers]
+    needs: [prepare-tests-ui, build-containers]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
     uses: ./.github/workflows/tests-ui.yml
     with:
       RELEASE: dev
   tests-ui-linux:
-    needs: [build-packages]
+    needs: [prepare-tests-ui, build-packages]
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.prepare-tests-core.outputs.tests) }}
     uses: ./.github/workflows/tests-ui-linux.yml
     with:
       RELEASE: dev
