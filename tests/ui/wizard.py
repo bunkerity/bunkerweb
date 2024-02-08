@@ -11,6 +11,9 @@ from selenium.common.exceptions import TimeoutException
 from base import DEFAULT_SERVER, DRIVER
 from utils import access_page, assert_button_click, safe_get_element
 
+UI_USERNAME = "admin"
+UI_PASSWORD = "S$cr3tP@ssw0rd"
+
 UI_URL = ""
 exit_code = None
 
@@ -39,15 +42,15 @@ try:
 
     admin_username_input = safe_get_element(DRIVER, By.ID, "admin_username")
     assert isinstance(admin_username_input, WebElement), "Admin username input is not a WebElement"
-    admin_username_input.send_keys("admin")
+    admin_username_input.send_keys(UI_USERNAME)
 
     password_input = safe_get_element(DRIVER, By.ID, "admin_password")
     assert isinstance(password_input, WebElement), "Password input is not a WebElement"
-    password_input.send_keys("S$cr3tP@ssw0rd")
+    password_input.send_keys(UI_PASSWORD)
 
     password_check_input = safe_get_element(DRIVER, By.ID, "admin_password_check")
     assert isinstance(password_check_input, WebElement), "Password check input is not a WebElement"
-    password_check_input.send_keys("S$cr3tP@ssw0rd")
+    password_check_input.send_keys(UI_PASSWORD)
 
     ui_url_elem = safe_get_element(DRIVER, By.ID, "ui_url")
     assert isinstance(ui_url_elem, WebElement), "UI URL input is not a WebElement"
@@ -117,11 +120,11 @@ try:
 
     username_input = safe_get_element(DRIVER, By.ID, "username")
     assert isinstance(username_input, WebElement), "Username input is not a WebElement"
-    username_input.send_keys("admin")
+    username_input.send_keys(UI_USERNAME)
 
     password_input = safe_get_element(DRIVER, By.ID, "password")
     assert isinstance(password_input, WebElement), "Password input is not a WebElement"
-    password_input.send_keys("S$cr3tP@ssw0rd")
+    password_input.send_keys(UI_PASSWORD)
 
     access_page(DRIVER, "//button[@value='login']", "home")
 except SystemExit as e:
