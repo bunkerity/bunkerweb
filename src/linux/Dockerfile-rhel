@@ -18,7 +18,7 @@ RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build wget \
   yum-utils && \
   wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
   rpm -Uvh epel-release*rpm && \
-  dnf module -y reset ruby && dnf module -y enable ruby:2.6 && dnf module -y install ruby:2.6/common && \
+  dnf module -y reset ruby && dnf module -y enable ruby:3.1 && dnf module -y install ruby:3.1/common && \
   gem install fpm && \
   dnf install -y --skip-broken --setopt=install_weak_deps=False readline-devel python39 python39-devel python39-setuptools brotli brotli-devel gperftools-devel perl libxslt-devel libxml2 yajl yajl-devel libxslt bash gd gd-devel gcc-c++ curl znc-modtcl gawk libtool pcre-devel automake autoconf gcc make openssl-devel git zlib-devel libxml2-devel pkgconf libcurl-devel geoip-devel && \
   wget https://nginx.org/packages/rhel/8/$(uname -m)/RPMS/nginx-${NGINX_VERSION}-1.el8.ngx.$(uname -m).rpm && \

@@ -1,4 +1,4 @@
-FROM python:3.12.2-alpine3.18@sha256:c9b14533a6a0016a4d2def5099bc420507f5a5cbcd783bf1ea0977eeeacd1339 as builder
+FROM python:3.12.2-alpine3.19@sha256:1a0501213b470de000d8432b3caab9d8de5489e9443c2cc7ccaa6b0aa5c3148e as builder
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
@@ -34,7 +34,7 @@ COPY src/common/helpers helpers
 COPY src/common/settings.json settings.json
 COPY src/common/utils utils
 
-FROM python:3.12.2-alpine3.18@sha256:c9b14533a6a0016a4d2def5099bc420507f5a5cbcd783bf1ea0977eeeacd1339
+FROM python:3.12.2-alpine3.19@sha256:1a0501213b470de000d8432b3caab9d8de5489e9443c2cc7ccaa6b0aa5c3148e
 
 # Set default umask to prevent huge recursive chmod increasing the final image size
 RUN umask 027
@@ -64,7 +64,7 @@ RUN apk add --no-cache bash && \
   chmod 750 cli/main.py helpers/*.sh /usr/bin/bwcli autoconf/main.py deps/python/bin/*
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.1.4-r5" "libssl3>=3.1.4-r5" "sqlite-libs>=3.41.2-r3" "libexpat>=2.6.0-r0"
+RUN apk add --no-cache "libexpat>=2.6.0-r0"
 
 VOLUME /data /etc/nginx
 
