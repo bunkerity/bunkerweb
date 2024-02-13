@@ -276,7 +276,7 @@ plugin /
         plugin.json
 ```
 
-- **conf_type.conf** : add a [custom NGINX configurations.](/quickstart-guide/#custom-configurations)
+- **conf_type.conf** : add a [custom NGINX configurations.](quickstart-guide.md#custom-configurations)
 
 - **actions.py** : script to execute on flask server.
 This script is running on flask context, you have access to lib and utils like `jinja2`, `requests`, etc...
