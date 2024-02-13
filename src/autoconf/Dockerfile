@@ -1,4 +1,4 @@
-FROM python:3.12.2-alpine3.18@sha256:c9b14533a6a0016a4d2def5099bc420507f5a5cbcd783bf1ea0977eeeacd1339
+FROM python:3.12.2-alpine3.18@sha256:c9b14533a6a0016a4d2def5099bc420507f5a5cbcd783bf1ea0977eeeacd1339 as builder
 
 # Copy python requirements
 COPY src/deps/requirements.txt /tmp/requirements-deps.txt
