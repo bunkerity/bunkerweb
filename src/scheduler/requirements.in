@@ -1,4 +1,4 @@
-certbot==2.8.0
+certbot==2.9.0
 configobj==5.0.8
 cryptography==42.0.2
 maxminddb==2.5.2
