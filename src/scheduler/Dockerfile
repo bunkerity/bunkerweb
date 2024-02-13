@@ -77,7 +77,7 @@ COPY --chown=root:scheduler src/bw/misc/country.mmdb /var/tmp/bunkerweb/country.
 RUN chmod 770 /var/tmp/bunkerweb/asn.mmdb /var/tmp/bunkerweb/country.mmdb
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.1.4-r5" "libssl3>=3.1.4-r5" "sqlite-libs>=3.41.2-r3" "libexpat>=2.6.0-r0"
+RUN apk add --no-cache "libexpat>=2.6.0-r0"
 
 VOLUME /data /etc/nginx
 
