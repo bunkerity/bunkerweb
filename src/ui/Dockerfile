@@ -70,7 +70,7 @@ RUN apk add --no-cache bash && \
   ln -s /proc/1/fd/2 /var/log/bunkerweb/ui.log
 
 # Fix CVEs
-RUN apk add --no-cache "libcrypto3>=3.1.4-r5" "libssl3>=3.1.4-r5" "sqlite-libs>=3.41.2-r3"
+RUN apk add --no-cache "libcrypto3>=3.1.4-r5" "libssl3>=3.1.4-r5" "sqlite-libs>=3.41.2-r3" "libexpat>=2.6.0-r0"
 
 VOLUME /data /etc/nginx
 
