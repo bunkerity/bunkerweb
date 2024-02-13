@@ -4,6 +4,7 @@
 
 - [LINUX] Support RHEL 9.3
 - [BUGFIX] Fix issues with the antibot feature ([#866](https://github.com/bunkerity/bunkerweb/issues/866), [#870](https://github.com/bunkerity/bunkerweb/issues/870))
+- [BUGFIX] Fix Bad behavior whitelist check in access phase
 - [UI] Add bans management page in the web UI
 - [UI] Add blocked requests page in the web UI
 - [UI] Add the possibility to clone a service in the web UI
@@ -13,6 +14,7 @@
 - [FEATURE] Add Redis Sentinel support for bwcli
 - [FEATURE] Add new Metrics core plugin that will allow metrics collection and retrieval of internal metrics
 - [FEATURE] Add setting DATABASE_LOG_LEVEL to control SQLAlchemy loggers separately from the main one
+- [FEATURE] Add whitelist check for the default-server as well
 - [MISC] Add a better custom certificate cache handling
 - [MISC] Updated Linux base images in Dockerfiles
 - [MISC] Add recommended dialects to databases string

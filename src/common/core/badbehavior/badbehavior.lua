@@ -21,7 +21,7 @@ end
 
 function badbehavior:log()
 	-- Check if we are whitelisted
-	if is_whitelisted(self.ctx) == "yes" then
+	if is_whitelisted(self.ctx) then
 		return self:ret(true, "client is whitelisted")
 	end
 	-- Check if bad behavior is activated
