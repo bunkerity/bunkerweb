@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from operator import itemgetter
 from os import sep
 from os.path import join
 from pathlib import Path
@@ -119,6 +120,12 @@ class Instance:
 
     def metrics(self, plugin_id) -> Tuple[bool, dict[str, Any]]:
         return self.apiCaller.send_to_apis("GET", f"/metrics/{plugin_id}", response=True)
+
+    def metrics_redis(self) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("GET", "/redis/stats", response=True)
+
+    def ping(self, plugin_id) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("POST", f"/{plugin_id}/ping", response=True)
 
 
 class Instances:
@@ -324,7 +331,7 @@ class Instances:
                 continue
             bans.extend(instance_bans[instance.name if instance.name != "local" else "127.0.0.1"].get("data", []))
 
-        bans.sort(key=lambda x: x["exp"])
+        bans.sort(key=itemgetter("exp"))
 
         unique_bans = {}
 
@@ -354,7 +361,7 @@ class Instances:
             resp, instance_reports = instance.reports()
             if not resp:
                 return []
-            return instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", {"requests": []})["requests"]
+            return (instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg") or {"requests": []})["requests"]
 
         reports: List[dict[str, Any]] = []
         for instance in self.get_instances():
@@ -365,9 +372,9 @@ class Instances:
 
             if not resp:
                 continue
-            reports.extend(instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg", {"requests": []})["requests"])
+            reports.extend((instance_reports[instance.name if instance.name != "local" else "127.0.0.1"].get("msg") or {"requests": []})["requests"])
 
-        reports.sort(key=lambda x: x["date"], reverse=True)
+        reports.sort(key=itemgetter("date"), reverse=True)
 
         return reports
 
@@ -376,7 +383,10 @@ class Instances:
         metrics = {}
         for instance in self.get_instances():
             try:
-                resp, instance_metrics = instance.metrics(plugin_id)
+                if plugin_id == "redis":
+                    resp, instance_metrics = instance.metrics_redis()
+                else:
+                    resp, instance_metrics = instance.metrics(plugin_id)
             except:
                 continue
 
@@ -393,6 +403,11 @@ class Instances:
             for key, value in metric_data.items():
                 if key not in metrics:
                     metrics[key] = value
+                    continue
+
+                # Some value are the same for all instances, we don't need to update them
+                # Example redis_nb_keys count
+                if key in ["redis_nb_keys"]:
                     continue
 
                 # Case value is number, add it to the existing value
@@ -423,3 +438,24 @@ class Instances:
                             metrics[key][k] = v
                             continue
         return metrics
+
+    def get_ping(self, plugin_id: str):
+        # Need at least one instance to get a success ping to return success
+        ping = {"status": "error"}
+        for instance in self.get_instances():
+            try:
+                resp, ping_data = instance.ping(plugin_id)
+            except:
+                continue
+
+            if not resp:
+                continue
+
+            if instance.name not in ping_data or ping_data[instance.name]["msg"] is None:
+                continue
+
+            if ping_data[instance.name]["status"] == "success":
+                ping["status"] = "success"
+                break
+
+        return ping

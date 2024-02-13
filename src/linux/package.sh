@@ -38,7 +38,7 @@ if [ -f "src/VERSION" ] ; then
 	version="$(tr -d '\n' < src/VERSION)"
 fi
 type="deb"
-if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] || [ "$linux" = "rhel" ] ; then
+if [ "$linux" = "fedora" ] || [ "$linux" = "centos" ] || [[ "$linux" = rhel* ]] ; then
 	type="rpm"
 fi
 do_and_check_cmd docker run --rm -v "${package_dir}:/data" "local/bunkerweb-${linux}:latest" "$type"

@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from json import dumps, loads
+from operator import itemgetter
 from time import time
 from dotenv import dotenv_values
 from os import getenv, sep
@@ -249,7 +250,7 @@ class CLI(ApiCaller):
                 exp = self.__redis.ttl(key)
                 servers["redis"].append({"ip": ip, "exp": exp} | loads(data))
 
-        servers = {k: sorted(v, key=lambda x: x["date"]) for k, v in servers.items()}
+        servers = {k: sorted(v, key=itemgetter("date")) for k, v in servers.items()}
 
         cli_str = ""
         for server, bans in servers.items():

@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - TEST_FILE=${TEST_FILE}
     environment:
       - PYTHONUNBUFFERED=1
     extra_hosts:

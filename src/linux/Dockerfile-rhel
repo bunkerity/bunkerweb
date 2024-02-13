@@ -12,7 +12,6 @@ COPY src/linux/RPM-GPG-KEY-centosofficial /etc/pki/rpm-gpg/RPM-GPG-KEY-centosoff
 
 # Import RPM-GPG-KEY-CentOS-Official
 RUN rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
-COPY src/linux/nginx.repo /etc/yum.repos.d/nginx.repo
 
 # Install Nginx, fpm and dependencies
 RUN dnf install -y ruby ruby-devel make gcc redhat-rpm-config rpm-build wget \

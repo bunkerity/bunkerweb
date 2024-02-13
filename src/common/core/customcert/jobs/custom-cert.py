@@ -60,7 +60,9 @@ def check_cert(cert_path: str, key_path: str, first_server: str) -> bool:
             cached, err = cache_file(cert_path, cert_cache_path, cert_hash, db, delete_file=False)
             if not cached:
                 logger.error(f"Error while caching custom-cert cert.pem file : {err}")
-
+        elif not cert_cache_path.is_file():
+            cert_cache_path.write_bytes(cert_path.read_bytes())
+            ret = True
         key_cache_path = Path(
             sep,
             "var",
@@ -78,6 +80,9 @@ def check_cert(cert_path: str, key_path: str, first_server: str) -> bool:
             cached, err = cache_file(key_path, key_cache_path, key_hash, db, delete_file=False)
             if not cached:
                 logger.error(f"Error while caching custom-cert key.pem file : {err}")
+        elif not key_cache_path.is_file():
+            key_cache_path.write_bytes(key_path.read_bytes())
+            ret = True
 
         return ret
     except:

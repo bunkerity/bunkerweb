@@ -1,21 +1,21 @@
 local cjson = require "cjson"
 local class = require "middleclass"
 local datastore = require "bunkerweb.datastore"
+local lrucache = require "resty.lrucache"
 local plugin = require "bunkerweb.plugin"
 local utils = require "bunkerweb.utils"
-local lrucache = require "resty.lrucache"
 
 local metrics = class("metrics", plugin)
+local ngx = ngx
+local ERR = ngx.ERR
 
 local lru, err_lru = lrucache.new(100000)
 if not lru then
 	require "bunkerweb.logger":new("METRICS"):log(ERR, "failed to instantiate LRU cache : " .. err_lru)
 end
 
-local ngx = ngx
 local shared = ngx.shared
 local subsystem = ngx.config.subsystem
-local ERR = ngx.ERR
 local HTTP_INTERNAL_SERVER_ERROR = ngx.HTTP_INTERNAL_SERVER_ERROR
 local HTTP_OK = ngx.HTTP_OK
 local worker = ngx.worker
@@ -94,13 +94,13 @@ function metrics:log(bypass_checks)
 	local all_metrics = self.ctx.bw.metrics
 	if all_metrics then
 		-- Loop on plugins
-		for plugin, plugin_metrics in pairs(all_metrics) do
+		for plugin_id, plugin_metrics in pairs(all_metrics) do
 			-- Loop on kinds
 			for kind, kind_metrics in pairs(plugin_metrics) do
 				-- Increment counters
 				if kind == "counters" then
 					for metric_key, metric_value in pairs(kind_metrics) do
-						local lru_key = plugin .. "_counter_" .. metric_key
+						local lru_key = plugin_id .. "_counter_" .. metric_key
 						local metric_counter = lru:get(lru_key)
 						if not metric_counter then
 							metric_counter = metric_value
@@ -148,7 +148,8 @@ function metrics:timer()
 	if not setup then
 		for _, key in ipairs(self.metrics_datastore:keys()) do
 			if key:match("_" .. wid .. "$") then
-				local value, err = self.metrics_datastore:get(key)
+				local value
+				value, err = self.metrics_datastore:get(key)
 				if not value and err ~= "not found" then
 					ret = false
 					ret_err = err
@@ -173,7 +174,8 @@ function metrics:timer()
 			value = encode(value)
 		end
 		-- Push to dict
-		local ok, err = self.metrics_datastore:set(key .. "_" .. wid, value)
+		local ok
+		ok, err = self.metrics_datastore:set(key .. "_" .. wid, value)
 		if not ok then
 			ret = false
 			ret_err = err
@@ -217,8 +219,8 @@ function metrics:api()
 				for _, metric_value in ipairs(data) do
 					table_insert(metrics_data[metric_key], metric_value)
 				end
-			-- Counter case
 			else
+				-- Counter case
 				if not metrics_data[metric_key] then
 					metrics_data[metric_key] = 0
 				end

@@ -3,6 +3,9 @@ name: Perform tests for UI (REUSABLE)
 on:
   workflow_call:
     inputs:
+      TEST:
+        required: true
+        type: string
       RELEASE:
         required: true
         type: string
@@ -29,6 +32,6 @@ jobs:
       - name: Run tests
         run: |
           cd ./tests/ui
-          ./tests.sh "docker"
+          ./tests.sh "docker" ${{ inputs.TEST }}
         env:
           MODE: ${{ inputs.RELEASE }}

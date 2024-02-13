@@ -786,7 +786,7 @@ utils.get_phases = function()
 		"preread",
 		"log_stream",
 		"log_default",
-		"timer"
+		"timer",
 	}
 end
 

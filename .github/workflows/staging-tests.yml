@@ -43,7 +43,7 @@ jobs:
         if: inputs.TYPE == 'swarm'
       - name: Install test dependencies
         run: pip3 install --no-cache-dir --require-hashes --no-deps -r tests/requirements.txt
-      - uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+      - uses: actions/download-artifact@eaceaf801fd36c7dee90939fad912460b18a1ffe # v4.1.2
         with:
           name: tf-k8s
           path: /tmp
@@ -84,6 +84,9 @@ jobs:
       - name: Pull BW linux rhel test image
         if: inputs.TYPE == 'linux'
         run: docker pull ghcr.io/bunkerity/rhel-tests:testing && docker tag ghcr.io/bunkerity/rhel-tests:testing local/rhel:latest
+      - name: Pull BW linux rhel9 test image
+        if: inputs.TYPE == 'rhel9'
+        run: docker pull ghcr.io/bunkerity/rhel9-tests:testing && docker tag ghcr.io/bunkerity/rhel9-tests:testing local/rhel9:latest
       # Do tests
       - name: Run tests
         if: inputs.TYPE == 'docker'
@@ -133,6 +136,12 @@ jobs:
       - name: Run Linux rhel tests
         if: inputs.TYPE == 'linux'
         run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "rhel"
+        env:
+          TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
+          ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
+      - name: Run Linux rhel9 tests
+        if: inputs.TYPE == 'linux'
+        run: export $(echo "$TEST_DOMAINS" | xargs) && ./tests/main.py "linux" "rhel9"
         env:
           TEST_DOMAINS: ${{ secrets.TEST_DOMAINS_LINUX }}
           ROOT_DOMAIN: ${{ secrets.ROOT_DOMAIN }}
