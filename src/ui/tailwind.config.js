@@ -4,7 +4,9 @@ module.exports = {
   content: [
     "./templates/*.{html,js}",
     "./static/js/*.js",
+    "./static/js/*.js",
     "./static/js/utils/*.js",
+    "./static/js/plugins/*.js",
     "../common/core/***/**/*.{html,js}",
   ],
 
