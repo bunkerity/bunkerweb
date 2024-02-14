@@ -317,9 +317,13 @@ function bunkernet:api()
 		return self:ret(false, "success")
 	end
 	-- Check id
-	if not self.bunkernet_id then
+	local id, err_id = self.datastore:get("plugin_bunkernet_id", true)
+	if not id and err_id ~= "not found" then
+		return self:ret(true, "error while getting bunkernet id : " .. err_id, HTTP_INTERNAL_SERVER_ERROR)
+	elseif not id then
 		return self:ret(true, "missing instance ID", HTTP_INTERNAL_SERVER_ERROR)
 	end
+	self.bunkernet_id = id
 	-- Send ping request
 	local ok, err, status, _ = self:ping()
 	if not ok then
