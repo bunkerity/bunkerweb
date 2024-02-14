@@ -124,9 +124,8 @@ class Instance:
     def metrics_redis(self) -> Tuple[bool, dict[str, Any]]:
         return self.apiCaller.send_to_apis("GET", "/redis/stats", response=True)
 
-    def ping(self, plugin_id, hostname=None) -> Tuple[bool, dict[str, Any]]:
-        hostname = f"/{hostname}" if hostname else ""
-        return self.apiCaller.send_to_apis("POST", f"/{plugin_id}/ping{hostname}", response=True)
+    def ping(self, plugin_id) -> Tuple[bool, dict[str, Any]]:
+        return self.apiCaller.send_to_apis("POST", f"/{plugin_id}/ping", response=True)
 
 
 class Instances:
@@ -445,7 +444,7 @@ class Instances:
         ping = {"status": "error"}
         for instance in self.get_instances():
             try:
-                resp, ping_data = instance.ping(plugin_id, instance.name)
+                resp, ping_data = instance.ping(plugin_id)
             except:
                 continue
 
