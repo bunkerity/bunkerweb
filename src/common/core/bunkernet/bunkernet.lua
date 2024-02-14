@@ -324,6 +324,8 @@ function bunkernet:api()
 		return self:ret(true, "missing instance ID", HTTP_INTERNAL_SERVER_ERROR)
 	end
 	self.bunkernet_id = id
+	self.version = get_version(self.ctx)
+	self.integration = get_integration(self.ctx)
 	-- Send ping request
 	local ok, err, status, _ = self:ping()
 	if not ok then
