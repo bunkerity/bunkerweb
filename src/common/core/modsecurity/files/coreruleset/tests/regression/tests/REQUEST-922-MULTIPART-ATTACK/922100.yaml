@@ -1,6 +1,6 @@
 ---
 meta:
-  author: "Felipe Zipitria"
+  author: "Felipe Zipitria, Max Leske"
   description: Test Multipart/form-data
   enabled: true
   name: 922100.yaml
@@ -13,7 +13,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: "localhost"
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: multipart/form-data; boundary=boundary
               Accept: "*/*"
             method: POST
@@ -41,7 +41,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: "localhost"
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: multipart/form-data; boundary=boundary
               Accept: "*/*"
             method: POST
@@ -61,3 +61,31 @@ tests:
               --boundary--
           output:
             no_log_contains: id "922100"
+  - test_title: 922100-3
+    desc: "Positive test: don't allow substrings of valid charsets when using _charset_"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Content-Type: multipart/form-data; boundary=boundary
+              Accept: "*/*"
+            method: POST
+            port: 80
+            uri: "/post"
+            version: "HTTP/1.1"
+            data: |
+              --boundary
+              Content-disposition: form-data; name="_charset_"
+
+              utf-
+              --boundary
+              Content-disposition: form-data; name="negative"
+              Content-Type: text/plain
+
+              utf-8 is valid but utf- should not be.
+              --boundary--
+          output:
+            log_contains: id "922100"

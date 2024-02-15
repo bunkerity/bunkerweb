@@ -14,6 +14,8 @@ tests:
             headers:
               Host: "localhost"
               Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             data: "var=%0aPOST / HTTP/1.0"
@@ -29,6 +31,8 @@ tests:
             headers:
               Host: "localhost"
               Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             data: "var=aaa%0aGET+/+HTTP/1.1"
@@ -44,6 +48,8 @@ tests:
             headers:
               Host: "localhost"
               Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             data: "var=aaa%0dHEAD+http://example.com/+HTTP/1.1"
@@ -51,7 +57,7 @@ tests:
           output:
             log_contains: id "921110"
   - test_title: 921110-4
-    desc: "HTTP Response Splitting"
+    desc: "HTTP Response Splitting - pre-HTTP/1.0"
     stages:
       - stage:
           input:
@@ -59,12 +65,14 @@ tests:
             headers:
               Host: "localhost"
               Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             data: "var=aaa%0d%0aGet+/foo%0d"
             version: HTTP/1.0
           output:
-            log_contains: id "921110"
+            no_log_contains: id "921110"
   - test_title: 921110-5
     desc: "HTTP Response Splitting"
     stages:
@@ -74,6 +82,8 @@ tests:
             headers:
               Host: "localhost"
               Cache-Control: "no-cache, no-store, must-revalidate"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             data: "var=aaa%0d%0aGet+foo+bar"
@@ -88,8 +98,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              Accept: "*/*"
-              User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
               Content-Type: text/plain
               Content-Length: 36
             method: POST
@@ -106,8 +116,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              Accept: "*/*"
-              User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
             method: GET
             port: 80
             uri: /?arg1=GET%20http%3A%2F%2Fwww.foo.bar%20HTTP%2F1.2
@@ -121,10 +131,58 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              Accept: "*/*"
-              User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
             method: GET
             port: 80
             uri: /?arg1=GET%20http%3A%2F%2Fwww.foo.bar%20HTTP%2F3.2
           output:
             log_contains: id "921110"
+  - test_title: 921110-9
+    desc: "HTTP Response Splitting false negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /
+            data: "var=soundtrack Gympl\r\nanything"
+          output:
+            no_log_contains: id "921110"
+  - test_title: 921110-10
+    desc: "HTTP Response Splitting false positive test issue 2054"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /
+            data: "var=budget foo)</bar>\n"
+          output:
+            no_log_contains: id "921110"
+  - test_title: 921110-11
+    desc: "HTTP Response Splitting false positive test issue 2054"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /
+            data: "var=get it\n"
+          output:
+            no_log_contains: id "921110"

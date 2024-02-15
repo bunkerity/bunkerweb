@@ -1,0 +1,17 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##! Attacks attempting bypass by forcing JSON body processor leveraging recommended rule 200000
+##! Find Content-Type: application/x-www-form-urlencoded;boundary="application/json"
+##! Find Content-Type: application/soap+xml;boundary="application/json"
+^[^;\s,]+[;\s,].*?application\/json
+
+##! Attacks attempting bypass by forcing JSON body processor leveraging recommended rule 200006
+##! Find Content-Type: application/x-www-form-urlencoded;boundary="application/some.vendor+json"
+##! Find Content-Type: application/soap+xml;boundary="application/some.vendor+json"
+^[^;\s,]+[;\s,].*?application\/.+[+]json
+
+##! Attacks attempting bypass by forcing XML body processor leveraging recommended rule 200001
+##! Find Content-Type: application/x-www-form-urlencoded;boundary="application/xml"
+##! Find Content-Type: application/json;boundary="application/soap+xml"
+^[^;\s,]+[;\s,].*?(?:application(?:\/soap\+|\/)|text\/)xml

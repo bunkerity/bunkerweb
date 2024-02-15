@@ -12,8 +12,9 @@ tests:
             dest_addr: "127.0.0.1"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             no_log_contains: "id \"911100\""
   - test_title: 911100-2
@@ -24,8 +25,9 @@ tests:
             port: 80
             method: "OPTIONS"
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             no_log_contains: "id \"911100\""
   - test_title: 911100-3
@@ -36,8 +38,9 @@ tests:
             method: "HEAD"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             no_log_contains: "id \"911100\""
   - test_title: 911100-4
@@ -48,9 +51,10 @@ tests:
             method: "POST"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "application/x-www-form-urlencoded"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             data: "test=value"
           output:
             no_log_contains: "id \"911100\""
@@ -62,8 +66,9 @@ tests:
             method: "TEST"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: "id \"911100\""
   - test_title: 911100-6
@@ -74,13 +79,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Encoding: gzip,deflate
               Accept-Language: en-us,en;q=0.5
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: DELETE
             port: 80
             uri: /
@@ -95,13 +99,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Encoding: gzip,deflate
               Accept-Language: en-us,en;q=0.5
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: FOO
             port: 80
             uri: /
@@ -116,13 +119,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Encoding: gzip,deflate
               Accept-Language: en-us,en;q=0.5
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: SUBSCRIBE
             port: 80
             uri: /

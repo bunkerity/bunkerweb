@@ -1,0 +1,42 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+
+##! General comments:
+##!
+##! The idea behind this expressions is to capture simple logic based (un)equalities that
+##! are used to quickly test SQL Logic that always returns FALSE.
+
+##! Prefix: captures the initial part that will be unmatched on the right hand side of the logical construct.
+
+##!^ [\s'\"`()]*?\b([\d\w]+)\b[\s'\"`()]*?
+
+##!+ i
+
+##! These expressions try to match the logic using the negative operator,
+##! so when the operator targets a false operation, the initial match
+##! should *not* be present after the operator, effectively meaning TRUE.
+##!
+##! Examples:
+##! '1' <= '2'
+##! 'a' not like 'b'
+##!
+##! SQL Comparison Operators: !=, <=, >=, <>, <, >, !>, !<, ^
+
+\!=[\s'\"`()]*?\b([\d\w]+)\b
+<>[\s'\"`()]*?\b([\d\w]+)\b
+<[\s'\"`()]*?\b([\d\w]+)\b
+\!<[\s'\"`()]*?\b([\d\w]+)\b
+>[\s'\"`()]*?\b([\d\w]+)\b
+\!>[\s'\"`()]*?\b([\d\w]+)\b
+<=[\s'\"`()]*?\b([\d\w]+)\b
+>=[\s'\"`()]*?\b([\d\w]+)\b
+\^[\s'\"`()]*?\b([\d\w]+)\b
+
+is\s+not[\s'\"`()]*?\b([\d\w]+)\b
+not\s+like[\s'\"`()]*?\b([\d\w]+)\b
+
+##! String based regexp.
+
+not\s+rlike[\s'\"`()]*?\b([\d\w]+)\b
+not\s+regexp[\s'\"`()]*?\b([\d\w]+)\b

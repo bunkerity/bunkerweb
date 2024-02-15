@@ -1,6 +1,6 @@
 ---
 meta:
-  author: "karelorigin"
+  author: "karelorigin, Max Leske"
   enabled: true
   name: "920600.yaml"
   description: "Accept header charset checks"
@@ -13,11 +13,11 @@ tests:
             port: 80
             uri: "/"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Accept: text/html;q=0.9;charset=CP1026,*/*;q=0.8
           output:
-            log_contains: "id \"920600\""
+            log_contains: id "920600"
   - test_title: 920600-2
     stages:
       - stage:
@@ -26,11 +26,11 @@ tests:
             port: 80
             uri: "/"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Accept: text/html;q=0.9;charset="CP1026",*/*;q=0.8
           output:
-            log_contains: "id \"920600\""
+            log_contains: id "920600"
   - test_title: 920600-3
     stages:
       - stage:
@@ -39,11 +39,11 @@ tests:
             port: 80
             uri: "/"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
-              Accept: text/html;q=0.9;charset=UTF-8,*/*;q=0.8
+              Accept: text/html; charset=CP1026
           output:
-            no_log_contains: "id \"920600\""
+            log_contains: id "920600"
   - test_title: 920600-4
     stages:
       - stage:
@@ -52,11 +52,11 @@ tests:
             port: 80
             uri: "/"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
-              Accept: text/html;q=0.9;charset="UTF-8",*/*;q=0.8
+              Accept: text/html;q=0.9;charset=UTF-8,*/*;q=0.8
           output:
-            no_log_contains: "id \"920600\""
+            no_log_contains: id "920600"
   - test_title: 920600-5
     stages:
       - stage:
@@ -65,11 +65,11 @@ tests:
             port: 80
             uri: "/"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
-              Accept: text/html;q=0.9;charset="iso-8859-1",*/*;q=0.8
+              Accept: text/html;q=0.9;charset="UTF-8",*/*;q=0.8
           output:
-            no_log_contains: "id \"920600\""
+            no_log_contains: id "920600"
   - test_title: 920600-6
     stages:
       - stage:
@@ -78,11 +78,11 @@ tests:
             port: 80
             uri: "/"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
-              Accept: text/html;q=0.9;charset="iso-8859-1",*/*;q=0.8;charset=utf-16
+              Accept: text/html;q=0.9;charset="iso-8859-1",*/*;q=0.8
           output:
-            log_contains: "id \"920600\""
+            no_log_contains: id "920600"
   - test_title: 920600-7
     stages:
       - stage:
@@ -91,11 +91,11 @@ tests:
             port: 80
             uri: "/"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
-              Accept: text/html;q=0.9;charset="iso-8859-1",*/*;q=0.8;charset=utf-8
+              Accept: text/html;q=0.9;charset="iso-8859-1",*/*;q=0.8;charset=utf-16
           output:
-            no_log_contains: "id \"920600\""
+            log_contains: id "920600"
   - test_title: 920600-8
     stages:
       - stage:
@@ -104,11 +104,11 @@ tests:
             port: 80
             uri: "/"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
-              Accept: text/html;q=0.9;charset="iso-8859-15",*/*;q=0.8
+              Accept: text/html;q=0.9;charset="iso-8859-1",*/*;q=0.8;charset=utf-8
           output:
-            no_log_contains: "id \"920600\""
+            no_log_contains: id "920600"
   - test_title: 920600-9
     stages:
       - stage:
@@ -117,11 +117,11 @@ tests:
             port: 80
             uri: "/"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
-              Accept: text/html;q=0.9;charset="windows-1252",*/*;q=0.8
+              Accept: text/html;q=0.9;charset="iso-8859-15",*/*;q=0.8
           output:
-            no_log_contains: "id \"920600\""
+            no_log_contains: id "920600"
   - test_title: 920600-10
     stages:
       - stage:
@@ -130,11 +130,11 @@ tests:
             port: 80
             uri: "/"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
-              Accept: text/html;q=0.9;charset="windows-1252",*/*;q=0.8;
+              Accept: text/html;q=0.9;charset="windows-1252",*/*;q=0.8
           output:
-            no_log_contains: "id \"920600\""
+            no_log_contains: id "920600"
   - test_title: 920600-11
     stages:
       - stage:
@@ -143,8 +143,63 @@ tests:
             port: 80
             uri: "/"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset="windows-1252",*/*;q=0.8;
+          output:
+            no_log_contains: id "920600"
+  - test_title: 920600-12
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Accept: text/html;q=0.9;charset="windows-1252";,*/*;q=0.8
           output:
-            no_log_contains: "id \"920600\""
+            no_log_contains: id "920600"
+  - test_title: 920600-13
+    desc: Allow "*" only media type
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset="utf-8";,*;q=0.8
+          output:
+            no_log_contains: id "920600"
+  - test_title: 920600-14
+    desc: Allow "q=.1" instead of "q=0.1"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset="utf-8";,*/*;q=.8
+          output:
+            no_log_contains: id "920600"
+  - test_title: 920600-15
+    desc: False positive test request that violates the spec but should be tolerated
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/html;q=0.9;charset=utf-8, *;q=0.1
+          output:
+            no_log_contains: id "920600"

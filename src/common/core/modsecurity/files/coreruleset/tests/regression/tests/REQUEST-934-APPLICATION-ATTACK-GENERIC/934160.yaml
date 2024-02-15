@@ -1,0 +1,535 @@
+---
+meta:
+  author: karelorigin
+  enabled: true
+  name: "934160.yaml"
+  description: "Tests for rule 934160"
+tests:
+  - test_title: 934160-1
+    desc: Normal text false positive test
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?text=while%20(foo)%20is%20bar."
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "934160"
+  - test_title: 934160-2
+    desc: while falsy with negations
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!false)"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-3
+    desc: while falsy with negations
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!-0);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-4
+    desc: while falsy with negations
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!%2B0);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-5
+    desc: while falsy with negations
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!0);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-6
+    desc: while falsy with negations
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!-0);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-7
+    desc: while falsy with negations
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: '/?eval=while(!"");'
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-8
+    desc: while falsy with negations
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!'');"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-9
+    desc: while falsy with negations
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!``);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-10
+    desc: while truthy
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(true);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-11
+    desc: while truthy
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(Infinity);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-12
+    desc: while truthy
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(-Infinity);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-13
+    desc: while truthy
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(%2BInfinity);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-14
+    desc: while truthy
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(-1);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-15
+    desc: while truthy
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(%2B1);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-16
+    desc: while truthy
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(new%20Date);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-17
+    desc: while truthy
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(this);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-18
+    desc: while truthy
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(String);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-19
+    desc: while truthy with negation (false positive)
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!true);"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "934160"
+  - test_title: 934160-20
+    desc: while truthy with double negation
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!!{});"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-21
+    desc: while truthy with double negation
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!![]);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-22
+    desc: while truthy with double negation
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!!\"\");"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-23
+    desc: while truthy with double negation
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!!'');"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-24
+    desc: while truthy with double negation
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!!``);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-25
+    desc: while falsy with negation
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!null)"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-26
+    desc: while falsy with negation
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!undefined)"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-27
+    desc: while falsy with negation
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while(!NaN)"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-28
+    desc: while truthy
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?eval=while((true)))"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-29
+    desc: "Detect example DoS loop while(true) submitted as plaintext"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?eval=while(true);"
+            version: HTTP/1.1
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-30
+    desc: "Detect example DoS loop while(true) submitted as plaintext with JavaScript escape sequence obfuscation"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?eval=\u0077\u0068ile(true);"
+            version: HTTP/1.1
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-31
+    desc: "Detect example DoS loop while(true) submitted as plaintext that has been Base64 encoded"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?eval=d2hpbGUodHJ1ZSk7Cg%3D%3D"
+            version: HTTP/1.1
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-32
+    desc: "Detect example DoS loop while(true) submitted as plaintext with JavaScript escape sequence obfuscation that has been Base64 encoded"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?eval=XHUwMDc3XHUwMDY4aWxlKHRydWUpOwo%3D"
+            version: HTTP/1.1
+          output:
+            log_contains: id "934160"
+  - test_title: 934160-33
+    desc: "Detect example DoS loop while(true) submitted as plaintext that has been Base64 encoded and then obfuscated with JavaScript escape sequences"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/get?eval=\u0064\u0032hpbGUodHJ1ZSk7Cg%3D%3D"
+            version: HTTP/1.1
+          output:
+            log_contains: id "934160"

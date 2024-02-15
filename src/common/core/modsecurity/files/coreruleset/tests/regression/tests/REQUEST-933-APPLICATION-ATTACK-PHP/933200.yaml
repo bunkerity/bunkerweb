@@ -1,0 +1,167 @@
+---
+meta:
+  author: "NiceYouKnow"
+  description: None
+  enabled: true
+  name: 933200.yaml
+tests:
+  - test_title: 933200-1
+    desc: "Positive test: PHP Injection Attack - Wrapper scheme detected (phar://)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /test.php?file=phar://phpinfo.zip/phpinfo.txt
+            version: HTTP/1.1
+          output:
+            log_contains: id "933200"
+  - test_title: 933200-2
+    desc: "Positive test: PHP Injection Attack - Wrapper scheme detected (compress.bzip2://)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /test.php?file=compress.bzip2://file.bz2
+            version: HTTP/1.1
+          output:
+            log_contains: id "933200"
+  - test_title: 933200-3
+    desc: "Positive test: PHP Injection Attack - Wrapper scheme detected (compress.zlib://)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /test.php?file=compress.zlib://http://www.example.com/some_file.gz
+            version: HTTP/1.1
+          output:
+            log_contains: id "933200"
+  - test_title: 933200-4
+    desc: "Positive test: PHP Injection Attack - Wrapper scheme detected (zip://)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /test.php?file=zip://archive.zip
+            version: HTTP/1.1
+          output:
+            log_contains: id "933200"
+  - test_title: 933200-5
+    desc: "Negative test: PHP Injection Attack - Non-existent wrapper scheme (lz77://)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /test.php?file=lz77://some_file.lz
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "933200"
+  - test_title: 933200-6
+    desc: "Positive test: PHP Injection Attack - Wrapper scheme detected (ssh2.shell://)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /test.php?file=ssh2.shell://user:password@example.com:22/xterm
+            version: HTTP/1.1
+          output:
+            log_contains: id "933200"
+  - test_title: 933200-7
+    desc: "Positive test: PHP Injection Attack - Wrapper scheme detected (ssh2.exec://)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /test.php?file=ssh2.exec://user:password@example.com:22/usr/local/bin/kubectl
+            version: HTTP/1.1
+          output:
+            log_contains: id "933200"
+  - test_title: 933200-8
+    desc: "Positive test: PHP Injection Attack - Wrapper scheme detected (ssh2.tunnel://)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /test.php?file=ssh2.tunnel://user:password@example.com:22/10.0.0.1:25
+            version: HTTP/1.1
+          output:
+            log_contains: id "933200"
+  - test_title: 933200-9
+    desc: "Positive test: PHP Injection Attack - Wrapper scheme detected (ssh2.sftp://)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /test.php?file=ssh2.sftp://user:password@example.com:22/path/to/filename
+            version: HTTP/1.1
+          output:
+            log_contains: id "933200"
+  - test_title: 933200-10
+    desc: "Positive test: PHP Injection Attack - Wrapper scheme detected (ssh2.scp://)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /test.php?file=ssh2.scp://user:password@example.com:22/path/to/filename
+            version: HTTP/1.1
+          output:
+            log_contains: id "933200"

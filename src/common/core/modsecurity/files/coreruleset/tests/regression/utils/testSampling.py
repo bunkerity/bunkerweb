@@ -2,9 +2,9 @@ from ftw import ruleset, http, errors
 
 """
 This script assumes that default blocking action is 403
-and sampling is one. It will send a know bad request 
+and sampling is one. It will send a know bad request
 that is expected to be blocked. If sampling is on it
-will only block a certain percentage. We send 1000 
+will only block a certain percentage. We send 1000
 requests to verify this. In order to do this we must
 also turn off IP Reputation blocking.
 SecAction "id:900005,phase:1,nolog,pass,ctl:ruleEngine=on,ctl:ruleRemoveById=910000"
@@ -30,7 +30,7 @@ def run_requests(iterations):
 	status_not_403 = 0
 	status_403 = 0
 	for status in returns.values():
-		if status == 403:	
+		if status == 403:
 			status_403 += 1
 		else:
 			status_not_403 += 1
@@ -39,7 +39,7 @@ def run_requests(iterations):
 	print "403s =", x
 	print "not 403s =", y
 	return (x,y)
-		
+
 def test_sampling():
 	print "running"
 	block,passed = run_requests(100)

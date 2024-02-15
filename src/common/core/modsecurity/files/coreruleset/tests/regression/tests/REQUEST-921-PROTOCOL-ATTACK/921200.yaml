@@ -13,7 +13,8 @@ tests:
             dest_addr: "127.0.0.1"
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             port: 80
             method: POST
             data: "foo=(%26(objectCategory=computer)  (userAccountControl:1.2.840.113556.1.4.803:=8192))"
@@ -28,7 +29,8 @@ tests:
             dest_addr: "127.0.0.1"
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             port: 80
             method: POST
             data: "foo=(objectSID=S-1-5-21-73586283-152049171-839522115-1111)"
@@ -43,7 +45,8 @@ tests:
             dest_addr: "127.0.0.1"
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             port: 80
             method: POST
             data: "foo=(userAccountControl:1.2.840.113556.1.4.803:=67108864)(%26(objectCategory=group)(groupType:1.2.840.113556.1.4.803:=2147483648))"
@@ -58,7 +61,8 @@ tests:
             dest_addr: "127.0.0.1"
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             data: "foo=bar)(%26)"
             uri: "/"
@@ -73,7 +77,8 @@ tests:
             dest_addr: "127.0.0.1"
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             data: "foo=printer)(uid=*)"
             uri: "/"
@@ -88,7 +93,8 @@ tests:
             dest_addr: "127.0.0.1"
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             data: "foo=void)(objectClass=users))(%26(objectClass=void)"
             uri: "/"
@@ -103,7 +109,8 @@ tests:
             dest_addr: "127.0.0.1"
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             data: "foo=eb9adbd87d)!(sn=*"
             uri: "/"
@@ -118,7 +125,8 @@ tests:
             dest_addr: "127.0.0.1"
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             data: "foo=*)!(sn=*"
             uri: "/"
@@ -133,7 +141,8 @@ tests:
             dest_addr: "127.0.0.1"
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             data: "foo=*)(uid=*))(|(uid=*"
             uri: "/"
@@ -148,7 +157,8 @@ tests:
             dest_addr: "127.0.0.1"
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             data: "foo=aaa*aaa)(cn>=bob)"
             uri: "/"

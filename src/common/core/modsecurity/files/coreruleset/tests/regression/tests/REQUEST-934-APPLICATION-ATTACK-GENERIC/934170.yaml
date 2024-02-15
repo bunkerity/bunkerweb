@@ -1,0 +1,58 @@
+---
+meta:
+  author: fzipi
+  enabled: true
+  name: "934170.yaml"
+  description: "Tests for rule 934170 - PHP data scheme support"
+tests:
+  - test_title: 934170-1
+    desc: "SSRF - data: scheme test - IN2OZO3N coverage"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            uri: "/get?ssrf=data:text/plain;base64,SSBsb3ZlIFBIUAo="
+          output:
+            log_contains: id "934170"
+  - test_title: 934170-2
+    desc: "Negative test - data:// should not match"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            uri: "/get?ssrf=data://text/plain;base64,SSBsb3ZlIFBIUAo="
+          output:
+            no_log_contains: id "934170"
+  - test_title: 934170-3
+    desc: "Status Page Test - SSRF - data: scheme test - simple trigger, isolated test"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Accept-Encoding: gzip,deflate
+              Accept-Language: en-us,en;q=0.5
+            method: GET
+            uri: "/get?ssrf=data:text/plain"
+          output:
+            log_contains: id "934170"

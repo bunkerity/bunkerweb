@@ -14,9 +14,10 @@ tests:
             method: "GET"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Length: "NotDigits"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "/"
           output:
@@ -30,10 +31,11 @@ tests:
             method: "POST"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "application/x-www-form-urlencoded"
               Content-Length: "NotDigits"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "/"
           output:
@@ -47,15 +49,17 @@ tests:
             method: "POST"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "application/x-www-form-urlencoded"
               Content-Length: "123x"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "/"
           output:
             status: [400]
-  - # Apache auto corrects for this error now so the log should not contain anything
+  - # Test is based in httpbin.org, so backend returns 405 if you are not posting to /post
+    # Apache auto corrects for this error now so the log should not contain anything
     test_title: 920160-4
     desc: Content-Length HTTP header is not numeric (920160)  from old modsec regressions
     stages:
@@ -64,14 +68,13 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Language: en-us,en;q=0.5
               Content-Length: '3'
               Content-Type: application/x-www-form-urlencoded
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: POST
             port: 80
             uri: /post
@@ -88,14 +91,13 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Language: en-us,en;q=0.5
               Content-Length: "3;"
               Content-Type: application/x-www-form-urlencoded
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: POST
             port: 80
             uri: /

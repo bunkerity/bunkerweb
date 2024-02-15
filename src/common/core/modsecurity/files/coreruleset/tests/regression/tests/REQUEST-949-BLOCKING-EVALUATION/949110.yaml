@@ -1,0 +1,91 @@
+---
+meta:
+  author: "studersi"
+  enabled: true
+  name: "949110.yaml"
+  description: |
+    Test whether the inbound blocking mechanism works by testing whether rule 949110 is triggered.
+    For these tests, existing test are repurposed with different assertions. Instead of asserting that the original
+    rules are triggered that the tests are written for, we assert that triggering these rules causes the blocking
+    rule to be triggered.
+tests:
+  - test_title: 949110-1
+    desc: Test is basically identical to 941100-1 (XSS positive test in phase 2) but here we assert that the inbound blocking mechanism is triggered
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/demo/xss/xml/vuln.xml.php?input=<script+xmlns="http://www.w3.org/1999/xhtml">setTimeout("top.frame2.location="javascript:(function+()+{var+x+=+document.createElement(\\"script\\");x.src+=+\\"//sdl.me/popup.js?//\\";document.childNodes\\[0\\].appendChild(x);}());"",1000)</script>&//'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            log_contains: id "949110"
+  - test_title: 949110-2
+    desc: Test is basically identical to 941100-4 (XSS negative test in phase 2) but here we assert that inbound blocking mechanism is not triggered
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: /
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Referer: http://www.cnn.com
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            no_log_contains: id "949110"
+  - test_title: 949110-3
+    desc: Test is basically identical to 920100-9 (protocol enforcement negative test in phase 1) but here we assert that the inbound blocking mechanism is not triggered
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "OPTIONS"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"949110\""
+  - test_title: 949110-4
+    desc: Test is basically identical to 920100-10 (protocol enforcement positive test in phase 1) but here we assert that inbound blocking mechanism is triggered
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "REALLYLONGUNREALMETHOD"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            log_contains: "id \"949110\""
+  - test_title: 949110-5
+    desc: Test is basically identical to 949110-0 (see above) but here we assert that the scores are summed up and reported properly
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            method: GET
+            port: 80
+            uri: '/demo/xss/xml/vuln.xml.php?input=<script+xmlns="http://www.w3.org/1999/xhtml">setTimeout("top.frame2.location="javascript:(function+()+{var+x+=+document.createElement(\\"script\\");x.src+=+\\"//sdl.me/popup.js?//\\";document.childNodes\\[0\\].appendChild(x);}());"",1000)</script>&//'
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            log_contains: "Inbound Anomaly Score Exceeded [(]Total Score: "

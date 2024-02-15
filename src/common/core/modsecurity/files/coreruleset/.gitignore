@@ -10,6 +10,10 @@ rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
 # util/upgrade.py geoip
 util/geo-location/GeoIP.dat
 
+# PHP functions frequency list generated and updated by running
+# util/php-dictionary-gen.sh 
+util/php-dictionary-gen/frequencylist.txt
+
 # Unit test caches
 .cache
 
@@ -19,3 +23,12 @@ __pycache__/
 *$py.class
 
 .idea/
+
+# Ignore test logs
+tests/logs/
+
+# ignore .env in tests for docker-compose variables
+tests/.env
+
+# Ignore Go-FTW configuration file
+.ftw.yaml

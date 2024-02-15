@@ -1,0 +1,117 @@
+---
+meta:
+  author: "Paul-Beckett"
+  enabled: true
+  name: "920121.yaml"
+  description: "Tests to trigger rule 920121"
+tests:
+  - test_title: 920121-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: "multipart/form-data; boundary=--------397236876"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: |
+              ----------397236876
+              Content-Disposition: form-data; name="fileRap"; filename="te;st.txt"
+              Content-Type: text/plain
+
+              Some-file-test-here
+              ----------397236876--
+            protocol: "http"
+          output:
+            log_contains: "id \"920121\""
+  - test_title: 920121-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: "multipart/form-data; boundary=--------397236876"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: |
+              ----------397236876
+              Content-Disposition: form-data; name="fileRap"; filename="te'st.txt"
+              Content-Type: text/plain
+
+              Some-file-text-here
+              ----------397236876--
+            protocol: "http"
+          output:
+            log_contains: "id \"920121\""
+  - test_title: 920121-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: "multipart/form-data; boundary=--------397236876"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: |
+              ----------397236876
+              Content-Disposition: form-data; name="fileRap"; filename="te\"st.txt"
+              Content-Type: text/plain
+
+              Some-file-text-here
+              ----------397236876--
+            protocol: "http"
+          output:
+            log_contains: "id \"920121\""
+  - test_title: 920121-4
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: "multipart/form-data; boundary=--------397236876"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: |
+              ----------397236876
+              Content-Disposition: form-data; name="fileRap"; filename="te=st.txt"
+              Content-Type: text/plain
+
+              Some-file-text-here
+              ----------397236876--
+            protocol: "http"
+          output:
+            log_contains: "id \"920121\""
+  - test_title: 920121-5
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Content-Type: "multipart/form-data; boundary=--------397236876"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: |
+              ----------397236876
+              Content-Disposition: form-data; name="fileRap"; filename="test.txt"
+              Content-Type: text/plain
+
+              Characters-shouldn't-trigger-rule-"-match-in-;-file
+              ----------397236876--
+            protocol: "http"
+          output:
+            no_log_contains: "id \"920121\""

@@ -49,7 +49,7 @@ function do_and_check_cmd() {
 	return 0
 }
 
-# CRS v3.3.5
+# CRS v4.0.0
 echo "ℹ️ Download CRS"
-git_secure_clone "https://github.com/coreruleset/coreruleset.git" "0bd51ff806c68e2a54c4d60ca13f731c5355696d"
+git_secure_clone "https://github.com/coreruleset/coreruleset.git" "1d95422bb31983a5290720b7fb662ce3dd51f753"
 do_and_check_cmd cp -r files/coreruleset/crs-setup.conf.example files/crs-setup.conf

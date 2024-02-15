@@ -12,8 +12,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=file?
@@ -27,8 +28,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=ftp?
@@ -42,8 +44,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=ftps?
@@ -57,8 +60,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=http?
@@ -72,8 +76,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=https?
@@ -87,8 +92,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=https://foo.bar?
@@ -102,8 +108,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=https://foo.bar?foo=bar
@@ -117,8 +124,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=https://foo.bar&foo=bar

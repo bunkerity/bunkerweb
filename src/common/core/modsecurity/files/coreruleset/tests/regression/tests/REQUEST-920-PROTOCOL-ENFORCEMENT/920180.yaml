@@ -13,9 +13,10 @@ tests:
             method: "POST"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "application/x-www-form-urlencoded"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             data: "hi=test"
             protocol: "http"
             stop_magic: true
@@ -30,9 +31,10 @@ tests:
             method: "POST"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "application/x-www-form-urlencoded"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             data: "hi=test"
             protocol: "http"
             uri: "/"
@@ -43,16 +45,16 @@ tests:
     stages:
       - stage:
           input:
+            stop_magic: true
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Language: en-us,en;q=0.5
               Content-Type: application/x-www-form-urlencoded
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: POST
             port: 80
             uri: /
@@ -67,13 +69,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Language: en-us,en;q=0.5
               Content-Type: application/x-www-form-urlencoded
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: POST
             port: 80
             uri: /

@@ -24,14 +24,14 @@
 #
 # The anomaly score envvar can be set as follows:
 # SecAction "id:90101,phase:5,pass,nolog,\
-#     setenv:ModSecAnomalyScoreIn=%{TX.anomaly_score}"
+#     setenv:ModSecAnomalyScoreIn=%{TX.blocking_inbound_anomaly_score}"
 #
 # Sample rule to setup the PL dynamically from localhost"
 # SecRule REMOTE_ADDR "@ipMatch 127.0.0.1,192.168.0.128" \
 #     "id:90102,phase:1,pass,capture,log,auditlog,\
 #     msg:'Setting engine to PL%{matched_var}',chain"
 #     SecRule REQUEST_HEADERS:PL "@rx ([1-4])" \
-#         "setvar:'tx.executing_paranoia_level=%{matched_var}'"
+#         "setvar:'tx.detection_paranoia_level=%{matched_var}'"
 
 # Path to CRS rule set and local files
 CRS="/usr/share/modsecurity-crs/rules"
@@ -75,6 +75,7 @@ do
             echo "Usage:"
             echo " --access \"/apache/logs/access.log\""
             echo " --error \"/apache/logs/error.log\""
+            echo " --crs \"/usr/share/modsecurity-crs/rules\""
             echo " --url \"localhost:40080\""
             echo " --resolve \"someservername:40080:localhost\""
             echo " --protocol \"https\""
@@ -143,20 +144,20 @@ for PL in 1 2 3 4; do
     # The automatic format detection may cause the script to malfunction.
     # Uncomment only the required format.
     # To use Christian's accesslog format uncomment the following line
-    uniq_id=$(tail -1 $accesslog | cut -d\" -f11 | cut -b2-26)
+    #uniq_id=$(tail -1 $accesslog | cut -d\" -f11 | cut -b2-26)
 
     # To use Spartan's accesslog format (21 col) uncomment the following line
     #uniq_id=$(tail -1 $accesslog | awk '{print $21}')
 
     # To use the automatic unique_id detection uncomment the following line
-    #uniq_id=$(tail -1 $accesslog | egrep -o '[a-zA-Z0-9]{26,28}')
+    uniq_id=$(tail -1 $accesslog | egrep -o '\b[a-zA-Z0-9_-]{26,28}\b')
 
     echo "Tracking unique id: $uniq_id"
 
-    grep $uniq_id $errorlog | sed -e "s/.*\[id \"//" -e "s/\(......\).*\[msg \"/\1 /" -e "s/\"\].*//" -e "s/(Total .*/(Total ...) .../" -e "s/Incoming and Outgoing Score: [0-9]* [0-9]*/Incoming and Outgoing Score: .../" | sed -e "s/$PL1/& PL1/" -e "s/$PL2/& PL2/" -e "s/$PL3/& PL3/ " -e "s/$PL4/& PL4/" | sort -k2 | sed -r "s/^([0-9]+)$/\1 FOREIGN RULE NOT IN CRS/"
+    grep $uniq_id $errorlog | sed -e "s/.*\[id \"//" -e "s/\(......\).*\[msg \"/\1 /" -e "s/\"\].*//" -e "s/(Total .*/(Total ...) .../" -e "s/Inbound and Outbound Score: [0-9]* [0-9]*/Inbound and Outbound Score: .../" | sed -e "s/$PL1/& PL1/" -e "s/$PL2/& PL2/" -e "s/$PL3/& PL3/ " -e "s/$PL4/& PL4/" | sort -k2 | sed -r "s/^([0-9]+)$/\1 FOREIGN RULE NOT IN CRS/"
 
     echo
-    echo -n "Total Incoming Score: "
+    echo -n "Total Inbound Score: "
 
     # Here are two ways to get the transaction anomaly score,
     # the first one is Christian's format, second is Spartan's format

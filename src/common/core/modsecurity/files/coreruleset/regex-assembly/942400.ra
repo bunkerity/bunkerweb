@@ -1,0 +1,9 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+\band\b\s+\d{1,10}\s*?[=<>]
+\band\b\s+'[^=]{1,10}'
+\band\b ?\d{1,10} ?[=<>]+
+\band\b ?[\'\"][^=]{1,10}[\'\"] ?[=<>]+

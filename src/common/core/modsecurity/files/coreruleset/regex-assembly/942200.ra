@@ -1,0 +1,40 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+##! Helpers
+##!> define punctuation-hexnumbers ,.*?[)\da-f\"'`]
+
+##!> define ticks [\"'`]
+
+##!> define spaces \s*?\(\s*?space\s*?\(
+
+##! Main assembly
+##!> assemble
+  {{punctuation-hexnumbers}}{{ticks}}
+  ##!=>
+  {{ticks}}.*?{{ticks}}
+  (?:\r?\n)?\z
+  [^\"'`]+
+  ##!=>
+##!<
+
+\Wselect.+\W*?from
+
+##!> assemble
+  alter
+  create
+  delete
+  desc
+  drop
+  insert
+  load
+  rename
+  select
+  truncate
+  update
+  ##!=>
+  {{spaces}}
+  ##!=>
+##!<

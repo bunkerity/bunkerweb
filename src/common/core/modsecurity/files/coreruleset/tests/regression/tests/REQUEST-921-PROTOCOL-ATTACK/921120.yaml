@@ -12,14 +12,14 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/msword, application/x-shockwave-flash, */*
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
               Accept-Encoding: gzip, deflate
               Accept-Language: zh-sg
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
               Referer: http
-              User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+              User-Agent: "OWASP CRS test agent"
             method: GET
             port: 80
             uri: /?lang=foobar%0d%0aContent-Length:%200%0d%0a%0d%0aHTTP/1.1%20200%20OK%0d%0aContent-Type:%20text/html%0d%0aContent-Length:%2019%0d%0a%0d%0a<html>Shazam</html>
@@ -36,7 +36,8 @@ tests:
               Host: localhost
               Proxy-Connection: keep-alive
               Referer: http
-              User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: "/file.jsp?somevar=foobar%0d%0aContent-Length:%2002343432423<html>ftw</html>"
@@ -53,10 +54,30 @@ tests:
               Host: localhost
               Proxy-Connection: keep-alive
               Referer: http
-              User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: "/file.jsp?somevar=%0A%0Dlocation:%0A%0D"
             version: HTTP/1.1
           output:
             no_log_contains: id "921120"
+  - test_title: 921120-4
+    desc: "Status Page Test - Parameter with value 'CR.LF.Content-Length: 0' to match the rule's regular expression"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              Proxy-Connection: keep-alive
+              Referer: http
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/post"
+            data: "var=%0d%0aContent-Length: 0"
+            version: HTTP/1.1
+          output:
+            log_contains: id "921120"

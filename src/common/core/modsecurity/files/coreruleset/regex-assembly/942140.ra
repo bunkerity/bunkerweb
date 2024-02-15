@@ -1,0 +1,31 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+##!^ \b
+
+database\W*\(
+db_name\W*\(
+information_schema\b
+master\.\.sysdatabases\b
+msdb\b
+msysaccessobjects\b
+msysaccessstorage\b
+msysaccessxml\b
+msysaces\b
+msysmodules2\b
+msysmodules\b
+msysobjects\b
+msysqueries\b
+msysrelationships\b
+mysql\.db\b
+northwind\b
+pg_catalog\b
+pg_toast\b
+schema_name\b
+schema\W*\(
+sqlite_master\b
+sqlite_temp_master\b
+sysaux\b
+sys\.database_name\b
+tempdb\b

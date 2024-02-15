@@ -13,10 +13,10 @@ tests:
             dest_addr: 127.0.0.1
             method: GET
             port: 80
-            uri: /xx?id=%25252bADw-script%25252bAD4-
+            uri: /xx?id=%252bADw-script%252bAD4-
             headers:
-              Accept: "*/*"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
               Host: localhost
-              User-Agent: ModSecurity CRS 3 Tests
+              User-Agent: "OWASP CRS test agent"
           output:
             log_contains: id "941350"

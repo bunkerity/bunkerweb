@@ -13,7 +13,6 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Encoding: gzip,deflate
               Accept-Language: en-us,en;q=0.5
               Host: localhost
@@ -34,7 +33,6 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Encoding: gzip,deflate
               Accept-Language: en-us,en;q=0.5
               Host: localhost
@@ -48,20 +46,19 @@ tests:
           output:
             log_contains: id "913100"
   - test_title: 913100-3
-    desc: Request Indicates a Security Scanner Scanned the Site (913100) from old modsec regressions
+    desc: Request Indicates a Security Scanner Scanned the Site (913100)
     stages:
       - stage:
           input:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Encoding: gzip,deflate
               Accept-Language: en-us,en;q=0.5
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: w3af.sourceforge.net
+              User-Agent: nuclei
             method: GET
             port: 80
             uri: /
@@ -78,7 +75,53 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-agent: "nessus"
+              User-Agent: "nessus"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             uri: "/"
           output:
             log_contains: id "913100"
+  - test_title: 913100-5
+    desc: "YUM package manager allow list"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "urlgrabber/3.10 yum/3.4.3"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/"
+          output:
+            no_log_contains: id "913100"
+  - test_title: 913100-6
+    desc: "ZGrab"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "Mozilla/5.0 zgrab/0.x"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/"
+          output:
+            log_contains: id "913100"
+  - test_title: 913100-7
+    desc: "eCairn allow list"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "mozilla/5.0 ecairn-grabber/1.0 (+http://ecairn.com/grabber)"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/"
+          output:
+            no_log_contains: id "913100"

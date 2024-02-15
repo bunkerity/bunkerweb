@@ -12,9 +12,10 @@ tests:
             dest_addr: "127.0.0.1"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Connection: "keep-alive"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             no_log_contains: "id \"920210\""
   - test_title: 920210-2
@@ -24,9 +25,10 @@ tests:
             dest_addr: "127.0.0.1"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Connection: "keep-alive,keep-alive"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: "id \"920210\""
   - test_title: 920210-3
@@ -36,9 +38,10 @@ tests:
             dest_addr: "127.0.0.1"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Connection: "keep-alive,close"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: "id \"920210\""
   - test_title: 920210-4
@@ -48,9 +51,10 @@ tests:
             dest_addr: "127.0.0.1"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Connection: "close,close"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: "id \"920210\""
   - test_title: 920210-5
@@ -60,9 +64,10 @@ tests:
             dest_addr: "127.0.0.1"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Connection: "User-Agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             no_log_contains: "id \"920210\""
   - test_title: 920210-6
@@ -73,13 +78,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Language: en-us,en;q=0.5
               Connection: keep-alive, keep-alive
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: GET
             port: 80
             uri: /
@@ -94,13 +98,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Language: en-us,en;q=0.5
               Connection: close, close
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: GET
             port: 80
             uri: /

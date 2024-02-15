@@ -16,9 +16,10 @@ tests:
             headers:
               Host: "localhost"
               SomeHeader: "Headerdata\rInjectedHeader: response_splitting_code"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             uri: "/"
           output:
-            status: [400]
             no_log_contains: "id:921140"
   - test_title: 921140-2
     desc: "HTTP Header Injection Attack via headers"
@@ -31,6 +32,8 @@ tests:
             headers:
               Host: "localhost"
               SomeHeader: "Headerdata%0dInjectedHeader: response_splitting_code"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             uri: "/"
           output:
             no_log_contains: "id:921140"

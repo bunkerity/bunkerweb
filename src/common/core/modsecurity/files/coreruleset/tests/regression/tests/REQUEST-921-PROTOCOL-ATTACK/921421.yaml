@@ -13,7 +13,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: application/x-www-form-urlencoded;boundary="application/json"
             method: POST
             port: 80
@@ -29,7 +29,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: application/x-www-form-urlencoded;boundary="application/vnd.mycompany.myapp.customer-v2+json"
             method: POST
             port: 80
@@ -45,7 +45,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: application/x-www-form-urlencoded;boundary="text/xml"
             method: POST
             port: 80
@@ -61,7 +61,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: application/x-www-form-urlencoded;boundary="application/xml"
             method: POST
             port: 80
@@ -77,7 +77,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: application/x-www-form-urlencoded;boundary="application/soap+xml"
             method: POST
             port: 80
@@ -93,7 +93,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: application/json
             method: POST
             port: 80
@@ -109,7 +109,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: application/vnd.mycompany.myapp.customer-v2+json
             method: POST
             port: 80
@@ -125,7 +125,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: text/xml
             method: POST
             port: 80
@@ -141,7 +141,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: application/xml
             method: POST
             port: 80
@@ -157,7 +157,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: application/soap+xml
             method: POST
             port: 80
@@ -173,7 +173,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: text/html; charset=UTF-8
             method: POST
             port: 80
@@ -189,7 +189,7 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: multipart/form-data; boundary=something
             method: POST
             port: 80

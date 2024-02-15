@@ -12,8 +12,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=file://foo.bar
@@ -27,8 +28,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=ftp://foo.bar
@@ -42,8 +44,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=ftps://foo.bar
@@ -57,8 +60,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=http://foo.bar
@@ -72,8 +76,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=https://foo.bar
@@ -87,8 +92,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
-              Host: example.com
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=https://evilexample.com/
@@ -102,8 +108,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: example.com
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=https://example.com.evil.com/
@@ -117,8 +124,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: example.com
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=https://example.com:1234/
@@ -132,8 +140,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: example.com
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=https://example.com/
@@ -147,8 +156,9 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: example.com
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=https://example.com:1234/
@@ -162,11 +172,188 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: example.com
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
             uri: /?x=http://www.example.com/some/path
             version: HTTP/1.1
           output:
             no_log_contains: id "931130"
+  - test_title: 931130-12
+    desc: Bypass 1
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: example.com
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /?x=http://example.com%2f:asd@evil.com/
+            version: HTTP/1.1
+          output:
+            log_contains: id "931130"
+  - test_title: 931130-13
+    desc: Bypass 2
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: example.com
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /?x=http://example.com%2f@evil.com/
+            version: HTTP/1.1
+          output:
+            log_contains: id "931130"
+  - test_title: 931130-14
+    desc: Bypass 3
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: example.com
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /?x=http://example.com%2f:foo@bar@evil.com/
+            version: HTTP/1.1
+          output:
+            log_contains: id "931130"
+  - test_title: 931130-15
+    desc: basic auth
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: example.com
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /?x=http://foo:bar@example.com/
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "931130"
+  - test_title: 931130-16
+    desc: "Positive test: Remote File Inclusion Attack (931130) - Detect url:file://"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /?x=url:file://foo.bar
+            version: HTTP/1.1
+          output:
+            log_contains: id "931130"
+  - test_title: 931130-17
+    desc: Remote File Inclusion Attack (931130) - Detect gopher://
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /?x=gopher://google.com/_SSRFTest!
+            version: HTTP/1.1
+          output:
+            log_contains: id "931130"
+  - test_title: 931130-18
+    desc: Remote File Inclusion Attack (931130) - Ldap Protocol
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /?x=ldap://127.0.0.1/
+            version: HTTP/1.1
+          output:
+            log_contains: id "931130"
+  - test_title: 931130-19
+    desc: Remote File Inclusion Attack (931130)
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /?x=jar:http://evil.co/b.zip!a
+            version: HTTP/1.1
+          output:
+            log_contains: id "931130"
+  - test_title: 931130-20
+    desc: Remote File Inclusion Attack (931130) with Java backend
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /?x=url:file://etc/services
+            version: HTTP/1.1
+          output:
+            log_contains: id "931130"
+  - test_title: 931130-21
+    desc: Remote File Inclusion Attack (931130) with local_file url scheme
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /get?x=local_file://something
+            version: HTTP/1.1
+          output:
+            log_contains: id "931130"
+  - test_title: 931130-22
+    desc: Remote File Inclusion Attack (931130) with Java backend and trailing /
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: /?x=url:file:///etc/passwd
+            version: HTTP/1.1
+          output:
+            log_contains: id "931130"

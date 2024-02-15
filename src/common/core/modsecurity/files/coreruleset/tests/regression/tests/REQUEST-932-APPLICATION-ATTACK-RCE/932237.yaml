@@ -1,0 +1,287 @@
+---
+meta:
+  author: "Franziska Bühler, Esad Cetiner"
+  enabled: true
+  name: "932237.yaml"
+tests:
+  - test_title: 932237-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: env
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get"
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: id
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get"
+            protocol: "http"
+          output:
+            log_contains: "id \"932237\""
+  - test_title: 932237-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: set -o history
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+          output:
+            log_contains: "id \"932237\""
+  - test_title: 932237-4
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: settings
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/get'
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-5
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: environment
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/get'
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-6
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: env
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get"
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-7
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: id
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get"
+            protocol: "http"
+          output:
+            log_contains: "id \"932237\""
+  - test_title: 932237-8
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: set -o history
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+          output:
+            log_contains: "id \"932237\""
+  - test_title: 932237-9
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: settings
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/get'
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-10
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: environment
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: '/get'
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-11
+    desc: "9323HNQU - should not be detected at PL 2"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              code=;vi dddd +silent\\ \!whoami +wq
+            version: HTTP/1.0
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-12
+    desc: "9323HNQU - should not be detected at PL 2"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+            method: POST
+            port: 80
+            uri: /post
+            data: |
+              code=;vi -c:\!pwd
+            version: HTTP/1.0
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-13
+    desc: "FP with word comment"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "https://example.com/?args=comment"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932237"
+  - test_title: 932237-14
+    desc: "FP with word settings"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "https://example.com/?args=settings"
+              Host: localhost
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+            method: GET
+            port: 80
+            uri: /get
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932237"
+  - test_title: 932237-15
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: set
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-16
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: set
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+          output:
+            no_log_contains: "id \"932237\""
+  - test_title: 932237-17
+    desc: "Block env command with arguments"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: env --version
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+          output:
+            log_contains: "id \"932237\""
+  - test_title: 932237-18
+    desc: "Block env command with arguments"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: OWASP CRS test agent
+              Referer: env --version
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+          output:
+            log_contains: "id \"932237\""

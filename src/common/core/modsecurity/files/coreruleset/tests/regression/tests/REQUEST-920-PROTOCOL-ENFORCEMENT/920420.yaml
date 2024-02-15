@@ -13,9 +13,10 @@ tests:
             port: 80
             method: "POST"
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "application/x-www-form-urlencoded"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             data: "test=value"
           output:
             no_log_contains: "id \"920420\""
@@ -27,9 +28,10 @@ tests:
             port: 80
             method: "POST"
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "my-new-content-type"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             data: "test"
           output:
             log_contains: "id \"920420\""
@@ -41,9 +43,10 @@ tests:
             port: 80
             method: "GET"
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "my-new-content-type"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             data: "test"
           output:
             log_contains: "id \"920420\""
@@ -55,9 +58,10 @@ tests:
             port: 80
             method: "PROPFIND"
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "my-new-content-type"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             data: "test"
           output:
             log_contains: "id \"920420\""
@@ -69,14 +73,13 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Encoding: gzip,deflate
               Accept-Language: en-us,en;q=0.5
               Content-Type: multipart/; boundary=0000
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: POST
             port: 80
             uri: /
@@ -106,14 +109,13 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Encoding: gzip,deflate
               Accept-Language: en-us,en;q=0.5
               Content-Type: multipart/foo; boundary=0000
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: POST
             port: 80
             uri: /
@@ -143,14 +145,13 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Encoding: gzip,deflate
               Accept-Language: en-us,en;q=0.5
               Content-Type: application/foo; boundary=0000
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: POST
             port: 80
             uri: /
@@ -180,7 +181,7 @@ tests:
             port: 80
             method: "HEAD"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "my-new-content-type"
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
@@ -195,7 +196,7 @@ tests:
             port: 80
             method: "OPTIONS"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "application/json"
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
@@ -210,7 +211,7 @@ tests:
             port: 80
             method: "OPTIONS"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "application/soap+xml"
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
@@ -225,7 +226,7 @@ tests:
             port: 80
             method: "OPTIONS"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "application"
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
@@ -240,7 +241,7 @@ tests:
             port: 80
             method: "HEAD"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "multipart/related"
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
@@ -255,7 +256,7 @@ tests:
             port: 80
             method: "HEAD"
             headers:
-              User-Agent: "OWASP ModSecurity Core Rule Set"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Content-Type: "Multipart/Related"
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
@@ -270,7 +271,7 @@ tests:
             method: "POST"
             port: 80
             headers:
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
               Content-Type: text/plain
@@ -287,7 +288,7 @@ tests:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
               Host: localhost
               Proxy-Connection: keep-alive
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: text/plain
             method: GET
             port: 80
@@ -305,7 +306,7 @@ tests:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
               Host: localhost
               Proxy-Connection: keep-alive
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: application/x-amf
             method: GET
             port: 80
@@ -323,7 +324,7 @@ tests:
               Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
               Host: localhost
               Proxy-Connection: keep-alive
-              User-Agent: OWASP ModSecurity Core Rule Set
+              User-Agent: "OWASP CRS test agent"
               Content-Type: application/octet-stream
             method: GET
             port: 80

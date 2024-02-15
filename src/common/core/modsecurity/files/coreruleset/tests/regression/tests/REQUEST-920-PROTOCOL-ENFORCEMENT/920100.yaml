@@ -14,8 +14,9 @@ tests:
             method: "GET"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "/"
             version: "HTTP/1.1"
@@ -31,8 +32,9 @@ tests:
             method: "     GET"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "/"
             version: "HTTP/1.1"
@@ -47,8 +49,9 @@ tests:
             method: "OPTIONS"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "*"
             version: "HTTP/1.1"
@@ -63,8 +66,9 @@ tests:
             method: "CONNECT"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "1.2.3.4:80"
             version: "HTTP/1.1"
@@ -79,8 +83,9 @@ tests:
             method: "CONNECT"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "www.cnn.com"
             version: "HTTP/1.1"
@@ -95,13 +100,14 @@ tests:
             method: "CONNECT"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests #FP"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "www.cnn.com:80"
             version: "HTTP/1.1"
           output:
-            log_contains: "id \"920100\""
+            no_log_contains: "id \"920100\""
   - # Valid request with query and anchor components
     test_title: 920100-7
     stages:
@@ -111,8 +117,9 @@ tests:
             method: "GET"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "/index.html?I=Like&Apples=Today#tag"
             version: "HTTP/1.1"
@@ -128,8 +135,9 @@ tests:
             method: "GET"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "/index.html:80?I=Like&Apples=Today#tag"
             version: "HTTP/1.1"
@@ -144,8 +152,9 @@ tests:
             method: "OPTIONS"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "/"
             version: "HTTP/1.1"
@@ -160,8 +169,9 @@ tests:
             method: "REALLYLONGUNREALMETHOD"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests # FN"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "/"
             version: "HTTP/1.1"
@@ -177,8 +187,9 @@ tests:
             dest_addr: "127.0.0.1"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests # FN"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             protocol: "http"
             uri: "\\"
             version: "HTTP/1.1"
@@ -195,7 +206,7 @@ tests:
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: "\tGET"
             port: 80
             uri: /
@@ -213,14 +224,13 @@ tests:
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: GET
             port: 80
             uri: \index.html
             version: HTTP\1.0
           output:
             status: [403, 400]
-            # log_contains: id "920100"
   - test_title: 920100-14
     desc: Invalid HTTP Request Line (920100) - Test 3 from old modsec regressions
     stages:
@@ -232,7 +242,7 @@ tests:
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
             method: '|GET'
             port: 80
             uri: /
@@ -249,8 +259,25 @@ tests:
             port: 80
             uri: '/demo/xss/xml/vuln.xml.php?input=<script xmlns="http://www.w3.org/1999/xhtml">setTimeout("top.frame2.location=\"javascript:(function () {var x = document.createElement(\\\"script\\\");x.src = \\\"//sdl.me/popup.js?//\\\";document.childNodes\[0\].appendChild(x);}());\"",1000)</script>&//'
             headers:
-              User-Agent: ModSecurity CRS 3 Tests
+              User-Agent: "OWASP CRS test agent"
               Host: localhost
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             status: [403, 400]
-            # log_contains: id "920100"
+  - test_title: 920100-16
+    desc: "Status Page Test - Invalid HTTP request line: URI has scheme and authority but no path"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            protocol: "http"
+            uri: "http://localhost"
+            version: "HTTP/1.1"
+          output:
+            log_contains: "id \"920100\""

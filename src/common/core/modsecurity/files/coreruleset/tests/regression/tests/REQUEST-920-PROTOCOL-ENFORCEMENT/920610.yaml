@@ -1,0 +1,36 @@
+---
+meta:
+  author: "karelorigin"
+  enabled: true
+  name: "920610.yaml"
+  description: "Tests for 920610"
+tests:
+  - test_title: 920610-1
+    desc: Encoded URL fragment false positive test
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            uri: "/%23fragment"
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/html;q=0.9,*/*;q=0.8
+          output:
+            no_log_contains: "id \"920610\""
+# Commented test because Apache errors before processing the rules, meaning it will always fail in our CI environment.
+#  - test_title: 920610-2
+#   desc: Raw URL fragment test
+#   stages:
+#     - stage:
+#         input:
+#           dest_addr: "127.0.0.1"
+#           port: 80
+#           uri: "/#fragment"
+#           headers:
+#             User-Agent: "OWASP CRS test agent"
+#             Host: "localhost"
+#             Accept: text/html;q=0.9,*/*;q=0.8
+#         output:
+#           log_contains: "id \"920610\""

@@ -3,28 +3,47 @@ owasp-crs-regressions
 
 Introduction
 ============
-Welcome to the OWASP Core Rule Set regression testing suite. This suite is meant to test specific rules in OWASP CRS version 3. The suite is designed to uses preconfigured IDs that are specific to this version of CRS. The tests themselves can be run without CRS and one would expect the same elements to be blocked, however one must override the default Output parameter in the tests. 
+Welcome to the OWASP CRS regression testing suite. This suite is meant to test specific rules in OWASP CRS version 3. The suite is designed to use pre-configured IDs that are specific to this version of CRS. The tests themselves can be run without CRS and one would expect the same elements to be blocked, however one must override the default Output parameter in the tests.
 
 Installation
 ============
-The OWASP Core Rule Set project was part of the effort to develop FTW, the Framework for Testing WAFs. As a result, we use this project in order to run our regression testing. FTW is designed to use existing Python testing frameworks to allow for easy to read web based testing, provided in YAML. You can install FTW by from the repository (at https://github.com/CRS-support/ftw) or by running pip.
+The OWASP CRS project was part of the effort to develop the Web Application Firewall Testing Framework (FTW), a framework for Testing WAFs. We recommend using `go-ftw`: a modern, fast, and efficient way to test the WAF. By utilizing it, you can test your WAF effortlessly in two steps: define a test case in YAML and run it with go-ftw.
 
-```pip install -r requirements.txt```
+```yaml
+# example of test case: /tests/regression/tests/REQUEST-911-METHOD-ENFORCEMENT
+# format can be found at: https://github.com/coreruleset/ftw/blob/master/docs/YAMLFormat.md
+---
+meta:
+  author: "csanders-git"
+  enabled: true
+  name: "911100.yaml"
+  description: "Description"
+tests:
+  - test_title: 911100-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+          output:
+            no_log_contains: "id \"911100\""
+```
 
-This will install FTW as a library. It can also be run natively, see the FTW documentation for more detail.
+For go-ftw, please check out from [go-ftw releases page](https://github.com/coreruleset/go-ftw/releases).
 
 Requirements
 ============
-There are Three requirements for running the OWASP CRS regressions.
+There are three requirements for running the OWASP CRS regressions:
 
-1. You must have ModSecurity specify the location of your error.log, this is done in the config.py file
-2. ModSecurity must be in DetectionOnly (or anomaly scoring) mode
-3. You must disable IP blocking based on previous events
+1. Create `.ftw.yaml` for your environment. (see Section [Yaml Config File](https://github.com/coreruleset/go-ftw#yaml-config-file) in go-ftw for more details)
+2. Specify your error.log location from ModSecurity in `.ftw.yaml`.
+3. Make sure ModSecurity is in `DetectionOnly` mode.
 
-Note: The test suite compares timezones -- if your test machine and your host machine are in different timezones this can cause bad results
-
-To accomplish 2. and 3. you may use the following rule in your setup.conf:
-
+The following rule is provided to properly configure your engine for testing. Add it to crs-setup.conf:
 ```
 SecAction "id:900005,\
   phase:1,\
@@ -32,13 +51,13 @@ SecAction "id:900005,\
   pass,\
   ctl:ruleEngine=DetectionOnly,\
   ctl:ruleRemoveById=910000,\
-  setvar:tx.paranoia_level=4,\
+  setvar:tx.blocking_paranoia_level=4,\
   setvar:tx.crs_validate_utf8_encoding=1,\
   setvar:tx.arg_name_length=100,\
-  setvar:tx.arg_length=400"
+  setvar:tx.arg_length=400,\
+  setvar:tx.max_file_size=64100,\
+  setvar:tx.combined_file_sizes=65535"
 ```
-
-Once these requirements have been met the tests can be run by using pytest.
 
 Running The Tests
 =================

@@ -1,0 +1,15 @@
+##! Please refer to the documentation at
+##! https://coreruleset.org/docs/development/regex_assembly/.
+
+##!+ i
+
+##!> assemble
+  ##!> include unix-shell-evasion-prefix-start-of-string
+##!<
+##!=>
+
+##! These patterns are approximations of the patterns used by the cmdline
+##! processor for `@` and `~`.
+##! These patterns are used across multiple files, change with care.
+##!> include-except unix-shell-upto3 unix-shell-fps-pl2 unix-shell-fps-pl2-start-of-string unix-shell-fps-useragents -- @ [\s<>&|)] ~ \S
+##!> include-except unix-shell-4andup unix-shell-fps-pl2 unix-shell-fps-pl2-start-of-string unix-shell-fps-useragents -- @ [\s<>&|)] ~ \S

@@ -5,7 +5,7 @@ meta:
   name: "944210.yaml"
   description: "Positive tests for rule 944210"
 tests:
-  - test_title: 944210-0
+  - test_title: 944210-1
     desc: "Argument test includes keyword rO0ABQ"
     stages:
       - stage:
@@ -14,9 +14,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -25,7 +24,7 @@ tests:
             data: "test=rO0ABQ"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-1
+  - test_title: 944210-2
     desc: "Argument name includes keyword rO0ABQ"
     stages:
       - stage:
@@ -34,9 +33,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -45,7 +43,7 @@ tests:
             data: "rO0ABQ=test"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-2
+  - test_title: 944210-3
     desc: "Cookie test includes keyword rO0ABQ"
     stages:
       - stage:
@@ -54,9 +52,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -66,7 +63,7 @@ tests:
             data: "test=value"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-3
+  - test_title: 944210-4
     desc: "Cookie name includes keyword rO0ABQ"
     stages:
       - stage:
@@ -75,9 +72,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -87,7 +83,7 @@ tests:
             data: "test=value"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-4
+  - test_title: 944210-5
     desc: "Request header test includes keyword rO0ABQ"
     stages:
       - stage:
@@ -96,9 +92,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -108,7 +103,7 @@ tests:
             data: "test=value"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-5
+  - test_title: 944210-6
     desc: "XML element includes keyword rO0ABQ"
     stages:
       - stage:
@@ -117,9 +112,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -128,7 +122,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><rO0ABQ attribute_name=\"attribute_value\">value</rO0ABQ></xml>"
           output:
             no_log_contains: "id \"944210\""
-  - test_title: 944210-6
+  - test_title: 944210-7
     desc: "XML attribute name includes keyword rO0ABQ"
     stages:
       - stage:
@@ -137,9 +131,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -148,7 +141,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><element rO0ABQ=\"attribute_value\">element_value</element></xml>"
           output:
             no_log_contains: "id \"944210\""
-  - test_title: 944210-7
+  - test_title: 944210-8
     desc: "XML attribute value includes keyword rO0ABQ"
     stages:
       - stage:
@@ -157,9 +150,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -168,7 +160,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"rO0ABQ\">element_value</element></xml>"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-8
+  - test_title: 944210-9
     desc: "XML element value includes keyword rO0ABQ"
     stages:
       - stage:
@@ -177,9 +169,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -188,7 +179,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"attribute_value\">rO0ABQ</element></xml>"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-9
+  - test_title: 944210-10
     desc: "Nested XML element value includes keyword rO0ABQ"
     stages:
       - stage:
@@ -197,9 +188,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -208,7 +198,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><l1><l2><l3><element attribute_name=\"attribute_value\">rO0ABQ</element></l3></l2></l1></xml>"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-10
+  - test_title: 944210-11
     desc: "Content-Type text/plain includes keyword rO0ABQ"
     stages:
       - stage:
@@ -217,9 +207,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "text/plain"
@@ -228,7 +217,7 @@ tests:
             data: "test=rO0ABQ"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-11
+  - test_title: 944210-12
     desc: "Content-Type application/json arg value includes keyword rO0ABQ"
     stages:
       - stage:
@@ -237,9 +226,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/json"
@@ -248,7 +236,7 @@ tests:
             data: "{\"test\": \"rO0ABQ\"}"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-12
+  - test_title: 944210-13
     desc: "Content-Type application/json arg name includes keyword rO0ABQ"
     stages:
       - stage:
@@ -257,9 +245,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/json"
@@ -268,7 +255,7 @@ tests:
             data: "{\"rO0ABQ\": \"test\"}"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-13
+  - test_title: 944210-14
     desc: "Content-Type multipart/form-data json arg name includes keyword rO0ABQ"
     stages:
       - stage:
@@ -277,35 +264,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
-              Accept-Encoding: "gzip,deflate"
-              Accept-Language: "en-us,en;q=0.5"
-              Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
-            method: "POST"
-            version: "HTTP/1.0"
-            data: |
-              -----------------------------thisissparta
-              Content-Disposition: form-data; name="payload"
-              Content-Type: application/json
-
-              {"rO0ABQ": "test"}
-              -----------------------------thisissparta--
-          output:
-            log_contains: "id \"944210\""
-  - test_title: 944210-14
-    desc: "Content-Type multipart/form-data json arg value includes keyword rO0ABQ"
-    stages:
-      - stage:
-          input:
-            dest_addr: "127.0.0.1"
-            port: 80
-            headers:
-              Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
-              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
@@ -321,7 +281,7 @@ tests:
           output:
             log_contains: "id \"944210\""
   - test_title: 944210-15
-    desc: "Content-Type multipart/form-data XML element value includes keyword rO0ABQ"
+    desc: "Content-Type multipart/form-data json arg value includes keyword rO0ABQ"
     stages:
       - stage:
           input:
@@ -329,9 +289,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
@@ -340,9 +299,9 @@ tests:
             data: |
               -----------------------------thisissparta
               Content-Disposition: form-data; name="payload"
-              Content-Type: application/xml
+              Content-Type: application/json
 
-              <?xml version="1.0"?><xml><element attribute_name="attribute_value">rO0ABQ</element></xml>
+              {"rO0ABQ": "test"}
               -----------------------------thisissparta--
           output:
             log_contains: "id \"944210\""
@@ -355,9 +314,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
@@ -373,6 +331,31 @@ tests:
           output:
             log_contains: "id \"944210\""
   - test_title: 944210-17
+    desc: "Content-Type multipart/form-data XML element value includes keyword rO0ABQ"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
+            method: "POST"
+            version: "HTTP/1.0"
+            data: |
+              -----------------------------thisissparta
+              Content-Disposition: form-data; name="payload"
+              Content-Type: application/xml
+
+              <?xml version="1.0"?><xml><element attribute_name="attribute_value">rO0ABQ</element></xml>
+              -----------------------------thisissparta--
+          output:
+            log_contains: "id \"944210\""
+  - test_title: 944210-18
     desc: "Argument test includes keyword KztAAU"
     stages:
       - stage:
@@ -381,9 +364,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -392,7 +374,7 @@ tests:
             data: "test=KztAAU"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-18
+  - test_title: 944210-19
     desc: "Argument name includes keyword KztAAU"
     stages:
       - stage:
@@ -401,9 +383,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -412,7 +393,7 @@ tests:
             data: "KztAAU=test"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-19
+  - test_title: 944210-20
     desc: "Cookie test includes keyword KztAAU"
     stages:
       - stage:
@@ -421,9 +402,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -433,7 +413,7 @@ tests:
             data: "test=value"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-20
+  - test_title: 944210-21
     desc: "Cookie name includes keyword KztAAU"
     stages:
       - stage:
@@ -442,9 +422,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -454,7 +433,7 @@ tests:
             data: "test=value"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-21
+  - test_title: 944210-22
     desc: "Request header test includes keyword KztAAU"
     stages:
       - stage:
@@ -463,9 +442,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -475,7 +453,7 @@ tests:
             data: "test=value"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-22
+  - test_title: 944210-23
     desc: "XML element includes keyword KztAAU"
     stages:
       - stage:
@@ -484,9 +462,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -495,7 +472,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><KztAAU attribute_name=\"attribute_value\">value</KztAAU></xml>"
           output:
             no_log_contains: "id \"944210\""
-  - test_title: 944210-23
+  - test_title: 944210-24
     desc: "XML attribute name includes keyword KztAAU"
     stages:
       - stage:
@@ -504,9 +481,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -515,7 +491,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><element KztAAU=\"attribute_value\">element_value</element></xml>"
           output:
             no_log_contains: "id \"944210\""
-  - test_title: 944210-24
+  - test_title: 944210-25
     desc: "XML attribute value includes keyword KztAAU"
     stages:
       - stage:
@@ -524,9 +500,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -535,7 +510,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"KztAAU\">element_value</element></xml>"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-25
+  - test_title: 944210-26
     desc: "XML element value includes keyword KztAAU"
     stages:
       - stage:
@@ -544,9 +519,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -555,7 +529,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"attribute_value\">KztAAU</element></xml>"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-26
+  - test_title: 944210-27
     desc: "Nested XML element value includes keyword KztAAU"
     stages:
       - stage:
@@ -564,9 +538,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -575,7 +548,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><l1><l2><l3><element attribute_name=\"attribute_value\">KztAAU</element></l3></l2></l1></xml>"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-27
+  - test_title: 944210-28
     desc: "Content-Type text/plain includes keyword KztAAU"
     stages:
       - stage:
@@ -584,9 +557,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "text/plain"
@@ -595,7 +567,7 @@ tests:
             data: "test=KztAAU"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-28
+  - test_title: 944210-29
     desc: "Content-Type application/json arg value includes keyword KztAAU"
     stages:
       - stage:
@@ -604,9 +576,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/json"
@@ -615,7 +586,7 @@ tests:
             data: "{\"test\": \"KztAAU\"}"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-29
+  - test_title: 944210-30
     desc: "Content-Type application/json arg name includes keyword KztAAU"
     stages:
       - stage:
@@ -624,9 +595,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/json"
@@ -635,7 +605,7 @@ tests:
             data: "{\"KztAAU\": \"test\"}"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-30
+  - test_title: 944210-31
     desc: "Content-Type multipart/form-data json arg name includes keyword KztAAU"
     stages:
       - stage:
@@ -644,9 +614,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
@@ -661,7 +630,7 @@ tests:
               -----------------------------thisissparta--
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-31
+  - test_title: 944210-32
     desc: "Content-Type multipart/form-data json arg value includes keyword KztAAU"
     stages:
       - stage:
@@ -670,9 +639,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
@@ -683,33 +651,7 @@ tests:
               Content-Disposition: form-data; name="payload"
               Content-Type: application/json
 
-              {"KztAAU": "test\}
-              -----------------------------thisissparta--
-          output:
-            log_contains: "id \"944210\""
-  - test_title: 944210-32
-    desc: "Content-Type multipart/form-data XML element value includes keyword KztAAU"
-    stages:
-      - stage:
-          input:
-            dest_addr: "127.0.0.1"
-            port: 80
-            headers:
-              Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
-              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
-              Accept-Encoding: "gzip,deflate"
-              Accept-Language: "en-us,en;q=0.5"
-              Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
-            method: "POST"
-            version: "HTTP/1.0"
-            data: |
-              -----------------------------thisissparta
-              Content-Disposition: form-data; name="payload"
-              Content-Type: application/xml
-
-              <?xml version="1.0"?><xml><element attribute_name="attribute_value">KztAAU</element></xml>
+              {"KztAAU": "test"}
               -----------------------------thisissparta--
           output:
             log_contains: "id \"944210\""
@@ -722,9 +664,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
@@ -740,6 +681,31 @@ tests:
           output:
             log_contains: "id \"944210\""
   - test_title: 944210-34
+    desc: "Content-Type multipart/form-data XML element value includes keyword KztAAU"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
+            method: "POST"
+            version: "HTTP/1.0"
+            data: |
+              -----------------------------thisissparta
+              Content-Disposition: form-data; name="payload"
+              Content-Type: application/xml
+
+              <?xml version="1.0"?><xml><element attribute_name="attribute_value">KztAAU</element></xml>
+              -----------------------------thisissparta--
+          output:
+            log_contains: "id \"944210\""
+  - test_title: 944210-35
     desc: "Argument test includes keyword Cs7QAF"
     stages:
       - stage:
@@ -748,9 +714,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -759,7 +724,7 @@ tests:
             data: "test=Cs7QAF"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-35
+  - test_title: 944210-36
     desc: "Argument name includes keyword Cs7QAF"
     stages:
       - stage:
@@ -768,9 +733,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -779,7 +743,7 @@ tests:
             data: "Cs7QAF=test"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-36
+  - test_title: 944210-37
     desc: "Cookie test includes keyword Cs7QAF"
     stages:
       - stage:
@@ -788,9 +752,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -800,7 +763,7 @@ tests:
             data: "test=value"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-37
+  - test_title: 944210-38
     desc: "Cookie name includes keyword Cs7QAF"
     stages:
       - stage:
@@ -809,9 +772,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -821,7 +783,7 @@ tests:
             data: "test=value"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-38
+  - test_title: 944210-39
     desc: "Request header test includes keyword Cs7QAF"
     stages:
       - stage:
@@ -830,9 +792,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/x-www-form-urlencoded"
@@ -842,7 +803,7 @@ tests:
             data: "test=value"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-39
+  - test_title: 944210-40
     desc: "XML element includes keyword Cs7QAF"
     stages:
       - stage:
@@ -851,9 +812,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -862,7 +822,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><Cs7QAF attribute_name=\"attribute_value\">value</Cs7QAF></xml>"
           output:
             no_log_contains: "id \"944210\""
-  - test_title: 944210-40
+  - test_title: 944210-41
     desc: "XML attribute name includes keyword Cs7QAF"
     stages:
       - stage:
@@ -871,9 +831,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -882,7 +841,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><element Cs7QAF=\"attribute_value\">element_value</element></xml>"
           output:
             no_log_contains: "id \"944210\""
-  - test_title: 944210-41
+  - test_title: 944210-42
     desc: "XML attribute value includes keyword Cs7QAF"
     stages:
       - stage:
@@ -891,9 +850,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -902,7 +860,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"Cs7QAF\">element_value</element></xml>"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-42
+  - test_title: 944210-43
     desc: "XML element value includes keyword Cs7QAF"
     stages:
       - stage:
@@ -911,9 +869,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -922,7 +879,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><element attribute_name=\"attribute_value\">Cs7QAF</element></xml>"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-43
+  - test_title: 944210-44
     desc: "Nested XML element value includes keyword Cs7QAF"
     stages:
       - stage:
@@ -931,9 +888,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/xml"
@@ -942,7 +898,7 @@ tests:
             data: "<?xml version=\"1.0\"?><xml><l1><l2><l3><element attribute_name=\"attribute_value\">Cs7QAF</element></l3></l2></l1></xml>"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-44
+  - test_title: 944210-45
     desc: "Content-Type text/plain includes keyword Cs7QAF"
     stages:
       - stage:
@@ -951,9 +907,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "text/plain"
@@ -962,7 +917,7 @@ tests:
             data: "test=Cs7QAF"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-45
+  - test_title: 944210-46
     desc: "Content-Type application/json arg value includes keyword Cs7QAF"
     stages:
       - stage:
@@ -971,9 +926,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/json"
@@ -982,7 +936,7 @@ tests:
             data: "{\"test\": \"Cs7QAF\"}"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-46
+  - test_title: 944210-47
     desc: "Content-Type application/json arg name includes keyword Cs7QAF"
     stages:
       - stage:
@@ -991,9 +945,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "application/json"
@@ -1002,7 +955,7 @@ tests:
             data: "{\"Cs7QAF\": \"test\"}"
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-47
+  - test_title: 944210-48
     desc: "Content-Type multipart/form-data json arg name includes keyword Cs7QAF"
     stages:
       - stage:
@@ -1011,35 +964,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
-              Accept-Encoding: "gzip,deflate"
-              Accept-Language: "en-us,en;q=0.5"
-              Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
-            method: "POST"
-            version: "HTTP/1.0"
-            data: |
-              -----------------------------thisissparta
-              Content-Disposition: form-data; name="payload"
-              Content-Type: application/json
-
-              {"Cs7QAF": "test"}
-              -----------------------------thisissparta--
-          output:
-            log_contains: "id \"944210\""
-  - test_title: 944210-48
-    desc: "Content-Type multipart/form-data json arg value includes keyword Cs7QAF"
-    stages:
-      - stage:
-          input:
-            dest_addr: "127.0.0.1"
-            port: 80
-            headers:
-              Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
-              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
@@ -1055,6 +981,31 @@ tests:
           output:
             log_contains: "id \"944210\""
   - test_title: 944210-49
+    desc: "Content-Type multipart/form-data json arg value includes keyword Cs7QAF"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
+              Accept-Encoding: "gzip,deflate"
+              Accept-Language: "en-us,en;q=0.5"
+              Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
+            method: "POST"
+            version: "HTTP/1.0"
+            data: |
+              -----------------------------thisissparta
+              Content-Disposition: form-data; name="payload"
+              Content-Type: application/json
+
+              {"Cs7QAF": "test"}
+              -----------------------------thisissparta--
+          output:
+            log_contains: "id \"944210\""
+  - test_title: 944210-50
     desc: "Content-Type multipart/form-data XML element value includes keyword Cs7QAF"
     stages:
       - stage:
@@ -1063,9 +1014,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"
@@ -1080,7 +1030,7 @@ tests:
               -----------------------------thisissparta--
           output:
             log_contains: "id \"944210\""
-  - test_title: 944210-50
+  - test_title: 944210-51
     desc: "Content-Type multipart/form-data XML element value includes keyword Cs7QAF"
     stages:
       - stage:
@@ -1089,9 +1039,8 @@ tests:
             port: 80
             headers:
               Host: "localhost"
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
-              Accept-Charset: "ISO-8859-1,utf-8;q=0.7,*;q=0.7"
               Accept-Encoding: "gzip,deflate"
               Accept-Language: "en-us,en;q=0.5"
               Content-Type: "multipart/form-data; boundary=---------------------------thisissparta"

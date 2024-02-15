@@ -1,0 +1,23 @@
+---
+meta:
+  author: karelorigin
+  enabled: true
+  name: "934140.yaml"
+  description: "Tests for rule 934140"
+tests:
+  - test_title: 934140-1
+    desc: Perl interpolation attack
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Accept: "*/*"
+              Host: localhost
+              User-Agent: ModSecurity CRS 3 Tests
+            method: GET
+            port: 80
+            uri: "/?x=@{[system+whoami]}"
+            version: HTTP/1.0
+          output:
+            log_contains: id "934140"

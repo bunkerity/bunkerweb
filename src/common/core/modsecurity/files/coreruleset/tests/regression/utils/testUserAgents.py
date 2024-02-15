@@ -21,17 +21,17 @@ def run_requests(useragent_list):
         http_ua = http.HttpUA()
         http_ua.send_request(input_data)
         status = http_ua.response_object.status
-        if status == 403:	
+        if status == 403:
             status_403 += 1
         else:
-            status_not_403 += 1        
+            status_not_403 += 1
     x = (status_403/(len(useragent_list)*1.0))*100
     y = (status_not_403/(len(useragent_list)*1.0))*100
     print "403s =", x
     print "not 403s =", y
 
-	
+
 def main():
     uas = read_useragents('./data/popularUAs.data')
     run_requests(uas)
-main()	
+main()

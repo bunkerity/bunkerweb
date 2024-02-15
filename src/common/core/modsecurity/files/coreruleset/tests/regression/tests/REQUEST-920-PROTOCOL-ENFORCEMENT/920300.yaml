@@ -12,13 +12,13 @@ tests:
           input:
             dest_addr: 127.0.0.1
             headers:
-              Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
               Accept-Encoding: gzip,deflate
               Accept-Language: en-us,en;q=0.5
               Host: localhost
               Keep-Alive: '300'
               Proxy-Connection: keep-alive
-              User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv
+              User-Agent: "OWASP CRS test agent"
+              # Test needs a missing 'Accept' header
             method: GET
             port: 80
             uri: /
@@ -26,3 +26,50 @@ tests:
             data: ''
           output:
             log_contains: id "920300"
+  - test_title: 920300-2
+    desc: "OPTIONS request: exempt from requiring an Accept request header"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              # Test needs a missing 'Accept' header
+            method: "OPTIONS"
+            uri: "*"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"920300\""
+  - test_title: 920300-3
+    desc: "CONNECT request: exempt from requiring an Accept request header"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            port: 80
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP CRS test agent"
+              Proxy-Connection: "Keep-Alive"
+              # Test needs a missing 'Accept' header
+            method: "CONNECT"
+            uri: "www.cnn.com:80"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"920300\""
+  - test_title: 920300-4
+    desc: "User-Agent containing AppleWebKit: exempt from requiring an Accept request header"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Host: "localhost"
+              User-Agent: "OWASP ModSecurity Core Rule Set; AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+              # Test needs a missing 'Accept' header
+            method: "GET"
+            uri: "/"
+            version: "HTTP/1.1"
+          output:
+            no_log_contains: "id \"920300\""

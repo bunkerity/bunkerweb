@@ -13,7 +13,10 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: "*/*"
             method: POST
+            uri: "/post"
             port: 80
             data: "var=v%26newline;b%26tab;s%26newline;c%26newline;r%26tab;i%26tab;p%26newline;t%26colon;:&var2=whatever"
             version: HTTP/1.0
@@ -27,7 +30,10 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: "*/*"
             method: POST
+            uri: "/post"
             port: 80
             data: "payload=<a href=\"vbscript:MsgBox+1\">XSS</a>"
             version: HTTP/1.0

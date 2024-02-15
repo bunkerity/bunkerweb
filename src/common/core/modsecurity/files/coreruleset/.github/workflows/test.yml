@@ -1,4 +1,3 @@
----
 name: Regression Tests
 
 on:
@@ -11,6 +10,7 @@ on:
     paths:
       - 'rules/**'
       - 'tests/**'
+      - 'util/**'
       - '.github/**'
 
 jobs:
@@ -21,12 +21,12 @@ jobs:
         modsec_version: [modsec2-apache]
     steps:
       - name: "Checkout repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: "Install dependencies"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GO_FTW_VERSION: '0.4.6'
+          GO_FTW_VERSION: '0.6.4'
         run: |
           gh release download -R coreruleset/go-ftw v${GO_FTW_VERSION} -p "ftw_${GO_FTW_VERSION}_linux_amd64.tar.gz" -O - | tar -xzvf - ftw
 
@@ -39,7 +39,7 @@ jobs:
           ./ftw check -d tests/regression/tests
           ./ftw run -d tests/regression/tests --show-failures-only
         env:
-          FTW_LOGFILE: './tests/logs/modsec2-apache/error.log'
+          FTW_LOGFILE: './tests/logs/${{ matrix.modsec_version }}/error.log'
 
       - name: "Change permissions if failed"
         if: failure()
@@ -47,7 +47,7 @@ jobs:
             # we want to get the audit log, so change permissions (file is only for root on docker)
             sudo chmod 644 tests/logs/${{ matrix.modsec_version }}/modsec_audit.log
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: waf-logs

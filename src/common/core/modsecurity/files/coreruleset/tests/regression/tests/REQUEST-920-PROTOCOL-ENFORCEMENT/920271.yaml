@@ -13,8 +13,9 @@ tests:
             port: 80
             uri: "/?test=test1%127"
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: "id \"920271\""
   - test_title: 920271-2
@@ -25,8 +26,9 @@ tests:
             port: 80
             uri: "/?test=test1%03"
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: "id \"920271\""
   - test_title: 920271-3
@@ -37,8 +39,9 @@ tests:
             port: 80
             uri: "/?test%00=test1"
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: "id \"920271\""
   - test_title: 920271-4
@@ -49,9 +52,10 @@ tests:
             port: 80
             uri: "/?test=test1"
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
               Cookie: hi%13=bye
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             log_contains: "id \"920271\""
   - test_title: 920271-5
@@ -62,8 +66,9 @@ tests:
             port: 80
             uri: "/%20index.html?test=test1"
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             no_log_contains: "id \"920271\""
   - test_title: 920271-6
@@ -74,7 +79,8 @@ tests:
             port: 80
             uri: "/%FFindex.html?test=test1"
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
           output:
             no_log_contains: "id \"920271\""

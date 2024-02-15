@@ -12,8 +12,9 @@ tests:
             dest_addr: "127.0.0.1"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              # Test needs an empty Accept: header
               Accept: ""
           output:
             log_contains: "id \"920310\""
@@ -25,8 +26,9 @@ tests:
             port: 80
             method: "OPTIONS"
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              # Test needs an empty Accept: header
               Accept: ""
           output:
             no_log_contains: "id \"920310\""
@@ -37,9 +39,9 @@ tests:
             dest_addr: "127.0.0.1"
             port: 80
             headers:
-              User-Agent: "ModSecurity CRS 3 Tests Enterprise"
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
-              Accept: ""
+              Accept: "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
           output:
             no_log_contains: "id \"920310\""
   - test_title: 920310-4
@@ -49,8 +51,9 @@ tests:
             dest_addr: "127.0.0.1"
             port: 80
             headers:
-              User-Agent: lol
+              User-Agent: "OWASP CRS test agent"
               Host: "localhost"
+              # Test needs an empty Accept: header
               Accept: ""
           output:
             log_contains: "id \"920310\""
@@ -61,8 +64,9 @@ tests:
             dest_addr: "127.0.0.1"
             port: 80
             headers:
-              User-Agent: "Business/6.6.1.2 CFNetwork/758.5.3 Darwin/15.6.0"
+              User-Agent: "OWASP ModSecurity Core Rule Set; Business/6.6.1.2 CFNetwork/758.5.3 Darwin/15.6.0"
               Host: "localhost"
+              # Test needs an empty Accept: header
               Accept: ""
           output:
             no_log_contains: "id \"920310\""
@@ -73,8 +77,9 @@ tests:
             dest_addr: "127.0.0.1"
             port: 80
             headers:
-              User-Agent: "Entreprise/6.5.0.177 CFNetwork/758.4.3 Darwin/15.5.0"
+              User-Agent: "OWASP ModSecurity Core Rule Set; Entreprise/6.5.0.177 CFNetwork/758.4.3 Darwin/15.5.0"
               Host: "localhost"
+              # Test needs an empty Accept: header
               Accept: ""
           output:
             no_log_contains: "id \"920310\""

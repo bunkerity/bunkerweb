@@ -1,6 +1,6 @@
 ---
 meta:
-  author: "Christian S.J. Peron and Allan Boll"
+  author: "Christian S.J. Peron and Allan Boll, Franziska Bühler"
   description: None
   enabled: true
   name: 942130.yaml
@@ -13,8 +13,11 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: POST
             port: 80
+            uri: /post
             data: "var=%221%22%20sSOUNDS%20LIKE%20%22SOUNDS%20LIKE%201&other_var=test"
             version: HTTP/1.0
           output:
@@ -27,8 +30,10 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
-            uri: "/?a=1=1"
+            uri: "/get?a=1=1"
             version: HTTP/1.1
           output:
             log_contains: id "942130"
@@ -40,8 +45,10 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
-            uri: "/?a=11=1"
+            uri: "/get?a=11=1"
             version: HTTP/1.1
           output:
             no_log_contains: id "942130"
@@ -53,8 +60,10 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
-            uri: "/?a=1=11"
+            uri: "/get?a=1=11"
             version: HTTP/1.1
           output:
             no_log_contains: id "942130"
@@ -66,11 +75,13 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
-            uri: "/?a=11!=1"
+            uri: "/get?a=11!=11"
             version: HTTP/1.1
           output:
-            log_contains: id "942130"
+            no_log_contains: id "942130"
   - test_title: 942130-6
     desc: "SQL Injection Attack: SQL Tautology"
     stages:
@@ -79,24 +90,29 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
-            uri: "/?a=1!=11"
+            uri: "/get?a=b,1=1"
             version: HTTP/1.1
           output:
             log_contains: id "942130"
   - test_title: 942130-7
-    desc: "SQL Injection Attack: SQL Tautology"
+    desc: "SQL Injection Attack: SQL Tautology - like"
     stages:
       - stage:
           input:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
-            method: GET
-            uri: "/?a=11!=11"
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: POST
+            uri: "/post"
+            data: "a=42%20like%2042"
             version: HTTP/1.1
           output:
-            no_log_contains: id "942130"
+            log_contains: id "942130"
   - test_title: 942130-8
     desc: "SQL Injection Attack: SQL Tautology"
     stages:
@@ -105,8 +121,40 @@ tests:
             dest_addr: 127.0.0.1
             headers:
               Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
             method: GET
-            uri: "/?a=b,1=1"
+            uri: "/get?a=This%20is%20like%20no%20other"
+            version: HTTP/1.1
+          output:
+            no_log_contains: id "942130"
+  - test_title: 942130-9
+    desc: "SQL Injection Attack: SQL Tautology using MySQL NULL-safe operator <=>"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            uri: "/get?a=42<=>42"
+            version: HTTP/1.1
+          output:
+            log_contains: id "942130"
+  - test_title: 942130-10
+    desc: "SQL Injection Attack: SQL Tautology using glob"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              Host: localhost
+              User-Agent: "OWASP CRS test agent"
+              Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+            method: GET
+            uri: "/?user=admin%40juice-sh.op'%20and%20password%20glob%20password;"
             version: HTTP/1.1
           output:
             log_contains: id "942130"
