@@ -1,5 +1,6 @@
 class SetupPlugin {
-  constructor(data) {
+  constructor(data, url = location.href) {
+    this.url = url;
     // Set data defaults elements and variables
     // Key of this.data need to match key of fetch data json object to update values
     // type<str> : text (target el), list (el need to be first element of list)
@@ -44,7 +45,7 @@ class SetupPlugin {
       this.updateDataDOM();
       this.updateAlert("fetch");
 
-      fetch(location.href, {
+      fetch(this.url, {
         method: "POST",
         headers: {
           "X-CSRFToken": document.querySelector('input[name="csrf_token"]')
