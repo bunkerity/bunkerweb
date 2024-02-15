@@ -1,4 +1,4 @@
-FROM nginx:1.24.0-alpine@sha256:76ca7f6bfe01c3e22e3af85fd37c30149ece3ac2a444973687cab1765abca115 AS builder
+FROM nginx:1.24.0-alpine@sha256:6845649eadc1f0a5dacaf5bb3f01b480ce200ae1249114be11fef9d389196eaf AS builder
 
 # Install temporary requirements for the dependencies
 RUN apk add --no-cache --virtual .build-deps bash autoconf libtool automake geoip-dev g++ gcc curl-dev libxml2-dev pcre-dev make linux-headers musl-dev gd-dev gnupg brotli-dev openssl-dev patch readline-dev yajl yajl-dev yajl-tools py3-pip
@@ -78,7 +78,7 @@ RUN apk add --no-cache pcre bash python3 yajl && \
 	ln -s /proc/1/fd/1 /var/log/bunkerweb/access.log
 
 # Fix CVEs
-RUN apk add --no-cache "libwebp>=1.2.4-r3" "curl>=8.3.0-r0" "libcurl>=8.3.0-r0" "nghttp2-libs>=1.51.0-r2" "libx11>=1.8.7-r0" "libssl3>=3.0.12-r1" "libcrypto3>=3.0.12-r1" "libexpat>=2.6.0-r0"
+RUN apk add --no-cache "curl>=8.5.0-r0" "libcurl>=8.5.0-r0" "libcrypto3>=3.0.12-r4" "libexpat>=2.6.0-r0" "libssl3>=3.0.12-r4" "libwebp>=1.2.4-r3" "libx11>=1.8.7-r0" "nghttp2-libs>=1.51.0-r2"
 
 EXPOSE 8080/tcp 8443/tcp
 
