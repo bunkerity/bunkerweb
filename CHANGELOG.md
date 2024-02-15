@@ -26,7 +26,7 @@
 - [DEPS] Updated zlib version to v1.3.1
 - [DEPS] Updated ModSecurity version to v3.0.12
 - [DEPS] Updated coreruleset version to v4.0.0
-- [DEPS] Updated lua-resty-mlcache version to v2.6.1
+- [DEPS] Updated lua-resty-mlcache version to v2.7.0
 
 ## v1.5.5 - 2024/01/12
 
