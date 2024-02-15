@@ -222,6 +222,15 @@ class FlashMsg {
     //animate message button if message + never opened
     window.addEventListener("load", (e) => {
       if (Number(this.flashCount.textContent) > 0) this.animeBtn();
+      // display only one fixed flash message
+      const flashFixedEls = document.querySelectorAll(
+        "[data-flash-message-fixed]",
+      );
+      if (flashFixedEls.length > 1) {
+        flashFixedEls.forEach((el, i) => {
+          if (i > 0) el.remove();
+        });
+      }
     });
     //stop animate if clicked once
     this.openBtn.addEventListener("click", (e) => {

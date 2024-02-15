@@ -314,15 +314,12 @@ class ServiceModal {
   }
 
   setIsDraft(isDraft, method) {
-    console.log(isDraft, method);
     const draftVal = isDraft ? "yes" : "no";
 
     document.querySelectorAll('input[name="is_draft"]').forEach((inp) => {
       inp.setAttribute("value", draftVal);
       inp.value = draftVal;
     });
-
-    console.log("f");
 
     //Update draft button
     const btn = document.querySelector("button[data-toggle-draft-btn]");
