@@ -1,5 +1,0 @@
-#!/bin/bash
-
-/usr/share/bunkerweb/cli/main.py "$@"
-
-exit $?

@@ -1,6 +1,0 @@
-[managers]
-manager ansible_host=${instances[0].access_ip_v4} ansible_user=debian failover_ip=${failover_ips[0]} local_ip=192.168.42.100
-
-[workers]
-worker1 ansible_host=${instances[1].access_ip_v4} ansible_user=debian failover_ip=${failover_ips[1]} local_ip=192.168.42.101
-worker2 ansible_host=${instances[2].access_ip_v4} ansible_user=debian failover_ip=${failover_ips[2]} local_ip=192.168.42.102

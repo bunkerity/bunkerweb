@@ -1,9 +1,0 @@
---TEST--
-pgsql, $-quoted strings
---INPUT--
-$foo
---EXPECTED--
-n $
-n foo
-
-

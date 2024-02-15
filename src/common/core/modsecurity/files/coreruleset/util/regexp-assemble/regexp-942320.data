@@ -1,7 +1,0 @@
-create\s+function\s*?\w+\s*?\(\s*?\)\s*?-
-create\s+procedure\s*?\w+\s*?\(\s*?\)\s*?-
-declare[^\w]+[@#]\s*?\w+
-exec\s*?\(\s*?@
-procedure\s+analyse\s*?\(
-;\s*?declare\s+[\w-]+
-;\s*?open\s+[\w-]+
