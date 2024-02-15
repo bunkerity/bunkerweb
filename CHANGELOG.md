@@ -1,5 +1,6 @@
 # Table of Contents
 
+- [2.7.0](#270)
 - [2.6.1](#261)
 - [2.6.0](#260)
 - [2.5.0](#250)
@@ -14,6 +15,26 @@
 - [2.0.0](#200)
 - [1.0.1](#101)
 - [1.0.0](#100)
+
+## [2.7.0]
+
+> Released on: 2024/02/09
+
+#### Changed
+
+- Update `peek()` to only return `0` when TTL (or neg-TTL) was "indefinite"
+  (i.e. `0`). Any non-zero TTL now guarantees a non-zero return value for
+  `peek()`. A stale value still in cache may still return a negative return
+  value.
+  [#124](https://github.com/thibaultcha/lua-resty-mlcache/pull/124)
+
+#### Added
+
+- New `get()` option `resty_lock_opts` allows overriding lua-resty-lock option
+  for individual calls.
+  [#125](https://github.com/thibaultcha/lua-resty-mlcache/pull/125)
+
+[Back to TOC](#table-of-contents)
 
 ## [2.6.1]
 
@@ -268,6 +289,7 @@ Initial release.
 
 [Back to TOC](#table-of-contents)
 
+[2.7.0]: https://github.com/thibaultcha/lua-resty-mlcache/compare/2.6.1...2.7.0
 [2.6.1]: https://github.com/thibaultcha/lua-resty-mlcache/compare/2.6.0...2.6.1
 [2.6.0]: https://github.com/thibaultcha/lua-resty-mlcache/compare/2.5.0...2.6.0
 [2.5.0]: https://github.com/thibaultcha/lua-resty-mlcache/compare/2.4.1...2.5.0

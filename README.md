@@ -410,6 +410,9 @@ options:
   having to repeat such transformations on every request, such as creating
   tables, cdata objects, loading new Lua code, etc...
   **Default:** inherited from the instance.
+- `resty_lock_opts`: _optional_ table. If specified, override the instance
+  `resty_lock_opts` for the current `get()` lookup.
+  **Default:** inherited from the instance.
 
 The third argument `callback` is optional. If provided, it must be a function
 whose signature and return values are documented in the following example:
@@ -745,8 +748,12 @@ If there is no value for the queried `key`, it returns `nil` and no error.
 If there is a value for the queried `key`, it returns a number indicating the
 remaining TTL of the cached value (in seconds) and no error. If the value for
 `key` has expired but is still in the L2 cache, returned TTL value will be
-negative. Finally, the third returned value in that case will be the cached
-value itself, for convenience.
+negative. The remaining TTL return value will only be `0` if the queried `key`
+has an indefinite ttl (`ttl=0`). Otherwise, this return value may be positive
+(`key` still valid), or negative (`key` is stale).
+
+The third returned value will be the cached value as stored in the L2 cache, if
+still available.
 
 This method is useful when you want to determine if a value is cached. A value
 stored in the L2 cache is considered cached regardless of whether or not it is

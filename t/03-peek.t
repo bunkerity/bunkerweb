@@ -120,9 +120,7 @@ ttl: 18
 
 
 
-=== TEST 4: peek() returns a negative ttl when a key expired
---- main_config
-    timer_resolution 10ms;
+=== TEST 4: peek() returns a 0 remaining_ttl if the ttl was 0
 --- config
     location /t {
         content_by_lua_block {
@@ -152,8 +150,8 @@ ttl: 18
         }
     }
 --- response_body
-ttl: -1
-ttl: -2
+ttl: 0
+ttl: 0
 --- no_error_log
 [error]
 [crit]

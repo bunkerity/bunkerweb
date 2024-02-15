@@ -701,9 +701,6 @@ qr/\[error\] .*?mlcache\.lua:\d+: cannot cache value of type userdata/
 
             local cache = assert(mlcache.new("my_mlcache", "cache_shm", {
                 ttl = 0.3,
-                l1_serializer = function(s)
-                    return "override"
-                end
             }))
 
             local function cb()
@@ -712,17 +709,17 @@ qr/\[error\] .*?mlcache\.lua:\d+: cannot cache value of type userdata/
             end
 
             local data = assert(cache:get("key", nil, cb))
-            assert(data == "override")
+            assert(data == 123)
 
             ngx.sleep(0.2)
 
             data = assert(cache:get("key", nil, cb))
-            assert(data == "override")
+            assert(data == 123)
 
             ngx.sleep(0.2)
 
             local data, err, lvl = assert(cache:get("key", nil, cb))
-            assert(data == "override")
+            assert(data == 123)
         }
     }
 --- response_body
@@ -1769,7 +1766,35 @@ in positive callback
 
 
 
-=== TEST 42: get() passes 'resty_lock_opts' for L3 calls
+=== TEST 42: get() errors on invalid opts.resty_lock_opts
+--- config
+    location /t {
+        content_by_lua_block {
+            local mlcache = require "resty.mlcache"
+
+            local cache, err = mlcache.new("my_mlcache", "cache_shm")
+            if not cache then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local ok, err = pcall(cache.get, cache, "key", {
+                resty_lock_opts = "true"
+            })
+            if not ok then
+                ngx.say(err)
+            end
+        }
+    }
+--- response_body
+opts.resty_lock_opts must be a table
+--- no_error_log
+[error]
+[crit]
+
+
+
+=== TEST 43: get() passes 'resty_lock_opts' for L3 calls
 --- config
     location /t {
         content_by_lua_block {
@@ -1810,7 +1835,51 @@ was given 'opts.resty_lock_opts': true
 
 
 
-=== TEST 43: get() errors on lock timeout
+=== TEST 44: get() uses 'opts.resty_lock_opts' if specified
+--- config
+    location /t {
+        content_by_lua_block {
+            local resty_lock = require "resty.lock"
+            local mlcache = require "resty.mlcache"
+
+            local opts = { timeout = 1 }
+            local resty_lock_opts = { timeout = 5 }
+
+            do
+                local orig_resty_lock_new = resty_lock.new
+                resty_lock.new = function(_, dict_name, opts, ...)
+                    ngx.say("was given 'opts.resty_lock_opts': ", opts == resty_lock_opts)
+
+                    return orig_resty_lock_new(_, dict_name, opts, ...)
+                end
+            end
+
+            local cache, err = mlcache.new("my_mlcache", "cache_shm", {
+                resty_lock_opts = opts,
+            })
+            if not cache then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+
+            local data, err = cache:get("key", {
+                resty_lock_opts = resty_lock_opts,
+            }, function() return nil end)
+            if err then
+                ngx.log(ngx.ERR, err)
+                return
+            end
+        }
+    }
+--- response_body
+was given 'opts.resty_lock_opts': true
+--- no_error_log
+[error]
+[crit]
+
+
+
+=== TEST 45: get() errors on lock timeout
 --- config
     location /t {
         access_by_lua_block {
@@ -1888,7 +1957,7 @@ hit_lvl: 1
 
 
 
-=== TEST 44: get() returns data even if failed to set in shm
+=== TEST 46: get() returns data even if failed to set in shm
 --- config
     location /t {
         content_by_lua_block {
@@ -1937,7 +2006,7 @@ qr/\[warn\] .*? could not write to lua_shared_dict 'cache_shm' after 3 tries \(n
 
 
 
-=== TEST 45: get() errors on invalid opts.shm_set_tries
+=== TEST 47: get() errors on invalid opts.shm_set_tries
 --- config
     location /t {
         content_by_lua_block {
@@ -1975,7 +2044,7 @@ opts.shm_set_tries must be >= 1
 
 
 
-=== TEST 46: get() with default shm_set_tries to LRU evict items when a large value is being cached
+=== TEST 48: get() with default shm_set_tries to LRU evict items when a large value is being cached
 --- config
     location /t {
         content_by_lua_block {
@@ -2043,7 +2112,7 @@ callback was called: 1 times
 
 
 
-=== TEST 47: get() respects instance opts.shm_set_tries to LRU evict items when a large value is being cached
+=== TEST 49: get() respects instance opts.shm_set_tries to LRU evict items when a large value is being cached
 --- config
     location /t {
         content_by_lua_block {
@@ -2113,7 +2182,7 @@ callback was called: 1 times
 
 
 
-=== TEST 48: get() accepts opts.shm_set_tries to LRU evict items when a large value is being cached
+=== TEST 50: get() accepts opts.shm_set_tries to LRU evict items when a large value is being cached
 --- config
     location /t {
         content_by_lua_block {
@@ -2183,7 +2252,7 @@ callback was called: 1 times
 
 
 
-=== TEST 49: get() caches data in L1 LRU even if failed to set in shm
+=== TEST 51: get() caches data in L1 LRU even if failed to set in shm
 --- config
     location /t {
         content_by_lua_block {
@@ -2245,7 +2314,7 @@ is stale: true
 
 
 
-=== TEST 50: get() does not cache value in LRU indefinitely when retrieved from shm on last ms (see GH PR #58)
+=== TEST 52: get() does not cache value in LRU indefinitely when retrieved from shm on last ms (see GH PR #58)
 --- config
     location /t {
         content_by_lua_block {
@@ -2308,7 +2377,7 @@ is stale: true
 
 
 
-=== TEST 51: get() bypass cache for negative callback TTL
+=== TEST 53: get() bypass cache for negative callback TTL
 --- config
     location /t {
         content_by_lua_block {
@@ -2373,7 +2442,7 @@ in negative callback
 
 
 
-=== TEST 52: get() nil callback returns positive cached items from L1/L2
+=== TEST 54: get() nil callback returns positive cached items from L1/L2
 --- config
     location /t {
         content_by_lua_block {
@@ -2455,7 +2524,7 @@ hit_lvl: 1
 
 
 
-=== TEST 53: get() nil callback returns negative cached items from L1/L2
+=== TEST 55: get() nil callback returns negative cached items from L1/L2
 --- config
     location /t {
         content_by_lua_block {
@@ -2537,7 +2606,7 @@ hit_lvl: 1
 
 
 
-=== TEST 54: get() JITs on misses without a callback
+=== TEST 56: get() JITs on misses without a callback
 --- config
     location /t {
         content_by_lua_block {
