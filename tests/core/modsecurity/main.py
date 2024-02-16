@@ -85,7 +85,7 @@ try:
         else:
             with open("/var/log/bunkerweb/error.log", "r") as f:
                 for line in f.readlines():
-                    if search(f'[ver "OWASP_CRS/{modsecurity_crs_version}', line):
+                    if search(r'\[ver "OWASP_CRS/' + modsecurity_crs_version, line):
                         found = True
                         break
 
