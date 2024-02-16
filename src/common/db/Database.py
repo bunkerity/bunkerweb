@@ -274,12 +274,14 @@ class Database:
 
     def get_metadata(self) -> Dict[str, str]:
         """Get the metadata from the database"""
-        data = {"version": "1.5.6", "integration": "unknown"}
+        data = {"version": "1.5.6", "integration": "unknown", "database_version": "Unknown"}
+        database = self.database_uri.split(":")[0].split("+")[0]
         with self.__db_session() as session:
             with suppress(ProgrammingError, OperationalError):
+                data["database_version"] = (session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"])[0]
                 metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration).filter_by(id=1).first()
                 if metadata:
-                    data = {"version": metadata.version, "integration": metadata.integration}
+                    data.update({"version": metadata.version, "integration": metadata.integration})
 
         return data
 
@@ -352,22 +354,26 @@ class Database:
                 for table in Base.metadata.tables:
                     if not inspector.has_table(table):
                         has_all_tables = False
-                    else:
-                        missing_columns = []
+                        continue
+                    missing_columns = []
 
-                        db_columns = inspector.get_columns(table)
-                        for column in Base.metadata.tables[table].columns:
-                            if not any(db_column["name"] == column.name for db_column in db_columns):
-                                missing_columns.append(column)
+                    db_columns = inspector.get_columns(table)
+                    self.__logger.debug(f'Checking table "{table}" for missing columns')
+                    for column in Base.metadata.tables[table].columns:
+                        self.__logger.debug(f'Checking column "{column.name}" in table "{table}"')
+                        if not any(db_column["name"] == column.name for db_column in db_columns):
+                            self.__logger.warning(f'Column "{column.name}" is missing in table "{table}"')
+                            missing_columns.append(column)
 
-                        try:
-                            with self.__db_session() as session:
-                                if missing_columns:
-                                    for column in missing_columns:
-                                        session.execute(text(f"ALTER TABLE {table} ADD COLUMN {column.name} {column.type}"))
-                                session.commit()
-                        except BaseException:
-                            return False, format_exc()
+                    try:
+                        with self.__db_session() as session:
+                            if missing_columns:
+                                for column in missing_columns:
+                                    self.__logger.warning(f'Adding column "{column.name}" to table "{table}"')
+                                    session.execute(text(f"ALTER TABLE {table} ADD COLUMN {column.name} {column.type}"))
+                            session.commit()
+                    except BaseException:
+                        return False, format_exc()
 
         if has_all_tables and db_version and db_version == bunkerweb_version:
             return False, ""
@@ -460,6 +466,9 @@ class Database:
 
                         if db_setting:
                             updates = {}
+
+                            if value["plugin_id"] != db_setting.plugin_id:
+                                updates[Settings.plugin_id] = value["plugin_id"]
 
                             if value["name"] != db_setting.name:
                                 updates[Settings.name] = value["name"]
