@@ -1,0 +1,72 @@
+version: '3.2'
+
+# Only one of these will be up at a time for now.
+# Concurrency will be on the tests folder we have.
+
+services:
+  modsec2-apache:
+    container_name: modsec2-apache
+    image: owasp/modsecurity-crs:apache
+    environment:
+      SERVERNAME: modsec2-apache
+      BACKEND: http://backend
+      PORT: "80"
+      MODSEC_RULE_ENGINE: DetectionOnly
+      PARANOIA: 4
+      TZ: "${TZ}"
+      ERRORLOG: "/var/log/error.log"
+      ACCESSLOG: "/var/log/access.log"
+      MODSEC_AUDIT_LOG_FORMAT: Native
+      MODSEC_AUDIT_LOG_TYPE: Serial
+      MODSEC_AUDIT_LOG: "/var/log/modsec_audit.log"
+      MODSEC_TMP_DIR: "/tmp"
+      MODSEC_RESP_BODY_ACCESS: "On"
+      MODSEC_RESP_BODY_MIMETYPE: "text/plain text/html text/xml application/json"
+      COMBINED_FILE_SIZES: "65535"
+      CRS_ENABLE_TEST_MARKER: 1
+    volumes:
+      - ./logs/modsec2-apache:/var/log:rw
+      - ../rules:/opt/owasp-crs/rules:ro
+      - ../crs-setup.conf.example:/etc/modsecurity.d/owasp-crs/crs-setup.conf.example
+    entrypoint: ["/bin/sh", "-c", "/bin/cp /etc/modsecurity.d/owasp-crs/crs-setup.conf.example /etc/modsecurity.d/owasp-crs/crs-setup.conf && /docker-entrypoint.sh && apachectl -D FOREGROUND"]
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+
+  modsec3-nginx:
+    container_name: modsec3-nginx
+    image: owasp/modsecurity-crs:nginx
+    environment:
+      SERVERNAME: modsec3-nginx
+      BACKEND: http://backend
+      PORT: "80"
+      MODSEC_RULE_ENGINE: DetectionOnly
+      PARANOIA: 4
+      TZ: "${TZ}"
+      ERRORLOG: "/var/log/error.log"
+      LOGLEVEL: "info"
+      ACCESSLOG: "/var/log/access.log"
+      MODSEC_AUDIT_LOG_FORMAT: Native
+      MODSEC_AUDIT_LOG_TYPE: Serial
+      MODSEC_AUDIT_LOG: "/var/log/modsec_audit.log"
+      MODSEC_RESP_BODY_ACCESS: "On"
+      MODSEC_RESP_BODY_MIMETYPE: "text/plain text/html text/xml application/json"
+      COMBINED_FILE_SIZES: "65535"
+      CRS_ENABLE_TEST_MARKER: 1
+    volumes:
+      - ./logs/modsec3-nginx:/var/log:rw
+      - ../rules:/opt/owasp-crs/rules:ro
+      - ../crs-setup.conf.example:/etc/modsecurity.d/owasp-crs/crs-setup.conf.example
+    command: ["nginx", "-g", "daemon off;"]
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  # our test originally targeted www.example.com as backend
+  # and that would do real traffic, to a real site
+  #
+  backend:
+    image: docker.io/kennethreitz/httpbin

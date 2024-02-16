@@ -1,0 +1,37 @@
+---
+meta:
+  author: "Walter Hop"
+  description: None
+  enabled: true
+  name: 942511.yaml
+tests:
+  - test_title: 942511-1
+    desc: "SQLi bypass detected: quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: localhost
+            method: GET
+            port: 80
+            uri: "/?`bla`"
+            version: HTTP/1.0
+          output:
+            no_log_contains: id "942511"
+  - test_title: 942511-2
+    desc: "SQLi bypass detected: quotes"
+    stages:
+      - stage:
+          input:
+            dest_addr: 127.0.0.1
+            headers:
+              User-Agent: "ModSecurity CRS 3 Tests"
+              Host: localhost
+            method: GET
+            port: 80
+            uri: "/?'bla'"
+            version: HTTP/1.0
+          output:
+            log_contains: id "942511"

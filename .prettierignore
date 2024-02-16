@@ -2,7 +2,7 @@ docs/
 env/
 */env/
 *.min*
-src/common/core/modsecurity/
+src/common/core/modsecurity/files/
 src/deps/src/
 mkdocs.yml
 CHANGELOG.md

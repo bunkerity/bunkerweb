@@ -1,0 +1,217 @@
+# Vulnerability scanners, bruteforce password crackers and exploitation tools
+
+# password cracker
+# http://sectools.org/tool/hydra/
+(hydra)
+# vuln scanner
+# http://virtualblueness.net/nasl.html
+.nasl
+# sql injection
+# https://sourceforge.net/projects/absinthe/
+absinthe
+# email harvesting
+# dead? 2004
+advanced email extractor
+# vuln scanner
+# http://www.arachni-scanner.com/
+arachni/
+autogetcontent
+# nessus frontend
+# http://www.crossley-nilsen.com/Linux/Bilbo_-_Nessus_WEB/bilbo_-_nessus_web.html
+# dead? 2003
+bilbo
+# Backup File Artifacts Checker
+# https://github.com/mazen160/bfac
+BFAC
+# password cracker
+# http://sectools.org/tool/brutus/
+brutus
+brutus/aet
+# sql injection
+# https://www.notsosecure.com/bsqlbf-v2-blind-sql-injection-brute-forcer/
+bsqlbf
+# vuln scanner
+# http://freecode.com/projects/cgichk dead? 2001
+cgichk
+# vuln scanner
+# https://sourceforge.net/projects/cisco-torch/
+cisco-torch
+# vuln scanner
+# https://github.com/stasinopoulos/commix
+commix
+# MS FrontPage vuln scanner?
+core-project/1.0
+# vuln scanner?
+crimscanner/
+# vuln scanner
+datacha0s
+# hidden page scanner
+# https://www.owasp.org/index.php/Category:OWASP_DirBuster_Project
+dirbuster
+# vuln scanner
+# https://sourceforge.net/projects/dominohunter/
+domino hunter
+# vuln scanner - directory traversal fuzzer
+# https://github.com/wireghoul/dotdotpwn
+dotdotpwn
+email extractor
+# vuln scanner
+fhscan core 1.
+floodgate
+# "F-Secure Radar is a turnkey vulnerability scanning and management platform."
+F-Secure Radar
+get-minimal
+# Scanner that looks for existing or hidden web objects
+# https://github.com/OJ/gobuster
+gobuster
+# vuln scanner
+gootkit auto-rooter scanner
+grabber
+# vuln scanner
+# https://sourceforge.net/projects/grendel/
+grendel-scan
+# sql injection
+havij
+# vuln scanner - path disclosure finder
+# http://seclists.org/fulldisclosure/2010/Sep/375
+inspath
+internet ninja
+# vuln scanner
+jaascois
+# vuln scanner
+zmeu
+# "Mozilla/5.0 Jorgee", vuln scanner
+Jorgee
+# port scanner
+# https://github.com/robertdavidgraham/masscan
+masscan
+# vuln scanner
+# http://www.severus.org/sacha/metis/
+metis
+# vuln scanner
+morfeus fucking scanner
+# sql injection
+# https://github.com/dtrip/mysqloit
+mysqloit
+# vuln scanner
+# http://www.nstalker.com/
+n-stealth
+# vuln scanner
+# http://www.tenable.com/products/nessus-vulnerability-scanner
+nessus
+# vuln scanner
+# https://www.netsparker.com/web-vulnerability-scanner/
+netsparker
+# vuln scanner
+# https://cirt.net/Nikto2
+nikto
+# vuln scanner
+nmap nse
+nmap scripting engine
+nmap-nse
+# vuln scanner
+# http://www.nsauditor.com/
+nsauditor
+# vuln scanner
+# https://github.com/projectdiscovery/nuclei
+Nuclei
+# vuln scanner
+# http://www.openvas.org/
+openvas
+# sql injection
+# http://www.vealtel.com/software/nosec/pangolin/
+pangolin
+# web proxy & vuln scanner
+# https://sourceforge.net/projects/paros/
+paros
+# phpmyadmin vuln scanner
+# dead 2005?
+pmafind
+prog.customcrawler
+# QQGameHall DoS/Virus/Malware/Adware
+# https://twitter.com/bagder/status/1244982556958826496?s=20
+QQGameHall
+# vuln scanner
+# https://www.qualys.com/suite/web-application-scanning/
+qualys was
+s.t.a.l.k.e.r.
+security scan
+# vuln scanner
+# https://sourceforge.net/projects/springenwerk/
+springenwerk
+# sql injection
+# http://www.sqlpowerinjector.com/
+sql power injector
+# sql injection
+# http://sqlmap.org/
+sqlmap
+# sql injection
+# http://sqlninja.sourceforge.net/
+sqlninja
+# https://www.cyber.nj.gov/threat-profiles/trojan-variants/sysscan
+sysscan
+# password cracker
+# http://foofus.net/goons/jmk/medusa/medusa.html
+teh forest lobster
+this is an exploit
+# vuln scanner?
+toata dragostea
+toata dragostea mea pentru diavola
+# SQL bot
+# http://tools.cisco.com/security/center/viewIpsSignature.x?signatureId=22142&signatureSubId=0
+uil2pn
+# badly scripted UAs (e.g. User-Agent: User-Agent: foo)
+user-agent:
+# vuln scannr
+# https://subgraph.com/vega/
+vega/
+# vuln scanner
+# dead?
+voideye
+# vuln scanner
+# http://w3af.org/
+w3af.sf.net
+w3af.sourceforge.net
+w3af.org
+# site scanner (legacy)
+# http://www.robotstxt.org/db/webbandit.html
+webbandit
+# vuln scanner
+# http://www8.hp.com/us/en/software-solutions/webinspect-dynamic-analysis-dast/
+webinspect
+# site scanner
+# http://www.scrt.ch/en/attack/downloads/webshag
+webshag
+# vuln scanner
+# dead?
+webtrends security analyzer
+# vuln scanner
+# https://github.com/hhucn/webvulnscan
+webvulnscan
+# vuln scanner
+# https://github.com/xmendez/wfuzz
+Wfuzz
+# vuln scanner
+# https://github.com/ffuf/ffuf
+Fuzz Faster U Fool
+# web technology scanner
+# https://www.morningstarsecurity.com/research/whatweb
+whatweb
+# vuln scanner
+whcc/
+# exploit poc
+wordpress hash grabber
+# exploit
+xmlrpc exploit
+# wordpress vuln scanner
+# https://wpscan.org/
+WPScan
+# vuln scanner
+# https://github.com/mazen160/struts-pwn
+struts-pwn
+# Detectify website vulnerability scanner
+# https://detectify.com/
+Detectify
+# ZGrab scanner (Mozilla/5.0 zgrab/0.x)
+# https://zmap.io
+zgrab

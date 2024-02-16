@@ -15,6 +15,7 @@
 - [FEATURE] Add new Metrics core plugin that will allow metrics collection and retrieval of internal metrics
 - [FEATURE] Add setting DATABASE_LOG_LEVEL to control SQLAlchemy loggers separately from the main one
 - [FEATURE] Add whitelist check for the default-server as well
+- [FEATURE] Add the possibility to choose between the coreruleset v3 and v4 that will be used by ModSecurity (default is v3)
 - [MISC] Add a better custom certificate cache handling
 - [MISC] Updated Linux base images in Dockerfiles
 - [MISC] Add recommended dialects to databases string
@@ -25,7 +26,8 @@
 - [DEPS] Updated lua-resty-core to v0.1.28
 - [DEPS] Updated zlib version to v1.3.1
 - [DEPS] Updated ModSecurity version to v3.0.12
-- [DEPS] Updated coreruleset version to v4.0.0
+- [DEPS] Updated coreruleset version to v3.3.5
+- [DEPS] Added coreruleset version v4.0.0
 - [DEPS] Updated lua-resty-mlcache version to v2.7.0
 
 ## v1.5.5 - 2024/01/12
