@@ -34,6 +34,7 @@ else
     echo "MODSECURITY_SEC_AUDIT_ENGINE=RelevantOnly" | sudo tee -a /etc/bunkerweb/variables.env
     echo "MODSECURITY_SEC_RULE_ENGINE=On" | sudo tee -a /etc/bunkerweb/variables.env
     echo "MODSECURITY_SEC_AUDIT_LOG_PARTS=ABCFHZ" | sudo tee -a /etc/bunkerweb/variables.env
+    export TEST_TYPE="linux"
     sudo touch /var/www/html/index.html
     sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
