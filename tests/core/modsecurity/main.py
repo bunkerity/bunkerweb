@@ -1,7 +1,6 @@
 from contextlib import suppress
 from datetime import datetime
 from re import search
-from docker import DockerClient
 from os import getenv
 from requests import get
 from requests.exceptions import RequestException
@@ -66,6 +65,8 @@ try:
     if use_modsecurity and use_modsecurity_crs:
         found = False
         if getenv("TEST_TYPE", "docker") == "docker":
+            from docker import DockerClient
+
             docker_host = getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
             docker_client = DockerClient(base_url=docker_host)
 
