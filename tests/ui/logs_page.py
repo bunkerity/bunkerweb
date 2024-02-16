@@ -132,8 +132,9 @@ except KeyboardInterrupt:
     exit_code = 1
 except:
     log_exception("Something went wrong, exiting ...")
-    DRIVER.save_screenshot("error.png")
     exit_code = 1
 finally:
+    if exit_code:
+        DRIVER.save_screenshot("error.png")
     DRIVER.quit()
     exit(exit_code)
