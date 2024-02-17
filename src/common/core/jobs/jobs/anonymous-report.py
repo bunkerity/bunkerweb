@@ -100,6 +100,8 @@ try:
     for key in data["non_default_settings"].copy():
         data["non_default_settings"][key] = str(data["non_default_settings"][key])
 
+    data["bw_instances_number"] = str(len(db.get_instances()))
+
     tmp_anonymous_report_path.joinpath("last_report.json").write_text(dumps(data, indent=4), encoding="utf-8")
 
     response = post("https://api.bunkerweb.io/data", json=data, headers={"User-Agent": f"BunkerWeb/{data['version']}"}, allow_redirects=True, timeout=10)
