@@ -49,6 +49,7 @@ STREAM support :warning:
 |`USE_UDP`                     |`no`                                                                                                                    |multisite|no      |UDP listen instead of TCP (stream).                         |
 |`USE_IPV6`                    |`no`                                                                                                                    |global   |no      |Enable IPv6 connectivity.                                   |
 |`IS_DRAFT`                    |`no`                                                                                                                    |multisite|no      |Internal use : set to yes when the service is in draft mode.|
+|`TIMERS_LOG_LEVEL`            |`debug`                                                                                                                 |global   |no      |Log level for timers.                                       |
 
 
 ## Core settings
