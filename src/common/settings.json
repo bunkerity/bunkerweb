@@ -297,5 +297,24 @@
     "label": "internal use draft",
     "regex": "^(yes|no)$",
     "type": "check"
+  },
+  "TIMERS_LOG_LEVEL": {
+    "context": "global",
+    "default": "debug",
+    "help": "Log level for timers.",
+    "id": "timers-log-level",
+    "label": "Timers log level",
+    "regex": "^(debug|info|notice|warn|error|crit|alert|emerg)$",
+    "type": "select",
+    "select": [
+      "debug",
+      "info",
+      "notice",
+      "warn",
+      "error",
+      "crit",
+      "alert",
+      "emerg"
+    ]
   }
 }
