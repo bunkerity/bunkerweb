@@ -5,6 +5,7 @@
 - [LINUX] Support RHEL 9.3
 - [BUGFIX] Fix issues with the antibot feature ([#866](https://github.com/bunkerity/bunkerweb/issues/866), [#870](https://github.com/bunkerity/bunkerweb/issues/870))
 - [BUGFIX] Fix Bad behavior whitelist check in access phase
+- [LINUX] Add logrotate support for the logs
 - [UI] Add bans management page in the web UI
 - [UI] Add blocked requests page in the web UI
 - [UI] Add the possibility to clone a service in the web UI
