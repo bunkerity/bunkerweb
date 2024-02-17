@@ -304,14 +304,14 @@
     "help": "Log level for timers.",
     "id": "timers-log-level",
     "label": "Timers log level",
-    "regex": "^(debug|info|notice|warn|error|crit|alert|emerg)$",
+    "regex": "^(debug|info|notice|warn|err|crit|alert|emerg)$",
     "type": "select",
     "select": [
       "debug",
       "info",
       "notice",
       "warn",
-      "error",
+      "err",
       "crit",
       "alert",
       "emerg"
