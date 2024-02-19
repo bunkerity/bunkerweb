@@ -2,12 +2,31 @@
 
 from os import getenv, sep
 from pathlib import Path
+from platform import machine
 from requests import request as requests_request, ReadTimeout
 from typing import Literal, Optional, Tuple, Union
 
 
 def request(method: Union[Literal["POST"], Literal["GET"]], url: str, _id: Optional[str] = None) -> Tuple[bool, Optional[int], Union[str, dict]]:
-    data = {"integration": get_integration(), "version": get_version()}
+    data = {
+        "integration": get_integration(),
+        "version": get_version(),
+        "os": {
+            "name": "Linux",
+            "version": "Unknown",
+            "version_id": "Unknown",
+            "version_codename": "Unknown",
+            "id": "Unknown",
+            "arch": machine(),
+        },
+    }
+    os_release = Path("/etc/os-release")
+    if os_release.exists():
+        for line in os_release.read_text().splitlines():
+            if "=" not in line or line.split("=")[0].strip().lower() not in data["os"]:
+                continue
+            data["os"][line.split("=")[0].lower()] = line.split("=")[1].strip('"')
+
     headers = {"User-Agent": f"BunkerWeb/{get_version()}"}
     if _id is not None:
         data["id"] = _id
