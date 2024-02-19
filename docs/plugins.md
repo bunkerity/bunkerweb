@@ -660,11 +660,11 @@ This class has two arguments `SetupPlugin(setup, url)` :
 
 **setup details**
 
-|     key     | Type   | Description                                                                                  |
-| :--------:  | :----: | :------------------------------------------------------------------------------------------- |
-| `dict name`   | string | Replace `dict name` by the JSON key to extract the related value.                                 |
+|     key     | Type       | Description                                                                                  |
+| :--------:  | :--------: | :------------------------------------------------------------------------------------------- |
+| `dict name` | string     | Replace `dict name` by the JSON key to extract the related value.                            |
 | `el`        | DOM element| Select element you want the value to be updated.                                             |
-|   `value`   | any    | Default value on template load or in case retrieving JSON failed.                            |
-|    `type`   | string | Define the script behavior with the incoming value. Available : `text`, `list` and `status`. |
-|  `textEl`   | DOM element| Optional additional text content when type is `status`.                                     |
-|  `listNames`| string | List of data keys when type is `list`.                                                       |
+|   `value`   | any        | Default value on template load or in case retrieving JSON failed.                            |
+|    `type`   | string     | Define the script behavior with the incoming value. Available : `text`, `list` and `status`. |
+|  `textEl`   | DOM element| Optional additional text content when type is `status`.                                      |
+|  `listNames`| string     | List of data keys when type is `list`.                                                       |

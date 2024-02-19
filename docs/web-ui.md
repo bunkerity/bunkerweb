@@ -1728,3 +1728,11 @@ After a successful login/password combination, you will be prompted to enter you
     ```shell
     systemctl restart bunkerweb
     ```
+
+## Upgrade pro version
+
+In case you have buy a pro version and you already have a BunkerWeb setup with an UI, you can update **pro settings** inside **global config page**.
+
+- add image
+
+- procedure : get key from panel, put on the related settings, save

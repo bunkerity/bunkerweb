@@ -2426,3 +2426,11 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
 
     ...
     ```
+
+## And now ?
+
+This quickstart is just a tiny fraction of the functionality that BunkerWeb has to offer. Be curious and see what else BunkerWeb has to offer.
+
+The documentation shares free and professional features. The latter will be marked accordingly to avoid confusion.
+
+If you want to make the most of the solution, don't hesitate to [take a detailed look at the features from the panel.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)

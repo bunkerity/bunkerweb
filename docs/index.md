@@ -61,11 +61,25 @@ A demo website protected with BunkerWeb is available at [demo.bunkerweb.io](http
 
 ## Professional services
 
+### Support panel
+
 Get the most of BunkerWeb by getting professional services directly from the maintainers of the project. From technical support to tailored consulting and development, we are here to assist you in the security of your web services.
 
 You will find more information by visiting the [BunkerWeb Panel](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc), our dedicated platform for professional services.
 
 Don't hesitate to [contact us](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc) if you have any question, we will be more than happy to respond to your needs.
+
+### Pro version
+
+BunkerWeb has a pro version to further improve the security of your applications and make managing them faster and easier (email reporting, more settings options...).
+
+We have centralised version management and support within the panel for greater ease of use.
+
+More detailed information about this version can be found [by visiting our website](https://www.bunkerweb.io/#services?utm_campaign=self&utm_source=doc).
+
+If you're interested, upgrade to the pro version in just a few clicks, [following the steps here.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc).
+
+Note that in the documentation, it will be mentioned when a feature is for the pro version.
 
 ## Ecosystem, community and resources
 

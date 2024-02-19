@@ -26,6 +26,10 @@ If you think that a new integration should be supported, do not hesitate to open
 
 ## Settings
 
+!!! tip "Pro settings"
+
+    Some plugins are reserved for the **pro version**. [Find out more about the pro version here.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)
+
 Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.
 
 The configuration of BunkerWeb is done by using what we call the "settings" or "variables". Each setting is identified by a name such as `AUTO_LETS_ENCRYPT` or `USE_ANTIBOT`. You can assign values to the settings to configure BunkerWeb.
