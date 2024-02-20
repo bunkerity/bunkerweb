@@ -1,12 +1,14 @@
 from contextlib import suppress
 from logging import info as log_info, exception as log_exception, error as log_error
 from pathlib import Path
+from time import sleep
+from requests import get
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
 
-from wizard import DRIVER
+from wizard import DRIVER, UI_URL
 from base import TEST_TYPE
 from utils import access_page, assert_button_click, safe_get_element, wait_for_service
 
@@ -15,6 +17,12 @@ exit_code = 0
 try:
     log_info("Navigating to the plugins page to create a new service ...")
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[6]/a", "plugins")
+
+    for _ in range(5):
+        get(f"http://www.example.com{UI_URL}/?id=/etc/passwd")
+        sleep(1)
+
+    sleep(7)
 
     log_info("Trying to reload the plugins without adding any ...")
 
@@ -79,7 +87,118 @@ try:
 
     log_info("The plugin has been deleted")
 
-    # TODO add test for plugin pages
+    DEACTIVATED_PLUGINS = ("antibot", "blacklist", "bunkernet", "cors", "country", "greylist", "redis", "reversescan")
+    for plugin in DEACTIVATED_PLUGINS:
+        log_info(f"Trying {plugin} plugin page ...")
+        DRIVER.get(f"http://www.example.com{UI_URL}/plugins/{plugin}")
+        first_card = safe_get_element(DRIVER, By.XPATH, "/html/body/main/div/div/div/div[1]/h5")
+        assert isinstance(first_card, WebElement), "First card is not a WebElement"
+
+        if first_card.text != "Deactivated":
+            log_error(f"The {plugin} page should show that the plugin is deactivated, exiting ...")
+            exit(1)
+
+        log_info(f"{plugin} page shows that the plugin is deactivated, as expected")
+        DRIVER.back()
+
+    log_info("Trying bad behavior plugin page ...")
+    DRIVER.get(f"http://www.example.com{UI_URL}/plugins/badbehavior")
+
+    sleep(5)
+
+    badbehavior_list = safe_get_element(DRIVER, By.XPATH, '//li[@data-item=""]', multiple=True)
+    assert isinstance(badbehavior_list, list), "Bad behavior list is not a list"
+
+    found_403 = False
+    for item in badbehavior_list:
+        if "403" in item.text:
+            found_403 = True
+            break
+
+    if not found_403:
+        log_error("Bad behavior list doesn't show 403, exiting ...")
+        exit(1)
+
+    log_info("Bad behavior list shows 403, as expected")
+    DRIVER.back()
+
+    log_info("Trying dnsbl plugin page ...")
+    DRIVER.get(f"http://www.example.com{UI_URL}/plugins/dnsbl")
+
+    sleep(5)
+
+    dnsbl_count = safe_get_element(DRIVER, By.XPATH, '//h5[@data-count=""]')
+    assert isinstance(dnsbl_count, WebElement), "DNSBL count is not a WebElement"
+
+    if dnsbl_count.text != "0":
+        log_error("DNSBL count is not 0, exiting ...")
+        exit(1)
+
+    log_info("DNSBL count is 0, as expected")
+    DRIVER.back()
+
+    log_info("Trying errors plugin page ...")
+    DRIVER.get(f"http://www.example.com{UI_URL}/plugins/errors")
+
+    sleep(5)
+
+    errors_list = safe_get_element(DRIVER, By.XPATH, '//li[@data-item=""]', multiple=True)
+    assert isinstance(errors_list, list), "Errors list is not a list"
+
+    found_403 = False
+    for item in errors_list:
+        if "403" in item.text:
+            found_403 = True
+            break
+
+    if not found_403:
+        log_error("Errors list doesn't show 403, exiting ...")
+        exit(1)
+
+    log_info("Errors list shows 403, as expected")
+    DRIVER.back()
+
+    log_info("Trying limit plugin page ...")
+    DRIVER.get(f"http://www.example.com{UI_URL}/plugins/limit")
+
+    limit_info_elem = safe_get_element(DRIVER, By.XPATH, "/html/body/main/div/div/div[1]/h5")
+    assert isinstance(limit_info_elem, WebElement), "Limit info element is not a WebElement"
+
+    if limit_info_elem.text != "INFO":
+        log_error("Limit page doesn't show the limit, exiting ...")
+        exit(1)
+
+    log_info("Limit page is shown, as expected")
+    DRIVER.back()
+
+    log_info("Trying miscellaneous plugin page ...")
+    DRIVER.get(f"http://www.example.com{UI_URL}/plugins/misc")
+
+    sleep(5)
+
+    misc_disallowed_count = safe_get_element(DRIVER, By.XPATH, '//h5[@data-count-disallowed-methods=""]')
+    assert isinstance(misc_disallowed_count, WebElement), "Miscellaneous disallowed count is not a WebElement"
+
+    if misc_disallowed_count.text != "0":
+        log_error("Miscellaneous disallowed count is not 0, exiting ...")
+        exit(1)
+
+    log_info("Miscellaneous disallowed count is 0, as expected")
+    DRIVER.back()
+
+    log_info("Trying whitelist plugin page ...")
+    DRIVER.get(f"http://www.example.com{UI_URL}/plugins/whitelist")
+
+    sleep(5)
+
+    dnsbl_count = safe_get_element(DRIVER, By.XPATH, '//h5[@data-count=""]')
+    assert isinstance(dnsbl_count, WebElement), "Whitelist count is not a WebElement"
+
+    if dnsbl_count.text != "0":
+        log_error("Whitelist count is not 0, exiting ...")
+        exit(1)
+
+    log_info("Whitelist count is 0, as expected")
 
     log_info("✅ Plugins page tests finished successfully")
 except SystemExit as e:
