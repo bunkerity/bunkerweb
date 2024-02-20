@@ -1273,8 +1273,10 @@ def custom_plugin(plugin: str):
     plugins = app.config["CONFIG"].get_plugins()
 
     curr_plugin = {}
+    plugin_id = None
     for plug in plugins:
         if plug["id"] == plugin:
+            plugin_id = plug["id"]
             curr_plugin = plug
             break
 
@@ -1284,10 +1286,32 @@ def custom_plugin(plugin: str):
     use_key = False
     is_used = False
     context = "multisite"
+
+    # {plugin_id: [[setting_name, setting_false], ...]}
+    specific_cases = {
+        "limit": [["USE_LIMIT_REQ", "no"], ["USE_LIMIT_CONN", "no"]],
+        "misc": [["DISABLE_DEFAULT_SERVER", "no"], ["ALLOWED_METHODS", ""]],
+        "modsecurity": [["USE_MODSECURITY", "no"]],
+        "realip": [["USE_REALIP", "no"]],
+        "reverseproxy": [["USE_REVERSE_PROXY", "no"]],
+        "selfsigned": [["GENERATE_SELF_SIGNED_SSL", "no"]],
+        "letsencrypt": [["AUTO_LETS_ENCRYPT", "no"]],
+        "country": [["BLACKLIST_COUNTRY", ""], ["WHITELIST_COUNTRY", ""]],
+    }
+
+    # specific cases
     for key, data in curr_plugin["settings"].items():
+        # specific cases
+        if plugin_id in specific_cases:
+            use_key = "SPECIFIC"
+            context = data["context"]
+            break
+
+        # default case (one USE_)
         if key.upper().startswith("USE_"):
             use_key = key
             context = data["context"]
+            break
 
     # Case no USE_<NAME>, it means always show
     if not use_key:
@@ -1296,9 +1320,27 @@ def custom_plugin(plugin: str):
     # Case USE_<NAME>, it means show only if used by one service
     if use_key and not is_used:
         if context == "global":
+            if plugin_id in specific_cases:
+                for key in specific_cases[plugin_id]:
+                    setting_name = key[0]
+                    setting_false = key[1]
+                    if config.get(setting_name, setting_false) != setting_false:
+                        is_used = True
+                        break
+
             is_used = config.get(use_key, "no") != "no"
         else:
             for service in config.get("SERVER_NAME", "").split(" "):
+                # specific case
+                if plugin_id in specific_cases:
+                    for key in specific_cases[plugin_id]:
+                        setting_name = key[0]
+                        setting_false = key[1]
+                        if config.get(f"{service}_{setting_name}", setting_false) != setting_false:
+                            is_used = True
+                            break
+
+                # general case
                 if config.get(f"{service}_{use_key}", "no") != "no":
                     is_used = True
                     break
