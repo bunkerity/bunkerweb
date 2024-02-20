@@ -53,6 +53,10 @@ from utils import check_settings, get_b64encoded_qr_image, path_to_dict, get_rem
 from Database import Database  # type: ignore
 from logging import getLogger
 
+# REPLACE BY REAL VALUES
+PRO_VERSION = False
+PRO_PLUGINS_LIST = [{"name": "metrics pro", "id": "metricspro", "type": "pro"}, {"name": "prometheus", "id": "prometheus", "type": "pro"}, {"name": "emergency", "id": "emergency", "type": "pro"}]
+
 
 def stop_gunicorn():
     p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
@@ -539,6 +543,8 @@ def home():
         services_autoconf_count=services_autoconf_count,
         username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
+        is_pro_version=PRO_VERSION,
+        plugins_pro=PRO_PLUGINS_LIST,
     )
 
 
@@ -635,7 +641,9 @@ def account():
         totp_qr_image = get_b64encoded_qr_image(current_user.get_authentication_setup_uri())
         app.config["CURRENT_TOTP_TOKEN"] = secret_token
 
-    return render_template("account.html", username=current_user.get_id(), is_totp=current_user.is_two_factor_enabled, secret_token=secret_token, totp_qr_image=totp_qr_image, dark_mode=app.config["DARK_MODE"])
+    return render_template(
+        "account.html", username=current_user.get_id(), is_totp=current_user.is_two_factor_enabled, secret_token=secret_token, totp_qr_image=totp_qr_image, dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST
+    )
 
 
 @app.route("/instances", methods=["GET", "POST"])
@@ -677,13 +685,7 @@ def instances():
 
     # Display instances
     instances = app.config["INSTANCES"].get_instances()
-    return render_template(
-        "instances.html",
-        title="Instances",
-        instances=instances,
-        username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-    )
+    return render_template("instances.html", title="Instances", instances=instances, username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST)
 
 
 @app.route("/services", methods=["GET", "POST"])
@@ -806,6 +808,8 @@ def services():
         ],
         username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
+        is_pro_version=PRO_VERSION,
+        plugins_pro=PRO_PLUGINS_LIST,
     )
 
 
@@ -862,11 +866,7 @@ def global_config():
         )
 
     # Display global config
-    return render_template(
-        "global_config.html",
-        username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-    )
+    return render_template("global_config.html", username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST)
 
 
 @app.route("/configs", methods=["GET", "POST"])
@@ -961,6 +961,8 @@ def configs():
         ],
         username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
+        is_pro_version=PRO_VERSION,
+        plugins_pro=PRO_PLUGINS_LIST,
     )
 
 
@@ -1203,12 +1205,7 @@ def plugins():
             plugins_internal += 1
 
     return render_template(
-        "plugins.html",
-        plugins=plugins,
-        plugins_internal=plugins_internal,
-        plugins_external=plugins_external,
-        username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
+        "plugins.html", plugins=plugins, plugins_internal=plugins_internal, plugins_external=plugins_external, username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST
     )
 
 
@@ -1368,6 +1365,8 @@ def custom_plugin(plugin: str):
                 plugin=curr_plugin,
                 is_used=is_used,
                 **app.jinja_env.globals,
+                is_pro_version=PRO_VERSION,
+                plugins_pro=PRO_PLUGINS_LIST,
             )
 
         message = f'The plugin "{plugin}" does not have a template'
@@ -1443,18 +1442,15 @@ def cache():
         ],
         username=current_user.get_id(),
         dark_mode=app.config["DARK_MODE"],
+        is_pro_version=PRO_VERSION,
+        plugins_pro=PRO_PLUGINS_LIST,
     )
 
 
 @app.route("/logs", methods=["GET"])
 @login_required
 def logs():
-    return render_template(
-        "logs.html",
-        instances=app.config["INSTANCES"].get_instances(),
-        username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-    )
+    return render_template("logs.html", instances=app.config["INSTANCES"].get_instances(), username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST)
 
 
 @app.route("/logs/local", methods=["GET"])
@@ -1700,13 +1696,7 @@ def reports():
     top_code = ([k for k, v in codes.items() if v == max(codes.values())] or [""])[0]
 
     return render_template(
-        "reports.html",
-        reports=reports,
-        total_reports=total_reports,
-        top_code=top_code,
-        top_reason=top_reason,
-        username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
+        "reports.html", reports=reports, total_reports=total_reports, top_code=top_code, top_reason=top_reason, username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST
     )
 
 
@@ -1894,25 +1884,13 @@ def bans():
 
     top_reason = ([k for k, v in reasons.items() if v == max(reasons.values())] or [""])[0]
 
-    return render_template(
-        "bans.html",
-        bans=bans,
-        top_reason=top_reason,
-        username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-    )
+    return render_template("bans.html", bans=bans, top_reason=top_reason, username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST)
 
 
 @app.route("/jobs", methods=["GET"])
 @login_required
 def jobs():
-    return render_template(
-        "jobs.html",
-        jobs=db.get_jobs(),
-        jobs_errors=db.get_plugins_errors(),
-        username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-    )
+    return render_template("jobs.html", jobs=db.get_jobs(), jobs_errors=db.get_plugins_errors(), username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST)
 
 
 @app.route("/jobs/download", methods=["GET"])

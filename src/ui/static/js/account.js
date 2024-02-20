@@ -114,7 +114,7 @@ class SwitchTabForm {
       if (!flashMsg) return;
       const content = flashMsg.querySelector("p").textContent.toLowerCase();
 
-      const names = ["password", "username", "totp"];
+      const names = ["global", "password", "username", "totp"];
 
       names.forEach((name) => {
         this.showRelateTab(name, content);
