@@ -820,12 +820,16 @@ def global_config():
         # Edit check fields and remove already existing ones
         config = app.config["CONFIG"].get_config(methods=False)
         for variable, value in deepcopy(variables).items():
+            if variable.endswith("SCHEMA"):
+                del variables[variable]
+                continue
+
             if value == "on":
                 value = "yes"
             elif value == "off":
                 value = "no"
 
-            if value == config.get(variable, None) or not value.strip():
+            if value == config.get(variable, None):
                 del variables[variable]
 
         if not variables:
