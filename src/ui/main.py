@@ -1270,63 +1270,75 @@ def custom_plugin(plugin: str):
             return message, 400
         return {"message": f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'}, 400
 
-    # Get current plugin.json
-    plugins = app.config["CONFIG"].get_plugins()
+    # Case we ware looking for a plugin template
+    # We need to check if a page exists, and if it does, we need to check if the plugin is activated and metrics are on
+    if request.method == "GET":
 
-    curr_plugin = {}
-    plugin_id = None
-    for plug in plugins:
-        if plug["id"] == plugin:
-            plugin_id = plug["id"]
-            curr_plugin = plug
-            break
+        # Check template
+        page = db.get_plugin_template(plugin)
 
-    if not plugin_id:
-        message = f'Plugin "{plugin}" not found'
-        app.logger.error(message)
-        if request.method == "GET":
+        if not page:
+            message = f'The plugin "{plugin}" does not have a template'
+            app.logger.error(message)
             return message, 404
-        return {"message": f'Plugin "{plugin}" not found'}, 404
+        
+        # Case template, prepare data
+        plugins = app.config["CONFIG"].get_plugins()
+        plugin_id = None
+        curr_plugin = {}
+        is_used = False
+        use_key = False
+        is_metrics_on = False
+        context = "multisite"
 
-    # Get USE_<NAME> if exists
-    # Check if the plugin is used by one service
-    config = app.config["CONFIG"].get_config(methods=False)
-    use_key = False
-    is_used = False
-    context = "multisite"
+        for plug in plugins:
+            if plug["id"] == plugin:
+                plugin_id = plug["id"]
+                curr_plugin = plug
+                break
 
-    # {plugin_id: [[setting_name, setting_false], ...]}
-    specific_cases = {
-        "limit": [["USE_LIMIT_REQ", "no"], ["USE_LIMIT_CONN", "no"]],
-        "misc": [["DISABLE_DEFAULT_SERVER", "no"], ["ALLOWED_METHODS", ""]],
-        "modsecurity": [["USE_MODSECURITY", "no"]],
-        "realip": [["USE_REALIP", "no"]],
-        "reverseproxy": [["USE_REVERSE_PROXY", "no"]],
-        "selfsigned": [["GENERATE_SELF_SIGNED_SSL", "no"]],
-        "letsencrypt": [["AUTO_LETS_ENCRYPT", "no"]],
-        "country": [["BLACKLIST_COUNTRY", ""], ["WHITELIST_COUNTRY", ""]],
-    }
+        # Case no plugin found
+        if plugin_id is None:
+            message = f'Plugin "{plugin}" not found'
+            app.logger.error(message)
+            return message, 404
+        
+        config = app.config["CONFIG"].get_config(methods=False)
 
-    # specific cases
-    for key, data in curr_plugin["settings"].items():
+        # Check if we are using metrics
+        for service in config.get("SERVER_NAME", "").split(" "):
+            # specific case
+            if config.get(f"{service}_USE_METRICS", "no") != "no":
+                is_metrics_on = True
+                break
+
+        # {plugin_id: [[setting_name, setting_false], ...]}
+        specific_cases = {
+            "limit": [["USE_LIMIT_REQ", "no"], ["USE_LIMIT_CONN", "no"]],
+            "misc": [["DISABLE_DEFAULT_SERVER", "no"], ["ALLOWED_METHODS", ""]],
+            "modsecurity": [["USE_MODSECURITY", "no"]],
+            "realip": [["USE_REALIP", "no"]],
+            "reverseproxy": [["USE_REVERSE_PROXY", "no"]],
+            "selfsigned": [["GENERATE_SELF_SIGNED_SSL", "no"]],
+            "letsencrypt": [["AUTO_LETS_ENCRYPT", "no"]],
+            "country": [["BLACKLIST_COUNTRY", ""], ["WHITELIST_COUNTRY", ""]],
+        }
+
         # specific cases
-        if plugin_id in specific_cases:
-            use_key = "SPECIFIC"
-            context = data["context"]
-            break
+        for key, data in curr_plugin["settings"].items():
+            # specific cases
+            if plugin_id in specific_cases:
+                use_key = "SPECIFIC"
+                context = data["context"]
+                break
 
-        # default case (one USE_)
-        if key.upper().startswith("USE_"):
-            use_key = key
-            context = data["context"]
-            break
+            # default case (one USE_)
+            if key.upper().startswith("USE_"):
+                use_key = key
+                context = data["context"]
+                break
 
-    # Case no USE_<NAME>, it means always show
-    if not use_key:
-        is_used = True
-
-    # Case USE_<NAME>, it means show only if used by one service
-    if use_key and not is_used:
+        # Case USE_<NAME>, it means show only if used by one service
         if context == "global":
             if plugin_id in specific_cases:
                 for key in specific_cases[plugin_id]:
@@ -1336,8 +1348,11 @@ def custom_plugin(plugin: str):
                         is_used = True
                         break
 
-            is_used = config.get(use_key, "no") != "no"
-        else:
+            if config.get(use_key, "no") != "no":
+                is_used = True
+
+        
+        if context == "multisite":
             for service in config.get("SERVER_NAME", "").split(" "):
                 # specific case
                 if plugin_id in specific_cases:
@@ -1352,11 +1367,8 @@ def custom_plugin(plugin: str):
                 if config.get(f"{service}_{use_key}", "no") != "no":
                     is_used = True
                     break
+                
 
-    if request.method == "GET":
-        page = db.get_plugin_template(plugin)
-
-        if page:
             return render_template(
                 Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
                 dark_mode=app.config["DARK_MODE"],
@@ -1364,14 +1376,12 @@ def custom_plugin(plugin: str):
                 current_endpoint=plugin,
                 plugin=curr_plugin,
                 is_used=is_used,
+                is_metrics=is_metrics_on,
                 **app.jinja_env.globals,
                 is_pro_version=PRO_VERSION,
                 plugins_pro=PRO_PLUGINS_LIST,
             )
 
-        message = f'The plugin "{plugin}" does not have a template'
-        app.logger.error(message)
-        return message, 404
 
     module = db.get_plugin_actions(plugin)
 
