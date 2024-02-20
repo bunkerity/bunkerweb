@@ -1284,6 +1284,13 @@ def custom_plugin(plugin: str):
             curr_plugin = plug
             break
 
+    if not plugin_id:
+        message = f'Plugin "{plugin}" not found'
+        app.logger.error(message)
+        if request.method == "GET":
+            return message, 404
+        return {"message": f'Plugin "{plugin}" not found'}, 404
+
     # Get USE_<NAME> if exists
     # Check if the plugin is used by one service
     config = app.config["CONFIG"].get_config(methods=False)
