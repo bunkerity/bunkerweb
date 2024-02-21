@@ -11,7 +11,7 @@ from os.path import basename, normpath, join
 from pathlib import Path
 from re import compile as re_compile
 from sys import _getframe, path as sys_path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 from time import sleep
 from traceback import format_exc
 
@@ -356,7 +356,9 @@ class Database:
                         has_all_tables = False
                         continue
                     missing_columns = []
+                    extra_columns = []
 
+                    # Check if any columns are missing
                     db_columns = inspector.get_columns(table)
                     self.__logger.debug(f'Checking table "{table}" for missing columns')
                     for column in Base.metadata.tables[table].columns:
@@ -365,12 +367,24 @@ class Database:
                             self.__logger.warning(f'Column "{column.name}" is missing in table "{table}"')
                             missing_columns.append(column)
 
+                    # Check if any columns are extra
+                    self.__logger.debug(f'Checking table "{table}" for extra columns')
+                    for db_column in db_columns:
+                        self.__logger.debug(f'Checking column "{db_column["name"]}" in table "{table}"')
+                        if not any(column.name == db_column["name"] for column in Base.metadata.tables[table].columns):
+                            self.__logger.warning(f'Column "{db_column["name"]}" is extra in table "{table}"')
+                            extra_columns.append(db_column)
+
                     try:
                         with self.__db_session() as session:
                             if missing_columns:
                                 for column in missing_columns:
                                     self.__logger.warning(f'Adding column "{column.name}" to table "{table}"')
                                     session.execute(text(f"ALTER TABLE {table} ADD COLUMN {column.name} {column.type}"))
+                            if extra_columns:
+                                for column in extra_columns:
+                                    self.__logger.warning(f'Removing column "{column["name"]}" from table "{table}"')
+                                    session.execute(text(f"ALTER TABLE {table} DROP COLUMN {column['name']}"))
                             session.commit()
                     except BaseException:
                         return False, format_exc()
@@ -400,7 +414,6 @@ class Database:
                             "description": "The general settings for the server",
                             "version": "0.1",
                             "stream": "partial",
-                            "external": False,
                         }
                     else:
                         settings = plugin.pop("settings", {})
@@ -423,8 +436,8 @@ class Database:
                         if plugin["stream"] != db_plugin.stream:
                             updates[Plugins.stream] = plugin["stream"]
 
-                        if plugin.get("external", False) != db_plugin.external:
-                            updates[Plugins.external] = plugin.get("external", False)
+                        if plugin.get("type", "core") != db_plugin.type:
+                            updates[Plugins.type] = plugin.get("type", "core")
 
                         if plugin.get("method", "manual") != db_plugin.method:
                             updates[Plugins.method] = plugin.get("method", "manual")
@@ -446,7 +459,7 @@ class Database:
                                 description=plugin["description"],
                                 version=plugin["version"],
                                 stream=plugin["stream"],
-                                external=plugin.get("external", False),
+                                type=plugin.get("type", "core"),
                                 method=plugin.get("method"),
                                 data=plugin.get("data"),
                                 checksum=plugin.get("checksum"),
@@ -1112,7 +1125,7 @@ class Database:
         """Update external plugins from the database"""
         to_put = []
         with self.__db_session() as session:
-            db_plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(external=True).all()
+            db_plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(type="external").all()
 
             db_ids = []
             if delete_missing and db_plugins:
@@ -1128,7 +1141,7 @@ class Database:
                 settings = plugin.pop("settings", {})
                 jobs = plugin.pop("jobs", [])
                 page = plugin.pop("page", False)
-                plugin["external"] = True
+                plugin["type"] = "external"
                 db_plugin = (
                     session.query(Plugins)
                     .with_entities(
@@ -1139,14 +1152,14 @@ class Database:
                         Plugins.method,
                         Plugins.data,
                         Plugins.checksum,
-                        Plugins.external,
+                        Plugins.type,
                     )
                     .filter_by(id=plugin["id"])
                     .first()
                 )
 
                 if db_plugin is not None:
-                    if db_plugin.external is False:
+                    if db_plugin.type != "external":
                         self.__logger.warning(
                             f"Plugin \"{plugin['id']}\" is not external, skipping update (updating a non-external plugin is forbidden for security reasons)",
                         )
@@ -1364,7 +1377,7 @@ class Database:
                         description=plugin["description"],
                         version=plugin["version"],
                         stream=plugin["stream"],
-                        external=True,
+                        type="external",
                         method=plugin["method"],
                         data=plugin.get("data"),
                         checksum=plugin.get("checksum"),
@@ -1474,17 +1487,19 @@ class Database:
 
         return ""
 
-    def get_plugins(self, *, external: bool = False, with_data: bool = False) -> List[Dict[str, Any]]:
+    def get_plugins(self, *, _type: Literal["all", "external", "pro"] = "all", with_data: bool = False) -> List[Dict[str, Any]]:
         """Get all plugins from the database."""
         plugins = []
         with self.__db_session() as session:
-            entities = [Plugins.id, Plugins.stream, Plugins.name, Plugins.description, Plugins.version, Plugins.external, Plugins.method, Plugins.checksum]
+            entities = [Plugins.id, Plugins.stream, Plugins.name, Plugins.description, Plugins.version, Plugins.type, Plugins.method, Plugins.checksum]
             if with_data:
                 entities.append(Plugins.data)
-            for plugin in session.query(Plugins).with_entities(*entities).all():
-                if external and not plugin.external:
-                    continue
 
+            db_plugins = session.query(Plugins).with_entities(*entities)
+            if _type != "all":
+                db_plugins = db_plugins.filter_by(type=_type)
+
+            for plugin in db_plugins.all():
                 page = session.query(Plugin_pages).with_entities(Plugin_pages.id).filter_by(plugin_id=plugin.id).first()
                 data = {
                     "id": plugin.id,
@@ -1492,7 +1507,7 @@ class Database:
                     "name": plugin.name,
                     "description": plugin.description,
                     "version": plugin.version,
-                    "external": plugin.external,
+                    "type": plugin.type,
                     "method": plugin.method,
                     "page": page is not None,
                     "settings": {},

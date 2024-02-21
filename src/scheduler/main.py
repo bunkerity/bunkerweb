@@ -352,7 +352,7 @@ if __name__ == "__main__":
 
         # Check if any external plugin has been added by the user
         external_plugins = []
-        db_plugins = db.get_plugins(external=True)
+        db_plugins = db.get_plugins(_type="external")
         plugins_dir = Path(sep, "etc", "bunkerweb", "plugins")
         for filename in glob(str(plugins_dir.joinpath("*", "plugin.json"))):
             with open(filename, "r", encoding="utf-8") as f:
@@ -398,7 +398,7 @@ if __name__ == "__main__":
 
         if (scheduler_first_start and db_plugins) or changes:
             generate_external_plugins(
-                db.get_plugins(external=True, with_data=True),
+                db.get_plugins(_type="external", with_data=True),
                 original_path=plugins_dir,
             )
             SCHEDULER.update_jobs()
@@ -651,7 +651,7 @@ if __name__ == "__main__":
                 if PLUGINS_NEED_GENERATION:
                     CHANGES.append("external_plugins")
                     generate_external_plugins(
-                        db.get_plugins(external=True, with_data=True),
+                        db.get_plugins(_type="external", with_data=True),
                         original_path=plugins_dir,
                     )
                     SCHEDULER.update_jobs()

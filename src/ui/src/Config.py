@@ -9,7 +9,7 @@ from json import loads as json_loads
 from pathlib import Path
 from re import search as re_search
 from subprocess import run, DEVNULL, STDOUT
-from typing import List, Tuple
+from typing import List, Literal, Tuple
 from uuid import uuid4
 
 
@@ -83,8 +83,8 @@ class Config:
             **self.__settings,
         }
 
-    def get_plugins(self, *, external: bool = False, with_data: bool = False) -> List[dict]:
-        plugins = self.__db.get_plugins(external=external, with_data=with_data)
+    def get_plugins(self, *, _type: Literal["all", "external", "pro"] = "all", with_data: bool = False) -> List[dict]:
+        plugins = self.__db.get_plugins(_type=_type, with_data=with_data)
         plugins.sort(key=itemgetter("name"))
 
         general_plugin = None

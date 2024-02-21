@@ -57,7 +57,7 @@ class Configurator:
     def get_settings(self) -> Dict[str, Any]:
         return self.__settings
 
-    def get_plugins(self, _type: Union[Literal["core"], Literal["external"]]) -> List[Dict[str, Any]]:
+    def get_plugins(self, _type: Literal["core", "external", "pro"]) -> List[Dict[str, Any]]:
         return self.__core_plugins if _type == "core" else self.__external_plugins
 
     def get_plugins_settings(self, _type: Union[Literal["core"], Literal["external"]]) -> Dict[str, Any]:
@@ -135,7 +135,7 @@ class Configurator:
 
                 data.update(
                     {
-                        "external": True,
+                        "type": "external",
                         "page": "ui" in listdir(dirname(file)),
                         "method": "manual",
                         "data": value,

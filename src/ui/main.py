@@ -999,21 +999,18 @@ def plugins():
             variables = deepcopy(request.form.to_dict())
             del variables["csrf_token"]
 
-            if variables["external"] != "True":
-                flash(f"Can't delete internal plugin {variables['name']}", "error")
+            if variables["type"] in ("core", "pro"):
+                flash(f"Can't delete {variables['type']} plugin {variables['name']}", "error")
                 return redirect(url_for("loading", next=url_for("plugins")))
 
             plugins = app.config["CONFIG"].get_plugins()
-            for plugin in deepcopy(plugins):
-                if plugin["external"] is False or plugin["id"] == variables["name"]:
-                    del plugins[plugins.index(plugin)]
+            for x, plugin in enumerate(deepcopy(plugins)):
+                if plugin["type"] in ("core", "pro") or plugin["id"] == variables["name"]:
+                    del plugins[x]
 
             err = db.update_external_plugins(plugins)
             if err:
-                flash(
-                    f"Couldn't update external plugins to database: {err}",
-                    "error",
-                )
+                flash(f"Couldn't update external plugins to database: {err}", "error")
             flash(f"Deleted plugin {variables['name']} successfully")
         else:
             if not tmp_ui_path.exists() or not listdir(str(tmp_ui_path)):
@@ -1130,7 +1127,7 @@ def plugins():
                     new_plugins.append(
                         plugin_file
                         | {
-                            "external": True,
+                            "type": "external",
                             "page": "ui" in listdir(str(temp_folder_path)),
                             "method": "ui",
                             "data": value,
@@ -1183,7 +1180,7 @@ def plugins():
             if errors >= files_count:
                 return redirect(url_for("loading", next=url_for("plugins")))
 
-            plugins = app.config["CONFIG"].get_plugins(external=True, with_data=True)
+            plugins = app.config["CONFIG"].get_plugins(_type="external", with_data=True)
             for plugin in deepcopy(plugins):
                 if plugin["id"] in new_plugins_ids:
                     flash(f"Plugin {plugin['id']} already exists", "error")
@@ -1191,10 +1188,7 @@ def plugins():
 
             err = db.update_external_plugins(new_plugins, delete_missing=False)
             if err:
-                flash(
-                    f"Couldn't update external plugins to database: {err}",
-                    "error",
-                )
+                flash(f"Couldn't update external plugins to database: {err}", "error")
 
         if operation:
             flash(operation)
@@ -1217,10 +1211,13 @@ def plugins():
     plugins = app.config["CONFIG"].get_plugins()
     plugins_internal = 0
     plugins_external = 0
+    plugins_pro = 0
 
     for plugin in plugins:
-        if plugin["external"] is True:
+        if plugin["type"] == "external":
             plugins_external += 1
+        elif plugin["type"] == "pro":
+            plugins_pro += 1
         else:
             plugins_internal += 1
 
@@ -1229,6 +1226,7 @@ def plugins():
         plugins=plugins,
         plugins_internal=plugins_internal,
         plugins_external=plugins_external,
+        plugins_pro=plugins_pro,
         username=current_user.get_id(),
     )
 
