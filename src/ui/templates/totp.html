@@ -10,7 +10,7 @@
     <link href="images/favicon.ico" rel="icon" type="image/x-icon" />
     <link rel="stylesheet" href="css/dashboard.css" />
     <link rel="stylesheet" href="css/login.css" />
-    <script defer src="./js/totp.js"></script>
+    <script defer src="./js/totp.js" nonce="{{ script_nonce }}"></script>
   </head>
   <body>
     <div
@@ -137,8 +137,8 @@
         <div id="particles-js" class="login-img [&>*]:bg-primary"></div>
       </div>
     </main>
-    <script src="js/tsparticles.bundle.min.js"></script>
-    <script>
+    <script src="js/tsparticles.bundle.min.js" nonce="{{ script_nonce }}"></script>
+    <script nonce="{{ script_nonce }}">
       class Loader {
         constructor() {
           this.menuContainer = document.querySelector("[data-menu-container]");

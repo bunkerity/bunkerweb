@@ -199,6 +199,7 @@ try:
         TO_FLASH=[],
         DARK_MODE=False,
         CURRENT_TOTP_TOKEN=None,
+        SCRIPT_NONCE=sha256(urandom(32)).hexdigest(),
     )
 except FileNotFoundError as e:
     app.logger.error(repr(e), e.filename)
@@ -288,10 +289,32 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
     app.config["RELOADING"] = False
 
 
+@app.before_request
+def generate_nonce():
+    app.config["SCRIPT_NONCE"] = sha256(urandom(32)).hexdigest()
+
+
+@app.context_processor
+def inject_variables():
+    return dict(
+        dark_mode=app.config["DARK_MODE"],
+        script_nonce=app.config["SCRIPT_NONCE"],
+        is_pro_version=PRO_VERSION,
+        plugins_pro=PRO_PLUGINS_LIST,
+    )
+
+
 @app.after_request
 def set_csp_header(response):
     """Set the Content-Security-Policy header to prevent XSS attacks."""
-    response.headers["Content-Security-Policy"] = "object-src 'none'; frame-ancestors 'self'; default-src 'self'"
+    response.headers["Content-Security-Policy"] = (
+        "object-src 'none';"
+        + " frame-ancestors 'self';"
+        + " default-src 'self' https://www.bunkerweb.io https://assets.bunkerity.com;"
+        + f" script-src 'self' 'nonce-{app.config['SCRIPT_NONCE']}';"
+        + " style-src 'self' 'unsafe-inline';"
+        + " img-src 'self' data: https://assets.bunkerity.com;"
+    )
     return response
 
 
@@ -483,7 +506,7 @@ def totp():
     if not current_user.is_two_factor_enabled or session.get("totp_validated", False):
         return redirect(url_for("home"))
 
-    return render_template("totp.html", dark_mode=app.config["DARK_MODE"])
+    return render_template("totp.html")
 
 
 @app.route("/home")
@@ -542,9 +565,6 @@ def home():
         services_ui_count=services_ui_count,
         services_autoconf_count=services_autoconf_count,
         username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-        is_pro_version=PRO_VERSION,
-        plugins_pro=PRO_PLUGINS_LIST,
     )
 
 
@@ -642,7 +662,11 @@ def account():
         app.config["CURRENT_TOTP_TOKEN"] = secret_token
 
     return render_template(
-        "account.html", username=current_user.get_id(), is_totp=current_user.is_two_factor_enabled, secret_token=secret_token, totp_qr_image=totp_qr_image, dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST
+        "account.html",
+        username=current_user.get_id(),
+        is_totp=current_user.is_two_factor_enabled,
+        secret_token=secret_token,
+        totp_qr_image=totp_qr_image,
     )
 
 
@@ -685,7 +709,7 @@ def instances():
 
     # Display instances
     instances = app.config["INSTANCES"].get_instances()
-    return render_template("instances.html", title="Instances", instances=instances, username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST)
+    return render_template("instances.html", title="Instances", instances=instances, username=current_user.get_id())
 
 
 @app.route("/services", methods=["GET", "POST"])
@@ -807,9 +831,6 @@ def services():
             for service in services
         ],
         username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-        is_pro_version=PRO_VERSION,
-        plugins_pro=PRO_PLUGINS_LIST,
     )
 
 
@@ -866,7 +887,7 @@ def global_config():
         )
 
     # Display global config
-    return render_template("global_config.html", username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST)
+    return render_template("global_config.html", username=current_user.get_id())
 
 
 @app.route("/configs", methods=["GET", "POST"])
@@ -960,9 +981,6 @@ def configs():
             )
         ],
         username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-        is_pro_version=PRO_VERSION,
-        plugins_pro=PRO_PLUGINS_LIST,
     )
 
 
@@ -1205,7 +1223,11 @@ def plugins():
             plugins_internal += 1
 
     return render_template(
-        "plugins.html", plugins=plugins, plugins_internal=plugins_internal, plugins_external=plugins_external, username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST
+        "plugins.html",
+        plugins=plugins,
+        plugins_internal=plugins_internal,
+        plugins_external=plugins_external,
+        username=current_user.get_id(),
     )
 
 
@@ -1369,15 +1391,12 @@ def custom_plugin(plugin: str):
 
             return render_template(
                 Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
-                dark_mode=app.config["DARK_MODE"],
                 username=current_user.get_id(),
                 current_endpoint=plugin,
                 plugin=curr_plugin,
                 is_used=is_used,
                 is_metrics=is_metrics_on,
                 **app.jinja_env.globals,
-                is_pro_version=PRO_VERSION,
-                plugins_pro=PRO_PLUGINS_LIST,
             )
 
     module = db.get_plugin_actions(plugin)
@@ -1448,16 +1467,13 @@ def cache():
             )
         ],
         username=current_user.get_id(),
-        dark_mode=app.config["DARK_MODE"],
-        is_pro_version=PRO_VERSION,
-        plugins_pro=PRO_PLUGINS_LIST,
     )
 
 
 @app.route("/logs", methods=["GET"])
 @login_required
 def logs():
-    return render_template("logs.html", instances=app.config["INSTANCES"].get_instances(), username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST)
+    return render_template("logs.html", instances=app.config["INSTANCES"].get_instances(), username=current_user.get_id())
 
 
 @app.route("/logs/local", methods=["GET"])
@@ -1703,7 +1719,12 @@ def reports():
     top_code = ([k for k, v in codes.items() if v == max(codes.values())] or [""])[0]
 
     return render_template(
-        "reports.html", reports=reports, total_reports=total_reports, top_code=top_code, top_reason=top_reason, username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST
+        "reports.html",
+        reports=reports,
+        total_reports=total_reports,
+        top_code=top_code,
+        top_reason=top_reason,
+        username=current_user.get_id(),
     )
 
 
@@ -1891,13 +1912,13 @@ def bans():
 
     top_reason = ([k for k, v in reasons.items() if v == max(reasons.values())] or [""])[0]
 
-    return render_template("bans.html", bans=bans, top_reason=top_reason, username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST)
+    return render_template("bans.html", bans=bans, top_reason=top_reason, username=current_user.get_id())
 
 
 @app.route("/jobs", methods=["GET"])
 @login_required
 def jobs():
-    return render_template("jobs.html", jobs=db.get_jobs(), jobs_errors=db.get_plugins_errors(), username=current_user.get_id(), dark_mode=app.config["DARK_MODE"], is_pro_version=PRO_VERSION, plugins_pro=PRO_PLUGINS_LIST)
+    return render_template("jobs.html", jobs=db.get_jobs(), jobs_errors=db.get_plugins_errors(), username=current_user.get_id())
 
 
 @app.route("/jobs/download", methods=["GET"])

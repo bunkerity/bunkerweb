@@ -162,8 +162,8 @@
     </main>
     <!-- end particles -->
     <!-- end content -->
-    <script src="js/tsparticles.bundle.min.js"></script>
-    <script>
+    <script src="js/tsparticles.bundle.min.js" nonce="{{ script_nonce }}"></script>
+    <script nonce="{{ script_nonce }}">
       class Loader {
         constructor() {
           this.menuContainer = document.querySelector("[data-menu-container]");
