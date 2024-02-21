@@ -116,6 +116,7 @@ jobs:
             }' | tee plugin.json
           zip discord.zip plugin.json
           rm plugin.json
+          sudo truncate -s 0 /var/log/bunkerweb/error.log
           ./tests.sh "linux" ${{ inputs.TEST }}
         env:
           MODE: ${{ inputs.RELEASE }}
