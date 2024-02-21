@@ -17,6 +17,8 @@ try:
     log_info("Navigating to the logs page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
+    assert_button_click(DRIVER, "//button[@data-tab-handler='username']")
+
     username_input = safe_get_element(DRIVER, By.ID, "admin_username")
     assert isinstance(username_input, WebElement), "The username input is not an instance of WebElement"
 
@@ -61,6 +63,8 @@ try:
 
     access_page(DRIVER, "//button[@value='login']", "home")
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[2]/a", "account")
+
+    assert_button_click(DRIVER, "//button[@data-tab-handler='username']")
 
     username_input = safe_get_element(DRIVER, By.ID, "admin_username")
     assert isinstance(username_input, WebElement), "The username input is not an instance of WebElement"
