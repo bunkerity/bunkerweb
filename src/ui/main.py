@@ -1224,9 +1224,9 @@ def plugins():
     return render_template(
         "plugins.html",
         plugins=plugins,
-        plugins_internal=plugins_internal,
-        plugins_external=plugins_external,
-        plugins_pro=plugins_pro,
+        plugins_count_internal=plugins_internal,
+        plugins_count_external=plugins_external,
+        plugins_count_pro=plugins_pro,
         username=current_user.get_id(),
     )
 

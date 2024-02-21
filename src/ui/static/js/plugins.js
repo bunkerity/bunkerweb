@@ -214,7 +214,7 @@ class Filter {
     if (this.lastType === "all") return;
     for (let i = 0; i < logs.length; i++) {
       const el = logs[i];
-      const type = el.getAttribute(`data-${this.prefix}-external`).trim();
+      const type = el.getAttribute(`data-${this.prefix}-type`).trim();
       if (type !== this.lastType) el.classList.add("hidden");
     }
   }
@@ -491,8 +491,8 @@ class Modal {
     this.modalTxt.textContent = `Are you sure you want to delete ${elName} ?`;
     //external
     const isExternal = el
-      .closest("[data-plugins-external]")
-      .getAttribute("data-plugins-external")
+      .closest("[data-plugins-type]")
+      .getAttribute("data-plugins-type")
       .trim()
       .includes("external")
       ? "True"
