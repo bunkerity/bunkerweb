@@ -1389,15 +1389,15 @@ def custom_plugin(plugin: str):
                     is_used = True
                     break
 
-            return render_template(
-                Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
-                username=current_user.get_id(),
-                current_endpoint=plugin,
-                plugin=curr_plugin,
-                is_used=is_used,
-                is_metrics=is_metrics_on,
-                **app.jinja_env.globals,
-            )
+        return render_template(
+            Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
+            username=current_user.get_id(),
+            current_endpoint=plugin,
+            plugin=curr_plugin,
+            is_used=is_used,
+            is_metrics=is_metrics_on,
+            **app.jinja_env.globals,
+        )
 
     module = db.get_plugin_actions(plugin)
 
