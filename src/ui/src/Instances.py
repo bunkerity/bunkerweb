@@ -445,11 +445,12 @@ class Instances:
             except:
                 continue
 
-            if not resp or not isinstance(ping_data.get(instance_name, {"msg": None}).get("msg"), dict):
+            if not resp:
                 continue
 
-            if ping_data[instance_name].get("status", "error") == "success":
-                ping["status"] = "success"
+            ping["status"] = ping_data[instance_name].get("status", "error")
+
+            if ping["status"] == "success":
                 break
 
         return ping
