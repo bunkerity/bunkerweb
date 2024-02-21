@@ -25,6 +25,7 @@ class Configurator:
         settings: str,
         core: str,
         external_plugins: Union[str, List[Dict[str, Any]]],
+        pro_plugins: Union[str, List[Dict[str, Any]]],
         variables: Union[str, Dict[str, Any]],
         logger: Logger,
     ):
@@ -46,6 +47,12 @@ class Configurator:
         else:
             self.__external_plugins = external_plugins
 
+        if isinstance(pro_plugins, str):
+            self.__pro_plugins = []
+            self.__load_plugins(pro_plugins, "pro")
+        else:
+            self.__pro_plugins = pro_plugins
+
         if isinstance(variables, str):
             self.__variables = self.__load_variables(variables)
         else:
@@ -58,11 +65,13 @@ class Configurator:
         return self.__settings
 
     def get_plugins(self, _type: Literal["core", "external", "pro"]) -> List[Dict[str, Any]]:
-        return self.__core_plugins if _type == "core" else self.__external_plugins
+        return {"core": self.__core_plugins, "external": self.__external_plugins, "pro": self.__pro_plugins}[_type]
 
-    def get_plugins_settings(self, _type: Union[Literal["core"], Literal["external"]]) -> Dict[str, Any]:
+    def get_plugins_settings(self, _type: Literal["core", "external", "pro"]) -> Dict[str, Any]:
         if _type == "core":
             plugins = self.__core_plugins
+        elif _type == "pro":
+            plugins = self.__pro_plugins
         else:
             plugins = self.__external_plugins
         plugins_settings = {}
@@ -78,9 +87,7 @@ class Configurator:
         servers = {}
         for server_name in self.__variables["SERVER_NAME"].strip().split(" "):
             if not re_search(self.__settings["SERVER_NAME"]["regex"], server_name):
-                self.__logger.warning(
-                    f"Ignoring server name {server_name} because regex is not valid",
-                )
+                self.__logger.warning(f"Ignoring server name {server_name} because regex is not valid")
                 continue
             names = [server_name]
             if f"{server_name}_SERVER_NAME" in self.__variables:
@@ -88,9 +95,7 @@ class Configurator:
                     self.__settings["SERVER_NAME"]["regex"],
                     self.__variables[f"{server_name}_SERVER_NAME"],
                 ):
-                    self.__logger.warning(
-                        f"Ignoring {server_name}_SERVER_NAME because regex is not valid",
-                    )
+                    self.__logger.warning(f"Ignoring {server_name}_SERVER_NAME because regex is not valid")
                 else:
                     names = self.__variables[f"{server_name}_SERVER_NAME"].strip().split(" ")
 
@@ -100,7 +105,7 @@ class Configurator:
     def __load_settings(self, path: str) -> Dict[str, Any]:
         return loads(Path(path).read_text())
 
-    def __load_plugins(self, path: str, _type: str = "core"):
+    def __load_plugins(self, path: str, _type: Literal["core", "external", "pro"] = "core"):
         threads = []
         for file in glob(join(path, "*", "plugin.json")):
             thread = Thread(target=self.__load_plugin, args=(file, _type))
@@ -110,32 +115,26 @@ class Configurator:
         for thread in threads:
             thread.join()
 
-    def __load_plugin(self, file: str, _type: str = "core"):
+    def __load_plugin(self, file: str, _type: Literal["core", "external", "pro"] = "core"):
         self.__semaphore.acquire(timeout=60)
         try:
             data = self.__load_settings(file)
 
             resp, msg = self.__validate_plugin(data)
             if not resp:
-                self.__logger.warning(
-                    f"Ignoring plugin {file} : {msg}",
-                )
+                self.__logger.warning(f"Ignoring {_type} plugin {file} : {msg}")
                 return
 
-            if _type == "external":
+            if _type != "core":
                 plugin_content = BytesIO()
                 with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                    tar.add(
-                        dirname(file),
-                        arcname=basename(dirname(file)),
-                        recursive=True,
-                    )
+                    tar.add(dirname(file), arcname=basename(dirname(file)), recursive=True)
                 plugin_content.seek(0, 0)
                 value = plugin_content.getvalue()
 
                 data.update(
                     {
-                        "type": "external",
+                        "type": _type,
                         "page": "ui" in listdir(dirname(file)),
                         "method": "manual",
                         "data": value,
@@ -144,14 +143,15 @@ class Configurator:
                 )
 
                 with self.__thread_lock:
-                    self.__external_plugins.append(data)
+                    if _type == "pro":
+                        self.__pro_plugins.append(data)
+                    else:
+                        self.__external_plugins.append(data)
             else:
                 with self.__thread_lock:
                     self.__core_plugins.append(data)
         except:
-            self.__logger.error(
-                f"Exception while loading JSON from {file} : {format_exc()}",
-            )
+            self.__logger.error(f"Exception while loading JSON from {file} : {format_exc()}")
         self.__semaphore.release()
 
     def __load_variables(self, path: str) -> Dict[str, Any]:
@@ -173,6 +173,7 @@ class Configurator:
             self.__settings,
             self.get_plugins_settings("core"),
             self.get_plugins_settings("external"),
+            self.get_plugins_settings("pro"),
         ]
         for settings in default_settings:
             for setting, data in settings.items():
@@ -226,10 +227,7 @@ class Configurator:
             if not where:
                 return False, f"variable name {variable} doesn't exist"
             elif not re_search(where[real_var]["regex"], value):
-                return (
-                    False,
-                    f"value {value} doesn't match regex {where[real_var]['regex']}",
-                )
+                return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
             return True, "ok"
         # MULTISITE=yes
         prefixed, real_var = self.__var_is_prefixed(variable)
@@ -239,10 +237,7 @@ class Configurator:
         elif prefixed and where[real_var]["context"] != "multisite":
             return False, f"context of {variable} isn't multisite"
         elif not re_search(where[real_var]["regex"], value):
-            return (
-                False,
-                f"value {value} doesn't match regex {where[real_var]['regex']}",
-            )
+            return (False, f"value {value} doesn't match regex {where[real_var]['regex']}")
         return True, "ok"
 
     def __find_var(self, variable: str) -> Tuple[Optional[Dict[str, Any]], str]:
@@ -250,6 +245,7 @@ class Configurator:
             self.__settings,
             self.get_plugins_settings("core"),
             self.get_plugins_settings("external"),
+            self.get_plugins_settings("pro"),
         ]
         for target in targets:
             if variable in target:
@@ -267,120 +263,57 @@ class Configurator:
 
     def __validate_plugin(self, plugin: dict) -> Tuple[bool, str]:
         if not all(key in plugin for key in ("id", "name", "description", "version", "stream", "settings")):
-            return (
-                False,
-                f"Missing mandatory keys for plugin {plugin.get('id', 'unknown')} (id, name, description, version, stream, settings)",
-            )
+            return (False, f"Missing mandatory keys for plugin {plugin.get('id', 'unknown')} (id, name, description, version, stream, settings)")
 
         if not self.__plugin_id_rx.match(plugin["id"]):
-            return (
-                False,
-                f"Invalid id for plugin {plugin['id']} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 64))",
-            )
+            return (False, f"Invalid id for plugin {plugin['id']} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 64))")
         elif len(plugin["name"]) > 128:
-            return (
-                False,
-                f"Invalid name for plugin {plugin['id']} (Max 128 characters)",
-            )
+            return (False, f"Invalid name for plugin {plugin['id']} (Max 128 characters)")
         elif len(plugin["description"]) > 256:
-            return (
-                False,
-                f"Invalid description for plugin {plugin['id']} (Max 256 characters)",
-            )
+            return (False, f"Invalid description for plugin {plugin['id']} (Max 256 characters)")
         elif not self.__plugin_version_rx.match(plugin["version"]):
-            return (
-                False,
-                f"Invalid version for plugin {plugin['id']} (Must be in format \\d+\\.\\d+(\\.\\d+)?)",
-            )
+            return (False, f"Invalid version for plugin {plugin['id']} (Must be in format \\d+\\.\\d+(\\.\\d+)?)")
         elif plugin["stream"] not in ("yes", "no", "partial"):
-            return (
-                False,
-                f"Invalid stream for plugin {plugin['id']} (Must be yes, no or partial)",
-            )
+            return (False, f"Invalid stream for plugin {plugin['id']} (Must be yes, no or partial)")
 
         for setting, data in plugin["settings"].items():
             if not all(key in data.keys() for key in ("context", "default", "help", "id", "label", "regex", "type")):
-                return (
-                    False,
-                    f"missing keys for setting {setting} in plugin {plugin['id']}, must have context, default, help, id, label, regex and type",
-                )
+                return (False, f"missing keys for setting {setting} in plugin {plugin['id']}, must have context, default, help, id, label, regex and type")
 
             if not self.__setting_id_rx.match(setting):
-                return (
-                    False,
-                    f"Invalid setting name for setting {setting} in plugin {plugin['id']} (Can only contain capital letters and underscores (min 1 characters and max 256))",
-                )
+                return (False, f"Invalid setting name for setting {setting} in plugin {plugin['id']} (Can only contain capital letters and underscores (min 1 characters and max 256))")
             elif data["context"] not in ("global", "multisite"):
-                return (
-                    False,
-                    f"Invalid context for setting {setting} in plugin {plugin['id']} (Must be global or multisite)",
-                )
+                return (False, f"Invalid context for setting {setting} in plugin {plugin['id']} (Must be global or multisite)")
             elif len(data["default"]) > 4096:
-                return (
-                    False,
-                    f"Invalid default for setting {setting} in plugin {plugin['id']} (Max 4096 characters)",
-                )
+                return (False, f"Invalid default for setting {setting} in plugin {plugin['id']} (Max 4096 characters)")
             elif len(data["help"]) > 512:
-                return (
-                    False,
-                    f"Invalid help for setting {setting} in plugin {plugin['id']} (Max 512 characters)",
-                )
+                return (False, f"Invalid help for setting {setting} in plugin {plugin['id']} (Max 512 characters)")
             elif len(data["label"]) > 256:
-                return (
-                    False,
-                    f"Invalid label for setting {setting} in plugin {plugin['id']} (Max 256 characters)",
-                )
+                return (False, f"Invalid label for setting {setting} in plugin {plugin['id']} (Max 256 characters)")
             elif len(data["regex"]) > 1024:
-                return (
-                    False,
-                    f"Invalid regex for setting {setting} in plugin {plugin['id']} (Max 1024 characters)",
-                )
+                return (False, f"Invalid regex for setting {setting} in plugin {plugin['id']} (Max 1024 characters)")
             elif data["type"] not in ("password", "text", "check", "select"):
-                return (
-                    False,
-                    f"Invalid type for setting {setting} in plugin {plugin['id']} (Must be password, text, check or select)",
-                )
+                return (False, f"Invalid type for setting {setting} in plugin {plugin['id']} (Must be password, text, check or select)")
 
             if "multiple" in data:
                 if not self.__name_rx.match(data["multiple"]):
-                    return (
-                        False,
-                        f"Invalid multiple for setting {setting} in plugin {plugin['id']} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128))",
-                    )
+                    return (False, f"Invalid multiple for setting {setting} in plugin {plugin['id']} (Can only contain numbers, letters, underscores and hyphens (min 1 characters and max 128))")
 
             for select in data.get("select", []):
                 if len(select) > 256:
-                    return (
-                        False,
-                        f"Invalid select value {select} for setting {setting} in plugin {plugin['id']} (Max 256 characters)",
-                    )
+                    return (False, f"Invalid select value {select} for setting {setting} in plugin {plugin['id']} (Max 256 characters)")
 
         for job in plugin.get("jobs", []):
             if not all(key in job.keys() for key in ("name", "file", "every", "reload")):
-                return (
-                    False,
-                    f"missing keys for job {job['name']} in plugin {plugin['id']}, must have name, file, every and reload",
-                )
+                return (False, f"missing keys for job {job['name']} in plugin {plugin['id']}, must have name, file, every and reload")
 
             if not self.__name_rx.match(job["name"]):
-                return (
-                    False,
-                    f"Invalid name for job {job['name']} in plugin {plugin['id']}",
-                )
+                return (False, f"Invalid name for job {job['name']} in plugin {plugin['id']}")
             elif not self.__job_file_rx.match(job["file"]):
-                return (
-                    False,
-                    f"Invalid file for job {job['name']} in plugin {plugin['id']} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256))",
-                )
+                return (False, f"Invalid file for job {job['name']} in plugin {plugin['id']} (Can only contain numbers, letters, underscores, hyphens and slashes (min 1 characters and max 256))")
             elif job["every"] not in ("once", "minute", "hour", "day", "week"):
-                return (
-                    False,
-                    f"Invalid every for job {job['name']} in plugin {plugin['id']} (Must be once, minute, hour, day or week)",
-                )
+                return (False, f"Invalid every for job {job['name']} in plugin {plugin['id']} (Must be once, minute, hour, day or week)")
             elif job["reload"] is not True and job["reload"] is not False:
-                return (
-                    False,
-                    f"Invalid reload for job {job['name']} in plugin {plugin['id']} (Must be true or false)",
-                )
+                return (False, f"Invalid reload for job {job['name']} in plugin {plugin['id']} (Must be true or false)")
 
         return True, "ok"

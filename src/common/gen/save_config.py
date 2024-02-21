@@ -79,55 +79,26 @@ if __name__ == "__main__":
     try:
         # Parse arguments
         parser = ArgumentParser(description="BunkerWeb config saver")
-        parser.add_argument(
-            "--settings",
-            default=join(sep, "usr", "share", "bunkerweb", "settings.json"),
-            type=str,
-            help="file containing the main settings",
-        )
-        parser.add_argument(
-            "--core",
-            default=join(sep, "usr", "share", "bunkerweb", "core"),
-            type=str,
-            help="directory containing the core plugins",
-        )
-        parser.add_argument(
-            "--plugins",
-            default=join(sep, "etc", "bunkerweb", "plugins"),
-            type=str,
-            help="directory containing the external plugins",
-        )
-        parser.add_argument(
-            "--variables",
-            type=str,
-            help="path to the file containing environment variables",
-        )
-        parser.add_argument(
-            "--init",
-            action="store_true",
-            help="Only initialize the database",
-        )
-        parser.add_argument(
-            "--method",
-            default="scheduler",
-            type=str,
-            help="The method that is used to save the config",
-        )
-        parser.add_argument(
-            "--no-check-changes",
-            action="store_true",
-            help="Set the changes to checked in the database",
-        )
+        parser.add_argument("--settings", default=join(sep, "usr", "share", "bunkerweb", "settings.json"), type=str, help="file containing the main settings")
+        parser.add_argument("--core", default=join(sep, "usr", "share", "bunkerweb", "core"), type=str, help="directory containing the core plugins")
+        parser.add_argument("--plugins", default=join(sep, "etc", "bunkerweb", "plugins"), type=str, help="directory containing the external plugins")
+        parser.add_argument("--pro-plugins", default=join(sep, "etc", "bunkerweb", "pro", "plugins"), type=str, help="directory containing the pro plugins")
+        parser.add_argument("--variables", type=str, help="path to the file containing environment variables")
+        parser.add_argument("--init", action="store_true", help="Only initialize the database")
+        parser.add_argument("--method", default="scheduler", type=str, help="The method that is used to save the config")
+        parser.add_argument("--no-check-changes", action="store_true", help="Set the changes to checked in the database")
         args = parser.parse_args()
 
         settings_path = Path(normpath(args.settings))
         core_path = Path(normpath(args.core))
         plugins_path = Path(normpath(args.plugins))
+        pro_plugins_path = Path(normpath(args.pro_plugins))
 
         logger.info("Save config started ...")
         logger.info(f"Settings : {settings_path}")
         logger.info(f"Core : {core_path}")
         logger.info(f"Plugins : {plugins_path}")
+        logger.info(f"Pro plugins : {pro_plugins_path}")
         logger.info(f"Init : {args.init}")
 
         integration = "Linux"
@@ -154,14 +125,16 @@ if __name__ == "__main__":
         apis = []
 
         external_plugins = args.plugins
+        pro_plugins = args.pro_plugins
         if not Path(sep, "usr", "sbin", "nginx").exists() and args.method == "ui":
             db = Database(logger, pool=False)
-            external_plugins = db.get_plugins()
+            external_plugins = db.get_plugins(_type="external")
+            pro_plugins = db.get_plugins(_type="pro")
 
         # Check existences and permissions
         logger.info("Checking arguments ...")
         files = [settings_path] + ([Path(normpath(args.variables))] if args.variables else [])
-        paths_rx = [core_path, plugins_path]
+        paths_rx = [core_path, plugins_path, pro_plugins_path]
         for file in files:
             if not file.is_file():
                 logger.error(f"Missing file : {file}")
@@ -174,9 +147,7 @@ if __name__ == "__main__":
                 logger.error(f"Missing directory : {path}")
                 sys_exit(1)
             if not access(path, R_OK | X_OK):
-                logger.error(
-                    f"Missing RX rights on directory : {path}",
-                )
+                logger.error(f"Missing RX rights on directory : {path}")
                 sys_exit(1)
 
         if args.variables:
@@ -185,13 +156,7 @@ if __name__ == "__main__":
 
             # Compute the config
             logger.info("Computing config ...")
-            config = Configurator(
-                str(settings_path),
-                str(core_path),
-                external_plugins,
-                str(variables_path),
-                logger,
-            )
+            config = Configurator(str(settings_path), str(core_path), external_plugins, pro_plugins, str(variables_path), logger)
             config_files = config.get_config()
             custom_confs = []
             for k, v in environ.items():
@@ -262,13 +227,7 @@ if __name__ == "__main__":
         # Compute the config
         if not config_files:
             logger.info("Computing config ...")
-            config = Configurator(
-                args.settings,
-                args.core,
-                external_plugins,
-                tmp_config,
-                logger,
-            )
+            config = Configurator(args.settings, args.core, external_plugins, pro_plugins, tmp_config, logger)
             config_files = config.get_config()
 
         bunkerweb_version = Path(sep, "usr", "share", "bunkerweb", "VERSION").read_text().strip()
@@ -279,11 +238,7 @@ if __name__ == "__main__":
                 "Database not initialized, initializing ...",
             )
             ret, err = db.init_tables(
-                [
-                    config.get_settings(),
-                    config.get_plugins("core"),
-                    config.get_plugins("external"),
-                ],
+                [config.get_settings(), config.get_plugins("core"), config.get_plugins("external"), config.get_plugins("pro")],
                 bunkerweb_version,
             )
 
@@ -303,11 +258,7 @@ if __name__ == "__main__":
             logger.info("Database is already initialized, checking for changes ...")
 
             ret, err = db.init_tables(
-                [
-                    config.get_settings(),
-                    config.get_plugins("core"),
-                    config.get_plugins("external"),
-                ],
+                [config.get_settings(), config.get_plugins("core"), config.get_plugins("external"), config.get_plugins("pro")],
                 bunkerweb_version,
             )
 

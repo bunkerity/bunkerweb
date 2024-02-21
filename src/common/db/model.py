@@ -66,7 +66,6 @@ class Settings(Base):
     __table_args__ = (
         PrimaryKeyConstraint("id", "name"),
         UniqueConstraint("id"),
-        UniqueConstraint("name"),
     )
 
     id = Column(String(256), primary_key=True)
@@ -274,6 +273,7 @@ class Metadata(Base):
     scheduler_first_start = Column(Boolean, nullable=True)
     custom_configs_changed = Column(Boolean, default=False, nullable=True)
     external_plugins_changed = Column(Boolean, default=False, nullable=True)
+    pro_plugins_changed = Column(Boolean, default=False, nullable=True)
     config_changed = Column(Boolean, default=False, nullable=True)
     instances_changed = Column(Boolean, default=False, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)

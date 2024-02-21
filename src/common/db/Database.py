@@ -294,6 +294,7 @@ class Database:
                     .with_entities(
                         Metadata.custom_configs_changed,
                         Metadata.external_plugins_changed,
+                        Metadata.pro_plugins_changed,
                         Metadata.config_changed,
                         Metadata.instances_changed,
                     )
@@ -304,6 +305,7 @@ class Database:
                 return dict(
                     custom_configs_changed=metadata is not None and metadata.custom_configs_changed,
                     external_plugins_changed=metadata is not None and metadata.external_plugins_changed,
+                    pro_plugins_changed=metadata is not None and metadata.pro_plugins_changed,
                     config_changed=metadata is not None and metadata.config_changed,
                     instances_changed=metadata is not None and metadata.instances_changed,
                 )
@@ -316,6 +318,7 @@ class Database:
             "config",
             "custom_configs",
             "external_plugins",
+            "pro_plugins",
             "instances",
         ]
         with self.__db_session() as session:
@@ -333,6 +336,8 @@ class Database:
                     metadata.custom_configs_changed = value
                 if "external_plugins" in changes:
                     metadata.external_plugins_changed = value
+                if "pro_plugins" in changes:
+                    metadata.pro_plugins_changed = value
                 if "instances" in changes:
                     metadata.instances_changed = value
                 session.commit()
@@ -1121,11 +1126,11 @@ class Database:
 
         return ""
 
-    def update_external_plugins(self, plugins: List[Dict[str, Any]], *, delete_missing: bool = True) -> str:
+    def update_external_plugins(self, plugins: List[Dict[str, Any]], *, _type: Literal["external", "pro"] = "external", delete_missing: bool = True) -> str:
         """Update external plugins from the database"""
         to_put = []
         with self.__db_session() as session:
-            db_plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(type="external").all()
+            db_plugins = session.query(Plugins).with_entities(Plugins.id).filter_by(type=_type).all()
 
             db_ids = []
             if delete_missing and db_plugins:
@@ -1141,7 +1146,7 @@ class Database:
                 settings = plugin.pop("settings", {})
                 jobs = plugin.pop("jobs", [])
                 page = plugin.pop("page", False)
-                plugin["type"] = "external"
+                plugin["type"] = _type
                 db_plugin = (
                     session.query(Plugins)
                     .with_entities(
@@ -1159,9 +1164,9 @@ class Database:
                 )
 
                 if db_plugin is not None:
-                    if db_plugin.type != "external":
+                    if db_plugin.type not in ("external", "pro"):
                         self.__logger.warning(
-                            f"Plugin \"{plugin['id']}\" is not external, skipping update (updating a non-external plugin is forbidden for security reasons)",
+                            f"Plugin \"{plugin['id']}\" is not {_type}, skipping update (updating a non-external or non-pro plugin is forbidden for security reasons)",
                         )
                         continue
 
@@ -1187,6 +1192,9 @@ class Database:
 
                     if plugin.get("checksum") != db_plugin.checksum:
                         updates[Plugins.checksum] = plugin.get("checksum")
+
+                    if plugin.get("type") != db_plugin.type:
+                        updates[Plugins.type] = plugin.get("type")
 
                     if updates:
                         session.query(Plugins).filter(Plugins.id == plugin["id"]).update(updates)
@@ -1377,7 +1385,7 @@ class Database:
                         description=plugin["description"],
                         version=plugin["version"],
                         stream=plugin["stream"],
-                        type="external",
+                        type=_type,
                         method=plugin["method"],
                         data=plugin.get("data"),
                         checksum=plugin.get("checksum"),
@@ -1477,7 +1485,10 @@ class Database:
             with suppress(ProgrammingError, OperationalError):
                 metadata = session.query(Metadata).get(1)
                 if metadata is not None:
-                    metadata.external_plugins_changed = True
+                    if _type == "external":
+                        metadata.external_plugins_changed = True
+                    elif _type == "pro":
+                        metadata.pro_plugins_changed = True
 
             try:
                 session.add_all(to_put)
