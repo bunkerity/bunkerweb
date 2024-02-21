@@ -211,24 +211,30 @@ class CLI(ApiCaller):
 
     def unban(self, ip: str) -> Tuple[bool, str]:
         if self.__redis:
-            ok = self.__redis.delete(f"bans_ip_{ip}")
-            if not ok:
-                self.__logger.error(f"Failed to delete ban for {ip} from redis")
+            try:
+                ok = self.__redis.delete(f"bans_ip_{ip}")
+                if not ok:
+                    self.__logger.error(f"Failed to delete ban for {ip} from redis")
+            except Exception as e:
+                self.__logger.error(f"Failed to delete ban for {ip} from redis: {e}")
 
         if self.send_to_apis("POST", "/unban", data={"ip": ip}):
             return True, f"IP {ip} has been unbanned"
-        return False, "error"
+        return False, f"Failed to unban {ip}"
 
     def ban(self, ip: str, exp: float, reason: str) -> Tuple[bool, str]:
         if self.__redis:
-            ok = self.__redis.set(f"bans_ip_{ip}", dumps({"reason": reason, "date": time()}))
-            if not ok:
-                self.__logger.error(f"Failed to ban {ip} in redis")
-            self.__redis.expire(f"bans_ip_{ip}", int(exp))
+            try:
+                ok = self.__redis.set(f"bans_ip_{ip}", dumps({"reason": reason, "date": time()}))
+                if not ok:
+                    self.__logger.error(f"Failed to ban {ip} in redis")
+                self.__redis.expire(f"bans_ip_{ip}", int(exp))
+            except Exception as e:
+                self.__logger.error(f"Failed to ban {ip} in redis: {e}")
 
         if self.send_to_apis("POST", "/ban", data={"ip": ip, "exp": exp, "reason": reason}):
             return (True, f"IP {ip} has been banned for {format_remaining_time(exp)} with reason {reason}")
-        return False, "error"
+        return False, f"Failed to ban {ip}"
 
     def bans(self) -> Tuple[bool, str]:
         servers = {}
