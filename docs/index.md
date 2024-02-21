@@ -75,9 +75,9 @@ BunkerWeb has a pro version to further improve the security of your applications
 
 We have centralised version management and support within the panel for greater ease of use.
 
-More detailed information about this version can be found [by visiting our website](https://www.bunkerweb.io/#services?utm_campaign=self&utm_source=doc).
+More detailed information about this version can be found [by visiting our website.](https://www.bunkerweb.io/#services?utm_campaign=self&utm_source=doc)
 
-If you're interested, upgrade to the pro version in just a few clicks, [following the steps here.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc).
+If you're interested, upgrade to the pro version in just a few clicks, [following the steps here.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)
 
 Note that in the documentation, it will be mentioned when a feature is for the pro version.
 
