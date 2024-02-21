@@ -9,6 +9,16 @@ module.exports = {
     "./static/js/plugins/*.js",
     "../common/core/***/**/*.{html,js}",
   ],
+  safelist: [
+    "bg-gray-500",
+    "bg-green-500",
+    "bg-yellow-500",
+    "bg-yellow-400",
+    "text-yellow-400",
+    "bg-red-500",
+    "bg-sky-500",
+    "bg-orange-500",
+  ],
 
   presets: [],
   darkMode: "class",
