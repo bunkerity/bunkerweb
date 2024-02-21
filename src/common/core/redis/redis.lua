@@ -38,6 +38,9 @@ end
 
 function redis:api()
 	if self.ctx.bw.uri == "/redis/ping" and self.ctx.bw.request_method == "POST" then
+		if self.variables["USE_REDIS"] ~= "yes" then
+			return self:ret(true, "redis is not enabled", HTTP_OK)
+		end
 		-- Check redis connection
 		local ok, err = self.clusterstore:connect(true)
 		if not ok then
@@ -59,6 +62,9 @@ function redis:api()
 		return self:ret(true, "success", HTTP_OK)
 	end
 	if self.ctx.bw.uri == "/redis/stats" and self.ctx.bw.request_method == "GET" then
+		if self.variables["USE_REDIS"] ~= "yes" then
+			return self:ret(true, "redis is not enabled", HTTP_OK)
+		end
 		-- Connect to redis
 		local ok, err = self.clusterstore:connect(true)
 		if not ok then
