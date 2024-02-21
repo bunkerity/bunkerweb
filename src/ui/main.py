@@ -291,7 +291,7 @@ def manage_bunkerweb(method: str, *args, operation: str = "reloads", is_draft: b
 @app.after_request
 def set_csp_header(response):
     """Set the Content-Security-Policy header to prevent XSS attacks."""
-    response.headers["Content-Security-Policy"] = "object-src 'none'; frame-ancestors 'self';"
+    response.headers["Content-Security-Policy"] = "object-src 'none'; frame-ancestors 'self'; default-src 'self'"
     return response
 
 
@@ -1281,7 +1281,7 @@ def custom_plugin(plugin: str):
             message = f'The plugin "{plugin}" does not have a template'
             app.logger.error(message)
             return message, 404
-        
+
         # Case template, prepare data
         plugins = app.config["CONFIG"].get_plugins()
         plugin_id = None
@@ -1302,13 +1302,13 @@ def custom_plugin(plugin: str):
             message = f'Plugin "{plugin}" not found'
             app.logger.error(message)
             return message, 404
-        
+
         config = app.config["CONFIG"].get_config(methods=False)
 
         # Check if we are using metrics
         for service in config.get("SERVER_NAME", "").split(" "):
             # specific case
-            if config.get(f"{service}_USE_METRICS", "no") != "no":
+            if config.get(f"{service}_USE_METRICS", "yes") != "no":
                 is_metrics_on = True
                 break
 
@@ -1351,7 +1351,6 @@ def custom_plugin(plugin: str):
             if config.get(use_key, "no") != "no":
                 is_used = True
 
-        
         if context == "multisite":
             for service in config.get("SERVER_NAME", "").split(" "):
                 # specific case
@@ -1367,7 +1366,6 @@ def custom_plugin(plugin: str):
                 if config.get(f"{service}_{use_key}", "no") != "no":
                     is_used = True
                     break
-                
 
             return render_template(
                 Environment(loader=FileSystemLoader(join(sep, "usr", "share", "bunkerweb", "ui", "templates") + "/")).from_string(page.decode("utf-8")),
@@ -1381,7 +1379,6 @@ def custom_plugin(plugin: str):
                 is_pro_version=PRO_VERSION,
                 plugins_pro=PRO_PLUGINS_LIST,
             )
-
 
     module = db.get_plugin_actions(plugin)
 

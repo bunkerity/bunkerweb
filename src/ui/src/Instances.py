@@ -382,6 +382,8 @@ class Instances:
         # Get metrics from all instances
         metrics = {}
         for instance in self.get_instances():
+            instance_name = instance.name if instance.name != "local" else "127.0.0.1"
+
             try:
                 if plugin_id == "redis":
                     resp, instance_metrics = instance.metrics_redis()
@@ -394,10 +396,10 @@ class Instances:
             if not resp:
                 continue
 
-            if not instance_metrics.get(instance.name, {"msg": None})["msg"] or not isinstance(instance_metrics[instance.name]["msg"], dict) or instance_metrics[instance.name]["status"] != "success":
+            if not isinstance(instance_metrics.get(instance_name, {"msg": None}).get("msg"), dict) or instance_metrics[instance_name].get("status", "error") != "success":
                 continue
 
-            metric_data = instance_metrics[instance.name]["msg"]
+            metric_data = instance_metrics[instance_name]["msg"]
 
             # Update metrics looking for value type
             for key, value in metric_data.items():
@@ -436,17 +438,17 @@ class Instances:
         # Need at least one instance to get a success ping to return success
         ping = {"status": "error"}
         for instance in self.get_instances():
+            instance_name = instance.name if instance.name != "local" else "127.0.0.1"
+
             try:
                 resp, ping_data = instance.ping(plugin_id)
             except:
                 continue
 
-            if not resp:
-                continue
-            if instance.name not in ping_data or ping_data[instance.name]["msg"] is None:
+            if not resp or not isinstance(ping_data.get(instance_name, {"msg": None}).get("msg"), dict):
                 continue
 
-            if ping_data[instance.name]["status"] == "success":
+            if ping_data[instance_name].get("status", "error") == "success":
                 ping["status"] = "success"
                 break
 
