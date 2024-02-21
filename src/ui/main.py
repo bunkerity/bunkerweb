@@ -314,6 +314,8 @@ def set_csp_header(response):
         + f" script-src 'self' 'nonce-{app.config['SCRIPT_NONCE']}';"
         + " style-src 'self' 'unsafe-inline';"
         + " img-src 'self' data: https://assets.bunkerity.com;"
+        + " font-src 'self' data:;"
+        + (" connect-src *;" if not app.config["USER"] else "")
     )
     return response
 
