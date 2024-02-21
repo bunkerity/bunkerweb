@@ -16,18 +16,11 @@ from jinja2 import Environment, FileSystemLoader
 
 
 class Templator:
-    def __init__(
-        self,
-        templates: str,
-        core: str,
-        plugins: str,
-        output: str,
-        target: str,
-        config: Dict[str, Any],
-    ):
+    def __init__(self, templates: str, core: str, plugins: str, pro_plugins: str, output: str, target: str, config: Dict[str, Any]):
         self.__templates = templates
         self.__core = core
         self.__plugins = plugins
+        self.__pro_plugins = pro_plugins
         self.__output = output
         self.__target = target
         self.__config = config
@@ -43,14 +36,10 @@ class Templator:
 
     def __load_jinja_env(self) -> Environment:
         searchpath = [self.__templates]
-        for subpath in glob(join(self.__core, "*")) + glob(join(self.__plugins, "*")):
+        for subpath in glob(join(self.__core, "*")) + glob(join(self.__plugins, "*")) + glob(join(self.__pro_plugins, "*")):
             if Path(subpath).is_dir():
                 searchpath.append(join(subpath, "confs"))
-        return Environment(
-            loader=FileSystemLoader(searchpath=searchpath),
-            lstrip_blocks=True,
-            trim_blocks=True,
-        )
+        return Environment(loader=FileSystemLoader(searchpath=searchpath), lstrip_blocks=True, trim_blocks=True)
 
     def __find_templates(self, contexts) -> List[str]:
         templates = []

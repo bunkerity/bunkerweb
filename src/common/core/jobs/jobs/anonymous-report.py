@@ -66,7 +66,7 @@ try:
     elif db_config.get("USE_UI", {"value": "no"})["value"] == "yes":
         data["use_ui"] = "yes"
 
-    data["external_plugins"] = [f"{plugin['id']}/{plugin['version']}" for plugin in db.get_plugins(external=True)]
+    data["external_plugins"] = [f"{plugin['id']}/{plugin['version']}" for plugin in db.get_plugins(_type="external")]
     data["os"] = {
         "name": "Linux",
         "version": "Unknown",

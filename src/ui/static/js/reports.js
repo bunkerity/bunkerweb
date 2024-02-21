@@ -1,7 +1,6 @@
 class Filter {
   constructor(prefix = "reports") {
     this.prefix = prefix;
-    this.container = document.querySelector(`[data-${this.prefix}-filter]`);
     this.keyInp = document.querySelector("input#keyword");
     this.methodValue = "all";
     this.statusValue = "all";
@@ -11,6 +10,11 @@ class Filter {
   }
 
   initHandler() {
+    this.container =
+      document.querySelector(`[data-${this.prefix}-filter]`) || null;
+
+    if (!this.container) return;
+
     //METHOD HANDLER
     this.container.addEventListener("click", (e) => {
       try {

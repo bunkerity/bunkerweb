@@ -581,7 +581,7 @@ For example, you can get the request arguments in your template like this :
     ```
 
 
-You can power-up your plugin page with additionnal scripting with the **actions.py** file when sending a **POST /plugins/<*plugin_id*>**.
+You can power-up your plugin page with additional scripting with the **actions.py** file when sending a **POST /plugins/<*plugin_id*>**.
 
 Here is what is send to the function :
 

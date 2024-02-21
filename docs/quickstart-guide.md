@@ -2431,6 +2431,12 @@ By default, BunkerWeb will only listen on IPv4 addresses and won't use IPv6 for 
 
 This quickstart is just a tiny fraction of the functionality that BunkerWeb has to offer. Be curious and see what else BunkerWeb has to offer.
 
-The documentation shares free and professional features. The latter will be marked accordingly to avoid confusion.
+You can take a detailed look at the many [plugins and settings available](settings.md) in this solution.
 
-If you want to make the most of the solution, don't hesitate to [take a detailed look at the features from the panel.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)
+Details on the use of certain plugins can also be found on the [security tuning page.](security-tuning.md)
+
+For simplified use of the solution, don't hesitate to [try out the web UI.](web-ui.md)
+
+Please note that **BunkerWeb comes in both free and pro versions**, with pro features indicated to avoid confusion.
+
+If you'd like to find out more about the pro version, and use the solution to the full, [visit the panel.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)

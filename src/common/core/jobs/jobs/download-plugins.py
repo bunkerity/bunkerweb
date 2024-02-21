@@ -48,7 +48,7 @@ def install_plugin(plugin_dir, db) -> bool:
     if EXTERNAL_PLUGINS_DIR.joinpath(metadata["id"], "plugin.json").is_file():
         old_version = None
 
-        for plugin in db.get_plugins(external=True):
+        for plugin in db.get_plugins(_type="external"):
             if plugin["id"] == metadata["id"]:
                 old_version = plugin["version"]
                 break
@@ -179,7 +179,7 @@ try:
 
         plugin_file.update(
             {
-                "external": True,
+                "type": "external",
                 "page": False,
                 "method": "scheduler",
                 "data": value,
@@ -195,7 +195,7 @@ try:
 
     lock = Lock()
 
-    for plugin in db.get_plugins(external=True, with_data=True):
+    for plugin in db.get_plugins(_type="external", with_data=True):
         if plugin["method"] != "scheduler" and plugin["id"] not in external_plugins_ids:
             external_plugins.append(plugin)
 

@@ -39,6 +39,7 @@ INTEGRATIONS_ENUM = Enum(
     "Unknown",
     name="integrations_enum",
 )
+PLUGIN_TYPES_ENUM = Enum("core", "external", "pro", name="plugin_types_enum")
 Base = declarative_base()
 
 
@@ -50,7 +51,7 @@ class Plugins(Base):
     description = Column(String(256), nullable=False)
     version = Column(String(32), nullable=False)
     stream = Column(String(16), nullable=False)
-    external = Column(Boolean, default=False, nullable=False)
+    type = Column(PLUGIN_TYPES_ENUM, default="core", nullable=False)
     method = Column(METHODS_ENUM, default="manual", nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     checksum = Column(String(128), nullable=True)
@@ -65,7 +66,6 @@ class Settings(Base):
     __table_args__ = (
         PrimaryKeyConstraint("id", "name"),
         UniqueConstraint("id"),
-        UniqueConstraint("name"),
     )
 
     id = Column(String(256), primary_key=True)
@@ -273,6 +273,7 @@ class Metadata(Base):
     scheduler_first_start = Column(Boolean, nullable=True)
     custom_configs_changed = Column(Boolean, default=False, nullable=True)
     external_plugins_changed = Column(Boolean, default=False, nullable=True)
+    pro_plugins_changed = Column(Boolean, default=False, nullable=True)
     config_changed = Column(Boolean, default=False, nullable=True)
     instances_changed = Column(Boolean, default=False, nullable=True)
     integration = Column(INTEGRATIONS_ENUM, default="Unknown", nullable=False)

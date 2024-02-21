@@ -128,6 +128,8 @@ api.global.POST["^/confs$"] = function(self)
 		destination = "/etc/bunkerweb/configs"
 	elseif self.ctx.bw.uri == "/plugins" then
 		destination = "/etc/bunkerweb/plugins"
+	elseif self.ctx.bw.uri == "/pro_plugins" then
+		destination = "/etc/bunkerweb/pro/plugins"
 	end
 	local form, err = upload:new(4096)
 	if not form then
@@ -174,6 +176,8 @@ api.global.POST["^/cache$"] = api.global.POST["^/confs$"]
 api.global.POST["^/custom_configs$"] = api.global.POST["^/confs$"]
 
 api.global.POST["^/plugins$"] = api.global.POST["^/confs$"]
+
+api.global.POST["^/pro_plugins$"] = api.global.POST["^/confs$"]
 
 api.global.POST["^/unban$"] = function(self)
 	read_body()

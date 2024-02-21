@@ -18,7 +18,7 @@ from tarfile import open as tar_open
 from threading import Thread
 from time import sleep
 from traceback import format_exc
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in (("deps", "python"), ("utils",), ("api",), ("db",))]:
     if deps_path not in sys_path:
@@ -34,6 +34,8 @@ RUN = True
 SCHEDULER: Optional[JobScheduler] = None
 INTEGRATION = "Linux"
 CACHE_PATH = join(sep, "var", "cache", "bunkerweb")
+EXTERNAL_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "plugins")
+PRO_PLUGINS_PATH = Path(sep, "etc", "bunkerweb", "pro", "plugins")
 SCHEDULER_TMP_ENV_PATH = Path(sep, "var", "tmp", "bunkerweb", "scheduler.env")
 SCHEDULER_TMP_ENV_PATH.parent.mkdir(parents=True, exist_ok=True)
 SCHEDULER_TMP_ENV_PATH.touch()
@@ -61,13 +63,9 @@ def handle_reload(signum, frame):
             else:
                 logger.error("Reload failed")
         else:
-            logger.warning(
-                "Ignored reload operation because scheduler is not running ...",
-            )
+            logger.warning("Ignored reload operation because scheduler is not running ...")
     except:
-        logger.error(
-            f"Exception while reloading scheduler : {format_exc()}",
-        )
+        logger.error(f"Exception while reloading scheduler : {format_exc()}")
 
 
 signal(SIGHUP, handle_reload)
@@ -79,11 +77,7 @@ def stop(status):
     _exit(status)
 
 
-def generate_custom_configs(
-    configs: List[Dict[str, Any]],
-    *,
-    original_path: Union[Path, str] = join(sep, "etc", "bunkerweb", "configs"),
-):
+def generate_custom_configs(configs: List[Dict[str, Any]], *, original_path: Union[Path, str] = join(sep, "etc", "bunkerweb", "configs")):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
 
@@ -113,21 +107,16 @@ def generate_custom_configs(
         ret = SCHEDULER.send_files(original_path, "/custom_configs")
 
         if not ret:
-            logger.error(
-                "Sending custom configs failed, configuration will not work as expected...",
-            )
+            logger.error("Sending custom configs failed, configuration will not work as expected...")
 
 
-def generate_external_plugins(
-    plugins: List[Dict[str, Any]],
-    *,
-    original_path: Union[Path, str] = join(sep, "etc", "bunkerweb", "plugins"),
-):
+def generate_external_plugins(plugins: List[Dict[str, Any]], *, original_path: Union[Path, str] = EXTERNAL_PLUGINS_PATH):
     if not isinstance(original_path, Path):
         original_path = Path(original_path)
+    pro = original_path.as_posix().endswith("/pro/plugins")
 
-    # Remove old external plugins files
-    logger.info("Removing old external plugins files ...")
+    # Remove old external/pro plugins files
+    logger.info(f"Removing old {'pro ' if pro else ''}external plugins files ...")
     for file in glob(str(original_path.joinpath("*"))):
         file = Path(file)
         if file.is_symlink() or file.is_file():
@@ -136,7 +125,7 @@ def generate_external_plugins(
             rmtree(file, ignore_errors=True)
 
     if plugins:
-        logger.info("Generating new external plugins ...")
+        logger.info(f"Generating new {'pro ' if pro else ''}external plugins ...")
         original_path.mkdir(parents=True, exist_ok=True)
         for plugin in plugins:
             tmp_path = original_path.joinpath(plugin["id"], f"{plugin['name']}.tar.gz")
@@ -151,13 +140,11 @@ def generate_external_plugins(
                 chmod(job_file, st.st_mode | S_IEXEC)
 
     if SCHEDULER and SCHEDULER.apis:
-        logger.info("Sending plugins to BunkerWeb")
-        ret = SCHEDULER.send_files(original_path, "/plugins")
+        logger.info(f"Sending {'pro ' if pro else ''}external plugins to BunkerWeb")
+        ret = SCHEDULER.send_files(original_path, "/pro_plugins" if original_path.as_posix().endswith("/pro/plugins") else "/plugins")
 
         if not ret:
-            logger.error(
-                "Sending plugins failed, configuration will not work as expected...",
-            )
+            logger.error(f"Sending {'pro ' if pro else ''}external plugins failed, configuration will not work as expected...")
 
 
 def dict_to_frozenset(d):
@@ -181,9 +168,7 @@ if __name__ == "__main__":
         # Don't execute if pid file exists
         pid_path = Path(sep, "var", "run", "bunkerweb", "scheduler.pid")
         if pid_path.is_file():
-            logger.error(
-                "Scheduler is already running, skipping execution ...",
-            )
+            logger.error("Scheduler is already running, skipping execution ...")
             _exit(1)
 
         # Write pid to file
@@ -193,11 +178,7 @@ if __name__ == "__main__":
 
         # Parse arguments
         parser = ArgumentParser(description="Job scheduler for BunkerWeb")
-        parser.add_argument(
-            "--variables",
-            type=str,
-            help="path to the file containing environment variables",
-        )
+        parser.add_argument("--variables", type=str, help="path to the file containing environment variables")
         args = parser.parse_args()
 
         integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
@@ -226,21 +207,13 @@ if __name__ == "__main__":
         )
         env = {}
 
-        if INTEGRATION in (
-            "Swarm",
-            "Kubernetes",
-            "Autoconf",
-        ):
+        if INTEGRATION in ("Swarm", "Kubernetes", "Autoconf"):
             while not db.is_initialized():
-                logger.warning(
-                    "Database is not initialized, retrying in 5s ...",
-                )
+                logger.warning("Database is not initialized, retrying in 5s ...")
                 sleep(5)
 
             while not db.is_autoconf_loaded():
-                logger.warning(
-                    "Autoconf is not loaded yet in the database, retrying in 5s ...",
-                )
+                logger.warning("Autoconf is not loaded yet in the database, retrying in 5s ...")
                 sleep(5)
 
             env = db.get_config()
@@ -259,21 +232,15 @@ if __name__ == "__main__":
                 check=False,
             )
             if proc.returncode != 0:
-                logger.error(
-                    "Config saver failed, configuration will not work as expected...",
-                )
+                logger.error("Config saver failed, configuration will not work as expected...")
 
             while not db.is_initialized():
-                logger.warning(
-                    "Database is not initialized, retrying in 5s ...",
-                )
+                logger.warning("Database is not initialized, retrying in 5s ...")
                 sleep(5)
 
             env = db.get_config()
             while not db.is_first_config_saved() or not env:
-                logger.warning(
-                    "Database doesn't have any config saved yet, retrying in 5s ...",
-                )
+                logger.warning("Database doesn't have any config saved yet, retrying in 5s ...")
                 sleep(5)
                 env = db.get_config()
         else:
@@ -290,9 +257,7 @@ if __name__ == "__main__":
                 SCHEDULER.auto_setup()
 
                 if not SCHEDULER.apis:
-                    logger.warning(
-                        "No BunkerWeb API found, retrying in 5s ...",
-                    )
+                    logger.warning("No BunkerWeb API found, retrying in 5s ...")
                     sleep(5)
             db.update_instances([api_to_instance(api) for api in SCHEDULER.apis])
 
@@ -337,73 +302,66 @@ if __name__ == "__main__":
         if changes:
             err = db.save_custom_configs(custom_configs, "manual")
             if err:
-                logger.error(
-                    f"Couldn't save some manually created custom configs to database: {err}",
-                )
+                logger.error(f"Couldn't save some manually created custom configs to database: {err}")
 
         if (scheduler_first_start and db_configs) or changes:
-            Thread(
-                target=generate_custom_configs,
-                args=(db.get_custom_configs(),),
-                kwargs={"original_path": configs_path},
-            ).start()
+            Thread(target=generate_custom_configs, args=(db.get_custom_configs(),), kwargs={"original_path": configs_path}).start()
 
         del custom_configs, db_configs
 
-        # Check if any external plugin has been added by the user
-        external_plugins = []
-        db_plugins = db.get_plugins(external=True)
-        plugins_dir = Path(sep, "etc", "bunkerweb", "plugins")
-        for filename in glob(str(plugins_dir.joinpath("*", "plugin.json"))):
-            with open(filename, "r", encoding="utf-8") as f:
-                _dir = dirname(filename)
-                plugin_content = BytesIO()
-                with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
-                    tar.add(_dir, arcname=basename(_dir), recursive=True)
-                plugin_content.seek(0, 0)
-                value = plugin_content.getvalue()
+        def check_plugin_changes(_type: Literal["external", "pro"] = "external"):
+            # Check if any external or pro plugin has been added by the user
+            external_plugins = []
+            db_plugins = db.get_plugins(_type=_type)
+            for filename in glob(str((EXTERNAL_PLUGINS_PATH if _type == "external" else PRO_PLUGINS_PATH).joinpath("*", "plugin.json"))):
+                with open(filename, "r", encoding="utf-8") as f:
+                    _dir = dirname(filename)
+                    plugin_content = BytesIO()
+                    with tar_open(fileobj=plugin_content, mode="w:gz", compresslevel=9) as tar:
+                        tar.add(_dir, arcname=basename(_dir), recursive=True)
+                    plugin_content.seek(0, 0)
+                    value = plugin_content.getvalue()
 
-                external_plugins.append(
-                    json_load(f)
-                    | {
-                        "external": True,
-                        "page": Path(_dir, "ui").exists(),
-                        "method": "manual",
-                        "data": value,
-                        "checksum": sha256(value).hexdigest(),
-                    }
+                    external_plugins.append(
+                        json_load(f)
+                        | {
+                            "type": _type,
+                            "page": Path(_dir, "ui").exists(),
+                            "method": "manual",
+                            "data": value,
+                            "checksum": sha256(value).hexdigest(),
+                        }
+                    )
+
+            tmp_external_plugins = []
+            for external_plugin in deepcopy(external_plugins):
+                external_plugin.pop("data", None)
+                external_plugin.pop("checksum", None)
+                external_plugin.pop("jobs", None)
+                external_plugin.pop("method", None)
+                tmp_external_plugins.append(external_plugin)
+
+            tmp_db_plugins = []
+            for db_plugin in db_plugins.copy():
+                db_plugin.pop("method", None)
+                tmp_db_plugins.append(db_plugin)
+
+            changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in tmp_db_plugins}
+
+            if changes:
+                err = db.update_external_plugins(external_plugins, _type=_type, delete_missing=True)
+                if err:
+                    logger.error(f"Couldn't save some manually added {_type} plugins to database: {err}")
+
+            if (scheduler_first_start and db_plugins) or changes:
+                generate_external_plugins(
+                    db.get_plugins(_type=_type, with_data=True),
+                    original_path=EXTERNAL_PLUGINS_PATH if _type == "external" else PRO_PLUGINS_PATH,
                 )
+                SCHEDULER.update_jobs()
 
-        tmp_external_plugins = []
-        for external_plugin in deepcopy(external_plugins):
-            external_plugin.pop("data", None)
-            external_plugin.pop("checksum", None)
-            external_plugin.pop("jobs", None)
-            external_plugin.pop("method", None)
-            tmp_external_plugins.append(external_plugin)
-
-        tmp_db_plugins = []
-        for db_plugin in db_plugins.copy():
-            db_plugin.pop("method", None)
-            tmp_db_plugins.append(db_plugin)
-
-        changes = {hash(dict_to_frozenset(d)) for d in tmp_external_plugins} != {hash(dict_to_frozenset(d)) for d in tmp_db_plugins}
-
-        if changes:
-            err = db.update_external_plugins(external_plugins, delete_missing=True)
-            if err:
-                logger.error(
-                    f"Couldn't save some manually added plugins to database: {err}",
-                )
-
-        if (scheduler_first_start and db_plugins) or changes:
-            generate_external_plugins(
-                db.get_plugins(external=True, with_data=True),
-                original_path=plugins_dir,
-            )
-            SCHEDULER.update_jobs()
-
-        del tmp_external_plugins, external_plugins, db_plugins
+        check_plugin_changes("external")
+        check_plugin_changes("pro")
 
         logger.info("Executing scheduler ...")
 
@@ -426,9 +384,7 @@ if __name__ == "__main__":
             logger.info(f"Sending {join(sep, 'etc', 'nginx')} folder ...")
             ret = SCHEDULER.send_files(join(sep, "etc", "nginx"), "/confs")
             if not ret:
-                logger.error(
-                    "Sending nginx configs failed, configuration will not work as expected...",
-                )
+                logger.error("Sending nginx configs failed, configuration will not work as expected...")
 
         def send_nginx_cache():
             logger.info(f"Sending {CACHE_PATH} folder ...")
@@ -498,14 +454,9 @@ if __name__ == "__main__":
                 )
 
                 if proc.returncode != 0:
-                    logger.error(
-                        "Config generator failed, configuration will not work as expected...",
-                    )
+                    logger.error("Config generator failed, configuration will not work as expected...")
                 else:
-                    copy(
-                        str(nginx_variables_path),
-                        join(sep, "var", "tmp", "bunkerweb", "variables.env"),
-                    )
+                    copy(str(nginx_variables_path), join(sep, "var", "tmp", "bunkerweb", "variables.env"))
 
                     if SCHEDULER.apis:
                         # send nginx configs
@@ -542,15 +493,14 @@ if __name__ == "__main__":
                 else:
                     logger.warning("No BunkerWeb instance found, skipping nginx reload ...")
             except:
-                logger.error(
-                    f"Exception while reloading after running jobs once scheduling : {format_exc()}",
-                )
+                logger.error(f"Exception while reloading after running jobs once scheduling : {format_exc()}")
 
             NEED_RELOAD = False
             RUN_JOBS_ONCE = False
             CONFIG_NEED_GENERATION = False
             CONFIGS_NEED_GENERATION = False
             PLUGINS_NEED_GENERATION = False
+            PRO_PLUGINS_NEED_GENERATION = False
             INSTANCES_NEED_GENERATION = False
 
             # infinite schedule for the jobs
@@ -567,6 +517,11 @@ if __name__ == "__main__":
                     stop(1)
 
                 # check if the plugins have changed since last time
+                if changes["pro_plugins_changed"]:
+                    logger.info("Pro plugins changed, generating ...")
+                    changes["external_plugins_changed"] = True
+                    PRO_PLUGINS_NEED_GENERATION = True
+
                 if changes["external_plugins_changed"]:
                     logger.info("External plugins changed, generating ...")
 
@@ -650,10 +605,12 @@ if __name__ == "__main__":
 
                 if PLUGINS_NEED_GENERATION:
                     CHANGES.append("external_plugins")
-                    generate_external_plugins(
-                        db.get_plugins(external=True, with_data=True),
-                        original_path=plugins_dir,
-                    )
+                    generate_external_plugins(db.get_plugins(_type="external", with_data=True))
+                    SCHEDULER.update_jobs()
+
+                if PRO_PLUGINS_NEED_GENERATION:
+                    CHANGES.append("pro_plugins")
+                    generate_external_plugins(db.get_plugins(_type="pro", with_data=True), original_path=PRO_PLUGINS_PATH)
                     SCHEDULER.update_jobs()
 
                 if CONFIG_NEED_GENERATION:
@@ -662,7 +619,5 @@ if __name__ == "__main__":
                     env["DATABASE_URI"] = db.database_uri
 
     except:
-        logger.error(
-            f"Exception while executing scheduler : {format_exc()}",
-        )
+        logger.error(f"Exception while executing scheduler : {format_exc()}")
         stop(1)
