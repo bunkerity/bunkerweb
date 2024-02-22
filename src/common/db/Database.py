@@ -39,7 +39,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from jobs import file_hash  # type: ignore
 
 from pymysql import install_as_MySQLdb
-from sqlalchemy import create_engine, text, inspect
+from sqlalchemy import create_engine, MetaData as sql_metadata, text, inspect
 from sqlalchemy.exc import (
     ArgumentError,
     DatabaseError,
@@ -348,51 +348,37 @@ class Database:
 
     def init_tables(self, default_plugins: List[dict], bunkerweb_version: str) -> Tuple[bool, str]:
         """Initialize the database tables and return the result"""
+        assert self.__sql_engine is not None, "The database engine is not initialized"
+
         inspector = inspect(self.__sql_engine)
         db_version = None
         has_all_tables = True
+        old_data = {}
+
         if inspector and len(inspector.get_table_names()):
             db_version = self.get_metadata()["version"]
 
             if db_version != bunkerweb_version:
-                self.__logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), checking if it needs to be updated")
-                for table in Base.metadata.tables:
-                    if not inspector.has_table(table):
+                self.__logger.warning(f"Database version ({db_version}) is different from Bunkerweb version ({bunkerweb_version}), migrating ...")
+                metadata = sql_metadata()
+                metadata.reflect(self.__sql_engine)
+
+                for table_name in Base.metadata.tables.keys():
+                    if not inspector.has_table(table_name):
+                        self.__logger.warning(f'Table "{table_name}" is missing')
                         has_all_tables = False
                         continue
-                    missing_columns = []
-                    extra_columns = []
 
-                    # Check if any columns are missing
-                    db_columns = inspector.get_columns(table)
-                    self.__logger.debug(f'Checking table "{table}" for missing columns')
-                    for column in Base.metadata.tables[table].columns:
-                        self.__logger.debug(f'Checking column "{column.name}" in table "{table}"')
-                        if not any(db_column["name"] == column.name for db_column in db_columns):
-                            self.__logger.warning(f'Column "{column.name}" is missing in table "{table}"')
-                            missing_columns.append(column)
+                    with self.__db_session() as session:
+                        old_data[table_name] = session.query(metadata.tables[table_name]).all()
 
-                    # Check if any columns are extra
-                    self.__logger.debug(f'Checking table "{table}" for extra columns')
-                    for db_column in db_columns:
-                        self.__logger.debug(f'Checking column "{db_column["name"]}" in table "{table}"')
-                        if not any(column.name == db_column["name"] for column in Base.metadata.tables[table].columns):
-                            self.__logger.warning(f'Column "{db_column["name"]}" is extra in table "{table}"')
-                            extra_columns.append(db_column)
-
-                    try:
+                # Drop all missing tables
+                for table_name in metadata.tables.keys():
+                    if table_name not in Base.metadata.tables:
                         with self.__db_session() as session:
-                            if missing_columns:
-                                for column in missing_columns:
-                                    self.__logger.warning(f'Adding column "{column.name}" to table "{table}"')
-                                    session.execute(text(f"ALTER TABLE {table} ADD COLUMN {column.name} {column.type}"))
-                            if extra_columns:
-                                for column in extra_columns:
-                                    self.__logger.warning(f'Removing column "{column["name"]}" from table "{table}"')
-                                    session.execute(text(f"ALTER TABLE {table} DROP COLUMN {column['name']}"))
-                            session.commit()
-                    except BaseException:
-                        return False, format_exc()
+                            session.execute(text(f"DROP TABLE {table_name}"))
+
+                Base.metadata.drop_all(self.__sql_engine)
 
         if has_all_tables and db_version and db_version == bunkerweb_version:
             return False, ""
@@ -401,6 +387,20 @@ class Database:
             Base.metadata.create_all(self.__sql_engine, checkfirst=True)
         except BaseException:
             return False, format_exc()
+
+        if db_version and db_version != bunkerweb_version:
+            with self.__db_session() as session:
+                for table_name, data in old_data.items():
+                    for row in data:
+                        has_external_column = "external" in row
+                        row = {column: getattr(row, column) for column in Base.metadata.tables[table_name].columns.keys() + (["external"] if has_external_column else []) if hasattr(row, column)}
+
+                        # ? As the external column has been replaced by the type column, we need to update the data if the column exists
+                        if table_name == "bw_plugins" and "external" in row:
+                            row["type"] = "external" if row.pop("external") else "core"
+
+                        session.execute(Base.metadata.tables[table_name].insert().values(row))
+                session.commit()
 
         to_put = []
         with self.__db_session() as session:

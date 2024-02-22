@@ -39,6 +39,7 @@ INTEGRATIONS_ENUM = Enum(
     "Unknown",
     name="integrations_enum",
 )
+STREAM_TYPES_ENUM = Enum("no", "yes", "partial", name="stream_types_enum")
 PLUGIN_TYPES_ENUM = Enum("core", "external", "pro", name="plugin_types_enum")
 Base = declarative_base()
 
@@ -50,7 +51,7 @@ class Plugins(Base):
     name = Column(String(128), nullable=False)
     description = Column(String(256), nullable=False)
     version = Column(String(32), nullable=False)
-    stream = Column(String(16), nullable=False)
+    stream = Column(STREAM_TYPES_ENUM, default="no", nullable=False)
     type = Column(PLUGIN_TYPES_ENUM, default="core", nullable=False)
     method = Column(METHODS_ENUM, default="manual", nullable=False)
     data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
