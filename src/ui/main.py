@@ -999,9 +999,9 @@ def plugins():
             if variables["type"] in ("core", "pro"):
                 return redirect_flash_error(f"Can't delete {variables['type']} plugin {variables['name']}", "plugins", True)
 
-            plugins = app.config["CONFIG"].get_plugins()
-            for x, plugin in enumerate(deepcopy(plugins)):
-                if plugin["type"] in ("core", "pro") or plugin["id"] == variables["name"]:
+            plugins = app.config["CONFIG"].get_plugins(_type="external")
+            for x, plugin in enumerate(plugins):
+                if plugin["id"] == variables["name"]:
                     del plugins[x]
 
             err = db.update_external_plugins(plugins)

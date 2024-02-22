@@ -64,7 +64,7 @@ try:
     if TEST_TYPE == "linux":
         wait_for_service()
 
-    external_plugins = safe_get_element(DRIVER, By.XPATH, "//div[@data-plugins-external=' external ']", multiple=True)
+    external_plugins = safe_get_element(DRIVER, By.XPATH, "//div[@data-plugins-type='external']", multiple=True)
     assert isinstance(external_plugins, list), "External plugins list is not a list"
 
     if len(external_plugins) != 1:

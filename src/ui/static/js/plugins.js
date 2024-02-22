@@ -442,7 +442,7 @@ class Modal {
     this.container = document.querySelector(`[data-${this.prefix}-list]`);
     this.modal = document.querySelector(`[data-${this.prefix}-modal]`);
     this.modalNameInp = this.modal.querySelector("input#name");
-    this.modalExtInp = this.modal.querySelector("input#external");
+    this.modalTypeInp = this.modal.querySelector("input#type");
 
     this.modalTitle = this.modal.querySelector(
       `[data-${this.prefix}-modal-title]`,
@@ -490,14 +490,11 @@ class Modal {
     this.modalTitle.textContent = `DELETE ${elName}`;
     this.modalTxt.textContent = `Are you sure you want to delete ${elName} ?`;
     //external
-    const isExternal = el
+    const pluginType = el
       .closest("[data-plugins-type]")
       .getAttribute("data-plugins-type")
-      .trim()
-      .includes("external")
-      ? "True"
-      : "False";
-    this.modalExtInp.value = isExternal;
+      .trim();
+    this.modalTypeInp.value = pluginType;
   }
 
   showModal() {
