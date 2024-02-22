@@ -6,16 +6,16 @@
   {% set countries = [] %}
   {% for report in reports %}
     {% if report["method"] not in methods %}
-      {% set methods = methods.append(report["method"]) %}
+      {% if methods.append(report["method"]) %}{% endif %}
     {% endif %}
     {% if report["status"] not in codes %}
-      {% set codes = codes.append(report["status"]) %}
+      {% if codes.append(report["status"]) %}{% endif %}
     {% endif %}
     {% if report["reason"] not in reasons %}
-      {% set reasons = reasons.append(report["reason"]) %}
+      {% if reasons.append(report["reason"]) %}{% endif %}
     {% endif %}
     {% if report["country"] not in countries %}
-      {% set countries = countries.append(report["country"]) %}
+      {% if countries.append(report["country"]) %}{% endif %}
     {% endif %}
   {% endfor %}
   <div class="{% if reports|length == 0 %}w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words {% else %}hidden{% endif %} ">

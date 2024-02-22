@@ -226,7 +226,7 @@
       {% if current_endpoint
         == "global-config" and value['context'] == "global" and value['multiple'] and not value['multiple'] in multList or current_endpoint ==
         "services" and value['context'] == "multisite" and value['multiple']  and not value['multiple'] in multList %}
-        {% set multList = multList.append(value['multiple']) %}
+        {% if multList.append(value['multiple']) %}{% endif %}
       {% endif %}
     {% endfor %}
     {% for multiple in multList %}

@@ -5,10 +5,10 @@
   {% set terms = [] %}
   {% for ban in bans %}
     {% if ban["reason"] not in reasons %}
-      {% set reasons = reasons.append(ban["reason"]) %}
+      {% if reasons.append(ban["reason"]) %}{% endif %}
     {% endif %}
     {% if ban["term"] not in terms %}
-      {% set terms = terms.append(ban["term"]) %}
+      {% if terms.append(ban["term"]) %}{% endif %}
     {% endif %}
   {% endfor %}
   <!-- actions -->
