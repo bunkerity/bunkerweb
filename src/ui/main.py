@@ -857,7 +857,7 @@ def global_config():
                 del variables[variable]
 
         if not variables:
-            return redirect_flash_error("The global configuration was not edited because all values had the default value.", "global_config", True)
+            return redirect_flash_error("The global configuration was not edited because no values were changed.", "global_config", True)
 
         error = app.config["CONFIG"].check_variables(variables, True)
 
