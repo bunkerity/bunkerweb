@@ -994,12 +994,11 @@ def configs():
 @login_required
 def plugins():
     tmp_ui_path = Path(sep, "var", "tmp", "bunkerweb", "ui")
+
     if request.method == "POST":
         error = 0
-
-        is_request_params(["operation"], "plugins", True)
         # Delete plugin
-        if request.form["operation"] == "delete":
+        if "operation" in request.form and request.form["operation"] == "delete":
 
             is_request_params(["type"], "plugins", True)
 
