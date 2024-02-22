@@ -198,7 +198,7 @@
                 }
               ] %}
               {% if service["SERVER_NAME"]['method'] == "ui" %}
-                {% set action_buttons = action_buttons.append({"name" : "delete", "label" : "delete service settings", "color" : "red-500"}) %}
+                {% if action_buttons.append({"name" : "delete", "label" : "delete service settings", "color" : "red-500"}) %}{% endif %}
               {% endif %}
               {% for button in action_buttons %}
                 <button data-services-action="{{ button['name'] }}"
