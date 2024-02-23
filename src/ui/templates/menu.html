@@ -190,7 +190,7 @@
                   </svg>
                 {% endif %}
               </div>
-              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">{{ path.replace('_', ' ') }}</span>
+              <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">{{ path[0]|upper }}{{ path[1:].replace('_', ' ') }}</span>
             </a>
           </li>
         {% endfor %}
