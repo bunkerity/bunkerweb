@@ -85,7 +85,7 @@ class Filter {
       } catch (err) {}
     });
     // REASON HANDLER
-    +this.container.addEventListener("click", (e) => {
+    this.container.addEventListener("click", (e) => {
       try {
         if (
           e.target
@@ -140,7 +140,7 @@ class Filter {
     }
   }
 
-  setFilterMethod(requests) {
+  setFilterCountry(requests) {
     if (this.countryValue === "all") return;
     for (let i = 0; i < requests.length; i++) {
       const el = requests[i];
