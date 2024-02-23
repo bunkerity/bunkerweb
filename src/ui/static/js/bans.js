@@ -80,7 +80,7 @@ class Filter {
       const el = bans[i];
 
       const ip = this.getElAttribut(el, "ip");
-      const banStart = this.getElAttribut(el, "ban_sart");
+      const banStart = this.getElAttribut(el, "ban_start");
       const banEnd = this.getElAttribut(el, "ban_end");
       const remain = this.getElAttribut(el, "remain");
 
