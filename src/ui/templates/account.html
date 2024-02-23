@@ -6,7 +6,7 @@
     {% set tabs = [
       {
         "name": "Global",
-        "id": "globlal",
+        "id": "global",
         "popover": "Global informations"
       },
       {
@@ -33,7 +33,7 @@
       {% for tab in tabs %}
         <button role="tab"
                 data-tab-handler="{{ tab['id'] }}"
-                class="active settings-tabs-tab-btn">
+                class="{% if loop.first %} active {% endif %} settings-tabs-tab-btn">
           <span class="w-full flex justify-between items-center">
             <!-- text and icon -->
             <span class="settings-tabs-name">{{ tab['name'] }}</span>
@@ -80,7 +80,9 @@
                   data-tab-handler-mobile="{{ tab['id'] }}"
                   data-select="{% if loop.first %}true{% else %}false{% endif %}"
                   id="edit-account-{{ tab['id'] }}-tab"
-                  class="{% if loop.first %} active first {% endif %} {% if loop.last %} last {% endif %} settings-tabs-mobile-dropdown-btn">{{ tab['name'] }}</button>
+                  class="{% if loop.first %} active first {% endif %} {% if loop.last %}last{% endif %} settings-tabs-mobile-dropdown-btn">
+            {{ tab['name'] }}
+          </button>
         {% endfor %}
       </div>
       <!-- end dropdown-->
