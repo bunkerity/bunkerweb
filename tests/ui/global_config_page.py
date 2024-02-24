@@ -1,5 +1,6 @@
 from logging import info as log_info, exception as log_exception, error as log_error, warning as log_warning
 from random import shuffle
+from time import sleep
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -13,6 +14,23 @@ exit_code = 0
 try:
     log_info("Navigating to the global config page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[3]/a", "global config")
+
+    log_info("Trying filters ...")
+
+    # Set keyword with no matching settings
+    keyword_no_match = "dqz48 é84 dzq 584dz5qd4"
+    btn_keyword = safe_get_element(DRIVER, "js", 'document.querySelector("button#settings-filter")')
+    btn_keyword.send_keys(keyword_no_match)
+    sleep(0.1)
+
+    # Check that the no matching element is shown and other card hide
+    is_no_match = DRIVER.execute_script('return document.querySelector("[data-global-config-nomatch]").classList.contains("hidden") ? false : true')
+    if not is_no_match:
+        log_error(f"Filter keyword with value {keyword_no_match} shouldn't match something.")
+        exit(1)
+
+    # Reset
+    btn_keyword.send_keys("")
 
     no_errors = True
     retries = 0

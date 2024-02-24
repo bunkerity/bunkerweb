@@ -33,3 +33,35 @@ const setFilterGlobal = new FilterSettings(
   "settings-filter",
   "[data-service-content='settings']",
 );
+
+// Hide completely configs card in all plugins hidden
+document
+  .querySelector("input#settings-filter")
+  .addEventListener("input", () => {
+    console.log("input");
+    const tabs = document
+      .querySelector("[data-global-config-tabs-desktop]")
+      .querySelectorAll("[data-tab-handler]");
+    let isAllHidden = true;
+    for (let i = 0; i < tabs.length; i++) {
+      const plugin = tabs[i];
+      if (!plugin.classList.contains("hidden")) {
+        console.log(plugin);
+        isAllHidden = false;
+        break;
+      }
+    }
+
+    const formEl = document.querySelector("[data-global-config-form]");
+    const noMatchEl = document.querySelector("[data-global-config-nomatch]");
+
+    if (isAllHidden) {
+      noMatchEl.classList.remove("hidden");
+      formEl.classList.add("hidden");
+    }
+
+    if (!isAllHidden) {
+      formEl.classList.remove("hidden");
+      noMatchEl.classList.add("hidden");
+    }
+  });

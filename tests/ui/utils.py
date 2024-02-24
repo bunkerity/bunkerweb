@@ -10,23 +10,48 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException, WebDriverException
 
 
-def safe_get_element(driver, by: str, _id: str, *, driver_wait: Optional[WebDriverWait] = None, multiple: bool = False, error: bool = False) -> Union[WebElement, List[WebElement]]:
+def safe_get_element(driver, by: str, selector: str, *, driver_wait: Optional[WebDriverWait] = None, multiple: bool = False, error: bool = False) -> Union[WebElement, List[WebElement]]:
     try:
-        return (driver_wait or WebDriverWait(driver, 4)).until(EC.presence_of_element_located((by, _id)) if not multiple else EC.presence_of_all_elements_located((by, _id)))
+        # Retrieve by js script
+        if by == "js":
+            # Run every wait seconds trying to get elements
+            wait = driver_wait or 4
+            el = None
+            for x in range(wait):
+                try:
+                    el = driver.execute_script(f"return {selector} ? {selector} : false")
+                    if el:
+                        break
+                    sleep(1)
+                except:
+                    el = None
+            # Case no el found
+            if not el:
+                raise TimeoutException
+
+            return el
+
+        # Retrieve with XPATH
+        return (driver_wait or WebDriverWait(driver, 4)).until(EC.presence_of_element_located((by, selector)) if not multiple else EC.presence_of_all_elements_located((by, selector)))
     except TimeoutException as e:
         if error:
             raise e
 
-        log_exception(f'Element searched by {by}: "{_id}" not found, exiting ...')
+        log_exception(f'Element searched by {by}: "{selector}" not found, exiting ...')
         exit(1)
 
 
-def assert_button_click(driver, button: Union[str, WebElement]):  # type: ignore
+def assert_button_click(driver, button: Union[str, WebElement], by: str = "xpath"):  # type: ignore
     clicked = False
     while not clicked:
         with suppress(ElementClickInterceptedException):
             if isinstance(button, str):
-                button: Union[WebElement, List[WebElement]] = safe_get_element(driver, By.XPATH, button)
+                # Retrieve with js script
+                if by == "js":
+                    button: Union[WebElement, List[WebElement]] = safe_get_element(driver, by, button)
+                # Retrieve by XPATH
+                else:
+                    button: Union[WebElement, List[WebElement]] = safe_get_element(driver, By.XPATH, button)
                 assert isinstance(button, WebElement), "Button is not a WebElement"
 
             sleep(0.5)

@@ -17,6 +17,22 @@ try:
     log_info("Navigating to the logs page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
+    log_info("Looking that all desktop tabs are working ...")
+
+    assert_button_click(DRIVER, "//button[@data-tab-handler='global']")
+    assert_button_click(DRIVER, "//button[@data-tab-handler='username']")
+    assert_button_click(DRIVER, "//button[@data-tab-handler='password']")
+    assert_button_click(DRIVER, "//button[@data-tab-handler='totp']")
+
+    log_info("Looking that all mobile tabs are working ...")
+
+    assert_button_click(DRIVER, "//button[@data-tab-handler-mobile='global']")
+    assert_button_click(DRIVER, "//button[@data-tab-handler-mobile='username']")
+    assert_button_click(DRIVER, "//button[@data-tab-handler-mobile='password']")
+    assert_button_click(DRIVER, "//button[@data-tab-handler-mobile='totp']")
+
+    log_info("Start username tab ...")
+
     assert_button_click(DRIVER, "//button[@data-tab-handler='username']")
 
     username_input = safe_get_element(DRIVER, By.ID, "admin_username")
