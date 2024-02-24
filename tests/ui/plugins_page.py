@@ -34,16 +34,36 @@ try:
 
     log_info("Trying to filter the plugins ...")
 
-    key_word_filter_input = safe_get_element(DRIVER, By.XPATH, "//input[@placeholder='key words']")
+    # Get total plugins
+    plugins = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-plugins-type]")')
+    plugins_total = len(plugins)
+
+    key_word_filter_input = safe_get_element(DRIVER, "js", 'document.querySelector("input#keyword")')
     assert isinstance(key_word_filter_input, WebElement), "Key word filter input is not a WebElement"
-    key_word_filter_input.send_keys("Anti")
+    key_word_filter_input.send_keys("Antibot")
 
-    plugins = safe_get_element(DRIVER, By.XPATH, "//div[@data-plugins-list='']", multiple=True)
-    assert isinstance(plugins, list), "Plugins list is not a list"
+    plugins_hidden = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-plugins-type][class*=hidden]")')
 
-    if len(plugins) != 1:
-        log_error("The filter is not working, exiting ...")
+    if len(plugins_hidden) == 0:
+        log_error("The keyword filter is not working, exiting ...")
         exit(1)
+
+    # Reset
+    key_word_filter_input.send_keys("")
+
+    # Try plugin type with external
+    type_external_filter_input = safe_get_element(DRIVER, "js", "document.querySelector('[data-plugins-setting-select-dropdown-btn=types][value=external]')")
+    type_external_filter_input.click()
+
+    # At least core need to be hidden
+    plugins_hidden = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-plugins-type][class*=hidden]")')
+    if len(plugins_hidden) == 0:
+        log_error("The type filter is not working, exiting ...")
+        exit(1)
+
+    # Reset
+    type_all_filter_input = safe_get_element(DRIVER, "js", "document.querySelector('[data-plugins-setting-select-dropdown-btn=types][value=all]')")
+    type_all_filter_input.click()
 
     log_info("The filter is working, trying to add a bad plugin ...")
 

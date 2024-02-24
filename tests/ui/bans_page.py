@@ -7,7 +7,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
 
 from wizard import DRIVER
-from utils import access_page, assert_button_click, safe_get_element
+from utils import access_page, assert_button_click, safe_get_element, verify_select_filters
 
 exit_code = 0
 
@@ -67,6 +67,30 @@ try:
     if len(entries) != 2:
         log_error("The bans are present but there should be 2, exiting ...")
         exit(1)
+
+    log_info("Bans found, trying filters ...")
+
+    # Get total bans
+    bans = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-bans-list-item]")')
+    bans_total = len(bans)
+
+    key_word_filter_input = safe_get_element(DRIVER, "js", 'document.querySelector("input#keyword")')
+    assert isinstance(key_word_filter_input, WebElement), "Key word filter input is not a WebElement"
+    key_word_filter_input.send_keys("dzq841czqdeqzzd")
+
+    bans_hidden = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-bans-list-item][class*=hidden]")')
+
+    if len(bans_hidden) == 0:
+        log_error("The keyword filter is not working, exiting ...")
+        exit(1)
+
+    # Reset
+    key_word_filter_input.send_keys("")
+
+    # Test select filters
+    select_filters = [{"name": "reason", "id": "reason", "value": "all", "update_value": "123456"}, {"name": "range", "id": "term", "value": "all", "update_value": "123456"}]
+
+    verify_select_filters(DRIVER, "bans", select_filters)
 
     log_info("Bans found, trying to delete them ...")
 

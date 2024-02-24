@@ -8,7 +8,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
 
 from wizard import DRIVER
-from utils import access_page, safe_get_element
+from utils import access_page, safe_get_element, verify_select_filters
 
 exit_code = 0
 
@@ -29,6 +29,16 @@ try:
         DRIVER.refresh()
 
     log_info("Trying to filter the reports ...")
+
+    # Test select filters
+    select_filters = [
+        {"name": "Country", "id": "country", "value": "all", "update_value": "123456"},
+        {"name": "Method", "id": "method", "value": "all", "update_value": "123456"},
+        {"name": "Status code", "id": "status", "value": "all", "update_value": "123456"},
+        {"name": "Reason", "id": "reason", "value": "all", "update_value": "123456"},
+    ]
+
+    verify_select_filters(DRIVER, "reports", select_filters)
 
     reports_list = safe_get_element(DRIVER, By.XPATH, "//ul[@data-reports-list='']/li", multiple=True)
     assert isinstance(reports_list, list), "Reports list is not a list"

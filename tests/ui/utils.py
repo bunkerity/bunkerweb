@@ -157,3 +157,26 @@ def wait_for_service(service: str = "www.example.com"):
             retries += 1
             log_warning(f"Waiting for {service} to be ready, retrying in 5s ...")
             sleep(5)
+
+
+# We replace value by non existing one and click on button
+# If elements are hidden, it means script is working
+# Example filter_items: [ {"name" : "Success state", "id" : "success", "value" : "all", "update_value" : "123456"}]
+def verify_select_filters(driver, page_name: str, filter_items: list):
+    for item in filter_items:
+        # Update in order to get no match
+        driver.execute_script(f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['value']}]').setAttribute('value', '{item['update_value']}')")
+        select_btn = safe_get_element(driver, "js", f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['update_value']}]')")
+        select_btn.click()
+
+        # Verify
+        bans_hidden = safe_get_element(driver, "js", f'document.querySelectorAll("[data-{page_name}-list-item][class*=hidden]")')
+        if len(bans_hidden) == 0:
+            log_error(f"The {item['name']} filter is not working, exiting ...")
+            exit(1)
+
+        # Reset
+        driver.execute_script(f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['update_value']}]').setAttribute('value', '{item['value']}')")
+        select_btn = safe_get_element(driver, "js", f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['value']}]')")
+        select_btn.click()
+        sleep(0.1)
