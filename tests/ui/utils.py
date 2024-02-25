@@ -19,7 +19,7 @@ def safe_get_element(driver, by: str, selector: str, *, driver_wait: Optional[We
             el = None
             for x in range(wait):
                 try:
-                    el = driver.execute_script(f"return {selector} ? {selector} : false")
+                    el = driver.execute_script(f"return {selector}")
                     if el:
                         break
                     sleep(1)
@@ -27,6 +27,7 @@ def safe_get_element(driver, by: str, selector: str, *, driver_wait: Optional[We
                     el = None
             # Case no el found
             if not el:
+                log_exception(f'Element searched by {by}: "{selector}" not found, exiting ...')
                 raise TimeoutException
 
             return el
@@ -34,6 +35,7 @@ def safe_get_element(driver, by: str, selector: str, *, driver_wait: Optional[We
         # Retrieve with XPATH
         return (driver_wait or WebDriverWait(driver, 4)).until(EC.presence_of_element_located((by, selector)) if not multiple else EC.presence_of_all_elements_located((by, selector)))
     except TimeoutException as e:
+
         if error:
             raise e
 
@@ -165,18 +167,18 @@ def wait_for_service(service: str = "www.example.com"):
 def verify_select_filters(driver, page_name: str, filter_items: list):
     for item in filter_items:
         # Update in order to get no match
-        driver.execute_script(f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['value']}]').setAttribute('value', '{item['update_value']}')")
-        select_btn = safe_get_element(driver, "js", f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['update_value']}]')")
+        driver.execute_script(f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn=`{item['id']}`][value=`{item['value']}`]').setAttribute('value', '{item['update_value']}')")
+        select_btn = safe_get_element(driver, "js", f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn=`{item['id']}`][value=`{item['update_value']}`]')")
         select_btn.click()
 
         # Verify
-        bans_hidden = safe_get_element(driver, "js", f'document.querySelectorAll("[data-{page_name}-list-item][class*=hidden]")')
+        bans_hidden = safe_get_element(driver, "js", f'document.querySelectorAll("[data-{page_name}-list-item][class*=`hidden`]")')
         if len(bans_hidden) == 0:
             log_error(f"The {item['name']} filter is not working, exiting ...")
             exit(1)
 
         # Reset
-        driver.execute_script(f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['update_value']}]').setAttribute('value', '{item['value']}')")
-        select_btn = safe_get_element(driver, "js", f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['value']}]')")
+        driver.execute_script(f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn=`{item['id']}`][value=`{item['update_value']}`]').setAttribute('value', '{item['value']}')")
+        select_btn = safe_get_element(driver, "js", f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn=`{item['id']}`][value=`{item['value']}`]')")
         select_btn.click()
         sleep(0.1)
