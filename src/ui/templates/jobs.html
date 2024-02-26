@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-  <!-- info-->
+{% set run_times = ["all"] %}
+{% for job_name, value in jobs.items() %}
+  {% if value['every'] not in run_times %}
+  {% if run_times.append(value['every']) %}{% endif %}
+  {% endif %}
+{% endfor %}
+<!-- info-->
   {% set jobs_info = [
       {"name" : "JOBS TOTAL", "data" : jobs|length|string},
       {"name" : "JOBS ERRORS", "data" : jobs_errors|string},
@@ -50,6 +56,13 @@
         "false",
         "true"
       ]
+    },
+    {
+      "type": "select",
+      "name": "Run time",
+      "id": "every",
+      "value": "all",
+      "values": run_times
     }
   ] %}
   <div data-jobs-filter
@@ -173,7 +186,7 @@
             <li class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
               {% for data in jobs_data %}
                 {% if data['type'] == "text" %}
-                  <p class="{{ data['custom_class'] }} dark:text-gray-400 dark:opacity-80 text-sm  m-0 my-1" data-jobs-{{ data['filter_name'] }}>
+                  <p class="{{ data['custom_class'] }} dark:text-gray-400 dark:opacity-80 text-sm  m-0 my-1" data-jobs-{{ data['filter_name'] }}="{{data['value']}}">
                     {{ data['value'] }}
                   </p>
                 {% endif %}
@@ -220,7 +233,7 @@
                           <button data-jobs-download="{{ job_name }}"
                                   data-jobs-file="{{ file['file_name'] }}"
                                   data-jobs-setting-select-dropdown-btn="{{ job_name }}"
-                                  value="list"
+                                  value="files"
                                   class="{% if loop.index == loop.length %}rounded-b-lg {% endif %}{% if loop.first %}rounded-t-lg{% endif %} border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative py-2 px-3 text-left align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300 bg-white dark:bg-slate-700 text-gray-700">
                             <span class="flex justify-start items-center">
                               <svg class="h-5.5 w-5.5 stroke-sky-500"

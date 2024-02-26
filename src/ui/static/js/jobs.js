@@ -177,16 +177,17 @@ class Dropdown {
 class Filter {
   constructor(prefix = "jobs") {
     this.prefix = prefix;
-    this.container = document.querySelector(`[data-${this.prefix}-filter]`);
+    this.container =
+      document.querySelector(`[data-${this.prefix}-filter]`) || null;
     this.keyInp = document.querySelector("input#keyword");
     this.successValue = "all";
     this.reloadValue = "all";
-    this.sortValue = "name";
-
+    this.everyValue = "all";
     this.initHandler();
   }
 
   initHandler() {
+    if (!this.container) return;
     //SUCCESS HANDLER
     this.container.addEventListener("click", (e) => {
       try {
@@ -233,6 +234,29 @@ class Filter {
         }
       } catch (err) {}
     });
+    //EVERY HANDLER
+    this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
+          "every"
+        ) {
+          setTimeout(() => {
+            const value = document
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="every"]`,
+              )
+              .textContent.trim();
+
+            this.everyValue = value;
+            //run filter
+            this.filter();
+          }, 10);
+        }
+      } catch (err) {}
+    });
     //KEYWORD HANDLER
     this.keyInp.addEventListener("input", (e) => {
       this.filter();
@@ -249,8 +273,21 @@ class Filter {
     }
     //filter type
     this.setFilterSuccess(jobs);
+    this.setFilterEvery(jobs);
     this.setFilterReload(jobs);
     this.setFilterKeyword(jobs);
+  }
+
+  setFilterEvery(jobs) {
+    if (this.everyValue === "all") return;
+    for (let i = 0; i < jobs.length; i++) {
+      const el = jobs[i];
+      const type = el
+        .querySelector(`[data-${this.prefix}-every]`)
+        .getAttribute(`data-${this.prefix}-every`)
+        .trim();
+      if (type !== this.everyValue) el.classList.add("hidden");
+    }
   }
 
   setFilterSuccess(jobs) {

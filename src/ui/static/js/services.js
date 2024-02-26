@@ -1305,7 +1305,6 @@ class Filter {
     if (this.stateValue === "all") return;
     for (let i = 0; i < services.length; i++) {
       const el = services[i];
-      console.log(el);
       const type = el
         .querySelector(`[data-${this.prefix}-state]`)
         .getAttribute(`data-${this.prefix}-state`)

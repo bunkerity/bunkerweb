@@ -41,6 +41,7 @@ try:
     select_filters = [
         {"name": "Success state", "id": "success", "value": "all", "update_value": "123456"},
         {"name": "Reload state", "id": "reload", "value": "all", "update_value": "123456"},
+        {"name": "Run time", "id": "every", "value": "all", "update_value": "123456"},
     ]
 
     verify_select_filters(DRIVER, "jobs", select_filters)
