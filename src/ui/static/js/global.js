@@ -53,6 +53,15 @@ class News {
 
   init() {
     window.addEventListener("load", () => {
+      if (sessionStorage.getItem("lastRefetch") !== null) {
+        const storeStamp = sessionStorage.getItem("lastRefetch");
+        const nowStamp = Math.round(new Date().getTime() / 1000);
+        if (+nowStamp > storeStamp) {
+          sessionStorage.removeItem("lastRefetch");
+          sessionStorage.removeItem("lastNews");
+        }
+      }
+
       if (sessionStorage.getItem("lastNews") !== null)
         return this.render(JSON.parse(sessionStorage.getItem("lastNews")));
       try {
@@ -71,6 +80,11 @@ class News {
     const lastNewsReverse = lastNews.reverse();
     // store for next time
     sessionStorage.setItem("lastNews", JSON.stringify(lastNewsReverse));
+    // Refetch after one hour
+    sessionStorage.setItem(
+      "lastRefetch",
+      Math.round(new Date().getTime() / 1000) + 3600,
+    );
     const newsContainer = document.querySelector("[data-news-container]");
     //remove default message
     newsContainer.textContent = "";
@@ -345,6 +359,15 @@ class Banner {
   }
 
   loadData() {
+    if (sessionStorage.getItem("bannerRefetch") !== null) {
+      const storeStamp = sessionStorage.getItem("bannerRefetch");
+      const nowStamp = Math.round(new Date().getTime() / 1000);
+      if (+nowStamp > storeStamp) {
+        sessionStorage.removeItem("bannerRefetch");
+        sessionStorage.removeItem("bannerNews");
+      }
+    }
+
     //test with data
     // sessionStorage.setItem("bannerNews", JSON.stringify([{"content" : `    <p class="dark:brightness-125 mb-0 text-center text-xs xs:text-sm text-white">
     // TEST
@@ -370,6 +393,11 @@ class Banner {
   updateBanner(bannerNews) {
     // store for next time
     sessionStorage.setItem("bannerNews", JSON.stringify(bannerNews));
+    // Refetch after one hour
+    sessionStorage.setItem(
+      "bannerRefetch",
+      Math.round(new Date().getTime() / 1000) + 3600,
+    );
     const bannerItems = this.bannerEl.querySelectorAll('[role="listitem"]');
     const maxItems = Math.min(bannerNews.length, bannerItems.length);
 
