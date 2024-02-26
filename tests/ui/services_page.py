@@ -9,9 +9,10 @@ from selenium.common.exceptions import TimeoutException
 
 from wizard import DRIVER
 from base import TEST_TYPE
-from utils import access_page, assert_alert_message, assert_button_click, safe_get_element, wait_for_service
+from utils import access_page, assert_alert_message, assert_button_click, safe_get_element, wait_for_service, verify_select_filters
 
 exit_code = 0
+
 
 try:
     log_info("Navigating to the services page ...")
@@ -233,7 +234,70 @@ try:
                 log_error("The service is still working, exiting ...")
                 exit(1)
 
-    log_info("The service is not working, as expected, trying to delete it ...")
+    log_info("Create another service app3.example.com to get filters (need at least 4 services on page)")
+
+    assert_button_click(DRIVER, "//button[@data-services-action='new']")
+
+    server_name_input = safe_get_element(DRIVER, By.ID, "SERVER_NAME")
+    assert isinstance(server_name_input, WebElement), "Input is not a WebElement"
+
+    server_name_input.clear()
+    server_name_input.send_keys("app3.example.com")
+
+    access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
+
+    if TEST_TYPE == "linux":
+        wait_for_service("app3.example.com")
+
+    try:
+        services = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service]", multiple=True, error=True)
+        assert isinstance(services, list), "Services is not a list"
+    except TimeoutException:
+        log_exception("Services not found, exiting ...")
+        exit(1)
+
+    if len(services) < 4:
+        log_error(f"The service hasn't been created ({len(services)} services found), exiting ...")
+        exit(1)
+
+    server_name_elem = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service='app3.example.com']//h5")
+    assert isinstance(server_name_elem, WebElement), "Server name element is not a WebElement"
+    if server_name_elem.text.strip() != "app3.example.com":
+        log_error('The service "app3.example.com" is not present, exiting ...')
+        exit(1)
+
+    service_method_elem = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service='app3.example.com']//h6")
+    assert isinstance(service_method_elem, WebElement), "Service method element is not a WebElement"
+    if service_method_elem.text.strip() != "ui":
+        log_error("The service should have been created by the ui, exiting ...")
+        exit(1)
+
+    log_info("Service app3.example.com is present, trying filters...")
+
+    # Set keyword with no matching settings
+    keyword_no_match = "dqz48 é84 dzq 584dz5qd4"
+    btn_keyword = safe_get_element(DRIVER, "js", 'document.querySelector("button#service-name-keyword")')
+    btn_keyword.send_keys(keyword_no_match)
+    sleep(0.1)
+
+    # Check that the no matching element is shown and other card hide
+    is_no_match = DRIVER.execute_script('return document.querySelector("[data-services-nomatch-card]").classList.contains("hidden") ? false : true')
+    if not is_no_match:
+        log_error(f"Filter keyword with value {keyword_no_match} shouldn't match something.")
+        exit(1)
+
+    # Reset
+    btn_keyword.send_keys("")
+
+    # Test select filters
+    select_filters = [
+        {"name": "Method", "id": "method", "value": "all", "update_value": "123456"},
+        {"name": "State", "id": "state", "value": "all", "update_value": "123456"},
+    ]
+
+    verify_select_filters(DRIVER, "services", select_filters)
+
+    log_info("Filters working as expected, trying to delete app2.example.com ...")
 
     try:
         delete_button = safe_get_element(DRIVER, By.XPATH, "//button[@data-services-action='delete' and @data-services-name='app2.example.com']", error=True)

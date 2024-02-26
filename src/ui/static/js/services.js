@@ -1044,6 +1044,308 @@ class Multiple {
   }
 }
 
+class Dropdown {
+  constructor(prefix = "services") {
+    this.prefix = prefix;
+    this.container = document.querySelector("main");
+    this.lastDrop = "";
+    this.initDropdown();
+  }
+
+  initDropdown() {
+    this.container.addEventListener("click", (e) => {
+      //SELECT BTN LOGIC
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-setting-select`) &&
+          !e.target.closest("button").hasAttribute(`disabled`)
+        ) {
+          const btnName = e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select`);
+          if (this.lastDrop !== btnName) {
+            this.lastDrop = btnName;
+            this.closeAllDrop();
+          }
+
+          this.toggleSelectBtn(e);
+        }
+      } catch (err) {}
+      //SELECT DROPDOWN BTN LOGIC
+      try {
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-setting-select-dropdown-btn`)
+        ) {
+          const btn = e.target.closest("button");
+          const btnValue = btn.getAttribute("value");
+          const btnSetting = btn.getAttribute(
+            `data-${this.prefix}-setting-select-dropdown-btn`,
+          );
+          //stop if same value to avoid new fetching
+          const isSameVal = this.isSameValue(btnSetting, btnValue);
+          if (isSameVal) return this.hideDropdown(btnSetting);
+          //else, add new value to custom
+          this.setSelectNewValue(btnSetting, btnValue);
+          //close dropdown and change style
+          this.hideDropdown(btnSetting);
+
+          if (
+            !e.target.closest("button").hasAttribute(`data-${this.prefix}-file`)
+          ) {
+            this.changeDropBtnStyle(btnSetting, btn);
+          }
+          //show / hide filter
+          if (btnSetting === "instances") {
+            this.hideFilterOnLocal(btn.getAttribute("data-_type"));
+          }
+        }
+      } catch (err) {}
+    });
+  }
+
+  closeAllDrop() {
+    const drops = document.querySelectorAll(
+      `[data-${this.prefix}-setting-select-dropdown]`,
+    );
+    drops.forEach((drop) => {
+      drop.classList.add("hidden");
+      drop.classList.remove("flex");
+      document
+        .querySelector(
+          `svg[data-${this.prefix}-setting-select="${drop.getAttribute(
+            `data-${this.prefix}-setting-select-dropdown`,
+          )}"]`,
+        )
+        .classList.remove("rotate-180");
+    });
+  }
+
+  isSameValue(btnSetting, value) {
+    const selectCustom = document.querySelector(
+      `[data-${this.prefix}-setting-select-text="${btnSetting}"]`,
+    );
+    const currVal = selectCustom.textContent;
+    return currVal === value ? true : false;
+  }
+
+  setSelectNewValue(btnSetting, value) {
+    const selectCustom = document.querySelector(
+      `[data-${this.prefix}-setting-select="${btnSetting}"]`,
+    );
+    selectCustom.querySelector(
+      `[data-${this.prefix}-setting-select-text]`,
+    ).textContent = value;
+  }
+
+  hideDropdown(btnSetting) {
+    //hide dropdown
+    const dropdownEl = document.querySelector(
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
+    );
+    dropdownEl.classList.add("hidden");
+    dropdownEl.classList.remove("flex");
+    //svg effect
+    const dropdownChevron = document.querySelector(
+      `svg[data-${this.prefix}-setting-select="${btnSetting}"]`,
+    );
+    dropdownChevron.classList.remove("rotate-180");
+  }
+
+  changeDropBtnStyle(btnSetting, selectedBtn) {
+    const dropdownEl = document.querySelector(
+      `[data-${this.prefix}-setting-select-dropdown="${btnSetting}"]`,
+    );
+    //reset dropdown btns
+    const btnEls = dropdownEl.querySelectorAll("button");
+
+    btnEls.forEach((btn) => {
+      btn.classList.remove(
+        "bg-primary",
+        "dark:bg-primary",
+        "text-gray-300",
+        "text-gray-300",
+      );
+      btn.classList.add("bg-white", "dark:bg-slate-700", "text-gray-700");
+    });
+    //highlight clicked btn
+    selectedBtn.classList.remove(
+      "bg-white",
+      "dark:bg-slate-700",
+      "text-gray-700",
+    );
+    selectedBtn.classList.add("dark:bg-primary", "bg-primary", "text-gray-300");
+  }
+
+  toggleSelectBtn(e) {
+    const attribute = e.target
+      .closest("button")
+      .getAttribute(`data-${this.prefix}-setting-select`);
+    //toggle dropdown
+    const dropdownEl = document.querySelector(
+      `[data-${this.prefix}-setting-select-dropdown="${attribute}"]`,
+    );
+    const dropdownChevron = document.querySelector(
+      `svg[data-${this.prefix}-setting-select="${attribute}"]`,
+    );
+    dropdownEl.classList.toggle("hidden");
+    dropdownEl.classList.toggle("flex");
+    dropdownChevron.classList.toggle("rotate-180");
+  }
+
+  //hide date filter on local
+  hideFilterOnLocal(type) {
+    if (type === "local") {
+      this.hideInp(`input#from-date`);
+      this.hideInp(`input#to-date`);
+    }
+
+    if (type !== "local") {
+      this.showInp(`input#from-date`);
+      this.showInp(`input#to-date`);
+    }
+  }
+
+  showInp(selector) {
+    document.querySelector(selector).closest("div").classList.add("flex");
+    document.querySelector(selector).closest("div").classList.remove("hidden");
+  }
+
+  hideInp(selector) {
+    document.querySelector(selector).closest("div").classList.add("hidden");
+    document.querySelector(selector).closest("div").classList.remove("flex");
+  }
+}
+
+class Filter {
+  constructor(prefix = "services") {
+    this.prefix = prefix;
+    this.container =
+      document.querySelector(`[data-${this.prefix}-filter]`) || null;
+    this.keyInp = document.querySelector("input#service-name-keyword");
+    this.stateValue = "all";
+    this.methodValue = "all";
+    this.initHandler();
+  }
+
+  initHandler() {
+    if (!this.container) return;
+    //STATE HANDLER
+    this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
+          "state"
+        ) {
+          setTimeout(() => {
+            const value = document
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="state"]`,
+              )
+              .textContent.trim()
+              .toLowerCase();
+
+            this.stateValue = value;
+            //run filter
+            this.filter();
+          }, 10);
+        }
+      } catch (err) {}
+    });
+    //METHOD HANDLER
+    this.container.addEventListener("click", (e) => {
+      try {
+        if (
+          e.target
+            .closest("button")
+            .getAttribute(`data-${this.prefix}-setting-select-dropdown-btn`) ===
+          "method"
+        ) {
+          setTimeout(() => {
+            const value = document
+              .querySelector(
+                `[data-${this.prefix}-setting-select-text="method"]`,
+              )
+              .textContent.trim()
+              .toLowerCase();
+
+            this.methodValue = value;
+            //run filter
+            this.filter();
+          }, 10);
+        }
+      } catch (err) {}
+    });
+    //KEYWORD HANDLER
+    this.keyInp.addEventListener("input", (e) => {
+      this.filter();
+    });
+  }
+
+  filter() {
+    const services = document.querySelectorAll(`[data-${this.prefix}-card]`);
+    if (services.length === 0) return;
+    //reset
+    for (let i = 0; i < services.length; i++) {
+      const el = services[i];
+      el.classList.remove("hidden");
+    }
+    //filter type
+    this.setFilterState(services);
+    this.setFilterMethod(services);
+    this.setFilterKeyword(services);
+  }
+
+  setFilterState(services) {
+    if (this.stateValue === "all") return;
+    for (let i = 0; i < services.length; i++) {
+      const el = services[i];
+      console.log(el);
+      const type = el
+        .querySelector(`[data-${this.prefix}-state]`)
+        .getAttribute(`data-${this.prefix}-state`)
+        .trim()
+        .toLowerCase();
+      if (type !== this.stateValue) el.classList.add("hidden");
+    }
+  }
+
+  setFilterMethod(services) {
+    if (this.methodValue === "all") return;
+    for (let i = 0; i < services.length; i++) {
+      const el = services[i];
+      const type = el
+        .querySelector(`[data-${this.prefix}-method]`)
+        .getAttribute(`data-${this.prefix}-method`)
+        .trim()
+        .toLowerCase();
+      if (type !== this.methodValue) el.classList.add("hidden");
+    }
+  }
+
+  setFilterKeyword(jobs) {
+    const keyword = this.keyInp.value.trim().toLowerCase();
+    if (!keyword) return;
+    for (let i = 0; i < jobs.length; i++) {
+      const el = jobs[i];
+      const name = el
+        .querySelector(`[data-${this.prefix}-name]`)
+        .textContent.trim()
+        .toLowerCase();
+
+      if (!name.includes(keyword)) el.classList.add("hidden");
+    }
+  }
+}
+
+const setDropdown = new Dropdown();
+const setFilter = new Filter();
+
 const setPopover = new Popover();
 const setTabs = new Tabs();
 const setModal = new ServiceModal();
@@ -1054,3 +1356,69 @@ const setFilterGlobal = new FilterSettings(
 );
 
 const setMultiple = new Multiple("services");
+
+// Hide / Show no matching message on service modal
+document
+  .querySelector("input#settings-filter")
+  .addEventListener("input", () => {
+    setTimeout(() => {
+      const tabs = document
+        .querySelector("[data-services-tabs-desktop]")
+        .querySelectorAll("[data-tab-handler]");
+      let isAllHidden = true;
+      for (let i = 0; i < tabs.length; i++) {
+        const plugin = tabs[i];
+        if (!plugin.classList.contains("hidden")) {
+          isAllHidden = false;
+          break;
+        }
+      }
+
+      const formEl = document.querySelector("[data-services-modal-form]");
+      const noMatchEl = document.querySelector("[data-services-nomatch]");
+
+      if (isAllHidden) {
+        noMatchEl.classList.remove("hidden");
+        formEl.classList.add("hidden");
+      }
+
+      if (!isAllHidden) {
+        formEl.classList.remove("hidden");
+        noMatchEl.classList.add("hidden");
+      }
+    }, 20);
+  });
+
+// Hide / Show no matching message for services card
+try {
+  document
+    .querySelector("input#service-name-keyword")
+    .addEventListener("input", () => {
+      setTimeout(() => {
+        const cards = document.querySelectorAll("[data-services-card]");
+        let isAllHidden = true;
+        for (let i = 0; i < cards.length; i++) {
+          const card = cards[i];
+          if (!card.classList.contains("hidden")) {
+            isAllHidden = false;
+            break;
+          }
+        }
+
+        const formEl = document.querySelector("[data-services-modal-form]");
+        const noMatchEl = document.querySelector(
+          "[data-services-nomatch-card]",
+        );
+
+        if (isAllHidden) {
+          noMatchEl.classList.remove("hidden");
+          formEl.classList.add("hidden");
+        }
+
+        if (!isAllHidden) {
+          formEl.classList.remove("hidden");
+          noMatchEl.classList.add("hidden");
+        }
+      }, 20);
+    });
+} catch (e) {}
