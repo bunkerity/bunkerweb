@@ -10,7 +10,7 @@ from selenium.common.exceptions import TimeoutException
 
 from wizard import DRIVER, UI_URL
 from base import TEST_TYPE
-from utils import access_page, assert_button_click, safe_get_element, wait_for_service
+from utils import access_page, assert_button_click, safe_get_element, wait_for_service, verify_select_filters
 
 exit_code = 0
 
@@ -51,19 +51,12 @@ try:
     # Reset
     key_word_filter_input.send_keys("")
 
-    # Try plugin type with external
-    type_external_filter_input = safe_get_element(DRIVER, "js", "document.querySelector('[data-plugins-setting-select-dropdown-btn=types][value=external]')")
-    type_external_filter_input.click()
+    # Test select filters
+    select_filters = [
+        {"name": "Types", "id": "types", "value": "all", "update_value": "123456"},
+    ]
 
-    # At least core need to be hidden
-    plugins_hidden = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-plugins-type][class*=hidden]")')
-    if len(plugins_hidden) == 0:
-        log_error("The type filter is not working, exiting ...")
-        exit(1)
-
-    # Reset
-    type_all_filter_input = safe_get_element(DRIVER, "js", "document.querySelector('[data-plugins-setting-select-dropdown-btn=types][value=all]')")
-    type_all_filter_input.click()
+    verify_select_filters(DRIVER, "plugins", select_filters)
 
     log_info("The filter is working, trying to add a bad plugin ...")
 

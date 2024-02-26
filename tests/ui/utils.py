@@ -19,7 +19,7 @@ def safe_get_element(driver, by: str, selector: str, *, driver_wait: Optional[We
             el = None
             for x in range(wait):
                 try:
-                    el = driver.execute_script(f"return {selector}")
+                    el = driver.execute_script(f"{selector}")
                     if el:
                         break
                     sleep(1)
@@ -170,6 +170,7 @@ def verify_select_filters(driver, page_name: str, filter_items: list):
         driver.execute_script(f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['value']}]').setAttribute('value', '{item['update_value']}')")
         select_btn = safe_get_element(driver, "js", f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['update_value']}]')")
         select_btn.click()
+        sleep(0.1)
 
         # Verify
         bans_hidden = safe_get_element(driver, "js", f'document.querySelectorAll("[data-{page_name}-list-item][class*=hidden]")')
@@ -179,6 +180,6 @@ def verify_select_filters(driver, page_name: str, filter_items: list):
 
         # Reset
         driver.execute_script(f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['update_value']}]').setAttribute('value', '{item['value']}')")
-        select_btn = safe_get_element(driver, "js", f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['value']}]')")
-        select_btn.click()
+        select_btn_reset = safe_get_element(driver, "js", f"document.querySelector('[data-{page_name}-setting-select-dropdown-btn={item['id']}][value={item['value']}]')")
+        select_btn_reset.click()
         sleep(0.1)

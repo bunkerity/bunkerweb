@@ -236,13 +236,24 @@ try:
 
     log_info("Create another service app3.example.com to get filters (need at least 4 services on page)")
 
-    assert_button_click(DRIVER, "//button[@data-services-action='new']")
+    try:
+        clone_button_2 = safe_get_element(DRIVER, By.XPATH, "//button[@data-services-action='clone' and @data-services-name='app1.example.com']", error=True)
+        assert isinstance(clone_button_2, WebElement), "Clone button is not a WebElement"
+    except TimeoutException:
+        log_exception("Clone button hasn't been found, even though it should be, exiting ...")
+        exit(1)
 
-    server_name_input = safe_get_element(DRIVER, By.ID, "SERVER_NAME")
-    assert isinstance(server_name_input, WebElement), "Input is not a WebElement"
+    assert_button_click(DRIVER, clone_button_2)
 
-    server_name_input.clear()
-    server_name_input.send_keys("app3.example.com")
+    server_name_input_2 = safe_get_element(DRIVER, By.ID, "SERVER_NAME")
+    assert isinstance(server_name_input_2, WebElement), "Input is not a WebElement"
+
+    if server_name_input_2.get_attribute("value"):
+        log_error("The cloned service input is not empty, exiting ...")
+        exit(1)
+
+    server_name_input_2.clear()
+    server_name_input_2.send_keys("app3.example.com")
 
     access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
 
