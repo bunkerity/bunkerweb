@@ -150,7 +150,21 @@
     </div>
   </div>
   <!-- end filter -->
-  <div class=" {% if bans|length == 0 %}hidden{% endif %} w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+  <div data-bans-nomatch
+  class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words">
+<div class="col-span-12 flex flex-col justify-center items-center h-fit">
+ <svg xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="mb-2 w-8 h-8 stroke-white">
+   <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
+ </svg>
+ <h5 class="font-bold dark:text-white/90 mx-2 text-white">No bans match</h5>
+</div>
+</div>
+  <div data-bans-list-container class=" {% if bans|length == 0 %}hidden{% endif %} w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
     <div class="col-span-12">
       <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">BANS LIST</h5>
     </div>
@@ -198,7 +212,7 @@
           <!-- list -->
           <ul class="col-span-12 w-full" data-bans-list>
             {% for ban in bans %}
-              <li data-bans-list-item="{{ ban }}"
+              <li data-bans-item data-bans-list-item="{{ ban }}"
                   class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
                 <div data-bans-ban-select
                      data-checkbox-handler="ban-item-{{ loop.index }}"

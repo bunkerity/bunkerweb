@@ -1,3 +1,5 @@
+import { CheckNoMatchFilter } from "./utils/settings.js";
+
 class Filter {
   constructor(prefix = "bans") {
     this.prefix = prefix;
@@ -605,3 +607,23 @@ const setDropdown = new Dropdown();
 const setFilter = new Filter();
 const setUnban = new Unban();
 const setModal = new AddBanModal();
+
+const checkPluginKeyword = new CheckNoMatchFilter(
+  document.querySelector("input#keyword"),
+  "input",
+  document
+    .querySelector("[data-bans-list]")
+    .querySelectorAll("[data-bans-item]"),
+  document.querySelector("[data-bans-list-container]"),
+  document.querySelector("[data-bans-nomatch]"),
+);
+
+const checkPluginSelect = new CheckNoMatchFilter(
+  document.querySelectorAll("button[data-bans-setting-select-dropdown-btn]"),
+  "select",
+  document
+    .querySelector("[data-bans-list]")
+    .querySelectorAll("[data-bans-item]"),
+  document.querySelector("[data-bans-list-container]"),
+  document.querySelector("[data-bans-nomatch]"),
+);

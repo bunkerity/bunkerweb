@@ -1,3 +1,5 @@
+import { CheckNoMatchFilter } from "./utils/settings.js";
+
 class Dropdown {
   constructor(prefix = "jobs") {
     this.prefix = prefix;
@@ -376,3 +378,23 @@ class Download {
 const setDropdown = new Dropdown("jobs");
 const setFilter = new Filter("jobs");
 const setDownload = new Download();
+
+const checkPluginKeyword = new CheckNoMatchFilter(
+  document.querySelector("input#keyword"),
+  "input",
+  document
+    .querySelector("[data-jobs-list]")
+    .querySelectorAll("[data-jobs-item]"),
+  document.querySelector("[data-jobs-list-container]"),
+  document.querySelector("[data-jobs-nomatch]"),
+);
+
+const checkPluginSelect = new CheckNoMatchFilter(
+  document.querySelectorAll("button[data-jobs-setting-select-dropdown-btn]"),
+  "select",
+  document
+    .querySelector("[data-jobs-list]")
+    .querySelectorAll("[data-jobs-item]"),
+  document.querySelector("[data-jobs-list-container]"),
+  document.querySelector("[data-jobs-nomatch]"),
+);

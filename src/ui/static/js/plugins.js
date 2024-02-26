@@ -1,3 +1,5 @@
+import { CheckNoMatchFilter } from "./utils/settings.js";
+
 class Dropdown {
   constructor(prefix = "plugins") {
     this.prefix = prefix;
@@ -512,3 +514,23 @@ const setDropdown = new Dropdown("plugins");
 const setFilter = new Filter("plugins");
 const setUpload = new Upload();
 const setModal = new Modal("plugins");
+
+const checkPluginKeyword = new CheckNoMatchFilter(
+  document.querySelector("input#keyword"),
+  "input",
+  document
+    .querySelector("[data-plugins-list]")
+    .querySelectorAll("[data-plugins-type]"),
+  document.querySelector("[data-plugins-list-container]"),
+  document.querySelector("[data-plugins-nomatch]"),
+);
+
+const checkPluginSelect = new CheckNoMatchFilter(
+  document.querySelectorAll("button[data-plugins-setting-select-dropdown-btn"),
+  "select",
+  document
+    .querySelector("[data-plugins-list]")
+    .querySelectorAll("[data-plugins-type]"),
+  document.querySelector("[data-plugins-list-container]"),
+  document.querySelector("[data-plugins-nomatch]"),
+);

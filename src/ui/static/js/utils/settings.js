@@ -241,4 +241,58 @@ class FilterSettings {
   }
 }
 
-export { Popover, Tabs, FormatValue, FilterSettings };
+class CheckNoMatchFilter {
+  constructor(input, type, elsToCheck, elContainer, noMatchEl) {
+    this.input = input;
+    this.type = type;
+    this.elsToCheck = elsToCheck;
+    this.elContainer = elContainer;
+    this.noMatchEl = noMatchEl;
+    this.init();
+  }
+
+  init() {
+    if (!this.input || !this.elsToCheck || !this.noMatchEl) return;
+
+    const event = this.type === "input" ? "input" : "click";
+
+    if (!this.input.length) {
+      this.input.addEventListener(event, () => {
+        this.check();
+      });
+    }
+
+    if (this.input.length) {
+      this.input.forEach((inp) => {
+        inp.addEventListener(event, () => {
+          this.check();
+        });
+      });
+    }
+  }
+
+  check() {
+    setTimeout(() => {
+      let isAllHidden = true;
+      for (let i = 0; i < this.elsToCheck.length; i++) {
+        const el = this.elsToCheck[i];
+        if (!el.classList.contains("hidden")) {
+          isAllHidden = false;
+          break;
+        }
+      }
+
+      if (isAllHidden) {
+        this.noMatchEl.classList.remove("hidden");
+        this.elContainer ? this.elContainer.classList.add("hidden") : false;
+      }
+
+      if (!isAllHidden) {
+        this.elContainer ? this.elContainer.classList.remove("hidden") : false;
+        this.noMatchEl.classList.add("hidden");
+      }
+    }, 20);
+  }
+}
+
+export { Popover, Tabs, FormatValue, FilterSettings, CheckNoMatchFilter };

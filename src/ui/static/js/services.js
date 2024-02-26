@@ -3,6 +3,7 @@ import {
   Tabs,
   FormatValue,
   FilterSettings,
+  CheckNoMatchFilter,
 } from "./utils/settings.js";
 
 class ServiceModal {
@@ -1356,68 +1357,32 @@ const setFilterGlobal = new FilterSettings(
 
 const setMultiple = new Multiple("services");
 
-// Hide / Show no matching message on service modal
-document
-  .querySelector("input#settings-filter")
-  .addEventListener("input", () => {
-    setTimeout(() => {
-      const tabs = document
-        .querySelector("[data-services-tabs-desktop]")
-        .querySelectorAll("[data-tab-handler]");
-      let isAllHidden = true;
-      for (let i = 0; i < tabs.length; i++) {
-        const plugin = tabs[i];
-        if (!plugin.classList.contains("hidden")) {
-          isAllHidden = false;
-          break;
-        }
-      }
-
-      const formEl = document.querySelector("[data-services-modal-form]");
-      const noMatchEl = document.querySelector("[data-services-nomatch]");
-
-      if (isAllHidden) {
-        noMatchEl.classList.remove("hidden");
-        formEl.classList.add("hidden");
-      }
-
-      if (!isAllHidden) {
-        formEl.classList.remove("hidden");
-        noMatchEl.classList.add("hidden");
-      }
-    }, 20);
-  });
-
-// Hide / Show no matching message for services card
-try {
+const checkServiceModalKeyword = new CheckNoMatchFilter(
+  document.querySelector("input#settings-filter"),
+  "input",
   document
-    .querySelector("input#service-name-keyword")
-    .addEventListener("input", () => {
-      setTimeout(() => {
-        const cards = document.querySelectorAll("[data-services-card]");
-        let isAllHidden = true;
-        for (let i = 0; i < cards.length; i++) {
-          const card = cards[i];
-          if (!card.classList.contains("hidden")) {
-            isAllHidden = false;
-            break;
-          }
-        }
+    .querySelector("[data-services-tabs-desktop]")
+    .querySelectorAll("[data-tab-handler]"),
+  document.querySelector("[data-services-modal-form]"),
+  document.querySelector("[data-services-nomatch]"),
+);
 
-        const formEl = document.querySelector("[data-services-modal-form]");
-        const noMatchEl = document.querySelector(
-          "[data-services-nomatch-card]",
-        );
+try {
+  const checkServiceCardKeyword = new CheckNoMatchFilter(
+    document.querySelectorAll("input#service-name-keyword"),
+    "input",
+    document.querySelectorAll("[data-services-card]"),
+    false,
+    document.querySelector("[data-services-nomatch-card]"),
+  );
 
-        if (isAllHidden) {
-          noMatchEl.classList.remove("hidden");
-          formEl.classList.add("hidden");
-        }
-
-        if (!isAllHidden) {
-          formEl.classList.remove("hidden");
-          noMatchEl.classList.add("hidden");
-        }
-      }, 20);
-    });
+  const checkServiceCardSelect = new CheckNoMatchFilter(
+    document.querySelectorAll(
+      "button[data-services-setting-select-dropdown-btn]",
+    ),
+    "select",
+    document.querySelectorAll("[data-services-card]"),
+    false,
+    document.querySelector("[data-services-nomatch-card]"),
+  );
 } catch (e) {}

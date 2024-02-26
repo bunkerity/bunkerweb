@@ -3,6 +3,7 @@ import {
   Tabs,
   FormatValue,
   FilterSettings,
+  CheckNoMatchFilter,
 } from "./utils/settings.js";
 
 class Multiple {
@@ -34,34 +35,12 @@ const setFilterGlobal = new FilterSettings(
   "[data-service-content='settings']",
 );
 
-// Hide completely configs card in all plugins hidden
-document
-  .querySelector("input#settings-filter")
-  .addEventListener("input", () => {
-    setTimeout(() => {
-      const tabs = document
-        .querySelector("[data-global-config-tabs-desktop]")
-        .querySelectorAll("[data-tab-handler]");
-      let isAllHidden = true;
-      for (let i = 0; i < tabs.length; i++) {
-        const plugin = tabs[i];
-        if (!plugin.classList.contains("hidden")) {
-          isAllHidden = false;
-          break;
-        }
-      }
-
-      const formEl = document.querySelector("[data-global-config-form]");
-      const noMatchEl = document.querySelector("[data-global-config-nomatch]");
-
-      if (isAllHidden) {
-        noMatchEl.classList.remove("hidden");
-        formEl.classList.add("hidden");
-      }
-
-      if (!isAllHidden) {
-        formEl.classList.remove("hidden");
-        noMatchEl.classList.add("hidden");
-      }
-    }, 20);
-  });
+const checkServiceModalKeyword = new CheckNoMatchFilter(
+  document.querySelector("input#settings-filter"),
+  "input",
+  document
+    .querySelector("[data-global-config-tabs]")
+    .querySelectorAll("[data-tab-handler]"),
+  document.querySelector("[data-global-config-form]"),
+  document.querySelector("[data-global-config-nomatch]"),
+);

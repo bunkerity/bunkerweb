@@ -157,7 +157,21 @@
       </div>
     </div>
     <!-- end filter -->
-    <div class="w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+    <div data-reports-nomatch
+    class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words">
+  <div class="col-span-12 flex flex-col justify-center items-center h-fit">
+    <svg xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="mb-2 w-8 h-8 stroke-white">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
+    </svg>
+    <h5 class="font-bold dark:text-white/90 mx-2 text-white">No reports match</h5>
+  </div>
+  </div>
+    <div data-reports-list-container class="w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
       <div class="col-span-12">
         <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">REPORTING</h5>
       </div>
@@ -212,7 +226,7 @@
           <!-- list -->
           <ul class="col-span-12 w-full" data-reports-list>
             {% for report in reports %}
-              <li class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
+              <li data-reports-item class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5">
                 <p class="text-center flex justify-center dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
                    data-reports-date="{{ report['date'] }}">{{ report['date'] }}</p>
                 <p class="flex justify-center dark:text-gray-400 dark:opacity-80 text-sm col-span-1 m-0 my-1"
