@@ -53,7 +53,10 @@ class News {
 
   init() {
     window.addEventListener("load", () => {
+      if (sessionStorage.getItem("lastNews") !== null)
+        return this.render(JSON.parse(sessionStorage.getItem("lastNews")));
       try {
+        console.lg("fetching news");
         fetch("https://www.bunkerweb.io/api/posts/0/2")
           .then((res) => {
             return res.json();
@@ -66,11 +69,14 @@ class News {
   }
 
   render(lastNews) {
+    const lastNewsReverse = lastNews.reverse();
+    // store for next time
+    sessionStorage.setItem("lastNews", JSON.stringify(lastNewsReverse));
     const newsContainer = document.querySelector("[data-news-container]");
     //remove default message
     newsContainer.textContent = "";
     //render last news
-    lastNews.forEach((news) => {
+    lastNewsReverse.forEach((news) => {
       //create html card from  infos
       const cardHTML = this.template(
         news.title,
