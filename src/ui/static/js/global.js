@@ -64,13 +64,14 @@ class News {
 
       if (sessionStorage.getItem("lastNews") !== null)
         return this.render(JSON.parse(sessionStorage.getItem("lastNews")));
-        fetch("https://www.bunkerweb.io/api/posts/0/2")
-          .then((res) => {
-            return res.json();
-          })
-          .then((res) => {
-            return this.render(res.data);
-          }).catch(e => {});
+      fetch("https://www.bunkerweb.io/api/posts/0/2")
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          return this.render(res.data);
+        })
+        .catch((e) => {});
     });
   }
 
@@ -377,13 +378,14 @@ class Banner {
       return this.updateBanner(
         JSON.parse(sessionStorage.getItem("bannerNews")),
       );
-      fetch("https://www.bunkerweb.io/api/bw-ui-news")
-        .then((res) => {
-          return res.json();
-        })
-        .then((res) => {
-          return this.updateBanner(res.data);
-        }).catch(e => {});
+    fetch("https://www.bunkerweb.io/api/bw-ui-news")
+      .then((res) => {
+        return res.json();
+      })
+      .then((res) => {
+        return this.updateBanner(res.data);
+      })
+      .catch((e) => {});
   }
 
   updateBanner(bannerNews) {

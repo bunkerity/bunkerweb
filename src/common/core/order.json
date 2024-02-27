@@ -15,7 +15,13 @@
     "letsencrypt",
     "selfsigned"
   ],
-  "set": ["sessions", "whitelist", "letsencrypt", "customcert", "selfsigned"],
+  "set": [
+    "sessions",
+    "whitelist",
+    "letsencrypt",
+    "customcert",
+    "selfsigned"
+  ],
   "ssl_certificate": ["customcert", "letsencrypt", "selfsigned"],
   "access": [
     "whitelist",

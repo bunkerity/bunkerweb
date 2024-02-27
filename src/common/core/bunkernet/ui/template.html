@@ -11,38 +11,28 @@
   {% if is_used %}
 
   <!-- info-->
-  <div
-    class="core-card"
-  >
+  <div class="core-card">
     <h5 class="core-card-title">INFO</h5>
 
     <div class="core-card-text-container">
-      <p
-        data-info
-        class="core-card-text"
-      ></p>
+      <p data-info class="core-card-text"></p>
     </div>
   </div>
   <!-- end info -->
 
-  <div
-    class="core-card-status"
-  >
+  <div class="core-card-status">
     <div class="core-card-status-container">
       <h5 class="core-card-status-title">STATUS</h5>
       <svg
         data-status-svg
-        class="core-card-status-svg"
+        class="core-card-status-svg info"
         viewBox="0 0 100 100"
         xmlns="http://www.w3.org/2000/svg"
       >
         <circle cx="50" cy="50" r="50" />
       </svg>
     </div>
-    <p
-      data-status-text
-      class="core-card-text"
-    ></p>
+    <p data-status-text class="core-card-text"></p>
   </div>
 
   <!-- end status -->
@@ -66,16 +56,11 @@
   </script>
 
   {% else %}
-  <div
-    class="core-card"
-  >
+  <div class="core-card">
     <div class="core-card-wrap">
       <h5 class="core-card-title">Deactivated</h5>
       <!-- icon -->
-      <div
-        role="img"
-        class="core-card-svg-container"
-      >
+      <div role="img" class="core-card-svg-container">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -95,10 +80,7 @@
     </div>
 
     <div class="core-card-text-container">
-      <p
-        data-info
-        class="core-card-text"
-      >
+      <p data-info class="core-card-text">
         This plugin need to be activated to get metrics.
       </p>
     </div>

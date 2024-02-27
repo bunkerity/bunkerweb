@@ -10,30 +10,19 @@
 <div class="core-layout">
   {% if is_used and is_metrics %}
   <!-- info-->
-  <div
-    class="core-card"
-  >
+  <div class="core-card">
     <h5 class="core-card-info-title">INFO</h5>
 
     <div class="core-card-info-list">
-      <p
-        data-info
-        class="core-card-info-text"
-      ></p>
+      <p data-info class="core-card-info-text"></p>
     </div>
   </div>
   <!-- end info -->
 
-  <div
-    class="core-card-metrics"
-  >
+  <div class="core-card-metrics">
     <!-- text -->
     <div>
-      <p
-        class="core-card-metrics-name"
-      >
-        Challenges
-      </p>
+      <p class="core-card-metrics-name">Challenges</p>
       <h5 data-count class="core-card-title">"unknown"</h5>
 
       <p class="core-card-metrics-subtitle">
@@ -44,15 +33,12 @@
     </div>
     <!-- end text -->
     <!-- icon -->
-    <div
-      role="img"
-      class="core-card-metrics-svg-container blue"
-    >
+    <div role="img" class="core-card-metrics-svg-container blue">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="currentColor"
-        class="size-base core-card-metrics-svg "
+        class="size-base core-card-metrics-svg"
       >
         <path
           d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.948 49.948 0 0 0-9.902 3.912l-.003.002c-.114.06-.227.119-.34.18a.75.75 0 0 1-.707 0A50.88 50.88 0 0 0 7.5 12.173v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.123 56.123 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.803 49.803 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z"
@@ -84,16 +70,11 @@
     });
   </script>
   {% else %}
-  <div
-    class="core-card"
-  >
+  <div class="core-card">
     <div class="core-card-wrap">
       <h5 class="core-card-deactivated-title">Deactivated</h5>
       <!-- icon -->
-      <div
-        role="img"
-        class="core-card-svg-container"
-      >
+      <div role="img" class="core-card-svg-container">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -113,10 +94,7 @@
     </div>
 
     <div class="core-card-text-container">
-      <p
-        data-info
-        class="core-card-text"
-      >
+      <p data-info class="core-card-text">
         This plugin need to be activated to get metrics.
       </p>
     </div>
