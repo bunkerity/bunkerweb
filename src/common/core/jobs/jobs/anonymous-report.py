@@ -52,7 +52,7 @@ try:
 
     data["integration"] = data["integration"].lower()
     data["database"] = f"{db.database_uri.split(':')[0].split('+')[0]}/{database_version}"
-    data["service_number"] = str(len(services))
+    data["services_number"] = str(len(services))
     data["python_version"] = version.split(" ")[0]
 
     data["use_ui"] = "no"

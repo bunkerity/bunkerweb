@@ -78,6 +78,7 @@ try:
         "integration": get_integration(),
         "version": get_version(),
         "os": get_os_info(),
+        "services_number": str(len(getenv("SERVER_NAME", "").split(" "))),
     }
 
     headers = {"User-Agent": f"BunkerWeb/{data['version']}"}
@@ -92,9 +93,6 @@ try:
         logger.error(f"Got unexpected content type: {resp.headers.get('Content-Type', 'missing')} from {API_ENDPOINT}")
         status = 2
         sys_exit(status)
-
-    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
-    plugin_nbr = 0
 
     temp_dir = TMP_DIR.joinpath(str(uuid4()))
     temp_dir.mkdir(parents=True, exist_ok=True)
@@ -116,6 +114,9 @@ try:
             plugin_path = temp_dir.joinpath(plugin["id"])
             plugin_path.mkdir(parents=True, exist_ok=True)
             plugin_path.joinpath("plugin.json").write_text(dumps(plugin, indent=4), encoding="utf-8")
+
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
+    plugin_nbr = 0
 
     # Install plugins
     try:
