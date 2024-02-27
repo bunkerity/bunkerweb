@@ -13,10 +13,10 @@
           {{ plugin['name'] }} <span>{{ plugin['version'] }}</span>
         </h5>
         {% if plugin['page'] %}
-          <a target="_blank"
+          <a 
              aria-label="plugin page link"
              class="hover:-translate-y-px mx-2"
-             href="{{ request.url_root }}plugins?plugin_id={{ plugin['id'] }}">
+             href="{{ request.url_root }}plugins/{{ plugin['id'] }}">
             <svg class="h-5 w-5 fill-sky-500 dark dark:brightness-90"
                  xmlns="http://www.w3.org/2000/svg"
                  viewBox="0 0 448 512">
