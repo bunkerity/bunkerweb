@@ -124,7 +124,7 @@ function headers:header()
 		elseif type(set_cookie) == "table" then
 			new_set_cookie = {}
 			for _, single_set_cookie in ipairs(set_cookie) do
-				check_set_cookie = single_set_cookie
+				local check_set_cookie = single_set_cookie
 				if not check_set_cookie:find("[Ss]ecure") then
 					check_set_cookie = check_set_cookie .. "; Secure"
 				end

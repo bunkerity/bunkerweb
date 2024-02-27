@@ -1,74 +1,57 @@
-{% extends "base.html" %} {% block content %}
-<input
-  type="csrf_token"
-  name="csrf_token"
-  value="{{ csrf_token }}"
-  class="hidden"
-  hidden
-/>
-
-<div class="core-layout">
-  {% if is_used %}
-
-  <!-- info-->
-  <div class="core-card">
-    <h5 class="core-card-title">INFO</h5>
-
-    <div class="core-card-text-container">
-      <p data-info class="core-card-text"></p>
-    </div>
-  </div>
-  <!-- end info -->
-  <div class="core-card-metrics">
-    <!-- text -->
-    <div>
-      <p class="core-card-metrics-name">Keys</p>
-      <h5 data-count class="core-card-title">"unknown"</h5>
-
-      <p class="core-card-metrics-subtitle">
-        <span class="core-card-metrics-subtitle-content info"
-          >total number
-        </span>
-      </p>
-    </div>
-    <!-- end text -->
-    <!-- icon -->
-    <div role="img" class="core-card-svg-container sky">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        class="scale-[0.6] leading-none text-lg relative-sky-700 stroke-white"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"
-        />
-      </svg>
-    </div>
-    <!-- end icon -->
-  </div>
-
-  <div class="core-card-status">
-    <div class="core-card-status-container">
-      <h5 class="core-card-status-title">STATUS</h5>
-      <svg
-        data-status-svg
-        class="core-card-status-svg info"
-        viewBox="0 0 100 100"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <circle cx="50" cy="50" r="50" />
-      </svg>
-    </div>
-    <p data-status-text class="core-card-text"></p>
-  </div>
-  <!-- end status -->
-
-  <script nonce="{{script_nonce}}">
+{% extends "base.html" %}
+{% block content %}
+    <input type="csrf_token"
+           name="csrf_token"
+           value="{{ csrf_token }}"
+           class="hidden"
+           hidden />
+    <div class="core-layout">
+        {% if is_used %}
+            <!-- info-->
+            <div class="core-card">
+                <h5 class="core-card-title">INFO</h5>
+                <div class="core-card-text-container">
+                    <p data-info class="core-card-text"></p>
+                </div>
+            </div>
+            <!-- end info -->
+            <div class="core-card-metrics">
+                <!-- text -->
+                <div>
+                    <p class="core-card-metrics-name">Keys</p>
+                    <h5 data-count class="core-card-title">"unknown"</h5>
+                    <p class="core-card-metrics-subtitle">
+                        <span class="core-card-metrics-subtitle-content info">total number</span>
+                    </p>
+                </div>
+                <!-- end text -->
+                <!-- icon -->
+                <div role="img" class="core-card-svg-container sky">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke-width="1.5"
+                         stroke="currentColor"
+                         class="scale-[0.6] leading-none text-lg relative-sky-700 stroke-white">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
+                    </svg>
+                </div>
+                <!-- end icon -->
+            </div>
+            <div class="core-card-status">
+                <div class="core-card-status-container">
+                    <h5 class="core-card-status-title">STATUS</h5>
+                    <svg data-status-svg
+                         class="core-card-status-svg info"
+                         viewBox="0 0 100 100"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="50" />
+                    </svg>
+                </div>
+                <p data-status-text class="core-card-text"></p>
+            </div>
+            <!-- end status -->
+            <script nonce="{{script_nonce}}">
     // Use SetupPlugin class that is on static/js/plugins/setup.js
     const setPlugin = new SetupPlugin({
       info: {
@@ -89,40 +72,29 @@
         textEl: document.querySelector("[data-status-text]"),
       },
     });
-  </script>
-
-  {% else %}
-  <div class="core-card">
-    <div class="core-card-wrap">
-      <h5 class="core-card-title">Deactivated</h5>
-      <!-- icon -->
-      <div role="img" class="core-card-svg-container">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="core-card-deactivated-svg"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-          />
-        </svg>
-      </div>
-      <!-- end icon -->
+            </script>
+        {% else %}
+            <div class="core-card">
+                <div class="core-card-wrap">
+                    <h5 class="core-card-title">Deactivated</h5>
+                    <!-- icon -->
+                    <div role="img" class="core-card-svg-container">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke-width="1.5"
+                             stroke="currentColor"
+                             class="core-card-deactivated-svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+                    <!-- end icon -->
+                </div>
+                <div class="core-card-text-container">
+                    <p data-info class="core-card-text">This plugin need to be activated to get metrics.</p>
+                </div>
+            </div>
+            <!-- end info -->
+        {% endif %}
     </div>
-
-    <div class="core-card-text-container">
-      <p data-info class="core-card-text">
-        This plugin need to be activated to get metrics.
-      </p>
-    </div>
-  </div>
-  <!-- end info -->
-  {% endif %}
-</div>
-
 {% endblock %}
