@@ -14,6 +14,15 @@ function misc:initialize(ctx)
 	plugin.initialize(self, "misc", ctx)
 end
 
+function misc:set()
+	local ngx_var = ngx.var
+	local auto_redirect = 'no'
+	if ngx_var.scheme == "http" and ngx_var.https_configured == "yes" then
+		auto_redirect = 'yes'
+	end
+	return self:ret(true, "set auto_redirect to " .. auto_redirect)
+end
+
 function misc:access()
 	-- Check if method is valid
 	local method = self.ctx.bw.request_method

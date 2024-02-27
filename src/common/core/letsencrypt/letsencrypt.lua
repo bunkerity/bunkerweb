@@ -33,6 +33,15 @@ function letsencrypt:initialize(ctx)
 	plugin.initialize(self, "letsencrypt", ctx)
 end
 
+function letsencrypt:set()
+	local ngx_var = ngx.var
+	local https_configured = self.variables["AUTO_LETS_ENCRYPT"]
+	if ngx_var.https_configured == "no" and https_configured == "yes" then
+		ngx_var.https_configured = "yes"
+	end
+	return self:ret(true, "set https_configured to " .. https_configured)
+end
+
 function letsencrypt:init()
 	local ret_ok, ret_err = true, "success"
 	if has_variable("AUTO_LETS_ENCRYPT", "yes") then

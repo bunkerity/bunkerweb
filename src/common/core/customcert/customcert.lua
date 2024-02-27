@@ -20,6 +20,15 @@ function customcert:initialize(ctx)
 	plugin.initialize(self, "customcert", ctx)
 end
 
+function customcert:set()
+	local ngx_var = ngx.var
+	local https_configured = self.variables["USE_CUSTOM_SSL"]
+	if ngx_var.https_configured == "no" and https_configured == "yes" then
+		ngx_var.https_configured = "yes"
+	end
+	return self:ret(true, "set https_configured to " .. https_configured)
+end
+
 function customcert:init()
 	local ret_ok, ret_err = true, "success"
 	if has_variable("USE_CUSTOM_SSL", "yes") then

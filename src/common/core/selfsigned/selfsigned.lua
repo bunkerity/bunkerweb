@@ -20,6 +20,15 @@ function selfsigned:initialize(ctx)
 	plugin.initialize(self, "selfsigned", ctx)
 end
 
+function selfsigned:set()
+	local ngx_var = ngx.var
+	local https_configured = self.variables["GENERATE_SELF_SIGNED_SSL"]
+	if ngx_var.https_configured == "no" and https_configured == "yes" then
+		ngx_var.https_configured = "yes"
+	end
+	return self:ret(true, "set https_configured to " .. https_configured)
+end
+
 function selfsigned:init()
 	local ret_ok, ret_err = true, "success"
 	if has_variable("GENERATE_SELF_SIGNED_SSL", "yes") then
