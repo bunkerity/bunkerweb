@@ -93,10 +93,13 @@ class FolderNav {
 
   //check if file/folder can be created on folder
   updateActions(folder) {
+    // for root
+    if (!folder) return this.addFileEl.setAttribute("disabled", "");
     //check if folder allow add file/folder
-    const isAddFile = folder.getAttribute("data-can-create-file");
-    console.log(isAddFile, "isAddFile")
-    isAddFile === "True" ? this.addFileEl.removeAttribute("disabled")  : this.addFileEl.setAttribute("disabled", "");
+    const isAddFile = folder.getAttribute("data-can-create-file") || "False";
+    isAddFile === "True"
+      ? this.addFileEl.removeAttribute("disabled")
+      : this.addFileEl.setAttribute("disabled", "");
   }
 
   showCurrentFolderEls(path, lvl) {
@@ -105,6 +108,37 @@ class FolderNav {
     );
     for (let i = 0; i < nestedEl.length; i++) {
       const el = nestedEl[i];
+      try {
+        // check filter before showing if any (case configs page)
+        const onlyPathWithConf = document
+          .querySelector('[data-configs-setting-select-text="withconf"]')
+          .textContent.trim()
+          .toLowerCase();
+        const onlyGlobalConf = document
+          .querySelector('[data-configs-setting-select-text="globalconf"]')
+          .textContent.trim()
+          .toLowerCase();
+        if (
+          onlyPathWithConf === "true" &&
+          !el.hasAttribute("data-path-to-a-conf")
+        ) {
+          el.classList.add("hidden");
+          continue;
+        }
+        if (onlyGlobalConf === "true") {
+          const type = el.getAttribute("data-_type");
+          const level = el.getAttribute("data-level");
+
+          if (+level > 2) {
+            el.classList.add("hidden");
+            continue;
+          }
+          if (level === "2" && type === "folder") {
+            el.classList.add("hidden");
+            continue;
+          }
+        }
+      } catch (err) {}
       el.setAttribute("data-current-el", "");
       el.classList.remove("hidden");
     }
@@ -341,11 +375,14 @@ class FolderModal {
 
   //HANDLERS
   initAddConfig() {
+    if (this.prefix !== "configs") return;
     this.addConfContainer.addEventListener("click", (e) => {
       //add file
       try {
         if (
-          e.target.closest("button").hasAttribute(`data-${this.prefix}-add-file`)
+          e.target
+            .closest("button")
+            .hasAttribute(`data-${this.prefix}-add-file`)
         ) {
           this.setModal(
             "new",
