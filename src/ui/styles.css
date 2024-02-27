@@ -146,6 +146,301 @@
 /*---------------END SETTINGS_TABS-------------*/
 /*---------------------------------------------*/
 
+/*---------------------------------------------*/
+/*--------------- HOME PAGE--------------------*/
+/*---------------------------------------------*/
+
+.home-card  {
+  @apply dark:brightness-110 sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border
+}
+
+.home-card-name {
+  @apply mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60
+}
+
+.home-card-title {
+  @apply mb-1 font-bold dark:text-white/90
+}
+
+
+.home-card-subtitle {
+  @apply  mx-0.5 font-bold leading-normal text-sm mb-0; 
+}
+
+.info.home-card-subtitle {
+  @apply text-sky-500;
+}
+
+.error.home-card-subtitle {
+  @apply text-red-500;
+}
+
+.success.home-card-subtitle {
+  @apply text-green-500;
+}
+
+.warning.home-card-subtitle {
+  @apply text-yellow-500;
+}
+
+.home-card-svg-container {
+  @apply dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle;
+}
+
+.version.home-card-svg-container {
+@apply bg-yellow-500;
+}
+
+.version-number.home-card-svg-container {
+  @apply bg-emerald-500
+}
+
+.instances.home-card-svg-container {
+  @apply bg-gray-600;
+}
+
+.services.home-card-svg-container {
+  @apply bg-orange-500;
+}
+
+.plugins.home-card-svg-container {
+  @apply bg-yellow-400;
+}
+
+
+/*---------------------------------------------*/
+/*--------------- END HOME PAGE ----------------*/
+/*---------------------------------------------*/
+
+/*---------------------------------------------*/
+/*--------------- CORE PLUGINS ----------------*/
+/*---------------------------------------------*/
+
+.core-layout {
+  @apply col-span-12 grid grid-cols-12 gap-4;
+}
+
+.core-card {
+  @apply h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border
+}
+
+.core-card-wrap {
+  @apply flex justify-between
+}
+
+.core-card-text {
+  @apply transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-100 dark:opacity-80
+}
+
+.core-card-title {
+  @apply mb-2 font-bold dark:text-white/90
+}
+
+.core-card-svg-container {
+  @apply dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle
+}
+
+.core-card-deactivated-svg {
+  @apply leading-none text-lg relative fill-yellow-500 stroke-white
+}
+
+.core-card-text-container {
+  @apply mx-1 flex justify-start items-center my-3
+}
+
+
+.core-card-status {
+  @apply col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 w-fit h-fit transition hover:scale-102 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border
+}
+
+.core-card-status-container {
+  @apply mx-1 flex justify-start items-center
+}
+
+.core-card-status-title {
+  @apply mb-0 font-bold dark:text-white/90 mr-4
+}
+
+.core-card-status-svg {
+  @apply w-6 h-6
+}
+
+.core-card-list {
+  @apply 2xl:col-span-4 3xl:col-span-3 w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border
+}
+
+.w-small.core-card-list {
+  @apply md:max-w-[300px]
+}
+
+.w-medium.core-card-list {
+  @apply md:max-w-[400px]
+}
+
+.w-large.core-card-list {
+  @apply md:max-w-[550px]
+}
+
+.core-card-list-title-container {
+  @apply col-span-12 flex
+}
+
+.core-card-list-title {
+  @apply mb-4 mt-2 font-bold dark:text-white/90 mx-2
+}
+
+.core-card-list-container {
+  @apply col-span-12 overflow-y-auto overflow-x-auto
+}
+
+.core-card-list-header {
+  @apply dark:text-gray-300 h-8 text-sm font-bold m-0 pb-2 border-b border-gray-400
+}
+
+.core-card-list-item {
+  @apply items-center grid grid-cols-12 border-b border-gray-300 py-2.5
+}
+
+.core-card-list-item-content {
+  @apply dark:text-gray-400 dark:opacity-80 text-sm m-0 my-1
+}
+
+.core-card-list-wrap {
+  @apply w-full grid grid-cols-12 rounded p-2
+}
+
+.w-small.core-card-list-wrap {
+  @apply min-w-[250px]
+}
+
+.w-medium.core-card-list-wrap {
+  @apply min-w-[350px]
+}
+
+.w-large.core-card-list-wrap {
+  @apply min-w-[500px]
+}
+
+.core-card-metrics {
+  @apply h-fit dark:brightness-110 sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+}
+
+.core-card-metrics-name {
+  @apply mb-2 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60
+}
+
+.core-card-metrics-subtitle {
+  @apply mb-0 dark:text-white dark:opacity-60
+}
+
+.core-card-metrics-subtitle-content {
+  @apply font-bold leading-normal text-sm mx-0.5;
+}
+
+.error.core-card-metrics-subtitle-content {
+  @apply text-red-500
+}
+
+.success.core-card-metrics-subtitle-content {
+  @apply text-green-500
+}
+
+.warning.core-card-metrics-subtitle-content {
+  @apply text-yellow-500
+}
+
+.info.core-card-metrics-subtitle-content {
+  @apply text-sky-500
+}
+
+.core-card-metrics-svg {
+  @apply leading-none text-lg relative fill-white
+}
+
+.size-small.core-card-metrics-svg {
+  @apply scale-[0.5]
+}
+
+.size-medium.core-card-metrics-svg {
+  @apply scale-[0.6]
+}
+
+.size-base.core-card-metrics-svg {
+  @apply scale-[0.75]
+}
+
+
+.purple.core-card-svg-container {
+  @apply bg-purple-600
+}
+
+.green.core-card-svg-container {
+  @apply bg-green-700
+}
+
+.red.core-card-svg-container {
+  @apply bg-red-700
+}
+
+.orange.core-card-svg-container {
+  @apply bg-orange-600
+}
+
+.blue.core-card-svg-container {
+  @apply bg-blue-600
+}
+
+.yellow.core-card-svg-container {
+  @apply bg-yellow-600
+}
+
+.gray.core-card-svg-container {
+  @apply bg-gray-600
+}
+
+.dark.core-card-svg-container {
+  @apply bg-slate-600
+}
+
+.amber.core-card-svg-container {
+  @apply bg-amber-600
+}
+
+.emerald.core-card-svg-container {
+  @apply bg-emerald-600
+}
+
+.teal.core-card-svg-container {
+  @apply bg-teal-600
+}
+
+.indigo.core-card-svg-container {
+  @apply bg-indigo-600
+}
+
+.cyan.core-card-svg-container {
+  @apply bg-cyan-600
+}
+
+.sky.core-card-svg-container {
+  @apply bg-sky-700
+}
+
+.pink.core-card-svg-container {
+  @apply bg-pink-600
+}
+
+.lime.core-card-svg-container {
+  @apply bg-lime-600
+}
+
+
+/*---------------------------------------------*/
+/*--------------- END CORE PLUGINS ------------*/
+/*---------------------------------------------*/
+
+
+
 .file-manager-actions-item-btn {
   @apply rounded dark:text-gray-300 text-primary whitespace-nowrap md:block border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border m-1 relative pl-4 pr-5 pb-2.5 pt-3 font-bold text-center uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }

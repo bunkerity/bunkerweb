@@ -7,37 +7,37 @@
   hidden
 />
 
-<div class="col-span-12 grid grid-cols-12 gap-4">
+<div class="core-layout">
   {% if is_used %}
 
   <!-- info-->
   <div
-    class="h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="core-card"
   >
-    <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
+    <h5 class="core-card-title">INFO</h5>
 
-    <div class="mx-1 flex justify-start items-center my-4">
+    <div class="core-card-text-container">
       <p
         data-info
-        class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-100 dark:opacity-80"
+        class="core-card-text"
       ></p>
     </div>
   </div>
   <!-- end info -->
   <div
-    class="h-fit dark:brightness-110 max-h-none sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="core-card-metrics"
   >
     <!-- text -->
     <div>
       <p
-        class="mb-2 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60"
+        class="core-card-metrics-name"
       >
         Keys
       </p>
-      <h5 data-count class="mb-1 font-bold dark:text-white/90">"unknown"</h5>
+      <h5 data-count class="core-card-title">"unknown"</h5>
 
-      <p class="mb-0 dark:text-white dark:opacity-60">
-        <span class="font-bold leading-normal text-sm textsky-500 mx-0.5"
+      <p class="core-card-metrics-subtitle">
+        <span class="core-card-metrics-subtitle-content info"
           >total number
         </span>
       </p>
@@ -46,7 +46,7 @@
     <!-- icon -->
     <div
       role="img"
-      class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-sky-700"
+      class="core-card-svg-container sky"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +54,7 @@
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="scale-[0.6] leading-none text-lg relative fill-sky-700 stroke-white"
+        class="scale-[0.6] leading-none text-lg relative-sky-700 stroke-white"
       >
         <path
           stroke-linecap="round"
@@ -67,13 +67,13 @@
   </div>
 
   <div
-    class="col-span-12 md:col-span-6 2xl:col-span-3 3xl:col-span-2 w-fit h-fit transition hover:scale-102 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="core-card-status"
   >
-    <div class="mx-1 flex justify-start items-center">
-      <h5 class="mb-0 font-bold dark:text-white/90 mr-4">STATUS</h5>
+    <div class="core-card-status-container">
+      <h5 class="core-card-status-title">STATUS</h5>
       <svg
         data-status-svg
-        class="w-6 h-6"
+        class="core-card-status-svg"
         viewBox="0 0 100 100"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -82,7 +82,7 @@
     </div>
     <p
       data-status-text
-      class="mx-1 transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-100 dark:opacity-80"
+      class="core-card-text"
     ></p>
   </div>
   <!-- end status -->
@@ -112,14 +112,14 @@
 
   {% else %}
   <div
-    class="h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="core-card"
   >
-    <div class="flex justify-between">
-      <h5 class="mb-2 font-bold dark:text-white/90">Deactivated</h5>
+    <div class="core-card-wrap">
+      <h5 class="core-card-title">Deactivated</h5>
       <!-- icon -->
       <div
         role="img"
-        class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-yellow-500"
+        class="core-card-svg-container"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -127,7 +127,7 @@
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="scale-75 leading-none text-lg relative fill-yellow-500 stroke-white"
+          class="core-card-deactivated-svg"
         >
           <path
             stroke-linecap="round"
@@ -139,10 +139,10 @@
       <!-- end icon -->
     </div>
 
-    <div class="mx-1 flex justify-start items-center my-2">
+    <div class="core-card-text-container">
       <p
         data-info
-        class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-100 dark:opacity-80"
+        class="core-card-text"
       >
         This plugin need to be activated to get metrics.
       </p>
