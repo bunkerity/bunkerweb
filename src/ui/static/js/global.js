@@ -64,31 +64,37 @@ class News {
 
       if (sessionStorage.getItem("lastNews") !== null)
         return this.render(JSON.parse(sessionStorage.getItem("lastNews")));
+
       fetch("https://www.bunkerweb.io/api/posts/0/2")
         .then((res) => {
           return res.json();
         })
         .then((res) => {
-          return this.render(res.data);
+          const reverseData = res.data.reverse();
+          return this.render(reverseData);
         })
         .catch((e) => {});
     });
   }
 
   render(lastNews) {
-    const lastNewsReverse = lastNews.reverse();
-    // store for next time
-    sessionStorage.setItem("lastNews", JSON.stringify(lastNewsReverse));
-    // Refetch after one hour
-    sessionStorage.setItem(
-      "lastRefetch",
-      Math.round(new Date().getTime() / 1000) + 3600,
-    );
+    // store for next time if not the case
+    if (
+      !sessionStorage.getItem("lastNews") &&
+      !sessionStorage.getItem("lastRefetch")
+    ) {
+      sessionStorage.setItem(
+        "lastRefetch",
+        Math.round(new Date().getTime() / 1000) + 3600,
+      );
+      sessionStorage.setItem("lastNews", JSON.stringify(lastNews));
+    }
+
     const newsContainer = document.querySelector("[data-news-container]");
     //remove default message
     newsContainer.textContent = "";
     //render last news
-    lastNewsReverse.forEach((news) => {
+    lastNews.forEach((news) => {
       //create html card from  infos
       const cardHTML = this.template(
         news.title,
@@ -528,6 +534,7 @@ const setSelect = new Select();
 const setPassword = new Password();
 const setDisabledPop = new DisabledPop();
 const setNews = new News();
+// const setBanner = new Banner();
 const setDarkM = new darkMode();
 const setFlash = new FlashMsg();
 const setLoader = new Loader();
