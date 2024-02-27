@@ -1731,18 +1731,24 @@ After a successful login/password combination, you will be prompted to enter you
 
 ## Upgrade to PRO
 
-In case you have buy a pro version and you already have a BunkerWeb setup with an UI, you can update **pro settings** inside **global config page**.
+In case you have buy a pro version and you already have a BunkerWeb setup with an UI, you can upgrade doing this :
 
-You have to click on the **pro plugin**, fill the license key settings and save.
+- access the **global config page**.
+- click on the **pro plugin**
+- fill the **setting Pro License Key**
+- **save** your changes
+
 
 <figure markdown>
-  ![Overview](assets/img/pro-from-ui.webp){ align=center, width="500" }
-  <figcaption>Upgrade to pro from UI</figcaption>
+  ![Overview](assets/img/pro-from-ui.webp){ align=center, width="1000" }
+  <figcaption>Upgrade to PRO from UI</figcaption>
 </figure>
 
-In case your license key is valid, you'll get BunkerWeb version pro. you can check this in **home page**.
+If your license key is valid, the upgrade to the pro version will take place automatically in the background.
+
+You can check the status of your version by going to the **home page**, you will see this in case of success :
 
 <figure markdown>
-  ![Overview](assets/img/pro-home-card.png){ align=center, width="400" }
-  <figcaption>Home version card with PRO</figcaption>
+  ![Overview](assets/img/pro-home-card.png){ align=center, width="450" }
+  <figcaption>PRO version card</figcaption>
 </figure>
