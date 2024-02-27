@@ -78,7 +78,7 @@ try:
         "integration": get_integration(),
         "version": get_version(),
         "os": get_os_info(),
-        "services_number": str(len(getenv("SERVER_NAME", "").split(" "))),
+        "service_number": str(len(getenv("SERVER_NAME", "").split(" "))),
     }
 
     headers = {"User-Agent": f"BunkerWeb/{data['version']}"}
