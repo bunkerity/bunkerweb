@@ -1733,6 +1733,16 @@ After a successful login/password combination, you will be prompted to enter you
 
 In case you have buy a pro version and you already have a BunkerWeb setup with an UI, you can update **pro settings** inside **global config page**.
 
-- add image
+You have to click on the **pro plugin**, fill the license key settings and save.
 
-- procedure : get key from panel, put on the related settings, save
+<figure markdown>
+  ![Overview](assets/img/pro-from-ui.webp){ align=center, width="500" }
+  <figcaption>Upgrade to pro from UI</figcaption>
+</figure>
+
+In case your license key is valid, you'll get BunkerWeb version pro. you can check this in **home page**.
+
+<figure markdown>
+  ![Overview](assets/img/pro-home-card.png){ align=center, width="400" }
+  <figcaption>Home version card with PRO</figcaption>
+</figure>
