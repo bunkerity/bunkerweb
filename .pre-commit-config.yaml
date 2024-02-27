@@ -17,7 +17,7 @@ repos:
       - id: check-case-conflict
 
   - repo: https://github.com/psf/black
-    rev: e026c93888f91a47a9c9f4e029f3eb07d96375e6 # frozen: 24.1.1
+    rev: 6fdf8a4af28071ed1d079c01122b34c5d587207a # frozen: 24.2.0
     hooks:
       - id: black
         name: Black Python Formatter

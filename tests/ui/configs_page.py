@@ -36,7 +36,7 @@ try:
     log_info("Trying to create a new config ...")
 
     assert_button_click(DRIVER, "//div[@data-configs-element='server-http' and @data-_type='folder']")
-    assert_button_click(DRIVER, "//li[@data-configs-add-file='']/button")
+    assert_button_click(DRIVER, "//button[@data-configs-add-file='']")
 
     configs_modal_path_input = safe_get_element(DRIVER, By.XPATH, "//div[@data-configs-modal-path='']/input")
     assert isinstance(configs_modal_path_input, WebElement), "The path input is not an instance of WebElement"

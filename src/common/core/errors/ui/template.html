@@ -1,54 +1,43 @@
-{% extends "base.html" %} {% block content %}
-<input
-  type="csrf_token"
-  name="csrf_token"
-  value="{{ csrf_token }}"
-  class="hidden"
-  hidden
-/>
-
-<div class="core-layout">
-  <!-- info-->
-  <div class="core-card">
-    <h5 class="core-card-title">INFO</h5>
-
-    <div class="core-card-text-container">
-      <p data-info class="core-card-text"></p>
-    </div>
-  </div>
-  <!-- end info -->
-
-  <div data-fetch-success-show class="hidden core-card-list w-medium">
-    <div class="core-card-list-container">
-      <h5 class="core-card-list-title">ERRORS LIST</h5>
-    </div>
-    <div class="core-card-list-container">
-      <!-- list container-->
-      <div class="core-card-list-wrap w-medium">
-        <!-- header-->
-        <p class="core-card-list-header col-span-8">Code error</p>
-        <p class="core-card-list-header col-span-4">Count</p>
-        <!-- end header-->
-        <!-- list -->
-        <ul class="col-span-12 w-full">
-          <li data-item class="core-card-list-item">
-            <p
-              data-name="code"
-              class="core-card-list-item-content col-span-8"
-            ></p>
-            <p
-              data-name="count"
-              class="core-card-list-item-content col-span-4"
-            ></p>
-          </li>
-        </ul>
-        <!-- end list-->
-      </div>
-      <!-- end list container-->
-    </div>
-  </div>
-
-  <script nonce="{{script_nonce}}">
+{% extends "base.html" %}
+{% block content %}
+    <input type="csrf_token"
+           name="csrf_token"
+           value="{{ csrf_token }}"
+           class="hidden"
+           hidden />
+    <div class="core-layout">
+        <!-- info-->
+        <div class="core-card">
+            <h5 class="core-card-title">INFO</h5>
+            <div class="core-card-text-container">
+                <p data-info class="core-card-text"></p>
+            </div>
+        </div>
+        <!-- end info -->
+        <div data-fetch-success-show class="hidden core-card-list w-medium">
+            <div class="core-card-list-container">
+                <h5 class="core-card-list-title">ERRORS LIST</h5>
+            </div>
+            <div class="core-card-list-container">
+                <!-- list container-->
+                <div class="core-card-list-wrap w-medium">
+                    <!-- header-->
+                    <p class="core-card-list-header col-span-8">Code error</p>
+                    <p class="core-card-list-header col-span-4">Count</p>
+                    <!-- end header-->
+                    <!-- list -->
+                    <ul class="col-span-12 w-full">
+                        <li data-item class="core-card-list-item">
+                            <p data-name="code" class="core-card-list-item-content col-span-8"></p>
+                            <p data-name="count" class="core-card-list-item-content col-span-4"></p>
+                        </li>
+                    </ul>
+                    <!-- end list-->
+                </div>
+                <!-- end list container-->
+            </div>
+        </div>
+        <script nonce="{{script_nonce}}">
     // Use SetupPlugin class that is on static/js/plugins/setup.js
     const setPlugin = new SetupPlugin({
       info: {
@@ -63,7 +52,6 @@
         listNames: ["code", "count"],
       },
     });
-  </script>
-</div>
-
+        </script>
+    </div>
 {% endblock %}

@@ -28,6 +28,15 @@ try:
 
         DRIVER.refresh()
 
+    log_info("Check if reports generated ...")
+
+    reports_list = safe_get_element(DRIVER, By.XPATH, "//ul[@data-reports-list='']/li", multiple=True)
+    assert isinstance(reports_list, list), "Reports list is not a list"
+
+    if not reports_list:
+        log_error("No reports found, exiting ...")
+        exit(1)
+
     log_info("Trying to filter the reports ...")
 
     # Test select filters
@@ -39,13 +48,6 @@ try:
     ]
 
     verify_select_filters(DRIVER, "reports", select_filters)
-
-    reports_list = safe_get_element(DRIVER, By.XPATH, "//ul[@data-reports-list='']/li", multiple=True)
-    assert isinstance(reports_list, list), "Reports list is not a list"
-
-    if not reports_list:
-        log_error("No reports found, exiting ...")
-        exit(1)
 
     filter_input = safe_get_element(DRIVER, By.ID, "keyword")
     assert isinstance(filter_input, WebElement), "Keyword filter input is not a WebElement"
