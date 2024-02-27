@@ -64,15 +64,13 @@ class News {
 
       if (sessionStorage.getItem("lastNews") !== null)
         return this.render(JSON.parse(sessionStorage.getItem("lastNews")));
-      try {
         fetch("https://www.bunkerweb.io/api/posts/0/2")
           .then((res) => {
             return res.json();
           })
           .then((res) => {
             return this.render(res.data);
-          });
-      } catch (err) {}
+          }).catch(e => {});
     });
   }
 
@@ -379,15 +377,13 @@ class Banner {
       return this.updateBanner(
         JSON.parse(sessionStorage.getItem("bannerNews")),
       );
-    try {
       fetch("https://www.bunkerweb.io/api/bw-ui-news")
         .then((res) => {
           return res.json();
         })
         .then((res) => {
           return this.updateBanner(res.data);
-        });
-    } catch (err) {}
+        }).catch(e => {});
   }
 
   updateBanner(bannerNews) {
@@ -532,7 +528,6 @@ const setDisabledPop = new DisabledPop();
 const setNews = new News();
 const setDarkM = new darkMode();
 const setFlash = new FlashMsg();
-const setBanner = new Banner();
 const setLoader = new Loader();
 const setMenu = new Menu();
 

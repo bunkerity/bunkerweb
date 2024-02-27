@@ -13,9 +13,6 @@ class FolderNav {
       `div[data-${this.prefix}-element][data-_type='file']`,
     );
     this.addFileEl = document.querySelector(`[data-${this.prefix}-add-file]`);
-    this.addFolderEl = document.querySelector(
-      `[data-${this.prefix}-add-folder]`,
-    );
     this.initSorted();
     this.initNav();
   }
@@ -96,18 +93,10 @@ class FolderNav {
 
   //check if file/folder can be created on folder
   updateActions(folder) {
-    //by default
-    this.hideAddConf();
     //check if folder allow add file/folder
     const isAddFile = folder.getAttribute("data-can-create-file");
-    const isAddFolder = folder.getAttribute("data-can-create-folder");
-    isAddFile === "True" ? this.addFileEl.classList.remove("hidden") : "";
-    isAddFolder === "True" ? this.addFolderEl.classList.remove("hidden") : "";
-  }
-
-  hideAddConf() {
-    this.addFileEl.classList.add("hidden");
-    this.addFolderEl.classList.add("hidden");
+    console.log(isAddFile, "isAddFile")
+    isAddFile === "True" ? this.addFileEl.removeAttribute("disabled")  : this.addFileEl.setAttribute("disabled", "");
   }
 
   showCurrentFolderEls(path, lvl) {
@@ -353,25 +342,10 @@ class FolderModal {
   //HANDLERS
   initAddConfig() {
     this.addConfContainer.addEventListener("click", (e) => {
-      //add folder
-      try {
-        if (
-          e.target.closest("li").hasAttribute(`data-${this.prefix}-add-folder`)
-        ) {
-          this.setModal(
-            "new",
-            this.getPathFromBread(),
-            "folder",
-            "",
-            "",
-            this.getLevelFromBread(),
-          );
-        }
-      } catch (err) {}
       //add file
       try {
         if (
-          e.target.closest("li").hasAttribute(`data-${this.prefix}-add-file`)
+          e.target.closest("button").hasAttribute(`data-${this.prefix}-add-file`)
         ) {
           this.setModal(
             "new",

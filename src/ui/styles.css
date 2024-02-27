@@ -145,3 +145,7 @@
 /*---------------------------------------------*/
 /*---------------END SETTINGS_TABS-------------*/
 /*---------------------------------------------*/
+
+.file-manager-actions-item-btn {
+  @apply rounded dark:text-gray-300 text-primary whitespace-nowrap md:block border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border m-1 relative pl-4 pr-5 pb-2.5 pt-3 font-bold text-center uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+}
