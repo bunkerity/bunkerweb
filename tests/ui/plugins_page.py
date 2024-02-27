@@ -35,7 +35,7 @@ try:
     log_info("Trying to filter the plugins ...")
 
     # Get total plugins
-    plugins = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-plugins-type]")')
+    plugins = safe_get_element(DRIVER, By.XPATH, "//div[@data-plugins-type]", multiple=True)
     plugins_total = len(plugins)
 
     key_word_filter_input = safe_get_element(DRIVER, "js", 'document.querySelector("input#keyword")')

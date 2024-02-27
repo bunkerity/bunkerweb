@@ -287,7 +287,7 @@ try:
 
     # Set keyword with no matching settings
     keyword_no_match = "dqz48 é84 dzq 584dz5qd4"
-    btn_keyword = safe_get_element(DRIVER, "js", 'document.querySelector("button#service-name-keyword")')
+    btn_keyword = safe_get_element(DRIVER, "js", 'document.querySelector("input#service-name-keyword")')
     btn_keyword.send_keys(keyword_no_match)
     sleep(0.1)
 
