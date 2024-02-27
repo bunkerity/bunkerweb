@@ -66,7 +66,7 @@ module.exports = {
     "hover:bg-emerald-500/80",
     "focus:bg-emerald-500/80",
     "col-span-12",
-    "w-full"
+    "w-full",
   ],
 
   presets: [],

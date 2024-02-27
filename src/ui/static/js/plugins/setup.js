@@ -76,7 +76,7 @@ class SetupPlugin {
         ["data-fetch", ""],
         ["role", "alert"],
       ],
-      "bg-sky-500 p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:bg-slate-850 dark:shadow-dark-xl bg-clip-border",
+      "bg-sky-500 p-4 mb-1 md:mb-3 md:mr-3 z-[1001] flex flex-col fixed bottom-0 right-0 w-full md:w-1/2 max-w-[300px] min-h-20 rounded-lg dark:brightness-110 hover:scale-102 transition shadow-md break-words dark:shadow-dark-xl bg-clip-border",
       "",
       "",
     );
@@ -159,7 +159,7 @@ class SetupPlugin {
           value === "success" ||
           value === "true"
         ) {
-          this.setStatus(el, textEl, "fill-green-500", "Active");
+          this.setStatus(el, textEl, "success", "Active");
           continue;
         }
 
@@ -170,12 +170,12 @@ class SetupPlugin {
           value === "error" ||
           value === "false"
         ) {
-          this.setStatus(el, textEl, "fill-red-500", "Inactive");
+          this.setStatus(el, textEl, "error", "Inactive");
           continue;
         }
 
         //default
-        this.setStatus(el, textEl, "fill-sky-500", "Unknown");
+        this.setStatus(el, textEl, "info", "Unknown");
         continue;
       }
 
@@ -208,7 +208,7 @@ class SetupPlugin {
   }
 
   setStatus(el, textEl, colorClass, text) {
-    el.classList.remove("fill-green-500", "fill-red-500", "fill-sky-500");
+    el.classList.remove("success", "error", "info");
     el ? el.classList.add(colorClass) : null;
     textEl ? (textEl.textContent = text) : null;
   }

@@ -10,51 +10,30 @@
 <div class="core-layout">
   {% if is_used and is_metrics %}
   <!-- info-->
-  <div
-    class="core-card"
-  >
+  <div class="core-card">
     <h5 class="core-card-title">INFO</h5>
 
     <div class="core-card-text-container">
-      <p
-        data-info
-        class="core-card-text"
-      ></p>
+      <p data-info class="core-card-text"></p>
     </div>
   </div>
   <!-- end info -->
 
-  <div
-    data-fetch-success-show
-    class="hidden core-card-list w-large"
-  >
+  <div data-fetch-success-show class="hidden core-card-list w-large">
     <div class="core-card-list-container">
-      <h5 class="core-card-list-title">
-        LIMIT AND REQUEST LIST
-      </h5>
+      <h5 class="core-card-list-title">LIMIT AND REQUEST LIST</h5>
     </div>
     <div class="core-card-list-container">
       <!-- list container-->
       <div class="core-card-list-wrap w-large">
         <!-- header-->
-        <p
-          class="core-card-list-header col-span-8"
-        >
-          URL
-        </p>
-        <p
-          class="core-card-list-header col-span-4"
-        >
-          Count
-        </p>
+        <p class="core-card-list-header col-span-8">URL</p>
+        <p class="core-card-list-header col-span-4">Count</p>
 
         <!-- end header-->
         <!-- list -->
         <ul class="col-span-12 w-full">
-          <li
-            data-item
-            class="core-card-list-item"
-          >
+          <li data-item class="core-card-list-item">
             <p
               data-name="url"
               class="core-card-list-item-content col-span-8"
@@ -88,16 +67,11 @@
     });
   </script>
   {% else %}
-  <div
-    class="core-card"
-  >
+  <div class="core-card">
     <div class="core-card-wrap">
       <h5 class="core-card-title">Deactivated</h5>
       <!-- icon -->
-      <div
-        role="img"
-        class="core-card-svg-container"
-      >
+      <div role="img" class="core-card-svg-container">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -117,10 +91,7 @@
     </div>
 
     <div class="core-card-text-container">
-      <p
-        data-info
-        class="core-card-text"
-      >
+      <p data-info class="core-card-text">
         This plugin need to be activated to get metrics.
       </p>
     </div>
