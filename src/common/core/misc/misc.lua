@@ -14,17 +14,11 @@ function misc:initialize(ctx)
 	plugin.initialize(self, "misc", ctx)
 end
 
-function misc:set()
-	local ngx_var = ngx.var
-	local auto_redirect = "no"
-	if ngx_var.scheme == "http" and ngx_var.https_configured == "yes" then
-		auto_redirect = "yes"
-		ngx_var.auto_redirect = auto_redirect
-	end
-	return self:ret(true, "set auto_redirect to " .. auto_redirect)
-end
-
 function misc:access()
+	-- Check if we need to redirect to HTTPS
+	if self.ctx.bw.scheme == "http" and ((self.ctx.bw.https_configured == "yes" and self.variables["AUTO_REDIRECT_HTTP_TO_HTTPS"] == "yes") or self.variables["REDIRECT_HTTP_TO_HTTPS"] == "yes") then
+		return self:ret(true, "redirect to HTTPS", nil, "https://" .. self.ctx.bw.http_host .. self.ctx.bw.request_uri)
+	end
 	-- Check if method is valid
 	local method = self.ctx.bw.request_method
 	if not method or not regex_match(method, "^[A-Z]+$") then
