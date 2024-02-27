@@ -67,7 +67,7 @@ def install_plugin(plugin_dir, db) -> bool:
     # Copy the plugin
     copytree(plugin_dir, join(sep, "etc", "bunkerweb", "plugins", metadata["id"]))
     # Add u+x permissions to jobs files
-    for job_file in glob(join(plugin_dir, "jobs", "*")):
+    for job_file in glob(join(sep, "etc", "bunkerweb", "plugins", "jobs", "*")):
         st = Path(job_file).stat()
         chmod(job_file, st.st_mode | S_IEXEC)
     logger.info(f"Plugin {metadata['id']} installed")
@@ -214,7 +214,7 @@ except:
     status = 2
     logger.error(f"Exception while running download-plugins.py :\n{format_exc()}")
 
-for plugin_tmp in glob(join(sep, "var", "tmp", "bunkerweb", "plugins-*")):
+for plugin_tmp in glob(join(sep, "var", "tmp", "bunkerweb", "plugins", "*")):
     rmtree(plugin_tmp, ignore_errors=True)
 
 sys_exit(status)
