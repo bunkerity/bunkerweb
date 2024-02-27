@@ -1,26 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
   {% set cards = [
-      {'name' : 'Version', 'title' : 'PRO' if is_pro_version else 'FREE', 'link' : '#' if is_pro_version else 'https://github.com/bunkerity/bunkerweb', 'subtitle' : 'all features available' if is_pro_version else 'upgrade to pro', 'subtitle_color' : 'green-500' if is_pro_version else 'yellow-500', 'svg_color' : 'yellow-500'  },
-      {'name' : 'Version number', 'title' : version, 'link' : 'https://github.com/bunkerity/bunkerweb', 'subtitle' : "couldn'd fint remote" if not remote_version else "latest version" if remote_version and check_version else 'Update to ' + remote_version  , 'subtitle_color' : "red-500" if not remote_version else "green-500" if remote_version and check_version else 'yellow-500', 'svg_color' : 'secondary'},
-      {'name' : 'Instances', 'title' : instances_number, 'link' : 'loading?next=' + url_for('instances')  , 'subtitle' : instance_health_count|string + ' / ' + instances_number|string + ' is working'  , 'subtitle_color' : "emerald-500", 'svg_color' : 'gray-600'},
-      {'name' : 'Services', 'title' : services_number, 'link' : 'loading?next=' + url_for('services')  , 'subtitle' : services_ui_count|string + ' ui, ' + services_scheduler_count|string + ' scheduler, ' + services_autoconf_count|string + ' autoconf ' , 'subtitle_color' : "sky-500", 'svg_color' : 'orange-500'},
-      {'name' : 'Plugins', 'title' : config["CONFIG"].get_plugins()|length, 'link' : 'loading?next=' + url_for('plugins')  , 'subtitle' : plugins_errors|string + ' errors' if plugins_errors > 0 else 'no error' , 'subtitle_color' : "red-500" if plugins_errors > 0 else 'green-500', 'svg_color' : 'yellow-400' }
+      {'name' : 'Version', 'title' : 'PRO' if is_pro_version else 'FREE', 'link' : '#' if is_pro_version else 'https://github.com/bunkerity/bunkerweb', 'subtitle' : 'all features available' if is_pro_version else 'upgrade to pro', 'subtitle_color' : 'success' if is_pro_version else 'warning' },
+      {'name' : 'Version number', 'title' : version, 'link' : 'https://github.com/bunkerity/bunkerweb', 'subtitle' : "couldn'd fint remote" if not remote_version else "latest version" if remote_version and check_version else 'Update to ' + remote_version  , 'subtitle_color' : "error" if not remote_version else "success" if remote_version and check_version else 'warning'},
+      {'name' : 'Instances', 'title' : instances_number, 'link' : 'loading?next=' + url_for('instances')  , 'subtitle' : instance_health_count|string + ' / ' + instances_number|string + ' is working'  , 'subtitle_color' : "info",},
+      {'name' : 'Services', 'title' : services_number, 'link' : 'loading?next=' + url_for('services')  , 'subtitle' : services_ui_count|string + ' ui, ' + services_scheduler_count|string + ' scheduler, ' + services_autoconf_count|string + ' autoconf ' , 'subtitle_color' : "info"},
+      {'name' : 'Plugins', 'title' : config["CONFIG"].get_plugins()|length, 'link' : 'loading?next=' + url_for('plugins')  , 'subtitle' : plugins_errors|string + ' errors' if plugins_errors > 0 else 'no error' , 'subtitle_color' : "error" if plugins_errors > 0 else 'success'}
     ] %}
   <div class="col-span-12 grid grid-cols-12 justify-start items-start gap-4">
     {% for card in cards %}
       <!-- stats card -->
       <a href="{{ card['link'] }}"
-         class="dark:brightness-110 max-h-none sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+         class="home-card"
          target="_blank">
         <!-- text -->
         <div>
-          <p class="mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60">
+          <p class="home-card-name">
             {{ card['name'] }}
           </p>
           <!-- version of user -->
-          <h5 class="mb-1 font-bold dark:text-white/90">{{ card['title'] }}</h5>
-          <p class="font-bold leading-normal text-sm mb-0 text-{{ card['subtitle_color'] }} mx-0.5 dark:text-white dark:opacity-60">
+          <h5 class="home-card-title">{{ card['title'] }}</h5>
+          <p class="home-card-subtitle {{card['subtitle_color']}}">
             {{ card['subtitle'] }}
           </p>
         </div>
@@ -28,7 +28,7 @@
         <!-- icon -->
         <div role="img"
              aria-label="version"
-             class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-{{ card['svg_color'] }}">
+             class="home-card-svg-container {{card['name'].replace(' ', '-')|lower}}">
           {% if card['name'] == "Version" and is_pro_version %}
             <svg class="leading-none text-lg relative scale-[0.6]"
                  viewBox="0 0 48 46"
@@ -39,7 +39,7 @@
             </svg>
           {% endif %}
           {% if card['name'] == "Version" and not is_pro_version %}
-            <svg class="leading-none fill-white text-{{ card['svg_color'] }} text-lg relative scale-[0.6]"
+            <svg class="leading-none fill-white text-yellow-500 text-lg relative scale-[0.6]"
                  xmlns="http://www.w3.org/2000/svg"
                  fill="none"
                  viewBox="0 0 24 24"
@@ -74,7 +74,7 @@
             </svg>
           {% endif %}
           {% if card['name'] == "Plugins" %}
-            <svg class="scale-75 leading-none text-lg relative fill-white text-{{ card['svg_color'] }}"
+            <svg class="scale-75 leading-none text-lg relative fill-white text-yellow-400"
                  xmlns="http://www.w3.org/2000/svg"
                  fill="none"
                  viewBox="0 0 24 24"

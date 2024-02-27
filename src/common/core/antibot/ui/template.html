@@ -7,37 +7,37 @@
   hidden
 />
 
-<div class="col-span-12 grid grid-cols-12 gap-4">
+<div class="core-layout">
   {% if is_used and is_metrics %}
   <!-- info-->
   <div
-    class="h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="core-card"
   >
-    <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
+    <h5 class="core-card-info-title">INFO</h5>
 
-    <div class="mx-1 flex justify-start items-center my-4">
+    <div class="core-card-info-list">
       <p
         data-info
-        class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-100 dark:opacity-80"
+        class="core-card-info-text"
       ></p>
     </div>
   </div>
   <!-- end info -->
 
   <div
-    class="h-fit dark:brightness-110 max-h-none sm:max-h-28 hover:scale-102 transition col-span-12 md:col-span-6 2xl:col-span-4 flex p-4 justify-between w-full shadow-md break-words bg-white dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="core-card-metrics"
   >
     <!-- text -->
     <div>
       <p
-        class="mb-2 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60"
+        class="core-card-metrics-name"
       >
         Challenges
       </p>
-      <h5 data-count class="mb-1 font-bold dark:text-white/90">"unknown"</h5>
+      <h5 data-count class="core-card-title">"unknown"</h5>
 
-      <p class="mb-0 dark:text-white dark:opacity-60">
-        <span class="font-bold leading-normal text-sm text-red-500 mx-0.5"
+      <p class="core-card-metrics-subtitle">
+        <span class="core-card-metrics-subtitle-content error"
           >total failed
         </span>
       </p>
@@ -46,13 +46,13 @@
     <!-- icon -->
     <div
       role="img"
-      class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-sky-700"
+      class="core-card-metrics-svg-container blue"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="currentColor"
-        class="scale-75 leading-none text-lg relative fill-white"
+        class="size-base core-card-metrics-svg "
       >
         <path
           d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.948 49.948 0 0 0-9.902 3.912l-.003.002c-.114.06-.227.119-.34.18a.75.75 0 0 1-.707 0A50.88 50.88 0 0 0 7.5 12.173v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.123 56.123 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.803 49.803 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z"
@@ -85,14 +85,14 @@
   </script>
   {% else %}
   <div
-    class="h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="core-card"
   >
-    <div class="flex justify-between">
-      <h5 class="mb-2 font-bold dark:text-white/90">Deactivated</h5>
+    <div class="core-card-wrap">
+      <h5 class="core-card-deactivated-title">Deactivated</h5>
       <!-- icon -->
       <div
         role="img"
-        class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-yellow-500"
+        class="core-card-svg-container"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -100,7 +100,7 @@
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="scale-75 leading-none text-lg relative fill-yellow-500 stroke-white"
+          class="core-card-deactivated-svg"
         >
           <path
             stroke-linecap="round"
@@ -112,10 +112,10 @@
       <!-- end icon -->
     </div>
 
-    <div class="mx-1 flex justify-start items-center my-2">
+    <div class="core-card-text-container">
       <p
         data-info
-        class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-100 dark:opacity-80"
+        class="core-card-text"
       >
         This plugin need to be activated to get metrics.
       </p>

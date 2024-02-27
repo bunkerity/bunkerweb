@@ -7,18 +7,18 @@
   hidden
 />
 
-<div class="col-span-12 grid grid-cols-12 gap-4">
+<div class="core-layout">
   {% if is_used and is_metrics %}
   <!-- info-->
   <div
-    class="h-fit transition hover:scale-102 col-span-12 md:col-span-4 2xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="core-card"
   >
-    <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
+    <h5 class="core-card-title">INFO</h5>
 
-    <div class="mx-1 flex justify-start items-center my-4">
+    <div class="core-card-text-container">
       <p
         data-info
-        class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-100 dark:opacity-80"
+        class="core-card-text"
       ></p>
     </div>
   </div>
@@ -26,24 +26,24 @@
 
   <div
     data-fetch-success-show
-    class="hidden col-span-12 md:col-span-8 3xl:col-span-9 w-full xl:max-w-[600px] overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="hidden core-card-list w-large"
   >
-    <div class="col-span-12">
-      <h5 class="mb-4 mt-2 font-bold dark:text-white/90 mx-2">
+    <div class="core-card-list-container">
+      <h5 class="core-card-list-title">
         LIMIT AND REQUEST LIST
       </h5>
     </div>
-    <div class="col-span-12 overflow-y-auto overflow-x-auto">
+    <div class="core-card-list-container">
       <!-- list container-->
-      <div class="min-w-[500px] w-full grid grid-cols-12 rounded p-2">
+      <div class="core-card-list-wrap w-large">
         <!-- header-->
         <p
-          class="dark:text-gray-300 h-8 text-sm font-bold col-span-8 m-0 pb-2 border-b border-gray-400"
+          class="core-card-list-header col-span-8"
         >
           URL
         </p>
         <p
-          class="dark:text-gray-300 h-8 text-sm font-bold col-span-4 m-0 pb-2 border-b border-gray-400"
+          class="core-card-list-header col-span-4"
         >
           Count
         </p>
@@ -53,15 +53,15 @@
         <ul class="col-span-12 w-full">
           <li
             data-item
-            class="items-center grid grid-cols-12 border-b border-gray-300 py-2.5"
+            class="core-card-list-item"
           >
             <p
               data-name="url"
-              class="ml-1 dark:text-gray-400 dark:opacity-80 text-sm col-span-8 m-0 my-1"
+              class="core-card-list-item-content col-span-8"
             ></p>
             <p
               data-name="count"
-              class="ml-1 dark:text-gray-400 dark:opacity-80 text-sm col-span-4 m-0 my-1"
+              class="core-card-list-item-content col-span-4"
             ></p>
           </li>
         </ul>
@@ -89,14 +89,14 @@
   </script>
   {% else %}
   <div
-    class="h-fit transition hover:scale-102 col-span-12 md:col-span-6 2xl:col-span-4 3xl:col-span-3 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border"
+    class="core-card"
   >
-    <div class="flex justify-between">
-      <h5 class="mb-2 font-bold dark:text-white/90">Deactivated</h5>
+    <div class="core-card-wrap">
+      <h5 class="core-card-title">Deactivated</h5>
       <!-- icon -->
       <div
         role="img"
-        class="dark:brightness-90 inline-block w-12 h-12 text-center rounded-circle bg-yellow-500"
+        class="core-card-svg-container"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -104,7 +104,7 @@
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="scale-75 leading-none text-lg relative fill-yellow-500 stroke-white"
+          class="core-card-deactivated-svg"
         >
           <path
             stroke-linecap="round"
@@ -116,10 +116,10 @@
       <!-- end icon -->
     </div>
 
-    <div class="mx-1 flex justify-start items-center my-2">
+    <div class="core-card-text-container">
       <p
         data-info
-        class="transition duration-300 ease-in-out mb-0 font-sans text-sm leading-normal dark:text-gray-100 dark:opacity-80"
+        class="core-card-text"
       >
         This plugin need to be activated to get metrics.
       </p>
