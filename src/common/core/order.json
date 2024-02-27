@@ -43,7 +43,6 @@
   ],
   "log_stream": ["badbehavior", "bunkernet"],
   "log_default": [
-    "whitelist",
     "badbehavior",
     "bunkernet",
     "errors",

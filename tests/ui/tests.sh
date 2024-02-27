@@ -156,7 +156,6 @@ if [ "$integration" == "docker" ] ; then
     fi
 
     docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from ui-tests
-    rm -f .env
 else
     python3 "$test"
 fi
@@ -164,6 +163,7 @@ fi
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] ; then
     if [ "$integration" == "docker" ] ; then
+        rm -f .env
         docker compose logs
     else
         echo "🛡️ Showing BunkerWeb journal logs ..."
