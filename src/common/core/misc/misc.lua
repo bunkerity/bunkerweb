@@ -16,9 +16,10 @@ end
 
 function misc:set()
 	local ngx_var = ngx.var
-	local auto_redirect = 'no'
+	local auto_redirect = "no"
 	if ngx_var.scheme == "http" and ngx_var.https_configured == "yes" then
-		auto_redirect = 'yes'
+		auto_redirect = "yes"
+		ngx_var.auto_redirect = auto_redirect
 	end
 	return self:ret(true, "set auto_redirect to " .. auto_redirect)
 end
