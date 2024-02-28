@@ -118,7 +118,7 @@ try:
 
     tmp_anonymous_report_path.joinpath("last_report.json").write_text(dumps(data, indent=4), encoding="utf-8")
 
-    response = post("http://api:8080/data", json=data, headers={"User-Agent": f"BunkerWeb/{data['version']}"}, allow_redirects=True, timeout=10)
+    response = post("https://api.bunkerweb.io/data", json=data, headers={"User-Agent": f"BunkerWeb/{data['version']}"}, allow_redirects=True, timeout=10)
     response.raise_for_status()
 
     cached, err = cache_file(tmp_anonymous_report_path.joinpath("last_report.json"), anonymous_report_path.joinpath("last_report.json"), None, db)
