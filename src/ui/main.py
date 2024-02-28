@@ -834,6 +834,8 @@ def services():
             }
             for service in services
         ],
+        plugins=app.config["CONFIG"].get_plugins(),
+        global_config=app.config["CONFIG"].get_config(),
         username=current_user.get_id(),
     )
 
@@ -890,7 +892,12 @@ def global_config():
         )
 
     # Display global config
-    return render_template("global_config.html", username=current_user.get_id())
+    return render_template(
+        "global_config.html",
+        username=current_user.get_id(),
+        plugins=app.config["CONFIG"].get_plugins(),
+        global_config=app.config["CONFIG"].get_config(),
+    )
 
 
 @app.route("/configs", methods=["GET", "POST"])
