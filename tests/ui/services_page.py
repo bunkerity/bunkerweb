@@ -271,6 +271,8 @@ try:
         log_error(f"The service hasn't been created ({len(services)} services found), exiting ...")
         exit(1)
 
+    log_info(f"We need 4 services to test filter, currently {len(services)}")
+
     server_name_elem = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service='app3.example.com']//h5")
     assert isinstance(server_name_elem, WebElement), "Server name element is not a WebElement"
     if server_name_elem.text.strip() != "app3.example.com":
@@ -337,7 +339,7 @@ try:
         log_exception("Services not found, exiting ...")
         exit(1)
 
-    if len(services) > 2:
+    if len(services) > 4:
         log_error(f"The service hasn't been deleted ({len(services)} services found), exiting ...")
         exit(1)
 

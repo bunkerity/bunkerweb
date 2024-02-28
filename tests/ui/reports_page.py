@@ -37,7 +37,7 @@ try:
         log_error("No reports found, exiting ...")
         exit(1)
 
-    log_info("Trying to filter the reports ...")
+    log_info("Reports found, trying to filter the reports ...")
 
     # Test select filters
     select_filters = [

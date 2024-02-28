@@ -15,6 +15,11 @@ try:
     log_info("Navigating to the global config page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[3]/a", "global config")
 
+    log_info("Looking that tabs are working programmatically ...")
+
+    DRIVER.execute_script(f"""document.querySelector('button[data-tab-handler-mobile="blacklist"]').click()""")
+    DRIVER.execute_script(f"""document.querySelector('button[data-tab-handler="general"]').click()""")
+
     log_info("Trying filters ...")
 
     # Set keyword with no matching settings

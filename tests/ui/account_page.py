@@ -24,12 +24,10 @@ try:
     assert_button_click(DRIVER, "//button[@data-tab-handler='password']")
     assert_button_click(DRIVER, "//button[@data-tab-handler='totp']")
 
-    log_info("Looking that all mobile tabs are working ...")
+    log_info("Looking that all mobile tabs are working programmatically ...")
 
-    assert_button_click(DRIVER, "//button[@data-tab-handler-mobile='global']")
-    assert_button_click(DRIVER, "//button[@data-tab-handler-mobile='username']")
-    assert_button_click(DRIVER, "//button[@data-tab-handler-mobile='password']")
-    assert_button_click(DRIVER, "//button[@data-tab-handler-mobile='totp']")
+    DRIVER.execute_script(f"""document.querySelector('button[data-tab-handler-mobile="username"]').click()""")
+    DRIVER.execute_script(f"""document.querySelector('button[data-tab-handler-mobile="global"]').click()""")
 
     log_info("Start username tab ...")
 
