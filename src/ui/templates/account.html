@@ -88,6 +88,12 @@
             <!-- end dropdown-->
         </div>
         <!-- end mobile tabs -->
+        {% set global_info = {
+            "message" : "You are using pro version" if is_pro_version and pro_status else "Pro version is expired" if is_pro_version and not pro_status else "You are using free version",
+            "link_message" : "Upgrade to pro" if not is_pro_version else "Renew my license" if is_pro_version and not pro_status else "",
+            "icon" : "pro" if is_pro_version and pro_status else "free"
+        }
+        %}
         <div data-plugin-item="global"
              class="grid grid-cols-12 w-full justify-items-center">
             <div class="col-span-12">
@@ -96,18 +102,12 @@
                 </h5>
                 <div class="flex justify-center items-center">
                     <p class="mb-0 mr-2 dark:text-gray-300">
-                        You are using
-                        {% if is_pro_version %}
-                            pro
-                        {% else %}
-                            free
-                        {% endif %}
-                        version
+                        {{global_info['message']}}
                     </p>
                     <div role="img"
                          aria-label="version"
                          class="dark:brightness-90 inline-block w-8 h-8 text-center rounded-circle bg-yellow-500">
-                        {% if is_pro_version %}
+                        {% if global_info['icon'] == 'pro' %}
                             <svg class="leading-none text-lg relative scale-[0.6]"
                                  viewBox="0 0 48 46"
                                  fill="none"
@@ -127,12 +127,35 @@
                         {% endif %}
                     </div>
                 </div>
-                {% if not is_pro_version %}
+                {% if global_info['link_message'] %}
                     <div class="flex justify-center mt-2">
                         <a class="text-center font-semibold text-yellow-500 underline"
-                           href="https://panel.bunkerweb.io/">Upgrade to pro</a>
+                           href="https://panel.bunkerweb.io/">{{ global_info['link_message'] }}</a>
                     </div>
                 {% endif %}
+
+                {% if  is_pro_version and pro_status %}
+                <div class="mt-2 flex flex-col justify-center items-center">
+                    {% if pro_expire %}
+                    <p class="my-2 mr-2 dark:text-gray-300 text-center">
+                        Your license is valid until {{ pro_expire }}
+                    </p>
+                    {% endif %}
+
+                    {% if pro_services %}
+                    <p class="my-2 mr-2 dark:text-gray-300 text-center">
+                        You can handle {{ pro_services }} services
+                    </p>
+                    {% endif %}
+
+                    {% if pro_overlapped %}
+                    <p class="my-2 mr-2 text-red-500 font-bold dark:brightness-95 text-center">
+                        You have more services than allowed by your license. Upgrade your license or move some services to draft mode before your license lockout.
+                    </p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
             </div>
         </div>
         <div data-plugin-item="username"

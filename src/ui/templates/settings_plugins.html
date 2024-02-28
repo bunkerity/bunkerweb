@@ -6,6 +6,11 @@
          class="{% if loop.index != 1 %}hidden{% endif %} w-full">
         <!-- title and desc -->
         <div class="col-span-12" data-setting-header>
+            {% if  (plugin['type'] == "pro" and not is_pro_version) or (plugin['type'] == "pro" and is_pro_version and not pro_status) %}
+            <p class="ml-2 mt-0 mb-2 mr-2 text-red-500 font-bold dark:brightness-95 text-sm">
+                You need a valid pro license to use this plugin
+            </p>
+            {% endif %}
             <div class="flex justify-start items-center">
                 <h5 class="transition duration-300 ease-in-out ml-2 font-bold text-md uppercase dark:text-white/90 mb-0">
                     {{ plugin['name'] }} <span>{{ plugin['version'] }}</span>
@@ -25,7 +30,7 @@
                 {% if plugin['type'] == "pro" %}
                 <a {% if not is_pro_version %}target="_blank" rel="noopener"{% endif %}
                     aria-label="pro plugin"
-                    class="hover:-translate-y-px mx-1 -translate-y-0.5"
+                    class="hover:-translate-y-px mx-1 -translate-y-0.5 ml-1"
                     href="{% if not is_pro_version %}https://panel.bunkerweb.io/{% else %}javascript:void(0){% endif %}">
                     <svg class="h-6 w-6 dark:brightness-90"
                         viewBox="0 0 48 46"
@@ -38,9 +43,10 @@
                 {% endif %}
 
             </div>
-            <div class="transition duration-300 ease-in-out dark:opacity-90 ml-2 text-sm mb-2 dark:text-gray-400">
-                {{ plugin['description'] }}
+            <div class="transition duration-300 ease-in-out dark:opacity-90 ml-2 ">
+                <p class="text-sm dark:text-gray-400 mb-1">{{ plugin['description'] }}</p>
             </div>
+
         </div>
         <!-- end title and desc -->
         <div data-plugin-settings class="w-full grid grid-cols-12">

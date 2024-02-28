@@ -15,6 +15,23 @@ try:
     log_info("Navigating to the logs page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[11]/a", "logs")
 
+    log_info("Trying filters ...")
+
+    key_word_filter_input = safe_get_element(DRIVER, "js", 'document.querySelector("input#keyword")')
+    assert isinstance(key_word_filter_input, WebElement), "Key word filter input is not a WebElement"
+    key_word_filter_input.send_keys("Antibot")
+
+    # Reset
+    key_word_filter_input.send_keys("")
+
+    # Test select filters
+    select_filters = [
+        {"name": "Types", "id": "types", "value": "all"},
+    ]
+
+    for item in select_filters:
+        DRIVER.execute_script(f"""document.querySelector('[data-logs-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
+
     log_info("Selecting correct instance ...")
 
     assert_button_click(DRIVER, "//button[@data-logs-setting-select='instances']")

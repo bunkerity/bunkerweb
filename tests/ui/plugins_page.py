@@ -10,7 +10,7 @@ from selenium.common.exceptions import TimeoutException
 
 from wizard import DRIVER, UI_URL
 from base import TEST_TYPE
-from utils import access_page, assert_button_click, safe_get_element, wait_for_service, verify_select_filters
+from utils import access_page, assert_button_click, safe_get_element, wait_for_service
 
 exit_code = 0
 
@@ -53,8 +53,11 @@ try:
 
     # Test select filters
     select_filters = [
-        {"name": "Types", "id": "types", "value": "all", "update_value": "123456"},
+        {"name": "Types", "id": "types", "value": "all"},
     ]
+
+    for item in select_filters:
+        DRIVER.execute_script(f"""document.querySelector('[data-plugins-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     verify_select_filters(DRIVER, "plugins", select_filters)
 

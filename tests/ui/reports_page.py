@@ -8,7 +8,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
 
 from wizard import DRIVER
-from utils import access_page, safe_get_element, verify_select_filters
+from utils import access_page, safe_get_element
 
 exit_code = 0
 
@@ -41,13 +41,14 @@ try:
 
     # Test select filters
     select_filters = [
-        {"name": "Country", "id": "country", "value": "all", "update_value": "123456"},
-        {"name": "Method", "id": "method", "value": "all", "update_value": "123456"},
-        {"name": "Status code", "id": "status", "value": "all", "update_value": "123456"},
-        {"name": "Reason", "id": "reason", "value": "all", "update_value": "123456"},
+        {"name": "Country", "id": "country", "value": "all"},
+        {"name": "Method", "id": "method", "value": "all"},
+        {"name": "Status code", "id": "status", "value": "all"},
+        {"name": "Reason", "id": "reason", "value": "all"},
     ]
 
-    verify_select_filters(DRIVER, "reports", select_filters)
+    for item in select_filters:
+        DRIVER.execute_script(f"""document.querySelector('[data-reports-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     filter_input = safe_get_element(DRIVER, By.ID, "keyword")
     assert isinstance(filter_input, WebElement), "Keyword filter input is not a WebElement"

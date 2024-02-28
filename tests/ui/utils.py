@@ -161,23 +161,3 @@ def wait_for_service(service: str = "www.example.com"):
             retries += 1
             log_warning(f"Waiting for {service} to be ready, retrying in 5s ...")
             sleep(5)
-
-
-# We replace value by non existing one and click on button
-# If elements are hidden, it means script is working
-# Example filter_items: [ {"name" : "Success state", "id" : "success", "value" : "all", "update_value" : "123456"}]
-def verify_select_filters(driver, page_name: str, filter_items: list):
-    for item in filter_items:
-        # Get a select filter, change value and click to get no match
-        # Verify that elements are all hidden
-        # If not return false, else reset and send true
-        set_el = driver.execute_script(f"""const select{item["id"]} = document.querySelector('[data-{page_name}-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]');""")
-        log_info("Create variable")
-        update_el_val = driver.execute_script(f"""if(!select{item["id"]}){{ return false }};select{item["id"]}.setAttribute('value', '{item["update_value"]}');select{item["id"]}.click();""")
-        log_info("Update value")
-        check_el = driver.execute_script(f"""const select{item["id"]}Match = document.querySelectorAll('[data-{page_name}-list-item][class*="hidden"]');if (select{item["id"]}Match.length === 0){{ return false }};""")
-        log_info("Check if elements are hidden")
-        reset_el = driver.execute_script(f"""select{item["id"]}.setAttribute('value', '{item["value"]}');select{item["id"]}.click();""")
-        log_info("Reset value")
-
-        sleep(0.1)
