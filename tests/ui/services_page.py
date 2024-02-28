@@ -324,6 +324,8 @@ try:
 
     assert_button_click(DRIVER, delete_button)
 
+    sleep(0.1)
+
     access_page(DRIVER, "//form[@data-services-modal-form-delete='']//button[@type='submit']", "services", False)
 
     if TEST_TYPE == "linux":
