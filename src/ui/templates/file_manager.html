@@ -1,7 +1,7 @@
 {% set current_endpoint = url_for(request.endpoint)[1:].split("/")[-1].strip().replace('_', '-') %}
 <!-- main container -->
-<div data-{{ current_endpoint }}-container class="flex flex-col justify-between :brightness-110 md:min-h-75-screen col-span-12 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-    <div class="max-h-[500px]">
+<div data-{{ current_endpoint }}-container class="max-h-[700px] flex flex-col justify-between :brightness-110 md:min-h-50-screen col-span-12 p-4 relative min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+    <div class="mb-4 px-3 max-h-[350px] md:max-h-[500px] overflow-y-auto overflow-x-hidden">
         <div class="w-full grid-cols-12 grid">
             <div class="col-span-12 md:col-span-8">
                 <h5 class="mb-2 font-bold dark:text-white/90">
@@ -13,7 +13,7 @@
                     {% endif %}
                 </h5>
                 <!--breadcrumb -->
-                <ul data-{{ current_endpoint }}-breadcrumb class="flex flex-wrap bg-transparent rounded-lg md:mb-8">
+                <ul data-{{ current_endpoint }}-breadcrumb class="flex flex-wrap bg-transparent rounded-lg mb-4">
                     <li data-{{ current_endpoint }}-breadcrumb-item data-{{ current_endpoint }}-back class="mr-3 cursor-pointer text-sm capitalize leading-normal dark:text-gray-500 text-gray-600" aria-current="page">
                         <svg class="w-4.5 h-4.5 hover:brigthness-80"
                              xmlns="http://www.w3.org/2000/svg"
@@ -219,8 +219,8 @@
     </div>
     {% if current_endpoint == "configs" %}
         <!-- actions -->
-        <ul data-{{ current_endpoint }}-add-container class="col-span-12 md:col-span-4 mt-4 mb-6 md:mt-0 md:mb-3 w-full flex justify-center items-center">
-            <li class="rounded transition flex-col items-center mx-2 mt-4 relative cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800">
+        <ul data-{{ current_endpoint }}-add-container class="col-span-12 md:col-span-4 md:mt-0 md:mb-3 w-full flex justify-center items-center">
+            <li class="rounded transition flex-col items-center mx-2 relative cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800">
                 <button disabled class="file-manager-actions-item-btn" data-{{ current_endpoint }}-add-file>
                     <svg class="-translate-x-1 relative dark:brightness-125 h-8 w-8 lg:h-9 lg:w-9 fill-primary stroke-gray-100 dark:stroke-gray-600"
                          xmlns="http://www.w3.org/2000/svg"
