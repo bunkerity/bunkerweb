@@ -5,11 +5,15 @@
 - [LINUX] Support RHEL 9.3
 - [BUGFIX] Fix issues with the antibot feature ([#866](https://github.com/bunkerity/bunkerweb/issues/866), [#870](https://github.com/bunkerity/bunkerweb/issues/870))
 - [BUGFIX] Fix Bad behavior whitelist check in access phase
+- [BUGFIX] Fix ModSecurity FP on antibot page
+- [BUGFIX] Fix Whitelist core plugin missing a check for empty server_name in multisite mode
 - [LINUX] Add logrotate support for the logs
 - [UI] Add bans management page in the web UI
 - [UI] Add blocked requests page in the web UI
 - [UI] Add the possibility to clone a service in the web UI
 - [UI] Add the possibility to set a service as draft in the web UI
+- [UI] Enhance the Content-Security-Policy header in the web UI
+- [UI] Add some core plugins pages in the web UI
 - [FEATURE] Add setting REDIS_SSL_VERIFY to activate/disable the SSL certificate verification when using Redis
 - [FEATURE] Add Redis Sentinel fallback to master automatically if no slaves are available
 - [FEATURE] Add Redis Sentinel support for bwcli
@@ -17,10 +21,22 @@
 - [FEATURE] Add setting DATABASE_LOG_LEVEL to control SQLAlchemy loggers separately from the main one
 - [FEATURE] Add whitelist check for the default-server as well
 - [FEATURE] Add the possibility to choose between the coreruleset v3 and v4 that will be used by ModSecurity (default is v3)
+- [FEATURE] Add the TIMERS_LOG_LEVEL setting to control the log level of the lua timers
+- [FEATURE] Add pro version management to core plugins, the scheduler and the web UI
+- [FEATURE] Add REVERSE_PROXY_CUSTOM_HOST setting to set a custom Host header when using reverse proxy
 - [MISC] Add a better custom certificate cache handling
 - [MISC] Updated Linux base images in Dockerfiles
 - [MISC] Add recommended dialects to databases string
+- [MISC] Refine the data sent in the anonymous reporting feature and move the setting and the job to the "jobs" plugin
+- [MISC] BunkerWeb will now load the default loading page even on 404 errors when generating the configuration
+- [MISC] Update database schema to support the new pro version and optimize it
+- [MISC] Refactor SSL/TLS logics to make it more consistent
+- [MISC] Use ed5519 key instead of RSA for default/fallback certificates
+- [MISC] Refactor certbot-new job to optimize the certbot requests
 - [DOCUMENTATION] Update web UI's setup wizard instructions in the documentation
+- [DOCUMENTATION] Update plugins documentation to reflect the new plugin system
+- [DOCUMENTATION] Update ModSecurity documentation to reflect the new changes in the Security Tuning section
+- [DOCUMENTATION] Add pro version documentation
 - [DEPS] Updated stream-lua-nginx-module to v0.0.14
 - [DEPS] Updated lua-nginx-module version to v0.10.26
 - [DEPS] Updated libmaxminddb version to v1.9.1
