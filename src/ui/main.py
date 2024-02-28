@@ -333,7 +333,7 @@ def inject_variables():
     return dict(
         dark_mode=app.config["DARK_MODE"],
         script_nonce=app.config["SCRIPT_NONCE"],
-        is_pro_version=db.get_metadata()["is_pro"],
+        is_pro_version=db.get_metadata()["is_pro"] == "yes",
         plugins=app.config["CONFIG"].get_plugins(),
     )
 

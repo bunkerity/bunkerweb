@@ -290,14 +290,14 @@ class Database:
 
     def get_metadata(self) -> Dict[str, str]:
         """Get the metadata from the database"""
-        data = {"version": "1.5.6", "integration": "unknown", "database_version": "Unknown", "is_pro": False}
+        data = {"version": "1.5.6", "integration": "unknown", "database_version": "Unknown", "is_pro": "no"}
         database = self.database_uri.split(":")[0].split("+")[0]
         with self.__db_session() as session:
             with suppress(ProgrammingError, OperationalError):
                 data["database_version"] = (session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"])[0]
                 metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration, Metadata.is_pro).filter_by(id=1).first()
                 if metadata:
-                    data.update({"version": metadata.version, "integration": metadata.integration, "is_pro": metadata.is_pro})
+                    data.update({"version": metadata.version, "integration": metadata.integration, "is_pro": "yes" if metadata.is_pro else "no"})
 
         return data
 
