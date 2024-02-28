@@ -992,6 +992,9 @@ class Database:
             if is_multisite:
                 for service in services:
                     config[f"{service.id}_IS_DRAFT"] = "yes" if service.is_draft else "no"
+                    if methods:
+                        config[f"{service.id}_IS_DRAFT"] = {"value": config[f"{service.id}_IS_DRAFT"], "global": False, "method": "default"}
+
                     checked_settings = []
                     for key, value in deepcopy(config).items():
                         original_key = key

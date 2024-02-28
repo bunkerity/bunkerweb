@@ -814,7 +814,7 @@ def services():
                     "full_value": service["SERVER_NAME"]["value"],
                     "method": service["SERVER_NAME"]["method"],
                 },
-                "IS_DRAFT": service.pop("IS_DRAFT", "no"),
+                "IS_DRAFT": service.pop("IS_DRAFT", {"value": "no"})["value"],
                 "USE_REVERSE_PROXY": service["USE_REVERSE_PROXY"],
                 "SERVE_FILES": service["SERVE_FILES"],
                 "REMOTE_PHP": service["REMOTE_PHP"],
