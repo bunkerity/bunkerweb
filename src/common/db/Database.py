@@ -223,6 +223,22 @@ class Database:
 
         return ""
 
+    def set_is_pro(self, value: bool = False) -> str:
+        """Set the is_pro value"""
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                metadata.is_pro = value
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
     def is_scheduler_first_start(self) -> bool:
         """Check if it's the scheduler's first start"""
         with self.__db_session() as session:
@@ -274,14 +290,14 @@ class Database:
 
     def get_metadata(self) -> Dict[str, str]:
         """Get the metadata from the database"""
-        data = {"version": "1.5.6", "integration": "unknown", "database_version": "Unknown"}
+        data = {"version": "1.5.6", "integration": "unknown", "database_version": "Unknown", "is_pro": False}
         database = self.database_uri.split(":")[0].split("+")[0]
         with self.__db_session() as session:
             with suppress(ProgrammingError, OperationalError):
                 data["database_version"] = (session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"])[0]
-                metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration).filter_by(id=1).first()
+                metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration, Metadata.is_pro).filter_by(id=1).first()
                 if metadata:
-                    data.update({"version": metadata.version, "integration": metadata.integration})
+                    data.update({"version": metadata.version, "integration": metadata.integration, "is_pro": metadata.is_pro})
 
         return data
 

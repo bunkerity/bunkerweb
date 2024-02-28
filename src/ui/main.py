@@ -55,11 +55,6 @@ from Database import Database  # type: ignore
 from logging import getLogger
 
 
-# REPLACE BY REAL VALUES AFTER
-PRO_VERSION = False
-PRO_PLUGINS_LIST = [{"name": "metrics pro", "id": "metricspro", "type": "pro"}, {"name": "prometheus", "id": "prometheus", "type": "pro"}, {"name": "emergency", "id": "emergency", "type": "pro"}]
-
-
 def stop_gunicorn():
     p = Popen(["pgrep", "-f", "gunicorn"], stdout=PIPE)
     out, _ = p.communicate()
@@ -338,8 +333,8 @@ def inject_variables():
     return dict(
         dark_mode=app.config["DARK_MODE"],
         script_nonce=app.config["SCRIPT_NONCE"],
-        is_pro_version=PRO_VERSION,
-        plugins_pro=PRO_PLUGINS_LIST,
+        is_pro_version=db.get_metadata()["is_pro"],
+        plugins=app.config["CONFIG"].get_plugins(),
     )
 
 
@@ -834,7 +829,6 @@ def services():
             }
             for service in services
         ],
-        plugins=app.config["CONFIG"].get_plugins(),
         global_config=app.config["CONFIG"].get_config(),
         username=current_user.get_id(),
     )
@@ -895,7 +889,6 @@ def global_config():
     return render_template(
         "global_config.html",
         username=current_user.get_id(),
-        plugins=app.config["CONFIG"].get_plugins(),
         global_config=app.config["CONFIG"].get_config(),
     )
 
@@ -1236,7 +1229,6 @@ def plugins():
 
     return render_template(
         "plugins.html",
-        plugins=plugins,
         plugins_count_internal=plugins_internal,
         plugins_count_external=plugins_external,
         plugins_count_pro=plugins_pro,

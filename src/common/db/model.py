@@ -269,6 +269,7 @@ class Metadata(Base):
 
     id = Column(Integer, primary_key=True, default=1)
     is_initialized = Column(Boolean, nullable=False)
+    is_pro = Column(Boolean, default=False, nullable=False)
     first_config_saved = Column(Boolean, nullable=False)
     autoconf_loaded = Column(Boolean, default=False, nullable=True)
     scheduler_first_start = Column(Boolean, nullable=True)

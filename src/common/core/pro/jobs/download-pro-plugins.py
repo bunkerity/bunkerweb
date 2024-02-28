@@ -34,7 +34,7 @@ from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from jobs import get_os_info, get_integration, get_version  # type: ignore
 
-API_ENDPOINT = "https://api.bunkerweb.io/pro"
+API_ENDPOINT = "http://api:8080/pro"
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "pro", "plugins")
 PRO_PLUGINS_DIR = Path(sep, "etc", "bunkerweb", "pro", "plugins")
 logger = setup_logger("Jobs.download-pro-plugins", getenv("LOG_LEVEL", "INFO"))
@@ -94,11 +94,14 @@ try:
         status = 2
         sys_exit(status)
 
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
     temp_dir = TMP_DIR.joinpath(str(uuid4()))
     temp_dir.mkdir(parents=True, exist_ok=True)
 
     if resp.headers.get("Content-Type") == "application/zip":
         logger.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated pro plugins...")
+
+        db.set_is_pro(True)
 
         with BytesIO(resp.content) as plugin_content:
             with ZipFile(plugin_content) as zf:
@@ -109,13 +112,14 @@ try:
             message = "Your BunkerWeb Pro license is not valid or has expired"
         logger.warning(f"{message}, only checking if there are new or updated info about pro plugins...")
 
+        db.set_is_pro(False)
+
         plugins = resp.json()
         for plugin in plugins["data"]:
             plugin_path = temp_dir.joinpath(plugin["id"])
             plugin_path.mkdir(parents=True, exist_ok=True)
             plugin_path.joinpath("plugin.json").write_text(dumps(plugin, indent=4), encoding="utf-8")
 
-    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
     plugin_nbr = 0
 
     # Install plugins

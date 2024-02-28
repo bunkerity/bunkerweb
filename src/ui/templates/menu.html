@@ -198,53 +198,32 @@
             </ul>
             <!-- end default anchor -->
             <!-- plugin list -->
-            {% set isPage = {'value': False} %} {% set plugins = config["CONFIG"].get_plugins() %}
-            {% for plugin in plugins %}
-                {% if
-                    plugin['page'] %}
-                    {% if isPage.update({"value": True}) %}{% endif %}
-                    {%
-                    endif %}
-                {% endfor %}
-                <div>
-                    <ul>
-                        {% if isPage.value == True %}
-                            <li class="w-full mt-4">
-                                <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60">PLUGINS PAGE</h6>
-                            </li>
-                        {% else %}
-                            <li class="w-full mt-8">
-                                <h6 class="text-center pl-6 pr-8 ml-2 text-xs leading-tight uppercase text-gray-600/90 dark:text-white/80">
-                                    Want your own plugins ?
-                                    <br />
-                                    <a class="leading-8 font-bold hover:brightness-75"
-                                       target="_blank"
-                                       href="https://docs.bunkerweb.io/latest/plugins/?utm_campaign=self&utm_source=ui#writing-a-plugin">check doc</a>
-                                </h6>
+            <div>
+                <ul>
+                    <li class="w-full mt-4">
+                        <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60">PLUGINS PAGE</h6>
+                    </li>
+                    {% for plugin in plugins %}
+                        {% if plugin['page'] and plugin['type'] != "pro" %}
+                            <li class="mt-0.5 w-full">
+                                <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
+                                   href="{{ request.url_root }}plugins/{{ plugin['id'] }}">
+                                    <div class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5">
+                                        <svg class="fill-gray-500 h-5 w-5 relative"
+                                             xmlns="http://www.w3.org/2000/svg"
+                                             viewBox="0 0 384 512">
+                                            <path d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128z" />
+                                        </svg>
+                                    </div>
+                                    <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">{{ plugin['name'] }}</span>
+                                </a>
                             </li>
                         {% endif %}
-                        {% for plugin in plugins %}
-                            {% if plugin['page'] %}
-                                <li class="mt-0.5 w-full">
-                                    <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-                                       href="{{ request.url_root }}plugins/{{ plugin['id'] }}">
-                                        <div class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5">
-                                            <svg class="fill-gray-500 h-5 w-5 relative"
-                                                 xmlns="http://www.w3.org/2000/svg"
-                                                 viewBox="0 0 384 512">
-                                                <path d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128z" />
-                                            </svg>
-                                        </div>
-                                        <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">{{ plugin['name'] }}</span>
-                                    </a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                        {% if plugins_pro %}
-                            {% for plugin in plugins_pro %}
-                                <a {% if not is_pro_version %}target="_blank"{% endif %}
+                        {% if plugin['page'] and plugin['type'] == "pro" %}
+                            <li class="mt-0.5 w-full">
+                                <a {% if not is_pro_version %}target="_blank" rel="noopener"{% endif %}
                                    class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
-                                   href="{% if not is_pro_version %}https://panel.bunkerweb.io/{% else %}{{ request.url_root }}plugins/{{ plugin['id'] }}{% endif %}">
+                                   href="{% if not is_pro_version %}https://panel.bunkerweb.io/{% else %}javascript:void(0){% endif %}"
                                     <div class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5">
                                         <svg class="h-5 w-5 dark:brightness-90"
                                              viewBox="0 0 48 46"
@@ -254,11 +233,11 @@
                                             <path class="fill-yellow-500"  d="M21.2803 45.5H26.7198C33.8098 45.5 37.3545 45.5 39.7198 43.383C40.7523 42.4588 41.4057 40.793 41.8775 38.625H6.1224C6.59413 40.793 7.24783 42.4588 8.2802 43.383C10.6454 45.5 14.1903 45.5 21.2803 45.5Z" fill="#1C274C" />
                                         </svg>
                                     </div>
-                                    <span class="ml-1 duration-300 {% if not is_plugin_pro %}opacity-80 dark:opacity-60{% endif %} pointer-events-none ease">{{ plugin['name'] }}</span>
+                                    <span class="ml-1 duration-300 {% if not is_pro_version %}opacity-80 dark:opacity-60{% endif %} pointer-events-none ease">{{ plugin['name'] }}</span>
                                 </a>
                             </li>
-                        {% endfor %}
-                    {% endif %}
+                        {% endif %}
+                    {% endfor %}
                 </ul>
                 <!-- end plugin list -->
             </div>
@@ -295,7 +274,8 @@
             <li class="mx-2 w-6">
                 <a aria-label="link to twitter"
                    href="https://twitter.com/bunkerity"
-                   target="_blank">
+                   target="_blank"
+                   rel="noopener">
                     <svg class="hover:opacity-80"
                          fill="#1DA1F2"
                          xmlns="http://www.w3.org/2000/svg"
@@ -307,7 +287,8 @@
             <li class="mx-2.5 w-6">
                 <a aria-label="link to linkedin"
                    href="https://www.linkedin.com/company/bunkerity/"
-                   target="_blank">
+                   target="_blank"
+                   rel="noopener">
                     <svg fill="#0A63BC"
                          class="hover:opacity-80 dark:brightness-110"
                          xmlns="http://www.w3.org/2000/svg"
@@ -319,7 +300,8 @@
             <li class="mx-2.5 w-6 -translate-y-1">
                 <a aria-label="link to discord"
                    href="https://discord.gg/fTf46FmtyD"
-                   target="_blank">
+                   target="_blank"
+                   rel="noopener">
                     <svg class="translate-y-1 hover:opacity-80"
                          fill="#5562EA"
                          xmlns="http://www.w3.org/2000/svg"
@@ -331,7 +313,8 @@
             <li class="mx-2.5 w-6">
                 <a aria-label="link to github"
                    href="https://github.com/bunkerity"
-                   target="_blank">
+                   target="_blank"
+                   rel="noopener">
                     <svg class="hover:opacity-80 dark:fill-gray-600"
                          fill="#171A1F"
                          xmlns="http://www.w3.org/2000/svg"
