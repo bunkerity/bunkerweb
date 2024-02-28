@@ -239,6 +239,102 @@ class Database:
 
         return ""
 
+    def set_pro_expire(self, value: str) -> str:
+        """Set the pro_expire value"""
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                metadata.pro_expire = value
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def get_pro_expire(self) -> str:
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).with_entities(Metadata.pro_expire).filter_by(id=1).first()
+                return metadata.pro_expire
+            except (ProgrammingError, OperationalError):
+                return ""
+
+    def set_pro_services(self, value: str) -> str:
+        """Set the pro_services value"""
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                metadata.pro_services = value
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def get_pro_services(self) -> str:
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).with_entities(Metadata.pro_services).filter_by(id=1).first()
+                return metadata.pro_services
+            except (ProgrammingError, OperationalError):
+                return ""
+
+    def set_pro_overlapped(self, value: bool = False) -> str:
+        """Set the pro_overlapped value"""
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                metadata.pro_overlapped = value
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def get_pro_overlapped(self) -> str:
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).with_entities(Metadata.pro_overlapped).filter_by(id=1).first()
+                return metadata.pro_overlapped
+            except (ProgrammingError, OperationalError):
+                return ""
+
+    def set_pro_status(self, value: str) -> str:
+        """Set the pro_status value"""
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).get(1)
+
+                if not metadata:
+                    return "The metadata are not set yet, try again"
+
+                metadata.pro_status = value
+                session.commit()
+            except BaseException:
+                return format_exc()
+
+        return ""
+
+    def get_pro_status(self) -> str:
+        with self.__db_session() as session:
+            try:
+                metadata = session.query(Metadata).with_entities(Metadata.pro_status).filter_by(id=1).first()
+                return metadata.pro_status
+            except (ProgrammingError, OperationalError):
+                return ""
+
     def is_scheduler_first_start(self) -> bool:
         """Check if it's the scheduler's first start"""
         with self.__db_session() as session:
@@ -295,9 +391,20 @@ class Database:
         with self.__db_session() as session:
             with suppress(ProgrammingError, OperationalError):
                 data["database_version"] = (session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"])[0]
-                metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration, Metadata.is_pro).filter_by(id=1).first()
+                metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration, Metadata.is_pro, Metadata.pro_expire, Metadata.pro_services, Metadata.pro_overlapped, Metadata.pro_status).filter_by(id=1).first()
                 if metadata:
-                    data.update({"version": metadata.version, "integration": metadata.integration, "is_pro": "yes" if metadata.is_pro else "no"})
+                    print("METADATA :", metadata.is_pro, metadata.pro_expire, metadata.pro_services, metadata.pro_overlapped, metadata.pro_status, flush=True)
+                    data.update(
+                        {
+                            "version": metadata.version,
+                            "integration": metadata.integration,
+                            "is_pro": "yes" if metadata.is_pro else "no",
+                            "pro_expire": metadata.pro_expire,
+                            "pro_services": metadata.pro_services,
+                            "pro_overlapped": metadata.pro_overlapped,
+                            "pro_status": metadata.pro_status,
+                        }
+                    )
 
         return data
 

@@ -330,10 +330,15 @@ def generate_nonce():
 
 @app.context_processor
 def inject_variables():
+    # check that is value is in tuple
     return dict(
         dark_mode=app.config["DARK_MODE"],
         script_nonce=app.config["SCRIPT_NONCE"],
-        is_pro_version=db.get_metadata()["is_pro"] == "yes",
+        is_pro_version=db.get_metadata()["is_pro"],
+        pro_status=db.get_metadata()["pro_status"],
+        pro_services=db.get_metadata()["pro_services"],
+        pro_expire=db.get_metadata()["pro_expire"],
+        pro_overlapped=db.get_metadata()["pro_overlapped"],
         plugins=app.config["CONFIG"].get_plugins(),
     )
 

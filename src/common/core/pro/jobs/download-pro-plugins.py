@@ -102,6 +102,10 @@ try:
         logger.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated pro plugins...")
 
         db.set_is_pro(True)
+        db.set_pro_expire("")
+        db.set_pro_status("valid")
+        db.set_pro_overlapped(False)
+        db.set_pro_services("")
 
         with BytesIO(resp.content) as plugin_content:
             with ZipFile(plugin_content) as zf:
@@ -113,6 +117,10 @@ try:
         logger.warning(f"{message}, only checking if there are new or updated info about pro plugins...")
 
         db.set_is_pro(False)
+        db.set_pro_expire("")
+        db.set_pro_status("invalid")
+        db.set_pro_overlapped(False)
+        db.set_pro_services("")
 
         plugins = resp.json()
         for plugin in plugins["data"]:
