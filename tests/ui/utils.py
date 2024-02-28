@@ -168,20 +168,24 @@ def wait_for_service(service: str = "www.example.com"):
 # Example filter_items: [ {"name" : "Success state", "id" : "success", "value" : "all", "update_value" : "123456"}]
 def verify_select_filters(driver, page_name: str, filter_items: list):
     for item in filter_items:
-        # Update in order to get no match
-        driver.execute_script(f"""document.querySelector("[data-{page_name}-setting-select-dropdown-btn='{item["id"]}'][value='{item["value"]}']').setAttribute('value', '{item["update_value"]}'")""")
-        select_btn = safe_get_element(driver, "js", f"""document.querySelector("[data-{page_name}-setting-select-dropdown-btn='{item["id"]}'][value='{item["update_value"]}']")""")
-        select_btn.click()
-        sleep(0.1)
+        # Get a select filter, change value and click to get no match
+        # Verify that elements are all hidden
+        # If not return false, else reset and send true
+        check_result = driver.execute_script(
+            f"""const select{item['id']} = document.querySelector("[data-{page_name}-setting-select-dropdown-btn='{item["id"]}'][value='{item["value"]}']');
+            if(!select{item['id']}) return false;
+            select{item['id']}.setAttribute('value', '{item["update_value"]}');
+            select{item['id']}.click();
+            const select{item['id']}Match = document.querySelectorAll("[data-{page_name}-list-item][class*='hidden']");
+            if (select{item['id']}Match.length === 0) return false;
+            select{item['id']}.setAttribute('value', '{item["value"]}');
+            select{item['id']}.click();
+            return true;
+            """
+        )
 
-        # Verify
-        bans_hidden = safe_get_element(driver, "js", f"""document.querySelectorAll("[data-{page_name}-list-item][class*='hidden']")""")
-        if len(bans_hidden) == 0:
+        if not check_result:
             log_error(f"The {item['name']} filter is not working, exiting ...")
             exit(1)
 
-        # Reset
-        driver.execute_script(f"""document.querySelector("[data-{page_name}-setting-select-dropdown-btn='{item["id"]}'][value='{item["update_value"]}']').setAttribute('value', '{item["value"]}'")""")
-        select_btn_reset = safe_get_element(driver, "js", f"""document.querySelector("[data-{page_name}-setting-select-dropdown-btn='{item["id"]}'][value='{item["value"]}']")""")
-        select_btn_reset.click()
         sleep(0.1)
