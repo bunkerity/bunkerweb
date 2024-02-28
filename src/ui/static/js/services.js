@@ -15,7 +15,9 @@ class ServiceModal {
     this.modalTabsHeader = this.modal.querySelector([
       "[data-services-tabs-header]",
     ]);
-
+    this.modalErrMsg = this.modal.querySelector(
+      "[data-services-modal-error-msg]",
+    );
     this.modalCard = this.modal.querySelector("[data-services-modal-card]");
     //modal forms
     this.formNewEdit = this.modal.querySelector("[data-services-modal-form]");
@@ -60,6 +62,7 @@ class ServiceModal {
   }
 
   init() {
+    this.disabledSaveCases();
     this.modal.addEventListener("click", (e) => {
       // update draft mode
       try {
@@ -378,6 +381,64 @@ class ServiceModal {
       nameInp.setAttribute("value", serviceName);
       nameInp.value = serviceName;
     }
+  }
+
+  // Get list of server name from services card
+  // When the server name input is matching existing server name that is not the current modal one
+  // Disable the submit button
+  disabledSaveCases() {
+    window.addEventListener("DOMContentLoaded", () => {
+      const serverNameInput = document.querySelector(
+        'input[name="SERVER_NAME"]',
+      );
+
+      window.addEventListener("click", (e) => {
+        if (e.target.hasAttribute("data-services-action")) {
+          // focus on input server name
+          serverNameInput.focus();
+          this.checkServNameInput();
+        }
+      });
+
+      serverNameInput.addEventListener("input", () => {
+        // Case input is empty
+        this.checkServNameInput();
+      });
+    });
+  }
+
+  checkServNameInput() {
+    const serverNameInput = document.querySelector('input[name="SERVER_NAME"]');
+
+    if (serverNameInput.value === "") {
+      this.modalErrMsg.textContent = "Server name cannot be empty";
+      this.modalErrMsg.classList.remove("hidden");
+      return this.submitBtn.setAttribute("disabled", "");
+    }
+
+    // Case conflict with another server name
+    const serverNames = document.querySelectorAll("[data-services-service]");
+    const serverNameValue = serverNameInput.getAttribute("value");
+
+    // Case inp name is current server name
+    if (serverNameInput.value === serverNameValue) {
+      return this.submitBtn.removeAttribute("disabled");
+    }
+    // case inp name is not current server name, check if it is same as another
+    for (let i = 0; i < serverNames.length; i++) {
+      const name = serverNames[i].getAttribute("data-services-service");
+      if (name === serverNameValue) continue;
+
+      if (name === serverNameInput.value) {
+        this.modalErrMsg.textContent = "Server name already exists";
+        this.modalErrMsg.classList.remove("hidden");
+        return this.submitBtn.setAttribute("disabled", "");
+      }
+    }
+
+    this.modalErrMsg.textContent = "";
+    this.modalErrMsg.classList.add("hidden");
+    return this.submitBtn.removeAttribute("disabled");
   }
 
   showNewEditForm() {
