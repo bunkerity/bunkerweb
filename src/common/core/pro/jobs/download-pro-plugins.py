@@ -34,7 +34,7 @@ from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from jobs import get_os_info, get_integration, get_version  # type: ignore
 
-API_ENDPOINT = "http://api:8080/pro"
+API_ENDPOINT = "https://api.bunkerweb.io/pro"
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "pro", "plugins")
 PRO_PLUGINS_DIR = Path(sep, "etc", "bunkerweb", "pro", "plugins")
 logger = setup_logger("Jobs.download-pro-plugins", getenv("LOG_LEVEL", "INFO"))
