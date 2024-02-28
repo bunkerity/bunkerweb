@@ -7,6 +7,7 @@
 - [BUGFIX] Fix Bad behavior whitelist check in access phase
 - [BUGFIX] Fix ModSecurity FP on antibot page
 - [BUGFIX] Fix Whitelist core plugin missing a check for empty server_name in multisite mode
+- [BUGFIX] Fix Templator missing some common configs
 - [LINUX] Add logrotate support for the logs
 - [UI] Add bans management page in the web UI
 - [UI] Add blocked requests page in the web UI
