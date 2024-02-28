@@ -171,7 +171,9 @@ def verify_select_filters(driver, page_name: str, filter_items: list):
         # Get a select filter, change value and click to get no match
         # Verify that elements are all hidden
         # If not return false, else reset and send true
-        check_result = driver.execute_script(f"""const select{item['id']} = document.querySelector("[data-{page_name}-setting-select-dropdown-btn='{item["id"]}'][value='{item["value"]}']'); if(!select{item['id']}) return false; select{item['id']}.setAttribute('value', '{item["update_value"]}');select{item['id']}.click(); const select{item['id']}Match = document.querySelectorAll("[data-{page_name}-list-item][class*='hidden']");if (select{item['id']}Match.length === 0) return false;select{item['id']}.setAttribute('value', '{item["value"]}');select{item['id']}.click();return true;""")
+        check_result = driver.execute_script(
+            f"""const select{item['id']} = document.querySelector("[data-{page_name}-setting-select-dropdown-btn='{item["id"]}'][value='{item["value"]}']');""" + "if(!select{item['id']}) { return false };" + f"""select{item['id']}.setAttribute('value', '{item["update_value"]}');select{item['id']}.click(); const select{item['id']}Match = document.querySelectorAll("[data-{page_name}-list-item][class*='hidden']");""" + "if (select{item['id']}Match.length === 0) { return false };"  + f"""select{item['id']}.setAttribute('value', '{item["value"]}');select{item['id']}.click();return true;"""
+        )
 
         if not check_result:
             log_error(f"The {item['name']} filter is not working, exiting ...")

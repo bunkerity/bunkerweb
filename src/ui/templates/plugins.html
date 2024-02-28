@@ -186,7 +186,7 @@
                         {% endif %}
                         {% if plugin['type'] == "pro" %}
                             <a {% if not is_pro_version %}target="_blank" rel="noopener"{% endif %}
-                               aria-label="plugin page link"
+                               aria-label="pro plugin"
                                class="hover:-translate-y-px mx-1 -translate-y-0.5"
                                href="{% if not is_pro_version %}https://panel.bunkerweb.io/{% else %}javascript:void(0){% endif %}">
                                 <svg class="h-6 w-6 dark:brightness-90"
