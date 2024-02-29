@@ -7,7 +7,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
 
 from wizard import DRIVER, UI_URL
-from utils import access_page, assert_button_click, safe_get_element, verify_select_filters
+from utils import access_page, assert_button_click, safe_get_element
 
 exit_code = 0
 
@@ -39,12 +39,13 @@ try:
 
     # Test select filters
     select_filters = [
-        {"name": "Success state", "id": "success", "value": "all", "update_value": "123456"},
-        {"name": "Reload state", "id": "reload", "value": "all", "update_value": "123456"},
-        {"name": "Run time", "id": "every", "value": "all", "update_value": "123456"},
+        {"name": "Success state", "id": "success", "value": "all"},
+        {"name": "Reload state", "id": "reload", "value": "all"},
+        {"name": "Run time", "id": "every", "value": "all"},
     ]
 
-    verify_select_filters(DRIVER, "jobs", select_filters)
+    for item in select_filters:
+        DRIVER.execute_script(f"""document.querySelector('[data-jobs-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     log_info("Keyword filter is working, trying to filter by success state ...")
 

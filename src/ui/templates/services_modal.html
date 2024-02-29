@@ -1,17 +1,17 @@
 <!-- modal -->
-<div data-service-content="settings"
+<div data-services-plugins-container
      data-services-modal
      class="dark:brightness-110 hidden w-screen h-screen fixed bg-gray-600/50 z-[1001] top-0 left-0 justify-center items-center">
     <div data-services-modal-card
-         class="overflow-y-auto mx-0 sm:mx-6 lg:mx-8 my-3 px-4 pt-4 pb-8 w-full sm:min-w-[500px] h-[90vh] flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-        <div class="w-full flex justify-between mb-2">
-            <div class="flex justify-start items-center">
+         class="overflow-y-auto mx-0 sm:mx-6 lg:mx-8 my-3 px-3 sm:px-4 pt-4 pb-8 w-full h-fit sm:min-w-[500px] max-w-[1000px] max-h-[95vh] md:max-h-[90vh] flex flex-col break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
+        <div class="w-full flex justify-between items-start mb-2">
+            <div class="flex flex-col sm:flex-row justify-start items-start sm:items-center">
                 <p data-services-modal-title
                    class="transition duration-300 ease-in-out dark:opacity-90 dark:text-gray-200 mb-1 font-sans font-semibold leading-normal uppercase text-md">
                     SERVICE MODAL
                 </p>
                 <button data-toggle-draft-btn
-                        class="transition hover:brightness-75 dark:hover:brightness-110 ml-4 flex items-center border border-gray-700 dark:border-gray-300 rounded py-1 px-2">
+                        class="transition hover:brightness-75 dark:hover:brightness-110 sm:ml-4 flex items-center border border-gray-700 dark:border-gray-300 rounded py-1 px-2">
                     <p data-toggle-draft="true"
                        class="hidden dark:text-gray-300 mb-0 mr-2  pointer-events-none">Draft</p>
                     <p data-toggle-draft="false"
@@ -43,26 +43,33 @@
             </button>
         </div>
         <div data-services-tabs-header
-             class="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-x-4 gap-y-2 my-3">
-            <h5 class="transition duration-300 ease-in-out dark:opacity-90 ml-2 font-bold text-md uppercase dark:text-white mb-0">
-                CONFIGS
-            </h5>
-            <!-- search inpt-->
-            <div class="flex relative">
-                <label class="sr-only" for="settings-filter">search</label>
-                <input type="text"
-                       id="settings-filter"
-                       name="settings-filter"
-                       class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
-                       placeholder="key words"
-                       pattern="(.*?)"
-                       required />
+             class="flex flex-col">
+             <div class="flex flex-col sm:flex-row justify-start w-full items-start sm:items-center gap-y-3 gap-x-4">
+                <div class="w-full sm:min-w-[250px] max-w-[300px]">
+                    {% include "settings_tabs.html" %}
+                </div>
+                <!-- search inpt-->
+                <div class="flex relative w-full max-w-[200px]">
+                    <label class="sr-only" for="settings-filter">search</label>
+                    <input type="text"
+                           id="settings-filter"
+                           name="settings-filter"
+                           class="col-span-12 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 disabled:opacity-75 focus:valid:border-green-500 focus:invalid:border-red-500 outline-none focus:border-primary text-sm leading-5.6 ease block w-full appearance-none rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-3 py-1 font-normal text-gray-700 transition-all placeholder:text-gray-500"
+                           placeholder="search by keyword"
+                           pattern="(.*?)"
+                           required />
+                </div>
+                <!-- end search inpt-->
+             </div>
+
+            <div class="w-full min-w-[300px] my-1 sm:my-0">
+                <hr class="separator" />
             </div>
-            <!-- end search inpt-->
         </div>
-        {% include "settings_tabs.html" %}
+
+
         <div data-services-nomatch
-             class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125  col-span-12 p-4 relative break-words">
+             class="hidden w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words">
             <div class="col-span-12 flex flex-col justify-center items-center h-fit">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      fill="none"
@@ -77,13 +84,14 @@
         </div>
         <!-- new and edit form -->
         <form data-services-modal-form
-              class="w-full h-full flex flex-col justify-between"
+              class="w-full h-[90vh] overflow-auto flex flex-col justify-between"
               id="form-new"
               method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" id="operation" value="new" name="operation" />
             <input type="hidden" value="new" name="OLD_SERVER_NAME" />
             <input type="hidden" value="no" name="is_draft" />
+
             {% include "settings_plugins.html" %}
             <!-- action button -->
             <div class="w-full justify-center flex mt-10">
@@ -93,7 +101,7 @@
                 <button data-services-modal-submit type="submit" class="mb-4 valid-btn">Save</button>
             </div>
             <!-- end action button-->
-            <p data-services-modal-error-msg  class="hidden text-red-500 dark:opacity-80 mb-0 text-center"></p>
+            <p data-services-modal-error-msg  class="hidden text-red-500 font-bold dark:opacity-80 mb-0 text-center"></p>
         </form>
         <!-- end new and edit form -->
         <!-- delete form-->

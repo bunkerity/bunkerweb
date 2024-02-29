@@ -53,6 +53,7 @@ try:
     data["integration"] = data["integration"].lower()
     data["database"] = f"{db.database_uri.split(':')[0].split('+')[0]}/{database_version}"
     data["service_number"] = str(len(services))
+    data["draft_service_number"] = 0
     data["python_version"] = version.split(" ")[0]
 
     data["use_ui"] = "no"
@@ -61,12 +62,25 @@ try:
         for server in services:
             if db_config.get(f"{server}_USE_UI", db_config.get("USE_UI", {"value": "no"}))["value"] == "yes":
                 data["use_ui"] = "yes"
-                break
+            if db_config.get(f"{server}_IS_DRAFT", db_config.get("IS_DRAFT", {"value": "no"}))["value"] == "yes":
+                data["draft_service_number"] += 1
     # Singlesite case
-    elif db_config.get("USE_UI", {"value": "no"})["value"] == "yes":
-        data["use_ui"] = "yes"
+    else:
+        if db_config.get("USE_UI", {"value": "no"})["value"] == "yes":
+            data["use_ui"] = "yes"
+        if db_config.get("IS_DRAFT", {"value": "no"})["value"] == "yes":
+            data["draft_service_number"] = 1
 
-    data["external_plugins"] = [f"{plugin['id']}/{plugin['version']}" for plugin in db.get_plugins(_type="external")]
+    data["draft_service_number"] = str(data["draft_service_number"])
+    data["external_plugins"] = []
+    data["pro_plugins"] = []
+
+    for plugin in db.get_plugins():
+        if plugin["type"] == "external":
+            data["external_plugins"].append(f"{plugin['id']}/{plugin['version']}")
+        elif plugin["type"] == "pro":
+            data["pro_plugins"].append(f"{plugin['id']}/{plugin['version']}")
+
     data["os"] = {
         "name": "Linux",
         "version": "Unknown",

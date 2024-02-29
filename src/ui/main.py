@@ -330,10 +330,15 @@ def generate_nonce():
 
 @app.context_processor
 def inject_variables():
+    # check that is value is in tuple
     return dict(
         dark_mode=app.config["DARK_MODE"],
         script_nonce=app.config["SCRIPT_NONCE"],
         is_pro_version=db.get_metadata()["is_pro"],
+        pro_status=db.get_metadata()["pro_status"],
+        pro_services=db.get_metadata()["pro_services"],
+        pro_expire=db.get_metadata()["pro_expire"],
+        pro_overlapped=db.get_metadata()["pro_overlapped"],
         plugins=app.config["CONFIG"].get_plugins(),
     )
 
@@ -814,7 +819,7 @@ def services():
                     "full_value": service["SERVER_NAME"]["value"],
                     "method": service["SERVER_NAME"]["method"],
                 },
-                "IS_DRAFT": service.pop("IS_DRAFT", "no"),
+                "IS_DRAFT": service.pop("IS_DRAFT", {"value": "no"})["value"],
                 "USE_REVERSE_PROXY": service["USE_REVERSE_PROXY"],
                 "SERVE_FILES": service["SERVE_FILES"],
                 "REMOTE_PHP": service["REMOTE_PHP"],

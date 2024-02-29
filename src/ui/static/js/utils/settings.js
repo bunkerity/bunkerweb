@@ -44,101 +44,105 @@ class Popover {
 }
 
 class Tabs {
-  constructor() {
+  constructor(tabContainer, contentContainer) {
+    this.tabContainer = tabContainer;
+    this.contentContainer = contentContainer;
+    this.tabArrow = tabContainer
+      .querySelector("[data-tab-dropdown-btn]")
+      .querySelector("[data-tab-dropdown-arrow]");
     this.init();
   }
 
   init() {
     window.addEventListener("click", (e) => {
       try {
-        if (
-          e.target.closest("button").hasAttribute("data-tab-handler") ||
-          e.target.closest("button").hasAttribute("data-tab-handler-mobile")
-        ) {
+        if (e.target.closest("button").hasAttribute("data-tab-handler")) {
           //get needed data
           const tab = e.target.closest("button");
-          const tabAtt =
-            tab.getAttribute("data-tab-handler") ||
-            tab.getAttribute("data-tab-handler-mobile");
-          const container = tab.closest("div[data-service-content]");
+          const tabAtt = tab.getAttribute("data-tab-handler");
           // change style
-          this.resetTabsStyle(container);
-          this.highlightClicked(container, tabAtt);
+          this.resetTabsStyle();
+          this.highlightClicked(tabAtt);
           //show content
-          this.hideAllSettings(container);
-          this.showSettingClicked(container, tabAtt);
+          this.hideAllSettings();
+          this.showSettingClicked(tabAtt);
           //close dropdown and change btn textcontent on mobile
-          this.setDropBtnText(container, tabAtt);
-          this.closeDropdown(container);
+          this.setDropBtnText(tabAtt);
+          this.closeDropdown();
         }
-      } catch (err) {}
+      } catch (e) {}
 
       try {
         if (e.target.closest("button").hasAttribute("data-tab-dropdown-btn")) {
           const dropBtn = e.target.closest("button");
-          const container = dropBtn.closest("div[data-service-content]");
-          this.toggleDropdown(container);
+          this.toggleDropdown();
         }
       } catch (err) {}
     });
   }
 
-  resetTabsStyle(container) {
-    //reset desktop style
-    const tabsDesktop = container.querySelectorAll("button[data-tab-handler]");
-    tabsDesktop.forEach((tab) => {
-      tab.classList.remove("active");
-    });
-    //reset mobile style
-    const tabsMobile = container.querySelectorAll(
-      "button[data-tab-handler-mobile]",
+  resetTabsStyle() {
+    const tabsMobile = this.tabContainer.querySelectorAll(
+      "button[data-tab-handler]",
     );
     tabsMobile.forEach((tab) => {
       tab.classList.remove("active");
     });
   }
 
-  highlightClicked(container, tabAtt) {
-    //desktop case
-    const tabDesktop = container.querySelector(
+  highlightClicked(tabAtt) {
+    const tabMobile = this.tabContainer.querySelector(
       `button[data-tab-handler='${tabAtt}']`,
-    );
-    tabDesktop.classList.add("active");
-
-    //mobile case
-    const tabMobile = container.querySelector(
-      `button[data-tab-handler-mobile='${tabAtt}']`,
     );
     tabMobile.classList.add("active");
   }
 
-  hideAllSettings(container) {
-    const plugins = container.querySelectorAll("[data-plugin-item]");
+  hideAllSettings() {
+    const plugins =
+      this.contentContainer.querySelectorAll("[data-plugin-item]");
     plugins.forEach((plugin) => {
       plugin.classList.add("hidden");
     });
   }
 
-  showSettingClicked(container, tabAtt) {
-    const plugin = container.querySelector(`[data-plugin-item='${tabAtt}']`);
+  showSettingClicked(tabAtt) {
+    const plugin = this.contentContainer.querySelector(
+      `[data-plugin-item='${tabAtt}']`,
+    );
     plugin.classList.remove("hidden");
   }
 
-  setDropBtnText(container, tabAtt) {
-    const dropBtn = container.querySelector("[data-tab-dropdown-btn]");
+  setDropBtnText(tabAtt) {
+    const dropBtn = this.tabContainer.querySelector("[data-tab-dropdown-btn]");
     dropBtn.querySelector("span").textContent = tabAtt;
   }
 
-  closeDropdown(container) {
-    const dropdown = container.querySelector("[data-tab-dropdown]");
+  closeDropdown() {
+    const dropdown = this.tabContainer.querySelector("[data-tab-dropdown]");
     dropdown.classList.add("hidden");
     dropdown.classList.remove("flex");
+
+    this.updateTabArrow();
   }
 
-  toggleDropdown(container) {
-    const dropdown = container.querySelector("[data-tab-dropdown]");
+  toggleDropdown() {
+    const dropdown = this.tabContainer.querySelector("[data-tab-dropdown]");
     dropdown.classList.toggle("hidden");
     dropdown.classList.toggle("flex");
+
+    this.updateTabArrow();
+  }
+
+  updateTabArrow() {
+    const dropdown = this.tabContainer.querySelector("[data-tab-dropdown]");
+
+    if (dropdown.classList.contains("hidden")) {
+      this.tabArrow.classList.remove("rotate-180");
+    }
+
+    if (dropdown.classList.contains("flex")) {
+      this.tabArrow.classList.add("rotate-180");
+    }
   }
 }
 
@@ -159,11 +163,11 @@ class FormatValue {
 }
 
 class FilterSettings {
-  constructor(inputID, container) {
+  constructor(inputID, tabContainer, contentContainer) {
     this.input = document.querySelector(`input#${inputID}`);
-    //DESKTOP
-    this.container = document.querySelector(container);
-    this.deskTabs = this.container.querySelectorAll(`[data-tab-handler]`);
+    this.tabContainer = tabContainer;
+    this.contentContainer = contentContainer;
+    this.tabsEls = this.tabContainer.querySelectorAll(`[data-tab-handler]`);
     this.init();
   }
 
@@ -172,8 +176,9 @@ class FilterSettings {
       this.resetFilter();
       //get inp format
       const inpValue = this.input.value.trim().toLowerCase();
+
       //loop all tabs
-      this.deskTabs.forEach((tab) => {
+      this.tabsEls.forEach((tab) => {
         //get settings of tabs except multiples
         const settings = this.getSettingsFromTab(tab);
 
@@ -196,31 +201,65 @@ class FilterSettings {
         //case no setting match, hidden tab and content
         if (settingCount === hiddenCount) {
           const tabName = tab.getAttribute(`data-tab-handler`);
-          //hide mobile and desk tabs
-          tab.classList.add("hidden");
-          this.container
-            .querySelector(`[data-tab-handler-mobile="${tabName}"]`)
-            .classList.add("hidden");
-          this.container
+          tab.classList.add("!hidden");
+
+          this.contentContainer
             .querySelector(`[data-plugin-item=${tabName}]`)
-            .querySelector("[data-setting-header]")
             .classList.add("hidden");
         }
       });
+
+      // check current tabs states
+      let isAllHidden = true;
+      let firstNotHiddenEl = null;
+      for (let i = 0; i < this.tabsEls.length; i++) {
+        const tab = this.tabsEls[i];
+        if (!tab.classList.contains("!hidden")) {
+          isAllHidden = false;
+          firstNotHiddenEl = tab;
+          break;
+        }
+      }
+
+      // case no tab match
+      if (isAllHidden) {
+        return (this.tabContainer.querySelector(
+          "[data-tab-dropdown-btn] span",
+        ).textContent = "No match");
+      }
+
+      // click first not hidden tab
+      const currTabEl = this.tabContainer.querySelector(
+        "[data-tab-dropdown-btn] span",
+      );
+      const currTabName = currTabEl.textContent.toLowerCase().trim();
+
+      // case previously no match
+      if (currTabName.toLowerCase() === "no match") {
+        return firstNotHiddenEl.click();
+      }
+
+      const currTabBtn = this.tabContainer.querySelector(
+        `[data-tab-handler='${currTabName}']`,
+      );
+      if (!currTabBtn) return;
+
+      if (!currTabBtn.classList.contains("!hidden")) {
+        return currTabBtn.click();
+      }
+      if (currTabBtn.classList.contains("!hidden")) {
+        return firstNotHiddenEl.click();
+      }
     });
   }
 
   resetFilter() {
-    this.deskTabs.forEach((tab) => {
+    this.tabsEls.forEach((tab) => {
       const tabName = tab.getAttribute(`data-tab-handler`);
       //hide mobile and desk tabs
-      tab.classList.remove("hidden");
-      this.container
-        .querySelector(`[data-tab-handler-mobile="${tabName}"]`)
-        .classList.remove("hidden");
-      this.container
+      tab.classList.remove("!hidden");
+      this.contentContainer
         .querySelector(`[data-plugin-item=${tabName}]`)
-        .querySelector("[data-setting-header]")
         .classList.remove("hidden");
       const settings = this.getSettingsFromTab(tab);
       settings.forEach((setting) => {
@@ -231,7 +270,7 @@ class FilterSettings {
 
   getSettingsFromTab(tabEl) {
     const tabName = tabEl.getAttribute(`data-tab-handler`);
-    const settingContainer = this.container
+    const settingContainer = this.contentContainer
       .querySelector(`[data-plugin-item="${tabName}"]`)
       .querySelector(`[data-plugin-settings]`);
     const settings = settingContainer.querySelectorAll(
@@ -242,12 +281,20 @@ class FilterSettings {
 }
 
 class CheckNoMatchFilter {
-  constructor(input, type, elsToCheck, elContainer, noMatchEl) {
+  constructor(
+    input,
+    type,
+    elsToCheck,
+    elContainer,
+    noMatchEl,
+    classToCheck = "hidden",
+  ) {
     this.input = input;
     this.type = type;
     this.elsToCheck = elsToCheck;
     this.elContainer = elContainer;
     this.noMatchEl = noMatchEl;
+    this.classToCheck = classToCheck;
     this.init();
   }
 
@@ -276,20 +323,24 @@ class CheckNoMatchFilter {
       let isAllHidden = true;
       for (let i = 0; i < this.elsToCheck.length; i++) {
         const el = this.elsToCheck[i];
-        if (!el.classList.contains("hidden")) {
+        if (!el.classList.contains(this.classToCheck)) {
           isAllHidden = false;
           break;
         }
       }
 
       if (isAllHidden) {
-        this.noMatchEl.classList.remove("hidden");
-        this.elContainer ? this.elContainer.classList.add("hidden") : false;
+        this.noMatchEl.classList.remove(this.classToCheck);
+        this.elContainer
+          ? this.elContainer.classList.add(this.classToCheck)
+          : false;
       }
 
       if (!isAllHidden) {
-        this.elContainer ? this.elContainer.classList.remove("hidden") : false;
-        this.noMatchEl.classList.add("hidden");
+        this.elContainer
+          ? this.elContainer.classList.remove(this.classToCheck)
+          : false;
+        this.noMatchEl.classList.add(this.classToCheck);
       }
     }, 20);
   }

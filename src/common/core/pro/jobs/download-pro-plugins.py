@@ -34,7 +34,7 @@ from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from jobs import get_os_info, get_integration, get_version  # type: ignore
 
-API_ENDPOINT = "http://api:8080/pro"
+API_ENDPOINT = "https://api.bunkerweb.io/pro"
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "pro", "plugins")
 PRO_PLUGINS_DIR = Path(sep, "etc", "bunkerweb", "pro", "plugins")
 logger = setup_logger("Jobs.download-pro-plugins", getenv("LOG_LEVEL", "INFO"))
@@ -102,6 +102,10 @@ try:
         logger.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated pro plugins...")
 
         db.set_is_pro(True)
+        db.set_pro_expire("")
+        db.set_pro_status("valid")
+        db.set_pro_overlapped(False)
+        db.set_pro_services("")
 
         with BytesIO(resp.content) as plugin_content:
             with ZipFile(plugin_content) as zf:
@@ -113,6 +117,10 @@ try:
         logger.warning(f"{message}, only checking if there are new or updated info about pro plugins...")
 
         db.set_is_pro(False)
+        db.set_pro_expire("")
+        db.set_pro_status("invalid")
+        db.set_pro_overlapped(False)
+        db.set_pro_services("")
 
         plugins = resp.json()
         for plugin in plugins["data"]:

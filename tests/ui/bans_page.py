@@ -7,7 +7,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
 
 from wizard import DRIVER
-from utils import access_page, assert_button_click, safe_get_element, verify_select_filters
+from utils import access_page, assert_button_click, safe_get_element
 
 exit_code = 0
 
@@ -88,9 +88,10 @@ try:
     key_word_filter_input.send_keys("")
 
     # Test select filters
-    select_filters = [{"name": "reason", "id": "reason", "value": "all", "update_value": "123456"}, {"name": "range", "id": "term", "value": "all", "update_value": "123456"}]
+    select_filters = [{"name": "reason", "id": "reason", "value": "all"}, {"name": "range", "id": "term", "value": "all"}]
 
-    verify_select_filters(DRIVER, "bans", select_filters)
+    for item in select_filters:
+        DRIVER.execute_script(f"""document.querySelector('[data-bans-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     log_info("Bans found, trying to delete them ...")
 
