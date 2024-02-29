@@ -787,6 +787,7 @@ utils.get_phases = function()
 		"log_stream",
 		"log_default",
 		"timer",
+		"init_workers"
 	}
 end
 

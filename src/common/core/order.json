@@ -43,5 +43,6 @@
   ],
   "log_stream": ["badbehavior", "bunkernet"],
   "log_default": ["badbehavior", "bunkernet", "errors", "misc", "metrics"],
-  "timer": ["metrics"]
+  "timer": ["metrics"],
+  "init_workers": []
 }
