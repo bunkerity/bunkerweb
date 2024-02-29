@@ -33,4 +33,76 @@
       .setAttribute("aria-label", "Search in documentation");
   } catch (err) {}
     </script>
+
+    <script defer>
+      window.addEventListener('DOMContentLoaded', () => {
+        const bannerEl = document.querySelector('aside.md-banner');
+        let defaultContent = [{ "content" : 'Need premium support ? <a style="text-decoration:underline; color :  white;" href="https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc">Check BunkerWeb Panel</a>'},
+        { "content" : 'Try BunkerWeb on our <a style="text-decoration:underline; color :  white;" href="https://demo.bunkerweb.io/link/?utm_campaign=self&utm_source=doc">demo web app !</a>'},
+        { "content" : 'All informations about BunkerWeb on our <a style="text-decoration:underline; color :  white;" href="https://www.bunkerweb.io/?utm_campaign=self&utm_source=doc">website !</a>'}
+        ]
+
+      function setBannerStyle() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        bannerEl.style.backgroundColor = "#36ce7a";
+        bannerItem.style.textAlign = "center";
+        bannerItem.style.transition = "all 0.5s ease-out";
+      }
+
+      function setDefault() {
+        const bannerItem = bannerEl.querySelector('.md-banner__inner');
+        const clone = bannerItem.cloneNode(true);
+        clone.innerHTML = defaultContent[defaultContent.length - 1]["content"];
+        bannerEl.replaceChild(clone, bannerItem);
+      }
+
+      function startBannerLoop() {
+        const switchDelay = 7000;
+        let i = 0;
+
+        setInterval(() => {
+          // Update or reset index
+          if(i + 1 === defaultContent.length - 1) {
+            i = 0;
+          } else {
+            i++;
+          }
+
+          // Prepare data with next el with opacity 0 too
+          const currItem = bannerEl.querySelector('.md-banner__inner');
+          currItem.style.opacity = 0;
+          const clone = currItem.cloneNode(true);
+          clone.innerHTML = defaultContent[i]["content"];
+          setTimeout(() => {
+            bannerEl.replaceChild(clone, currItem);
+            setTimeout(() => {
+              const newItem = bannerEl.querySelector('.md-banner__inner');
+              newItem.style.opacity = 1;
+            }, 20);
+          }, 600);
+
+        }, switchDelay);
+      }
+
+      function runBanner() {
+        // Try to get dynamic content
+        // Else keep static ones
+        fetch("https://www.bunkerweb.io/api/bw-ui-news")
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          defaultContent = res.data;
+          startBannerLoop();
+        })
+        .catch((e) => {          startBannerLoop();
+});
+      }
+
+        setBannerStyle();
+        setDefault();
+        runBanner()
+
+      })
+    </script>
 {% endblock %}
