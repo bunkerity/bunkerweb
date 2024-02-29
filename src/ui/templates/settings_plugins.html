@@ -3,7 +3,7 @@
 {% for plugin in plugins %}
     <div data-plugin-item="{{ plugin['id'] }}"
          id="{{ plugin['id'] }}"
-         class="{% if loop.index != 1 %}hidden{% endif %} w-full">
+         class="{% if loop.index != 1 %}hidden{% endif %} w-full px-1">
         <!-- title and desc -->
         <div class="col-span-12" data-setting-header>
             {% if  (plugin['type'] == "pro" and not is_pro_version) or (plugin['type'] == "pro" and is_pro_version and not pro_status) %}
@@ -56,7 +56,8 @@
                     == "global-config" and value['context'] == "global" and not value['multiple'] or setting != "IS_DRAFT" and current_endpoint ==
                     "services" and value['context'] == "multisite" and not value['multiple'] %}
                     <div data-setting-container
-                         class="mx-0 sm:mx-4  my-2 col-span-12 md:mx-6 md:my-3 md:col-span-6 2xl:mx-6 2xl:my-3 2xl:col-span-4"
+                        data-{{current_endpoint}}-context="{{ value['context'] }}"
+                         class="mx-0 sm:mx-2 my-2 col-span-12 md:my-3 md:col-span-6  2xl:my-3 2xl:col-span-4"
                          id="form-edit-{{ current_endpoint }}-{{ value["id"] }}">
                         <!-- title and info -->
                         <div class="flex items-center my-1 relative z-10">
@@ -250,8 +251,8 @@
         {% for multiple in multList %}
             <!-- plugin multiple handler -->
             <div data-multiple-handler
-                 class="flex items-center mx-0 sm:mx-4 md:mx-6 md:my-3 my-2 2xl:mx-6 2xl:my-3  col-span-12 ">
-                <h5 class="input-title">{{ multiple }}</h5>
+                 class="flex items-center mx-0 sm:mx-4 md:mx-6 mb-2 mt-5 2xl:mx-6 col-span-12 ">
+                <h5 class="input-title max-w-[150px] sm:max-w-[350px]">{{ multiple }}</h5>
                 <button data-{{ current_endpoint }}-multiple-add="{{ multiple }}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
                     Add
                 </button>
@@ -261,14 +262,14 @@
             </div>
             <!-- end plugin multiple handler-->
             <!-- multiple settings -->
-            <div data-{{ current_endpoint }}-settings-multiple="{{ multiple }}_SCHEMA" class="bg-gray-50 dark:bg-slate-900/30 hidden w-full mb-8 grid-cols-12 border dark:border-gray-700 rounded">
+            <div data-{{ current_endpoint }}-settings-multiple="{{ multiple }}_SCHEMA" class="bg-gray-50 dark:bg-slate-900/30 hidden w-full mb-4 mt-2 grid-cols-12 border dark:border-gray-700 rounded">
                 {% for setting, value in plugin["settings"].items() %}
                     {# render only setting that match the multiple id and context #}
                     {% if current_endpoint
                         == "global-config" and value['context'] == "global" and value['multiple'] == multiple or current_endpoint ==
                         "services" and value['context'] == "multisite" and value['multiple'] == multiple %}
                         <div data-setting-container="{{ setting }}_SCHEMA"
-                             class="mx-0 sm:mx-4  my-2 col-span-12 md:mx-6 md:my-3 md:col-span-6 2xl:mx-6 2xl:my-3 2xl:col-span-4"
+                             class="mx-2 md:mx-3 my-2 md:my-3 col-span-12 md:col-span-6 2xl:col-span-4"
                              id="form-edit-{{ current_endpoint }}-{{ value["id"] }}_SCHEMA">
                             <!-- title and info -->
                             <div class="flex items-center my-1 relative z-10">

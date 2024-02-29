@@ -1406,14 +1406,19 @@ class Filter {
 
 const setDropdown = new Dropdown();
 const setFilter = new Filter();
+const setTabs = new Tabs(
+  document.querySelector("[data-services-tabs]"),
+  document.querySelector("[data-services-modal-form]"),
+);
 
 const setPopover = new Popover();
-const setTabs = new Tabs();
 const setModal = new ServiceModal();
 const format = new FormatValue();
+
 const setFilterGlobal = new FilterSettings(
   "settings-filter",
-  "[data-service-content='settings']",
+  document.querySelector("[data-services-tabs]"),
+  document.querySelector("[data-services-modal-form]"),
 );
 
 const setMultiple = new Multiple("services");
@@ -1422,8 +1427,8 @@ const checkServiceModalKeyword = new CheckNoMatchFilter(
   document.querySelector("input#settings-filter"),
   "input",
   document
-    .querySelector("[data-services-tabs-desktop]")
-    .querySelectorAll("[data-tab-handler]"),
+    .querySelector("[data-services-modal-form]")
+    .querySelectorAll("[data-plugin-item]"),
   document.querySelector("[data-services-modal-form]"),
   document.querySelector("[data-services-nomatch]"),
 );

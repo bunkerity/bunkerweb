@@ -23,24 +23,28 @@
   @apply hidden;
 }
 
+.separator {
+  @apply h-px mx-0 mt-3 mb-2 bg-transparent bg-gradient-to-r from-transparent via-black/40 to-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white dark:to-transparent;
+}
+
 .close-btn {
-  @apply dark:brightness-90  inline-block px-6 py-3 font-bold text-center text-red-500 border border-red-500 uppercase align-middle transition-all rounded-lg cursor-pointer dark:bg-gray-200 dark:hover:brightness-75 bg-white hover:bg-white/80 focus:bg-white/80 leading-normal ease-in tracking-tight-rem shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply dark:brightness-90  inline-block px-4 py-2 md:px-5 md:py-2.5 font-bold text-center text-red-500 border border-red-500 uppercase align-middle transition-all rounded-lg cursor-pointer dark:bg-gray-200 dark:hover:brightness-75 bg-white hover:bg-white/80 focus:bg-white/80 leading-normal ease-in tracking-tight-rem shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 .valid-btn {
-  @apply tracking-wide dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply tracking-wide dark:brightness-90 inline-block px-4 py-2 md:px-5 md:py-2.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 .delete-btn {
-  @apply tracking-wide dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply tracking-wide dark:brightness-90 inline-block px-4 py-2 md:px-5 md:py-2.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 .edit-btn {
-  @apply tracking-wide dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-yellow-500 hover:bg-yellow-500/80 focus:bg-yellow-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply tracking-wide dark:brightness-90 inline-block px-4 py-2 md:px-5 md:py-2.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-yellow-500 hover:bg-yellow-500/80 focus:bg-yellow-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 .info-btn {
-  @apply tracking-wide dark:brightness-90 inline-block px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
+  @apply tracking-wide dark:brightness-90 inline-block px-4 py-2 md:px-5 md:py-2.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-sky-500 hover:bg-sky-500/80 focus:bg-sky-500/80 leading-normal ease-in shadow-xs hover:-translate-y-px active:opacity-85 hover:shadow-md disabled:cursor-not-allowed dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400/0 dark:disabled:bg-gray-700 dark:disabled:border-gray-700/0 disabled:hover:translate-y-0 disabled:hover:bg-gray-400 disabled:hover:border-gray-400/0 dark:disabled:hover:translate-y-0 dark:disabled:hover:bg-gray-700 dark:disabled:hover:border-gray-700/0;
 }
 
 /*----------------------------------------------*/
@@ -102,43 +106,27 @@
 /*---------------SETTINGS_TABS-----------------*/
 /*---------------------------------------------*/
 
-.active.settings-tabs-tab-btn {
-  @apply border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border my-1 relative  px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md brightness-90 z-10;
+.settings-tabs-btn {
+  @apply dark:hover:brightness-95 dark:border-slate-600 dark:bg-slate-700  border-primary border w-full flex items-center justify-between rounded-lg hover:-translate-y-px my-1 px-4 py-2 md:px-6 md:py-3 font-bold text-center  uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-50 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
 }
 
-.settings-tabs-tab-btn {
-  @apply border-primary dark:hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 border my-1 relative  px-3 py-3 font-bold text-center uppercase align-middle transition-all rounded-none cursor-pointer bg-white hover:bg-gray-100 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
-}
-
-.settings-tabs-name {
-  @apply text-primary transition duration-300 ease-in-out dark:opacity-90 pl-3 pr-2 dark:text-gray-300;
-}
-
-.settings-tabs-popover-container {
-  @apply top-[60px] min-w-[150px] dark:brightness-90 bg-blue-500 transition z-50 rounded-md p-3 left-0 absolute;
-}
-
-.settings-tabs-popover-text {
-  @apply font-bold text-sm text-white m-0;
-}
-
-.settings-tabs-mobile-btn {
-  @apply dark:hover:brightness-95 dark:border-slate-600 dark:bg-slate-700  border-primary border w-full flex items-center justify-between rounded-lg hover:-translate-y-px my-1 px-6 py-3 font-bold text-center  uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-50 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
-}
-
-.settings-tabs-mobile-btn-text {
+.settings-tabs-btn-text {
   @apply transition duration-300 ease-in-out dark:opacity-90 dark:text-gray-300 text-primary;
 }
 
-.active.settings-tabs-mobile-dropdown-btn {
+.active.settings-tabs-dropdown-btn {
   @apply border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300 z-[1000] dark:bg-primary bg-primary text-gray-300;
 }
 
-.first.settings-tabs-mobile-dropdown-btn {
+.first.settings-tabs-dropdown-btn {
   @apply border-t rounded-t border-b border-l border-r;
 }
 
-.settings-tabs-mobile-dropdown-btn {
+.last.settings-tabs-dropdown-btn {
+  @apply rounded-b;
+}
+
+.settings-tabs-dropdown-btn {
   @apply flex justify-between border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90  bg-white text-gray-700 my-0 relative px-6 py-2  text-center  align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
 }
 

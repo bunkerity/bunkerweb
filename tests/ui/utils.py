@@ -8,7 +8,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException, WebDriverException
-from selenium.webdriver.common.action_chains import ActionChains
 
 
 def safe_get_element(driver, by: str, selector: str, *, driver_wait: Optional[WebDriverWait] = None, multiple: bool = False, error: bool = False) -> Union[WebElement, List[WebElement]]:
@@ -61,7 +60,7 @@ def assert_button_click(driver, button: Union[str, WebElement], by: str = "xpath
 
             sleep(0.5)
 
-            ActionChains(driver).move_to_element(button).click(button).perform()
+            button.click()
 
             clicked = True
     return clicked

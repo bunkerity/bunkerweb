@@ -27,20 +27,25 @@ class Multiple {
 }
 
 const setPopover = new Popover("main", "global-config");
-const setTabs = new Tabs("[global-config-tabs]", "global-config");
+const setTabs = new Tabs(
+  document.querySelector("[data-global-config-tabs-container]"),
+  document.querySelector("[data-global-config-plugins-container]"),
+);
 const format = new FormatValue();
 const setMultiple = new Multiple("global-config");
+
 const setFilterGlobal = new FilterSettings(
-  "settings-filter",
-  "[data-service-content='settings']",
+  "keyword",
+  document.querySelector("[data-global-config-tabs-container]"),
+  document.querySelector("[data-global-config-plugins-container]"),
 );
 
 const checkServiceModalKeyword = new CheckNoMatchFilter(
-  document.querySelector("input#settings-filter"),
+  document.querySelector("input#keyword"),
   "input",
   document
-    .querySelector("[data-global-config-tabs]")
-    .querySelectorAll("[data-tab-handler]"),
+    .querySelector("[data-global-config-plugins-container]")
+    .querySelectorAll("[data-plugin-item]"),
   document.querySelector("[data-global-config-form]"),
   document.querySelector("[data-global-config-nomatch]"),
 );
