@@ -49,7 +49,7 @@ try:
         exit(1)
 
     # Reset
-    key_word_filter_input.send_keys("")
+    key_word_filter_input.clear()
 
     # Test select filters
     select_filters = [

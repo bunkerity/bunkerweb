@@ -9,6 +9,7 @@ from selenium.common.exceptions import TimeoutException
 from wizard import DRIVER
 from utils import access_page, assert_button_click, safe_get_element
 from time import sleep
+
 exit_code = 0
 
 try:
@@ -91,7 +92,7 @@ try:
         exit(1)
 
     # Reset
-    key_word_filter_input.send_keys("")
+    key_word_filter_input.clear()
 
     log_info("Keyword filter worked, trying select filters ...")
 
@@ -116,7 +117,7 @@ try:
     DRIVER.execute_script(f"""document.querySelector('input[id="ban-item-2"]').click()""")
 
     log_info("Ban item id=2 checkbox clicked ...")
-    delete_ban_state =  DRIVER.execute_script("return arguments[0].checked", delete_ban_checkbox)
+    delete_ban_state = DRIVER.execute_script("return arguments[0].checked", delete_ban_checkbox)
 
     if not delete_ban_state:
         log_exception("Checkbox not checked...")
@@ -125,7 +126,7 @@ try:
     unban_button = safe_get_element(DRIVER, By.XPATH, "//button[@data-unban-btn='']")
     assert isinstance(unban_button, WebElement), "Delete button is not WebElement"
 
-    unban_disabled_state =  DRIVER.execute_script("return arguments[0].hasAttribute('disabled')", delete_ban_checkbox)
+    unban_disabled_state = DRIVER.execute_script("return arguments[0].hasAttribute('disabled')", delete_ban_checkbox)
 
     if unban_disabled_state:
         log_exception("Disabled attribut is on unban button ...")

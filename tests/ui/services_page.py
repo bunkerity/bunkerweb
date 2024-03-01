@@ -315,7 +315,7 @@ try:
         exit(1)
 
     # Reset
-    btn_keyword.send_keys("")
+    btn_keyword.clear()
 
     log_info("Service card keyword filter working, trying select filters ...")
 

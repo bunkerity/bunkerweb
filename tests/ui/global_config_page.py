@@ -29,10 +29,10 @@ try:
         log_error(f"Filter keyword with value {keyword_no_match} shouldn't match something.")
         exit(1)
 
-    log_info("Filter with unmatched keyword works as expected, try with a keyword that matches a setting...")
-
     # Reset
-    btn_keyword.send_keys("")
+    btn_keyword.clear()
+
+    log_info("Filter with unmatched keyword works as expected, try with a keyword that matches a setting...")
 
     no_errors = True
     retries = 0
