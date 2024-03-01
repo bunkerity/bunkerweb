@@ -19,7 +19,7 @@ try:
 
     # Set keyword with no matching settings
     keyword_no_match = "dqz48 é84 dzq 584dz5qd4"
-    btn_keyword = safe_get_element(DRIVER, "js", 'document.querySelector("input#settings-filter")')
+    btn_keyword = safe_get_element(DRIVER, "js", 'document.querySelector("input#keyword")')
     btn_keyword.send_keys(keyword_no_match)
     sleep(0.1)
 
@@ -91,13 +91,13 @@ try:
 
     log_info("The value was updated successfully, trying to navigate through the global config tabs ...")
 
-    buttons = safe_get_element(DRIVER, By.XPATH, "//button[@data-tab-handler='']", multiple=True)
+    buttons = safe_get_element(DRIVER, By.XPATH, "//button[@data-tab-select-handler='']", multiple=True)
     assert isinstance(buttons, list), "Buttons is not a list of WebElements"
 
     # Open dropdown and click button
     shuffle(buttons)
     for button in buttons:
-        assert_button_click(DRIVER, "//button[@data-tab-dropdown-btn='']")
+        assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
         assert_button_click(DRIVER, button)
 
     log_info("Trying to filter the global config ...")

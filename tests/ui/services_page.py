@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
 
+
 from wizard import DRIVER
 from base import TEST_TYPE
 from utils import access_page, assert_alert_message, assert_button_click, safe_get_element, wait_for_service
@@ -48,8 +49,8 @@ try:
 
     log_info('The value for the "SERVER_NAME" input is the expected one, trying to edit the config ...')
 
-    assert_button_click(DRIVER, "//button[@data-tab-dropdown-btn='']")
-    assert_button_click(DRIVER, "//button[@data-tab-handler='gzip']")
+    assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
+    assert_button_click(DRIVER, "//button[@data-tab-select-handler='gzip']")
     gzip_select = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select='gzip-comp-level']")
     assert isinstance(gzip_select, WebElement), "Gzip select is not a WebElement"
     assert_button_click(DRIVER, gzip_select)
@@ -71,8 +72,8 @@ try:
         log_error("Modal is hidden even though it shouldn't be, exiting ...")
         exit(1)
 
-    assert_button_click(DRIVER, "//button[@data-tab-dropdown-btn='']")
-    assert_button_click(DRIVER, "//button[@data-tab-handler='gzip']")
+    assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
+    assert_button_click(DRIVER, "//button[@data-tab-select-handler='gzip']")
 
     gzip_comp_level_selected_elem = safe_get_element(DRIVER, By.XPATH, "//select[@id='GZIP_COMP_LEVEL']/option[@selected='']")
     assert isinstance(gzip_comp_level_selected_elem, WebElement), "Gzip comp level selected element is not a WebElement"
@@ -93,8 +94,8 @@ try:
     server_name_input.send_keys("app1.example.com")
 
     if TEST_TYPE == "docker":
-        assert_button_click(DRIVER, "//button[@data-tab-dropdown-btn='']")
-        assert_button_click(DRIVER, "//button[@data-tab-handler='reverseproxy']")
+        assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
+        assert_button_click(DRIVER, "//button[@data-tab-select-handler='reverseproxy']")
 
         use_reverse_proxy_checkbox = safe_get_element(DRIVER, By.ID, "USE_REVERSE_PROXY")
         assert isinstance(use_reverse_proxy_checkbox, WebElement), "Use reverse proxy checkbox is not a WebElement"
@@ -325,6 +326,7 @@ try:
 
     log_info("Delete button is present, as expected, deleting the service ...")
 
+    DRIVER.execute_script("arguments[0].scrollIntoView();", delete_button)
     assert_button_click(DRIVER, delete_button)
 
     sleep(0.1)

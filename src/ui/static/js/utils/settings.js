@@ -43,23 +43,25 @@ class Popover {
   }
 }
 
-class Tabs {
+class TabsSelect {
   constructor(tabContainer, contentContainer) {
     this.tabContainer = tabContainer;
     this.contentContainer = contentContainer;
     this.tabArrow = tabContainer
-      .querySelector("[data-tab-dropdown-btn]")
-      .querySelector("[data-tab-dropdown-arrow]");
+      .querySelector("[data-tab-select-dropdown-btn]")
+      .querySelector("[data-tab-select-dropdown-arrow]");
     this.init();
   }
 
   init() {
     window.addEventListener("click", (e) => {
       try {
-        if (e.target.closest("button").hasAttribute("data-tab-handler")) {
+        if (
+          e.target.closest("button").hasAttribute("data-tab-select-handler")
+        ) {
           //get needed data
           const tab = e.target.closest("button");
-          const tabAtt = tab.getAttribute("data-tab-handler");
+          const tabAtt = tab.getAttribute("data-tab-select-handler");
           // change style
           this.resetTabsStyle();
           this.highlightClicked(tabAtt);
@@ -73,8 +75,11 @@ class Tabs {
       } catch (e) {}
 
       try {
-        if (e.target.closest("button").hasAttribute("data-tab-dropdown-btn")) {
-          const dropBtn = e.target.closest("button");
+        if (
+          e.target
+            .closest("button")
+            .hasAttribute("data-tab-select-dropdown-btn")
+        ) {
           this.toggleDropdown();
         }
       } catch (err) {}
@@ -82,17 +87,17 @@ class Tabs {
   }
 
   resetTabsStyle() {
-    const tabsMobile = this.tabContainer.querySelectorAll(
-      "button[data-tab-handler]",
+    const tabsEl = this.tabContainer.querySelectorAll(
+      "button[data-tab-select-handler]",
     );
-    tabsMobile.forEach((tab) => {
+    tabsEl.forEach((tab) => {
       tab.classList.remove("active");
     });
   }
 
   highlightClicked(tabAtt) {
     const tabMobile = this.tabContainer.querySelector(
-      `button[data-tab-handler='${tabAtt}']`,
+      `button[data-tab-select-handler='${tabAtt}']`,
     );
     tabMobile.classList.add("active");
   }
@@ -113,12 +118,16 @@ class Tabs {
   }
 
   setDropBtnText(tabAtt) {
-    const dropBtn = this.tabContainer.querySelector("[data-tab-dropdown-btn]");
+    const dropBtn = this.tabContainer.querySelector(
+      "[data-tab-select-dropdown-btn]",
+    );
     dropBtn.querySelector("span").textContent = tabAtt;
   }
 
   closeDropdown() {
-    const dropdown = this.tabContainer.querySelector("[data-tab-dropdown]");
+    const dropdown = this.tabContainer.querySelector(
+      "[data-tab-select-dropdown]",
+    );
     dropdown.classList.add("hidden");
     dropdown.classList.remove("flex");
 
@@ -126,7 +135,9 @@ class Tabs {
   }
 
   toggleDropdown() {
-    const dropdown = this.tabContainer.querySelector("[data-tab-dropdown]");
+    const dropdown = this.tabContainer.querySelector(
+      "[data-tab-select-dropdown]",
+    );
     dropdown.classList.toggle("hidden");
     dropdown.classList.toggle("flex");
 
@@ -134,7 +145,9 @@ class Tabs {
   }
 
   updateTabArrow() {
-    const dropdown = this.tabContainer.querySelector("[data-tab-dropdown]");
+    const dropdown = this.tabContainer.querySelector(
+      "[data-tab-select-dropdown]",
+    );
 
     if (dropdown.classList.contains("hidden")) {
       this.tabArrow.classList.remove("rotate-180");
@@ -167,7 +180,9 @@ class FilterSettings {
     this.input = document.querySelector(`input#${inputID}`);
     this.tabContainer = tabContainer;
     this.contentContainer = contentContainer;
-    this.tabsEls = this.tabContainer.querySelectorAll(`[data-tab-handler]`);
+    this.tabsEls = this.tabContainer.querySelectorAll(
+      `[data-tab-select-handler]`,
+    );
     this.init();
   }
 
@@ -200,7 +215,7 @@ class FilterSettings {
         });
         //case no setting match, hidden tab and content
         if (settingCount === hiddenCount) {
-          const tabName = tab.getAttribute(`data-tab-handler`);
+          const tabName = tab.getAttribute(`data-tab-select-handler`);
           tab.classList.add("!hidden");
 
           this.contentContainer
@@ -224,13 +239,13 @@ class FilterSettings {
       // case no tab match
       if (isAllHidden) {
         return (this.tabContainer.querySelector(
-          "[data-tab-dropdown-btn] span",
+          "[data-tab-select-dropdown-btn] span",
         ).textContent = "No match");
       }
 
       // click first not hidden tab
       const currTabEl = this.tabContainer.querySelector(
-        "[data-tab-dropdown-btn] span",
+        "[data-tab-select-dropdown-btn] span",
       );
       const currTabName = currTabEl.textContent.toLowerCase().trim();
 
@@ -240,7 +255,7 @@ class FilterSettings {
       }
 
       const currTabBtn = this.tabContainer.querySelector(
-        `[data-tab-handler='${currTabName}']`,
+        `[data-tab-select-handler='${currTabName}']`,
       );
       if (!currTabBtn) return;
 
@@ -255,7 +270,7 @@ class FilterSettings {
 
   resetFilter() {
     this.tabsEls.forEach((tab) => {
-      const tabName = tab.getAttribute(`data-tab-handler`);
+      const tabName = tab.getAttribute(`data-tab-select-handler`);
       //hide mobile and desk tabs
       tab.classList.remove("!hidden");
       this.contentContainer
@@ -269,7 +284,7 @@ class FilterSettings {
   }
 
   getSettingsFromTab(tabEl) {
-    const tabName = tabEl.getAttribute(`data-tab-handler`);
+    const tabName = tabEl.getAttribute(`data-tab-select-handler`);
     const settingContainer = this.contentContainer
       .querySelector(`[data-plugin-item="${tabName}"]`)
       .querySelector(`[data-plugin-settings]`);
@@ -346,4 +361,4 @@ class CheckNoMatchFilter {
   }
 }
 
-export { Popover, Tabs, FormatValue, FilterSettings, CheckNoMatchFilter };
+export { Popover, TabsSelect, FormatValue, FilterSettings, CheckNoMatchFilter };

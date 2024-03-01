@@ -106,27 +106,27 @@
 /*---------------SETTINGS_TABS-----------------*/
 /*---------------------------------------------*/
 
-.settings-tabs-btn {
+.settings-tabs-select-btn {
   @apply dark:hover:brightness-95 dark:border-slate-600 dark:bg-slate-700  border-primary border w-full flex items-center justify-between rounded-lg hover:-translate-y-px my-1 px-4 py-2 md:px-6 md:py-3 font-bold text-center  uppercase align-middle transition-all cursor-pointer bg-white hover:bg-gray-50 leading-normal text-sm ease-in tracking-tight-rem shadow-xs hover:shadow-md;
 }
 
-.settings-tabs-btn-text {
+.settings-tabs-select-btn-text {
   @apply transition duration-300 ease-in-out dark:opacity-90 dark:text-gray-300 text-primary;
 }
 
-.active.settings-tabs-dropdown-btn {
+.active.settings-tabs-select-dropdown-btn {
   @apply border-gray-300 dark:hover:brightness-90 hover:brightness-90 my-0 relative px-6 py-2 text-center align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:text-gray-300 z-[1000] dark:bg-primary bg-primary text-gray-300;
 }
 
-.first.settings-tabs-dropdown-btn {
+.first.settings-tabs-select-dropdown-btn {
   @apply border-t rounded-t border-b border-l border-r;
 }
 
-.last.settings-tabs-dropdown-btn {
+.last.settings-tabs-select-dropdown-btn {
   @apply rounded-b;
 }
 
-.settings-tabs-dropdown-btn {
+.settings-tabs-select-dropdown-btn {
   @apply flex justify-between border-b border-l border-r border-gray-300 dark:hover:brightness-90 hover:brightness-90  bg-white text-gray-700 my-0 relative px-6 py-2  text-center  align-middle transition-all rounded-none cursor-pointer leading-normal text-sm ease-in tracking-tight-rem dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300;
 }
 

@@ -95,7 +95,10 @@ try:
 
     log_info("Bans found, trying to delete them ...")
 
-    assert_button_click(DRIVER, "//input[@id='ban-item-2']")
+    ban_item_2 = safe_get_element(DRIVER, By.XPATH, "//input[@id='ban-item-2']")
+
+    DRIVER.execute_script("arguments[0].scrollIntoView();", ban_item_2)
+    ban_item_2.click()
 
     access_page(DRIVER, "//button[@data-unban-btn='']", "bans", False)
 

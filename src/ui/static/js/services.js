@@ -1,6 +1,6 @@
 import {
   Popover,
-  Tabs,
+  TabsSelect,
   FormatValue,
   FilterSettings,
   CheckNoMatchFilter,
@@ -11,9 +11,9 @@ class ServiceModal {
     //modal elements
     this.modal = document.querySelector("[data-services-modal]");
     this.modalTitle = this.modal.querySelector("[data-services-modal-title]");
-    this.modalTabs = this.modal.querySelector(["[data-services-tabs]"]);
+    this.modalTabs = this.modal.querySelector(["[data-services-tabs-select]"]);
     this.modalTabsHeader = this.modal.querySelector([
-      "[data-services-tabs-header]",
+      "[data-services-tabs-select-header]",
     ]);
     this.modalErrMsg = this.modal.querySelector(
       "[data-services-modal-error-msg]",
@@ -443,14 +443,14 @@ class ServiceModal {
 
   showNewEditForm() {
     this.cardViewport();
-    this.showTabs();
+    this.showSelectTabs();
     this.hideForms();
     this.formNewEdit.classList.remove("hidden");
   }
 
   showDeleteForm() {
     this.cardNoViewport();
-    this.hideTabs();
+    this.hideSelectTabs();
     this.hideForms();
 
     this.formDelete.classList.remove("hidden");
@@ -471,7 +471,7 @@ class ServiceModal {
     this.formDelete.classList.add("hidden");
   }
 
-  hideTabs() {
+  hideSelectTabs() {
     this.modalTabs.classList.remove("grid");
     this.modalTabs.classList.add("hidden");
 
@@ -479,7 +479,7 @@ class ServiceModal {
     this.modalTabsHeader.classList.add("hidden");
   }
 
-  showTabs() {
+  showSelectTabs() {
     this.modalTabs.classList.add("grid");
     this.modalTabs.classList.remove("hidden");
     this.modalTabsHeader.classList.add("flex");
@@ -581,7 +581,7 @@ class ServiceModal {
 
   openModal() {
     //switch to first setting
-    document.querySelector("button[data-tab-handler]").click();
+    document.querySelector("button[data-tab-select-handler]").click();
     //show modal el
     this.modal.classList.add("flex");
     this.modal.classList.remove("hidden");
@@ -1406,8 +1406,8 @@ class Filter {
 
 const setDropdown = new Dropdown();
 const setFilter = new Filter();
-const setTabs = new Tabs(
-  document.querySelector("[data-services-tabs]"),
+const setTabsSelect = new TabsSelect(
+  document.querySelector("[data-services-tabs-select]"),
   document.querySelector("[data-services-modal-form]"),
 );
 
@@ -1417,7 +1417,7 @@ const format = new FormatValue();
 
 const setFilterGlobal = new FilterSettings(
   "settings-filter",
-  document.querySelector("[data-services-tabs]"),
+  document.querySelector("[data-services-tabs-select]"),
   document.querySelector("[data-services-modal-form]"),
 );
 
