@@ -343,21 +343,15 @@ try:
     try:
         delete_card_button = safe_get_element(DRIVER, By.XPATH, "//button[@data-services-action='delete' and @data-services-name='app3.example.com']", error=True)
         assert isinstance(delete_card_button, WebElement), "Delete button is not a WebElement"
+        assert_button_click(DRIVER, delete_card_button)
+
     except TimeoutException:
         log_exception("Delete button hasn't been found, even though it should be, exiting ...")
         exit(1)
 
     log_info("Delete button is present, as expected, deleting the service ...")
 
-    # Click on the delete button
-    DRIVER.execute_script("arguments[0].click()", delete_card_button)
-
-    log_info("Delete button clicked, modal open ...")
-
-    delete_modal_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form-delete='']//button[@type='submit']")
-    assert isinstance(delete_modal_button, WebElement), "Delete modal button is not a WebElement"
-
-    DRIVER.execute_script("arguments[0].click()", delete_modal_button)
+    access_page(DRIVER, "//form[@data-services-modal-form-delete='']//button[@type='submit']", "services", False)
 
     log_info("Delete service modal button clicked, check if delete ...")
 
