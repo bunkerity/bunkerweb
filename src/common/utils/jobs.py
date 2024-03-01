@@ -217,19 +217,19 @@ def get_integration() -> str:
         integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
         os_release_path = Path(sep, "etc", "os-release")
         if getenv("KUBERNETES_MODE", "no").lower() == "yes":
-            return "kubernetes"
+            return "Kubernetes"
         elif getenv("SWARM_MODE", "no").lower() == "yes":
-            return "swarm"
+            return "Swarm"
         elif getenv("AUTOCONF_MODE", "no").lower() == "yes":
-            return "autoconf"
+            return "Autoconf"
         elif integration_path.is_file():
             return integration_path.read_text(encoding="utf-8").strip().lower()
         elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
-            return "docker"
+            return "Docker"
 
-        return "linux"
+        return "Linux"
     except:
-        return "unknown"
+        return "Unknown"
 
 
 def get_os_info() -> Dict[str, str]:

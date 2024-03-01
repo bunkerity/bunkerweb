@@ -28,6 +28,8 @@ from jobs import get_file_in_db, set_file_in_db  # type: ignore
 logger = setup_logger("LETS-ENCRYPT.renew", getenv("LOG_LEVEL", "INFO"))
 status = 0
 
+LETS_ENCRYPT_PATH = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
+
 try:
     # Check if we're using let's encrypt
     use_letsencrypt = False
@@ -44,37 +46,21 @@ try:
         _exit(0)
 
     # Create directory if it doesn't exist
-    letsencrypt_path = Path(sep, "var", "cache", "bunkerweb", "letsencrypt")
-    letsencrypt_path.mkdir(parents=True, exist_ok=True)
+    LETS_ENCRYPT_PATH.mkdir(parents=True, exist_ok=True)
     Path(sep, "var", "lib", "bunkerweb", "letsencrypt").mkdir(parents=True, exist_ok=True)
 
-    # Get env vars
-    bw_integration = "Linux"
-    integration_path = Path(sep, "usr", "share", "bunkerweb", "INTEGRATION")
-    os_release_path = Path(sep, "etc", "os-release")
-    if getenv("KUBERNETES_MODE", "no") == "yes":
-        bw_integration = "Kubernetes"
-    elif getenv("SWARM_MODE", "no") == "yes":
-        bw_integration = "Swarm"
-    elif getenv("AUTOCONF_MODE", "no") == "yes":
-        bw_integration = "Autoconf"
-    elif integration_path.is_file():
-        bw_integration = integration_path.read_text(encoding="utf-8").strip()
-    elif os_release_path.is_file() and "Alpine" in os_release_path.read_text(encoding="utf-8"):
-        bw_integration = "Docker"
-
     # Extract letsencrypt folder if it exists in db
-    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI", None), pool=False)
+    db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
 
     tgz = get_file_in_db("folder.tgz", db)
     if tgz:
         # Delete folder if needed
-        if letsencrypt_path.exists():
-            rmtree(str(letsencrypt_path), ignore_errors=True)
-        letsencrypt_path.mkdir(parents=True, exist_ok=True)
+        if LETS_ENCRYPT_PATH.exists():
+            rmtree(LETS_ENCRYPT_PATH, ignore_errors=True)
+        LETS_ENCRYPT_PATH.mkdir(parents=True, exist_ok=True)
         # Extract it
         with tar_open(name="folder.tgz", mode="r:gz", fileobj=BytesIO(tgz)) as tf:
-            tf.extractall(str(letsencrypt_path))
+            tf.extractall(LETS_ENCRYPT_PATH)
         logger.info("Successfully retrieved Let's Encrypt data from db cache")
     else:
         logger.info("No Let's Encrypt data found in db cache")
@@ -86,7 +72,7 @@ try:
                 "renew",
                 "--no-random-sleep-on-renew",
                 "--config-dir",
-                str(letsencrypt_path.joinpath("etc")),
+                LETS_ENCRYPT_PATH.joinpath("etc").as_posix(),
                 "--work-dir",
                 join(sep, "var", "lib", "bunkerweb", "letsencrypt"),
                 "--logs-dir",
@@ -105,7 +91,7 @@ try:
     # Put new folder in cache
     bio = BytesIO()
     with tar_open("folder.tgz", mode="w:gz", fileobj=bio, compresslevel=9) as tgz:
-        tgz.add(str(letsencrypt_path), arcname=".")
+        tgz.add(LETS_ENCRYPT_PATH, arcname=".")
     bio.seek(0, 0)
 
     # Put tgz in cache
