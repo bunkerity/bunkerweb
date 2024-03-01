@@ -35,8 +35,7 @@ try:
         log_error("The username is not correct, exiting ...")
         exit(1)
 
-    username_input.clear()
-    username_input.send_keys("admin2")
+    DRIVER.execute_script(f"arguments[0].value = 'admin2'", username_input)
 
     password_input = safe_get_element(DRIVER, By.ID, "curr_password")
     assert isinstance(password_input, WebElement), "The password input is not an instance of WebElement"
@@ -45,8 +44,8 @@ try:
         log_error("The current password is not empty, exiting ...")
         exit(1)
 
-    password_input.send_keys(UI_PASSWORD)
-
+    # execute script using create password_input
+    DRIVER.execute_script(f"arguments[0].value = '{UI_PASSWORD}'", password_input)
     assert_button_click(DRIVER, "//button[@id='username-button' and @class='edit-btn']")
 
     try:

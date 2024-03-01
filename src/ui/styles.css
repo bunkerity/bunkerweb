@@ -295,7 +295,7 @@
 }
 
 .core-card-list {
-  @apply 2xl:col-span-4 3xl:col-span-3 w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
+  @apply col-span-12 md:col-span-6 w-full overflow-hidden grid grid-cols-12 max-h-100 sm:max-h-125 col-span-12 p-4 relative break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border;
 }
 
 .w-small.core-card-list {
@@ -339,15 +339,15 @@
 }
 
 .w-small.core-card-list-wrap {
-  @apply min-w-[250px];
+  @apply min-w-[200px];
 }
 
 .w-medium.core-card-list-wrap {
-  @apply min-w-[350px];
+  @apply min-w-[300px];
 }
 
 .w-large.core-card-list-wrap {
-  @apply min-w-[500px];
+  @apply min-w-[450px];
 }
 
 .core-card-metrics {

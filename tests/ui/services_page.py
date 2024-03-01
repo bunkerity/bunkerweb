@@ -315,30 +315,33 @@ try:
     for item in select_filters:
         DRIVER.execute_script(f"""document.querySelector('[data-services-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
-    log_info("Filters working as expected, trying to delete app2.example.com ...")
+    log_info("Filters working as expected, trying to delete app3.example.com ...")
 
     try:
-        delete_button = safe_get_element(DRIVER, By.XPATH, "//button[@data-services-action='delete' and @data-services-name='app2.example.com']", error=True)
-        assert isinstance(delete_button, WebElement), "Delete button is not a WebElement"
+        delete_card_button = safe_get_element(DRIVER, By.XPATH, "//button[@data-services-action='delete' and @data-services-name='app3.example.com']", error=True)
+        assert isinstance(delete_card_button, WebElement), "Delete button is not a WebElement"
     except TimeoutException:
         log_exception("Delete button hasn't been found, even though it should be, exiting ...")
         exit(1)
 
     log_info("Delete button is present, as expected, deleting the service ...")
 
-    DRIVER.execute_script("arguments[0].scrollIntoView();", delete_button)
-    assert_button_click(DRIVER, delete_button)
+    # Click on the delete button
+    DRIVER.execute_script("arguments[0].click()", delete_card_button)
 
-    sleep(0.1)
+    delete_modal_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form-delete='']//button[@type='submit']")
+    assert isinstance(delete_modal_button, WebElement), "Delete modal button is not a WebElement"
 
-    access_page(DRIVER, "//form[@data-services-modal-form-delete='']//button[@type='submit']", "services", False)
+    DRIVER.execute_script("arguments[0].click()", delete_modal_button)
+
+    access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[4]/a", "services")
 
     if TEST_TYPE == "linux":
         wait_for_service()
 
     assert_alert_message(DRIVER, "has been deleted.")
 
-    log_info("Service app2.example.com has been deleted, checking if it's still present ...")
+    log_info("Service app3.example.com has been deleted, checking if it's still present ...")
 
     try:
         services = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service='']", multiple=True, error=True)
@@ -351,7 +354,7 @@ try:
         log_error(f"The service hasn't been deleted ({len(services)} services found), exiting ...")
         exit(1)
 
-    log_info("Service app2.example.com has been deleted successfully")
+    log_info("Service app3.example.com has been deleted successfully")
 
     log_info("✅ Services page tests finished successfully")
 except SystemExit as e:
