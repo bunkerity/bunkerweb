@@ -393,7 +393,6 @@ class Database:
                 data["database_version"] = (session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"])[0]
                 metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration, Metadata.is_pro, Metadata.pro_expire, Metadata.pro_services, Metadata.pro_overlapped, Metadata.pro_status).filter_by(id=1).first()
                 if metadata:
-                    print("METADATA :", metadata.is_pro, metadata.pro_expire, metadata.pro_services, metadata.pro_overlapped, metadata.pro_status, flush=True)
                     data.update(
                         {
                             "version": metadata.version,
