@@ -16,6 +16,7 @@ services:
       REVERSE_PROXY_AUTH_REQUEST: ""
       REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: ""
       REVERSE_PROXY_AUTH_REQUEST_SET: ""
+      REVERSE_PROXY_CUSTOM_HOST: ""
     extra_hosts:
       - "www.example.com:192.168.0.2"
     networks:

@@ -25,6 +25,11 @@ async def headers(request: Request):
     keepalive = getenv("REVERSE_PROXY_KEEPALIVE", "no") == "yes" or getenv("REVERSE_PROXY_WS", "no") == "yes"
     request_headers = request.headers
     http_version = request.scope.get("http_version")
+
+    custom_host = getenv("REVERSE_PROXY_CUSTOM_HOST", "")
+    if custom_host:
+        headers["host"] = custom_host
+
     print(f"ℹ️ Headers received: {request_headers}", flush=True)
 
     if keepalive and http_version != "1.1":

@@ -31,6 +31,7 @@ services:
       REVERSE_PROXY_AUTH_REQUEST: ""
       REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: ""
       REVERSE_PROXY_AUTH_REQUEST_SET: ""
+      REVERSE_PROXY_CUSTOM_HOST: ""
       CUSTOM_CONF_SERVER_HTTP_ready: |
         location /ready {
           default_type 'text/plain';
@@ -74,6 +75,7 @@ services:
       REVERSE_PROXY_WS: "no"
       REVERSE_PROXY_KEEPALIVE: "no"
       REVERSE_PROXY_AUTH_REQUEST: ""
+      REVERSE_PROXY_CUSTOM_HOST: ""
     networks:
       bw-services:
         ipv4_address: 192.168.0.4

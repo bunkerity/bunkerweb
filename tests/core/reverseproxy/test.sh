@@ -50,6 +50,7 @@ else
     echo "REVERSE_PROXY_AUTH_REQUEST=" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL=" | sudo tee -a /etc/bunkerweb/variables.env
     echo "REVERSE_PROXY_AUTH_REQUEST_SET=" | sudo tee -a /etc/bunkerweb/variables.env
+    echo "REVERSE_PROXY_CUSTOM_HOST=" | sudo tee -a /etc/bunkerweb/variables.env
     sudo cp ready.conf /etc/bunkerweb/configs/server-http
 fi
 
@@ -68,8 +69,9 @@ cleanup_stack () {
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_AUTH_REQUEST: ".*"@REVERSE_PROXY_AUTH_REQUEST: ""@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: ".*"@REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL: ""@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_AUTH_REQUEST_SET: ".*"@REVERSE_PROXY_AUTH_REQUEST_SET: ""@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_CUSTOM_HOST: ".*"@REVERSE_PROXY_CUSTOM_HOST: ""@' {} \;
         else
-            x=12
+            x=13
             while [ $x -gt 0 ] ; do
                 sudo sed -i '$ d' /etc/bunkerweb/variables.env
                 x=$((x-1))
@@ -83,6 +85,7 @@ cleanup_stack () {
             unset REVERSE_PROXY_AUTH_REQUEST
             unset REVERSE_PROXY_AUTH_REQUEST_SIGNIN_URL
             unset REVERSE_PROXY_AUTH_REQUEST_SET
+            unset REVERSE_PROXY_CUSTOM_HOST
         fi
         if [[ $end -eq 1 && $exit_code = 0 ]] ; then
             return
@@ -143,6 +146,7 @@ do
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_HEADERS: ".*"@REVERSE_PROXY_HEADERS: "Test test;Test2 test2"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_HEADERS_CLIENT: ".*"@REVERSE_PROXY_HEADERS_CLIENT: "Test test;Test2 test2"@' {} \;
             find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_AUTH_REQUEST: ".*"@REVERSE_PROXY_AUTH_REQUEST: "/auth"@' {} \;
+            find . -type f -name 'docker-compose.*' -exec sed -i 's@REVERSE_PROXY_CUSTOM_HOST: ".*"@REVERSE_PROXY_CUSTOM_HOST: "test.example.com"@' {} \;
         else
             sudo sed -i 's@REVERSE_PROXY_WS=yes$@REVERSE_PROXY_WS=no@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REVERSE_PROXY_KEEPALIVE=yes$@REVERSE_PROXY_KEEPALIVE=no@' /etc/bunkerweb/variables.env
@@ -150,12 +154,14 @@ do
             sudo sed -i 's@REVERSE_PROXY_HEADERS=.*$@REVERSE_PROXY_HEADERS=Test test;Test2 test2@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REVERSE_PROXY_HEADERS_CLIENT=.*$@REVERSE_PROXY_HEADERS_CLIENT=Test test;Test2 test2@' /etc/bunkerweb/variables.env
             sudo sed -i 's@REVERSE_PROXY_AUTH_REQUEST=.*$@REVERSE_PROXY_AUTH_REQUEST=/auth@' /etc/bunkerweb/variables.env
+            sudo sed -i 's@REVERSE_PROXY_CUSTOM_HOST=.*$@REVERSE_PROXY_CUSTOM_HOST=test.example.com@' /etc/bunkerweb/variables.env
             unset REVERSE_PROXY_WS
             unset REVERSE_PROXY_KEEPALIVE
             export REVERSE_PROXY_INTERCEPT_ERRORS="no"
             export REVERSE_PROXY_HEADERS="Test test;Test2 test2"
             export REVERSE_PROXY_HEADERS_CLIENT="Test test;Test2 test2"
             export REVERSE_PROXY_AUTH_REQUEST="/auth"
+            export REVERSE_PROXY_CUSTOM_HOST="test.example.com"
         fi
     elif [ "$test" = "auth_signin" ] ; then
         echo "↪️ Running tests with reverseproxy activated and auth signin ..."
