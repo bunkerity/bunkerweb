@@ -8,6 +8,7 @@ from selenium.common.exceptions import TimeoutException
 
 from wizard import DRIVER
 from utils import access_page, assert_button_click, safe_get_element
+from time import sleep
 
 exit_code = 0
 
@@ -25,6 +26,8 @@ try:
 
     assert_button_click(DRIVER, "//button[@data-add-ban='']")
 
+    log_info("Add ban modal clicked ...")
+
     try:
         safe_get_element(DRIVER, By.XPATH, "//ul[@data-bans-add-ban-list='']/li", error=True)
     except TimeoutException:
@@ -32,6 +35,8 @@ try:
         exit(1)
 
     assert_button_click(DRIVER, "//button[@data-add-ban-delete-all-item='']")
+
+    log_info("Delete all add bans from button clicked ...")
 
     with suppress(TimeoutException):
         safe_get_element(DRIVER, By.XPATH, "//ul[@data-bans-add-ban-list='']/li", error=True)
@@ -54,6 +59,8 @@ try:
     ip_input = safe_get_element(DRIVER, By.ID, "ip-2")
     assert isinstance(ip_input, WebElement), "IP input not found"
     ip_input.send_keys(f"127.0.0.{randint(123, 255)}")
+
+    log_info("Added 2 bans entries to modal, click on save ...")
 
     access_page(DRIVER, "//button[@data-bans-modal-submit='']", "bans", False)
 
@@ -87,28 +94,47 @@ try:
     # Reset
     key_word_filter_input.send_keys("")
 
+    log_info("Keyword filter worked, trying select filters ...")
+
     # Test select filters
     select_filters = [{"name": "reason", "id": "reason", "value": "all"}, {"name": "range", "id": "term", "value": "all"}]
 
     for item in select_filters:
         DRIVER.execute_script(f"""document.querySelector('[data-bans-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
-    log_info("Bans found, trying to delete them ...")
+    log_info("All filters worked, try to delete 1 ban ...")
+
+    try:
+        entries = safe_get_element(DRIVER, By.XPATH, "//ul[@data-bans-list='']/li", multiple=True, error=True)
+        assert isinstance(entries, list), "Bans not found"
+        log_info(f"Currently {len(entries)} bans items ...")
+    except TimeoutException:
+        log_exception("No bans found, exiting ...")
+        exit(1)
 
     delete_ban_checkbox = safe_get_element(DRIVER, By.XPATH, "//input[@id='ban-item-2']")
     assert isinstance(delete_ban_checkbox, WebElement), "Delete checkbox is not WebElement"
     DRIVER.execute_script("arguments[0].click()", delete_ban_checkbox)
+
+    log_info("Ban item id=2 checkbox clicked ...")
 
     unban_button = safe_get_element(DRIVER, By.XPATH, "//button[@data-unban-btn='']")
     assert isinstance(unban_button, WebElement), "Delete button is not WebElement"
 
     DRIVER.execute_script("arguments[0].click()", unban_button)
 
+    log_info("Unban button clicked, access bans ...")
+
+    sleep(3)
+
     access_page(DRIVER, False, "bans", False)
+
+    log_info("Acces page after delete action ...")
 
     try:
         entries = safe_get_element(DRIVER, By.XPATH, "//ul[@data-bans-list='']/li", multiple=True, error=True)
         assert isinstance(entries, list), "Bans not found"
+        log_info(f"Currently {len(entries)} bans items ...")
     except TimeoutException:
         log_exception("No bans found, exiting ...")
         exit(1)

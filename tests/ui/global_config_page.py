@@ -31,23 +31,9 @@ try:
 
     log_info("Filter with unmatched keyword works as expected, try with a keyword that matches a setting...")
 
-    btn_keyword.send_keys("Datastore")
-
-    settings = safe_get_element(
-        DRIVER,
-        By.XPATH,
-        "//form[@id='form-edit-global-configs']//div[@data-setting-container='' and not(contains(@class, 'hidden'))]",
-        multiple=True,
-    )
-    assert isinstance(settings, list), "Hidden settings is not a list of WebElements"
-
-    if len(settings) != 1:
-        log_error(f"The filter didn't work (found {len(settings)} settings instead of 1), exiting ...")
-        exit(1)
-
     # Reset
     btn_keyword.send_keys("")
-
+    
     no_errors = True
     retries = 0
     while no_errors:

@@ -17,7 +17,10 @@ exit_code = 0
 
 try:
     log_info("Navigating to the services page ...")
+
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[4]/a", "services")
+
+    log_info("Check if default www.example.com service is here ...")
 
     service_name_elem = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service='www.example.com']//h5")
     assert isinstance(service_name_elem, WebElement), "Service name element is not a WebElement"
@@ -25,13 +28,15 @@ try:
         log_error("The service is not present, exiting ...")
         exit(1)
 
+    log_info("Service correctly checked, check if right method ...")
+
     service_method_elem = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service='www.example.com']//h6")
     assert isinstance(service_method_elem, WebElement), "Service method element is not a WebElement"
     if service_method_elem.text.strip() != "ui":
         log_error("The service should have been created by the ui, exiting ...")
         exit(1)
 
-    log_info("Service www.example.com is present, trying to edit it ...")
+    log_info("Service method 'ui' correctly checked, additionnal check ...")
 
     assert_button_click(DRIVER, "//div[@data-services-service='www.example.com']//button[@data-services-action='edit']")
 
@@ -41,13 +46,17 @@ try:
         log_error("Modal is hidden even though it shouldn't be, exiting ...")
         exit(1)
 
+    log_info("Service edit modal checked ...")
+
     input_server_name = safe_get_element(DRIVER, By.ID, "SERVER_NAME")
     assert isinstance(input_server_name, WebElement), "Input is not a WebElement"
     if input_server_name.get_attribute("value") != "www.example.com":
         log_error("The value is not the expected one, exiting ...")
         exit(1)
 
-    log_info('The value for the "SERVER_NAME" input is the expected one, trying to edit the config ...')
+    log_info("Input service checked ...")
+
+    log_info("Additionnal checks done, trying to edit the config ...")
 
     assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
     assert_button_click(DRIVER, "//button[@data-tab-select-handler='gzip']")
@@ -109,7 +118,9 @@ try:
         assert isinstance(reverse_proxy_url_input, WebElement), "Reverse proxy url input is not a WebElement"
         reverse_proxy_url_input.send_keys("/")
 
-    access_page(DRIVER, False, "services", False)
+    log_info("Set new service values, trying to save ...")
+
+    access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
 
     if TEST_TYPE == "linux":
         wait_for_service("app1.example.com")
@@ -137,7 +148,7 @@ try:
         log_error("The service should have been created by the ui, exiting ...")
         exit(1)
 
-    log_info("Service app1.example.com is present, trying it ...")
+    log_info("New service 'app1.example.com' is present, trying it ...")
 
     try:
         safe_get_element(DRIVER, By.XPATH, "//button[@data-services-action='edit' and @data-services-name='app1.example.com']//ancestor::div//a", error=True)
@@ -289,7 +300,7 @@ try:
         log_error("The service should have been created by the ui, exiting ...")
         exit(1)
 
-    log_info("Service app3.example.com is present, trying filters...")
+    log_info("Service app3.example.com is present, trying service card filters...")
 
     # Set keyword with no matching settings
     keyword_no_match = "dqz48 é84 dzq 584dz5qd4"
@@ -305,6 +316,8 @@ try:
 
     # Reset
     btn_keyword.send_keys("")
+
+    log_info("Service card keyword filter working, trying select filters ...")
 
     # Test select filters
     select_filters = [
@@ -329,10 +342,14 @@ try:
     # Click on the delete button
     DRIVER.execute_script("arguments[0].click()", delete_card_button)
 
+    log_info("Delete button clicked, modal open ...")
+
     delete_modal_button = safe_get_element(DRIVER, By.XPATH, "//form[@data-services-modal-form-delete='']//button[@type='submit']")
     assert isinstance(delete_modal_button, WebElement), "Delete modal button is not a WebElement"
 
     DRIVER.execute_script("arguments[0].click()", delete_modal_button)
+
+    log_info("Delete service modal button clicked, check if delete ...")
 
     if TEST_TYPE == "linux":
         wait_for_service()

@@ -17,14 +17,14 @@ try:
     log_info("Navigating to the logs page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[2]/a", "account")
 
-    log_info("Looking that all desktop tabs are working ...")
+    log_info("Try to click on all available tabs ...")
 
     assert_button_click(DRIVER, "//button[@data-tab-handler='global']")
     assert_button_click(DRIVER, "//button[@data-tab-handler='username']")
     assert_button_click(DRIVER, "//button[@data-tab-handler='password']")
     assert_button_click(DRIVER, "//button[@data-tab-handler='totp']")
 
-    log_info("Start username tab ...")
+    log_info("All tabs working, start username tab ...")
 
     assert_button_click(DRIVER, "//button[@data-tab-handler='username']")
 
@@ -34,6 +34,8 @@ try:
     if username_input.get_attribute("value") != "admin":
         log_error("The username is not correct, exiting ...")
         exit(1)
+
+    log_info("username 'admin' is correctly set by default, trying username update ...")
 
     DRIVER.execute_script(f"arguments[0].value = 'admin2'", username_input)
 
