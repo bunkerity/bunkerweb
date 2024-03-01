@@ -24,7 +24,7 @@ try:
     sleep(0.1)
 
     # Check that the no matching element is shown and other card hide
-    is_no_match = DRIVER.execute_script('return document.querySelector("[data-global-config-nomatch]").classList.contains("hidden")')
+    is_no_match = DRIVER.execute_script('return !document.querySelector("[data-global-config-nomatch]").classList.contains("hidden")')
     if not is_no_match:
         log_error(f"Filter keyword with value {keyword_no_match} shouldn't match something.")
         exit(1)

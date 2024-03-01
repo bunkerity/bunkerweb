@@ -100,11 +100,11 @@ try:
     DRIVER.execute_script("arguments[0].click()", delete_ban_checkbox)
 
     unban_button = safe_get_element(DRIVER, By.XPATH, "//button[@data-unban-btn='']")
-    assert isinstance(delete_ban_button, WebElement), "Delete button is not WebElement"
+    assert isinstance(unban_button, WebElement), "Delete button is not WebElement"
 
     DRIVER.execute_script("arguments[0].click()", unban_button)
 
-    access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[9]/a", "bans")
+    refresh = safe_get_element(DRIVER, By.XPATH, "//button[@data-unban-btn='']", 5)
 
     try:
         entries = safe_get_element(DRIVER, By.XPATH, "//ul[@data-bans-list='']/li", multiple=True, error=True)
