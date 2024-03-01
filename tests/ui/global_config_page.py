@@ -4,6 +4,7 @@ from time import sleep
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.common.keys import Keys
 
 from wizard import DRIVER
 from base import TEST_TYPE
@@ -30,7 +31,8 @@ try:
         exit(1)
 
     # Reset
-    btn_keyword.clear()
+    btn_keyword.send_keys(Keys.CONTROL, "a")
+    btn_keyword.send_keys(Keys.BACKSPACE)
 
     log_info("Filter with unmatched keyword works as expected, try with a keyword that matches a setting...")
 
@@ -68,7 +70,10 @@ try:
     input_worker = safe_get_element(DRIVER, By.ID, "WORKER_RLIMIT_NOFILE")
     assert isinstance(input_worker, WebElement), "Input is not a WebElement"
 
-    input_worker.clear()
+    # Reset
+    input_worker.send_keys(Keys.CONTROL, "a")
+    input_worker.send_keys(Keys.BACKSPACE)
+
     input_worker.send_keys("ZZZ")
 
     assert_button_click(DRIVER, "//form[@id='form-edit-global-config']//button[@type='submit']")
@@ -76,7 +81,10 @@ try:
 
     log_info("The form was not submitted, trying to edit the global config with good values ...")
 
-    input_worker.clear()
+    # Reset
+    input_worker.send_keys(Keys.CONTROL, "a")
+    input_worker.send_keys(Keys.BACKSPACE)
+
     input_worker.send_keys("4096")
 
     access_page(DRIVER, "//form[@id='form-edit-global-config']//button[@type='submit']", "global config", False)

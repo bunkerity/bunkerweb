@@ -5,6 +5,7 @@ from random import randint
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.keys import Keys
 
 from wizard import DRIVER
 from utils import access_page, assert_button_click, safe_get_element
@@ -92,7 +93,8 @@ try:
         exit(1)
 
     # Reset
-    key_word_filter_input.clear()
+    key_word_filter_input.send_keys(Keys.CONTROL, "a")
+    key_word_filter_input.send_keys(Keys.BACKSPACE)
 
     log_info("Keyword filter worked, trying select filters ...")
 
@@ -129,7 +131,7 @@ try:
     unban_disabled_state = DRIVER.execute_script("return arguments[0].hasAttribute('disabled')", delete_ban_checkbox)
 
     if unban_disabled_state:
-        log_exception("Disabled attribut is on unban button ...")
+        log_exception("Disabled attribute is on unban button ...")
         exit(1)
 
     DRIVER.execute_script(f"""document.querySelector('button[data-unban-btn]').click()""")

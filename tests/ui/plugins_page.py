@@ -7,6 +7,7 @@ from requests import get
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.keys import Keys
 
 from wizard import DRIVER, UI_URL
 from base import TEST_TYPE
@@ -49,7 +50,7 @@ try:
         exit(1)
 
     # Reset
-    key_word_filter_input.clear()
+    key_word_filter_input.sendKeys(Keys.chord(Keys.CONTROL, "a", Keys.DELETE))
 
     # Test select filters
     select_filters = [

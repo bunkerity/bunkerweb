@@ -5,6 +5,7 @@ from requests import get
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.keys import Keys
 
 from wizard import DRIVER, UI_URL
 from utils import access_page, assert_button_click, safe_get_element
@@ -35,7 +36,9 @@ try:
             log_error("The keyword filter is not working, exiting ...")
             exit(1)
 
-    filter_input.clear()
+    # Reset
+    filter_input.send_keys(Keys.CONTROL, "a")
+    filter_input.send_keys(Keys.BACKSPACE)
 
     # Test select filters
     select_filters = [

@@ -6,6 +6,7 @@ from requests import RequestException, get
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.keys import Keys
 
 
 from wizard import DRIVER
@@ -36,7 +37,7 @@ try:
         log_error("The service should have been created by the ui, exiting ...")
         exit(1)
 
-    log_info("Service method 'ui' correctly checked, additionnal check ...")
+    log_info("Service method 'ui' correctly checked, additional check ...")
 
     assert_button_click(DRIVER, "//div[@data-services-service='www.example.com']//button[@data-services-action='edit']")
 
@@ -56,7 +57,7 @@ try:
 
     log_info("Input service checked ...")
 
-    log_info("Additionnal checks done, trying to edit the config ...")
+    log_info("Additional checks done, trying to edit the config ...")
 
     assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
     assert_button_click(DRIVER, "//button[@data-tab-select-handler='gzip']")
@@ -99,7 +100,10 @@ try:
     server_name_input = safe_get_element(DRIVER, By.ID, "SERVER_NAME")
     assert isinstance(server_name_input, WebElement), "Input is not a WebElement"
 
-    server_name_input.clear()
+    # Reset
+    server_name_input.send_keys(Keys.CONTROL, "a")
+    server_name_input.send_keys(Keys.BACKSPACE)
+
     server_name_input.send_keys("app1.example.com")
 
     if TEST_TYPE == "docker":
@@ -176,7 +180,9 @@ try:
         log_error("The cloned service input is not empty, exiting ...")
         exit(1)
 
-    server_name_input.clear()
+    # Reset
+    server_name_input.send_keys(Keys.CONTROL, "a")
+    server_name_input.send_keys(Keys.BACKSPACE)
     server_name_input.send_keys("app2.example.com")
 
     access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
@@ -267,7 +273,10 @@ try:
         log_error("The cloned service input is not empty, exiting ...")
         exit(1)
 
-    server_name_input_2.clear()
+    # Reset
+    server_name_input_2.send_keys(Keys.CONTROL, "a")
+    server_name_input_2.send_keys(Keys.BACKSPACE)
+
     server_name_input_2.send_keys("app3.example.com")
 
     access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
@@ -315,7 +324,8 @@ try:
         exit(1)
 
     # Reset
-    btn_keyword.clear()
+    btn_keyword.send_keys(Keys.CONTROL, "a")
+    btn_keyword.send_keys(Keys.BACKSPACE)
 
     log_info("Service card keyword filter working, trying select filters ...")
 
