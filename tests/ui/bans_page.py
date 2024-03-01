@@ -34,6 +34,17 @@ try:
         log_exception("No bans found, exiting ...")
         exit(1)
 
+    log_info("Add one ban to try delete entry button ...")
+
+    add_entry_button = safe_get_element(DRIVER, By.XPATH, "//button[@data-ban-add-new='']")
+    assert isinstance(add_entry_button, WebElement), "Add entry button not found"
+
+    assert_button_click(DRIVER, add_entry_button)
+
+    ip_input = safe_get_element(DRIVER, By.ID, "ip-1")
+    assert isinstance(ip_input, WebElement), "IP input not found"
+    ip_input.send_keys(f"127.0.0.{randint(10, 122)}")
+
     assert_button_click(DRIVER, "//button[@data-add-ban-delete-all-item='']")
 
     log_info("Delete all add bans from button clicked ...")
@@ -50,13 +61,13 @@ try:
 
     assert_button_click(DRIVER, add_entry_button)
 
-    ip_input = safe_get_element(DRIVER, By.ID, "ip-1")
+    ip_input = safe_get_element(DRIVER, By.ID, "ip-2")
     assert isinstance(ip_input, WebElement), "IP input not found"
     ip_input.send_keys(f"127.0.0.{randint(10, 122)}")
 
     assert_button_click(DRIVER, add_entry_button)
 
-    ip_input = safe_get_element(DRIVER, By.ID, "ip-2")
+    ip_input = safe_get_element(DRIVER, By.ID, "ip-3")
     assert isinstance(ip_input, WebElement), "IP input not found"
     ip_input.send_keys(f"127.0.0.{randint(123, 255)}")
 
@@ -85,11 +96,10 @@ try:
         log_exception("No bans found, exiting ...")
         exit(1)
 
-    delete_ban_checkbox = safe_get_element(DRIVER, By.XPATH, "//input[@id='ban-item-2']")
-    assert isinstance(delete_ban_checkbox, WebElement), "Delete checkbox is not WebElement"
-    DRIVER.execute_script(f"""document.querySelector('input[id="ban-item-2"]').click()""")
+    assert_button_click(DRIVER, "//input[@id='ban-item-2']")
 
-    log_info("Ban item id=2 checkbox clicked ...")
+    log_info("Ban item 2 checkbox clicked ...")
+    delete_ban_checkbox = safe_get_element(DRIVER, By.XPATH, "//input[@id='ban-item-2']")
     delete_ban_state = DRIVER.execute_script("return arguments[0].checked", delete_ban_checkbox)
 
     if not delete_ban_state:
@@ -105,7 +115,7 @@ try:
         log_exception("Disabled attribute is on unban button ...")
         exit(1)
 
-    DRIVER.execute_script(f"""document.querySelector('button[data-unban-btn]').click()""")
+    assert_button_click(DRIVER, "//button[@data-unban-btn='']")
 
     log_info("Unban button clicked, access bans ...")
 
@@ -133,13 +143,18 @@ try:
         log_error("Need at least one ban to test filters ...")
         exit(1)
 
-    key_word_filter_input = safe_get_element(DRIVER, "js", 'document.querySelector("input#keyword")')
+    log_info("Start with keyword filtering ...")
+
+    key_word_filter_input = safe_get_element(DRIVER, By.XPATH, "//input[@id='keyword']")
     assert isinstance(key_word_filter_input, WebElement), "Key word filter input is not a WebElement"
     key_word_filter_input.send_keys("dzq841czqdeqzzd")
 
     bans_hidden = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-bans-list-item][class*=hidden]")')
+    bans_hidden_total = len(bans_hidden)
 
-    if len(bans_total) != 0:
+    log_info(f"Added 'dzq841czqdeqzzd' value, bans hidden {bans_hidden_total} / {bans_total} ...")
+
+    if bans_hidden_total != 1:
         log_error("Keyword filtering error, should have match nothing ...")
         exit(1)
 
