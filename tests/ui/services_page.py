@@ -109,7 +109,7 @@ try:
         assert isinstance(reverse_proxy_url_input, WebElement), "Reverse proxy url input is not a WebElement"
         reverse_proxy_url_input.send_keys("/")
 
-    access_page(DRIVER, "//button[@data-services-modal-submit='']", "services", False)
+    access_page(DRIVER, False, "services", False)
 
     if TEST_TYPE == "linux":
         wait_for_service("app1.example.com")
@@ -333,8 +333,6 @@ try:
     assert isinstance(delete_modal_button, WebElement), "Delete modal button is not a WebElement"
 
     DRIVER.execute_script("arguments[0].click()", delete_modal_button)
-
-    access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[4]/a", "services")
 
     if TEST_TYPE == "linux":
         wait_for_service()

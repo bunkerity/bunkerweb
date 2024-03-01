@@ -106,14 +106,14 @@ def assert_alert_message(driver, message: str):
     assert_button_click(driver, "//button[@data-flash-sidebar-close='']/*[local-name() = 'svg']")
 
 
-def access_page(driver, button: Union[str, WebElement], name: str, message: bool = True, *, retries: int = 0, clicked: bool = False):
+def access_page(driver, button: Union[bool, str, WebElement], name: str, message: bool = True, *, retries: int = 0, clicked: bool = False):
     if retries > 5:
         log_error("Too many retries...")
         exit(1)
 
     try:
-        if not clicked:
-            clicked = assert_button_click(driver, button)
+        if not isinstance(button, bool) and not clicked:
+=                clicked = assert_button_click(driver, button)
 
         title: Union[WebElement, List[WebElement]] = safe_get_element(driver, By.XPATH, "/html/body/div[3]/header/div/nav/h6", driver_wait=WebDriverWait(driver, 45))
         assert isinstance(title, WebElement), "Title is not a WebElement"

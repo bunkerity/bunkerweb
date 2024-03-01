@@ -241,7 +241,7 @@ class FilterSettings {
       // case no tab match
       if (isAllHidden) {
         this.tabContainer
-          .querySelector("[data-tab-select-dropdown-btn] span")
+          .querySelector("[data-tab-select-dropdown-btn]")
           .setAttribute("data-tab-id", "no-match");
         return (this.tabContainer.querySelector(
           "[data-tab-select-dropdown-btn] span",
@@ -250,24 +250,24 @@ class FilterSettings {
 
       // click first not hidden tab
       const currTabEl = this.tabContainer.querySelector(
-        "[data-tab-select-dropdown-btn] span",
+        "[data-tab-select-dropdown-btn]",
       );
 
       const currTabName = currTabEl.getAttribute("data-tab-id");
 
       // case previously no match
-      if (currTabName === "no-match") {
+      if (currTabName === "no-match" && !isAllHidden) {
         return firstNotHiddenEl.click();
       }
 
       const currTabBtn = this.tabContainer.querySelector(
         `[data-tab-select-handler='${currTabName}']`,
       );
-      if (!currTabBtn) return;
 
       if (!currTabBtn.classList.contains("!hidden")) {
         return currTabBtn.click();
       }
+
       if (currTabBtn.classList.contains("!hidden")) {
         return firstNotHiddenEl.click();
       }

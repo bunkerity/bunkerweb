@@ -29,6 +29,22 @@ try:
         log_error(f"Filter keyword with value {keyword_no_match} shouldn't match something.")
         exit(1)
 
+    log_info("Filter with unmatched keyword works as expected, try with a keyword that matches a setting...")
+
+    btn_keyword.send_keys("Datastore")
+
+    settings = safe_get_element(
+        DRIVER,
+        By.XPATH,
+        "//form[@id='form-edit-global-configs']//div[@data-setting-container='' and not(contains(@class, 'hidden'))]",
+        multiple=True,
+    )
+    assert isinstance(settings, list), "Hidden settings is not a list of WebElements"
+
+    if len(settings) != 1:
+        log_error(f"The filter didn't work (found {len(settings)} settings instead of 1), exiting ...")
+        exit(1)
+
     # Reset
     btn_keyword.send_keys("")
 
@@ -99,24 +115,6 @@ try:
     for button in buttons:
         assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
         assert_button_click(DRIVER, button)
-
-    log_info("Trying to filter the global config ...")
-
-    setting_filter_elem = safe_get_element(DRIVER, By.ID, "settings-filter")
-    assert isinstance(setting_filter_elem, WebElement), "Setting filter input is not a WebElement"
-    setting_filter_elem.send_keys("Datastore")
-
-    settings = safe_get_element(
-        DRIVER,
-        By.XPATH,
-        "//form[@id='form-edit-global-configs']//div[@data-setting-container='' and not(contains(@class, 'hidden'))]",
-        multiple=True,
-    )
-    assert isinstance(settings, list), "Hidden settings is not a list of WebElements"
-
-    if len(settings) != 1:
-        log_error(f"The filter didn't work (found {len(settings)} settings instead of 1), exiting ...")
-        exit(1)
 
     log_info("✅ Global config page tests finished successfully")
 except SystemExit as e:

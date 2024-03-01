@@ -248,11 +248,16 @@
                 {% if multList.append(value['multiple']) %}{% endif %}
             {% endif %}
         {% endfor %}
+        {% if multList|length > 0 %}
+        <h5 class="transition duration-300 ease-in-out ml-2 font-bold text-[1.1rem] uppercase dark:text-white/90 mt-2 mb-0">
+            multiple settings
+        </h5>
+        {% endif %}
         {% for multiple in multList %}
             <!-- plugin multiple handler -->
             <div data-multiple-handler
-                 class="flex items-center mx-0 sm:mx-4 md:mx-6 mb-2 mt-5 2xl:mx-6 col-span-12 ">
-                <h5 class="input-title max-w-[150px] sm:max-w-[350px]">{{ multiple }}</h5>
+                 class="flex items-center mx-2 mb-2 mt-5 col-span-12 ">
+                <h5 class="input-title max-w-[150px] sm:max-w-[350px]">{{ multiple.replace('-', ' ').replace('_', ' ')|upper }}</h5>
                 <button data-{{ current_endpoint }}-multiple-add="{{ multiple }}" type="button" class="ml-3 dark:brightness-90 inline-block px-3 py-1.5 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-md ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
                     Add
                 </button>

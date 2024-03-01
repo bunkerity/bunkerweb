@@ -3,6 +3,7 @@
     <div class="relative col-span-12 h-full">
         <button data-tab-select-dropdown-btn
                 aria-controls="tab-dropdown"
+                data-tab-id="{{ plugins[0]['id'] }}"
                 class="settings-tabs-select-btn">
             <span aria-description="current tab" class="settings-tabs-select-btn-text">
                 {% if current_endpoint == "global-config" %}general{% endif %}
