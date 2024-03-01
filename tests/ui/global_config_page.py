@@ -33,13 +33,13 @@ try:
 
     # Reset
     btn_keyword.send_keys("")
-    
+
     no_errors = True
     retries = 0
     while no_errors:
         try:
             log_info("Trying to save the global config without changing anything ...")
-            access_page(DRIVER, "//form[@id='form-edit-global-configs']//button[@type='submit']", "global config", False)
+            access_page(DRIVER, "//form[@id='form-edit-global-config']//button[@type='submit']", "global config", False)
 
             log_info("The page reloaded successfully, checking the message ...")
             assert_alert_message(DRIVER, "The global configuration was not edited because no values were changed.")
@@ -71,7 +71,7 @@ try:
     input_worker.clear()
     input_worker.send_keys("ZZZ")
 
-    assert_button_click(DRIVER, "//form[@id='form-edit-global-configs']//button[@type='submit']")
+    assert_button_click(DRIVER, "//form[@id='form-edit-global-config']//button[@type='submit']")
     assert_alert_message(DRIVER, "The global configuration was not edited because no values were changed.")
 
     log_info("The form was not submitted, trying to edit the global config with good values ...")
@@ -79,7 +79,7 @@ try:
     input_worker.clear()
     input_worker.send_keys("4096")
 
-    access_page(DRIVER, "//form[@id='form-edit-global-configs']//button[@type='submit']", "global config", False)
+    access_page(DRIVER, "//form[@id='form-edit-global-config']//button[@type='submit']", "global config", False)
 
     if TEST_TYPE == "linux":
         wait_for_service()

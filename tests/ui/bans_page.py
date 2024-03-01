@@ -114,22 +114,21 @@ try:
 
     delete_ban_checkbox = safe_get_element(DRIVER, By.XPATH, "//input[@id='ban-item-2']")
     assert isinstance(delete_ban_checkbox, WebElement), "Delete checkbox is not WebElement"
-    DRIVER.execute_script("arguments[0].click()", delete_ban_checkbox)
+    DRIVER.execute_script(f"""document.querySelector('input[id="ban-item-2"]').click()""")
 
     log_info("Ban item id=2 checkbox clicked ...")
 
     unban_button = safe_get_element(DRIVER, By.XPATH, "//button[@data-unban-btn='']")
     assert isinstance(unban_button, WebElement), "Delete button is not WebElement"
+    DRIVER.execute_script(f"""document.querySelector('button[data-unban-btn]').click()""")
 
-    DRIVER.execute_script("arguments[0].click()", unban_button)
-
-    log_info("Unban button clicked, access bans ...")
+    log_info("Unban button clicked, wait to check if delete ...")
 
     sleep(3)
 
-    access_page(DRIVER, False, "bans", False)
+    safe_get_element(DRIVER, By.XPATH, "//button[@data-unban-btn='']")
 
-    log_info("Acces page after delete action ...")
+    log_info("Start checking if delete action worked ...")
 
     try:
         entries = safe_get_element(DRIVER, By.XPATH, "//ul[@data-bans-list='']/li", multiple=True, error=True)

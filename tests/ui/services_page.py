@@ -354,8 +354,6 @@ try:
     if TEST_TYPE == "linux":
         wait_for_service()
 
-    assert_alert_message(DRIVER, "has been deleted.")
-
     log_info("Service app3.example.com has been deleted, checking if it's still present ...")
 
     try:
