@@ -11,7 +11,7 @@ from selenium.webdriver.common.keys import Keys
 
 from wizard import DRIVER
 from base import TEST_TYPE
-from utils import access_page, assert_alert_message, assert_button_click, safe_get_element, wait_for_service
+from utils import access_page, assert_button_click, safe_get_element, wait_for_service
 
 exit_code = 0
 

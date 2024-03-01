@@ -9,7 +9,6 @@ from selenium.webdriver.common.keys import Keys
 
 from wizard import DRIVER
 from utils import access_page, assert_button_click, safe_get_element
-from time import sleep
 
 exit_code = 0
 
@@ -76,35 +75,7 @@ try:
         log_error("The bans are present but there should be 2, exiting ...")
         exit(1)
 
-    log_info("Bans found, trying filters ...")
-
-    # Get total bans
-    bans = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-bans-list-item]")')
-    bans_total = len(bans)
-
-    key_word_filter_input = safe_get_element(DRIVER, "js", 'document.querySelector("input#keyword")')
-    assert isinstance(key_word_filter_input, WebElement), "Key word filter input is not a WebElement"
-    key_word_filter_input.send_keys("dzq841czqdeqzzd")
-
-    bans_hidden = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-bans-list-item][class*=hidden]")')
-
-    if len(bans_hidden) == 0:
-        log_error("The keyword filter is not working, exiting ...")
-        exit(1)
-
-    # Reset
-    key_word_filter_input.send_keys(Keys.CONTROL, "a")
-    key_word_filter_input.send_keys(Keys.BACKSPACE)
-
-    log_info("Keyword filter worked, trying select filters ...")
-
-    # Test select filters
-    select_filters = [{"name": "reason", "id": "reason", "value": "all"}, {"name": "range", "id": "term", "value": "all"}]
-
-    for item in select_filters:
-        DRIVER.execute_script(f"""document.querySelector('[data-bans-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
-
-    log_info("All filters worked, try to delete 1 ban ...")
+    log_info("Trying to delete 1 ban ...")
 
     try:
         entries = safe_get_element(DRIVER, By.XPATH, "//ul[@data-bans-list='']/li", multiple=True, error=True)
@@ -151,6 +122,38 @@ try:
     if len(entries) != 1:
         log_error("The bans are present but there should be 1, exiting ...")
         exit(1)
+
+    log_info("Bans found, trying filters ...")
+
+    # Get total bans
+    bans = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-bans-list-item]")')
+    bans_total = len(bans)
+
+    if bans_total == 0:
+        log_error("Need at least one ban to test filters ...")
+        exit(1)
+
+    key_word_filter_input = safe_get_element(DRIVER, "js", 'document.querySelector("input#keyword")')
+    assert isinstance(key_word_filter_input, WebElement), "Key word filter input is not a WebElement"
+    key_word_filter_input.send_keys("dzq841czqdeqzzd")
+
+    bans_hidden = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-bans-list-item][class*=hidden]")')
+
+    if len(bans_total) != 0:
+        log_error("Keyword filtering error, should have match nothing ...")
+        exit(1)
+
+    # Reset
+    key_word_filter_input.send_keys(Keys.CONTROL, "a")
+    key_word_filter_input.send_keys(Keys.BACKSPACE)
+
+    log_info("Keyword filter worked, trying select filters ...")
+
+    # Test select filters
+    select_filters = [{"name": "reason", "id": "reason", "value": "all"}, {"name": "range", "id": "term", "value": "all"}]
+
+    for item in select_filters:
+        DRIVER.execute_script(f"""document.querySelector('[data-bans-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     log_info("Ban deleted successfully")
 

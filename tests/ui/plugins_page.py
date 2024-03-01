@@ -50,7 +50,8 @@ try:
         exit(1)
 
     # Reset
-    key_word_filter_input.sendKeys(Keys.chord(Keys.CONTROL, "a", Keys.DELETE))
+    key_word_filter_input.send_keys(Keys.CONTROL, "a")
+    key_word_filter_input.send_keys(Keys.BACKSPACE)
 
     # Test select filters
     select_filters = [

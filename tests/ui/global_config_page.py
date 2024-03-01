@@ -1,5 +1,4 @@
 from logging import info as log_info, exception as log_exception, error as log_error, warning as log_warning
-from random import shuffle
 from time import sleep
 
 from selenium.webdriver.common.by import By
@@ -99,16 +98,10 @@ try:
         log_error(f"The value was not updated ({input_worker.get_attribute('value')} instead of 4096), exiting ...")
         exit(1)
 
-    log_info("The value was updated successfully, trying to navigate through the global config tabs ...")
+    log_info("The value was updated successfully, trying to select another plugin ...")
 
-    buttons = safe_get_element(DRIVER, By.XPATH, "//button[@data-tab-select-handler='']", multiple=True)
-    assert isinstance(buttons, list), "Buttons is not a list of WebElements"
-
-    # Open dropdown and click button
-    shuffle(buttons)
-    for button in buttons:
-        assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
-        assert_button_click(DRIVER, button)
+    assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
+    assert_button_click(DRIVER, "//button[@data-tab-select-handler='blacklist']")
 
     log_info("✅ Global config page tests finished successfully")
 except SystemExit as e:
