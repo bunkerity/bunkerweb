@@ -75,7 +75,7 @@
                 <!-- loop paths -->
                 {% for path in paths %}
                     <li class="mt-0.5 w-full">
-                        <a class="{% if current_endpoint == path %} font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/10 hover:bg-primary/30 {% else %} dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} dark:text-white dark:opacity-80 py-1 ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap rounded-lg px-4 transition text-sm"
+                        <a class="{% if current_endpoint == path %} font-semibold text-slate-700 dark:bg-primary/50 rounded-lg dark:hover:bg-primary/60 bg-primary/10 hover:bg-primary/30 {% else %} dark:hover:bg-primary/20 hover:bg-primary/5 {% endif %} dark:text-gray-200 py-1 ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap rounded-lg px-4 transition text-sm"
                            href="{% if current_endpoint == path %}#{% else %}loading?next={{ url_for(path) }}{% endif %}">
                             <div class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5">
                                 {% if path == "home" %}
@@ -190,7 +190,7 @@
                                     </svg>
                                 {% endif %}
                             </div>
-                            <span class="ml-1 duration-300 opacity-100 pointer-events-none ease">{{ path[0]|upper }}{{ path[1:].replace('_', ' ') }}</span>
+                            <span class="ml-1 duration-300 dark:text-gray-200 pointer-events-none ease">{{ path[0]|upper }}{{ path[1:].replace('_', ' ') }}</span>
                         </a>
                     </li>
                 {% endfor %}
@@ -201,12 +201,12 @@
             <div>
                 <ul>
                     <li class="w-full mt-4">
-                        <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-white opacity-60">PLUGINS PAGE</h6>
+                        <h6 class="pl-6 ml-2 text-xs font-bold leading-tight uppercase dark:text-gray-400 dark:opacity-100 opacity-60">PLUGINS PAGE</h6>
                     </li>
                     {% for plugin in plugins %}
                         {% if plugin['page'] and plugin['type'] != "pro" %}
                             <li class="mt-0.5 w-full">
-                                <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
+                                <a class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-gray-200 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
                                    href="{{ request.url_root }}plugins/{{ plugin['id'] }}">
                                     <div class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5">
                                         <svg class="fill-gray-500 h-5 w-5 relative"
@@ -222,7 +222,7 @@
                         {% if plugin['page'] and plugin['type'] == "pro" %}
                             <li class="mt-0.5 w-full">
                                 <a {% if not is_pro_version %}target="_blank" rel="noopener"{% endif %}
-                                   class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-white dark:opacity-80 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
+                                   class="dark:hover:bg-primary/20 hover:bg-primary/5 hover:rounded-lg dark:text-gray-200 py-1 text-sm ease-nav-brand my-0 mx-2 flex items-center whitespace-nowrap px-4 transition"
                                    href="{% if not is_pro_version %}https://panel.bunkerweb.io/{% else %}javascript:void(0){% endif %}"
                                     <div class="mr-2 flex items-center justify-center rounded-lg bg-center stroke-0 text-center p-1 xl:p-1.5">
                                         <svg class="h-5 w-5 dark:brightness-90"
@@ -260,7 +260,7 @@
                    type="checkbox" />
             <label for="darkMode"
                    data-dark-toggle-label
-                   class="dark:text-white dark:opacity-80 transition inline-block pl-3 mb-0 ml-0 font-normal cursor-pointer select-none text-sm text-slate-700">
+                   class="dark:text-gray-200 transition inline-block pl-3 mb-0 ml-0 font-normal cursor-pointer select-none text-sm text-slate-700">
                 {% if dark_mode == True %}
                     dark mode
                 {% else %}

@@ -14,7 +14,7 @@
     <div class="col-span-12 relative flex justify-center min-w-0 break-words rounded-2xl bg-clip-border">
         <button data-add-ban
                 type="button"
-                class="dark:bg-green-500/90 duration-300 dark:opacity-90 w-80 flex justify-center items-center px-6 py-3 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
+                class="dark:bg-green-500/90 duration-300 w-80 flex justify-center items-center px-6 py-3 font-bold text-center text-white dark:text-gray-200 uppercase align-middle transition-all rounded-lg cursor-pointer bg-green-500 hover:bg-green-500/80 focus:bg-green-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md">
             <span class="mr-2">Add ban</span>
             <svg xmlns="http://www.w3.org/2000/svg"
                  fill="none"
@@ -49,10 +49,10 @@
         <h5 class="mb-2 font-bold dark:text-white/90">INFO</h5>
         {% for info in bans_info %}
             <div class="mx-1 flex items-center my-4">
-                <p class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 dark:opacity-80">
+                <p class="transition duration-300 ease-in-out font-bold mb-0 font-sans text-sm leading-normal uppercase dark:text-gray-500 ">
                     {{ info['name'] }}
                 </p>
-                <p class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-80">
+                <p class="transition duration-300 ease-in-out pl-2 col-span-1 mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-gray-200">
                     {{ info['data'] }}
                 </p>
             </div>
@@ -92,7 +92,7 @@
                 {% if filter['type'] == 'input' %}
                     <!-- search inpt-->
                     <div class="flex flex-col relative col-span-12 md:col-span-6">
-                        <h5 class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300">
+                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                             {{ filter['name'] }}
                         </h5>
                         <label for="{{ filter['id'] }}" class="sr-only">{{ filter['label'] }}</label>
@@ -109,12 +109,12 @@
                 {% if filter['type'] == 'select' %}
                     <!-- select -->
                     <div class="flex flex-col relative col-span-12 md:col-span-6">
-                        <h5 class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300">
+                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                             {{ filter['name'] }}
                         </h5>
                         <button aria-controls="filter-{{ filter['id'] }}"
                                 data-bans-setting-select="{{ filter['id'] }}"
-                                class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:opacity-90 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
+                                class="disabled:opacity-75 dark:disabled:text-gray-300 disabled:text-gray-700 disabled:bg-gray-400 disabled:border-gray-400 dark:disabled:bg-gray-800 dark:disabled:border-gray-800 duration-300 ease-in-out dark:border-slate-600 dark:bg-slate-700 dark:text-gray-300 focus:border-green-500 flex justify-between align-middle items-center text-left text-sm leading-5.6 ease w-full rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding px-1.5 py-1 md:px-3 font-normal text-gray-700 transition-all placeholder:text-gray-500">
                             <span aria-description="current filter state value"
                                   id="bans-{{ filter['id'] }}"
                                   data-name="bans-{{ filter['id'] }}"
@@ -205,7 +205,7 @@
                 <div class="overflow-hidden min-w-[1150px] w-full grid grid-cols-12 rounded p-2">
                     <!-- header-->
                     {% for header in bans_headers %}
-                        <p class="dark:text-gray-300 h-8 text-sm font-bold {{ header['position'] }} m-0 pb-2 border-b border-gray-400">
+                        <p class="dark:text-gray-100 h-8 text-sm font-bold {{ header['position'] }} m-0 pb-2 border-b border-gray-400">
                             {{ header['name'] }}
                         </p>
                     {% endfor %}
@@ -237,15 +237,15 @@
                                         </path>
                                     </svg>
                                 </div>
-                                <p class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0 my-1"
+                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
                                    data-bans-ip="{{ ban['ip'] }}">{{ ban['ip'] }}</p>
-                                <p class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0 my-1"
+                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
                                    data-bans-reason="{{ ban['reason'] }}">{{ ban['reason'] }}</p>
-                                <p class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0 my-1"
+                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
                                    data-bans-ban_start="{{ ban['ban_start'] }}">{{ ban['ban_start'] }}</p>
-                                <p class="dark:text-gray-400 dark:opacity-80 text-sm col-span-2 m-0 my-1"
+                                <p class="dark:text-gray-400 text-sm col-span-2 m-0 my-1"
                                    data-bans-ban_end="{{ ban['ban_end'] }}">{{ ban['ban_end'] }}</p>
-                                <p class="dark:text-gray-400 dark:opacity-80 text-sm col-span-3 m-0 my-1"
+                                <p class="dark:text-gray-400 text-sm col-span-3 m-0 my-1"
                                    data-bans-remain="{{ ban['remain'] }}">{{ ban['remain'] }}</p>
                                 <p class="hidden" data-bans-term="{{ ban['term'] }}">{{ ban['term'] }}</p>
                             </li>

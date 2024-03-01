@@ -522,7 +522,7 @@ class AddBanModal {
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="pointer-events-none absolute top-1 right-2 w-6 h-6"
+          class="pointer-events-none dark:stroke-gray-300 absolute top-1 right-2 w-6 h-6"
         >
           <path
             stroke-linecap="round"
@@ -536,7 +536,7 @@ class AddBanModal {
       <button
         data-add-ban-delete-item
         type="button"
-        class="dark:bg-red-500/90 duration-300 dark:opacity-90 flex justify-center items-center p-2 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
+        class="dark:bg-red-500/90 duration-300 flex justify-center items-center p-2 font-bold text-center text-white uppercase align-middle transition-all rounded-lg cursor-pointer bg-red-500 hover:bg-red-500/80 focus:bg-red-500/80 leading-normal text-base ease-in tracking-tight-rem shadow-xs bg-150 bg-x-25 hover:-translate-y-px active:opacity-85 hover:shadow-md"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -7,7 +7,7 @@
         <div class="mx-2 grid grid-cols-12 gap-x-4 gap-y-2">
             <!-- select instance -->
             <div class="flex flex-col relative col-span-12">
-                <h5 class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300">
+                <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                     Select instance
                 </h5>
                 <button data-logs-setting-select="instances"
@@ -53,7 +53,7 @@
             <h5 class="col-span-12 mb-1 mt-2 text-[1.1rem] font-bold dark:text-white/90">Date options</h5>
             <!-- from date input -->
             <div class="flex flex-col relative col-span-12 sm:col-span-6">
-                <h5 class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300">
+                <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                     From date
                 </h5>
                 <div class="relative">
@@ -77,7 +77,7 @@
             <!-- end from date input -->
             <!-- to date input -->
             <div class="flex flex-col relative col-span-12 sm:col-span-6">
-                <h5 class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300">
+                <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                     To date (default today)
                 </h5>
                 <div class="relative">
@@ -102,7 +102,7 @@
             <h5 class="col-span-12 mb-1 mt-2 text-[1.1rem] font-bold dark:text-white/90">Live options</h5>
             <!-- refresh inp -->
             <div class="flex flex-col relative col-span-12 sm:col-span-6 3xl:col-span-3">
-                <h5 class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300">
+                <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                     Listen live
                 </h5>
                 <div data-checkbox-handler="live-update" class="relative mb-7 md:mb-0">
@@ -127,7 +127,7 @@
 
             <!-- refresh delay input -->
             <div class="flex flex-col relative col-span-12 sm:col-span-6">
-                <h5 class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300">
+                <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                     Update delay (in seconds)
                 </h5>
                 <input type="number"
@@ -188,7 +188,7 @@
                 {% if filter['type'] == 'input' %}
                     <!-- search inpt-->
                     <div class="flex flex-col relative col-span-12">
-                        <h5 class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300">
+                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                             {{ filter['name'] }}
                         </h5>
                         <label for="{{ filter['id'] }}" class="sr-only">{{ filter['label'] }}</label>
@@ -205,7 +205,7 @@
                 {% if filter['type'] == 'select' %}
                     <!-- select -->
                     <div class="flex flex-col relative col-span-12">
-                        <h5 class="my-1 transition duration-300 ease-in-out dark:opacity-90 text-sm sm:text-md font-bold m-0 dark:text-gray-300">
+                        <h5 class="my-1 transition duration-300 ease-in-out text-sm sm:text-md font-bold m-0 dark:text-gray-200">
                             {{ filter['name'] }}
                         </h5>
                         <button aria-controls="filter-{{ filter['id'] }}"
@@ -271,8 +271,8 @@
                 <!-- list container-->
                 <div class="overflow-hidden min-w-[800px] w-full grid grid-cols-12 rounded p-2">
                     <!-- header-->
-                    <p class="dark:text-gray-300 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400">Type</p>
-                    <p class="dark:text-gray-300 h-8 text-sm font-bold col-span-9 m-0 pb-2 border-b border-gray-400">Description</p>
+                    <p class="dark:text-gray-100 h-8 text-sm font-bold col-span-3 m-0 pb-2 border-b border-gray-400">Type</p>
+                    <p class="dark:text-gray-100 h-8 text-sm font-bold col-span-9 m-0 pb-2 border-b border-gray-400">Description</p>
                     <!-- end header-->
                     <!-- list -->
                     <ul class="col-span-12 w-full" data-logs-list>
