@@ -113,7 +113,7 @@ def access_page(driver, button: Union[bool, str, WebElement], name: str, message
 
     try:
         if not isinstance(button, bool) and not clicked:
-=                clicked = assert_button_click(driver, button)
+            clicked = assert_button_click(driver, button)
 
         title: Union[WebElement, List[WebElement]] = safe_get_element(driver, By.XPATH, "/html/body/div[3]/header/div/nav/h6", driver_wait=WebDriverWait(driver, 45))
         assert isinstance(title, WebElement), "Title is not a WebElement"
