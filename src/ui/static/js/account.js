@@ -1,4 +1,4 @@
-import { TabsSelect, Popover } from "./utils/settings.js";
+import { Tabs, Popover } from "./utils/settings.js";
 
 class SubmitAccount {
   constructor() {
@@ -130,6 +130,6 @@ class SwitchTabForm {
 
 const setPWBtn = new PwBtn();
 const setSubmit = new SubmitAccount();
-const setTabsSelect = new TabsSelect();
+const setTabs = new Tabs();
 const setPopover = new Popover();
 const setSwitchTabForm = new SwitchTabForm();

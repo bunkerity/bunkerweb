@@ -86,7 +86,7 @@ try:
 
     assert_button_click(DRIVER, "//button[@data-tab-handler='password']")
 
-    password_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-plugin-item='password']//input[@id='curr_password']")
+    password_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-tab-item='password']//input[@id='curr_password']")
     assert isinstance(password_input, WebElement), "The password input is not an instance of WebElement"
 
     if password_input.get_attribute("value") != "":
@@ -169,7 +169,7 @@ try:
     assert isinstance(totp_input, WebElement), "The TOTP input is not an instance of WebElement"
     totp_input.send_keys(totp.now())
 
-    password_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-plugin-item='totp']//input[@id='curr_password']")
+    password_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-tab-item='totp']//input[@id='curr_password']")
     assert isinstance(password_input, WebElement), "The password input is not an instance of WebElement"
 
     if password_input.get_attribute("value") != "":
@@ -252,7 +252,7 @@ try:
     assert isinstance(totp_input, WebElement), "The TOTP input is not an instance of WebElement"
     totp_input.send_keys(totp.now())
 
-    password_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-plugin-item='totp']//input[@id='curr_password']")
+    password_input = safe_get_element(DRIVER, By.XPATH, "//form[@data-tab-item='totp']//input[@id='curr_password']")
     assert isinstance(password_input, WebElement), "The password input is not an instance of WebElement"
     password_input.send_keys("P@ssw0rd")
 

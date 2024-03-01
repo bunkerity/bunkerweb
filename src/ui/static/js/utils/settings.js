@@ -62,6 +62,7 @@ class TabsSelect {
           //get needed data
           const tab = e.target.closest("button");
           const tabAtt = tab.getAttribute("data-tab-select-handler");
+          const text = tab.textContent;
           // change style
           this.resetTabsStyle();
           this.highlightClicked(tabAtt);
@@ -69,7 +70,7 @@ class TabsSelect {
           this.hideAllSettings();
           this.showSettingClicked(tabAtt);
           //close dropdown and change btn textcontent on mobile
-          this.setDropBtnText(tabAtt);
+          this.setDropBtnText(tabAtt, text);
           this.closeDropdown();
         }
       } catch (e) {}
@@ -117,11 +118,12 @@ class TabsSelect {
     plugin.classList.remove("hidden");
   }
 
-  setDropBtnText(tabAtt) {
+  setDropBtnText(tabAtt, text) {
     const dropBtn = this.tabContainer.querySelector(
       "[data-tab-select-dropdown-btn]",
     );
-    dropBtn.querySelector("span").textContent = tabAtt;
+    dropBtn.setAttribute("data-tab-id", tabAtt);
+    dropBtn.querySelector("span").textContent = text;
   }
 
   closeDropdown() {
@@ -238,6 +240,9 @@ class FilterSettings {
 
       // case no tab match
       if (isAllHidden) {
+        this.tabContainer
+          .querySelector("[data-tab-select-dropdown-btn] span")
+          .setAttribute("data-tab-id", "no-match");
         return (this.tabContainer.querySelector(
           "[data-tab-select-dropdown-btn] span",
         ).textContent = "No match");
@@ -247,10 +252,11 @@ class FilterSettings {
       const currTabEl = this.tabContainer.querySelector(
         "[data-tab-select-dropdown-btn] span",
       );
-      const currTabName = currTabEl.textContent.toLowerCase().trim();
+
+      const currTabName = currTabEl.getAttribute("data-tab-id");
 
       // case previously no match
-      if (currTabName.toLowerCase() === "no match") {
+      if (currTabName === "no-match") {
         return firstNotHiddenEl.click();
       }
 
@@ -292,6 +298,57 @@ class FilterSettings {
       "[data-setting-container]",
     );
     return settings;
+  }
+}
+
+class Tabs {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    window.addEventListener("click", (e) => {
+      try {
+        if (e.target.closest("button").hasAttribute("data-tab-handler")) {
+          //get needed data
+          const tab = e.target.closest("button");
+          const tabAtt = tab.getAttribute("data-tab-handler");
+          const container = tab.closest("div[data-service-content]");
+          // change style
+          this.resetTabsStyle(container);
+          this.highlightClicked(container, tabAtt);
+          this.hideAllSettings(container);
+          this.showSettingClicked(container, tabAtt);
+        }
+      } catch (err) {}
+    });
+  }
+
+  resetTabsStyle(container) {
+    //reset desktop style
+    const tabsEk = container.querySelectorAll("button[data-tab-handler]");
+    tabsEk.forEach((tab) => {
+      tab.classList.remove("active");
+    });
+  }
+
+  highlightClicked(container, tabAtt) {
+    //desktop case
+    const tab = container.querySelector(`button[data-tab-handler='${tabAtt}']`);
+    tab.classList.add("active");
+  }
+
+  hideAllSettings(container) {
+    const tabsContent = container.querySelectorAll("[data-tab-item]");
+
+    tabsContent.forEach((tabContent) => {
+      tabContent.classList.add("hidden");
+    });
+  }
+
+  showSettingClicked(container, tabAtt) {
+    const tabContent = container.querySelector(`[data-tab-item='${tabAtt}']`);
+    tabContent.classList.remove("hidden");
   }
 }
 
@@ -361,4 +418,11 @@ class CheckNoMatchFilter {
   }
 }
 
-export { Popover, TabsSelect, FormatValue, FilterSettings, CheckNoMatchFilter };
+export {
+  Popover,
+  Tabs,
+  TabsSelect,
+  FormatValue,
+  FilterSettings,
+  CheckNoMatchFilter,
+};
