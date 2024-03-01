@@ -15,11 +15,6 @@ try:
     log_info("Navigating to the global config page ...")
     access_page(DRIVER, "/html/body/aside[1]/div[1]/div[3]/ul/li[3]/a", "global config")
 
-    log_info("Looking that tabs are working programmatically ...")
-
-    DRIVER.execute_script(f"""document.querySelector('button[data-tab-handler-mobile="blacklist"]').click()""")
-    DRIVER.execute_script(f"""document.querySelector('button[data-tab-handler="general"]').click()""")
-
     log_info("Trying filters ...")
 
     # Set keyword with no matching settings
@@ -96,11 +91,13 @@ try:
 
     log_info("The value was updated successfully, trying to navigate through the global config tabs ...")
 
-    buttons = safe_get_element(DRIVER, By.XPATH, "//div[@data-global-config-tabs-desktop='']/button", multiple=True)
+    buttons = safe_get_element(DRIVER, By.XPATH, "//button[@data-tab-handler='']", multiple=True)
     assert isinstance(buttons, list), "Buttons is not a list of WebElements"
 
+    # Open dropdown and click button
     shuffle(buttons)
     for button in buttons:
+        assert_button_click(DRIVER, "//button[@data-tab-dropdown-btn='']")
         assert_button_click(DRIVER, button)
 
     log_info("Trying to filter the global config ...")

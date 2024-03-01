@@ -48,6 +48,7 @@ try:
 
     log_info('The value for the "SERVER_NAME" input is the expected one, trying to edit the config ...')
 
+    assert_button_click(DRIVER, "//button[@data-tab-dropdown-btn='']")
     assert_button_click(DRIVER, "//button[@data-tab-handler='gzip']")
     gzip_select = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select='gzip-comp-level']")
     assert isinstance(gzip_select, WebElement), "Gzip select is not a WebElement"
@@ -70,6 +71,7 @@ try:
         log_error("Modal is hidden even though it shouldn't be, exiting ...")
         exit(1)
 
+    assert_button_click(DRIVER, "//button[@data-tab-dropdown-btn='']")
     assert_button_click(DRIVER, "//button[@data-tab-handler='gzip']")
 
     gzip_comp_level_selected_elem = safe_get_element(DRIVER, By.XPATH, "//select[@id='GZIP_COMP_LEVEL']/option[@selected='']")
@@ -91,6 +93,7 @@ try:
     server_name_input.send_keys("app1.example.com")
 
     if TEST_TYPE == "docker":
+        assert_button_click(DRIVER, "//button[@data-tab-dropdown-btn='']")
         assert_button_click(DRIVER, "//button[@data-tab-handler='reverseproxy']")
 
         use_reverse_proxy_checkbox = safe_get_element(DRIVER, By.ID, "USE_REVERSE_PROXY")
