@@ -51,12 +51,12 @@ python3 /usr/share/bunkerweb/gen/main.py --variables /tmp/variables.env
 log "ENTRYPOINT" "ℹ️" "Starting nginx ..."
 nginx -g "daemon off;" &
 pid="$!"
-
 # wait while nginx is running
 wait "$pid"
-while [ -f "/var/run/bunkerweb/nginx.pid" ] ; do
-	wait "$pid"
-done
+if [ -f "/var/run/bunkerweb/nginx.pid" ]; then # process $pid exited but didn't cleanup pid file => crash?
+	log "ENTRYPOINT" "❌" "Main nginx process exited uncleanly! Stopping BunkerWeb..."
+	exit 1
+fi
 
 log "ENTRYPOINT" "ℹ️" "BunkerWeb stopped"
 exit 0
