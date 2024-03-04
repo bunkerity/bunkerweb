@@ -48,7 +48,7 @@ try:
     ]
 
     for item in select_filters:
-        DRIVER.execute_script(f"""document.querySelector('[data-jobs-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
+        DRIVER.execute_script(f"""return document.querySelector('[data-jobs-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     log_info("Keyword filter is working, trying to filter by success state ...")
 

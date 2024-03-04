@@ -140,8 +140,6 @@ def access_page(driver, button: Union[bool, str, WebElement], name: str, message
         log_info(f"{name.title()} page loaded successfully")
 
     driver.set_window_size(2560, 1440)
-    log_info("Try update window size to 2560,1440")
-    log_info("Current window size is: " + str(driver.get_window_size()))
 
 
 def wait_for_service(service: str = "www.example.com"):

@@ -18,22 +18,60 @@ try:
     log_info("Trying filters ...")
 
     # Set keyword with no matching settings
-    keyword_no_match = "dqz48 é84 dzq 584dz5qd4"
-    btn_keyword = safe_get_element(DRIVER, "js", 'document.querySelector("input#keyword")')
-    btn_keyword.send_keys(keyword_no_match)
-    sleep(0.1)
+    input_keyword = safe_get_element(DRIVER, By.ID, "keyword")
+    input_keyword.send_keys("dqz48 é84 dzq 584dz5qd4")
 
     # Check that the no matching element is shown and other card hide
-    is_no_match = DRIVER.execute_script('return !document.querySelector("[data-global-config-nomatch]").classList.contains("hidden")')
-    if not is_no_match:
-        log_error(f"Filter keyword with value {keyword_no_match} shouldn't match something.")
+    is_no_match_hidden = DRIVER.execute_script('return document.querySelector("[data-global-config-nomatch]").classList.contains("hidden")')
+
+    if is_no_match_hidden:
+        log_error(f"Filter keyword shouldn't match something.")
         exit(1)
 
     # Reset
-    btn_keyword.send_keys(Keys.CONTROL, "a")
-    btn_keyword.send_keys(Keys.BACKSPACE)
+    input_keyword.send_keys(Keys.CONTROL, "a")
+    input_keyword.send_keys(Keys.BACKSPACE)
 
-    log_info("Filter with unmatched keyword works as expected, try with a keyword that matches a setting...")
+    log_info("Filter with unmatched keyword works as expected, try to match a setting ...")
+
+    input_keyword.send_keys("http port")
+
+    # Check that the matching element is shown and other card hide
+    is_http_port_hidden = DRIVER.execute_script(f"""return document.querySelector('#form-edit-global-config-http-port').classList.contains('hidden')""")
+
+    if is_http_port_hidden:
+        log_error(f"hidden http port should be match.")
+        exit(1)
+
+    is_https_port_hidden = DRIVER.execute_script(f"""return document.querySelector('#form-edit-global-config-https-port').classList.contains('hidden')""")
+
+    if not is_https_port_hidden:
+        log_error(f"Setting https port should not be match.")
+        exit(1)
+
+    # Reset
+    input_keyword.send_keys(Keys.CONTROL, "a")
+    input_keyword.send_keys(Keys.BACKSPACE)
+
+    log_info("Matching a setting done ...")
+
+    log_info("Filters working, trying settings interaction ...")
+
+    log_info("Select from dropdown ...")
+
+    select = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select='timers-log-level']")
+    assert_button_click(DRIVER, select)
+
+    select_active_item = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select-dropdown-btn='timers-log-level' and contains(@class, 'active')]")
+    assert_button_click(DRIVER, select_active_item)
+
+    log_info("Select dropdown done, trying toggle checkbox...")
+
+    checkbox_api = safe_get_element(DRIVER, By.ID, "USE_API")
+    assert_button_click(DRIVER, checkbox_api)
+    assert_button_click(DRIVER, checkbox_api)
+
+    log_info("Toggle checkbox done, trying to update global config ...")
 
     no_errors = True
     retries = 0
@@ -98,10 +136,15 @@ try:
         log_error(f"The value was not updated ({input_worker.get_attribute('value')} instead of 4096), exiting ...")
         exit(1)
 
-    log_info("The value was updated successfully, trying to select another plugin ...")
+    log_info("The value was updated successfully, trying to select all plugins ...")
 
-    assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
-    assert_button_click(DRIVER, "//button[@data-tab-select-handler='blacklist']")
+    # Open dropdown to select all plugins and click on them
+    buttons_plugin = DRIVER.execute_script('return document.querySelectorAll("button[data-tab-select-handler]")')
+
+    for button in buttons_plugin:
+        DRIVER.execute_script("arguments[0].click()", button)
+
+    log_info("Selecting all plugins worked ...")
 
     log_info("✅ Global config page tests finished successfully")
 except SystemExit as e:

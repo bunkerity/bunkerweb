@@ -48,7 +48,7 @@ try:
     ]
 
     for item in select_filters:
-        DRIVER.execute_script(f"""document.querySelector('[data-reports-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
+        DRIVER.execute_script(f"""return document.querySelector('[data-reports-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     filter_input = safe_get_element(DRIVER, By.ID, "keyword")
     assert isinstance(filter_input, WebElement), "Keyword filter input is not a WebElement"

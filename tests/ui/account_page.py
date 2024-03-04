@@ -37,7 +37,7 @@ try:
 
     log_info("username 'admin' is correctly set by default, trying username update ...")
 
-    DRIVER.execute_script(f"arguments[0].value = 'admin2'", username_input)
+    DRIVER.execute_script(f"return arguments[0].value = 'admin2'", username_input)
 
     password_input = safe_get_element(DRIVER, By.ID, "curr_password")
     assert isinstance(password_input, WebElement), "The password input is not an instance of WebElement"
@@ -47,7 +47,7 @@ try:
         exit(1)
 
     # execute script using create password_input
-    DRIVER.execute_script(f"arguments[0].value = '{UI_PASSWORD}'", password_input)
+    DRIVER.execute_script(f"return arguments[0].value = '{UI_PASSWORD}'", password_input)
     assert_button_click(DRIVER, "//button[@id='username-button' and @class='edit-btn']")
 
     try:

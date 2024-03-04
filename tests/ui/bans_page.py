@@ -54,7 +54,14 @@ try:
         log_error("Bans present even though they shouldn't be, exiting ...")
         exit(1)
 
-    log_info("No bans found, as expected, trying to add multiple bans ...")
+    log_info("Toggle modal, then trying to add multiple bans ...")
+
+    close_modal = safe_get_element(DRIVER, By.XPATH, "//button[@data-bans-modal-close='']")
+    assert isinstance(close_modal, WebElement), "Add entry button not found"
+
+    assert_button_click(DRIVER, close_modal)
+
+    assert_button_click(DRIVER, "//button[@data-add-ban='']")
 
     add_entry_button = safe_get_element(DRIVER, By.XPATH, "//button[@data-ban-add-new='']")
     assert isinstance(add_entry_button, WebElement), "Add entry button not found"
@@ -62,14 +69,16 @@ try:
     assert_button_click(DRIVER, add_entry_button)
 
     ip_input = safe_get_element(DRIVER, By.ID, "ip-2")
+    ip_input_value = f"127.0.0.{randint(10, 122)}"
     assert isinstance(ip_input, WebElement), "IP input not found"
-    ip_input.send_keys(f"127.0.0.{randint(10, 122)}")
+    ip_input.send_keys(ip_input_value)
 
     assert_button_click(DRIVER, add_entry_button)
 
-    ip_input = safe_get_element(DRIVER, By.ID, "ip-3")
-    assert isinstance(ip_input, WebElement), "IP input not found"
-    ip_input.send_keys(f"127.0.0.{randint(123, 255)}")
+    ip_input_2 = safe_get_element(DRIVER, By.ID, "ip-3")
+    ip_input_value_2 = f"127.0.0.{randint(123, 255)}"
+    assert isinstance(ip_input_2, WebElement), "IP input not found"
+    ip_input_2.send_keys(ip_input_value_2)
 
     log_info("Added 2 bans entries to modal, click on save ...")
 
@@ -85,6 +94,53 @@ try:
     if len(entries) != 2:
         log_error("The bans are present but there should be 2, exiting ...")
         exit(1)
+
+    log_info("Bans added successfully, trying to filter ...")
+
+    # Get total bans
+    bans = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-bans-list-item]")')
+    bans_total = len(bans)
+
+    if bans_total == 0:
+        log_error("Need at least one ban to test filters ...")
+        exit(1)
+
+    log_info("Start with keyword filtering ...")
+
+    key_word_filter_input = safe_get_element(DRIVER, By.XPATH, "//input[@id='keyword']")
+    assert isinstance(key_word_filter_input, WebElement), "Key word filter input is not a WebElement"
+    key_word_filter_input.send_keys("dzq841czqdeqzzd")
+
+    bans_hidden = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-bans-list-item][class*=hidden]")')
+    bans_hidden_total = len(bans_hidden)
+
+    log_info(f"Added 'dzq841czqdeqzzd' value, bans hidden {bans_hidden_total} / {bans_total} ...")
+
+    if bans_hidden_total != 2:
+        log_error("Keyword filtering error, should have match nothing ...")
+        exit(1)
+
+    # Reset
+    key_word_filter_input.send_keys(Keys.CONTROL, "a")
+    key_word_filter_input.send_keys(Keys.BACKSPACE)
+
+    log_info("Keyword filter with no match worked, trying to match a  ban value ...")
+    key_word_filter_input.send_keys(ip_input_value_2)
+
+    bans_hidden = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-bans-list-item][class*=hidden]")')
+    bans_hidden_total = len(bans_hidden)
+
+    if bans_hidden_total != 1:
+        log_error("Keyword filtering error, should have match one ban ...")
+        exit(1)
+
+    log_info("Keyword filter to show only one ban worked, trying select filters ...")
+
+    # Test select filters
+    select_filters = [{"name": "reason", "id": "reason", "value": "all"}, {"name": "range", "id": "term", "value": "all"}]
+
+    for item in select_filters:
+        DRIVER.execute_script(f"""return document.querySelector('[data-bans-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     log_info("Trying to delete 1 ban ...")
 
@@ -132,43 +188,6 @@ try:
     if len(entries) != 1:
         log_error("The bans are present but there should be 1, exiting ...")
         exit(1)
-
-    log_info("Bans found, trying filters ...")
-
-    # Get total bans
-    bans = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-bans-list-item]")')
-    bans_total = len(bans)
-
-    if bans_total == 0:
-        log_error("Need at least one ban to test filters ...")
-        exit(1)
-
-    log_info("Start with keyword filtering ...")
-
-    key_word_filter_input = safe_get_element(DRIVER, By.XPATH, "//input[@id='keyword']")
-    assert isinstance(key_word_filter_input, WebElement), "Key word filter input is not a WebElement"
-    key_word_filter_input.send_keys("dzq841czqdeqzzd")
-
-    bans_hidden = safe_get_element(DRIVER, "js", 'document.querySelectorAll("[data-bans-list-item][class*=hidden]")')
-    bans_hidden_total = len(bans_hidden)
-
-    log_info(f"Added 'dzq841czqdeqzzd' value, bans hidden {bans_hidden_total} / {bans_total} ...")
-
-    if bans_hidden_total != 1:
-        log_error("Keyword filtering error, should have match nothing ...")
-        exit(1)
-
-    # Reset
-    key_word_filter_input.send_keys(Keys.CONTROL, "a")
-    key_word_filter_input.send_keys(Keys.BACKSPACE)
-
-    log_info("Keyword filter worked, trying select filters ...")
-
-    # Test select filters
-    select_filters = [{"name": "reason", "id": "reason", "value": "all"}, {"name": "range", "id": "term", "value": "all"}]
-
-    for item in select_filters:
-        DRIVER.execute_script(f"""document.querySelector('[data-bans-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     log_info("Ban deleted successfully")
 

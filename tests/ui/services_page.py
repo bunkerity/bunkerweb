@@ -57,7 +57,93 @@ try:
 
     log_info("Input service checked ...")
 
+    assert_button_click(DRIVER, "//button[@data-services-modal-close='']")
+    assert_button_click(DRIVER, "//button[@data-services-action='new']")
+
+    log_info("Toggle modal checked, trying settings ...")
+
+    log_info("Check only one plugin is visible ...")
+
+    is_general_plugin_hidden = DRIVER.execute_script(f"""return document.querySelector('[data-plugin-item="general"]').classList.contains('hidden')""")
+
+    if is_general_plugin_hidden:
+        log_error(f"Plugin general should be visible.")
+        exit(1)
+
+    is_antibot_plugin_hidden = DRIVER.execute_script(f"""return document.querySelector('[data-plugin-item="antibot"]').classList.contains('hidden')""")
+
+    if not is_antibot_plugin_hidden:
+        log_error(f"Plugin antibot should not be visible.")
+        exit(1)
+
+    log_info("Only one plugin visible checked, trying keyword no match ...")
+
+    # Set keyword with no matching settings
+    input_keyword = safe_get_element(DRIVER, By.ID, "settings-filter")
+    input_keyword.send_keys("dqz48 é84 dzq 584dz5qd4")
+
+    # Check that the no matching element is shown and other card hide
+    is_no_match = DRIVER.execute_script('return document.querySelector("[data-services-nomatch]").classList.contains("hidden")')
+    if is_no_match:
+        log_error(f"Filter keyword shouldn't match something.")
+        exit(1)
+
+    # Reset
+    input_keyword.send_keys(Keys.CONTROL, "a")
+    input_keyword.send_keys(Keys.BACKSPACE)
+
+    log_info("Filter with unmatched keyword works as expected, try to match a setting ...")
+
+    input_keyword.send_keys("server type")
+
+    # Check that the matching element is shown and other card hide
+    is_server_type_hidden = DRIVER.execute_script(f"""return document.querySelector('#form-edit-services-server-type').classList.contains('hidden')""")
+
+    if is_server_type_hidden:
+        log_error(f"Setting server type should be match.")
+        exit(1)
+
+    is_server_name_hidden = DRIVER.execute_script(f"""return document.querySelector('#form-edit-services-server-name').classList.contains('hidden')""")
+
+    if not is_server_name_hidden:
+        log_error(f"Setting server name should not be match.")
+        exit(1)
+
+    # Reset
+    input_keyword.send_keys(Keys.CONTROL, "a")
+    input_keyword.send_keys(Keys.BACKSPACE)
+
+    log_info("Matching a setting done, trying select dropdown ...")
+
+    assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
+
+    select = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select='server-type']")
+    assert_button_click(DRIVER, select)
+
+    select_active_item = safe_get_element(DRIVER, By.XPATH, "//button[@data-setting-select-dropdown-btn='server-type' and contains(@class, 'active')]")
+    assert_button_click(DRIVER, select_active_item)
+
+    log_info("Select dropdown done, trying toggle checkbox...")
+
+    checkbox_api = safe_get_element(DRIVER, By.ID, "LISTEN_STREAM")
+    assert_button_click(DRIVER, checkbox_api)
+    assert_button_click(DRIVER, checkbox_api)
+
+    log_info("Toggle checkbox done, trying multiple plugins select ...")
+
+    # Open dropdown to select all plugins and click on them
+    buttons_plugin = DRIVER.execute_script('return document.querySelectorAll("button[data-tab-select-handler]")')
+
+    for button in buttons_plugin:
+        DRIVER.execute_script("arguments[0].click()", button)
+
+    assert_button_click(DRIVER, "//button[@data-services-modal-close='']")
+
+    log_info("Multiple plugins select done ...")
+
     log_info("Additional checks done, trying to edit the config ...")
+
+    assert_button_click(DRIVER, "//div[@data-services-service='www.example.com']//button[@data-services-action='edit']")
 
     assert_button_click(DRIVER, "//button[@data-tab-select-dropdown-btn='']")
     assert_button_click(DRIVER, "//button[@data-tab-select-handler='gzip']")
@@ -93,7 +179,7 @@ try:
 
     assert_button_click(DRIVER, "//button[@data-services-modal-close='']/*[local-name() = 'svg']")
 
-    log_info("Creating a new service ...")
+    log_info("Setting updated, creating a new service ...")
 
     assert_button_click(DRIVER, "//button[@data-services-action='new']")
 
@@ -295,7 +381,7 @@ try:
         log_error(f"The service hasn't been created ({len(services)} services found), exiting ...")
         exit(1)
 
-    log_info(f"We need 4 services to test filter, currently {len(services)}")
+    log_info(f"We need at least 4 services to test filter, currently {len(services)}")
 
     server_name_elem = safe_get_element(DRIVER, By.XPATH, "//div[@data-services-service='app3.example.com']//h5")
     assert isinstance(server_name_elem, WebElement), "Server name element is not a WebElement"
@@ -312,20 +398,19 @@ try:
     log_info("Service app3.example.com is present, trying service card filters...")
 
     # Set keyword with no matching settings
-    keyword_no_match = "dqz48 é84 dzq 584dz5qd4"
-    btn_keyword = safe_get_element(DRIVER, "js", 'document.querySelector("input#service-name-keyword")')
-    btn_keyword.send_keys(keyword_no_match)
+    input_card_keyword = safe_get_element(DRIVER, By.ID, "service-name-keyword")
+    input_card_keyword.send_keys("dqz48 é84 dzq 584dz5qd4")
     sleep(0.1)
 
     # Check that the no matching element is shown and other card hide
-    is_no_match = DRIVER.execute_script('return document.querySelector("[data-services-nomatch-card]").classList.contains("hidden") ? false : true')
-    if not is_no_match:
-        log_error(f"Filter keyword with value {keyword_no_match} shouldn't match something.")
+    is_no_match = DRIVER.execute_script('return document.querySelector("[data-services-nomatch-card]").classList.contains("hidden")')
+    if is_no_match:
+        log_error(f"Filter keyword shouldn't match something.")
         exit(1)
 
     # Reset
-    btn_keyword.send_keys(Keys.CONTROL, "a")
-    btn_keyword.send_keys(Keys.BACKSPACE)
+    input_card_keyword.send_keys(Keys.CONTROL, "a")
+    input_card_keyword.send_keys(Keys.BACKSPACE)
 
     log_info("Service card keyword filter working, trying select filters ...")
 
@@ -336,7 +421,7 @@ try:
     ]
 
     for item in select_filters:
-        DRIVER.execute_script(f"""document.querySelector('[data-services-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
+        DRIVER.execute_script(f"""return document.querySelector('[data-services-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     log_info("Filters working as expected, trying to delete app3.example.com ...")
 

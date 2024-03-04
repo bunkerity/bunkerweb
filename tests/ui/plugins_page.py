@@ -59,7 +59,7 @@ try:
     ]
 
     for item in select_filters:
-        DRIVER.execute_script(f"""document.querySelector('[data-plugins-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
+        DRIVER.execute_script(f"""return document.querySelector('[data-plugins-setting-select-dropdown-btn="{item["id"]}"][value="{item["value"]}"]').click()""")
 
     log_info("The filter is working, trying to add a bad plugin ...")
 
