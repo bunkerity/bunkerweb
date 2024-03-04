@@ -41,6 +41,12 @@ try:
 
     # ? Get version and integration of BunkerWeb
     data: Dict[str, Any] = db.get_metadata()
+
+    data.pop("pro_expire", None)
+    data.pop("pro_services", None)
+    data.pop("pro_overlapped", None)
+    data.pop("pro_status", None)
+
     db_config = db.get_config(methods=True, with_drafts=True)
     services = db_config.get("SERVER_NAME", {"value": ""})["value"].split(" ")
     multisite = db_config.get("MULTISITE", {"value": "no"})["value"] == "yes"

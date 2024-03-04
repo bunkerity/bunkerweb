@@ -101,11 +101,15 @@ try:
     if resp.headers.get("Content-Type") == "application/zip":
         logger.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated pro plugins...")
 
-        db.set_is_pro(True)
-        db.set_pro_expire("")
-        db.set_pro_status("valid")
-        db.set_pro_overlapped(False)
-        db.set_pro_services("")
+        db.set_pro_metadata(
+            {
+                "is_pro": True,
+                "pro_expire": None,
+                "pro_status": "valid",
+                "pro_overlapped": False,
+                "pro_services": 0,
+            }
+        )
 
         with BytesIO(resp.content) as plugin_content:
             with ZipFile(plugin_content) as zf:
@@ -116,11 +120,15 @@ try:
             message = "Your BunkerWeb Pro license is not valid or has expired"
         logger.warning(f"{message}, only checking if there are new or updated info about pro plugins...")
 
-        db.set_is_pro(False)
-        db.set_pro_expire("")
-        db.set_pro_status("invalid")
-        db.set_pro_overlapped(False)
-        db.set_pro_services("")
+        db.set_pro_metadata(  # TODO: set other pro metadata than is_pro correctly
+            {
+                "is_pro": False,
+                "pro_expire": None,
+                "pro_status": "invalid",
+                "pro_overlapped": False,
+                "pro_services": 0,
+            }
+        )
 
         plugins = resp.json()
         for plugin in plugins["data"]:

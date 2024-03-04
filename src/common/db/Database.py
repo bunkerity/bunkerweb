@@ -223,8 +223,8 @@ class Database:
 
         return ""
 
-    def set_is_pro(self, value: bool = False) -> str:
-        """Set the is_pro value"""
+    def set_pro_metadata(self, data: Dict[Literal["is_pro", "pro_expire", "pro_status", "pro_overlapped", "pro_services"], Any] = {}) -> str:
+        """Set the pro metadata values"""
         with self.__db_session() as session:
             try:
                 metadata = session.query(Metadata).get(1)
@@ -232,108 +232,13 @@ class Database:
                 if not metadata:
                     return "The metadata are not set yet, try again"
 
-                metadata.is_pro = value
+                for key, value in data.items():
+                    setattr(metadata, key, value)
                 session.commit()
             except BaseException:
                 return format_exc()
 
         return ""
-
-    def set_pro_expire(self, value: str) -> str:
-        """Set the pro_expire value"""
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).get(1)
-
-                if not metadata:
-                    return "The metadata are not set yet, try again"
-
-                metadata.pro_expire = value
-                session.commit()
-            except BaseException:
-                return format_exc()
-
-        return ""
-
-    def get_pro_expire(self) -> str:
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).with_entities(Metadata.pro_expire).filter_by(id=1).first()
-                return metadata.pro_expire
-            except (ProgrammingError, OperationalError):
-                return ""
-
-    def set_pro_services(self, value: str) -> str:
-        """Set the pro_services value"""
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).get(1)
-
-                if not metadata:
-                    return "The metadata are not set yet, try again"
-
-                metadata.pro_services = value
-                session.commit()
-            except BaseException:
-                return format_exc()
-
-        return ""
-
-    def get_pro_services(self) -> str:
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).with_entities(Metadata.pro_services).filter_by(id=1).first()
-                return metadata.pro_services
-            except (ProgrammingError, OperationalError):
-                return ""
-
-    def set_pro_overlapped(self, value: bool = False) -> str:
-        """Set the pro_overlapped value"""
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).get(1)
-
-                if not metadata:
-                    return "The metadata are not set yet, try again"
-
-                metadata.pro_overlapped = value
-                session.commit()
-            except BaseException:
-                return format_exc()
-
-        return ""
-
-    def get_pro_overlapped(self) -> str:
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).with_entities(Metadata.pro_overlapped).filter_by(id=1).first()
-                return metadata.pro_overlapped
-            except (ProgrammingError, OperationalError):
-                return ""
-
-    def set_pro_status(self, value: str) -> str:
-        """Set the pro_status value"""
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).get(1)
-
-                if not metadata:
-                    return "The metadata are not set yet, try again"
-
-                metadata.pro_status = value
-                session.commit()
-            except BaseException:
-                return format_exc()
-
-        return ""
-
-    def get_pro_status(self) -> str:
-        with self.__db_session() as session:
-            try:
-                metadata = session.query(Metadata).with_entities(Metadata.pro_status).filter_by(id=1).first()
-                return metadata.pro_status
-            except (ProgrammingError, OperationalError):
-                return ""
 
     def is_scheduler_first_start(self) -> bool:
         """Check if it's the scheduler's first start"""
@@ -386,7 +291,16 @@ class Database:
 
     def get_metadata(self) -> Dict[str, str]:
         """Get the metadata from the database"""
-        data = {"version": "1.5.6", "integration": "unknown", "database_version": "Unknown", "is_pro": "no"}
+        data = {
+            "version": "1.5.6",
+            "integration": "unknown",
+            "database_version": "Unknown",
+            "is_pro": "no",
+            "pro_expire": None,
+            "pro_services": 0,
+            "pro_overlapped": False,
+            "pro_status": "invalid",
+        }
         database = self.database_uri.split(":")[0].split("+")[0]
         with self.__db_session() as session:
             with suppress(ProgrammingError, OperationalError):

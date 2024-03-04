@@ -41,6 +41,7 @@ INTEGRATIONS_ENUM = Enum(
 )
 STREAM_TYPES_ENUM = Enum("no", "yes", "partial", name="stream_types_enum")
 PLUGIN_TYPES_ENUM = Enum("core", "external", "pro", name="plugin_types_enum")
+PRO_STATUS_ENUM = Enum("invalid", "valid", "expired", name="pro_status_enum")
 Base = declarative_base()
 
 
@@ -270,9 +271,9 @@ class Metadata(Base):
     id = Column(Integer, primary_key=True, default=1)
     is_initialized = Column(Boolean, nullable=False)
     is_pro = Column(Boolean, default=False, nullable=False)
-    pro_expire = Column(String(32), default="", nullable=False)
-    pro_status = Column(String(32), default="", nullable=False)
-    pro_services = Column(String(256), default="", nullable=False)
+    pro_expire = Column(DateTime, nullable=True)
+    pro_status = Column(PRO_STATUS_ENUM, default="invalid", nullable=False)
+    pro_services = Column(Integer, default=0, nullable=False)
     pro_overlapped = Column(Boolean, default=False, nullable=False)
     first_config_saved = Column(Boolean, nullable=False)
     autoconf_loaded = Column(Boolean, default=False, nullable=True)
