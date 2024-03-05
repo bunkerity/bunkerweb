@@ -483,13 +483,18 @@ if __name__ == "__main__":
                 elif INTEGRATION == "Linux":
                     # Reload nginx
                     logger.info("Reloading nginx ...")
-                    proc = subprocess_run([join(sep, "usr", "sbin", "nginx"), "-s", "reload"], stdin=DEVNULL, stderr=STDOUT, env=env.copy(), check=False, stdout=PIPE)
+                    proc = subprocess_run(
+                        [join(sep, "usr", "sbin", "nginx"), "-s", "reload"],
+                        stdin=DEVNULL,
+                        stderr=STDOUT,
+                        env=env.copy(),
+                        check=False,
+                        stdout=PIPE,
+                    )
                     if proc.returncode == 0:
                         logger.info("Successfully sent reload signal to nginx")
                     else:
-                        logger.error(
-                            f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stdout.decode('utf-8') if proc.stdout else 'no output'}",
-                        )
+                        logger.error(f"Error while reloading nginx - returncode: {proc.returncode} - error: {proc.stdout.decode('utf-8') if proc.stdout else 'no output'}")
                 else:
                     logger.warning("No BunkerWeb instance found, skipping nginx reload ...")
             except:
@@ -519,54 +524,38 @@ if __name__ == "__main__":
                 # check if the plugins have changed since last time
                 if changes["pro_plugins_changed"]:
                     logger.info("Pro plugins changed, generating ...")
-                    changes["external_plugins_changed"] = True
                     PRO_PLUGINS_NEED_GENERATION = True
+                    CONFIG_NEED_GENERATION = True
+                    RUN_JOBS_ONCE = True
+                    NEED_RELOAD = True
 
                 if changes["external_plugins_changed"]:
                     logger.info("External plugins changed, generating ...")
-
-                    if FIRST_RUN:
-                        if INTEGRATION not in (
-                            "Swarm",
-                            "Kubernetes",
-                            "Autoconf",
-                        ):
-                            # run the config saver to save potential ignored external plugins settings
-                            logger.info("Running config saver to save potential ignored external plugins settings ...")
-                            proc = subprocess_run(
-                                [
-                                    "python3",
-                                    join(
-                                        sep,
-                                        "usr",
-                                        "share",
-                                        "bunkerweb",
-                                        "gen",
-                                        "save_config.py",
-                                    ),
-                                    "--settings",
-                                    join(sep, "usr", "share", "bunkerweb", "settings.json"),
-                                ],
-                                stdin=DEVNULL,
-                                stderr=STDOUT,
-                                check=False,
-                            )
-                            if proc.returncode != 0:
-                                logger.error(
-                                    "Config saver failed, configuration will not work as expected...",
-                                )
-
-                        changes.update(
-                            {
-                                "custom_configs_changed": True,
-                                "config_changed": True,
-                            }
-                        )
-
                     PLUGINS_NEED_GENERATION = True
                     CONFIG_NEED_GENERATION = True
                     RUN_JOBS_ONCE = True
                     NEED_RELOAD = True
+
+                if FIRST_RUN and (changes["pro_plugins_changed"] or changes["external_plugins_changed"]):
+                    if INTEGRATION not in ("Swarm", "Kubernetes", "Autoconf"):
+                        # run the config saver to save potential ignored external plugins settings
+                        logger.info("Running config saver to save potential ignored external plugins settings ...")
+                        proc = subprocess_run(
+                            [
+                                "python3",
+                                join(sep, "usr", "share", "bunkerweb", "gen", "save_config.py"),
+                                "--settings",
+                                join(sep, "usr", "share", "bunkerweb", "settings.json"),
+                            ],
+                            stdin=DEVNULL,
+                            stderr=STDOUT,
+                            check=False,
+                        )
+                        if proc.returncode != 0:
+                            logger.error(
+                                "Config saver failed, configuration will not work as expected...",
+                            )
+                    changes.update({"custom_configs_changed": True, "config_changed": True})
 
                 # check if the custom configs have changed since last time
                 if changes["custom_configs_changed"]:
