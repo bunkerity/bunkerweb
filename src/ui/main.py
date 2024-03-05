@@ -1298,7 +1298,7 @@ def upload_plugin():
 def custom_plugin(plugin: str):
     message = ""
     if not plugin_id_rx.match(plugin):
-        return error_message(f'Invalid plugin id, "{plugin}" (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)'), 400
+        return error_message(f"Invalid plugin id, (must be between 1 and 64 characters, only letters, numbers, underscores and hyphens)"), 400
 
     # Case we ware looking for a plugin template
     # We need to check if a page exists, and if it does, we need to check if the plugin is activated and metrics are on
@@ -1308,7 +1308,7 @@ def custom_plugin(plugin: str):
         page = db.get_plugin_template(plugin)
 
         if not page:
-            return error_message(f'The plugin "{plugin}" does not have a template'), 404
+            return error_message(f"The plugin does not have a template"), 404
 
         # Case template, prepare data
         plugins = app.config["CONFIG"].get_plugins()
@@ -1327,7 +1327,7 @@ def custom_plugin(plugin: str):
 
         # Case no plugin found
         if plugin_id is None:
-            return error_message(f'Plugin "{plugin}" not found'), 404
+            return error_message(f"Plugin not found"), 404
 
         config = app.config["CONFIG"].get_config(methods=False)
 
@@ -1409,7 +1409,7 @@ def custom_plugin(plugin: str):
     module = db.get_plugin_actions(plugin)
 
     if module is None:
-        return error_message(f'The actions.py file for the plugin "{plugin}" does not exist'), 404
+        return error_message(f"The actions.py file for the plugin does not exist"), 404
 
     try:
         # Try to import the custom plugin
@@ -1420,7 +1420,7 @@ def custom_plugin(plugin: str):
             loader = SourceFileLoader("actions", temp.name)
             actions = loader.load_module()
     except:
-        return error_message(f'An error occurred while importing the plugin "{plugin}", see logs for more details'), 500
+        return error_message(f"An error occurred while importing the plugin, see logs for more details"), 500
 
     res = None
 
@@ -1434,9 +1434,9 @@ def custom_plugin(plugin: str):
         else:
             res = method(app=app)
     except AttributeError:
-        message = f'The plugin "{plugin}" does not have a "{plugin}" method, see logs for more details'
+        message = f"The plugin does not have a method, see logs for more details"
     except:
-        message = f'An error occurred while executing the plugin "{plugin}", see logs for more details'
+        message = f"An error occurred while executing the plugin, see logs for more details"
     finally:
         if sbin_nginx_path.is_file():
             # Remove the custom plugin from the shared library
@@ -1445,7 +1445,7 @@ def custom_plugin(plugin: str):
             del actions
 
         if message or not isinstance(res, dict) and not res:
-            return error_message(message or f'The plugin "{plugin}" did not return a valid response'), 500
+            return error_message(message or "The plugin did not return a valid response"), 500
 
     app.logger.info(f"Plugin {plugin} action executed successfully")
     return jsonify({"message": "ok", "data": res}), 200
