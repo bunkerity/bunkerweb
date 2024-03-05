@@ -23,7 +23,7 @@ You can get in touch with us about any of the following :
 
 ### Pro version
 
-We have a pro version of BunkerWeb, which includes :
+We have a (pro version of BunkerWeb)[https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro], which includes :
 
 - additional features and plugins
 - regular updates to improve your experience

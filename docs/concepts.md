@@ -28,7 +28,7 @@ If you think that a new integration should be supported, do not hesitate to open
 
 !!! tip "Pro settings"
 
-    Some plugins are reserved for the **pro version**. [Find out more about the pro version here.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)
+    Some plugins are reserved for the **pro version**. [Find out more about the pro version here.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro)
 
 Once BunkerWeb is integrated into your environment, you will need to configure it to serve and protect your web applications.
 

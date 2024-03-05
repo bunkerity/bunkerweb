@@ -1731,7 +1731,7 @@ After a successful login/password combination, you will be prompted to enter you
 
 ## Upgrade to PRO
 
-In case you have buy a pro version and you already have a BunkerWeb setup with an UI, you can upgrade doing this :
+In case you have buy a (pro version)[https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro] and you already have a BunkerWeb setup with an UI, you can upgrade doing this :
 
 - access the **global config page**.
 - click on the **pro plugin**

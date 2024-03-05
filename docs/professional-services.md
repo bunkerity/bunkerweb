@@ -37,7 +37,7 @@ Any features from pro version are up to date, and we have an active listening on
 
 Switching to the pro version is done centrally via the panel, which is also used for support.
 
-If you are interested, please [visit the dedicated page.](https://panel.bunkerweb.io/contact.php?utm_campaign=self&utm_source=doc)
+If you are interested, please [visit the dedicated page.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro)
 
 ## How can I get more information ?
 

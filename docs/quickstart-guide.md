@@ -2439,4 +2439,4 @@ For simplified use of the solution, don't hesitate to [try out the web UI.](web-
 
 Please note that **BunkerWeb comes in both free and pro versions**, with pro features indicated to avoid confusion.
 
-If you'd like to find out more about the pro version, and use the solution to the full, [visit the panel.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc)
+If you'd like to find out more about the pro version, and use the solution to the full, [visit the panel.](https://panel.bunkerweb.io/?utm_campaign=self&utm_source=doc#pro)
