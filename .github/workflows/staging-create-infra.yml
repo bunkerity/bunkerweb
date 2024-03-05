@@ -11,8 +11,6 @@ on:
         required: true
       SECRET_KEY:
         required: true
-      K8S_IP:
-        required: true
 
 jobs:
   create:
