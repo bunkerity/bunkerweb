@@ -75,6 +75,7 @@ jobs:
           echo "127.0.0.1 www.example.com" | sudo tee -a /etc/hosts
           echo "127.0.0.1 app1.example.com" | sudo tee -a /etc/hosts
           echo "127.0.0.1 app2.example.com" | sudo tee -a /etc/hosts
+          echo "127.0.0.1 app3.example.com" | sudo tee -a /etc/hosts
           # BunkerWeb
           sudo mkdir -p /etc/bunkerweb
           echo "SERVER_NAME=" | sudo tee /etc/bunkerweb/variables.env
