@@ -43,10 +43,10 @@ try:
     data: Dict[str, Any] = db.get_metadata()
 
     data["is_pro"] = "yes" if data["is_pro"] else "no"
-    data.pop("pro_expire", None)
-    data.pop("pro_services", None)
-    data.pop("pro_overlapped", None)
-    data.pop("pro_status", None)
+
+    for key in data.copy():
+        if key not in ("version", "integration", "database_version", "is_pro"):
+            data.pop(key, None)
 
     db_config = db.get_config(methods=True, with_drafts=True)
     services = db_config.get("SERVER_NAME", {"value": ""})["value"].split(" ")
