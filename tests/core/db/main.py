@@ -323,6 +323,9 @@ try:
         )
 
         for plugin in plugins:
+            if plugin.type == "pro":  # ? We do not test the pro plugins in here
+                continue
+
             if plugin.type == "core" and plugin.id in core_plugins:
                 current_plugin = core_plugins
             elif plugin.type == "external" and plugin.id in external_plugins:
