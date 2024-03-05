@@ -419,6 +419,16 @@ Manage local or remote PHP-FPM.
 |`LOCAL_PHP`      |       |multisite|no      |Path to the PHP-FPM socket file.                            |
 |`LOCAL_PHP_PATH` |       |multisite|no      |Root folder containing files in the local PHP-FPM instance. |
 
+### Pro
+
+STREAM support :x:
+
+Pro settings for the Pro version of BunkerWeb.
+
+|     Setting     |Default|Context|Multiple|                   Description                   |
+|-----------------|-------|-------|--------|-------------------------------------------------|
+|`PRO_LICENSE_KEY`|       |global |no      |The License Key for the Pro version of BunkerWeb.|
+
 ### Real IP
 
 STREAM support :warning:
@@ -504,6 +514,7 @@ Manage reverse proxy configurations.
 |`REVERSE_PROXY_READ_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when reading from the proxied resource.                                                                              |
 |`REVERSE_PROXY_SEND_TIMEOUT`           |`60s`                             |multisite|yes     |Timeout when sending to the proxied resource.                                                                                |
 |`REVERSE_PROXY_INCLUDES`               |                                  |multisite|yes     |Additional configuration to include in the location block, separated with spaces.                                            |
+|`REVERSE_PROXY_CUSTOM_HOST`            |                                  |multisite|no      |Override Host header sent to upstream server.                                                                                |
 
 ### Reverse scan
 
