@@ -14,10 +14,10 @@ def request(method: Union[Literal["POST"], Literal["GET"]], url: str, _id: Optio
         "version": get_version(),
         "os": get_os_info(),
     }
+    if _id:
+        data["id"] = _id
 
     headers = {"User-Agent": f"BunkerWeb/{data['version']}"}
-    if _id is not None:
-        data["id"] = _id
     try:
         resp = requests_request(
             method,
