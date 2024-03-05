@@ -45,11 +45,44 @@ The first step is to install the plugin by putting the plugin files inside the c
     cp -rp ./bunkerweb-plugins/* ./bw-data/plugins
     ```
 
-    Because the scheduler runs as an unprivileged user with UID and GID 101, you will need to edit the permissions :
+    !!! warning "Using local folder for persistent data"
+        The scheduler runs as an **unprivileged user with UID 101 and GID 101** inside the container. The reason behind this is security : in case a vulnerability is exploited, the attacker won't have full root (UID/GID 0) privileges.
+        But there is a downside : if you use a **local folder for the persistent data**, you will need to **set the correct permissions** so the unprivileged user can write data to it. Something like that should do the trick :
 
-    ```shell
-    chown -R 101:101 ./bw-data
-    ```
+        ```shell
+        mkdir bw-data && \
+        chown root:101 bw-data && \
+        chmod 770 bw-data
+        ```
+
+        Alternatively, if the folder already exists :
+
+        ```shell
+        chown -R root:101 bw-data && \
+        chmod -R 770 bw-data
+        ```
+
+        If you are using [Docker in rootless mode](https://docs.docker.com/engine/security/rootless) or [podman](https://podman.io/), UIDs and GIDs in the container will be mapped to different ones in the host. You will first need to check your initial subuid and subgid :
+
+        ```shell
+        grep ^$(whoami): /etc/subuid && \
+        grep ^$(whoami): /etc/subgid
+        ```
+
+        For example, if you have a value of **100000**, the mapped UID/GID will be **100100** (100000 + 100) :
+
+        ```shell
+        mkdir bw-data && \
+        sudo chgrp 100100 bw-data && \
+        chmod 770 bw-data
+        ```
+
+        Or if the folder already exists :
+
+        ```shell
+        sudo chgrp -R 100100 bw-data && \
+        chmod -R 770 bw-data
+        ```
 
     Then you can mount the volume when starting your Docker stack :
 
