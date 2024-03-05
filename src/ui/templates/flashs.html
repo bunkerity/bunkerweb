@@ -1,9 +1,8 @@
 <!-- float button-->
 {% with messages = get_flashed_messages(with_categories=true) %}
-
-{% if is_pro_version and pro_status and pro_overlapped %}
-    {% set messages = messages.append(('error', 'You have more services than allowed by your pro license. Upgrade your license or move some services to draft mode before your license lockout.'))%}
-{% endif %}
+    {% if pro_status == "active" and pro_overlapped %}
+        {% set messages = messages.append(('error', 'You have more services than allowed by your pro license. Upgrade your license or move some services to draft mode to unlock your pro license.')) %}
+    {% endif %}
     <div data-flash-group
          class="transition-all group group-hover hover:brightness-75 dark:hover:brightness-105 fixed top-[4.5rem] right-20 sm:right-24 xl:right-24 z-990">
         <button aria-controls="sidebar-flash"
