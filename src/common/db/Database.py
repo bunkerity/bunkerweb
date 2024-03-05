@@ -300,12 +300,27 @@ class Database:
             "pro_services": 0,
             "pro_overlapped": False,
             "pro_status": "invalid",
+            "last_pro_check": None,
         }
         database = self.database_uri.split(":")[0].split("+")[0]
         with self.__db_session() as session:
             with suppress(ProgrammingError, OperationalError):
                 data["database_version"] = (session.execute(text("SELECT sqlite_version()" if database == "sqlite" else "SELECT VERSION()")).first() or ["unknown"])[0]
-                metadata = session.query(Metadata).with_entities(Metadata.version, Metadata.integration, Metadata.is_pro, Metadata.pro_expire, Metadata.pro_services, Metadata.pro_overlapped, Metadata.pro_status).filter_by(id=1).first()
+                metadata = (
+                    session.query(Metadata)
+                    .with_entities(
+                        Metadata.version,
+                        Metadata.integration,
+                        Metadata.is_pro,
+                        Metadata.pro_expire,
+                        Metadata.pro_services,
+                        Metadata.pro_overlapped,
+                        Metadata.pro_status,
+                        Metadata.last_pro_check,
+                    )
+                    .filter_by(id=1)
+                    .first()
+                )
                 if metadata:
                     data.update(
                         {
@@ -316,6 +331,7 @@ class Database:
                             "pro_services": metadata.pro_services,
                             "pro_overlapped": metadata.pro_overlapped,
                             "pro_status": metadata.pro_status,
+                            "last_pro_check": metadata.last_pro_check,
                         }
                     )
 

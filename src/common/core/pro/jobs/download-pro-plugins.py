@@ -35,7 +35,7 @@ from Database import Database  # type: ignore
 from logger import setup_logger  # type: ignore
 from jobs import get_os_info, get_integration, get_version  # type: ignore
 
-API_ENDPOINT = "https://api.staging.bunkerweb.io"
+API_ENDPOINT = "https://api.bunkerweb.io"
 PREVIEW_ENDPOINT = "https://assets.bunkerity.com/bw-pro/preview"
 TMP_DIR = Path(sep, "var", "tmp", "bunkerweb", "pro", "plugins")
 PRO_PLUGINS_DIR = Path(sep, "etc", "bunkerweb", "pro", "plugins")
@@ -98,8 +98,16 @@ def install_plugin(plugin_dir: str, db, preview: bool = True) -> bool:
 
 
 try:
-    logger.info("Checking BunkerWeb Pro license key...")
     db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
+    db_metadata = db.get_metadata()
+    current_date = datetime.now()
+
+    # If we already checked in the last 10 minutes, skip the check
+    if db_metadata["last_pro_check"] and (current_date - db_metadata["last_pro_check"]).seconds < 600:
+        logger.info("Skipping the check for BunkerWeb Pro license (already checked in the last 10 minutes)")
+        sys_exit(0)
+
+    logger.info("Checking BunkerWeb Pro license key...")
 
     data = {
         "integration": get_integration(),
@@ -116,7 +124,6 @@ try:
         "pro_services": 0,
     }
     metadata = {}
-    db_metadata = db.get_metadata()
     pro_license_key = getenv("PRO_LICENSE_KEY")
     error = False
 
@@ -140,16 +147,17 @@ try:
         else:
             resp.raise_for_status()
 
-            metadata = resp.json()
+            metadata = resp.json()["data"]
+            logger.debug(f"Got BunkerWeb Pro license metadata: {metadata}")
             metadata["pro_expire"] = datetime.strptime(metadata["pro_expire"], "%Y-%m-%d") if metadata["pro_expire"] else None
             if metadata["pro_expire"] and metadata["pro_expire"] < datetime.now():
                 metadata["pro_status"] = "expired"
             if metadata["pro_services"] < int(data["service_number"]):
                 metadata["pro_overlapped"] = True
-            metadata["is_pro"] = metadata["pro_status"] == "valid" and not metadata["pro_overlapped"]
+            metadata["is_pro"] = metadata["pro_status"] == "active" and not metadata["pro_overlapped"]
 
     metadata = metadata or default_metadata
-    db.set_pro_metadata(metadata)
+    db.set_pro_metadata(metadata | {"last_pro_check": current_date})
 
     if metadata["is_pro"]:
         logger.info("🚀 Your BunkerWeb Pro license is valid, checking if there are new or updated Pro plugins...")
@@ -163,7 +171,7 @@ try:
             logger.error(f"Access denied to {API_ENDPOINT}/pro - please check your BunkerWeb Pro access at https://panel.bunkerweb.io/")
             error = True
             metadata = default_metadata
-            db.set_pro_metadata(metadata)
+            db.set_pro_metadata(metadata | {"last_pro_check": current_date})
             clean_pro_plugins(db)
         elif resp.headers.get("Content-Type", "") != "application/octet-stream":
             logger.error(f"Got unexpected content type: {resp.headers.get('Content-Type', 'missing')} from {API_ENDPOINT}/pro")
@@ -180,7 +188,7 @@ try:
             message = "No BunkerWeb Pro license key provided"
         logger.warning(f"{message}, only checking if there are new or updated preview versions of Pro plugins...")
 
-        if db_metadata["pro_status"] == "valid":
+        if metadata["is_pro"]:
             clean_pro_plugins(db)
 
         resp = get(f"{PREVIEW_ENDPOINT}/v{data['version']}.zip", timeout=5, allow_redirects=True)
@@ -208,7 +216,7 @@ try:
 
     # Install plugins
     try:
-        for plugin_dir in glob(temp_dir.joinpath("*").as_posix()):
+        for plugin_dir in glob(temp_dir.joinpath(data["version"] if metadata["is_pro"] else "", "*").as_posix()):
             try:
                 if install_plugin(plugin_dir, db, not metadata["is_pro"]):
                     plugin_nbr += 1
