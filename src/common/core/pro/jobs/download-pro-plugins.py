@@ -98,7 +98,6 @@ def install_plugin(plugin_dir: str, db, preview: bool = True) -> bool:
 
 
 try:
-    logger.info("Checking BunkerWeb Pro license key...")
     db = Database(logger, sqlalchemy_string=getenv("DATABASE_URI"), pool=False)
     db_metadata = db.get_metadata()
     current_date = datetime.now()
@@ -107,6 +106,8 @@ try:
     if db_metadata["last_pro_check"] and (current_date - db_metadata["last_pro_check"]).seconds < 600:
         logger.info("Skipping the check for BunkerWeb Pro license (already checked in the last 10 minutes)")
         sys_exit(0)
+
+    logger.info("Checking BunkerWeb Pro license key...")
 
     data = {
         "integration": get_integration(),
@@ -215,7 +216,7 @@ try:
 
     # Install plugins
     try:
-        for plugin_dir in glob(temp_dir.joinpath("*").as_posix()):
+        for plugin_dir in glob(temp_dir.joinpath(data["version"] if metadata["is_pro"] else "", "*").as_posix()):
             try:
                 if install_plugin(plugin_dir, db, not metadata["is_pro"]):
                     plugin_nbr += 1
