@@ -56,7 +56,7 @@
         </div>
         {% set global_info = {
                     "message" : "Pro version" if is_pro_version else "Pro version but exceeding services" if pro_status == "active" and pro_overlapped else "Pro version is expired" if pro_status == "expired" else "Pro version suspended" if pro_status == "suspended" else "You are using free version",
-                    "link_message" : "All features available" if is_pro_version else "Awaiting compliance" if pro_status == "active" and pro_overlapped "Renew license" if pro_status == "expired" else "Talk to team" if pro_status == "suspended" else "Upgrade to pro",
+                    "link_message" : "All features available" if is_pro_version else "Awaiting compliance" if pro_status == "active" and pro_overlapped else "Renew license" if pro_status == "expired" else "Talk to team" if pro_status == "suspended" else "Upgrade to pro",
                     "icon" : "pro" if is_pro_version else "free"
                 } %}
         <div data-tab-item="global"
@@ -108,9 +108,9 @@
                 {% endif %}
                 {% if not is_pro_version and pro_status == "active" and pro_overlapped %}
                     <div class="mt-2 flex flex-col justify-center items-center">
-                            <p class="my-2 mr-2 text-red-500 text-center">
-                                You have more services than your license allows. Delete or draft some services to reach the number of {{ pro_services }} services.
-                            </p>
+                        <p class="my-2 mr-2 text-red-500 text-center">
+                            You have more services than your license allows. Delete or draft some services to reach the number of {{ pro_services }} services.
+                        </p>
                     </div>
                 {% endif %}
             </div>
