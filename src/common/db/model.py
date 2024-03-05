@@ -275,6 +275,7 @@ class Metadata(Base):
     pro_status = Column(PRO_STATUS_ENUM, default="invalid", nullable=False)
     pro_services = Column(Integer, default=0, nullable=False)
     pro_overlapped = Column(Boolean, default=False, nullable=False)
+    last_pro_check = Column(DateTime, nullable=True)
     first_config_saved = Column(Boolean, nullable=False)
     autoconf_loaded = Column(Boolean, default=False, nullable=True)
     scheduler_first_start = Column(Boolean, nullable=True)
