@@ -42,6 +42,7 @@ try:
     # ? Get version and integration of BunkerWeb
     data: Dict[str, Any] = db.get_metadata()
 
+    data["is_pro"] = "yes" if data["is_pro"] else "no"
     data.pop("pro_expire", None)
     data.pop("pro_services", None)
     data.pop("pro_overlapped", None)
